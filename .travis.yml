@@ -1,0 +1,63 @@
+sudo: false
+os:
+- linux
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.9
+    - g++-4.9
+    - uuid-dev
+language: node_js
+node_js:
+- '8'
+- '7'
+env:
+  global:
+  - CXX=g++-4.9
+  - CC=gcc-4.9
+  matrix:
+  - ZMQ="4.1.6" ZMQ_REPO="zeromq4-1"
+services:
+  - mysql
+before_install:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install mariadb && mysql.server start; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install zeromq; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CC=/usr/bin/clang; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CXX=/usr/bin/clang++; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir ldlocal; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LDHACK=`pwd`/ldlocal; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LD_RUN_PATH=$LDHACK/lib; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LD_LIBRARY_PATH=$LDHACK/lib; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export PKG_CONFIG_PATH=$LDHACK/lib/pkgconfig; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/zeromq/$ZMQ_REPO/releases/download/v$ZMQ/zeromq-$ZMQ.tar.gz; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar xzvf zeromq-$ZMQ.tar.gz; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd zeromq-$ZMQ; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./autogen.sh; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure --prefix=$LDHACK --without-libsodium; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
+- mysql -uroot -e 'CREATE DATABASE notifications;'
+- mysql -uroot -e 'USE notifications; CREATE TABLE `subscriptions` (
+    `sub_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+    `endpoint` varchar(300) DEFAULT NULL,
+    `auth_key` varchar(200) DEFAULT NULL,
+    `p256dh_key` varchar(200) DEFAULT NULL,
+    `deviceToken` varchar(100) DEFAULT NULL,
+    `preferences` varchar(20) NOT NULL DEFAULT '000',
+    PRIMARY KEY (`sub_id`)
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8;'
+before_script:
+- npm install -g codecov
+- openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=www.test.com" -keyout test.key -out test.pem
+- mv config-default.json config.json
+- node -e "const urlBase64 = require('urlsafe-base64'); const config = require('./config.json'); const pubKey = urlBase64.encode(new Buffer(65)); const privKey = urlBase64.encode(new Buffer(32)); config.pushNotifications.vapid.publicKey = pubKey; config.pushNotifications.vapid.privateKey = privKey; fs.writeFileSync('./config.json', JSON.stringify(config));"
+script: npm test
+after_success:
+- npm run coverage
+- ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov && codecov
+notifications:
+  email: false
+  slack:
+    secure: e5fCrr1ANOJmY+QlErhaumGVK/Pyl4N/15iP/8cUa+TjIN8SveCaIfdnVds2fKNgNQA+yhLci1l29sB/6mxrN6lic0rg++MzNPToM3mLbsI3uUSzizv02zZuqLWaPAx3wUkIQdOKX266FKp6Y+JVMTQlYAC0Md0ApZ3ul640M+Yvl/usJ1+/kcg2BlzRD0YsK9Hl73gr1Sa7jJ5NiyMP2FWTcB2fXGMxMOOve+CEb6fs3KBAASybfbVBQk3ZJ80JlbAS4jP0+3/ZviNKCTCDkkzQOzZFObyQe3QQbJny1wrHVcqKDwB4Iyg2e71jhG21OuZcxibsEKsWvLTOVUR4OZpkYIoEdFf5oBujvbdHPPDstc6dqi7bLEw8hPz/aky3o7oGdyGcvMuB1+7gSu47c66RhJVS5KlX+MZCb8xzV1Y3+mmzNIvcGdJfbIYMw8gsUSzOnp9e11leUxFy+g9BIT0hiz/2/OilD8cmUgNK7KhQD1Qb3pVBwb7tHSlb52I8Bxzd2N5kIcEA0mlZPkb+6P7DOQPZZK60GBO3kYAd9Ybs++y4XzGZPmSpdi04J8ET4FKoCbCzKrz1seiUpJoWYKhXzlnlwpFecK+jqfKT8D2s1WQKk1j4w6ctTPIU4/Qj47UT6UWUSuU7GQIWObZ4uZC3O/Q09E4RH5ZefaOpXEI=

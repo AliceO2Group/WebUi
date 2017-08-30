@@ -1,0 +1,18 @@
+codecov:
+  notify:
+    after_n_builds: 2
+
+coverage:
+  precision: 2
+  round: nearest
+  range: 60...90
+  status:
+    project: true
+    patch: true
+    changes: false
+
+ignore:
+  - docs/*
+  - node_modules/*
+
+comment: false

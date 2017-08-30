@@ -1,0 +1,64 @@
+{
+"jwt": {
+    "secret": "<secret>",
+    "issuer": "alice-o2-gui",
+    "expiration": "45s",
+    "maxAge": "2m"
+  },  
+  "oAuth": {
+    "secret": "<oAuthSecret>",
+    "id": "<oAuthId>",
+    "tokenHost": "https://token.host",
+    "tokenPath": "/OAuth/Token",
+    "authorizePath": "/OAuth/Authorize",
+    "redirect_uri": "https://redirect.uri/callback",
+    "scope": "https://scope.user/api/User",
+    "state": "3(#0/!~",
+    "resource": {
+      "hostname": "hostname.user",
+      "path": "/api/User",
+      "port": 443 
+    }   
+  },  
+  "key": "test.key",
+  "cert": "test.pem",
+  "zeromq": {
+    "sub": {
+      "ip": "127.0.0.1",
+      "port": 3000
+    },  
+    "req": {
+      "ip": "127.0.0.1",
+      "port": 3001
+    }   
+  },  
+  "http": {
+    "port": 8080,
+    "portSecure": 8443
+  },  
+  "log": {
+    "console": "debug",
+    "file": "error"
+  },
+  "websocket": {
+    "hostname": "127.0.0.1"
+  },
+  "pushNotifications": {
+    "vapid": {
+      "publicKey": "<application server public key>",
+      "privateKey": "<application server private key>",
+      "email": "alice-o2-flp-prototype@cern.ch"
+    },
+    "APN": {
+      "keyId": "<APN Key ID>",
+      "teamId": "<APN Team ID>",
+      "pushId": "<APN Push ID>",
+      "authenticationToken": "<Authentication Token File Name>",
+      "hostname": "<Host URL (must start with https)>"
+    },
+    "host": "localhost",
+    "user": "root",
+    "password": "",
+    "database": "notifications"
+  }
+}
