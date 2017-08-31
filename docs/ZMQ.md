@@ -14,10 +14,16 @@ Where:
  * `PORT`
  * `PATTERN`
 
+### Emitted events
+ * `message` - when a new message is received
+
 ### Example
 ```js
 const ZeroMQClient = require('@aliceo2/aliceo2-gui').ZeroMQClient;
-const zmqReq = new ZeroMQClient('zeromq.cern.ch', '1234', 'req');
+const zmqSub = new ZeroMQClient('zeromq.cern.ch', '1234', 'sub');
+zmqSub.on('message', function(message) {
+  console.log(message);
+});
 ```
 
 ## ZeroMQ installation note
