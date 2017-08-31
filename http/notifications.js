@@ -22,12 +22,12 @@ class Notifications {
       vapidKeys.privateKey
     );
 
-    server.post('/save-subscription', this.saveSubscription);
-    server.post('/update-preferences', this.updatePref);
-    server.post('/update-preferences-safari', this.updatePrefSafari);
-    server.post('/get-preferences', this.getPref);
-    server.post('/get-preferences-safari', this.getPrefSafari);
-    server.post('/delete-subscription', this.deleteSubscription);
+    server.post('/save-subscription', (req, res) => this.saveSubscription(req, res));
+    server.post('/update-preferences', (req, res) => this.updatePref(req, res));
+    server.post('/update-preferences-safari', (req, res) => this.updatePrefSafari(req, res));
+    server.post('/get-preferences', (req, res) => this.getPref(req, res));
+    server.post('/get-preferences-safari', (req, res) => this.getPrefSafari(req, res));
+    server.post('/delete-subscription', (req, res) => this.deleteSubscription(req, res));
 
     server.postNoAuth('/v1/pushPackages/web.ch.cern.anirudh',
       (req, res) => this.safariPermission(res)
