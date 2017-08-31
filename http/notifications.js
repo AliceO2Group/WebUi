@@ -40,6 +40,10 @@ class Notifications {
       (req, res) => this.safariUnsubscribe(req, res)
     );
     server.postNoAuth('/v1/log', (req, res) => log.debug(req.body));
+
+    server.passToTemplate('applicationServerPublicKey', config.pushNotifications.vapid.publicKey);
+    server.passToTemplate('pushId', config.pushNotifications.APN.pushId);
+    server.passToTemplate('hostname', config.pushNotifications.APN.hostname);
   }
   /**
    * Receives User Subscription object from 'web-push' server

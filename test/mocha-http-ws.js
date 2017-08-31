@@ -1,6 +1,4 @@
 const assert = require('assert');
-const express = require('express');
-const app = express();
 const config = require('./../config.json');
 const JwtToken = require('./../jwt/token.js');
 const chai = require('chai');
@@ -8,8 +6,8 @@ const expect = chai.expect;
 const chaiHttp = require('chai-http');
 const fs = require('fs');
 const credentials = {
-  key: fs.readFileSync(config.key),
-  cert: fs.readFileSync(config.cert)
+  key: fs.readFileSync(config.http.key),
+  cert: fs.readFileSync(config.http.cert)
 };
 const WebSocketClient = require('ws');
 const WebSocket = require('./../websocket/server');
@@ -19,8 +17,8 @@ const HttpServer = require('./../http/server');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 chai.use(chaiHttp);
 
-const http = new HttpServer(credentials, app);
-new WebSocket(http.httpsServer);
+const http = new HttpServer(config.http, config.jwt);
+new WebSocket(http.httpsServer, config.jwt);
 const jwt = new JwtToken(config.jwt);
 const token = jwt.generateToken(0, 'test', 1);
 

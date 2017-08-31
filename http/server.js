@@ -24,25 +24,31 @@ class HttpServer {
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} app
    */
-  constructor() {
+  constructor(httpConfig, jwtConfig) {
     app.use(express.static(path.join(__dirname, '')));
 
-    this.jwt = new JwtToken(config.jwt);
+    this.jwt = new JwtToken(jwtConfig);
     this.oauth = new OAuth();
 
     this.enableHttpRedirect();
     this.specifyRoutes();
 
     // HTTP server, just to redirect to HTTPS
-    http.createServer(app).listen(config.http.port);
+    http.createServer(app).listen(httpConfig.port);
 
     // HTTPS server
     const credentials = {
-      key: fs.readFileSync(config.key),
-      cert: fs.readFileSync(config.cert)
+      key: fs.readFileSync(httpConfig.key),
+      cert: fs.readFileSync(httpConfig.cert)
     };
     this.httpsServer = https.createServer(credentials, app);
-    this.httpsServer.listen(config.http.portSecure);
+    this.httpsServer.listen(httpConfig.portSecure);
+
+    this.templateData = {};
+  }
+
+  passToTemplate(key, value) {
+    this.templateData[key] = value;
   }
 
   /**
@@ -120,10 +126,7 @@ class HttpServer {
       /* !!! JUST FOR DEVELOPMENT !!! */
       data.personid += Math.floor(Math.random() * 100);
       data.token = this.jwt.generateToken(data.personid, data.username, 1);
-      data.websockethostname = config.websocket.hostname;
-      data.applicationServerPublicKey = config.pushNotifications.vapid.publicKey;
-      data.pushId = config.pushNotifications.APN.pushId;
-      data.hostname = config.pushNotifications.APN.hostname;
+      Object.assign(data, this.templateData);
       return res.status(200).send(this.renderPage('public/index.tpl', data));
     }.bind(this));
   }

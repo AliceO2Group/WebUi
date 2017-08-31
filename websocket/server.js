@@ -1,7 +1,6 @@
 const EventEmitter = require('events');
 const WebSocketServer = require('ws').Server;
 const url = require('url');
-const config = require('./../config.json');
 const log = require('./../log.js');
 const JwtToken = require('./../jwt/token.js');
 const Response = require('./response.js');
@@ -15,15 +14,17 @@ class WebSocket extends EventEmitter {
   /**
    * Starts up the server and binds event handler.
    * @param {object} httpsServer - HTTPS server
+   * @param {object} jwtConfig - configuration of jwt
    * @constructor
    */
-  constructor(httpsServer) {
+  constructor(httpsServer, jwtConfig) {
     super();
-    this.jwt = new JwtToken(config.jwt);
+    this.jwt = new JwtToken(jwtConfig);
     this.server = new WebSocketServer({server: httpsServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
     log.debug('WebSocket server started');
     this.callbackArray = [];
+    //httpsServer.passToTemplate('websockethostname', 'pcald03.cern.ch');
   }
 
   /**

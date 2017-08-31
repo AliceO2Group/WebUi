@@ -20,8 +20,6 @@
       "port": 443 
     }   
   },  
-  "key": "test.key",
-  "cert": "test.pem",
   "zeromq": {
     "sub": {
       "ip": "127.0.0.1",
@@ -34,7 +32,9 @@
   },  
   "http": {
     "port": 8080,
-    "portSecure": 8443
+    "portSecure": 8443,
+    "key": "test.key",
+    "cert": "test.pem"
   },  
   "log": {
     "console": "debug",
