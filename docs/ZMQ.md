@@ -3,7 +3,7 @@
 ### Module include
 ```js
 const ZeroMQClient = require('@aliceo2/aliceo2-gui').ZeroMQClient;
-``
+```
 
 ### API
 ```js
