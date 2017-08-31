@@ -4,11 +4,6 @@ const JwtToken = require('./../jwt/token.js');
 const chai = require('chai');
 const expect = chai.expect;
 const chaiHttp = require('chai-http');
-const fs = require('fs');
-const credentials = {
-  key: fs.readFileSync(config.http.key),
-  cert: fs.readFileSync(config.http.cert)
-};
 const WebSocketClient = require('ws');
 const WebSocket = require('./../websocket/server');
 const HttpServer = require('./../http/server');

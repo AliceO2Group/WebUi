@@ -1,4 +1,3 @@
-const config = require('./../config.json');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -22,7 +21,8 @@ const app = express();
 class HttpServer {
   /**
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
-   * @param {object} app
+   * @param {object} httpConfig - configuration of HTTP server
+   * @param {object} jwtConfig - configuration of JWT
    */
   constructor(httpConfig, jwtConfig) {
     app.use(express.static(path.join(__dirname, '')));
