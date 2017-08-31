@@ -1,5 +1,5 @@
 {
-  "name": "aliceo2-gui",
+  "name": "@aliceo2/aliceo2-gui",
   "version": "1.0.0",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
@@ -45,7 +45,9 @@
     "qunit": "^1.0.0",
     "qunit-phantomjs-runner": "^2.3.0"
   },
+  "main": "aliceo2-gui.js",
   "files": [
+    "aliceo2-gui.js",
     "LICENSE",
     "README.md",
     "log.js",
