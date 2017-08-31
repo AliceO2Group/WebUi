@@ -23,6 +23,7 @@ class HttpServer {
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} httpConfig - configuration of HTTP server
    * @param {object} jwtConfig - configuration of JWT
+   * @param {object} oAuthConfig - configuration of oAuth
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     app.use(express.static(path.join(__dirname, '')));
@@ -47,6 +48,11 @@ class HttpServer {
     this.templateData = {};
   }
 
+  /**
+   * Passes key-value that can be used in template
+   * @param {string} key - allows to access value from temaplte
+   * @param {string} value
+   */
   passToTemplate(key, value) {
     this.templateData[key] = value;
   }

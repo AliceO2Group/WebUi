@@ -1,4 +1,3 @@
-const config = require('./../config.json');
 const webpush = require('web-push');
 const Database = require('./db.js');
 const db = new Database();
@@ -10,15 +9,16 @@ const path = require('path');
 class Notifications {
   /** Sets up VAPID keys and specified REST API routes
    * @param {object} server - https server
+   * @param {object} config configuration object (see documentation for the description of fields)
    */
-  constructor(server) {
+  constructor(server, config) {
     const vapidKeys = {
-      publicKey: config.pushNotifications.vapid.publicKey,
-      privateKey: config.pushNotifications.vapid.privateKey
+      publicKey: config.vapid.publicKey,
+      privateKey: config.vapid.privateKey
     };
 
     webpush.setVapidDetails(
-      'mailto: ' + config.pushNotifications.email,
+      'mailto: ' + config.email,
       vapidKeys.publicKey,
       vapidKeys.privateKey
     );
@@ -41,9 +41,9 @@ class Notifications {
     );
     server.postNoAuth('/v1/log', (req, res) => log.debug(req.body));
 
-    server.passToTemplate('applicationServerPublicKey', config.pushNotifications.vapid.publicKey);
-    server.passToTemplate('pushId', config.pushNotifications.APN.pushId);
-    server.passToTemplate('hostname', config.pushNotifications.APN.hostname);
+    server.passToTemplate('applicationServerPublicKey', config.vapid.publicKey);
+    server.passToTemplate('pushId', config.APN.pushId);
+    server.passToTemplate('hostname', config.APN.hostname);
   }
   /**
    * Receives User Subscription object from 'web-push' server

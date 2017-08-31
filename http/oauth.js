@@ -11,6 +11,7 @@ const log = require('./../log.js');
 class OAuth {
   /**
    * Creates OAuth object based on id and secret stored in config file.
+   * @param {object} config - configuration object (see docs for details)
    * @constructor
    */
   constructor(config) {
