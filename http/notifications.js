@@ -1,6 +1,5 @@
 const webpush = require('web-push');
-const Database = require('./db.js');
-const db = new Database();
+const Database = require('./this.db.js');
 const log = require('./../log.js');
 const path = require('path');
 
@@ -44,6 +43,8 @@ class Notifications {
     server.passToTemplate('applicationServerPublicKey', config.vapid.publicKey);
     server.passToTemplate('pushId', config.APN.pushId);
     server.passToTemplate('hostname', config.APN.hostname);
+
+    this.db = new Database(config);
   }
   /**
    * Receives User Subscription object from 'web-push' server
@@ -65,7 +66,7 @@ class Notifications {
       return;
     }
 
-    db.insertSubscription(req.body)
+    this.db.insertSubscription(req.body)
       .then(function() {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify({data: {success: true}}));
@@ -88,7 +89,7 @@ class Notifications {
    * @param {object} res - response object
    */
   updatePref(req, res) {
-    db.updatePreferences(req.body)
+    this.db.updatePreferences(req.body)
       .then(function() {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify({data: {success: true}}));
@@ -105,7 +106,7 @@ class Notifications {
    * @param {object} res - response object
    */
   getPref(req, res) {
-    db.getPreferences(req.body)
+    this.db.getPreferences(req.body)
       .then(function(preferences) {
         res.setHeader('Content-Type', 'application/json');
         res.send(preferences);
@@ -121,7 +122,7 @@ class Notifications {
    * @param {object} res - response object
    */
   deleteSubscription(req, res) {
-    db.deleteSubscription(req.body.endpoint)
+    this.db.deleteSubscription(req.body.endpoint)
       .then(function() {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify({data: {success: true}}));
@@ -148,7 +149,7 @@ class Notifications {
    * @param {object} res - response object
    */
   safariSubscribe(req, res) {
-    db.insertSubscriptionSafari(req.params.deviceToken)
+    this.db.insertSubscriptionSafari(req.params.deviceToken)
       .then(function() {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify({data: {success: true}}));
@@ -173,7 +174,7 @@ class Notifications {
    * @param {object} res - response object
    */
   safariUnsubscribe(req, res) {
-    db.deleteSubscriptionSafari(req.params.deviceToken)
+    this.db.deleteSubscriptionSafari(req.params.deviceToken)
       .then(function() {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify({data: {success: true}}));
@@ -190,7 +191,7 @@ class Notifications {
    * @param {object} res - response object
    */
   getPrefSafari(req, res) {
-    db.getPreferencesSafari(req.body)
+    this.db.getPreferencesSafari(req.body)
       .then(function(preferences) {
         res.setHeader('Content-Type', 'application/json');
         res.send(preferences);
@@ -206,7 +207,7 @@ class Notifications {
    * @param {object} res - response object
    */
   updatePrefSafari(req, res) {
-    db.updatePreferencesSafari(req.body)
+    this.db.updatePreferencesSafari(req.body)
       .then(function() {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify({data: {success: true}}));
