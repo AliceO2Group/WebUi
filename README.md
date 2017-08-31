@@ -16,12 +16,12 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
    - VAPID (Chrome and Mozzila)
    - APN (Safari)
  - ZeroMQ client 
-  - sub and rep patterns
+   - *sub* and *rep* patterns
 
-## Requirements
- * node >= 7
- * zeromq-devel >= 4.0 (see [zeromq](docs/ZMQ.md) module docs for more details)
- * mariadb (mysql-community-server) (for [notifications](docs/NOTIF.md) module only)
+## System requirements
+ * `nodejs` >= 7
+ * `zeromq-devel` >= 4.0 (see [zeromq](docs/ZMQ.md) module docs for more details)
+ * `mariadb` (or `mysql-community-server`) (for [notifications](docs/NOTIF.md) module only)
 
 ## Installation
  ```
