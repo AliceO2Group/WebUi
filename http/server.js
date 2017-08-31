@@ -57,10 +57,11 @@ class HttpServer {
   specifyRoutes() {
     app.use(bodyParser.json());
     app.get('/', (req, res) => this.oAuthAuthorize(res));
+    app.use(express.static(path.join(__dirname, '../public')));
     app.use(express.static('public'));
-    app.use('/jquery', express.static(path.join(__dirname, '../node_modules/jquery/dist')));
+    app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
     app.use('/jquery-ui', express.static(
-      path.join(__dirname, '../node_modules/jquery-ui-dist/')
+      path.join(__dirname, '../../../jquery-ui-dist/')
     ));
     app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     // eslint-disable-next-line
