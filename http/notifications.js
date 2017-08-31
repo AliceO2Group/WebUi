@@ -1,5 +1,5 @@
 const webpush = require('web-push');
-const Database = require('./this.db.js');
+const Database = require('./db.js');
 const log = require('./../log.js');
 const path = require('path');
 
