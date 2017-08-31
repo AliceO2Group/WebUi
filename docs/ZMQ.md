@@ -1,8 +1,6 @@
 # ZeroMQ client
 ZeroMQ client allows to connect to the server via `req` or `sub` socket patterns.
 
-### Getting started
-
 #### Include module
 ```js
 const ZeroMQClient = require('@aliceo2/aliceo2-gui').ZeroMQClient;
@@ -15,7 +13,7 @@ ZeroMQClient(IP, PORT, PATTERN);
 Where:
  * `IP` IP address of ZeroMQ server
  * `PORT` port number of ZeroMQ server
- * `PATTERN` socket patters (either `req` or `sub`)
+ * `PATTERN` socket patters (either *req* or *sub*)
 
 #### Emitted events
  * `message` - when a new message is received
