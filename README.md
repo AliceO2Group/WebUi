@@ -28,13 +28,14 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
  npm install --save @aliceo2/aliceo2-gui
  ```
 
-## Modules
- * [notifications](docs/NOTIF.md)
+## Getting started
+See documentation of available modules:
  * [http/https](docs/HTTP.md)
+ * [notifications](docs/NOTIF.md)
  * [websockets](docs/WS.md)
  * [zeromq](docs/ZMQ.md)
 
-### Documentation for developers
+## Documentation for developers
  * [API](docs/API.md)
  * [Development environment](docs/DEV.md)
  * [Functional architecture and data flow](docs/ARCH.md)
