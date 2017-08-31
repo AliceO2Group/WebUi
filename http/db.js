@@ -1,5 +1,4 @@
 const mysql = require('mysql');
-const config = require('./../config.json');
 const log = require('./../log.js');
 
 /**
@@ -12,13 +11,14 @@ const log = require('./../log.js');
 class Database {
   /**
    * Establishes connections with MySQL Database
+   * @param {object} config - configuration object for db, see docs for more details
    */
-  constructor() {
+  constructor(config) {
     this.connection = mysql.createConnection({
-      host: config.pushNotifications.host,
-      user: config.pushNotifications.user,
-      password: config.pushNotifications.password,
-      database: config.pushNotifications.database
+      host: config.host,
+      user: config.user,
+      password: config.password,
+      database: config.database
     });
 
     this.connection.connect(function(err) {

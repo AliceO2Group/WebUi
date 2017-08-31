@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const chai = require('chai');
 const assert = chai.assert;
 const expect = chai.expect;
+const config = require('./../config.json');
 const log = require('./../log.js');
 
 let db = undefined;
@@ -45,7 +46,7 @@ describe('Access to db', function() {
   });
 
   it('should return true if db is running and connected', function(done) {
-    db = new Database();
+    db = new Database(config.pushNotifications);
     done();
   });
 });
