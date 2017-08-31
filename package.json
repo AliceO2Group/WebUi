@@ -1,9 +1,9 @@
 {
   "name": "@aliceo2/aliceo2-gui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
-  "license": "GPLv3",
+  "license": "GPL-3.0",
   "repository": "AliceO2Group/Gui",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
