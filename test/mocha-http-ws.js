@@ -12,7 +12,7 @@ const HttpServer = require('./../http/server');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 chai.use(chaiHttp);
 
-const http = new HttpServer(config.http, config.jwt);
+const http = new HttpServer(config.http, config.jwt, config.oAuth);
 new WebSocket(http.server, config.jwt);
 const jwt = new JwtToken(config.jwt);
 const token = jwt.generateToken(0, 'test', 1);

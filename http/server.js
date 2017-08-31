@@ -24,11 +24,11 @@ class HttpServer {
    * @param {object} httpConfig - configuration of HTTP server
    * @param {object} jwtConfig - configuration of JWT
    */
-  constructor(httpConfig, jwtConfig) {
+  constructor(httpConfig, jwtConfig, oAuthConfig) {
     app.use(express.static(path.join(__dirname, '')));
 
     this.jwt = new JwtToken(jwtConfig);
-    this.oauth = new OAuth();
+    this.oauth = new OAuth(oAuthConfig);
 
     this.enableHttpRedirect();
     this.specifyRoutes();

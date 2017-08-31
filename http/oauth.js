@@ -1,6 +1,5 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
-const config = require('./../config.json');
 const log = require('./../log.js');
 
 /**
@@ -14,24 +13,30 @@ class OAuth {
    * Creates OAuth object based on id and secret stored in config file.
    * @constructor
    */
-  constructor() {
+  constructor(config) {
     this.oauthCreds = oauth2.create({
       client: {
-        id: config.oAuth.id,
-        secret: config.oAuth.secret
+        id: config.id,
+        secret: config.secret
       },
       auth: {
-        tokenHost: config.oAuth.tokenHost,
-        tokenPath: config.oAuth.tokenPath,
-        authorizePath: config.oAuth.authorizePath
+        tokenHost: config.tokenHost,
+        tokenPath: config.tokenPath,
+        authorizePath: config.authorizePath
       }
     });
 
     this.authorizationUri = this.oauthCreds.authorizationCode.authorizeURL({
-      redirect_uri: config.oAuth.redirect_uri,
-      scope: config.oAuth.scope,
-      state: config.oAuth.state
+      redirect_uri: config.redirect_uri,
+      scope: config.scope,
+      state: config.state
     });
+    this.redirectUri = config.redirect_uri;
+    this.postOptions = {
+      host: config.resource.hostname,
+      port: config.resource.port,
+      path: config.resource.path
+    };
   }
 
   /**
@@ -42,7 +47,7 @@ class OAuth {
   oAuthCallback(emitter, code) {
     const options = {
       code,
-      redirect_uri: config.oAuth.redirect_uri
+      redirect_uri: this.redirectUri
     };
 
     this.oauthCreds.authorizationCode.getToken(options, function(error, result) {
@@ -63,15 +68,13 @@ class OAuth {
    */
   oAuthGetUserDetails(token, emitter) {
     const postOptions = {
-      host: config.oAuth.resource.hostname,
-      port: config.oAuth.resource.port,
-      path: config.oAuth.resource.path,
       method: 'GET',
       headers: {
         'Content-Type': 'text',
         'Authorization': 'Bearer ' + token
       }
     };
+    Object.assign(postOptions, this.postOptions);
     const postRequest = https.request(postOptions, function(res) {
       res.setEncoding('utf8');
       res.on('data', function(chunk) {
