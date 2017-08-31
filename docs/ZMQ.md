@@ -13,9 +13,9 @@ const ZeroMQClient = require('@aliceo2/aliceo2-gui').ZeroMQClient;
 ZeroMQClient(IP, PORT, PATTERN);
 ```
 Where:
- * `IP`
- * `PORT`
- * `PATTERN`
+ * `IP` IP address of ZeroMQ server
+ * `PORT` port number of ZeroMQ server
+ * `PATTERN` socket patters (either `req` or `sub`)
 
 #### Emitted events
  * `message` - when a new message is received
