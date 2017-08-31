@@ -2,13 +2,6 @@ const mysql = require('mysql');
 const config = require('./../config.json');
 const log = require('./../log.js');
 
-const connection = mysql.createConnection({
-  host: config.pushNotifications.host,
-  user: config.pushNotifications.user,
-  password: config.pushNotifications.password,
-  database: config.pushNotifications.database
-});
-
 /**
  * Database Module containing functions for-
  * Insertion and Deletion of Subscriptions for both, APN and other browsers
@@ -21,7 +14,14 @@ class Database {
    * Establishes connections with MySQL Database
    */
   constructor() {
-    connection.connect(function(err) {
+    this.connection = mysql.createConnection({
+      host: config.pushNotifications.host,
+      user: config.pushNotifications.user,
+      password: config.pushNotifications.password,
+      database: config.pushNotifications.database
+    });
+
+    this.connection.connect(function(err) {
       if (err) {
         throw err;
       }
@@ -46,8 +46,8 @@ class Database {
 
     let sql = 'INSERT INTO subscriptions (endpoint, auth_key, p256dh_key) VALUES (?, ?, ?)';
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [endpoint, authKey, p256dhKey], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [endpoint, authKey, p256dhKey], function(err, result) {
         if (err) {
           throw reject(err);
         }
@@ -69,8 +69,8 @@ class Database {
       throw Error('Invalid endpoint.');
     }
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [endpoint], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [endpoint], function(err, result) {
         if (err) {
           throw reject(err);
         }
@@ -95,8 +95,8 @@ class Database {
 
     let sql = 'UPDATE subscriptions SET preferences = ? WHERE endpoint = ?';
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [preferences, endpoint], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [preferences, endpoint], function(err, result) {
         if (err) {
           throw reject(err);
         }
@@ -123,8 +123,8 @@ class Database {
 
     let sql = 'SELECT preferences FROM subscriptions WHERE endpoint = ?';
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [endpoint], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [endpoint], function(err, result) {
         if (err) {
           throw reject(err);
         }
@@ -145,8 +145,8 @@ class Database {
 
     let sql = 'INSERT INTO subscriptions (deviceToken) VALUES (?)';
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [deviceToken], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [deviceToken], function(err, result) {
         if (err) {
           throw reject(err);
         }
@@ -168,8 +168,8 @@ class Database {
 
     let sql = 'DELETE FROM subscriptions WHERE deviceToken = ?';
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [deviceToken], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [deviceToken], function(err, result) {
         if (err) {
           throw reject(err);
         }
@@ -194,8 +194,8 @@ class Database {
 
     let sql = 'UPDATE subscriptions SET preferences = ? WHERE deviceToken = ?';
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [preferences, deviceToken], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [preferences, deviceToken], function(err, result) {
         if (err) {
           throw reject(err);
         }
@@ -222,8 +222,8 @@ class Database {
 
     let sql = 'SELECT preferences FROM subscriptions WHERE deviceToken = ?';
 
-    return new Promise(function(resolve, reject) {
-      connection.query(sql, [deviceToken], function(err, result) {
+    return new Promise((resolve, reject) => {
+      this.connection.query(sql, [deviceToken], function(err, result) {
         if (err) {
           throw reject(err);
         }
