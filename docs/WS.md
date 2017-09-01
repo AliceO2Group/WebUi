@@ -50,14 +50,14 @@ var ws = $.o2.websocket({
 ```js
 ws.send(JSON)
 ```
-WHERE:
+Where:
  * `JSON` JSON object with at least `command` filed specified
 
 #### Binding to incoming messages
 ```js
 $('#ws').bind(MESSAGE_NAME, CALLBACK);
 ```
-WHERE:
+Where:
  * `MESSAGE_NAME` message name prefixed with widget name (`websocket`)
  * `CALLBACK` callable with two parameters `evt` and `data`
 
