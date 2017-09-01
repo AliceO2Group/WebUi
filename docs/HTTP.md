@@ -4,6 +4,8 @@ The basic task of HTTPS server is to provide REST API. In addition, it:
  - Authorizes via e-groups
  - Secures each request with JWT token
  - Redirects HTTP to HTTPS
+By default, it serves `public` directory as static content. It also renders main page from `public/index.tpl`. Tem
+
 
 #### Instance
 ```js
@@ -71,3 +73,11 @@ const oauth = {
 };
 const http = new HttpServer(http, jwt, oauth);
 ```
+
+### Routes
+By default, the server publishes `public` directory as static content.
+New routes can be defined by calling `post`, `postNoAuth`, `get` methods.
+
+#### Templates
+The main page is render from `public/index.tpl`.
+The template variables can be passed via `passToTemplate` and then access from templated as `{{ key }}`.
