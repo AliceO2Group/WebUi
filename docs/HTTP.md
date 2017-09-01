@@ -1,7 +1,8 @@
 # HTTPS server
-HTTPS server allows to 
- - In addition it provides authentication via OAuth 2 service and authorization via e-groups.
- - Secure each request with JWT token
+The basic task of HTTPS server is to provide REST API. In addition it:
+ - Authenticates via OAuth 2 service
+ - Authorizes via e-groups
+ - Secures each request with JWT token
  - Redirects HTTP to HTTPS
 
 #### Instance
@@ -36,6 +37,7 @@ Where:
 #### Public methods
  * [`passToTemplate(KEY, VALUE)`](API.md#HttpServer+passToTemplate)
  * [`post(KEY, VALUE)`](API.md#httpserverpostpath-callback)
+ * [`postNoAuth(KEY, VALUE)`](API.md#httpserverpostnoauthpath-callback)
 
 #### Example
 ```js
