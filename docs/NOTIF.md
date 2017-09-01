@@ -1,4 +1,29 @@
-# Configuring Apple Push Notifications Service (APNS)
+# Notifications
+
+## General configuration
+
+###  MySQL setup instructions
+Run the command in MySQL command line
+ ```sql
+    CREATE TABLE `subscriptions` (
+      `sub_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      `endpoint` varchar(300) DEFAULT NULL,
+      `auth_key` varchar(200) DEFAULT NULL,
+      `p256dh_key` varchar(200) DEFAULT NULL,
+      `deviceToken` varchar(100) DEFAULT NULL,
+      `preferences` varchar(20) NOT NULL DEFAULT '000'
+    ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ ```
+
+## Configuring notification via VAPID (Chrome and Firefox)
+You can generate a set of Private and Public VAPID keys using any of the two methods mentioned below-
+  1. By using 'web-push' package from the terminal.
+     ```bash
+     ./node_modules/web-push/src/cli.js generate-vapid-keys
+     ```
+  2. By going to [Google CodeLab](https://web-push-codelab.appspot.com) (use Chrome or Mozilla, not Safari).
+
+## Configuring Apple Push Notifications Service (Safari)
 
 ### Registering with Apple
 You must register in the [Certificates, Identifiers & Profiles](https://developer.apple.com/account/ios/certificate) section of your developer account to send push notifications. Registration requires an [Apple developer license](https://developer.apple.com/programs).
@@ -46,14 +71,14 @@ The Key ID obtained after generating the token should be added in `keyId` in con
         pushPackage.raw
             website.json
             icon.iconset
-                icon_128x128@2x.png  
-                icon_128x128.png  
-                icon_32x32@2x.png  
-                icon_32x32.png  
-                icon_16x16@2x.png  
+                icon_128x128@2x.png
+                icon_128x128.png
+                icon_32x32@2x.png
+                icon_32x32.png
+                icon_16x16@2x.png
                 icon_16x16.png
     ```
-    
+
     **Description of contents of `pushpackage`**
 
     - **createPushPackage.php**
@@ -73,7 +98,7 @@ The Key ID obtained after generating the token should be added in `keyId` in con
             "webServiceURL": "<Domain>"
         }
         ```
-    
+
     The description of various fields in this file are:
 
     - `websiteName` – The website name. This is the heading used in Notification Center.
