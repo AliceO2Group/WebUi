@@ -34,8 +34,8 @@ Where:
         * `port` - resource server port
 
 #### Public methods
- * `passToTemplate(KEY, VALUE)`
- * `post(PATH, CALLBACK)`
+ * [`passToTemplate`](API.md#HttpServer+passToTemplate)
+ * [`post`](API.md#httpserverpostpath-callback)
 
 #### Example
 ```js
