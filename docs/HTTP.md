@@ -74,7 +74,7 @@ const oauth = {
 const http = new HttpServer(http, jwt, oauth);
 ```
 
-### Routes
+#### Routes
 By default, the server publishes `public` directory as static content.
 New routes can be defined by calling `post`, `postNoAuth`, `get` methods.
 
