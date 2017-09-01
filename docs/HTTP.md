@@ -1,5 +1,5 @@
 # HTTPS server
-The basic task of HTTPS server is to provide REST API. In addition it:
+The basic task of HTTPS server is to provide REST API. In addition, it:
  - Authenticates via OAuth 2 service
  - Authorizes via e-groups
  - Secures each request with JWT token
