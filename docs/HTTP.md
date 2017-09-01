@@ -9,14 +9,29 @@ HTTPS server allows to
 HttpServer(HTTP_CONF, JWT_CONF, OAUTH_CONF);
 ```
 Where:
- * `HTTP_CONF` configuration object for the http server
-    The `HTTP_CONF` object is a JSON object that defines of following fields:
+ * `HTTP_CONF` JSON formatted configuration object for the http server with following defined fields:
      * `port` - HTTP port number 
      * `portSecure` - HTTPS port number
      * `key` - private key filepath
      * `cert` - certificate filepath
- * `JWT_CONF` configuration for JWT
- * `OAUTH_COFN` configuration for OAuth 2
+ * `JWT_CONF` JSON formatted configuration object for JWT with following defined fields:
+     * `secret` - JWT secret passphrase to sign and verify tokens
+     * `issuer` - name of token issuer
+     * `expiration` - token expiration time (as time literal)
+     * `maxAge` - token refresh expiration time (as time literal)
+ * `OAUTH_COFN` JSON formatted configuration object for OAuth 2 with following defined fields:
+     * `secret` - oAuth secret
+     * `id` - oAuth ID
+     * `tokenHost` - hostname that provides tokens
+     * `tokenPath` - path to token provider
+     * `authorizePath` - verifies access token
+     * `redirectUri` - oAuth application callback
+     * `scope` - oAuth scope (to fetch user details)
+     * `state` - oAuth state (to prevent CSRF attacks)
+     * `resource` - details of resource server
+        * `hostname` - resource server hostname
+        * `path` - resource server path
+        * `port` - resource server port
 
 #### Public methods
  * `passToTemplate(KEY, VALUE)`
