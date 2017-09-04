@@ -7,12 +7,13 @@
   "repository": "AliceO2Group/Gui",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
-    "test": "npm run eslint && npm run mocha",
+    "test": "npm run eslint && npm run mocha && npm run nsp",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha",
     "mocha": "./node_modules/.bin/mocha test/",
     "//": "./node_modules/.bin/phantomjs ./node_modules/qunit-phantomjs-runner/runner-list.js",
     "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js",
-    "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js > docs/API.md"
+    "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js > docs/API.md",
+    "nsp": "./node_modules/.bin/nsp check"
   },
   "dependencies": {
     "apn": "^2.1.5",
@@ -39,8 +40,10 @@
     "chai-http": "^3.0.0",
     "eslint": "^4.5.0",
     "eslint-config-google": "^0.9.1",
+    "eslint-plugin-security": "^1.4.0",
     "jsdoc-to-markdown": "^3.0.0",
     "mocha": "^3.2.0",
+    "nsp": "^2.7.0",
     "nyc": "^11.1.0",
     "phantom": "^4.0.5",
     "qunit": "^1.0.0",

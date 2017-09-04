@@ -27,7 +27,13 @@ class HttpServer {
    * @param {object} oAuthConfig - configuration of oAuth
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
-    app.use(helmet());
+    app.use(helmet.noCache());
+    app.use(helmet.frameguard());
+    app.use(helmet.dnsPrefetchControl());
+    app.use(helmet.hsts());
+    app.use(helmet.referrerPolicy());
+    app.use(helmet.xssFilter());
+    app.use(helmet.hidePoweredBy());
     app.use(express.static(path.join(__dirname, '')));
 
     this.jwt = new JwtToken(jwtConfig);
