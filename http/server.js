@@ -2,6 +2,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const express = require('express');
+const helmet = require('helmet');
 const mustache = require('mustache');
 const EventEmitter = require('events').EventEmitter;
 const log = require('./../log.js');
@@ -26,6 +27,13 @@ class HttpServer {
    * @param {object} oAuthConfig - configuration of oAuth
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
+    app.use(helmet.noCache());
+    app.use(helmet.frameguard());
+    app.use(helmet.dnsPrefetchControl());
+    app.use(helmet.hsts());
+    app.use(helmet.referrerPolicy());
+    app.use(helmet.xssFilter());
+    app.use(helmet.hidePoweredBy());
     app.use(express.static(path.join(__dirname, '')));
 
     this.jwt = new JwtToken(jwtConfig);
