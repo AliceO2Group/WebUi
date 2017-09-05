@@ -25,7 +25,7 @@ class WebSocket extends EventEmitter {
     this.server.on('connection', (client, request) => this.onconnection(client, request));
     log.debug('WebSocket server started');
     this.callbackArray = [];
-    httpsServer.passToTemplate('websockethostname', hostname);
+    this.http.passToTemplate('websockethostname', hostname);
   }
 
   /**
@@ -93,42 +93,35 @@ class WebSocket extends EventEmitter {
     }
   }
 
-  oAuthVerify(oauth) {
-    
-  }
   /**
    * Handles client connection and message receiving.
    * @param {object} client - connected client
    * @param {object} request - connection request (new in v3.0.0, client.upgradeReq replacement)
    */
   onconnection(client, request) {
-     
     const oauth = url.parse(request.url, true).query.oauth;
-    oAuthVerify(oauth)
-      .then(onMessageListener)
-      .then(onCloseListener)
-      .catch((err) => {
+    this.http.oauth.oAuthGetUserDetails(oauth)
+    .then(() => {
+      client.on('message', (message, flags) => {
+        const parsed = JSON.parse(message);
+        const response = this.onmessage(parsed);
+        for (let message of response) {
+          if (message.getcommand == undefined) {
+            message.command(parsed.command);
+          }
+          if (message.getbroadcast) {
+            log.debug('broadcast : command %s sent', message.getcommand);
+            this.broadcast(JSON.stringify(message.json));
+          } else {
+            log.debug('%d : command %s sent', id, message.getcommand);
+            client.send(JSON.stringify(message.json));
+          }
+        }
+      });
+      client.on('close', (client) => this.onclose(client));  
+      }).catch((err) => {
+        log('Websocket: OAuth authentication faild');
     });
-    const feedback = this.oauthVerify(oauth);
-    log.info('%d : connected', id);
-    client.on('message', function(message, flags) {
-      const parsed = JSON.parse(message);
-      const response = this.onmessage(parsed);
-      for (let message of response) {
-        if (message.getcommand == undefined) {
-          message.command(parsed.command);
-        }
-        if (message.getbroadcast) {
-          log.debug('broadcast : command %s sent', message.getcommand);
-          this.broadcast(JSON.stringify(message.json));
-        } else {
-          log.debug('%d : command %s sent', id, message.getcommand);
-          client.send(JSON.stringify(message.json));
-        }
-      }
-    }.bind(this));
-
-    client.on('close', (client) => this.onclose(client));
   }
 
   /**
