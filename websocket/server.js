@@ -20,7 +20,7 @@ class WebSocket extends EventEmitter {
    */
   constructor(httpsServer, jwtConfig, hostname) {
     super();
-    this.jwt = new JwtToken(jwtConfig);
+    this.http = httpsServer;
     this.server = new WebSocketServer({server: httpsServer.server, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
     log.debug('WebSocket server started');
@@ -78,11 +78,11 @@ class WebSocket extends EventEmitter {
    */
   jwtVerify(token, refresh = true) {
     try {
-      return this.jwt.verify(token);
+      return this.http.jwt.verify(token);
     } catch (err) {
       log.warn('jwt verify failed: %s', err.message);
       if (err.name == 'TokenExpiredError' && refresh) {
-        const newtoken = this.jwt.refreshToken(token);
+        const newtoken = this.http.jwt.refreshToken(token);
         if (newtoken === false) {
           return new Response(403);
         }
@@ -93,19 +93,23 @@ class WebSocket extends EventEmitter {
     }
   }
 
+  oAuthVerify(oauth) {
+    
+  }
   /**
    * Handles client connection and message receiving.
    * @param {object} client - connected client
    * @param {object} request - connection request (new in v3.0.0, client.upgradeReq replacement)
    */
   onconnection(client, request) {
-    const token = url.parse(request.url, true).query.token;
-    const feedback = this.jwtVerify(token, false);
-    if (feedback instanceof Response) {
-      client.close(1008);
-      return;
-    }
-    const id = feedback.id;
+     
+    const oauth = url.parse(request.url, true).query.oauth;
+    oAuthVerify(oauth)
+      .then(onMessageListener)
+      .then(onCloseListener)
+      .catch((err) => {
+    });
+    const feedback = this.oauthVerify(oauth);
     log.info('%d : connected', id);
     client.on('message', function(message, flags) {
       const parsed = JSON.parse(message);

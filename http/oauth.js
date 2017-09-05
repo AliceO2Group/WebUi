@@ -51,6 +51,17 @@ class OAuth {
       redirect_uri: this.redirectUri
     };
 
+    this.oauthCreds.authorizationCode.getToken(options)
+      .then((result) => {
+        const oAuthToken = this.oauthCreds.accessToken.create(result);
+        return oAuthToken;
+      }).then((token) => {
+// post
+      }).catch((error) => {
+        log.warn('Access Token Error', error.message);
+        return error.message;
+      });
+
     this.oauthCreds.authorizationCode.getToken(options, function(error, result) {
       if (error) {
         log.warn('Access Token Error', error.message);
