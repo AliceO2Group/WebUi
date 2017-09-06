@@ -119,7 +119,8 @@ class WebSocket extends EventEmitter {
         });
         client.on('close', (client) => this.onclose(client));
       }).catch((err) => {
-        log('Websocket: OAuth authentication faild');
+        client.close(1008);
+        log.warn('Websocket: OAuth authentication faild');
       });
   }
 
