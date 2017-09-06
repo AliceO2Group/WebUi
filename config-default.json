@@ -15,7 +15,7 @@
     "scope": "https://scope.user/api/User",
     "state": "3(#0/!~",
     "resource": {
-      "hostname": "hostname.user",
+      "hostname": "localhost",
       "path": "/api/User",
       "port": 443 
     }   
@@ -41,7 +41,7 @@
     "file": "error"
   },
   "websocket": {
-    "hostname": "127.0.0.1"
+    "hostname": "localhost"
   },
   "pushNotifications": {
     "vapid": {

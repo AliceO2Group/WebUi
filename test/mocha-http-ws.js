@@ -39,7 +39,7 @@ describe('rest-api', () => {
 describe('websocket', () => {
   it('connection should be dropped due to invalid oAuth token', (done) => {
     const connection = new WebSocketClient(
-      'wss://127.0.0.1:' + config.http.portSecure +'/?oauth=' + token
+      'wss://localhost:' + config.http.portSecure +'/?oauth=' + token
     );
 
     connection.on('close', () => {
