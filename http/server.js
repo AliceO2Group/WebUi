@@ -4,7 +4,6 @@ const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
 const mustache = require('mustache');
-const EventEmitter = require('events').EventEmitter;
 const log = require('./../log.js');
 const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
@@ -135,17 +134,16 @@ class HttpServer {
    * @param {object} res - HTTP response
    */
   oAuthCallback(req, res) {
-    const emitter = new EventEmitter();
     this.oauth.oAuthCallback(req.query.code)
-    .then((data) => {
-      /* !!! JUST FOR DEVELOPMENT !!! */
-      data.personid += Math.floor(Math.random() * 100);
-      data.token = this.jwt.generateToken(data.personid, data.username, 1);
-      Object.assign(data, this.templateData);
-      return res.status(200).send(this.renderPage('public/index.tpl', data));
-    }).catch((error) => {
-      return res.status(401).send('Unauthorized');
-    });
+      .then((data) => {
+        /* !!! JUST FOR DEVELOPMENT !!! */
+        data.personid += Math.floor(Math.random() * 100);
+        data.token = this.jwt.generateToken(data.personid, data.username, 1);
+        Object.assign(data, this.templateData);
+        return res.status(200).send(this.renderPage('public/index.tpl', data));
+      }).catch((error) => {
+        return res.status(401).send('Unauthorized');
+      });
   }
 
   /**

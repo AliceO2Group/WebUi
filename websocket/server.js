@@ -2,7 +2,6 @@ const EventEmitter = require('events');
 const WebSocketServer = require('ws').Server;
 const url = require('url');
 const log = require('./../log.js');
-const JwtToken = require('./../jwt/token.js');
 const Response = require('./response.js');
 
 /**
@@ -101,27 +100,27 @@ class WebSocket extends EventEmitter {
   onconnection(client, request) {
     const oauth = url.parse(request.url, true).query.oauth;
     this.http.oauth.oAuthGetUserDetails(oauth)
-    .then(() => {
-      client.on('message', (message, flags) => {
-        const parsed = JSON.parse(message);
-        const response = this.onmessage(parsed);
-        for (let message of response) {
-          if (message.getcommand == undefined) {
-            message.command(parsed.command);
+      .then(() => {
+        client.on('message', (message, flags) => {
+          const parsed = JSON.parse(message);
+          const response = this.onmessage(parsed);
+          for (let message of response) {
+            if (message.getcommand == undefined) {
+              message.command(parsed.command);
+            }
+            if (message.getbroadcast) {
+              log.debug('broadcast : command %s sent', message.getcommand);
+              this.broadcast(JSON.stringify(message.json));
+            } else {
+              log.debug('command %s sent', message.getcommand);
+              client.send(JSON.stringify(message.json));
+            }
           }
-          if (message.getbroadcast) {
-            log.debug('broadcast : command %s sent', message.getcommand);
-            this.broadcast(JSON.stringify(message.json));
-          } else {
-            log.debug('%d : command %s sent', id, message.getcommand);
-            client.send(JSON.stringify(message.json));
-          }
-        }
-      });
-      client.on('close', (client) => this.onclose(client));  
+        });
+        client.on('close', (client) => this.onclose(client));
       }).catch((err) => {
         log('Websocket: OAuth authentication faild');
-    });
+      });
   }
 
   /**

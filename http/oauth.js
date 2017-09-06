@@ -42,33 +42,34 @@ class OAuth {
   /**
    * OAuth redirection callback (called by library).
    * @param {number} code - authorization code to request access token
+   * @return {object} Promise with user details and token
    */
   oAuthCallback(code) {
     return new Promise((resolve, reject) => {
-    const options = {
-      code,
-      redirect_uri: this.redirectUri
-    };
+      const options = {
+        code,
+        redirect_uri: this.redirectUri
+      };
 
-    this.oauthCreds.authorizationCode.getToken(options)
-      .then((result) => {
-        return this.oauthCreds.accessToken.create(result);
-      }).then((token) => {
-        return this.oAuthGetUserDetails(token.token.access_token)
-      }).then((user) => {
-        resolve(user);
-      }).catch((error) => {
-        reject(error);
-      });
+      this.oauthCreds.authorizationCode.getToken(options)
+        .then((result) => {
+          return this.oauthCreds.accessToken.create(result);
+        }).then((token) => {
+          return this.oAuthGetUserDetails(token.token.access_token);
+        }).then((user) => {
+          resolve(user);
+        }).catch((error) => {
+          reject(error);
+        });
     });
   }
 
   /**
    * Queries user details using received access token.
    * @param {string} token - OAuth access token
+   * @return {object} Promise with user details
    */
   oAuthGetUserDetails(token) {
-    token = "asd";
     return new Promise((resolve, reject) => {
       const postOptions = {
         method: 'GET',
