@@ -37,17 +37,13 @@ describe('rest-api', () => {
 });
 
 describe('websocket', () => {
-  it('should successfully connect to websocket server', (done) => {
+  it('connection should be dropped due to invalid oAuth token', (done) => {
     const connection = new WebSocketClient(
-      'wss://localhost:' + config.http.portSecure +'/?token=' + token
+      'wss://localhost:' + config.http.portSecure +'/?oauth=' + token
     );
-    connection.on('open', () => {
-      setTimeout(() => {
-        done();
-      }, 250);
-    });
+
     connection.on('close', () => {
-      throw new Error('disconnected from ws server');
+      done();
     });
   });
 });

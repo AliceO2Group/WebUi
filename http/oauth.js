@@ -1,6 +1,5 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
-const log = require('./../log.js');
 
 /**
  * Authenticates users via CERN OAuth 2.0.
@@ -42,52 +41,61 @@ class OAuth {
 
   /**
    * OAuth redirection callback (called by library).
-   * @param {object} emitter
    * @param {number} code - authorization code to request access token
+   * @return {object} Promise with user details and token
    */
-  oAuthCallback(emitter, code) {
-    const options = {
-      code,
-      redirect_uri: this.redirectUri
-    };
+  oAuthCallback(code) {
+    return new Promise((resolve, reject) => {
+      const options = {
+        code,
+        redirect_uri: this.redirectUri
+      };
 
-    this.oauthCreds.authorizationCode.getToken(options, function(error, result) {
-      if (error) {
-        log.warn('Access Token Error', error.message);
-        return error.message;
-      }
-
-      const oAuthToken = this.oauthCreds.accessToken.create(result);
-      this.oAuthGetUserDetails(oAuthToken.token.access_token, emitter);
-    }.bind(this));
+      this.oauthCreds.authorizationCode.getToken(options)
+        .then((result) => {
+          return this.oauthCreds.accessToken.create(result);
+        }).then((token) => {
+          return this.oAuthGetUserDetails(token.token.access_token);
+        }).then((user) => {
+          resolve(user);
+        }).catch((error) => {
+          reject(error);
+        });
+    });
   }
 
   /**
    * Queries user details using received access token.
    * @param {string} token - OAuth access token
-   * @param {object} emitter
+   * @return {object} Promise with user details
    */
-  oAuthGetUserDetails(token, emitter) {
-    const postOptions = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'text',
-        'Authorization': 'Bearer ' + token
-      }
-    };
-    Object.assign(postOptions, this.postOptions);
-    const postRequest = https.request(postOptions, function(res) {
-      res.setEncoding('utf8');
-      res.on('data', function(chunk) {
-        return emitter.emit('userdata', JSON.parse(chunk));
+  oAuthGetUserDetails(token) {
+    return new Promise((resolve, reject) => {
+      const postOptions = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'text',
+          'Authorization': 'Bearer ' + token
+        }
+      };
+      Object.assign(postOptions, this.postOptions);
+      let response = [];
+      const postRequest = https.request(postOptions, (res) => {
+        res.on('data', (chunk) => response.push(chunk));
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            let userdata = JSON.parse(response.join(''));
+            userdata.oauth = token;
+            resolve(userdata);
+          } else {
+            reject(new Error(res.statusMessage));
+          }
+        });
+        res.on('error', (err) => reject(err));
       });
-      res.on('error', function(e) {
-        log.warn(e);
-      });
+      postRequest.write('');
+      postRequest.end();
     });
-
-    postRequest.write('');
-    postRequest.end();
   }
 }
 module.exports = OAuth;
