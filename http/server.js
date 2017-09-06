@@ -7,10 +7,8 @@ const mustache = require('mustache');
 const log = require('./../log.js');
 const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
-
 const path = require('path');
 const bodyParser = require('body-parser');
-const app = express();
 
 
 /**
@@ -26,14 +24,15 @@ class HttpServer {
    * @param {object} oAuthConfig - configuration of oAuth
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
-    app.use(helmet.noCache());
-    app.use(helmet.frameguard());
-    app.use(helmet.dnsPrefetchControl());
-    app.use(helmet.hsts());
-    app.use(helmet.referrerPolicy());
-    app.use(helmet.xssFilter());
-    app.use(helmet.hidePoweredBy());
-    app.use(express.static(path.join(__dirname, '')));
+    this.app = express();
+    this.app.use(helmet.noCache());
+    this.app.use(helmet.frameguard());
+    this.app.use(helmet.dnsPrefetchControl());
+    this.app.use(helmet.hsts());
+    this.app.use(helmet.referrerPolicy());
+    this.app.use(helmet.xssFilter());
+    this.app.use(helmet.hidePoweredBy());
+    this.app.use(express.static(path.join(__dirname, '')));
 
     this.jwt = new JwtToken(jwtConfig);
     this.oauth = new OAuth(oAuthConfig);
@@ -42,14 +41,14 @@ class HttpServer {
     this.specifyRoutes();
 
     // HTTP server, just to redirect to HTTPS
-    http.createServer(app).listen(httpConfig.port);
+    http.createServer(this.app).listen(httpConfig.port);
 
     // HTTPS server
     const credentials = {
       key: fs.readFileSync(httpConfig.key),
       cert: fs.readFileSync(httpConfig.cert)
     };
-    this.httpsServer = https.createServer(credentials, app);
+    this.httpsServer = https.createServer(credentials, this.app);
     this.httpsServer.listen(httpConfig.portSecure);
 
     this.templateData = {};
@@ -68,19 +67,19 @@ class HttpServer {
    * Specified routes and their callbacks.
    */
   specifyRoutes() {
-    app.use(bodyParser.json());
-    app.get('/', (req, res) => this.oAuthAuthorize(res));
-    app.use(express.static(path.join(__dirname, '../public')));
-    app.use(express.static('public'));
-    app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
-    app.use('/jquery-ui', express.static(
+    this.app.use(bodyParser.json());
+    this.app.get('/', (req, res) => this.oAuthAuthorize(res));
+    this.app.use(express.static(path.join(__dirname, '../public')));
+    this.app.use(express.static('public'));
+    this.app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
+    this.app.use('/jquery-ui', express.static(
       path.join(__dirname, '../../../jquery-ui-dist/')
     ));
-    app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
+    this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
-    app.use('/api', this.router);
+    this.app.use('/api', this.router);
     this.router.use('/runs', this.runs);
   }
 
@@ -97,7 +96,7 @@ class HttpServer {
    * @param {function} callback - function (that receives req and res parameters)
    */
   postNoAuth(path, callback) {
-    app.post(path, callback);
+    this.app.post(path, callback);
   }
 
   /** Adds DELETE route without authentication
@@ -105,14 +104,14 @@ class HttpServer {
    * @param {function} callback - function (that receives req and res parameters)
    */
   deleteNoAuth(path, callback) {
-    app.delete(path, callback);
+    this.app.delete(path, callback);
   }
 
   /**
    * Redirects HTTP to HTTPS.
    */
   enableHttpRedirect() {
-    app.use(function(req, res, next) {
+    this.app.use(function(req, res, next) {
       if (!req.secure) {
         return res.redirect('https://' + req.headers.host + req.url);
       }
