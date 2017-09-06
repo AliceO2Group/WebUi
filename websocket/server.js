@@ -95,7 +95,7 @@ class WebSocket extends EventEmitter {
   /**
    * Handles client connection and message receiving.
    * @param {object} client - connected client
-   * @param {object} request - connection request (new in v3.0.0, client.upgradeReq replacement)
+   * @param {object} request - connection request
    */
   onconnection(client, request) {
     const oauth = url.parse(request.url, true).query.oauth;
