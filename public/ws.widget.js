@@ -27,7 +27,7 @@ $.widget('o2.websocket', {
    * Connect to Websocket endpoint and specyfies WebSocket event listeners
    */ 
   _connect: function() {
-    this.options.connection = new WebSocket(this.options.url + '?token=' + this.options.token);
+    this.options.connection = new WebSocket(this.options.url + '?oauth=' + this.options.oauth);
 
     this.options.connection.onopen = () => {
       this._trigger('open', null, null);
