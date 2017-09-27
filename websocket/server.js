@@ -142,7 +142,7 @@ class WebSocket extends EventEmitter {
    */
   broadcast(message) {
     this.server.clients.forEach(function(client) {
-      if (typeof client.filter === "function") {
+      if (typeof client.filter === 'function') {
         if (!client.filter(message)) {
           return;
         }
