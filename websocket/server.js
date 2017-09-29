@@ -34,7 +34,7 @@ class WebSocket extends EventEmitter {
    * @param {function} callback - callback function
    */
   bind(name, callback) {
-    if (typeof this.callbackArray[name] !== 'undefined') {
+    if (this.callbackArray.hasOwnProperty(name)) {
       throw Error('WebSocket callback already exists.');
     }
     this.callbackArray[name] = callback;
@@ -60,7 +60,7 @@ class WebSocket extends EventEmitter {
     message.id = feedback.id;
 
     log.debug('%d : command %s', message.id, message.command);
-    if (typeof this.callbackArray[message.command] !== 'undefined') {
+    if (this.callbackArray.hasOwnProperty(message.command)) {
       const response = this.callbackArray[message.command](message);
       responseArray.push(response);
     } else {
@@ -103,6 +103,10 @@ class WebSocket extends EventEmitter {
       .then(() => {
         client.on('message', (message, flags) => {
           const parsed = JSON.parse(message);
+          // add filter to a client
+          if (parsed.command == 'filter') {
+            client.filter = new Function('return ' + parsed.filter.toString())();
+          }
           const response = this.onmessage(parsed);
           for (let message of response) {
             if (message.getcommand == undefined) {
@@ -110,7 +114,7 @@ class WebSocket extends EventEmitter {
             }
             if (message.getbroadcast) {
               log.debug('broadcast : command %s sent', message.getcommand);
-              this.broadcast(JSON.stringify(message.json));
+              this.broadcast(message.json);
             } else {
               log.debug('command %s sent', message.getcommand);
               client.send(JSON.stringify(message.json));
@@ -138,7 +142,12 @@ class WebSocket extends EventEmitter {
    */
   broadcast(message) {
     this.server.clients.forEach(function(client) {
-      client.send(message);
+      if (typeof client.filter === 'function') {
+        if (!client.filter(message)) {
+          return;
+        }
+      }
+      client.send(JSON.stringify(message));
     });
   }
 }

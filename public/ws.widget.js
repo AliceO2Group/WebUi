@@ -10,6 +10,7 @@ $.widget('o2.websocket', {
   options: {
     id: null,
     token: null,
+    oauth: null,
     url: 'localhost'
   },
 
@@ -57,6 +58,18 @@ $.widget('o2.websocket', {
     this.options.connection.onclose = (code) => {
       this._trigger('close', null, null);
     };
+  },
+
+  /**
+   * Send filter to WebSocket server
+   * @param {function} filter
+   */
+  setFilter: function(filter) {
+    const message = {
+      'command': 'filter',
+      'filter': filter.toString()
+    };
+    this.send(message);
   },
 
   /**
