@@ -13,7 +13,7 @@
     "//": "./node_modules/.bin/phantomjs ./node_modules/qunit-phantomjs-runner/runner-list.js",
     "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js",
     "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js > docs/API.md",
-    "nsp": "./node_modules/.bin/nsp check"
+    "nsp": "./node_modules/.bin/nsp check --warn-only"
   },
   "dependencies": {
     "apn": "^2.1.5",
