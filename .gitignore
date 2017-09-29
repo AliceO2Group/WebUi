@@ -6,3 +6,4 @@ npm-debug.log
 .nyc_output
 APNsAuthKey.p8
 pushpackage.zip
+public/libs/
