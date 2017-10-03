@@ -14,7 +14,7 @@
     "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js",
     "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js > docs/API.md",
     "nsp": "./node_modules/.bin/nsp check --warn-only",
-    "postinstall": "mkdir -p public/libs; cp ../../jquery/dist/jquery.js public/libs; cp ../../jquery-ui-dist/jquery-ui.* public/libs"
+    "postinstall": 'mkdir -p public/libs; parent=`ls ..`; if [ "$parent" = aliceo2-gui ]; then cp ../../jquery/dist/jquery.js public/libs; cp ../../jquery-ui-dist/jquery-ui.* public/libs; else cp node_modules/jquery/dist/jquery.js public/libs; cp node_modules/jquery-ui-dist/jquery-ui.* public/libs; fi'
   },
   "dependencies": {
     "apn": "^2.1.5",
