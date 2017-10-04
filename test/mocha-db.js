@@ -6,15 +6,15 @@ const expect = chai.expect;
 const config = require('./../config.json');
 const log = require('./../log.js');
 
-let db = undefined;
+let db = null;
 
-describe('Access to db', function() {
+describe('Test notification database', function() {
   before(function(done) {
     const con = mysql.createConnection({
-      host: '127.0.0.1',
-      user: 'root',
-      password: '',
-      database: 'notifications'
+      host: config.pushNotifications.host,
+      user: config.pushNotifications.user,
+      password: config.pushNotifications.password,
+      database: config.pushNotifications.database
     });
 
     con.connect(function(err) {
@@ -38,261 +38,202 @@ describe('Access to db', function() {
           throw err;
         }
         log.debug('Table Created');
-
         con.end();
+        db = new Database(config.pushNotifications);
         done();
       });
     });
   });
 
-  it('should return true if db is running and connected', function(done) {
-    db = new Database(config.pushNotifications);
-    done();
-  });
-});
-
-describe('Insert Subscription', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let sub = {
-        endpoint: undefined,
-        keys: {
-          auth: undefined,
-          p256dh: undefined
-        }
-      };
-
-      assert.throws(() => {
-        db.insertSubscription(sub);
-      }, Error, 'Invalid subscription object.');
-    });
+  it('Fail to insert subscription to the database', function() {
+    let sub = {
+      endpoint: undefined,
+      keys: {
+        auth: undefined,
+        p256dh: undefined
+      }
+    };
+    assert.throws(() => {
+      db.insertSubscription(sub);
+    }, Error, 'Invalid subscription object.');
   });
 
-  describe('#pass', function() {
-    it('should successfully add subscription to Database', function() {
-      let sub = {
-        endpoint: 'test',
-        keys: {
-          auth: 'test',
-          p256dh: 'test'
-        }
-      };
-
-      return db.insertSubscription(sub)
-        .then(function(data) {
-          expect(data).to.equal(true);
-        });
-    });
-  });
-});
-
-describe('Update Preferences', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let data = {
-        endpoint: undefined,
-        preferences: undefined
-      };
-
-      assert.throws(() => {
-        db.updatePreferences(data);
-      }, Error, 'Invalid endpoint or preferences.');
-    });
+  it('Successfully add subscription to database', function() {
+    let sub = {
+      endpoint: 'test',
+      keys: {
+        auth: 'test',
+        p256dh: 'test'
+      }
+    };
+    return db.insertSubscription(sub)
+      .then(function(data) {
+        expect(data).to.equal(true);
+      });
   });
 
-  describe('#fail2', function() {
-    it('should reject Promise', function() {
-      let data = {
-        endpoint: 'new',
-        preferences: '111'
-      };
+  it('Fail to update prefernces - invalid preferences', function() {
+    let data = {
+      endpoint: undefined,
+      preferences: undefined
+    };
 
-      return db.updatePreferences(data)
-        .then(function fullfilled(result) {
-          throw new Error('Promise was unexpectedly fullfilled');
-        }, function rejected(error) {
-          assert.equal('No subscription exists with endpoint: new', error);
-        });
-    });
+    assert.throws(() => {
+      db.updatePreferences(data);
+    }, Error, 'Invalid endpoint or preferences.');
   });
 
-  describe('#pass', function() {
-    it('should successfully Update Preferences', function() {
-      let data = {
-        endpoint: 'test',
-        preferences: '111'
-      };
-      return db.updatePreferences(data)
-        .then(function(data) {
-          expect(data).to.equal(true);
-        });
-    });
-  });
-});
+  it('Fail to update prefernces - promise rejection', function() {
+    let data = {
+      endpoint: 'new',
+      preferences: '111'
+    };
 
-
-describe('Get Preferences', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let data = {
-        endpoint: undefined
-      };
-
-      assert.throws(() => {
-        db.getPreferences(data);
-      }, Error, 'Invalid endpoint.');
-    });
+    return db.updatePreferences(data)
+      .then(function fullfilled(result) {
+        throw new Error('Promise was unexpectedly fullfilled');
+      }, function rejected(error) {
+        assert.equal('No subscription exists with endpoint: new', error);
+      });
   });
 
-  describe('#pass', function() {
-    it('should successfully Update Preferences', function() {
-      let data = {
-        endpoint: 'test'
-      };
-      return db.getPreferences(data)
-        .then(function(data) {
-          expect(data).to.be.an('array');
-        });
-    });
-  });
-});
-
-
-describe('Delete Subscription', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let endpoint = undefined;
-
-      assert.throws(() => {
-        db.deleteSubscription(endpoint);
-      }, Error, 'Invalid endpoint.');
-    });
+  it('Successfully update preferences', function() {
+    let data = {
+      endpoint: 'test',
+      preferences: '111'
+    };
+    return db.updatePreferences(data)
+      .then(function(data) {
+        expect(data).to.equal(true);
+      });
   });
 
-  describe('#pass', function() {
-    it('should successfully delete subscription from Database', function() {
-      let endpoint = 'test';
+  it('Fail to get preferences', function() {
+    let data = {
+      endpoint: undefined
+    };
 
-      return db.deleteSubscription(endpoint)
-        .then(function(data) {
-          expect(data).to.equal(true);
-        });
-    });
-  });
-});
-
-describe('Insert Safari Subscription', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let deviceToken = undefined;
-
-      assert.throws(() => {
-        db.insertSubscriptionSafari(deviceToken);
-      }, Error, 'Invalid Device Token.');
-    });
+    assert.throws(() => {
+      db.getPreferences(data);
+    }, Error, 'Invalid endpoint.');
   });
 
-  describe('#pass', function() {
-    it('should successfully add subscription to Database', function() {
-      let deviceToken = 'safariTest';
-
-      return db.insertSubscriptionSafari(deviceToken)
-        .then(function(data) {
-          expect(data).to.equal(true);
-        });
-    });
-  });
-});
-
-describe('Update Safari Preferences', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let data = {
-        deviceToken: undefined,
-        preferences: undefined
-      };
-
-      assert.throws(() => {
-        db.updatePreferencesSafari(data);
-      }, Error, 'Invalid deviceToken or preferences.');
-    });
+  it('Successfully update preferences', function() {
+    let data = {
+      endpoint: 'test'
+    };
+    return db.getPreferences(data)
+      .then(function(data) {
+        expect(data).to.be.an('array');
+      });
   });
 
-  describe('#fail2', function() {
-    it('should reject Promise', function() {
-      let data = {
-        deviceToken: 'new',
-        preferences: '111'
-      };
-
-      return db.updatePreferencesSafari(data)
-        .then(function fullfilled(result) {
-          throw new Error('Promise was unexpectedly fullfilled');
-        }, function rejected(error) {
-          assert.equal('No subscription exists with deviceToken: new', error);
-        });
-    });
+  it('Fail to delete subscription', function() {
+    let endpoint = undefined;
+    assert.throws(() => {
+      db.deleteSubscription(endpoint);
+    }, Error, 'Invalid endpoint.');
   });
 
-  describe('#pass', function() {
-    it('should successfully Update Preferences', function() {
-      let data = {
-        deviceToken: 'safariTest',
-        preferences: '111'
-      };
-      return db.updatePreferencesSafari(data)
-        .then(function(data) {
-          expect(data).to.equal(true);
-        });
-    });
-  });
-});
+  it('Successfully delete subscription from database', function() {
+    let endpoint = 'test';
 
-describe('Get Safari Preferences', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let data = {
-        deviceToken: undefined
-      };
-
-      assert.throws(() => {
-        db.getPreferencesSafari(data);
-      }, Error, 'Invalid deviceToken.');
-    });
+    return db.deleteSubscription(endpoint)
+      .then(function(data) {
+        expect(data).to.equal(true);
+      });
   });
 
-  describe('#pass', function() {
-    it('should successfully Update Preferences', function() {
-      let data = {
-        deviceToken: 'safariTest'
-      };
-      return db.getPreferencesSafari(data)
-        .then(function(data) {
-          expect(data).to.be.an('array');
-        });
-    });
-  });
-});
+  it('Fail to insert Safari subscription', function() {
+    let deviceToken = undefined;
 
-describe('Delete Safari Subscription', function() {
-  describe('#fail', function() {
-    it('should throw Error', function() {
-      let deviceToken = undefined;
-
-      assert.throws(() => {
-        db.deleteSubscriptionSafari(deviceToken);
-      }, Error, 'Invalid Device Token.');
-    });
+    assert.throws(() => {
+      db.insertSubscriptionSafari(deviceToken);
+    }, Error, 'Invalid Device Token.');
   });
 
-  describe('#pass', function() {
-    it('should successfully delete safari subscription from Database', function() {
-      let deviceToken = 'safariTest';
+  it('Successfully add subscription to database', function() {
+    let deviceToken = 'safariTest';
 
-      return db.deleteSubscriptionSafari(deviceToken)
-        .then(function(data) {
-          expect(data).to.equal(true);
-        });
-    });
+    return db.insertSubscriptionSafari(deviceToken)
+      .then(function(data) {
+        expect(data).to.equal(true);
+      });
+  });
+
+  it('Fail to update Safari preferences', function() {
+    let data = {
+      deviceToken: undefined,
+      preferences: undefined
+    };
+
+    assert.throws(() => {
+      db.updatePreferencesSafari(data);
+    }, Error, 'Invalid deviceToken or preferences.');
+  });
+
+  it('Fail to update Safari preferences - promise rejection', function() {
+    let data = {
+      deviceToken: 'new',
+      preferences: '111'
+    };
+
+    return db.updatePreferencesSafari(data)
+      .then(function fullfilled(result) {
+        throw new Error('Promise was unexpectedly fullfilled');
+      }, function rejected(error) {
+        assert.equal('No subscription exists with deviceToken: new', error);
+      });
+  });
+
+  it('Successfully update Safari preferences', function() {
+    let data = {
+      deviceToken: 'safariTest',
+      preferences: '111'
+    };
+    return db.updatePreferencesSafari(data)
+      .then(function(data) {
+        expect(data).to.equal(true);
+      });
+  });
+
+  it('Fail to get Safari preferences', function() {
+    let data = {
+      deviceToken: undefined
+    };
+
+    assert.throws(() => {
+      db.getPreferencesSafari(data);
+    }, Error, 'Invalid deviceToken.');
+  });
+
+  it('Successfully update Safari preferences', function() {
+    let data = {
+      deviceToken: 'safariTest'
+    };
+    return db.getPreferencesSafari(data)
+      .then(function(data) {
+        expect(data).to.be.an('array');
+      });
+  });
+
+  it('Fail to delete Safari subscription', function() {
+    let deviceToken = undefined;
+
+    assert.throws(() => {
+      db.deleteSubscriptionSafari(deviceToken);
+    }, Error, 'Invalid Device Token.');
+  });
+
+  it('Successfully delete Safari subscription from database', function() {
+    let deviceToken = 'safariTest';
+    return db.deleteSubscriptionSafari(deviceToken)
+      .then(function(data) {
+        expect(data).to.equal(true);
+      });
+  });
+
+  after(function() {
+    db.close();
   });
 });

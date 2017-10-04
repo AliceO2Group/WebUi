@@ -30,6 +30,13 @@ class Database {
   }
 
   /**
+   * Destroyes connection
+   */
+  close() {
+    this.connection.destroy();
+  }
+
+  /**
    * Saves 'web-push' subscription object to Database
    * @param {object} sub - Subscription Object
    * @return {Promise} Promise
