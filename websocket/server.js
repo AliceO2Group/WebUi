@@ -147,7 +147,7 @@ class WebSocket extends EventEmitter {
           return;
         }
       }
-      client.send(JSON.stringify(message));
+      client.send(JSON.stringify(message.payload));
     });
   }
 }
