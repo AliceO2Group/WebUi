@@ -143,11 +143,11 @@ class WebSocket extends EventEmitter {
   broadcast(message) {
     this.server.clients.forEach(function(client) {
       if (typeof client.filter === 'function') {
-        if (!client.filter(message)) {
+        if (!client.filter(message.payload)) {
           return;
         }
       }
-      client.send(JSON.stringify(message.payload));
+      client.send(JSON.stringify(message));
     });
   }
 }
