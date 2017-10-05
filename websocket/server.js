@@ -25,6 +25,9 @@ class WebSocket extends EventEmitter {
     log.debug('WebSocket server started');
     this.callbackArray = [];
     this.http.passToTemplate('websockethostname', hostname);
+    this.bind('filter', () => {
+      return new Response(200);
+    });
   }
 
   /**
@@ -122,6 +125,8 @@ class WebSocket extends EventEmitter {
           }
         });
         client.on('close', (client) => this.onclose(client));
+      }, () => {
+        throw new Error('OAuth promise rejection');
       }).catch((err) => {
         client.close(1008);
         log.warn('Websocket: OAuth authentication faild');
