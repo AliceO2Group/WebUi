@@ -141,7 +141,7 @@ class HttpServer {
         Object.assign(data, this.templateData);
         return res.status(200).send(this.renderPage('public/index.tpl', data));
       }).catch((error) => {
-        return res.status(401).send('Unauthorized');
+          return res.redirect('/');
       });
   }
 
