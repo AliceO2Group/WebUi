@@ -11,7 +11,8 @@ $.widget('o2.websocket', {
     id: null,
     token: null,
     oauth: null,
-    url: 'localhost'
+    url: 'localhost',
+    authed: false
   },
 
   /**
@@ -50,6 +51,9 @@ $.widget('o2.websocket', {
         } else {
           this._trigger(parsed.command, evt, parsed);
         }
+        if (parsed.command == 'authed') {
+          this.options.authed = true;
+        }
       } catch (e) {
         // continue even though message parsing failed
       }
@@ -77,6 +81,9 @@ $.widget('o2.websocket', {
    * @param {object} message - message to be sent
    */ 
   send: function(message) {
+    if (!this.options.authed) {
+       throw new Error(this.widgetFullName + ': Client not yet authenticated by the server');
+    }
     message.token = this.options.token;
     this.options.connection.send(JSON.stringify(message));
   }
