@@ -60,7 +60,7 @@ $.widget('o2.websocket', {
     };
 
     this.options.connection.onclose = (code) => {
-      this._trigger('close', {code: code}, null);
+      this._trigger('close', null, {code: code});
     };
   },
 
