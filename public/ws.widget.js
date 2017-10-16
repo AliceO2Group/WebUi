@@ -82,7 +82,7 @@ $.widget('o2.websocket', {
    */ 
   send: function(message) {
     if (!this.options.authed) {
-       throw new Error(this.widgetFullName + ': Client not yet authenticated by the server');
+      throw new Error(this.widgetFullName + ': Client not yet authenticated by the server');
     }
     message.token = this.options.token;
     this.options.connection.send(JSON.stringify(message));

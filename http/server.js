@@ -25,13 +25,8 @@ class HttpServer {
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     this.app = express();
-    this.app.use(helmet.noCache());
-    this.app.use(helmet.frameguard());
-    this.app.use(helmet.dnsPrefetchControl());
-    this.app.use(helmet.hsts());
-    this.app.use(helmet.referrerPolicy());
-    this.app.use(helmet.xssFilter());
-    this.app.use(helmet.hidePoweredBy());
+    this.configureHelmet();
+
     this.app.use(express.static(path.join(__dirname, '')));
 
     this.jwt = new JwtToken(jwtConfig);
@@ -52,6 +47,31 @@ class HttpServer {
     this.httpsServer.listen(httpConfig.portSecure);
 
     this.templateData = {};
+  }
+
+  /**
+   * Configures Helmet rules to increase web app secuirty
+   */
+  configureHelmet() {
+    // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
+    this.app.use(helmet.frameguard({action: 'deny'}));
+    // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
+    this.app.use(helmet.hsts({
+      maxAge: 5184000
+    }));
+    // Sets "Referrer-Policy: same-origin"
+    this.app.use(helmet.referrerPolicy({policy: 'same-origin'}));
+    // Sets "X-XSS-Protection: 1; mode=block"
+    this.app.use(helmet.xssFilter());
+    // Removes X-Powered-By header
+    this.app.use(helmet.hidePoweredBy());
+    // Disables external resourcers
+    this.app.use(helmet.contentSecurityPolicy({
+      directives: {
+        // eslint-disable-next-line
+        defaultSrc: ["'self'"]
+      }
+    }));
   }
 
   /**
