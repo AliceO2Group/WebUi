@@ -26,7 +26,7 @@ class HttpServer {
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     this.app = express();
     this.app.use(compression());
-    this.configureHelmet();
+    this.configureHelmet(httpConfig.hostname);
 
     this.app.use(express.static(path.join(__dirname, '')));
 
@@ -52,8 +52,9 @@ class HttpServer {
 
   /**
    * Configures Helmet rules to increase web app secuirty
+   * @param {string} hostname whitelisted hostname for websocket connection
    */
-  configureHelmet() {
+  configureHelmet(hostname) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -70,7 +71,10 @@ class HttpServer {
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
         // eslint-disable-next-line
-        defaultSrc: ["'self'"]
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        connectSrc: ['wss://' + hostname]
       }
     }));
   }
@@ -145,9 +149,7 @@ class HttpServer {
    * @param {object} res - HTTP response
    */
   oAuthAuthorize(req, res) {
-    let state = new Buffer(JSON.stringify(req.query)).toString('base64');
-    console.log(state);
-    state = "test";
+    const state = new Buffer(JSON.stringify(req.query)).toString('base64');
     res.redirect(this.oauth.getAuthorizationUri(state));
   }
 
@@ -161,8 +163,13 @@ class HttpServer {
       .then((data) => {
         /* !!! JUST FOR DEVELOPMENT !!! */
         data.personid += Math.floor(Math.random() * 100);
+        const params = JSON.parse(new Buffer(req.query.state, 'base64').toString('ascii'));
+        Object.keys(params).forEach((key) => {
+          data[key] = params[key];
+        });
         data.token = this.jwt.generateToken(data.personid, data.username, 1);
         Object.assign(data, this.templateData);
+        console.log(data);
         return res.status(200).send(this.renderPage('public/index.tpl', data));
       }).catch((error) => {
         return res.redirect('/');
