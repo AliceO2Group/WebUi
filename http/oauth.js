@@ -46,7 +46,7 @@ class OAuth {
       redirect_uri: this.redirect_uri,
       scope: this.scope,
       state: state
-    }); 
+    });
   }
 
   /**

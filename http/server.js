@@ -70,10 +70,11 @@ class HttpServer {
     // Disables external resourcers
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
-        // eslint-disable-next-line
+        /* eslint-disable */
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
+        /* eslint-enable */
         connectSrc: ['wss://' + hostname]
       }
     }));
@@ -146,6 +147,7 @@ class HttpServer {
 
   /**
    * OAuth redirection.
+   * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    */
   oAuthAuthorize(req, res) {
@@ -169,7 +171,6 @@ class HttpServer {
         });
         data.token = this.jwt.generateToken(data.personid, data.username, 1);
         Object.assign(data, this.templateData);
-        console.log(data);
         return res.status(200).send(this.renderPage('public/index.tpl', data));
       }).catch((error) => {
         return res.redirect('/');
