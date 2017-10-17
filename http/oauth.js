@@ -26,17 +26,27 @@ class OAuth {
       }
     });
 
-    this.authorizationUri = this.oauthCreds.authorizationCode.authorizeURL({
-      redirect_uri: config.redirect_uri,
-      scope: config.scope,
-      state: config.state
-    });
     this.redirectUri = config.redirect_uri;
     this.postOptions = {
       host: config.resource.hostname,
       port: config.resource.port,
       path: config.resource.path
     };
+    this.scope = config.scope;
+    this.redirect_uri = config.redirect_uri;
+  }
+
+  /** 
+   * Returns autorization URL
+   * @param {string} state - Base64 encoded parameters
+   * @return {object} authorizeURL
+   */
+  getAuthorizationUri(state) {
+    return this.oauthCreds.authorizationCode.authorizeURL({
+      redirect_uri: this.redirect_uri,
+      scope: this.scope,
+      state: state
+    });
   }
 
   /**

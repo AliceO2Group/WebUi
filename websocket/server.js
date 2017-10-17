@@ -24,7 +24,6 @@ class WebSocket extends EventEmitter {
     this.server.on('connection', (client, request) => this.onconnection(client, request));
     log.debug('WebSocket server started');
     this.callbackArray = [];
-    this.http.passToTemplate('websockethostname', hostname);
     this.bind('filter', () => {
       return new Response(200);
     });

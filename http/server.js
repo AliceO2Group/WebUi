@@ -9,7 +9,7 @@ const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
 const path = require('path');
 const bodyParser = require('body-parser');
-
+const compression = require('compression');
 
 /**
  * HTTPS server that handles OAuth and provides REST API.
@@ -25,7 +25,8 @@ class HttpServer {
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     this.app = express();
-    this.configureHelmet();
+    this.app.use(compression());
+    this.configureHelmet(httpConfig.hostname);
 
     this.app.use(express.static(path.join(__dirname, '')));
 
@@ -51,8 +52,9 @@ class HttpServer {
 
   /**
    * Configures Helmet rules to increase web app secuirty
+   * @param {string} hostname whitelisted hostname for websocket connection
    */
-  configureHelmet() {
+  configureHelmet(hostname) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -68,8 +70,12 @@ class HttpServer {
     // Disables external resourcers
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
-        // eslint-disable-next-line
-        defaultSrc: ["'self'"]
+        /* eslint-disable */
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        /* eslint-enable */
+        connectSrc: ['wss://' + hostname]
       }
     }));
   }
@@ -88,19 +94,19 @@ class HttpServer {
    */
   specifyRoutes() {
     this.app.use(bodyParser.json());
-    this.app.get('/', (req, res) => this.oAuthAuthorize(res));
+    this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
     this.app.use(express.static(path.join(__dirname, '../public')));
     this.app.use(express.static('public'));
-    this.app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
-    this.app.use('/jquery-ui', express.static(
-      path.join(__dirname, '../../../jquery-ui-dist/')
-    ));
     this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
     this.app.use('/api', this.router);
     this.router.use('/runs', this.runs);
+    this.app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
+    this.app.use('/jquery-ui', express.static(
+      path.join(__dirname, '../../../jquery-ui-dist/')
+    ));
   }
 
   /** Adds POST route
@@ -141,10 +147,12 @@ class HttpServer {
 
   /**
    * OAuth redirection.
+   * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    */
-  oAuthAuthorize(res) {
-    res.redirect(this.oauth.authorizationUri);
+  oAuthAuthorize(req, res) {
+    const state = new Buffer(JSON.stringify(req.query)).toString('base64');
+    res.redirect(this.oauth.getAuthorizationUri(state));
   }
 
   /**
@@ -157,6 +165,10 @@ class HttpServer {
       .then((data) => {
         /* !!! JUST FOR DEVELOPMENT !!! */
         data.personid += Math.floor(Math.random() * 100);
+        const params = JSON.parse(new Buffer(req.query.state, 'base64').toString('ascii'));
+        Object.keys(params).forEach((key) => {
+          data[key] = params[key];
+        });
         data.token = this.jwt.generateToken(data.personid, data.username, 1);
         Object.assign(data, this.templateData);
         return res.status(200).send(this.renderPage('public/index.tpl', data));
