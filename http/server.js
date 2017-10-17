@@ -9,7 +9,7 @@ const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
 const path = require('path');
 const bodyParser = require('body-parser');
-
+const compression = require('compression');
 
 /**
  * HTTPS server that handles OAuth and provides REST API.
@@ -25,6 +25,7 @@ class HttpServer {
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     this.app = express();
+    this.app.use(compression());
     this.configureHelmet();
 
     this.app.use(express.static(path.join(__dirname, '')));
@@ -88,19 +89,19 @@ class HttpServer {
    */
   specifyRoutes() {
     this.app.use(bodyParser.json());
-    this.app.get('/', (req, res) => this.oAuthAuthorize(res));
+    this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
     this.app.use(express.static(path.join(__dirname, '../public')));
     this.app.use(express.static('public'));
-    this.app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
-    this.app.use('/jquery-ui', express.static(
-      path.join(__dirname, '../../../jquery-ui-dist/')
-    ));
     this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
     this.app.use('/api', this.router);
     this.router.use('/runs', this.runs);
+    this.app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
+    this.app.use('/jquery-ui', express.static(
+      path.join(__dirname, '../../../jquery-ui-dist/')
+    ));
   }
 
   /** Adds POST route
@@ -143,8 +144,11 @@ class HttpServer {
    * OAuth redirection.
    * @param {object} res - HTTP response
    */
-  oAuthAuthorize(res) {
-    res.redirect(this.oauth.authorizationUri);
+  oAuthAuthorize(req, res) {
+    let state = new Buffer(JSON.stringify(req.query)).toString('base64');
+    console.log(state);
+    state = "test";
+    res.redirect(this.oauth.getAuthorizationUri(state));
   }
 
   /**
