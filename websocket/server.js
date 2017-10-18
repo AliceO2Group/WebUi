@@ -125,12 +125,29 @@ class WebSocket extends EventEmitter {
           }
         });
         client.on('close', (client) => this.onclose(client));
+        client.on('pong', () => client.isAlive = true);
+        this.ping();
       }, () => {
         throw new Error('OAuth promise rejection');
       }).catch((err) => {
         client.close(1008);
         log.warn('Websocket: OAuth authentication faild');
       });
+  }
+
+  /**
+   * Sends ping message every 30s
+   */
+  ping() {
+    setInterval(() => {
+      this.server.clients.forEach(function(client) {
+        if (client.isAlive === false) {
+          return client.terminate();
+        }
+        client.isAlive = false;
+        client.ping('', false, true);
+      });
+    }, 30000);
   }
 
   /**
