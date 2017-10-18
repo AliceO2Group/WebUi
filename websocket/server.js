@@ -126,6 +126,7 @@ class WebSocket extends EventEmitter {
         });
         client.on('close', (client) => this.onclose(client));
         client.on('pong', () => client.isAlive = true);
+        this.ping();
       }, () => {
         throw new Error('OAuth promise rejection');
       }).catch((err) => {
