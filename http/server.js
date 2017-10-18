@@ -103,10 +103,6 @@ class HttpServer {
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
     this.app.use('/api', this.router);
     this.router.use('/runs', this.runs);
-    this.app.use('/jquery', express.static(path.join(__dirname, '../../../jquery/dist')));
-    this.app.use('/jquery-ui', express.static(
-      path.join(__dirname, '../../../jquery-ui-dist/')
-    ));
   }
 
   /** Adds POST route
