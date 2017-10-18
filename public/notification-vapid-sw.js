@@ -11,7 +11,7 @@ self.addEventListener('push', function(event) {
   const options = {
     body: `${event.data.json().message}`,
     icon: './../img/icon.png',
-    badge: './../img/badge.png'
+    badge: './../img/O2_logo.png.png'
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
