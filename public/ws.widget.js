@@ -40,9 +40,11 @@ $.widget('o2.websocket', {
     };
 
     this.options.connection.onmessage = (evt) => {
-      $((~evt.data.indexOf('testmessage')) ? '#messages' : '#console').append(evt.data + '\n');
       try {
         let parsed = $.parseJSON(evt.data);
+        if (parsed.command == 'authed') {
+          this.options.authed = true;
+        }
         // handling token refresh error
         if (parsed.code == 440) {
           this.options.token = parsed.payload.newtoken;
@@ -50,10 +52,6 @@ $.widget('o2.websocket', {
           throw new Error(this.widgetFullName + ': Return code ' + parsed.code);
         } else {
           this._trigger(parsed.command, evt, parsed);
-        }
-        if (parsed.command == 'authed') {
-          this.options.authed = true;
-          this._trigger('authed', null, null);
         }
       } catch (e) {
         // continue even though message parsing failed
