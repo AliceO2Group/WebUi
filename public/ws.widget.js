@@ -53,6 +53,7 @@ $.widget('o2.websocket', {
         }
         if (parsed.command == 'authed') {
           this.options.authed = true;
+          this._trigger('authed', null, null);
         }
       } catch (e) {
         // continue even though message parsing failed
