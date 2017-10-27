@@ -32,20 +32,18 @@ class HttpServer {
 
     this.jwt = new JwtToken(jwtConfig);
     this.oauth = new OAuth(oAuthConfig);
-
-    this.enableHttpRedirect();
     this.specifyRoutes();
 
-    // HTTP server, just to redirect to HTTPS
-    http.createServer(this.app).listen(httpConfig.port);
-
-    // HTTPS server
-    const credentials = {
-      key: fs.readFileSync(httpConfig.key),
-      cert: fs.readFileSync(httpConfig.cert)
-    };
-    this.httpsServer = https.createServer(credentials, this.app);
-    this.httpsServer.listen(httpConfig.portSecure);
+    if (httpConfig.tls) {
+      const credentials = {
+        key: fs.readFileSync(httpConfig.key),
+        cert: fs.readFileSync(httpConfig.cert)
+      };
+      this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
+      this.enableHttpRedirect();
+    } else {
+      this.server = http.createServer(this.app).listen(httpConfig.port);
+    }
 
     this.templateData = {};
   }
@@ -188,8 +186,8 @@ class HttpServer {
    * HTTPs server getter.
    * @return {object} - HTTPs server
    */
-  get server() {
-    return this.httpsServer;
+  get getServer() {
+    return this.server;
   }
 
   /**
