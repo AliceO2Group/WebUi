@@ -20,7 +20,7 @@ class WebSocket extends EventEmitter {
   constructor(httpsServer, jwtConfig, hostname) {
     super();
     this.http = httpsServer;
-    this.server = new WebSocketServer({server: httpsServer.server, clientTracking: true});
+    this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
     log.debug('WebSocket server started');
     this.callbackArray = [];
