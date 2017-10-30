@@ -19,14 +19,14 @@ const token = jwt.generateToken(0, 'test', 1);
 
 describe('rest-api', () => {
   it('should fail as no token provided', (done) => {
-    chai.request(http.httpsServer).get('/api/runs').end((err, res) => {
+    chai.request(http.getServer).get('/api/runs').end((err, res) => {
       assert.equal(res.status, 403, 'Wrong HTTP response code');
       done();
     });
   });
 
   it('should get response', (done) => {
-    chai.request(http.httpsServer)
+    chai.request(http.getServer)
       .get('/api/runs')
       .query({token: token})
       .end((err, res) => {
@@ -50,7 +50,7 @@ describe('websocket', () => {
 
 describe('save-subscription', () => {
   it('should throw error because save request does not have endpoint', () => {
-    chai.request(http.httpsServer)
+    chai.request(http.getServer)
       .post('/api/save-subscription')
       .query({token: token})
       .send({
@@ -62,7 +62,7 @@ describe('save-subscription', () => {
   });
 
   it('should save subscription', () => {
-    chai.request(http.httpsServer)
+    chai.request(http.getServer)
       .post('/api/save-subscription')
       .query({token: token})
       .send({
@@ -80,7 +80,7 @@ describe('save-subscription', () => {
 
 describe('update-preferences', () => {
   // it('should throw error because save request is invalid', (done) => {
-  //   chai.request(http.httpsServer)
+  //   chai.request(http.getServer)
   //   .post('/api/update-preferences')
   //   .query({token: token})
   //   .send({
@@ -93,7 +93,7 @@ describe('update-preferences', () => {
   // });
 
   it('should update preferences', () => {
-    chai.request(http.httpsServer)
+    chai.request(http.getServer)
       .post('/api/update-preferences')
       .query({token: token})
       .send({
@@ -108,7 +108,7 @@ describe('update-preferences', () => {
 
 describe('get-preferences', () => {
   // it('should throw error because save request is invalid', () => {
-  //   chai.request(http.httpsServer)
+  //   chai.request(http.getServer)
   //     .post('/api/get-preferences')
   //     .query({token: token})
   //     .send({ key: 'hello'})
@@ -118,7 +118,7 @@ describe('get-preferences', () => {
   // });
 
   it('should get preferences', () => {
-    chai.request(http.httpsServer)
+    chai.request(http.getServer)
       .post('/api/get-preferences')
       .query({token: token})
       .send({
@@ -132,7 +132,7 @@ describe('get-preferences', () => {
 
 describe('delete-subscription', () => {
   // it('should throw error because save request is invalid', () => {
-  //   chai.request(http.httpsServer)
+  //   chai.request(http.getServer)
   //     .post('/api/save-subscription')
   //     .query({token: token})
   //     .send({ key: 'hello'})
@@ -142,7 +142,7 @@ describe('delete-subscription', () => {
   // });
 
   it('should delete subscription', () => {
-    chai.request(http.httpsServer)
+    chai.request(http.getServer)
       .post('/api/delete-subscription')
       .query({token: token})
       .send({

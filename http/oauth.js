@@ -36,7 +36,7 @@ class OAuth {
     this.redirect_uri = config.redirect_uri;
   }
 
-  /** 
+  /**
    * Returns autorization URL
    * @param {string} state - Base64 encoded parameters
    * @return {object} authorizeURL

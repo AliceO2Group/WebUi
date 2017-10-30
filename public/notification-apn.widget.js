@@ -108,7 +108,7 @@ $.widget('o2.apn', {
     }
   },
 
-  // Currently incomplete. Find a method to remove notification 
+  // Currently incomplete. Find a method to remove notification
   // permissions from Safari preferences, if possible.
   unsubscribeUser: function(permissionData) {
     // window.safari.pushNotification.permission(this.options.pushId).permission = "denied";

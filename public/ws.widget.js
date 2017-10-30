@@ -16,8 +16,8 @@ $.widget('o2.websocket', {
   },
 
   /**
-   * Create widget instance 
-   */ 
+   * Create widget instance
+   */
   _create: function() {
     if (this.options.id == null || this.options.token == null) {
       throw new Error(this.widgetFullName + ': Options not set.');
@@ -27,7 +27,7 @@ $.widget('o2.websocket', {
 
   /**
    * Connect to Websocket endpoint and specyfies WebSocket event listeners
-   */ 
+   */
   _connect: function() {
     this.options.connection = new WebSocket(this.options.url + '?oauth=' + this.options.oauth);
 
@@ -36,7 +36,7 @@ $.widget('o2.websocket', {
     };
 
     this.options.connection.onerror = (err) => {
-      throw new Error(this.widgetFullName + ': Connection failed.');
+      this._trigger('error', null, err);
     };
 
     this.options.connection.onmessage = (evt) => {
@@ -78,7 +78,7 @@ $.widget('o2.websocket', {
   /**
    * Send message to WebSocket server
    * @param {object} message - message to be sent
-   */ 
+   */
   send: function(message) {
     if (!this.options.authed) {
       throw new Error(this.widgetFullName + ': Client not yet authenticated by the server');
