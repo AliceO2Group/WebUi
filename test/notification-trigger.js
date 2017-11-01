@@ -184,7 +184,7 @@ function sendAPNNotif() {
   const type = argv.type;
   let options = {
     token: {
-      key: 'APNsAuthKey_M6F56D7FRJ.p8',
+      key: config.pushNotifications.APN.authenticationToken,
       keyId: config.pushNotifications.APN.keyId,
       teamId: config.pushNotifications.APN.teamId
     },
