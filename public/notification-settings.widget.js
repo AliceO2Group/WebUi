@@ -243,7 +243,7 @@ $.widget('o2.pushNotification', {
       });
   },
 
-  // Gets current user preferences from the database and 
+  // Gets current user preferences from the database and
   // updates the preferences form according to them.
   getPreferences: function() {
     this.options.swRegistration.pushManager.getSubscription()

@@ -26,7 +26,7 @@ class HttpServer {
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     this.app = express();
     this.app.use(compression());
-    this.configureHelmet(httpConfig.hostname);
+    this.configureHelmet(httpConfig.hostname, httpConfig.portSecure);
 
     this.app.use(express.static(path.join(__dirname, '')));
 
@@ -51,8 +51,9 @@ class HttpServer {
   /**
    * Configures Helmet rules to increase web app secuirty
    * @param {string} hostname whitelisted hostname for websocket connection
+   * @param {number} port secure port number
    */
-  configureHelmet(hostname) {
+  configureHelmet(hostname, port) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -72,7 +73,7 @@ class HttpServer {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'wss://' + hostname]
+        connectSrc: ["'self'", 'wss://' + hostname, 'wss://' + hostname + ':' + port]
         /* eslint-enable */
       }
     }));

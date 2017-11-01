@@ -27,6 +27,7 @@ class WebSocket extends EventEmitter {
     this.bind('filter', () => {
       return new Response(200);
     });
+    this.ping();
   }
 
   /**
@@ -126,7 +127,6 @@ class WebSocket extends EventEmitter {
         });
         client.on('close', (client) => this.onclose(client));
         client.on('pong', () => client.isAlive = true);
-        this.ping();
       }, () => {
         throw new Error('OAuth promise rejection');
       }).catch((err) => {
