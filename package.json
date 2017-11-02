@@ -11,8 +11,8 @@
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha --exit",
     "mocha": "./node_modules/.bin/mocha --exit",
     "//": "./node_modules/.bin/phantomjs ./node_modules/qunit-phantomjs-runner/runner-list.js",
-    "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js",
-    "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js > docs/API.md",
+    "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js",
+    "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js > docs/API.md",
     "nsp": "./node_modules/.bin/nsp check --warn-only",
     "postinstall": "mkdir -p public/libs/images; parent=`ls ..`; if [ \"$parent\" = aliceo2-gui ]; then cp ../../jquery/dist/jquery.js public/libs; cp ../../jquery-ui-dist/jquery-ui.* public/libs; cp ../../jquery-ui-dist/images/* public/libs/images; else cp node_modules/jquery/dist/jquery.js public/libs; cp node_modules/jquery-ui-dist/jquery-ui.* public/libs; cp node_modules/jquery-ui-dist/images/* public/libs/images; fi"
   },

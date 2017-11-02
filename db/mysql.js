@@ -1,23 +1,23 @@
 const mysql = require('mysql');
 const log = require('./../log.js');
+
 /**
  * MySQL pool wrapper
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  * @author Vladimir Kosmala <vladimir.kosmala@cern.ch>
  */
-
 class MySQL {
-
   constructor(config) {
+    this.config = config;
     this.pool = mysql.createPool(config);
     this.pool.getConnection((error, connection) => {
       if (error) {
-        throw new Error(this.errorHandler(err));
+        throw new Error(this.errorHandler(error));
       }
       connection.release();
     });
   }
-  
+
   query(query, parameters) {
     return new Promise((resolve, reject) => {
       this.pool.query({
@@ -25,12 +25,17 @@ class MySQL {
         timeout: 60000,
         values: parameters
       }, (error, results, fields) => {
-        if (error) { 
-          reject(new Error(this.errorHandler(err)));
+        if (error) {
+          reject(new Error(this.errorHandler(error)));
         }
-        resolve(result);
-      }
-    }
+        resolve(results);
+      });
+    });
+  }
+
+  close() {
+    this.pool.end(() => {
+    });
   }
 
   /**
@@ -44,16 +49,16 @@ class MySQL {
 
     // Handle some common errors and just report the user he can't use mysql
     if (err.code === 'ER_NO_DB_ERROR') {
-      message = `Unable to connect to mysql, ${this.options.database} database not found`;
+      message = `Unable to connect to mysql, ${this.config.database} database not found`;
       log.warn(message);
     } else if (err.code === 'ER_NO_SUCH_TABLE') {
-      message = `Unable to connect to mysql, "messages" table not found in ${this.options.database}`;
+      message = `Unable to connect to mysql, "messages" table not found in ${this.config.database}`;
       log.warn(message);
     } else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
-      message = `Unable to connect to mysql on ${this.options.host}:${this.options.port}`;
+      message = `Unable to connect to mysql on ${this.config.host}:${this.config.port}`;
       log.warn(message);
     } else if (err.code === 'ER_ACCESS_DENIED_ERROR') {
-      message = `Unable to connect to mysql, access denied for ${this.options.user}`;
+      message = `Unable to connect to mysql, access denied for ${this.config.user}`;
       log.warn(message);
     } else {
       message = `Unable to connect to mysql: ${err.code}`;
