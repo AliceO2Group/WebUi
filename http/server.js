@@ -66,6 +66,8 @@ class HttpServer {
     this.app.use(helmet.xssFilter());
     // Removes X-Powered-By header
     this.app.use(helmet.hidePoweredBy());
+    // Disable DNS prefetching
+    this.app.use(helmet.dnsPrefetchControl());
     // Disables external resourcers
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
