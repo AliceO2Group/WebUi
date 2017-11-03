@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const MySQL = require('./../db/mysql.js');
 const log = require('./../log.js');
 
 /**
@@ -14,26 +14,19 @@ class Database {
    * @param {object} config - configuration object for db, see docs for more details
    */
   constructor(config) {
-    this.connection = mysql.createConnection({
-      host: config.host,
-      user: config.user,
-      password: config.password,
-      database: config.database
-    });
-
-    this.connection.connect(function(err) {
-      if (err) {
-        throw err;
-      }
+    try {
+      this.connection = new MySQL(config);
       log.debug('Connected to the database');
-    });
+    } catch (err) {
+      log.error(err.message);
+    }
   }
 
   /**
    * Destroyes connection
    */
   close() {
-    this.connection.destroy();
+    this.connection.close();
   }
 
   /**
@@ -53,15 +46,7 @@ class Database {
 
     let sql = 'INSERT INTO subscriptions (endpoint, auth_key, p256dh_key) VALUES (?, ?, ?)';
 
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [endpoint, authKey, p256dhKey], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        log.debug('Subscription saved successfully in database.');
-        resolve(true);
-      });
-    });
+    return this.connection.query(sql, [endpoint, authKey, p256dhKey]);
   }
 
   /**
@@ -75,16 +60,7 @@ class Database {
     if (endpoint == undefined || '') {
       throw Error('Invalid endpoint.');
     }
-
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [endpoint], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        log.debug('Deleted successfully from database. endpoint: ', endpoint);
-        resolve(true);
-      });
-    });
+    return this.connection.query(sql, [endpoint]);
   }
 
   /**
@@ -101,19 +77,7 @@ class Database {
     }
 
     let sql = 'UPDATE subscriptions SET preferences = ? WHERE endpoint = ?';
-
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [preferences, endpoint], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        if (result.affectedRows == 0) {
-          reject('No subscription exists with endpoint: ' + endpoint);
-        }
-        log.debug('Preferences Updated successfully.');
-        resolve(true);
-      });
-    });
+    return this.connection.query(sql, [preferences, endpoint]);
   }
 
   /**
@@ -129,15 +93,7 @@ class Database {
     }
 
     let sql = 'SELECT preferences FROM subscriptions WHERE endpoint = ?';
-
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [endpoint], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        resolve(result);
-      });
-    });
+    return this.connection.query(sql, [endpoint]);
   }
 
   /**
@@ -151,16 +107,7 @@ class Database {
     }
 
     let sql = 'INSERT INTO subscriptions (deviceToken) VALUES (?)';
-
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [deviceToken], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        log.debug('Safari Subscription saved successfully in database.');
-        resolve(true);
-      });
-    });
+    return this.connection.query(sql, [deviceToken]);
   }
 
   /**
@@ -174,16 +121,7 @@ class Database {
     }
 
     let sql = 'DELETE FROM subscriptions WHERE deviceToken = ?';
-
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [deviceToken], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        log.debug('Deleted Safari subscriptions successfully from database. ');
-        resolve(true);
-      });
-    });
+    return this.connection.query(sql, [deviceToken]);
   }
 
   /**
@@ -200,19 +138,7 @@ class Database {
     }
 
     let sql = 'UPDATE subscriptions SET preferences = ? WHERE deviceToken = ?';
-
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [preferences, deviceToken], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        if (result.affectedRows == 0) {
-          reject('No subscription exists with deviceToken: ' + deviceToken);
-        }
-        log.debug('Preferences Updated successfully.');
-        resolve(true);
-      });
-    });
+    return this.connection.query(sql, [preferences, deviceToken]);
   }
 
   /**
@@ -228,15 +154,7 @@ class Database {
     }
 
     let sql = 'SELECT preferences FROM subscriptions WHERE deviceToken = ?';
-
-    return new Promise((resolve, reject) => {
-      this.connection.query(sql, [deviceToken], function(err, result) {
-        if (err) {
-          throw reject(err);
-        }
-        resolve(result);
-      });
-    });
+    return this.connection.query(sql, [deviceToken]);
   }
 }
 module.exports = Database;
