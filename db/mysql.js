@@ -7,6 +7,11 @@ const log = require('./../log.js');
  * @author Vladimir Kosmala <vladimir.kosmala@cern.ch>
  */
 class MySQL {
+  /**
+   * Creates pool of connections
+   * @param {object} config configuration object including hostname, username, password
+   * and database name.
+   */
   constructor(config) {
     this.config = config;
     this.pool = mysql.createPool(config);
@@ -18,6 +23,13 @@ class MySQL {
     });
   }
 
+  /**
+   * Prepares and executes query.
+   * Sets up 60s timeout.
+   * @param {string} query - SQL query
+   * @param {array} parameters - parameters to be boud to the query
+   * @return {object} promise
+   */
   query(query, parameters) {
     return new Promise((resolve, reject) => {
       this.pool.query({
@@ -33,6 +45,9 @@ class MySQL {
     });
   }
 
+  /**
+   * Smothly terminates connection pool
+   */ 
   close() {
     this.pool.end(() => {
     });

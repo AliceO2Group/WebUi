@@ -90,9 +90,13 @@ class Notifications {
    */
   updatePref(req, res) {
     this.db.updatePreferences(req.body)
-      .then(function() {
-        res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify({data: {success: true}}));
+      .then(function(result) {
+        if (result.affectedRows == 0) {
+          res.send('No subscription exists with endpoint');
+        } else {
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify({data: {success: true}}));
+        }
       })
       .catch(function(err) {
         res.send(err);
@@ -208,9 +212,13 @@ class Notifications {
    */
   updatePrefSafari(req, res) {
     this.db.updatePreferencesSafari(req.body)
-      .then(function() {
-        res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify({data: {success: true}}));
+      .then(function(result) {
+        if (result.affectedRows == 0) {
+          res.send('No subscription exists with this devToken');
+        } else {
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify({data: {success: true}}));
+        }
       })
       .catch(function(err) {
         res.send(err);

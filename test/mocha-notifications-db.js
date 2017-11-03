@@ -68,7 +68,7 @@ describe('Test notification database', function() {
     };
     return db.insertSubscription(sub)
       .then(function(data) {
-        expect(data).to.equal(true);
+        expect(data.affectedRows).to.equal(1);
       });
   });
 
@@ -91,7 +91,7 @@ describe('Test notification database', function() {
 
     return db.updatePreferences(data)
       .then(function fullfilled(result) {
-        throw new Error('Promise was unexpectedly fullfilled');
+        expect(result.affectedRows).to.equal(0);
       }, function rejected(error) {
         assert.equal('No subscription exists with endpoint: new', error);
       });
@@ -104,7 +104,7 @@ describe('Test notification database', function() {
     };
     return db.updatePreferences(data)
       .then(function(data) {
-        expect(data).to.equal(true);
+        expect(data.affectedRows).to.equal(1);
       });
   });
 
@@ -140,7 +140,7 @@ describe('Test notification database', function() {
 
     return db.deleteSubscription(endpoint)
       .then(function(data) {
-        expect(data).to.equal(true);
+        expect(data.affectedRows).to.equal(1);
       });
   });
 
@@ -157,7 +157,7 @@ describe('Test notification database', function() {
 
     return db.insertSubscriptionSafari(deviceToken)
       .then(function(data) {
-        expect(data).to.equal(true);
+        expect(data.affectedRows).to.equal(1);
       });
   });
 
@@ -180,7 +180,7 @@ describe('Test notification database', function() {
 
     return db.updatePreferencesSafari(data)
       .then(function fullfilled(result) {
-        throw new Error('Promise was unexpectedly fullfilled');
+        expect(result.affectedRows).to.equal(0);
       }, function rejected(error) {
         assert.equal('No subscription exists with deviceToken: new', error);
       });
@@ -193,7 +193,7 @@ describe('Test notification database', function() {
     };
     return db.updatePreferencesSafari(data)
       .then(function(data) {
-        expect(data).to.equal(true);
+        expect(data.affectedRows).to.equal(1);
       });
   });
 
@@ -229,7 +229,7 @@ describe('Test notification database', function() {
     let deviceToken = 'safariTest';
     return db.deleteSubscriptionSafari(deviceToken)
       .then(function(data) {
-        expect(data).to.equal(true);
+        expect(data.affectedRows).to.equal(1);
       });
   });
 
