@@ -38,6 +38,7 @@ class OAuth {
       path: config.resource.groupPath
     };
     this.scope = 'https://' + config.resource.hostname + config.resource.userpath;
+    this.egroup = config.egroup;
   }
 
   /**
@@ -74,6 +75,9 @@ class OAuth {
             this.getDetails(token.token.access_token, this.groupOptions)
           ]);
         }).then((data) => {
+          if (data[1].groups.find((group) => group === this.egroup) === undefined) {
+            throw new Error('e-grups restriction');
+          }
           resolve(data);
         }).catch((error) => {
           reject(error);

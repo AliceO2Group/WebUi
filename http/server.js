@@ -170,7 +170,7 @@ class HttpServer {
         Object.assign(data[0], this.templateData);
         return res.status(200).send(this.renderPage('public/index.tpl', data[0]));
       }).catch((error) => {
-        return res.redirect('/');
+        return res.status(401).send('oAuth failed');
       });
   }
 
