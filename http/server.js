@@ -9,7 +9,6 @@ const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
 const path = require('path');
 const bodyParser = require('body-parser');
-const compression = require('compression');
 
 /**
  * HTTPS server that handles OAuth and provides REST API.
@@ -25,7 +24,6 @@ class HttpServer {
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     this.app = express();
-    this.app.use(compression());
     this.configureHelmet(httpConfig.hostname, httpConfig.portSecure);
 
     this.app.use(express.static(path.join(__dirname, '')));

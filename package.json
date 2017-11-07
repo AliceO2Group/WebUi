@@ -7,11 +7,12 @@
   "repository": "AliceO2Group/Gui",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
-    "test": "npm run eslint; npm run mocha; npm run nsp",
+    "test": "npm run eslint; npm run mocha; npm run nsp; npm run deps",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha --exit",
     "mocha": "./node_modules/.bin/mocha --exit",
     "//": "./node_modules/.bin/phantomjs ./node_modules/qunit-phantomjs-runner/runner-list.js",
     "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js",
+    "deps": "./node_modules/.bin/dependency-check ./package.json --unused --no-dev --ignore-module jquery --ignore-module jquery-ui-dist",
     "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js > docs/API.md",
     "nsp": "./node_modules/.bin/nsp check --warn-only",
     "postinstall": "mkdir -p public/libs/images; parent=`ls ..`; if [ \"$parent\" = aliceo2-gui ]; then cp ../../jquery/dist/jquery.js public/libs; cp ../../jquery-ui-dist/jquery-ui.* public/libs; cp ../../jquery-ui-dist/images/* public/libs/images; else cp node_modules/jquery/dist/jquery.js public/libs; cp node_modules/jquery-ui-dist/jquery-ui.* public/libs; cp node_modules/jquery-ui-dist/images/* public/libs/images; fi"
@@ -36,6 +37,7 @@
     "apn": "^2.1.5",
     "chai": "^4.1.2",
     "chai-http": "^3.0.0",
+    "dependency-check": "^2.9.1",
     "eslint": "^4.10.0",
     "eslint-config-google": "^0.9.1",
     "jsdoc-to-markdown": "^3.0.0",
