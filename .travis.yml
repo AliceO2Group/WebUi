@@ -49,10 +49,6 @@ before_script:
 - openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=www.test.com"
   -keyout test.key -out test.pem
 - mv config-default.json config.json
-- node -e "const urlBase64 = require('urlsafe-base64'); const config = require('./config.json');
-  const pubKey = urlBase64.encode(new Buffer(65)); const privKey = urlBase64.encode(new
-  Buffer(32)); config.pushNotifications.vapid.publicKey = pubKey; config.pushNotifications.vapid.privateKey
-  = privKey; fs.writeFileSync('./config.json', JSON.stringify(config));"
 script: npm test
 after_success:
 - npm run coverage
