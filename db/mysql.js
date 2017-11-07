@@ -47,7 +47,7 @@ class MySQL {
 
   /**
    * Smothly terminates connection pool
-   */ 
+   */
   close() {
     this.pool.end(() => {
     });
