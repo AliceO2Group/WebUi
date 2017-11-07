@@ -4,6 +4,4 @@ error.log
 npm-debug.log
 .DS_Store
 .nyc_output
-APNsAuthKey.p8
-pushpackage.zip
 public/libs/

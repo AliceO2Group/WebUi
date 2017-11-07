@@ -1,14 +1,6 @@
 ## Classes
 
 <dl>
-<dt><a href="#Database">Database</a></dt>
-<dd><p>Database Module containing functions for-
-Insertion and Deletion of Subscriptions for both, APN and other browsers
-Updating User Notification Preferences
-Fetching User Notification Preferences</p>
-</dd>
-<dt><a href="#Notifications">Notifications</a></dt>
-<dd></dd>
 <dt><a href="#OAuth">OAuth</a></dt>
 <dd><p>Authenticates users via CERN OAuth 2.0.
 Gathers user account details.</p>
@@ -32,332 +24,27 @@ In addition, it provides custom authentication with JWT tokens.</p>
 <dd><p>ZeroMQ client that communicates with Control Master prcess via one of two supported
 socket patterns (sub and req).</p>
 </dd>
+<dt><a href="#MySQL">MySQL</a></dt>
+<dd><p>MySQL pool wrapper</p>
+</dd>
 </dl>
 
 ## Functions
 
 <dl>
-<dt><a href="#triggerPushMsg">triggerPushMsg(subscription, dataToSend)</a> ⇒ <code>promise</code></dt>
-<dd><p>Sends push notifications to subscribed users</p>
-</dd>
-<dt><a href="#deleteSubscriptionFromDatabase">deleteSubscriptionFromDatabase(endpoint)</a> ⇒ <code>promise</code></dt>
-<dd><p>Deletes user subscriptions from Database</p>
-</dd>
-<dt><a href="#getSubscriptions">getSubscriptions()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches subscriptions from Database</p>
-</dd>
-<dt><a href="#getAPNSubscriptions">getAPNSubscriptions()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches APN subscriptions from Database</p>
-</dd>
-<dt><a href="#formatSubscription">formatSubscription(sub)</a> ⇒ <code>object</code></dt>
-<dd><p>Formats the subscription to a suitable format to be sent to &#39;web-push&#39; server</p>
-</dd>
-<dt><a href="#sendNotif">sendNotif()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches subscriptions from db then verifies them and sends notifications.</p>
-</dd>
-<dt><a href="#sendAPNNotif">sendAPNNotif()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches APN subscriptions from db then verifies them and sends notifications.</p>
-</dd>
 <dt><a href="#_create">_create()</a></dt>
 <dd><p>Create widget instance</p>
 </dd>
 <dt><a href="#_connect">_connect()</a></dt>
 <dd><p>Connect to Websocket endpoint and specyfies WebSocket event listeners</p>
 </dd>
+<dt><a href="#setFilter">setFilter(filter)</a></dt>
+<dd><p>Send filter to WebSocket server</p>
+</dd>
 <dt><a href="#send">send(message)</a></dt>
 <dd><p>Send message to WebSocket server</p>
 </dd>
-<dt><a href="#triggerPushMsg">triggerPushMsg(subscription, dataToSend)</a> ⇒ <code>promise</code></dt>
-<dd><p>Sends push notifications to subscribed users</p>
-</dd>
-<dt><a href="#deleteSubscriptionFromDatabase">deleteSubscriptionFromDatabase(endpoint)</a> ⇒ <code>promise</code></dt>
-<dd><p>Deletes user subscriptions from Database</p>
-</dd>
-<dt><a href="#getSubscriptions">getSubscriptions()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches subscriptions from Database</p>
-</dd>
-<dt><a href="#getAPNSubscriptions">getAPNSubscriptions()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches APN subscriptions from Database</p>
-</dd>
-<dt><a href="#formatSubscription">formatSubscription(sub)</a> ⇒ <code>object</code></dt>
-<dd><p>Formats the subscription to a suitable format to be sent to &#39;web-push&#39; server</p>
-</dd>
-<dt><a href="#sendNotif">sendNotif()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches subscriptions from db then verifies them and sends notifications.</p>
-</dd>
-<dt><a href="#sendAPNNotif">sendAPNNotif()</a> ⇒ <code>promise</code></dt>
-<dd><p>Fetches APN subscriptions from db then verifies them and sends notifications.</p>
-</dd>
 </dl>
-
-<a name="Database"></a>
-
-## Database
-Database Module containing functions for-
-Insertion and Deletion of Subscriptions for both, APN and other browsers
-Updating User Notification Preferences
-Fetching User Notification Preferences
-
-**Kind**: global class  
-**Author**: Anirudh Goel <anirudh.goel@cern.ch>  
-
-* [Database](#Database)
-    * [new Database(config)](#new_Database_new)
-    * [.insertSubscription(sub)](#Database+insertSubscription) ⇒ <code>Promise</code>
-    * [.deleteSubscription(endpoint)](#Database+deleteSubscription) ⇒ <code>Promise</code>
-    * [.updatePreferences(data)](#Database+updatePreferences) ⇒ <code>Promise</code>
-    * [.getPreferences(data)](#Database+getPreferences) ⇒ <code>Promise</code>
-    * [.insertSubscriptionSafari(deviceToken)](#Database+insertSubscriptionSafari) ⇒ <code>Promise</code>
-    * [.deleteSubscriptionSafari(deviceToken)](#Database+deleteSubscriptionSafari) ⇒ <code>Promise</code>
-    * [.updatePreferencesSafari(data)](#Database+updatePreferencesSafari) ⇒ <code>Promise</code>
-    * [.getPreferencesSafari(data)](#Database+getPreferencesSafari) ⇒ <code>Promise</code>
-
-<a name="new_Database_new"></a>
-
-### new Database(config)
-Establishes connections with MySQL Database
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| config | <code>object</code> | configuration object for db, see docs for more details |
-
-<a name="Database+insertSubscription"></a>
-
-### database.insertSubscription(sub) ⇒ <code>Promise</code>
-Saves 'web-push' subscription object to Database
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| sub | <code>object</code> | Subscription Object |
-
-<a name="Database+deleteSubscription"></a>
-
-### database.deleteSubscription(endpoint) ⇒ <code>Promise</code>
-Module for deleting subscriotion from MySQL database
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| endpoint | <code>string</code> | Subscription Endpoint |
-
-<a name="Database+updatePreferences"></a>
-
-### database.updatePreferences(data) ⇒ <code>Promise</code>
-Module for updating user notification preferences in MySQL database
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>object</code> | Preferences Object |
-
-<a name="Database+getPreferences"></a>
-
-### database.getPreferences(data) ⇒ <code>Promise</code>
-Module for fetching user notification preferences from MySQL database
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>object</code> | Object containing Endpoint |
-
-<a name="Database+insertSubscriptionSafari"></a>
-
-### database.insertSubscriptionSafari(deviceToken) ⇒ <code>Promise</code>
-Save Safari subscription to MySQL database
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| deviceToken | <code>string</code> | Unique Device Identifier Token |
-
-<a name="Database+deleteSubscriptionSafari"></a>
-
-### database.deleteSubscriptionSafari(deviceToken) ⇒ <code>Promise</code>
-Delete Safari subscriotion from MySQL database
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| deviceToken | <code>string</code> | Unique Device Identifier Token |
-
-<a name="Database+updatePreferencesSafari"></a>
-
-### database.updatePreferencesSafari(data) ⇒ <code>Promise</code>
-Module for updating user notification preferences in MySQL database for APNs
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>object</code> | Object containing Device Token and preferences |
-
-<a name="Database+getPreferencesSafari"></a>
-
-### database.getPreferencesSafari(data) ⇒ <code>Promise</code>
-Module for fetching user notification preferences from MySQL database for APNs
-
-**Kind**: instance method of [<code>Database</code>](#Database)  
-**Returns**: <code>Promise</code> - Promise  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>object</code> | Object containing Device Token |
-
-<a name="Notifications"></a>
-
-## Notifications
-**Kind**: global class  
-
-* [Notifications](#Notifications)
-    * [new Notifications(server, config)](#new_Notifications_new)
-    * [.saveSubscription(req, res)](#Notifications+saveSubscription)
-    * [.updatePref(req, res)](#Notifications+updatePref)
-    * [.getPref(req, res)](#Notifications+getPref)
-    * [.deleteSubscription(req, res)](#Notifications+deleteSubscription)
-    * [.safariPermission(res)](#Notifications+safariPermission)
-    * [.safariSubscribe(req, res)](#Notifications+safariSubscribe)
-    * [.safariUnsubscribe(req, res)](#Notifications+safariUnsubscribe)
-    * [.getPrefSafari(req, res)](#Notifications+getPrefSafari)
-    * [.updatePrefSafari(req, res)](#Notifications+updatePrefSafari)
-
-<a name="new_Notifications_new"></a>
-
-### new Notifications(server, config)
-Sets up VAPID keys and specified REST API routes
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| server | <code>object</code> | https server |
-| config | <code>object</code> | configuration object (see documentation for the description of fields) |
-
-<a name="Notifications+saveSubscription"></a>
-
-### notifications.saveSubscription(req, res)
-Receives User Subscription object from 'web-push' server
-and saves it to Database
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+updatePref"></a>
-
-### notifications.updatePref(req, res)
-Receives User Notification Preferences and updates it in Database
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+getPref"></a>
-
-### notifications.getPref(req, res)
-Gets User Notification Preferences from Database
-and passes it to browser
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+deleteSubscription"></a>
-
-### notifications.deleteSubscription(req, res)
-Deletes user subscription from database
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+safariPermission"></a>
-
-### notifications.safariPermission(res)
-When the user clicks on 'Allow' in notification prompt box,
-a call is made to this function to receive a zipped push package.
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+safariSubscribe"></a>
-
-### notifications.safariSubscribe(req, res)
-Receives Device Token from APN server
-and saves it to Database
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+safariUnsubscribe"></a>
-
-### notifications.safariUnsubscribe(req, res)
-When user removes/denies the notifications from Safari Preferences,
-a call to this function is made.
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+getPrefSafari"></a>
-
-### notifications.getPrefSafari(req, res)
-Gets User Notification Preferences for APNs from Database
-and passes it to browser
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
-
-<a name="Notifications+updatePrefSafari"></a>
-
-### notifications.updatePrefSafari(req, res)
-Receives User APNs Notification Preferences and updates it in Database
-
-**Kind**: instance method of [<code>Notifications</code>](#Notifications)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | request object |
-| res | <code>object</code> | response object |
 
 <a name="OAuth"></a>
 
@@ -374,8 +61,10 @@ Gathers user account details.
 
 * [OAuth](#OAuth)
     * [new OAuth(config)](#new_OAuth_new)
-    * [.oAuthCallback(emitter, code)](#OAuth+oAuthCallback)
-    * [.oAuthGetUserDetails(token, emitter)](#OAuth+oAuthGetUserDetails)
+    * [.getAuthorizationUri(state)](#OAuth+getAuthorizationUri) ⇒ <code>object</code>
+    * [.oAuthCallback(code)](#OAuth+oAuthCallback) ⇒ <code>object</code>
+    * [.getUserDetails(token)](#OAuth+getUserDetails) ⇒ <code>object</code>
+    * [.getDetails(token, options)](#OAuth+getDetails) ⇒ <code>object</code>
 
 <a name="new_OAuth_new"></a>
 
@@ -387,29 +76,54 @@ Creates OAuth object based on id and secret stored in config file.
 | --- | --- | --- |
 | config | <code>object</code> | configuration object (see docs for details) |
 
-<a name="OAuth+oAuthCallback"></a>
+<a name="OAuth+getAuthorizationUri"></a>
 
-### oAuth.oAuthCallback(emitter, code)
-OAuth redirection callback (called by library).
+### oAuth.getAuthorizationUri(state) ⇒ <code>object</code>
+Returns autorization URL
 
 **Kind**: instance method of [<code>OAuth</code>](#OAuth)  
+**Returns**: <code>object</code> - authorizeURL  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| emitter | <code>object</code> |  |
-| code | <code>number</code> | authorization code to request access token |
+| state | <code>string</code> | Base64 encoded parameters |
 
-<a name="OAuth+oAuthGetUserDetails"></a>
+<a name="OAuth+oAuthCallback"></a>
 
-### oAuth.oAuthGetUserDetails(token, emitter)
-Queries user details using received access token.
+### oAuth.oAuthCallback(code) ⇒ <code>object</code>
+OAuth redirection callback (called by library).
 
 **Kind**: instance method of [<code>OAuth</code>](#OAuth)  
+**Returns**: <code>object</code> - Promise with user details and token  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| code | <code>number</code> | authorization code to request access token |
+
+<a name="OAuth+getUserDetails"></a>
+
+### oAuth.getUserDetails(token) ⇒ <code>object</code>
+Provides user details (used by wesocket)
+
+**Kind**: instance method of [<code>OAuth</code>](#OAuth)  
+**Returns**: <code>object</code> - promise of user data  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | oAuth token |
+
+<a name="OAuth+getDetails"></a>
+
+### oAuth.getDetails(token, options) ⇒ <code>object</code>
+Queries details using received access token.
+
+**Kind**: instance method of [<code>OAuth</code>](#OAuth)  
+**Returns**: <code>object</code> - Promise with user details  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | OAuth access token |
-| emitter | <code>object</code> |  |
+| options | <code>object</code> | POST options |
 
 <a name="HttpServer"></a>
 
@@ -422,14 +136,15 @@ Each request is authenticated with JWT token.
 
 * [HttpServer](#HttpServer)
     * [new HttpServer(httpConfig, jwtConfig, oAuthConfig)](#new_HttpServer_new)
-    * [.server](#HttpServer+server) ⇒ <code>object</code>
+    * [.getServer](#HttpServer+getServer) ⇒ <code>object</code>
+    * [.configureHelmet(hostname, port)](#HttpServer+configureHelmet)
     * [.passToTemplate(key, value)](#HttpServer+passToTemplate)
     * [.specifyRoutes()](#HttpServer+specifyRoutes)
     * [.post(path, callback)](#HttpServer+post)
     * [.postNoAuth(path, callback)](#HttpServer+postNoAuth)
     * [.deleteNoAuth(path, callback)](#HttpServer+deleteNoAuth)
     * [.enableHttpRedirect()](#HttpServer+enableHttpRedirect)
-    * [.oAuthAuthorize(res)](#HttpServer+oAuthAuthorize)
+    * [.oAuthAuthorize(req, res)](#HttpServer+oAuthAuthorize)
     * [.oAuthCallback(req, res)](#HttpServer+oAuthCallback)
     * [.renderPage(page, data)](#HttpServer+renderPage) ⇒ <code>string</code>
     * [.jwtVerify(req, res, next)](#HttpServer+jwtVerify)
@@ -447,13 +162,25 @@ Sets up the server, routes and binds HTTP and HTTPS sockets.
 | jwtConfig | <code>object</code> | configuration of JWT |
 | oAuthConfig | <code>object</code> | configuration of oAuth |
 
-<a name="HttpServer+server"></a>
+<a name="HttpServer+getServer"></a>
 
-### httpServer.server ⇒ <code>object</code>
+### httpServer.getServer ⇒ <code>object</code>
 HTTPs server getter.
 
 **Kind**: instance property of [<code>HttpServer</code>](#HttpServer)  
 **Returns**: <code>object</code> - - HTTPs server  
+<a name="HttpServer+configureHelmet"></a>
+
+### httpServer.configureHelmet(hostname, port)
+Configures Helmet rules to increase web app secuirty
+
+**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| hostname | <code>string</code> | whitelisted hostname for websocket connection |
+| port | <code>number</code> | secure port number |
+
 <a name="HttpServer+passToTemplate"></a>
 
 ### httpServer.passToTemplate(key, value)
@@ -516,13 +243,14 @@ Redirects HTTP to HTTPS.
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
 <a name="HttpServer+oAuthAuthorize"></a>
 
-### httpServer.oAuthAuthorize(res)
+### httpServer.oAuthAuthorize(req, res)
 OAuth redirection.
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
 
 | Param | Type | Description |
 | --- | --- | --- |
+| req | <code>object</code> | HTTP request |
 | res | <code>object</code> | HTTP response |
 
 <a name="HttpServer+oAuthCallback"></a>
@@ -758,17 +486,18 @@ In addition, it provides custom authentication with JWT tokens.
 **Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
 
 * [WebSocket](#WebSocket)
-    * [new WebSocket(httpsServer, jwtConfig)](#new_WebSocket_new)
+    * [new WebSocket(httpsServer, jwtConfig, hostname)](#new_WebSocket_new)
     * [.bind(name, callback)](#WebSocket+bind)
     * [.onmessage(message)](#WebSocket+onmessage) ⇒ <code>object</code>
     * [.jwtVerify(token, refresh)](#WebSocket+jwtVerify) ⇒ <code>object</code>
     * [.onconnection(client, request)](#WebSocket+onconnection)
+    * [.ping()](#WebSocket+ping)
     * [.onclose(client)](#WebSocket+onclose)
     * [.broadcast(message)](#WebSocket+broadcast)
 
 <a name="new_WebSocket_new"></a>
 
-### new WebSocket(httpsServer, jwtConfig)
+### new WebSocket(httpsServer, jwtConfig, hostname)
 Starts up the server and binds event handler.
 
 
@@ -776,6 +505,7 @@ Starts up the server and binds event handler.
 | --- | --- | --- |
 | httpsServer | <code>object</code> | HTTPS server |
 | jwtConfig | <code>object</code> | configuration of jwt |
+| hostname | <code>string</code> | hostname that clients will be conneting to |
 
 <a name="WebSocket+bind"></a>
 
@@ -825,8 +555,14 @@ Handles client connection and message receiving.
 | Param | Type | Description |
 | --- | --- | --- |
 | client | <code>object</code> | connected client |
-| request | <code>object</code> | connection request (new in v3.0.0, client.upgradeReq replacement) |
+| request | <code>object</code> | connection request |
 
+<a name="WebSocket+ping"></a>
+
+### webSocket.ping()
+Sends ping message every 30s
+
+**Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  
 <a name="WebSocket+onclose"></a>
 
 ### webSocket.onclose(client)
@@ -921,66 +657,64 @@ Sends message via socket.
 | --- | --- |
 | message | <code>string</code> | 
 
-<a name="triggerPushMsg"></a>
+<a name="MySQL"></a>
 
-## triggerPushMsg(subscription, dataToSend) ⇒ <code>promise</code>
-Sends push notifications to subscribed users
+## MySQL
+MySQL pool wrapper
 
-**Kind**: global function  
-**Returns**: <code>promise</code> - webpush.sendNotification - Sends Notification  
+**Kind**: global class  
+**Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
+**Author**: Vladimir Kosmala <vladimir.kosmala@cern.ch>  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| subscription | <code>object</code> | Subscription object with user endpoint |
-| dataToSend | <code>string</code> | String message to be sent in notification |
+* [MySQL](#MySQL)
+    * [new MySQL(config)](#new_MySQL_new)
+    * [.query(query, parameters)](#MySQL+query) ⇒ <code>object</code>
+    * [.close()](#MySQL+close)
+    * [.errorHandler(err)](#MySQL+errorHandler) ⇒ <code>string</code>
 
-<a name="deleteSubscriptionFromDatabase"></a>
+<a name="new_MySQL_new"></a>
 
-## deleteSubscriptionFromDatabase(endpoint) ⇒ <code>promise</code>
-Deletes user subscriptions from Database
+### new MySQL(config)
+Creates pool of connections
 
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| endpoint | <code>string</code> | URL to identify each user |
-
-<a name="getSubscriptions"></a>
-
-## getSubscriptions() ⇒ <code>promise</code>
-Fetches subscriptions from Database
-
-**Kind**: global function  
-<a name="getAPNSubscriptions"></a>
-
-## getAPNSubscriptions() ⇒ <code>promise</code>
-Fetches APN subscriptions from Database
-
-**Kind**: global function  
-<a name="formatSubscription"></a>
-
-## formatSubscription(sub) ⇒ <code>object</code>
-Formats the subscription to a suitable format to be sent to 'web-push' server
-
-**Kind**: global function  
-**Returns**: <code>object</code> - formattedSubscription - Subscription object reformatted  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| sub | <code>object</code> | Subscription object fetched from Database |
+| config | <code>object</code> | configuration object including hostname, username, password and database name. |
 
-<a name="sendNotif"></a>
+<a name="MySQL+query"></a>
 
-## sendNotif() ⇒ <code>promise</code>
-Fetches subscriptions from db then verifies them and sends notifications.
+### mySQL.query(query, parameters) ⇒ <code>object</code>
+Prepares and executes query.
+Sets up 60s timeout.
 
-**Kind**: global function  
-<a name="sendAPNNotif"></a>
+**Kind**: instance method of [<code>MySQL</code>](#MySQL)  
+**Returns**: <code>object</code> - promise  
 
-## sendAPNNotif() ⇒ <code>promise</code>
-Fetches APN subscriptions from db then verifies them and sends notifications.
+| Param | Type | Description |
+| --- | --- | --- |
+| query | <code>string</code> | SQL query |
+| parameters | <code>array</code> | parameters to be boud to the query |
 
-**Kind**: global function  
+<a name="MySQL+close"></a>
+
+### mySQL.close()
+Smothly terminates connection pool
+
+**Kind**: instance method of [<code>MySQL</code>](#MySQL)  
+<a name="MySQL+errorHandler"></a>
+
+### mySQL.errorHandler(err) ⇒ <code>string</code>
+The purpose is to translate Error object from mysql to more human one
+so we can send it to final user when it can be recovered
+
+**Kind**: instance method of [<code>MySQL</code>](#MySQL)  
+**Returns**: <code>string</code> - the new state of this source instance  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>Error</code> | the error from a catch or callback |
+
 <a name="_create"></a>
 
 ## _create()
@@ -993,6 +727,17 @@ Create widget instance
 Connect to Websocket endpoint and specyfies WebSocket event listeners
 
 **Kind**: global function  
+<a name="setFilter"></a>
+
+## setFilter(filter)
+Send filter to WebSocket server
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| filter | <code>function</code> | 
+
 <a name="send"></a>
 
 ## send(message)
@@ -1004,63 +749,3 @@ Send message to WebSocket server
 | --- | --- | --- |
 | message | <code>object</code> | message to be sent |
 
-<a name="triggerPushMsg"></a>
-
-## triggerPushMsg(subscription, dataToSend) ⇒ <code>promise</code>
-Sends push notifications to subscribed users
-
-**Kind**: global function  
-**Returns**: <code>promise</code> - webpush.sendNotification - Sends Notification  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| subscription | <code>object</code> | Subscription object with user endpoint |
-| dataToSend | <code>string</code> | String message to be sent in notification |
-
-<a name="deleteSubscriptionFromDatabase"></a>
-
-## deleteSubscriptionFromDatabase(endpoint) ⇒ <code>promise</code>
-Deletes user subscriptions from Database
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| endpoint | <code>string</code> | URL to identify each user |
-
-<a name="getSubscriptions"></a>
-
-## getSubscriptions() ⇒ <code>promise</code>
-Fetches subscriptions from Database
-
-**Kind**: global function  
-<a name="getAPNSubscriptions"></a>
-
-## getAPNSubscriptions() ⇒ <code>promise</code>
-Fetches APN subscriptions from Database
-
-**Kind**: global function  
-<a name="formatSubscription"></a>
-
-## formatSubscription(sub) ⇒ <code>object</code>
-Formats the subscription to a suitable format to be sent to 'web-push' server
-
-**Kind**: global function  
-**Returns**: <code>object</code> - formattedSubscription - Subscription object reformatted  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| sub | <code>object</code> | Subscription object fetched from Database |
-
-<a name="sendNotif"></a>
-
-## sendNotif() ⇒ <code>promise</code>
-Fetches subscriptions from db then verifies them and sends notifications.
-
-**Kind**: global function  
-<a name="sendAPNNotif"></a>
-
-## sendAPNNotif() ⇒ <code>promise</code>
-Fetches APN subscriptions from db then verifies them and sends notifications.
-
-**Kind**: global function  
