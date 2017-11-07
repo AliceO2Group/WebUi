@@ -13,7 +13,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 chai.use(chaiHttp);
 
 const http = new HttpServer(config.http, config.jwt, config.oAuth);
-new WebSocket(http, config.jwt, 'test.cern.ch');
+new WebSocket(http, config.jwt, 'localhost');
 const jwt = new JwtToken(config.jwt);
 const token = jwt.generateToken(0, 'test', 1);
 

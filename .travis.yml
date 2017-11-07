@@ -46,7 +46,7 @@ before_install:
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
 before_script:
 - npm install -g codecov
-- openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=www.test.com"
+- openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost"
   -keyout test.key -out test.pem
 - mv config-default.json config.json
 script: npm test
