@@ -44,8 +44,7 @@
     "nyc": "^11.3.0",
     "phantom": "^4.0.5",
     "qunit": "^2.4.1",
-    "qunit-phantomjs-runner": "^2.3.0",
-    "yargs": "^10.0.3"
+    "qunit-phantomjs-runner": "^2.3.0"
   },
   "main": "aliceo2-gui.js",
   "files": [
