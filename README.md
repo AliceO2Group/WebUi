@@ -12,16 +12,12 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
    - Authentication via CERN OAuth 2 and authorization via e-groups
  - WebSocket
    - Custom WebSocket authentication based on JSON Web Tokens
- - Web Push Notifications
-   - VAPID (Chrome and Mozzila)
-   - APN (Safari)
  - ZeroMQ client 
    - *sub* and *rep* patterns
 
 ## System requirements
  * `nodejs` >= 7
  * `zeromq-devel` >= 4.0 (see [zeromq](docs/ZMQ.md) module docs for more details)
- * `mariadb` (or `mysql-community-server`) (for [notifications](docs/NOTIF.md) module only)
 
 ## Installation
  ```
@@ -31,7 +27,6 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
 ## Getting started
 See documentation of available modules:
  * [http/https](docs/HTTP.md)
- * [notifications](docs/NOTIF.md)
  * [websockets](docs/WS.md)
  * [zeromq](docs/ZMQ.md)
 

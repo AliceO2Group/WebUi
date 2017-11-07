@@ -43,12 +43,7 @@ before_install:
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
-- mysql -uroot -e 'CREATE DATABASE notifications;'
-- mysql -uroot -e 'USE notifications; CREATE TABLE `subscriptions` ( `sub_id` int(11)
-  unsigned NOT NULL AUTO_INCREMENT, `endpoint` varchar(300) DEFAULT NULL, `auth_key`
-  varchar(200) DEFAULT NULL, `p256dh_key` varchar(200) DEFAULT NULL, `deviceToken`
-  varchar(100) DEFAULT NULL, `preferences` varchar(20) NOT NULL DEFAULT '000', PRIMARY
-  KEY (`sub_id`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8;'
+- mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
 before_script:
 - npm install -g codecov
 - openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=www.test.com"

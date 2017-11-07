@@ -35,30 +35,12 @@
     "portSecure": 8443,
     "key": "test.key",
     "cert": "test.pem"
-  },  
-  "log": {
-    "console": "debug",
-    "file": "error"
   },
-  "websocket": {
-    "hostname": "localhost"
-  },
-  "pushNotifications": {
-    "vapid": {
-      "publicKey": "<application server public key>",
-      "privateKey": "<application server private key>",
-      "email": "alice-o2-flp-prototype@cern.ch"
-    },
-    "APN": {
-      "keyId": "<APN Key ID>",
-      "teamId": "<APN Team ID>",
-      "pushId": "<APN Push ID>",
-      "authenticationToken": "<Authentication Token File Name>",
-      "hostname": "<Host URL (must start with https)>"
-    },
-    "host": "localhost",
+  "mysql": {
+    "host": "127.0.0.1",
     "user": "root",
-    "password": "",
-    "database": "notifications"
+    "password": "", 
+    "database": "INFOLOGGER",
+    "port": 3306
   }
 }
