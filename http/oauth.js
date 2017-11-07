@@ -27,13 +27,18 @@ class OAuth {
     });
 
     this.redirectUri = config.redirect_uri;
-    this.postOptions = {
+    this.userOptions = {
       host: config.resource.hostname,
       port: config.resource.port,
-      path: config.resource.path
+      path: config.resource.userPath
     };
-    this.scope = config.scope;
-    this.redirect_uri = config.redirect_uri;
+    this.groupOptions = {
+      host: config.resource.hostname,
+      port: config.resource.port,
+      path: config.resource.groupPath
+    };
+    this.scope = 'https://' + config.resource.hostname + config.resource.userpath;
+    this.egroup = config.egroup;
   }
 
   /**
@@ -43,7 +48,7 @@ class OAuth {
    */
   getAuthorizationUri(state) {
     return this.oauthCreds.authorizationCode.authorizeURL({
-      redirect_uri: this.redirect_uri,
+      redirect_uri: this.redirectUri,
       scope: this.scope,
       state: state
     });
@@ -65,9 +70,15 @@ class OAuth {
         .then((result) => {
           return this.oauthCreds.accessToken.create(result);
         }).then((token) => {
-          return this.oAuthGetUserDetails(token.token.access_token);
-        }).then((user) => {
-          resolve(user);
+          return Promise.all([
+            this.getDetails(token.token.access_token, this.userOptions),
+            this.getDetails(token.token.access_token, this.groupOptions)
+          ]);
+        }).then((data) => {
+          if (data[1].groups.find((group) => group === this.egroup) === undefined) {
+            throw new Error('e-grups restriction');
+          }
+          resolve(data);
         }).catch((error) => {
           reject(error);
         });
@@ -75,11 +86,21 @@ class OAuth {
   }
 
   /**
-   * Queries user details using received access token.
+   * Provides user details (used by wesocket)
+   * @param {string} token oAuth token
+   * @return {object} promise of user data
+   */
+  getUserDetails(token) {
+    return this.getDetails(token, this.userOptions);
+  }
+
+  /**
+   * Queries details using received access token.
    * @param {string} token - OAuth access token
+   * @param {object} options POST options
    * @return {object} Promise with user details
    */
-  oAuthGetUserDetails(token) {
+  getDetails(token, options) {
     return new Promise((resolve, reject) => {
       const postOptions = {
         method: 'GET',
@@ -88,7 +109,7 @@ class OAuth {
           'Authorization': 'Bearer ' + token
         }
       };
-      Object.assign(postOptions, this.postOptions);
+      Object.assign(postOptions, options);
       let response = [];
       const postRequest = https.request(postOptions, (res) => {
         res.on('data', (chunk) => response.push(chunk));

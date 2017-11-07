@@ -161,16 +161,16 @@ class HttpServer {
     this.oauth.oAuthCallback(req.query.code)
       .then((data) => {
         /* !!! JUST FOR DEVELOPMENT !!! */
-        data.personid += Math.floor(Math.random() * 100);
+        data[0].personid += Math.floor(Math.random() * 100);
         const params = JSON.parse(new Buffer(req.query.state, 'base64').toString('ascii'));
         Object.keys(params).forEach((key) => {
-          data[key] = params[key];
+          data[0][key] = params[key];
         });
-        data.token = this.jwt.generateToken(data.personid, data.username, 1);
-        Object.assign(data, this.templateData);
-        return res.status(200).send(this.renderPage('public/index.tpl', data));
+        data[0].token = this.jwt.generateToken(data[0].personid, data[0].username, 1);
+        Object.assign(data[0], this.templateData);
+        return res.status(200).send(this.renderPage('public/index.tpl', data[0]));
       }).catch((error) => {
-        return res.redirect('/');
+        return res.status(401).send('oAuth failed');
       });
   }
 
@@ -202,7 +202,6 @@ class HttpServer {
    */
   jwtVerify(req, res, next) {
     try {
-      // console.log(req.query);
       const jwtFeedback = this.jwt.verify(req.query.token);
       req.decoded = jwtFeedback.decoded;
       next();

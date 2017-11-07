@@ -102,7 +102,7 @@ class WebSocket extends EventEmitter {
    */
   onconnection(client, request) {
     const oauth = url.parse(request.url, true).query.oauth;
-    this.http.oauth.oAuthGetUserDetails(oauth)
+    this.http.oauth.getUserDetails(oauth)
       .then(() => {
         client.send(JSON.stringify({command: 'authed'}));
         client.on('message', (message, flags) => {
