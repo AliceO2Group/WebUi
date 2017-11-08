@@ -140,6 +140,8 @@ Each request is authenticated with JWT token.
     * [.configureHelmet(hostname, port)](#HttpServer+configureHelmet)
     * [.passToTemplate(key, value)](#HttpServer+passToTemplate)
     * [.specifyRoutes()](#HttpServer+specifyRoutes)
+    * [.get(path, callback)](#HttpServer+get)
+    * [.getNoAuth(path, callback)](#HttpServer+getNoAuth)
     * [.post(path, callback)](#HttpServer+post)
     * [.postNoAuth(path, callback)](#HttpServer+postNoAuth)
     * [.deleteNoAuth(path, callback)](#HttpServer+deleteNoAuth)
@@ -199,10 +201,34 @@ Passes key-value that can be used in template
 Specified routes and their callbacks.
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+<a name="HttpServer+get"></a>
+
+### httpServer.get(path, callback)
+Adds GET route with authentification (req.query.token must be provided)
+
+**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | path that the callback will be bound to |
+| callback | <code>function</code> | function (that receives req and res parameters) |
+
+<a name="HttpServer+getNoAuth"></a>
+
+### httpServer.getNoAuth(path, callback)
+Adds GET route without authentication
+
+**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | path that the callback will be bound to |
+| callback | <code>function</code> | function (that receives req and res parameters) |
+
 <a name="HttpServer+post"></a>
 
 ### httpServer.post(path, callback)
-Adds POST route
+Adds POST route with authentification (req.query.token must be provided)
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
 
@@ -487,6 +513,7 @@ In addition, it provides custom authentication with JWT tokens.
 
 * [WebSocket](#WebSocket)
     * [new WebSocket(httpsServer, jwtConfig, hostname)](#new_WebSocket_new)
+    * [.shutdown()](#WebSocket+shutdown)
     * [.bind(name, callback)](#WebSocket+bind)
     * [.onmessage(message)](#WebSocket+onmessage) ⇒ <code>object</code>
     * [.jwtVerify(token, refresh)](#WebSocket+jwtVerify) ⇒ <code>object</code>
@@ -507,6 +534,12 @@ Starts up the server and binds event handler.
 | jwtConfig | <code>object</code> | configuration of jwt |
 | hostname | <code>string</code> | hostname that clients will be conneting to |
 
+<a name="WebSocket+shutdown"></a>
+
+### webSocket.shutdown()
+Shutdown WebSocket server cleanly
+
+**Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  
 <a name="WebSocket+bind"></a>
 
 ### webSocket.bind(name, callback)
