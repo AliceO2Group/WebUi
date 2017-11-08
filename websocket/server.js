@@ -31,6 +31,14 @@ class WebSocket extends EventEmitter {
   }
 
   /**
+   * Shutdown WebSocket server cleanly
+   */
+  shutdown() {
+    clearInterval(this.interval);
+    this.server.close();
+  }
+
+  /**
    * Binds callback to websocket message (depending on message name)
    * Message as an Object is passed to the callback
    * @param {string} name - websocket message name
@@ -139,7 +147,7 @@ class WebSocket extends EventEmitter {
    * Sends ping message every 30s
    */
   ping() {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.server.clients.forEach(function(client) {
         if (client.isAlive === false) {
           return client.terminate();
