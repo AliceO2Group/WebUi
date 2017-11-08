@@ -106,7 +106,23 @@ class HttpServer {
     this.router.use('/runs', this.runs);
   }
 
-  /** Adds POST route
+  /** Adds GET route with authentification (req.query.token must be provided)
+   * @param {string} path - path that the callback will be bound to
+   * @param {function} callback - function (that receives req and res parameters)
+   */
+  get(path, callback) {
+    this.router.get(path, callback);
+  }
+
+  /** Adds GET route without authentication
+   * @param {string} path - path that the callback will be bound to
+   * @param {function} callback - function (that receives req and res parameters)
+   */
+  getNoAuth(path, callback) {
+    this.app.get(path, callback);
+  }
+
+  /** Adds POST route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
    */
