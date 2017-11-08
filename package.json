@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/aliceo2-gui",
-  "version": "1.0.39",
+  "version": "1.0.40",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "license": "GPL-3.0",
@@ -54,6 +54,7 @@
     "log.js",
     "config-default.json",
     "http",
+    "db",
     "jwt",
     "public",
     "websocket",
