@@ -5,8 +5,6 @@ const config = require('./../config.json');
 const JwtToken = require('./../jwt/token.js');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const WebSocketClient = require('ws');
-const WebSocket = require('./../websocket/server');
 const HttpServer = require('./../http/server');
 
 // as CERN cerfiticates are not signed by any CA
@@ -27,7 +25,7 @@ describe('rest-api', () => {
       .end((err, res) => {
         assert.strictEqual(res.status, 403);
         done();
-    });
+      });
   });
 
   it('should respond 200/JSON', (done) => {
@@ -48,7 +46,7 @@ describe('rest-api', () => {
       .end((err, res) => {
         assert.strictEqual(res.status, 404);
         done();
-      }); 
+      });
   });
   after(() => {
     http.getServer.close();
