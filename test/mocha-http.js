@@ -19,9 +19,7 @@ describe('rest-api', () => {
   before(() => {
     http = new HttpServer(config.http, config.jwt, config.oAuth);
     http.get('/test-with-auth', (req, res) => res.json({ok: 1}));
-    http.getNoAuth('/test-without-auth', (req, res) => res.json({ok: 1}));
     http.post('/test-with-auth', (req, res) => res.json({ok: 1}));
-    http.postNoAuth('/test-without-auth', (req, res) => res.json({ok: 1}));
   });
   it('should respond 403 as no token provided', (done) => {
     chai.request(http.getServer)
@@ -75,18 +73,6 @@ describe('rest-api', () => {
       });
   });
 
-  it('GET /api/test-without-auth should respond 200/JSON/{ok:1}', (done) => {
-    chai.request(http.getServer)
-      .get('/api/test-without-auth')
-      .query()
-      .end((err, res) => {
-        assert.strictEqual(err, null);
-        assert.strictEqual(res.status, 200);
-        assert.strictEqual(res.body.ok, 1);
-        done();
-      });
-  });
-
   it('POST /api/test-with-auth with token should respond 200/JSON/{ok:1}', (done) => {
     chai.request(http.getServer)
       .post('/api/test-with-auth')
@@ -105,18 +91,6 @@ describe('rest-api', () => {
       .query({token: 'wrong token'})
       .end((err, res) => {
         assert.strictEqual(res.status, 403);
-        done();
-      });
-  });
-
-  it('POST /api/test-without-auth should respond 200/JSON/{ok:1}', (done) => {
-    chai.request(http.getServer)
-      .post('/api/test-without-auth')
-      .query()
-      .end((err, res) => {
-        assert.strictEqual(err, null);
-        assert.strictEqual(res.status, 200);
-        assert.strictEqual(res.body.ok, 1);
         done();
       });
   });

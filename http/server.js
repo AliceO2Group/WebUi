@@ -95,60 +95,43 @@ class HttpServer {
    */
   specifyRoutes() {
     // eslint-disable-next-line
-    this.routerAuth = express.Router();
-    this.routerAuth.use((req, res, next) => this.jwtVerify(req, res, next));
-    this.routerAuth.use('/runs', this.runs);
-
-    // eslint-disable-next-line
-    this.routerNoAuth = express.Router();
+    this.router = express.Router();
+    this.router.use((req, res, next) => this.jwtVerify(req, res, next));
+    this.router.use('/runs', this.runs);
 
     this.app.use(bodyParser.json());
     this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
     this.app.use(express.static(path.join(__dirname, '../public')));
     this.app.use(express.static('public'));
     this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
-    this.app.use('/api', this.routerNoAuth);
-    this.app.use('/api', this.routerAuth);
+    this.app.use('/api', this.router);
   }
 
-  /** Adds GET route with authentification (req.query.token must be provided)
+  /**
+   * Adds GET route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
    */
   get(path, callback) {
-    this.routerAuth.get(path, callback);
+    this.router.get(path, callback);
   }
 
-  /** Adds GET route without authentication
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   */
-  getNoAuth(path, callback) {
-    this.routerNoAuth.get(path, callback);
-  }
-
-  /** Adds POST route with authentification (req.query.token must be provided)
+  /**
+   * Adds POST route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
    */
   post(path, callback) {
-    this.routerAuth.post(path, callback);
+    this.router.post(path, callback);
   }
 
-  /** Adds POST route without authentication
+  /**
+   * Adds DELETE route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
    */
-  postNoAuth(path, callback) {
-    this.routerNoAuth.post(path, callback);
-  }
-
-  /** Adds DELETE route without authentication
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   */
-  deleteNoAuth(path, callback) {
-    this.app.delete(path, callback);
+  delete(path, callback) {
+    this.router.delete(path, callback);
   }
 
   /**
