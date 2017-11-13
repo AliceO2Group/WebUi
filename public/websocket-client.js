@@ -5,7 +5,7 @@
  * @param {string} oauth - oAuth access_token
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
-class WebSocketClient {
+class WebSocketClient { // eslint-disable-line no-unused-vars
   /**
    * Sets up internal variables
    * @param {number} id - CERN person id

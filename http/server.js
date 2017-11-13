@@ -190,7 +190,7 @@ class HttpServer {
         data[0].token = this.jwt.generateToken(data[0].personid, data[0].username, 1);
         Object.assign(data[0], this.templateData);
         return res.status(200).send(this.renderPage('public/index.tpl', data[0]));
-      }).catch((error) => {
+      }).catch(() => {
         return res.status(401).send('oAuth failed');
       });
   }

@@ -36,7 +36,7 @@ class MySQL {
         sql: query,
         timeout: 60000,
         values: parameters
-      }, (error, results, fields) => {
+      }, (error, results) => {
         if (error) {
           reject(new Error(this.errorHandler(error)));
         }

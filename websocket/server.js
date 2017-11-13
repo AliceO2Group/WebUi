@@ -17,7 +17,7 @@ class WebSocket extends EventEmitter {
    * @param {string} hostname - hostname that clients will be conneting to
    * @constructor
    */
-  constructor(httpsServer, jwtConfig, hostname) {
+  constructor(httpsServer) {
     super();
     this.http = httpsServer;
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
@@ -113,7 +113,7 @@ class WebSocket extends EventEmitter {
     this.http.oauth.getUserDetails(oauth)
       .then(() => {
         client.send(JSON.stringify({command: 'authed'}));
-        client.on('message', (message, flags) => {
+        client.on('message', (message) => {
           const parsed = JSON.parse(message);
           // add filter to a client
           if (parsed.command == 'filter') {
@@ -133,11 +133,11 @@ class WebSocket extends EventEmitter {
             }
           }
         });
-        client.on('close', (client) => this.onclose(client));
+        client.on('close', () => this.onclose());
         client.on('pong', () => client.isAlive = true);
       }, () => {
         throw new Error('OAuth promise rejection');
-      }).catch((err) => {
+      }).catch(() => {
         client.close(1008);
         log.warn('Websocket: OAuth authentication faild');
       });
@@ -162,7 +162,7 @@ class WebSocket extends EventEmitter {
    * Handles client disconnection.
    * @param {object} client - disconnected client
    */
-  onclose(client) {
+  onclose() {
     log.info('disconnected');
   }
 
