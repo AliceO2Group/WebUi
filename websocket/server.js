@@ -108,7 +108,7 @@ class WebSocket {
    */
   onconnection(client, request) {
     const oauth = url.parse(request.url, true).query.oauth;
-    this.http.oauth.getUserDetails(oauth)
+    this.http.oauth.getDetails(oauth, this.http.oauth.userOptions)
       .then(() => {
         client.send(JSON.stringify({command: 'authed'}));
         client.on('message', (message) => {
@@ -134,7 +134,7 @@ class WebSocket {
         client.on('close', () => this.onclose());
         client.on('pong', () => client.isAlive = true);
       }, () => {
-        throw new Error('OAuth promise rejection');
+        throw new Error('WebSocket: oAuth promise rejection');
       }).catch(() => {
         client.close(1008);
         log.warn('Websocket: OAuth authentication faild');

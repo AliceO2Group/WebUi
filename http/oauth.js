@@ -86,15 +86,6 @@ class OAuth {
   }
 
   /**
-   * Provides user details (used by wesocket)
-   * @param {string} token oAuth token
-   * @return {object} promise of user data
-   */
-  getUserDetails(token) {
-    return this.getDetails(token, this.userOptions);
-  }
-
-  /**
    * Queries details using received access token.
    * @param {string} token - OAuth access token
    * @param {object} options POST options
@@ -111,9 +102,10 @@ class OAuth {
       };
       Object.assign(postOptions, options);
       let response = [];
-      const postRequest = https.request(postOptions, (res) => {
-        res.on('data', (chunk) => response.push(chunk));
-        res.on('end', () => {
+      const req = https.request(postOptions, (res) => {
+        res.on('data', (chunk) => {
+          response.push(chunk);
+        }).on('end', () => {
           if (res.statusCode === 200) {
             let userdata = JSON.parse(response.join(''));
             userdata.oauth = token;
@@ -121,11 +113,15 @@ class OAuth {
           } else {
             reject(new Error(res.statusMessage));
           }
+        }).on('error', (err) => {
+          reject(err);
         });
-        res.on('error', (err) => reject(err));
       });
-      postRequest.write('');
-      postRequest.end();
+
+      req.on('error', (err) => {
+        reject(err);
+      });
+      req.end();
     });
   }
 }
