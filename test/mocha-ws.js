@@ -9,6 +9,7 @@ let http;
 
 describe('websocket', () => {
   before(() => {
+    console.log(config.http);
     http = new HttpServer(config.http, config.jwt, config.oAuth);
   });
   it('connection should be dropped due to invalid oAuth token', (done) => {
