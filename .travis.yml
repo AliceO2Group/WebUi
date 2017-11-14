@@ -1,22 +1,11 @@
 sudo: false
 os:
 - linux
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.9
-    - g++-4.9
-    - uuid-dev
 language: node_js
 node_js:
 - '8'
 - '7'
 env:
-  global:
-  - CXX=g++-4.9
-  - CC=gcc-4.9
   matrix:
   - ZMQ="4.1.6" ZMQ_REPO="zeromq4-1"
 services:
