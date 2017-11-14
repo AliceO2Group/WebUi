@@ -39,6 +39,7 @@ class HttpServer {
         key: fs.readFileSync(httpConfig.key),
         cert: fs.readFileSync(httpConfig.cert)
       };
+      http.createServer(this.app).listen(httpConfig.port);
       this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
       this.enableHttpRedirect();
     } else {
