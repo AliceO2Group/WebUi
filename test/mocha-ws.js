@@ -13,16 +13,14 @@ describe('websocket', () => {
   });
   it('connection should be dropped due to invalid oAuth token', (done) => {
     const ws = new WebSocket(http, config.jwt, 'localhost');
-    /*const connection = new WebSocketClient(
+    const connection = new WebSocketClient(
       'ws://localhost:' + config.http.port
     );
-
     connection.on('close', () => {
-      ws.shutdown();
       connection.terminate();
+      ws.shutdown();
       done();
-    });*/
-    done();
+    });
   });
   after(() => {
     http.getServer.close();
