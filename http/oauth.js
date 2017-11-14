@@ -76,7 +76,7 @@ class OAuth {
           ]);
         }).then((data) => {
           if (data[1].groups.find((group) => group === this.egroup) === undefined) {
-            throw new Error('e-grups restriction');
+            reject(new Error('e-grups restriction'));
           }
           resolve(data);
         }).catch((error) => {
