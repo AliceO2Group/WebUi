@@ -17,7 +17,7 @@ describe('websocket', () => {
       'ws://localhost:' + config.http.port
     );
     connection.on('close', () => {
-      connection.terminate();
+      // connection.terminate();
       ws.shutdown();
       done();
     });
