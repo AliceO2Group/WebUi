@@ -35,7 +35,7 @@
     "portSecure": 8443,
     "key": "test.key",
     "cert": "test.pem",
-    "tls": false
+    "tls": true
   },
   "mysql": {
     "host": "127.0.0.1",
