@@ -1,4 +1,3 @@
-const EventEmitter = require('events');
 const WebSocketServer = require('ws').Server;
 const url = require('url');
 const log = require('./../log.js');
@@ -9,7 +8,7 @@ const Response = require('./response.js');
  * In addition, it provides custom authentication with JWT tokens.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
-class WebSocket extends EventEmitter {
+class WebSocket {
   /**
    * Starts up the server and binds event handler.
    * @param {object} httpsServer - HTTPS server
@@ -18,7 +17,6 @@ class WebSocket extends EventEmitter {
    * @constructor
    */
   constructor(httpsServer) {
-    super();
     this.http = httpsServer;
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
