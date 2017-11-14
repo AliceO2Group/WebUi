@@ -22,32 +22,26 @@ env:
 services:
 - mysql
 before_install:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install mariadb && mysql.server start;
-  fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install mariadb && mysql.server start; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install zeromq; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CC=/usr/bin/clang; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CXX=/usr/bin/clang++; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir ldlocal; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LDHACK=`pwd`/ldlocal; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LD_RUN_PATH=$LDHACK/lib; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LD_LIBRARY_PATH=$LDHACK/lib;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export PKG_CONFIG_PATH=$LDHACK/lib/pkgconfig;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/zeromq/$ZMQ_REPO/releases/download/v$ZMQ/zeromq-$ZMQ.tar.gz;
-  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LD_LIBRARY_PATH=$LDHACK/lib; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export PKG_CONFIG_PATH=$LDHACK/lib/pkgconfig; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/zeromq/$ZMQ_REPO/releases/download/v$ZMQ/zeromq-$ZMQ.tar.gz; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar xzvf zeromq-$ZMQ.tar.gz; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd zeromq-$ZMQ; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./autogen.sh; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure --prefix=$LDHACK --without-libsodium;
-  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure --prefix=$LDHACK --without-libsodium; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
 before_script:
 - npm install -g codecov
-- openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost"
-  -keyout test.key -out test.pem
+- openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
 - mv config-default.json config.json
 script: npm test
 after_success:
