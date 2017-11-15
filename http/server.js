@@ -206,14 +206,14 @@ class HttpServer {
    * @param {function} next - passes control to next matching route
    */
   jwtVerify(req, res, next) {
-    try {
-      const jwtFeedback = this.jwt.verify(req.query.token);
-      req.decoded = jwtFeedback.decoded;
-      next();
-    } catch (err) {
-      log.debug(this.constructor.name, ':', err.name);
-      res.status(403).json({message: err.name});
-    }
+    this.jwt.verify(req.query.token)
+      .then((data) => {
+        req.decoded = data.decoded;
+        next();
+      }, (err) => {
+        log.debug(this.constructor.name, ':', err.name);
+        res.status(403).json({message: err.name});
+      });
   }
 }
 module.exports = HttpServer;

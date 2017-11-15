@@ -1,5 +1,6 @@
 const config = require('./../config.json');
 const JwtToken = require('./../jwt/token.js');
+const assert = require('assert');
 
 describe('json web token', () => {
   let verified;
@@ -8,30 +9,39 @@ describe('json web token', () => {
   const access = 1;
 
   afterEach(() => {
-    if (verified.id !== id) {
-      throw new Error('id does not match');
-    }
-    if (verified.username !== username) {
-      throw new Error('username does not match');
-    }
-    if (verified.access !== access) {
-      throw new Error('access level does not match');
-    }
+    assert.strictEqual(verified.id, id);
+    assert.strictEqual(verified.username, username);
+    assert.strictEqual(verified.access, access);
   });
 
-  it('should generate and verify token', () => {
+  it('should generate and verify token', (done) => {
     const jwt = new JwtToken(config.jwt);
     const token = jwt.generateToken(id, username, access);
-    verified = jwt.verify(token);
+    jwt.verify(token)
+      .then((decoded) => {
+        verified = decoded;
+        done();
+      }, (err) => {
+        assert.fail('verify() promise rejection: ' + err.message);
+      });
   });
 
   it('should refresh token', (done) => {
     const jwt = new JwtToken(config.jwt);
     const token = jwt.generateToken(id, username, access);
     setTimeout(() => {
-      const newtoken = jwt.refreshToken(token);
-      verified = jwt.verify(newtoken);
-      done();
+      jwt.refreshToken(token)
+        .then((data) => {
+          jwt.verify(data.newToken)
+            .then((decoded) => {
+              verified = decoded;
+              done();
+            }, (err) => {
+              assert.fail('verify() promise rejection: ' + err.message);
+            });
+        }, (err) => {
+          assert.fail('refreshToken() promise rejection: ' + err.message);
+        });
     }, 1200);
   });
 });

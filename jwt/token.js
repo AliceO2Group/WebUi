@@ -43,16 +43,21 @@ class JwtToken {
    * @return {object} new token or false in case of failure
    */
   refreshToken(token) {
-    try {
-      const decoded = jwt.verify(token, this._secret, {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, this._secret, {
         issuer: this._issuer,
         ignoreExpiration: true,
         maxAge: this._maxAge
+      }, (err, decoded) => {
+        if (err) {
+          reject(err);
+        }
+        const newToken = this.generateToken(decoded.id, decoded.username, decoded.access);
+        resolve(
+          {id: decoded.id, username: decoded.username, access: decoded.access, newToken: newToken}
+        );
       });
-      return this.generateToken(decoded.id, decoded.username, decoded.access);
-    } catch (err) {
-      return false;
-    }
+    });
   }
 
   /**
@@ -61,10 +66,22 @@ class JwtToken {
    * @return {object} whether operation was successful, if so decoded data are passed as well
    */
   verify(token) {
-    const decoded = jwt.verify(token, this._secret, {
-      issuer: this._issuer
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, this._secret, {issuer: this._issuer}, (err, decoded) => {
+        if (err) {
+          if (err.name == 'TokenExpiredError') {
+            this.http.jwt.refreshToken(token)
+              .then((newToken) => {
+                resolve(newToken);
+              }, (error) => {
+                reject(error);
+              });
+          }
+          reject(err);
+        }
+        resolve(decoded);
+      });
     });
-    return decoded;
   }
 }
 module.exports = JwtToken;
