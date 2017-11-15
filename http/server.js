@@ -97,8 +97,6 @@ class HttpServer {
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
-    this.router.use('/runs', this.runs);
-
     this.app.use(bodyParser.json());
     this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
     this.app.use(express.static(path.join(__dirname, '../public')));
@@ -216,16 +214,6 @@ class HttpServer {
       log.debug(this.constructor.name, ':', err.name);
       res.status(403).json({message: err.name});
     }
-  }
-
-  /**
-   * For the test purposes.
-   * Simply returns JSON encoded fixed run number.
-   * @param {object} req - HTTP request
-   * @param {object} res - HTTP response
-   */
-  runs(req, res) {
-    res.json({run: 123});
   }
 }
 module.exports = HttpServer;

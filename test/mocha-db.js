@@ -3,7 +3,7 @@ const config = require('./../config.json');
 
 let db = null;
 
-describe('MySQL: Connect, query, disconnect', () => {
+describe('MySQL database', () => {
   before(() => {
     db = new MySQL(config.mysql);
   });
