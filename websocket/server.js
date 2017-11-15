@@ -54,10 +54,10 @@ class WebSocket {
    * @param {object} message
    * @return {object} message to be send back to the user
    */
-  onmessage(message) {
+  getReply(message) {
     return new Promise((resolve, reject) => {
       if (typeof message === 'undefined') {
-        reject([new Response(403)]);
+        reject(new Error('Message undefined'));
       }
       const responseArray = [];
       this.jwtVerify(message.token)
@@ -75,8 +75,8 @@ class WebSocket {
             responseArray.push(new Response(404));
           }
           resolve(responseArray);
-        }, () => {
-          reject([new Response(401)]);
+        }, (error) => {
+          reject(error);
         });
     });
   }
@@ -88,7 +88,7 @@ class WebSocket {
    */
   jwtVerify(token) {
     return new Promise((resolve, reject) => {
-      this.jwt.verify(token)
+      this.http.jwt.verify(token)
         .then((data) => {
           resolve(data);
         }, (err) => {
@@ -107,37 +107,43 @@ class WebSocket {
     this.http.oauth.getDetails(oauth, this.http.oauth.userOptions)
       .then(() => {
         client.send(JSON.stringify({command: 'authed'}));
-        client.on('message', (message) => {
-          const parsed = JSON.parse(message);
-          // add filter to a client
-          if (parsed.command == 'filter') {
-            client.filter = new Function('return ' + parsed.filter.toString())();
-          }
-          this.onmessage(parsed)
-            .then((responses) => {
-              for (let response of responses) {
-                if (response.getcommand == undefined) {
-                  response.command(parsed.command);
-                }
-                if (response.getbroadcast) {
-                  log.debug('broadcast : command %s sent', response.getcommand);
-                  this.broadcast(response.json);
-                } else {
-                  log.debug('command %s sent', response.getcommand);
-                  client.send(JSON.stringify(response.json));
-                }
-              }
-            }, (response) => {
-              client.send(JSON.stringify(response.json));
-            });
-        });
+        client.on('message', (message) => this.onmessage(message, client));
         client.on('close', () => this.onclose());
         client.on('pong', () => client.isAlive = true);
-      }, () => {
-        throw new Error('WebSocket: oAuth promise rejection');
-      }).catch(() => {
+      }, (error) => {
+        log.warn('Websocket: oAuth failed', error.message);
         client.close(1008);
-        log.warn('Websocket: OAuth authentication faild');
+      });
+  }
+
+  /**
+   * Called when a new message arrivies
+   * Handles connection with a client
+   * @param {object} message received message
+   * @param {object} client TCP socket of the client
+   */
+  onmessage(message, client) {
+    const parsed = JSON.parse(message);
+    // add filter to a client
+    if (parsed.command == 'filter') {
+      client.filter = new Function('return ' + parsed.filter.toString())();
+    }
+    this.getReply(parsed)
+      .then((responses) => {
+        for (let response of responses) {
+          if (response.getcommand == undefined) {
+            response.command(parsed.command);
+          }
+          if (response.getbroadcast) {
+            this.broadcast(response.json);
+          } else {
+            log.debug('command %s sent', response.getcommand);
+            client.send(JSON.stringify(response.json));
+          }
+        }
+      }, (response) => {
+        log.warn('Websocket: getReply() failed', response.message);
+        client.close(1008);
       });
   }
 
@@ -177,6 +183,7 @@ class WebSocket {
       }
       client.send(JSON.stringify(message));
     });
+    log.debug('broadcast : command %s sent', message.command);
   }
 }
 module.exports = WebSocket;
