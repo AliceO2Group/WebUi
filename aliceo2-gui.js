@@ -9,13 +9,13 @@
 const ZeroMQClient = require('./zeromq/client');
 const WebSocket = require('./websocket/server');
 const HttpServer = require('./http/server');
-const Response = require('./websocket/response.js');
+const WebSocketMessage = require('./websocket/message.js');
 const Log = require('./log.js');
 const MySQL = require('./db/mysql.js');
 
 exports.ZeroMQClient = ZeroMQClient;
 exports.WebSocket = WebSocket;
 exports.HttpServer = HttpServer;
-exports.Response = Response;
+exports.WebSocketMessage = WebSocketMessage;
 exports.Log = Log;
 exports.MySQL = MySQL;
