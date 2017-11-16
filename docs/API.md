@@ -12,7 +12,10 @@ Each request is authenticated with JWT token.</p>
 <dt><a href="#JwtToken">JwtToken</a></dt>
 <dd><p>Provides JSON Web Token functionality such as token generation and verification.</p>
 </dd>
-<dt><a href="#Response">Response</a></dt>
+<dt><a href="#WebSocketClient">WebSocketClient</a></dt>
+<dd><p>WebSocket client class</p>
+</dd>
+<dt><a href="#WebSocketMessage">WebSocketMessage</a></dt>
 <dd><p>WebSocket module that allows to create response to user request.
 It&#39;s based on HTTP status codes.</p>
 </dd>
@@ -26,23 +29,6 @@ socket patterns (sub and req).</p>
 </dd>
 <dt><a href="#MySQL">MySQL</a></dt>
 <dd><p>MySQL pool wrapper</p>
-</dd>
-</dl>
-
-## Functions
-
-<dl>
-<dt><a href="#_create">_create()</a></dt>
-<dd><p>Create widget instance</p>
-</dd>
-<dt><a href="#_connect">_connect()</a></dt>
-<dd><p>Connect to Websocket endpoint and specyfies WebSocket event listeners</p>
-</dd>
-<dt><a href="#setFilter">setFilter(filter)</a></dt>
-<dd><p>Send filter to WebSocket server</p>
-</dd>
-<dt><a href="#send">send(message)</a></dt>
-<dd><p>Send message to WebSocket server</p>
 </dd>
 </dl>
 
@@ -63,7 +49,6 @@ Gathers user account details.
     * [new OAuth(config)](#new_OAuth_new)
     * [.getAuthorizationUri(state)](#OAuth+getAuthorizationUri) ⇒ <code>object</code>
     * [.oAuthCallback(code)](#OAuth+oAuthCallback) ⇒ <code>object</code>
-    * [.getUserDetails(token)](#OAuth+getUserDetails) ⇒ <code>object</code>
     * [.getDetails(token, options)](#OAuth+getDetails) ⇒ <code>object</code>
 
 <a name="new_OAuth_new"></a>
@@ -100,18 +85,6 @@ OAuth redirection callback (called by library).
 | --- | --- | --- |
 | code | <code>number</code> | authorization code to request access token |
 
-<a name="OAuth+getUserDetails"></a>
-
-### oAuth.getUserDetails(token) ⇒ <code>object</code>
-Provides user details (used by wesocket)
-
-**Kind**: instance method of [<code>OAuth</code>](#OAuth)  
-**Returns**: <code>object</code> - promise of user data  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>string</code> | oAuth token |
-
 <a name="OAuth+getDetails"></a>
 
 ### oAuth.getDetails(token, options) ⇒ <code>object</code>
@@ -141,16 +114,13 @@ Each request is authenticated with JWT token.
     * [.passToTemplate(key, value)](#HttpServer+passToTemplate)
     * [.specifyRoutes()](#HttpServer+specifyRoutes)
     * [.get(path, callback)](#HttpServer+get)
-    * [.getNoAuth(path, callback)](#HttpServer+getNoAuth)
     * [.post(path, callback)](#HttpServer+post)
-    * [.postNoAuth(path, callback)](#HttpServer+postNoAuth)
-    * [.deleteNoAuth(path, callback)](#HttpServer+deleteNoAuth)
+    * [.delete(path, callback)](#HttpServer+delete)
     * [.enableHttpRedirect()](#HttpServer+enableHttpRedirect)
     * [.oAuthAuthorize(req, res)](#HttpServer+oAuthAuthorize)
     * [.oAuthCallback(req, res)](#HttpServer+oAuthCallback)
     * [.renderPage(page, data)](#HttpServer+renderPage) ⇒ <code>string</code>
     * [.jwtVerify(req, res, next)](#HttpServer+jwtVerify)
-    * [.runs(req, res)](#HttpServer+runs)
 
 <a name="new_HttpServer_new"></a>
 
@@ -213,18 +183,6 @@ Adds GET route with authentification (req.query.token must be provided)
 | path | <code>string</code> | path that the callback will be bound to |
 | callback | <code>function</code> | function (that receives req and res parameters) |
 
-<a name="HttpServer+getNoAuth"></a>
-
-### httpServer.getNoAuth(path, callback)
-Adds GET route without authentication
-
-**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | path that the callback will be bound to |
-| callback | <code>function</code> | function (that receives req and res parameters) |
-
 <a name="HttpServer+post"></a>
 
 ### httpServer.post(path, callback)
@@ -237,22 +195,10 @@ Adds POST route with authentification (req.query.token must be provided)
 | path | <code>string</code> | path that the callback will be bound to |
 | callback | <code>function</code> | function (that receives req and res parameters) |
 
-<a name="HttpServer+postNoAuth"></a>
+<a name="HttpServer+delete"></a>
 
-### httpServer.postNoAuth(path, callback)
-Adds POST route without authentication
-
-**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | path that the callback will be bound to |
-| callback | <code>function</code> | function (that receives req and res parameters) |
-
-<a name="HttpServer+deleteNoAuth"></a>
-
-### httpServer.deleteNoAuth(path, callback)
-Adds DELETE route without authentication
+### httpServer.delete(path, callback)
+Adds DELETE route with authentification (req.query.token must be provided)
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
 
@@ -321,19 +267,6 @@ Verifies JWT token synchronously.
 | res | <code>object</code> | HTTP response |
 | next | <code>function</code> | passes control to next matching route |
 
-<a name="HttpServer+runs"></a>
-
-### httpServer.runs(req, res)
-For the test purposes.
-Simply returns JSON encoded fixed run number.
-
-**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>object</code> | HTTP request |
-| res | <code>object</code> | HTTP response |
-
 <a name="JwtToken"></a>
 
 ## JwtToken
@@ -401,107 +334,224 @@ Decrypts user token to verify that is vaild.
 | --- | --- | --- |
 | token | <code>object</code> | token to be verified |
 
-<a name="Response"></a>
+<a name="WebSocketClient"></a>
 
-## Response
+## WebSocketClient
+WebSocket client class
+
+**Kind**: global class  
+**Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
+
+* [WebSocketClient](#WebSocketClient)
+    * [new WebSocketClient(id, token, oauth)](#new_WebSocketClient_new)
+    * [.connect()](#WebSocketClient+connect)
+    * [.activateOnMessage()](#WebSocketClient+activateOnMessage)
+    * [.bind(name, callback)](#WebSocketClient+bind)
+    * [.setFilter(filter)](#WebSocketClient+setFilter)
+    * [.send(message)](#WebSocketClient+send)
+    * [.onclose(callback)](#WebSocketClient+onclose)
+    * [.onopen(callback)](#WebSocketClient+onopen)
+    * [.onerror(callback)](#WebSocketClient+onerror)
+
+<a name="new_WebSocketClient_new"></a>
+
+### new WebSocketClient(id, token, oauth)
+Sets up internal variables
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>number</code> | CERN person id |
+| token | <code>string</code> | JWT authentication token |
+| oauth | <code>string</code> | oAuth access_token |
+
+<a name="WebSocketClient+connect"></a>
+
+### webSocketClient.connect()
+Connects to WebSocket endpoint
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+<a name="WebSocketClient+activateOnMessage"></a>
+
+### webSocketClient.activateOnMessage()
+Created onmessage event listener.
+Handles token refresh procedure
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+<a name="WebSocketClient+bind"></a>
+
+### webSocketClient.bind(name, callback)
+Allows to attach callback to given message name
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | message name |
+| callback | <code>fucntion</code> | invoked when the message with given name is received |
+
+<a name="WebSocketClient+setFilter"></a>
+
+### webSocketClient.setFilter(filter)
+Send filter to WebSocket server
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+
+| Param | Type |
+| --- | --- |
+| filter | <code>function</code> | 
+
+<a name="WebSocketClient+send"></a>
+
+### webSocketClient.send(message)
+Send message to WebSocket server
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>object</code> | message to be sent |
+
+<a name="WebSocketClient+onclose"></a>
+
+### webSocketClient.onclose(callback)
+Sets onclose callback
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+
+| Param | Type |
+| --- | --- |
+| callback | <code>function</code> | 
+
+<a name="WebSocketClient+onopen"></a>
+
+### webSocketClient.onopen(callback)
+Sets onopen callaback
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+
+| Param | Type |
+| --- | --- |
+| callback | <code>function</code> | 
+
+<a name="WebSocketClient+onerror"></a>
+
+### webSocketClient.onerror(callback)
+Sets onerror callback
+
+**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
+
+| Param | Type |
+| --- | --- |
+| callback | <code>function</code> | 
+
+<a name="WebSocketMessage"></a>
+
+## WebSocketMessage
 WebSocket module that allows to create response to user request.
 It's based on HTTP status codes.
 
 **Kind**: global class  
 **Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
 
-* [Response](#Response)
-    * [new Response(code)](#new_Response_new)
-    * [.getcode](#Response+getcode) ⇒ <code>number</code>
-    * [.getcommand](#Response+getcommand) ⇒ <code>string</code>
-    * [.getbroadcast](#Response+getbroadcast) ⇒ <code>bool</code>
-    * [.getpayload](#Response+getpayload) ⇒ <code>object</code>
-    * [.json](#Response+json) ⇒ <code>object</code>
-    * [._message(code)](#Response+_message) ⇒ <code>string</code>
-    * [.command(command)](#Response+command) ⇒ <code>object</code>
-    * [.broadcast()](#Response+broadcast) ⇒ <code>object</code>
-    * [.payload(payload)](#Response+payload) ⇒ <code>object</code>
+* [WebSocketMessage](#WebSocketMessage)
+    * [new WebSocketMessage(code)](#new_WebSocketMessage_new)
+    * [.json](#WebSocketMessage+json) ⇒ <code>object</code>
+    * [.parse(json)](#WebSocketMessage+parse) ⇒ <code>object</code>
+    * [.getCode()](#WebSocketMessage+getCode) ⇒ <code>number</code>
+    * [.getToken()](#WebSocketMessage+getToken) ⇒ <code>string</code>
+    * [.setCommand(command)](#WebSocketMessage+setCommand) ⇒ <code>object</code>
+    * [.getCommand()](#WebSocketMessage+getCommand) ⇒ <code>string</code>
+    * [.setBroadcast()](#WebSocketMessage+setBroadcast) ⇒ <code>object</code>
+    * [.getBroadcast()](#WebSocketMessage+getBroadcast) ⇒ <code>bool</code>
+    * [.setPayload(payload)](#WebSocketMessage+setPayload) ⇒ <code>object</code>
+    * [.getPayload()](#WebSocketMessage+getPayload) ⇒ <code>object</code>
 
-<a name="new_Response_new"></a>
+<a name="new_WebSocketMessage_new"></a>
 
-### new Response(code)
+### new WebSocketMessage(code)
 Sets initial variables.
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| code | <code>number</code> | response code (based on HTTP) |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| code | <code>number</code> | <code>200</code> | response code (based on HTTP) |
 
-<a name="Response+getcode"></a>
+<a name="WebSocketMessage+json"></a>
 
-### response.getcode ⇒ <code>number</code>
-**Kind**: instance property of [<code>Response</code>](#Response)  
-**Returns**: <code>number</code> - code  
-<a name="Response+getcommand"></a>
-
-### response.getcommand ⇒ <code>string</code>
-**Kind**: instance property of [<code>Response</code>](#Response)  
-**Returns**: <code>string</code> - command  
-<a name="Response+getbroadcast"></a>
-
-### response.getbroadcast ⇒ <code>bool</code>
-**Kind**: instance property of [<code>Response</code>](#Response)  
-**Returns**: <code>bool</code> - broadcast flag  
-<a name="Response+getpayload"></a>
-
-### response.getpayload ⇒ <code>object</code>
-**Kind**: instance property of [<code>Response</code>](#Response)  
-**Returns**: <code>object</code> - payload  
-<a name="Response+json"></a>
-
-### response.json ⇒ <code>object</code>
+### webSocketMessage.json ⇒ <code>object</code>
 Formats the reponse to object that is ready to be formatted into JSON.
 
-**Kind**: instance property of [<code>Response</code>](#Response)  
+**Kind**: instance property of [<code>WebSocketMessage</code>](#WebSocketMessage)  
 **Returns**: <code>object</code> - response  
-<a name="Response+_message"></a>
+<a name="WebSocketMessage+parse"></a>
 
-### response._message(code) ⇒ <code>string</code>
-Provides HTTP message based on code.
+### webSocketMessage.parse(json) ⇒ <code>object</code>
+Parses JSON-encoded websocket string into WebSocketMessage object
 
-**Kind**: instance method of [<code>Response</code>](#Response)  
-**Returns**: <code>string</code> - message for given code  
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>object</code> - promise to parsed message  
 
 | Param | Type |
 | --- | --- |
-| code | <code>number</code> | 
+| json | <code>string</code> | 
 
-<a name="Response+command"></a>
+<a name="WebSocketMessage+getCode"></a>
 
-### response.command(command) ⇒ <code>object</code>
+### webSocketMessage.getCode() ⇒ <code>number</code>
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>number</code> - code  
+<a name="WebSocketMessage+getToken"></a>
+
+### webSocketMessage.getToken() ⇒ <code>string</code>
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>string</code> - JWT token  
+<a name="WebSocketMessage+setCommand"></a>
+
+### webSocketMessage.setCommand(command) ⇒ <code>object</code>
 Command setter.
 
-**Kind**: instance method of [<code>Response</code>](#Response)  
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
 **Returns**: <code>object</code> - 'this' to allow function call chaining  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | command | <code>string</code> | user request command |
 
-<a name="Response+broadcast"></a>
+<a name="WebSocketMessage+getCommand"></a>
 
-### response.broadcast() ⇒ <code>object</code>
+### webSocketMessage.getCommand() ⇒ <code>string</code>
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>string</code> - command  
+<a name="WebSocketMessage+setBroadcast"></a>
+
+### webSocketMessage.setBroadcast() ⇒ <code>object</code>
 Set broadcast flag to true.
 
-**Kind**: instance method of [<code>Response</code>](#Response)  
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
 **Returns**: <code>object</code> - 'this' to allow function call chaining  
-<a name="Response+payload"></a>
+<a name="WebSocketMessage+getBroadcast"></a>
 
-### response.payload(payload) ⇒ <code>object</code>
+### webSocketMessage.getBroadcast() ⇒ <code>bool</code>
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>bool</code> - broadcast flag  
+<a name="WebSocketMessage+setPayload"></a>
+
+### webSocketMessage.setPayload(payload) ⇒ <code>object</code>
 Payload setter.
 
-**Kind**: instance method of [<code>Response</code>](#Response)  
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
 **Returns**: <code>object</code> - 'this' to allow function call chaining  
 
 | Param | Type |
 | --- | --- |
 | payload | <code>object</code> | 
 
+<a name="WebSocketMessage+getPayload"></a>
+
+### webSocketMessage.getPayload() ⇒ <code>object</code>
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>object</code> - payload  
 <a name="WebSocket"></a>
 
 ## WebSocket
@@ -515,9 +565,9 @@ In addition, it provides custom authentication with JWT tokens.
     * [new WebSocket(httpsServer, jwtConfig, hostname)](#new_WebSocket_new)
     * [.shutdown()](#WebSocket+shutdown)
     * [.bind(name, callback)](#WebSocket+bind)
-    * [.onmessage(message)](#WebSocket+onmessage) ⇒ <code>object</code>
-    * [.jwtVerify(token, refresh)](#WebSocket+jwtVerify) ⇒ <code>object</code>
+    * [.getReply(req)](#WebSocket+getReply) ⇒ <code>object</code>
     * [.onconnection(client, request)](#WebSocket+onconnection)
+    * [.onmessage(message, client)](#WebSocket+onmessage)
     * [.ping()](#WebSocket+ping)
     * [.onclose(client)](#WebSocket+onclose)
     * [.broadcast(message)](#WebSocket+broadcast)
@@ -551,11 +601,11 @@ Message as an Object is passed to the callback
 | Param | Type | Description |
 | --- | --- | --- |
 | name | <code>string</code> | websocket message name |
-| callback | <code>function</code> | callback function |
+| callback | <code>function</code> | callback function, that receives message object |
 
-<a name="WebSocket+onmessage"></a>
+<a name="WebSocket+getReply"></a>
 
-### webSocket.onmessage(message) ⇒ <code>object</code>
+### webSocket.getReply(req) ⇒ <code>object</code>
 Handles incoming text messages: verifies token and processes request/command.
 
 **Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  
@@ -563,20 +613,7 @@ Handles incoming text messages: verifies token and processes request/command.
 
 | Param | Type |
 | --- | --- |
-| message | <code>object</code> | 
-
-<a name="WebSocket+jwtVerify"></a>
-
-### webSocket.jwtVerify(token, refresh) ⇒ <code>object</code>
-Verifies token, if expired requests a new one.
-
-**Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  
-**Returns**: <code>object</code> - includes either parsed token or response message  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| token | <code>object</code> |  | JWT token |
-| refresh | <code>bool</code> | <code>true</code> | whether try to refresh token when expired or not |
+| req | <code>object</code> | 
 
 <a name="WebSocket+onconnection"></a>
 
@@ -589,6 +626,19 @@ Handles client connection and message receiving.
 | --- | --- | --- |
 | client | <code>object</code> | connected client |
 | request | <code>object</code> | connection request |
+
+<a name="WebSocket+onmessage"></a>
+
+### webSocket.onmessage(message, client)
+Called when a new message arrivies
+Handles connection with a client
+
+**Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>object</code> | received message |
+| client | <code>object</code> | TCP socket of the client |
 
 <a name="WebSocket+ping"></a>
 
@@ -747,38 +797,4 @@ so we can send it to final user when it can be recovered
 | Param | Type | Description |
 | --- | --- | --- |
 | err | <code>Error</code> | the error from a catch or callback |
-
-<a name="_create"></a>
-
-## _create()
-Create widget instance
-
-**Kind**: global function  
-<a name="_connect"></a>
-
-## _connect()
-Connect to Websocket endpoint and specyfies WebSocket event listeners
-
-**Kind**: global function  
-<a name="setFilter"></a>
-
-## setFilter(filter)
-Send filter to WebSocket server
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| filter | <code>function</code> | 
-
-<a name="send"></a>
-
-## send(message)
-Send message to WebSocket server
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| message | <code>object</code> | message to be sent |
 
