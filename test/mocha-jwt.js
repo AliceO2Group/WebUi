@@ -29,19 +29,17 @@ describe('json web token', () => {
   it('should refresh token', (done) => {
     const jwt = new JwtToken(config.jwt);
     const token = jwt.generateToken(id, username, access);
-    setTimeout(() => {
-      jwt.refreshToken(token)
-        .then((data) => {
-          jwt.verify(data.newToken)
-            .then((decoded) => {
-              verified = decoded;
-              done();
-            }, (err) => {
-              assert.fail('verify() promise rejection: ' + err.message);
-            });
-        }, (err) => {
-          assert.fail('refreshToken() promise rejection: ' + err.message);
-        });
-    }, 1200);
+    jwt.refreshToken(token)
+      .then((data) => {
+        jwt.verify(data.newToken)
+          .then((decoded) => {
+            verified = decoded;
+            done();
+          }, (err) => {
+            assert.fail('verify() promise rejection: ' + err.message);
+          });
+      }, (err) => {
+        assert.fail('refreshToken() promise rejection: ' + err.message);
+      });
   });
 });

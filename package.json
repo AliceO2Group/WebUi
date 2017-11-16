@@ -9,7 +9,8 @@
   "scripts": {
     "test": "npm run eslint && npm run mocha && npm run nsp",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha --exit",
-    "mocha": "./node_modules/.bin/mocha",
+    "mocha": "./node_modules/.bin/mocha test/mocha-*",
+    "travis": "./node_modules/.bin/mocha",
     "//": "./node_modules/.bin/phantomjs ./node_modules/qunit-phantomjs-runner/runner-list.js",
     "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js",
     "doc": "./node_modules/.bin/jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js > docs/API.md",
