@@ -70,16 +70,18 @@ class JwtToken {
       jwt.verify(token, this._secret, {issuer: this._issuer}, (err, decoded) => {
         if (err) {
           if (err.name == 'TokenExpiredError') {
-            this.http.jwt.refreshToken(token)
+            this.refreshToken(token)
               .then((newToken) => {
                 resolve(newToken);
               }, (error) => {
                 reject(error);
               });
+          } else {
+            reject(err);
           }
-          reject(err);
+        } else {
+          resolve(decoded);
         }
-        resolve(decoded);
       });
     });
   }

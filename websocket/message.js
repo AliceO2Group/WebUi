@@ -3,45 +3,52 @@
  * It's based on HTTP status codes.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
-class Response {
+class WebSocketMessage {
   /**
    * Sets initial variables.
    * @param {number} code response code (based on HTTP)
    * @constructor
    */
-  constructor(code) {
+  constructor(code = 200) {
     this._code = code;
     this._broadcast = false;
     this._payload = {};
-    this._command = undefined;
+    this._command = 'default';
+    this._message = '';
   }
 
   /**
-   * Provides HTTP message based on code.
-   * @param {number} code
-   * @return {string} message for given code
+   * Parses JSON-encoded websocket string into WebSocketMessage object
+   * @param {string} json
+   * @return {object} promise to parsed message
    */
-  _message(code) {
-    const messages = {
-      101: 'Switching Protocols',
-      200: 'OK',
-      201: 'Created',
-      202: 'Accepted',
-      204: 'No content',
-      400: 'Bad request',
-      401: 'Unauthorized',
-      403: 'Forbidden',
-      404: 'Not found',
-      440: 'Login timeout'
-    };
-    return messages[code];
+  parse(json) {
+    return new Promise((resolve, reject) => {
+      const parsed = JSON.parse(json);
+      if ((typeof parsed.command !== 'string') || (typeof parsed.token !== 'string')) {
+        this._code(400);
+        reject(this);
+      }
+      this._command = parsed.command;
+      this._token = parsed.token;
+      delete parsed.command;
+      delete parsed.token;
+      this._payload = parsed;
+      resolve(this);
+    });
   }
-
   /**
    * @return {number} code
    */
-  get getcode() {
+  getCode() {
     return this._code;
+  }
+
+  /**
+   * @return {string} JWT token
+   */
+  getToken() {
+    return this._token;
   }
 
   /**
@@ -49,7 +56,7 @@ class Response {
    * @param {string} command - user request command
    * @return {object} 'this' to allow function call chaining
    */
-  command(command) {
+  setCommand(command) {
     this._command = command;
     return this;
   }
@@ -57,7 +64,7 @@ class Response {
   /**
    * @return {string} command
    */
-  get getcommand() {
+  getCommand() {
     return this._command;
   }
 
@@ -65,7 +72,7 @@ class Response {
    * Set broadcast flag to true.
    * @return {object} 'this' to allow function call chaining
    */
-  broadcast() {
+  setBroadcast() {
     this._broadcast = true;
     return this;
   }
@@ -73,7 +80,7 @@ class Response {
   /**
    * @return {bool} broadcast flag
    */
-  get getbroadcast() {
+  getBroadcast() {
     return this._broadcast;
   }
 
@@ -82,7 +89,7 @@ class Response {
    * @param {object} payload
    * @return {object} 'this' to allow function call chaining
    */
-  payload(payload) {
+  setPayload(payload) {
     this._payload = payload;
     return this;
   }
@@ -90,7 +97,7 @@ class Response {
   /**
   * @return {object} payload
   */
-  get getpayload() {
+  getPayload() {
     return this._payload;
   }
 
@@ -102,9 +109,8 @@ class Response {
     let jsonResponse = {
       code: this._code
     };
-    const message = this._message(this._code);
-    if (message != undefined) {
-      jsonResponse.message = message;
+    if (this._message != '') {
+      jsonResponse.message = this._message;
     }
     if (this._command != undefined) {
       jsonResponse.command = this._command;
@@ -115,4 +121,4 @@ class Response {
     return jsonResponse;
   }
 }
-module.exports = Response;
+module.exports = WebSocketMessage;

@@ -1,7 +1,7 @@
 const WebSocketServer = require('ws').Server;
 const url = require('url');
 const log = require('./../log.js');
-const Response = require('./response.js');
+const WebSocketMessage = require('./message.js');
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -23,7 +23,7 @@ class WebSocket {
     log.debug('WebSocket server started');
     this.callbackArray = [];
     this.bind('filter', () => {
-      return new Response(200);
+      return new WebSocketMessage(200);
     });
     this.ping();
   }
@@ -40,7 +40,7 @@ class WebSocket {
    * Binds callback to websocket message (depending on message name)
    * Message as an Object is passed to the callback
    * @param {string} name - websocket message name
-   * @param {function} callback - callback function
+   * @param {function} callback - callback function, that receives message object
    */
   bind(name, callback) {
     if (this.callbackArray.hasOwnProperty(name)) {
@@ -51,48 +51,35 @@ class WebSocket {
 
   /**
    * Handles incoming text messages: verifies token and processes request/command.
-   * @param {object} message
+   * @param {object} req
    * @return {object} message to be send back to the user
    */
-  getReply(message) {
+  getReply(req) {
     return new Promise((resolve, reject) => {
-      if (typeof message === 'undefined') {
-        reject(new Error('Message undefined'));
-      }
       const responseArray = [];
-      this.jwtVerify(message.token)
+      this.http.jwt.verify(req.getToken())
         .then((data) => {
           if (data.newToken) {
-            responseArray.push(
-              new Response(440).command('new-token').payload({newtoken: data.newToken})
+            responseArray.push(new WebSocketMessage(440)
+              .setCommand('new-token')
+              .setPayload({newtoken: data.newToken})
             );
           }
-          message.id = data.id;
-          log.debug('%d : command %s', message.id, message.command);
-          if (this.callbackArray.hasOwnProperty(message.command)) {
-            responseArray.push(this.callbackArray[message.command](message));
+          req.id = data.id;
+          log.debug('%d : command %s', data.id, req.getCommand());
+          if (this.callbackArray.hasOwnProperty(req.getCommand())) {
+            const res = this.callbackArray[req.getCommand()](req);
+            if (res.constructor.name === 'WebSocketMessage') {
+              responseArray.push(res);
+            } else {
+              responseArray.push(new WebSocketMessage(500));
+            }
           } else {
-            responseArray.push(new Response(404));
+            responseArray.push(new WebSocketMessage(404));
           }
           resolve(responseArray);
         }, (error) => {
           reject(error);
-        });
-    });
-  }
-
-  /**
-   * Verifies token, if expired requests a new one.
-   * @param {object} token - JWT token
-   * @return {object} includes either parsed token or response message
-   */
-  jwtVerify(token) {
-    return new Promise((resolve, reject) => {
-      this.http.jwt.verify(token)
-        .then((data) => {
-          resolve(data);
-        }, (err) => {
-          reject(err);
         });
     });
   }
@@ -123,27 +110,28 @@ class WebSocket {
    * @param {object} client TCP socket of the client
    */
   onmessage(message, client) {
-    const parsed = JSON.parse(message);
-    // add filter to a client
-    if (parsed.command == 'filter') {
-      client.filter = new Function('return ' + parsed.filter.toString())();
-    }
-    this.getReply(parsed)
-      .then((responses) => {
-        for (let response of responses) {
-          if (response.getcommand == undefined) {
-            response.command(parsed.command);
-          }
-          if (response.getbroadcast) {
-            this.broadcast(response.json);
-          } else {
-            log.debug('command %s sent', response.getcommand);
-            client.send(JSON.stringify(response.json));
-          }
+    new WebSocketMessage().parse(message)
+      .then((parsed) => {
+        // add filter to a client
+        if (parsed.getCommand() == 'filter') {
+          client.filter = new Function('return ' + parsed.filter.toString())();
         }
-      }, (response) => {
-        log.warn('Websocket: getReply() failed', response.message);
-        client.close(1008);
+        this.getReply(parsed)
+          .then((responses) => {
+            for (let res of responses) {
+              if (res.getBroadcast()) {
+                this.broadcast(res.json);
+              } else {
+                log.debug('command %s sent', res.getCommand());
+                client.send(JSON.stringify(res.json));
+              }
+            }
+          }, (response) => {
+            log.warn('Websocket: getReply() failed', response.message);
+            client.close(1008);
+          });
+      }, (failed) => {
+        client.send(JSON.stringify(failed.json));
       });
   }
 
@@ -177,13 +165,13 @@ class WebSocket {
   broadcast(message) {
     this.server.clients.forEach(function(client) {
       if (typeof client.filter === 'function') {
-        if (!client.filter(message.payload)) {
+        if (!client.filter(message.getPayload())) {
           return;
         }
       }
       client.send(JSON.stringify(message));
     });
-    log.debug('broadcast : command %s sent', message.command);
+    log.debug('broadcast : command %s sent', message.getCommand());
   }
 }
 module.exports = WebSocket;
