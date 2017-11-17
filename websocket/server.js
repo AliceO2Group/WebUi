@@ -22,8 +22,8 @@ class WebSocket {
     this.server.on('connection', (client, request) => this.onconnection(client, request));
     log.debug('WebSocket server started');
     this.callbackArray = [];
-    this.bind('filter', () => {
-      return new WebSocketMessage(200);
+    this.bind('filter', (message) => {
+      return new WebSocketMessage(200).setCommand(message.getCommand());
     });
     this.ping();
   }
@@ -113,25 +113,29 @@ class WebSocket {
     new WebSocketMessage().parse(message)
       .then((parsed) => {
         // add filter to a client
-        if (parsed.getCommand() == 'filter') {
-          client.filter = new Function('return ' + parsed.filter.toString())();
+        if ((parsed.getCommand() == 'filter') &&
+          (typeof parsed.getProperty('filter') === 'string')) {
+          client.filter = new Function('return ' + parsed.getProperty('filter').toString())();
         }
+        // message reply
         this.getReply(parsed)
           .then((responses) => {
             for (let res of responses) {
               if (res.getBroadcast()) {
-                this.broadcast(res.json);
+                this.broadcast(res);
               } else {
                 log.debug('command %s sent', res.getCommand());
                 client.send(JSON.stringify(res.json));
               }
             }
           }, (response) => {
-            log.warn('Websocket: getReply() failed', response.message);
-            client.close(1008);
+            throw new Error('Websocket: getReply() failed', response.message);
           });
       }, (failed) => {
         client.send(JSON.stringify(failed.json));
+      }).catch((error) => {
+        log.warn(error.message);
+        client.close(1008);
       });
   }
 
@@ -169,7 +173,7 @@ class WebSocket {
           return;
         }
       }
-      client.send(JSON.stringify(message));
+      client.send(JSON.stringify(message.json));
     });
     log.debug('broadcast : command %s sent', message.getCommand());
   }
