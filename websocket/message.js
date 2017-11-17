@@ -62,6 +62,16 @@ class WebSocketMessage {
   }
 
   /**
+   * @param {string} name property name
+   * @return {string} Object property
+   */
+  getProperty(name) {
+    if (this._payload.hasOwnProperty(name)) {
+      return this._payload[name];
+    }
+  }
+
+  /**
    * @return {string} command
    */
   getCommand() {

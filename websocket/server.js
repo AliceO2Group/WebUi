@@ -22,8 +22,8 @@ class WebSocket {
     this.server.on('connection', (client, request) => this.onconnection(client, request));
     log.debug('WebSocket server started');
     this.callbackArray = [];
-    this.bind('filter', () => {
-      return new WebSocketMessage(200);
+    this.bind('filter', (message) => {
+      return new WebSocketMessage(200).setCommand(message.getCommand());
     });
     this.ping();
   }
@@ -114,13 +114,13 @@ class WebSocket {
       .then((parsed) => {
         // add filter to a client
         if (parsed.getCommand() == 'filter') {
-          client.filter = new Function('return ' + parsed.filter.toString())();
+          client.filter = new Function('return ' + parsed.getProperty('filter').toString())();
         }
         this.getReply(parsed)
           .then((responses) => {
             for (let res of responses) {
               if (res.getBroadcast()) {
-                this.broadcast(res.json);
+                this.broadcast(res);
               } else {
                 log.debug('command %s sent', res.getCommand());
                 client.send(JSON.stringify(res.json));
@@ -169,7 +169,7 @@ class WebSocket {
           return;
         }
       }
-      client.send(JSON.stringify(message));
+      client.send(JSON.stringify(message.json));
     });
     log.debug('broadcast : command %s sent', message.getCommand());
   }
