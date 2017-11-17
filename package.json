@@ -41,7 +41,6 @@
     "jsdoc-to-markdown": "^3.0.2",
     "mocha": "^4.0.1",
     "nsp": "^3.1.0",
-    "nyc": "^11.3.0",
     "phantom": "^4.0.8",
     "qunit": "^2.4.1",
     "qunit-phantomjs-runner": "^2.3.0"
