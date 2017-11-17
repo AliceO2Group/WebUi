@@ -113,9 +113,11 @@ class WebSocket {
     new WebSocketMessage().parse(message)
       .then((parsed) => {
         // add filter to a client
-        if (parsed.getCommand() == 'filter') {
+        if ((parsed.getCommand() == 'filter') &&
+          (typeof parsed.getProperty('filter') === 'string')) {
           client.filter = new Function('return ' + parsed.getProperty('filter').toString())();
         }
+        // message reply
         this.getReply(parsed)
           .then((responses) => {
             for (let res of responses) {
@@ -127,11 +129,13 @@ class WebSocket {
               }
             }
           }, (response) => {
-            log.warn('Websocket: getReply() failed', response.message);
-            client.close(1008);
+            throw new Error('Websocket: getReply() failed', response.message);
           });
       }, (failed) => {
         client.send(JSON.stringify(failed.json));
+      }).catch((error) => {
+        log.warn(error.message);
+        client.close(1008);
       });
   }
 

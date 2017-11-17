@@ -23,6 +23,11 @@ describe('websocket', () => {
       return {test: 'test'};
     });
 
+    ws.bind('broadcast', (message) => {
+      let res = new WebSocketMessage().setCommand(message.getCommand()).setBroadcast();
+      return res;
+    });
+
     jwt = new JwtToken(config.jwt);
     token = jwt.generateToken(0, 'test', 1);
   });
@@ -55,7 +60,7 @@ describe('websocket', () => {
     });
   });
 
-  it('response should be rejected and server should return 500 ', (done) => {
+  it('response should be rejected and server should return 500', (done) => {
     const connection = new WebSocketClient(
       'ws://localhost:' + config.http.port
     );
@@ -72,6 +77,41 @@ describe('websocket', () => {
     });
   });
 
+  it('filter should be accepted - 200', (done) => {
+    const connection = new WebSocketClient(
+      'ws://localhost:' + config.http.port
+    );
+
+    connection.on('open', () => {
+      const message = {command: 'filter', token: token,
+        filter: (function() {
+          return false;
+        }).toString()};
+      connection.send(JSON.stringify(message));
+    });
+
+    connection.on('message', (message) => {
+      const parsed = JSON.parse(message);
+      if (parsed.code == 200 && parsed.command == 'filter') {
+        done();
+      }
+    });
+  });
+
+  it('filter should not be accepted - 200', (done) => {
+    const connection = new WebSocketClient(
+      'ws://localhost:' + config.http.port
+    );
+
+    connection.on('open', () => {
+      const message = {command: 'filter', token: token, filter: 'function() return false;}'};
+      connection.send(JSON.stringify(message));
+    });
+    connection.on('close', () => {
+      done();
+    });
+  });
+
   it('token should be refreshed', (done) => {
     const connection = new WebSocketClient(
       'ws://localhost:' + config.http.port
@@ -83,9 +123,27 @@ describe('websocket', () => {
         connection.send(JSON.stringify(message));
       }, 1200);
     });
+
     connection.on('message', (message) => {
       const parsed = JSON.parse(message);
       if (parsed.code == 440) {
+        done();
+      }
+    });
+  });
+
+  it('message should be bradcast', (done) => {
+    const connection = new WebSocketClient(
+      'ws://localhost:' + config.http.port
+    );
+
+    connection.on('open', () => {
+      const message = {command: 'broadcast', token: token};
+      connection.send(JSON.stringify(message));
+    });
+    connection.on('message', (message) => {
+      const parsed = JSON.parse(message);
+      if (parsed.code == 200 && parsed.command == 'broadcast') {
         done();
       }
     });
