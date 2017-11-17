@@ -13,7 +13,7 @@ class WebSocketMessage {
     this._code = code;
     this._broadcast = false;
     this._payload = {};
-    this._command = 'default';
+    this._command = undefined;
     this._message = '';
   }
 

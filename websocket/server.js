@@ -70,6 +70,9 @@ class WebSocket {
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
             const res = this.callbackArray[req.getCommand()](req);
             if (res.constructor.name === 'WebSocketMessage') {
+              if (typeof res.getCommand() !== 'string') {
+                res.setCommand(req.getCommand());
+              }
               responseArray.push(res);
             } else {
               responseArray.push(new WebSocketMessage(500));
