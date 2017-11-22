@@ -84,7 +84,7 @@ class InfoLogger {
     }
 
     this.client = net.createConnection(options);
-    this.client.on('data', (data) => this.onessage(data));
+    this.client.on('data', (data) => this.onmessage(data.toString()));
 
     this.client.on('connect', () => {
       this.winston.instance.info('Connected to infoLoggerServer.');
@@ -114,7 +114,7 @@ class InfoLogger {
    */
   send(log) {
     const frame = this.format(log);
-    this.client.send(frame);
+    this.client.write(frame);
   }
 
   /**
@@ -145,12 +145,12 @@ class InfoLogger {
       }
 
       const fields = frame.substr(5, frame.length - 5 - 2).split('#');
-      if (fields.length !== currentProtocol.protocol.length) {
+      if (fields.length !== currentProtocol.fields.length) {
         reject(new Error(`Unexpected number of fileds: ${fields.length}`));
       }
 
       let message = {};
-      currentProtocol.fileds.forEach((field, index) => {
+      currentProtocol.fields.forEach((field, index) => {
         message[field.name] = field.type === Number ? parseInt(fields[index], 10) : fields[index];
       });
       resolve(message);
