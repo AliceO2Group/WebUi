@@ -1,8 +1,9 @@
 const assert = require('assert');
 const fs = require('fs');
 const log = require('./../log/log.js');
+const config = require('./../config.json');
 
-const config = {
+const configLocal = {
   winston: {
     file: './error.log',
     fileLvl: 'error',
@@ -12,11 +13,16 @@ const config = {
 
 describe('error-log', () => {
   it('should generate error file', (done) => {
-    log.configure(config);
+    log.configure(configLocal);
     log.error('Test error log entry');
     setTimeout(() => {
       assert.ok(fs.existsSync('./error.log'));
       done();
     }, 100);
+  });
+
+  it('should generate error file', (done) => {
+    log.configure(config.log);
+    log.error('test');
   });
 });

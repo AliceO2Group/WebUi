@@ -8,8 +8,9 @@ exports.configure = function(config) {
   if (!winston && config.winston) {
     winston = new Winston(config.winston);
   }
-  if (infologger && config.infologger) {
-    infologger = new InfoLogger(config.infologger);
+  if (!infologger && config.infologger) {
+    infologger = new InfoLogger(winston);
+    infologger.connect(config.infologger);
   }
 };
 
