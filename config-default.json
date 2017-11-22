@@ -43,5 +43,10 @@
     "password": "", 
     "database": "INFOLOGGER",
     "port": 3306
+  },
+  "log": {
+    "winston": {
+      "consoleLvl": "debug"
+    }
   }
 }
