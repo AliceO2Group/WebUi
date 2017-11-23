@@ -1,5 +1,6 @@
 const net = require('net');
-
+const process = require('process');
+const os = require('os');
 const protocols = [
   {
     version: '1.3',
@@ -65,9 +66,18 @@ class InfoLogger {
    */
   format(fields, version = '1.4') {
     let message = '*' + version;
-    protocols[version].fields.forEach((field) => {
+    fields.pid = fields.pid || process.pid;
+    fields.hostname = fields.hostname || os.hostname();
+    fields.severity = fields.severity || 'D';
+    fields.system = fields.system || 'Web';
+    fields.facility = fields.facility || `Node ${process.version}`;
+    fields.username = fields.username || os.userInfo().username;
+
+    const currentProtocol = protocols.find((protocol) => protocol.version === version);
+
+    currentProtocol.fields.forEach((field) => {
       message += '#';
-      if (field.type == typeof fields[field.name]) {
+      if (fields[field.name] && fields[field.name].constructor === field.type) {
         message += fields[field.name];
       }
     });
@@ -83,11 +93,12 @@ class InfoLogger {
       return;
     }
 
-    this.client = net.createConnection(options);
+    // this.client = net.createConnection(options);
+    this.client = net.createConnection('/tmp/infocpy.sock');
     this.client.on('data', (data) => this.onmessage(data.toString()));
 
     this.client.on('connect', () => {
-      this.winston.instance.info('Connected to infoLoggerServer.');
+      this.winston.instance.info(`Connected to infoLoggerServer: ${options.host} : ${options.port}`);
     });
 
     this.client.on('end', () => {
@@ -102,7 +113,7 @@ class InfoLogger {
   onmessage(data) {
     this.parse(data)
       .then((parsed) => {
-      // emit or callback
+        console.log(parsed);
       }, (error) => {
         this.winston.instance.error(error.message);
       });

@@ -23,6 +23,12 @@ describe('error-log', () => {
 
   it('should generate error file', (done) => {
     log.configure(config.log);
-    log.error('test');
+    setTimeout(() => {
+      log.error('test');
+      done();
+    }, 400);
+  });
+  after(() => {
+    log.stop();
   });
 });

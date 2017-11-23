@@ -19,12 +19,29 @@ exports.debug = function(log) {
     winston.instance.log('debug', log);
   }
   if (infologger) {
-    infologger.debug(log);
+    const logObj = { 
+      severity: 'E',
+      message: logObj
+    };
+    infologger.send(log);
   }
 };
 
 exports.error = function(log) {
   if (winston) {
     winston.instance.log('error', log);
+  }
+  if (infologger) {
+    const logObj = {
+      severity: 'E',
+      message: log
+    };
+    infologger.send(logObj);
+  }
+};
+
+exports.stop = function() {
+  if (infologger) {
+    infologger.disconnect();
   }
 };
