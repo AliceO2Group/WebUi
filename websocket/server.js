@@ -1,6 +1,6 @@
 const WebSocketServer = require('ws').Server;
 const url = require('url');
-const log = require('./../log.js');
+const log = require('./../log/log.js');
 const WebSocketMessage = require('./message.js');
 
 /**

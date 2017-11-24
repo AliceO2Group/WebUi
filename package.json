@@ -50,7 +50,7 @@
     "aliceo2-gui.js",
     "LICENSE",
     "README.md",
-    "log.js",
+    "log",
     "config-default.json",
     "http",
     "jwt",

@@ -1,5 +1,5 @@
 const mysql = require('mysql');
-const log = require('./../log.js');
+const log = require('./../log/log.js');
 
 /**
  * MySQL pool wrapper

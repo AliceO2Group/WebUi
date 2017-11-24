@@ -20,9 +20,35 @@ exports.debug = function(log) {
   if (infologger) {
     const logObj = {
       severity: 'E',
-      message: logObj
+      message: log
     };
-    infologger.send(log);
+    infologger.send(logObj);
+  }
+};
+
+exports.warn = function(log) {
+  if (winston) {
+    winston.instance.log('warn', log);
+  }
+  if (infologger) {
+    const logObj = {
+      severity: 'W',
+      message: log
+    };
+    infologger.send(logObj);
+  }
+};
+
+exports.info = function(log) {
+  if (winston) {
+    winston.instance.log('info', log);
+  }
+  if (infologger) {
+    const logObj = {
+      severity: 'I',
+      message: log
+    };
+    infologger.send(logObj);
   }
 };
 
