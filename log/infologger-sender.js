@@ -24,7 +24,6 @@ class InfoLoggerSender {
   format(fields, version = '1.4') {
     let parameters = [];
     fields.severity = fields.severity || 'D';
-    fields.pid = 123;
     fields.system = fields.system || 'Web';
     fields.facility = fields.facility || `Node ${process.version}`;
     const currentProtocol = protocols.find((protocol) => protocol.version === version);
