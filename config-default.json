@@ -47,6 +47,11 @@
   "log": {
     "winston": {
       "consoleLvl": "debug"
+    },
+    "infologger": {
+      "host": "127.0.0.1",
+      "port": 6102,
+      "execPath": "log"
     }
   }
 }
