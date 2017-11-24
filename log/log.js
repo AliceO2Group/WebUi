@@ -1,5 +1,5 @@
 const Winston = require('./winston.js');
-const InfoLogger = require('./infologger.js');
+const InfoLoggerSender = require('./infologger-sender.js');
 
 let winston = null;
 let infologger = null;
@@ -9,8 +9,7 @@ exports.configure = function(config) {
     winston = new Winston(config.winston);
   }
   if (!infologger && config.infologger) {
-    infologger = new InfoLogger(winston);
-    infologger.connect(config.infologger);
+    infologger = new InfoLoggerSender(winston, config.infologger.execPath);
   }
 };
 
@@ -19,7 +18,7 @@ exports.debug = function(log) {
     winston.instance.log('debug', log);
   }
   if (infologger) {
-    const logObj = { 
+    const logObj = {
       severity: 'E',
       message: logObj
     };
@@ -37,11 +36,5 @@ exports.error = function(log) {
       message: log
     };
     infologger.send(logObj);
-  }
-};
-
-exports.stop = function() {
-  if (infologger) {
-    infologger.disconnect();
   }
 };

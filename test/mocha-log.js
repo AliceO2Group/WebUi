@@ -11,24 +11,21 @@ const configLocal = {
   }
 };
 
-describe('error-log', () => {
+describe('should display and write log to a file (winston)', () => {
   it('should generate error file', (done) => {
     log.configure(configLocal);
-    log.error('Test error log entry');
+    log.error('Test error winston');
     setTimeout(() => {
       assert.ok(fs.existsSync('./error.log'));
       done();
     }, 100);
   });
 
-  it('should generate error file', (done) => {
+  it('should pass log message to InfoLogger client', (done) => {
     log.configure(config.log);
     setTimeout(() => {
-      log.error('test');
+      log.error('Test error InfoLogger');
       done();
-    }, 400);
-  });
-  after(() => {
-    log.stop();
+    }, 500);
   });
 });
