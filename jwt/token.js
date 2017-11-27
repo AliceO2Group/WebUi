@@ -52,10 +52,8 @@ class JwtToken {
         if (err) {
           reject(err);
         }
-        const newToken = this.generateToken(decoded.id, decoded.username, decoded.access);
-        resolve(
-          {id: decoded.id, username: decoded.username, access: decoded.access, newToken: newToken}
-        );
+        decoded.newToken = this.generateToken(decoded.id, decoded.username, decoded.access);
+        resolve(decoded);
       });
     });
   }

@@ -43,5 +43,12 @@
     "password": "", 
     "database": "INFOLOGGER",
     "port": 3306
+  },
+  "log": {
+    "infologger": {
+      "host": "127.0.0.1",
+      "port": 6102,
+      "execPath": "/bin/log"
+    }
   }
 }
