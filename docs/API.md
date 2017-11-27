@@ -30,6 +30,16 @@ socket patterns (sub and req).</p>
 <dt><a href="#MySQL">MySQL</a></dt>
 <dd><p>MySQL pool wrapper</p>
 </dd>
+<dt><a href="#InfoLoggerReceiver">InfoLoggerReceiver</a></dt>
+<dd><p>Implements InfoLogger protocol</p>
+</dd>
+<dt><a href="#InfoLoggerSender">InfoLoggerSender</a></dt>
+<dd><p>Implements InfoLogger protocol</p>
+</dd>
+<dt><a href="#Winston">Winston</a></dt>
+<dd><p>Creates Winston logger
+Uses two transports file and console (if properly configured)</p>
+</dd>
 </dl>
 
 <a name="OAuth"></a>
@@ -461,6 +471,7 @@ It's based on HTTP status codes.
     * [.getCode()](#WebSocketMessage+getCode) ⇒ <code>number</code>
     * [.getToken()](#WebSocketMessage+getToken) ⇒ <code>string</code>
     * [.setCommand(command)](#WebSocketMessage+setCommand) ⇒ <code>object</code>
+    * [.getProperty(name)](#WebSocketMessage+getProperty) ⇒ <code>string</code>
     * [.getCommand()](#WebSocketMessage+getCommand) ⇒ <code>string</code>
     * [.setBroadcast()](#WebSocketMessage+setBroadcast) ⇒ <code>object</code>
     * [.getBroadcast()](#WebSocketMessage+getBroadcast) ⇒ <code>bool</code>
@@ -517,6 +528,16 @@ Command setter.
 | Param | Type | Description |
 | --- | --- | --- |
 | command | <code>string</code> | user request command |
+
+<a name="WebSocketMessage+getProperty"></a>
+
+### webSocketMessage.getProperty(name) ⇒ <code>string</code>
+**Kind**: instance method of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>string</code> - Object property  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | property name |
 
 <a name="WebSocketMessage+getCommand"></a>
 
@@ -797,4 +818,129 @@ so we can send it to final user when it can be recovered
 | Param | Type | Description |
 | --- | --- | --- |
 | err | <code>Error</code> | the error from a catch or callback |
+
+<a name="InfoLoggerReceiver"></a>
+
+## InfoLoggerReceiver
+Implements InfoLogger protocol
+
+**Kind**: global class  
+
+* [InfoLoggerReceiver](#InfoLoggerReceiver)
+    * [new InfoLoggerReceiver(winston)](#new_InfoLoggerReceiver_new)
+    * [.connect(options)](#InfoLoggerReceiver+connect)
+    * [.onmessage(data)](#InfoLoggerReceiver+onmessage)
+    * [.disconnect()](#InfoLoggerReceiver+disconnect)
+    * [.parse(frame)](#InfoLoggerReceiver+parse) ⇒ <code>object</code>
+
+<a name="new_InfoLoggerReceiver_new"></a>
+
+### new InfoLoggerReceiver(winston)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| winston | <code>object</code> | local loging object |
+
+<a name="InfoLoggerReceiver+connect"></a>
+
+### infoLoggerReceiver.connect(options)
+Connects to InfoLogger server or deamon (TCP socket)
+
+**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> | TCP options according to net package |
+
+<a name="InfoLoggerReceiver+onmessage"></a>
+
+### infoLoggerReceiver.onmessage(data)
+Handles frames received from InfoLogger server
+
+**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>object</code> | InfoLogger frame |
+
+<a name="InfoLoggerReceiver+disconnect"></a>
+
+### infoLoggerReceiver.disconnect()
+Disconnection from the socket
+
+**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
+<a name="InfoLoggerReceiver+parse"></a>
+
+### infoLoggerReceiver.parse(frame) ⇒ <code>object</code>
+Parses InfoLogger protocol string into an Object
+
+**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
+**Returns**: <code>object</code> - Object including all frame fileds  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| frame | <code>string</code> | InfoLogger frame |
+
+<a name="InfoLoggerSender"></a>
+
+## InfoLoggerSender
+Implements InfoLogger protocol
+
+**Kind**: global class  
+
+* [InfoLoggerSender](#InfoLoggerSender)
+    * [new InfoLoggerSender(winston, path)](#new_InfoLoggerSender_new)
+    * [.format(fields, version)](#InfoLoggerSender+format) ⇒ <code>string</code>
+    * [.send(log)](#InfoLoggerSender+send)
+
+<a name="new_InfoLoggerSender_new"></a>
+
+### new InfoLoggerSender(winston, path)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| winston | <code>object</code> | local loging object |
+| path | <code>string</code> | path to InfoLogger client (log executable) |
+
+<a name="InfoLoggerSender+format"></a>
+
+### infoLoggerSender.format(fields, version) ⇒ <code>string</code>
+Formats an Object into protocol frame
+
+**Kind**: instance method of [<code>InfoLoggerSender</code>](#InfoLoggerSender)  
+**Returns**: <code>string</code> - InfoLogger protocol frame  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| fields | <code>object</code> |  | Object including InfoLogger protocol fields |
+| version | <code>string</code> | <code>&quot;1.4&quot;</code> | protocol version |
+
+<a name="InfoLoggerSender+send"></a>
+
+### infoLoggerSender.send(log)
+Sends log message
+
+**Kind**: instance method of [<code>InfoLoggerSender</code>](#InfoLoggerSender)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| log | <code>object</code> | message as Object |
+
+<a name="Winston"></a>
+
+## Winston
+Creates Winston logger
+Uses two transports file and console (if properly configured)
+
+**Kind**: global class  
+**Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
+<a name="new_Winston_new"></a>
+
+### new Winston(config)
+Creates two transports and constructs a logger
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config | <code>object</code> | configuration for console and file transports |
 
