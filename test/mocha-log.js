@@ -2,6 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const log = require('./../log/log.js');
 const config = require('./../config.json');
+const process = require('process');
 const InfoLoggerSender = require('./../log/infologger-sender.js');
 const InfoLoggerReceiver = require('./../log/infologger-receiver.js');
 
@@ -34,7 +35,7 @@ describe('InfoLogger and winston', () => {
   it('should prepare InfoLogger command', () => {
     const sender = new InfoLoggerSender('log');
     const log = {severity: 'E', message: 'test-log'};
-    const expected = ['-oSeverity=E', '-oSystem=Web', '-oFacility=Node v8.3.0'];
+    const expected = ['-oSeverity=E', '-oSystem=Web', `-oFacility=Node ${process.version}`];
     assert.deepStrictEqual(expected, sender.format(log));
   });
 
