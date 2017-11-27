@@ -8,7 +8,7 @@ exports.configure = function(config) {
   if (!winston && config.winston) {
     winston = new Winston(config.winston);
   }
-  if (!infologger && config.infologger) {
+  if (!infologger && config.infologger && fs.existsSync(config.infologger.execPath)) {
     infologger = new InfoLoggerSender(winston, config.infologger.execPath);
   }
 };
@@ -19,7 +19,7 @@ exports.debug = function(log) {
   }
   if (infologger) {
     const logObj = {
-      severity: 'E',
+      severity: 'D',
       message: log
     };
     infologger.send(logObj);
