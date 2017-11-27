@@ -10,11 +10,14 @@ class Winston {
    * @param {object} config configuration for console and file transports
    */
   constructor(config) {
+    if (!config) {
+      config = {};
+    }
+    config.consoleLvl = config.consoleLvl || 'debug';
+
     const consoleFormat = winston.format.printf((info) => {
       return `${info.timestamp} ${info.level}: ${info.message}`;
     });
-
-    config.consoleLvl = config.consoleLvl || 'debug';
 
     let transports = [
       new (winston.transports.Console)({

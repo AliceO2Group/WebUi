@@ -1,3 +1,4 @@
+const fs = require('fs');
 const Winston = require('./winston.js');
 const InfoLoggerSender = require('./infologger-sender.js');
 
@@ -5,7 +6,7 @@ let winston = null;
 let infologger = null;
 
 exports.configure = function(config) {
-  if (!winston && config.winston) {
+  if (!winston) {
     winston = new Winston(config.winston);
   }
   if (!infologger && config.infologger && fs.existsSync(config.infologger.execPath)) {

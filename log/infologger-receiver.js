@@ -76,15 +76,17 @@ class InfoLoggerReceiver extends EventEmitter {
       if (currentProtocol === undefined) {
         reject(new Error(`Unhandled protcol version: ${currentProtocol}`));
       }
-
-      const fields = frame.substr(5, frame.length - 5 - 2).split('#');
+      const fields = frame.substr(5, frame.length - 5 - 1).split('#');
       if (fields.length !== currentProtocol.fields.length) {
         reject(new Error(`Unexpected number of fileds: ${fields.length}`));
       }
 
       let message = {};
       currentProtocol.fields.forEach((field, index) => {
-        message[field.name] = field.type === Number ? parseInt(fields[index], 10) : fields[index];
+        if (!fields[index].trim()) {
+          return;
+        }
+        message[field.name] = (field.type === Number) ? parseInt(fields[index], 10) : fields[index];
       });
       resolve(message);
     });
