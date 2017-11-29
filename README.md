@@ -7,19 +7,6 @@
 
 The goal of ALICE O<sup>2</sup> UX framework is to identify library and framework sets and develop the core functionalities of common [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) Web Applications.
 
-## Features
- - HTTPS / REST API
-   - Authentication via CERN OAuth 2
-   - Authorization via e-groups
-   - Requests secured by JSON Web Tokens
- - WebSocket
-   - Inherits Authentication and authorization from HTTP layer
- - ZeroMQ client
-   - *sub* and *rep* patterns
- - Logs
-   - Console and file
-   - [InfoLogger](https://github.com/AliceO2Group/InfoLogger) support
-
 ## System requirements
  * `nodejs` >= 7
  * `zeromq-devel` >= 4.0 (optional, see [zeromq](docs/ZMQ.md) module docs for more details)
@@ -29,14 +16,14 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
  npm install --save @aliceo2/aliceo2-gui
  ```
 
-## Getting started
+## Modules/features
 See documentation of available modules:
- * [https](docs/HTTP.md)
- * [jwt](docs/JWT.md)
- * [log](docs/LOG.md)
- * [oauth](docs/OAUTH.md)
- * [websockets](docs/WS.md)
- * [zeromq](docs/ZMQ.md)
+ * [https](docs/HTTP.md) - HTTP server and REST API
+ * [jwt](docs/JWT.md) - secure requests with JSON Web Token (for `https` and `websockets` modules)
+ * [log](docs/LOG.md) - save log messages into a file or push them to InfoLogger service
+ * [oauth](docs/OAUTH.md) - CERN oAuth (for `https` module)
+ * [websockets](docs/WS.md) - communicate with server using websocket protocol
+ * [zeromq](docs/ZMQ.md) - create `sub` or `req` zeromq sockets easily
 
 ## Documentation for developers
  * [API](docs/API.md)
