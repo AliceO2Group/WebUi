@@ -9,15 +9,20 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
 
 ## Features
  - HTTPS / REST API
-   - Authentication via CERN OAuth 2 and authorization via e-groups
+   - Authentication via CERN OAuth 2
+   - Authorization via e-groups
+   - Requests secured by JSON Web Tokens
  - WebSocket
-   - Custom WebSocket authentication based on JSON Web Tokens
- - ZeroMQ client 
+   - Inherits Authentication and authorization from HTTP layer
+ - ZeroMQ client
    - *sub* and *rep* patterns
+ - Logs
+   - Console and file
+   - [InfoLogger](https://github.com/AliceO2Group/InfoLogger) support
 
 ## System requirements
  * `nodejs` >= 7
- * `zeromq-devel` >= 4.0 (see [zeromq](docs/ZMQ.md) module docs for more details)
+ * `zeromq-devel` >= 4.0 (optional, see [zeromq](docs/ZMQ.md) module docs for more details)
 
 ## Installation
  ```
@@ -26,7 +31,10 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
 
 ## Getting started
 See documentation of available modules:
- * [http/https](docs/HTTP.md)
+ * [https](docs/HTTP.md)
+ * [jwt](docs/JWT.md)
+ * [log](docs/LOG.md)
+ * [oauth](docs/OAUTH.md)
  * [websockets](docs/WS.md)
  * [zeromq](docs/ZMQ.md)
 
