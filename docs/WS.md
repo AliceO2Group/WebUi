@@ -1,49 +1,39 @@
-# Websocket
-The basic task of Websocket server is to communicate with connected clients via protocol defined in RFC 6455. In addition, it:
- - Secures each message with JWT token
+# WebSocket
+The purpose of WebSocket server is to communicate with connected clients via protocol defined in RFC 6455. In addition, it:
+- Secures each message with JWT token
+- Verifies `access_token` obtained during authorization by oAuth
 
 ## Server side
 
 #### Instance
 ```js
-WebSocket(HTTP_SERVER, JWT_CONFIG);
+WebSocket(HTTP_SERVER);
 ```
 Where:
- * `HTTP_CONF` instance of HTTP server
- * `JWT_CONF` JSON formatted configuration object for JWT with following defined fields:
-     * `secret` - JWT secret passphrase to sign and verify tokens
-     * `issuer` - name of token issuer
-     * `expiration` - token expiration time (as time literal)
-     * `maxAge` - token refresh expiration time (as time literal)
+ * `HTTP_SERVER` instance of HTTP server
 
 #### Public methods
  * [`bind(NAME, CALLBACK)`](https://github.com/awegrzyn/Gui/blob/docs/docs/API.md#WebSocket+bind)
 
 #### Example
 ```js
-const AliceO2Gui = require('@aliceo2/aliceo2-gui');
+const {HttpServer, WebSocket} = require('@aliceo2/aliceo2-gui');
 ...
-const jwtConf = {
-  "secret": "secret",
-  "issuer": "your-issuer-name",
-  "expiration": "1d",
-  "maxAge": "7d"
-};
-const http = new AliceO2Gui.HttpServer(httpConf, jwtConf, oauthConf);
-const ws = new AliceO2Gui.WebSocket(http, jwtConf);
+const http = new HttpServer(httpConf, jwtConf, oauthConf);
+const ws = new WebSocket(http);
+ws.bind('message', (body) => console.log(body));
 ```
 
 ## Client side widget
 #### Instance
-Modyfiy template:
-1. Create HTML element with id `#ws`.
-2. Add following code:
+1. Include `websocket-client.js` script.
+2. Create instance and pass server-side variables as parameters:
 ```js
-var ws = $.o2.websocket({
-  url: 'wss://{{websockethostname}}',
-  token: '{{token}}',
-  id: {{personid}},
-}, $('#ws') );
+const ws = new WebSocketClient(
+  {{personid}},
+  '{{token}}',
+  '{{oauth}}'
+);
 ```
 
 #### Sending message
@@ -55,13 +45,13 @@ Where:
 
 #### Binding to incoming messages
 ```js
-$('#ws').bind(MESSAGE_NAME, CALLBACK);
+ws.bind(MESSAGE_NAME, CALLBACK);
 ```
 Where:
- * `MESSAGE_NAME` message name prefixed with widget name (`websocket`)
- * `CALLBACK` callable with two parameters `evt` and `data`
+ * `MESSAGE_NAME` message name
+ * `CALLBACK` callable with one parameter  `data`
 
 #### Example
 ```js
-$('#ws').bind('websocketcustommessage', (evt, data) => ws.send({command: data.command));
+ws.bind('custommessage', (evt, data) => ws.send({command: data.command));
 ```

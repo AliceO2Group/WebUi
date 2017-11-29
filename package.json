@@ -36,14 +36,14 @@
     "chai": "^4.1.2",
     "chai-http": "^3.0.0",
     "dependency-check": "^2.9.1",
-    "eslint": "^4.11.0",
+    "eslint": "^4.12.0",
     "eslint-config-google": "^0.9.1",
     "jsdoc-to-markdown": "^3.0.2",
     "mocha": "^4.0.1",
     "nsp": "^3.1.0",
-    "phantom": "^4.0.8",
+    "phantom": "^4.0.9",
     "qunit": "^2.4.1",
-    "qunit-phantomjs-runner": "^2.3.0"
+    "qunit-phantomjs-runner": "^2.3.1"
   },
   "main": "aliceo2-gui.js",
   "files": [
