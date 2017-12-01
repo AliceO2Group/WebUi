@@ -72,7 +72,7 @@ class HttpServer {
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
         /* eslint-disable */
-        defaultSrc: ["'self'"],
+        defaultSrc: ["'self'", "data:"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'wss://' + hostname + ':*']
