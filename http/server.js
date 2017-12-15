@@ -28,8 +28,6 @@ class HttpServer {
     this.app.use(compression());
     this.configureHelmet(httpConfig.hostname);
 
-    this.app.use(express.static(path.join(__dirname, '')));
-
     this.jwt = new JwtToken(jwtConfig);
     this.oauth = new OAuth(oAuthConfig);
     this.specifyRoutes();
