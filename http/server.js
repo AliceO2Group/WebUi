@@ -10,6 +10,7 @@ const OAuth = require('./oauth.js');
 const path = require('path');
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const url = require('url');
 
 /**
  * HTTPS server that handles OAuth and provides REST API.
@@ -143,38 +144,67 @@ class HttpServer {
   }
 
   /**
-   * OAuth redirection.
+   * Home route of application.
+   * - shows app with token embeded if query.code is valid (user comes from /callback)
+   * - redirects to the OAuth flow if query.code is inexistant (user comes from an external link)
+   * - just print an error if code is wrong
+   * The query arguments are preserved through serialization during redirect into OAuth state.
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    */
   oAuthAuthorize(req, res) {
-    const state = new Buffer(JSON.stringify(req.query)).toString('base64');
-    res.redirect(this.oauth.getAuthorizationUri(state));
+    const code = req.query.code; // OAuth code
+    const query = req.query; // User's arguments
+    delete query.code; // Don't keep code, it's not an user's argument
+
+    if (!code) {
+      // redirects to the OAuth flow
+      const state = new Buffer(JSON.stringify(query)).toString('base64');
+      res.redirect(this.oauth.getAuthorizationUri(state));
+    }
+
+    this.oauth.oAuthCallback(code)
+      .then((details) => {
+        // Generate random user id (dev only, don't know why, comment needed)
+        details.user.personid += Math.floor(Math.random() * 100);
+
+        // Insert query inside details
+        details.query = query;
+
+        // Add token
+        details.token = this.jwt.generateToken(details.user.personid, details.user.username, 1);
+
+        // Default data
+        Object.assign(details, this.templateData);
+
+        // Show app
+        return res.status(200).send(this.renderPage('public/index.tpl', details));
+      })
+      .catch((error) => {
+        // The code can be wrong if it was used multi-times (refresh) or OAuth failed
+        log.warn(error);
+        res.status(401).send(`OAuth failed: ${error.message}, maybe you refreshed this page without removing the one-time code?`);
+      });
   }
 
   /**
-   * OAuth callback if authentication succeeds.
+   * Callback route from OAuth flow.
+   * Redirects to home with given code and saved arguments from OAuth state
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    */
   oAuthCallback(req, res) {
-    this.oauth.oAuthCallback(req.query.code)
-      .then((data) => {
-        /* !!! JUST FOR DEVELOPMENT !!! */
-        data[0].personid += Math.floor(Math.random() * 100);
-        const params = JSON.parse(new Buffer(req.query.state, 'base64').toString('ascii'));
-        Object.keys(params).forEach((key) => {
-          data[0][key] = params[key];
-        });
-        data[0].token = this.jwt.generateToken(data[0].personid, data[0].username, 1);
-        Object.assign(data[0], this.templateData);
-        return res.status(200).send(this.renderPage('public/index.tpl', data[0]));
-      }, (error) => {
-        log.info(error.message);
-        return res.status(401).send(error.message);
-      }).catch(() => {
-        return res.status(401).send('oAuth failed');
-      });
+    const code = req.query.code;
+    const state = req.query.state; // base64
+    if (!code || !state) {
+      return res.status(400).send('code and state required');
+    }
+
+    const query = JSON.parse(new Buffer(state, 'base64').toString('ascii'));
+    query.code = code;
+    const homeUrlAuthentified = url.format({pathname: '/', query: query});
+
+    return res.redirect(homeUrlAuthentified);
   }
 
   /**
