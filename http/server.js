@@ -168,13 +168,13 @@ class HttpServer {
         // Generate random user id (dev only, don't know why, comment needed)
         details.user.personid += Math.floor(Math.random() * 100);
 
-        // Insert query inside details
+        // Insert query to be used from the template
         details.query = query;
 
-        // Add token
+        // Add token to the template data
         details.token = this.jwt.generateToken(details.user.personid, details.user.username, 1);
 
-        // Default data
+        // Add default data set by passToTemplate()
         Object.assign(details, this.templateData);
 
         // Show app
@@ -200,6 +200,7 @@ class HttpServer {
       return res.status(400).send('code and state required');
     }
 
+    // Reinject the saved query args into the final URL
     const query = JSON.parse(new Buffer(state, 'base64').toString('ascii'));
     query.code = code;
     const homeUrlAuthentified = url.format({pathname: '/', query: query});
