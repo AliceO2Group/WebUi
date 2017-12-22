@@ -56,7 +56,8 @@ class OAuth {
 
   /**
    * OAuth redirection callback (called by library).
-   * Ask the oauth server if this code is valid and retrive some user's infos.
+   * Verify with the oAuth server that the code parameter is valid.
+   * Retrive some user's information from resource server.
    * @param {number} code - authorization code to request access token
    * @return {object} Promise with user details and token
    */
@@ -81,7 +82,7 @@ class OAuth {
             group: result[1]
           };
 
-          // Is the user's group allows him to view this app?
+          // E-group authorization (verify that user is subscribed to the e-group)
           if (!details.group.groups.find((group) => group === this.egroup)) {
             reject(new Error('e-groups restriction'));
           }

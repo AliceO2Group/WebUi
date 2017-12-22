@@ -144,11 +144,11 @@ class HttpServer {
   }
 
   /**
-   * Home route of application.
-   * - shows app with token embeded if query.code is valid (user comes from /callback)
-   * - redirects to the OAuth flow if query.code is inexistant (user comes from an external link)
-   * - just print an error if code is wrong
-   * The query arguments are preserved through serialization during redirect into OAuth state.
+   * Handles oAuth authentication flow (default path of the app: '/')
+   * - If query.code is valid embeds the token and grants the access to the application
+   * - Redirects to the OAuth flow if query.code is not present (origin path != /callback)
+   * - Prints out an error when code is not valid
+   * The query arguments are serialized and kept in the 'state' parameter through OAuth process
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    */
@@ -158,38 +158,40 @@ class HttpServer {
     delete query.code; // Don't keep code, it's not an user's argument
 
     if (!code) {
-      // redirects to the OAuth flow
+      // Redirects to the OAuth flow
       const state = new Buffer(JSON.stringify(query)).toString('base64');
       res.redirect(this.oauth.getAuthorizationUri(state));
     }
 
     this.oauth.oAuthCallback(code)
       .then((details) => {
-        // Generate random user id (dev only, don't know why, comment needed)
+        // Generates random user id (for the test purposes)
+        // To emulate two different users connecting to the app)
         details.user.personid += Math.floor(Math.random() * 100);
 
-        // Insert query to be used from the template
+        // Append query parameter to the details object which is passed to the front-end template
         details.query = query;
 
-        // Add token to the template data
+        // Adds token to the details object
         details.token = this.jwt.generateToken(details.user.personid, details.user.username, 1);
 
-        // Add default data set by passToTemplate()
+        // Concatanates details from oAuth flow with data directly passed by user
         Object.assign(details, this.templateData);
 
-        // Show app
+        // Renders the app
         return res.status(200).send(this.renderPage('public/index.tpl', details));
       })
       .catch((error) => {
-        // The code can be wrong if it was used multi-times (refresh) or OAuth failed
+        // Handles invalid oAuth code parameters
         log.warn(error);
-        res.status(401).send(`OAuth failed: ${error.message}, maybe you refreshed this page without removing the one-time code?`);
+        res.status(401).send(`OAuth failed: ${error.message}, beware refreshing the page without removing the one-time code paramete`);
       });
   }
 
   /**
-   * Callback route from OAuth flow.
-   * Redirects to home with given code and saved arguments from OAuth state
+   * oAuth allback route - when successfully authorized (/callback)
+   * Redirects to the application deserializes the query parameters from state variable
+   * and injects them to the url
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    */
