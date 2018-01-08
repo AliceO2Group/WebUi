@@ -87,12 +87,12 @@ class WebSocket {
     });
   }
 
+  /* eslint-disable no-unused-vars, indent */
   /**
    * Handles client connection and message receiving.
    * @param {object} client - connected client
    * @param {object} request - connection request
    */
-  /* eslint-disable no-unused-vars, indent */
   onconnection(client, request) {
     const oauth = url.parse(request.url, true).query.oauth;
     this.http.oauth.getDetails(oauth, this.http.oauth.userOptions)
