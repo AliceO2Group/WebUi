@@ -87,6 +87,7 @@ class WebSocket {
     });
   }
 
+  /* eslint-disable no-unused-vars, indent */
   /**
    * Handles client connection and message receiving.
    * @param {object} client - connected client
@@ -105,6 +106,7 @@ class WebSocket {
         client.close(1008);
       });
   }
+  /* eslint-enable */
 
   /**
    * Called when a new message arrivies
