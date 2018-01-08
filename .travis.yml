@@ -33,7 +33,7 @@ before_script:
 - openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
 - mv config-default.json config.json
 - rm test/mocha-ws.js
-- line0=2; line=`grep -n "query.oauth" websocket/server.js | sed 's/^\([0-9]\+\):.*$/\1/'`; line2=$((line + 2)); line3=$((line + 7)); line4=$((line + 10)); sed -i "$line"','"$line2"'d;'"$line3"','"$line4"'d' websocket/server.js
+- line0=2; line=`grep -n "query.oauth" websocket/server.js | sed 's/^\([0-9]\+\):.*$/\1/'`; line2=$((line + 2)); line3=$((line + 7)); line4=$((line + 10)); sed -i "$line0"','"$line"','"$line2"'d;'"$line3"','"$line4"'d' websocket/server.js
 script: npm run travis && dependency-check ./package.json --unused --no-dev --ignore-module jquery
 after_success:
 - jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md

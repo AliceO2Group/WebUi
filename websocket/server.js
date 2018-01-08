@@ -93,7 +93,7 @@ class WebSocket {
    * @param {object} request - connection request
    */
   onconnection(client, request) {
-    /*eslint-disable no-unused-vars, indent */
+    /* eslint-disable no-unused-vars, indent */
     const oauth = url.parse(request.url, true).query.oauth;
     this.http.oauth.getDetails(oauth, this.http.oauth.userOptions)
       .then(() => {
@@ -105,7 +105,7 @@ class WebSocket {
         log.warn('Websocket: oAuth failed', error.message);
         client.close(1008);
       });
-    /*eslint-enable */
+    /* eslint-enable */
   }
 
   /**
