@@ -184,7 +184,9 @@ class HttpServer {
       .catch((error) => {
         // Handles invalid oAuth code parameters
         log.warn(error);
-        res.status(401).send(`OAuth failed: ${error.message}, beware refreshing the page without removing the one-time code paramete`);
+        res.status(401).send(
+          `OAuth failed: ${error.message}, beware refreshing the page with one-time code parameter`
+        );
       });
   }
 
@@ -194,6 +196,7 @@ class HttpServer {
    * and injects them to the url
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
+   * @return {object} redirect to address with re-included query string
    */
   oAuthCallback(req, res) {
     const code = req.query.code;
