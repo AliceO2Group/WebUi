@@ -56,6 +56,8 @@ class OAuth {
 
   /**
    * OAuth redirection callback (called by library).
+   * Verify with the oAuth server that the code parameter is valid.
+   * Retrive some user's information from resource server.
    * @param {number} code - authorization code to request access token
    * @return {object} Promise with user details and token
    */
@@ -74,11 +76,18 @@ class OAuth {
             this.getDetails(token.token.access_token, this.userOptions),
             this.getDetails(token.token.access_token, this.groupOptions)
           ]);
-        }).then((data) => {
-          if (data[1].groups.find((group) => group === this.egroup) === undefined) {
-            reject(new Error('e-grups restriction'));
+        }).then((result) => {
+          const details = {
+            user: result[0],
+            group: result[1]
+          };
+
+          // E-group authorization (verify that user is subscribed to the e-group)
+          if (!details.group.groups.find((group) => group === this.egroup)) {
+            reject(new Error('e-groups restriction'));
           }
-          resolve(data);
+
+          resolve(details);
         }).catch((error) => {
           reject(error);
         });
