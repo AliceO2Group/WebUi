@@ -3,7 +3,6 @@ const http = require('http');
 const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
-const mustache = require('mustache');
 const log = require('./../log/log.js');
 const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
@@ -179,7 +178,7 @@ class HttpServer {
         Object.assign(details, this.templateData);
 
         // Renders the app
-        return res.status(200).send(this.renderPage('public/index.tpl', details));
+        return res.status(200).send(fs.readFileSync(page).toString());
       })
       .catch((error) => {
         // Handles invalid oAuth code parameters
@@ -211,17 +210,6 @@ class HttpServer {
     const homeUrlAuthentified = url.format({pathname: '/', query: query});
 
     return res.redirect(homeUrlAuthentified);
-  }
-
-  /**
-   * Renders template using Mustache engine.
-   * @param {string} page - template file path
-   * @param {object} data - data to fill the template with
-   * @return {string} - HTML page
-   */
-  renderPage(page, data) {
-    const template = fs.readFileSync(page).toString();
-    return mustache.to_html(template, data);
   }
 
   /**

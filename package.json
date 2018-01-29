@@ -23,7 +23,6 @@
     "helmet": "^3.9.0",
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.1.1",
-    "mustache": "^2.3.0",
     "mysql": "^2.15.0",
     "simple-oauth2": "^1.5.0",
     "winston": "^3.0.0-rc1",
