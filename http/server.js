@@ -80,11 +80,11 @@ class HttpServer {
   }
 
   /**
-   * Passes key-value that can be used in template
-   * @param {string} key - allows to access value from temaplte
+   * Passes key-value parameters that are available on front-end side
+   * @param {string} key
    * @param {string} value
    */
-  passToTemplate(key, value) {
+  passAsUrl(key, value) {
     this.templateData[key] = value;
   }
 
@@ -178,7 +178,8 @@ class HttpServer {
         Object.assign(details, this.templateData);
 
         // Renders the app
-        return res.status(200).send(fs.readFileSync(page).toString());
+        res.location('public/?query=test');
+        return res.status(200).send(fs.readFileSync('public/index.html').toString());
       })
       .catch((error) => {
         // Handles invalid oAuth code parameters
