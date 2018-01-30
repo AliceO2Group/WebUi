@@ -150,6 +150,7 @@ class HttpServer {
    * The query arguments are serialized and kept in the 'state' parameter through OAuth process
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
+   * @return {object} redirects to OAuth flow or displays the page if JWT token is valid
    */
   oAuthAuthorize(req, res) {
     const query = req.query; // User's arguments
@@ -159,7 +160,7 @@ class HttpServer {
     if (token && this.jwt.verify(token)) {
       return res.status(200).send(fs.readFileSync('public/index.html').toString());
     } else {
-     // Save query params and redirect to the OAuth flow
+      // Save query params and redirect to the OAuth flow
       const state = new Buffer(JSON.stringify(query)).toString('base64');
       return res.redirect(this.oauth.getAuthorizationUri(state));
     }
