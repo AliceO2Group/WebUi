@@ -12,8 +12,11 @@ let http, ws, jwt, token; // eslint-disable-line
 
 describe('websocket', () => {
   before(() => {
+    jwt = new JwtToken(config.jwt);
+    token = jwt.generateToken(0, 'test', 1);
+
     http = new HttpServer(config.http, config.jwt, config.oAuth);
-    ws = new WebSocket(http, config.jwt, 'localhost');
+    ws = new WebSocket(http, config.jwt, 'localhost?token=' + token);
     ws.bind('test', (message) => {
       let res = new WebSocketMessage().setCommand(message.getCommand());
       return res;
@@ -27,9 +30,6 @@ describe('websocket', () => {
       let res = new WebSocketMessage().setCommand(message.getCommand()).setBroadcast();
       return res;
     });
-
-    jwt = new JwtToken(config.jwt);
-    token = jwt.generateToken(0, 'test', 1);
   });
 
   it('connection should be successful', (done) => {
