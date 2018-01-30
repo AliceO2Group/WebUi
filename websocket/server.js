@@ -56,15 +56,8 @@ class WebSocket {
    */
   getReply(req) {
     return new Promise((resolve, reject) => {
-      const responseArray = [];
       this.http.jwt.verify(req.getToken())
         .then((data) => {
-          if (data.newToken) {
-            responseArray.push(new WebSocketMessage(440)
-              .setCommand('new-token')
-              .setPayload({newtoken: data.newToken})
-            );
-          }
           req.id = data.id;
           log.debug('%d : command %s', data.id, req.getCommand());
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
@@ -73,14 +66,13 @@ class WebSocket {
               if (typeof res.getCommand() !== 'string') {
                 res.setCommand(req.getCommand());
               }
-              responseArray.push(res);
+              resolve(res);
             } else {
-              responseArray.push(new WebSocketMessage(500));
+              resolve(new WebSocketMessage(500));
             }
           } else {
-            responseArray.push(new WebSocketMessage(404));
+            resolve(new WebSocketMessage(404));
           }
-          resolve(responseArray);
         }, (error) => {
           reject(error);
         });
@@ -94,15 +86,15 @@ class WebSocket {
    * @param {object} request - connection request
    */
   onconnection(client, request) {
-    const oauth = url.parse(request.url, true).query.oauth;
-    this.http.oauth.getDetails(oauth, this.http.oauth.userOptions)
+    const token = url.parse(request.url, true).query.token;
+    this.http.jwt.verify(token)
       .then(() => {
         client.send(JSON.stringify({command: 'authed'}));
         client.on('message', (message) => this.onmessage(message, client));
         client.on('close', () => this.onclose());
         client.on('pong', () => client.isAlive = true);
       }, (error) => {
-        log.warn('Websocket: oAuth failed', error.message);
+        log.warn('Websocket: jwt failed', error.message);
         client.close(1008);
       });
   }
@@ -124,14 +116,12 @@ class WebSocket {
         }
         // message reply
         this.getReply(parsed)
-          .then((responses) => {
-            for (let res of responses) {
-              if (res.getBroadcast()) {
-                this.broadcast(res);
-              } else {
-                log.debug('command %s sent', res.getCommand());
-                client.send(JSON.stringify(res.json));
-              }
+          .then((response) => {
+            if (response.getBroadcast()) {
+              this.broadcast(response);
+            } else {
+              log.debug('command %s sent', response.getCommand());
+              client.send(JSON.stringify(response.json));
             }
           }, (response) => {
             throw new Error('Websocket: getReply() failed', response.message);
