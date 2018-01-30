@@ -155,7 +155,6 @@ class HttpServer {
   oAuthAuthorize(req, res) {
     const query = req.query; // User's arguments
     const token = req.query.token;
-    delete query.code; // Don't keep the code, it's not an user's argument
 
     if (token && this.jwt.verify(token)) {
       return res.status(200).send(fs.readFileSync('public/index.html').toString());

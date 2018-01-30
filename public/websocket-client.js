@@ -2,7 +2,6 @@
  * WebSocket client class
  * @param {number} id - CERN person id
  * @param {string} token - JWT authentication token
- * @param {string} oauth - oAuth access_token
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class WebSocketClient { // eslint-disable-line no-unused-vars
@@ -10,12 +9,10 @@ class WebSocketClient { // eslint-disable-line no-unused-vars
    * Sets up internal variables
    * @param {number} id - CERN person id
    * @param {string} token - JWT authentication token
-   * @param {string} oauth - oAuth access_token
    */
-  constructor(id, token, oauth) {
+  constructor(id, token) {
     this.id = id;
     this.token = token;
-    this.oauth = oauth;
     this.url = (location.host.length == 0) ? 'ws://localhost' : `wss://${location.host}`;
     this.authed = false;
     this.callbackArray = [];
@@ -27,7 +24,7 @@ class WebSocketClient { // eslint-disable-line no-unused-vars
    * Connects to WebSocket endpoint
    */
   connect() {
-    this.connection = new WebSocket(this.url + '?oauth=' + this.oauth);
+    this.connection = new WebSocket(this.url + '?token=' + this.token);
   }
 
   /**
