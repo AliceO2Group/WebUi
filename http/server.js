@@ -152,42 +152,17 @@ class HttpServer {
    * @param {object} res - HTTP response
    */
   oAuthAuthorize(req, res) {
-    const code = req.query.code; // OAuth code
     const query = req.query; // User's arguments
-    delete query.code; // Don't keep code, it's not an user's argument
+    const token = req.query.token;
+    delete query.code; // Don't keep the code, it's not an user's argument
 
-    if (!code) {
-      // Redirects to the OAuth flow
+    if (token && this.jwt.verify(token)) {
+      return res.status(200).send(fs.readFileSync('public/index.html').toString());
+    } else {
+     // Save query params and redirect to the OAuth flow
       const state = new Buffer(JSON.stringify(query)).toString('base64');
-      res.redirect(this.oauth.getAuthorizationUri(state));
+      return res.redirect(this.oauth.getAuthorizationUri(state));
     }
-
-    this.oauth.oAuthCallback(code)
-      .then((details) => {
-        // Generates random user id (for the test purposes)
-        // To emulate two different users connecting to the app)
-        details.user.personid += Math.floor(Math.random() * 100);
-
-        // Append query parameter to the details object which is passed to the front-end template
-        details.query = query;
-
-        // Adds token to the details object
-        details.token = this.jwt.generateToken(details.user.personid, details.user.username, 1);
-
-        // Concatanates details from oAuth flow with data directly passed by user
-        Object.assign(details, this.templateData);
-
-        // Renders the app
-        res.location('public/?query=test');
-        return res.status(200).send(fs.readFileSync('public/index.html').toString());
-      })
-      .catch((error) => {
-        // Handles invalid oAuth code parameters
-        log.warn(error);
-        res.status(401).send(
-          `OAuth failed: ${error.message}, beware refreshing the page with one-time code parameter`
-        );
-      });
   }
 
   /**
@@ -205,12 +180,31 @@ class HttpServer {
       return res.status(400).send('code and state required');
     }
 
-    // Reinject the saved query args into the final URL
     const query = JSON.parse(new Buffer(state, 'base64').toString('ascii'));
-    query.code = code;
-    const homeUrlAuthentified = url.format({pathname: '/', query: query});
 
-    return res.redirect(homeUrlAuthentified);
+    this.oauth.createTokenAndProvideDetails(code)
+      .then((details) => {
+        // TEST ONLY
+        // Generates random user id to emulate two different users connecting to the app
+        query.personid = details.user.personid + Math.floor(Math.random() * 100);
+        query.name = details.user.name;
+
+        // Generates JWT token and adds it to the details object
+        query.token = this.jwt.generateToken(details.user.personid, details.user.username, 1);
+
+        // Concatanates details from oAuth flow with data directly passed by user
+        Object.assign(query, this.templateData);
+
+        const homeUrlAuthentified = url.format({pathname: '/', query: query});
+        return res.redirect(homeUrlAuthentified);
+      })
+      .catch((error) => {
+        // Handles invalid oAuth code parameters
+        log.warn(error);
+        res.status(401).send(
+          `OAuth failed: ${error.message}, beware refreshing the page with one-time code parameter`
+        );
+      });
   }
 
   /**

@@ -55,20 +55,14 @@ class OAuth {
   }
 
   /**
-   * OAuth redirection callback (called by library).
-   * Verify with the oAuth server that the code parameter is valid.
-   * Retrive some user's information from resource server.
+   * Creates access_token based on code parameters.
+   * Retrive some user's and group information from resource server using access_token.
    * @param {number} code - authorization code to request access token
    * @return {object} Promise with user details and token
    */
-  oAuthCallback(code) {
+  createTokenAndProvideDetails(code) {
     return new Promise((resolve, reject) => {
-      const options = {
-        code,
-        redirect_uri: this.redirectUri
-      };
-
-      this.oauthCreds.authorizationCode.getToken(options)
+      this.oauthCreds.authorizationCode.getToken({code, redirect_uri: this.redirectUri})
         .then((result) => {
           return this.oauthCreds.accessToken.create(result);
         }).then((token) => {
