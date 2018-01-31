@@ -1,9 +1,6 @@
 module.exports = {
   "root": true,
-  "plugins": [
-    "security"
-  ],
-  "extends": ["eslint:recommended", "google", "plugin:security/recommended"],
+  "extends": ["eslint:recommended", "google"],
   "env": {
     "es6": true,
     "node": true,
