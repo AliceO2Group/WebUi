@@ -11,13 +11,11 @@
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha --exit",
     "mocha": "./node_modules/.bin/mocha test/mocha-*",
     "travis": "./node_modules/.bin/mocha && npm run eslint",
-    "//": "./node_modules/.bin/phantomjs ./node_modules/qunit-phantomjs-runner/runner-list.js",
     "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js",
     "nsp": "./node_modules/.bin/nsp check --warn-only",
     "postinstall": "mkdir -p public/libs; parent=`ls ..`; if [ \"$parent\" = aliceo2-gui ]; then cp ../../jquery/dist/jquery.js public/libs; else cp node_modules/jquery/dist/jquery.js public/libs; fi"
   },
   "dependencies": {
-    "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "helmet": "^3.10.0",
     "jquery": "^3.3.1",

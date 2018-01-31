@@ -7,7 +7,6 @@ const log = require('./../log/log.js');
 const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
 const path = require('path');
-const bodyParser = require('body-parser');
 const url = require('url');
 
 /**
@@ -93,7 +92,6 @@ class HttpServer {
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
-    this.app.use(bodyParser.json());
     this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
     this.app.use(express.static(path.join(__dirname, '../public')));
     this.app.use(express.static('public'));
