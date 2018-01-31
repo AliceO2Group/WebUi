@@ -1,7 +1,6 @@
 # WebSocket
 The purpose of WebSocket server is to communicate with connected clients via protocol defined in RFC 6455. In addition, it:
-- Secures each message with JWT token
-- Verifies `access_token` obtained during authorization by oAuth
+- Secures connection and each message with JWT token
 
 ### Instance
 ```js
