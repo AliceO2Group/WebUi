@@ -2,7 +2,7 @@
 "jwt": {
     "secret": "<secret>",
     "issuer": "alice-o2-gui",
-    "expiration": "1s",
+    "expiration": "2s",
     "maxAge": "2m"
   },  
   "oAuth": {
