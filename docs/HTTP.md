@@ -1,10 +1,10 @@
 # HTTPS server
-The basic task of HTTPS server is to provide REST API. In addition, it:
- - Authenticates via OAuth 2 service
- - Authorizes via e-groups
- - Secures each request with JWT token
- - Redirects HTTP to HTTPS
-By default, it serves `public` directory as static content. It also renders main page from `public/index.tpl`.
+HTTPS server provided an easy way of createing REST API. In addition, it supports:
+ - CERN OAuth 2 authentication
+ - E-groups authorization
+ - JWT token secured requests
+ - HTTP to HTTPS redirection
+By default, it serves `public` directory as static content.
 
 
 #### Instance
@@ -14,6 +14,7 @@ HttpServer(HTTP_CONF, JWT_CONF, OAUTH_CONF);
 Where:
  * `HTTP_CONF` Configuration object for the http server with following defined fields:
      * `port` - HTTP port number 
+     * `tls` - flag that enables/disables TLS
      * `portSecure` - HTTPS port number
      * `key` - private key filepath
      * `cert` - certificate filepath
