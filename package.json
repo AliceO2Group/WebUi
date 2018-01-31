@@ -35,9 +35,7 @@
     "eslint-plugin-security": "^1.4.0",
     "mocha": "^5.0.0",
     "nsp": "^3.1.0",
-    "phantom": "^4.0.12",
-    "qunit": "^2.5.0",
-    "qunit-phantomjs-runner": "^2.3.1"
+    "phantom": "^4.0.12"
   },
   "main": "aliceo2-gui.js",
   "files": [
