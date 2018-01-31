@@ -224,7 +224,7 @@ class HttpServer {
         req.decoded = data.decoded;
         next();
       }, (err) => {
-        log.debug(this.constructor.name, ':', err.name);
+        log.error(err.name + ': ' +err.message);
         res.status(403).json({message: err.name});
       });
   }
