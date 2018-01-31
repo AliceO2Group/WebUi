@@ -4,6 +4,7 @@ HTTPS server provided an easy way of createing REST API. In addition, it support
  - E-groups authorization
  - JWT token secured requests
  - HTTP to HTTPS redirection
+
 By default, it serves `public` directory as static content.
 
 
