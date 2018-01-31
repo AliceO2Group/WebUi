@@ -8,7 +8,6 @@ const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
 const path = require('path');
 const bodyParser = require('body-parser');
-const compression = require('compression');
 const url = require('url');
 
 /**
@@ -25,7 +24,6 @@ class HttpServer {
    */
   constructor(httpConfig, jwtConfig, oAuthConfig) {
     this.app = express();
-    this.app.use(compression());
     this.configureHelmet(httpConfig.hostname);
 
     this.jwt = new JwtToken(jwtConfig);
