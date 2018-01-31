@@ -31,7 +31,7 @@
     }   
   },  
   "http": {
-    "port": 8080,
+    "port": 8181,
     "portSecure": 8443,
     "key": "test.key",
     "cert": "test.pem",

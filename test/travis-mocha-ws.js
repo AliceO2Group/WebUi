@@ -16,7 +16,7 @@ describe('websocket', () => {
     token = jwt.generateToken(0, 'test', 1);
 
     http = new HttpServer(config.http, config.jwt, config.oAuth);
-    ws = new WebSocket(http, config.jwt, 'localhost/');
+    ws = new WebSocket(http, config.jwt, 'localhost');
     ws.bind('test', (message) => {
       let res = new WebSocketMessage().setCommand(message.getCommand());
       return res;
