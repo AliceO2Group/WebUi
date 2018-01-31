@@ -23,7 +23,7 @@ Where:
  * `OAUTH_COFN` Configuration object for OAuth 2 (see [oauth](OAUTH.md) module)
 
 #### Public methods
- * [`passToTemplate(KEY, VALUE)`](API.md#HttpServer+passToTemplate)
+ * [`passAsUrl(KEY, VALUE)`](API.md#httpserverpassasurlkey-value)
  * [`get(KEY, CALLBACK)`](API.md#HttpServer+get)
  * [`post(KEY, CALLBACK)`](API.md#HttpServer+post)
  * [`delete(KEY, CALLBACK)`](API.md#HttpServer+delete)
@@ -33,6 +33,7 @@ Where:
 const {HttpServer} = require('@aliceo2/aliceo2-gui');
 const http = {
   "port": 8080,
+  "tls": true,
   "portSecure": 8443,
   "key": "/path/key/private.key",
   "cert": "/path/cert/certificate.pem"
@@ -44,8 +45,7 @@ const http = new HttpServer(http, jwt, oauth);
 
 #### Routes
 By default, the server publishes `public` directory as static content.
-New routes can be defined by calling `post`, `postNoAuth`, `get` methods.
+New routes can be defined by calling `post`, `get` methods.
 
-#### Templates
-The main page is render from `public/index.tpl`.
-The template variables can be passed via `passToTemplate` and then access from templated as `{{ key }}`.
+#### Passing values to frontend
+Values can be passed to frontend in URL via `passAsUrl` method.
