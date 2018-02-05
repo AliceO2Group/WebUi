@@ -1,20 +1,21 @@
-import './mithril.js/mithril.js'
+/* global m */
+// mithril function 'm' will be injected into window
+import '/mithril.js';
 
 /**
- * Register a callback to be called only one time at browser render time and only if the trigger was called before. Used to push new renderings efficitly.
+ * Register a callback to be called one time at browser render time if
+ * the trigger was called before. Used to push new renderings efficitly.
  * @param {function} fn - The callback to be registered
  * @return {function} The trigger to be called
  */
-
 function frameDebouncer(fn) {
   let requestFrame;
-  return function() {
-    const args = arguments;
+  return function(...args) {
     if (requestFrame) {
       cancelAnimationFrame(requestFrame);
     }
     requestFrame = requestAnimationFrame(function() {
-      fn.apply(null, args);
+      fn(...args);
     });
   };
 }
@@ -30,16 +31,17 @@ function render(element, vnode) {
 }
 
 /**
- * Hyperscript function to represente a DOM element and produce a vnode compatible with a patch function.
+ * Hyperscript function to represente a DOM element
+ * it produces a vnode usable by render function.
  * @param {String} selector - Tag name
  * @param {Object} attributes - (optional) className, class, onclick, href, ...
  * @param {Array<Vnode>|String|Number|Boolean} children - Children inside this tag
  * @return {Vnode} the Vnode representation
  */
-function h() {
+function h(...args) {
   // encapsulate mithril engine so we can change if needed
   // TODO: the API should be simplified of lifecycle methods and not depend on mithril
-  return m.apply(null, arguments);
+  return m(...args);
 }
 
 /**
@@ -47,12 +49,19 @@ function h() {
  * @param {Element} element - The DOM element
  * @param {Function} view - The functional view which produces a vnode tree
  * @param {Observable} model - The model containing the state
+ * @param {boolean} debug - Facultative. Shows the rendering time each time
  */
-function mount(element, view, model) {
+function mount(element, view, model, debug) {
   const smartRender = frameDebouncer((model) => {
-    console.time('render');
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.time('render');
+    }
     render(element, view(model));
-    console.timeEnd('render');
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.timeEnd('render');
+    }
   });
 
   if (model.observe) {
@@ -61,4 +70,4 @@ function mount(element, view, model) {
   smartRender(model); // first draw
 }
 
-export { h, render, frameDebouncer, mount }
+export {h, render, frameDebouncer, mount};
