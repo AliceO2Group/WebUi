@@ -22,6 +22,7 @@ class OAuth {
     assert(config.tokenPath, 'Config value "tokenPath" is mandatory');
     assert(config.authorizePath, 'Config value "authorizePath" is mandatory');
     assert(config.redirect_uri, 'Config value "redirect_uri" is mandatory');
+    assert(config.egroup, 'Config value "egroup" is mandatory');
     assert(config.resource.port, 'Config value "resource.port" is mandatory');
     assert(config.resource.hostname, 'Config value "resource.hostname" is mandatory');
     assert(config.resource.userPath, 'Config value "resource.userPath" is mandatory');
