@@ -11,7 +11,7 @@
     "test": "npm run eslint && npm run mocha",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/mocha-* --exit",
     "mocha": "./node_modules/.bin/mocha Backend/test/mocha-*",
-    "travis": "./node_modules/.bin/mocha && npm run eslint",
+    "travis": "./node_modules/.bin/mocha Backend/test/ && npm run eslint",
     "eslint": "./node_modules/.bin/eslint Backend/*.js Backend/http/*.js Backend/jwt/*.js public/*.js Backend/websocket/*.js Backend/zeromq/*.js Backend/test/*.js Backend/db/*.js Backend/log/*.js"
   },
   "dependencies": {
