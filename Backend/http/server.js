@@ -93,10 +93,18 @@ class HttpServer {
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
     this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
-    this.app.use(express.static(path.join(__dirname, '../public')));
-    this.app.use(express.static('public'));
     this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     this.app.use('/api', this.router);
+    this.addStaticPath(require.resolve('mithril'), 'mithril.js');
+  }
+
+  /**
+   * Serves local static path under specified URI path
+   * @param {string} localPath - local directory to be served
+   * @param {string} uriPath - URI path (optional, '/' as default)
+   */
+  addStaticPath(localPath, uriPath = '') {
+    this.app.use(path.join('/', uriPath), express.static(localPath));
   }
 
   /**
