@@ -100,7 +100,7 @@ class HttpServer {
       this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     }
     this.app.use('/api', this.router);
-    this.addStaticPath(require.resolve('mithril'), 'mithril.js');
+    this.addStaticPath(require.resolve('mithril'), '/js/mithril.js');
   }
 
   /**

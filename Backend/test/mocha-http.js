@@ -120,4 +120,13 @@ describe('rest-api', () => {
   after(() => {
     httpServer.getServer.close();
   });
+
+  it('Check whether mithril is present', (done) => {
+    http.get('http://localhost:' + config.http.port + '/js/mithril.js',
+      (res) => {
+        assert.strictEqual(res.statusCode, 200);
+        done();
+      }
+    );
+  });
 });
