@@ -1,6 +1,7 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
 const log = require('./../log/log.js');
+const assert = require('assert');
 
 /**
  * Authenticates users via CERN OAuth 2.0.
@@ -15,6 +16,17 @@ class OAuth {
    * @constructor
    */
   constructor(config) {
+    assert(config.id, 'Config value "id" is mandatory');
+    assert(config.secret, 'Config value "secret" is mandatory');
+    assert(config.tokenHost, 'Config value "tokenHost" is mandatory');
+    assert(config.tokenPath, 'Config value "tokenPath" is mandatory');
+    assert(config.authorizePath, 'Config value "authorizePath" is mandatory');
+    assert(config.redirect_uri, 'Config value "redirect_uri" is mandatory');
+    assert(config.resource.port, 'Config value "resource.port" is mandatory');
+    assert(config.resource.hostname, 'Config value "resource.hostname" is mandatory');
+    assert(config.resource.userPath, 'Config value "resource.userPath" is mandatory');
+    assert(config.resource.groupPath, 'Config value "resource.groupPath" is mandatory');
+
     this.oauthCreds = oauth2.create({
       client: {
         id: config.id,
