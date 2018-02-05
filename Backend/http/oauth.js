@@ -1,6 +1,5 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
-const log = require('./../log/log.js');
 const assert = require('assert');
 
 /**
@@ -130,7 +129,7 @@ class OAuth {
           let userdata;
           try {
             userdata = JSON.parse(response.join(''));
-          } catch(e) {
+          } catch (e) {
             return reject(new Error('Unable to parse user details answer'));
           }
 
