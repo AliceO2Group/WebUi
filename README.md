@@ -16,14 +16,21 @@ The goal of ALICE O<sup>2</sup> UX framework is to identify library and framewor
  npm install --save @aliceo2/aliceo2-gui
  ```
 
-## Modules/features
-See documentation of available modules:
+## Backend
+Modules documentation:
  * [https](docs/HTTP.md) - HTTP server and REST API
  * [jwt](docs/JWT.md) - secure requests with JSON Web Token (for `https` and `websockets` modules)
  * [log](docs/LOG.md) - save log messages into a file or push them to InfoLogger service
  * [oauth](docs/OAUTH.md) - CERN oAuth (for `https` module)
  * [websockets](docs/WS.md) - communicate with server using websocket protocol
  * [zeromq](docs/ZMQ.md) - create `sub` or `req` zeromq sockets easily
+
+## Frontend
+Modules documentation:
+ * CSS bootstrap
+ * Async calls (AJAX)
+
+## Tutorials
 
 ## Documentation for developers
  * [API](docs/API.md)

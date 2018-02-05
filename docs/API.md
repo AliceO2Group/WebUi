@@ -58,7 +58,7 @@ Gathers user account details.
 * [OAuth](#OAuth)
     * [new OAuth(config)](#new_OAuth_new)
     * [.getAuthorizationUri(state)](#OAuth+getAuthorizationUri) ⇒ <code>object</code>
-    * [.oAuthCallback(code)](#OAuth+oAuthCallback) ⇒ <code>object</code>
+    * [.createTokenAndProvideDetails(code)](#OAuth+createTokenAndProvideDetails) ⇒ <code>object</code>
     * [.getDetails(token, options)](#OAuth+getDetails) ⇒ <code>object</code>
 
 <a name="new_OAuth_new"></a>
@@ -83,10 +83,11 @@ Returns autorization URL
 | --- | --- | --- |
 | state | <code>string</code> | Base64 encoded parameters |
 
-<a name="OAuth+oAuthCallback"></a>
+<a name="OAuth+createTokenAndProvideDetails"></a>
 
-### oAuth.oAuthCallback(code) ⇒ <code>object</code>
-OAuth redirection callback (called by library).
+### oAuth.createTokenAndProvideDetails(code) ⇒ <code>object</code>
+Creates access_token based on code parameters.
+Retrive some user's and group information from resource server using access_token.
 
 **Kind**: instance method of [<code>OAuth</code>](#OAuth)  
 **Returns**: <code>object</code> - Promise with user details and token  
@@ -121,15 +122,14 @@ Each request is authenticated with JWT token.
     * [new HttpServer(httpConfig, jwtConfig, oAuthConfig)](#new_HttpServer_new)
     * [.getServer](#HttpServer+getServer) ⇒ <code>object</code>
     * [.configureHelmet(hostname, port)](#HttpServer+configureHelmet)
-    * [.passToTemplate(key, value)](#HttpServer+passToTemplate)
+    * [.passAsUrl(key, value)](#HttpServer+passAsUrl)
     * [.specifyRoutes()](#HttpServer+specifyRoutes)
     * [.get(path, callback)](#HttpServer+get)
     * [.post(path, callback)](#HttpServer+post)
     * [.delete(path, callback)](#HttpServer+delete)
     * [.enableHttpRedirect()](#HttpServer+enableHttpRedirect)
-    * [.oAuthAuthorize(req, res)](#HttpServer+oAuthAuthorize)
-    * [.oAuthCallback(req, res)](#HttpServer+oAuthCallback)
-    * [.renderPage(page, data)](#HttpServer+renderPage) ⇒ <code>string</code>
+    * [.oAuthAuthorize(req, res)](#HttpServer+oAuthAuthorize) ⇒ <code>object</code>
+    * [.oAuthCallback(req, res)](#HttpServer+oAuthCallback) ⇒ <code>object</code>
     * [.jwtVerify(req, res, next)](#HttpServer+jwtVerify)
 
 <a name="new_HttpServer_new"></a>
@@ -163,17 +163,17 @@ Configures Helmet rules to increase web app secuirty
 | hostname | <code>string</code> | whitelisted hostname for websocket connection |
 | port | <code>number</code> | secure port number |
 
-<a name="HttpServer+passToTemplate"></a>
+<a name="HttpServer+passAsUrl"></a>
 
-### httpServer.passToTemplate(key, value)
-Passes key-value that can be used in template
+### httpServer.passAsUrl(key, value)
+Passes key-value parameters that are available on front-end side
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>string</code> | allows to access value from temaplte |
-| value | <code>string</code> |  |
+| Param | Type |
+| --- | --- |
+| key | <code>string</code> | 
+| value | <code>string</code> | 
 
 <a name="HttpServer+specifyRoutes"></a>
 
@@ -225,10 +225,15 @@ Redirects HTTP to HTTPS.
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
 <a name="HttpServer+oAuthAuthorize"></a>
 
-### httpServer.oAuthAuthorize(req, res)
-OAuth redirection.
+### httpServer.oAuthAuthorize(req, res) ⇒ <code>object</code>
+Handles oAuth authentication flow (default path of the app: '/')
+- If query.code is valid embeds the token and grants the access to the application
+- Redirects to the OAuth flow if query.code is not present (origin path != /callback)
+- Prints out an error when code is not valid
+The query arguments are serialized and kept in the 'state' parameter through OAuth process
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+**Returns**: <code>object</code> - redirects to OAuth flow or displays the page if JWT token is valid  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -237,28 +242,18 @@ OAuth redirection.
 
 <a name="HttpServer+oAuthCallback"></a>
 
-### httpServer.oAuthCallback(req, res)
-OAuth callback if authentication succeeds.
+### httpServer.oAuthCallback(req, res) ⇒ <code>object</code>
+oAuth allback route - when successfully authorized (/callback)
+Redirects to the application deserializes the query parameters from state variable
+and injects them to the url
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+**Returns**: <code>object</code> - redirect to address with re-included query string  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | req | <code>object</code> | HTTP request |
 | res | <code>object</code> | HTTP response |
-
-<a name="HttpServer+renderPage"></a>
-
-### httpServer.renderPage(page, data) ⇒ <code>string</code>
-Renders template using Mustache engine.
-
-**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
-**Returns**: <code>string</code> - - HTML page  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| page | <code>string</code> | template file path |
-| data | <code>object</code> | data to fill the template with |
 
 <a name="HttpServer+jwtVerify"></a>
 
@@ -353,7 +348,7 @@ WebSocket client class
 **Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
 
 * [WebSocketClient](#WebSocketClient)
-    * [new WebSocketClient(id, token, oauth)](#new_WebSocketClient_new)
+    * [new WebSocketClient(id, token)](#new_WebSocketClient_new)
     * [.connect()](#WebSocketClient+connect)
     * [.activateOnMessage()](#WebSocketClient+activateOnMessage)
     * [.bind(name, callback)](#WebSocketClient+bind)
@@ -365,7 +360,7 @@ WebSocket client class
 
 <a name="new_WebSocketClient_new"></a>
 
-### new WebSocketClient(id, token, oauth)
+### new WebSocketClient(id, token)
 Sets up internal variables
 
 
@@ -373,7 +368,6 @@ Sets up internal variables
 | --- | --- | --- |
 | id | <code>number</code> | CERN person id |
 | token | <code>string</code> | JWT authentication token |
-| oauth | <code>string</code> | oAuth access_token |
 
 <a name="WebSocketClient+connect"></a>
 
