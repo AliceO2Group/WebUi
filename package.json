@@ -7,11 +7,12 @@
   "repository": "AliceO2Group/Gui",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
+    "start": "echo 'it suppose to run demo app'",
     "test": "npm run eslint && npm run mocha",
-    "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha --exit",
-    "mocha": "./node_modules/.bin/mocha test/mocha-*",
+    "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/mocha-* --exit",
+    "mocha": "./node_modules/.bin/mocha Backend/test/mocha-*",
     "travis": "./node_modules/.bin/mocha && npm run eslint",
-    "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js"
+    "eslint": "./node_modules/.bin/eslint Backend/*.js Backend/http/*.js Backend/jwt/*.js public/*.js Backend/websocket/*.js Backend/zeromq/*.js Backend/test/*.js Backend/db/*.js Backend/log/*.js"
   },
   "dependencies": {
     "express": "^4.16.2",
@@ -30,16 +31,16 @@
   },
   "main": "aliceo2-gui.js",
   "files": [
-    "aliceo2-gui.js",
+    "Backend/aliceo2-gui.js",
     "LICENSE",
     "README.md",
-    "log",
+    "Backend/log",
     "config-default.json",
-    "http",
-    "jwt",
+    "Backend/http",
+    "Backend/jwt",
     "public",
-    "websocket",
-    "zeromq",
-    "db"
+    "Backend/websocket",
+    "Backend/zeromq",
+    "Backend/db"
   ]
 }
