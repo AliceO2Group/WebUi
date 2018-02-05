@@ -112,8 +112,7 @@ describe('rest-api', () => {
   it('Add custom static path that does not exist', (done) => {
     try {
       httpServer.addStaticPath(path.join(__dirname, 'does-not-exist'), 'does-not-exist');
-    }
-    catch (error) {
+    } catch (error) {
       done();
     }
   });
