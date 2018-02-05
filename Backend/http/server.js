@@ -109,6 +109,9 @@ class HttpServer {
    * @param {string} uriPath - URI path (optional, '/' as default)
    */
   addStaticPath(localPath, uriPath = '') {
+    if (!fs.existsSync(localPath)) {
+      throw new Error(`static path ${localPath} does not exist`);
+    }
     this.app.use(path.join('/', uriPath), express.static(localPath));
   }
 

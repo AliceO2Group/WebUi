@@ -2,6 +2,7 @@ process.env.NODE_ENV = 'test';
 
 const assert = require('assert');
 const config = require('./../config.json');
+const path = require('path');
 const JwtToken = require('./../jwt/token.js');
 const HttpServer = require('./../http/server');
 const http = require('http');
@@ -96,6 +97,24 @@ describe('rest-api', () => {
       done();
     });
     req.end();
+  });
+
+  it('Adds custom static path', (done) => {
+    httpServer.addStaticPath(path.join(__dirname, 'mocha-http.js'), 'mocha-http');
+    http.get('http://localhost:' + config.http.port + '/mocha-http',
+      (res) => {
+        assert.strictEqual(res.statusCode, 200);
+        done();
+      }
+    );
+  });
+
+  it('Add custom static path that does not exist', (done) => {
+    try {
+      httpServer.addStaticPath(path.join(__dirname, 'does-not-exist'), 'does-not-exist');
+    } catch (error) {
+      done();
+    }
   });
 
   after(() => {
