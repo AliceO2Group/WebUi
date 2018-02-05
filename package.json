@@ -7,16 +7,18 @@
   "repository": "AliceO2Group/Gui",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
+    "start": "echo 'it suppose to run demo app'",
     "test": "npm run eslint && npm run mocha",
-    "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha --exit",
-    "mocha": "./node_modules/.bin/mocha test/mocha-*",
-    "travis": "./node_modules/.bin/mocha && npm run eslint",
-    "eslint": "./node_modules/.bin/eslint ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js"
+    "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/mocha-* --exit",
+    "mocha": "./node_modules/.bin/mocha Backend/test/mocha-*",
+    "travis": "./node_modules/.bin/mocha Backend/test/ && npm run eslint",
+    "eslint": "./node_modules/.bin/eslint Backend/ Frontend/"
   },
   "dependencies": {
     "express": "^4.16.2",
     "helmet": "^3.10.0",
     "jsonwebtoken": "^8.1.1",
+    "mithril": "^1.1.6",
     "mysql": "^2.15.0",
     "simple-oauth2": "^1.5.0",
     "winston": "^3.0.0-rc1",
@@ -28,18 +30,18 @@
     "eslint-config-google": "^0.9.1",
     "mocha": "^5.0.0"
   },
-  "main": "aliceo2-gui.js",
+  "main": "Backend/index.js",
   "files": [
-    "aliceo2-gui.js",
+    "Backend/aliceo2-gui.js",
     "LICENSE",
     "README.md",
-    "log",
+    "Backend/log",
     "config-default.json",
-    "http",
-    "jwt",
+    "Backend/http",
+    "Backend/jwt",
     "public",
-    "websocket",
-    "zeromq",
-    "db"
+    "Backend/websocket",
+    "Backend/zeromq",
+    "Backend/db"
   ]
 }

@@ -11,7 +11,7 @@ Where:
    * `tokenHost` - hostname that provides tokens
    * `tokenPath` - path to token provider
    * `authorizePath` - verifies access token
-   * `redirectUri` - oAuth application callback
+   * `redirect_uri` - oAuth application callback
    * `egroup` - CERN e-group required for the authorization
    * `state` - oAuth state (to prevent CSRF attacks)
    * `resource` - details of resource server

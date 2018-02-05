@@ -1,5 +1,6 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
+const assert = require('assert');
 
 /**
  * Authenticates users via CERN OAuth 2.0.
@@ -14,6 +15,18 @@ class OAuth {
    * @constructor
    */
   constructor(config) {
+    assert(config.id, 'Config value "id" is mandatory');
+    assert(config.secret, 'Config value "secret" is mandatory');
+    assert(config.tokenHost, 'Config value "tokenHost" is mandatory');
+    assert(config.tokenPath, 'Config value "tokenPath" is mandatory');
+    assert(config.authorizePath, 'Config value "authorizePath" is mandatory');
+    assert(config.redirect_uri, 'Config value "redirect_uri" is mandatory');
+    assert(config.egroup, 'Config value "egroup" is mandatory');
+    assert(config.resource.port, 'Config value "resource.port" is mandatory');
+    assert(config.resource.hostname, 'Config value "resource.hostname" is mandatory');
+    assert(config.resource.userPath, 'Config value "resource.userPath" is mandatory');
+    assert(config.resource.groupPath, 'Config value "resource.groupPath" is mandatory');
+
     this.oauthCreds = oauth2.create({
       client: {
         id: config.id,
@@ -109,13 +122,19 @@ class OAuth {
         res.on('data', (chunk) => {
           response.push(chunk);
         }).on('end', () => {
-          if (res.statusCode === 200) {
-            let userdata = JSON.parse(response.join(''));
-            userdata.oauth = token;
-            resolve(userdata);
-          } else {
-            reject(new Error(res.statusMessage));
+          if (res.statusCode !== 200) {
+            return reject(new Error(res.statusMessage));
           }
+
+          let userdata;
+          try {
+            userdata = JSON.parse(response.join(''));
+          } catch (e) {
+            return reject(new Error('Unable to parse user details answer'));
+          }
+
+          userdata.oauth = token;
+          resolve(userdata);
         }).on('error', (err) => {
           reject(err);
         });
