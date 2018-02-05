@@ -14,6 +14,11 @@ exports.configure = function(config) {
   }
 };
 
+// Set default logger if not configured
+exports.configure({
+  level: 'verbose'
+});
+
 exports.debug = function(log) {
   if (winston) {
     winston.instance.log('debug', log);
