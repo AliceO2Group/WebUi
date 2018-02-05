@@ -30,7 +30,7 @@
     "eslint-config-google": "^0.9.1",
     "mocha": "^5.0.0"
   },
-  "main": "aliceo2-gui.js",
+  "main": "Backend/index.js",
   "files": [
     "Backend/aliceo2-gui.js",
     "LICENSE",
