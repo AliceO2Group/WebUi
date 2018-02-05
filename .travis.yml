@@ -30,14 +30,14 @@ before_install:
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
 before_script:
 - npm install -g codecov nyc dependency-check jsdoc-to-markdown
-- openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
-- mv config-default.json config.json
-- rm test/mocha-ws.js
+- cd Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
+- cd Backend; mv config-default.json config.json
+- cd Backend; rm test/mocha-ws.js
 script: npm run travis && dependency-check ./package.json --unused --no-dev --ignore-module jquery
 after_success:
-- jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
-- nyc ./node_modules/mocha/bin/mocha
-- nyc report --reporter=text-lcov > coverage.lcov && codecov
+- cd Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
+- cd Backend; nyc ./node_modules/mocha/bin/mocha
+- cd Backend; nyc report --reporter=text-lcov > coverage.lcov && codecov
 notifications:
   email: false
   slack:
