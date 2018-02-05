@@ -29,11 +29,11 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
 before_script:
-- npm install -g codecov nyc dependency-check jsdoc-to-markdown
+- npm install -g codecov nyc jsdoc-to-markdown
 - cd Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
 - cd Backend; mv config-default.json config.json
 - cd Backend; rm test/mocha-ws.js
-script: npm run travis && dependency-check ./package.json --unused --no-dev --ignore-module jquery
+script: npm run travis
 after_success:
 - cd Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
 - cd Backend; nyc ./node_modules/mocha/bin/mocha
