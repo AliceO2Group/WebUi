@@ -1,5 +1,6 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
+const log = require('./../log/log.js');
 
 /**
  * Authenticates users via CERN OAuth 2.0.
@@ -109,13 +110,19 @@ class OAuth {
         res.on('data', (chunk) => {
           response.push(chunk);
         }).on('end', () => {
-          if (res.statusCode === 200) {
-            let userdata = JSON.parse(response.join(''));
-            userdata.oauth = token;
-            resolve(userdata);
-          } else {
-            reject(new Error(res.statusMessage));
+          if (res.statusCode !== 200) {
+            return reject(new Error(res.statusMessage));
           }
+
+          let userdata;
+          try {
+            userdata = JSON.parse(response.join(''));
+          } catch(e) {
+            return reject(new Error('Unable to parse user details answer'));
+          }
+
+          userdata.oauth = token;
+          resolve(userdata);
         }).on('error', (err) => {
           reject(err);
         });
