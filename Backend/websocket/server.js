@@ -59,7 +59,7 @@ class WebSocket {
       this.http.jwt.verify(req.getToken())
         .then((data) => {
           req.id = data.id;
-          log.debug('%d : command %s', data.id, req.getCommand());
+          log.debug(`${data.id}: command ${req.getCommand()}`);
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
             const res = this.callbackArray[req.getCommand()](req);
             if (res.constructor.name === 'WebSocketMessage') {
@@ -93,7 +93,7 @@ class WebSocket {
         client.on('close', () => this.onclose());
         client.on('pong', () => client.isAlive = true);
       }, (error) => {
-        log.warn('Websocket: jwt failed', error.message);
+        log.warn(`WebSocket - ${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -118,16 +118,16 @@ class WebSocket {
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              log.debug('command %s sent', response.getCommand());
+              log.debug(`WebSocket - ${response.getCommand()} sent`);
               client.send(JSON.stringify(response.json));
             }
           }, (response) => {
-            throw new Error('Websocket: getReply() failed', response.message);
+            throw new Error(`Websocket - getReply failed: ${response.message}`);
           });
       }, (failed) => {
         client.send(JSON.stringify(failed.json));
       }).catch((error) => {
-        log.warn(error.message);
+        log.warn(`WebSocket - ${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -152,7 +152,7 @@ class WebSocket {
    * @param {object} client - disconnected client
    */
   onclose() {
-    log.info('disconnected');
+    log.info('WebSocket - disconnected');
   }
 
   /**
@@ -168,7 +168,7 @@ class WebSocket {
       }
       client.send(JSON.stringify(message.json));
     });
-    log.debug('broadcast : command %s sent', message.getCommand());
+    log.debug(`WebSocket - broadcast ${message.getCommand()}`);
   }
 }
 module.exports = WebSocket;

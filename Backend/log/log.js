@@ -6,10 +6,10 @@ let winston = null;
 let infologger = null;
 
 exports.configure = function(config) {
-  if (!winston) {
+  if (!winston && config) {
     winston = new Winston(config.winston);
   }
-  if (!infologger && config.infologger && fs.existsSync(config.infologger.execPath)) {
+  if (!infologger && config && config.infologger && fs.existsSync(config.infologger.execPath)) {
     infologger = new InfoLoggerSender(winston, config.infologger.execPath);
   }
 };

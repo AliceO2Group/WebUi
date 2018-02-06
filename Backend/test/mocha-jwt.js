@@ -2,7 +2,7 @@ const config = require('./../config.json');
 const JwtToken = require('./../jwt/token.js');
 const assert = require('assert');
 
-describe('JSON  Web Token', () => {
+describe('JSON Web Token', () => {
   let verified;
   const username = 'test';
   const id = 1111;

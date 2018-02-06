@@ -28,7 +28,6 @@ class HttpServer {
     this.jwt = new JwtToken(jwtConfig);
     if (oAuthConfig != null) {
       this.oauth = new OAuth(oAuthConfig);
-      log.debug('OAuth enabled');
     }
     this.specifyRoutes();
 
@@ -39,8 +38,10 @@ class HttpServer {
       };
       this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
       this.enableHttpRedirect();
+      log.debug(`HTTPS server listening on port ${httpConfig.portSecure}`);
     } else {
       this.server = http.createServer(this.app).listen(httpConfig.port);
+      log.debug(`HTTP server listening on port ${httpConfig.port}`);
     }
 
     this.templateData = {};
@@ -239,9 +240,9 @@ class HttpServer {
       .then((data) => {
         req.decoded = data.decoded;
         next();
-      }, (err) => {
-        log.error(err.name + ': ' +err.message);
-        res.status(403).json({message: err.name});
+      }, (error) => {
+        log.warn(`HTTP - ${error.name} : ${error.message}`);
+        res.status(403).json({message: error.name});
       });
   }
 }
