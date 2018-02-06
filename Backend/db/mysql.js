@@ -1,4 +1,5 @@
 const mysql = require('mysql');
+const assert = require('assert');
 const log = require('./../log/log.js');
 
 /**
@@ -13,6 +14,12 @@ class MySQL {
    * and database name.
    */
   constructor(config) {
+    assert(config.host, 'Missing config value: mysql.host');
+    assert(config.user, 'Missing config value: mysql.user');
+    assert(config.database, 'Missing config value: mysql.database');
+    config.port = (!config.port) ? 3306 : config.port;
+    config.password = (!config.password) ? '' : config.password;
+
     this.config = config;
     this.pool = mysql.createPool(config);
     this.pool.getConnection((error, connection) => {

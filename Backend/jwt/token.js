@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const assert = require('assert');
 /**
  * Provides JSON Web Token functionality such as token generation and verification.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
@@ -10,6 +11,11 @@ class JwtToken {
    * @param {object} config - jwt cofiguration object
    */
   constructor(config) {
+    assert(config.secret, 'Missing config value: jwt.secret');
+    assert(config.expiration, 'Missing config value: jwt.expiration');
+    config.issuer = (!config.issuer) ? 'o2-ui' : config.issuer;
+    config.maxAge = (!config.maxAge) ? '7d' : config.maxAge;
+
     this._expiration = config.expiration;
     this._maxAge = config.maxAge;
     this._secret = config.secret;

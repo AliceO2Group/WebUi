@@ -16,17 +16,17 @@ class OAuth {
    * @constructor
    */
   constructor(config) {
-    assert(config.id, 'Config value "id" is mandatory');
-    assert(config.secret, 'Config value "secret" is mandatory');
-    assert(config.tokenHost, 'Config value "tokenHost" is mandatory');
-    assert(config.tokenPath, 'Config value "tokenPath" is mandatory');
-    assert(config.authorizePath, 'Config value "authorizePath" is mandatory');
-    assert(config.redirect_uri, 'Config value "redirect_uri" is mandatory');
-    assert(config.egroup, 'Config value "egroup" is mandatory');
-    assert(config.resource.port, 'Config value "resource.port" is mandatory');
-    assert(config.resource.hostname, 'Config value "resource.hostname" is mandatory');
-    assert(config.resource.userPath, 'Config value "resource.userPath" is mandatory');
-    assert(config.resource.groupPath, 'Config value "resource.groupPath" is mandatory');
+    assert(config.id, 'Missing config value: oAuth.id');
+    assert(config.secret, 'Missing config value: oAuth.secret');
+    assert(config.tokenHost, 'Missing config value: oAuth.tokenHost');
+    assert(config.tokenPath, 'Missing config value: oAuth.tokenPath');
+    assert(config.authorizePath, 'Missing config value: oAuth.authorizePath');
+    assert(config.redirect_uri, 'Missing config value: oAuth.redirect_uri');
+    assert(config.egroup, 'Missing config value: oAuth.egroup');
+    assert(config.resource.port, 'Missing config value: oAuth.resource.port');
+    assert(config.resource.hostname, 'Missing config value: oAuth.resource.hostname');
+    assert(config.resource.userPath, 'Missing config value: oAuth.resource.userPath');
+    assert(config.resource.groupPath, 'Missing config value: oAuth.resource.groupPath');
 
     this.oauthCreds = oauth2.create({
       client: {
