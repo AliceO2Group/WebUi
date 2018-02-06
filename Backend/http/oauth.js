@@ -1,6 +1,7 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
 const assert = require('assert');
+const log = require('./../log/log.js');
 
 /**
  * Authenticates users via CERN OAuth 2.0.
@@ -52,6 +53,7 @@ class OAuth {
     };
     this.scope = 'https://' + config.resource.hostname + config.resource.userpath;
     this.egroup = config.egroup;
+    log.debug(`OAuth enabled. Authorize: ${config.tokenHost}`);
   }
 
   /**
