@@ -1,11 +1,11 @@
 process.env.NODE_ENV = 'test';
 
 const assert = require('assert');
-const config = require('./../config.json');
 const path = require('path');
+const http = require('http');
+const config = require('./../config.json');
 const JwtToken = require('./../jwt/token.js');
 const HttpServer = require('./../http/server');
-const http = require('http');
 
 // as CERN cerfiticates are not signed by any CA
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -14,7 +14,7 @@ let httpServer;
 const jwt = new JwtToken(config.jwt);
 const token = jwt.generateToken(0, 'test', 1);
 
-describe('rest-api', () => {
+describe('REST API', () => {
   before(() => {
     httpServer = new HttpServer(config.http, config.jwt, config.oAuth);
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
@@ -65,7 +65,7 @@ describe('rest-api', () => {
     );
   });
 
-  it('POST with correct token should respond 200/JSON', (done) => {
+  it('POST with a token should respond 200/JSON', (done) => {
     const req = http.request({
       hostname: 'localhost',
       port: config.http.port,
@@ -98,8 +98,14 @@ describe('rest-api', () => {
     });
     req.end();
   });
+});
 
-  it('Adds custom static path', (done) => {
+describe('HTTP server', () => {
+  after(() => {
+    httpServer.getServer.close();
+  });
+
+  it('Add and verify custom static path', (done) => {
     httpServer.addStaticPath(path.join(__dirname, 'mocha-http.js'), 'mocha-http');
     http.get('http://localhost:' + config.http.port + '/mocha-http',
       (res) => {
@@ -117,11 +123,7 @@ describe('rest-api', () => {
     }
   });
 
-  after(() => {
-    httpServer.getServer.close();
-  });
-
-  it('Check whether mithril is present', (done) => {
+  it('Ensure that mithril is present at /js/mithril.js', (done) => {
     http.get('http://localhost:' + config.http.port + '/js/mithril.js',
       (res) => {
         assert.strictEqual(res.statusCode, 200);

@@ -1,8 +1,8 @@
 const assert = require('assert');
 const WebSocketMessage = require('./../websocket/message.js');
 
-describe('Web Socket message', () => {
-  it('create and verify instance', () => {
+describe('WebSocket message', () => {
+  it('Create and verify message instance', () => {
     const command = 'test-cmd';
     const code = 200;
     const payload = {message: 'test message'};
@@ -14,7 +14,7 @@ describe('Web Socket message', () => {
     assert.equal(json.payload.message, payload.message);
   });
 
-  it('parse message', () => {
+  it('Parse message', () => {
     const message = {
       command: 'test',
       test: 'value',
@@ -30,7 +30,7 @@ describe('Web Socket message', () => {
       });
   });
 
-  it('parse message without token', (done) => {
+  it('Parse invalid message without token', (done) => {
     const message = {
       command: 'test',
       test: 'value'

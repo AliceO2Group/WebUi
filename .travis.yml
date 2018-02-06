@@ -33,11 +33,11 @@ before_script:
 - cd Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
 - cd Backend; mv config-default.json config.json
 - cd Backend; rm test/mocha-ws.js
-script: npm run travis
+script: npm test
 after_success:
 - cd Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
-- cd Backend; nyc ./node_modules/mocha/bin/mocha
-- cd Backend; nyc report --reporter=text-lcov > coverage.lcov && codecov
+- nyc ./node_modules/mocha/bin/mocha Backend/test
+- nyc report --reporter=text-lcov > coverage.lcov && codecov
 notifications:
   email: false
   slack:

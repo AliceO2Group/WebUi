@@ -14,8 +14,8 @@ const configLocal = {
   }
 };
 
-describe('InfoLogger and winston', () => {
-  it('should generate error file (winston)', (done) => {
+describe('Logging: winston', () => {
+  it('Generate error file (winston)', (done) => {
     log.configure(configLocal);
     log.error('Test error winston');
     setTimeout(() => {
@@ -23,8 +23,10 @@ describe('InfoLogger and winston', () => {
       done();
     }, 100);
   });
+});
 
-  it('should fail on InfoLogger instance creation', (done) => {
+describe('Logging: InfoLogger', () => {
+  it('Fail on instance creation', (done) => {
     log.configure(config.log);
     setTimeout(() => {
       log.error('Test error InfoLogger');
@@ -32,14 +34,14 @@ describe('InfoLogger and winston', () => {
     }, 100);
   });
 
-  it('should prepare InfoLogger command', () => {
+  it('Prepare bash command', () => {
     const sender = new InfoLoggerSender('log');
     const log = {severity: 'E', message: 'test-log'};
     const expected = ['-oSeverity=E', '-oSystem=Web', `-oFacility=Node ${process.version}`];
     assert.deepStrictEqual(expected, sender.format(log));
   });
 
-  it('should parse InfoLoger message', (done) => {
+  it('Parse message', (done) => {
     const receiver = new InfoLoggerReceiver('log');
     const message = '*1.4#I##1505140368.399439#o2test#O2#143388#root#DAQ#P2##PHY##123###test\n';
     const expected = {
