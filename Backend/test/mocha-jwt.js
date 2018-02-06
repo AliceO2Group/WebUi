@@ -2,7 +2,7 @@ const config = require('./../config.json');
 const JwtToken = require('./../jwt/token.js');
 const assert = require('assert');
 
-describe('json web token', () => {
+describe('JSON  Web Token', () => {
   let verified;
   const username = 'test';
   const id = 1111;
@@ -14,7 +14,7 @@ describe('json web token', () => {
     assert.strictEqual(verified.access, access);
   });
 
-  it('should generate and verify token', (done) => {
+  it('Generate and verify token', (done) => {
     const jwt = new JwtToken(config.jwt);
     const token = jwt.generateToken(id, username, access);
     jwt.verify(token)
@@ -26,7 +26,7 @@ describe('json web token', () => {
       });
   });
 
-  it('should refresh token', (done) => {
+  it('Refresh token', (done) => {
     const jwt = new JwtToken(config.jwt);
     const token = jwt.generateToken(id, username, access);
     jwt.refreshToken(token)

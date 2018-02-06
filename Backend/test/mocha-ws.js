@@ -7,11 +7,11 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let http;
 
-describe('websocket', () => {
+describe('Websocket server', () => {
   before(() => {
     http = new HttpServer(config.http, config.jwt, config.oAuth);
   });
-  it('connection should be dropped due to invalid oAuth token', (done) => {
+  it('Drop connection due to invalid JWT token', (done) => {
     const ws = new WebSocket(http, config.jwt, 'localhost');
     const connection = new WebSocketClient(
       'ws://localhost:' + config.http.port
