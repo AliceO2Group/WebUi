@@ -1,4 +1,4 @@
-/*global: window*/
+/* global: window */
 
 import sessionService from './sessionService.js';
 import EventTarget from './EventTarget.js';
@@ -18,6 +18,9 @@ const location = window.location;
  * @author Vladimir Kosmala <vladimir.kosmala@cern.ch>
  */
 export default class WebSocketClient extends EventTarget {
+  /**
+   * Create a connection to the server
+   */
   constructor() {
     super();
 
@@ -29,8 +32,6 @@ export default class WebSocketClient extends EventTarget {
 
   /**
    * Private. Create an instance of WebSocket and binds events
-   * @param {string} argName - blabla
-   * @return {string} blabla
    */
   _connect() {
     const session = sessionService.get();
@@ -79,14 +80,13 @@ export default class WebSocketClient extends EventTarget {
     }
 
     // fire parsed and valid message to be used by clients
-    console.log('parsed:', parsed);
     this.dispatchEvent(new Event(parsed.command, parsed));
   }
 
   /**
    * Send plain object to server, it must implement the Message interface (command field),
    * you must also wait the connection to be authentificated (authed property and event).
-   * @param {object} payloadJson
+   * @param {object} message
    */
   sendMessage(message) {
     if (!this.authed) {

@@ -1,4 +1,4 @@
-/*global: window*/
+/* global: window */
 
 import sessionService from '/js/src/sessionService.js';
 

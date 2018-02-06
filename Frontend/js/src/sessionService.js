@@ -1,4 +1,4 @@
-/*global: window*/
+/* global: window */
 
 const location = window.location;
 const history = window.history;
@@ -30,7 +30,7 @@ export default {
     parametersNames.forEach((parameterName) => {
       this.session[parameterName] = url.searchParams.get(parameterName);
       if (this.session[parameterName] === undefined) {
-        throw new Error(`server should have provided the parameter ${parameterName}, but got value undefined`);
+        throw new Error(`query string should contain the parameter ${parameterName}`);
       }
     });
   },
@@ -52,7 +52,7 @@ export default {
    */
   get() {
     if (!this.session) {
-      throw new Error('session has not been initialized, call loadParameters or loadAndHideParameters first');
+      throw new Error('session has not been loaded');
     }
 
     return this.session;
