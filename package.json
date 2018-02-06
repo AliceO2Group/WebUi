@@ -9,9 +9,8 @@
   "scripts": {
     "start": "echo 'it suppose to run demo app'",
     "test": "npm run eslint && npm run mocha",
-    "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/mocha-* --exit",
-    "mocha": "./node_modules/.bin/mocha Backend/test/mocha-*",
-    "travis": "./node_modules/.bin/mocha Backend/test/ && npm run eslint",
+    "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/ --exit",
+    "mocha": "./node_modules/.bin/mocha Backend/test/",
     "eslint": "./node_modules/.bin/eslint Backend/ Frontend/"
   },
   "dependencies": {
