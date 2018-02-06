@@ -1,4 +1,8 @@
+/*global: window*/
+
 import sessionService from '/js/src/sessionService.js';
+
+const location = window.location;
 
 /**
  * Extends the fetch() function by adding the session token in the request
