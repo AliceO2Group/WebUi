@@ -6,7 +6,7 @@ let winston = null;
 let infologger = null;
 
 exports.configure = function(config) {
-  if (!winston && config) {
+  if (config && config.winston) {
     winston = new Winston(config.winston);
   }
   if (!infologger && config && config.infologger && fs.existsSync(config.infologger.execPath)) {
