@@ -15,9 +15,12 @@ exports.configure = function(config) {
 };
 
 exports.debug = function(log) {
-  if (winston) {
-    winston.instance.log('debug', log);
+  if (!winston) {
+    winston = new Winston();
+    winston.instance.log('warn', 'Created default instance of logger');
   }
+  winston.instance.log('debug', log);
+
   if (infologger) {
     const logObj = {
       severity: 'D',
@@ -28,9 +31,12 @@ exports.debug = function(log) {
 };
 
 exports.warn = function(log) {
-  if (winston) {
-    winston.instance.log('warn', log);
+  if (!winston) {
+    winston = new Winston();
+    winston.instance.log('warn', 'Created default instance of logger');
   }
+  winston.instance.log('warn', log);
+
   if (infologger) {
     const logObj = {
       severity: 'W',
@@ -41,9 +47,12 @@ exports.warn = function(log) {
 };
 
 exports.info = function(log) {
-  if (winston) {
-    winston.instance.log('info', log);
+  if (!winston) {
+    winston = new Winston();
+    winston.instance.log('warn', 'Created default instance of logger');
   }
+  winston.instance.log('info', log);
+
   if (infologger) {
     const logObj = {
       severity: 'I',
@@ -54,9 +63,12 @@ exports.info = function(log) {
 };
 
 exports.error = function(log) {
-  if (winston) {
-    winston.instance.log('error', log);
+  if (!winston) {
+    winston = new Winston();
+    winston.instance.log('warn', 'Created default instance of logger');
   }
+  winston.instance.log('error', log);
+
   if (infologger) {
     const logObj = {
       severity: 'E',
