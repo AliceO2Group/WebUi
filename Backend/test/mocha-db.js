@@ -2,12 +2,22 @@ const MySQL = require('./../db/mysql.js');
 const config = require('./../config.json');
 
 let db = null;
+let skip = false;
 
 describe('MySQL database', () => {
   before(() => {
-    db = new MySQL(config.mysql);
+    if (!config.mysql) {
+      skip = true;
+    }
+    if (!skip) {
+      db = new MySQL(config.mysql);
+    }
   });
-  it('Execute SHOW TABLES query', (done) => {
+
+  it('Execute SHOW TABLES query', function(done) {
+    if (skip) {
+      this.skip(); // eslint-disable-line no-invalid-this
+    }
     const query = 'SHOW TABLES';
     const params = [];
     db.query(query, params)
@@ -19,6 +29,8 @@ describe('MySQL database', () => {
   });
 
   after(() => {
-    db.close();
+    if (!skip) {
+      db.close();
+    }
   });
 });
