@@ -39,8 +39,8 @@ script: npm test
 after_success:
 - nyc ./node_modules/mocha/bin/mocha Backend/test
 - nyc report --reporter=text-lcov > coverage.lcov && codecov
-- jsdoc2md --files Backend/*.js Backend/http/*.js Backend/jwt/*.js Backend/websocket/*.js Backend/zeromq/*.js Backend/db/*.js Backend/log/*.js > docs/API.md
-- if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then git add docs/API.md && git commit -m "Travis auto generated JSDoc ($TRAVIS_BUILD_NUMBER)" && git push origin $TRAVIS_PULL_REQUEST_BRANCH; fi
+- jsdoc2md --files Backend/*.js Backend/http/*.js Backend/jwt/*.js Backend/websocket/*.js Backend/zeromq/*.js Backend/db/*.js Backend/log/*.js > ./docs/API.md
+- if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then git add ./docs/API.md && git commit -m "Travis auto generated JSDoc ($TRAVIS_BUILD_NUMBER)" && git push origin $TRAVIS_PULL_REQUEST_BRANCH; fi
 notifications:
   email: false
   slack:
