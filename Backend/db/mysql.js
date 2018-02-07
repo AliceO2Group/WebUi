@@ -14,6 +14,7 @@ class MySQL {
    * and database name.
    */
   constructor(config) {
+    assert(config, 'Missing MySQL config');
     assert(config.host, 'Missing config value: mysql.host');
     assert(config.user, 'Missing config value: mysql.user');
     assert(config.database, 'Missing config value: mysql.database');
