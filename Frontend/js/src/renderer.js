@@ -1,6 +1,11 @@
-/* global m */
-// mithril function 'm' will be injected into window
-import '/mithril.js';
+/* global window */
+
+if (!window.m) {
+  throw new Error('mithril must be loaded into window');
+}
+if (!window.requestAnimationFrame) {
+  throw new Error('renderer must be run inside a browser envirnnement');
+}
 
 /**
  * Register a callback to be called one time at browser render time if
@@ -12,9 +17,9 @@ function frameDebouncer(fn) {
   let requestFrame;
   return function(...args) {
     if (requestFrame) {
-      cancelAnimationFrame(requestFrame);
+      window.cancelAnimationFrame(requestFrame);
     }
-    requestFrame = requestAnimationFrame(function() {
+    requestFrame = window.requestAnimationFrame(function() {
       fn(...args);
     });
   };
@@ -27,7 +32,7 @@ function frameDebouncer(fn) {
  */
 function render(element, vnode) {
   // encapsulate mithril engine so we can change if needed
-  m.render(element, vnode);
+  window.m.render(element, vnode);
 }
 
 /**
@@ -41,7 +46,7 @@ function render(element, vnode) {
 function h(...args) {
   // encapsulate mithril engine so we can change if needed
   // TODO: the API should be simplified of lifecycle methods and not depend on mithril
-  return m(...args);
+  return window.m(...args);
 }
 
 /**
@@ -67,7 +72,7 @@ function mount(element, view, model, debug) {
   if (model.observe) {
     model.observe(smartRender); // redraw on changes
   }
-  smartRender(model); // first draw
+  render(element, view(model)); // first draw
 }
 
 export {h, render, frameDebouncer, mount};
