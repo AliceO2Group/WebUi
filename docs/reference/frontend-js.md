@@ -1,4 +1,4 @@
-# API
+# Frontend - JS API Reference
 
 ### `h(selector, [attributes], children | childrens | text)`
 

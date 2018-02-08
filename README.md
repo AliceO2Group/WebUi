@@ -40,8 +40,8 @@ Modules documentation:
 * [zeromq](docs/ZMQ.md) - create `sub` or `req` zeromq sockets easily
 
 ### Frontend
-* [API JS](docs/API-front.md)
-* [Reference CSS](docs/)
+* [API JS](docs/reference/frontend-js.md)
+* [Reference CSS](docs/reference/frontend-css.md)
 
 - [Write DOM with Javascript without HTML](./docs/guides/reactive-programming.md)
 - [What are hyperscript and virtual nodes](./docs/guides/vnodes.md)
