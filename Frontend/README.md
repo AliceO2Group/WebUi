@@ -1,4 +1,4 @@
-# Front-End Kit
+# Frontend
 
 Web applications made maintainable. Served hot with a CSS Bootstrap and a React-like template engine.
 
@@ -67,18 +67,4 @@ Create mini applications with explanations.
 - [Reuse parts of a view as Components](./docs/guides/components.md)
 - [Debugging with the inspector](./docs/guides/debug.md)
 
-### Compatibility
 
-- Chrome 62 (end 2017)
-- Firefox 54 (end 2017 - [must activate modules](./docs/firefox-modules.md))
-- EDGE 16 (end 2017)
-- Safari 10.1 (2017)
-- iOS Safari (2017)
-- Chrome Android 62
-
-* https://caniuse.com/#feat=es6-module
-* https://caniuse.com/#feat=template-literals
-* https://caniuse.com/#feat=es6-class
-* https://caniuse.com/#feat=arrow-functions
-* https://caniuse.com/#feat=promises
-* https://caniuse.com/#feat=async-functions
