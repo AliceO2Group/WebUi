@@ -130,7 +130,7 @@ This was the easy part using traditional classes and the Observer pattern. Let's
 
 ### Step 4 - view
 
-The view is a functional representation of the DOM. We use hyperscript for this, see the full documentation inside the [./js/docs](./js/docs) folder.
+The view is a functional representation of the DOM. We use hyperscript for this, see the full documentation inside the [../reference/frontend-js.md](../reference/frontend-js.md) folder.
 
 ```js
 function view(model) {
