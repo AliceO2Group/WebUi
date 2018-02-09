@@ -13,8 +13,8 @@ class WebSocketMessage {
     this._code = code;
     this._broadcast = false;
     this._payload = {};
-    this._command = undefined;
-    this._message = '';
+    this._command = null;
+    this._message = null;;
   }
 
   /**
@@ -25,8 +25,11 @@ class WebSocketMessage {
   parse(json) {
     return new Promise((resolve, reject) => {
       const parsed = JSON.parse(json);
-      if ((typeof parsed.command !== 'string') || (typeof parsed.token !== 'string')) {
-        this._code(400);
+      if ((typeof parsed.command !== 'string')
+        || (typeof parsed.token !== 'string')
+        || (parsed.command == '')) {
+        this._code = 400;
+        this._command = 'error';
         reject(this);
       }
       this._command = parsed.command;
