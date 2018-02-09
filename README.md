@@ -52,7 +52,7 @@ npm install --save @aliceo2/aliceo2-gui
 - TODO: full application using ajax, ws, js, css
 
 ### Project skeleton
-The skeleton of a project using this framework can be found in [docs/skeleton](here).
+The skeleton of a project using this framework can be found in [docs/skeleton](docs/skeleton).
 
 ### Documentation for developers
 * [Development environment](docs/DEV.md)
