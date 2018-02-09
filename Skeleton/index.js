@@ -1,9 +1,6 @@
 // Import the backend framework
 const {HttpServer, Log, WebSocket, WebSocketMessage} = require('Gui');
 
-// Activate debug logs
-Log.configure({winston: {}});
-
 // Import config and utils
 const config = require('./config.js');
 const path = require('path');
