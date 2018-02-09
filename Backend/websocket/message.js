@@ -14,7 +14,7 @@ class WebSocketMessage {
     this._broadcast = false;
     this._payload = {};
     this._command = null;
-    this._message = null;;
+    this._message = null;
   }
 
   /**
