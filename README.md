@@ -14,7 +14,7 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 ### Minimum browser version support
 - Chrome 62
 - Firefox 54 (**!** Navigate to `about:config` set value `true` of `dom.moduleScripts.enabled` preference)
-- EDGE 16
+- Edge 16
 - Safari 10.1
 - iOS Safari
 - Chrome Android 62
