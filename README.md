@@ -24,8 +24,7 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 npm install --save @aliceo2/aliceo2-gui
 ```
 
-### Backend
-Modules documentation:
+### Backend guide
 * [https](docs/HTTP.md) - HTTP server and REST API
 * [jwt](docs/JWT.md) - secure requests with JSON Web Token (for `https` and `websockets` modules)
 * [log](docs/LOG.md) - save log messages into a file or push them to InfoLogger service
@@ -33,10 +32,7 @@ Modules documentation:
 * [websockets](docs/WS.md) - communicate with server using websocket protocol
 * [zeromq](docs/ZMQ.md) - create `sub` or `req` zeromq sockets easily
 
-### Frontend
-* [API Reference JS](docs/reference/frontend-js.md)
-* [API Reference CSS](docs/reference/frontend-css.md)
-
+### Frontend guide
 - [Write DOM with Javascript without HTML](./docs/guide/reactive-programming.md)
 - [What are hyperscript and virtual nodes](./docs/guide/vnodes.md)
 - [Handle sorted list with keys](./docs/guide/keys.md)
@@ -45,13 +41,19 @@ Modules documentation:
 - [Async calls (ajax)](./docs/guide/async-calls.md)
 - [Scale the code of your application (architecture)](./docs/guide/scale-app.md)
 
+### API Reference
+* [Backend](docs/reference/backend.md)
+* [Frontend JS](docs/reference/frontend-js.md)
+* [Frontend CSS](docs/reference/frontend-css.md)
+
 ### Tutorials
-- TODO: Quick start with a skeleton
 - [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
 - [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
 - TODO: full application using ajax, ws, js, css
 
+### Project skeleton
+The skeleton of a project using this framework can be found in [docs/skeleton](here).
+
 ### Documentation for developers
-* [API](docs/API.md)
 * [Development environment](docs/DEV.md)
 * [Functional architecture and data flow](docs/ARCH.md)
