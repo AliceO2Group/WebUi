@@ -13,17 +13,11 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 
 ### User requirements
 - Chrome 62 (end 2017)
-- Firefox 54 (end 2017 - [must activate modules](docs/guides/firefox-modules.md))
+- Firefox 54 (end 2017 - [must activate modules](docs/guide/firefox-modules.md))
 - EDGE 16 (end 2017)
 - Safari 10.1 (2017)
 - iOS Safari (2017)
 - Chrome Android 62
-* https://caniuse.com/#feat=es6-module
-* https://caniuse.com/#feat=template-literals
-* https://caniuse.com/#feat=es6-class
-* https://caniuse.com/#feat=arrow-functions
-* https://caniuse.com/#feat=promises
-* https://caniuse.com/#feat=async-functions
 
 ### Installation
 ```
@@ -43,18 +37,18 @@ Modules documentation:
 * [API Reference JS](docs/reference/frontend-js.md)
 * [API Reference CSS](docs/reference/frontend-css.md)
 
-- [Write DOM with Javascript without HTML](./docs/guides/reactive-programming.md)
-- [What are hyperscript and virtual nodes](./docs/guides/vnodes.md)
-- [Handle sorted list with keys](./docs/guides/keys.md)
-- [Reuse parts of a view as Components](./docs/guides/components.md)
-- [Debugging with the inspector](./docs/guides/debug.md)
-- [Async calls (ajax)](./docs/guides/async-calls.md)
-- [Scale the code of your application (architecture)](./docs/guides/scale-app.md)
+- [Write DOM with Javascript without HTML](./docs/guide/reactive-programming.md)
+- [What are hyperscript and virtual nodes](./docs/guide/vnodes.md)
+- [Handle sorted list with keys](./docs/guide/keys.md)
+- [Reuse parts of a view as Components](./docs/guide/components.md)
+- [Debugging with the inspector](./docs/guide/debug.md)
+- [Async calls (ajax)](./docs/guide/async-calls.md)
+- [Scale the code of your application (architecture)](./docs/guide/scale-app.md)
 
 ### Tutorials
 - TODO: Quick start with a skeleton
-- [Hello World - quick start copy/paste](./docs/tutorials/hello-world.md)
-- [Pasta Timer - step by step](./docs/tutorials/pasta-timer.md)
+- [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
+- [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
 - TODO: full application using ajax, ws, js, css
 
 ### Documentation for developers

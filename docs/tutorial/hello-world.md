@@ -48,7 +48,7 @@ See it in action in your browser:
 ```bash
 cd FrontEndKit
 node serve-folder.js
-open http://localhost:9000/docs/tutorials/hello-world.html
+open http://localhost:9000/docs/tutorial/hello-world.html
 ```
 
 ### How it works?
