@@ -61,4 +61,4 @@ const model = new Model();
 
 When a call to `model.submodel.increment()` is made, `model` will be notified and will call all callbacks registered via `model.observe(callbackFunction)`.
 
-![Global view of the architecture](../architecture.jpeg)
+![Global view of the architecture](../images/architecture-front.jpeg)
