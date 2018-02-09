@@ -1,5 +1,5 @@
 // Import the backend framework
-const {HttpServer, Log, WebSocket, WebSocketMessage} = require('Gui');
+const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2-gui');
 
 // Import config and utils
 const config = require('./config.js');
