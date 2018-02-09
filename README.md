@@ -11,12 +11,12 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 * `nodejs` >= 7
 * `zeromq-devel` >= 4.0 (optional, see [zeromq](docs/ZMQ.md) module docs for more details)
 
-### User requirements
-- Chrome 62 (end 2017)
-- Firefox 54 (end 2017 - [must activate modules](docs/guide/firefox-modules.md))
-- EDGE 16 (end 2017)
-- Safari 10.1 (2017)
-- iOS Safari (2017)
+### Minimum browser version support
+- Chrome 62
+- Firefox 54 (__!__Navigate to <a href="about:config" target="_blank">about:config</a> set value `true` of `dom.moduleScripts.enabled` preference)
+- EDGE 16
+- Safari 10.1
+- iOS Safari
 - Chrome Android 62
 
 ### Installation
