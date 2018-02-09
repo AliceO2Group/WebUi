@@ -54,26 +54,33 @@ class WebSocket {
    * @param {object} req
    * @return {object} message to be send back to the user
    */
-  getReply(req) {
+  processRequest(req) {
     return new Promise((resolve, reject) => {
+      // 1. Verify JWT token
       this.http.jwt.verify(req.getToken())
         .then((data) => {
-          req.id = data.id;
-          log.debug(`${data.id}: command ${req.getCommand()}`);
+          // 2. Transfer decoded JWT data to request
+          Object.assign(req, data);
+          log.debug(`${data.id}: command [${req.getCommand()}] processing`);
+          // 3. Check whether callback exists
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
             const res = this.callbackArray[req.getCommand()](req);
+            // 4. Verify that response is type of WebSocketMessage
             if (res.constructor.name === 'WebSocketMessage') {
               if (typeof res.getCommand() !== 'string') {
                 res.setCommand(req.getCommand());
               }
               resolve(res);
             } else {
+              // 5. 500 when callback does not return WebSocketMessage
               resolve(new WebSocketMessage(500));
             }
           } else {
+            // 6. When callback does not exist return 404
             resolve(new WebSocketMessage(404));
           }
         }, (error) => {
+          // 7. When JWT fails
           reject(error);
         });
     });
@@ -105,26 +112,31 @@ class WebSocket {
    * @param {object} client TCP socket of the client
    */
   onmessage(message, client) {
+    // 1. parse message
     new WebSocketMessage().parse(message)
       .then((parsed) => {
-        // add filter to a client
+        // 2. Check if its message filter (no auth required)
         if ((parsed.getCommand() == 'filter') &&
           (typeof parsed.getProperty('filter') === 'string')) {
           client.filter = new Function('return ' + parsed.getProperty('filter').toString())();
         }
-        // message reply
-        this.getReply(parsed)
+        // 3. Get reply if callback exists
+        this.processRequest(parsed)
           .then((response) => {
+            // 4. Broadcast if necessary
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              log.debug(`WebSocket - ${response.getCommand()} sent`);
+              log.debug(`WebSocket - [${response.getCommand()}/${response.getCode()}] sent`);
+              // 5. Send back to a client
               client.send(JSON.stringify(response.json));
             }
           }, (response) => {
-            throw new Error(`Websocket - getReply failed: ${response.message}`);
+            // 6. If generating response fails
+            throw new Error(`Websocket - processRequest failed: ${response.message}`);
           });
       }, (failed) => {
+        // 7. If parsing message fails
         client.send(JSON.stringify(failed.json));
       }).catch((error) => {
         log.warn(`WebSocket - ${error.name} : ${error.message}`);
@@ -168,7 +180,7 @@ class WebSocket {
       }
       client.send(JSON.stringify(message.json));
     });
-    log.debug(`WebSocket - broadcast ${message.getCommand()}`);
+    log.debug(`WebSocket - [${message.getCommand()}/${message.getCode()}] broadcast`);
   }
 }
 module.exports = WebSocket;
