@@ -12,7 +12,7 @@
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/ --exit",
     "mocha": "./node_modules/.bin/mocha --require babel-core/register Backend/test/ Frontend/test/",
     "mocha-front": "./node_modules/.bin/mocha ./Frontend/test/",
-    "eslint": "./node_modules/.bin/eslint Backend/ Frontend/"
+    "eslint": "./node_modules/.bin/eslint Backend/ Frontend/ docs/skeleton/*.js"
   },
   "dependencies": {
     "express": "^4.16.2",
