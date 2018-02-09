@@ -29,7 +29,7 @@ export default {
     this.session = {};
     parametersNames.forEach((parameterName) => {
       this.session[parameterName] = url.searchParams.get(parameterName);
-      if (this.session[parameterName] === undefined) {
+      if (!this.session[parameterName]) {
         throw new Error(`query string should contain the parameter ${parameterName}`);
       }
     });
