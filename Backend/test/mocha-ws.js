@@ -1,5 +1,6 @@
 const config = require('./../config.json');
 const WebSocketClient = require('ws');
+const assert = require('assert');
 const WebSocket = require('./../websocket/server');
 const HttpServer = require('./../http/server');
 const JwtToken = require('./../jwt/token.js');
@@ -42,7 +43,7 @@ describe('websocket', () => {
     });
   });
 
-  it('Connect and receive a message', (done) => {
+  it('Connect send, and receive a message', (done) => {
     const connection = new WebSocketClient(
       'ws://localhost:' + config.http.port + '/?token=' + token
     );
@@ -53,9 +54,32 @@ describe('websocket', () => {
     });
     connection.on('message', (message) => {
       const parsed = JSON.parse(message);
-      if (parsed.command == 'test') {
-        done();
+      if (parsed.command == 'authed') {
+        return;
       }
+      assert.strictEqual(parsed.command, 'test');
+      connection.terminate();
+      done();
+    });
+  });
+
+  it('Reject message with misformatted fields', (done) => {
+    const connection = new WebSocketClient(
+      'ws://localhost:' + config.http.port + '/?token=' + token
+    );
+
+    connection.on('open', () => {
+      const message = {command: '', token: token};
+      connection.send(JSON.stringify(message));
+    });
+    connection.on('message', (message) => {
+      const parsed = JSON.parse(message);
+      if (parsed.command == 'authed') {
+        return;
+      }
+      assert.strictEqual(parsed.code, 400);
+      connection.terminate();
+      done();
     });
   });
 
@@ -70,9 +94,12 @@ describe('websocket', () => {
     });
     connection.on('message', (message) => {
       const parsed = JSON.parse(message);
-      if (parsed.code == 500) {
-        done();
+      if (parsed.command == 'authed') {
+        return;
       }
+      assert.strictEqual(parsed.code, 500);
+      connection.terminate();
+      done();
     });
   });
 
@@ -91,9 +118,13 @@ describe('websocket', () => {
 
     connection.on('message', (message) => {
       const parsed = JSON.parse(message);
-      if (parsed.code == 200 && parsed.command == 'filter') {
-        done();
+      if (parsed.command == 'authed') {
+        return;
       }
+      assert.strictEqual(parsed.code, 200);
+      assert.strictEqual(parsed.command, 'filter');
+      connection.terminate();
+      done();
     });
   });
 
@@ -106,11 +137,16 @@ describe('websocket', () => {
       const message = {command: 'broadcast', token: token};
       connection.send(JSON.stringify(message));
     });
+
     connection.on('message', (message) => {
       const parsed = JSON.parse(message);
-      if (parsed.code == 200 && parsed.command == 'broadcast') {
-        done();
+      if (parsed.command == 'authed') {
+        return;
       }
+      assert.strictEqual(parsed.code, 200);
+      assert.strictEqual(parsed.command, 'broadcast');
+      connection.terminate();
+      done();
     });
   });
 

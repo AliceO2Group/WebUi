@@ -9,10 +9,10 @@ Let's begin, we will create a pasta timer as a web application.
 * install [nodejs](https://nodejs.org/en/) first, version 7 or 8 is fine
 * open a terminal
 * clone this repo where you want `git clone ...`
-* inside, do a `touch ./docs/tutorials/pasta-timer.html`
+* inside, do a `touch ./docs/tutorial/pasta-timer.html`
 * open this file in your favorite editor
 * start `node serve-folder.js`
-* open a browser and go to `http://localhost:9000/docs/tutorials/pasta-timer.html`
+* open a browser and go to `http://localhost:9000/docs/tutorial/pasta-timer.html`
 
 You should now have a blank page 🗒
 
@@ -130,7 +130,7 @@ This was the easy part using traditional classes and the Observer pattern. Let's
 
 ### Step 4 - view
 
-The view is a functional representation of the DOM. We use hyperscript for this, see the full documentation inside the [./js/docs](./js/docs) folder.
+The view is a functional representation of the DOM. We use hyperscript for this, see the full documentation inside the [../reference/frontend-js.md](../reference/frontend-js.md) folder.
 
 ```js
 function view(model) {
@@ -239,5 +239,5 @@ Perfect, we can replace `h('button', ...)` by the above code. I also added a spa
 
 This is the end. Congratulations! 🎉
 
-The final tutorial result can be find here [http://localhost:9000/docs/tutorials/pasta-timer-final.html](http://localhost:9000/docs/tutorials/pasta-timer-final.html).
+The final tutorial result can be find here [http://localhost:9000/docs/tutorial/pasta-timer-final.html](http://localhost:9000/docs/tutorial/pasta-timer-final.html).
 
