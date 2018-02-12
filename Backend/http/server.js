@@ -99,9 +99,30 @@ class HttpServer {
     if (this.oauth) {
       this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
       this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
+    } else {
+      this.app.get('/', (req, res) => this.addDefaultUserData(req, res));
     }
     this.app.use('/api', this.router);
     this.addStaticPath(require.resolve('mithril'), '/js/mithril.js');
+  }
+
+  /**
+   * Adds default user details when skipping OAuth flow
+   * @param {string} req
+   * @param {string} res
+   * @return {object} redirection
+   */
+  addDefaultUserData(req, res) {
+    let query = req.query;
+    if (!query.token) {
+      query.personid = 0;
+      query.name = 'Anonymous';
+      query.token = this.jwt.generateToken(query.personid, query.name);
+
+      const homeUrlAuthentified = url.format({pathname: '/', query: query});
+      return res.redirect(homeUrlAuthentified);
+    }
+    return this.oAuthAuthorize(req, res);
   }
 
   /**
