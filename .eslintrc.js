@@ -12,8 +12,9 @@ module.exports = {
     "Promise": true
   },
   "parserOptions": {
-    "ecmaVersion": 6
-  }, 
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
   "rules": {
     "max-len": ['error', {code: 100}], // default 80
     "indent": ['error', 2, {"SwitchCase": 1}], // not set by default
