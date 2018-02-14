@@ -102,6 +102,7 @@ class HttpServer {
     }
     this.app.use('/api', this.router);
     this.addStaticPath(require.resolve('mithril'), '/js/mithril.js');
+    this.addStaticPath(path.join(__dirname, '../../Frontend'));
   }
 
   /**
