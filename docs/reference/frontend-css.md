@@ -4,6 +4,6 @@ The better way to have a CSS reference is to view it in the browser.
 
 ```bash
 git clone this_repo
-cd docs
-open showroom.html # from terminal or in your file explorer
+npm start
+open http://127.0.0.1:8080/showroom.html
 ```
