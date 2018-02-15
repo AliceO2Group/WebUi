@@ -26,10 +26,10 @@ describe('REST API', () => {
     http.get('http://localhost:' + config.http.port + '/',
       (res) => {
         assert.strictEqual(res.statusCode, 302);
-        const query = url.parse(res.headers.location).query.split('&');
-        assert(query[0].includes('personid'));
-        assert(query[1].includes('name'));
-        assert(query[2].includes('token'));
+        const parsedUrl = new url.URL(res.headers.location, 'http://localhost');
+        parsedUrl.searchParams.has('personid');
+        parsedUrl.searchParams.has('name');
+        parsedUrl.searchParams.has('token');
         done();
       }
     );
