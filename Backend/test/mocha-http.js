@@ -3,6 +3,7 @@ process.env.NODE_ENV = 'test';
 const assert = require('assert');
 const path = require('path');
 const http = require('http');
+const url = require('url');
 const config = require('./../config.json');
 const JwtToken = require('./../jwt/token.js');
 const HttpServer = require('./../http/server');
@@ -16,9 +17,22 @@ const token = jwt.generateToken(0, 'test', 1);
 
 describe('REST API', () => {
   before(() => {
-    httpServer = new HttpServer(config.http, config.jwt, config.oAuth);
+    httpServer = new HttpServer(config.http, config.jwt);
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-request', (req, res) => res.json({ok: 1}));
+  });
+
+  it('GET the "/" and return user details', (done) => {
+    http.get('http://localhost:' + config.http.port + '/',
+      (res) => {
+        assert.strictEqual(res.statusCode, 302);
+        const parsedUrl = new url.URL(res.headers.location, 'http://localhost');
+        parsedUrl.searchParams.has('personid');
+        parsedUrl.searchParams.has('name');
+        parsedUrl.searchParams.has('token');
+        done();
+      }
+    );
   });
 
   it('GET with token should respond 200/JSON', (done) => {
