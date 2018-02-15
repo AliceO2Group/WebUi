@@ -122,6 +122,6 @@ describe('view and model integration', () => {
     setTimeout(() => {
       assert.strictEqual(window.document.body.innerHTML, '<div>Bob</div>');
       done();
-    }, 1000/60 * 2); // 60fps
+    }, 1000 / 60 * 2); // 60fps
   });
 });
