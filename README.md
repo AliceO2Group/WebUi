@@ -8,7 +8,7 @@
 The goal of ALICE O<sup>2</sup> UI framework is to identify library and framework sets and develop the core functionalities of common [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) Web Applications.
 
 ### System requirements
-* `nodejs` >= 7
+* `nodejs` >= 8.9.4
 * `zeromq-devel` >= 4.0 (optional, see [zeromq](docs/ZMQ.md) module docs for more details)
 
 ### Minimum browser version support

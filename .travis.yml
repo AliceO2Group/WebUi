@@ -4,7 +4,7 @@ os:
 - osx
 language: node_js
 node_js:
-- '8'
+- '8.9.4'
 env:
   matrix:
   - ZMQ="4.1.6" ZMQ_REPO="zeromq4-1"

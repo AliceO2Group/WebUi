@@ -80,7 +80,7 @@ export default class WebSocketClient extends EventTarget {
     }
 
     // fire parsed and valid message to be used by clients
-    this.dispatchEvent(new Event(parsed.command, parsed));
+    this.dispatchEvent(new CustomEvent(parsed.command, {detail: parsed.payload}));
   }
 
   /**
