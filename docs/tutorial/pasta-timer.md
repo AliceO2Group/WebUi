@@ -8,13 +8,15 @@ Let's begin, we will create a pasta timer as a web application.
 
 * install [nodejs](https://nodejs.org/en/) first, version 7 or 8 is fine
 * open a terminal
-* clone this repo where you want `git clone ...`
+* clone this repo where you want `git clone this_repo`
+* start `npm start`
 * inside, do a `touch ./docs/tutorial/pasta-timer.html`
 * open this file in your favorite editor
-* start `node serve-folder.js`
-* open a browser and go to `http://localhost:9000/docs/tutorial/pasta-timer.html`
+* open a browser and go to `http://127.0.0.1:8080/tutorial/pasta-timer.html`
 
 You should now have a blank page 🗒
+
+The final result of this tutorial can be seen here `http://127.0.0.1:8080/tutorial/pasta-timer-final.html`
 
 ### Step 2 - import
 
@@ -238,6 +240,3 @@ Object.keys(model.times).map(name => [
 Perfect, we can replace `h('button', ...)` by the above code. I also added a space `' '` to avoid collapsing the buttons, spaces are explicit with hyperscript, with HTML we would have just put a new line for the same job, creating a textNode with spaces. Notice the new array containing this space and the button.
 
 This is the end. Congratulations! 🎉
-
-The final tutorial result can be find here [http://localhost:9000/docs/tutorial/pasta-timer-final.html](http://localhost:9000/docs/tutorial/pasta-timer-final.html).
-

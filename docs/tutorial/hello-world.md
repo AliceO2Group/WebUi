@@ -46,9 +46,9 @@ This will show on the screen a counter which can be incremented or decremented.
 See it in action in your browser:
 
 ```bash
-cd FrontEndKit
-node serve-folder.js
-open http://localhost:9000/docs/tutorial/hello-world.html
+git clone this_repo
+npm start
+open http://127.0.0.1:8080/tutorial/hello-world.html
 ```
 
 ### How it works?

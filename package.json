@@ -7,7 +7,7 @@
   "repository": "AliceO2Group/Gui",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
-    "start": "echo 'it suppose to run demo app'",
+    "start": "echo 'Running demo app...' && node docs/demo/index.js",
     "test": "npm run eslint && npm run mocha",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/ --exit",
     "mocha": "./node_modules/.bin/mocha --require babel-core/register Backend/test/ Frontend/test/",
