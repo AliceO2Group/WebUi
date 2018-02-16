@@ -7,7 +7,7 @@ HTTP module provided a simple way of createing REST API. In addition, it support
  - Defining new routes (GET, POST)
  - Passing values to frontend easily
 
-See [API reference](../reference/backend.md) for more details.
+See [API reference](../reference/backend.md#httpserver) for more details.
 
 #### Instance
 ```js
