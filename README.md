@@ -25,12 +25,12 @@ npm install --save @aliceo2/aliceo2-gui
 ```
 
 ### Backend guide
-* [https](docs/HTTP.md) - HTTP server and REST API
-* [jwt](docs/JWT.md) - secure requests with JSON Web Token (for `https` and `websockets` modules)
-* [log](docs/LOG.md) - save log messages into a file or push them to InfoLogger service
-* [oauth](docs/OAUTH.md) - CERN oAuth (for `https` module)
-* [websockets](docs/WS.md) - communicate with server using websocket protocol
-* [zeromq](docs/ZMQ.md) - create `sub` or `req` zeromq sockets easily
+* [https](docs/HTTP.md) - HTTP(S) server that serves custom REST API
+* [jwt](docs/JWT.md) - secure HTTP requests and WebSocket messages with JSON Web Token (required for `https` and `websockets` modules)
+* [log](docs/LOG.md) - stores log messages in a file or push them to InfoLogger service
+* [oauth](docs/OAUTH.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
+* [websockets](docs/WS.md) - provides bi-directional communication between browsers and server using websocket protocol
+* [zeromq](docs/ZMQ.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
 ### Frontend guide
 - [Write DOM with Javascript without HTML](./docs/guide/reactive-programming.md)
