@@ -136,12 +136,14 @@ mount(document.body, view, model, debug);
 ### Client side - Model.js
 
 TODO
+copy part of the pasta timer tuto
 ajax
 ws
 
 ### Client side - view.js
 
 TODO
+copy part of the pasta timer tuto
 link hyperscript
 link api reference
 
