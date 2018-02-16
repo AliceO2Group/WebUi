@@ -29,9 +29,9 @@ The result of both code will produce the same result, but in the first one the c
 Hyperscript allows in the end to have the positive feature of HMTL (declarative) and DOM API (updates).
 
 |              | DOM API | HTML | Hyperscript |
-| ------------ | ---------------------------- |
+| ------------ | --------|------|------------ |
 | Declarative  | ✗       | ✓    | ✓           |
-| Updates      | ✓       | ✗    | ✓           |
+| Dynamic      | ✓       | ✗    | ✓           |
 
 Being declarative improves maintenance of an application to avoid spaghetti code, and provides all functional features for free (tests, reusability).
 
