@@ -12,9 +12,6 @@ Each request is authenticated with JWT token.</p>
 <dt><a href="#JwtToken">JwtToken</a></dt>
 <dd><p>Provides JSON Web Token functionality such as token generation and verification.</p>
 </dd>
-<dt><a href="#WebSocketClient">WebSocketClient</a></dt>
-<dd><p>WebSocket client class</p>
-</dd>
 <dt><a href="#WebSocketMessage">WebSocketMessage</a></dt>
 <dd><p>WebSocket module that allows to create response to user request.
 It&#39;s based on HTTP status codes.</p>
@@ -124,11 +121,13 @@ Each request is authenticated with JWT token.
     * [.configureHelmet(hostname, port)](#HttpServer+configureHelmet)
     * [.passAsUrl(key, value)](#HttpServer+passAsUrl)
     * [.specifyRoutes()](#HttpServer+specifyRoutes)
+    * [.addDefaultUserData(req, res, next)](#HttpServer+addDefaultUserData) ⇒ <code>object</code>
+    * [.addStaticPath(localPath, uriPath)](#HttpServer+addStaticPath)
     * [.get(path, callback)](#HttpServer+get)
     * [.post(path, callback)](#HttpServer+post)
     * [.delete(path, callback)](#HttpServer+delete)
     * [.enableHttpRedirect()](#HttpServer+enableHttpRedirect)
-    * [.oAuthAuthorize(req, res)](#HttpServer+oAuthAuthorize) ⇒ <code>object</code>
+    * [.oAuthAuthorize(req, res, next)](#HttpServer+oAuthAuthorize) ⇒ <code>object</code>
     * [.oAuthCallback(req, res)](#HttpServer+oAuthCallback) ⇒ <code>object</code>
     * [.jwtVerify(req, res, next)](#HttpServer+jwtVerify)
 
@@ -138,11 +137,11 @@ Each request is authenticated with JWT token.
 Sets up the server, routes and binds HTTP and HTTPS sockets.
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| httpConfig | <code>object</code> | configuration of HTTP server |
-| jwtConfig | <code>object</code> | configuration of JWT |
-| oAuthConfig | <code>object</code> | configuration of oAuth |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| httpConfig | <code>object</code> |  | configuration of HTTP server |
+| jwtConfig | <code>object</code> |  | configuration of JWT |
+| oAuthConfig | <code>object</code> | <code></code> | configuration of oAuth |
 
 <a name="HttpServer+getServer"></a>
 
@@ -181,6 +180,32 @@ Passes key-value parameters that are available on front-end side
 Specified routes and their callbacks.
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+<a name="HttpServer+addDefaultUserData"></a>
+
+### httpServer.addDefaultUserData(req, res, next) ⇒ <code>object</code>
+Adds default user details when skipping OAuth flow
+
+**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+**Returns**: <code>object</code> - redirection  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| req | <code>object</code> |  |
+| res | <code>object</code> |  |
+| next | <code>object</code> | serves static paths |
+
+<a name="HttpServer+addStaticPath"></a>
+
+### httpServer.addStaticPath(localPath, uriPath)
+Serves local static path under specified URI path
+
+**Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| localPath | <code>string</code> | local directory to be served |
+| uriPath | <code>string</code> | URI path (optional, '/' as default) |
+
 <a name="HttpServer+get"></a>
 
 ### httpServer.get(path, callback)
@@ -225,7 +250,7 @@ Redirects HTTP to HTTPS.
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
 <a name="HttpServer+oAuthAuthorize"></a>
 
-### httpServer.oAuthAuthorize(req, res) ⇒ <code>object</code>
+### httpServer.oAuthAuthorize(req, res, next) ⇒ <code>object</code>
 Handles oAuth authentication flow (default path of the app: '/')
 - If query.code is valid embeds the token and grants the access to the application
 - Redirects to the OAuth flow if query.code is not present (origin path != /callback)
@@ -239,6 +264,7 @@ The query arguments are serialized and kept in the 'state' parameter through OAu
 | --- | --- | --- |
 | req | <code>object</code> | HTTP request |
 | res | <code>object</code> | HTTP response |
+| next | <code>object</code> | serves static paths when OAuth suceeds |
 
 <a name="HttpServer+oAuthCallback"></a>
 
@@ -305,11 +331,11 @@ Sets expiration time and sings it using secret.
 **Kind**: instance method of [<code>JwtToken</code>](#JwtToken)  
 **Returns**: <code>object</code> - generated token  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| personid | <code>number</code> | CERN user id |
-| username | <code>string</code> | CERN username |
-| access | <code>number</code> | level of access |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| personid | <code>number</code> |  | CERN user id |
+| username | <code>string</code> |  | CERN username |
+| access | <code>number</code> | <code>0</code> | level of access |
 
 <a name="JwtToken+refreshToken"></a>
 
@@ -338,116 +364,6 @@ Decrypts user token to verify that is vaild.
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>object</code> | token to be verified |
-
-<a name="WebSocketClient"></a>
-
-## WebSocketClient
-WebSocket client class
-
-**Kind**: global class  
-**Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
-
-* [WebSocketClient](#WebSocketClient)
-    * [new WebSocketClient(id, token)](#new_WebSocketClient_new)
-    * [.connect()](#WebSocketClient+connect)
-    * [.activateOnMessage()](#WebSocketClient+activateOnMessage)
-    * [.bind(name, callback)](#WebSocketClient+bind)
-    * [.setFilter(filter)](#WebSocketClient+setFilter)
-    * [.send(message)](#WebSocketClient+send)
-    * [.onclose(callback)](#WebSocketClient+onclose)
-    * [.onopen(callback)](#WebSocketClient+onopen)
-    * [.onerror(callback)](#WebSocketClient+onerror)
-
-<a name="new_WebSocketClient_new"></a>
-
-### new WebSocketClient(id, token)
-Sets up internal variables
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>number</code> | CERN person id |
-| token | <code>string</code> | JWT authentication token |
-
-<a name="WebSocketClient+connect"></a>
-
-### webSocketClient.connect()
-Connects to WebSocket endpoint
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-<a name="WebSocketClient+activateOnMessage"></a>
-
-### webSocketClient.activateOnMessage()
-Created onmessage event listener.
-Handles token refresh procedure
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-<a name="WebSocketClient+bind"></a>
-
-### webSocketClient.bind(name, callback)
-Allows to attach callback to given message name
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | message name |
-| callback | <code>fucntion</code> | invoked when the message with given name is received |
-
-<a name="WebSocketClient+setFilter"></a>
-
-### webSocketClient.setFilter(filter)
-Send filter to WebSocket server
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-
-| Param | Type |
-| --- | --- |
-| filter | <code>function</code> | 
-
-<a name="WebSocketClient+send"></a>
-
-### webSocketClient.send(message)
-Send message to WebSocket server
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| message | <code>object</code> | message to be sent |
-
-<a name="WebSocketClient+onclose"></a>
-
-### webSocketClient.onclose(callback)
-Sets onclose callback
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-
-| Param | Type |
-| --- | --- |
-| callback | <code>function</code> | 
-
-<a name="WebSocketClient+onopen"></a>
-
-### webSocketClient.onopen(callback)
-Sets onopen callaback
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-
-| Param | Type |
-| --- | --- |
-| callback | <code>function</code> | 
-
-<a name="WebSocketClient+onerror"></a>
-
-### webSocketClient.onerror(callback)
-Sets onerror callback
-
-**Kind**: instance method of [<code>WebSocketClient</code>](#WebSocketClient)  
-
-| Param | Type |
-| --- | --- |
-| callback | <code>function</code> | 
 
 <a name="WebSocketMessage"></a>
 
@@ -580,7 +496,7 @@ In addition, it provides custom authentication with JWT tokens.
     * [new WebSocket(httpsServer, jwtConfig, hostname)](#new_WebSocket_new)
     * [.shutdown()](#WebSocket+shutdown)
     * [.bind(name, callback)](#WebSocket+bind)
-    * [.getReply(req)](#WebSocket+getReply) ⇒ <code>object</code>
+    * [.processRequest(req)](#WebSocket+processRequest) ⇒ <code>object</code>
     * [.onconnection(client, request)](#WebSocket+onconnection)
     * [.onmessage(message, client)](#WebSocket+onmessage)
     * [.ping()](#WebSocket+ping)
@@ -618,9 +534,9 @@ Message as an Object is passed to the callback
 | name | <code>string</code> | websocket message name |
 | callback | <code>function</code> | callback function, that receives message object |
 
-<a name="WebSocket+getReply"></a>
+<a name="WebSocket+processRequest"></a>
 
-### webSocket.getReply(req) ⇒ <code>object</code>
+### webSocket.processRequest(req) ⇒ <code>object</code>
 Handles incoming text messages: verifies token and processes request/command.
 
 **Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  

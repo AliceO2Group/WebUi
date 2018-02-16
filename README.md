@@ -24,22 +24,25 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 npm install --save @aliceo2/aliceo2-gui
 ```
 
+### Getting started
+- [Overview](docs/guide/overview.md)
+- [Starting a new project](docs/skeleton/README.md)
+
 ### Backend guide
-* [https](docs/HTTP.md) - HTTP server and REST API
-* [jwt](docs/JWT.md) - secure requests with JSON Web Token (for `https` and `websockets` modules)
-* [log](docs/LOG.md) - save log messages into a file or push them to InfoLogger service
-* [oauth](docs/OAUTH.md) - CERN oAuth (for `https` module)
-* [websockets](docs/WS.md) - communicate with server using websocket protocol
-* [zeromq](docs/ZMQ.md) - create `sub` or `req` zeromq sockets easily
+* [https](./docs/guide/http-server.md) - serves custom REST API, supports TLS
+* [jwt](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
+* [log](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
+* [oauth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
+* [websockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
+* [zeromq](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
 ### Frontend guide
-- [Write DOM with Javascript without HTML](./docs/guide/reactive-programming.md)
-- [What are hyperscript and virtual nodes](./docs/guide/vnodes.md)
-- [Handle sorted list with keys](./docs/guide/keys.md)
-- [Reuse parts of a view as Components](./docs/guide/components.md)
-- [Debugging with the inspector](./docs/guide/debug.md)
-- [Async calls (ajax)](./docs/guide/async-calls.md)
-- [Scale the code of your application (architecture)](./docs/guide/scale-app.md)
+- [Hyperscript and vnode](./docs/guide/hyperscript-vnode.md) - Manipulate the HTML view with Javascript
+- [Components](./docs/guide/components.md) - Split and reuse views
+- [Architecture](./docs/guide/scale-app.md) - Scale the code of your application with convensions
+- [Keys](./docs/guide/keys.md) - Handle sorted list in hyperscript with keys
+- [Debug](./docs/guide/debug.md) - Use the inspector
+- [Ajax](./docs/guide/async-calls.md) - Fetch data from the server
 
 ### API Reference
 * [Backend](docs/reference/backend.md)
@@ -47,9 +50,9 @@ npm install --save @aliceo2/aliceo2-gui
 * [Frontend CSS](docs/reference/frontend-css.md)
 
 ### Tutorials
-- [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
-- [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
-- TODO: full application using ajax, ws, js, css
+* [On-demande and real-time time server with a Ajax and WebSocket](./docs/tutorial/time-server.md)
+* [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
+* [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
 
 ### Project skeleton
 The skeleton of a project using this framework can be found in [docs/skeleton](docs/skeleton).

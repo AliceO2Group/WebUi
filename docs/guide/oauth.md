@@ -1,4 +1,6 @@
-# CERN Open Auth 2.0
+# Backend - OAuth module
+This module supports CERN OAuth 2.0 flow and CERN egroup authorization.
+It protects the static content (REST API calls and WebSocket messages are protected by JWT token).
 
 ### Instace
 ```js
@@ -19,6 +21,3 @@ Where:
       * `userPath` - user resource path
       * `groupPath` - group resource path
       * `port` - resource server port
-
-### Public methods
-* [`getDetails(ACCESS_TOKEN, OPTIONS)`](API.md#OAuth+getDetails)

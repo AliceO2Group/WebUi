@@ -36,16 +36,19 @@
   },
   "main": "Backend/index.js",
   "files": [
-    "Backend/aliceo2-gui.js",
+    "Backend/index.js",
     "LICENSE",
     "README.md",
     "Backend/log",
-    "config-default.json",
+    "Backend/config-default.json",
     "Backend/http",
     "Backend/jwt",
-    "public",
     "Backend/websocket",
     "Backend/zeromq",
-    "Backend/db"
+    "Backend/db",
+    "Frontend/css",
+    "Frontend/img",
+    "Frontend/js",
+    "docs"
   ]
 }

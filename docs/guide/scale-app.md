@@ -1,4 +1,4 @@
-# Guide - How to scale and architecture
+# How to scale and architecture
 
 ### Files
 

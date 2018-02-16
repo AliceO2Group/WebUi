@@ -7,3 +7,5 @@ The two most useful tabs are *Console* and *Network*. The first one allows you t
 When things get wrong, the script stops and the error is shown in the *Console*. Click on it to show the source code with the associated error. You can also force the third tab *Source code* to be shown at some point by inserting the statement `debugger;` inside your Javascript code. You wil then be able to see the stack and values.
 
 Finally, a fourth tab *Element* or *DOM* shown the DOM tree of the current page. You can see with it if the view is renderer as expected but also modify it on the fly to see what happens before coding it in your code. For example you can see if a layout is well by changing a class element or directly the CSS values of the page.
+
+On Safari, follow this [guide](https://support.apple.com/fr-ch/guide/safari/use-the-safari-develop-menu-sfri20948/mac) to open the inspector.

@@ -74,7 +74,7 @@ class HttpServer {
         defaultSrc: ["'self'", "data:"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'wss://' + hostname + ':*']
+        connectSrc: ["'self'", 'wss://' + hostname + ':*', 'ws://' + hostname + ':*']
         /* eslint-enable */
       }
     }));
@@ -97,10 +97,10 @@ class HttpServer {
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
     if (this.oauth) {
-      this.app.get('/', (req, res) => this.oAuthAuthorize(req, res));
+      this.app.get('/', (req, res, next) => this.oAuthAuthorize(req, res, next));
       this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     } else {
-      this.app.get('/', (req, res) => this.addDefaultUserData(req, res));
+      this.app.get('/', (req, res, next) => this.addDefaultUserData(req, res, next));
     }
     this.app.use('/api', this.router);
     this.addStaticPath(require.resolve('mithril'), '/js/mithril.js');
@@ -109,11 +109,12 @@ class HttpServer {
 
   /**
    * Adds default user details when skipping OAuth flow
-   * @param {string} req
-   * @param {string} res
+   * @param {object} req
+   * @param {object} res
+   * @param {object} next - serves static paths
    * @return {object} redirection
    */
-  addDefaultUserData(req, res) {
+  addDefaultUserData(req, res, next) {
     let query = req.query;
     if (!query.token) {
       query.personid = 0;
@@ -123,7 +124,7 @@ class HttpServer {
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);
     }
-    return this.oAuthAuthorize(req, res);
+    return this.oAuthAuthorize(req, res, next);
   }
 
   /**
@@ -185,14 +186,15 @@ class HttpServer {
    * The query arguments are serialized and kept in the 'state' parameter through OAuth process
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
+   * @param {object} next - serves static paths when OAuth suceeds
    * @return {object} redirects to OAuth flow or displays the page if JWT token is valid
    */
-  oAuthAuthorize(req, res) {
+  oAuthAuthorize(req, res, next) {
     const query = req.query; // User's arguments
     const token = req.query.token;
 
     if (token && this.jwt.verify(token)) {
-      return res.status(200).send(fs.readFileSync('public/index.html').toString());
+      next();
     } else {
       // Save query params and redirect to the OAuth flow
       const state = new Buffer(JSON.stringify(query)).toString('base64');

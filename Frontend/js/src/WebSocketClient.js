@@ -36,7 +36,7 @@ export default class WebSocketClient extends EventTarget {
   _connect() {
     const session = sessionService.get();
     const url = new URL(location);
-    url.protocol = 'wss';
+    url.protocol = location.protocol === 'https:' ? 'wss' : 'ws';
     url.searchParams.append('token', session.token);
 
     this.connection = new WebSocket(url);
