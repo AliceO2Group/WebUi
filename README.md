@@ -24,10 +24,9 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 npm install --save @aliceo2/aliceo2-gui
 ```
 
-### Get started
-
+### Getting started
 - [Overview](docs/guide/overview.md)
-- [Start a new project](docs/skeleton/README.md)
+- [Starting a new project](docs/skeleton/README.md)
 
 ### Backend guide
 * [https](./docs/guide/http-server.md) - serves custom REST API, supports TLS
