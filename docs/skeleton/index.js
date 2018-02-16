@@ -27,7 +27,7 @@ http.post('/getDate', (req, res) => {
 let streamTimer = null;
 
 // Declare WebSocket callback for "stream-date" messages
-ws.bind('stream-date', (body) => {
+ws.bind('stream-date', () => {
   if (streamTimer) {
     // already started, kill it
     clearInterval(streamTimer);
