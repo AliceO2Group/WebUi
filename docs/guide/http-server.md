@@ -30,17 +30,17 @@ Where:
 const {HttpServer, JwtToken} = require('@aliceo2/aliceo2-gui');
 
 // configuration file for simple, unsecured http server
-const http = {
+const httpConf = {
   port: 8080,
   tls: false,
   hostname: 'localhost'
 };
 
 // JWT configuration (follow instruction from jwt module)
-const jwt = {...};
+const jwtConf = {...};
 
 // create instance of http server
-const http = new HttpServer(http, jwt);
+const http = new HttpServer(httpConf, jwtConf);
 
 // pass test value to the frontend (via URL)
 http.passAsUrl('testKey', 'testValue');

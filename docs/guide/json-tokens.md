@@ -1,4 +1,11 @@
-# JSON Web Tokens
+# Backend - JSON Web Token module
+JSON Web Tokens allow to secure requests or claims send between client and server - see more details at https://jwt.io
+This module is required by [http](http-server.md) and [websockets](websockets.md) modules.
+ * Generate JWT tokens that includes encrypted ID, username and auth level
+ * Verify token and decode encrypted data on the server side
+ * Refresh tokens if `maxAge` parameter is not expired
+
+See [API reference](../reference/backend.md##jwttoken) for more details.
 
 ### Instance
 ```js
@@ -7,30 +14,31 @@ JwtToken(JWT_CONF);
 Where
  `JWT_CONF` JSON formatted configuration object for JWT with following defined fields:
    * `secret` - JWT secret passphrase to sign and verify tokens
-   * `issuer` - name of token issuer
    * `expiration` - token expiration time (as time literal)
-   * `maxAge` - token refresh expiration time (as time literal)
+   * [`issuer`] - name of token issuer
+   * [`maxAge`] - token refresh expiration time (as time literal)
 
-### Public methods
-* [`generateToken(PERSONID, USERNAME, ACCESS)`](API.md#JwtToken+generateToken)
-* [`refreshToken(TOKEN)`](API.md#JwtToken+refreshToken)
-* [`verify(TOKEN)`](https://github.com/awegrzyn/Gui/blob/docs-2/docs/API.md#JwtToken+verify)
-
-### Example
+### Code example
 ```js
+// Include module
 const {JwtToken} = require('@aliceo2/aliceo2-gui');
-const jwtConfig = {
-  "secret": "secret",
-  "issuer": "alice-o2-gui",
-  "expiration": "1d",
-  "maxAge": "7d"
-}
 
-const jwt = new JwtToken(jwtConfig);
-const token = jwt.generateToken(1, 'Adam', 1);
+// JWT configuration
+const jwtConf = {
+  "secret": "secret",
+  "expiration": "1d",
+};
+
+// Create instance of jwt module
+const jwt = new JwtToken(jwtConf);
+
+// Generate a token
+const token = jwt.generateToken(1, 'code-example');
+
+// Verify a token
 jwt.verify(token)
   .then(() => {
-    cosole.log('verified');
-  })
+    cosole.log('Access granted !');
+  });
 }
 ```
