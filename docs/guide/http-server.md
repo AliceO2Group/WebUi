@@ -7,7 +7,7 @@ HTTP module provided a simple way of createing REST API. In addition, it support
  - Defining new routes (GET, POST)
  - Passing values to frontend easily
 
-See [API document](API.md) for more details.
+See [API reference](API.md) for more details.
 
 #### Instance
 ```js
@@ -33,7 +33,7 @@ const {HttpServer, JwtToken} = require('@aliceo2/aliceo2-gui');
 const http = {
   port: 8080,
   tls: false,
-  hostname": 'localhost'
+  hostname: 'localhost'
 };
 
 // JWT configuration (follow instruction from jwt module)

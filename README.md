@@ -25,12 +25,12 @@ npm install --save @aliceo2/aliceo2-gui
 ```
 
 ### Backend guide
-* [https](docs/HTTP.md) - serves custom REST API, supports TLS
-* [jwt](docs/JWT.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
-* [log](docs/LOG.md) - stores log messages in a file or push them to InfoLogger service
-* [oauth](docs/OAUTH.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
-* [websockets](docs/WS.md) - provides bi-directional communication between browsers and server using websocket protocol
-* [zeromq](docs/ZMQ.md) - ZeroMQ client to providing `sub` or `req` socket patterns
+* [https](./docs/guide/http-server.md) - serves custom REST API, supports TLS
+* [jwt](./docs/guide/json-token.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
+* [log](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
+* [oauth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
+* [websockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
+* [zeromq](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
 ### Frontend guide
 - [Write DOM with Javascript without HTML](./docs/guide/reactive-programming.md)
