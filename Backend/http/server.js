@@ -74,7 +74,7 @@ class HttpServer {
         defaultSrc: ["'self'", "data:"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'wss://' + hostname + ':*']
+        connectSrc: ["'self'", 'wss://' + hostname + ':*', 'ws://' + hostname + ':*']
         /* eslint-enable */
       }
     }));
