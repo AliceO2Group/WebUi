@@ -1,25 +1,32 @@
-### Project skeleton
+# Start a new project
 
-## Run project
-You can start "skeleton" project by runnig:
+A template project is available to begin with a working project containing a simple demo application that you will change according to your specifications.
+
+### 1. Get the skeleton template
+
 ```bash
-node index.js
-```
-And accessing web application via browser:
-```
-http://localhost:8080
+git clone this-repos
+cp -R this-repos/docs/skeleton ./newproject
+cd newproject
 ```
 
-## Creating a dedicated project from skeleton
+It contains a minimal application. Let's turn it on.
 
-Move skeleton to a new directory and init node project
+### 2. Install the framework as dependency
+
 ```bash
-mv * ~/NewProject
-npm init
-
-Add framework as dependency
-```
+npm init # fill the questions
 npm install --save @aliceo2/aliceo2-gui
 ```
 
-Modify `index.js` as stated in the first comment
+You can fill with blank field, to understand those fields go [to the official doc](https://docs.npmjs.com/files/package.json).
+
+### 3. See it in action
+
+Start the project's server
+
+```bash
+node index.js
+```
+
+Open your browser and go to [http://127.0.0.1:8080](http://127.0.0.1:8080).

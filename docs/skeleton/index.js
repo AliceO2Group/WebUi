@@ -32,7 +32,10 @@ let streamTimer = null;
 // Declare WebSocket callback for "stream-date" messages
 ws.bind('stream-date', (body) => {
   if (streamTimer) {
-    return; // already started
+    // already started, kill it
+    clearInterval(streamTimer);
+    streamTimer = null;
+    return;
   }
 
   Log.info('start timer');
