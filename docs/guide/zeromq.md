@@ -16,7 +16,11 @@ Where:
 #### Example
 ```js
 const {ZeroMQClient} = require('@aliceo2/aliceo2-gui');
+
+// Subscribe to publisher server
 const zmqSub = new ZeroMQClient('zeromq.cern.ch', '1234', 'sub');
+
+// display messages with topic 'message'
 zmqSub.on('message', function(message) {
   console.log(message);
 });
