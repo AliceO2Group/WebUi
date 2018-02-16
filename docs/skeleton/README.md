@@ -30,3 +30,5 @@ node index.js
 ```
 
 Open your browser and go to [http://127.0.0.1:8080](http://127.0.0.1:8080).
+
+To understand it you can follow [this tutorial](../tutorial/time-server.md).

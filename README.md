@@ -51,8 +51,7 @@ npm install --save @aliceo2/aliceo2-gui
 * [Frontend CSS](docs/reference/frontend-css.md)
 
 ### Tutorials
-* On-demande time server with a REST API and Ajax
-* Real-time time server with WebSocket
+* [On-demande and real-time time server with a Ajax and WebSocket](./docs/tutorial/time-server.md)
 * [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
 * [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
 
