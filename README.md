@@ -51,12 +51,10 @@ npm install --save @aliceo2/aliceo2-gui
 * [Frontend CSS](docs/reference/frontend-css.md)
 
 ### Tutorials
-
-- On-demande time server with a REST API and Ajax
-- Real-time time server with WebSocket
-
-- [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
-- [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
+* On-demande time server with a REST API and Ajax
+* Real-time time server with WebSocket
+* [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
+* [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
 
 ### Project skeleton
 The skeleton of a project using this framework can be found in [docs/skeleton](docs/skeleton).
