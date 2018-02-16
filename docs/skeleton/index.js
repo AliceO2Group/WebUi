@@ -11,9 +11,6 @@ const ws = new WebSocket(http);
 // Server static content in public directory
 http.addStaticPath('./public');
 
-// Declare simple model (global variable)
-let serverCount = 0;
-
 // ----------------------------------------
 // REST API
 // ----------------------------------------
@@ -43,7 +40,7 @@ ws.bind('stream-date', (body) => {
   // Send to all clients the date every 100ms
   streamTimer = setInterval(() => {
     ws.broadcast(
-      new WebSocketMessage(200).setCommand('serverDate').setPayload({date: new Date()})
+      new WebSocketMessage(200).setCommand('server-date').setPayload({date: new Date()})
     );
   }, 100);
 });

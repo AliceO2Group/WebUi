@@ -20,7 +20,7 @@ export default class Model extends Observable {
       console.log('ready, let send a message');
     });
 
-    this.ws.addEventListener('serverDate', (e) => {
+    this.ws.addEventListener('server-date', (e) => {
       this.date = e.detail.date;
       this.notify();
     });
