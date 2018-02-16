@@ -24,6 +24,11 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 npm install --save @aliceo2/aliceo2-gui
 ```
 
+### Get started
+
+- [Overview](docs/guide/overview.md)
+- [Start a new project](docs/guide/start-project.md)
+
 ### Backend guide
 * [https](./docs/guide/http-server.md) - serves custom REST API, supports TLS
 * [jwt](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
@@ -46,6 +51,11 @@ npm install --save @aliceo2/aliceo2-gui
 * [Frontend CSS](docs/reference/frontend-css.md)
 
 ### Tutorials
+- On-demande time server with a REST API and Ajax
+- Real-time time server with WebSocket
+
+
+
 - [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
 - [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
 - TODO: full application using ajax, ws, js, css

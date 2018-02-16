@@ -8,75 +8,18 @@ import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
 </script>
 
-<!-- Main application -->
+<!-- Main application controller -->
 <script type="module">
-// Import frontend framework
-import fetchClient from '/js/src/fetchClient.js';
-import WebSocketClient from '/js/src/WebSocketClient.js';
-import {Observable, h, mount} from '/js/src/index.js';
+// Import MVC
+import {mount} from '/js/src/index.js';
+import view from './view.js';
+import Model from './model.js';
 
-// The model
-class Model extends Observable {
-  constructor() {
-    super();
-    this.count = 0;
-    this.serverCount = 0;
-
-    this._prepareWebSocket();
-  }
-
-  _prepareWebSocket() {
-    // Real-time communication with server
-    let ws = new WebSocketClient();
-    ws.addEventListener('authed', (message) => {
-      console.log('ready, let send a message');
-      ws.sendMessage({command: 'hello', message: 'message from client'});
-      ws.setFilter(function(e) {return true;});
-    });
-    ws.addEventListener('serverCountUpdate', (e) => {
-      this.serverCount = e.detail.count;
-      this.notify();
-    });
-  }
-
-  increment() {
-    this.count++;
-    this.notify();
-  }
-
-  decrement() {
-    this.count--;
-    this.notify();
-  }
-
-  setRemote() {
-    fetchClient('/api/setCounter?count=' + this.count, {
-      method: 'POST',
-    })
-      .then((response) => response.json())
-      .then((content) => console.log(content));
-  }
-}
-
-// The view
-function view(model) {
-  return h('.fill-parent.flex-column.items-center.justify-center',
-    h('.bg-gray.br3.p4', [
-      h('h1', 'Hello World'),
-      h('ul', [
-        h('li', `local counter: ${model.count}`),
-        h('li', `remote counter: ${model.serverCount}`),
-      ]),
-      h('div', [
-        h('button', {onclick: e => model.increment()}, '++'),
-        h('button', {onclick: e => model.decrement()}, '--'),
-        h('button', {onclick: e => model.setRemote()}, 'set remote'),
-      ])
-    ])
-  );
-}
-
-// The controller
+// Start application
 const model = new Model();
-mount(document.body, view, model);
+const debug = true; // shows when redraw is done
+mount(document.body, view, model, debug);
+
+// Expose model as global to interract with in the console
+window.model = model;
 </script>
