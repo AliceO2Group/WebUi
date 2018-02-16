@@ -1,13 +1,13 @@
 # Backend - HTTP module
 HTTP module provided a simple way of createing REST API. In addition, it supports:
- - CERN OAuth 2 authentication and e-groups authorization using [OAuth](OAUTH.md) module
- - JWT token secured requests using [JWT](JWT.md) module
+ - CERN OAuth 2 authentication and e-groups authorization using [OAuth](oauth.md) module
+ - JWT token secured requests using [JWT](json-tokens.md) module
  - Protects server by defining: Content Security Policy, DNS Prefech Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
  - Serving custom static paths
  - Defining new routes (GET, POST)
  - Passing values to frontend easily
 
-See [API reference](API.md) for more details.
+See [API reference](../reference/backend.md) for more details.
 
 #### Instance
 ```js
@@ -21,8 +21,8 @@ Where:
      * [`portSecure`] - HTTPS port number
      * [`key`] - private key filepath
      * [`cert`] - certificate filepath
- * `JWT_CONF` JSON Web token configuration is explained in the [jwt](JWT.md) module
- * [`OAUTH_CONF`] OAuth confguration is explained in the [oauth](OAUTH.md) module
+ * `JWT_CONF` JSON Web token configuration is explained in the [jwt](json-tokens.md) module
+ * [`OAUTH_CONF`] OAuth confguration is explained in the [oauth](oauth.md) module
 
 #### Code example
 ```js
