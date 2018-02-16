@@ -25,8 +25,8 @@ npm install --save @aliceo2/aliceo2-gui
 ```
 
 ### Backend guide
-* [https](docs/HTTP.md) - HTTP(S) server that serves custom REST API
-* [jwt](docs/JWT.md) - secure HTTP requests and WebSocket messages with JSON Web Token (required for `https` and `websockets` modules)
+* [https](docs/HTTP.md) - serves custom REST API, supports TLS
+* [jwt](docs/JWT.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
 * [log](docs/LOG.md) - stores log messages in a file or push them to InfoLogger service
 * [oauth](docs/OAUTH.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
 * [websockets](docs/WS.md) - provides bi-directional communication between browsers and server using websocket protocol
