@@ -23,4 +23,4 @@ Every generic or common part of your needs are included in this framework so you
 - create a great user experience
 - package and ship your application on server
 
-Follow the next link to [start a new project](start-project.md).
+Follow the next link to [start a new project](../skeleton/README.md).
