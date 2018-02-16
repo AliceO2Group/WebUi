@@ -47,6 +47,8 @@ describe('Hyperscript h() and DOM diff algo render()', () => {
   });
 
   it('debounce rendering', (done) => {
+    // 3 calls debounced do only 1 call to done()
+    // mocha detects if done is called less or more than 1 time to thow error
     let fn = frameDebouncer(() => {
       done();
     });
