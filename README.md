@@ -28,6 +28,9 @@ npm install @aliceo2/aliceo2-gui
 - [Overview](docs/guide/overview.md)
 - [Starting a new project](docs/skeleton/README.md)
 
+### Tutorials
+* [Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
+
 ### Backend guide
 * [HTTPS server](./docs/guide/http-server.md) - serves custom REST API, supports TLS
 * [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token
@@ -48,11 +51,6 @@ npm install @aliceo2/aliceo2-gui
 * [Backend](docs/reference/backend.md)
 * [Frontend JS](docs/reference/frontend-js.md)
 * [Frontend CSS](docs/reference/frontend-css.md)
-
-### Tutorials
-* [On-demande and real-time time server with a Ajax and WebSocket](./docs/tutorial/time-server.md)
-* [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
-* [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
 
 ### Project skeleton
 The skeleton of a project using this framework can be found in [docs/skeleton](docs/skeleton).

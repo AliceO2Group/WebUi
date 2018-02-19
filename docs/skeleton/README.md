@@ -17,16 +17,16 @@ cd newproject
 npm init
 npm install --save @aliceo2/aliceo2-gui
 ```
-More about `npm init` and `package.json` in the [official docunmentation](https://docs.npmjs.com/files/package.json).
+More about `npm init` and `package.json` in the [official documentation](https://docs.npmjs.com/files/package.json).
 
 ### 3. Launch the application
 
-Start the server
+First, start the server
 
 ```bash
 node index.js
 ```
 
-Open your browser and navigate to [http://127.0.0.1:8080](http://127.0.0.1:8080).
+Then, open your browser and navigate to [http://127.0.0.1:8080](http://127.0.0.1:8080).
 
 To build a sample application step-by-step follow [Time server tutorial](../tutorial/time-server.md).
