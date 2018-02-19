@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<body></body>
+
+<script type="module">
+import {Observable, h, mount} from '../../js/src/index.js'
+
+// The model
+class Model extends Observable {
+  constructor() {
+    super();
+    this.count = 0;
+  }
+
+  increment() {
+    this.count++;
+    this.notify();
+  }
+
+  decrement() {
+    this.count--;
+    this.notify();
+  }
+}
+
+// The view
+function view(model) {
+  return h('center',
+    h('h1', 'Hello World'),
+    h('p', `counter value: ${model.count}`),
+    h('div', [
+      h('button', {onclick: e => model.increment()}, '++'),
+      h('button', {onclick: e => model.decrement()}, '--'),
+    ])
+  );
+}
+
+// The controller
+const model = new Model();
+mount(document.body, view, model);
+</script>

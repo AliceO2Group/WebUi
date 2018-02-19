@@ -1,0 +1,55 @@
+{
+"jwt": {
+    "secret": "<secret>",
+    "issuer": "alice-o2-gui",
+    "expiration": "60s",
+    "maxAge": "2m"
+  },
+  "oAuth": {
+    "secret": "<oAuthSecret>",
+    "id": "<oAuthId>",
+    "tokenHost": "https://oauth.web.cern-TEST.ch",
+    "tokenPath": "/OAuth/Token",
+    "authorizePath": "/OAuth/Authorize",
+    "redirect_uri": "https://redirect.uri/callback",
+    "state": "3(#0/!~",
+    "egroup": "alice-p2info",
+    "resource": {
+      "hostname": "oauthresource.web.cern-TEST.ch",
+      "userPath": "/api/User",
+      "groupPath": "/api/Groups",
+      "port": 8443
+    }
+  },
+  "zeromq": {
+    "sub": {
+      "ip": "127.0.0.1",
+      "port": 3000
+    },
+    "req": {
+      "ip": "127.0.0.1",
+      "port": 3001
+    }
+  },
+  "http": {
+    "port": 8181,
+    "portSecure": 8443,
+    "key": "test.key",
+    "cert": "test.pem",
+    "tls": false
+  },
+  "mysql": {
+    "host": "127.0.0.1",
+    "user": "root",
+    "password": "",
+    "database": "INFOLOGGER",
+    "port": 3306
+  },
+  "log": {
+    "infologger": {
+      "host": "127.0.0.1",
+      "port": 6102,
+      "execPath": "/bin/log"
+    }
+  }
+}

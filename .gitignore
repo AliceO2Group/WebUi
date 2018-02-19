@@ -1,7 +1,7 @@
 node_modules
-config.json
+Backend/config.json
 error.log
 npm-debug.log
 .DS_Store
 .nyc_output
-public/libs/
+*.pem

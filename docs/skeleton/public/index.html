@@ -1,0 +1,25 @@
+<!doctype html>
+<title>Frontend Skeleton</title>
+<link rel="stylesheet" href="/css/src/bootstrap.css">
+
+<!-- First, load the session from the query string passed from server side -->
+<script type="module">
+import sessionService from '/js/src/sessionService.js';
+sessionService.loadAndHideParameters();
+</script>
+
+<!-- Main application controller -->
+<script type="module">
+// Import MVC
+import {mount} from '/js/src/index.js';
+import view from './view.js';
+import Model from './model.js';
+
+// Start application
+const model = new Model();
+const debug = true; // shows when redraw is done
+mount(document.body, view, model, debug);
+
+// Expose model as global to interract with in the console
+window.model = model;
+</script>
