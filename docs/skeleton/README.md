@@ -1,34 +1,32 @@
-# Start a new project
+# Starting a new project
 
-A template project is available to begin with a working project containing a simple demo application that you will change according to your specifications.
+A template project is available quickly bootstrap a new project. Sample code has been provided that can be adjusted to your needs.
 
-### 1. Get the skeleton template
+### 1. Fetch skeleton template
+...that contains a minimal code.
 
 ```bash
-git clone this-repos
-cp -R this-repos/docs/skeleton ./newproject
+git clone https://github.com/AliceO2Group/Gui.git
+cp -R Gui/docs/skeleton ./newproject
 cd newproject
 ```
 
-It contains a minimal application. Let's turn it on.
-
-### 2. Install the framework as dependency
+### 2. Add the framework to dependency list
 
 ```bash
-npm init # fill the questions
+npm init
 npm install --save @aliceo2/aliceo2-gui
 ```
+More about `npm init` and `package.json` in the [official docunmentation](https://docs.npmjs.com/files/package.json).
 
-You can fill with blank field, to understand those fields go [to the official doc](https://docs.npmjs.com/files/package.json).
+### 3. Launch the application
 
-### 3. See it in action
-
-Start the project's server
+Start the server
 
 ```bash
 node index.js
 ```
 
-Open your browser and go to [http://127.0.0.1:8080](http://127.0.0.1:8080).
+Open your browser and navigate to [http://127.0.0.1:8080](http://127.0.0.1:8080).
 
-To understand it you can follow [this tutorial](../tutorial/time-server.md).
+To build a sample application step-by-step follow [Time server tutorial](../tutorial/time-server.md).
