@@ -30,9 +30,9 @@ npm install @aliceo2/aliceo2-gui
 
 ### Backend guide
 * [HTTPS server](./docs/guide/http-server.md) - serves custom REST API, supports TLS
-* [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
+* [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token
 * [Logging](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
-* [OAuth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
+* [OAuth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups
 * [WebSockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
 * [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
