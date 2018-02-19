@@ -29,12 +29,12 @@ npm install @aliceo2/aliceo2-gui
 - [Starting a new project](docs/skeleton/README.md)
 
 ### Backend guide
-* [https](./docs/guide/http-server.md) - serves custom REST API, supports TLS
-* [jwt](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
-* [log](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
-* [oauth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
-* [websockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
-* [zeromq](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
+* [HTTPS server](./docs/guide/http-server.md) - serves custom REST API, supports TLS
+* [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
+* [Logging](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
+* [OAuth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
+* [WebSockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
+* [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
 ### Frontend guide
 - [Hyperscript and vnode](./docs/guide/hyperscript-vnode.md) - Manipulate the HTML view with Javascript
