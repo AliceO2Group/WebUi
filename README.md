@@ -52,9 +52,6 @@ npm install @aliceo2/aliceo2-gui
 * [Frontend JS](docs/reference/frontend-js.md)
 * [Frontend CSS](docs/reference/frontend-css.md)
 
-### Project skeleton
-The skeleton of a project using this framework can be found in [docs/skeleton](docs/skeleton).
-
 ### Documentation for developers
 * [Development environment](docs/DEV.md)
 * [Functional architecture and data flow](docs/ARCH.md)
