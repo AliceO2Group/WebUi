@@ -1,26 +1,22 @@
 # Overview
 
-This framework is a client/server user-interface using Javascript on both sides to build rich web applications. It is made for O2 project at CERN/ALICE.
+This framework provides necessary services and building blocks to easily create rich web applications.
 
-There are two main part:
-- the server which contains the core business and can access the data you want to provide to users
-- the client which is a simple browser that will connect to the server to start the web application, this app will then ask server for updates
+#### Server-side features
+- REST and WebSocket API
+- Authentication via CERN OAuth 2.0 and authorization via CERN e-groups
+- Communication integrity ensured by JSON Web Tokens
+- External resource access: MySQL, ZeroMQ
 
-Every generic or common part of your needs are included in this framework so you only need to write few lines of code.
+#### Client side-features
+- User interface CSS building blocks in accordance with ALICE standards
+- Asynchronous data fetching, WebSocket client
+- Client side MVC engine to build advanced user interfaces
 
-### What is provided by the framework
+### To create a full functional web application
+- Connect server with external resources
+- Connect client with server by defining custom REST paths or WebSocket messages
+- Choose building blocks to create user interface
+- Define model and control of client side application
 
-- a JS server with OAuth authentification
-- common tools to define REST and WebSocket API
-- a JS client engine to make a powerful interface
-- a CSS framework to build great looking interface
-
-### What you need to provide
-
-- define a REST API according to your specifications
-- connect this API to your data-sources
-- write client models to use it
-- create a great user experience
-- package and ship your application on server
-
-Follow the next link to [start a new project](../skeleton/README.md).
+Follow the link to [start a new project](../skeleton/README.md).

@@ -21,7 +21,7 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 
 ### Installation
 ```
-npm install --save @aliceo2/aliceo2-gui
+npm install @aliceo2/aliceo2-gui
 ```
 
 ### Getting started
