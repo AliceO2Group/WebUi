@@ -36,10 +36,10 @@ We can integrate promises with an observable model:
 
 ```js
 class Model extends Observable {
-  fetchImages() {
-    return fetch('/api/images')
-      .then((images) => this.setImages(images))
-      .catch((error) => this.handleErrors(error));
+  async fetchImages() {
+    const response = await fetch('/api/images').catch((error) => this.handleErrors(error));
+    const images = await response.json();
+    this.setImages(images);
   }
 
   setImages(images) {
@@ -54,7 +54,7 @@ class Model extends Observable {
 }
 ```
 
-The method fetchImages will create a network request and return a promise. When the promise is finished it will either call the success method or a generic handler.
+The method fetchImages will create a network request and return a promise. When the promise is finished it will either call the success method or a generic handler. The `then` method can be replaced with the `await` keyword so the function pauses while waiting for ans answer. You can also catch the error with a `try catch` or by using the `catch` method of the promise object.
 
 Because you often have a lot of requests, it is a efficient to have a generic handler for errors which will for example print an error message to the user.
 
@@ -66,7 +66,7 @@ Here is a practical example where we don't want the user to request again when a
 
 ```js
 class Model extends Observable {
-  fetchImages() {
+  async fetchImages() {
     if (this.fetchingImages) {
       return;
     }
@@ -74,17 +74,12 @@ class Model extends Observable {
     this.fetchingImages = true;
     this.notify();
 
-    return fetch('/api/images')
-      .then((images) => {
-        this.setImages(images);
-      })
-      .catch((error) => {
-        this.handleErrors(error);
-      })
-      .finally((error) => {
-        this.fetchingImages = false;
-        this.notify();
-      });
+    const response = await fetch('/api/images').catch((error) => this.handleErrors(error));
+    const images = await response.json();
+    this.setImages(images);
+
+    this.fetchingImages = false;
+    this.notify();
   }
 
   setImages(images) {
