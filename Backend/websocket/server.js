@@ -66,7 +66,7 @@ class WebSocket {
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
             const res = this.callbackArray[req.getCommand()](req);
             // 4. Verify that response is type of WebSocketMessage
-            if (res.constructor.name === 'WebSocketMessage') {
+            if (res && res.constructor.name === 'WebSocketMessage') {
               if (typeof res.getCommand() !== 'string') {
                 res.setCommand(req.getCommand());
               }
@@ -99,6 +99,7 @@ class WebSocket {
         client.on('message', (message) => this.onmessage(message, client));
         client.on('close', () => this.onclose());
         client.on('pong', () => client.isAlive = true);
+        client.on('error', (err) => log.error(`WebSocket - Connection ${err.code}`));
       }, (error) => {
         log.warn(`WebSocket - ${error.name} : ${error.message}`);
         client.close(1008);

@@ -43,4 +43,5 @@ ws.bind('stream-date', () => {
       new WebSocketMessage(200).setCommand('server-date').setPayload({date: new Date()})
     );
   }, 100);
+  return new WebSocketMessage(200).setCommand('stream-date');
 });
