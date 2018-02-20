@@ -21,20 +21,23 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 
 ### Installation
 ```
-npm install --save @aliceo2/aliceo2-gui
+npm install @aliceo2/aliceo2-gui
 ```
 
 ### Getting started
 - [Overview](docs/guide/overview.md)
 - [Starting a new project](docs/skeleton/README.md)
 
+### Tutorials
+* [Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
+
 ### Backend guide
-* [https](./docs/guide/http-server.md) - serves custom REST API, supports TLS
-* [jwt](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token (required for `https` and `websockets` modules)
-* [log](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
-* [oauth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups (optional for `https` module)
-* [websockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
-* [zeromq](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
+* [HTTPS server](./docs/guide/http-server.md) - serves custom REST API, supports TLS
+* [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token
+* [Logging](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
+* [OAuth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups
+* [WebSockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
+* [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
 ### Frontend guide
 - [Hyperscript and vnode](./docs/guide/hyperscript-vnode.md) - Manipulate the HTML view with Javascript
@@ -48,14 +51,6 @@ npm install --save @aliceo2/aliceo2-gui
 * [Backend](docs/reference/backend.md)
 * [Frontend JS](docs/reference/frontend-js.md)
 * [Frontend CSS](docs/reference/frontend-css.md)
-
-### Tutorials
-* [On-demande and real-time time server with a Ajax and WebSocket](./docs/tutorial/time-server.md)
-* [Hello World - quick start copy/paste](./docs/tutorial/hello-world.md)
-* [Pasta Timer - step by step](./docs/tutorial/pasta-timer.md)
-
-### Project skeleton
-The skeleton of a project using this framework can be found in [docs/skeleton](docs/skeleton).
 
 ### Documentation for developers
 * [Development environment](docs/DEV.md)
