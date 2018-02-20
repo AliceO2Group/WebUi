@@ -12,7 +12,7 @@ export default function view(model) {
       h('div', [
         h('button', {onclick: e => model.increment()}, '++'),
         h('button', {onclick: e => model.decrement()}, '--'),
-        h('button', {onclick: e => model.getDate()}, 'Get date from server'),
+        h('button', {onclick: e => model.fetchDate()}, 'Get date from server'),
         h('button', {onclick: e => model.streamDate()}, 'Stream date from server'),
       ])
     ])

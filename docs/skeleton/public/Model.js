@@ -36,15 +36,11 @@ export default class Model extends Observable {
     this.notify();
   }
 
-  getDate() {
-    fetchClient('/api/getDate', {
-      method: 'POST',
-    })
-      .then((response) => response.json())
-      .then((content) => {
-        this.date = content.date;
-        this.notify();
-      });
+  async fetchDate() {
+    const response = await fetchClient('/api/getDate', {method: 'POST'});
+    const content = await response.json();
+    this.date = content.date;
+    this.notify();
   }
 
   streamDate() {
