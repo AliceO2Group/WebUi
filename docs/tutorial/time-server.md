@@ -1,56 +1,48 @@
-# Time server
+# Tutorial - Time server
 
-We are going to build a time server allowing a user to get a remote date.
+This tutorial explains how to develop a time server that pushes time updates to client side.
 
 You will learn:
-* how to create a new project using this framework
-* how to start it and see it in action
-* how to build a web application using [hyperscript](../guide/hyperscript-vnode.md)
-* how communication is made between client and server
-* how to change the interface
+* How to create a new project based on this framework
+* How to launch it
+* How to build a web user interface using [hyperscript](../guide/hyperscript-vnode.md)
+* How server communicates with client
 
-### Start a new project
+### Starting a new project
 
-First we will use the existing documentation to start a new project.
+At first use the [project skeleton](../skeleton/README.md) to start a new project.
 
-Just follow the instruction [here from the skeleton](../skeleton/README.md).
+This will provide you with sample web application. Open it in the browser and click on `++` and `--` to change the local counter.
+You can also click on the two other buttons to request the server to push a current date.
 
-You have now a client/server working. Click on `++` and `--` to change the local counter.
-You can also click on the two other button to ask the remote date of the server.
+### Files overview
 
-### Overview of the architecture
-
-In your project you can see this files and folders:
-
-* package.json - contains de dependencies
-* config.js - contains the configuration, a basic one here
-* index.js - the server main file
-* public - folder with the web application
+* package.json - dependencies and scripts
+* config.js - basic configuration
+* index.js - server main file
+* public - folder with client side application
 * public/Model.js - the root class of your model
 * public/view.js - the root function of the view
-* public/index.html - the page seen by users, containing the controller
+* public/index.html - main web pages, contains controller
 
-When you need to create more models, you can follow [this guide on how to scale](../guide/scale-app.md) your application.
+If you need to create additional model just follow the guide on [how to scale](../guide/scale-app.md) your application.
 
-### Server side
+### Explaining server side
 
-Open the `index.js` file at the root of the skeleton.
+Open the `index.js` file in an editor.
 
-To understand all classes and methods you will need to read the [backend API reference](../reference/backend.md).
-
-First we import those tools to create a web server and socket server. `@aliceo2/aliceo2-gui` is the package you installed before with `npm install --save`.
+First line is responsible for importing framework modules: `HttpServer`, `Log`, `WebSocket`, `WebSocketMessage`.
 
 ```js
 const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2-gui');
 ```
-
-Before instanciating it, we need to require the configuration file. It is good practice to put it at the root of your project. Prefer using a `js` file instead of `json` to allow comments on values.
+Then the configuration file is loaded. It is good practice to include it in the root file of your project. Prefer using a `js` file instead of `json` to allow comments on values.
 
 ```js
 const config = require('./config.js');
 ```
 
-Then we instanciate the servers and expose the public folder we seen before.
+Afterwards an instanciate of the HTTP and WebSocket servers is created and `./public` folder serveed.
 
 ```js
 const http = new HttpServer(config.http, config.jwt);
@@ -58,7 +50,7 @@ const ws = new WebSocket(http);
 http.addStaticPath('./public');
 ```
 
-The application part is the API defined. For our time server, we want to provide a RPC way to get the date via the REST API.
+Next step is definition of HTTP POST server path (`/api/getDate`) which provides current date.
 
 ```js
 http.post('/getDate', (req, res) => {
@@ -66,9 +58,7 @@ http.post('/getDate', (req, res) => {
 });
 ```
 
-This will answer with an object containing the date for each POST request to the endpoint "/api/getDate".
-
-We also want to stream the date via websocket, which acts like a TCP/IP socket. To broadcast a message we use the `ws` instance like this:
+The date could be also server pushed via WebSocket. To broadcast a message to all connected client run:
 
 ```js
 ws.broadcast(
@@ -76,7 +66,7 @@ ws.broadcast(
 );
 ```
 
-We will send the date every 100ms as a "server-date" message if we receive the "stream-date" command from the client. If we receive it again, we will stop it by killing the timer of 100ms.
+The date will be pushed by server every 100ms as a "server-date" message. This action will be trigged when clients sends "stream-date" command. If the command is received once again it will stop the updates.
 
 ```js
 let streamTimer = null;
@@ -98,26 +88,24 @@ ws.bind('stream-date', (body) => {
 });
 ```
 
-That's it, let's go to the frontend.
-
 ### Client side - index.html
 
-The index.html contains what is needed to boot the framework, you may not need it to be modified. Except for the title.
+The `index.html` file contains includes the framework. It is unlikely that it needs any modifications.
 
-It imports the CSS for make good looking interfaces.
+It imports the CSS bootstrap
 
 ```html
 <link rel="stylesheet" href="/css/src/bootstrap.css">
 ```
 
-It gets some variables sent from the server, store it, and remove it from the URL, you cannot see it, but it's good to know what's going on. You can use the [inspector](../guide/debug.md) of your browser to see the original page URL inside "network" tab.
+It includes parameter service that parses the URL to recover variables provided by the server and store them in global context. It also clears the URL so variables are invisible for users of the application. You can use the browsers [inspector](../guide/debug.md) to find out the original URL (go to "network" tab).
 
 ```js
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
 ```
 
-Then we import the MVC parts using Javascript modules.
+Then the MVC files are imported using Javascript modules.
 
 ```js
 import {mount} from '/js/src/index.js';
@@ -125,7 +113,7 @@ import view from './view.js';
 import Model from './model.js';
 ```
 
-And finally we instanciate it. The application is running and the page should show something.
+And finally, the instanciates of M, V, C are created.
 
 ```js
 const model = new Model();
@@ -135,9 +123,9 @@ mount(document.body, view, model, debug);
 
 ### Client side - Model.js
 
-After viewing the main controller, we can go to the model of the application. In the skeleton one file provides it: "model.js" as seen in the importation of "index.html". The model is a class which inherit the `Observable` class, thus providing a way to listen to any change of it's internal data. The controller will listen to this and render the view.
+After going through the simple controller (`index.html`), you can take a look at the model of the application: `Model.js`. The model is a class which inherits the `Observable` class which  notifies about any changes in  the model. Based on this notifications the controller will re-render the view.
 
-Here is a simple example of a model declaration (you can open Model.js to see the while file):
+Here is a simple example of a model declaration (you can open Model.js to see it all):
 
 ```js
 // Import frontend framework
@@ -151,15 +139,15 @@ export default class Model extends Observable {
 }
 ```
 
-We import everything about data from the framework:
-- the `Observable` class, to listen to the model's changes
-- a `fetchClient` function to make Ajax calls
-- and a stream class `WebSocketClient`
+First line imports client side of theframework:
+- `Observable` to listen to the models changes
+- `fetchClient` to hadle Ajax requests
+- `WebSocketClient` to communicate with WebSocket server
 See the [reference API](../reference/frontend-js.md) for more details.
 
-As you can see, we also export the class as the default exportation, [see more information on import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) which is part of ES6 (Javascript version ECMAScript 6 or ECMAScript 2015, it's the same name for the same thing).
+Them the `Model` class is exported - [see more information on import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) which is part of ES6 (ECMAScript 6 or ECMAScript 2015).
 
-Basically, we need to declare the data structure first in the constructor.
+The constructor should be extended to define data structure of the model.
 
 ```js
   constructor() {
