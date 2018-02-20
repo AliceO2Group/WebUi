@@ -50,7 +50,7 @@ npm install @aliceo2/aliceo2-gui
 ### API Reference
 * [Backend](docs/reference/backend.md)
 * [Frontend JS](docs/reference/frontend-js.md)
-* [Frontend CSS](docs/reference/frontend-css.md)
+* [Frontend CSS](https://aliceo2group.github.io/Gui/docs/reference/frontend-css.html)
 
 ### Documentation for developers
 * [Development environment](docs/DEV.md)
