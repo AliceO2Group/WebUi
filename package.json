@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "express": "^4.16.2",
-    "helmet": "^3.10.0",
+    "helmet": "^3.11.0",
     "jsonwebtoken": "^8.1.1",
     "mithril": "^1.1.6",
     "mysql": "^2.15.0",
@@ -29,10 +29,10 @@
     "babel-core": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
-    "eslint": "^4.16.0",
+    "eslint": "^4.18.0",
     "eslint-config-google": "^0.9.1",
     "jsdom": "^11.6.2",
-    "mocha": "^5.0.0"
+    "mocha": "^5.0.1"
   },
   "main": "Backend/index.js",
   "files": [
