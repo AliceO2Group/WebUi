@@ -160,9 +160,10 @@ The constructor should be extended to define data structure of the model.
   }
 ```
 
-We have a local counter `count`, the current `date` from the remote server and a websocket instance followed by a method instanciating it.
+The model consists of a local counter `count`, the current `date`  provided by the HTTP or WebSocket server via `fetchClient` or WebSocket client respectively..
 
-Let's go to the simplest action of a model, updating itself. We want to increment and decrement the internal counter for example when a user click on a button. So we provide an API of two methods here.
+Let's simply update the model. 
+To increment and decrement the internal counter (eg. when a user clicks a button) two methods are defined:
 
 ```js
   increment() {
@@ -176,9 +177,9 @@ Let's go to the simplest action of a model, updating itself. We want to incremen
   }
 ```
 
-In both cases, we call `notify`, observers will understand that the model has changed, the controller is an observer and will redraw the view. It is important to always `notify` when data has changed.
+In both cases `notify` is called to inform `Observer` that the model has changed. This will cause the Controller to redraw the view. It is important to always `notify` when data has changed.
 
-Notice that all method in Javascript are public. By convention you can put a `_` before the name to say it's private, just like `_prepareWebSocket`.
+Notice that all the methods are public. By convention prepend method name with `_` to make it private (like `_prepareWebSocket`).
 
 Then we want some communication with the server (to get the current date of it). We use Ajax for this, which makes request/response calls with the server. Its implementation is done though the framework's `fetchClient`, a wrapper of the native `fetch` function (it wraps the session key for you).
 
