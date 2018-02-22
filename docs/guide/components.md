@@ -16,7 +16,7 @@ function title() {
 }
 ```
 
-Because components are pure functios we can use their properties, they are composable:
+Because components are pure functions we can use their properties, they are composable:
 
 ```js
 function title() {

@@ -10,12 +10,12 @@ In [this tutorial](../tutorial/time-server.md) you can see a single model (one f
   - userList.js (view, camelCase)
   - userItem.js (view, camelCase)
   - userAvatar.js (view, camelCase)
-  - user.css (facultative style, camelCase)
+  - user.css (optional style, camelCase)
 ```
 
 This allows you to have everything concerning a module in the same place, you can then import it as needed.
 
-For common things accross the application like a header or a menu, a `common` module (folder) can be made for example.
+For common things across the application like a header or a menu, a `common` module (folder) can be made for example.
 
 ### View
 
