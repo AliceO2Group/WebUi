@@ -1,87 +1,68 @@
-# Time server
+# Tutorial - Time server
 
-We are going to build a time server allowing a user to get a remote date.
+This tutorial explains how to develop a time server. The server provides the time either by:
+* response to HTTP request
+* WebSocket protocol server push
 
 You will learn:
-* how to create a new project using this framework
-* how to start it and see it in action
-* how to build a web application using [hyperscript](../guide/hyperscript-vnode.md)
-* how communication is made between client and server
-* how to change the interface
+* How to create a new project based on this framework
+* How to launch your project
+* How to build a web user interface using [hyperscript](../guide/hyperscript-vnode.md)
+* How server communicates with client
 
-### Start a new project
+### Starting a new project
 
-First we will use the existing documentation to start a new project.
+At first, use the [project skeleton](../skeleton/README.md) to start a new project.
 
-Just follow the instruction [here from the skeleton](../skeleton/README.md).
+This will provide you with basic web application. Start the server and open the application in the browser. You can click on `++` and `--` to change the local counter.
+You can also click on the two other buttons to request the server to push a current time.
 
-You have now a client/server working. Click on `++` and `--` to change the local counter.
-You can also click on the two other button to ask the remote date of the server.
+### Files overview
 
-### Overview of the architecture
-
-In your project you can see this files and folders:
-
-* package.json - contains de dependencies
-* config.js - contains the configuration, a basic one here
-* index.js - the server main file
-* public - folder with the web application
-* public/Model.js - the root class of your model
+* package.json - dependencies and scripts
+* config.js - basic configuration
+* index.js - server main file
+* public - folder with client side application
+* public/Model.js - the root class of the model
 * public/view.js - the root function of the view
-* public/index.html - the page seen by users, containing the controller
+* public/index.html - main web pages, contains controller
 
-When you need to create more models, you can follow [this guide on how to scale](../guide/scale-app.md) your application.
+### Explaining server side
 
-### Server side
+Open the `index.js` file.
 
-Open the `index.js` file at the root of the skeleton.
-
-To understand all classes and methods you will need to read the [backend API reference](../reference/backend.md).
-
-First we import those tools to create a web server and socket server. `@aliceo2/aliceo2-gui` is the package you installed before with `npm install --save`.
-
+The first line is responsible for importing framework modules: `HttpServer`, `Log`, `WebSocket`, `WebSocketMessage`.
 ```js
 const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2-gui');
 ```
 
-Before instanciating it, we need to require the configuration file. It is good practice to put it at the root of your project. Prefer using a `js` file instead of `json` to allow comments on values.
-
+Then, the configuration file is loaded. It is good practice to include it in the root file of the project. Prefer using a `js` file instead of `json` to allow comments on values.
 ```js
 const config = require('./config.js');
 ```
 
-Then we instanciate the servers and expose the public folder we seen before.
-
+Afterwards an instance of the HTTP server is created and `./public` folder served (`http://localhost:8080/public`).
 ```js
-const http = new HttpServer(config.http, config.jwt);
-const ws = new WebSocket(http);
-http.addStaticPath('./public');
+const httpServer = new HttpServer(config.http, config.jwt);
+httpServer.addStaticPath('./public');
 ```
 
-The application part is the API defined. For our time server, we want to provide a RPC way to get the date via the REST API.
-
+Next step define of HTTP POST path (accessible by `/api/getDate`) which provides current time.
 ```js
-http.post('/getDate', (req, res) => {
+httpServer.post('/getDate', (req, res) => {
   res.json({date: new Date()});
 });
 ```
 
-This will answer with an object containing the date for each POST request to the endpoint "/api/getDate".
-
-We also want to stream the date via websocket, which acts like a TCP/IP socket. To broadcast a message we use the `ws` instance like this:
-
-```js
-ws.broadcast(
-  new WebSocketMessage(STATUS).setCommand(COMMAND).setPayload(OBJECT)
-);
-```
-
-We will send the date every 100ms as a "server-date" message if we receive the "stream-date" command from the client. If we receive it again, we will stop it by killing the timer of 100ms.
+The other way of communicating with the server is WebSocket protocol. It allows to work in request-reply mode or broadcast the data to all connected clients.
+The code below will start pushing the time every 100ms as a "server-date" message when server receives "stream-date" command from a client. If the command is received once again it will stop the updates.
 
 ```js
+const wsServer = new WebSocket(httpServer);
+
 let streamTimer = null;
 
-ws.bind('stream-date', (body) => {
+wsServer.bind('stream-date', (body) => {
   if (streamTimer) {
     clearInterval(streamTimer);
     streamTimer = null;
@@ -91,54 +72,47 @@ ws.bind('stream-date', (body) => {
   Log.info('start timer');
 
   streamTimer = setInterval(() => {
-    ws.broadcast(
+    wsServer.broadcast(
       new WebSocketMessage(200).setCommand('server-date').setPayload({date: new Date()})
     );
   }, 100);
 });
 ```
 
-That's it, let's go to the frontend.
+### Explaining client side - Controller
 
-### Client side - index.html
-
-The index.html contains what is needed to boot the framework, you may not need it to be modified. Except for the title.
-
-It imports the CSS for make good looking interfaces.
-
+Open `index.html` file. First line imports the CSS bootstrap
 ```html
 <link rel="stylesheet" href="/css/src/bootstrap.css">
 ```
 
-It gets some variables sent from the server, store it, and remove it from the URL, you cannot see it, but it's good to know what's going on. You can use the [inspector](../guide/debug.md) of your browser to see the original page URL inside "network" tab.
+It includes session service that recovers variables provided by the server via URL and store them in a global context. Then, it clears the URL so variables are invisible for users of the application. You can use the [browser inspector](../guide/debug.md) to find out the original URL ("network" tab).
 
 ```js
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
 ```
 
-Then we import the MVC parts using Javascript modules.
-
+Then the MVC files are imported using Javascript modules.
 ```js
 import {mount} from '/js/src/index.js';
 import view from './view.js';
 import Model from './model.js';
 ```
 
-And finally we instanciate it. The application is running and the page should show something.
-
+And finally, the instance of model is created and `mount` called.
+The `mount()` function attaches the root view and model to the `body` of the document. The last argument is a flag that enables timing of re-draw process. This value is printed in the console.
 ```js
 const model = new Model();
 const debug = true; // shows when redraw is done
 mount(document.body, view, model, debug);
 ```
 
-### Client side - Model.js
+### Explaining client side - Model
 
-After viewing the main controller, we can go to the model of the application. In the skeleton one file provides it: "model.js" as seen in the importation of "index.html". The model is a class which inherit the `Observable` class, thus providing a way to listen to any change of it's internal data. The controller will listen to this and render the view.
+After going through the controller you can take a look at the model of the application, which is defined in the `public/Model.js` file. The model is a class which inherits from `Observable`. Class `Observable` notifies about any changes in the model. Based on these notification the controller re-renders the view.
 
-Here is a simple example of a model declaration (you can open Model.js to see the while file):
-
+Here is a minimal code of a Model class
 ```js
 // Import frontend framework
 import {Observable, fetchClient, WebSocketClient} from '/js/src/index.js';
@@ -151,30 +125,29 @@ export default class Model extends Observable {
 }
 ```
 
-We import everything about data from the framework:
-- the `Observable` class, to listen to the model's changes
-- a `fetchClient` function to make Ajax calls
-- and a stream class `WebSocketClient`
-See the [reference API](../reference/frontend-js.md) for more details.
+First line imports client side of the framework:
+- `Observable` to listen to the model changes
+- `fetchClient` to handle Ajax requests
+- `WebSocketClient` to communicate with WebSocket server
+See the [JS reference](../reference/frontend-js.md) for more details.
 
-As you can see, we also export the class as the default exportation, [see more information on import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) which is part of ES6 (Javascript version ECMAScript 6 or ECMAScript 2015, it's the same name for the same thing).
+The export keyword of the `Model` class allows it to be imported in other files - see more information on [import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
 
-Basically, we need to declare the data structure first in the constructor.
-
+Extend the constructor with additional variables to define the full model:
+- `count` - local counter
+- `date` - the current
+- `ws` - WebSocket client (to be defined in the next steps)
 ```js
   constructor() {
     super();
     this.count = 0;
     this.date = null;
     this.ws = null;
-
-    this._prepareWebSocket();
   }
 ```
 
-We have a local counter `count`, the current `date` from the remote server and a websocket instance followed by a method instanciating it.
-
-Let's go to the simplest action of a model, updating itself. We want to increment and decrement the internal counter for example when a user click on a button. So we provide an API of two methods here.
+Now some operation on the model can be defined. 
+To increment and decrement the internal counter (eg. when a user clicks a button) two methods are defined:
 
 ```js
   increment() {
@@ -188,12 +161,9 @@ Let's go to the simplest action of a model, updating itself. We want to incremen
   }
 ```
 
-In both cases, we call `notify`, observers will understand that the model has changed, the controller is an observer and will redraw the view. It is important to always `notify` when data has changed.
+In both cases `notify` is called to inform `Observer` that the model has changed. This will cause the Controller to redraw the view. It is necessary to always call `notify` when data has changed.
 
-Notice that all method in Javascript are public. By convention you can put a `_` before the name to say it's private, just like `_prepareWebSocket`.
-
-Then we want some communication with the server (to get the current date of it). We use Ajax for this, which makes request/response calls with the server. Its implementation is done though the framework's `fetchClient`, a wrapper of the native `fetch` function (it wraps the session key for you).
-
+The next step is fetching the data from the server (in order to get current time). To make it asynchronous Ajax requests should be used. This can be done by the `fetchClient` method provided by the framework.
 ```js
   async fetchDate() {
     const response = await fetchClient('/api/getDate', {method: 'POST'});
@@ -202,13 +172,14 @@ Then we want some communication with the server (to get the current date of it).
     this.notify();
   }
 ```
+The `fetchDate` uses `fetchClient` to request time from `'/api/getDate'` path using `POST` method. On success it returns JSON object. The object is parsed, model updated and then `notify` called.
+If you look at the code, both `fetchClient` and `response.json` methods have `await` keyword in front. This makes the method calls synchronous (it will block until the result is available). To read more about Ajax calls go to [Async calls guide](../guide/async-calls.md).
 
-This method `fetchDate` will ask `fetchClient` to make a request to the URL `'/api/getDate'` with the method `POST`. The result is a promise, an object that will contain the asked value in the future and will notice you if it successes or fails, see [this guide](../guide/async-calls.md) for more information. For this reason, put `wait` in front to wait the result, the method must also be declared as `async` because it can be blocked (waiting for all instructions to finish).
-
-On success, the method will transform the `response` into a json content (object), and we can update the internal property with `this.date = content.date`, we also don't forget to `notify` to change the view.
-
-The other way of communicating is a websocket (WS) for bi-directional communication. We need to instanciate the socket, then listen to some events and send some requests.
-
+The other way of communicating with server are WebSockets - bi-directional communication protocol.
+Create an instance of the WebSocket client. Then you can either send or listen to messages. 
+The following `this._prepareWebSocket()` method (note that by convention all method names prepended with `_` are private) listens to two events: 
+ -  `authed` - notifies that client has successfully authorized by the server (automatically generated by server)
+ - `server-date` - custom message that includes server's time (as defined in the [Explaining server side](#explaining-server-side) section - look for `wsServer.bind`)
 ```js
 _prepareWebSocket() {
   // Real-time communication with server
@@ -224,29 +195,32 @@ _prepareWebSocket() {
   });
 }
 ```
+Add this method call to the constructor.
 
-Here we listen to two events: `authed` and `server-date`. The first one is a `WebSocketClient` event just to let you know that the socket is authentified and can be used (session layer of OSI). The second one is a message from the server (application layer of OSI).
-
-To receive some `server-date` events containing the date the server wants to the client to send `stream-date` (remember we did a `ws.bind` in index.js). The method is written like this:
-
+The only missing part is sending the message, enabling time message streaming, to the server. The message should have a command name `stream-date`. In addition, server accepts filters (`ws.setFilter`). The filter is a function assigned on client basis. This function should return `true` or `false` depending whether client wishes to receive it or not.
 ```js
   streamDate() {
     if (!this.ws.authed) {
-      return alert('WS not authed, wait and retry');
+      return alert('WebSocket not authenticated, please retry in a while');
     }
     this.ws.sendMessage({command: 'stream-date', message: 'message from client'});
     this.ws.setFilter(function(e) {return true;});
   }
 ```
 
-We check that the socket is open and authentified to avoid errors and then we can send a message containing a command and some other properties we want to send. Because streaming can use a lot of bandwidth, the WS connection has a filter on the server side for broadcasting. And because we don't want to filter for now we just put a function returning always true `function(e) {return true;}`. The function will be sent to the server, the argument `e` is the message to check.
+If you need to create additional model just follow the guide on [how to scale](../guide/scale-app.md) your application.
 
-Usually, a bigger project will nee more models, this means more files that you will place intro folders to tidy things up. You can follow [this guide on how to scale your application](../guide/scale-app.md) for this.
+### Client side - View.
 
-### Client side - view.js
+Open `public/view.js` file.
+This requires basic knowledge of CSS and the DOM tree.
 
-For the last part, let's take a look at the view. You need to learn how to use CSS and the basic elements of the DOM tree, but the engine itself of the framework is simple.
+At first import the [hyperscript](../guide/hyperscript-vnode.md) function `h()` which represent the DOM elements. The `h()` function accepts three arguments:
+1. Tag name
+2. Object attributes
+3. List of [vnodes](../guide/hyperscript-vnode.md) which can be recursively created by `h()`.
 
+Then the `view` function is specified. It receives Model as argument.
 ```js
 import {h} from '/js/src/index.js';
 
@@ -269,14 +243,6 @@ export default function view(model) {
   );
 }
 ```
+Now focus on the button, each on them specified `onclick` attribute which calls the model's methods. As described in the [Explaining client side - Model](#explainig-client-side---model) section these methods modify the model what causes the controller to re-draw the view by calling the `view` method above.
 
-From the framework we import the [hyperscript](../guide/hyperscript-vnode.md) function `h()` to represent the DOM elements. Its first argument is the tag name, the second (facultative) is an object of attributes and the third one is a text content or a list of [vnodes](../guide/hyperscript-vnode.md).
-
-The critical part is on the buttons, under the `onclick` attribute, we define it as an arrow function from ES6 and we call the model's methods. It will be modified, then it will notify the controller and the function `view` above will be called again to redraw the screen.
-
-The controller gives you the model as a single argument to the function `view`. This view is really simple, when the application grow it should be split into more functions and files, see [this guide](../guide/components.md) on how to do that.
-
-### Going further
-
-You can play with this interface to add buttons and change the model and multiply the counter. Maybe you could also change the colors and layout with the [CSS reference](https://aliceo2group.github.io/Gui/docs/reference/frontend-css.html) ?
-
+When the application grows the view can easily scale by splitting it into multiple functions and files, see [components guide](../guide/components.md) explaining that.

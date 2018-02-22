@@ -1,6 +1,6 @@
-// This is default configuration for quick start
-// See the documentation for all fields and possibilities
-
+// This is quick start configuration
+// See the Backend documentation for more details
+//
 module.exports = {
   jwt: {
     secret: 'supersecret',
