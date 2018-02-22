@@ -102,7 +102,7 @@ That's it, let's go to the frontend.
 
 ### Client side - index.html
 
-The index.html contains what is needed to boot the framework, you may not need it to be modified. Except for the title.
+The index.html contains what is needed to boot the framework, as a controller, it may not need it to be modified. Except for the title.
 
 It imports the CSS for make good looking interfaces.
 
