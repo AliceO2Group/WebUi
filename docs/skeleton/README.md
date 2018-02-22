@@ -27,6 +27,6 @@ First, start the server
 node index.js
 ```
 
-Then, open your browser and navigate to [http://127.0.0.1:8080](http://127.0.0.1:8080).
+Then, open your browser and navigate to [http://localhost:8080](http://localhost:8080).
 
 To build a sample application step-by-step follow [Time server tutorial](../tutorial/time-server.md).
