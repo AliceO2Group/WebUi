@@ -4,30 +4,33 @@ const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2
 // Define configuration for JWT tokens and HTTP server
 const config = require('./config.js');
 
-// Instanciate the HTTP and WebSocket servers
-const http = new HttpServer(config.http, config.jwt);
-const ws = new WebSocket(http);
+
+// HTTP server
+// -----------
+//
+// Instanciate the HTTP server
+const httpServer = new HttpServer(config.http, config.jwt);
 
 // Server static content in public directory
-http.addStaticPath('./public');
-
-// ----------------------------------------
-// REST API
-// ----------------------------------------
+httpServer.addStaticPath('./public');
 
 // Declare HTTP POST route availabe under "/api/getDate" path
-http.post('/getDate', (req, res) => {
+httpServer.post('/getDate', (req, res) => {
   res.json({date: new Date()});
 });
 
-// ----------------------------------------
-// WebSocket API
-// ----------------------------------------
 
+// WebSocket server
+// ----------------
+//
+// Instanciate the WebSocket server
+const wsServer = new WebSocket(httpServer);
+
+// Define gloval variable
 let streamTimer = null;
 
-// Declare WebSocket callback for "stream-date" messages
-ws.bind('stream-date', () => {
+// Declare WebSocket callback for 'stream-date' messages
+wsServer.bind('stream-date', () => {
   if (streamTimer) {
     // already started, kill it
     clearInterval(streamTimer);
@@ -35,11 +38,12 @@ ws.bind('stream-date', () => {
     return;
   }
 
+  // Use internal logging
   Log.info('start timer');
 
-  // Send to all clients the date every 100ms
+  // Broadcase the time to all clients every 100ms
   streamTimer = setInterval(() => {
-    ws.broadcast(
+    wsServer.broadcast(
       new WebSocketMessage(200).setCommand('server-date').setPayload({date: new Date()})
     );
   }, 100);

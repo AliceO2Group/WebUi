@@ -43,14 +43,13 @@ const config = require('./config.js');
 
 Afterwards an instanciate of the HTTP and WebSocket servers is created, and then `./public` folder served over HTTP (`http://localhost:8080/public`).
 ```js
-const http = new HttpServer(config.http, config.jwt);
-const ws = new WebSocket(http);
-http.addStaticPath('./public');
+const httpServer = new HttpServer(config.http, config.jwt);
+httpServer.addStaticPath('./public');
 ```
 
 Next step define of HTTP POST path (accessible byy `/api/getDate`) which provides current time.
 ```js
-http.post('/getDate', (req, res) => {
+httpServer.post('/getDate', (req, res) => {
   res.json({date: new Date()});
 });
 ```
@@ -59,9 +58,11 @@ The other way to communicate with the server is WebSocket protocol. It allows to
 The code below will push the time every 100ms as a "server-date" message. This action will be trigged when clients sends a request with "stream-date" command. If the command is received once again it will stop the updates.
 
 ```js
+const wsServer = new WebSocket(httpServer);
+
 let streamTimer = null;
 
-ws.bind('stream-date', (body) => {
+wsServer.bind('stream-date', (body) => {
   if (streamTimer) {
     clearInterval(streamTimer);
     streamTimer = null;
@@ -71,7 +72,7 @@ ws.bind('stream-date', (body) => {
   Log.info('start timer');
 
   streamTimer = setInterval(() => {
-    ws.broadcast(
+    wsServer.broadcast(
       new WebSocketMessage(200).setCommand('server-date').setPayload({date: new Date()})
     );
   }, 100);
