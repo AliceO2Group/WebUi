@@ -47,15 +47,15 @@ const httpServer = new HttpServer(config.http, config.jwt);
 httpServer.addStaticPath('./public');
 ```
 
-Next step define of HTTP POST path (accessible by `/api/getDate`) which provides current time.
+Next step defines of HTTP POST path (accessible by `/api/getDate`) which provides current time.
 ```js
 httpServer.post('/getDate', (req, res) => {
   res.json({date: new Date()});
 });
 ```
 
-The other way of communicating with the server is WebSocket protocol. It allows to work in request-reply mode or broadcast the data to all connected clients.
-The code below will start pushing the time every 100ms as a "server-date" message when server receives "stream-date" command from a client. If the command is received once again it will stop the updates.
+The other way of communicating with the server is the WebSocket protocol. It allows to work in request-reply mode or broadcast the data to all connected clients.
+The code below will start pushing the current time every 100ms as a "server-date" message when server receives "stream-date" command from a client. If the command is received once again it will stop the updates.
 
 ```js
 const wsServer = new WebSocket(httpServer);
@@ -81,13 +81,12 @@ wsServer.bind('stream-date', (body) => {
 
 ### Explaining client side - Controller
 
-Open `index.html` file. First line imports the CSS bootstrap
+Open `public/index.html` file. In the 3rd line CSS bootstrap is imported
 ```html
 <link rel="stylesheet" href="/css/src/bootstrap.css">
 ```
 
-It includes session service that recovers variables provided by the server via URL and store them in a global context. Then, it clears the URL so variables are invisible for users of the application. You can use the [browser inspector](../guide/debug.md) to find out the original URL ("network" tab).
-
+It includes session service that recovers variables provided by the server via URL and store them in a global context.
 ```js
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
@@ -129,6 +128,7 @@ First line imports client side of the framework:
 - `Observable` to listen to the model changes
 - `fetchClient` to handle Ajax requests
 - `WebSocketClient` to communicate with WebSocket server
+
 See the [JS reference](../reference/frontend-js.md) for more details.
 
 The export keyword of the `Model` class allows it to be imported in other files - see more information on [import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
