@@ -19,9 +19,9 @@ Examples:
 - {onclick: e => model.do(), class: 'active'}
 - {style: {backgroundColor: 'red'}}
 
-*children* must be an other vnode, but to homogenize the code is it recommanded to use *childrens*, see bellow.
+*children* must be an other vnode, but to homogenize the code is it recommended to use *children*, see bellow.
 
-*childrens* is an array of vnodes. This representes the tree of the DOM.
+*children* is an array of vnodes. This represents the tree of the DOM.
 Examples:
 - [m('a', 'link 1'), m('a', 'link 2')]
 
@@ -49,4 +49,4 @@ mount(document.body, model => h('h1', model.name), {name: 'John'})
 
 *callback* any function which will be an observer and called when the observable object has its `notify()` function called.
 
-*observable* any other observable object which wants to be notified. This allows to create an observable tree, the root beeing notified if any other tree node has been modified. Avoid circular `bubbleTo` this will produce a stack overflow.
+*observable* any other observable object which wants to be notified. This allows to create an observable tree, the root being notified if any other tree node has been modified. Avoid circular `bubbleTo` this will produce a stack overflow.

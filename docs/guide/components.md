@@ -1,4 +1,4 @@
-# Components
+# Guide - Components
 
 Components are pieces of UI like a menu, a form, etc, thanks to hyperscript it is also a pure function which returns a vnode tree. This is testable, reusable and easy to understand.
 
@@ -16,7 +16,7 @@ function title() {
 }
 ```
 
-Because components are pure functios we can use their properties, they are composable:
+Because components are pure functions we can use their properties, they are composable:
 
 ```js
 function title() {
@@ -30,10 +30,10 @@ function page() {
 }
 ```
 
-A best practice in pure functional programming is to have no side effect. Your components should only rely on constant expressions and always returns the same output for one input. A good way is to use only `const` variables.
+A best practice in pure functional programming is to have no side effect. Your components should only rely on constant expressions and always return the same output for one input. A good way is to use only `const` variables.
 
 ```js
-// ✗ WRONG, side effect
+// ✗ WRONG, it has a side effect
 let count = 0;
 
 function title() {
@@ -43,7 +43,7 @@ function title() {
 
 
 ```js
-// ✗ WRONG, constant variable from dynamic expression
+// ✗ WRONG, it uses a constant variable from a dynamic expression
 const today = new Date();
 
 function title() {

@@ -1,8 +1,8 @@
-# How to scale and architecture
+# How to scale and architecture your application
 
 ### Files
 
-In the tutorials you can see a single model and a single view. But a large application cannot be made as a large file. A good way is to split the code into module like this:
+In [this tutorial](../tutorial/time-server.md) you can see a single model (one file) and a single view (one file). But a large application cannot be made with two large files. A good way is to split the code into modules like this:
 
 ```
 - user (folder, camelCase)
@@ -10,16 +10,16 @@ In the tutorials you can see a single model and a single view. But a large appli
   - userList.js (view, camelCase)
   - userItem.js (view, camelCase)
   - userAvatar.js (view, camelCase)
-  - user.css (facultative style, camelCase)
+  - user.css (optional style, camelCase)
 ```
 
-This allows you to have everything concerning a module in the same place. You can have as many modules as you want. At some point you can ever create a super-module as a folder for some parts of your application.
+This allows you to have everything concerning a module in the same place, you can then import it as needed.
 
-For common things like a `header.js` or `alert.js`, a `common` folder can be made.
+For common things across the application like a header or a menu, a `common` module (folder) can be made for example.
 
 ### View
 
-Inside the view files, avoid to have a big function containing all your page. Try to split in smaller functions and pass the model as parameter each time.
+Inside the view files, avoid to have a big function containing all your page. Try to split in smaller functions, you can then pass the model as a first parameter for each call and the specific variables afterward.
 
 ```js
 export function userList(model) {
@@ -33,7 +33,7 @@ function userListRow(model, user) {
 
 ### Model
 
-The `Observable` model can be, like the view, a tree and all notification event can be bubbled to the root model like this:
+The `Observable` model can be, like the view, a tree of models. Each one will dispatch to its parent a notification if it has been modified through `bubbleTo` method:
 
 ```js
 class Model extends Observable {
@@ -59,6 +59,6 @@ class SubModel extends Observable {
 const model = new Model();
 ```
 
-When a call to `model.submodel.increment()` is made, `model` will be notified and will call all callbacks registered via `model.observe(callbackFunction)`.
+When a call to `model.submodel.increment()` is made, `model` will be notified and will call all listeners (callback functions) registered via `model.observe(callbackFunction)`.
 
 ![Global view of the architecture](../images/architecture-front.jpeg)

@@ -41,21 +41,21 @@ Then, the configuration file is loaded. It is good practice to include it in the
 const config = require('./config.js');
 ```
 
-Afterwards an instance of the HTTP server is created and `./public` folder served (`http://localhost:8080/public`).
+Afterwards an instance of the HTTP server is created and `./public` folder served (`http://localhost:8080/`).
 ```js
 const httpServer = new HttpServer(config.http, config.jwt);
 httpServer.addStaticPath('./public');
 ```
 
-Next step define of HTTP POST path (accessible by `/api/getDate`) which provides current time.
+Next step defines of HTTP POST path (accessible by `/api/getDate`) which provides current time.
 ```js
 httpServer.post('/getDate', (req, res) => {
   res.json({date: new Date()});
 });
 ```
 
-The other way of communicating with the server is WebSocket protocol. It allows to work in request-reply mode or broadcast the data to all connected clients.
-The code below will start pushing the time every 100ms as a "server-date" message when server receives "stream-date" command from a client. If the command is received once again it will stop the updates.
+The other way of communicating with the server is the WebSocket protocol. It allows to work in request-reply mode or broadcast the data to all connected clients.
+The code below will start pushing the current time every 100ms as a "server-date" message when server receives "stream-date" command from a client. If the command is received once again it will stop the updates.
 
 ```js
 const wsServer = new WebSocket(httpServer);
@@ -81,13 +81,12 @@ wsServer.bind('stream-date', (body) => {
 
 ### Explaining client side - Controller
 
-Open `index.html` file. First line imports the CSS bootstrap
+Open `public/index.html` file. In the 3rd line CSS bootstrap is imported
 ```html
 <link rel="stylesheet" href="/css/src/bootstrap.css">
 ```
 
-It includes session service that recovers variables provided by the server via URL and store them in a global context. Then, it clears the URL so variables are invisible for users of the application. You can use the [browser inspector](../guide/debug.md) to find out the original URL ("network" tab).
-
+It includes session service that recovers variables provided by the server via URL and store them in a global context.
 ```js
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
@@ -129,6 +128,7 @@ First line imports client side of the framework:
 - `Observable` to listen to the model changes
 - `fetchClient` to handle Ajax requests
 - `WebSocketClient` to communicate with WebSocket server
+
 See the [JS reference](../reference/frontend-js.md) for more details.
 
 The export keyword of the `Model` class allows it to be imported in other files - see more information on [import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
@@ -146,7 +146,7 @@ Extend the constructor with additional variables to define the full model:
   }
 ```
 
-Now some operation on the model can be defined. 
+Now some operation on the model can be defined.
 To increment and decrement the internal counter (eg. when a user clicks a button) two methods are defined:
 
 ```js
@@ -161,7 +161,7 @@ To increment and decrement the internal counter (eg. when a user clicks a button
   }
 ```
 
-In both cases `notify` is called to inform `Observer` that the model has changed. This will cause the Controller to redraw the view. It is necessary to always call `notify` when data has changed.
+In both cases `notify` is called to inform listeners that the model has changed. This will cause the controller to redraw the view. It is necessary to always call `notify` when data has changed.
 
 The next step is fetching the data from the server (in order to get current time). To make it asynchronous Ajax requests should be used. This can be done by the `fetchClient` method provided by the framework.
 ```js
@@ -176,8 +176,8 @@ The `fetchDate` uses `fetchClient` to request time from `'/api/getDate'` path us
 If you look at the code, both `fetchClient` and `response.json` methods have `await` keyword in front. This makes the method calls synchronous (it will block until the result is available). To read more about Ajax calls go to [Async calls guide](../guide/async-calls.md).
 
 The other way of communicating with server are WebSockets - bi-directional communication protocol.
-Create an instance of the WebSocket client. Then you can either send or listen to messages. 
-The following `this._prepareWebSocket()` method (note that by convention all method names prepended with `_` are private) listens to two events: 
+Create an instance of the WebSocket client. Then you can either send or listen to messages.
+The following `this._prepareWebSocket()` method (note that by convention all method names prepended with `_` are private) listens to two events:
  -  `authed` - notifies that client has successfully authorized by the server (automatically generated by server)
  - `server-date` - custom message that includes server's time (as defined in the [Explaining server side](#explaining-server-side) section - look for `wsServer.bind`)
 ```js

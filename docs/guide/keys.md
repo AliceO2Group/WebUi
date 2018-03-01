@@ -1,13 +1,13 @@
-# Guide - Keys
+# Guide - Keys in hyperscript
 
-When a list is re-ordered, the `key attribute` allows the engine to recognize the items and to sort them rather than destroying it.
+When manipulating a list of items with [hyperscript](../hyperscript-vnode.md), the `key` attribute of an element helps the engine to identify which items have changed, are added, or are removed. The key value should be a unique ID (from the database for example), but not the index of the array.
 
-An example of usage is when using a CSS animation on elements that should not be destroyed and created again, like a fade animation. The same applies for a list of videos, you don't want the video to be re-recreated if it changed its place in a list.
+Let's see an example of a list of videos, we don't want the video to be re-recreated if it changed its position in the list after a click on "Sort by".
 
 ```js
-function imageGallery(images) {
-  return images.map((image) => {
-    return h('img.fade-animation', {src: image.src, key: image.src});
+function videoGallery(videos) {
+  return videos.map((video) => {
+    return h('video', {src: video.src, key: video.src});
   });
 }
 ```
@@ -19,7 +19,7 @@ Another usage is in combination with the life cycles when you bind unusual views
 ```js
 function list(images) {
   return images.map((image) => {
-    return h('img', {key: image.src, oncreate: dom => doSomething(dom)});
+    return h('img', {key: image.src, oncreate: dom => doSomethingWithALibrary(dom)});
   });
 }
 ```

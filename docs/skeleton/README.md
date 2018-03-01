@@ -17,7 +17,7 @@ cd newproject
 npm init
 npm install --save @aliceo2/aliceo2-gui
 ```
-More about `npm init` and `package.json` in the [official documentation](https://docs.npmjs.com/files/package.json).
+To learn how to follow `npm init` wizard in the [official documentation](https://docs.npmjs.com/files/package.json).
 
 ### 3. Launch the application
 
