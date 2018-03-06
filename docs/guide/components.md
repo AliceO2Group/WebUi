@@ -70,6 +70,32 @@ function title() {
 }
 ```
 
+Note: because vnodes can be modified by the template engine, you must always re-generate them each time the view is called.
+
+```js
+// ✗ WRONG, it uses a constant vnode
+const icon = h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
+  h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
+);
+
+function title() {
+  return h('h1', [icon, ' ', 'Hello']);
+}
+```
+
+```js
+// ✓ OK, it generates vnode each time
+function icon() {
+  return h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
+    h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
+  );
+}
+
+function title() {
+  return h('h1', [icon(), ' ', 'Hello']);
+}
+```
+
 Components are a way to split parts of a view, it is then possible to scale and arrange in files those functions.
 
 See the [architecture](./docs/guide/scale-app.md) article to scale the code of your application with convensions.
