@@ -70,7 +70,7 @@ function title() {
 }
 ```
 
-Note: because vnodes can be modified by the template engine, you must always re-generate them each time the view is called.
+Note: As vnodes can be modified by the template engine you must not reuse them. Instead, create a new instance for each view redraw.
 
 ```js
 // ✗ WRONG, it uses a constant vnode
@@ -84,7 +84,7 @@ function title() {
 ```
 
 ```js
-// ✓ OK, it generates vnode each time
+// ✓ OK, it create a new instance vnode each time
 function icon() {
   return h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
     h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
