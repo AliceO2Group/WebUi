@@ -28,16 +28,17 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
+install: cd Framework; npm install
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
-- cd Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
-- cd Backend; mv config-default.json config.json
-- cd Backend; rm test/mocha-ws.js
-script: npm test
+- cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
+- cd Framework/Backend; mv config-default.json config.json
+- cd Framework/Backend; rm test/mocha-ws.js
+script: cd Framework; npm test
 after_success:
-- cd Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
-- nyc ./node_modules/mocha/bin/mocha Backend/test
-- nyc report --reporter=text-lcov > coverage.lcov && codecov
+- cd Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
+- cd Framework; nyc ./node_modules/mocha/bin/mocha Backend/test
+- cd Framework; nyc report --reporter=text-lcov > coverage.lcov && codecov
 notifications:
   email: false
   slack:
