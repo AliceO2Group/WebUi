@@ -4,7 +4,7 @@
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "license": "GPL-3.0",
-  "repository": "AliceO2Group/Gui",
+  "repository": "AliceO2Group/WebUi",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
     "start": "echo 'Running demo app...' && node docs/demo/index.js",
