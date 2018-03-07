@@ -35,6 +35,8 @@ Hyperscript allows in the end to have the positive features of HTML (declarative
 
 Being declarative improves maintenance of an application to avoid spaghetti code, and it provides all functional features for free (tests, re-usability).
 
+Note: As vnodes can be modified by the template engine you must not reuse them. Instead, create a new instance for each view redraw.
+
 See [Components](components.md) guide to learn more about re-usability and maintenance.
 See [API Reference for JS](../reference/frontend-js.md) to get the `h()` function prototype.
 
