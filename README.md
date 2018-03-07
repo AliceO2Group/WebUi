@@ -1,4 +1,4 @@
-# ALICE O<sup>2</sup> UI
+# ALICE O<sup>2</sup>Web UI
 
 [![Build Status](https://travis-ci.org/AliceO2Group/WebUi.svg?branch=master)](https://travis-ci.org/AliceO2Group/WebUi)
 [![Dependencies Status](https://david-dm.org/AliceO2Group/WebUi/status.svg)](https://david-dm.org/AliceO2Group/WebUi)
@@ -50,7 +50,7 @@ npm install @aliceo2/aliceo2-gui
 ### API Reference
 * [Backend](docs/reference/backend.md)
 * [Frontend JS](docs/reference/frontend-js.md)
-* [Frontend CSS](https://aliceo2group.github.io/Gui/docs/reference/frontend-css.html)
+* [Frontend CSS](https://aliceo2group.github.io/WebUi/docs/reference/frontend-css.html)
 
 ### Documentation for developers
 * [Development environment](docs/DEV.md)
