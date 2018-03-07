@@ -6,8 +6,8 @@ A template project is available quickly bootstrap a new project. Sample code has
 ...that contains a minimal code.
 
 ```bash
-git clone https://github.com/AliceO2Group/Gui.git
-cp -R Gui/docs/skeleton ./newproject
+git clone https://github.com/AliceO2Group/WebUi.git
+cp -R WebUi/docs/skeleton ./newproject
 cd newproject
 ```
 
