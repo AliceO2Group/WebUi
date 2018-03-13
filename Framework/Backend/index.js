@@ -5,7 +5,6 @@
  */
 
 'use strict';
-
 const ZeroMQClient = require('./zeromq/client');
 const WebSocket = require('./websocket/server');
 const HttpServer = require('./http/server');
