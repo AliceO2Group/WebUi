@@ -37,7 +37,7 @@ install:
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
 - cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
-- mv config-default.json config.json; rm test/mocha-ws.js
+- cd Framework/Backend; mv config-default.json config.json; rm test/mocha-ws.js
 script:
 - if [ -f Framework/TEST ]; then cd Framework; npm test; fi
 - if [ -f Control/TEST ]; then cd Control; npm test; fi
