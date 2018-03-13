@@ -9,7 +9,7 @@ const ZeroMQClient = require('./zeromq/client');
 const WebSocket = require('./websocket/server');
 const HttpServer = require('./http/server');
 const WebSocketMessage = require('./websocket/message.js');
-onst Log = require('./log/log.js');
+const Log = require('./log/log.js');
 const MySQL = require('./db/mysql.js');
 const JwtToken = require('./jwt/token.js');
 
