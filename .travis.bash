@@ -25,5 +25,5 @@ get_changed_projects_list () {
 }
 
 get_changed_projects_list $TRAVIS_BRANCH
-printf '%s\n' "${CHANGED_PROJECT[@]}"
-export $CHANGED_PROJECT;
+printf '%s\n' "${CHANGED_PROJECTS[@]}"
+#export $CHANGED_PROJECT;
