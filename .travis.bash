@@ -4,12 +4,15 @@ get_changed_projects_list () {
   UPSTREAM_BRANCH="$1"
 
   # get list of files changed
-  CHANGED_FILES=`git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD ${UPSTREAM_BRANCH})`
+  CHANGED_FILES=$(git diff --name-only HEAD $(git merge-base HEAD ${UPSTREAM_BRANCH}))
   for dir in $CHANGED_FILES; do
+
     # remove filenames
     dir=$(dirname $dir);
+
     # keep root directories only
     dir=$(echo "$dir" | awk -F "/" '{print $1}');
+
     # append array
     CHANGED_PROJECTS+=("$dir");
   done
@@ -21,5 +24,5 @@ get_changed_projects_list () {
   CHANGED_PROJECTS=("${CHANGED_PROJECTS[@]/.}");
 }
 
-get_changed_projects_list master
-export $CHANGED_PROJECTS;
+get_changed_projects_list $TRAVIS_BRANCH
+export $CHANGED_PROJECT;
