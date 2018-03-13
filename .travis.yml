@@ -28,7 +28,7 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
-- for dir in `git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD devel)`; do dir=$(dirname $dir); dir=$(echo "$dir" | awk -F "/" '{print $1}'); CHANGED_PROJECTS+=("$dir"); CHANGED_PROJECTS=($(echo "${CHANGED_PROJECTS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')); export $CHANGED_PROJECTS; done
+- for dir in `git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD devel)`; do dir=$(dirname $dir); dir=$(echo "$dir" | awk -F "/" '{print $1}'); CHANGED_PROJECTS+=("$dir"); CHANGED_PROJECTS=($(echo "${CHANGED_PROJECTS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')); export CHANGED_PROJECTS=("${CHANGED_PROJECTS[@]/.}"); done
 install: for project in ${CHANGED_PROJECTS[@]}; do echo $project; cd $project; npm install; done
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
