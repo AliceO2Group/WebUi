@@ -1,4 +1,4 @@
-# ALICE O<sup>2</sup> Web UI
+# ALICE O<sup>2</sup> Web UI Framework
 
 [![Build Status](https://travis-ci.org/AliceO2Group/WebUi.svg?branch=master)](https://travis-ci.org/AliceO2Group/WebUi)
 [![Dependencies Status](https://david-dm.org/AliceO2Group/WebUi/status.svg)](https://david-dm.org/AliceO2Group/WebUi)
