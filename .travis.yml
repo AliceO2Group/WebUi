@@ -28,16 +28,13 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
-- for dir in `git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD devel)`; do dir=$(dirname $dir); dir=$(echo "$dir" | awk -F "/" '{print $1}'); CHANGED_PROJECTS+=("$dir"); CHANGED_PROJECTS=($(echo "${CHANGED_PROJECTS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')); export CHANGED_PROJECTS=("${CHANGED_PROJECTS[@]/.}"); done
-install: for project in ${CHANGED_PROJECTS[@]}; do echo $project; cd $project; npm install; done
+install: source .travis.bash; for project in ${CHANGED_PROJECTS[@]}; do echo $project; done
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
 - cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
 - cd Framework/Backend; mv config-default.json config.json
 - cd Framework/Backend; rm test/mocha-ws.js
-script:
-- for dir in `git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD devel)`; do dir=$(dirname $dir); dir=$(echo "$dir" | awk -F "/" '{print $1}'); CHANGED_PROJECTS+=("$dir"); CHANGED_PROJECTS=($(echo "${CHANGED_PROJECTS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')); export $CHANGED_PROJECTS; done
-- for project in ${CHANGED_PROJECTS[@]}; do cd $project; npm test; done
+script: echo test
 after_success:
 - cd Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
 - cd Framework; nyc ./node_modules/mocha/bin/mocha Backend/test
