@@ -1,8 +1,6 @@
 # ALICE O<sup>2</sup> Web UIs
 
-### [WebUI Framework](./Framework)
-
-### Projects based on WebUI
+ - [**WebUI Framework**](./Framework)
  - [Control](./Control)
  - [InfoLogger](./InfoLogger)
  - [Quality Control](./QualityControl)
