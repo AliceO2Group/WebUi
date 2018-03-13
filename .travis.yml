@@ -28,7 +28,12 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
-install: chmod +x .travis.bash; source .travis.bash; for project in ${CHANGED_PROJECTS[@]}; do echo $project; done
+- chmod +x .travis.bash; ./.travis.bash;
+install:
+- if [ -f Framework/TEST ]; then cd Framework; npm install; fi
+- if [ -f Control/TEST ]; then cd Control; npm install; fi
+- if [ -f QualityControl/TEST ]; then cd QualityControl; npm install; fi
+- if [ -f QualityControl/TEST ]; then cd InfoLogger; npm install; fi
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
 - cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem

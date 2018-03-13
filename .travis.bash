@@ -25,5 +25,7 @@ get_changed_projects_list () {
 }
 
 get_changed_projects_list $TRAVIS_BRANCH
-printf '%s\n' "${CHANGED_PROJECTS[@]}"
-#export $CHANGED_PROJECT;
+
+for project in ${CHANGED_PROJECTS[@]}; do
+  cd ${project}; touch TEST; cd -
+done
