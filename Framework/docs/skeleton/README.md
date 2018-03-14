@@ -7,7 +7,7 @@ A template project is available quickly bootstrap a new project. Sample code has
 
 ```bash
 git clone https://github.com/AliceO2Group/WebUi.git
-cp -R WebUi/docs/skeleton ./newproject
+cp -R WebUi/Framework/docs/skeleton ./newproject
 cd newproject
 ```
 
