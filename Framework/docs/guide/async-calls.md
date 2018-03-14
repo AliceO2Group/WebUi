@@ -22,7 +22,7 @@ resultPromise.catch(function callback(error) {
 
 Notice that the callbacks are now binded to an object, the promise.
 
-Then Javascript went full asynchronous is the langage itself with await.
+Then Javascript went full asynchronous is the language itself with await.
 
 ```js
 try {

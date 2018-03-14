@@ -15,7 +15,7 @@ Where:
      * [`file`] - log filepath
      * [`fileLvl`] - file log level
      * [`consoleLvl`] - console log level
-   * [`infologger`] - InfoLogger cofiguration variables
+   * [`infologger`] - InfoLogger configuration variables
      * `execPath` - path to the log executable
 
 ### Code example

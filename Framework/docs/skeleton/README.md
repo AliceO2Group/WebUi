@@ -6,8 +6,8 @@ A template project is available quickly bootstrap a new project. Sample code has
 ...that contains a minimal code.
 
 ```bash
-git clone https://github.com/AliceO2Group/Gui.git
-cp -R Gui/docs/skeleton ./newproject
+git clone https://github.com/AliceO2Group/WebUi.git
+cp -R WebUi/docs/skeleton ./newproject
 cd newproject
 ```
 
@@ -17,7 +17,7 @@ cd newproject
 npm init
 npm install --save @aliceo2/aliceo2-gui
 ```
-More about `npm init` and `package.json` in the [official documentation](https://docs.npmjs.com/files/package.json).
+To learn how to follow `npm init` wizard in the [official documentation](https://docs.npmjs.com/files/package.json).
 
 ### 3. Launch the application
 

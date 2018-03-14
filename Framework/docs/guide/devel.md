@@ -27,10 +27,10 @@ The complete API of the project is available in [API.md](API.md) file.
 Scripts are specified in `package.json` file.
 
 ## Continuous integration
-[Travis CI](https://travis-ci.org/AliceO2Group/ControlGui) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.travis.yml` file.
+[Travis CI](https://travis-ci.org/AliceO2Group/WebUi) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.travis.yml` file.
 
 ## Dependencies status
-The versions of [dependencies](https://david-dm.org/AliceO2Group/ControlGui) and [development dependencies](https://david-dm.org/AliceO2Group/ControlGui?type=dev) are monitored by David service.
+The versions of [dependencies](https://david-dm.org/AliceO2Group/WebUi) and [development dependencies](https://david-dm.org/AliceO2Group/WebUi?type=dev) are monitored by David service.
 
 ## Test coverage
 [Instambul](https://www.npmjs.com/package/istanbul) module together with [codecov](https://codecov.io) service are used to generate coverage reports of nodejs unit tests.

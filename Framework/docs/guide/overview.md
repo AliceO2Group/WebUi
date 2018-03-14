@@ -1,6 +1,6 @@
 # Overview
 
-This framework provides necessary services and building blocks to easily create rich web applications.
+This framework provides some services and the building blocks to easily create rich web applications within CERN environment.
 
 #### Server-side features
 - REST and WebSocket API
@@ -10,8 +10,8 @@ This framework provides necessary services and building blocks to easily create 
 
 #### Client side-features
 - User interface CSS building blocks in accordance with ALICE standards
-- Asynchronous data fetching, WebSocket client
-- Client side MVC engine to build advanced user interfaces
+- Asynchronous data fetching and bi-directional socket (Ajax and WebSocket)
+- Client side MVC engine to build a user interface
 
 ### To create a full functional web application
 - Connect server with external resources
