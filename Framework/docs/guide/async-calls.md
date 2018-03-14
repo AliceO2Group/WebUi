@@ -1,6 +1,6 @@
-# Guide - Async calls (ajax)
+# Guide - Async calls (Ajax)
 
-Javascript deals well with asynchronous calls like network requests. Historically it was implemented though callback functions like this.
+Javascript deals well with asynchronous calls like network requests. Historically, a reply was delivered though callback functions:
 
 ```js
 request(arguments, function callback(error, result) {
@@ -8,21 +8,19 @@ request(arguments, function callback(error, result) {
 });
 ```
 
-But this leads to spaghetti code and a more formal way was created: Promises.
+But this may lead to spaghetti code therefore Promises were introduced:
 
 ```js
 var resultPromise = request(arguments);
 resultPromise.then(function callback(result) {
-
+  // Promise fulfilled, do something with result
 });
 resultPromise.catch(function callback(error) {
-
+  // handle expections
 });
 ```
 
-Notice that the callbacks are now binded to an object, the promise.
-
-Then Javascript went full asynchronous is the language itself with await.
+The `await` keyword pauses asynchronous function until Promise is fulfilled.
 
 ```js
 try {
@@ -32,8 +30,7 @@ try {
 }
 ```
 
-We can integrate promises with an observable model:
-
+The promises can be integrated in the model in order to handle HTTP requests. This is possible through `fetch` method:
 ```js
 class Model extends Observable {
   async fetchImages() {
@@ -54,15 +51,10 @@ class Model extends Observable {
 }
 ```
 
-The method fetchImages will create a network request and return a promise. When the promise is finished it will either call the success method or a generic handler. The `then` method can be replaced with the `await` keyword so the function pauses while waiting for ans answer. You can also catch the error with a `try catch` or by using the `catch` method of the promise object.
+The `fetch` method creates an HTTP request and returns a promise. Either `async` keyword or `then` method can be used to handle fulfilled promise.
 
-Because you often have a lot of requests, it is a efficient to have a generic handler for errors which will for example print an error message to the user.
-
-fetchImages also returns a promise, the caller could use it to know that the call is finished or not and avoid calling again while the request is still in progress.
-
-Of course we call `notify()` each time the model changes, for both `then` and `catch` callbacks.
-
-Here is a practical example where we don't want the user to request again when a request has been made:
+To error can be handled within a `try`,  `catch` blocks or using `catch` method of the promise object. It is a recommended to use a generic error handler.
+`fetchImages` also returns a promise. This can be used to avoid repeated requests to the same resource:
 
 ```js
 class Model extends Observable {
@@ -99,6 +91,3 @@ function button(model) {
   return h('button', {onclick: action, class: className}, 'Fetch images')
 }
 ```
-
-We used the method `finally` of the promise to clean up the request.
-
