@@ -1,4 +1,4 @@
-# Scaling the application
+# Guide - Scaling the application
 
 ### Files
 
