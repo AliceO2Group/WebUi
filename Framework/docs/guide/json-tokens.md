@@ -21,7 +21,7 @@ Where
 ### Code example
 ```js
 // Include module
-const {JwtToken} = require('@aliceo2/aliceo2-gui');
+const {JwtToken} = require('@aliceo2/web-ui');
 
 // JWT configuration
 const jwtConf = {

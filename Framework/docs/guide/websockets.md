@@ -11,7 +11,7 @@ Where:
 ### Example
 ```js
 // Include requred modules
-const {HttpServer, WebSocket} = require('@aliceo2/aliceo2-gui');
+const {HttpServer, WebSocket} = require('@aliceo2/web-ui');
 
 // Prepare HTTP, JWT, and oAuth configuration
 ...

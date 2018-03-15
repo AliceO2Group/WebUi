@@ -21,7 +21,7 @@ Where:
 ### Code example
 ```js
 // Include logging module
-const {Log} = require('@aliceo2/aliceo2-gui');
+const {Log} = require('@aliceo2/web-ui');
 
 // This enables saving logs to file; otherwise it uses default console logging only
 // Log.configure({winston: {file: 'error.log'}});

@@ -1,5 +1,5 @@
 // Import the backend classes
-const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2-gui');
+const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 
 // Define configuration for JWT tokens and HTTP server
 const config = require('./config.js');

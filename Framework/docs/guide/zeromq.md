@@ -15,7 +15,7 @@ Where:
 
 #### Example
 ```js
-const {ZeroMQClient} = require('@aliceo2/aliceo2-gui');
+const {ZeroMQClient} = require('@aliceo2/web-ui');
 
 // Subscribe to publisher server
 const zmqSub = new ZeroMQClient('zeromq.cern.ch', '1234', 'sub');
@@ -30,7 +30,7 @@ zmqSub.on('message', function(message) {
 If you have installed ZeroMQ under custom path, npm install will fail with : `fatal error: zmq.h: No such file or directory`.
 To resolve this issue you need to recompile zmq module.
 
-1. Go to `node_modules/@aliceo2/aliceo2-gui` directory
+1. Go to `node_modules/@aliceo2/web-ui` directory
 2. Download `zeromq` modue
  ```
  curl `npm v zeromq dist.tarball` | tar xvz && mv package/ node_modules/zeromq/
