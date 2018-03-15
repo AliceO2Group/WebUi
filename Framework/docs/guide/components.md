@@ -1,4 +1,4 @@
-# Guide - Components
+# Frontend - Components
 
 Component is a part of UI like a menu, form, etc. Thanks to Hyperscript it is also a pure JavaScript function which returns a vnode.
 

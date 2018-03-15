@@ -1,4 +1,4 @@
-# Guide - Hyperscript and vnode
+# Frontend - Hyperscript and vnode
 
 Web page view is described by the browser's DOM tree and can be manipulated using [DOM API](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model). It can also be represented using HTML in a static and declarative way. Hyperscript is a similar representation but it is dynamic and uses Javascript function to represent a DOM element with its attributes and children.
 Here are the two equivalent representations, HTML and Hyperscript respectively:

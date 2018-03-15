@@ -1,4 +1,4 @@
-# Guide - Async calls (Ajax)
+# Frontend - Async calls (Ajax)
 
 Javascript deals well with asynchronous calls like network requests. Historically, a reply was delivered though callback functions:
 

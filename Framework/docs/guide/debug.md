@@ -1,4 +1,4 @@
-# Guide - Debugging with the browser's inspector
+# Frontend - Debugging with the browser's inspector
 
 ![Inspector inside Chrome](../images/inspector-chrome.png)
 

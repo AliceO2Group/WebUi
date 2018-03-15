@@ -1,4 +1,4 @@
-# Guide - Scaling the application
+# Frontend - Scaling the application
 
 ### Files
 
