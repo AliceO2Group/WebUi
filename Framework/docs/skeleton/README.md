@@ -15,7 +15,7 @@ cd newproject
 
 ```bash
 npm init
-npm install --save @aliceo2/aliceo2-gui
+npm install --save @aliceo2/web-ui
 ```
 To learn how to follow `npm init` wizard in the [official documentation](https://docs.npmjs.com/files/package.json).
 

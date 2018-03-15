@@ -33,7 +33,7 @@ Open the `index.js` file.
 
 The first line is responsible for importing framework modules: `HttpServer`, `Log`, `WebSocket`, `WebSocketMessage`.
 ```js
-const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2-gui');
+const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 ```
 
 Then, the configuration file is loaded. It is good practice to include it in the root file of the project. Prefer using a `js` file instead of `json` to allow comments on values.
