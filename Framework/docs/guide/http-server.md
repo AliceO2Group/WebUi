@@ -27,7 +27,7 @@ Where:
 #### Code example
 ```js
 // Include required modules
-const {HttpServer, JwtToken} = require('@aliceo2/aliceo2-gui');
+const {HttpServer, JwtToken} = require('@aliceo2/web-ui');
 
 // configuration file for simple, unsecured http server
 const httpConf = {
