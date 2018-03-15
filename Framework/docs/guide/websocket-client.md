@@ -1,9 +1,8 @@
-# Guide - WebSocket client
+# Frontend - WebSocket client
 
-The `WebSocketClient` class on the client side encapsulate communication with the `WebSocket` class on the server side though HTTP(S) and allows a bi-directional stream.
+The `WebSocketClient` class encapsulates communication with the WebSocket server (see backend guide on [WebSocket server](./websockets.md)).
 
-WebSocketClient needs to be instanciated and authentificated before usage:
-
+WebSocketClient needs to be authentificated by the server before it can send any requests or receive notifications:
 
 ```js
 import {WebSocketClient} from '/js/src/index.js';
@@ -11,13 +10,12 @@ import {WebSocketClient} from '/js/src/index.js';
 const ws = new WebSocketClient();
 
 ws.addEventListener('authed', (message) => {
-  console.log('ready, let send a message');
+  console.log('ready, lets send a message');
   ws.sendMessage({command: 'custom-client-event-name', customAttribute: 123});
 });
 ```
 
-Client can listen to events.
-
+Client receives notifications from the server:
 ```js
 ws.addEventListener('custom-server-event-name', (e) => {
   const dataFromServer = e.detail;
@@ -25,12 +23,9 @@ ws.addEventListener('custom-server-event-name', (e) => {
 });
 ```
 
-Filtered broadcast is handled by providing a filter function to the server.
-
+Server can filter messages pushed to a client. This can be done by passing a filter via `setFilter` method. The filter should return either `true` or `false` what translates into "send" or "do not send" the message.
 ```js
 ws.setFilter(function(message) {
   return message.customAttribute === 42;
 });
 ```
-
-[WebSocket on the backend side](./websockets.md)
