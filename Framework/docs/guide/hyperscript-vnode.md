@@ -42,5 +42,17 @@ See [Components](components.md) guide to learn more about re-usability and maint
 See [API Reference for JS](../reference/frontend-js.md) to get the `h()` function prototype.
 
 
+# Keys in hyperscript
+
+When manipulating a list of items with Hyperscript, the `key` attribute helps the engine to identify the element. This key should be constant and unique like DB primary key. Do not use array indexes as they may chage (eg. when you sort the array).
+```js
+function videoGallery(videos) {
+  return videos.map((video) => {
+    return h('video', {src: video.src, key: video.src});
+  });
+}
+```
+
 ### JSX disclaimer
+
 This concept is used by many recent libraries and frameworks like AngularJS, ReactJS, MithrilJS, Hyperapp. ou In addition to Hyperscript they usually allow to use JSX, which is a new syntax producing vnodes without using `h()`. We dropped the idea of using JSX as it introduces additional dependency on BabelJS.
