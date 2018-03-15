@@ -11,30 +11,21 @@ Here are the two equivalent representations, HTML and Hyperscript respectively:
 h('h1', {class: 'title'}, 'Hello')
 ```
 
-The Hyperscript function produces a virtual-node (vnode). As it is written in JavaScript it supports variables, conditions, etc. just like any other JavaScript program.
+The Hyperscript function produces a virtual-node (vnode). As it is written in JavaScript it supports variables, conditions, etc. just like any other JavaScript program. A vnode is an abstract object representing a DOM element. It can be directly translated into DOM element using a render engine.
 
-A vnode is an abstract object representing a DOM element. It can be directly translated into DOM element using a render engine. The render engine is smart enough to compare current element state and apply necessary changes instead of replacing the whole element. Under the hood, the engine uses DOM API though `createElement`, `setAttribute`, `appendChild` to manipulate the tree but this is not visible to the user.
+Typically, vnodes are then recreated every render cycle, which normally occurs in response to event handlers (clicks) or to data changes (Ajax response). The template enfine diffs a vnode tree against its previous version and only modifies DOM elements in spots where there are changes.
 
-Let's assume that the `body` of a page has a simple element: `<h1 class="title">Hello</h1>`. These two following code snippets will produce the same result:
-```js
-let stringNode = '<h1 class="title">World</h1>';
-document.body.innerHTML = stringNode; // replaces whole body content with h1 element
-```
+It may seem wasteful to recreate vnodes so frequently, but as it turns out, modern Javascript engines can create hundreds of thousands of objects in less than a millisecond. On the other hand, modifying the whole DOM is more expensive than creating vnodes.
+
+In the end rendering a web page is simple as:
 
 ```js
 let virtualNode = h('h1', {class: 'title'}, 'World');
-render(document.body, virtualNode); // updates body - changes the text only
+render(document.body, virtualNode);
+
+// equivalent HTML:
+// <h1 class="title">Hello</h1>
 ```
-
-In the first example the DOM of body is  *replaced* with a new version. In the latter one, the DOM is just  *updated*. This difference is important as during the update internal states of DOM elements (such as: scroll position, input value, checkbox value, etc.) are preserved.
-
-Summarising, Hyperscript merges features of HTML (declarative) and DOM API (updates) as defined in the table below.
-
-|              | DOM API | HTML | Hyperscript |
-| ------------ | --------|------|------------ |
-| Declarative  | ✗       | ✓    | ✓           |
-| Dynamic      | ✓       | ✗    | ✓           |
-
 
 Note: As vnodes can be modified by the template engine you must not reuse them. Instead, create a new instance for each view redraw.
 
