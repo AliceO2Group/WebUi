@@ -11,7 +11,9 @@ Within a file defining a view avoid having large functions. Try to split the cod
 
 ```js
 export function userList(model) {
-  return h('ul', model.user.list.map(user => userListRow(model, user))); # where user var comes from?
+  return h('ul', model.user.list.map((user) => {
+    return userListRow(model, user);
+  }));
 }
 
 function userListRow(model, user) {
@@ -21,7 +23,7 @@ function userListRow(model, user) {
 
 ### Model
 
-A model can be implemented as a tree of submodels. Each parent model needs to notify submodel about its existance by `bubbleTo` method:
+A model can be implemented as a tree of submodels. Each parent model needs to observe its submodels by `bubbleTo` method:
 
 ```js
 class Model extends Observable {
