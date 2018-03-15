@@ -1,29 +1,17 @@
-# How to scale and architecture your application
+# Scaling the application
 
 ### Files
 
-In [this tutorial](../tutorial/time-server.md) you can see a single model (one file) and a single view (one file). But a large application cannot be made with two large files. A good way is to split the code into modules like this:
-
-```
-- user (folder, camelCase)
-  - User.js (model, PascalCase)
-  - userList.js (view, camelCase)
-  - userItem.js (view, camelCase)
-  - userAvatar.js (view, camelCase)
-  - user.css (optional style, camelCase)
-```
-
-This allows you to have everything concerning a module in the same place, you can then import it as needed.
-
+In the documentation and [tutorial](../tutorial/time-server.md) a single model and single view are used. A larger application may require multiple models and views. They should be kept in a seperate files. Use `UpperCamelCase` convention for file names that define classes and `camelCase` for others.
 For common things across the application like a header or a menu, a `common` module (folder) can be made for example.
 
 ### View
 
-Inside the view files, avoid to have a big function containing all your page. Try to split in smaller functions, you can then pass the model as a first parameter for each call and the specific variables afterward.
+Within a file defining a view avoid having large functions. Try to split the code into smaller pieces; Pass the model as a first parameter as shown below.
 
 ```js
 export function userList(model) {
-  return h('ul', model.user.list.map(user => userListRow(model, user)));
+  return h('ul', model.user.list.map(user => userListRow(model, user))); # where user var comes from?
 }
 
 function userListRow(model, user) {
@@ -33,7 +21,7 @@ function userListRow(model, user) {
 
 ### Model
 
-The `Observable` model can be, like the view, a tree of models. Each one will dispatch to its parent a notification if it has been modified through `bubbleTo` method:
+A model can be implemented as a tree of submodels. Each parent model needs to notify submodel about its existance by `bubbleTo` method:
 
 ```js
 class Model extends Observable {
@@ -59,6 +47,6 @@ class SubModel extends Observable {
 const model = new Model();
 ```
 
-When a call to `model.submodel.increment()` is made, `model` will be notified and will call all listeners (callback functions) registered via `model.observe(callbackFunction)`.
+When `model.submodel.increment()` is called, the observers of the parent `model` will be also notified.
 
 ![Global view of the architecture](../images/architecture-front.jpeg)
