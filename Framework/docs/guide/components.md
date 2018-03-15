@@ -1,8 +1,8 @@
-# Guide - Components
+# Frontend - Components
 
-Components are pieces of UI like a menu, a form, etc, thanks to hyperscript it is also a pure function which returns a vnode tree. This is testable, reusable and easy to understand.
+Component is a part of UI like a menu, form, etc. Thanks to Hyperscript it is also a pure JavaScript function which returns a vnode.
 
-Let's define a [vnode with hyperscript](hyperscript-vnode.md):
+Let's define a [vnode with Hyperscript](hyperscript-vnode.md):
 
 ```js
 h('h1', {class: 'title'}, 'Hello')
@@ -26,14 +26,14 @@ function content() {
   return h('p', 'Lorem ipsum');
 }
 function page() {
-  return h('div', [menu(), content()]);
+  return h('div', [title(), content()]);
 }
 ```
 
-A best practice in pure functional programming is to have no side effect. Your components should only rely on constant expressions and always return the same output for one input. A good way is to use only `const` variables.
+A best practice in pure functional programming. The components should only rely on constant expressions and always return the same output for given input.
 
 ```js
-// ✗ WRONG, it has a side effect
+// ✗ WRONG, it manipulates a global variable
 let count = 0;
 
 function title() {
@@ -43,7 +43,7 @@ function title() {
 
 
 ```js
-// ✗ WRONG, it uses a constant variable from a dynamic expression
+// ✓ CORRECT, it uses a constant variable
 const today = new Date();
 
 function title() {
@@ -96,6 +96,6 @@ function title() {
 }
 ```
 
-Components are a way to split parts of a view, it is then possible to scale and arrange in files those functions.
+Components are a way to split parts of a view, what allows to scale the application  and arrange it in multiple files.
 
-See the [architecture](./docs/guide/scale-app.md) article to scale the code of your application with convensions.
+See the [architecture](./docs/guide/scale-app.md) article to scale the code of your application.

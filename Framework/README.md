@@ -33,19 +33,19 @@ npm install @aliceo2/aliceo2-gui
 
 ### Backend guide
 * [HTTPS server](./docs/guide/http-server.md) - serves custom REST API, supports TLS
-* [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a token
-* [Logging](./docs/guide/logging.md) - stores log messages in a file or push them to InfoLogger service
+* [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a JWT token
+* [Logging](./docs/guide/logging.md) - stores log messages in a file or pushes them to InfoLogger service
 * [OAuth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups
-* [WebSockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using websocket protocol
+* [WebSockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using WebSocket protocol
 * [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
 ### Frontend guide
-- [Hyperscript and vnode](./docs/guide/hyperscript-vnode.md) - Manipulate the HTML view with Javascript
-- [Components](./docs/guide/components.md) - Split and reuse views
-- [Architecture](./docs/guide/scale-app.md) - Scale the code of your application with convensions
-- [Keys](./docs/guide/keys.md) - Handle sorted list in hyperscript with keys
-- [Debug](./docs/guide/debug.md) - Use the inspector
-- [Ajax](./docs/guide/async-calls.md) - Fetch data from the server
+- [Hyperscript and vnodes](./docs/guide/hyperscript-vnode.md) - Manipulate the view using JavaScript (no HTML)
+- [Components](./docs/guide/components.md) - Split and reuse elements
+- [Scaling the application](./docs/guide/scale-app.md) - Scale the code of your application
+- [Debug](./docs/guide/debug.md) - Debug the application with browser's tools
+- [Ajax](./docs/guide/async-calls.md) - Asynchronously fetch data from the server
+- [WebSocket client](./docs/guide/websocket-client.md) - Connect to WebSocket server
 
 ### API Reference
 * [Backend](docs/reference/backend.md)

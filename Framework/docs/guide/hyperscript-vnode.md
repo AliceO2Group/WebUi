@@ -1,6 +1,7 @@
-# Guide - Hyperscript and vnode
+# Frontend - Hyperscript and vnode
 
-Web views are described by the DOM tree of the browser and can be manipulated with the [DOM API](https://www.google.ch/search?q=dom+api). This can be represented using HMTL usually, in a static and declarative way. Hyperscript is the same representation but it is dynamic and declarative using Javascript. Hyperscript is a non-standard function to represent a DOM element with its attributes and children. Here are the two equivalent representations:
+Web page view is described by the browser's DOM tree and can be manipulated using [DOM API](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model). It can also be represented using HTML in a static and declarative way. Hyperscript is a similar representation but it is dynamic and uses Javascript function to represent a DOM element with its attributes and children.
+Here are the two equivalent representations, HTML and Hyperscript respectively:
 
 ```html
 <h1 class="title">Hello</h1>
@@ -10,36 +11,39 @@ Web views are described by the DOM tree of the browser and can be manipulated wi
 h('h1', {class: 'title'}, 'Hello')
 ```
 
-The first one is HTML which is really a string and the second is a hyperscript call producing a virtual-node (vnode). Because it is written in pure Javascript, hyperscript can handle variables, conditions, etc. just like you would in any program.
+The Hyperscript function produces a virtual-node (vnode). As it is written in JavaScript it supports variables, conditions, etc. just like any other JavaScript program. A vnode is an abstract object representing a DOM element. It can be directly translated into DOM element using a render engine.
 
-A vnode, is an object representing the DOM element dependently of an engine (a Difference Algorithm) to manipulate the DOM according to the vnode. With HTML we just use `innerHTML` property of a DOM element instead of the engine. Inside the engine (render function), DOM is manipulated though `createElement`, `setAttribute`, `appendChild`, etc. but you will not see it, the engine takes care of it for you.
+Typically, vnodes are then recreated every render cycle, which normally occurs in response to event handlers (clicks) or to data changes (Ajax response). The template enfine diffs a vnode tree against its previous version and only modifies DOM elements in spots where there are changes.
+
+It may seem wasteful to recreate vnodes so frequently, but as it turns out, modern Javascript engines can create hundreds of thousands of objects in less than a millisecond. On the other hand, modifying the whole DOM is more expensive than creating vnodes.
+
+In the end rendering a web page is simple as:
 
 ```js
-let stringNode = '<h1 class="title">Hello</h1>';
-document.body.innerHTML = stringNode; // replaces everything inside body no matter what
+let virtualNode = h('h1', {class: 'title'}, 'World');
+render(document.body, virtualNode);
+
+// equivalent HTML:
+// <h1 class="title">Hello</h1>
 ```
-
-```js
-let virtualNode = h('h1', {class: 'title'}, 'Hello');
-render(document.body, virtualNode); // only updates body according to the previous content
-```
-
-The result of both code will produce the same result, but in the first one the current DOM tree of body is *replaced*, in the second one it is *updated*. This difference is important if you consider that maybe the user had selected the `Hello` text produced, because it is replaced the cursor is lost, it is not the case in the second option. Internal states of DOM elements can be: scroll position, input value, checkbox value, etc.
-
-Hyperscript allows in the end to have the positive features of HTML (declarative) and DOM API (updates).
-
-|              | DOM API | HTML | Hyperscript |
-| ------------ | --------|------|------------ |
-| Declarative  | ✗       | ✓    | ✓           |
-| Dynamic      | ✓       | ✗    | ✓           |
-
-Being declarative improves maintenance of an application to avoid spaghetti code, and it provides all functional features for free (tests, re-usability).
 
 Note: As vnodes can be modified by the template engine you must not reuse them. Instead, create a new instance for each view redraw.
 
 See [Components](components.md) guide to learn more about re-usability and maintenance.
 See [API Reference for JS](../reference/frontend-js.md) to get the `h()` function prototype.
 
-### To go further
 
-This concept is used by many recent libraries like AngularJS, ReactJS, MithrilJS, Hyperapp, etc. And you can find some tools which allows you to use JSX, which is a new syntax producing vnodes without using `h()` because of a compiler doing it for you. We will not use it in this library because of the new syntax to learn and the extra tools needed (BabelJS).
+# Keys in hyperscript
+
+When manipulating a list of items with Hyperscript, the `key` attribute helps the engine to identify the element. This key should be constant and unique like DB primary key. Do not use array indexes as they may chage (eg. when you sort the array).
+```js
+function videoGallery(videos) {
+  return videos.map((video) => {
+    return h('video', {src: video.src, key: video.src});
+  });
+}
+```
+
+### JSX disclaimer
+
+This concept is used by many recent libraries and frameworks like AngularJS, ReactJS, MithrilJS, Hyperapp. ou In addition to Hyperscript they usually allow to use JSX, which is a new syntax producing vnodes without using `h()`. We dropped the idea of using JSX as it introduces additional dependency on BabelJS.
