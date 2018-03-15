@@ -1,6 +1,6 @@
 # Guide - Components
 
-Components is a part of UI like a menu, form, etc. Thanks to Hyperscript it is also a pure JavaScript function which returns a vnode.
+Component is a part of UI like a menu, form, etc. Thanks to Hyperscript it is also a pure JavaScript function which returns a vnode.
 
 Let's define a [vnode with Hyperscript](hyperscript-vnode.md):
 
@@ -30,10 +30,10 @@ function page() {
 }
 ```
 
-A best practice in pure functional programming. The components should only rely on constant expressions and always return the same output for given input. (.).)
+A best practice in pure functional programming. The components should only rely on constant expressions and always return the same output for given input.
 
 ```js
-// ✗ WRONG, it manipulates global variable
+// ✗ WRONG, it manipulates a global variable
 let count = 0;
 
 function title() {
