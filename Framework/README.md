@@ -40,10 +40,9 @@ npm install @aliceo2/aliceo2-gui
 * [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
 
 ### Frontend guide
-- [Hyperscript and vnode](./docs/guide/hyperscript-vnode.md) - Manipulate the HTML view with Javascript
+- [Hyperscript and vnodes](./docs/guide/hyperscript-vnode.md) - Manipulate the HTML view with Javascript
 - [Components](./docs/guide/components.md) - Split and reuse views
-- [Architecture](./docs/guide/scale-app.md) - Scale the code of your application with convensions
-- [Keys](./docs/guide/keys.md) - Handle sorted list in hyperscript with keys
+- [Scaling the application](./docs/guide/scale-app.md) - Scale the code of your application with convensions
 - [Debug](./docs/guide/debug.md) - Use the inspector
 - [Ajax](./docs/guide/async-calls.md) - Fetch data from the server
 
