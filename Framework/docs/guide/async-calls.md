@@ -34,7 +34,7 @@ The promises can be integrated in the model in order to handle HTTP requests. Th
 ```js
 class Model extends Observable {
   async fetchImages() {
-    const response = await fetch('/api/images').catch((error) => this.handleErrors(error));
+    const response = await fetchClient('/api/images').catch((error) => this.handleErrors(error));
     const images = await response.json();
     this.setImages(images);
   }
@@ -51,10 +51,12 @@ class Model extends Observable {
 }
 ```
 
-The `fetch` method creates an HTTP request and returns a promise. Either `async` keyword or `then` method can be used to handle fulfilled promise.
+The `fetchClient` method is part of the framework, creates an HTTP request and returns a promise. Either `await` keyword or `then` method can be used to handle fulfilled promise.
 
-To error can be handled within a `try`,  `catch` blocks or using `catch` method of the promise object. It is a recommended to use a generic error handler.
-`fetchImages` also returns a promise. This can be used to avoid repeated requests to the same resource:
+Error can be handled within a `try`,  `catch` blocks or using `catch` method of the promise object. It is a recommended to use a generic error handler.
+`fetchImages` also returns a promise because it has `async` keyword.
+
+Because the web interface is not blocked when the method is paused with `await` keyword, the user can call it many times leading to unnecessary network usage. Repeated requests to the same resource can be avoid by adding a new state in the model, `fetchingImages` boolean in the following example does this:
 
 ```js
 class Model extends Observable {
@@ -66,7 +68,7 @@ class Model extends Observable {
     this.fetchingImages = true;
     this.notify();
 
-    const response = await fetch('/api/images').catch((error) => this.handleErrors(error));
+    const response = await fetchClient('/api/images').catch((error) => this.handleErrors(error));
     const images = await response.json();
     this.setImages(images);
 
@@ -86,8 +88,10 @@ class Model extends Observable {
 }
 
 function button(model) {
-  const action = model.fetchingImages ? e => model.fetchImages() : null;
-  const className = model.fetchingImages ? 'disabled' : '';
-  return h('button', {onclick: action, class: className}, 'Fetch images')
+  const action = () => model.fetchImages();
+  const disabled = model.fetchingImages;
+
+  // clicks are not handled when a button is 'disabled'
+  return h('button', {onclick: action, disabled: disabled}, 'Fetch images')
 }
 ```
