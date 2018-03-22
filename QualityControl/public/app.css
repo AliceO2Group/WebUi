@@ -1,0 +1,61 @@
+@keyframes highlight { from { background-color: yellow; } to { background-color: transparent; } }
+@keyframes appearance { from { opacity: 0; } to { opacity: 1; } }
+@keyframes move { from { transform: translate(0, -100%); } to { transform: translate(0%, 0px); } }
+
+.jsroot { animation-name: appearance; animation-duration: 0.2s; }
+.appearance { animation-name: appearance; animation-duration: 0.2s; }
+.highlight { animation-name: highlight; animation-duration: 1s; }
+.move { animation-name: move; animation-duration: 0.2s; }
+
+.animate-width { transition: width 0.3s; }
+.animate-height { transition: height 0.3s; }
+.animate-dimensions { transition: height 0.3s, width 0.3s; }
+.animate-dimensions-position { transition: height 0.3s, width 0.3s, top 0.3s, left 0.3s; }
+
+.object-shadow { box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2); }
+.object-selected { border: 0.4em solid var(--color-primary); }
+.object-edit-layer { cursor: move; opacity: 0; }
+.object-edit-layer:hover { opacity: 1; background-color: ; overflow: scroll; }
+
+/*fix*/
+.table-condensed tbody td { padding: 0.1em 0.625em; }
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+
+.table > tbody > tr.selected > td { background-color: var(--color-primary); color: var(--color-white); }
+
+.button[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+.pointer { cursor: pointer; }
+
+.sidebar {
+ overflow-x: unset;
+ overflow-y: unset;
+ /* le user choisi ce qu'il fait dans cette boîte */
+}
+.sidebar-content {
+  height: 100%;
+}
+
+.h-100 { height: 100% }
+/*déjà mis ? vérifier*/
+
+/* .button-group updated */
+
+.ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.no-select { user-select: none; }
+
+.sidebar-extend { width: 30em; }
+.sidebar-extend .sidebar-content { width: 30em; }
+
+.btn-xs {
+  padding: 0.0em 0.7em;
+  font-size: 0.7em;
+  line-height: 1.5;
+  border-radius: 0.3em;
+}
+
+/* delete object-h3, object-w3, etc. */
+
