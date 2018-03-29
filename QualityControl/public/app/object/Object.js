@@ -2,7 +2,7 @@ import {Observable, fetchClient, WebSocketClient} from '/js/src/index.js';
 
 import ObjectTree from './ObjectTree.class.js'
 
-export default class Object extends Observable {
+export default class Object_ extends Observable {
   constructor(model) {
     super();
 
@@ -15,6 +15,10 @@ export default class Object extends Observable {
 
     this.searchInput = ''; // string - content of input search
     this.searchResult = null; // array - result list of search
+
+    this.refreshTimer = 0;
+    this.refreshInterval = 0; // seconds
+    this.setRefreshInterval(2);
   }
 
   async loadList() {
@@ -38,7 +42,30 @@ export default class Object extends Observable {
     const res = await req;
     const json = await res.text();
     const object = JSROOT.parse(json);
+    object.lastUpdate = new Date();
     this.objects[objectName] = object;
+    this.notify();
+  }
+
+  unloadObject(objectName) {
+    delete this.objects[objectName];
+    this.notify();
+  }
+
+  setRefreshInterval(intervalSeconds) {
+    clearInterval(this.refreshTimer);
+
+    const parsedValue = parseInt(intervalSeconds, 10);
+    if (isNaN(parsedValue) || parsedValue < 1) {
+      parsedValue = 2;
+    }
+
+    this.refreshInterval = intervalSeconds;
+    this.refreshTimer = setInterval(() => {
+      Object.keys(this.objects).forEach((objectName) => {
+        this.loadObject(objectName);
+      });
+    }, this.refreshInterval * 1000);
     this.notify();
   }
 

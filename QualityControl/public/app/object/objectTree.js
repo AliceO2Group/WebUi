@@ -33,7 +33,7 @@ function searchRows(model) {
   return model.object.searchResult.map(item => {
     const path = item.name;
     const selectItem = () => model.object.select(item);
-    const color = item.status === 'active' ? 'success' : 'alert';
+    const color = item.quality === 'good' ? 'success' : 'alert';
     const className = item && item === model.object.selected ? 'selected' : '';
 
     return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
@@ -42,7 +42,7 @@ function searchRows(model) {
         ' ',
         item.name
       ]),
-      h('td.highlight', {class: color}, item.status),
+      h('td.highlight', {class: color}, item.quality),
     ]);
   });
 }
@@ -66,7 +66,7 @@ function objectIcon() {
 
 // flatten the tree in a functional way
 function treeRow(model, tree, level) {
-  const color = tree.status === 'active' ? 'success' : 'alert';
+  const color = tree.quality === 'good' ? 'success' : 'alert';
   const padding = `${level}em`;
   const levelDeeper = level + 1;
   const icon = tree.object ? objectIcon() : (tree.open ? openIcon() : closedIcon()); // 1 of 3 icons
@@ -83,7 +83,7 @@ function treeRow(model, tree, level) {
         ' ',
         tree.name
       ]),
-      h('td.highlight', {class: color}, tree.status),
+      h('td.highlight', {class: color}, tree.quality),
     ]),
     ...childrens
   ];

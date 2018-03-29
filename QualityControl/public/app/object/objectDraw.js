@@ -6,6 +6,7 @@ export function draw(model, object, options) {
     height: '100%', // CSS size
     className: '', // any CSS class
     portrait: false,
+    style: [], // JSROOT TStyles like logx, gridx, etc.
     ...options,
   };
 
@@ -18,17 +19,19 @@ export function draw(model, object, options) {
       // JSROOT.resize(vnode.dom);
       // console.log('resized');
       // vnode.dom.resizeJsRoot(); TODO rétablir quand window resize
+      vnode.dom.resizeJsRoot();
       return;
     }
 
     // jsroot is not drawn but data are ready, draw it
     if (model.object.objects[object.name]) {
       timerDebouncer(function() {
-        JSROOT.redraw(vnode.dom, model.object.objects[object.name], object.options.join(';'));
+        JSROOT.redraw(vnode.dom, model.object.objects[object.name], options.style.join(';'));
       }, 300)();
 
       vnode.dom.resizeJsRoot = timerDebouncer(function() {
-        JSROOT.resize(vnode.dom);
+        // JSROOT.resize(vnode.dom);
+        JSROOT.redraw(vnode.dom, model.object.objects[object.name], options.style.join(';'));
       }, 300);
 
       vnode.dom.resizeJsRoot();
@@ -36,10 +39,11 @@ export function draw(model, object, options) {
   };
   const ondestroy = (vnode) => {
     // remove jsroot binding to avoid memory leak
+    model.object.unloadObject(object.name);
     JSROOT.cleanup(vnode.dom);
   };
   const attributes = {
-    key: object.name + object.options.join(';'),
+    key: object.name + options.style.join(';'),
     class: options.className,
     style: {height: options.height, width: options.width},
     oncreate: oncreate,

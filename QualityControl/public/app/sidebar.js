@@ -35,6 +35,7 @@ const sidebarMenu = (model) => [
   exploreMenu(model),
   myLayoutsMenu(model),
   myFavoritesMenu(model),
+  refreshOptions(model),
 ];
 
 const exploreMenu = (model) => [
@@ -82,5 +83,17 @@ const myFavoritesMenu = (model) => [
 //     iconPlus(), ' ', h('span', 'DAQ 866')
 //   ]
 // )
+];
+
+const refreshOptions = (model) => [
+  h('.sidebar-menu-title', [
+    'Refresh period ',
+    h('input.form-control.text-center', {
+      type: 'number',
+      style: {'width': '50px', 'animation-name': 'highlight', 'animation-duration': `${model.object.refreshInterval}s`, 'animation-iteration-count': 'infinite'},
+      value: model.object.refreshInterval,
+      oninput: (e) => model.object.setRefreshInterval(e.target.value)
+    }),
+  ]),
 ];
 

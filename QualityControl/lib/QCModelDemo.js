@@ -39,7 +39,7 @@ function PromiseResolveWithLatency(data) {
 
 function readObject(path) {
   let object = objects.find(object => object.name === `${path}`);
-  return PromiseResolveWithLatency(object ? {name: object.name, status: object.status} : null);
+  return PromiseResolveWithLatency(object ? {name: object.name, quality: object.quality} : null);
 }
 
 function readObjectData(name) {
@@ -50,7 +50,7 @@ function readObjectData(name) {
 // List all object without the data which are heavy
 function listObjects() {
   return PromiseResolveWithLatency(objects.map(object => {
-    return {name: object.name, status: object.status}
+    return {name: object.name, quality: object.quality}
   }));
 }
 
@@ -111,42 +111,46 @@ const graphs = {
   alice: require('./demoData/alice.json'),
 };
 
+setInterval(() => {
+  graphs.histo.fArray[3] += Math.random() * 10000 - 5000;
+});
+
 const objects = [
-  {name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', status: 'active', data: graphs.histo},
-  {name: 'DAQ01/EquipmentSize/CPV/CPV', status: 'active', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EquipmentSize/HMPID/HMPID', status: 'active', data: graphs.gaussian},
-  {name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', status: 'active', data: graphs.hpx},
-  {name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', status: 'active', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EquipmentSize/TOF/TOF', status: 'active', data: graphs.histo},
-  {name: 'DAQ01/EquipmentSize/TPC/TPC', status: 'active', data: graphs.gaussian},
-  {name: 'DAQ01/EventSize/ACORDE/ACORDE', status: 'active', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EventSize/CPV/CPV', status: 'active', data: graphs.hpx},
-  {name: 'DAQ01/EventSize/HMPID/HMPID', status: 'active', data: graphs.gaussian},
-  {name: 'DAQ01/EventSize/ITSSDD/ITSSDD', status: 'active', data: graphs.root0},
-  {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', status: 'active', data: graphs.histo},
-  {name: 'DAQ01/EventSize/TOF/TOF', status: 'inactive', data: graphs.gaussian},
-  {name: 'DAQ01/EventSize/TPC/TPC', status: 'active', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', status: 'active', data: graphs.hpx},
-  {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', status: 'active', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', status: 'active', data: graphs.gaussian},
-  {name: 'DAQ01/_EquimentSizeSummmary', status: 'inactive', data: graphs.gaussian},
-  {name: 'DAQ01/_EventSizeClusters', status: 'inactive', data: graphs.canvas_tf1},
-  {name: 'DAQ01/_EventSizeSummary', status: 'inactive', data: graphs.histo},
-  {name: 'TOFQAshifter/Default/hTOFRRawHitMap', status: 'active', data: graphs.gaussian},
-  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM035', status: 'active', data: graphs.canvas_tf1},
-  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM3671', status: 'active', data: graphs.root0},
-  {name: 'TOFQAshifter/Default/hTOFRRaws', status: 'active', data: graphs.histo},
-  {name: 'TOFQAshifter/Default/hTOFRRawsTime', status: 'active', data: graphs.canvas_tf1},
-  {name: 'TOFQAshifter/Default/hTOFRRawsToT', status: 'inactive', data: graphs.hpx},
-  {name: 'TOFQAshifter/Default/hTOFrefMap', status: 'inactive', data: graphs.histo},
-  {name: 'TST01/Default/hTOFRRawHitMap', status: 'active', data: graphs.histo},
-  {name: 'TST01/Default/hTOFRRawTimeVsTRM035', status: 'active', data: graphs.root0},
-  {name: 'TST01/Default/hTOFRRawTimeVsTRM3671', status: 'active', data: graphs.canvas_tf1},
-  {name: 'TST01/Default/hTOFRRaws', status: 'active', data: graphs.gaussian},
-  {name: 'TST01/Default/hTOFRRawsTime', status: 'active', data: graphs.canvas_tf1},
-  {name: 'TST01/Default/hTOFRRawsToT', status: 'active', data: graphs.histo},
-  {name: 'TST01/Default/hTOFrefMap', status: 'active', data: graphs.hpx},
-  ...Array.from({length: 2500}, (x, i) => ({name: `BIGTREE/120KB/${i}`, status: 'active', data: graphs.hpx}))
+  {name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', quality: 'good', data: graphs.histo},
+  {name: 'DAQ01/EquipmentSize/CPV/CPV', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'DAQ01/EquipmentSize/HMPID/HMPID', quality: 'good', data: graphs.gaussian},
+  {name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', quality: 'good', data: graphs.hpx},
+  {name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'DAQ01/EquipmentSize/TOF/TOF', quality: 'good', data: graphs.histo},
+  {name: 'DAQ01/EquipmentSize/TPC/TPC', quality: 'good', data: graphs.gaussian},
+  {name: 'DAQ01/EventSize/ACORDE/ACORDE', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'DAQ01/EventSize/CPV/CPV', quality: 'good', data: graphs.hpx},
+  {name: 'DAQ01/EventSize/HMPID/HMPID', quality: 'good', data: graphs.gaussian},
+  {name: 'DAQ01/EventSize/ITSSDD/ITSSDD', quality: 'good', data: graphs.root0},
+  {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', quality: 'good', data: graphs.histo},
+  {name: 'DAQ01/EventSize/TOF/TOF', quality: 'bad', data: graphs.gaussian},
+  {name: 'DAQ01/EventSize/TPC/TPC', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', quality: 'good', data: graphs.hpx},
+  {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', quality: 'good', data: graphs.gaussian},
+  {name: 'DAQ01/_EquimentSizeSummmary', quality: 'bad', data: graphs.gaussian},
+  {name: 'DAQ01/_EventSizeClusters', quality: 'bad', data: graphs.canvas_tf1},
+  {name: 'DAQ01/HistoWithRandom', quality: 'bad', data: graphs.histo},
+  {name: 'TOFQAshifter/Default/hTOFRRawHitMap', quality: 'good', data: graphs.gaussian},
+  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM035', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM3671', quality: 'good', data: graphs.root0},
+  {name: 'TOFQAshifter/Default/hTOFRRaws', quality: 'good', data: graphs.histo},
+  {name: 'TOFQAshifter/Default/hTOFRRawsTime', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'TOFQAshifter/Default/hTOFRRawsToT', quality: 'bad', data: graphs.hpx},
+  {name: 'TOFQAshifter/Default/hTOFrefMap', quality: 'bad', data: graphs.histo},
+  {name: 'TST01/Default/hTOFRRawHitMap', quality: 'good', data: graphs.histo},
+  {name: 'TST01/Default/hTOFRRawTimeVsTRM035', quality: 'good', data: graphs.root0},
+  {name: 'TST01/Default/hTOFRRawTimeVsTRM3671', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'TST01/Default/hTOFRRaws', quality: 'good', data: graphs.gaussian},
+  {name: 'TST01/Default/hTOFRRawsTime', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'TST01/Default/hTOFRRawsToT', quality: 'good', data: graphs.histo},
+  {name: 'TST01/Default/hTOFrefMap', quality: 'good', data: graphs.hpx},
+  ...Array.from({length: 2500}, (x, i) => ({name: `BIGTREE/120KB/${i}`, quality: 'good', data: graphs.hpx}))
 ];
 
 const tabObject = [

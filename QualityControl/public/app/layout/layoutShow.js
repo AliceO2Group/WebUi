@@ -110,7 +110,7 @@ function tabShow(model) {
       };
 
       return h('.absolute.animate-dimensions-position', attrs, [
-        h('.bg-white.m1.fill-parent.object-shadow.br3', {class: model.layout.editingtabObject === tabObject ? 'object-selected' : ''}, draw(model, tabObject)),
+        h('.bg-white.m1.fill-parent.object-shadow.br3', {class: model.layout.editingtabObject === tabObject ? 'object-selected' : ''}, draw(model, tabObject, {style: tabObject.options})),
         model.layout.editEnabled && h('.object-edit-layer.fill-parent.m1.br3')
       ]);
     })

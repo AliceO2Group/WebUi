@@ -10,7 +10,7 @@ export default class ObjectTree extends Observable {
     this.parent = parent || null;
     this.path = [];
 
-    this.status = null; // most negative status from this subtree
+    this.quality = null; // most negative quality from this subtree
   }
 
   toggle() {
@@ -58,10 +58,10 @@ export default class ObjectTree extends Observable {
       return;
     }
 
-    // Keep status of wrost status of all leaf
-    // so the root has the wrost status, easy to monitor
-    if (!this.status || object.status === 'inactive') {
-      this.status = object.status;
+    // Keep quality of wrost quality of all leaf
+    // so the root has the wrost quality, easy to monitor
+    if (!this.quality || object.quality === 'bad') {
+      this.quality = object.quality;
     }
 
     // Case end of path, associate the object to 'this' node
