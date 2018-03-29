@@ -24,7 +24,7 @@ export function draw(model, object, options) {
     // jsroot is not drawn but data are ready, draw it
     if (model.object.objects[object.name]) {
       timerDebouncer(function() {
-        JSROOT.redraw(vnode.dom, model.object.objects[object.name], 'colz');
+        JSROOT.redraw(vnode.dom, model.object.objects[object.name], 'logx;logy;gridx;lego');
       }, 300)();
 
       vnode.dom.resizeJsRoot = timerDebouncer(function() {

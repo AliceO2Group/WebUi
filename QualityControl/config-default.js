@@ -1,4 +1,7 @@
 module.exports = {
+  app: {
+    demoData: true // uses fake data instead of DB data
+  },
   jwt: {
     secret: '<secret>',
     issuer: 'alice-o2-gui',

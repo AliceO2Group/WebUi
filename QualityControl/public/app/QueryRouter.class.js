@@ -114,4 +114,26 @@ export default class QueryRouter extends Observable {
     // replaceState and pushState cannot be listen so we trigger manually that location changed
     this._handleLocationChange();
   }
+
+  /**
+   * Go to the specified `uri`. If `replace` is set, the current history point is replaced.
+   * @param {string} uri - e.g. ?foo=bar
+   * @param {boolean} replace - true to replace history
+   */
+  go(uri, replace) {
+    const newURL = new URL(uri, this.location);
+
+    if (replace) {
+      this.history.replaceState({}, '', newURL);
+    } else {
+      this.history.pushState({}, '', newURL);
+    }
+
+    // replaceState and pushState cannot be listen so we trigger manually that location changed
+    this._handleLocationChange();
+  }
+
+  parameter(key) {
+    return (new URL(this.location)).searchParams.get(key);
+  }
 }

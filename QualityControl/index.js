@@ -1,43 +1,11 @@
-// Doc: https://github.com/winstonjs/winston/tree/2.x
-// const winston = require('winston');
-// const log = new winston.Logger({
-//   transports: [
-//     new winston.transports.Console(
-//       {timestamp: true, colorize: true}
-//     )
-//   ],
-//   exitOnError: true
-// });
-
 const HttpServer = require('@aliceo2/aliceo2-gui').HttpServer;
 const log = require('@aliceo2/aliceo2-gui').Log;
 const Response = require('@aliceo2/aliceo2-gui').Response;
 const mysql = require('mysql');
 const fs = require('fs');
-const model = require('./lib/QCModelStatic.js');
 const config = require('./config.js');
-
-// Not working
-// const log2 = require('@aliceo2/aliceo2-gui').Log;
-// log2.configure({
-//   winston: {
-//     transports: [
-//       new winston.transports.Console(
-//         {timestamp: true, colorize: true}
-//       )
-//     ],
-//     exitOnError: true
-//   }
-// });
-
-// process.once('uncaughtException', function(e) {
-//   if (e.code === 'EADDRINUSE') {
-//     log.error('Port is already used');
-//   }
-
-//   log.error(e.stack || e);
-//   process.exit(1);
-// });
+const validator = require('./lib/validator.js');
+const model = config.app.demoData ? require('./lib/QCModelDemo.js') : require('./lib/QCModel.js');
 
 // Quick check config at start
 log.info(`HTTP full link: http://${config.http.hostname}:${config.http.port}`);
@@ -46,9 +14,13 @@ log.info(`TObject2JSON URL: ${config.tobject2json.endpoint}`);
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.oAuth);
+http.addStaticPath('public');
+http.addStaticPath('node_modules/jsroot', 'jsroot');
 
-// Retrieve a TObject from the TObject2JSON server
-// and send it to client
+// --------------------------------------------------------
+// API
+// --------------------------------------------------------
+
 http.post('/readObject', function(req, res) {
   const path = req.query.path;
 
@@ -91,12 +63,52 @@ http.post('/readLayout', function(req, res) {
     .catch(err => res.status(500).send(err));
 });
 
-http.post('/listLayouts', function(req, res) {
-  model.listLayouts()
+http.post('/writeLayout', function(req, res) {
+  const layoutName = req.query.layoutName;
+  const data = req.body;
+
+  if (!layoutName) {
+    return res.status(400).send('layoutName parameter is needed');
+  }
+
+  if (!data) {
+    return res.status(400).send('body is needed');
+  }
+
+  model.writeLayout(layoutName, data)
     .then(data => res.status(200).json(data))
     .catch(err => res.status(500).send(err));
 });
 
-http.addStaticPath('public');
-http.addStaticPath('node_modules/jsroot', 'jsroot');
+http.get('/layout', function(req, res) {
+  const filter = {
+    owner_id: parseInt(req.query.owner_id, 10)
+  };
+
+  model.listLayouts(filter)
+    .then(data => res.status(200).json(data))
+    .catch(err => res.status(500).send(err));
+});
+
+http.post('/layout', function(req, res) {
+  const layout = req.body;
+
+  if (!layout.name) {
+    return res.status(400).send('layout.name parameter is needed');
+  }
+  if (!layout.owner_id) {
+    return res.status(400).send('layout.owner_id parameter is needed');
+  }
+  if (!layout.owner_name) {
+    return res.status(400).send('layout.owner_name parameter is needed');
+  }
+  if (!layout.tabs) {
+    return res.status(400).send('layout.tabs parameter is needed');
+  }
+  validator.layout(layout);
+
+  model.createLayout(layout)
+    .then(data => res.status(201).json(data))
+    .catch(err => res.status(500).send(err));
+});
 

@@ -49,7 +49,7 @@ function rows(model) {
           ]
         ),
         h('td',
-          layout.owner
+          layout.owner_name
         ),
         h('td',
           layout.popularity

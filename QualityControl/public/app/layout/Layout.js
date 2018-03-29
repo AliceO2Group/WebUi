@@ -1,5 +1,8 @@
+import sessionService from '/js/src/sessionService.js';
 import {Observable, fetchClient, WebSocketClient} from '/js/src/index.js';
+
 import GridList from './Grid.js';
+import {objectId, clone} from '../utils.js';
 
 export default class Layout extends Observable {
   constructor(model) {
@@ -11,11 +14,14 @@ export default class Layout extends Observable {
     this.item = null; // layout containing an array of tabs
     this.tab = null; // pointer to a tab from `item`
 
+    this.myList = null; // array of layouts
+
     this.searchInput = '';
     this.searchResult = null; // null means no search, sub-array of `list`
 
     this.editEnabled = false; // activate UI for adding, dragging and deleting tabObjects inside the current tab
-    this.editingItem = null; // pointer to a tabObject begin modified
+    this.editingTabObject = null; // pointer to a tabObject beeing modified
+    this.editOriginalClone = null; // contains a deep clone of item before editing
 
     // https://github.com/hootsuite/grid
     this.gridList = new GridList([], {
@@ -28,7 +34,7 @@ export default class Layout extends Observable {
   }
 
   loadList() {
-    return this.model.loader.watchPromise(fetchClient(`/api/listLayouts`, {method: 'POST'})
+    return this.model.loader.watchPromise(fetchClient(`/api/layout`, {method: 'GET'})
       .then(res => res.json())
       .then(list => {
         this.list = list;
@@ -37,9 +43,19 @@ export default class Layout extends Observable {
     );
   }
 
+  loadMyList() {
+    return this.model.loader.watchPromise(fetchClient(`/api/layout?owner_id=822826`, {method: 'GET'})
+      .then(res => res.json())
+      .then(myList => {
+        this.myList = myList;
+        this.notify();
+      })
+    );
+  }
+
   loadItem(layoutName) {
     if (!layoutName) {
-      throw new Error('layoutName is mandatory');
+      throw new Error('layoutName parameter is mandatory');
     }
     return this.model.loader.watchPromise(fetchClient(`/api/readLayout?layoutName=${layoutName}`, {method: 'POST'})
       .then(res => res.json())
@@ -51,14 +67,83 @@ export default class Layout extends Observable {
     );
   }
 
-  selectTab(index) {
-    if (!this.item.folders[index]) {
-      return;
+  async newItem(layoutName) {
+    if (!layoutName) {
+      throw new Error('layoutName parameter is mandatory');
     }
 
-    this.tab = this.item.folders[index];
-    this.gridList.items = this.tab.objects.map(object => ({x: 0, y: 0, h: 1, w: 1, object}));
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    const body = {
+      name: layoutName,
+      owner_id: parseInt(sessionService.get().personid, 10),
+      owner_name: sessionService.get().name,
+      tabs: [{
+        id: objectId(),
+        name: 'main',
+        objects: [],
+      }]
+    };
+    const req = fetchClient(`/api/layout`, {method: 'POST', headers, body: JSON.stringify(body)});
+    this.model.loader.watchPromise(req);
+    const res = await req;
+    const layout = await res.json();
+
+    this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layout.name)}`);
+    this.loadMyList();
+  }
+
+  saveItem() {
+    if (!this.item) {
+      throw new Error('no layout to save');
+    }
+
+    return this.model.loader.watchPromise(fetchClient(`/api/writeLayout?layoutName=${this.item.name}`, {method: 'POST', body: JSON.stringify(this.item),     headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },})
+      .then(res => res.json())
+      .then(item => {
+        this.notify();
+      })
+    );
+  }
+
+  sortObjectsOfCurrentTab() {
+    this.gridList.items = this.tab.objects;
     this.gridList.resizeGrid(3);
+  }
+
+  selectTab(index) {
+    if (!this.item.tabs[index]) {
+      throw new Error(`index ${index} does not exist`);
+    }
+
+    this.tab = this.item.tabs[index];
+    this.sortObjectsOfCurrentTab();
+    this.notify();
+  }
+
+  deleteTab(index) {
+    if (!this.item.tabs[index]) {
+      throw new Error(`index ${index} does not exist`);
+    }
+
+    this.item.tabs.splice(index, 1);
+    this.notify();
+  }
+
+  newTab(name) {
+    if (!name) {
+      throw new Error(`tab name is required`);
+    }
+
+    this.item.tabs.push({
+      name,
+      objects: []
+    });
     this.notify();
   }
 
@@ -76,14 +161,37 @@ export default class Layout extends Observable {
     this.notify();
   }
 
-  editToggle() {
-    this.editEnabled = !this.editEnabled;
+  /**
+   * Creates a deep clone of current `item` to edit it without side effect.
+   */
+  edit() {
+    if (!this.item) {
+      throw new Error('An item should be loaded before editing it');
+    }
 
-    // Reset and free memory
-    this.itemMoving = null;
-    this.editingItem = null;
-    this.originalItems = null;
+    this.editEnabled = true;
+    this.editOriginalClone = JSON.parse(JSON.stringify(this.item)); // deep clone
+    this.editingTabObject = null;
+    this.notify();
+  }
 
+  /**
+   * Ends editing and send back to server the new version of the current layout
+   */
+  save() {
+    this.editEnabled = false;
+    console.log('save layout', this.item);
+    this.saveItem();
+    this.notify();
+  }
+
+  /**
+   * Ends editing and replaces the current layout by the original before editing
+   */
+  cancelEdit() {
+    this.editEnabled = false;
+    this.item = this.editOriginalClone;
+    this.selectTab(0);
     this.notify();
   }
 
@@ -91,61 +199,59 @@ export default class Layout extends Observable {
     this.canvasHeight = height;
   }
 
-  addItem(objectName) {console.log('objectName:', objectName);
-    const newItem = {
+  addItem(objectName) {
+    const newTabObject = {
+      id: objectId(),
       x: 0,
       y: 100, // place it at the end first
       h: 1,
       w: 1,
-      object: {
-        name: objectName
-      }
+      name: objectName
     };
-    this.gridList.items.push(newItem);
-    this.gridList.resizeGrid(3);
+    this.tab.objects.push(newTabObject);
+    this.sortObjectsOfCurrentTab();
     this.notify();
-    return newItem;
+    return newTabObject;
   }
 
-  moveItemStart(item) {
-    console.log('move item start', item);
-    this.itemMoving = item.object;
-    this.originalItems = this.gridList.items.concat().map((item, i) => Object.assign({}, item));
-    this.notify();
-  }
-
-  moveItemStop() {
-    console.log('move item stop');
-    this.itemMoving = null;
-    this.editingItem = null;
+  moveTabObjectStart(tabObject) {
+    this.tabObjectMoving = tabObject;
+    this.originalItems = clone(this.tab.objects);
     this.notify();
   }
 
-  moveItemToPosition(newX, newY) {
-    if (!this.itemMoving) {
+  moveTabObjectStop() {
+    this.tabObjectMoving = null;
+    this.notify();
+  }
+
+  moveTabObjectToPosition(newX, newY) {
+    if (!this.tabObjectMoving) {
       return;
     }
-    this.gridList.items = this.originalItems.concat().map((item, i) => Object.assign({}, item));
-    this.gridList.moveItemToPosition(this.gridList.items.find(item => item.object === this.itemMoving), [newX, newY]);
-    this.notify();
-  }
-
-  resizeItem(item, w, h) {
-    this.gridList.resizeItem(item, {w, h});
-    this.notify();
-  }
-
-  editItem(item) {
-    this.editingItem = item;
-    this.notify();
-  }
-
-  deleteItem(item) {
-    if (this.editingItem === item) {
-      this.editingItem = null;
+    this.tab.objects = clone(this.originalItems);
+    this.gridList.items = this.tab.objects;
+    const tabObjectToMove = this.tab.objects.find(tabObject => tabObject.id === this.tabObjectMoving.id);
+    if (!tabObjectToMove) {
+      throw new Error(`the tabObject ${this.tabObjectMoving.id} was not found in the objects of the current tab`);
     }
-    this.gridList.items = this.gridList.items.filter(_item => _item !== item);
-    this.gridList.resizeGrid(3);
+    this.gridList.moveItemToPosition(tabObjectToMove, [newX, newY]);
+    this.notify();
+  }
+
+  resizeTabObject(tabObject, w, h) {
+    this.gridList.resizeItem(tabObject, {w, h});
+    this.notify();
+  }
+
+  editTabObject(tabObject) {
+    this.editingTabObject = tabObject;
+    this.notify();
+  }
+
+  deleteTabObject(tabObject) {
+    this.tab.objects = this.tab.objects.filter(item => item.id !== tabObject.id);
+    this.sortObjectsOfCurrentTab();
     this.notify();
   }
 }

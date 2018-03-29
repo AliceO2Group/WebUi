@@ -11,6 +11,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@aliceo2/aliceo2-gui": "2.0.0",
+    "body-parser": "^1.18.2",
     "jsroot": "^5.3.5",
     "zeromq": "^4.6.0"
   },

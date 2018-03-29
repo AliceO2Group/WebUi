@@ -1,6 +1,10 @@
 import {h} from '/js/src/index.js';
 
 export default function objectTreeHeader(model) {
+  if (!model.object.list) {
+    return null;
+  }
+
   return [
     h('.w-100.text-center', [
       h('div', {class: 'header-layout'}, [

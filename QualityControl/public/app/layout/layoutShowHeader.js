@@ -1,42 +1,77 @@
 import {h} from '/js/src/index.js';
+import {iconStar, iconEdit} from '../icons.js';
 
-export default function layoutShowHeader(model) {
-  return [
-    h('.w-100.text-center', [
-      h('div', {class: 'header-layout'}, [
-        h('b', model.layout.item.name),
-        h('.f6.no-select',
-          model.layout.item.folders.map((folder, i) => {
-            const linkClass = model.layout.tab.name === folder.name ? 'active' : '';
-            const onclick = () => model.layout.selectTab(i);
+export default (model) => model.layout.editEnabled ? toolbarEditMode(model) : toolbarViewMode(model);
 
-            return [
-              h('button.br-pill.ph2.pointer.button.btn-xs.default', {class: linkClass, onclick}, folder.name),
-              ' '
-            ];
-          })
-        ),
-        // h('br'),
-        // h('span', model.layout.tab.name)
-      ])
-    ]),
-    h('.w-100.text-right', [
-      h('button.button.default.mh1',
-        h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
-          h('path', {d: 'M4 0l-1 3h-3l2.5 2-1 3 2.5-2 2.5 2-1-3 2.5-2h-3l-1-3z'})
-        )
-      ),
-      h('.button-group.mh1',
-        [
-          h('button.button.default', {onclick: e => model.layout.editToggle()},
-            [
-              h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
-                h('path', {d: 'M6 0l-1 1 2 2 1-1-2-2zm-2 2l-4 4v2h2l4-4-2-2z'})
-              )
-            ]
-          ),
-        ]
-      )
-    ]),
-  ];
-}
+const toolbarViewMode = (model) => [
+  h('.w-100.text-center', [
+    h('div', {class: 'header-layout'}, [
+      h('b', model.layout.item.name),
+      h('.f6.no-select', [
+        model.layout.item.tabs.map((folder, i) => {
+          const linkClass = model.layout.tab.name === folder.name ? 'active' : '';
+          const selectTab = () => model.layout.selectTab(i);
+
+          return [
+            h('.button-group', [
+              h('button.br-pill.ph2.pointer.button.btn-xs.default', {class: linkClass, onclick: selectTab}, folder.name),
+            ]),
+            ' '
+          ]
+        }),
+      ]),
+    ])
+  ]),
+  h('.w-100.text-right', [
+    // TODO
+    // h('button.button.default.mh1', {onclick: e => alert('Not implemented')},
+    //   iconStar()
+    // ),
+    h('button.button.default', {onclick: e => model.layout.edit()},
+      [
+        iconEdit()
+      ]
+    ),
+  ]),
+];
+
+const toolbarEditMode = (model) => [
+  h('.w-100.text-center', [
+    h('div', {class: 'header-layout'}, [
+      h('b', model.layout.item.name),
+      h('.f6.no-select', [
+        model.layout.item.tabs.map((folder, i) => {
+          const linkClass = model.layout.tab.name === folder.name ? 'active' : '';
+          const selectTab = () => model.layout.selectTab(i);
+          let deleteTab = () => confirm('Are you sure to delete this tab?') && model.layout.deleteTab(i);
+
+          return [
+            h('.button-group', [
+              h('button.br-pill.ph2.pointer.button.btn-xs.default', {class: linkClass, onclick: selectTab}, folder.name),
+              h('button.br-pill.ph2.pointer.button.btn-xs.default', {class: linkClass, onclick: deleteTab}, 'x'),
+            ]),
+            ' '
+          ]
+        }),
+        h('.button-group', [
+          tabBtn({class: 'default', onclick: () => {
+            const name = prompt('Enter the name of the new tab:');
+            if (name) {
+              model.layout.newTab(name);
+            }
+          }}, '+'),
+        ])
+      ]),
+    ])
+  ]),
+  h('.w-100.text-right', [
+    h('button.button.default.mh1', {onclick: () => model.layout.cancelEdit()},
+      'Cancel'
+    ),
+    h('button.button.primary.mh1', {onclick: () => model.layout.save()},
+      'Save'
+    ),
+  ]),
+];
+
+const tabBtn = (...args) => h('button.br-pill.ph2.pointer.button.btn-xs', ...args);

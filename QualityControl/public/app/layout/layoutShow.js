@@ -15,7 +15,7 @@ export default function layouts(model) {
 function tabNav(model) {
   return h('div', [
     h('.button-group', [
-      model.layout.item.folders.map(folder => [
+      model.layout.item.tabs.map(folder => [
         h('a.button', {class: model.layout.tab.name === folder.name ? 'default active' : 'default'}, folder.name),
         ' '
       ]),
@@ -26,18 +26,22 @@ function tabNav(model) {
 }
 
 function tabShow(model) {
-  if (!model.layout.gridList.items.length) {
+  if (!model.layout.tab) {
+    return;
+  }
+
+  if (!model.layout.tab.objects.length) {
     return h('.m4', [
       h('h1', 'Empty list'),
       h('p', 'Owner can edit this tab to add objects to see.')
     ]);
   }
 
-  const items = model.layout.gridList.items.concat().sort(compare);
+  const tabObjects = model.layout.tab.objects.concat().sort(compare);
   function compare(a, b) {
-    if (a.object.name < b.object.name)
+    if (a.name < b.name)
       return -1;
-    if (a.object.name > b.object.name)
+    if (a.name > b.name)
       return 1;
     return 0;
   }
@@ -50,7 +54,7 @@ function tabShow(model) {
     },
     ondragover(e) {
       // avoid events from other draggings things (files, etc.)
-      if (!model.layout.itemMoving) {
+      if (!model.layout.tabObjectMoving) {
         return;
       }
       // console.log('ondragend:', e);
@@ -74,27 +78,27 @@ function tabShow(model) {
       const y = Math.floor(canvasY / cellHeight);
 
       // console.log(x, y, pageX, canvasDimensions.x);
-      model.layout.moveItemToPosition(x, y);
+      model.layout.moveTabObjectToPosition(x, y);
     },
     ondragend(e) {
-      model.layout.moveItemStop();
+      model.layout.moveTabObjectStop();
     }
   };
 
   return h('div', attrs2, [
-    items.map((item) => {
-      const key = item.object.name;
+    tabObjects.map((tabObject) => {
+      const key = tabObject.name;
       const style = {
-        height: (cellHeight * item.h) + 'px',
-        width: (cellWidth * item.w) + '%',
-        top: (item.y * cellHeight) + 'px',
-        left: (item.x * cellWidth) + '%',
-        opacity: (model.layout.itemMoving && item.object === model.layout.itemMoving ? '0.1' : '1')
+        height: (cellHeight * tabObject.h) + 'px',
+        width: (cellWidth * tabObject.w) + '%',
+        top: (tabObject.y * cellHeight) + 'px',
+        left: (tabObject.x * cellWidth) + '%',
+        opacity: (model.layout.tabObjectMoving && tabObject === model.layout.tabObjectMoving ? '0.1' : '1')
       };
 
       const draggable = model.layout.editEnabled;
-      const ondragstart = model.layout.editEnabled ? () => model.layout.moveItemStart(item) : null;
-      const onclick = model.layout.editEnabled ? () => model.layout.editItem(item) : null;
+      const ondragstart = model.layout.editEnabled ? () => model.layout.moveTabObjectStart(tabObject) : null;
+      const onclick = model.layout.editEnabled ? () => model.layout.editTabObject(tabObject) : null;
 
       const attrs = {
         alt: key,
@@ -106,7 +110,7 @@ function tabShow(model) {
       };
 
       return h('.absolute.animate-dimensions-position', attrs, [
-        h('.bg-white.m1.fill-parent.object-shadow.br3', {class: model.layout.editingItem === item ? 'object-selected' : ''}, draw(model, item.object)),
+        h('.bg-white.m1.fill-parent.object-shadow.br3', {class: model.layout.editingtabObject === tabObject ? 'object-selected' : ''}, draw(model, tabObject)),
         model.layout.editEnabled && h('.object-edit-layer.fill-parent.m1.br3')
       ]);
     })

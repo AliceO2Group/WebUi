@@ -59,3 +59,10 @@
 
 /* delete object-h3, object-w3, etc. */
 
+
+/*
+updates on JS side:
+- fetchClient with JSON headers
+- sessionService.get() ajouter un argument pour avoir une clé en particulier
+*/
+

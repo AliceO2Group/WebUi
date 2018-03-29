@@ -25,6 +25,9 @@
 <script type="module">
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
+
+// Expose sessionService to interract with it the browser's console
+window.sessionService = sessionService;
 </script>
 
 <!-- Main application controller -->

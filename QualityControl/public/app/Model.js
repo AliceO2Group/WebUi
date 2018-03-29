@@ -18,7 +18,6 @@ export default class Model extends Observable {
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
 
-    this.zoom = 80;
     this.sidebar = true;
     this.route = null;
     this.page = null;
@@ -31,7 +30,8 @@ export default class Model extends Observable {
 
     window.addEventListener('resize', () => this.notify());
 
-    this.object.loadList(); // TODO pas propre
+    // this.object.loadList(); // TODO pas propre
+    this.layout.loadMyList();
   }
 
   handleLocationChange() {
@@ -64,41 +64,14 @@ export default class Model extends Observable {
           });
         break;
       case 'objectTree':
-        this.object.loadList()
-          .then(() => {
-            this.page = 'objectTree';
-            this.notify();
-          })
-          .catch(() => {
-
-          });
+        this.page = 'objectTree';
+        this.notify();
         break;
       default:
         // default route, replace the current one not handled
         this.router.setSearch('?page=layoutList', true);
         break;
     }
-  }
-
-  zoomIn() {
-    if (this.zoom >= 120) {
-      return;
-    }
-    this.zoom += 10;
-    this.notify();
-  }
-
-  zoomOut() {
-    if (this.zoom <= 10) {
-      return;
-    }
-    this.zoom -= 10;
-    this.notify();
-  }
-
-  zoomReset() {
-    this.zoom = 80; // arbitrary, it should be not too high to see at least one full scale graphic
-    this.notify();
   }
 
   toggleSidebar() {

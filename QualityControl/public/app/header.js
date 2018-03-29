@@ -41,6 +41,7 @@ function commonHeader(model) {
         )
       ]
     ),
+    h('span.f4.gray', ' Quality Control'),
     model.loader.active && h('span.f4.mh1.gray', spinner())
   ]);
 }

@@ -2,6 +2,8 @@
 
 User preferences stored inside MariaDB.
 
+Tables: layout, favorite
+
 *tab-object*
 - id
 - tab_id
@@ -18,12 +20,14 @@ User preferences stored inside MariaDB.
 - id
 - layout_id
 - name
+- objects: JSON<list of tab-objects>
 
 *layout*
 - id
 - name
 - owner_id
 - owner_name
+- tabs: JSON<list of tabs>
 
 *favorite*
 - id
