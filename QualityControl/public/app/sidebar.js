@@ -5,14 +5,30 @@ import objectPropertiesSidebar from './object/objectPropertiesSidebar.js';
 import {iconLayers, iconPlus, iconBarChart} from './icons.js';
 
 export default function sidebar(model) {
-  const className = `${model.layout.editEnabled ? 'sidebar-extend' : ''}
-                     ${!model.sidebar && !model.layout.editEnabled ? 'sidebar-closed' : ''}`;
+  // Spacial case when sidebar is used as a required form or perperty editor
+  if (model.router.parameter('page') === 'layoutShow' && model.layout.editEnabled && model.layout.editingTabObject) {
+    return h('.sidebar.sidebar-extend', {class: ''}, [
+      h('.sidebar-content', [
+        objectPropertiesSidebar(model)
+      ])
+    ]);
+  }
 
-  return h('.sidebar', {class: className},
-    h('.sidebar-content',
-      model.layout.editEnabled ? (model.layout.editingTabObject ? objectPropertiesSidebar(model) : objectTreeSidebar(model)) : sidebarMenu(model)
-    )
-  );
+  // Spacial case when sidebar is used as a required form or perperty editor
+  if (model.router.parameter('page') === 'layoutShow' && model.layout.editEnabled) {
+    return h('.sidebar.sidebar-extend', {class: ''}, [
+      h('.sidebar-content', [
+        objectTreeSidebar(model)
+      ])
+    ]);
+  }
+
+  // General case with an optional menu on the left
+  return h('.sidebar', {class: model.sidebar ? '' : 'sidebar-closed'}, [
+    h('.sidebar-content', [
+      sidebarMenu(model)
+    ])
+  ]);
 }
 
 const sidebarMenu = (model) => [

@@ -24,7 +24,7 @@ export function draw(model, object, options) {
     // jsroot is not drawn but data are ready, draw it
     if (model.object.objects[object.name]) {
       timerDebouncer(function() {
-        JSROOT.redraw(vnode.dom, model.object.objects[object.name], 'logx;logy;gridx;lego');
+        JSROOT.redraw(vnode.dom, model.object.objects[object.name], object.options.join(';'));
       }, 300)();
 
       vnode.dom.resizeJsRoot = timerDebouncer(function() {
@@ -39,7 +39,7 @@ export function draw(model, object, options) {
     JSROOT.cleanup(vnode.dom);
   };
   const attributes = {
-    key: object.name,
+    key: object.name + object.options.join(';'),
     class: options.className,
     style: {height: options.height, width: options.width},
     oncreate: oncreate,

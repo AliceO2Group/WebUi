@@ -27,7 +27,9 @@ const toolbarViewMode = (model) => [
     // h('button.button.default.mh1', {onclick: e => alert('Not implemented')},
     //   iconStar()
     // ),
-    h('button.button.default', {onclick: e => model.layout.edit()},
+    // TODO
+    // after personid is fixed, activate the next line so edit button is only for owner
+    /*model.session.personid === model.layout.item.owner_id && */h('button.button.default', {onclick: e => model.layout.edit()},
       [
         iconEdit()
       ]
@@ -65,11 +67,14 @@ const toolbarEditMode = (model) => [
     ])
   ]),
   h('.w-100.text-right', [
-    h('button.button.default.mh1', {onclick: () => model.layout.cancelEdit()},
-      'Cancel'
+    h('button.button.alert.mh1', {onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()},
+      'Delete layout'
     ),
     h('button.button.primary.mh1', {onclick: () => model.layout.save()},
       'Save'
+    ),
+    h('button.button.default.mh1', {onclick: () => model.layout.cancelEdit()},
+      'Cancel'
     ),
   ]),
 ];

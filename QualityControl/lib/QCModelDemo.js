@@ -20,6 +20,7 @@ module.exports.readLayout = readLayout;
 module.exports.writeLayout = writeLayout;
 module.exports.listLayouts = listLayouts;
 module.exports.createLayout = createLayout;
+module.exports.deleteLayout = deleteLayout;
 
 /**
  * Retrieve a monitoring object (TObject)
@@ -88,6 +89,16 @@ function writeLayout(layoutName, data) {
   return PromiseResolveWithLatency(layout);
 }
 
+function deleteLayout(layoutName) {
+  const layout = layouts.find(layout => layout.name === layoutName);
+  if (!layout) {
+    throw new Error(`layout ${layoutName} not found`);
+  }
+  const index = layouts.indexOf(layout);
+  layouts.splice(index, 1);
+  return PromiseResolveWithLatency(null);
+}
+
 // Fake data, not normalized but should be if inserted in relational DB
 
 const graphs = {
@@ -139,17 +150,17 @@ const objects = [
 ];
 
 const tabObject = [
-  {id: '5aba4a059b755d517e76ef51', name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', x: 0, y: 0, w: 2, h: 1},
-  {id: '5aba4a059b755d517e76ef52', name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef53', name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef54', name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef55', name: 'DAQ01/EquipmentSize/HMPID/HMPID', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef56', name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef57', name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef58', name: 'DAQ01/EquipmentSize/TOF/TOF', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef59', name: 'DAQ01/EquipmentSize/TPC/TPC', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef50', name: 'DAQ01/EventSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
-  {id: '5aba4a059b755d517e76ef60', name: 'DAQ01/EventSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef51', options: ['logx'], name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', x: 0, y: 0, w: 2, h: 1},
+  {id: '5aba4a059b755d517e76ef52', options: ['logy'], name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef53', options: ['gridx', 'lego'], name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef54', options: ['gridx', 'lego'], name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef55', options: ['gridx', 'lego'], name: 'DAQ01/EquipmentSize/HMPID/HMPID', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef56', options: [], name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef57', options: [], name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef58', options: [], name: 'DAQ01/EquipmentSize/TOF/TOF', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef59', options: [], name: 'DAQ01/EquipmentSize/TPC/TPC', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef50', options: [], name: 'DAQ01/EventSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef60', options: [], name: 'DAQ01/EventSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1},
 ];
 
 const tabs = [

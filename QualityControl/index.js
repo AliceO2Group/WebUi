@@ -90,6 +90,18 @@ http.get('/layout', function(req, res) {
     .catch(err => res.status(500).send(err));
 });
 
+http.delete('/layout/:name', function(req, res) {
+  const layoutName = req.params.name;
+
+  if (!layoutName) {
+    return res.status(400).send('layoutName is needed');
+  }
+
+  model.deleteLayout(layoutName)
+    .then(data => res.status(204).json(data))
+    .catch(err => res.status(500).send(err));
+});
+
 http.post('/layout', function(req, res) {
   const layout = req.body;
 

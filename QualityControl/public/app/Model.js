@@ -1,3 +1,4 @@
+import sessionService from '/js/src/sessionService.js';
 import {Observable} from '/js/src/index.js';
 import Layout from './layout/Layout.js'
 import Object from './object/Object.js'
@@ -8,6 +9,8 @@ import Router from './QueryRouter.class.js'
 export default class Model extends Observable {
   constructor() {
     super();
+
+    this.session = sessionService.session;
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
@@ -52,7 +55,7 @@ export default class Model extends Observable {
         break;
       case 'layoutShow':
         if (!url.searchParams.get('layout')) {
-          return this.router.setSearch('?', true);
+          return this.router.go('?', true);
         }
         this.layout.loadItem(url.searchParams.get('layout'))
           .then(() => {
@@ -60,7 +63,7 @@ export default class Model extends Observable {
             this.notify();
           })
           .catch(() => {
-
+            this.router.go('?page=layoutList');
           });
         break;
       case 'objectTree':
@@ -69,7 +72,7 @@ export default class Model extends Observable {
         break;
       default:
         // default route, replace the current one not handled
-        this.router.setSearch('?page=layoutList', true);
+        this.router.go('?page=layoutList', true);
         break;
     }
   }

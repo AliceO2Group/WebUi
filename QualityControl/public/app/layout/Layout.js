@@ -53,18 +53,20 @@ export default class Layout extends Observable {
     );
   }
 
-  loadItem(layoutName) {
+  async loadItem(layoutName) {
     if (!layoutName) {
       throw new Error('layoutName parameter is mandatory');
     }
-    return this.model.loader.watchPromise(fetchClient(`/api/readLayout?layoutName=${layoutName}`, {method: 'POST'})
-      .then(res => res.json())
-      .then(item => {
-        this.item = item;
-        this.selectTab(0);
-        this.notify();
-      })
-    );
+
+    const req = fetchClient(`/api/readLayout?layoutName=${layoutName}`, {method: 'POST'});
+    const {result, response} = await this.model.loader.intercept(req);
+    if (!response.ok) {
+      throw new Error();
+    }
+
+    this.item = result;
+    this.selectTab(0);
+    this.notify();
   }
 
   async newItem(layoutName) {
@@ -93,6 +95,22 @@ export default class Layout extends Observable {
 
     this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layout.name)}`);
     this.loadMyList();
+  }
+
+  async deleteItem() {
+    if (!this.item) {
+      throw new Error('no layout to delete');
+    }
+
+    const req = fetchClient(`/api/layout/${this.item.name}`, {method: 'DELETE'});
+    this.model.loader.watchPromise(req);
+    const res = await req;
+    // const layout = await res.json();
+
+    this.model.router.go(`?page=layouts`);
+    this.loadMyList();
+    this.editEnabled = false;
+    this.notify();
   }
 
   saveItem() {
@@ -241,6 +259,16 @@ export default class Layout extends Observable {
 
   resizeTabObject(tabObject, w, h) {
     this.gridList.resizeItem(tabObject, {w, h});
+    this.notify();
+  }
+
+  toggleTabObjectOption(tabObject, option) {
+    const index = tabObject.options.indexOf(option);
+    if (index >= 0) {
+      tabObject.options.splice(index, 1);
+    } else {
+      tabObject.options.push(option);
+    }
     this.notify();
   }
 
