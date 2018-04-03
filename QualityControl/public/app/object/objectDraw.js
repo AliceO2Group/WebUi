@@ -26,29 +26,30 @@ export function draw(model, object, options) {
     // jsroot is not drawn but data are ready, draw it
     if (model.object.objects[object.name]) {
       timerDebouncer(function() {
-        JSROOT.redraw(vnode.dom, model.object.objects[object.name], options.style.join(';'));
+        JSROOT.redraw(vnode.dom, model.object.objects[object.name], (options.style || []).join(';'));
       }, 300)();
 
       vnode.dom.resizeJsRoot = timerDebouncer(function() {
         // JSROOT.resize(vnode.dom);
-        JSROOT.redraw(vnode.dom, model.object.objects[object.name], options.style.join(';'));
+        JSROOT.redraw(vnode.dom, model.object.objects[object.name], (options.style || []).join(';'));
       }, 300);
 
       vnode.dom.resizeJsRoot();
     }
   };
-  const ondestroy = (vnode) => {
+  const onremove = (vnode) => {
     // remove jsroot binding to avoid memory leak
+    console.log('unload object', object.name);
     model.object.unloadObject(object.name);
     JSROOT.cleanup(vnode.dom);
   };
   const attributes = {
-    key: object.name + options.style.join(';'),
+    key: object.name + (options.style || []).join(';'),
     class: options.className,
     style: {height: options.height, width: options.width},
-    oncreate: oncreate,
-    onupdate: onupdate,
-    ondestroy: ondestroy
+    oncreate,
+    onupdate,
+    onremove
   };
 
   return h('div', attributes);

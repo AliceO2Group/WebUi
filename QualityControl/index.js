@@ -45,6 +45,31 @@ http.post('/readObjectData', function(req, res) {
     .catch(err => res.status(500).send(err));
 });
 
+http.get('/readObjectsData', function(req, res) {
+  let objectName = req.query.objectName;
+
+  if (!objectName) {
+    return res.status(400).send('parameter objectName is needed');
+  }
+
+  if (!Array.isArray(objectName)) {
+    objectName = [objectName];
+  }
+
+  // Retrieve all data and fill a key-value object with it
+  const safeRetriever = (name) => model.readObjectData(name).catch((err) => null);
+  const promiseArray = objectName.map(safeRetriever);
+  Promise.all(promiseArray)
+    .then((results) => {
+      const resultsByName = {};
+      objectName.forEach((name, i) => {
+        resultsByName[name] = results[i];
+      });
+      res.status(200).json(resultsByName);
+    })
+    .catch(err => res.status(500).send(err));
+});
+
 http.post('/listObjects', function(req, res) {
   model.listObjects()
     .then(data => res.status(200).json(data))

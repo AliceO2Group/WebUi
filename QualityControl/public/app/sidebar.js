@@ -86,14 +86,19 @@ const myFavoritesMenu = (model) => [
 ];
 
 const refreshOptions = (model) => [
-  h('.sidebar-menu-title', [
-    'Refresh period ',
+  h('.sidebar-menu-title',[
+    h('span', [
+      h('span.highlight', {key: 'timer' + model.object.refreshTimer, title: 'timer' + model.object.refreshTimer}, 'Refresh period')
+    ]),
+    ' ',
     h('input.form-control.text-center', {
       type: 'number',
-      style: {'width': '50px', 'animation-name': 'highlight', 'animation-duration': `${model.object.refreshInterval}s`, 'animation-iteration-count': 'infinite'},
+      style: {'width': '50px'},
       value: model.object.refreshInterval,
       oninput: (e) => model.object.setRefreshInterval(e.target.value)
     }),
+    ' ',
+    h('button.button', {onclick: () => model.object.setRefreshInterval(model.object.refreshInterval)}, 'Now')
   ]),
 ];
 
