@@ -112,9 +112,12 @@ const graphs = {
 };
 
 setInterval(() => {
-  graphs.histo.fArray[3] += Math.random() * 10000 - 5000;
-  graphs.histo.fArray[4] += Math.random() * 10000 - 5000;
-  graphs.histo.fArray[5] += Math.random() * 10000 - 5000;
+  graphs.histo.fArray[0] = Math.random() * 10000 - 5000;
+  graphs.histo.fArray[1] = Math.random() * 10000 - 5000;
+  graphs.histo.fArray[2] = Math.random() * 10000 - 5000;
+  graphs.histo.fArray[3] = Math.random() * 10000 - 5000;
+  graphs.histo.fArray[4] = Math.random() * 10000 - 5000;
+  graphs.histo.fArray[5] = Math.random() * 10000 - 5000;
 }, 100);
 
 const objects = [
