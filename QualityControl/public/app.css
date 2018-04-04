@@ -30,8 +30,9 @@
 .pointer { cursor: pointer; }
 
 .sidebar {
- overflow-x: unset;
- overflow-y: unset;
+/* overflow-x: unset;
+ overflow-y: unset;*/
+ /*does not work in all cases, when closed, sidebar content must be hidden*/
  /* le user choisi ce qu'il fait dans cette boîte */
 }
 .sidebar-content {
