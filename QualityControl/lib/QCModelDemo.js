@@ -113,7 +113,9 @@ const graphs = {
 
 setInterval(() => {
   graphs.histo.fArray[3] += Math.random() * 10000 - 5000;
-});
+  graphs.histo.fArray[4] += Math.random() * 10000 - 5000;
+  graphs.histo.fArray[5] += Math.random() * 10000 - 5000;
+}, 100);
 
 const objects = [
   {name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', quality: 'good', data: graphs.histo},
