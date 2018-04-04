@@ -19,7 +19,7 @@ export default class Object_ extends Observable {
 
     this.refreshTimer = 0;
     this.refreshInterval = 0; // seconds
-    this.setRefreshInterval(2);
+    this.setRefreshInterval(60);
   }
 
   async loadList() {

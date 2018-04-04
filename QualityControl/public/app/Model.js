@@ -1,9 +1,11 @@
 import sessionService from '/js/src/sessionService.js';
 import {Observable} from '/js/src/index.js';
+
 import Layout from './layout/Layout.js'
 import Object from './object/Object.js'
 import Loader from './loader/Loader.js'
 import Router from './QueryRouter.class.js'
+import {timerDebouncer} from './utils.js';
 
 
 export default class Model extends Observable {
@@ -31,7 +33,7 @@ export default class Model extends Observable {
     // Init first page
     this.handleLocationChange();
 
-    window.addEventListener('resize', () => this.notify());
+    window.addEventListener('resize', timerDebouncer(() => this.notify(), 100));
 
     // this.object.loadList(); // TODO pas propre
     this.layout.loadMyList();

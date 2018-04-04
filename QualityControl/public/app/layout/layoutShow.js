@@ -1,31 +1,21 @@
 import {h} from '/js/src/index.js';
 import {draw} from '../object/objectDraw.js';
 
-export default function layouts(model) {
-  return h('.scroll-y.fill-parent.bg-gray-light', {onupdate: (vnode) => {
-    vnode.dom.style.setProperty('--h', vnode.dom.offsetHeight + 'px');
-    model.layout.setCanvasHeight(vnode.dom.offsetHeight);
-  } },
-    [
-      tabShow(model)
-    ]
-  );
+const cellHeight = 100 / 3 * 0.95; // %, put some margin at bottom to see below
+const cellWidth = 100 / 3; // %
+
+/*
+LayoutShow is composed of:
+- 1 canvasView
+- 1 subcanvasView
+- N chartView
+*/
+
+export default function canvasView(model) {
+  return h('.scroll-y.fill-parent.bg-gray-light', {id: 'canvas'}, subcanvasView(model));
 }
 
-function tabNav(model) {
-  return h('div', [
-    h('.button-group', [
-      model.layout.item.tabs.map(folder => [
-        h('a.button', {class: model.layout.tab.name === folder.name ? 'default active' : 'default'}, folder.name),
-        ' '
-      ]),
-    ]),
-    ' ',
-    h('a.button.default', '+')
-  ]);
-}
-
-function tabShow(model) {
+function subcanvasView(model) {
   if (!model.layout.tab) {
     return;
   }
@@ -37,45 +27,44 @@ function tabShow(model) {
     ]);
   }
 
-  const tabObjects = model.layout.tab.objects.concat().sort(compare);
-  function compare(a, b) {
-    if (a.name < b.name)
-      return -1;
-    if (a.name > b.name)
-      return 1;
-    return 0;
-  }
-  const cellHeight = model.layout.canvasHeight * 0.95 / 3;
-  const cellWidth = 33.33; // %
+  // Sort the list by id to help template engine. It will only update style's positions and not DOM order
+  // which could force recreate some charts and then have an unfriendly blink. The source array can be suffle
+  // because of the GridList algo, the sort below avoid this.
+  const tabObjects = cloneSortById(model.layout.tab.objects);
 
-  const attrs2 = {
+  const subcanvasAttributes = {
     style: {
-      height: cellHeight * model.layout.gridList.grid.length + 'px'
+      height: `${cellHeight * model.layout.gridList.grid.length}%`
     },
+    id: 'subcanvas',
     ondragover(e) {
+      // Warning CPU heavy function: getBoundingClientRect and offsetHeight re-compute layout
+      // it is ok to use them on user interactions like clicks or drags
+
       // avoid events from other draggings things (files, etc.)
       if (!model.layout.tabObjectMoving) {
         return;
       }
-      // console.log('ondragend:', e);
-      window.end = e;
 
-      // canvas is the div contaning all graphs' divs
-      const canvasDimensions = e.target.parentElement.parentElement.getBoundingClientRect();
+      // mouse position according to the viewport (scroll has no effect)
       const pageX = e.pageX;
       const pageY = e.pageY;
+
+      // canvas is the div containing the subcanvas with screen dependent height (100% - navbar)
+      const canvas = e.currentTarget.parentElement;
+
+      // subcanvas is the div contaning all graphs' divs, height is independent of the screen
+      const subcanvas = e.currentTarget;
+
+      const canvasDimensions = subcanvas.getBoundingClientRect();
       const canvasX = pageX - canvasDimensions.x;
       const canvasY = pageY - canvasDimensions.y;
 
       const cellWidth2 = canvasDimensions.width / 3;
 
-      if (!pageX) {
-        return;
-      }
-
       // position in the gridList
       const x = Math.floor(canvasX / cellWidth2);
-      const y = Math.floor(canvasY / cellHeight);
+      const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / 3));
 
       // console.log(x, y, pageX, canvasDimensions.x);
       model.layout.moveTabObjectToPosition(x, y);
@@ -85,34 +74,49 @@ function tabShow(model) {
     }
   };
 
-  return h('div', attrs2, [
-    tabObjects.map((tabObject) => {
-      const key = tabObject.name;
-      const style = {
-        height: (cellHeight * tabObject.h) + 'px',
-        width: (cellWidth * tabObject.w) + '%',
-        top: (tabObject.y * cellHeight) + 'px',
-        left: (tabObject.x * cellWidth) + '%',
-        opacity: (model.layout.tabObjectMoving && tabObject === model.layout.tabObjectMoving ? '0.1' : '1')
-      };
+  return h('div', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject)));
+}
 
-      const draggable = model.layout.editEnabled;
-      const ondragstart = model.layout.editEnabled ? () => model.layout.moveTabObjectStart(tabObject) : null;
-      const onclick = model.layout.editEnabled ? () => model.layout.editTabObject(tabObject) : null;
+function chartView(model, tabObject) {
+  const key = tabObject.id;
 
-      const attrs = {
-        alt: key,
-        key,
-        style,
-        draggable,
-        ondragstart,
-        onclick
-      };
+  // Position and size are produced by GridList in the model
+  const style = {
+    height: `${cellHeight * tabObject.h}%`,
+    width: `${cellWidth * tabObject.w}%`,
+    top: `${cellHeight * tabObject.y}%`,
+    left: `${cellWidth * tabObject.x}%`,
+    opacity: (model.layout.tabObjectMoving && tabObject.id === model.layout.tabObjectMoving.id ? '0' : '1')
+  };
 
-      return h('.absolute.animate-dimensions-position', attrs, [
-        h('.bg-white.m1.fill-parent.object-shadow.br3', {class: model.layout.editingtabObject === tabObject ? 'object-selected' : ''}, draw(model, tabObject, {style: tabObject.options})),
-        model.layout.editEnabled && h('.object-edit-layer.fill-parent.m1.br3')
-      ]);
-    })
+  // Interactions with user
+  const draggable = model.layout.editEnabled;
+  const ondragstart = model.layout.editEnabled ? () => model.layout.moveTabObjectStart(tabObject) : null;
+  const onclick = model.layout.editEnabled ? () => model.layout.editTabObject(tabObject) : null;
+
+  const attrs = {
+    alt: key,
+    key,
+    style,
+    draggable,
+    ondragstart,
+    onclick
+  };
+
+  return h('.absolute.animate-dimensions-position', attrs, [
+    h('.bg-white.m1.fill-parent.object-shadow.br3', {class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id ? 'object-selected' : ''}, draw(model, tabObject, {style: tabObject.options})),
+    model.layout.editEnabled && h('.object-edit-layer.fill-parent.m1.br3')
   ]);
+}
+
+function compareById(a, b) {
+  if (a.id < b.id)
+    return -1;
+  if (a.id > b.id)
+    return 1;
+  return 0;
+}
+
+function cloneSortById(array) {
+  return array.concat().sort(compareById);
 }

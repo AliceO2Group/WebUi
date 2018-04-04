@@ -29,8 +29,6 @@ export default class Layout extends Observable {
       lanes: 3
     });
     // gridList.grid.length: integer, number of rows
-
-    this.canvasHeight = 0;
   }
 
   loadList() {
@@ -211,10 +209,6 @@ export default class Layout extends Observable {
     this.item = this.editOriginalClone;
     this.selectTab(0);
     this.notify();
-  }
-
-  setCanvasHeight(height) {
-    this.canvasHeight = height;
   }
 
   addItem(objectName) {

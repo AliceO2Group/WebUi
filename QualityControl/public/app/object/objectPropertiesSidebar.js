@@ -54,7 +54,7 @@ const btnSize = (model, tabObject, width, height) => h('button.button.default.fl
   `${width}x${height}`);
 
 const btnOption = (model, tabObject, option) => h('button.button.default.flex-grow.m1', {
-  class: tabObject.options.indexOf(option) >= 0 ? 'active' : '',
+  class: (tabObject.options || []).indexOf(option) >= 0 ? 'active' : '',
   onclick: () => model.layout.toggleTabObjectOption(tabObject, option)
 },
   option);
