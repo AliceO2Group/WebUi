@@ -3,6 +3,7 @@ import {Observable, fetchClient, WebSocketClient} from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import {objectId, clone} from '../utils.js';
+import {assertTabObject, assertLayout, assertLayouts} from '../Types.js';
 
 export default class Layout extends Observable {
   constructor(model) {
@@ -35,7 +36,7 @@ export default class Layout extends Observable {
     return this.model.loader.watchPromise(fetchClient(`/api/layout`, {method: 'GET'})
       .then(res => res.json())
       .then(list => {
-        this.list = list;
+        this.list = assertLayouts(list);
         this.notify();
       })
     );
@@ -45,7 +46,7 @@ export default class Layout extends Observable {
     return this.model.loader.watchPromise(fetchClient(`/api/layout?owner_id=822826`, {method: 'GET'})
       .then(res => res.json())
       .then(myList => {
-        this.myList = myList;
+        this.myList = assertLayouts(myList);
         this.notify();
       })
     );
@@ -62,7 +63,7 @@ export default class Layout extends Observable {
       throw new Error();
     }
 
-    this.item = result;
+    this.item = assertLayout(result);
     this.selectTab(0);
     this.notify();
   }
@@ -76,7 +77,8 @@ export default class Layout extends Observable {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     };
-    const body = {
+    const body = assertLayout({
+      id: objectId(),
       name: layoutName,
       owner_id: parseInt(sessionService.get().personid, 10),
       owner_name: sessionService.get().name,
@@ -85,7 +87,7 @@ export default class Layout extends Observable {
         name: 'main',
         objects: [],
       }]
-    };
+    });
     const req = fetchClient(`/api/layout`, {method: 'POST', headers, body: JSON.stringify(body)});
     this.model.loader.watchPromise(req);
     const res = await req;
@@ -212,14 +214,15 @@ export default class Layout extends Observable {
   }
 
   addItem(objectName) {
-    const newTabObject = {
+    const newTabObject = assertTabObject({
       id: objectId(),
       x: 0,
       y: 100, // place it at the end first
       h: 1,
       w: 1,
-      name: objectName
-    };
+      name: objectName,
+      options: []
+    });
     this.tab.objects.push(newTabObject);
     this.sortObjectsOfCurrentTab();
     this.notify();
@@ -272,6 +275,9 @@ export default class Layout extends Observable {
   }
 
   deleteTabObject(tabObject) {
+    if (tabObject === this.editingTabObject) {
+      this.editingTabObject = null;
+    }
     this.tab.objects = this.tab.objects.filter(item => item.id !== tabObject.id);
     this.sortObjectsOfCurrentTab();
     this.notify();

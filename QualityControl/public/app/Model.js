@@ -64,7 +64,8 @@ export default class Model extends Observable {
             this.page = 'layoutShow';
             this.notify();
           })
-          .catch(() => {
+          .catch((err) => {
+            console.log(err);
             this.router.go('?page=layoutList');
           });
         break;

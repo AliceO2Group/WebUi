@@ -6,19 +6,15 @@ Tables: layout, favorite
 
 *tab-object*
 - id
-- tab_id
-- object_name
+- name
 - x
 - y
 - w
 - h
-- logx
-- logy
-- color
+- options
 
 *tab*
 - id
-- layout_id
 - name
 - objects: JSON<list of tab-objects>
 

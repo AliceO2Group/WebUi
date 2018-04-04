@@ -103,8 +103,12 @@ function chartView(model, tabObject) {
     onclick
   };
 
+  const attrsInternal = {
+    class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id ? 'object-selected' : ''
+  };
+
   return h('.absolute.animate-dimensions-position', attrs, [
-    h('.bg-white.m1.fill-parent.object-shadow.br3', {class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id ? 'object-selected' : ''}, draw(model, tabObject, {style: tabObject.options})),
+    h('.bg-white.m1.fill-parent.object-shadow.br3', attrsInternal, draw(model, tabObject, {drawOptions: tabObject.options})),
     model.layout.editEnabled && h('.object-edit-layer.fill-parent.m1.br3')
   ]);
 }
