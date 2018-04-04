@@ -1,12 +1,3 @@
-
-export function Uuid32From(reference) {
-
-}
-
-export function Uuid32Random() {
-
-}
-
 /**
  * Generates a new ObjectId
  */
@@ -24,4 +15,24 @@ export function objectId() {
  */
 export function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+/**
+ * Produces a lambda function waiting `time` ms before calling fn.
+ * No matter how many calls are done to lambda, the last call is the waiting starting point.
+ * @param {function} fn - function to be called after `time` ms
+ * @param {number} time - ms
+ * @return {function} the lambda function produced
+ */
+export function timerDebouncer(fn, time) {
+  let timer;
+  return function() {
+    const args = arguments;
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+      fn.apply(null, args);
+    }, time);
+  };
 }
