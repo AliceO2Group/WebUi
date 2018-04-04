@@ -49,11 +49,12 @@ function searchRows(model) {
   });
 }
 
-// flatten the tree in a functional way
+// Flatten the tree in a functional way
+// Tree is traversed in depth-first with pre-order (root then subtrees)
 function treeRow(model, tree, level) {
   // Tree construction
   const levelDeeper = level + 1;
-  const childrens = tree.open ? tree.childrens.map(children => treeRow(model, children, levelDeeper)) : [];
+  const subtree = tree.open ? tree.childrens.map(children => treeRow(model, children, levelDeeper)) : [];
 
   // UI construction
   const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
@@ -64,17 +65,24 @@ function treeRow(model, tree, level) {
 
   // UI events
   const onclick = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
+  const ondblclick = tree.object ? () => model.layout.addItem(tree.object.name) : null;
   const ondragstart = tree.object ? (e) => { const newItem = model.layout.addItem(tree.object.name); model.layout.moveTabObjectStart(newItem); } : null;
 
+  const attr = {
+    key: path,
+    title: path,
+    onclick,
+    class: className,
+    draggable,
+    ondragstart,
+    ondblclick
+  };
+
   return [
-    h('tr', {key: path, title: path, onclick, class: className, draggable, ondragstart}, [
-      h('td.ellipsis', {}, [
-        iconWrapper,
-        ' ',
-        tree.name
-      ])
+    h('tr', attr, [
+      h('td.ellipsis', [iconWrapper, ' ', tree.name])
     ]),
-    ...childrens
+    ...subtree
   ];
 }
 
