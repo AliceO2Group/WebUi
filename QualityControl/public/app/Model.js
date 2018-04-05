@@ -33,7 +33,15 @@ export default class Model extends Observable {
     // Init first page
     this.handleLocationChange();
 
-    window.addEventListener('resize', timerDebouncer(() => this.notify(), 100));
+    // Keyboard dispatcher
+    window.addEventListener('keydown', (e) => {
+      console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+      const code = e.keyCode;
+
+      if (code === 8 && this.router.parameter('page') === 'layoutShow' && this.layout.editEnabled && this.layout.editingTabObject) {
+        this.layout.deleteTabObject(this.layout.editingTabObject);
+      }
+    });
 
     // this.object.loadList(); // TODO pas propre
     this.layout.loadMyList();
