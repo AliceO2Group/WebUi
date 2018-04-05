@@ -1,6 +1,6 @@
 import {h} from '/js/src/index.js';
 import {timerDebouncer} from '../utils.js';
-import {objectId, clone} from '../utils.js';
+import {objectId, clone, pointerId} from '../utils.js';
 
 /**
  * Draw an object using JSROOT
@@ -33,10 +33,13 @@ export function draw(model, tabObject, options) {
 
   function cacheHash(tabObject) {
     // help to identify when some data have changed to tell jsroot to redraw
-    return `${tabObject.name}:${model.object.objects[tabObject.name].version}:${tabObject.options.join(';')}`;
+    // pointerId returns a different number if object has been replaced by another
+    return `${tabObject.name}:${model.object.objects[tabObject.name] ? pointerId(model.object.objects[tabObject.name]) : null}:${drawingOptions}`;
   }
 
   const attributes = {
+    alt: cacheHash(tabObject),
+    key: tabObject.name, // completly re-create this div if the chart is not the same at all
     class: options.className,
     style: {height: options.height, width: options.width},
 
@@ -47,8 +50,11 @@ export function draw(model, tabObject, options) {
       if (model.object.objects[tabObject.name]) {
         // cache control
         vnode.dom.dataset.cacheHash = cacheHash(tabObject);
+        if (!vnode.dom.resizer) {
+          vnode.dom.resizer = timerDebouncer(() => JSROOT.resize(vnode.dom), 200);
+        }
         setTimeout(() => {
-          JSROOT.redraw(vnode.dom, model.object.objects[tabObject.name], tabObject.options.join(';'))
+          JSROOT.redraw(vnode.dom, model.object.objects[tabObject.name], drawingOptions)
         }, 0);
       }
     },
@@ -56,16 +62,17 @@ export function draw(model, tabObject, options) {
     onupdate(vnode) {
       if (model.object.objects[tabObject.name] && vnode.dom.dataset.cacheHash !== cacheHash(tabObject)) {
         vnode.dom.dataset.cacheHash = cacheHash(tabObject);
+        if (!vnode.dom.resizer) {
+          vnode.dom.resizer = timerDebouncer(() => JSROOT.resize(vnode.dom), 200);
+        }
         setTimeout(() => {
-          JSROOT.redraw(vnode.dom, model.object.objects[tabObject.name], tabObject.options.join(';'))
+          JSROOT.redraw(vnode.dom, model.object.objects[tabObject.name], drawingOptions)
         }, 0);
       } else if (vnode.dom.dataset.cacheHash) {
         // in case other data are updated we do a simple resize of jsroot if window has changed size
         // but we do that after 0.2s to avoid slowing down CSS animations while computing resizing
         // this increase user experience, animations need to be fluid
-        setTimeout(() => {
-          JSROOT.resize(vnode.dom);
-        }, 200);
+        vnode.dom.resizer();
       }
     },
 

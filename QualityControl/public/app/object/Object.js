@@ -58,8 +58,6 @@ export default class Object_ extends Observable {
     const object = JSROOT.parse(json);
     object.lastUpdate = new Date();
     this.objects[objectName] = object;
-    this.objects[objectName].version = (new Date()).toString(); // cache control
-    this.objects[objectName].hash = json;
     this.notify();
   }
 
@@ -84,8 +82,6 @@ export default class Object_ extends Observable {
 
     for (let name in objects) {
       this.objects[name] = objects[name];
-      this.objects[name].version = (new Date()).toString(); // cache control
-      this.objects[name].hash = JSON.stringify(objectsRaw[name]);
     }
     this.notify();
   }

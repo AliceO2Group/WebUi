@@ -4,7 +4,7 @@ import {draw} from './objectDraw.js';
 export function objectTree(model) {
   return h('.flex-row.fill-parent', {...{key: model.router.parameter('page')}, oncreate: () => model.object.loadList()}, [
     h('.flex-grow.scroll-y', tabShow(model)),
-    h('.animate-width.scroll-y', {style: {width: model.object.selected ? '50%' : 0}}, model.object.selected ? draw(model, model.object.selected) : null)
+    h('.animate-width.scroll-y', {style: {width: model.object.selected ? '50%' : 0}}, model.object.selected ? draw(model, model.object.selected.name) : null)
   ]);
 }
 

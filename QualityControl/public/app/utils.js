@@ -36,3 +36,22 @@ export function timerDebouncer(fn, time) {
     }, time);
   };
 }
+
+let pointers = new WeakMap();
+let currentAddress = 0;
+
+/**
+ * Generates a unique number for the provided object like a pointer or id
+ * Two calls with the same object will provide the same number.
+ * Uses a WeekMap so no memory leak.
+ * @param {object} obj - the object that needs to be identified
+ * @return {number} a unique pointer number
+ */
+export function pointerId(obj) {
+  let ptr = pointers.get(obj);
+  if (!ptr) {
+    ptr = currentAddress++;
+    pointers.set(obj, ptr);
+  }
+  return ptr;
+}
