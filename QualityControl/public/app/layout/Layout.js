@@ -92,8 +92,10 @@ export default class Layout extends Observable {
     this.model.loader.watchPromise(req);
     const res = await req;
     const layout = await res.json();
+    this.item = assertLayout(layout);
 
     this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layout.name)}`);
+    this.edit(); // edit the new item after loading page
     this.loadMyList();
   }
 
@@ -147,6 +149,9 @@ export default class Layout extends Observable {
   deleteTab(index) {
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
+    }
+    if (this.item.tabs.length <= 1) {
+      throw new Error(`deleting last tab is forbidden`);
     }
 
     this.item.tabs.splice(index, 1);

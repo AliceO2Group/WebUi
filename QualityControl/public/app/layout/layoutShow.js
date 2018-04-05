@@ -1,5 +1,6 @@
 import {h} from '/js/src/index.js';
 import {draw} from '../object/objectDraw.js';
+import {iconArrowLeft, iconArrowTop} from '../icons.js';
 
 const cellHeight = 100 / 3 * 0.95; // %, put some margin at bottom to see below
 const cellWidth = 100 / 3; // %
@@ -15,16 +16,32 @@ export default function canvasView(model) {
   return h('.scroll-y.fill-parent.bg-gray-light', {id: 'canvas'}, subcanvasView(model));
 }
 
+function emptyListViewMode(model) {
+  return h('.m4', [
+    h('h1', 'Empty list'),
+    h('p', 'Owner can edit this tab to add objects to see.')
+  ]);
+}
+
+function emptyListEditMode(model) {
+  return h('.m4', [
+    h('h1', 'Empty list'),
+    h('p', [iconArrowLeft(), ' Add new objects from the sidebar tree.']),
+    h('p', ['You can also add/remove tabs or save/delete this layout on the navbar. ', iconArrowTop()]),
+  ]);
+}
+
 function subcanvasView(model) {
   if (!model.layout.tab) {
     return;
   }
 
   if (!model.layout.tab.objects.length) {
-    return h('.m4', [
-      h('h1', 'Empty list'),
-      h('p', 'Owner can edit this tab to add objects to see.')
-    ]);
+    if (model.layout.editEnabled) {
+      return emptyListEditMode(model);
+    } else {
+      return emptyListViewMode(model);
+    }
   }
 
   // Sort the list by id to help template engine. It will only update style's positions and not DOM order
@@ -108,7 +125,7 @@ function chartView(model, tabObject) {
   };
 
   return h('.absolute.animate-dimensions-position', attrs, [
-    h('.bg-white.m1.fill-parent.object-shadow.br3', attrsInternal, draw(model, tabObject, {drawOptions: tabObject.options})),
+    h('.bg-white.m1.fill-parent.object-shadow.br3', attrsInternal, draw(model, tabObject)),
     model.layout.editEnabled && h('.object-edit-layer.fill-parent.m1.br3')
   ]);
 }

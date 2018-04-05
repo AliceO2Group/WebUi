@@ -45,7 +45,16 @@ const toolbarEditMode = (model) => [
         model.layout.item.tabs.map((folder, i) => {
           const linkClass = model.layout.tab.name === folder.name ? 'active' : '';
           const selectTab = () => model.layout.selectTab(i);
-          let deleteTab = () => confirm('Are you sure to delete this tab?') && model.layout.deleteTab(i);
+          let deleteTab = () => {
+            if (model.layout.item.tabs.length <= 1) {
+              alert(`Please, add another tab before deleting the last one`);
+              return;
+            }
+
+            if (confirm('Are you sure to delete this tab?')) {
+              model.layout.deleteTab(i);
+            }
+          };
 
           return [
             h('.button-group', [
