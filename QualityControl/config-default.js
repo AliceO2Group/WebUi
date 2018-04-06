@@ -34,6 +34,13 @@ module.exports = {
     tls: true
   },
   tobject2json: {
-    endpoint: 'tcp://127.0.0.1:5555' // zmq endpoint
+    host: '####',
+    port: 7777
+  },
+  mysql: {
+    host: '####',
+    user: '####',
+    password: '####',
+    database: 'quality_control'
   }
 };

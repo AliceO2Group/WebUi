@@ -95,7 +95,7 @@ function subcanvasView(model) {
 }
 
 function chartView(model, tabObject) {
-  const key = tabObject.id;
+  const key = 'key'+tabObject.id;
 
   // Position and size are produced by GridList in the model
   const style = {
@@ -117,7 +117,8 @@ function chartView(model, tabObject) {
     style,
     draggable,
     ondragstart,
-    onclick
+    onclick,
+    onremove: () => 1 // fix strange bug with unlimited redraws when layout contains only one chart (!!!)
   };
 
   const attrsInternal = {

@@ -91,10 +91,8 @@ export default class Layout extends Observable {
     const req = fetchClient(`/api/layout`, {method: 'POST', headers, body: JSON.stringify(body)});
     this.model.loader.watchPromise(req);
     const res = await req;
-    const layout = await res.json();
-    this.item = assertLayout(layout);
 
-    this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layout.name)}`);
+    this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layoutName)}`);
     this.edit(); // edit the new item after loading page
     this.loadMyList();
   }

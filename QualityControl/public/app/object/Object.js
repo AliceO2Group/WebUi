@@ -54,9 +54,14 @@ export default class Object_ extends Observable {
     const req = fetchClient(`/api/readObjectData?objectName=${objectName}`, {method: 'POST'});
     this.model.loader.watchPromise(req);
     const res = await req;
+    if (!res.ok) {
+      this.objects[objectName] = null;
+      this.notify();
+      return;
+    }
+
     const json = await res.text();
     const object = JSROOT.parse(json);
-    object.lastUpdate = new Date();
     this.objects[objectName] = object;
     this.notify();
   }
@@ -99,6 +104,15 @@ export default class Object_ extends Observable {
       delete this.objectsReferences[objectName];
     }
 
+    this.notify();
+  }
+
+  /**
+   * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
+   * @param {string} name - name of the object
+   */
+  invalidObject(name) {
+    this.objects[name] = null;
     this.notify();
   }
 

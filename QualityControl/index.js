@@ -4,7 +4,6 @@ const Response = require('@aliceo2/aliceo2-gui').Response;
 const mysql = require('mysql');
 const fs = require('fs');
 const config = require('./config.js');
-const validator = require('./lib/validator.js');
 const model = config.app.demoData ? require('./lib/QCModelDemo.js') : require('./lib/QCModel.js');
 
 // Quick check config at start
@@ -21,18 +20,6 @@ http.addStaticPath('node_modules/jsroot', 'jsroot');
 // API
 // --------------------------------------------------------
 
-http.post('/readObject', function(req, res) {
-  const path = req.query.path;
-
-  if (!path) {
-    return res.status(400).send('parameter path is needed');
-  }
-
-  model.readObject(path)
-    .then(data => res.status(data ? 200 : 404).json(data))
-    .catch(err => res.status(500).send(err));
-});
-
 http.post('/readObjectData', function(req, res) {
   const objectName = req.query.objectName;
 
@@ -42,7 +29,7 @@ http.post('/readObjectData', function(req, res) {
 
   model.readObjectData(objectName)
     .then(data => res.status(data ? 200 : 404).json(data))
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
 
 http.get('/readObjectsData', function(req, res) {
@@ -67,13 +54,13 @@ http.get('/readObjectsData', function(req, res) {
       });
       res.status(200).json(resultsByName);
     })
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
 
 http.post('/listObjects', function(req, res) {
   model.listObjects()
     .then(data => res.status(200).json(data))
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
 
 http.post('/readLayout', function(req, res) {
@@ -85,7 +72,7 @@ http.post('/readLayout', function(req, res) {
 
   model.readLayout(layoutName)
     .then(data => res.status(data ? 200 : 404).json(data))
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
 
 http.post('/writeLayout', function(req, res) {
@@ -102,7 +89,7 @@ http.post('/writeLayout', function(req, res) {
 
   model.writeLayout(layoutName, data)
     .then(data => res.status(200).json(data))
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
 
 http.get('/layout', function(req, res) {
@@ -112,7 +99,7 @@ http.get('/layout', function(req, res) {
 
   model.listLayouts(filter)
     .then(data => res.status(200).json(data))
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
 
 http.delete('/layout/:name', function(req, res) {
@@ -124,7 +111,7 @@ http.delete('/layout/:name', function(req, res) {
 
   model.deleteLayout(layoutName)
     .then(data => res.status(204).json(data))
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
 
 http.post('/layout', function(req, res) {
@@ -142,10 +129,14 @@ http.post('/layout', function(req, res) {
   if (!layout.tabs) {
     return res.status(400).send('layout.tabs parameter is needed');
   }
-  validator.layout(layout);
 
   model.createLayout(layout)
     .then(data => res.status(201).json(data))
-    .catch(err => res.status(500).send(err));
+    .catch((err) => errorHandler(err, res));
 });
+
+function errorHandler(err, res) {
+  console.error(err);
+  res.status(500).send();
+}
 
