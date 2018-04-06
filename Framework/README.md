@@ -38,7 +38,6 @@ npm install @aliceo2/web-ui
 * [OAuth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups
 * [WebSockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using WebSocket protocol
 * [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
-* [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 
 ### Frontend guide
 - [Hyperscript and vnodes](./docs/guide/hyperscript-vnode.md) - Manipulate the view using JavaScript (no HTML)
