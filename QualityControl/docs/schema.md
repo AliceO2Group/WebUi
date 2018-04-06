@@ -1,8 +1,27 @@
 ### Storage data structure
 
-User preferences stored inside MariaDB.
+User preferences stored inside MySQL.
 
-Tables: layout, favorite
+Tables: layout, data_AGENTNAME
+
+*data_AGENTNAME*
+- object_name
+- updatetime
+- data
+- size
+- run
+- fill
+
+*layout*
+- id
+- name
+- owner_id
+- owner_name
+- tabs: JSON<list of tabs>
+
+*object*
+- name (AGENTNAME/object_name)
+- quality
 
 *tab-object*
 - id
@@ -17,15 +36,3 @@ Tables: layout, favorite
 - id
 - name
 - objects: JSON<list of tab-objects>
-
-*layout*
-- id
-- name
-- owner_id
-- owner_name
-- tabs: JSON<list of tabs>
-
-*favorite*
-- id
-- owner_id
-- layout_id
