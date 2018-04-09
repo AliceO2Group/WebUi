@@ -6,5 +6,6 @@ import Observable from './Observable.js';
 import {render, h, frameDebouncer, mount} from './renderer.js';
 import fetchClient from './fetchClient.js';
 import WebSocketClient from './WebSocketClient.js';
+import icons from './icons.js';
 
-export {Observable, WebSocketClient, fetchClient, render, h, frameDebouncer, mount};
+export {Observable, WebSocketClient, fetchClient, render, h, frameDebouncer, mount, icons};
