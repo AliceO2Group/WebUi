@@ -215,11 +215,11 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 .table { border-collapse: collapse; width: 100%; margin-bottom: 1em; border-radius: 0; }
 .table thead { background: #f8f8f8; color: #0a0a0a; }
 .table thead { border-bottom: 1px solid #c5c5c5; }
-.table thead th, .table thead td { padding: 0.5em 0.625em 0.625em; font-weight: bold; text-align: left; }
+.table th, .table td { padding: 0.625em; text-align: left; }
+.table th { font-weight: bold; }
 .table tbody tr:nth-child(even) { background-color: #f1f1f1; }
 .table tbody tr:nth-child(odd) { background-color: #fefefe; }
-.table tbody td { padding: 0.5em 0.625em 0.625em; }
-.table-condensed tbody td { padding: 0.1em; }
+.table-sm th, .table-sm td { padding: 0.3em; }
 
 /* Component spinner atomic */
 /* Credit: http://epic-spinners.epicmax.co/ */
