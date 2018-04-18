@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="../../Frontend/css/src/bootstrap.css">
 
 <div class="flex-row fill-parent">
-<div class="outline scroll-y p3 w-25">
+<div class="scroll-y p3 w-25">
   <div class="text-right">
     <div><a href="#introduction">Introduction</a></div>
 
@@ -18,12 +18,12 @@
     <div><a href="#radius">Radius</a></div>
     <div><a href="#display">Display</a></div>
     <div><a href="#effects">Effects</a></div>
+    <div><a href="#shadow">Shadow</a></div>
 
     <p><b>Layout</b></p>
     <div><a href="#width">Width</a></div>
     <div><a href="#spacing">Padding / Margin</a></div>
     <div><a href="#flex">Flex</a></div>
-    <div><a href="#outline">Outline</a></div>
 
     <p><b>Components</b></p>
     <div><a href="#applayout">App layout</a></div>
@@ -98,7 +98,9 @@
   <hr />
   <a name="buttons"></a>
   <h2>Buttons</h2>
-  <p class="measure">The .btn class is designed to be used with &lt;button&gt; elements.<p>
+  <p class="measure">The .btn class is designed to be used with <code>&lt;button&gt;</code> elements.
+    Buttons can have many native states according to mouse position: <code>:hover</code>, <code>:active</code> and <code>:disabled</code>.
+    A fourth is called <code>.selected</code> and can activated with a CSS class.<p>
 
   <p>
     Normal:<br/>
@@ -134,55 +136,101 @@
     </div>
   </p>
 
+  <p>Tabs:<br/>
+    <button class="btn btn-tab">Menu 1</button>
+    <button class="btn btn-tab selected">Menu 2</button>
+    <button class="btn btn-tab ">Menu 3</button>
+    <button class="btn btn-tab ">Menu 4</button>
+    <button class="btn btn-tab ">Menu 5</button>
+    <button class="btn btn-tab loading">Menu 6</button>
+    <button class="btn btn-tab loading">Menu 7</button>
+  </p>
+
+  <p>Menu:<br/>
+    <div class="menu-title">Menu</div>
+    <a href="#" class="menu-item ">
+      <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M0 0v4h4v-4h-4zm5 2v3h-3v1h4v-4h-1zm2 2v3h-3v1h4v-4h-1z"></path></svg>
+      <span>Item 1</span>
+    </a>
+    <a href="#" class="menu-item selected">
+      <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M0 0v4h4v-4h-4zm5 2v3h-3v1h4v-4h-1zm2 2v3h-3v1h4v-4h-1z"></path></svg>
+      <span>Item 2</span>
+    </a>
+    <a href="#" class="menu-item ">
+      <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M0 0v4h4v-4h-4zm5 2v3h-3v1h4v-4h-1zm2 2v3h-3v1h4v-4h-1z"></path></svg>
+      <span>Item 3</span>
+    </a>
+    <a href="#" class="menu-item">
+      <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M0 0v4h4v-4h-4zm5 2v3h-3v1h4v-4h-1zm2 2v3h-3v1h4v-4h-1z"></path></svg>
+      <span>Item 4</span>
+    </a>
+  </p>
+
   <a href="javascipt:;">link to external website</a><br>
 
   <hr />
   <a name="form"></a>
   <h2>Form inputs</h2>
-  <p class="measure">Main way for a user to insert data inside an app with buttons.<p>
+  <p class="measure">Forms are a way to have user inputs in addition to buttons.
+    Always put a <code>&lt;label&gt;</code> tag with a <code>for</code> attribute associated to the <code>id</code> of the <code>&lt;input&gt;</code> it is targeting.
+    It helps the user to click, espacially for checkboxes which are small.
+    <code>&lt;form&gt;</code> tag is not useful in single page application, except for a reset button which needs it.<p>
 
-  <input class="form-control" placeholder=".form-control" />
 
-  <p>Using icons and some classes we are able to draw any toggle input (checkbox, radio button, star toggle, etc.)</p>
+  <div class="form-group">
+    <label for="clusterName">Name of cluster</label>
+    <input id="clusterName" type="text" class="form-control" placeholder="Enter cluster's name" required />
+  </div>
+
+  <div class="form-group">
+    <label for="clusterDescription">Description</label>
+    <textarea id="clusterDescription" type="range" class="form-control" placeholder="Enter cluster's description" rows="5"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="clusterNumber">Machines inside</label>
+    <input id="clusterNumber" type="range" class="form-control" step="1" min="0" max="300" value="150" />
+  </div>
 
   <p>
-    <label>
-      <svg viewBox="0 0 8 8" class="icon icon-control gray bg-gray br2" fill="currentcolor"">
-        <path d="M6.406 1l-.719.688-2.781 2.781-.781-.781-.719-.688-1.406 1.406.688.719 1.5 1.5.719.688.719-.688 3.5-3.5.688-.719-1.406-1.406z" name="check"></path>
-      </svg>
-      Option 1
-    </label>
-
-    <label>
-      <svg viewBox="0 0 8 8" class="icon icon-control white bg-primary br2" fill="currentcolor"">
-        <path d="M6.406 1l-.719.688-2.781 2.781-.781-.781-.719-.688-1.406 1.406.688.719 1.5 1.5.719.688.719-.688 3.5-3.5.688-.719-1.406-1.406z" name="check"></path>
-      </svg>
-      Option 2
-    </label>
-
-    <label>
-      <svg viewBox="0 0 8 8" class="icon icon-control white bg-primary br2" fill="currentcolor"">
-        <path d="M6.406 1l-.719.688-2.781 2.781-.781-.781-.719-.688-1.406 1.406.688.719 1.5 1.5.719.688.719-.688 3.5-3.5.688-.719-1.406-1.406z" name="check"></path>
-      </svg>
-      Option 3
-    </label>
-
-    <p>Radio button</p>
-
-    <label>
-      <svg viewBox="0 0 8 8" class="icon icon-control gray bg-gray br-100" fill="currentcolor"">
-        <path d="M4 1c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path>
-      </svg>
-      Option 1
-    </label>
-
-    <label>
-      <svg viewBox="0 0 8 8" class="icon icon-control white bg-primary br-100" fill="currentcolor"">
-        <path d="M4 1c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path>
-      </svg>
-      Option 2
-    </label>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+      <label class="form-check-label" for="exampleRadios1">
+        Default radio
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+      <label class="form-check-label" for="exampleRadios2">
+        Second default radio
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3" disabled>
+      <label class="form-check-label" for="exampleRadios3">
+        Disabled radio
+      </label>
+    </div>
   </p>
+  <p>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="exampleCheckboxes" id="exampleRadios4" value="option4" checked>
+      <label class="form-check-label" for="exampleRadios4">
+        Default checkbox
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="exampleCheckboxes" id="exampleRadios5" value="option5">
+      <label class="form-check-label" for="exampleRadios5">
+        Second default checkbox
+      </label>
+    </div>
+  </p>
+
+  <div>
+    <button type="button" class="btn">Back to cluster list</button>
+    <button type="button" class="btn btn-primary">Create cluster</button>
+  </div>
 
   <hr />
   <a name="table"></a>
@@ -285,8 +333,16 @@
   <p>Increase user experience and awareness with effects.</p>
 
   <p>.highlight will flash the background in yellow, once</p>
-  <p>.spin-around will rotate 360° the item, forever</p>
+  <p>.spin-around will rotate 360° the item, forever.</p>
   <p>.appearance will show the item slowly, once</p>
+
+  <hr>
+  <a name="shadow"></a>
+  <h2>Shadow</h2>
+  <p>Shadow is a way to elevate contents and stack them, for example a menu is above the rest of the page which scrolls below.</p>
+
+  <p class="shadow-level1">.shadow-level1</p>
+  <p class="shadow-level2">.shadow-level2</p>
 
   <hr />
   <a name="width"></a>
@@ -462,21 +518,14 @@
   </div>
 
   <hr>
-  <a name="outline"></a>
-
-  <p class="measure outline-gray">.outline-gray</p>
-  <p class="measure outline-gray-light">.outline-gray-light</p>
-  <p class="measure outline-gray-lighter">.outline-gray-lighter</p>
-
-  <hr>
   <a name="applayout"></a>
   <h2>App layout</h2>
   <p class="measure">Main app layout with navbar, menubar and its content.</p>
 
   <div class="flex-column fill-parent___ifinsidebodyforexample" style="height: 300px">
-    <div class="bg-gray-lighter flex-row p2">
-      <div class="w-100 text-left">
-        <button class="btn active">
+    <div class="bg-white flex-row p2 shadow-level2 level2">
+      <div class="flex-grow text-left">
+        <button class="btn">
           <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 1v1h8v-1h-8zm0 2.969v1h8v-1h-8zm0 3v1h8v-1h-8z" name="expand-right" /></svg>
         </button>
         <button class="btn">
@@ -484,23 +533,16 @@
         </button>
       </div>
 
-      <div class="w-100 text-center">
-        <button class="btn">
-          <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0l-.5 1.188-.281.125-1.188-.5-.719.719.5 1.188-.125.281-1.188.5v1l1.188.5.125.313-.5 1.156.719.719 1.188-.5.281.125.5 1.188h1l.5-1.188.281-.125 1.188.5.719-.719-.5-1.188.125-.281 1.188-.5v-1l-1.188-.5-.125-.281.469-1.188-.688-.719-1.188.5-.281-.125-.5-1.188h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" name="cog" /></svg>
-        </button>
-        <button class="btn">
-          <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0l-.5 1.188-.281.125-1.188-.5-.719.719.5 1.188-.125.281-1.188.5v1l1.188.5.125.313-.5 1.156.719.719 1.188-.5.281.125.5 1.188h1l.5-1.188.281-.125 1.188.5.719-.719-.5-1.188.125-.281 1.188-.5v-1l-1.188-.5-.125-.281.469-1.188-.688-.719-1.188.5-.281-.125-.5-1.188h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" name="cog" /></svg>
-        </button>
-        <button class="btn">
-          <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0l-.5 1.188-.281.125-1.188-.5-.719.719.5 1.188-.125.281-1.188.5v1l1.188.5.125.313-.5 1.156.719.719 1.188-.5.281.125.5 1.188h1l.5-1.188.281-.125 1.188.5.719-.719-.5-1.188.125-.281 1.188-.5v-1l-1.188-.5-.125-.281.469-1.188-.688-.719-1.188.5-.281-.125-.5-1.188h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" name="cog" /></svg>
-        </button>
-        <button class="btn">
-          <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0l-.5 1.188-.281.125-1.188-.5-.719.719.5 1.188-.125.281-1.188.5v1l1.188.5.125.313-.5 1.156.719.719 1.188-.5.281.125.5 1.188h1l.5-1.188.281-.125 1.188.5.719-.719-.5-1.188.125-.281 1.188-.5v-1l-1.188-.5-.125-.281.469-1.188-.688-.719-1.188.5-.281-.125-.5-1.188h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" name="cog" /></svg>
-        </button>
+      <div class="w-50 text-center">
+        <button class="btn btn-tab">Menu 1</button>
+        <button class="btn btn-tab selected">Menu 2</button>
+        <button class="btn btn-tab ">Menu 3</button>
+        <button class="btn btn-tab ">Menu 4</button>
+        <button class="btn btn-tab ">Menu 5</button>
       </div>
 
-      <div class="w-100 text-right">
-        <input placeholder="Search" class="form-control" type="search" />
+      <div class="flex-grow text-right">
+        <input placeholder="Search" class="form-control form-inline" type="search" />
         <div class="btn-group">
           <button class="btn">
             <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0c-1.927 0-3.5 1.573-3.5 3.5s1.573 3.5 3.5 3.5c.592 0 1.166-.145 1.656-.406a1 1 0 0 0 .094.094l1.031 1.031a1.016 1.016 0 1 0 1.438-1.438l-1.031-1.031a1 1 0 0 0-.125-.094c.266-.493.438-1.059.438-1.656 0-1.927-1.573-3.5-3.5-3.5zm0 1c1.387 0 2.5 1.113 2.5 2.5 0 .587-.196 1.137-.531 1.563l-.031.031a1 1 0 0 0-.063.031 1 1 0 0 0-.281.281 1 1 0 0 0-.063.063c-.422.326-.953.531-1.531.531-1.387 0-2.5-1.113-2.5-2.5s1.113-2.5 2.5-2.5zm-1.5 2v1h3v-1h-3z" name="zoom-out" /></svg>
@@ -515,21 +557,21 @@
     <div class="flex-row">
       <div class="sidebar">
         <div class="sidebar-content">
-          <div class="sidebar-menu-title">Title</div>
-          <a class="sidebar-menu-item">
+          <div class="menu-title">Title</div>
+          <a class="menu-item">
             <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
             Item
           </a>
-          <a class="sidebar-menu-item">
+          <a class="menu-item">
             <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
             Item
           </a>
-          <div class="sidebar-menu-title">Title</div>
-          <a class="sidebar-menu-item selected">
+          <div class="menu-title">Title</div>
+          <a class="menu-item selected">
             <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
             Item
           </a>
-          <a class="sidebar-menu-item">
+          <a class="menu-item">
             <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
             Item
           </a>
