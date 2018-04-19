@@ -7,7 +7,7 @@ Each class or widget should be covered by unit tests. The following frameworks a
 * [QUnit](http://qunitjs.com) (front-end)
 * [Mocha](https://mochajs.org) with [Chai](http://chaijs.com) assertion library (back-end)
 
-The source code of unit tests is kept in `test/` directory. The filename should prefixed with either `qunit-` or `mocha-`. 
+The source code of unit tests is kept in `Backend/test/` and `Frontend/test/` directories. The filename should prefixed with either `qunit-` or `mocha-`.
 
 ## Linting
 The project uses [ESLint](http://eslint.org) to validate JavaScript syntax and coding style. The rules are defined in `.eslint` file and follow O<sup>2</sup> JavaScript Coding Guideline.
@@ -24,7 +24,12 @@ The complete API of the project is available in [API.md](API.md) file.
 * documentation in Markdown format
 * linting
 
-Scripts are specified in `package.json` file.
+Scripts are specified in `package.json` file. Execute a `npm install` before using them to install the tools needed.
+
+```bash
+npm install
+npm test
+```
 
 ## Continuous integration
 [Travis CI](https://travis-ci.org/AliceO2Group/WebUi) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.travis.yml` file.

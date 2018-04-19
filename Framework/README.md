@@ -55,5 +55,5 @@ npm install @aliceo2/web-ui
 * [Frontend CSS](https://aliceo2group.github.io/WebUi/Framework/docs/reference/frontend-css.html)
 
 ### Documentation for developers
-* [Development environment](docs/DEV.md)
+* [Development environment](docs/guide/devel.md)
 * [Functional architecture and data flow](docs/ARCH.md)

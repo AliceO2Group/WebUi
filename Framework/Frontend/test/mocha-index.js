@@ -97,6 +97,30 @@ describe('assets paths', () => {
     fs.stat(path.join(__dirname, '../js/src/index.js'), done);
   });
 
+  it('contains framework js/src/icons.js', (done) => {
+    fs.stat(path.join(__dirname, '../js/src/icons.js'), done);
+  });
+
+  it('contains framework js/src/Observable.js', (done) => {
+    fs.stat(path.join(__dirname, '../js/src/Observable.js'), done);
+  });
+
+  it('contains framework js/src/WebSocketClient.js', (done) => {
+    fs.stat(path.join(__dirname, '../js/src/WebSocketClient.js'), done);
+  });
+
+  it('contains framework js/src/fetchClient.js', (done) => {
+    fs.stat(path.join(__dirname, '../js/src/fetchClient.js'), done);
+  });
+
+  it('contains framework js/src/sessionService.js', (done) => {
+    fs.stat(path.join(__dirname, '../js/src/sessionService.js'), done);
+  });
+
+  it('contains framework js/src/renderer.js', (done) => {
+    fs.stat(path.join(__dirname, '../js/src/renderer.js'), done);
+  });
+
   it('contains framework css/src/bootstrap.css', (done) => {
     fs.stat(path.join(__dirname, '../css/src/bootstrap.css'), done);
   });
