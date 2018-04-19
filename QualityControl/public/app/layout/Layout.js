@@ -201,6 +201,7 @@ export default class Layout extends Observable {
    */
   save() {
     this.editEnabled = false;
+    this.editingTabObject = null;
     console.log('save layout', this.item);
     this.saveItem();
     this.notify();
@@ -211,6 +212,7 @@ export default class Layout extends Observable {
    */
   cancelEdit() {
     this.editEnabled = false;
+    this.editingTabObject = null;
     this.item = this.editOriginalClone;
     this.selectTab(0);
     this.notify();

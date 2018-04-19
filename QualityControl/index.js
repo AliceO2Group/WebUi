@@ -1,6 +1,6 @@
-const HttpServer = require('@aliceo2/aliceo2-gui').HttpServer;
-const log = require('@aliceo2/aliceo2-gui').Log;
-const Response = require('@aliceo2/aliceo2-gui').Response;
+const HttpServer = require('@aliceo2/web-ui').HttpServer;
+const log = require('@aliceo2/web-ui').Log;
+const Response = require('@aliceo2/web-ui').Response;
 const mysql = require('mysql');
 const fs = require('fs');
 

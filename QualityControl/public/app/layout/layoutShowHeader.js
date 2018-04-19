@@ -1,91 +1,87 @@
 import {h} from '/js/src/index.js';
-import {iconStar, iconEdit} from '../icons.js';
+import {iconStar, iconPencil} from '/js/src/icons.js';
 
 export default (model) => model.layout.editEnabled ? toolbarEditMode(model) : toolbarViewMode(model);
 
 const toolbarViewMode = (model) => [
-  h('.w-100.text-center', [
-    h('div', {class: 'header-layout'}, [
-      h('b', model.layout.item.name),
-      h('.f6.no-select', [
-        model.layout.item.tabs.map((folder, i) => {
-          const linkClass = model.layout.tab.name === folder.name ? 'active' : '';
-          const selectTab = () => model.layout.selectTab(i);
+  h('.w-50.text-center', [
+    h('div', [
+      model.layout.item.tabs.map((folder, i) => {
+        const linkClass = model.layout.tab.name === folder.name ? 'selected' : '';
+        const selectTab = () => model.layout.selectTab(i);
 
-          return [
-            h('.button-group', [
-              h('button.br-pill.ph2.pointer.button.btn-xs.default', {class: linkClass, onclick: selectTab}, folder.name),
-            ]),
-            ' '
-          ]
-        }),
-      ]),
+        return [
+          h('.btn-group', [
+            h('button.br-pill.ph2.btn.btn-tab.btn-xs', {class: linkClass, onclick: selectTab}, folder.name),
+          ]),
+          ' '
+        ]
+      }),
     ])
   ]),
-  h('.w-100.text-right', [
-    // TODO
-    // h('button.button.default.mh1', {onclick: e => alert('Not implemented')},
-    //   iconStar()
-    // ),
+  h('.flex-grow.text-right', [
     // TODO
     // after personid is fixed, activate the next line so edit button is only for owner
-    /*model.session.personid === model.layout.item.owner_id && */h('button.button.default', {onclick: e => model.layout.edit()},
+    /*model.session.personid === model.layout.item.owner_id && */
+    h('b', model.layout.item.name),
+    ' ',
+    h('button.btn', {onclick: e => model.layout.edit()},
       [
-        iconEdit()
+        iconPencil()
       ]
     ),
   ]),
 ];
 
 const toolbarEditMode = (model) => [
-  h('.w-100.text-center', [
+  h('.w-50.text-center', [
     h('div', {class: 'header-layout'}, [
-      h('b', model.layout.item.name),
-      h('.f6.no-select', [
-        model.layout.item.tabs.map((folder, i) => {
-          const linkClass = model.layout.tab.name === folder.name ? 'active' : '';
-          const selectTab = () => model.layout.selectTab(i);
-          let deleteTab = () => {
-            if (model.layout.item.tabs.length <= 1) {
-              alert(`Please, add another tab before deleting the last one`);
-              return;
-            }
+      model.layout.item.tabs.map((folder, i) => {
+        const selected = model.layout.tab.name === folder.name;
+        const linkClass = selected ? 'selected' : '';
+        const selectTab = () => model.layout.selectTab(i);
+        let deleteTab = () => {
+          if (model.layout.item.tabs.length <= 1) {
+            alert(`Please, add another tab before deleting the last one`);
+            return;
+          }
 
-            if (confirm('Are you sure to delete this tab?')) {
-              model.layout.deleteTab(i);
-            }
-          };
+          if (confirm('Are you sure to delete this tab?')) {
+            model.layout.deleteTab(i);
+          }
+        };
 
-          return [
-            h('.button-group', [
-              h('button.br-pill.ph2.pointer.button.btn-xs.default', {class: linkClass, onclick: selectTab}, folder.name),
-              h('button.br-pill.ph2.pointer.button.btn-xs.default', {class: linkClass, onclick: deleteTab}, 'x'),
-            ]),
-            ' '
-          ]
-        }),
-        h('.button-group', [
-          tabBtn({class: 'default', onclick: () => {
-            const name = prompt('Enter the name of the new tab:');
-            if (name) {
-              model.layout.newTab(name);
-            }
-          }}, '+'),
-        ])
-      ]),
+        return [
+          h('.btn-group', [
+            h('button.br-pill.ph2.btn.btn-tab', {class: linkClass, onclick: selectTab}, folder.name),
+            selected && h('button.br-pill.ph2.btn.btn-tab', {class: linkClass, onclick: deleteTab}, 'x'),
+          ]),
+          ' '
+        ]
+      }),
+      h('.btn-group', [
+        tabBtn({class: 'default', onclick: () => {
+          const name = prompt('Enter the name of the new tab:');
+          if (name) {
+            model.layout.newTab(name);
+          }
+        }}, '+'),
+      ])
     ])
   ]),
-  h('.w-100.text-right', [
-    h('button.button.alert.mh1', {onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()},
+  h('.flex-grow.text-right', [
+    h('b', model.layout.item.name),
+    ' ',
+    h('button.btn.btn-danger.mh1', {onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()},
       'Delete layout'
     ),
-    h('button.button.primary.mh1', {onclick: () => model.layout.save()},
+    h('button.btn.btn-primary.mh1', {onclick: () => model.layout.save()},
       'Save'
     ),
-    h('button.button.default.mh1', {onclick: () => model.layout.cancelEdit()},
+    h('button.btn.mh1', {onclick: () => model.layout.cancelEdit()},
       'Cancel'
     ),
   ]),
 ];
 
-const tabBtn = (...args) => h('button.br-pill.ph2.pointer.button.btn-xs', ...args);
+const tabBtn = (...args) => h('button.br-pill.ph2.btn', ...args);

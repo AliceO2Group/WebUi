@@ -1,6 +1,6 @@
 import {h} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
-import {iconCaretBottom, iconCaretRight, iconBarChart} from '../icons.js';
+import {iconCaretBottom, iconCaretRight, iconBarChart} from '/js/src/icons.js';
 
 export default function objectTreeSidebar(model) {
   return tabShow(model);
@@ -17,14 +17,14 @@ export function tabShow(model) {
       h('input.form-control.w-100', {placeholder: 'Search', type: 'search', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
     ]),
     h('.h-100.scroll-y', [
-      h('table.table.table-condensed.no-select.flex-grow.f6', attrs, [
+      h('table.table.table-sm.text-no-select.flex-grow.f6', attrs, [
         h('tbody', [
           // The main table of the view can be a tree OR the result of a search
           model.object.searchInput ? searchRows(model) : treeRows(model)
         ])
       ]),
     ]),
-    h('', {style: {height: '15em'}, class: model.object.selected ? 'bg-white' : ''}, model.object.selected && draw(model, model.object.selected.name))
+    h('', {class: model.object.selected ? 'bg-white' : ''}, model.object.selected && draw(model, model.object.selected.name))
   ]);
 }
 
@@ -40,7 +40,7 @@ function searchRows(model) {
     const className = item && item === model.object.selected ? 'selected' : '';
 
     return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
-      h('td.highlight.ellipsis', [
+      h('td.highlight.text-ellipsis', [
         objectIcon(),
         ' ',
         item.name
@@ -80,7 +80,7 @@ function treeRow(model, tree, level) {
 
   return [
     h('tr', attr, [
-      h('td.ellipsis', [iconWrapper, ' ', tree.name])
+      h('td.text-ellipsis', [iconWrapper, ' ', tree.name])
     ]),
     ...subtree
   ];

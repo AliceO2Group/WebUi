@@ -24,7 +24,7 @@ export function draw(model, tabObject, options) {
 
   if (typeof tabObject === 'string') {
     tabObject = {
-      id: objectId(),
+      id: tabObject,
       name: tabObject,
       options: [],
       x: 0,

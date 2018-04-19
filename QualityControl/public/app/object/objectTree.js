@@ -10,7 +10,7 @@ export function objectTree(model) {
 
 export function tabShow(model) {
   return [
-    h('table.table.table-condensed.pointer', [
+    h('table.table.table-sm.text-no-select', [
       h('thead', [
         h('tr', [
           h('th', {}, 'Name'),
@@ -33,8 +33,8 @@ function searchRows(model) {
   return model.object.searchResult.map(item => {
     const path = item.name;
     const selectItem = () => model.object.select(item);
-    const color = item.quality === 'good' ? 'success' : 'alert';
-    const className = item && item === model.object.selected ? 'selected' : '';
+    const color = item.quality === 'good' ? 'success' : 'danger';
+    const className = item && item === model.object.selected ? 'table-primary' : '';
 
     return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight', [
@@ -66,7 +66,7 @@ function objectIcon() {
 
 // flatten the tree in a functional way
 function treeRow(model, tree, level) {
-  const color = tree.quality === 'good' ? 'success' : 'alert';
+  const color = tree.quality === 'good' ? 'success' : 'danger';
   const padding = `${level}em`;
   const levelDeeper = level + 1;
   const icon = tree.object ? objectIcon() : (tree.open ? openIcon() : closedIcon()); // 1 of 3 icons
@@ -74,7 +74,7 @@ function treeRow(model, tree, level) {
   const childrens = tree.open ? tree.childrens.map(children => treeRow(model, children, levelDeeper)) : [];
   const path = tree.path.join('/');
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
-  const className = tree.object && tree.object === model.object.selected ? 'selected' : '';
+  const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
   return [
     h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
