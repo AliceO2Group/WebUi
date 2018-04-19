@@ -10,5 +10,5 @@ The QCG is a client/server Web application for viewing ROOT objects of past and 
 - git clone
 - npm install
 - mv config-default.js config.js
-- npm run dev OR npm start
+- npm run dev OR npm start [/path/config.js]
 - Go to the link shown in the terminal
