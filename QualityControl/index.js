@@ -5,7 +5,7 @@ const mysql = require('mysql');
 const fs = require('fs');
 
 // Reading config file
-let configFile = './config.js';console.log(process.argv)
+let configFile = './config.js';
 if (process.argv.length >= 3) {
   configFile = process.argv[2];
 }
