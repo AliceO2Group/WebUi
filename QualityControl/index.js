@@ -3,7 +3,24 @@ const log = require('@aliceo2/aliceo2-gui').Log;
 const Response = require('@aliceo2/aliceo2-gui').Response;
 const mysql = require('mysql');
 const fs = require('fs');
-const config = require('./config.js');
+
+// Reading config file
+let configFile = './config.js';
+if (process.argv.length >= 3) {
+  configFile = process.argv[2];
+}
+
+try {
+  configFile = fs.realpathSync(configFile);
+} catch (err) {
+  log.error(`Unable to read config file: ${err.message}`);
+  process.exit(1);
+}
+
+log.info(`Reading config file "${configFile}"`);
+const config = require(configFile);
+
+// Load data source (demo or DB)
 const model = config.app.demoData ? require('./lib/QCModelDemo.js') : require('./lib/QCModel.js');
 
 // Quick check config at start
