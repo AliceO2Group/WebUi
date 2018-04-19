@@ -3,6 +3,7 @@ const log = require('@aliceo2/aliceo2-gui').Log;
 const Response = require('@aliceo2/aliceo2-gui').Response;
 const mysql = require('mysql');
 const fs = require('fs');
+const path = require('path');
 
 // Reading config file
 let configFile = './config.js';
@@ -31,7 +32,7 @@ log.info(`TObject2JSON URL: ${config.tobject2json.endpoint}`);
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.oAuth);
 http.addStaticPath('public');
-http.addStaticPath('node_modules/jsroot', 'jsroot');
+http.addStaticPath(path.join(require.resolve('jsroot'), '../..'), 'jsroot');
 
 // --------------------------------------------------------
 // API
