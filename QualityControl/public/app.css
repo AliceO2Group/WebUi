@@ -1,36 +1,12 @@
-
-
-
 .animate-width { transition: width 0.3s; }
 .animate-height { transition: height 0.3s; }
 .animate-dimensions { transition: height 0.3s, width 0.3s; }
 .animate-dimensions-position { transition: height 0.3s, width 0.3s, top 0.3s, left 0.3s; }
 
-.object-shadow { box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2); }
-.object-selected { border: 0.4em solid var(--color-primary); }
+.object-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
+.object-selected { border: 0.3em solid var(--color-primary); }
 .object-edit-layer { cursor: move; opacity: 0; }
 .object-edit-layer:hover { opacity: 1; background-color: ; overflow: scroll; }
-
-
-hr {
-  border: 0;
-  height: 1px;
-  background-color: var(--color-gray);
-}
-
-.sidebar {
-/* overflow-x: unset;
- overflow-y: unset;*/
- /*does not work in all cases, when closed, sidebar content must be hidden*/
- /* le user choisi ce qu'il fait dans cette boîte */
-}
-.sidebar-content {
-  height: 100%;
-}
-
-
-.sidebar-extend { width: 30em; }
-.sidebar-extend .sidebar-content { width: 30em; }
 
 /* Force jsroot's background to be transparent */
 .canvas_fillrect { fill: transparent !important; }
@@ -43,4 +19,3 @@ updates on JS side:
 - fetchClient with JSON headers
 - sessionService.get() ajouter un argument pour avoir une clé en particulier
 */
-

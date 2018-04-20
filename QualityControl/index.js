@@ -28,6 +28,6 @@ log.info(`TObject2JSON URL: ${config.tobject2json.host}`);
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.oAuth);
-http.addStaticPath('public');
+http.addStaticPath(path.join(__dirname, 'public'));
 http.addStaticPath(path.join(require.resolve('jsroot'), '../..'), 'jsroot');
 api.setup(config, http);

@@ -122,11 +122,11 @@ function chartView(model, tabObject) {
   };
 
   const attrsInternal = {
-    class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id ? 'object-selected' : ''
+    class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id ? 'object-selected object-selectable' : 'object-selectable'
   };
 
   return h('.absolute.animate-dimensions-position', attrs, [
-    h('.bg-white.m1.absolute-fill.object-shadow.br3', attrsInternal, draw(model, tabObject)),
+    h('.bg-white.m1.absolute-fill.shadow-level1.br3', attrsInternal, draw(model, tabObject)),
     model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3')
   ]);
 }
