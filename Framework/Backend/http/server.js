@@ -8,6 +8,7 @@ const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
 const path = require('path');
 const url = require('url');
+const bodyParser = require('body-parser');
 
 /**
  * HTTPS server that handles OAuth and provides REST API.
@@ -102,6 +103,7 @@ class HttpServer {
     } else {
       this.app.get('/', (req, res, next) => this.addDefaultUserData(req, res, next));
     }
+    this.router.use(bodyParser.json()); // parse json body for API calls
     this.app.use('/api', this.router);
     this.addStaticPath(require.resolve('mithril'), '/js/mithril.js');
     this.addStaticPath(path.join(__dirname, '../../Frontend'));

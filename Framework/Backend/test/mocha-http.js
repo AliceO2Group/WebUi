@@ -4,7 +4,7 @@ const assert = require('assert');
 const path = require('path');
 const http = require('http');
 const url = require('url');
-const config = require('./../config.json');
+const config = require('./../config-default.json');
 const JwtToken = require('./../jwt/token.js');
 const HttpServer = require('./../http/server');
 
@@ -20,6 +20,7 @@ describe('REST API', () => {
     httpServer = new HttpServer(config.http, config.jwt);
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-request', (req, res) => res.json({ok: 1}));
+    httpServer.post('/post-with-body', (req, res) => res.json({body: req.body}));
   });
 
   it('GET the "/" and return user details', (done) => {
@@ -97,6 +98,33 @@ describe('REST API', () => {
         done();
       });
     });
+    req.end();
+  });
+
+  it('POST with a JSON body', (done) => {
+    const postData = {fake: 'message'};
+    const postDataString = JSON.stringify(postData);
+    const req = http.request({
+      hostname: 'localhost',
+      port: config.http.port,
+      path: '/api/post-with-body?token=' + token,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postDataString)
+      }
+    }, (res) => {
+      let rawData = '';
+      res.on('data', (chunk) => {
+        rawData += chunk;
+      });
+      res.on('end', () => {
+        const parsedData = JSON.parse(rawData);
+        assert.deepStrictEqual(parsedData.body, postData);
+        done();
+      });
+    });
+    req.write(postDataString);
     req.end();
   });
 

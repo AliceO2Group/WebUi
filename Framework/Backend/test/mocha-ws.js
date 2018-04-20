@@ -1,4 +1,4 @@
-const config = require('./../config.json');
+const config = require('./../config-default.json');
 const WebSocketClient = require('ws');
 const assert = require('assert');
 const WebSocket = require('./../websocket/server');

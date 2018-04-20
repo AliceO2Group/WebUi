@@ -1,5 +1,5 @@
 const MySQL = require('./../db/mysql.js');
-const config = require('./../config.json');
+const config = require('./../config-default.json');
 
 let db = null;
 let skip = false;
