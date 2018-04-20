@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "postinstall": "if [[ ${NODE_ENV} == \"production\" ]]; then echo 'HERE=`pwd` cd node_modules/@aliceo2/qc && npm start ${HERE}/config.js' > ./../../../start; chmod +x ./../../../start; fi"
+    "postinstall": "if [[ ${NODE_ENV} == \"production\" ]]; then echo 'HERE=`pwd` cd node_modules/@aliceo2/qc && npm start ${HERE}/config.js' > ./../../../start; chmod +x ./../../../start; fi",
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/"
   },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
@@ -17,6 +18,8 @@
     "zeromq": "4.6.0"
   },
   "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-google": "^0.9.1",
     "nodemon": "1.17.3"
   }
 }
