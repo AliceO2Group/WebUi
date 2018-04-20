@@ -10,9 +10,10 @@
     "start": "echo 'Running demo app...' && node docs/demo/index.js",
     "test": "npm run eslint && npm run mocha",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/ --exit",
-    "mocha": "./node_modules/.bin/mocha --require babel-core/register Frontend/test/ && echo 'End of Frontend tests, use Travis for Backend tests.'",
+    "mocha": "npm run mocha-frontend && npm run mocha-backend",
+    "mocha-frontend": "./node_modules/.bin/mocha --require babel-core/register Frontend/test/",
     "mocha-backend": "./node_modules/.bin/mocha ./Backend/test/",
-    "eslint": "./node_modules/.bin/eslint Backend/ Frontend/ docs/skeleton/*.js"
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js Backend/ Frontend/ docs/skeleton/*.js"
   },
   "dependencies": {
     "express": "^4.16.3",
