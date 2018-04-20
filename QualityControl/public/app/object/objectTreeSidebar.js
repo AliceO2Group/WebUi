@@ -14,7 +14,7 @@ export function tabShow(model) {
   };
   return h('.flex-column.h-100', {oncreate: () => model.object.loadList()}, [
     h('.m2', [
-      h('input.form-control.w-100', {placeholder: 'Search', type: 'search', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
+      h('input.form-control.w-100', {placeholder: 'Search', type: 'text', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
     ]),
     h('.h-100.scroll-y', [
       h('table.table.table-sm.text-no-select.flex-grow.f6', attrs, [

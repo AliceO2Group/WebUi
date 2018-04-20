@@ -16,7 +16,7 @@ export default function objectTreeHeader(model) {
     ]),
     h('.flex-grow.text-right', [
       h('button.btn', {onclick: e => model.object.tree.toggleAll(), disabled: !!model.object.searchInput}, iconProject()),
-      h('input.form-control.form-inline.mh1.w-33', {placeholder: 'Search', type: 'search', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
+      h('input.form-control.form-inline.mh1.w-33', {placeholder: 'Search', type: 'text', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
     ]),
   ];
 }
