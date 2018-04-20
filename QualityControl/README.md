@@ -42,6 +42,10 @@ CREATE TABLE `layout` (
   KEY `index_owner_id` (`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
+=======
+The MySQL database must contain a table for each agent like `agent_*` and a row per object. Another table called `layout` will contain user's layouts in the same database.
+
+The tables' structure and some sample data are available in [quality_control.sql](./docs/quality_control.sql) file.
 
 In the `config.js` configuration file disable demo data flag:
 ```js
