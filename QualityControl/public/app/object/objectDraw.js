@@ -15,12 +15,13 @@ import {objectId, clone, pointerId} from '../utils.js';
  * @return {vdom} output virtual-dom, a single div with JSROOT attached to it
  */
 export function draw(model, tabObject, options) {
-  options = {
+  const defaultOptions = {
     width: '100%', // CSS size
     height: '100%', // CSS size
     className: '', // any CSS class
-    ...options,
   };
+
+  options = Object.assign({}, defaultOptions, options);
 
   if (typeof tabObject === 'string') {
     tabObject = {
