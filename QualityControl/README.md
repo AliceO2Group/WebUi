@@ -7,9 +7,9 @@
 QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https://github.com/AliceO2Group/QualityControl).
 
 ## Requirements
-- A [TObject2Json](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) server connected a backend
+- Running TObject2Json server connected a backend
 - nodejs `7.x` or higher
-- [Supported browser](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
+- [Supported browser](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support)
 
 ## Installation
 ```
@@ -18,19 +18,17 @@ NODE_ENV=production npm install @aliceo2/qc@1.0.0 --loglevel warn --no-save --on
 
 ## Configuration
 
-### Configuration file
-- Open `config.js`
-- Fill up missing sections
-  - OAuth
-  - HTTP
-  - TObject2Json
+### Configuration OAuth
+
+
+### Configuration HTTPS
+
 
 ### MySQL database
 
-The MySQL database must contain a table for each agent like `agent_*` and a row per object. A sample of agents is available in [quality_control.sql](./docs/quality_control.sql) file.
+A table is required for each agent (`agent_*`) and a row per object. A sample SQL schema is available: [quality_control.sql](./docs/quality_control.sql).
 
-Another table called `layout` will contain user's layouts in the same database.
-
+The `layout` table contains user layout
 ```sql
 CREATE TABLE `layout` (
   `id` varchar(24) NOT NULL DEFAULT '',
@@ -45,16 +43,14 @@ CREATE TABLE `layout` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
-On the server side, first disable demo data in the configuration file `config.js`.
-
+In the `config.js` configuration file disable demo data flag:
 ```js
 app: {
   demoData: false
 },
 ```
 
-Then configure your MySQL access:
-
+Then configure your MySQL connection
 ```js
 mysql: {
   host: '###',
@@ -64,8 +60,13 @@ mysql: {
 }
 ```
 
-To parse TObject data contained inside objects, you need to run a TObject2Json instance connected to this same database and add it into the configuration file.
+### Configuration TOjbect2Json
+Run `tobject2json` binary which is part of [QualityControl](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) package
+```
+tobject2json --backend mysql://<loign>:<password>@<hostname>:<port>/<database> --zeromq-server tcp://<host>:<port>
+```
 
+In the `config.js` set up hostname and port number
 ```js
 tobject2json: {
   host: '###',
