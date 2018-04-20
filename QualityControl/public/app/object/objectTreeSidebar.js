@@ -24,7 +24,7 @@ export function tabShow(model) {
         ])
       ]),
     ]),
-    h('', {class: model.object.selected ? 'bg-white' : ''}, model.object.selected && draw(model, model.object.selected.name))
+    h('', {style: {height: '10em'}, class: model.object.selected ? 'bg-white' : ''}, model.object.selected && draw(model, model.object.selected.name))
   ]);
 }
 
