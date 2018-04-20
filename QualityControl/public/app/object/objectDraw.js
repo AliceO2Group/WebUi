@@ -62,7 +62,7 @@ export function draw(model, tabObject, options) {
   let inner = null;
   if (model.object.objects[tabObject.name] === null) {
     // data are null, it means an error of reading occured
-    inner = h('.fill-parent.flex-column.items-center.justify-center', [
+    inner = h('.absolute-fill.flex-column.items-center.justify-center', [
       h('.alert', 'No data available')
     ]);
   }
@@ -86,11 +86,14 @@ function redrawOnDataUpdates(model, dom, tabObject) {
 }
 
 function keyHash(tabObject) {
-  return `${tabObject.id}:${tabObject.options.join(';')}`;
+  // Each time this key change means the jsroot plot must be redone.
+  // Like: tabObject changed, options changed, dimension changed (need redraw!)
+  return `${tabObject.id}:${tabObject.options.join(';')}:${tabObject.h}:${tabObject.w}`;
 }
 
 function cacheHash(model, tabObject) {
   // help to identify when some data have changed to tell jsroot to redraw
   // pointerId returns a different number if object has been replaced by another
-  return `${tabObject.id}:${model.object.objects[tabObject.name] ? pointerId(model.object.objects[tabObject.name]) : null}:${tabObject.options.join(';')}`;
+  const dataPointerId = model.object.objects[tabObject.name] ? pointerId(model.object.objects[tabObject.name]) : null;
+  return `${keyHash(tabObject)}:${dataPointerId}}`;
 }

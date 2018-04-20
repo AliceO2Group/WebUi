@@ -1,7 +1,7 @@
 import {h} from '/js/src/index.js';
 
 export default function layouts(model) {
-  return h('.scroll-y.fill-parent', [
+  return h('.scroll-y.absolute-fill', [
     table(model)
   ]);
 }
