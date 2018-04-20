@@ -25,7 +25,7 @@ export default function sidebar(model) {
 
   // General case with an optional menu on the left
   return h('.sidebar', {class: model.sidebar ? '' : 'sidebar-closed'}, [
-    h('.sidebar-content', [
+    h('.sidebar-content.scroll-y', [
       sidebarMenu(model)
     ])
   ]);
