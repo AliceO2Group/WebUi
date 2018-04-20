@@ -1,7 +1,7 @@
 import {h} from '/js/src/index.js';
 import {iconMenu} from '/js/src/icons.js';
 
-import spinner from './Loader/spinner.js'
+import spinner from './loader/spinner.js'
 import layoutShowHeader from './layout/layoutShowHeader.js'
 import layoutListHeader from './layout/layoutListHeader.js'
 import objectTreeHeader from './object/objectTreeHeader.js'
