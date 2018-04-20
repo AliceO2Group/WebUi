@@ -43,6 +43,10 @@ script:
 - if [ -f $TRAVIS_BUILD_DIR/Control/TEST ]; then cd $TRAVIS_BUILD_DIR/Control; npm test; fi
 - if [ -f $TRAVIS_BUILD_DIR/QualityControl/TEST ]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm test; fi
 - if [ -f $TRAVIS_BUILD_DIR/InfoLogger/TEST ]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; fi
+- if [ -f $TRAVIS_BUILD_DIR/Framework/TEST ]; then echo 'Framework tests COMPLETED'; else echo 'Framework tests SKIPPED'; fi
+- if [ -f $TRAVIS_BUILD_DIR/Control/TEST ]; then echo 'Control tests COMPLETED'; else echo 'Control tests SKIPPED'; fi
+- if [ -f $TRAVIS_BUILD_DIR/QualityControl/TEST ]; then echo 'QualityControl tests COMPLETED'; else echo 'QualityControl tests SKIPPED'; fi
+- if [ -f $TRAVIS_BUILD_DIR/InfoLogger/TEST ]; then echo 'InfoLogger tests COMPLETED'; else echo 'InfoLogger tests SKIPPED'; fi
 after_success:
 - cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
 - cd $TRAVIS_BUILD_DIR/Framework; nyc ./node_modules/mocha/bin/mocha Backend/test
