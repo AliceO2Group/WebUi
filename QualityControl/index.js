@@ -27,7 +27,7 @@ const model = config.app.demoData ? require('./lib/QCModelDemo.js') : require('.
 // Quick check config at start
 log.info(`HTTP full link: http://${config.http.hostname}:${config.http.port}`);
 log.info(`HTTPS full link: https://${config.http.hostname}:${config.http.portSecure}`);
-log.info(`TObject2JSON URL: ${config.tobject2json.endpoint}`);
+log.info(`TObject2JSON URL: ${config.tobject2json.host}`);
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.oAuth);
