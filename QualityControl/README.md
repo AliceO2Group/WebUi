@@ -8,7 +8,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 
 ## Requirements
 - Running TObject2Json server connected a backend
-- nodejs `8.9.4` or higher
+- [System requirements](https://github.com/AliceO2Group/WebUi/tree/master/Framework#system-requirements)
 - [Supported browser](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support)
 
 ## Installation
@@ -19,10 +19,15 @@ NODE_ENV=production npm install @aliceo2/qc@1.0.0 --loglevel warn --no-save --on
 ## Configuration
 
 ### Configuration OAuth
-
+- Register your application in the [CERN OAuth service](https://sso-management.web.cern.ch/OAuth/RegisterOAuthClient.aspx)
+- Provide any `client_id`, eg `qc_gui`
+- Set `redirect_uri` to `https://<YOUR_HOSTNAME>/callback`
+- Fill these values and generated secret into `oAuth` section of `config.js` file.
 
 ### Configuration HTTPS
-
+- Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
+- Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
+- Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
 ### MySQL database
 
@@ -42,10 +47,6 @@ CREATE TABLE `layout` (
   KEY `index_owner_id` (`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
-=======
-The MySQL database must contain a table for each agent like `agent_*` and a row per object. Another table called `layout` will contain user's layouts in the same database.
-
-The tables' structure and some sample data are available in [quality_control.sql](./docs/quality_control.sql) file.
 
 In the `config.js` configuration file disable demo data flag:
 ```js
