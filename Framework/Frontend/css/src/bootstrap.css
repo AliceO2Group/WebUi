@@ -78,6 +78,9 @@ h6, .f6 { font-size: .875rem; }
 .relative { position: relative !important; }
 .absolute { position: absolute !important; }
 
+/* use all space provided by relative parent node */
+.absolute-fill { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+
 /* flexbox */
 .flex-row { display: flex; flex-direction: row; }
 .flex-column { display: flex; flex-direction: column; }
@@ -167,10 +170,6 @@ h6, .f6 { font-size: .875rem; }
 a { color: var(--color-blue); text-decoration: none; }
 a:hover { color: var(--color-blue); text-decoration: underline; }
 
-/* use all space provided by parent node
-used for sidebar content and container */
-.fill-parent { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
-
 /* SVG icons - scale as a font */
 svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 
@@ -240,9 +239,9 @@ label { display: block; margin-bottom: 0.5em; }
 
 /* Component sidebar */
 
-.sidebar { width: 15em; background-color: var(--color-gray-light); overflow-x: hidden; overflow-y: auto; transition: width 0.3s; }
-.sidebar-closed { width: 0; }
-.sidebar .sidebar-content { width: 15em; }
+.sidebar { width: 15em; background-color: var(--color-gray-light); transition: width 0.3s; }
+.sidebar-closed { width: 0; overflow: hidden; }
+.sidebar .sidebar-content { width: 15em; height: 100%; overflow: hidden; }
 .sidebar-extend { width: 30em; }
 .sidebar-extend .sidebar-content { width: 30em; }
 
