@@ -1,14 +1,24 @@
-# QualityControlGui
-The QCG is a client/server Web application for viewing ROOT objects of past and present runs of Alice as part of the DAQ (Data Acquisition Quality).
+# Quality Control GUI (QCG)
+QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https://github.com/AliceO2Group/QualityControl).
 
 ## Requirements
-- A TObject2JSON server connected to a MySQL DB
-- node v7 and npm
-- Chrome (others coming)
+- A [TObject2Json](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) server connected a backend
+- nodejs > 7
+- [Supported browser](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
-## Usage
-- git clone
-- npm install
-- mv config-default.js config.js
-- npm run dev OR npm start [/path/config.js]
-- Go to the link shown in the terminal
+## Installation
+```
+NODE_ENV=production npm install @aliceo2/qc@1.0.0 --loglevel warn --no-save --only=production --no-package-lock
+```
+
+## Configuration
+- Open `config.js`
+- Fill up missing sections
+  - OAuth
+  - HTTP
+  - TObject2Json
+
+## Run
+```
+./start
+```

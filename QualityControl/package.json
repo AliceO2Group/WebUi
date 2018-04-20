@@ -1,7 +1,7 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.0.0-alpha.7",
-  "description": "Explore ROOT objects",
+  "version": "1.0.0-alpha.10",
+  "description": "O2 Quality Control Web User Interface",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
