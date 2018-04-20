@@ -9,7 +9,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 ## Requirements
 - Running TObject2Json server connected a backend
 - [System requirements](https://github.com/AliceO2Group/WebUi/tree/master/Framework#system-requirements)
-- [Supported browser](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support)
+- [Supported browsers](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support)
 
 ## Installation
 ```
@@ -58,9 +58,9 @@ app: {
 Then configure your MySQL connection
 ```js
 mysql: {
-  host: '###',
-  user: '###',
-  password: '###',
+  host: '<HOSTNAME>',
+  user: '<USERNAME>',
+  password: '<PASSWORD>',
   database: 'quality_control'
 }
 ```
@@ -70,20 +70,11 @@ Run `tobject2json` binary which is part of [QualityControl](https://github.com/A
 ```
 tobject2json --backend mysql://<loign>:<password>@<hostname>:<port>/<database> --zeromq-server tcp://<host>:<port>
 ```
-=======
-To parse TObject data contained inside objects, you need to run a TObject2Json instance connected to this same database.
-
-```bash
-build QualityControl with aliBuild
-tobject2json --backend mysql://<login>:<password>@<hostname>:<port>/<database> --zeromq-server tcp://<host>:<port>
-```
-
-Add it into the configuration file:
 
 In the `config.js` set up hostname and port number
 ```js
 tobject2json: {
-  host: '###',
+  host: '<HOSTNAME>',
   port: 7777
 },
 ```
