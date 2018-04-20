@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.0.0-alpha.9",
+  "version": "1.0.0-alpha.10",
   "description": "O2 Quality Control Web User Interface",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "1.0.5",
     "body-parser": "^1.18.2",
-    "jsroot": "5.4.1",
+    "jsroot": "5.3.5",
     "zeromq": "4.6.0"
   },
   "devDependencies": {
