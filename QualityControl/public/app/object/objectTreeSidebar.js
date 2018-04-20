@@ -37,7 +37,7 @@ function searchRows(model) {
     const path = item.name;
     const selectItem = () => model.object.select(item);
     const color = item.status === 'active' ? 'success' : 'alert';
-    const className = item && item === model.object.selected ? 'selected' : '';
+    const className = item && item === model.object.selected ? 'table-primary' : '';
 
     return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight.text-ellipsis', [
@@ -60,7 +60,7 @@ function treeRow(model, tree, level) {
   const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
   const iconWrapper = h('span', {style: {paddingLeft: `${level}em`}}, icon);
   const path = tree.path.join('/');
-  const className = tree.object && tree.object === model.object.selected ? 'selected' : '';
+  const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
   const draggable = !!tree.object;
 
   // UI events
