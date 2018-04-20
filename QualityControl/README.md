@@ -64,7 +64,14 @@ mysql: {
 }
 ```
 
-To parse TObject data contained inside objects, you need to run a TObject2Json instance connected to this same database and add it into the configuration file.
+To parse TObject data contained inside objects, you need to run a TObject2Json instance connected to this same database.
+
+```bash
+build QualityControl with aliBuild
+tobject2json --backend mysql://<login>:<password>@<hostname>:<port>/<database> --zeromq-server tcp://<host>:<port>
+```
+
+Add it into the configuration file:
 
 ```js
 tobject2json: {
