@@ -5,18 +5,18 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js --trace-sync-io",
+    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "postinstall": "if [[ ${NODE_ENV} == \"production\" ]]; then echo 'HERE=`pwd` cd node_modules/@aliceo2/qc && npm start ${HERE}/config.js' > ./../../../start; chmod +x ./../../../start; fi"
   },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/aliceo2-gui": "2.0.0",
+    "@aliceo2/web-ui": "1.0.3",
     "body-parser": "^1.18.2",
-    "jsroot": "^5.3.5",
-    "zeromq": "^4.6.0"
+    "jsroot": "5.3.5",
+    "zeromq": "4.6.0"
   },
   "devDependencies": {
-    "nodemon": "^1.15.1"
+    "nodemon": "1.17.3"
   }
 }

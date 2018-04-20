@@ -1,6 +1,6 @@
 import {h} from '/js/src/index.js';
 import {draw} from '../object/objectDraw.js';
-import {iconArrowLeft, iconArrowTop} from '../icons.js';
+import {iconArrowLeft, iconArrowTop} from '/js/src/icons.js';
 
 const cellHeight = 100 / 3 * 0.95; // %, put some margin at bottom to see below
 const cellWidth = 100 / 3; // %

@@ -22,7 +22,7 @@ function page(model) {
 
 function layout(model, content) {
   return m('.fill-parent.flex-column', [
-    m('.', [
+    m('.shadow-level2.level2', [
       header(model),
     ]),
     m('.flex-grow.flex-row.outline-gray', [
