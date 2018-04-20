@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "test": "npm run eslint",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "postinstall": "if [[ ${NODE_ENV} == \"production\" ]]; then echo 'HERE=`pwd` cd node_modules/@aliceo2/qc && npm start ${HERE}/config.js' > ./../../../start; chmod +x ./../../../start; fi",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/"
