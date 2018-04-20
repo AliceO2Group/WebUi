@@ -12,11 +12,15 @@ NODE_ENV=production npm install @aliceo2/qc@1.0.0 --loglevel warn --no-save --on
 ```
 
 ## Configuration
+
+### Configuration file
 - Open `config.js`
 - Fill up missing sections
   - OAuth
   - HTTP
   - TObject2Json
+
+### MySQL database
 
 ## Run
 ```
