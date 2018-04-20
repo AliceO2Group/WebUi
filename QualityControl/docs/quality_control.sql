@@ -1,3 +1,19 @@
+--
+-- Table structure for table `layout`
+--
+
+CREATE TABLE `layout` (
+  `id` varchar(24) NOT NULL DEFAULT '',
+  `name` varchar(30) NOT NULL DEFAULT '',
+  `owner_id` int(11) NOT NULL,
+  `owner_name` varchar(200) NOT NULL DEFAULT '',
+  `tabs` text NOT NULL COMMENT 'JSON payload',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_name` (`name`),
+  KEY `index_owner_name` (`owner_name`),
+  KEY `index_owner_id` (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- MySQL dump 10.14  Distrib 5.5.56-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: quality_control

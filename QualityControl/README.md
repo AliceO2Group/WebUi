@@ -27,23 +27,9 @@ NODE_ENV=production npm install @aliceo2/qc@1.0.0 --loglevel warn --no-save --on
 
 ### MySQL database
 
-The MySQL database must contain a table for each agent like `agent_*` and a row per object. A sample of agents is available in [quality_control.sql](./docs/quality_control.sql) file.
+The MySQL database must contain a table for each agent like `agent_*` and a row per object. Another table called `layout` will contain user's layouts in the same database.
 
-Another table called `layout` will contain user's layouts in the same database.
-
-```sql
-CREATE TABLE `layout` (
-  `id` varchar(24) NOT NULL DEFAULT '',
-  `name` varchar(30) NOT NULL DEFAULT '',
-  `owner_id` int(11) NOT NULL,
-  `owner_name` varchar(200) NOT NULL DEFAULT '',
-  `tabs` text NOT NULL COMMENT 'JSON payload',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `index_name` (`name`),
-  KEY `index_owner_name` (`owner_name`),
-  KEY `index_owner_id` (`owner_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-```
+The tables' structure and some sample data are available in [quality_control.sql](./docs/quality_control.sql) file.
 
 On the server side, first disable demo data in the configuration file `config.js`.
 
