@@ -15,32 +15,27 @@ module.exports.listLayouts = listLayouts;
 module.exports.createLayout = createLayout;
 module.exports.deleteLayout = deleteLayout;
 
+
 /**
- * Retrieve a monitoring object (TObject)
- * @param {string} agentName
- * @param {string} objectName
- * @return {object} javascript representation of monitoring object
+ * Read object's data or null if it fails
+ * @param {string} path - Object's path like agentName/objectName/objectNameSub
+ * @return {Object|null}
  */
-
-function PromiseResolveWithLatency(data) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(data);
-    }, 250);
-  });
-}
-
 function readObjectData(path) {
   const [agentName, ...rest] = path.split('/');
   const objectName = rest.join('/');
 
   return new Promise((resolve, fail) => {
     // TODO: configure and handle timeout error
-    const zeroMQClient = new ZeroMQClient(config.tobject2json.host, config.tobject2json.port, 'req');
+    const zeroMQClient = new ZeroMQClient(
+      config.tobject2json.host,
+      config.tobject2json.port,
+      'req'
+    );
     zeroMQClient.on('message', (m) => {
       try {
         resolve(JSON.parse(m));
-      } catch(e) {
+      } catch (e) {
         // failed to parse
         fail(null);
       }
@@ -49,15 +44,21 @@ function readObjectData(path) {
   });
 }
 
-// List all object without the data which are heavy
+/**
+ * List all object without the data which are heavy
+ * @return {Array<Layout>}
+ */
 async function listObjects() {
   // first list all agents available
-  const agentsQuery = 'select * from information_schema.tables where table_schema = ? and table_name like "data_%"';
+  const agentsQuery = `select *
+                       from information_schema.tables
+                       where table_schema = ? and table_name like "data_%"`;
   const agentTables = await mySQL.query(agentsQuery, [config.mysql.database]);
 
   // then list all objects form those agents
   const objectsPromises = agentTables.map((agentTable) => {
-    return mySQL.query(`select object_name as name, '${agentTable.TABLE_NAME}' as agent from ${agentTable.TABLE_NAME}`);
+    return mySQL.query(`select object_name as name, '${agentTable.TABLE_NAME}' as agent
+                        from ${agentTable.TABLE_NAME}`);
   });
   const objectListListRaw = await Promise.all(objectsPromises);
 
@@ -65,23 +66,35 @@ async function listObjects() {
   const objects = objectListListRaw.reduce((result, objectListRaw) => {
     const objectList = objectListRaw.map((objectRaw) => {
       return {name: `${objectRaw.agent.substr(5)}/${objectRaw.name}`, quality: 'good'};
-    })
+    });
     return result.concat(objectList);
   }, []);
 
   return objects;
 }
 
+/**
+ * Create a layout
+ * @param {Layout} layout
+ * @return {Object} MySQL request details
+ */
 function createLayout(layout) {
-  return mySQL.query('insert into layout (id, name, owner_id, owner_name, tabs) value (?,?,?,?,?)', [
-    layout.id,
-    layout.name,
-    layout.owner_id,
-    layout.owner_name,
-    JSON.stringify(layout.tabs)
-  ]);
+  return mySQL.query('insert into layout (id, name, owner_id, owner_name, tabs) value (?,?,?,?,?)',
+    [
+      layout.id,
+      layout.name,
+      layout.owner_id,
+      layout.owner_name,
+      JSON.stringify(layout.tabs)
+    ]
+  );
 }
 
+/**
+ * List layouts, can be filtered
+ * @param {Object} filter - undefined or {owner_id: XXX}
+ * @return {Array<Layout>}
+ */
 async function listLayouts(filter = {}) {
   let request;
 
@@ -101,23 +114,35 @@ async function listLayouts(filter = {}) {
 /**
  * Retrieve a layout or null
  * @param {string} layoutName - layout name
- * @return {Layout|null} blabla
+ * @return {Layout|null}
  */
 function readLayout(layoutName) {
   return mySQL.query('select * from layout where name = ? limit 1', [layoutName]).then((items) => {
     if (items.length === 0) {
       return null;
     }
-    const item = items[0]
+    const item = items[0];
     item.tabs = JSON.parse(item.tabs);
     return item;
   });
 }
 
+/**
+ * Update a single layout by its name
+ * @param {string} layoutName
+ * @param {Layout} data
+ * @return {Object} MySQL request details
+ */
 function writeLayout(layoutName, data) {
-  return mySQL.query('update layout set tabs = ? where name = ?', [JSON.stringify(data.tabs), layoutName]);
+  return mySQL.query('update layout set tabs = ? where name = ?',
+    [JSON.stringify(data.tabs), layoutName]);
 }
 
+/**
+ * Delete a single layout by its name
+ * @param {string} layoutName
+ * @return {Object} MySQL request details
+ */
 function deleteLayout(layoutName) {
   return mySQL.query('delete from layout where name = ?', [layoutName]);
 }
