@@ -62,7 +62,7 @@ export function draw(model, tabObject, options) {
   let inner = null;
   if (model.object.objects[tabObject.name] === null) {
     // data are null, it means an error of reading occured
-    inner = h('.fill-parent.flex-column.items-center.justify-center', [
+    inner = h('.absolute-fill.flex-column.items-center.justify-center', [
       h('.alert', 'No data available')
     ]);
   }

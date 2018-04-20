@@ -13,7 +13,7 @@ LayoutShow is composed of:
 */
 
 export default function canvasView(model) {
-  return h('.scroll-y.fill-parent.bg-gray-light', {id: 'canvas'}, subcanvasView(model));
+  return h('.scroll-y.absolute-fill.bg-gray-light', {id: 'canvas'}, subcanvasView(model));
 }
 
 function emptyListViewMode(model) {
@@ -126,8 +126,8 @@ function chartView(model, tabObject) {
   };
 
   return h('.absolute.animate-dimensions-position', attrs, [
-    h('.bg-white.m1.fill-parent.object-shadow.br3', attrsInternal, draw(model, tabObject)),
-    model.layout.editEnabled && h('.object-edit-layer.fill-parent.m1.br3')
+    h('.bg-white.m1.absolute-fill.object-shadow.br3', attrsInternal, draw(model, tabObject)),
+    model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3')
   ]);
 }
 

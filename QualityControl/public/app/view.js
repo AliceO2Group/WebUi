@@ -21,7 +21,7 @@ function page(model) {
 }
 
 function layout(model, content) {
-  return m('.fill-parent.flex-column', [
+  return m('.absolute-fill.flex-column', [
     m('.shadow-level2.level2', [
       header(model),
     ]),
