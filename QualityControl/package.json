@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "Explore ROOT objects",
   "main": "index.js",
   "scripts": {
@@ -13,9 +13,9 @@
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/web-ui": "1.0.3",
+    "@aliceo2/web-ui": "1.0.5",
     "body-parser": "^1.18.2",
-    "jsroot": "5.3.5",
+    "jsroot": "5.4.1",
     "zeromq": "4.6.0"
   },
   "devDependencies": {
