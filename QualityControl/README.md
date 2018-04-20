@@ -8,7 +8,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 
 ## Requirements
 - A [TObject2Json](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) server connected a backend
-- nodejs > 7
+- nodejs `7.x` or higher
 - [Supported browser](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
 ## Installation
