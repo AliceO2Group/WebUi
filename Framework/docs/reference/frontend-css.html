@@ -2,7 +2,7 @@
 <title>Alice Bootstrap Gui</title>
 <link rel="stylesheet" href="../../Frontend/css/src/bootstrap.css">
 
-<div class="flex-row fill-parent">
+<div class="flex-row absolute-fill">
 <div class="scroll-y p3 w-25">
   <div class="text-right">
     <div><a href="#introduction">Introduction</a></div>
@@ -21,9 +21,11 @@
     <div><a href="#shadow">Shadow</a></div>
 
     <p><b>Layout</b></p>
+    <div><a href="#position">Position</a></div>
+    <div><a href="#flex">Flex</a></div>
+    <div><a href="#scroll">Scroll</a></div>
     <div><a href="#width">Width</a></div>
     <div><a href="#spacing">Padding / Margin</a></div>
-    <div><a href="#flex">Flex</a></div>
 
     <p><b>Components</b></p>
     <div><a href="#applayout">App layout</a></div>
@@ -344,78 +346,14 @@
   <p class="shadow-level1">.shadow-level1</p>
   <p class="shadow-level2">.shadow-level2</p>
 
-  <hr />
-  <a name="width"></a>
-  <h2>Width</h2>
-  <p class="measure">Main widths used to cut a view: full view (100%), 2 parts (50%), 3 parts (33%) and 4 parts (25%). More than this begins to be difficult to read.<p>
-  <p class="measure">The current documentation use a 25% sidebar and a flex-grow content for the rest (75%).<p>
+  <hr>
+  <a name="position"></a>
+  <h2>Position</h2>
+  <p>Specifies the type of positioning method used for an element and can be enhanced with some attributes (top, left, bottom, right).</p>
 
-  <p class="bg-gray p1 w-25">.w-25</p>
-  <p class="bg-gray p1 w-33">.w-33</p>
-  <p class="bg-gray p1 w-50">.w-50</p>
-  <p class="bg-gray p1 w-100">.w-100</p>
-
-  <hr />
-  <a name="spacing"></a>
-  <h2>Spacing (padding, margin)</h2>
-  <p class="measure">Provides a spacing scale based on powers of two that starts at .25rem (for most devices this will be the equivalent of 4px).<p>
-  <p class="measure">Always use the same spacing for two contents that should be aligned (margin value of a button above a text with same padding value).<p>
-
-  <p>Padding all</p>
-  <div class="bg-gray p1 mv1">.p1</div>
-  <div class="bg-gray p2 mv1">.p2</div>
-  <div class="bg-gray p3 mv1">.p3</div>
-  <div class="bg-gray p4 mv1">.p4</div>
-  <p>Padding horizontal</p>
-  <div class="bg-gray ph1 mv1">.ph1</div>
-  <div class="bg-gray ph2 mv1">.ph2</div>
-  <div class="bg-gray ph3 mv1">.ph3</div>
-  <div class="bg-gray ph4 mv1">.ph4</div>
-  <p>Padding vertical</p>
-  <div class="bg-gray pv1 mv1">.pv1</div>
-  <div class="bg-gray pv2 mv1">.pv2</div>
-  <div class="bg-gray pv3 mv1">.pv3</div>
-  <div class="bg-gray pv4 mv1">.pv4</div>
-
-  <p>Margin all</p>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray m1 d-inline-block">.m1</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray m2 d-inline-block">.m2</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray m3 d-inline-block">.m3</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray m4 d-inline-block">.m4</div>
-  </div>
-  <p>Margin horizontal</p>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mh1 d-inline-block">.mh1</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mh2 d-inline-block">.mh2</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mh3 d-inline-block">.mh3</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mh4 d-inline-block">.mh4</div>
-  </div>
-  <p>Margin vertical</p>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mv1 d-inline-block">.mv1</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mv2 d-inline-block">.mv2</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mv3 d-inline-block">.mv3</div>
-  </div>
-  <div class="bg-gray-light  mv1">
-    <div class="bg-gray mv4 d-inline-block">.mv4</div>
-  </div>
+  <p class=""><code>.relative</code> is positioned relative to its normal position</p>
+  <p class=""><code>.absolute</code> is positioned relative to the nearest positioned ancestor</p>
+  <p class=""><code>.absolute-fill</code> will fill completly its nearest parent which has .relative</p>
 
   <hr />
   <a name="flex"></a>
@@ -518,68 +456,173 @@
   </div>
 
   <hr>
+  <a name="scroll"></a>
+  <h2>Scroll</h2>
+  <p>This should always be applied to layouts before content to avoid overflow.</p>
+
+  <p class=""><code>.scroll-y</code> only show vertical scroll bar (recommanded)</p>
+  <p class=""><code>.scroll-auto</code> add scroll bars if needed</p>
+  <p class=""><code>.scroll-off</code> just hide all overflow</p>
+
+  <pre><code>&lt;div class="absolute-fill scroll-y"&gt;
+    &lt;p&gt;
+      Very long text that should be scrollable if window is too small
+      ...
+    &lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+  <hr />
+  <a name="width"></a>
+  <h2>Width</h2>
+  <p class="measure">Main widths used to cut a view: full view (100%), 2 parts (50%), 3 parts (33%) and 4 parts (25%). More than this begins to be difficult to read.<p>
+  <p class="measure">The current documentation use a 25% sidebar and a flex-grow content for the rest (75%).<p>
+
+  <p class="bg-gray p1 w-25">.w-25</p>
+  <p class="bg-gray p1 w-33">.w-33</p>
+  <p class="bg-gray p1 w-50">.w-50</p>
+  <p class="bg-gray p1 w-100">.w-100</p>
+
+  <hr />
+  <a name="spacing"></a>
+  <h2>Spacing (padding, margin)</h2>
+  <p class="measure">Provides a spacing scale based on powers of two that starts at .25rem (for most devices this will be the equivalent of 4px).<p>
+  <p class="measure">Always use the same spacing for two contents that should be aligned (margin value of a button above a text with same padding value).<p>
+
+  <p>Padding all</p>
+  <div class="bg-gray p1 mv1">.p1</div>
+  <div class="bg-gray p2 mv1">.p2</div>
+  <div class="bg-gray p3 mv1">.p3</div>
+  <div class="bg-gray p4 mv1">.p4</div>
+  <p>Padding horizontal</p>
+  <div class="bg-gray ph1 mv1">.ph1</div>
+  <div class="bg-gray ph2 mv1">.ph2</div>
+  <div class="bg-gray ph3 mv1">.ph3</div>
+  <div class="bg-gray ph4 mv1">.ph4</div>
+  <p>Padding vertical</p>
+  <div class="bg-gray pv1 mv1">.pv1</div>
+  <div class="bg-gray pv2 mv1">.pv2</div>
+  <div class="bg-gray pv3 mv1">.pv3</div>
+  <div class="bg-gray pv4 mv1">.pv4</div>
+
+  <p>Margin all</p>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray m1 d-inline-block">.m1</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray m2 d-inline-block">.m2</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray m3 d-inline-block">.m3</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray m4 d-inline-block">.m4</div>
+  </div>
+  <p>Margin horizontal</p>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mh1 d-inline-block">.mh1</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mh2 d-inline-block">.mh2</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mh3 d-inline-block">.mh3</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mh4 d-inline-block">.mh4</div>
+  </div>
+  <p>Margin vertical</p>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mv1 d-inline-block">.mv1</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mv2 d-inline-block">.mv2</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mv3 d-inline-block">.mv3</div>
+  </div>
+  <div class="bg-gray-light  mv1">
+    <div class="bg-gray mv4 d-inline-block">.mv4</div>
+  </div>
+
+  <hr>
   <a name="applayout"></a>
   <h2>App layout</h2>
   <p class="measure">Main app layout with navbar, menubar and its content.</p>
 
-  <div class="flex-column fill-parent___ifinsidebodyforexample" style="height: 300px">
-    <div class="bg-white flex-row p2 shadow-level2 level2">
-      <div class="flex-grow text-left">
-        <button class="btn">
-          <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 1v1h8v-1h-8zm0 2.969v1h8v-1h-8zm0 3v1h8v-1h-8z" name="expand-right" /></svg>
-        </button>
-        <button class="btn">
-          <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0l-.5 1.188-.281.125-1.188-.5-.719.719.5 1.188-.125.281-1.188.5v1l1.188.5.125.313-.5 1.156.719.719 1.188-.5.281.125.5 1.188h1l.5-1.188.281-.125 1.188.5.719-.719-.5-1.188.125-.281 1.188-.5v-1l-1.188-.5-.125-.281.469-1.188-.688-.719-1.188.5-.281-.125-.5-1.188h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" name="cog" /></svg>
-        </button>
-      </div>
-
-      <div class="w-50 text-center">
-        <button class="btn btn-tab">Menu 1</button>
-        <button class="btn btn-tab selected">Menu 2</button>
-        <button class="btn btn-tab ">Menu 3</button>
-        <button class="btn btn-tab ">Menu 4</button>
-        <button class="btn btn-tab ">Menu 5</button>
-      </div>
-
-      <div class="flex-grow text-right">
-        <input placeholder="Search" class="form-control form-inline" type="search" />
-        <div class="btn-group">
+  <div class="relative" style="height: 600px"><!-- this element represents body -->
+    <div class="flex-column absolute-fill">
+      <div class="bg-white flex-row p2 shadow-level2 level2">
+        <div class="flex-grow text-left">
           <button class="btn">
-            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0c-1.927 0-3.5 1.573-3.5 3.5s1.573 3.5 3.5 3.5c.592 0 1.166-.145 1.656-.406a1 1 0 0 0 .094.094l1.031 1.031a1.016 1.016 0 1 0 1.438-1.438l-1.031-1.031a1 1 0 0 0-.125-.094c.266-.493.438-1.059.438-1.656 0-1.927-1.573-3.5-3.5-3.5zm0 1c1.387 0 2.5 1.113 2.5 2.5 0 .587-.196 1.137-.531 1.563l-.031.031a1 1 0 0 0-.063.031 1 1 0 0 0-.281.281 1 1 0 0 0-.063.063c-.422.326-.953.531-1.531.531-1.387 0-2.5-1.113-2.5-2.5s1.113-2.5 2.5-2.5zm-1.5 2v1h3v-1h-3z" name="zoom-out" /></svg>
+            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 1v1h8v-1h-8zm0 2.969v1h8v-1h-8zm0 3v1h8v-1h-8z" name="expand-right" /></svg>
           </button>
-          <button class="btn" >
-            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0c-1.927 0-3.5 1.573-3.5 3.5s1.573 3.5 3.5 3.5c.592 0 1.166-.145 1.656-.406a1 1 0 0 0 .094.094l1.031 1.031a1.016 1.016 0 1 0 1.438-1.438l-1.031-1.031a1 1 0 0 0-.125-.094c.266-.493.438-1.059.438-1.656 0-1.927-1.573-3.5-3.5-3.5zm0 1c1.387 0 2.5 1.113 2.5 2.5 0 .587-.196 1.137-.531 1.563l-.031.031a1 1 0 0 0-.063.031 1 1 0 0 0-.281.281 1 1 0 0 0-.063.063c-.422.326-.953.531-1.531.531-1.387 0-2.5-1.113-2.5-2.5s1.113-2.5 2.5-2.5zm-.5 1v1h-1v1h1v1h1v-1h1v-1h-1v-1h-1z" name="zoom-in" /></svg>
+          <button class="btn">
+            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0l-.5 1.188-.281.125-1.188-.5-.719.719.5 1.188-.125.281-1.188.5v1l1.188.5.125.313-.5 1.156.719.719 1.188-.5.281.125.5 1.188h1l.5-1.188.281-.125 1.188.5.719-.719-.5-1.188.125-.281 1.188-.5v-1l-1.188-.5-.125-.281.469-1.188-.688-.719-1.188.5-.281-.125-.5-1.188h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" name="cog" /></svg>
           </button>
+          <button class="btn">?</button>
+          <span class="f4 gray">Title of application</span>
         </div>
-      </div>
-    </div>
 
-    <div class="flex-row">
-      <div class="sidebar">
-        <div class="sidebar-content">
-          <div class="menu-title">Title</div>
-          <a class="menu-item">
-            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
-            Item
-          </a>
-          <a class="menu-item">
-            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
-            Item
-          </a>
-          <div class="menu-title">Title</div>
-          <a class="menu-item selected">
-            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
-            Item
-          </a>
-          <a class="menu-item">
-            <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg>
-            Item
-          </a>
+        <div class="w-50 text-center">
+          <button class="btn btn-tab">Menu 1</button>
+          <button class="btn btn-tab selected">Menu 2</button>
+          <button class="btn btn-tab ">Menu 3</button>
+          <button class="btn btn-tab ">Menu 4</button>
+          <button class="btn btn-tab ">Menu 5</button>
+        </div>
+
+        <div class="flex-grow text-right">
+          <input placeholder="Search" class="form-control form-inline" type="search" />
+          <div class="btn-group">
+            <button class="btn">
+              <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0c-1.927 0-3.5 1.573-3.5 3.5s1.573 3.5 3.5 3.5c.592 0 1.166-.145 1.656-.406a1 1 0 0 0 .094.094l1.031 1.031a1.016 1.016 0 1 0 1.438-1.438l-1.031-1.031a1 1 0 0 0-.125-.094c.266-.493.438-1.059.438-1.656 0-1.927-1.573-3.5-3.5-3.5zm0 1c1.387 0 2.5 1.113 2.5 2.5 0 .587-.196 1.137-.531 1.563l-.031.031a1 1 0 0 0-.063.031 1 1 0 0 0-.281.281 1 1 0 0 0-.063.063c-.422.326-.953.531-1.531.531-1.387 0-2.5-1.113-2.5-2.5s1.113-2.5 2.5-2.5zm-1.5 2v1h3v-1h-3z" name="zoom-out" /></svg>
+            </button>
+            <button class="btn" >
+              <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0c-1.927 0-3.5 1.573-3.5 3.5s1.573 3.5 3.5 3.5c.592 0 1.166-.145 1.656-.406a1 1 0 0 0 .094.094l1.031 1.031a1.016 1.016 0 1 0 1.438-1.438l-1.031-1.031a1 1 0 0 0-.125-.094c.266-.493.438-1.059.438-1.656 0-1.927-1.573-3.5-3.5-3.5zm0 1c1.387 0 2.5 1.113 2.5 2.5 0 .587-.196 1.137-.531 1.563l-.031.031a1 1 0 0 0-.063.031 1 1 0 0 0-.281.281 1 1 0 0 0-.063.063c-.422.326-.953.531-1.531.531-1.387 0-2.5-1.113-2.5-2.5s1.113-2.5 2.5-2.5zm-.5 1v1h-1v1h1v1h1v-1h1v-1h-1v-1h-1z" name="zoom-in" /></svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="flex-grow scroll-y">
-        <div class="p2">Example of basic layout with toolbar and one sidebar.</div>
+      <div class="flex-grow flex-row">
+        <div class="sidebar">
+          <div class="sidebar-content relative">
+            <div class="absolute-fill scroll-y">
+              <div class="menu-title">Title</div>
+              <a class="menu-item selected"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <div class="menu-title">Title</div>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <div class="menu-title">Title</div>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <div class="menu-title">Title</div>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <div class="menu-title">Title</div>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <div class="menu-title">Title</div>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-grow scroll-y">
+          <div class="p2">
+            <p class="measure">Example of basic layout with toolbar and one sidebar.</p>
+            <p class="measure">The sidebar can be closed with <code>.sidebar-closed</code> and the layout is free.
+              In the current example the menu is inside a scrollable container but we could imagine the sidebar to be
+              splitted in half to preview some element at the bottom and have a menu at the top.</p>
+            <p class="measure">Sidebar can also grow is more place is needed, use <code>.sidebar-extend</code>
+              or just specify the width you want with a style attribute.</p>
+            <p class="measure">Only flex (<code>.flex-row</code> or <code>.flex-column</code> with <code>.flex-grow</code>)
+              and position (<code>.relative</code> and <code>.absolute-fill</code>) are required for most of your needs.</p>
+            <p class="measure"><code>.scroll-y</code> should be applied to layouts before content.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -589,16 +632,18 @@
   <h2>App loading</h2>
   <p class="measure">This component contains a spinner, a text and a layout to put the content in the middle of the screen.</p>
 
-  <div class="fill-parent___ flex-column items-center justify-center">
-    <div class="atom-spinner f1">
-      <div class="spinner-inner">
-        <div class="spinner-line"></div>
-        <div class="spinner-line"></div>
-        <div class="spinner-line"></div>
-        <div class="spinner-circle">●</div>
+  <div class="relative" style="height: 600px"><!-- this element represents body -->
+    <div class="absolute-fill flex-column items-center justify-center">
+      <div class="atom-spinner f1">
+        <div class="spinner-inner">
+          <div class="spinner-line"></div>
+          <div class="spinner-line"></div>
+          <div class="spinner-line"></div>
+          <div class="spinner-circle">●</div>
+        </div>
       </div>
+      <div class="f5">Loading...</div>
     </div>
-    <div class="f5">Loading...</div>
   </div>
 
     <hr />
