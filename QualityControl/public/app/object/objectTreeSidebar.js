@@ -20,7 +20,14 @@ export function tabShow(model) {
       h('table.table.table-sm.text-no-select.flex-grow.f6', attrs, [
         h('tbody', [
           // The main table of the view can be a tree OR the result of a search
-          model.object.searchInput ? searchRows(model) : treeRows(model)
+          model.object.searchInput ? searchRows(model) : treeRows(model),
+
+          // Empty rows to avoid blank space (design)
+          ...Array.from({length: 40}, () => (
+            h('tr', [
+              h('td', ' '),
+            ])
+          ))
         ])
       ]),
     ]),
