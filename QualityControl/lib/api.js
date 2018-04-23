@@ -81,9 +81,10 @@ function readObjectData(req, res) {
  * @param {Response} res
  */
 function listLayouts(req, res) {
-  const filter = {
-    owner_id: parseInt(req.query.owner_id, 10)
-  };
+  let filter = {};
+  if (req.query.owner_id !== undefined) {
+    filter.owner_id = parseInt(req.query.owner_id, 10);
+  }
 
   model.listLayouts(filter)
     .then((data) => res.status(200).json(data))

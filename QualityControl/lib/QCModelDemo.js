@@ -1,5 +1,5 @@
 // force user accounts during demo
-const ownerIdUser1 = 100;
+const ownerIdUser1 = 0;
 const ownerNameUser1 = 'John Doe';
 const ownerIdUser2 = 101;
 const ownerNameUser2 = 'Samantha Smith';
@@ -76,7 +76,7 @@ function listLayouts(filter = {}) {
   }
 
   return promiseResolveWithLatency(layouts.filter((layout) => {
-    if (filter.owner_id && layout.owner_id !== filter.owner_id) {
+    if (filter.owner_id !== undefined && layout.owner_id !== filter.owner_id) {
       return false;
     }
 
