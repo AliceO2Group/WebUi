@@ -11,8 +11,9 @@ class JwtToken {
    * @param {object} config - jwt cofiguration object
    */
   constructor(config) {
-    assert(config.secret, 'Missing config value: jwt.secret');
-    assert(config.expiration, 'Missing config value: jwt.expiration');
+    config = (typeof config == 'undefined') ? {} : config;
+    config.secret = (!config.secret) ? (Math.random()+1).toString(36).substring(7) : config.secret;
+    config.expiration = (!config.expiration) ? '1d' : config.expiration;
     config.issuer = (!config.issuer) ? 'o2-ui' : config.issuer;
     config.maxAge = (!config.maxAge) ? '7d' : config.maxAge;
 
