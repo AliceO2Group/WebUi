@@ -42,14 +42,15 @@ export default class Layout extends Observable {
     );
   }
 
-  loadMyList() {
-    return this.model.loader.watchPromise(fetchClient(`/api/layout?owner_id=822826`, {method: 'GET'})
-      .then(res => res.json())
-      .then(myList => {
-        this.myList = assertLayouts(myList);
-        this.notify();
-      })
-    );
+  async loadMyList() {
+    const req = fetchClient(`/api/layout?owner_id=${this.model.session.personid}`, {method: 'GET'});
+    const {result, response} = await this.model.loader.intercept(req);
+    if (!response.ok) {
+      throw new Error('unable to load layouts of user');
+    }
+
+    this.myList = assertLayouts(result);
+    this.notify();
   }
 
   async loadItem(layoutName) {
@@ -60,7 +61,7 @@ export default class Layout extends Observable {
     const req = fetchClient(`/api/readLayout?layoutName=${layoutName}`, {method: 'POST'});
     const {result, response} = await this.model.loader.intercept(req);
     if (!response.ok) {
-      throw new Error();
+      throw new Error(`unable to load layout "${layoutName}"`);
     }
 
     this.item = assertLayout(result);
@@ -80,8 +81,8 @@ export default class Layout extends Observable {
     const body = assertLayout({
       id: objectId(),
       name: layoutName,
-      owner_id: parseInt(sessionService.get().personid, 10),
-      owner_name: sessionService.get().name,
+      owner_id: this.model.session.personid,
+      owner_name: this.model.session.name,
       tabs: [{
         id: objectId(),
         name: 'main',
@@ -92,7 +93,10 @@ export default class Layout extends Observable {
     this.model.loader.watchPromise(req);
     const res = await req;
 
-    this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layoutName)}`);
+    // Read the new layout created
+    await this.loadItem(layoutName);
+
+    this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layoutName)}`, false, true);
     this.edit(); // edit the new item after loading page
     this.loadMyList();
   }

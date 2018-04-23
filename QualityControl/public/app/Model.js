@@ -13,6 +13,7 @@ export default class Model extends Observable {
     super();
 
     this.session = sessionService.session;
+    this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);

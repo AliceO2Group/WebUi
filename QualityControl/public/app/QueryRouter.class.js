@@ -119,8 +119,9 @@ export default class QueryRouter extends Observable {
    * Go to the specified `uri`. If `replace` is set, the current history point is replaced.
    * @param {string} uri - e.g. ?foo=bar
    * @param {boolean} replace - true to replace history
+   * @param {boolean} silent - change URL bar and history, but do not notify observers
    */
-  go(uri, replace) {
+  go(uri, replace, silent) {
     const newURL = new URL(uri, this.location);
 
     if (replace) {

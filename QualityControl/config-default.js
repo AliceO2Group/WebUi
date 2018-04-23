@@ -1,7 +1,23 @@
 module.exports = {
-  app: {
-    demoData: true // uses fake data instead of DB data
+  http: {
+    port: 8080,
+    // portSecure: 8443,
+    hostname: 'localhost',
+    // key: './cert/key.pem',
+    // cert: './cert/cert.pem',
+    tls: false
   },
+  mysql: {
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'quality_control'
+  },
+  tobject2json: {
+    host: 'localhost',
+    port: 7777
+  }/* ,
+  demoData: false,
   jwt: {
     secret: '<secret>',
     issuer: 'alice-o2-gui',
@@ -24,23 +40,6 @@ module.exports = {
       groupPath: '/api/Groups',
       port: 443
     }
-  },
-  http: {
-    port: 8080,
-    portSecure: 8443,
-    hostname: 'vcap.me',
-    key: './cert/key.pem',
-    cert: './cert/cert.pem',
-    tls: true
-  },
-  tobject2json: {
-    host: '####',
-    port: 7777
-  },
-  mysql: {
-    host: '####',
-    user: '####',
-    password: '####',
-    database: 'quality_control'
   }
+*/
 };

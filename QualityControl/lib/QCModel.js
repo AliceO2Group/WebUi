@@ -1,9 +1,9 @@
-const config = require('../config.js');
+const config = require('./configProvider.js');
 
-const MySQL = require('@aliceo2/aliceo2-gui').MySQL;
+const MySQL = require('@aliceo2/web-ui').MySQL;
 const mySQL = new MySQL(config.mysql);
 
-const ZeroMQClient = require('@aliceo2/aliceo2-gui').ZeroMQClient;
+const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
 
 // CRUD
 module.exports.readObjectData = readObjectData;
@@ -15,6 +15,7 @@ module.exports.listLayouts = listLayouts;
 module.exports.createLayout = createLayout;
 module.exports.deleteLayout = deleteLayout;
 
+const ZMQ_TIMEOUT = 1000; // ms
 
 /**
  * Read object's data or null if it fails
@@ -26,18 +27,25 @@ function readObjectData(path) {
   const objectName = rest.join('/');
 
   return new Promise((resolve, fail) => {
-    // TODO: configure and handle timeout error
+    const timer = setTimeout(() => {
+      zeroMQClient.socket.close();
+      fail('Timeout loading object from TObject2Json');
+    }, ZMQ_TIMEOUT);
+
     const zeroMQClient = new ZeroMQClient(
       config.tobject2json.host,
       config.tobject2json.port,
       'req'
     );
+
     zeroMQClient.on('message', (m) => {
+      zeroMQClient.socket.close();
+      clearTimeout(timer);
       try {
         resolve(JSON.parse(m));
       } catch (e) {
         // failed to parse
-        fail(null);
+        fail('Failed to parse object from TObject2Json');
       }
     });
     zeroMQClient.send(`${agentName} ${objectName}`);
@@ -98,7 +106,7 @@ function createLayout(layout) {
 async function listLayouts(filter = {}) {
   let request;
 
-  if (filter.owner_id) {
+  if (filter.owner_id !== undefined) {
     request = mySQL.query('select * from layout where owner_id = ?', [filter.owner_id]);
   }
 

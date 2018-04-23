@@ -20,12 +20,10 @@ const toolbarViewMode = (model) => [
     ])
   ]),
   h('.flex-grow.text-right', [
-    // TODO
-    // after personid is fixed, activate the next line so edit button is only for owner
-    /*model.session.personid === model.layout.item.owner_id && */
-    h('b', model.layout.item.name),
+    h('b.f4', model.layout.item.name),
     ' ',
-    h('button.btn', {onclick: e => model.layout.edit()},
+    // Show edit button only for owner of the layout shown
+    model.session.personid == model.layout.item.owner_id && h('button.btn', {onclick: e => model.layout.edit()},
       [
         iconPencil()
       ]

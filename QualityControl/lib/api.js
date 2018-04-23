@@ -1,10 +1,10 @@
 const log = require('@aliceo2/web-ui').Log;
-let model; // lazy loaded on setup
+const config = require('./configProvider.js');
 
-module.exports.setup = (config, http) => {
-  // Load data source (demo or DB)
-  model = config.app.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
+// Load data source (demo or DB)
+const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
 
+module.exports.setup = (http) => {
   http.post('/readObjectData', readObjectData);
   http.get('/readObjectsData', readObjectsData);
   http.post('/listObjects', listObjects);
@@ -81,9 +81,10 @@ function readObjectData(req, res) {
  * @param {Response} res
  */
 function listLayouts(req, res) {
-  const filter = {
-    owner_id: parseInt(req.query.owner_id, 10)
-  };
+  let filter = {};
+  if (req.query.owner_id !== undefined) {
+    filter.owner_id = parseInt(req.query.owner_id, 10);
+  }
 
   model.listLayouts(filter)
     .then((data) => res.status(200).json(data))
@@ -162,7 +163,7 @@ function createLayout(req, res) {
     res.status(400).send('layout.name parameter is needed');
     return;
   }
-  if (!layout.owner_id) {
+  if (layout.owner_id === undefined) { // integer from 0 to Infinity
     res.status(400).send('layout.owner_id parameter is needed');
     return;
   }

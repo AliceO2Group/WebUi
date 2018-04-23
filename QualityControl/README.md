@@ -13,10 +13,13 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 
 ## Installation
 ```
-NODE_ENV=production npm install @aliceo2/qc@1.0.2 --loglevel error --no-save --no-package-lock
+NODE_ENV=production npm install @aliceo2/qc@1.0.4 --loglevel error --no-save --no-package-lock
 ```
 
 ## Minimal configuration
+
+### HTTP
+In the HTTP section of the `config.js` file set up `port` number and `hostname` of your server (`localhost` is allowed).
 
 ### MySQL database
 Information regarding agents and objects are stored in the Quality Control database (a table per agent and a row per object). QCG requires additional `layout` table that contains user layout settings.
@@ -47,7 +50,7 @@ mysql: {
 ```
 
 ### TOjbect2Json
-`TOjbect2Json` is party of [QualityControl](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) package and is required to convert Objects into JSRoot readable format.
+`TOjbect2Json` is part of [QualityControl](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) package and is required to convert Objects into format compatible with  JSRoot.
 
 1. Run `TOjbect2Json`:
 ```
