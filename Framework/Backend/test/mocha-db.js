@@ -2,7 +2,7 @@ const MySQL = require('./../db/mysql.js');
 const config = require('./../config-default.json');
 
 let db = null;
-let skip = false;
+let skip = true;
 
 describe('MySQL database', () => {
   before(() => {
