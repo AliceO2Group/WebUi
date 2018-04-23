@@ -18,6 +18,9 @@ NODE_ENV=production npm install @aliceo2/qc@1.0.2 --loglevel error --no-save --n
 
 ## Minimal configuration
 
+### HTTP
+In the HTTP section of the `config.js` file set up `port` number and `hostname` of your server (`localhost` is allowed).
+
 ### MySQL database
 Information regarding agents and objects are stored in the Quality Control database (a table per agent and a row per object). QCG requires additional `layout` table that contains user layout settings.
 

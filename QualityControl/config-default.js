@@ -7,15 +7,15 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false
   },
-  tobject2json: {
-    host: 'localhost',
-    port: 7777
-  },
   mysql: {
     host: 'localhost',
     user: 'root',
     password: '',
     database: 'quality_control'
+  },
+  tobject2json: {
+    host: 'localhost',
+    port: 7777
   }/* ,
   demoData: false,
   jwt: {
