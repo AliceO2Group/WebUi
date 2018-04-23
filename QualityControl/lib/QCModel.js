@@ -1,4 +1,4 @@
-const config = require('../config.js');
+const config = require('./configProvider.js');
 
 const MySQL = require('@aliceo2/web-ui').MySQL;
 const mySQL = new MySQL(config.mysql);

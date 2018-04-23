@@ -1,10 +1,10 @@
 const log = require('@aliceo2/web-ui').Log;
-let model; // lazy loaded on setup
+const config = require('./configProvider.js');
 
-module.exports.setup = (config, http) => {
-  // Load data source (demo or DB)
-  model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
+// Load data source (demo or DB)
+const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
 
+module.exports.setup = (http) => {
   http.post('/readObjectData', readObjectData);
   http.get('/readObjectsData', readObjectsData);
   http.post('/listObjects', listObjects);
