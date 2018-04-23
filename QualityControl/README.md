@@ -13,7 +13,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 
 ## Installation
 ```
-NODE_ENV=production npm install @aliceo2/qc@1.0.2 --loglevel error --no-save --no-package-lock
+NODE_ENV=production npm install @aliceo2/qc@1.0.4 --loglevel error --no-save --no-package-lock
 ```
 
 ## Minimal configuration
