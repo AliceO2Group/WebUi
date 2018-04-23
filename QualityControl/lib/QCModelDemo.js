@@ -71,7 +71,7 @@ function createLayout(layout) {
  * @return {Array<Layout>}
  */
 function listLayouts(filter = {}) {
-  if (filter.owner_id) {
+  if (filter.owner_id !== undefined) {
     filter.owner_id = ownerIdUser1;
   }
 

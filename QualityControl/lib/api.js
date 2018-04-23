@@ -162,7 +162,7 @@ function createLayout(req, res) {
     res.status(400).send('layout.name parameter is needed');
     return;
   }
-  if (!layout.owner_id) {
+  if (layout.owner_id === undefined) { // integer from 0 to Infinity
     res.status(400).send('layout.owner_id parameter is needed');
     return;
   }

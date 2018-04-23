@@ -98,7 +98,7 @@ function createLayout(layout) {
 async function listLayouts(filter = {}) {
   let request;
 
-  if (filter.owner_id) {
+  if (filter.owner_id !== undefined) {
     request = mySQL.query('select * from layout where owner_id = ?', [filter.owner_id]);
   }
 

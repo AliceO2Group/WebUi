@@ -42,14 +42,15 @@ export default class Layout extends Observable {
     );
   }
 
-  loadMyList() {
-    return this.model.loader.watchPromise(fetchClient(`/api/layout?owner_id=822826`, {method: 'GET'})
-      .then(res => res.json())
-      .then(myList => {
-        this.myList = assertLayouts(myList);
-        this.notify();
-      })
-    );
+  async loadMyList() {
+    const req = fetchClient(`/api/layout?owner_id=${sessionService.get().personid}`, {method: 'GET'});
+    const {result, response} = await this.model.loader.intercept(req);
+    if (!response.ok) {
+      throw new Error('unable to load layouts of user');
+    }
+
+    this.myList = assertLayouts(result);
+    this.notify();
   }
 
   async loadItem(layoutName) {
@@ -60,7 +61,7 @@ export default class Layout extends Observable {
     const req = fetchClient(`/api/readLayout?layoutName=${layoutName}`, {method: 'POST'});
     const {result, response} = await this.model.loader.intercept(req);
     if (!response.ok) {
-      throw new Error();
+      throw new Error(`unable to load layout "${layoutName}"`);
     }
 
     this.item = assertLayout(result);
