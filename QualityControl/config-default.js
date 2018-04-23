@@ -16,7 +16,7 @@ module.exports = {
     user: 'root',
     password: '',
     database: 'quality_control'
-  }/*,
+  }/* ,
   demoData: false,
   jwt: {
     secret: '<secret>',
@@ -41,5 +41,5 @@ module.exports = {
       port: 443
     }
   }
-*/ 
+*/
 };

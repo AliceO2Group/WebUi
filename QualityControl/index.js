@@ -26,7 +26,7 @@ if (config.http.tls) {
   log.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
 }
 log.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
-if (typeof config.demoData != 'undefined' &&  config.demoData) {
+if (typeof config.demoData != 'undefined' && config.demoData) {
   log.info(`Using demo data`);
 } else {
   config.demoData = false;
