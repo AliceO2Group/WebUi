@@ -2,7 +2,7 @@ import {h} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
 
 export function objectTree(model) {
-  return h('.flex-row.absolute-fill', {...{key: model.router.parameter('page')}, oncreate: () => model.object.loadList()}, [
+  return h('.flex-row.absolute-fill', {key: model.router.parameter('page'), oncreate: () => model.object.loadList()}, [
     h('.flex-grow.scroll-y', tabShow(model)),
     h('.animate-width.scroll-y', {style: {width: model.object.selected ? '50%' : 0}}, model.object.selected ? draw(model, model.object.selected.name) : null)
   ]);
@@ -19,7 +19,15 @@ export function tabShow(model) {
       ]),
       h('tbody', [
         // The main table of the view can be a tree OR the result of a search
-        model.object.searchInput ? searchRows(model) : treeRows(model)
+        model.object.searchInput ? searchRows(model) : treeRows(model),
+
+        // Empty rows to avoid blank space (design)
+        ...Array.from({length: 20}, () => (
+          h('tr', [
+            h('td', ' '),
+            h('td', ' '),
+          ])
+        ))
       ])
     ])
   ];

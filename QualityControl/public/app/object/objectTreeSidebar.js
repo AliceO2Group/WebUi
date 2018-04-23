@@ -14,13 +14,20 @@ export function tabShow(model) {
   };
   return h('.flex-column.h-100', {oncreate: () => model.object.loadList()}, [
     h('.m2', [
-      h('input.form-control.w-100', {placeholder: 'Search', type: 'search', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
+      h('input.form-control.w-100', {placeholder: 'Search', type: 'text', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
     ]),
     h('.h-100.scroll-y', [
       h('table.table.table-sm.text-no-select.flex-grow.f6', attrs, [
         h('tbody', [
           // The main table of the view can be a tree OR the result of a search
-          model.object.searchInput ? searchRows(model) : treeRows(model)
+          model.object.searchInput ? searchRows(model) : treeRows(model),
+
+          // Empty rows to avoid blank space (design)
+          ...Array.from({length: 40}, () => (
+            h('tr', [
+              h('td', ' '),
+            ])
+          ))
         ])
       ]),
     ]),
@@ -37,7 +44,7 @@ function searchRows(model) {
     const path = item.name;
     const selectItem = () => model.object.select(item);
     const color = item.status === 'active' ? 'success' : 'alert';
-    const className = item && item === model.object.selected ? 'selected' : '';
+    const className = item && item === model.object.selected ? 'table-primary' : '';
 
     return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight.text-ellipsis', [
@@ -60,7 +67,7 @@ function treeRow(model, tree, level) {
   const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
   const iconWrapper = h('span', {style: {paddingLeft: `${level}em`}}, icon);
   const path = tree.path.join('/');
-  const className = tree.object && tree.object === model.object.selected ? 'selected' : '';
+  const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
   const draggable = !!tree.object;
 
   // UI events
