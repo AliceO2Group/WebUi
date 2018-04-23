@@ -4,7 +4,6 @@ const MySQL = require('@aliceo2/web-ui').MySQL;
 const mySQL = new MySQL(config.mysql);
 
 const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
-const log = require('@aliceo2/web-ui').Log;
 
 // CRUD
 module.exports.readObjectData = readObjectData;
