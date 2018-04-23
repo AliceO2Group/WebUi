@@ -50,7 +50,7 @@ mysql: {
 ```
 
 ### TOjbect2Json
-`TOjbect2Json` is party of [QualityControl](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) package and is required to convert Objects into JSRoot readable format.
+`TOjbect2Json` is part of [QualityControl](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) package and is required to convert Objects into format compatible with  JSRoot.
 
 1. Run `TOjbect2Json`:
 ```
