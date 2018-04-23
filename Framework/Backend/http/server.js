@@ -223,6 +223,7 @@ class HttpServer {
 
     this.oauth.createTokenAndProvideDetails(code)
       .then((details) => {
+        query.personid = details.user.personid;
         query.name = details.user.name;
 
         // Generates JWT token and adds it to the details object

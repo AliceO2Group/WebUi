@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const assert = require('assert');
 /**
  * Provides JSON Web Token functionality such as token generation and verification.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
