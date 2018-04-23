@@ -223,9 +223,6 @@ class HttpServer {
 
     this.oauth.createTokenAndProvideDetails(code)
       .then((details) => {
-        // TEST ONLY
-        // Generates random user id to emulate two different users connecting to the app
-        query.personid = details.user.personid + Math.floor(Math.random() * 100);
         query.name = details.user.name;
 
         // Generates JWT token and adds it to the details object
