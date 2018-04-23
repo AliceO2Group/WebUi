@@ -3,7 +3,7 @@ let model; // lazy loaded on setup
 
 module.exports.setup = (config, http) => {
   // Load data source (demo or DB)
-  model = config.app.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
+  model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
 
   http.post('/readObjectData', readObjectData);
   http.get('/readObjectsData', readObjectsData);

@@ -21,9 +21,16 @@ log.info(`Reading config file "${configFile}"`);
 const config = require(configFile);
 
 // Quick check config at start
-log.info(`HTTP full link: http://${config.http.hostname}:${config.http.port}`);
-log.info(`HTTPS full link: https://${config.http.hostname}:${config.http.portSecure}`);
-log.info(`Using demo data: ${config.app.demoData}`);
+
+if (config.http.tls) {
+  log.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
+}
+log.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
+if (typeof config.demoData != 'undefined' &&  config.demoData) {
+  log.info(`Using demo data`);
+} else {
+  config.demoData = false;
+}
 log.info(`TObject2JSON URL: ${config.tobject2json.host}`);
 
 // Start servers

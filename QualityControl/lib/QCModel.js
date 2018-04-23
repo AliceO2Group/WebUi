@@ -1,9 +1,9 @@
 const config = require('../config.js');
 
-const MySQL = require('@aliceo2/aliceo2-gui').MySQL;
+const MySQL = require('@aliceo2/web-ui').MySQL;
 const mySQL = new MySQL(config.mysql);
 
-const ZeroMQClient = require('@aliceo2/aliceo2-gui').ZeroMQClient;
+const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
 
 // CRUD
 module.exports.readObjectData = readObjectData;
