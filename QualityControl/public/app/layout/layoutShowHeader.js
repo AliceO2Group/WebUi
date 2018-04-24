@@ -12,7 +12,7 @@ const toolbarViewMode = (model) => [
 
         return [
           h('.btn-group', [
-            h('button.br-pill.ph2.btn.btn-tab.btn-xs', {class: linkClass, onclick: selectTab}, folder.name),
+            h('button.br-pill.ph2.btn.btn-tab', {class: linkClass, onclick: selectTab}, folder.name),
           ]),
           ' '
         ]
