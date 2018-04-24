@@ -21,11 +21,11 @@ function page(model) {
 }
 
 function layout(model, content) {
-  return m('.absolute-fill.flex-column', [
-    m('.shadow-level2.level2', [
+  return h('.absolute-fill.flex-column', [
+    h('.shadow-level2.level2', [
       header(model),
     ]),
-    m('.flex-grow.flex-row.outline-gray', [
+    h('.flex-grow.flex-row.outline-gray', [
       sidebar(model),
       h('.outline-gray.flex-grow.relative', content)
     ])

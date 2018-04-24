@@ -121,7 +121,7 @@ export default class Object_ extends Observable {
     clearTimeout(this.refreshTimer);
 
     // Validate user input
-    const parsedValue = parseInt(intervalSeconds, 10);
+    let parsedValue = parseInt(intervalSeconds, 10);
     if (isNaN(parsedValue) || parsedValue < 1) {
       parsedValue = 2;
     }
