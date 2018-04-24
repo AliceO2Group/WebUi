@@ -8,7 +8,8 @@ const config = require('./lib/configProvider.js');
 
 // Quick check config at start
 
-if (config.http.tls) {
+if (config.http.tls)
+{
   log.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
 }
 log.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
