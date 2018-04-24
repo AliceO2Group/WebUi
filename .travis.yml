@@ -37,16 +37,12 @@ install:
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
 - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
-- cd $TRAVIS_BUILD_DIR/Framework/Backend; rm test/mocha-ws.js
+- cd $TRAVIS_BUILD_DIR/Framework/Backend/test; rm mocha-ws.js; sed -i -e 's/let skip = true/let skip = false/g' mocha-db.js
 script:
-- if [ -f $TRAVIS_BUILD_DIR/Framework/TEST ]; then cd $TRAVIS_BUILD_DIR/Framework; npm test; fi
-- if [ -f $TRAVIS_BUILD_DIR/Control/TEST ]; then cd $TRAVIS_BUILD_DIR/Control; npm test; fi
-- if [ -f $TRAVIS_BUILD_DIR/QualityControl/TEST ]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm test; fi
-- if [ -f $TRAVIS_BUILD_DIR/InfoLogger/TEST ]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; fi
-- if [ -f $TRAVIS_BUILD_DIR/Framework/TEST ]; then echo 'Framework tests COMPLETED'; else echo 'Framework tests SKIPPED'; fi
-- if [ -f $TRAVIS_BUILD_DIR/Control/TEST ]; then echo 'Control tests COMPLETED'; else echo 'Control tests SKIPPED'; fi
-- if [ -f $TRAVIS_BUILD_DIR/QualityControl/TEST ]; then echo 'QualityControl tests COMPLETED'; else echo 'QualityControl tests SKIPPED'; fi
-- if [ -f $TRAVIS_BUILD_DIR/InfoLogger/TEST ]; then echo 'InfoLogger tests COMPLETED'; else echo 'InfoLogger tests SKIPPED'; fi
+- if [ -f $TRAVIS_BUILD_DIR/Framework/TEST ]; then cd $TRAVIS_BUILD_DIR/Framework; npm test; else echo 'Framework tests SKIPPED'; fi
+- if [ -f $TRAVIS_BUILD_DIR/Control/TEST ]; then cd $TRAVIS_BUILD_DIR/Control; npm test; else echo 'Control tests SKIPPED'; fi
+- if [ -f $TRAVIS_BUILD_DIR/QualityControl/TEST ]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm test; else echo 'QualityControl tests SKIPPED'; fi
+- if [ -f $TRAVIS_BUILD_DIR/InfoLogger/TEST ]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; else echo 'InfoLogger tests SKIPPED'; fi
 after_success:
 - cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
 - cd $TRAVIS_BUILD_DIR/Framework; nyc ./node_modules/mocha/bin/mocha Backend/test
