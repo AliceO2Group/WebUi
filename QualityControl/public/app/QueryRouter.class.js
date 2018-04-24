@@ -1,4 +1,4 @@
-/* Global: window, document */
+/* Global: window */
 
 import EventEmitter from './EventEmitter.class.js';
 import {Observable} from '/js/src/index.js';
@@ -26,7 +26,11 @@ Recall from NodeJS doc: https://nodejs.org/api/url.html
 
 /**
  * Router handle query history for Single Page Application (SPA)
- * It notifies when route change and it allows to push a new route
+ * It notifies when route change and it allows to push a new route.
+ * Search parameters can be read directly via `params`, for example:
+ * '?page=list' will give `.params ==== {page: 'list'}`.
+ *
+ * @property {object} params - Keys/values of search parameters
  */
 export default class QueryRouter extends Observable {
   /**
@@ -38,7 +42,8 @@ export default class QueryRouter extends Observable {
     this.history = window.history;
     this.location = window.location;
     this.window = window;
-    this.document = document;
+    this.document = window.document;
+    this.params = {};
 
     this._attachEvents();
   }
@@ -66,6 +71,12 @@ export default class QueryRouter extends Observable {
    * Notify observers that the location has changed
    */
   _handleLocationChange() {
+    const url = new URL(this.location);
+    const entries = url.searchParams.entries();
+    this.params = {};
+    for (let pair of entries) {
+      this.params[pair[0]] = pair[1];
+    }
     this.notify();
   }
 
@@ -101,27 +112,13 @@ export default class QueryRouter extends Observable {
     return new URL(this.location);
   }
 
-  setSearch(search, replace) {
-    const url = this.getUrl();
-    url.search = search;
-
-    if (replace) {
-      this.history.replaceState({}, '', url);
-    } else {
-      this.history.pushState({}, '', url);
-    }
-
-    // replaceState and pushState cannot be listen so we trigger manually that location changed
-    this._handleLocationChange();
-  }
-
   /**
    * Go to the specified `uri`. If `replace` is set, the current history point is replaced.
    * @param {string} uri - e.g. ?foo=bar
    * @param {boolean} replace - true to replace history
    * @param {boolean} silent - change URL bar and history, but do not notify observers
    */
-  go(uri, replace, silent) {
+  go(uri, replace, silent) {console.log('uri:', uri);
     const newURL = new URL(uri, this.location);
 
     if (replace) {
@@ -132,9 +129,5 @@ export default class QueryRouter extends Observable {
 
     // replaceState and pushState cannot be listen so we trigger manually that location changed
     this._handleLocationChange();
-  }
-
-  parameter(key) {
-    return (new URL(this.location)).searchParams.get(key);
   }
 }

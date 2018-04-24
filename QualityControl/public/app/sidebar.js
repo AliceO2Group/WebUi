@@ -6,7 +6,7 @@ import {iconLayers, iconPlus, iconBarChart} from '/js/src/icons.js';
 
 export default function sidebar(model) {
   // Spacial case when sidebar is used as a required form or perperty editor
-  if (model.router.parameter('page') === 'layoutShow' && model.layout.editEnabled && model.layout.editingTabObject) {
+  if (model.router.params.page === 'layoutShow' && model.layout.editEnabled && model.layout.editingTabObject) {
     return h('.sidebar.sidebar-extend', {class: ''}, [
       h('.sidebar-content.scroll-y', [
         objectPropertiesSidebar(model)
@@ -15,7 +15,7 @@ export default function sidebar(model) {
   }
 
   // Spacial case when sidebar is used as a required form or perperty editor
-  if (model.router.parameter('page') === 'layoutShow' && model.layout.editEnabled) {
+  if (model.router.params.page === 'layoutShow' && model.layout.editEnabled) {
     return h('.sidebar.sidebar-extend', {class: ''}, [
       h('.sidebar-content', [
         objectTreeSidebar(model)
@@ -56,7 +56,7 @@ const myLayoutsMenu = (model) => [
   (model.layout.myList ? model.layout.myList.map((layout) => h('a.menu-item', {
       href: `?page=layoutShow&layout=${encodeURIComponent(layout.name)}`,
       onclick: (e) => model.router.handleLinkEvent(e),
-      class: model.router.parameter('layout') === layout.name ? 'selected' : ''
+      class: model.router.params.layout === layout.name ? 'selected' : ''
     },
     [
       iconLayers(), ' ', h('span', layout.name)
