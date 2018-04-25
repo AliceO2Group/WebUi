@@ -19,7 +19,19 @@ describe('QCG', function () {
   });
 
   it('should load first page "/"', async () => {
-    await page.goto('http://localhost:8181/');
+    // try many times until backend server is ready
+    for (let i = 0; i < 10; i++) {
+      try {
+        await page.goto('http://localhost:8181/', {waitUntil: 'networkidle0'});
+        break; // conneciton ok, this test passed
+      } catch(e) {
+        if (e.message === 'net::ERR_CONNECTION_REFUSED at http://localhost:8181/') {
+          await new Promise((done) => setTimeout(done, 500));
+          continue; // try again
+        }
+        throw e;
+      }
+    }
   });
 
   it('should have redirected to default page "/?page=layoutList"', async () => {
