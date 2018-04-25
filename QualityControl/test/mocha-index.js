@@ -1,9 +1,14 @@
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
+
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
 // https://mochajs.org/
+
+// Tips:
+// Network and rendering can have delays this can leads to random failures
+// if they are tested just after their initialization.
 
 describe('QCG', function () {
   let browser;
@@ -106,20 +111,47 @@ describe('QCG', function () {
     });
 
     it('should have a tree sidebar in edit mode', async () => {
-      await page.waitForSelector('nav table tr'); // loading...
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tr').length);
+      await page.waitForSelector('nav table tbody tr'); // loading...
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
       assert.deepStrictEqual(rowsCount, 4); // 4 agents
     });
 
     it('should have filtered results on input search filled', async () => {
       await page.type('nav input', 'HistoWithRandom');
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tr').length);
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
       assert.deepStrictEqual(rowsCount, 1); // 1 object
     });
 
     it('should show normal sidebar after Cancel click', async () => {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(3)').click());
       await page.waitForSelector('nav .menu-title');
+    });
+
+    it('should have second tab to be empty (according to demo data)', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) button:nth-child(2)').click());
+      await page.waitForSelector('section h1');
+      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+      assert.deepStrictEqual(plotsCount, 0);
+    });
+  });
+
+  describe('page objectTree', () => {
+    before(async () => {
+      await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
+      const location = await page.evaluate(() => window.location);
+      assert(location.search === '?page=objectTree');
+    });
+
+    it('should have a tree as a table', async () => {
+      await page.waitForSelector('section table tbody tr');
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
+      assert.deepStrictEqual(rowsCount, 4); // 4 agents
+    });
+
+    it('should have filtered results on input search filled', async () => {
+      await page.type('header input', 'HistoWithRandom');
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
+      assert.deepStrictEqual(rowsCount, 1); // 1 object
     });
   });
 
