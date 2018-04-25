@@ -20,14 +20,6 @@ export function tabShow(model) {
       h('tbody', [
         // The main table of the view can be a tree OR the result of a search
         model.object.searchInput ? searchRows(model) : treeRows(model),
-
-        // Empty rows to avoid blank space (design)
-        ...Array.from({length: 20}, () => (
-          h('tr', [
-            h('td', ' '),
-            h('td', ' '),
-          ])
-        ))
       ])
     ])
   ];

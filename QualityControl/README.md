@@ -16,7 +16,15 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 NODE_ENV=production npm install @aliceo2/qc@1.0.4 --loglevel error --no-save --no-package-lock
 ```
 
+This will create in the current directory `start`, `node_modules` and `config.js`.
+
 ## Minimal configuration
+
+## Demo data
+
+If you don't have a MySQL instance nor a TOjbect2Json one, you can run QCG with random data by putting in `config.js` the statement `demoData: true`, then go to section "Run" of this README.
+
+Otherwise, continue.
 
 ### HTTP
 In the HTTP section of the `config.js` file set up `port` number and `hostname` of your server (`localhost` is allowed).

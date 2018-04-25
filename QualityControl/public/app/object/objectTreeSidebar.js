@@ -21,13 +21,6 @@ export function tabShow(model) {
         h('tbody', [
           // The main table of the view can be a tree OR the result of a search
           model.object.searchInput ? searchRows(model) : treeRows(model),
-
-          // Empty rows to avoid blank space (design)
-          ...Array.from({length: 40}, () => (
-            h('tr', [
-              h('td', ' '),
-            ])
-          ))
         ])
       ]),
     ]),
@@ -48,7 +41,7 @@ function searchRows(model) {
 
     return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight.text-ellipsis', [
-        objectIcon(),
+        iconBarChart(),
         ' ',
         item.name
       ])

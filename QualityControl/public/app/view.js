@@ -22,12 +22,12 @@ function page(model) {
 
 function layout(model, content) {
   return h('.absolute-fill.flex-column', [
-    h('.shadow-level2.level2', [
+    h('header.shadow-level2.level2', [
       header(model),
     ]),
     h('.flex-grow.flex-row.outline-gray', [
       sidebar(model),
-      h('.outline-gray.flex-grow.relative', content)
+      h('section.outline-gray.flex-grow.relative', content)
     ])
   ]);
 }
