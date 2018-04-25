@@ -28,6 +28,7 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
+- for b in `git branch -r | grep -v -- '->'`; do git branch --track ${b##origin/} $b; done
 - chmod +x .travis.bash; ./.travis.bash;
 install:
 - if [ -f $TRAVIS_BUILD_DIR/Framework/TEST ]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
