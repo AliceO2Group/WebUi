@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const assert = require('assert');
-
+const config = require('./test-config.js');
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
 // https://mochajs.org/
@@ -10,6 +10,7 @@ describe('QCG', function () {
   let page;
   this.timeout(5000);
   this.slow(1000);
+  const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
   before(async () => {
     browser = await puppeteer.launch({
@@ -22,10 +23,10 @@ describe('QCG', function () {
     // try many times until backend server is ready
     for (let i = 0; i < 10; i++) {
       try {
-        await page.goto('http://localhost:8181/', {waitUntil: 'networkidle0'});
+        await page.goto(url, {waitUntil: 'networkidle0'});
         break; // conneciton ok, this test passed
       } catch(e) {
-        if (e.message === 'net::ERR_CONNECTION_REFUSED at http://localhost:8181/') {
+        if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
           continue; // try again
         }
@@ -50,7 +51,7 @@ describe('QCG', function () {
 
   describe('page layoutList', () => {
     before(async () => {
-      await page.goto('http://localhost:8181/?page=layoutList', {waitUntil: 'networkidle0'});
+      await page.goto(url + '?page=layoutList', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=layoutList');
     });
@@ -75,7 +76,7 @@ describe('QCG', function () {
 
   describe('page layoutShow', () => {
     before(async () => {
-      await page.goto('http://localhost:8181/?page=layoutShow&layout=AliRoot%20dashboard', {waitUntil: 'networkidle0'});
+      await page.goto(url + '?page=layoutShow&layout=AliRoot%20dashboard', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=layoutShow&layout=AliRoot+dashboard');
     });
