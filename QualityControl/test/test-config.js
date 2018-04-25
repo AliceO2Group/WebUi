@@ -1,10 +1,10 @@
 module.exports = {
+  demoData: true,
   http: {
     port: 8181,
     hostname: 'localhost',
     tls: false
   },
-  demoData: true,
   mysql: {
     host: 'aaaa',
     user: 'aaaa',
