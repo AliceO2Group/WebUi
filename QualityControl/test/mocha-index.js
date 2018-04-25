@@ -116,6 +116,11 @@ describe('QCG', function () {
       const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tr').length);
       assert.deepStrictEqual(rowsCount, 1); // 1 object
     });
+
+    it('should show normal sidebar after Cancel click', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(3)').click());
+      await page.waitForSelector('nav .menu-title');
+    });
   });
 
   after(async () => {
