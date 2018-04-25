@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const assert = require('assert');
-
+const config = require('./../config-default.js');
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
 // https://mochajs.org/
@@ -19,7 +19,7 @@ describe('QCG', function () {
   });
 
   it('should load first page "/"', async () => {
-    await page.goto('http://localhost:8181/');
+    await page.goto(`http://${config.http.hostname}:${config.http.port}/`);
   });
 
   it('should have redirected to default page "/?page=layoutList"', async () => {
@@ -38,7 +38,7 @@ describe('QCG', function () {
 
   describe('page layoutList', () => {
     before(async () => {
-      await page.goto('http://localhost:8181/?page=layoutList', {waitUntil: 'networkidle0'});
+      await page.goto(`http://${config.http.hostname}:${config.http.port}/?page=layoutList`, {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=layoutList');
     });
@@ -63,7 +63,7 @@ describe('QCG', function () {
 
   describe('page layoutShow', () => {
     before(async () => {
-      await page.goto('http://localhost:8181/?page=layoutShow&layout=AliRoot%20dashboard', {waitUntil: 'networkidle0'});
+      await page.goto(`http://${config.http.hostname}:${config.http.port}/?page=layoutShow&layout=AliRoot%20dashboard`, {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=layoutShow&layout=AliRoot+dashboard');
     });

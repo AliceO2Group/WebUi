@@ -38,6 +38,7 @@ before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
 - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
 - cd $TRAVIS_BUILD_DIR/Framework/Backend/test; rm mocha-ws.js; sed -i -e 's/let skip = true/let skip = false/g' mocha-db.js
+- if [ -f $TRAVIS_BUILD_DIR/QualityControl/TEST ]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm start config-default.json; fi
 script:
 - if [ -f $TRAVIS_BUILD_DIR/Framework/TEST ]; then cd $TRAVIS_BUILD_DIR/Framework; npm test; else echo 'Framework tests SKIPPED'; fi
 - if [ -f $TRAVIS_BUILD_DIR/Control/TEST ]; then cd $TRAVIS_BUILD_DIR/Control; npm test; else echo 'Control tests SKIPPED'; fi
