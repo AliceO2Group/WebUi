@@ -1,4 +1,6 @@
-sudo: false
+sudo: required
+addons:
+  chrome: stable
 os:
 - linux
 - osx
