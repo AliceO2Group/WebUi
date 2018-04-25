@@ -95,6 +95,27 @@ describe('QCG', function () {
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
       assert(plotsCount > 1);
     });
+
+    it('should have one edit button in the header to go in edit mode', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button').click());
+    });
+
+    it('should have 3 buttons in edit mode', async () => {
+      const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > button').length);
+      assert.deepStrictEqual(count, 3);
+    });
+
+    it('should have a tree sidebar in edit mode', async () => {
+      await page.waitForSelector('nav table tr'); // loading...
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tr').length);
+      assert.deepStrictEqual(rowsCount, 4); // 4 agents
+    });
+
+    it('should have filtered results on input search filled', async () => {
+      await page.type('nav input', 'HistoWithRandom');
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tr').length);
+      assert.deepStrictEqual(rowsCount, 1); // 1 object
+    });
   });
 
   after(async () => {
