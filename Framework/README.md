@@ -12,6 +12,24 @@ The goal of ALICE O<sup>2</sup> UI framework is to identify library and framewor
 * `nodejs` >= 8.9.4
 * `zeromq-devel` >= 4.0 (optional, see [zeromq](docs/ZMQ.md) module docs for more details)
 
+#### CERN CentOS 7
+Install `zeromq-devel`
+```
+sudo yum install zeromq-devel
+```
+
+Then, download `nodejs` from https://nodejs.org/en/download/ unarchive it and add `bin` directory your `PATH`
+```
+curl -O https://nodejs.org/dist/v8.11.1/node-v8.11.1-linux-x64.tar.gz
+tar xvf node-v8.11.1-linux-x64.tar.gz
+export PATH=`pwd`/node-v8.11.1-linux-x64/bin:$PATH
+```
+#### macOS
+Install packages using `brew`
+```
+brew install zeromq node
+```
+
 ### Minimum browser version support
 - Chrome 62
 - Firefox 54 (**!** Navigate to `about:config` set value `true` of `dom.moduleScripts.enabled` preference)
