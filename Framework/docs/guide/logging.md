@@ -29,3 +29,14 @@ const {Log} = require('@aliceo2/web-ui');
 // Send an error log
 Log.error('An error has occured');
 ```
+
+### API
+
+```js
+log.configure(<LOG_CONF>);
+log.debug(<String>);
+log.info(<String>);
+log.warn(<String>);
+log.error(<String>);
+log.trace(<Error>);
+```
