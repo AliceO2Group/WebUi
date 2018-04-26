@@ -73,7 +73,7 @@ class HttpServer {
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'wss://' + hostname + ':*', 'ws://' + hostname + ':*']
         /* eslint-enable */
@@ -94,19 +94,40 @@ class HttpServer {
    * Specified routes and their callbacks.
    */
   specifyRoutes() {
-    // eslint-disable-next-line
-    this.router = express.Router();
-    this.router.use((req, res, next) => this.jwtVerify(req, res, next));
+    // Routes of authorization
     if (this.oauth) {
       this.app.get('/', (req, res, next) => this.oAuthAuthorize(req, res, next));
       this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
     } else {
       this.app.get('/', (req, res, next) => this.addDefaultUserData(req, res, next));
     }
-    this.router.use(bodyParser.json()); // parse json body for API calls
-    this.app.use('/api', this.router);
+
+    // Router for static files (can grow with addStaticPath)
+    // eslint-disable-next-line
+    this.routerStatics = express.Router();
     this.addStaticPath(require.resolve('mithril'), '/js/mithril.js');
     this.addStaticPath(path.join(__dirname, '../../Frontend'));
+    this.app.use(this.routerStatics);
+
+    // Router for API (can grow with get, post and delete)
+    // eslint-disable-next-line
+    this.router = express.Router();
+    this.router.use((req, res, next) => this.jwtVerify(req, res, next));
+    this.router.use(bodyParser.json()); // parse json body for API calls
+    this.app.use('/api', this.router);
+
+    // Catch-all if no controller handled request
+    this.app.use((req, res, next) => {
+      log.debug(`Page was not found: ${req.originalUrl}`);
+      res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
+    });
+
+    // Error handler when a controller crashes
+    this.app.use((err, req, res, next) => {
+      log.error(`Request ${req.originalUrl} went wrong: ${err.message || err}`);
+      log.trace(err);
+      res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
+    });
   }
 
   /**
@@ -138,7 +159,7 @@ class HttpServer {
     if (!fs.existsSync(localPath)) {
       throw new Error(`static path ${localPath} does not exist`);
     }
-    this.app.use(path.join('/', uriPath), express.static(localPath));
+    this.routerStatics.use(path.join('/', uriPath), express.static(localPath));
   }
 
   /**

@@ -77,3 +77,9 @@ exports.error = function(log) {
     infologger.send(logObj);
   }
 };
+
+exports.trace = function(err) {
+  // Print more information for debugging
+  // eslint-disable-next-line
+  console.trace(err);
+};
