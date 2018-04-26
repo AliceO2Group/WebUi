@@ -24,6 +24,11 @@ get_changed_projects_list () {
   CHANGED_PROJECTS=("${CHANGED_PROJECTS[@]/.}");
 }
 
+# fetch all branches
+for b in `git branch -r | grep -v -- '->'`; do
+  git branch --track ${b##origin/} $b || true;
+done
+
 get_changed_projects_list $TRAVIS_BRANCH
 
 for project in ${CHANGED_PROJECTS[@]}; do
