@@ -1,34 +1,25 @@
-// Check ES6
-try {
-  eval('() => 1');
-  eval('const a = 1');
-  eval('class a {}');
-} catch (e) {
-  alert('Your browser does not support ES6. See browser requirements of O2 WebUi Framework.');
+/**
+ * Try to execute a string code with eval, on failure redirect to the compatibility page.
+ * @param {string} stringCode - source code as a string
+ */
+function tryCompatibility(stringCode) {
+  try {
+    eval(stringCode);
+  } catch (e) {
+    // eslint-disable-next-line
+    console.error(`Compatibility issue with: ${stringCode}`);
+    // Goto compatibility page provided by default with WebUi/Framework/Frontend
+    window.location.href = '/compatibility.html';
+  }
 }
 
-// Check ES7
-try {
-  eval('const [a, b] = [1, 2]');
-  eval('const {a, b} = {a: 1, b: 2}');
-} catch (e) {
-  alert('Your browser does not support ES7. See browser requirements of O2 WebUi Framework.');
-}
-
-// Check ES8
-try {
-  eval('async () => 1');
-} catch (e) {
-  alert('Your browser does not support ES8. See browser requirements of O2 WebUi Framework.');
-}
-
-// Currently not supported by Safari
-// // Check ES9
-// try {
-//   eval('const {a, ...rest} = {a: 1, b: 2}');
-// } catch(e) {
-//   alert('Your browser does not support ES9. See browser requirements of O2 WebUi Framework.');
-// }
+tryCompatibility('() => 1');
+tryCompatibility('const a = 1');
+tryCompatibility('class a {}');
+tryCompatibility('const [a, b] = [1, 2]');
+tryCompatibility('const {a, b} = {a: 1, b: 2}');
+tryCompatibility('async () => 1');
+// tryCompatibility('const {a, ...rest} = {a: 1, b: 2}'); // Currently not supported by Safari, ES9
 
 // Check Javascript Modules (firefox 58-59 has but needs to be enabled)
 const script = document.createElement('script');
@@ -37,7 +28,9 @@ script.innerHTML = 'window.nomodules = true;';
 document.head.insertBefore(script, document.head.firstChild);
 script.remove();
 if (window.nomodules) {
-  alert(`Your browser does not support JS modules. 
-         See browser requirements of O2 WebUi Framework.`);
+  // eslint-disable-next-line
+  console.error(`Compatibility issue with: JS modules`);
+  // Goto compatibility page provided by default with WebUi/Framework/Frontend
+  window.location.href = '/compatibility.html';
 }
 
