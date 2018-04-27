@@ -5,13 +5,13 @@ import EventEmitter from './EventEmitter.js';
 
 const location = window.location;
 
- /**
+/**
   * `open` event.
   *
   * @event WebSocketClient#open
   */
 
- /**
+/**
   * `error` event.
   * See `close` event for more details on why.
   *
@@ -22,7 +22,7 @@ const location = window.location;
   * @property {object} payload
   */
 
- /**
+/**
   * `close` event.
   * https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
   *
@@ -32,21 +32,21 @@ const location = window.location;
   * @property {number} code
   */
 
- /**
+/**
   * `authed` event when WSClient is authentificated by server
   * and can process incoming requests.
   *
   * @event WebSocketClient#authed
   */
 
- /**
+/**
   * `token` event when new auth token has been made
   * sessionService is also refreshed.
   *
   * @event WebSocketClient#token
   */
 
- /**
+/**
   * `command` event when a custom command is received.
   *
   * @event WebSocketClient#command
@@ -96,7 +96,7 @@ export default class WebSocketClient extends EventEmitter {
     url.searchParams.append('token', session.token);
 
     this.connection = new WebSocket(url);
-    this.connection.addEventListener('message', (messageEvent) => this._handleProtocolMessages(messageEvent));
+    this.connection.addEventListener('message', (message) => this._handleMessage(message));
     this.connection.addEventListener('open', () => this.emit('open'));
     this.connection.addEventListener('close', (closeEvent) => this.emit('close', closeEvent));
   }
@@ -105,7 +105,7 @@ export default class WebSocketClient extends EventEmitter {
    * Private. Handle non-user messages: authentification, token refresh, errors
    * @param {MessageEvent} e - Event message received by websocket
    */
-  _handleProtocolMessages(e) {
+  _handleMessage(e) {
     let parsed;
 
     try {

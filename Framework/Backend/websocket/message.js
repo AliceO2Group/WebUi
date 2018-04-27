@@ -73,7 +73,6 @@ class WebSocketMessage {
   /**
    * Command setter.
    * @param {string} command - user request command
-   * @return {object} 'this' to allow function call chaining
    */
   set command(command) {
     this._command = command;
@@ -132,7 +131,6 @@ class WebSocketMessage {
   /**
    * Payload setter.
    * @param {object} payload
-   * @return {object} 'this' to allow function call chaining
    */
   set payload(payload) {
     this._payload = payload;

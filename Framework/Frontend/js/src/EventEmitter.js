@@ -52,7 +52,8 @@ export default class EventEmitter {
   }
 
   /**
-   * Synchronously calls each of the listeners registered for the event named eventName, in the order they were registered, passing the supplied arguments to each
+   * Synchronously calls each of the listeners registered for the event named eventName,
+   * in the order they were registered, passing the supplied arguments to each
    * @param {string} eventName
    * @param {any} ...args - arguments to be passed to the listeners
    * @return {boolean} - Returns true if the event had listeners, false otherwise.

@@ -30,7 +30,7 @@ const wsServer = new WebSocket(httpServer);
 let streamTimer = null;
 
 // Declare WebSocket callback for 'stream-date' messages
-wsServer.bind('stream-date', (message) => {
+wsServer.bind('stream-date', () => {
   if (streamTimer) {
     // already started, kill it
     clearInterval(streamTimer);
