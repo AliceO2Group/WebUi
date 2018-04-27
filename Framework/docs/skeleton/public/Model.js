@@ -49,7 +49,7 @@ export default class Model extends Observable {
     if (!this.ws.authed) {
       return alert('WS not authed, wait and retry');
     }
-    this.ws.sendMessage({command: 'stream-date', message: 'message from client'});
-    this.ws.setFilter(function(e) {return true;});
+    this.ws.sendMessage({command: 'stream-date', payload: 'message from client'});
+    this.ws.setFilter(function(message) {return message.command === 'server-date'});
   }
 }

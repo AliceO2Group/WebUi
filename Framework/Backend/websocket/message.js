@@ -34,16 +34,22 @@ class WebSocketMessage {
       }
       this._command = parsed.command;
       this._token = parsed.token;
-      delete parsed.command;
-      delete parsed.token;
-      this._payload = parsed;
+      this._payload = parsed.payload;
       resolve(this);
     });
   }
+
   /**
    * @return {number} code
    */
   getCode() {
+    return this._code;
+  }
+
+  /**
+   * @return {number} code
+   */
+  get code() {
     return this._code;
   }
 
@@ -65,6 +71,15 @@ class WebSocketMessage {
   }
 
   /**
+   * Command setter.
+   * @param {string} command - user request command
+   * @return {object} 'this' to allow function call chaining
+   */
+  set command(command) {
+    this._command = command;
+  }
+
+  /**
    * @param {string} name property name
    * @return {string} Object property
    */
@@ -78,6 +93,13 @@ class WebSocketMessage {
    * @return {string} command
    */
   getCommand() {
+    return this._command;
+  }
+
+  /**
+   * @return {string} command
+   */
+  get command() {
     return this._command;
   }
 
@@ -108,9 +130,25 @@ class WebSocketMessage {
   }
 
   /**
+   * Payload setter.
+   * @param {object} payload
+   * @return {object} 'this' to allow function call chaining
+   */
+  set payload(payload) {
+    this._payload = payload;
+  }
+
+  /**
   * @return {object} payload
   */
   getPayload() {
+    return this._payload;
+  }
+
+  /**
+  * @return {object} payload
+  */
+  get payload() {
     return this._payload;
   }
 

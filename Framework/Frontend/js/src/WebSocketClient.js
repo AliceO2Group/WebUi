@@ -164,7 +164,7 @@ export default class WebSocketClient extends EventEmitter {
   setFilter(filter) {
     const message = {
       command: 'filter',
-      filter: filter.toString()
+      payload: filter.toString()
     };
     this.sendMessage(message);
   }
