@@ -31,6 +31,7 @@ class WebSocketMessage {
         this._code = 400;
         this._command = 'error';
         reject(this);
+        return;
       }
       this._command = parsed.command;
       this._token = parsed.token;

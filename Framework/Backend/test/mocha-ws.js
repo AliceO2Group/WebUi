@@ -83,7 +83,7 @@ describe('websocket', () => {
     });
   });
 
-  it('Reject messege with 500', (done) => {
+  it('Reject message with 500', (done) => {
     const connection = new WebSocketClient(
       'ws://localhost:' + config.http.port + '/?token=' + token
     );
