@@ -16,13 +16,15 @@ export default class Model extends Observable {
     // Real-time communication with server
     this.ws = new WebSocketClient();
 
-    this.ws.addEventListener('authed', (message) => {
+    this.ws.addListener('authed', () => {
       console.log('ready, let send a message');
     });
 
-    this.ws.addEventListener('server-date', (e) => {
-      this.date = e.detail.date;
-      this.notify();
+    this.ws.addListener('command', (msg) => {
+      if (msg.command === 'server-date') {
+        this.date = msg.payload.date;
+        this.notify();
+      }
     });
   }
 

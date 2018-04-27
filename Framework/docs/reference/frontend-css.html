@@ -652,12 +652,13 @@
     <p class="measure">You can use icons inside text, they will adapt to the font size with the 'icon' class.
       Choose the right one then put the mouse on top of it to get the icon name, the name is the function to call inside javascript to produce an hyperscript equivalent.</p>
       <p>
-    <pre><code>import {h, icons} from '/js/src/index.js';
+    <pre><code>import {h} from '/js/src/index.js';
+import {iconZoomIn, iconZoomOut} from '/js/src/icons.js';
 
   function view(model) {
     return [
-      h('button', {onclick: () => model.zoomIn()}, icons.iconZoomIn()),
-      h('button', {onclick: () => model.zoomOut()}, icons.iconZoomOut()),
+      h('button', {onclick: () => model.zoomIn()}, iconZoomIn()),
+      h('button', {onclick: () => model.zoomOut()}, iconZoomOut()),
     ];
   }</code></pre>
 
