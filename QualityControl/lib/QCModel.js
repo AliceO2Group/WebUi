@@ -154,3 +154,80 @@ function writeLayout(layoutName, data) {
 function deleteLayout(layoutName) {
   return mySQL.query('delete from layout where name = ?', [layoutName]);
 }
+
+
+// Information service
+// Map<agentName:string, Map<objectName:string, data:Any>>
+const util = require('util');
+
+/**
+ * Keep a synchronized representation of IS over ZMQ
+ */
+class InformationServiceState {
+  constructor() {
+    this.tasks = {};
+    this.reqConnexion = null;
+    this.subConnexion = null;
+  }
+
+  clear() {
+    this.tasks = {};
+  }
+
+  upsert(agentName, objectsNames) {
+    this.tasks[agentName] = objectsNames;
+  }
+
+  getState() {
+    return this.tasks;
+  }
+
+  startSynchronization(config) {
+    this.reqConnexion = new ZeroMQClient(
+      config.server.host,
+      config.server.port,
+      'req'
+    );
+
+    this.subConnexion = new ZeroMQClient(
+      config.publisher.host,
+      config.publisher.port,
+      'sub'
+    );
+
+    this.reqConnexion.send('all');
+    this.reqConnexion.on('message', (json) => {
+      const parsed = JSON.parse(json);
+      this.clear();
+      for (let task of parsed.tasks) {
+        const agentName = task.name;
+        const objectsNames = task.objects.map((object) => object.id);
+        this.upsert(agentName, objectsNames);
+      }
+      console.log('all', util.inspect(this.tasks, {depth: 3}));
+    });
+
+
+    this.subConnexion.on('message', (json) => {
+      const parsed = JSON.parse(json);
+      const agentName = parsed.name;
+      const objectsNames = parsed.objects.map((object) => object.id);
+      this.upsert(agentName, objectsNames);
+      console.log('all', util.inspect(this.tasks, {depth: 3}));
+    });
+  }
+}
+
+let is = new InformationServiceState();
+is.startSynchronization({
+  server: {
+    host: 'aidrefflp01.cern.ch',
+    port: 5562,
+  },
+  publisher: {
+    host: 'aidrefflp01.cern.ch',
+    port: 5561,
+  }
+});
+
+
