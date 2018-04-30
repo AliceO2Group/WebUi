@@ -13,13 +13,55 @@ export default class Object_ extends Observable {
     this.selected = null; // object - id of object
     this.objects = {}; // key -> value for object name -> object full content
     this.objectsReferences = {}; // object name -> number of
+    this.informationService = null;
+    this.listOnline = []; // intersection of informationService and list
+    this.onlineMode = true; // show only online objects or all (offline)
 
     this.searchInput = ''; // string - content of input search
-    this.searchResult = null; // array - result list of search
+    this.searchResult = []; // array - result list of search
 
     this.refreshTimer = 0;
     this.refreshInterval = 0; // seconds
     this.setRefreshInterval(60);
+  }
+
+  /**
+   * Go between online and ffline moe
+   */
+  toggleMode() {
+    this.onlineMode = !this.onlineMode;
+    this._computeFilters();
+    this.notify();
+  }
+
+  /**
+   * Set IS data
+   * {DAQ01/EquipmentSize/ACORDE/ACORDE: {}, DAQ01/EquipmentSize/ITSSDD/ITSSDD: {},…}
+   * @param {Map<path:string, object>} informationService
+   */
+  setInformationService(informationService) {
+    this.informationService = informationService;
+    this._computeFilters();
+    this.notify();
+  }
+
+  _computeFilters() {
+    if (this.onlineMode && this.tree && this.informationService) {
+      this.tree.clearAllIS();
+      this.tree.updateAllIS(this.informationService);
+    }
+
+    if (this.onlineMode && this.list && this.informationService) {
+      this.listOnline = this.list.filter((item) => this.informationService[item.name]);
+    }
+
+    if (this.searchInput) {
+      const listSource = (this.onlineMode ? this.listOnline : this.list) || []; // with fallback
+      const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
+      this.searchResult = listSource.filter(item => {
+        return item.name.match(fuzzyRegex);
+      });
+    }
   }
 
   async loadList() {
@@ -35,6 +77,8 @@ export default class Object_ extends Observable {
 
     this.tree.addChildrens(list);
     this.list = list;
+    this._computeFilters();
+    this.notify();
   }
 
   /**
@@ -145,19 +189,7 @@ export default class Object_ extends Observable {
 
   search(searchInput) {
     this.searchInput = searchInput;
-
-    if (!searchInput) {
-      this.searchResult = null;
-      this.notify();
-      return;
-    }
-
-    const fuzzyRegex = new RegExp(searchInput.split('').join('.*?'), 'i');
-    this.searchInput = searchInput;
-    this.searchResult = this.list.filter(item => {
-      return item.name.match(fuzzyRegex);
-    });
-
+    this._computeFilters();
     this.notify();
   }
 }

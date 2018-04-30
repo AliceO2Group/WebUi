@@ -1,3 +1,7 @@
+const config = require('./configProvider.js');
+const util = require('util');
+const InformationServiceState = require('./InformationServiceState.js');
+
 // force user accounts during demo
 const ownerIdUser1 = 0;
 const ownerNameUser1 = 'John Doe';
@@ -9,15 +13,26 @@ const ownerNameUser2 = 'Samantha Smith';
  * It produces layouts, folders, objects and the contents.
  */
 
-// CRUD
-module.exports.readObjectData = readObjectData;
-module.exports.listObjects = listObjects;
+// --------------------------------------------------------
 
-module.exports.readLayout = readLayout;
-module.exports.writeLayout = writeLayout;
-module.exports.listLayouts = listLayouts;
-module.exports.createLayout = createLayout;
-module.exports.deleteLayout = deleteLayout;
+const is = new InformationServiceState();
+
+// Change manually IS to simulate changing data
+setInterval(() => {
+  is.clear();
+
+  is.tasks = {
+    'DAQ01/EquipmentSize/ACORDE/ACORDE': {},
+    'DAQ01/EquipmentSize/ITSSDD/ITSSDD': {},
+    'TOFQAshifter/Default/hTOFrefMap': {},
+  };
+
+  if (Math.random() > 0.5) {
+    is.tasks['TOFQAshifter/Default/hTOFRRawsTime'] = {};
+    is.tasks['DAQ01/EventSize/TPC/TPC'] = {};
+  }
+  is.emit('updated', is.getState());
+}, 500);
 
 /**
  * Fake promise latency
@@ -251,3 +266,16 @@ const layouts = [
   {id: '5aba4a059b755d517e76ea26',
     owner_id: ownerIdUser2, name: 'PWG-LF (2)', owner_name: ownerNameUser2, tabs: tabs},
 ];
+
+// --------------------------------------------------------
+
+module.exports.readObjectData = readObjectData;
+module.exports.listObjects = listObjects;
+
+module.exports.readLayout = readLayout;
+module.exports.writeLayout = writeLayout;
+module.exports.listLayouts = listLayouts;
+module.exports.createLayout = createLayout;
+module.exports.deleteLayout = deleteLayout;
+
+module.exports.informationService = is;

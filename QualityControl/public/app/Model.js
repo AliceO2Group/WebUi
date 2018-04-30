@@ -1,5 +1,5 @@
 import sessionService from '/js/src/sessionService.js';
-import {Observable} from '/js/src/index.js';
+import {Observable, WebSocketClient} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js'
 import Object_ from './object/Object.js'
@@ -46,6 +46,16 @@ export default class Model extends Observable {
 
     // this.object.loadList(); // TODO pas propre
     this.layout.loadMyList();
+
+    const ws = new WebSocketClient();
+    ws.addEventListener('authed', () => {
+      ws.setFilter(() => {return true;});
+    });
+    ws.addEventListener('information-service', (e) => {
+      const rawIs = e.detail;
+      this.object.setInformationService(rawIs);
+    });
+    this.ws = ws;
   }
 
   handleLocationChange() {

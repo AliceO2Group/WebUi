@@ -3,31 +3,79 @@ import {Observable} from '/js/src/index.js';
 export default class ObjectTree extends Observable {
   constructor(name, parent) {
     super();
-    this.name = name || '';
+    this.name = name || ''; // like 'B'
     this.object = null;
     this.open = false;
-    this.childrens = [];
-    this.parent = parent || null;
-    this.path = [];
+    this.childrens = []; // <Array<ObjectTree>>
+    this.parent = parent || null; // <ObjectTree>
+    this.path = []; // like ['A', 'B'] for node at path 'A/B' called 'B'
+    this.pathString = ''; // 'A/B'
 
     this.quality = null; // most negative quality from this subtree
+
+    this.informationService = null;
   }
 
+  /**
+   * Erase all information service data of the tree
+   */
+  clearAllIS() {
+    this.informationService = null;
+    this.childrens.forEach(children => children.clearAllIS());
+    this.notify();
+  }
+
+  /**
+   * Update the tree with data passed
+   * Example of data passed:
+   * {DAQ01/EquipmentSize/ACORDE/ACORDE: {}, DAQ01/EquipmentSize/ITSSDD/ITSSDD: {},…}
+   * @param {object} arg - blabla
+   * @return {number} # of nodes associated to their IS data
+   */
+  updateAllIS(informationService) {
+    for (let [pathString, data] of Object.entries(informationService)) {
+      if (pathString === this.pathString) {
+        this.informationService = data; // exact match
+        return 1;
+      }
+
+      if (pathString.startsWith(this.pathString)) {
+        this.informationService = data; // one of children match
+        return this.childrens.reduce((total, children) => total + children.updateAllIS(informationService), 0);
+      }
+
+      // try next line
+    }
+    return 0;
+  }
+
+  /**
+   * Toggle this node (open/close)
+   */
   toggle() {
     this.open = !this.open;
     this.notify();
   }
 
+  /**
+   * Open all or close all nodes of the tree
+   */
   toggleAll() {
     this.open ? this.closeAll() : this.openAll();
   }
 
+  /**
+   * Open all nodes of the tree
+   */
   openAll() {
     this.open = true;
     this.childrens.forEach(chidren => chidren.openAll());
     this.notify();
   }
 
+  /**
+   * Close all nodes of the tree
+   */
   closeAll() {
     this.open = false;
     this.childrens.forEach(chidren => chidren.closeAll());
@@ -41,10 +89,10 @@ export default class ObjectTree extends Observable {
    * @param {array of string} pathParent - Path of the current tree node, if null object.name is used
    *
    * Example of recurvive call:
-   *  addChildren(o)
+   *  addChildren(o) // begin insert 'A/B'
    *  addChildren(o, ['A', 'B'], [])
    *  addChildren(o, ['B'], ['A'])
-   *  addChildren(o, [], ['A', 'B'])
+   *  addChildren(o, [], ['A', 'B']) // end inserting, affecting B
    */
   addChildren(object, path, pathParent) {
     // Fill the path argument through recursive call
@@ -81,6 +129,7 @@ export default class ObjectTree extends Observable {
       // Listen also for changes to bubble it until root
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
+      subtree.pathString = fullPath.join('/');
       this.childrens.push(subtree);
       subtree.observe(e => this.notify());
     }
