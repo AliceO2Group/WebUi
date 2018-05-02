@@ -153,6 +153,16 @@ describe('QCG', function () {
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
       assert.deepStrictEqual(rowsCount, 1); // 1 object
     });
+
+    it('should have a button to activate online mode', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(1)').click());
+      await page.waitForSelector('header > div > div:nth-child(3) > button.active');
+    });
+
+    it('should have nothing to show in online mode with the previous search', async () => {
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
+      assert.deepStrictEqual(rowsCount, 0);
+    });
   });
 
   after(async () => {
