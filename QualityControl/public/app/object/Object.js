@@ -15,7 +15,7 @@ export default class Object_ extends Observable {
     this.objectsReferences = {}; // object name -> number of
     this.informationService = null;
     this.listOnline = []; // intersection of informationService and list
-    this.onlineMode = true; // show only online objects or all (offline)
+    this.onlineMode = false; // show only online objects or all (offline)
 
     this.searchInput = ''; // string - content of input search
     this.searchResult = []; // array - result list of search

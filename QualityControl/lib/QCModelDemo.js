@@ -1,5 +1,3 @@
-const config = require('./configProvider.js');
-const util = require('util');
 const InformationServiceState = require('./InformationServiceState.js');
 
 // force user accounts during demo

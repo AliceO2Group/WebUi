@@ -6,8 +6,6 @@ const mySQL = new MySQL(config.mysql);
 
 const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
 
-const util = require('util');
-
 const ZMQ_TIMEOUT = 1000; // ms
 
 // --------------------------------------------------------

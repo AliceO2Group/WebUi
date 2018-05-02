@@ -3,28 +3,55 @@ import {draw} from './objectDraw.js';
 import {iconCaretBottom, iconCaretRight, iconBarChart} from '/js/src/icons.js';
 
 export default function objectTreeSidebar(model) {
-  return tabShow(model);
+  return h('.flex-column.h-100', [
+    h('.m2.mv3', searchForm(model)),
+    h('.h-100.scroll-y', treeTable(model)),
+    objectPreview(model)
+  ]);
 }
 
-export function tabShow(model) {
+function searchForm(model) {
+  return [
+    h('input.form-control.w-100', {
+      placeholder: 'Search',
+      type: 'text',
+      value: model.object.searchInput,
+      oninput: (e) => model.object.search(e.target.value)
+    }),
+    h('.form-check.f6', [
+      h('input.form-check-input', {
+        type: 'checkbox',
+        id: 'inputOnlineOnlyTreeSidebar',
+        onchange: () => model.object.toggleMode(),
+        checked: model.object.onlineMode
+      }),
+      h('label.form-check-label', {for: 'inputOnlineOnlyTreeSidebar'}, [
+        'Online only'
+      ])
+    ])
+  ];
+}
+
+function objectPreview(model) {
+  if (!model.object.selected) {
+    return null;
+  }
+
+  return h('.bg-white', {style: {height: '10em'}}, draw(model, model.object.selected.name));
+}
+
+function treeTable(model) {
   const attrs = {
     ondragend(e) {
       model.layout.moveTabObjectStop();
     }
   };
-  return h('.flex-column.h-100', {oncreate: () => model.object.loadList()}, [
-    h('.m2', [
-      h('input.form-control.w-100', {placeholder: 'Search', type: 'text', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
-    ]),
-    h('.h-100.scroll-y', [
-      h('table.table.table-sm.text-no-select.flex-grow.f6', attrs, [
-        h('tbody', [
-          // The main table of the view can be a tree OR the result of a search
-          model.object.searchInput ? searchRows(model) : treeRows(model),
-        ])
-      ]),
-    ]),
-    h('', {style: {height: '10em'}, class: model.object.selected ? 'bg-white' : ''}, model.object.selected && draw(model, model.object.selected.name))
+
+  return h('table.table.table-sm.text-no-select.flex-grow.f6', attrs, [
+    h('tbody', [
+      // The main table of the view can be a tree OR the result of a search
+      model.object.searchInput ? searchRows(model) : treeRows(model),
+    ])
   ]);
 }
 
@@ -52,6 +79,11 @@ function searchRows(model) {
 // Flatten the tree in a functional way
 // Tree is traversed in depth-first with pre-order (root then subtrees)
 function treeRow(model, tree, level) {
+  // Don't show nodes without IS in online mode
+  if (model.object.onlineMode && !tree.informationService) {
+    return null;
+  }
+
   // Tree construction
   const levelDeeper = level + 1;
   const subtree = tree.open ? tree.childrens.map(children => treeRow(model, children, levelDeeper)) : [];

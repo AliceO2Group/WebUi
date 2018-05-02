@@ -44,7 +44,7 @@ export default class Model extends Observable {
       }
     });
 
-    // this.object.loadList(); // TODO pas propre
+    this.object.loadList();
     this.layout.loadMyList();
 
     const ws = new WebSocketClient();

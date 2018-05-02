@@ -7,6 +7,9 @@ const EventEmitter = require('events');
  * @fires InformationServiceState#updated
  */
 class InformationServiceState extends EventEmitter {
+  /**
+   * Create a new IS state container
+   */
   constructor() {
     super();
 
@@ -37,7 +40,7 @@ class InformationServiceState extends EventEmitter {
 
   /**
    * Get the current state of IS
-   * @return {Map<objectPath:string, informationServiceData:object>}
+   * @return {Object.<string, object>}
    */
   getState() {
     return this.tasks;
@@ -54,7 +57,9 @@ class InformationServiceState extends EventEmitter {
    * and
    * all = {tasks: [one, ...]}
    *
-   * @return {string} config
+   * config = {server: {host, port}, publisher: {host, port}}
+   *
+   * @param {object} config - ZMQ infos
    */
   startSynchronization(config) {
     this.reqConnexion = new ZeroMQClient(

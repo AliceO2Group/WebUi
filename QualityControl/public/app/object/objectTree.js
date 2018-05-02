@@ -105,6 +105,11 @@ function objectIcon() {
 
 // flatten the tree in a functional way
 function treeRow(model, tree, level) {
+  // Don't show nodes without IS in online mode
+  if (model.object.onlineMode && !tree.informationService) {
+    return null;
+  }
+
   const color = tree.quality === 'good' ? 'success' : 'danger';
   const padding = `${level}em`;
   const levelDeeper = level + 1;
@@ -114,11 +119,6 @@ function treeRow(model, tree, level) {
   const path = tree.path.join('/');
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
-
-  // Don't show nodes without IS in online mode
-  if (model.object.onlineMode && !tree.informationService) {
-    return [];
-  }
 
   return [
     h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
