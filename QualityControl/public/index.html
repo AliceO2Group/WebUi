@@ -16,11 +16,12 @@
         <div class="spinner-circle">●</div>
       </div>
     </div>
-    <div class="f5">Loading QualityControl...</div>
+    <div class="f5">Loading Quality Control...</div>
   </div>
 </body>
 
 <script src="/js/src/compatibility.js"></script>
+<script src="/jsroot/scripts/JSRootCore.js"></script>
 
 <!-- Load the session service, parses variables provided by server in the query -->
 <script type="module">
@@ -47,18 +48,11 @@ mount(document.body, view, model, debug);
 window.model = model;
 </script>
 
-
-
-
-
-
-<script type="text/javascript" src="/jsroot/scripts/JSRootCore.js"></script>
-<script type="text/javascript" src="/jsroot/scripts/d3.min.js"></script>
-<script type="text/javascript" src="/jsroot/scripts/JSRootPainter.js"></script>
-<script type="text/javascript" src="/jsroot/scripts/JSRootPainter.hist.js"></script>
-
-
 <script>
+// Optimization of JSROOT to be as quick as possible (remove unecessary UIs)
+// Also configure style for a better integration
+// CSS file modifies also the styles
+
 JSROOT.gStyle.AutoStat = false;
 // JSROOT.gStyle.ContextMenu = true;
 JSROOT.gStyle.CanEnlarge = false;
@@ -66,47 +60,7 @@ JSROOT.gStyle.DragAndDrop = false;
 JSROOT.gStyle.MoveResize = false; // div 2
 JSROOT.gStyle.ToolBar = false;
 JSROOT.gStyle.ZoomWheel = false;
+JSROOT.gStyle.ApproxTextSize = true;
 
 JSROOT.gStyle.fFrameLineColor = 16;
-</script>
-
-
-<script type="text/javascript">
-function retrieve() {
-  const params = new URLSearchParams();
-  params.set('token', token);
-  params.set('agentName', 'daqTask');
-  params.set('objectName', 'PayloadSizeSubBlocks');
-
-  return fetch('/api/retrieve?' + params.toString(), {method: 'POST'})
-    .then(res => res.text())
-    .then(txt => JSROOT.parse(txt));
-}
-
-// var i = 1;
-// retrieve('daqTask', 'PayloadSizeSubBlocks').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// retrieve('daqTask', 'numberSubBlocks').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// retrieve('daqTask', 'objectsList').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// retrieve('daqTask', 'payloadSize').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// retrieve('daqTask', 'IDs').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-
-// retrieve('myTask_1', 'array-0').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// retrieve('myTask_1', 'array-1').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// retrieve('myTask_1', 'array-2').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// retrieve('myTask_1', 'array-3').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-4').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-5').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-6').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-7').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-8').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-9').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-10').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-11').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-12').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-13').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-14').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-15').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-// // retrieve('myTask_1', 'array-16').then(obj => JSROOT.redraw(document.querySelectorAll('.mo-graph')[i++], obj));
-
-
 </script>
