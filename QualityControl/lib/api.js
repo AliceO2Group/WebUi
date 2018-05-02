@@ -16,9 +16,10 @@ module.exports.setup = (http) => {
 
   const ws = new WebSocket(http);
   model.informationService.on('updated', (state) => {
-    ws.broadcast(
-      new WebSocketMessage(200).setCommand('information-service').setPayload(state)
-    );
+    const message = new WebSocketMessage(200);
+    message.command = 'information-service';
+    message.payload = state;
+    ws.broadcast(message);
   });
 };
 

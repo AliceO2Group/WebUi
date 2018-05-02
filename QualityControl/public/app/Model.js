@@ -48,12 +48,14 @@ export default class Model extends Observable {
     this.layout.loadMyList();
 
     const ws = new WebSocketClient();
-    ws.addEventListener('authed', () => {
+    ws.addListener('authed', () => {
       ws.setFilter(() => {return true;});
     });
-    ws.addEventListener('information-service', (e) => {
-      const rawIs = e.detail;
-      this.object.setInformationService(rawIs);
+    ws.addListener('command', (message) => {
+      if (message.command === 'information-service') {
+        this.object.setInformationService(message.payload);
+        return;
+      }
     });
     this.ws = ws;
   }
