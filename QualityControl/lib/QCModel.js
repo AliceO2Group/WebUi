@@ -1,21 +1,17 @@
 const config = require('./configProvider.js');
+const InformationServiceState = require('./InformationServiceState.js');
 
 const MySQL = require('@aliceo2/web-ui').MySQL;
 const mySQL = new MySQL(config.mysql);
 
 const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
 
-// CRUD
-module.exports.readObjectData = readObjectData;
-module.exports.listObjects = listObjects;
-
-module.exports.readLayout = readLayout;
-module.exports.writeLayout = writeLayout;
-module.exports.listLayouts = listLayouts;
-module.exports.createLayout = createLayout;
-module.exports.deleteLayout = deleteLayout;
-
 const ZMQ_TIMEOUT = 1000; // ms
+
+// --------------------------------------------------------
+
+const is = new InformationServiceState();
+is.startSynchronization(config.informationService);
 
 /**
  * Read object's data or null if it fails
@@ -154,3 +150,16 @@ function writeLayout(layoutName, data) {
 function deleteLayout(layoutName) {
   return mySQL.query('delete from layout where name = ?', [layoutName]);
 }
+
+// --------------------------------------------------------
+
+module.exports.readObjectData = readObjectData;
+module.exports.listObjects = listObjects;
+
+module.exports.readLayout = readLayout;
+module.exports.writeLayout = writeLayout;
+module.exports.listLayouts = listLayouts;
+module.exports.createLayout = createLayout;
+module.exports.deleteLayout = deleteLayout;
+
+module.exports.informationService = is;

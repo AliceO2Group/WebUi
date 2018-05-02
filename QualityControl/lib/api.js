@@ -1,4 +1,4 @@
-const log = require('@aliceo2/web-ui').Log;
+const {log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
 
 // Load data source (demo or DB)
@@ -13,6 +13,14 @@ module.exports.setup = (http) => {
   http.get('/layout', listLayouts);
   http.delete('/layout/:name', deleteLayout);
   http.post('/layout', createLayout);
+
+  const ws = new WebSocket(http);
+  model.informationService.on('updated', (state) => {
+    const message = new WebSocketMessage(200);
+    message.command = 'information-service';
+    message.payload = state;
+    ws.broadcast(message);
+  });
 };
 
 /**

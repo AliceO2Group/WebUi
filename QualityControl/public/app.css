@@ -7,6 +7,8 @@
 .object-selected { border: 0.3em solid var(--color-primary); }
 .object-edit-layer { cursor: move; opacity: 0; }
 
+.status-bar { border-top: 1px solid var(--color-gray-dark); }
+
 /* Force jsroot's background to be transparent */
 .canvas_fillrect { fill: transparent !important; }
 

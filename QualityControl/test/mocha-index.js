@@ -103,6 +103,7 @@ describe('QCG', function () {
 
     it('should have one edit button in the header to go in edit mode', async () => {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button').click());
+      await page.waitForFunction('true', {polling: 'raf'}); // wait next animation frame
     });
 
     it('should have 3 buttons in edit mode', async () => {
@@ -152,6 +153,16 @@ describe('QCG', function () {
       await page.type('header input', 'HistoWithRandom');
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
       assert.deepStrictEqual(rowsCount, 1); // 1 object
+    });
+
+    it('should have a button to activate online mode', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(1)').click());
+      await page.waitForSelector('header > div > div:nth-child(3) > button.active');
+    });
+
+    it('should have nothing to show in online mode with the previous search', async () => {
+      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
+      assert.deepStrictEqual(rowsCount, 0);
     });
   });
 

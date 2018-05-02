@@ -1,4 +1,4 @@
-const HttpServer = require('@aliceo2/web-ui').HttpServer;
+const {HttpServer} = require('@aliceo2/web-ui');
 const log = require('@aliceo2/web-ui').Log;
 const path = require('path');
 const api = require('./lib/api.js');
