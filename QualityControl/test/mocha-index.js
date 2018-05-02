@@ -103,6 +103,7 @@ describe('QCG', function () {
 
     it('should have one edit button in the header to go in edit mode', async () => {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button').click());
+      await page.waitForFunction('true', {polling: 'raf'}); // wait next animation frame
     });
 
     it('should have 3 buttons in edit mode', async () => {
