@@ -239,8 +239,8 @@ label { display: block; margin-bottom: 0.5em; }
 
 /* Component sidebar */
 
-.sidebar { width: 15em; background-color: var(--color-gray-light); transition: width 0.3s; }
-.sidebar-closed { width: 0; overflow: hidden; }
+.sidebar { width: 15em; background-color: var(--color-gray-light); transition: width 0.3s; overflow: hidden; }
+.sidebar-closed { width: 0; }
 .sidebar .sidebar-content { width: 15em; height: 100%; overflow: hidden; }
 .sidebar-extend { width: 30em; }
 .sidebar-extend .sidebar-content { width: 30em; }
