@@ -46,7 +46,13 @@ class InformationServiceState extends EventEmitter {
   /**
    * Connect to ZMQ servers and start synchronization of IS state
    *
-   * QQQQ
+   * See doc of QC
+   * https://github.com/AliceO2Group/QualityControl
+   *
+   * Received structures:
+   * one = {name: "task_1", objects: [{id: "array_0"}, ...]}
+   * and
+   * all = {tasks: [one, ...]}
    *
    * @return {string} config
    */
@@ -69,8 +75,9 @@ class InformationServiceState extends EventEmitter {
       this.clear();
       for (let task of parsed.tasks) {
         const agentName = task.name;
-        const objectsNames = task.objects.map((object) => object.id);
-        this.upsert(agentName, objectsNames);
+        task.objects.forEach((object) => {
+          this.upsert(`${agentName}/${object.id}`, object);
+        });
       }
       this.emit('updated', this.tasks);
     });
@@ -79,8 +86,9 @@ class InformationServiceState extends EventEmitter {
     this.subConnexion.on('message', (json) => {
       const parsed = JSON.parse(json);
       const agentName = parsed.name;
-      const objectsNames = parsed.objects.map((object) => object.id);
-      this.upsert(agentName, objectsNames);
+      parsed.objects.forEach((object) => {
+        this.upsert(`${agentName}/${object.id}`, object);
+      });
       this.emit('updated', this.tasks);
     });
   }

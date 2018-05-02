@@ -14,9 +14,6 @@ const ZMQ_TIMEOUT = 1000; // ms
 
 const is = new InformationServiceState();
 is.startSynchronization(config.informationService);
-is.on('updated', (state) => {
-  console.log('all', util.inspect(state, {depth: 3}));
-})
 
 /**
  * Read object's data or null if it fails
