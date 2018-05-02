@@ -22,6 +22,6 @@ const http = new HttpServer(httpConf, jwtConf, oauthConf);
 // Create instance of WebSocket server
 const ws = new WebSocket(http);
 
-// Print all messages with topic 'message'
-ws.bind('message', (body) => console.log(body));
+// Print all messages with topic 'custom-command-from-client'
+ws.bind('custom-command-from-client', (message) => console.log(message));
 ```

@@ -117,9 +117,8 @@ class WebSocket {
     new WebSocketMessage().parse(message)
       .then((parsed) => {
         // 2. Check if its message filter (no auth required)
-        if ((parsed.getCommand() == 'filter') &&
-          (typeof parsed.getProperty('filter') === 'string')) {
-          client.filter = new Function('return ' + parsed.getProperty('filter').toString())();
+        if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
+          client.filter = new Function('return ' + parsed.getPayload())();
         }
         // 3. Get reply if callback exists
         this.processRequest(parsed)
@@ -175,7 +174,7 @@ class WebSocket {
   broadcast(message) {
     this.server.clients.forEach(function(client) {
       if (typeof client.filter === 'function') {
-        if (!client.filter(message.getPayload())) {
+        if (!client.filter(message)) {
           return;
         }
       }

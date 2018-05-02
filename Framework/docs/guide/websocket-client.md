@@ -9,23 +9,40 @@ import {WebSocketClient} from '/js/src/index.js';
 
 const ws = new WebSocketClient();
 
-ws.addEventListener('authed', (message) => {
+ws.addEventListener('authed', () => {
   console.log('ready, lets send a message');
-  ws.sendMessage({command: 'custom-client-event-name', customAttribute: 123});
+  ws.sendMessage({command: 'custom-client-event-name', payload: 123});
 });
 ```
 
 Client receives notifications from the server:
 ```js
-ws.addEventListener('custom-server-event-name', (e) => {
-  const dataFromServer = e.detail;
-  // work with dataFromServer
+ws.addEventListener('command', (message) => {
+  if (message.command === 'custom-server-event-name') {
+    // use message.payload
+  }
 });
 ```
 
 Server can filter messages pushed to a client. This can be done by passing a filter via `setFilter` method. The filter should return either `true` or `false` what translates into "send" or "do not send" the message.
 ```js
 ws.setFilter(function(message) {
-  return message.customAttribute === 42;
+  return message.command === 'custom-server-event-name';
 });
+```
+
+### WebSocketMessage
+
+WebSocketMessage encapsulate data for a websocket exchange between client and server.
+
+```js
+{
+  code: 200,
+  command: 'custom-command',
+  payload: {
+    foo: 1,
+    bar: 2,
+    baz: 3
+  }
+}
 ```

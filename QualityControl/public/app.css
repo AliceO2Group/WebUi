@@ -6,7 +6,6 @@
 .object-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
 .object-selected { border: 0.3em solid var(--color-primary); }
 .object-edit-layer { cursor: move; opacity: 0; }
-.object-edit-layer:hover { opacity: 1; background-color: ; overflow: scroll; }
 
 /* Force jsroot's background to be transparent */
 .canvas_fillrect { fill: transparent !important; }
