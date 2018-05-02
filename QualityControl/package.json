@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "O2 Quality Control Web User Interface",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/web-ui": "^1.0.9",
+    "@aliceo2/web-ui": "^1.1.0",
     "jsroot": "5.3.5",
     "zeromq": "4.6.0"
   },
