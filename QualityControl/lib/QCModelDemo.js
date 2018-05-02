@@ -21,18 +21,16 @@ const is = new InformationServiceState();
 setInterval(() => {
   is.clear();
 
-  is.tasks = {
-    'DAQ01/EquipmentSize/ACORDE/ACORDE': {},
-    'DAQ01/EquipmentSize/ITSSDD/ITSSDD': {},
-    'TOFQAshifter/Default/hTOFrefMap': {},
-  };
+  is.upsert('DAQ01/EquipmentSize/ACORDE/ACORDE', {});
+  is.upsert('DAQ01/EquipmentSize/ITSSDD/ITSSDD', {});
+  is.upsert('TOFQAshifter/Default/hTOFrefMap', {});
 
   if (Math.random() > 0.5) {
-    is.tasks['TOFQAshifter/Default/hTOFRRawsTime'] = {};
-    is.tasks['DAQ01/EventSize/TPC/TPC'] = {};
+    is.upsert('TOFQAshifter/Default/hTOFRRawsTime', {});
+    is.upsert('DAQ01/EventSize/TPC/TPC', {});
   }
   is.emit('updated', is.getState());
-}, 500);
+}, 1000);
 
 /**
  * Fake promise latency

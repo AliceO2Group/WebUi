@@ -10,25 +10,46 @@ class InformationServiceState extends EventEmitter {
   constructor() {
     super();
 
-    // Map<agentName:string, Map<objectName:string, data:Any>>
     // Map<objectPath:string, informationServiceData:object>
     this.tasks = {};
     this.reqConnexion = null;
     this.subConnexion = null;
   }
 
+  /**
+   * Remove all data about tasks
+   */
   clear() {
     this.tasks = {};
   }
 
-  upsert(agentName, objectsNames) {
-    this.tasks[agentName] = objectsNames;
+  /**
+   * Insert or update an agent and its objects properties
+   * @param {string} objectPath - result of `${agentName}/${objectName}`
+   * @param {object} objectInformation - any information from IS
+   */
+  upsert(objectPath, objectInformation) {
+    if (!objectPath.includes('/')) {
+      throw new Error(`objectPath "${objectPath}" should contain "/"`);
+    }
+    this.tasks[objectPath] = objectInformation;
   }
 
+  /**
+   * Get the current state of IS
+   * @return {Map<objectPath:string, informationServiceData:object>}
+   */
   getState() {
     return this.tasks;
   }
 
+  /**
+   * Connect to ZMQ servers and start synchronization of IS state
+   *
+   * QQQQ
+   *
+   * @return {string} config
+   */
   startSynchronization(config) {
     this.reqConnexion = new ZeroMQClient(
       config.server.host,
