@@ -15,7 +15,8 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@aliceo2/web-ui": "^1.1.0",
-    "jsroot": "5.3.5"
+    "jsroot": "^5.4.1",
+    "zeromq": "4.6.0"
   },
   "devDependencies": {
     "concurrently": "^3.5.1",
