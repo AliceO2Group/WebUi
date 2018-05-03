@@ -1,13 +1,12 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "O2 Quality Control Web User Interface",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "postinstall": "if [[ ${NODE_ENV} == \"production\" ]]; then echo 'export QCGUI_ROOT=`pwd` && cd node_modules/@aliceo2/qc && npm start ${QCGUI_ROOT}/config.js' > ./../../../start; chmod +x ./../../../start; if [ ! -f ./../../../config.js ]; then cp config-default.js ./../../../config.js; fi; fi",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
     "mocha": "concurrently --kill-others --success first \"npm start test/test-config.js\" \"mocha test\""
   },
