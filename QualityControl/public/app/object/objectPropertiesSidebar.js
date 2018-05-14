@@ -38,6 +38,9 @@ export default function objectPropertiesSidebar(model) {
       h('', [
         btnOption(model, tabObject, 'lego'), ' ',
       ]),
+      h('', [
+        btnOption(model, tabObject, 'stat'), ' ',
+      ]),
     ]),
 
     h('hr'),
