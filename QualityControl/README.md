@@ -17,16 +17,21 @@ aliBuild build qcg --default o2-dataflow
 ## Run QCG locally
 1. Load QCG modules
 ```
-alienv load
+alienv enter qcg/latest-o2-dataflow
 ```
 2. Run `TObject2Json` (it converts Objects into JSRoot readable format)
 ```
-tobject2json --backend mysql://qc_user:qc_user@localhost/quality_control --zeromq-server tcp://localhost:7777
+tobject2json --backend mysql://qc_user:qc_user@localhost/quality_control --zeromq-server tcp://127.0.0.1:7777
 ```
 
 3. (Run `Information Service` if you need Online mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
 
-4. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
+4. Run QCG server
+```
+qcg
+```
+
+5. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
 
 ---

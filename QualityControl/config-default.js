@@ -18,7 +18,7 @@ module.exports = {
   },
 
   tobject2json: {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 7777
   },
 
