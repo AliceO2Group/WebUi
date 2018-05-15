@@ -102,17 +102,18 @@ describe('QCG', function () {
     });
 
     it('should have one edit button in the header to go in edit mode', async () => {
+      await page.waitForSelector('header > div > div:nth-child(3) > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button').click());
-      await page.waitForFunction('true', {polling: 'raf'}); // wait next animation frame
     });
 
     it('should have 3 buttons in edit mode', async () => {
+      await page.waitForSelector('header > div > div:nth-child(3) > button', {timeout: 5000});
       const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > button').length);
       assert.deepStrictEqual(count, 3);
     });
 
     it('should have a tree sidebar in edit mode', async () => {
-      await page.waitForSelector('nav table tbody tr'); // loading...
+      await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
       const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
       assert.deepStrictEqual(rowsCount, 4); // 4 agents
     });
@@ -125,12 +126,12 @@ describe('QCG', function () {
 
     it('should show normal sidebar after Cancel click', async () => {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(3)').click());
-      await page.waitForSelector('nav .menu-title');
+      await page.waitForSelector('nav .menu-title', {timeout: 5000});
     });
 
     it('should have second tab to be empty (according to demo data)', async () => {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) button:nth-child(2)').click());
-      await page.waitForSelector('section h1');
+      await page.waitForSelector('section h1', {timeout: 5000});
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
       assert.deepStrictEqual(plotsCount, 0);
     });
@@ -144,7 +145,7 @@ describe('QCG', function () {
     });
 
     it('should have a tree as a table', async () => {
-      await page.waitForSelector('section table tbody tr');
+      await page.waitForSelector('section table tbody tr', {timeout: 5000});
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
       assert.deepStrictEqual(rowsCount, 4); // 4 agents
     });
@@ -157,7 +158,7 @@ describe('QCG', function () {
 
     it('should have a button to activate online mode', async () => {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(1)').click());
-      await page.waitForSelector('header > div > div:nth-child(3) > button.active');
+      await page.waitForSelector('header > div > div:nth-child(3) > button.active', {timeout: 5000});
     });
 
     it('should have nothing to show in online mode with the previous search', async () => {
