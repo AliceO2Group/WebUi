@@ -61,10 +61,20 @@ export function draw(model, tabObject, options) {
   };
 
   let inner = null;
-  if (model.object.objects[tabObject.name] === null) {
+  if (!model.object.objects[tabObject.name]) {
     // data are null, it means an error of reading occured
     inner = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('.alert', 'No data available')
+      h('.animate-slow-appearance', 'Loading')
+    ]);
+  } else if (model.object.objects[tabObject.name] === null) {
+    // data are null, it means an error of reading occured
+    inner = h('.absolute-fill.flex-column.items-center.justify-center', [
+      h('', 'No data available')
+    ]);
+  } else if (model.object.objects[tabObject.name] && model.object.objects[tabObject.name].error) {
+    // data are null, it means an error of reading occured
+    inner = h('.absolute-fill.flex-column.items-center.justify-center', [
+      h('', model.object.objects[tabObject.name].error),
     ]);
   }
 
@@ -72,7 +82,7 @@ export function draw(model, tabObject, options) {
 }
 
 function redrawOnDataUpdates(model, dom, tabObject) {
-  if (model.object.objects[tabObject.name] && dom.dataset.cacheHash !== cacheHash(model, tabObject)) {
+  if (model.object.objects[tabObject.name] && !model.object.objects[tabObject.name].error && dom.dataset.cacheHash !== cacheHash(model, tabObject)) {
     // cache control
     dom.dataset.cacheHash = cacheHash(model, tabObject);
     setTimeout(() => {

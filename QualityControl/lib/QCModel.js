@@ -7,7 +7,7 @@ const log = Log;
 
 const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
 
-const ZMQ_TIMEOUT = 1000; // ms
+const ZMQ_TIMEOUT = 8000; // ms, can be decreased when tobject2json is multi-thread
 
 // --------------------------------------------------------
 

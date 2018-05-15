@@ -2,6 +2,12 @@
 .animate-height { transition: height 0.3s; }
 .animate-dimensions { transition: height 0.3s, width 0.3s; }
 .animate-dimensions-position { transition: height 0.3s, width 0.3s, top 0.3s, left 0.3s; }
+.animate-slow-appearance { animation-name: slow-appearance; animation-duration: 1s; }
+@keyframes slow-appearance {
+  0% { opacity: 0; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
 
 .object-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
 .object-selected { border: 0.3em solid var(--color-primary); }

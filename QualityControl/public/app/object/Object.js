@@ -11,7 +11,7 @@ export default class Object_ extends Observable {
     this.list = null;
     this.tree = null; // ObjectTree
     this.selected = null; // object - id of object
-    this.objects = {}; // key -> value for object name -> object full content
+    this.objects = {}; // name -> {object full content} or {error:}
     this.objectsReferences = {}; // object name -> number of
     this.informationService = null; // null or {...}, null means not loaded yet
     this.listOnline = []; // intersection of informationService and list
@@ -100,15 +100,14 @@ export default class Object_ extends Observable {
     const req = fetchClient(`/api/readObjectData?objectName=${objectName}`, {method: 'POST'});
     this.model.loader.watchPromise(req);
     const res = await req;
-    if (!res.ok) {
-      this.objects[objectName] = null;
-      this.notify();
-      return;
-    }
-
     const json = await res.text();
-    const object = JSROOT.parse(json);
-    this.objects[objectName] = object;
+    if (res.ok) {
+      const object = JSROOT.parse(json);
+      this.objects[objectName] = object;
+    } else {
+      const error = JSON.parse(json);
+      this.objects[objectName] = error;
+    }
     this.notify();
   }
 
@@ -158,7 +157,7 @@ export default class Object_ extends Observable {
    * @param {string} name - name of the object
    */
   invalidObject(name) {
-    this.objects[name] = null;
+    this.objects[name] = {error: 'JSROOT is unable to draw this object'};
     this.notify();
   }
 
