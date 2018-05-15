@@ -18,7 +18,7 @@ function searchForm(model) {
       value: model.object.searchInput,
       oninput: (e) => model.object.search(e.target.value)
     }),
-    h('.form-check.f6', [
+    model.object.onlineModeAvailable && h('.form-check.f6', [
       h('input.form-check-input', {
         type: 'checkbox',
         id: 'inputOnlineOnlyTreeSidebar',

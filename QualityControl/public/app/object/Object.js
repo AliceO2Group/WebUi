@@ -13,9 +13,10 @@ export default class Object_ extends Observable {
     this.selected = null; // object - id of object
     this.objects = {}; // key -> value for object name -> object full content
     this.objectsReferences = {}; // object name -> number of
-    this.informationService = null;
+    this.informationService = null; // null or {...}, null means not loaded yet
     this.listOnline = []; // intersection of informationService and list
     this.onlineMode = false; // show only online objects or all (offline)
+    this.onlineModeAvailable = false; // true if data are coming from server
 
     this.searchInput = ''; // string - content of input search
     this.searchResult = []; // array - result list of search
@@ -41,6 +42,7 @@ export default class Object_ extends Observable {
    */
   setInformationService(informationService) {
     this.informationService = informationService;
+    this.onlineModeAvailable = true;
     this._computeFilters();
     this.notify();
   }
