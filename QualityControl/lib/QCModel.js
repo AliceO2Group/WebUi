@@ -1,8 +1,9 @@
 const config = require('./configProvider.js');
 const InformationServiceState = require('./InformationServiceState.js');
 
-const MySQL = require('@aliceo2/web-ui').MySQL;
+const {Log, MySQL} = require('@aliceo2/web-ui');
 const mySQL = new MySQL(config.mysql);
+const log = Log;
 
 const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
 
@@ -11,7 +12,12 @@ const ZMQ_TIMEOUT = 1000; // ms
 // --------------------------------------------------------
 
 const is = new InformationServiceState();
-is.startSynchronization(config.informationService);
+if (config.informationService) {
+  log.info('Information service: starting synchronization');
+  is.startSynchronization(config.informationService);
+} else {
+  log.info('Information service: no configuration found');
+}
 
 /**
  * Read object's data or null if it fails
