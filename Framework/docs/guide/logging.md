@@ -21,13 +21,13 @@ Where:
 ### Code example
 ```js
 // Include logging module
-const {Log} = require('@aliceo2/web-ui');
+const {log} = require('@aliceo2/web-ui');
 
 // This enables saving logs to file; otherwise it uses default console logging only
-// Log.configure({winston: {file: 'error.log'}});
+// log.configure({winston: {file: 'error.log'}});
 
 // Send an error log
-Log.error('An error has occured');
+log.error('An error has occured');
 ```
 
 ### API
