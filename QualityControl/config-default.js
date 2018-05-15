@@ -12,13 +12,13 @@ module.exports = {
 
   mysql: {
     host: 'localhost',
-    user: 'root',
-    password: '',
+    user: 'qc_user',
+    password: 'qc_user',
     database: 'quality_control'
   },
 
   tobject2json: {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 7777
   },
 

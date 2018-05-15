@@ -6,89 +6,83 @@
 
 QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https://github.com/AliceO2Group/QualityControl).
 
-## Requirements
-- [System requirements](https://github.com/AliceO2Group/WebUi/tree/master/Framework#system-requirements)
-- Compiled and configuration [QualityControl](https://github.com/AliceO2Group/QualityControl) framework (including MySQL database)
-- [Supported browsers](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support)
 
 ## Installation
+1. Install QualityControl using `aliBuild` and configure database with [following instructions](https://github.com/AliceO2Group/QualityControl/blob/master/README.md).
+2. Install QCG
 ```
-NODE_ENV=production npm install @aliceo2/qc@1.0.4 --loglevel error --no-save --no-package-lock
-```
-
-This will create in the current directory `start`, `node_modules` and `config.js`.
-
-## Minimal configuration
-
-## Demo data
-
-If you don't have a MySQL instance nor a TOjbect2Json one, you can run QCG with random data by putting in `config.js` the statement `demoData: true`, then go to section "Run" of this README.
-
-Otherwise, continue.
-
-### HTTP
-In the HTTP section of the `config.js` file set up `port` number and `hostname` of your server (`localhost` is allowed).
-
-### MySQL database
-Information regarding agents and objects are stored in the Quality Control database (a table per agent and a row per object). QCG requires additional `layout` table that contains user layout settings.
-
-1. Add `layout` table to the existing Quality Control database:
-```sql
-CREATE TABLE `layout` (
-  `id` varchar(24) NOT NULL DEFAULT '',
-  `name` varchar(30) NOT NULL DEFAULT '',
-  `owner_id` int(11) NOT NULL,
-  `owner_name` varchar(200) NOT NULL DEFAULT '',
-  `tabs` text NOT NULL COMMENT 'JSON payload',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `index_name` (`name`),
-  KEY `index_owner_name` (`owner_name`),
-  KEY `index_owner_id` (`owner_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+aliBuild build qcg --default o2-dataflow
 ```
 
-2. Configure MySQL connection in `config.js` file
-```js
-mysql: {
-  host: '<HOSTNAME>',
-  user: '<USERNAME>',
-  password: '<PASSWORD>',
-  database: '<DATABASE_NAME>'
-}
+## Run QCG locally
+1. Load QCG modules
+```
+alienv enter qcg/latest-o2-dataflow
+```
+2. Run `TObject2Json` (it converts Objects into JSRoot readable format)
+```
+tobject2json --backend mysql://qc_user:qc_user@localhost/quality_control --zeromq-server tcp://127.0.0.1:7777
 ```
 
-### TOjbect2Json
-`TOjbect2Json` is part of [QualityControl](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/src/TObject2JsonServer.cxx) package and is required to convert Objects into format compatible with  JSRoot.
+3. (Run `Information Service` if you need Online mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
 
-1. Run `TOjbect2Json`:
+4. Run QCG server
+```
+qcg
+```
+
+5. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
+
+
+---
+
+
+## Custom configuration
+These steps are necessary only when you don't run QCG on `localhost`.
+
+In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/config.js`
+
+#### HTTP
+Edit `http` section to define custom:
+- `port` number
+- `hostname` of your server.
+
+#### MySQL database
+Edit `mysql` section to define custom:
+- MySQL database `host`name
+- `user`name
+- `password`
+- `database` name
+
+#### Information Service
+Edit `informationService` section to define custom:
+- `host`name
+- `port`
+
+of Information Service publish and reponse socket.
+
+#### TOjbect2Json
+In order to customise hostname and port of `TOjbect2Json` follow these two steps:
+
+1. Edit `tobject2json` section of configuration file to define custom:
+ - `host`name
+ - `port` number
+
+2. Run `TOjbect2Json` with updated parameters
 ```
 tobject2json --backend mysql://<loign>:<password>@<hostname>:<port>/<database> --zeromq-server tcp://<host>:<port>
 ```
 WHERE:
- - `backend` is a Quality Control database URL (the same as in the above section)
- - `zeromq-server` which provides communication between `TOjbect2Json` and tht GUI
+ - `backend` is a Quality Control database URL
+ - `zeromq-server` which provides communication between `TOjbect2Json` and the GUI; it must match with `host` and `port` that you set up in `1.`.
 
-2. In the QCG `config.js` set up `zeromq-server` hostname and port number:
-```js
-tobject2json: {
-  host: '<HOSTNAME>',
-  port: 7777
-},
-```
-
-## Run
-```
-./start
-```
-
-## Advanced configuration (production)
-### Configuration OAuth
+#### CERN OAuth
 - Register your application in the [CERN OAuth service](https://sso-management.web.cern.ch/OAuth/RegisterOAuthClient.aspx)
 - Provide any `client_id`, eg `qc_gui`
 - Set `redirect_uri` to `https://<YOUR_HOSTNAME>/callback`
 - Fill these values and generated secret into `oAuth` section of `config.js` file.
 
-### Configuration HTTPS
+#### Enable HTTPS
 - Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
 - Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
