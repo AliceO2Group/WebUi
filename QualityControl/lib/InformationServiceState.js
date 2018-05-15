@@ -62,6 +62,10 @@ class InformationServiceState extends EventEmitter {
    * @param {object} config - ZMQ infos
    */
   startSynchronization(config) {
+    if (!config) {
+      throw new Error('Missing InformationService config');
+    }
+
     this.reqConnexion = new ZeroMQClient(
       config.server.host,
       config.server.port,
