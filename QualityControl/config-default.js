@@ -12,8 +12,8 @@ module.exports = {
 
   mysql: {
     host: 'localhost',
-    user: 'root',
-    password: '',
+    user: 'qc_user',
+    password: 'qc_user',
     database: 'quality_control'
   },
 
