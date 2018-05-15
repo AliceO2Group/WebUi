@@ -18,6 +18,6 @@ exports.WebSocket = WebSocket;
 exports.HttpServer = HttpServer;
 exports.WebSocketMessage = WebSocketMessage;
 exports.log = log; // log is an instance
-exports.Log = log; // reprecated, compatibility
+exports.Log = log; // deprecated, compatibility
 exports.MySQL = MySQL;
 exports.JwtToken = JwtToken;
