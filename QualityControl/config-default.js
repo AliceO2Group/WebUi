@@ -47,14 +47,14 @@ module.exports = {
   //   }
   // },
 
-  informationService: {
-    server: {
-      host: 'localhost',
-      port: 5562,
-    },
-    publisher: {
-      host: 'localhost',
-      port: 5561,
-    }
-  }
+  // informationService: {
+  //   server: {
+  //     host: 'localhost',
+  //     port: 5562,
+  //   },
+  //   publisher: {
+  //     host: 'localhost',
+  //     port: 5561,
+  //   }
+  // }
 };
