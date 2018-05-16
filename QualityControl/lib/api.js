@@ -52,7 +52,7 @@ function readObjectsData(req, res) {
   }
 
   // Retrieve all data and fill a key-value object with it
-  const safeRetriever = (name) => model.readObjectData(name).catch((err) => errorHandler(err, res));
+  const safeRetriever = (name) => model.readObjectData(name).catch((err) => ({error: err}));
   const promiseArray = objectName.map(safeRetriever);
   Promise.all(promiseArray)
     .then((results) => {
@@ -196,5 +196,5 @@ function createLayout(req, res) {
  */
 function errorHandler(err, res) {
   log.error(err);
-  res.status(500).send();
+  res.status(500).send({error: err});
 }
