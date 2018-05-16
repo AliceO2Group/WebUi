@@ -36,7 +36,7 @@ export function draw(model, tabObject, options) {
   }
 
   const attributes = {
-    alt: cacheHash(model, tabObject),
+    alt: keyHash(tabObject),
     key: keyHash(tabObject), // completly re-create this div if the chart is not the same at all
     class: options.className,
     style: {height: options.height, width: options.width},

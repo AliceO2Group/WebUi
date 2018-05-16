@@ -238,28 +238,49 @@ export default class Layout extends Observable {
     return newTabObject;
   }
 
+  /**
+   * Track the item to be moved by drag&drop.
+   * Also save the current order of items as the 'initial order'.
+   * @param {TabObject} tabObject - the moving item
+   */
   moveTabObjectStart(tabObject) {
     this.tabObjectMoving = tabObject;
     this.originalItems = clone(this.tab.objects);
     this.notify();
   }
 
+  /**
+   * Stop to track the drag of 'moving item'
+   */
   moveTabObjectStop() {
     this.tabObjectMoving = null;
     this.notify();
   }
 
+  /**
+   * Set position of 'moving item' to `newX` and `newY`.
+   * Items are then reordered so avoid collapses based on 'initial order',
+   * this avoids to move other items twice from their initial position.
+   * @param {Number} newX - x position starting left top
+   * @param {Number} newY - y position starting left top
+   */
   moveTabObjectToPosition(newX, newY) {
     if (!this.tabObjectMoving) {
       return;
     }
-    this.tab.objects = clone(this.originalItems);
-    this.gridList.items = this.tab.objects;
-    const tabObjectToMove = this.tab.objects.find(tabObject => tabObject.id === this.tabObjectMoving.id);
-    if (!tabObjectToMove) {
-      throw new Error(`the tabObject ${this.tabObjectMoving.id} was not found in the objects of the current tab`);
-    }
-    this.gridList.moveItemToPosition(tabObjectToMove, [newX, newY]);
+
+    // restoration of positions by mutating so we keep references
+    this.tab.objects.forEach((obj) => {
+      const originalClone = this.originalItems.find(tabObject => tabObject.id === obj.id);
+      obj.x = originalClone.x;
+      obj.y = originalClone.y;
+      obj.h = originalClone.h;
+      obj.w = originalClone.w;
+    });
+
+    // use GridList to move the moving item from initial position to the new one
+    this.gridList.moveItemToPosition(this.tabObjectMoving, [newX, newY]);
+
     this.notify();
   }
 
