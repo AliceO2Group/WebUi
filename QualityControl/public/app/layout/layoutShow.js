@@ -108,7 +108,11 @@ function chartView(model, tabObject) {
 
   // Interactions with user
   const draggable = model.layout.editEnabled;
-  const ondragstart = model.layout.editEnabled ? () => model.layout.moveTabObjectStart(tabObject) : null;
+  const ondragstart = model.layout.editEnabled ? (e) => {
+    e.dataTransfer.setData('application/qcg', null); // custom type forbids to drag on desktop
+    e.dataTransfer.effectAllowed = 'move';
+    model.layout.moveTabObjectStart(tabObject);
+  } : null;
   const onclick = model.layout.editEnabled ? () => model.layout.editTabObject(tabObject) : null;
 
   const attrs = {
@@ -126,7 +130,10 @@ function chartView(model, tabObject) {
   };
 
   return h('.absolute.animate-dimensions-position', attrs, [
+    // super-container of jsroot data
     h('.bg-white.m1.absolute-fill.shadow-level1.br3', attrsInternal, draw(model, tabObject)),
+
+    // transparent layer to drag&drop in edit mode, avoid interraction with jsroot
     model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3')
   ]);
 }
