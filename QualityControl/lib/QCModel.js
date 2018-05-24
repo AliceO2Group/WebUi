@@ -1,5 +1,6 @@
 const config = require('./configProvider.js');
 const InformationServiceState = require('./InformationServiceState.js');
+const TObject2JsonClient = require('./TObject2JsonClient.js');
 
 const {Log, MySQL} = require('@aliceo2/web-ui');
 const mySQL = new MySQL(config.mysql);
@@ -10,6 +11,7 @@ const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
 const ZMQ_TIMEOUT = 8000; // ms, can be decreased when tobject2json is multi-thread
 
 // --------------------------------------------------------
+// Initialization of model
 
 const is = new InformationServiceState();
 if (config.informationService) {
@@ -19,39 +21,24 @@ if (config.informationService) {
   log.info('Information service: no configuration found');
 }
 
+if (!config.tobject2json) {
+  throw new Error('tobject2json field in config is missing');
+}
+const tObject2JsonClient = new TObject2JsonClient(config.tobject2json);
+
+// --------------------------------------------------------
+
 /**
  * Read object's data or null if it fails
  * @param {string} path - Object's path like agentName/objectName/objectNameSub
- * @return {Object|null}
+ * @return {Promise<Object>}
  */
 function readObjectData(path) {
-  const [agentName, ...rest] = path.split('/');
-  const objectName = rest.join('/');
+  if (!path || path.indexOf('/') === -1) {
+    Promise.reject('Path should contain a slash at least');
+  }
 
-  return new Promise((resolve, fail) => {
-    const timer = setTimeout(() => {
-      zeroMQClient.socket.close();
-      fail('Timeout loading object from TObject2Json');
-    }, ZMQ_TIMEOUT);
-
-    const zeroMQClient = new ZeroMQClient(
-      config.tobject2json.host,
-      config.tobject2json.port,
-      'req'
-    );
-
-    zeroMQClient.on('message', (m) => {
-      zeroMQClient.socket.close();
-      clearTimeout(timer);
-      try {
-        resolve(JSON.parse(m));
-      } catch (e) {
-        // failed to parse
-        fail('Failed to parse object from TObject2Json');
-      }
-    });
-    zeroMQClient.send(`${agentName} ${objectName}`);
-  });
+  return tObject2JsonClient.retrieve(path);
 }
 
 /**

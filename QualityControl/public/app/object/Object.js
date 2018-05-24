@@ -104,6 +104,8 @@ export default class Object_ extends Observable {
     if (res.ok) {
       const object = JSROOT.parse(json);
       this.objects[objectName] = object;
+    } else if (res.status === 404) {
+      this.objects[objectName] = {error: 'Object not found'};
     } else {
       const error = JSON.parse(json);
       this.objects[objectName] = error;
@@ -131,7 +133,7 @@ export default class Object_ extends Observable {
     const objectsRaw = JSON.parse(json);
 
     for (let name in objects) {
-      this.objects[name] = objects[name];
+      this.objects[name] = objects[name] || {error: 'Object not found'};
     }
     this.notify();
   }

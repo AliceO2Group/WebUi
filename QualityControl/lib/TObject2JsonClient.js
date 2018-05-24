@@ -43,7 +43,7 @@ class TObject2JsonClient extends EventEmitter {
   /**
    * Get ROOT object'json according to its path
    * @param {string} path - object's path (agentName/objectName)
-   * @return {Promise<Object>} The root data
+   * @return {Promise<Object|null>.catch(string)} The root data
    */
   retrieve(path) {
     this.zmqClient.send(path);
@@ -54,10 +54,19 @@ class TObject2JsonClient extends EventEmitter {
       }, ZMQ_TIMEOUT);
 
       const handler = (message) => {
+        // de-multiplexe
         if (message.request && message.request === path) {
           clearTimeout(timer);
           this.removeListener('message', handler);
-          resolve(message.payload);
+
+          // protocol
+          if (message.payload) { // 200
+            resolve(message.payload);
+          } else if (message.error === 404) {
+            resolve(null);
+          } else { // 400 or 500
+            fail(message.why || 'Unexpected communication error');
+          }
         }
       };
 
