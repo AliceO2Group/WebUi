@@ -41,9 +41,9 @@ class TObject2JsonClient extends EventEmitter {
   }
 
   /**
-   * Get ROOT object'json according to its path
+   * Get ROOT object's json according to its path
    * @param {string} path - object's path (agentName/objectName)
-   * @return {Promise<Object|null>.catch(string)} The root data
+   * @return {Promise.<Object|null, string>} The root data, null is not found
    */
   retrieve(path) {
     this.zmqClient.send(path);

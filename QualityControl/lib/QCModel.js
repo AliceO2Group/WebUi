@@ -6,10 +6,6 @@ const {Log, MySQL} = require('@aliceo2/web-ui');
 const mySQL = new MySQL(config.mysql);
 const log = Log;
 
-const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
-
-const ZMQ_TIMEOUT = 8000; // ms, can be decreased when tobject2json is multi-thread
-
 // --------------------------------------------------------
 // Initialization of model
 
