@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
+const {spawn} = require('child_process');
 
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
@@ -13,11 +14,23 @@ const config = require('./test-config.js');
 describe('QCG', function () {
   let browser;
   let page;
+  let subprocess; // web-server runs into a subprocess
+  let subprocessOutput = '';
   this.timeout(5000);
   this.slow(1000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
   before(async () => {
+    // Start web-server in background
+    subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
+    subprocess.stdout.on('data', (chunk) => {
+      subprocessOutput += chunk.toString();
+    });
+    subprocess.stderr.on('data', (chunk) => {
+      subprocessOutput += chunk.toString();
+    });
+
+    // Start browser to test UI
     browser = await puppeteer.launch({
       headless: true
     });
@@ -169,5 +182,10 @@ describe('QCG', function () {
 
   after(async () => {
     await browser.close();
+    console.log('---------------------------------------------');
+    console.log('Output of server logs for the previous tests:');
+    console.log(subprocessOutput);
+    subprocess.kill();
+    process.exit(0);
   });
 });

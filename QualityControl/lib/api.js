@@ -51,8 +51,11 @@ function readObjectsData(req, res) {
     objectName = [objectName];
   }
 
-  // Retrieve all data and fill a key-value object with it
-  const safeRetriever = (name) => model.readObjectData(name).catch((err) => ({error: err}));
+  // Retrieve data and handle errors
+  const safeRetriever = (name) => model.readObjectData(name)
+    .then((data) => !data ? {error: 'Object not found'} : data)
+    .catch((err) => ({error: err}));
+
   const promiseArray = objectName.map(safeRetriever);
   Promise.all(promiseArray)
     .then((results) => {
@@ -80,7 +83,7 @@ function readObjectData(req, res) {
 
   model.readObjectData(objectName)
     .then((data) => res.status(data ? 200 : 404).json(data))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => errorHandler('Reading object data: ' + err, res));
 }
 
 /**
