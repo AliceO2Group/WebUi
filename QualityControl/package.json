@@ -8,7 +8,7 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
-    "mocha": "concurrently --kill-others --success first \"npm start test/test-config.js\" \"mocha test\""
+    "mocha": "mocha $(find test -name 'mocha-*.js')"
   },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
