@@ -1,13 +1,23 @@
 const config = require('./configProvider.js');
 const InformationServiceState = require('./InformationServiceState.js');
 const TObject2JsonClient = require('./TObject2JsonClient.js');
+const CCDBConnector = require('./CCDBConnector.js');
+const MySQLConnector = require('./MySQLConnector.js');
 
-const {Log, MySQL} = require('@aliceo2/web-ui');
-const mySQL = new MySQL(config.mysql);
-const log = Log;
+const {log} = require('@aliceo2/web-ui');
 
 // --------------------------------------------------------
-// Initialization of model
+// Initialization of model according to config file
+
+if (!config.mysql) {
+  throw new Error('MySQL config is mandatory at least for layout saving');
+}
+const mysql = new MySQLConnector(config.mysql);
+
+if (!config.tobject2json) {
+  throw new Error('TObject2Json config is mandatory');
+}
+const tObject2JsonClient = new TObject2JsonClient(config.tobject2json);
 
 const is = new InformationServiceState();
 if (config.informationService) {
@@ -17,138 +27,26 @@ if (config.informationService) {
   log.info('Information service: no configuration found');
 }
 
-if (!config.tobject2json) {
-  throw new Error('tobject2json field in config is missing');
-}
-const tObject2JsonClient = new TObject2JsonClient(config.tobject2json);
-
-// --------------------------------------------------------
-
-/**
- * Read object's data or null if it fails
- * @param {string} path - Object's path like agentName/objectName/objectNameSub
- * @return {Promise<Object>}
- */
-function readObjectData(path) {
-  if (!path || path.indexOf('/') === -1) {
-    Promise.reject('Path should contain a slash at least');
+if (config.listingConnector === 'ccdb') {
+  log.info('Object listing: using CCDB');
+  if (!config.ccdb) {
+    throw new Error('CCDB config is mandatory');
   }
-
-  return tObject2JsonClient.retrieve(path);
-}
-
-/**
- * List all object without the data which are heavy
- * @return {Array<Layout>}
- */
-async function listObjects() {
-  // first list all agents available
-  const agentsQuery = `select *
-                       from information_schema.tables
-                       where table_schema = ? and table_name like "data_%"`;
-  const agentTables = await mySQL.query(agentsQuery, [config.mysql.database]);
-
-  // then list all objects form those agents
-  const objectsPromises = agentTables.map((agentTable) => {
-    return mySQL.query(`select object_name as name, '${agentTable.TABLE_NAME}' as agent
-                        from ${agentTable.TABLE_NAME}`);
-  });
-  const objectListListRaw = await Promise.all(objectsPromises);
-
-  // Flatten the array of array of raw objects from the database to array of objects
-  const objects = objectListListRaw.reduce((result, objectListRaw) => {
-    const objectList = objectListRaw.map((objectRaw) => {
-      return {name: `${objectRaw.agent.substr(5)}/${objectRaw.name}`, quality: 'good'};
-    });
-    return result.concat(objectList);
-  }, []);
-
-  return objects;
-}
-
-/**
- * Create a layout
- * @param {Layout} layout
- * @return {Object} MySQL request details
- */
-function createLayout(layout) {
-  return mySQL.query('insert into layout (id, name, owner_id, owner_name, tabs) value (?,?,?,?,?)',
-    [
-      layout.id,
-      layout.name,
-      layout.owner_id,
-      layout.owner_name,
-      JSON.stringify(layout.tabs)
-    ]
-  );
-}
-
-/**
- * List layouts, can be filtered
- * @param {Object} filter - undefined or {owner_id: XXX}
- * @return {Array<Layout>}
- */
-async function listLayouts(filter = {}) {
-  let request;
-
-  if (filter.owner_id !== undefined) {
-    request = mySQL.query('select * from layout where owner_id = ?', [filter.owner_id]);
-  }
-
-  request = mySQL.query('select * from layout');
-  request.then((items) => {
-    return items.forEach((item) => {
-      item.tabs = JSON.parse(item.tabs);
-    });
-  });
-  return request;
-}
-
-/**
- * Retrieve a layout or null
- * @param {string} layoutName - layout name
- * @return {Layout|null}
- */
-function readLayout(layoutName) {
-  return mySQL.query('select * from layout where name = ? limit 1', [layoutName]).then((items) => {
-    if (items.length === 0) {
-      return null;
-    }
-    const item = items[0];
-    item.tabs = JSON.parse(item.tabs);
-    return item;
-  });
-}
-
-/**
- * Update a single layout by its name
- * @param {string} layoutName
- * @param {Layout} data
- * @return {Object} MySQL request details
- */
-function writeLayout(layoutName, data) {
-  return mySQL.query('update layout set tabs = ? where name = ?',
-    [JSON.stringify(data.tabs), layoutName]);
-}
-
-/**
- * Delete a single layout by its name
- * @param {string} layoutName
- * @return {Object} MySQL request details
- */
-function deleteLayout(layoutName) {
-  return mySQL.query('delete from layout where name = ?', [layoutName]);
+  const ccdb = new CCDBConnector(config.ccdb);
+  module.exports.listObjects = ccdb.listObjects.bind(ccdb);
+} else {
+  log.info('Object listing: using MySQL');
+  module.exports.listObjects = mysql.listObjects.bind(mysql);
 }
 
 // --------------------------------------------------------
 
-module.exports.readObjectData = readObjectData;
-module.exports.listObjects = listObjects;
-
-module.exports.readLayout = readLayout;
-module.exports.writeLayout = writeLayout;
-module.exports.listLayouts = listLayouts;
-module.exports.createLayout = createLayout;
-module.exports.deleteLayout = deleteLayout;
+module.exports.readLayout = mysql.readLayout.bind(mysql);
+module.exports.writeLayout = mysql.writeLayout.bind(mysql);
+module.exports.listLayouts = mysql.listLayouts.bind(mysql);
+module.exports.createLayout = mysql.createLayout.bind(mysql);
+module.exports.deleteLayout = mysql.deleteLayout.bind(mysql);
 
 module.exports.informationService = is;
+
+module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);

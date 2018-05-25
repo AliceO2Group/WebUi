@@ -198,6 +198,9 @@ function createLayout(req, res) {
  * @param {Response} res - Response object to send to
  */
 function errorHandler(err, res) {
-  log.error(err);
+  if (err.stack) {
+    log.trace(err);
+  }
+  log.error(err.message || err);
   res.status(500).send({error: err});
 }
