@@ -7,43 +7,42 @@ export function objectTree(model) {
       h('.flex-grow.scroll-y', tableShow(model)),
       h('.animate-width.scroll-y', {style: {width: model.object.selected ? '50%' : 0}}, model.object.selected ? draw(model, model.object.selected.name) : null)
     ]),
-    h('.f6.status-bar.ph1', statusBar(model))
+    h('.f6.status-bar.ph1.flex-row', [
+      statusBarLeft(model),
+      statusBarRight(model),
+    ])
   ]);
 }
 
-function statusBar(model) {
+function statusBarLeft(model) {
+  let itemsInfo;
+
   if (!model.object.list) {
-    return h('span', [
-      'Loading objects...'
-    ]);
-  }
-
-  if (model.object.onlineMode) {
+    itemsInfo = 'Loading objects...';
+  } else if (model.object.onlineMode) {
     if (!model.object.informationService) {
-      return h('span', [
-        'Waiting information service state...'
-      ]);
+      itemsInfo = 'Waiting information service state...';
+    } else if (model.object.searchInput) {
+      itemsInfo = `${model.object.searchResult.length} found of ${model.object.listOnline.length} items (online mode)`;
+    } else {
+      itemsInfo = `${model.object.listOnline.length} items (online mode)`;
     }
-
-    if (model.object.searchInput) {
-      return h('span', [
-        `${model.object.searchResult.length} found of ${model.object.listOnline.length} items (online mode)`
-      ]);
-    }
-
-    return h('span', [
-      `${model.object.listOnline.length} items (online mode)`
-    ]);
+  } else if (model.object.searchInput) {
+    itemsInfo = `${model.object.searchResult.length} found of ${model.object.list.length} items`;
+  } else {
+    itemsInfo = `${model.object.list.length} items`;
   }
 
-  if (model.object.searchInput) {
-    return h('span', [
-      `${model.object.searchResult.length} found of ${model.object.list.length} items`
-    ]);
+  return h('span.flex-grow', itemsInfo);
+}
+
+function statusBarRight(model) {
+  if (!model.object.selected) {
+    return null;
   }
 
-  return h('span', [
-    `${model.object.list.length} items`
+  return h('span.right', [
+    model.object.selected.name
   ]);
 }
 
