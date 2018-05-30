@@ -55,7 +55,10 @@ export function draw(model, tabObject, options) {
     onremove(vnode) {
       // remove jsroot binding to avoid memory leak
       model.object.unloadObject(tabObject.name);
-      JSROOT.cleanup(vnode.dom);
+      if (JSROOT.cleanup) {
+        // cleanup might not be loaded yet
+        JSROOT.cleanup(vnode.dom);
+      }
       window.removeEventListener('resize', vnode.dom.onresize);
     }
   };
