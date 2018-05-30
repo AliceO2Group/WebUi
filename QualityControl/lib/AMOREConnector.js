@@ -32,7 +32,6 @@ class AMOREConnector {
       const objectsQuery = `select moname as name, '${agentTable.TABLE_NAME}' as agent
                             from \`${agentTable.TABLE_NAME}\`
                             where data is not NULL`;
-      console.log('objectsQuery:', objectsQuery);
       return this.connection.query(objectsQuery);
     });
     const objectListListRaw = await Promise.all(objectsPromises);
