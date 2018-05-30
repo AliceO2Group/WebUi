@@ -46,6 +46,10 @@ class TObject2JsonClient extends EventEmitter {
    * @return {Promise.<Object|null, string>} The root data, null is not found
    */
   retrieve(path) {
+    if (!path || path.indexOf('/') === -1) {
+      return Promise.reject('Path should contain a slash at least');
+    }
+
     this.zmqClient.send(path);
 
     return new Promise((resolve, fail) => {

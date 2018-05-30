@@ -47,6 +47,12 @@ module.exports = {
   //   }
   // },
 
+  // listingConnector: 'mysql', // ccdb or mysql (default mysql)
+  // ccdb: {
+  //   hostname: '<ccdb hostname>',
+  //   port: 8080
+  // },
+
   // informationService: {
   //   server: {
   //     host: 'localhost',
