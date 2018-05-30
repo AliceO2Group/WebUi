@@ -47,10 +47,18 @@ module.exports = {
   //   }
   // },
 
-  // listingConnector: 'mysql', // ccdb or mysql (default mysql)
+  // listingConnector: 'mysql', // ccdb or mysql or amore (default mysql)
+
   // ccdb: {
   //   hostname: '<ccdb hostname>',
   //   port: 8080
+  // },
+
+  // amore: {
+  //   host: '<mysql host>',
+  //   user: '<login>',
+  //   password: '<pwd>',
+  //   database: 'AMORE'
   // },
 
   // informationService: {
