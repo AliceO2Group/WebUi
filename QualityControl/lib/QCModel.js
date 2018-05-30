@@ -3,6 +3,7 @@ const InformationServiceState = require('./InformationServiceState.js');
 const TObject2JsonClient = require('./TObject2JsonClient.js');
 const CCDBConnector = require('./CCDBConnector.js');
 const MySQLConnector = require('./MySQLConnector.js');
+const AMOREConnector = require('./AMOREConnector.js');
 
 const {log} = require('@aliceo2/web-ui');
 
@@ -34,6 +35,13 @@ if (config.listingConnector === 'ccdb') {
   }
   const ccdb = new CCDBConnector(config.ccdb);
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
+} else if (config.listingConnector === 'amore') {
+  log.info('Object listing: using AMORE');
+  if (!config.amore) {
+    throw new Error('AMORE config is mandatory');
+  }
+  const amore = new AMOREConnector(config.amore);
+  module.exports.listObjects = amore.listObjects.bind(amore);
 } else {
   log.info('Object listing: using MySQL');
   module.exports.listObjects = mysql.listObjects.bind(mysql);
