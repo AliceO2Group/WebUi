@@ -29,7 +29,10 @@ class AMOREConnector {
                            and c1.table_name = c2.table_name
                            and c1.column_name = 'moname'
                            and c2.column_name = 'data'`;
-    const agentTables = await this.connection.query(agentsQuery, [this.config.database, this.config.database]);
+    const agentTables = await this.connection.query(
+      agentsQuery,
+      [this.config.database, this.config.database]
+    );
 
     // then list all objects form those agents
     const objectsPromises = agentTables.map((agentTable) => {
