@@ -22,10 +22,17 @@ class AMOREConnector {
    */
   async listObjects() {
     // first list all agents available
-    const agentsQuery = `select *
-                         from INFORMATION_SCHEMA.COLUMNS
-                         where TABLE_SCHEMA = ? and COLUMN_NAME = 'moname'`;
-    const agentTables = await this.connection.query(agentsQuery, [this.config.database]);
+    const agentsQuery = `select c1.table_name as TABLE_NAME
+                         from information_schema.columns c1, information_schema.columns c2
+                         where c1.table_schema = ?
+                           and c2.table_schema = ?
+                           and c1.table_name = c2.table_name
+                           and c1.column_name = 'moname'
+                           and c2.column_name = 'data'`;
+    const agentTables = await this.connection.query(
+      agentsQuery,
+      [this.config.database, this.config.database]
+    );
 
     // then list all objects form those agents
     const objectsPromises = agentTables.map((agentTable) => {
