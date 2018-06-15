@@ -15,6 +15,8 @@
 export default class RemoteData {
   /**
    * Private constructor, use factories.
+   * @param {string} kind
+   * @param {Any} payload
    */
   constructor(kind, payload) {
     this.kind = kind;
@@ -80,6 +82,7 @@ export default class RemoteData {
 
 /**
  * Factory to create new 'NotAsked' RemoteData kind
+ * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static
@@ -88,6 +91,7 @@ RemoteData.NotAsked = () => new RemoteData('NotAsked');
 
 /**
  * Factory to create new 'Loading' RemoteData kind
+ * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static
@@ -96,6 +100,8 @@ RemoteData.Loading = () => new RemoteData('Loading');
 
 /**
  * Factory to create new 'Success' RemoteData kind
+ * @param {Any} payload
+ * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static
@@ -104,6 +110,8 @@ RemoteData.Success = (payload) => new RemoteData('Success', payload);
 
 /**
  * Factory to create new 'Failure' RemoteData kind
+ * @param {Any} payload
+ * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static

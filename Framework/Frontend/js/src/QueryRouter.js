@@ -1,6 +1,5 @@
 /* Global: window */
 
-import EventEmitter from './EventEmitter.js';
 import {Observable} from '/js/src/index.js';
 
 /*
@@ -52,18 +51,20 @@ export default class QueryRouter extends Observable {
    * Listen to all history and location events and notify on change
    */
   _attachEvents() {
+    const onLocationChange = this._handleLocationChange.bind(this);
+
     // On user goes backward in history
-    this.window.addEventListener('popstate', this._handleLocationChange.bind(this), false);
+    this.window.addEventListener('popstate', onLocationChange, false);
 
     // On user goes forward in history
-    this.window.addEventListener('pushstate', this._handleLocationChange.bind(this), false);
+    this.window.addEventListener('pushstate', onLocationChange, false);
 
     // On page already loaded trigger the first state
     if (this.document.readyState === 'interactive' || this.document.readyState === 'complete') {
       this._handleLocationChange();
     } else {
       // ... or wait until page is loaded
-      this.window.addEventListener('DOMContentLoaded', this._handleLocationChange.bind(this), false);
+      this.window.addEventListener('DOMContentLoaded', onLocationChange, false);
     }
   }
 
@@ -85,8 +86,12 @@ export default class QueryRouter extends Observable {
    * @param {object} e - DOM event
    */
   handleLinkEvent(e) {
-    const target = e.currentTarget; // the element to which the handler is attached, not the one firing
-    const specialOpening = e.altKey || e.metaKey || e.ctrlKey || e.shiftKey; // user asked download, new tab, new window
+    // the element to which the handler is attached, not the one firing
+    const target = e.currentTarget;
+
+    // user asked download, new tab, new window
+    const specialOpening = e.altKey || e.metaKey || e.ctrlKey || e.shiftKey;
+
     const forceNewTab = target.target === '_blank';
     const differentOrigin = target.origin !== window.location.origin;
 
