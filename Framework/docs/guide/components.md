@@ -11,7 +11,7 @@ h('h1', {class: 'title'}, 'Hello')
 Let's define a component:
 
 ```js
-function title() {
+const title = () => {
   return h('h1', {class: 'title'}, 'Hello');
 }
 ```
@@ -19,13 +19,13 @@ function title() {
 Because components are pure functions we can use their properties, they are composable:
 
 ```js
-function title() {
+const title = () => {
   return h('h1', {class: 'title'}, 'Hello');
 }
-function content() {
+const content = () => {
   return h('p', 'Lorem ipsum');
 }
-function page() {
+const page = () => {
   return h('div', [title(), content()]);
 }
 ```
@@ -36,7 +36,7 @@ A best practice in pure functional programming. The components should only rely 
 // ✗ WRONG, it manipulates a global variable
 let count = 0;
 
-function title() {
+const title = () => {
   return h('h1', {class: 'title'}, `Hello number ${count++}`);
 }
 ```
@@ -46,7 +46,7 @@ function title() {
 // ✓ CORRECT, it uses a constant variable
 const today = new Date();
 
-function title() {
+const title = () => {
   return h('h1', {class: 'title'}, `Hello timestamp is ${today}`);
 }
 ```
@@ -55,7 +55,7 @@ function title() {
 // ✓ OK, external constant expression
 const greetings = 'Hello';
 
-function title() {
+const title = () => {
   return h('h1', {class: 'title'}, greetings);
 }
 ```
@@ -63,7 +63,7 @@ function title() {
 ```js
 // ✓ OK, internal constant variables for readability
 
-function title() {
+const title = () => {
   const greetings = 'Hello';
   const attributes = {class: 'title'};
   return h('h1', attributes, greetings);
@@ -78,20 +78,20 @@ const icon = h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
   h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
 );
 
-function title() {
+const title = () => {
   return h('h1', [icon, ' ', 'Hello']);
 }
 ```
 
 ```js
-// ✓ OK, it create a new instance vnode each time
-function icon() {
+// ✓ OK, it create a new vnode instance each time
+const icon = () => {
   return h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
     h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
   );
 }
 
-function title() {
+const title = () => {
   return h('h1', [icon(), ' ', 'Hello']);
 }
 ```

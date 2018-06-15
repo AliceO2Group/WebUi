@@ -66,6 +66,7 @@ npm install @aliceo2/web-ui
 - [Debug](./docs/guide/debug.md) - Debug the application with browser's tools
 - [Ajax](./docs/guide/async-calls.md) - Asynchronously fetch data from the server
 - [WebSocket client](./docs/guide/websocket-client.md) - Connect to WebSocket server
+- [Routing](./docs/guide/front-router.md) - Let you manage many pages in one application
 
 ### API Reference
 * [Backend](docs/reference/backend.md)

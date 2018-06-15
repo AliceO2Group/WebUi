@@ -9,6 +9,7 @@ export {default as RemoteData} from './RemoteData.js';
 
 // Template engine
 export {render, h, frameDebouncer, mount} from './renderer.js';
+export {default as QueryRouter} from './QueryRouter.js';
 
 // Utils
 export {default as switchCase} from './switchCase.js';
