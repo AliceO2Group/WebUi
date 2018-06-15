@@ -7,7 +7,7 @@
   "repository": "AliceO2Group/WebUi",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
-    "start": "echo 'Running demo app...' && node docs/demo/index.js",
+    "start": "echo 'Framework is not meant to be started but it can be tested with a demo app, see docs/skeleton/README.md'",
     "test": "npm run eslint && npm run mocha",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",

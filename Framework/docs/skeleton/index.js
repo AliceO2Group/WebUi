@@ -1,5 +1,5 @@
 // Import the backend classes
-const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
+const {HttpServer, log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 
 // Define configuration for JWT tokens and HTTP server
 const config = require('./config.js');
@@ -39,7 +39,7 @@ wsServer.bind('stream-date', () => {
   }
 
   // Use internal logging
-  Log.info('start timer');
+  log.info('start timer');
 
   // Broadcase the time to all clients every 100ms
   streamTimer = setInterval(() => {
