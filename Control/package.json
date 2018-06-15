@@ -1,18 +1,27 @@
 {
   "name": "@aliceo2/control",
   "description": "ALICE O2 Control GUI",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run eslint && npm run mocha",
+    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
+    "mocha": "mocha $(find test -name 'mocha-*.js')"
   },
   "author": "Adam Wegrzynek",
   "license": "GPL-3.0",
   "repository": "AliceO2Group/WebUi",
   "homepage": "https://alice-o2.web.cern.ch",
   "dependencies": {
-    "@aliceo2/web-ui": "^1.0.9",
+    "@aliceo2/web-ui": "^1.1.2",
     "grpc": "^1.10.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-google": "^0.9.1",
+    "mocha": "^5.2.0",
+    "nodemon": "^1.17.5"
   }
 }
