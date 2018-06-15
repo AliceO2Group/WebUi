@@ -95,3 +95,17 @@ function button(model) {
   return h('button', {onclick: action, disabled: disabled}, 'Fetch images')
 }
 ```
+
+fetchClient inherit from native [fetch](https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch). All options can be used:
+
+```js
+const options = {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({...})
+};
+const response = await fetchClient('/api/lock', options);
+```
