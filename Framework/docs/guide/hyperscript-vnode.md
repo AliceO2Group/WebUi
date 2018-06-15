@@ -32,16 +32,29 @@ Note: As vnodes can be modified by the template engine you must not reuse them. 
 See [Components](components.md) guide to learn more about re-usability and maintenance.
 See [API Reference for JS](../reference/frontend-js.md) to get the `h()` function prototype.
 
+Because hyperscript can be written in functional programming, a functional switchCase is provided. Javascript comes with a native `switch case` statement not compatible with functional programming.
+
+```js
+import {h, switchCase} from '/js/src/index.js';
+
+default export (model) => h('div', [
+  h('h1', 'Hello'),
+  switchCase(model.page, {
+    list: () => h('p', 'print list'),
+    item: () => h('p', 'print item'),
+    form: () => h('p', 'print form'),
+  }, h('p', 'print default'))();
+]);
+```
 
 # Keys in hyperscript
 
 When manipulating a list of items with Hyperscript, the `key` attribute helps the engine to identify the element. This key should be constant and unique like DB primary key. Do not use array indexes as they may chage (eg. when you sort the array).
 ```js
-function videoGallery(videos) {
-  return videos.map((video) => {
-    return h('video', {src: video.src, key: video.src});
-  });
-}
+const videoGallery = (videos) => videos.map((video) => {
+  return h('video', {src: video.src, key: video.src});
+});
+
 ```
 
 ### JSX disclaimer

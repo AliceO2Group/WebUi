@@ -96,7 +96,7 @@ function button(model) {
 }
 ```
 
-fetchClient inherit from native [fetch](https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch). All options can be used:
+fetchClient inherit from native [fetch](https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch) and automatically add a token to the request. All options from `fetch` can be used:
 
 ```js
 const options = {
@@ -109,3 +109,26 @@ const options = {
 };
 const response = await fetchClient('/api/lock', options);
 ```
+
+As a utility, the framework provides RemoteData type to encapsulate the different states of a data coming from the server. It may be used to deal with all possibilities like: are data asked? are they loaded yet? what if an error happen?
+
+```js
+import {RemoteData} from '/js/src/index.js';
+
+var item = RemoteData.NotAsked();
+item.isNotAsked() === true
+item.isSuccess() === false
+
+var item = RemoteData.Success({...});
+item.isNotAsked() === false
+item.isSuccess() === true
+
+item.match({
+  NotAsked: () => ...,
+  Loading: () => ...,
+  Success: (data) => ...,
+  Failure: (error) => ...,
+});
+```
+
+This pattern uses tagged union type and is explained here: http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html it is also comparable to solving the "accessing data from null pointer" problem.
