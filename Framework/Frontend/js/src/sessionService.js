@@ -14,15 +14,19 @@ const parametersNames = ['personid', 'name', 'token'];
 export default {
   session: null,
 
+  /**
+   * Load parameters from the query string inside sessionService
+   * and remove them from the query string.
+   */
   loadAndHideParameters() {
-    this.loadParameters();
-    this.hideParameters();
+    this._loadParameters();
+    this._hideParameters();
   },
 
   /**
    * Load the session parameters from query string into the session object
    */
-  loadParameters() {
+  _loadParameters() {
     if (this.session) {
       throw new Error('the session is already loaded');
     }
@@ -39,7 +43,7 @@ export default {
   /**
    * Replace the current URL without the session parameters
    */
-  hideParameters() {
+  _hideParameters() {
     const url = new URL(location);
     parametersNames.forEach((parameterName) =>
       url.searchParams.delete(parameterName)

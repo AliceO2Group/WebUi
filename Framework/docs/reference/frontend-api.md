@@ -143,19 +143,27 @@ Singleton to retrieve and hide the parameters passed as query string.
 
 
 * [sessionService](#module_sessionService)
-    * [`.loadParameters()`](#module_sessionService.loadParameters)
-    * [`.hideParameters()`](#module_sessionService.hideParameters)
+    * [`.loadAndHideParameters()`](#module_sessionService.loadAndHideParameters)
+    * [`._loadParameters()`](#module_sessionService._loadParameters)
+    * [`._hideParameters()`](#module_sessionService._hideParameters)
     * [`.get()`](#module_sessionService.get) ⇒ <code>object</code>
 
-<a name="module_sessionService.loadParameters"></a>
+<a name="module_sessionService.loadAndHideParameters"></a>
 
-### `sessionService.loadParameters()`
+### `sessionService.loadAndHideParameters()`
+Load parameters from the query string inside sessionService
+and remove them from the query string.
+
+**Kind**: static method of [<code>sessionService</code>](#module_sessionService)  
+<a name="module_sessionService._loadParameters"></a>
+
+### `sessionService._loadParameters()`
 Load the session parameters from query string into the session object
 
 **Kind**: static method of [<code>sessionService</code>](#module_sessionService)  
-<a name="module_sessionService.hideParameters"></a>
+<a name="module_sessionService._hideParameters"></a>
 
-### `sessionService.hideParameters()`
+### `sessionService._hideParameters()`
 Replace the current URL without the session parameters
 
 **Kind**: static method of [<code>sessionService</code>](#module_sessionService)  
@@ -326,13 +334,22 @@ Notify every observer that something changed
 <a name="Observable+bubbleTo"></a>
 
 ### `loader.bubbleTo(observer)`
-titre
+All notifications from `this` will be notified to `observer`.
 
 **Kind**: instance method of [<code>Loader</code>](#Loader)  
 **Params**
 
 - observer [<code>Observable</code>](#Observable) - the observable object which will notify its observers
 
+**Example**  
+```js
+const model1 = new Observable();
+const model2 = new Observable();
+const model3 = new Observable();
+model1.bubbleTo(model2);
+model2.bubbleTo(model3);
+model1.notify(); // model1, model2 and model3 notified
+```
 <a name="Observable"></a>
 
 ## Observable
@@ -352,6 +369,13 @@ Simple Observable class to notify others listening for changes
 ### `new Observable()`
 Initialize observable with an empty array
 
+**Example**  
+```js
+const model = new Observable();
+model.observe((data) => console.log(data))
+model.name = 'Amonbeaufils';
+model.notify(); // callback called
+```
 <a name="Observable+observe"></a>
 
 ### `observable.observe(callback)`
@@ -381,13 +405,22 @@ Notify every observer that something changed
 <a name="Observable+bubbleTo"></a>
 
 ### `observable.bubbleTo(observer)`
-titre
+All notifications from `this` will be notified to `observer`.
 
 **Kind**: instance method of [<code>Observable</code>](#Observable)  
 **Params**
 
 - observer [<code>Observable</code>](#Observable) - the observable object which will notify its observers
 
+**Example**  
+```js
+const model1 = new Observable();
+const model2 = new Observable();
+const model3 = new Observable();
+model1.bubbleTo(model2);
+model2.bubbleTo(model3);
+model1.notify(); // model1, model2 and model3 notified
+```
 <a name="QueryRouter"></a>
 
 ## QueryRouter ⇐ [<code>Observable</code>](#Observable)
@@ -540,13 +573,22 @@ Notify every observer that something changed
 <a name="Observable+bubbleTo"></a>
 
 ### `queryRouter.bubbleTo(observer)`
-titre
+All notifications from `this` will be notified to `observer`.
 
 **Kind**: instance method of [<code>QueryRouter</code>](#QueryRouter)  
 **Params**
 
 - observer [<code>Observable</code>](#Observable) - the observable object which will notify its observers
 
+**Example**  
+```js
+const model1 = new Observable();
+const model2 = new Observable();
+const model3 = new Observable();
+model1.bubbleTo(model2);
+model2.bubbleTo(model3);
+model1.notify(); // model1, model2 and model3 notified
+```
 <a name="RemoteData"></a>
 
 ## RemoteData
