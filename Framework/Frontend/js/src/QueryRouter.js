@@ -1,6 +1,6 @@
 /* Global: window */
 
-import {Observable} from '/js/src/index.js';
+import Observable from './Observable.js';
 
 /*
 Recall from NodeJS doc: https://nodejs.org/api/url.html

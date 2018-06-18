@@ -20,6 +20,7 @@ export {default as sessionService} from './sessionService.js';
 // Data sources
 export {default as fetchClient} from './fetchClient.js';
 export {default as WebSocketClient} from './WebSocketClient.js';
+export {default as Loader} from './Loader.js';
 
 // All icons helpers, namespaced with prefix 'icon*'
 export * from './icons.js';

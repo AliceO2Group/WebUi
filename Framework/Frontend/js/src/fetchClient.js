@@ -1,6 +1,6 @@
 /* global: window */
 
-import sessionService from '/js/src/sessionService.js';
+import sessionService from './sessionService.js';
 
 const location = window.location;
 
