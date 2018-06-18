@@ -16,13 +16,13 @@
 <dd><p>Class EventEmitter for event-driven architecture
 Similar to the one provided by NodeJS</p>
 </dd>
-<dt><a href="#Loader">Loader</a></dt>
+<dt><a href="#Loader">Loader</a> ⇐ <code><a href="#Observable">Observable</a></code></dt>
 <dd><p>Network loader, count current requests, handle errors, make ajax requests</p>
 </dd>
 <dt><a href="#Observable">Observable</a></dt>
 <dd><p>Simple Observable class to notify others listening for changes</p>
 </dd>
-<dt><a href="#QueryRouter">QueryRouter</a></dt>
+<dt><a href="#QueryRouter">QueryRouter</a> ⇐ <code><a href="#Observable">Observable</a></code></dt>
 <dd><p>Router handle query history for Single Page Application (SPA)
 It notifies when route change and it allows to push a new route.
 Search parameters can be read directly via <code>params</code>, for example:
@@ -224,17 +224,22 @@ in the order they were registered, passing the supplied arguments to each
 
 <a name="Loader"></a>
 
-## Loader
+## Loader ⇐ [<code>Observable</code>](#Observable)
 Network loader, count current requests, handle errors, make ajax requests
 
 **Kind**: global class  
+**Extends**: [<code>Observable</code>](#Observable)  
 
-* [Loader](#Loader)
+* [Loader](#Loader) ⇐ [<code>Observable</code>](#Observable)
     * [`new Loader()`](#new_Loader_new)
     * [`loader.watchPromise(promise)`](#Loader+watchPromise)
     * [`loader._promiseSuccess(data)`](#Loader+_promiseSuccess) ⇒ <code>Any</code>
     * [`loader._promiseError(err)`](#Loader+_promiseError)
     * [`loader.post(url, body)`](#Loader+post) ⇒ <code>object</code>
+    * [`loader.observe(callback)`](#Observable+observe)
+    * [`loader.unobserve(callback)`](#Observable+unobserve)
+    * [`loader.notify()`](#Observable+notify)
+    * [`loader.bubbleTo(observer)`](#Observable+bubbleTo)
 
 <a name="new_Loader_new"></a>
 
@@ -292,6 +297,42 @@ import {Loader} from '/js/src/index.js';
 const loader = new Loader();
 const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
 ```
+<a name="Observable+observe"></a>
+
+### `loader.observe(callback)`
+Add an observer
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Params**
+
+- callback <code>function</code> - will be called for each notification
+
+<a name="Observable+unobserve"></a>
+
+### `loader.unobserve(callback)`
+Remove an observer
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Params**
+
+- callback <code>function</code> - the callback to remove
+
+<a name="Observable+notify"></a>
+
+### `loader.notify()`
+Notify every observer that something changed
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+<a name="Observable+bubbleTo"></a>
+
+### `loader.bubbleTo(observer)`
+titre
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Params**
+
+- observer [<code>Observable</code>](#Observable) - the observable object which will notify its observers
+
 <a name="Observable"></a>
 
 ## Observable
@@ -349,25 +390,30 @@ titre
 
 <a name="QueryRouter"></a>
 
-## QueryRouter
+## QueryRouter ⇐ [<code>Observable</code>](#Observable)
 Router handle query history for Single Page Application (SPA)
 It notifies when route change and it allows to push a new route.
 Search parameters can be read directly via `params`, for example:
 '?page=list' will give `.params ==== {page: 'list'}`.
 
 **Kind**: global class  
+**Extends**: [<code>Observable</code>](#Observable)  
 **Properties**
 
 - params <code>object</code> - Keys/values of search parameters  
 
 
-* [QueryRouter](#QueryRouter)
+* [QueryRouter](#QueryRouter) ⇐ [<code>Observable</code>](#Observable)
     * [`new QueryRouter()`](#new_QueryRouter_new)
     * [`queryRouter._attachEvents()`](#QueryRouter+_attachEvents)
     * [`queryRouter._handleLocationChange()`](#QueryRouter+_handleLocationChange)
     * [`queryRouter.handleLinkEvent(e)`](#QueryRouter+handleLinkEvent)
     * [`queryRouter.getUrl()`](#QueryRouter+getUrl) ⇒ <code>URL</code>
     * [`queryRouter.go(uri, replace, silent)`](#QueryRouter+go)
+    * [`queryRouter.observe(callback)`](#Observable+observe)
+    * [`queryRouter.unobserve(callback)`](#Observable+unobserve)
+    * [`queryRouter.notify()`](#Observable+notify)
+    * [`queryRouter.bubbleTo(observer)`](#Observable+bubbleTo)
 
 <a name="new_QueryRouter_new"></a>
 
@@ -464,6 +510,42 @@ Go to the specified `uri`. If `replace` is set, the current history point is rep
 - uri <code>string</code> - e.g. ?foo=bar
 - replace <code>boolean</code> - true to replace history
 - silent <code>boolean</code> - change URL bar and history, but do not notify observers
+
+<a name="Observable+observe"></a>
+
+### `queryRouter.observe(callback)`
+Add an observer
+
+**Kind**: instance method of [<code>QueryRouter</code>](#QueryRouter)  
+**Params**
+
+- callback <code>function</code> - will be called for each notification
+
+<a name="Observable+unobserve"></a>
+
+### `queryRouter.unobserve(callback)`
+Remove an observer
+
+**Kind**: instance method of [<code>QueryRouter</code>](#QueryRouter)  
+**Params**
+
+- callback <code>function</code> - the callback to remove
+
+<a name="Observable+notify"></a>
+
+### `queryRouter.notify()`
+Notify every observer that something changed
+
+**Kind**: instance method of [<code>QueryRouter</code>](#QueryRouter)  
+<a name="Observable+bubbleTo"></a>
+
+### `queryRouter.bubbleTo(observer)`
+titre
+
+**Kind**: instance method of [<code>QueryRouter</code>](#QueryRouter)  
+**Params**
+
+- observer [<code>Observable</code>](#Observable) - the observable object which will notify its observers
 
 <a name="RemoteData"></a>
 

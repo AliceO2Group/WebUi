@@ -30,6 +30,7 @@ Recall from NodeJS doc: https://nodejs.org/api/url.html
  * '?page=list' will give `.params ==== {page: 'list'}`.
  *
  * @property {object} params - Keys/values of search parameters
+ * @extends Observable
  * @example
  * import {Observable, QueryRouter} from '/js/src/index.js';
  *

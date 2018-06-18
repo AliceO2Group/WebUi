@@ -3,6 +3,7 @@ import fetchClient from './fetchClient.js';
 
 /**
  * Network loader, count current requests, handle errors, make ajax requests
+ * @extends Observable
  */
 class Loader extends Observable {
   /**
