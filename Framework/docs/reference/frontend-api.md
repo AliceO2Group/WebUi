@@ -228,6 +228,52 @@ in the order they were registered, passing the supplied arguments to each
 Network loader, count current requests, handle errors, make ajax requests
 
 **Kind**: global class  
+
+* [Loader](#Loader)
+    * [`new Loader()`](#new_Loader_new)
+    * [`loader.watchPromise(promise)`](#Loader+watchPromise)
+    * [`loader._promiseSuccess(data)`](#Loader+_promiseSuccess) ⇒ <code>Any</code>
+    * [`loader._promiseError(err)`](#Loader+_promiseError)
+    * [`loader.post(url, body)`](#Loader+post) ⇒ <code>object</code>
+
+<a name="new_Loader_new"></a>
+
+### `new Loader()`
+Initialize `activePromises` to 0
+
+<a name="Loader+watchPromise"></a>
+
+### `loader.watchPromise(promise)`
+Register a promise and increase `activePromises` by 1,
+on promise ends, decrease by 1.
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Params**
+
+- promise <code>Promise</code>
+
+<a name="Loader+_promiseSuccess"></a>
+
+### `loader._promiseSuccess(data)` ⇒ <code>Any</code>
+Private method. increase `activePromises` by 1
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Returns**: <code>Any</code> - data  
+**Params**
+
+- data <code>Any</code> - passthough
+
+<a name="Loader+_promiseError"></a>
+
+### `loader._promiseError(err)`
+Private method. decrease `activePromises` by 1
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Throw**: <code>Any</code> err  
+**Params**
+
+- err <code>Any</code> - passthough
+
 <a name="Loader+post"></a>
 
 ### `loader.post(url, body)` ⇒ <code>object</code>
@@ -373,10 +419,10 @@ const content = (model) => h('div', [
 ]);
 
 const menu = (model) => h('ul', [
-  h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=list'}, 'List')),
-  h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=1'}, 'Item 1')),
-  h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=2'}, 'Item 2')),
-  h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=3'}, 'Item 3')),
+  h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=list'}, 'List'),
+  h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=1'}, 'Item 1'),
+  h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=2'}, 'Item 2'),
+  h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=3'}, 'Item 3'),
 ]);
 ```
 <a name="QueryRouter+_attachEvents"></a>

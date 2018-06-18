@@ -74,10 +74,10 @@ Recall from NodeJS doc: https://nodejs.org/api/url.html
  * ]);
  *
  * const menu = (model) => h('ul', [
- *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=list'}, 'List')),
- *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=1'}, 'Item 1')),
- *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=2'}, 'Item 2')),
- *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=3'}, 'Item 3')),
+ *   h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=list'}, 'List'),
+ *   h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=1'}, 'Item 1'),
+ *   h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=2'}, 'Item 2'),
+ *   h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=3'}, 'Item 3'),
  * ]);
  */
 class QueryRouter extends Observable {

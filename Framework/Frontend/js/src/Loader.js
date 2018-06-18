@@ -5,29 +5,48 @@ import fetchClient from './fetchClient.js';
  * Network loader, count current requests, handle errors, make ajax requests
  */
 class Loader extends Observable {
-  constructor(model) {
+  /**
+   * Initialize `activePromises` to 0
+   * @property {boolean} active
+   * @property {number} activePromises
+   */
+  constructor() {
     super();
 
-    this.model = model;
     this.active = false;
     this.activePromises = 0;
   }
 
+  /**
+   * Register a promise and increase `activePromises` by 1,
+   * on promise ends, decrease by 1.
+   * @param {Promise} promise
+   */
   watchPromise(promise) {
     this.activePromises++;
     this.active = true;
-    promise.then(this.promiseSuccess.bind(this))
-           .catch(this.promiseError.bind(this));
-    return promise;
+    promise
+      .then(this._promiseSuccess.bind(this))
+      .catch(this._promiseError.bind(this));
   }
 
-  promiseSuccess(data) {
+  /**
+   * Private method. increase `activePromises` by 1
+   * @param {Any} data - passthough
+   * @return {Any} data
+   */
+  _promiseSuccess(data) {
     this.activePromises--;
     this.active = this.activePromises > 0;
     return data;
   }
 
-  promiseError(err) {
+  /**
+   * Private method. decrease `activePromises` by 1
+   * @param {Any} err - passthough
+   * @throw {Any} err
+   */
+  _promiseError(err) {
     this.activePromises--;
     this.active = this.activePromises > 0;
     throw err;
