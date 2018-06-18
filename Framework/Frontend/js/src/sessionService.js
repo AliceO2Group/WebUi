@@ -9,6 +9,7 @@ const parametersNames = ['personid', 'name', 'token'];
 
 /**
  * Singleton to retrieve and hide the parameters passed as query string.
+ * @module sessionService
  */
 export default {
   session: null,

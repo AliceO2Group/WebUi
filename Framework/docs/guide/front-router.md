@@ -19,7 +19,7 @@ export default class Model extends Observable {
     super();
 
     // Setup router
-    this.router = new Router();
+    this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.handleLocationChange(); // Init first page
   }

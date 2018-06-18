@@ -4,7 +4,7 @@ import fetchClient from './fetchClient.js';
 /**
  * Network loader, count current requests, handle errors, make ajax requests
  */
-export default class Loader extends Observable {
+class Loader extends Observable {
   constructor(model) {
     super();
 
@@ -33,6 +33,16 @@ export default class Loader extends Observable {
     throw err;
   }
 
+  /**
+   * Do a POST request with `body` as JSON content.
+   * @param {string} url - any URL part
+   * @param {object} body - content
+   * @return {object} result, ok, status
+   * @example
+   * import {Loader} from '/js/src/index.js';
+   * const loader = new Loader();
+   * const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
+   */
   async post(url, body) {
     body = body || {};
     const options = {
@@ -56,3 +66,5 @@ export default class Loader extends Observable {
     }
   }
 }
+
+export default Loader;

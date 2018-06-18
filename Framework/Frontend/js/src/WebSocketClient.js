@@ -72,8 +72,20 @@ const location = window.location;
  *
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  * @author Vladimir Kosmala <vladimir.kosmala@cern.ch>
+ * @example
+ * import {WebSocketClient} from '/js/src/index.js';
+ * const ws = new WebSocketClient();
+ * ws.addListener('authed', () => {
+ *   console.log('ready, lets send a message');
+ *   ws.sendMessage({command: 'custom-client-event-name', payload: 123});
+ * });
+ * ws.addListener('command', (message) => {
+ *   if (message.command === 'custom-server-event-name') {
+ *     // use message.payload
+ *   }
+ * });
  */
-export default class WebSocketClient extends EventEmitter {
+class WebSocketClient extends EventEmitter {
   /**
    * Create a connection to the server
    */
@@ -169,3 +181,5 @@ export default class WebSocketClient extends EventEmitter {
     this.sendMessage(message);
   }
 }
+
+export default WebSocketClient;

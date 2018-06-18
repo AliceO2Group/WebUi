@@ -30,8 +30,57 @@ Recall from NodeJS doc: https://nodejs.org/api/url.html
  * '?page=list' will give `.params ==== {page: 'list'}`.
  *
  * @property {object} params - Keys/values of search parameters
+ * @example
+ * import {Observable, QueryRouter} from '/js/src/index.js';
+ *
+ * export default class Model extends Observable {
+ *   constructor() {
+ *     super();
+ *
+ *     // Setup router
+ *     this.router = new QueryRouter();
+ *     this.router.observe(this.handleLocationChange.bind(this));
+ *     this.handleLocationChange(); // Init first page
+ *   }
+ *
+ *   handleLocationChange() {
+ *     switch (this.router.params.page) {
+ *       case 'list':
+ *         // call some ajax to load list
+ *         break;
+ *       case 'item':
+ *         // call some ajax to load item this.router.params.id
+ *         break;
+ *       default:
+ *         // default route, replace the current one not handled
+ *         this.router.go('?page=list', true);
+ *         break;
+ *     }
+ *   }
+ * }
+ *
+ * import {h, switchCase} from '/js/src/index.js';
+ *
+ * export default (model) => h('div', [
+ *   menu(model),
+ *   content(model),
+ * ]);
+ *
+ * const content = (model) => h('div', [
+ *   switchCase(model.router.params.page, {
+ *     list: () => h('p', 'print list'),
+ *     item: () => h('p', `print item ${model.router.params.id}`),
+ *   })()
+ * ]);
+ *
+ * const menu = (model) => h('ul', [
+ *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=list'}, 'List')),
+ *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=1'}, 'Item 1')),
+ *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=2'}, 'Item 2')),
+ *   h('li', h('a', {onclick: (e) => model.router.handleLinkEvent(e), href: '?page=item&id=3'}, 'Item 3')),
+ * ]);
  */
-export default class QueryRouter extends Observable {
+class QueryRouter extends Observable {
   /**
    * Constructor
    */
@@ -138,3 +187,5 @@ export default class QueryRouter extends Observable {
     }
   }
 }
+
+export default QueryRouter;

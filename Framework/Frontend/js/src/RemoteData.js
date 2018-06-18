@@ -2,17 +2,18 @@
  * RemoteData is tagged union type representing remote data loaded via network.
  * http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html
  * @example
+ * import {RemoteData} from '/js/src/index.js';
  * var item = RemoteData.NotAsked();
  * item.isNotAsked() === true
  * item.isLoading() === false
  * item.match({
- *   NotAsked: () => ...,
- *   Loading: () => ...,
- *   Success: (data) => ...,
- *   Failure: (error) => ...,
- * });
+ *   NotAsked: () => 1,
+ *   Loading: () => 2,
+ *   Success: (data) => 3,
+ *   Failure: (error) => 4,
+ * }) === 1
  */
-export default class RemoteData {
+class RemoteData {
   /**
    * Private constructor, use factories.
    * @param {string} kind
@@ -29,6 +30,15 @@ export default class RemoteData {
    * An error is thrown if all clauses are not listed.
    * @param {Object.<string,function>} clauses
    * @return {Any} result of the function associated to clause
+   * @example
+   * import {RemoteData} from '/js/src/index.js';
+   * var item = RemoteData.NotAsked();
+   * item.match({
+   *   NotAsked: () => 1,
+   *   Loading: () => 2,
+   *   Success: (data) => 3,
+   *   Failure: (error) => 4,
+   * }) === 1
    */
   match(clauses) {
     if (!clauses.NotAsked) {
@@ -50,6 +60,11 @@ export default class RemoteData {
   /**
    * Test is current kind is a `NotAsked`
    * @return {boolean}
+   * @example
+   * import {RemoteData} from '/js/src/index.js';
+   * var item = RemoteData.NotAsked();
+   * item.isNotAsked() === true
+   * item.isLoading() === false
    */
   isNotAsked() {
     return this.kind === 'NotAsked';
@@ -58,6 +73,11 @@ export default class RemoteData {
   /**
    * Test is current kind is a `Loading`
    * @return {boolean}
+   * @example
+   * import {RemoteData} from '/js/src/index.js';
+   * var item = RemoteData.NotAsked();
+   * item.isNotAsked() === true
+   * item.isLoading() === false
    */
   isLoading() {
     return this.kind === 'Loading';
@@ -117,3 +137,5 @@ RemoteData.Success = (payload) => new RemoteData('Success', payload);
  * @static
  */
 RemoteData.Failure = (payload) => new RemoteData('Failure', payload);
+
+export default RemoteData;

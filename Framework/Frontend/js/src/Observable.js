@@ -1,7 +1,7 @@
 /**
  * Simple Observable class to notify others listening for changes
  */
-export default class Observable {
+class Observable {
   /**
    * Initialize observable with an empty array
    */
@@ -44,3 +44,5 @@ export default class Observable {
     this.observe(() => observer.notify());
   }
 }
+
+export default Observable;
