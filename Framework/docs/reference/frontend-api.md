@@ -367,13 +367,12 @@ Simple Observable class to notify others listening for changes
 <a name="new_Observable_new"></a>
 
 ### `new Observable()`
-Initialize observable with an empty array
+Initialize with an empty array of observers
 
 **Example**  
 ```js
 const model = new Observable();
-model.observe((data) => console.log(data))
-model.name = 'Amonbeaufils';
+model.observe(() => console.log('model has changed'))
 model.notify(); // callback called
 ```
 <a name="Observable+observe"></a>
