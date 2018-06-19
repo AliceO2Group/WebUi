@@ -2,7 +2,7 @@
  * Class EventEmitter for event-driven architecture
  * Similar to the one provided by NodeJS
  */
-export default class EventEmitter {
+class EventEmitter {
   /**
    * Constructor
    */
@@ -72,3 +72,5 @@ export default class EventEmitter {
     return true;
   }
 }
+
+export default EventEmitter;

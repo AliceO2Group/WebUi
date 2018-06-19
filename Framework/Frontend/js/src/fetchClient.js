@@ -1,16 +1,28 @@
 /* global: window */
 
-import sessionService from '/js/src/sessionService.js';
+import sessionService from './sessionService.js';
 
 const location = window.location;
 
 /**
  * Extends the fetch() function by adding the session token in the request
+ * by taking it from sessionService transparently for developer.
  * See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
  * @param {string} URL
  * @return {object} options - method, etc.
+ * @example
+ * import {fetchClient} from '/js/src/index.js';
+ * const options = {
+ *   method: 'POST',
+ *   headers: {
+ *     'Accept': 'application/json',
+ *     'Content-Type': 'application/json'
+ *   },
+ *   body: JSON.stringify({...})
+ * };
+ * const response = await fetchClient('/api/lock', options);
  */
-export default function fetchClient(...args) {
+function fetchClient(...args) {
   if (!args[0]) {
     throw new Error('argument needed');
   }
@@ -30,4 +42,4 @@ export default function fetchClient(...args) {
   return fetch(...args);
 }
 
-
+export default fetchClient;

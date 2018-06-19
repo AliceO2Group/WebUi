@@ -24,4 +24,10 @@ const ws = new WebSocket(http);
 
 // Print all messages with topic 'custom-command-from-client'
 ws.bind('custom-command-from-client', (message) => console.log(message));
+
+// Send to all clients
+const msg = new WebSocketMessage();
+msg.command = 'custom-command-from-server';
+msg.payload = {...};
+ws.broadcast(msg);
 ```

@@ -1,9 +1,13 @@
 /**
  * Simple Observable class to notify others listening for changes
+ * @example
+ * const model = new Observable();
+ * model.observe(() => console.log('model has changed'))
+ * model.notify(); // callback called
  */
-export default class Observable {
+class Observable {
   /**
-   * Initialize observable with an empty array
+   * Initialize with an empty array of observers
    */
   constructor() {
     this.observers = [];
@@ -37,10 +41,19 @@ export default class Observable {
   }
 
   /**
-   * titre
+   * All notifications from `this` will be notified to `observer`.
    * @param {Observable} observer - the observable object which will notify its observers
+   * @example
+   * const model1 = new Observable();
+   * const model2 = new Observable();
+   * const model3 = new Observable();
+   * model1.bubbleTo(model2);
+   * model2.bubbleTo(model3);
+   * model1.notify(); // model1, model2 and model3 notified
    */
   bubbleTo(observer) {
     this.observe(() => observer.notify());
   }
 }
+
+export default Observable;

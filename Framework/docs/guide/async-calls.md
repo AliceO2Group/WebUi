@@ -95,3 +95,62 @@ function button(model) {
   return h('button', {onclick: action, disabled: disabled}, 'Fetch images')
 }
 ```
+
+## fetchClient
+
+fetchClient inherit from native [fetch](https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch) and automatically add a token to the request. All options from `fetch` can be used:
+
+```js
+const options = {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({...})
+};
+const response = await fetchClient('/api/lock', options);
+```
+
+## RemoteData
+
+As a utility, the framework provides RemoteData type to encapsulate the different states of a data coming from the server. It may be used to deal with all possibilities like: are data asked? are they loaded yet? what if an error happen?
+
+```js
+import {RemoteData} from '/js/src/index.js';
+
+var item = RemoteData.NotAsked();
+item.isNotAsked() === true
+item.isSuccess() === false
+
+var item = RemoteData.Success({...});
+item.isNotAsked() === false
+item.isSuccess() === true
+
+item.match({
+  NotAsked: () => ...,
+  Loading: () => ...,
+  Success: (data) => ...,
+  Failure: (error) => ...,
+});
+```
+
+This pattern uses tagged union type and is explained here: http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html it is also comparable to solving the "accessing data from null pointer" problem.
+
+## Loader
+
+The `Loader` model is an other utility to watch and simplify requests made with `fetchClient`, his goal is to be a "network manager".
+
+```js
+import {Loader} from '/js/src/index.js';
+
+const loader = new Loader();
+const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
+```
+
+The syntax is much more compact than using directly fetchClient.
+
+- `result` is the JSON decoded
+- `ok` is true on 2XX response only
+- `loader.active` is true if there is one or more requests working (used for a global spinner eventually)
+
