@@ -3,21 +3,21 @@ import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
 import switchCase from '../common/switchCase.js';
 
 export default (model) => [
-  model.role.list.match({
+  model.lock.padlockState.match({
     NotAsked: () => buttonLoading(),
-    Loading: () => pageLoading(),
-    Success: (data) => button(model),
+    Loading: () => buttonLoading(),
+    Success: (data) => button(model, data),
     Failure: (error) => null,
   })
 ];
 
-const button = (model) => typeof model.lock.padlockState.getPayload().lockedBy !== 'number'
+const button = (model, padlockState) => typeof padlockState.lockedBy !== 'number'
   ? h('button.btn', {
     title: 'Lock is free',
     onclick: () => model.lock.lock()
   }, iconLockUnlocked())
   : h('button.btn', {
-    title: `Lock is talken by ${model.lock.padlockState.getPayload().lockedByName} (id ${model.lock.padlockState.getPayload().lockedBy})`,
+    title: `Lock is talken by ${padlockState.lockedByName} (id ${padlockState.lockedBy})`,
     onclick: () => model.lock.unlock()
   }, iconLockLocked());
 
