@@ -47,7 +47,7 @@ model.notify();
 This example will show a simple title, see "skeleton" inside docs for more complete example.
 
 See [Components](components.md) guide to learn more about re-usability and maintenance.
-See [API Reference for JS](../reference/frontend-js.md) for function prototypes.
+See [API Reference for JS](../reference/frontend-api.md) for function prototypes.
 See [skeleton](../skeleton/) for function project bootstrap.
 
 ## Tools
