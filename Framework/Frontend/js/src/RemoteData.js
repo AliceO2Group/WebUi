@@ -54,7 +54,7 @@ class RemoteData {
       throw new Error('Missing clause `Failure`');
     }
 
-    return clauses[this.kind].apply(undefined, this.payload);
+    return clauses[this.kind].call(undefined, this.payload);
   }
 
   /**
