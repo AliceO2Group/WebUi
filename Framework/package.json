@@ -1,19 +1,20 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "1.1.2",
+  "version": "1.2.1",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "license": "GPL-3.0",
   "repository": "AliceO2Group/WebUi",
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
-    "start": "echo 'Running demo app...' && node docs/demo/index.js",
+    "start": "echo 'Framework is not meant to be started but it can be tested with a demo app, see docs/skeleton/README.md'",
     "test": "npm run eslint && npm run mocha",
     "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "./node_modules/.bin/mocha --require babel-core/register Frontend/test/",
     "mocha-backend": "./node_modules/.bin/mocha ./Backend/test/",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js Backend/ Frontend/ docs/skeleton/*.js"
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js Backend/ Frontend/ docs/skeleton/*.js",
+    "doc-frontend": "./node_modules/.bin/jsdoc2md --files \"./Frontend/**/*.js\" -p list -r list --member-index-format list --name-format --no-gfm -l js > ./docs/reference/frontend-api.md"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
@@ -33,6 +34,7 @@
     "babel-register": "^6.26.0",
     "eslint": "^4.19.1",
     "eslint-config-google": "^0.9.1",
+    "jsdoc-to-markdown": "^4.0.1",
     "jsdom": "^11.10.0",
     "mocha": "^5.1.1"
   },

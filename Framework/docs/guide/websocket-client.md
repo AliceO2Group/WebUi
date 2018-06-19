@@ -9,7 +9,7 @@ import {WebSocketClient} from '/js/src/index.js';
 
 const ws = new WebSocketClient();
 
-ws.addEventListener('authed', () => {
+ws.addListener('authed', () => {
   console.log('ready, lets send a message');
   ws.sendMessage({command: 'custom-client-event-name', payload: 123});
 });
@@ -17,7 +17,7 @@ ws.addEventListener('authed', () => {
 
 Client receives notifications from the server:
 ```js
-ws.addEventListener('command', (message) => {
+ws.addListener('command', (message) => {
   if (message.command === 'custom-server-event-name') {
     // use message.payload
   }

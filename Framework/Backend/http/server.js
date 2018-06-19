@@ -284,6 +284,10 @@ class HttpServer {
     this.jwt.verify(req.query.token)
       .then((data) => {
         req.decoded = data.decoded;
+        req.session = {
+          personid: data.id,
+          name: data.username
+        };
         next();
       }, (error) => {
         log.warn(`HTTP - ${error.name} : ${error.message}`);

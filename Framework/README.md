@@ -60,17 +60,19 @@ npm install @aliceo2/web-ui
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 
 ### Frontend guide
-- [Hyperscript and vnodes](./docs/guide/hyperscript-vnode.md) - Manipulate the view using JavaScript (no HTML)
+- [Template engine](./docs/guide/hyperscript-vnode.md) - Using hyperscript and vnodes (no HTML)
 - [Components](./docs/guide/components.md) - Split and reuse elements
 - [Scaling the application](./docs/guide/scale-app.md) - Scale the code of your application
 - [Debug](./docs/guide/debug.md) - Debug the application with browser's tools
 - [Ajax](./docs/guide/async-calls.md) - Asynchronously fetch data from the server
 - [WebSocket client](./docs/guide/websocket-client.md) - Connect to WebSocket server
+- [Routing](./docs/guide/front-router.md) - Let you manage many pages in one application
 
 ### API Reference
 * [Backend](docs/reference/backend.md)
-* [Frontend JS](docs/reference/frontend-js.md)
+* [Frontend JS](docs/reference/frontend-api.md)
 * [Frontend CSS](https://aliceo2group.github.io/WebUi/Framework/docs/reference/frontend-css.html)
+* [Frontend classes overview](./docs/images/front-arch.dot.png)
 
 ### Documentation for developers
 * [Development environment](docs/guide/devel.md)
