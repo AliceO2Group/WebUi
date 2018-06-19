@@ -29,8 +29,30 @@ render(document.body, virtualNode);
 
 Note: As vnodes can be modified by the template engine you must not reuse them. Instead, create a new instance for each view redraw.
 
+## Render vnodes
+
+The template engine needs only one vnode tree to draw DOM tree, two functions do that:
+- `render` render a vnode tree inside a DOM element
+- `mount` same but also listen to an `Observable` model and re-render when changed
+
+```js
+import {h, mount, Observable} from '/js/src/index.js';
+const model = new Observable();
+const view = (model) => h('h1.title', `hello ${model.name}`);
+mount(document.body, view, model);
+model.name = 'Joueur du Grenier';
+model.notify();
+```
+
+This example will show a simple title, see "skeleton" inside docs for more complete example.
+
 See [Components](components.md) guide to learn more about re-usability and maintenance.
-See [API Reference for JS](../reference/frontend-js.md) to get the `h()` function prototype.
+See [API Reference for JS](../reference/frontend-js.md) for function prototypes.
+See [skeleton](../skeleton/) for function project bootstrap.
+
+## Tools
+
+### switchCase
 
 Because hyperscript can be written in functional programming, a functional switchCase is provided. Javascript comes with a native `switch case` statement not compatible with functional programming.
 
@@ -47,7 +69,20 @@ default export (model) => h('div', [
 ]);
 ```
 
-# Keys in hyperscript
+### icons
+
+Icons with SVG are not easy to read and take space in the source code, Framework provides them ready to use. The full list is inside `icons.js` and documented in the [CSS Reference](https://aliceo2group.github.io/WebUi/Framework/docs/reference/frontend-css.html#icons) page so you can see them and choose which one to pick. Simply put the mouse cursor on top of it to get the function name.
+
+```js
+import {h, iconAccountLogin} from '/js/src/index.js';
+
+default export (model) => h('div', [
+  h('h1', 'Hello'),
+  iconAccountLogin()
+]);
+```
+
+## Keys in hyperscript
 
 When manipulating a list of items with Hyperscript, the `key` attribute helps the engine to identify the element. This key should be constant and unique like DB primary key. Do not use array indexes as they may chage (eg. when you sort the array).
 ```js

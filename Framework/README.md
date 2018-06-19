@@ -60,7 +60,7 @@ npm install @aliceo2/web-ui
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 
 ### Frontend guide
-- [Hyperscript and vnodes](./docs/guide/hyperscript-vnode.md) - Manipulate the view using JavaScript (no HTML)
+- [Template engine](./docs/guide/hyperscript-vnode.md) - Using hyperscript and vnodes (no HTML)
 - [Components](./docs/guide/components.md) - Split and reuse elements
 - [Scaling the application](./docs/guide/scale-app.md) - Scale the code of your application
 - [Debug](./docs/guide/debug.md) - Debug the application with browser's tools
