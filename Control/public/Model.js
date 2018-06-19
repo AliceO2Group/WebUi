@@ -1,12 +1,10 @@
 // Import frontend framework
-import {Observable, WebSocketClient, fetchClient} from '/js/src/index.js';
+import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader} from '/js/src/index.js';
 
-import Loader from './loader/Loader.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import Role from './role/Role.js';
 import Status from './status/Status.js';
-import QueryRouter from './common/QueryRouter.js';
 
 // The model
 export default class Model extends Observable {

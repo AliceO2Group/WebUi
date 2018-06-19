@@ -1,9 +1,8 @@
-import {h} from '/js/src/index.js';
+import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import switchCase from '../common/switchCase.js';
 import showTableList from '../common/showTableList.js';
-import {iconPlus} from '/js/src/icons.js';
 
 export let header = (model) => [
   h('.w-50 text-center', [
@@ -15,12 +14,12 @@ export let header = (model) => [
 ];
 
 export let content = (model) => h('.scroll-y.absolute-fill', [
-  switchCase(model.environment.list.getState(), {
-    'NOT_ASKED': () => null,
-    'LOADING': () => pageLoading(),
-    'SUCCESS': () => showContent(model, model.environment.list.getPayload().environments),
-    'FAILURE': () => pageError(model.environment.list.getPayload()),
-  })(model)
+  model.environment.list.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (data) => showContent(model, data),
+    Failure: (error) => pageError(error),
+  })
 ]);
 
 const showContent = (model, list) => list.length

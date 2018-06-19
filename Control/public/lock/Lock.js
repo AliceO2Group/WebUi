@@ -1,5 +1,4 @@
-import {Observable} from '/js/src/index.js';
-import RemoteData from '../common/RemoteData.js';
+import {Observable, RemoteData} from '/js/src/index.js';
 
 export default class Lock extends Observable {
   constructor(model) {

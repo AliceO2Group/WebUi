@@ -14,12 +14,12 @@ export let header = (model) => [
 ];
 
 export let content = (model) => h('.scroll-y.absolute-fill', [
-  switchCase(model.environment.item.getState(), {
-    'NOT_ASKED': () => null,
-    'LOADING': () => pageLoading(),
-    'SUCCESS': () => showContent(model, model.environment.item.getPayload().environment),
-    'FAILURE': () => pageError(model.environment.item.getPayload()),
-  })(model)
+  model.environment.item.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (data) => showContent(model, data),
+    Failure: (error) => pageError(error),
+  })
 ]);
 
 const showContent = (model, item) => [
@@ -55,10 +55,10 @@ const showControl = (model, item) =>   h('.m4', [
       'DELETE'
       ), ' ',
   ]),
-  switchCase(model.environment.itemControl.getState(), {
-    'NOT_ASKED': () => null,
-    'LOADING': () => null,
-    'SUCCESS': () => h('.primary', 'done'),
-    'FAILURE': () => h('p.danger', model.environment.itemControl.getPayload()),
-  })()
+  model.environment.itemControl.match({
+    NotAsked: () => null,
+    Loading: () => null,
+    Success: (data) => h('.primary', 'done'),
+    Failure: (error) => h('p.danger', error),
+  })
 ]);

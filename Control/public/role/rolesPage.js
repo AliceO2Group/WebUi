@@ -14,12 +14,12 @@ export let header = (model) => [
 ];
 
 export let content = (model) => h('.scroll-y.absolute-fill', [
-  switchCase(model.role.list.getState(), {
-    'NOT_ASKED': () => null,
-    'LOADING': () => pageLoading(),
-    'SUCCESS': () => showContent(model, model.role.list.getPayload().roles),
-    'FAILURE': () => pageError(model.role.list.getPayload()),
-  })(model)
+  model.role.list.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (data) => showContent(model, data),
+    Failure: (error) => pageError(error),
+  })
 ]);
 
 const showContent = (model, list) => list.length

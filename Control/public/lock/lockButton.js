@@ -3,12 +3,12 @@ import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
 import switchCase from '../common/switchCase.js';
 
 export default (model) => [
-  switchCase(model.lock.padlockState.getState(), {
-    'NOT_ASKED': () => buttonLoading(),
-    'LOADING': () => buttonLoading(),
-    'SUCCESS': () => button(model),
-    'FAILURE': () => null,
-  })()
+  model.role.list.match({
+    NotAsked: () => buttonLoading(),
+    Loading: () => pageLoading(),
+    Success: (data) => button(model),
+    Failure: (error) => null,
+  })
 ];
 
 const button = (model) => typeof model.lock.padlockState.getPayload().lockedBy !== 'number'
