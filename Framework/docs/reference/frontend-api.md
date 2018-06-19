@@ -33,7 +33,10 @@ Search parameters can be read directly via <code>params</code>, for example:
 <a href="http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html">http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html</a></p>
 </dd>
 <dt><a href="#WebSocketClient">WebSocketClient</a> ⇐ <code><a href="#EventEmitter">EventEmitter</a></code></dt>
-<dd><p>Encapsulate WebSocket and provides the endpoint, filtering stream and authentification status.</p>
+<dd><p>Encapsulate WebSocket and provides the endpoint, filtering stream and authentification status.
+It also handles session token by adding it in the handshake request
+from sessionService transparently for developer. Authentification is done when <code>authed</code> event
+is emitted.</p>
 </dd>
 </dl>
 
@@ -45,6 +48,7 @@ Search parameters can be read directly via <code>params</code>, for example:
 </dd>
 <dt><a href="#fetchClient">`fetchClient(URL)`</a> ⇒ <code>object</code></dt>
 <dd><p>Extends the fetch() function by adding the session token in the request
+by taking it from sessionService transparently for developer.
 See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API</a></p>
 </dd>
 <dt><a href="#switchCase">`switchCase(caseName, cases, defaultCaseValue)`</a> ⇒ <code>Any</code></dt>
@@ -90,7 +94,7 @@ Renders a vnode tree inside the dom element.
 **Example**  
 ```js
 import {h, render} from '/js/src/index.js';
-let virtualNode = h('h1', {class: 'title'}, 'World');
+let virtualNode = h('h1.title', 'World');
 render(document.body, virtualNode);
 ```
 <a name="module_renderer..h"></a>
@@ -103,15 +107,18 @@ it produces a vnode usable by render function.
 **Returns**: <code>Vnode</code> - the Vnode representation  
 **Params**
 
-- selector <code>String</code> - Tag name
-- attributes <code>Object</code> - (optional) className, class, onclick, href, ...
+- selector <code>String</code> - Tag name and optional classes as CSS selector
+- attributes <code>Object</code> - (optional) className, onclick, href, ...
 - children <code>Array.&lt;Vnode&gt;</code> | <code>String</code> | <code>Number</code> | <code>Boolean</code> - Children inside this tag
 
 **Example**  
 ```js
 import {h, render} from '/js/src/index.js';
-let virtualNode = h('h1', {class: 'title'}, 'World');
-render(document.body, virtualNode);
+var virtualNode1 = h('h1.title', 'World');
+var virtualNode2 = h('h1', {className: 'title'}, 'World');
+var virtualNode3 = h('h1', {className: 'title', onclick: () => console.log('clicked')}, 'World');
+var containerNode = h('div', [virtualNode1, virtualNode2, virtualNode3]);
+render(document.body, containerNode);
 ```
 <a name="module_renderer..mount"></a>
 
@@ -131,7 +138,7 @@ When the model change and is an `Observable`, view refresh by itself (unlike `re
 ```js
 import {h, mount, Observable} from '/js/src/index.js';
 const model = new Observable();
-const view = (model) => h('h1', {class: 'title'}, `hello ${model.name}`);
+const view = (model) => h('h1.title', `hello ${model.name}`);
 mount(document.body, view, model);
 model.name = 'Joueur du Grenier';
 model.notify();
@@ -729,6 +736,9 @@ Factory to create new 'Failure' RemoteData kind
 
 ## WebSocketClient ⇐ [<code>EventEmitter</code>](#EventEmitter)
 Encapsulate WebSocket and provides the endpoint, filtering stream and authentification status.
+It also handles session token by adding it in the handshake request
+from sessionService transparently for developer. Authentification is done when `authed` event
+is emitted.
 
 **Kind**: global class  
 **Extends**: [<code>EventEmitter</code>](#EventEmitter)  
@@ -919,6 +929,7 @@ Try to execute a string code with eval, on failure redirect to the compatibility
 
 ## `fetchClient(URL)` ⇒ <code>object</code>
 Extends the fetch() function by adding the session token in the request
+by taking it from sessionService transparently for developer.
 See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
 
 **Kind**: global function  
