@@ -1,11 +1,34 @@
 <!doctype html>
-<title>ALICE O2 Control GUI</title>
+<title>Control - Alice O2 UI</title>
+<meta name="description" content="Control interface of Alice O2">
+<meta name="author" content="Vladimir Kosmala">
 <link rel="stylesheet" href="/css/src/bootstrap.css">
+<link rel="stylesheet" href="/app.css">
 
-<!-- Load the session service, parse variables provided by server in the query -->
+<body class="scroll-off">
+  <!-- This loader will be replaced by the web app when is loaded and renders -->
+  <div class="absolute-fill flex-column items-center justify-center">
+    <div class="atom-spinner f1">
+      <div class="spinner-inner">
+        <div class="spinner-line"></div>
+        <div class="spinner-line"></div>
+        <div class="spinner-line"></div>
+        <div class="spinner-circle">●</div>
+      </div>
+    </div>
+    <div class="f5">Loading Control...</div>
+  </div>
+</body>
+
+<script src="/js/src/compatibility.js"></script>
+
+<!-- Load the session service, parses variables provided by server in the query -->
 <script type="module">
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
+
+// Expose sessionService to interract with it the browser's console
+window.sessionService = sessionService;
 </script>
 
 <!-- Main application controller -->
