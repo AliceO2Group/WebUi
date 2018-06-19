@@ -1,20 +1,25 @@
-# InfoLoggerGui
+# InfoLoggerGui (ILG)
 
 Web app for querying infoLogger database and streaming logs in real-time with filtering. Compatible with all browsers, starting from IE 12 (Edge).
 
-![](docs/screenshot.png)
+## Features
+1. Query infologger database
+1. Live stream infologger events with filter
 
-User documentation:
- * [Configuration (config.js, oauth and certificate)](docs/configuration.md)
- * [Install or remove package](docs/create-install-remove-package.md)
+## Current setup and use
+1. git clone this repository
+1. npm install
+1. cp config-default.js config.js
+1. edit config.js
+1. start Control server
+1. npm start
+1. open your browser to the URL configured previously
 
-Dev documentation:
- * [Development guide - getting started](docs/developement-guide.md)
- * [Configuration (config.js, oauth and certificate)](docs/configuration.md)
- * [Create a package release](docs/create-install-remove-package.md)
- * [API](docs/API.md)
-
-### Credits
-
-Favicon made by Freepik from www.flaticon.com
-
+## Development
+1. fork branch dev with Jira ticket in the name of the new branch
+1. npm run dev (server is reloaded when files change)
+1. edit files
+1. check result inside a browser
+1. npm test
+1. git commit
+1. merge pull-request into dev
