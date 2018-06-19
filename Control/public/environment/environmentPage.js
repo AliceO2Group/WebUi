@@ -17,7 +17,7 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showContent(model, data),
+    Success: (data) => showContent(model, data.environment),
     Failure: (error) => pageError(error),
   })
 ]);
