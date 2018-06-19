@@ -57,6 +57,9 @@ const location = window.location;
 
 /**
  * Encapsulate WebSocket and provides the endpoint, filtering stream and authentification status.
+ * It also handles session token by adding it in the handshake request
+ * from sessionService transparently for developer. Authentification is done when `authed` event
+ * is emitted.
  *
  * @extends EventEmitter
  *

@@ -6,6 +6,7 @@ const location = window.location;
 
 /**
  * Extends the fetch() function by adding the session token in the request
+ * by taking it from sessionService transparently for developer.
  * See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
  * @param {string} URL
  * @return {object} options - method, etc.

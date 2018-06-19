@@ -36,7 +36,7 @@ function frameDebouncer(fn) {
  * @param {Vnode} vnode - the vnode tree
  * @example
  * import {h, render} from '/js/src/index.js';
- * let virtualNode = h('h1', {class: 'title'}, 'World');
+ * let virtualNode = h('h1.title', 'World');
  * render(document.body, virtualNode);
  */
 function render(element, vnode) {
@@ -47,14 +47,17 @@ function render(element, vnode) {
 /**
  * Hyperscript function to represente a DOM element
  * it produces a vnode usable by render function.
- * @param {String} selector - Tag name
- * @param {Object} attributes - (optional) className, class, onclick, href, ...
+ * @param {String} selector - Tag name and optional classes as CSS selector
+ * @param {Object} attributes - (optional) className, onclick, href, ...
  * @param {Array<Vnode>|String|Number|Boolean} children - Children inside this tag
  * @return {Vnode} the Vnode representation
  * @example
  * import {h, render} from '/js/src/index.js';
- * let virtualNode = h('h1', {class: 'title'}, 'World');
- * render(document.body, virtualNode);
+ * var virtualNode1 = h('h1.title', 'World');
+ * var virtualNode2 = h('h1', {className: 'title'}, 'World');
+ * var virtualNode3 = h('h1', {className: 'title', onclick: () => console.log('clicked')}, 'World');
+ * var containerNode = h('div', [virtualNode1, virtualNode2, virtualNode3]);
+ * render(document.body, containerNode);
  */
 function h(...args) {
   // encapsulate mithril engine so we can change if needed
@@ -72,7 +75,7 @@ function h(...args) {
  * @example
  * import {h, mount, Observable} from '/js/src/index.js';
  * const model = new Observable();
- * const view = (model) => h('h1', {class: 'title'}, `hello ${model.name}`);
+ * const view = (model) => h('h1.title', `hello ${model.name}`);
  * mount(document.body, view, model);
  * model.name = 'Joueur du Grenier';
  * model.notify();
