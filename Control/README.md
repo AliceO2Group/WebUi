@@ -11,7 +11,7 @@ A [Control](https://github.com/AliceO2Group/Control) server is required.
 
 ## Current setup and use
 1. git clone this repository
-1. npm install
+1. cd Control && npm install
 1. cp config-default.js config.js
 1. edit config.js
 1. start Control server
