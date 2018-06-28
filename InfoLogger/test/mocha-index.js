@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
 const {spawn} = require('child_process');
-const grpc = require('grpc');
 const path = require('path');
 
 const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
@@ -15,7 +14,7 @@ const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
 // Network and rendering can have delays this can leads to random failures
 // if they are tested just after their initialization.
 
-describe('Control', function () {
+describe('InfoLogger', function () {
   let browser;
   let page;
   let subprocess; // web-server runs into a subprocess
@@ -59,9 +58,10 @@ describe('Control', function () {
     }
   });
 
-  it('should have redirected to default page "/?page=status"', async () => {
+  it('should have redirected to default page "/?q={"level":{"max":1}}"', async () => {
     const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=status');
+    const search = decodeURIComponent(location.search);
+    assert(search === '?q={"level":{"max":1}}');
   });
 
   after(async () => {

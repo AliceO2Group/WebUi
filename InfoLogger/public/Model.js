@@ -44,7 +44,6 @@ export default class Model extends Observable {
 
     this.servicesResult = RemoteData.NotAsked(); // Success({query, live})
 
-    this.log.query();
     this.detectServices();
 
     // update router on model change
@@ -66,6 +65,11 @@ export default class Model extends Observable {
     }
     this.servicesResult = RemoteData.Success(result);
     this.notify();
+
+    // auto-query if service available
+    if (result.query) {
+      this.log.query();
+    }
   }
 
   /**
@@ -136,7 +140,9 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     const q = this.router.params.q;
-    this.log.filter.fromObject(JSON.parse(q));
+    if (q) {
+      this.log.filter.fromObject(JSON.parse(q));
+    }
   }
 
   updateRouteOnModelChange() {
