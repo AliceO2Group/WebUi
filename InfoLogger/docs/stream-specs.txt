@@ -1,0 +1,3 @@
+Each log can be send as one line, starting with protocol version number followed by the values separated by #.
+
+*1.4#[severity]#[level]#[stamp]#[hostname]#[rolename]#[pid]#[username]#[system]#[facility]#[detector]#[partition]#[run]#[errcode]#[errline]#[errsource]#[message]

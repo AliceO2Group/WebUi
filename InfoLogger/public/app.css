@@ -1,0 +1,81 @@
+
+/* make the sidebar big enough to contain inspector */
+.sidebar, .sidebar .sidebar-content { width: 20rem; }
+
+.transition-background-color { transition: background-color 0.5s ease; }
+
+
+/* includes buttons and input */
+.table-filters { width: 100%; }
+
+.table-logs-header { width: 100%; border-collapse: collapse; border-bottom: 1px solid #aaa; }
+.table-logs-header td { padding: 0.3rem 0.2rem; }
+.table-logs-content { width: 100%; border-collapse: collapse; }
+.table-logs-content td { }
+.table-logs-header td, .table-logs-content td { font-size: 0.7rem; }
+
+td, th {max-width: 0; /* allow ellipsis on tables */vertical-align: top;}
+
+.cell {
+  line-height: 1rem;
+  font-size: 1rem;
+  padding: 0rem 0.2rem;
+  font-weight: 100;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 18px; /* must be sync with rowHeight constant in view */
+}
+.cell-bordered {
+  border-left: 1px solid rgb(170, 170, 170);
+}
+
+.cell-xs { width: 2rem; }
+.cell-s { width: 4rem; }
+.cell-m { width: 7rem; }
+.cell-l { width: 16rem; }
+
+.cell:last-child { width: initial; }
+
+.row-hover:hover { background-color: rgba(0,0,0,.075); }
+.row-selected, .row-selected:hover { background-color: #007bff; color: white; }
+
+
+.table-max { width: 100%; }
+
+.pull-right { float: right; }
+
+/* fix */
+.shadow-level0 { z-index: 0; }
+.shadow-level1 { z-index: 100; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 3px 5px 0 rgba(0,0,0,0.2); }
+
+.btn:hover {
+  box-shadow: none !important;
+}
+
+.btn:active, .btn.active {
+  box-shadow: inset 0 2px 2px rgba(0,0,0,.1) !important;
+}
+
+footer { border-top: 1px solid var(--color-gray); }
+
+/* Add very small font, a little difficult to read by in InfoLogger we want very high information concentration */
+.f7 { font-size: .75rem; }
+
+.datetime-helper { position: absolute; left: calc(100% + 4px); color: black; top: -6px; width: 320px; background-color: #f3f3f3; border: 1px solid rgb(154, 154, 154); border-radius: 5px; box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.4); z-index: 1000; }
+.datetime-helper-result { padding: 10px; font-weight: bold; background: #007bff; color: white; border-radius: 4px 4px 0 0; margin: -1px; }
+.datetime-helper-memo { padding: 10px; }
+
+.arrow-up-left:before { content: ''; display: block; position: absolute; right: 100%; top: 6px; width: 0; height: 0; border-right-color: #9a9a9a; border-radius: 10px; }
+.arrow-up-left:after { content: ''; display: block; position: absolute; right: 100%; top: 7px; width: 0; height: 0; border: 9px solid transparent; border-right-color: #007bff; }
+
+
+/* specific colors to InfoLogger */
+.severity-i { color: #17a2b8; }
+.severity-w { color: #ffc107; }
+.severity-e { color: #dc3545; }
+.severity-f { color: #9c27b0; }
+.severity-i-bg { background-color: #17a2b8; color: white; }
+.severity-w-bg { background-color: #ffc107; color: white; }
+.severity-e-bg { background-color: #dc3545; color: white; }
+.severity-f-bg { background-color: #9c27b0; color: white; }
