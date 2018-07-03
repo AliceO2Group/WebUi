@@ -61,26 +61,28 @@ Edit `informationService` section to define custom:
 
 of Information Service publish and reponse socket.
 
-#### TOjbect2Json
-In order to customise hostname and port of `TOjbect2Json` follow these two steps:
+#### TObject2Json
+In order to customise hostname and port of `TObject2Json` follow these two steps:
 
 1. Edit `tobject2json` section of configuration file to define custom:
  - `host`name
  - `port` number
 
-2. Run `TOjbect2Json` with updated parameters
+2. Run `TObject2Json` with updated parameters
 ```
 tobject2json --backend mysql://<loign>:<password>@<hostname>:<port>/<database> --zeromq-server tcp://<host>:<port>
 ```
 WHERE:
  - `backend` is a Quality Control database URL
- - `zeromq-server` which provides communication between `TOjbect2Json` and the GUI; it must match with `host` and `port` that you set up in `1.`.
+ - `zeromq-server` which provides communication between `TObject2Json` and the GUI; it must match with `host` and `port` that you set up in `1.`.
 
 #### CERN OAuth
 - Register your application in the [CERN OAuth service](https://sso-management.web.cern.ch/OAuth/RegisterOAuthClient.aspx)
 - Provide any `client_id`, eg `qc_gui`
 - Set `redirect_uri` to `https://<YOUR_HOSTNAME>/callback`
 - Fill these values and generated secret into `oAuth` section of `config.js` file.
+
+Note: if you go from OAuth disabled to enabled (and opposite), you will lose ownership of layouts. When OAuth is disabled, all users share the same id `0`, if you activate OAuth (ids form `1` to `Infinity`). You can change ownership by hand on table `layout.owner_id` to migrate layouts.
 
 #### Enable HTTPS
 - Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
