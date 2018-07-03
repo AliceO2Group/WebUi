@@ -1,9 +1,8 @@
-import sessionService from '/js/src/sessionService.js';
-import {Observable, fetchClient, WebSocketClient} from '/js/src/index.js';
+import {Observable, fetchClient, WebSocketClient, RemoteData} from '/js/src/index.js';
 
 import GridList from './Grid.js';
-import {objectId, clone} from '../utils.js';
-import {assertTabObject, assertLayout, assertLayouts} from '../Types.js';
+import {objectId, clone} from '../common/utils.js';
+import {assertTabObject, assertLayout, assertLayouts} from '../common/Types.js';
 
 export default class Layout extends Observable {
   constructor(model) {
@@ -15,7 +14,7 @@ export default class Layout extends Observable {
     this.item = null; // layout containing an array of tabs
     this.tab = null; // pointer to a tab from `item`
 
-    this.myList = null; // array of layouts
+    this.myList = RemoteData.NotAsked(); // array of layouts
 
     this.searchInput = '';
     this.searchResult = null; // null means no search, sub-array of `list`
@@ -32,24 +31,27 @@ export default class Layout extends Observable {
     // gridList.grid.length: integer, number of rows
   }
 
-  loadList() {
-    return this.model.loader.watchPromise(fetchClient(`/api/layout`, {method: 'GET'})
-      .then(res => res.json())
-      .then(list => {
-        this.list = assertLayouts(list);
-        this.notify();
-      })
-    );
+  async loadList() {
+    const {result, ok} = await this.model.loader.post('/api/listLayouts');
+    if (!ok) {
+      alert('unable to load layouts');
+      return;
+    }
+
+    this.list = assertLayouts(result);
+    this.notify();
   }
 
   async loadMyList() {
-    const req = fetchClient(`/api/layout?owner_id=${this.model.session.personid}`, {method: 'GET'});
-    const {result, response} = await this.model.loader.intercept(req);
-    if (!response.ok) {
-      throw new Error('unable to load layouts of user');
+    this.myList = RemoteData.Loading();
+
+    const {result, ok} = await this.model.loader.post('/api/listLayouts', {owner_id: this.model.session.personid});
+    if (!ok) {
+      this.myList = RemoteData.Failure('Unable to load layouts of user');
+    } else {
+      this.myList = RemoteData.Success(assertLayouts(result));
     }
 
-    this.myList = assertLayouts(result);
     this.notify();
   }
 
@@ -58,10 +60,10 @@ export default class Layout extends Observable {
       throw new Error('layoutName parameter is mandatory');
     }
 
-    const req = fetchClient(`/api/readLayout?layoutName=${layoutName}`, {method: 'POST'});
-    const {result, response} = await this.model.loader.intercept(req);
-    if (!response.ok) {
-      throw new Error(`unable to load layout "${layoutName}"`);
+    const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutName: layoutName});
+    if (!ok) {
+      alert(`unable to load layout "${layoutName}"`);
+      return;
     }
 
     this.item = assertLayout(result);
@@ -157,6 +159,18 @@ export default class Layout extends Observable {
     }
 
     this.item.tabs.splice(index, 1);
+    this.notify();
+  }
+
+  renameTab(index, name) {
+    if (!this.item.tabs[index]) {
+      throw new Error(`index ${index} does not exist`);
+    }
+    if (this.item.tabs.length <= 1) {
+      throw new Error(`deleting last tab is forbidden`);
+    }
+
+    this.item.tabs[index].name = name;
     this.notify();
   }
 

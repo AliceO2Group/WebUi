@@ -1,6 +1,5 @@
 import {h} from '/js/src/index.js';
-import {timerDebouncer} from '../utils.js';
-import {objectId, clone, pointerId} from '../utils.js';
+import {timerDebouncer, objectId, clone, pointerId} from '../common/utils.js';
 
 /**
  * Draw an object using JSROOT
@@ -72,12 +71,12 @@ export function draw(model, tabObject, options) {
   } else if (model.object.objects[tabObject.name] === null) {
     // data are null, it means an error of reading occured
     inner = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('', 'No data available')
+      h('.p4', 'No data available')
     ]);
   } else if (model.object.objects[tabObject.name] && model.object.objects[tabObject.name].error) {
     // data are null, it means an error of reading occured
     inner = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('', model.object.objects[tabObject.name].error),
+      h('.p4', model.object.objects[tabObject.name].error),
     ]);
   }
 

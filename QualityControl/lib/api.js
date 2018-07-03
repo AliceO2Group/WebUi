@@ -6,11 +6,11 @@ const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel
 
 module.exports.setup = (http) => {
   http.post('/readObjectData', readObjectData);
-  http.get('/readObjectsData', readObjectsData);
+  http.post('/readObjectsData', readObjectsData);
   http.post('/listObjects', listObjects);
   http.post('/readLayout', readLayout);
   http.post('/writeLayout', writeLayout);
-  http.get('/layout', listLayouts);
+  http.post('/listLayouts', listLayouts);
   http.delete('/layout/:name', deleteLayout);
   http.post('/layout', createLayout);
 
@@ -93,8 +93,8 @@ function readObjectData(req, res) {
  */
 function listLayouts(req, res) {
   let filter = {};
-  if (req.query.owner_id !== undefined) {
-    filter.owner_id = parseInt(req.query.owner_id, 10);
+  if (req.body.owner_id !== undefined) {
+    filter.owner_id = parseInt(req.body.owner_id, 10);
   }
 
   model.listLayouts(filter)
@@ -108,7 +108,7 @@ function listLayouts(req, res) {
  * @param {Response} res
  */
 function readLayout(req, res) {
-  const layoutName = req.query.layoutName;
+  const layoutName = req.body.layoutName;
 
   if (!layoutName) {
     res.status(400).send('layoutName parameter is needed');

@@ -1,7 +1,7 @@
 import {h} from '/js/src/index.js';
 
-import sidebar from './sidebar.js';
-import header from './header.js';
+import sidebar from './common/sidebar.js';
+import header from './common/header.js';
 
 import layoutList from './layout/layoutList.js';
 import layoutShow from './layout/layoutShow.js';

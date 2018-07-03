@@ -1,10 +1,9 @@
-import {h} from '/js/src/index.js';
-import {iconMenu} from '/js/src/icons.js';
+import {h, iconMenu} from '/js/src/index.js';
 
-import spinner from './loader/spinner.js'
-import layoutShowHeader from './layout/layoutShowHeader.js'
-import layoutListHeader from './layout/layoutListHeader.js'
-import objectTreeHeader from './object/objectTreeHeader.js'
+import spinner from '../loader/spinner.js'
+import layoutShowHeader from '../layout/layoutShowHeader.js'
+import layoutListHeader from '../layout/layoutListHeader.js'
+import objectTreeHeader from '../object/objectTreeHeader.js'
 
 export default function header(model) {
   return h('.flex-row.p2', [

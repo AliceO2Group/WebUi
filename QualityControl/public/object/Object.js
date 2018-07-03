@@ -125,7 +125,7 @@ export default class Object_ extends Observable {
     for (let name of objectsNames) {
       reqUrl.searchParams.append('objectName', name);
     }
-    const req = fetchClient(reqUrl, {method: 'GET'});
+    const req = fetchClient(reqUrl, {method: 'POST'});
     this.model.loader.watchPromise(req);
     const res = await req;
     const json = await res.text();
