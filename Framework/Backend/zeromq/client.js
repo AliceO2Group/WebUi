@@ -25,11 +25,11 @@ class ZeroMQClient extends EventEmitter {
     this.socket.on('close', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('disconnect', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('connect_delay', () => {
-      log.debug('ZMQ: Connection to the socket is pending..');
+      log.debug('ZMQ: Connection to the socket is pending...');
     });
 
     this.socket.on('connect_retry', () => {
-      log.debug('ZMQ: Socket is being reconnectd...');
+      log.debug('ZMQ: Socket is being reconnected...');
       this.connected = false;
     });
 
