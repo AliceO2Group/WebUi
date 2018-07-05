@@ -62,30 +62,28 @@ class MySQL {
   }
 
   /**
-   * The purpose is to translate Error object from mysql to more human one
-   * so we can send it to final user when it can be recovered
+   * The purpose is to translate MySQL errors to more human readable format
    * @param {Error} err - the error from a catch or callback
-   * @return {string} the new state of this source instance
+   * @return {string} Clear error message
    */
   errorHandler(err) {
     let message;
 
-    // Handle some common errors and just report the user he can't use mysql
     if (err.code === 'ER_NO_DB_ERROR') {
-      message = `Unable to connect to mysql, ${this.config.database} database not found`;
+      message = `${this.config.database} database not found`;
       log.warn(message);
     } else if (err.code === 'ER_NO_SUCH_TABLE') {
-      message = `Unable to connect to mysql, "messages" table not found in ${this.config.database}`;
+      message = `Table not found in ${this.config.database}`;
       log.warn(message);
     } else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
       message = `Unable to connect to mysql on ${this.config.host}:${this.config.port}`;
       log.warn(message);
     } else if (err.code === 'ER_ACCESS_DENIED_ERROR') {
-      message = `Unable to connect to mysql, access denied for ${this.config.user}`;
+      message = `Access denied for ${this.config.user}`;
       log.warn(message);
     } else {
-      message = `Unable to connect to mysql: ${err.code}`;
-      log.error(err); // log the whole error because we don't know why connection crashed
+      message = `MySQL error: ${err.code}, ${err.message}`;
+      log.error(message);
     }
 
     return message;
