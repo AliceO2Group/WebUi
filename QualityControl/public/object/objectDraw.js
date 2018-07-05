@@ -2,11 +2,15 @@ import {h} from '/js/src/index.js';
 import {timerDebouncer, objectId, clone, pointerId} from '../common/utils.js';
 
 /**
- * Draw an object using JSROOT
- * if name change, re-create entire div
- * if data are loaded, redraw jsroot
- * if data change, redraw jsroot
- * if data did not change but model did, resize jsroot after CSS animations and debouncer
+ * Draw an object using JSROOT.
+ * Many JSROOT actions depends on events and model change:
+ * replace element on tabObject change (id)
+ * resize element on tabObject size change (w, h)
+ * resize element on window size change
+ * redraw element on data changed (pointerId of object)
+ * clean-redraw element on options changed
+ * see fingerprint functions at bottom
+ * fingerprints are stored in DOM datasets to keep view internal state
  *
  * @param {object} model - root model object
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
@@ -35,78 +39,146 @@ export function draw(model, tabObject, options) {
   }
 
   const attributes = {
-    alt: keyHash(tabObject),
-    key: keyHash(tabObject), // completly re-create this div if the chart is not the same at all
+    'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
+    key: fingerprintReplacement(tabObject), // completly re-create this div if the chart is not the same at all
     class: options.className,
-    style: {height: options.height, width: options.width},
+    style: {
+      height: options.height,
+      width: options.width
+    },
 
     oncreate(vnode) {
+      // ask model to load data to be shown
       model.object.loadObject(tabObject.name);
-      vnode.dom.onresize = timerDebouncer(() => JSROOT.resize(vnode.dom), 200);
+
+      // setup resize function
+      vnode.dom.onresize = timerDebouncer(() => {
+        if (JSROOT.resize) {
+          // resize might not be loaded yet
+          JSROOT.resize(vnode.dom);
+        }
+      }, 200);
+
+      // resize on window size change
       window.addEventListener('resize', vnode.dom.onresize);
-      redrawOnDataUpdates(model, vnode.dom, tabObject);
+
+      // JSROOT setup
+      redrawOnDataUpdate(model, vnode.dom, tabObject);
+      resizeOnSizeUpdate(model, vnode.dom, tabObject);
     },
 
     onupdate(vnode) {
-      redrawOnDataUpdates(model, vnode.dom, tabObject);
+      // JSROOT setup
+      redrawOnDataUpdate(model, vnode.dom, tabObject);
+      resizeOnSizeUpdate(model, vnode.dom, tabObject);
     },
 
     onremove(vnode) {
-      // remove jsroot binding to avoid memory leak
+      // tell model we don't need those data anymore and free memory if needed
       model.object.unloadObject(tabObject.name);
+
+      // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {
         // cleanup might not be loaded yet
         JSROOT.cleanup(vnode.dom);
       }
+
+      // stop listening for window size change
       window.removeEventListener('resize', vnode.dom.onresize);
     }
   };
 
-  let inner = null;
-  if (!model.object.objects[tabObject.name]) {
-    // data are null, it means an error of reading occured
-    inner = h('.absolute-fill.flex-column.items-center.justify-center', [
+  let content = null;
+  const objectRemoteData = model.object.objects[tabObject.name];
+  if (!objectRemoteData || objectRemoteData.isLoading()) {
+    // not asked yet or loading
+    content = h('.absolute-fill.flex-column.items-center.justify-center', [
       h('.animate-slow-appearance', 'Loading')
     ]);
-  } else if (model.object.objects[tabObject.name] === null) {
-    // data are null, it means an error of reading occured
-    inner = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('.p4', 'No data available')
+  } else if (objectRemoteData.isFailure()) {
+    content = h('.absolute-fill.flex-column.items-center.justify-center', [
+      h('.p4', objectRemoteData.payload),
     ]);
-  } else if (model.object.objects[tabObject.name] && model.object.objects[tabObject.name].error) {
-    // data are null, it means an error of reading occured
-    inner = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('.p4', model.object.objects[tabObject.name].error),
-    ]);
+  } else {
+    // on success, JSROOT will erase all DOM inside div and put its own
   }
 
-  return h('div.relative', attributes, inner);
+  return h('div.relative', attributes, content);
 }
 
-function redrawOnDataUpdates(model, dom, tabObject) {
-  if (model.object.objects[tabObject.name] && !model.object.objects[tabObject.name].error && dom.dataset.cacheHash !== cacheHash(model, tabObject)) {
-    // cache control
-    dom.dataset.cacheHash = cacheHash(model, tabObject);
+// Apply a JSROOT resize when view goes from one size state to another
+// State is stored DOM dataset of element
+function resizeOnSizeUpdate(model, dom, tabObject) {
+  const resizeHash = fingerprintResize(tabObject);
+
+  if (dom.dataset.fingerprintResize !== resizeHash) {
+    dom.onresize();
+    dom.dataset.fingerprintResize = resizeHash;
+  }
+}
+
+// Apply a JSROOT redraw when view goes from one data state to another
+// State is stored DOM dataset of element
+function redrawOnDataUpdate(model, dom, tabObject) {
+  const objectRemoteData = model.object.objects[tabObject.name];
+
+  const redrawHash = fingerprintRedraw(model, tabObject);
+  const cleanRedrawHash = fingerprintCleanRedraw(model, tabObject);
+
+  const shouldRedraw = dom.dataset.fingerprintRedraw !== redrawHash;
+  const shouldCleanRedraw = dom.dataset.fingerprintCleanRedraw !== cleanRedrawHash;
+
+  if (objectRemoteData && objectRemoteData.isSuccess() &&
+    (shouldRedraw || shouldCleanRedraw)) {
+
     setTimeout(() => {
-      JSROOT.redraw(dom, model.object.objects[tabObject.name], tabObject.options.join(';'), (painter) => {
+      if (shouldCleanRedraw && JSROOT.cleanup) {
+        // Remove previous JSROOT content before draw to do a real redraw.
+        // Official redraw will keep options whenever they changed, we don't want this.
+        // (cleanup might not be loaded yet)
+        JSROOT.cleanup(dom);
+      }
+      JSROOT.redraw(dom, objectRemoteData.payload, tabObject.options.join(';'), (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
         }
       });
     }, 0);
+
+    dom.dataset.fingerprintRedraw = redrawHash;
+    dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
   }
 }
 
-function keyHash(tabObject) {
-  // Each time this key change means the jsroot plot must be redone.
-  // Like: tabObject changed, options changed, dimension changed (need redraw!)
-  return `${tabObject.id}:${tabObject.options.join(';')}:${tabObject.h}:${tabObject.w}`;
+// Replacement fingerprint.
+// When it changes, element should be replaced
+// - tabObject.id (associated to .name) is dependency of oncreate and onremove to load/unload
+function fingerprintReplacement(tabObject) {
+  return `${tabObject.id}`;
 }
 
-function cacheHash(model, tabObject) {
-  // help to identify when some data have changed to tell jsroot to redraw
-  // pointerId returns a different number if object has been replaced by another
-  const dataPointerId = model.object.objects[tabObject.name] ? pointerId(model.object.objects[tabObject.name]) : null;
-  return `${keyHash(tabObject)}:${dataPointerId}}`;
+// Resize fingerprint.
+// When it changes, JSROOT should resize canvas
+// - tabObject.w and tabObject.h change size
+function fingerprintResize(tabObject) {
+  return `${tabObject.w}:${tabObject.h}`;
+}
+
+// Redraw fingerprint.
+// When it changes, JSROOT should redraw canvas
+// - object data could be replaced on data refresh
+// - tabObject.options change requires redraw
+function fingerprintRedraw(model, tabObject) {
+  const drawData = model.object.objects[tabObject.name];
+  const dataPointerId = drawData ? pointerId(drawData) : null;
+  return `${dataPointerId}`;
+}
+
+// Clean redraw fingerprint.
+// When it changes, JSROOT should clean and redraw canvas
+// - tabObject.options change requires clean-redraw, not just redraw
+function fingerprintCleanRedraw(model, tabObject) {
+  const drawOptions = tabObject.options.join(';');
+  return `${drawOptions}`;
 }

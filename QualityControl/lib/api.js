@@ -36,31 +36,32 @@ function listObjects(req, res) {
 
 /**
  * List objects with data specified by objectName[]
+ * Send back array of objects or {error: ...}
  * @param {Request} req
  * @param {Response} res
  */
 function readObjectsData(req, res) {
-  let objectName = req.query.objectName;
+  let objectsNames = req.body.objectsNames;
 
-  if (!objectName) {
-    res.status(400).send('parameter objectName is needed');
+  if (!objectsNames) {
+    res.status(400).send('parameter objectsNames is needed');
     return;
   }
 
-  if (!Array.isArray(objectName)) {
-    objectName = [objectName];
+  if (!Array.isArray(objectsNames)) {
+    objectsNames = [objectsNames];
   }
 
-  // Retrieve data and handle errors
+  // Retrieve data, in case of error or not found, put message on 'error' field
   const safeRetriever = (name) => model.readObjectData(name)
     .then((data) => !data ? {error: 'Object not found'} : data)
     .catch((err) => ({error: err}));
 
-  const promiseArray = objectName.map(safeRetriever);
+  const promiseArray = objectsNames.map(safeRetriever);
   Promise.all(promiseArray)
     .then((results) => {
       const resultsByName = {};
-      objectName.forEach((name, i) => {
+      objectsNames.forEach((name, i) => {
         resultsByName[name] = results[i];
       });
       res.status(200).json(resultsByName);
