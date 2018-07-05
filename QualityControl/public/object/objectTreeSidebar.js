@@ -2,35 +2,31 @@ import {h} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
 import {iconCaretBottom, iconCaretRight, iconBarChart} from '/js/src/icons.js';
 
-export default function objectTreeSidebar(model) {
-  return h('.flex-column.h-100', [
-    h('.m2.mv3', searchForm(model)),
-    h('.h-100.scroll-y', treeTable(model)),
-    objectPreview(model)
-  ]);
-}
+export default (model) => h('.flex-column.h-100', [
+  h('.m2.mv3', searchForm(model)),
+  h('.h-100.scroll-y', treeTable(model)),
+  objectPreview(model)
+]);
 
-function searchForm(model) {
-  return [
-    h('input.form-control.w-100', {
-      placeholder: 'Search',
-      type: 'text',
-      value: model.object.searchInput,
-      oninput: (e) => model.object.search(e.target.value)
+const searchForm = (model) => [
+  h('input.form-control.w-100', {
+    placeholder: 'Search',
+    type: 'text',
+    value: model.object.searchInput,
+    oninput: (e) => model.object.search(e.target.value)
+  }),
+  model.object.onlineModeAvailable && h('.form-check.f6', [
+    h('input.form-check-input', {
+      type: 'checkbox',
+      id: 'inputOnlineOnlyTreeSidebar',
+      onchange: () => model.object.toggleMode(),
+      checked: model.object.onlineMode
     }),
-    model.object.onlineModeAvailable && h('.form-check.f6', [
-      h('input.form-check-input', {
-        type: 'checkbox',
-        id: 'inputOnlineOnlyTreeSidebar',
-        onchange: () => model.object.toggleMode(),
-        checked: model.object.onlineMode
-      }),
-      h('label.form-check-label', {for: 'inputOnlineOnlyTreeSidebar'}, [
-        'Online only'
-      ])
+    h('label.form-check-label', {for: 'inputOnlineOnlyTreeSidebar'}, [
+      'Online only'
     ])
-  ];
-}
+  ])
+];
 
 function objectPreview(model) {
   if (!model.object.selected) {
@@ -55,9 +51,7 @@ function treeTable(model) {
   ]);
 }
 
-function treeRows(model) {
-  return !model.object.tree ? null : model.object.tree.childrens.map(children => treeRow(model, children, 0));
-}
+const treeRows = (model) => !model.object.tree ? null : model.object.tree.childrens.map(children => treeRow(model, children, 0));
 
 function searchRows(model) {
   return !model.object.searchResult ? null : model.object.searchResult.map(item => {
