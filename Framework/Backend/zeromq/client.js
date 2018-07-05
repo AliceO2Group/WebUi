@@ -20,7 +20,7 @@ class ZeroMQClient extends EventEmitter {
 
     this.connected = false;
     this.socket = zmq.socket(type);
-    this.socket.monitor(1000);
+    this.socket.monitor(1000); // monitor socket every 1s
     this.socket.on('connect', (fd, endpoint) => this.connect(endpoint));
     this.socket.on('close', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('disconnect', (fd, endpoint) => this.disconnect(endpoint));
