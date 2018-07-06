@@ -122,13 +122,13 @@ it produces a vnode usable by render function.
     - .onremove <code>Hook</code> - Hook is called before a DOM element is removed from the document
 - children <code>Array.&lt;(Vnode\|string)&gt;</code> | <code>string</code> - Children inside this tag
 
-**Example**  
+**Example** *(Simple tag declaration)*  
 ```js
 import {h, render} from '/js/src/index.js';
 const virtualNode1 = h('h1.text-center', 'World');
 render(document.body, virtualNode1);
 ```
-**Example**  
+**Example** *(Usage of click and hooks)*  
 ```js
 import {h, render} from '/js/src/index.js';
 const virtualNode1 = h('h1.text-center', 'World');

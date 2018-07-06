@@ -75,12 +75,11 @@ function render(element, vnode) {
  * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
  * @param {Array.<Vnode|string>|string} children - Children inside this tag
  * @return {Vnode} the Vnode representation
- * @example
+ * @example <caption>Simple tag declaration</caption>
  * import {h, render} from '/js/src/index.js';
  * const virtualNode1 = h('h1.text-center', 'World');
  * render(document.body, virtualNode1);
- *
- * @example
+ * @example <caption>Usage of click and hooks</caption>
  * import {h, render} from '/js/src/index.js';
  * const virtualNode1 = h('h1.text-center', 'World');
  * const virtualNode2 = h('h1.text-center', {className: 'primary'}, 'World');
