@@ -67,6 +67,7 @@ Template engine functions using vnode and DOM diff algo
     * [`~render(element, vnode)`](#module_renderer..render)
     * [`~h(selector, attributes, children)`](#module_renderer..h) ⇒ <code>Vnode</code>
     * [`~mount(element, view, model, debug)`](#module_renderer..mount)
+    * [`~Hook`](#module_renderer..Hook) : <code>function</code>
 
 <a name="module_renderer..frameDebouncer"></a>
 
@@ -107,17 +108,36 @@ it produces a vnode usable by render function.
 **Returns**: <code>Vnode</code> - the Vnode representation  
 **Params**
 
-- selector <code>String</code> - Tag name and optional classes as CSS selector
-- attributes <code>Object</code> - (optional) className, onclick, href, ...
-- children <code>Array.&lt;Vnode&gt;</code> | <code>String</code> | <code>Number</code> | <code>Boolean</code> - Children inside this tag
+- selector <code>String</code> - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
+- attributes <code>Object</code> - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
+    - .className <code>string</code> - Additional class names
+    - .onclick <code>function</code> - On mouse click (DOM handler onclick)[https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick]
+    - .oninput <code>function</code> - On content typed inside input tag (DOM handler oninput)[https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput]
+    - .style <code>string</code> | <code>Object</code> - If string used, change HTML attribute (`style="..."`). If object used, change DOM property (`style = {}`).
+    - .oncreate <code>Hook</code> - Hook called after a DOM element is created and attached to the document
+    - .onupdate <code>Hook</code> - Hook is called after each render, while DOM element is attached to the document
+    - .onremove <code>Hook</code> - Hook is called before a DOM element is removed from the document
+    - .href <code>string</code> - Destination for links (DOM href property)[https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href]
+    - .placeholder <code>string</code> - Placeholder for inputs (DOM input, all properties)[https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input]
+    - .value <code>string</code> - Value for inputs (DOM input, all properties)[https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input]
+- children <code>Array.&lt;(Vnode\|string)&gt;</code> | <code>string</code> - Children inside this tag
 
 **Example**  
 ```js
 import {h, render} from '/js/src/index.js';
-var virtualNode1 = h('h1.title', 'World');
-var virtualNode2 = h('h1', {className: 'title'}, 'World');
-var virtualNode3 = h('h1', {className: 'title', onclick: () => console.log('clicked')}, 'World');
-var containerNode = h('div', [virtualNode1, virtualNode2, virtualNode3]);
+const virtualNode1 = h('h1.text-center', 'World');
+const virtualNode2 = h('h1.text-center', {className: 'primary'}, 'World');
+const virtualNode3 = h('h1', {onclick: () => console.log('clicked')}, 'World');
+const chart = h('div', {
+  oncreate: (vnode) => chartlib.attachTo(vnode.dom),
+  onremove: (vnode) => chartlib.detachFrom(vnode.dom)
+});
+const containerNode = h('div', [
+  virtualNode1,
+  virtualNode2,
+  virtualNode3,
+  chart
+]);
 render(document.body, containerNode);
 ```
 <a name="module_renderer..mount"></a>
@@ -143,6 +163,22 @@ mount(document.body, view, model);
 model.name = 'Joueur du Grenier';
 model.notify();
 ```
+<a name="module_renderer..Hook"></a>
+
+### `renderer~Hook` : <code>function</code>
+This callback type is a Hook.
+Hooks are lifecycle methods of vnodes.
+They are only called as a side effect of template engine (`render` or `mount`).
+Properties of vnode argument must not be used, except `dom`.
+It's very useful to connect with another template engine like a chart lib or a canvas.
+Don't forget to remove any link to DOM element when `onremove` is called to avoid memory leaks.
+
+**Kind**: inner typedef of [<code>renderer</code>](#module_renderer)  
+**Params**
+
+- vnode <code>Object</code>
+    - .dom <code>Object</code> - DOM element
+
 <a name="module_sessionService"></a>
 
 ## sessionService
