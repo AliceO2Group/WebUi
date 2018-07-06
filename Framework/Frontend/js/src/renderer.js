@@ -45,23 +45,59 @@ function render(element, vnode) {
 }
 
 /**
+ * This callback type is a Hook.
+ * Hooks are lifecycle methods of vnodes.
+ * They are only called as a side effect of template engine (`render` or `mount`).
+ * Properties of vnode argument must not be used, except `dom`.
+ * It's very useful to connect with another template engine like a chart lib or a canvas.
+ * Don't forget to remove any link to DOM element when `onremove` is called to avoid memory leaks.
+ *
+ * @callback Hook
+ * @param {Object} vnode
+ * @param {DOMElement} vnode.dom - DOM element you can access
+ */
+
+/**
  * Hyperscript function to represente a DOM element
  * it produces a vnode usable by render function.
- * @param {String} selector - Tag name and optional classes as CSS selector
- * @param {Object} attributes - (optional) className, onclick, href, ...
- * @param {Array<Vnode>|String|Number|Boolean} children - Children inside this tag
+ *
+ * @param {String} selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
+ * @param {Object} attributes - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
+ * @param {string} attributes.className - Additional class names
+ * @param {function} attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
+ * @param {function} attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
+ * @param {string|Object} attributes.style - `style: "background:red;"` or `style: {background: "red"}`
+ * @param {string} attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
+ * @param {string} attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {string} attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {Hook} attributes.oncreate - Hook called after a DOM element is created and attached to the document
+ * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
+ * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
+ * @param {Array.<Vnode|string>|string} children - Children inside this tag
  * @return {Vnode} the Vnode representation
- * @example
+ * @example <caption>Simple tag declaration</caption>
  * import {h, render} from '/js/src/index.js';
- * var virtualNode1 = h('h1.title', 'World');
- * var virtualNode2 = h('h1', {className: 'title'}, 'World');
- * var virtualNode3 = h('h1', {className: 'title', onclick: () => console.log('clicked')}, 'World');
- * var containerNode = h('div', [virtualNode1, virtualNode2, virtualNode3]);
+ * const virtualNode1 = h('h1.text-center', 'World');
+ * render(document.body, virtualNode1);
+ * @example <caption>Usage of click and hooks</caption>
+ * import {h, render} from '/js/src/index.js';
+ * const virtualNode1 = h('h1.text-center', 'World');
+ * const virtualNode2 = h('h1.text-center', {className: 'primary'}, 'World');
+ * const virtualNode3 = h('h1', {onclick: () => console.log('clicked')}, 'World');
+ * const chart = h('div', {
+ *   oncreate: (vnode) => chartlib.attachTo(vnode.dom),
+ *   onremove: (vnode) => chartlib.detachFrom(vnode.dom)
+ * });
+ * const containerNode = h('div', [
+ *   virtualNode1,
+ *   virtualNode2,
+ *   virtualNode3,
+ *   chart
+ * ]);
  * render(document.body, containerNode);
  */
 function h(...args) {
   // encapsulate mithril engine so we can change if needed
-  // TODO: the API should be simplified of lifecycle methods and not depend on mithril
   return window.m(...args);
 }
 
