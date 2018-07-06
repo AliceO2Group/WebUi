@@ -82,7 +82,7 @@ WHERE:
 - Set `redirect_uri` to `https://<YOUR_HOSTNAME>/callback`
 - Fill these values and generated secret into `oAuth` section of `config.js` file.
 
-Note: if you go from OAuth disabled to enabled (and opposite), you will lose ownership of layouts. When OAuth is disabled, all users share the same id `0`, if you activate OAuth (ids form `1` to `Infinity`). You can change ownership by hand on table `layout.owner_id` to migrate layouts.
+Note: Enabling or disabling OAuth may impacts layout ownership model. When OAuth is disabled all users share the same `id` (`0`), otherwise `id` equals to CERN Person ID. The layout ownership `id` can be changed directly in the database -  `layout.owner_id`.
 
 #### Enable HTTPS
 - Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
