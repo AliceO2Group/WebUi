@@ -21,6 +21,7 @@ class TObject2JsonClient extends EventEmitter {
       'dealer'
     );
 
+    this.zmqClient.socket.monitor();
     this.zmqClient.on('message', this._onRawMessage.bind(this));
   }
 
@@ -48,6 +49,10 @@ class TObject2JsonClient extends EventEmitter {
   retrieve(path) {
     if (!path || path.indexOf('/') === -1) {
       return Promise.reject('Path should contain a slash at least');
+    }
+
+    if (!this.zmqClient.connected) {
+      return Promise.reject('Unable to connect to TObject2Json');
     }
 
     this.zmqClient.send(path);

@@ -1,7 +1,7 @@
 import {h} from '/js/src/index.js';
 
-import objectTreeSidebar from './object/objectTreeSidebar.js';
-import objectPropertiesSidebar from './object/objectPropertiesSidebar.js';
+import objectTreeSidebar from '../object/objectTreeSidebar.js';
+import objectPropertiesSidebar from '../object/objectPropertiesSidebar.js';
 import {iconLayers, iconPlus, iconBarChart} from '/js/src/icons.js';
 
 export default function sidebar(model) {
@@ -53,19 +53,26 @@ const exploreMenu = (model) => [
 
 const myLayoutsMenu = (model) => [
   h('.menu-title', 'My Layouts'),
-  (model.layout.myList ? model.layout.myList.map((layout) => h('a.menu-item', {
-      href: `?page=layoutShow&layout=${encodeURIComponent(layout.name)}`,
-      onclick: (e) => model.router.handleLinkEvent(e),
-      class: model.router.params.layout === layout.name ? 'selected' : ''
-    },
-    [
-      iconLayers(), ' ', h('span', layout.name)
-    ]
-  )) : null),
+  model.layout.myList.match({
+    NotAsked: () => null,
+    Loading: () => h('.menu-item', 'Loading...'),
+    Success: (list) => list.map((layout) => myLayoutsMenuItem(model, layout)),
+    Failure: (error) => h('.menu-item', error),
+  }),
   h('a.menu-item', {onclick: () => model.layout.newItem(prompt('Choose a name of the new layout:'))}, [
     iconPlus(), ' ', h('span', 'New layout...')
   ])
 ];
+
+const myLayoutsMenuItem = (model, layout) => h('a.menu-item', {
+    href: `?page=layoutShow&layout=${encodeURIComponent(layout.name)}`,
+    onclick: (e) => model.router.handleLinkEvent(e),
+    class: model.router.params.layout === layout.name ? 'selected' : ''
+  },
+  [
+    iconLayers(), ' ', h('span', layout.name)
+  ]
+);
 
 const refreshOptions = (model) => [
   h('.menu-title',[

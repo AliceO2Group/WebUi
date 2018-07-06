@@ -21,11 +21,11 @@
 </body>
 
 <script src="/js/src/compatibility.js"></script>
-<script src="/jsroot/scripts/JSRootCore.js"></script>
+<script src="/jsroot/scripts/JSRootCore.js?2d&more2d"></script>
 
 <!-- Load the session service, parses variables provided by server in the query -->
 <script type="module">
-import sessionService from '/js/src/sessionService.js';
+import {sessionService} from '/js/src/index.js';
 sessionService.loadAndHideParameters();
 
 // Expose sessionService to interract with it the browser's console
@@ -36,8 +36,8 @@ window.sessionService = sessionService;
 <script type="module">
 // Import MVC
 import {mount} from '/js/src/index.js';
-import view from './app/view.js';
-import Model from './app/Model.js';
+import view from './view.js';
+import Model from './Model.js';
 
 // Start application
 const model = new Model();

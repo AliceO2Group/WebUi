@@ -72,9 +72,10 @@ class MySQLConnector {
 
     if (filter.owner_id !== undefined) {
       request = this.connection.query('select * from layout where owner_id = ?', [filter.owner_id]);
+    } else {
+      request = this.connection.query('select * from layout');
     }
 
-    request = this.connection.query('select * from layout');
     request.then((items) => {
       return items.forEach((item) => {
         item.tabs = JSON.parse(item.tabs);

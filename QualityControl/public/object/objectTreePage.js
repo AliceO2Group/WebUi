@@ -1,18 +1,16 @@
 import {h} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
 
-export function objectTree(model) {
-  return h('.flex-column.absolute-fill', {key: model.router.params.page}, [
-    h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()}, [
-      h('.flex-grow.scroll-y', tableShow(model)),
-      h('.animate-width.scroll-y', {style: {width: model.object.selected ? '50%' : 0}}, model.object.selected ? draw(model, model.object.selected.name) : null)
-    ]),
-    h('.f6.status-bar.ph1.flex-row', [
-      statusBarLeft(model),
-      statusBarRight(model),
-    ])
-  ]);
-}
+export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
+  h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()}, [
+    h('.flex-grow.scroll-y', tableShow(model)),
+    h('.animate-width.scroll-y', {style: {width: model.object.selected ? '50%' : 0}}, model.object.selected ? draw(model, model.object.selected.name) : null)
+  ]),
+  h('.f6.status-bar.ph1.flex-row', [
+    statusBarLeft(model),
+    statusBarRight(model),
+  ])
+]);
 
 function statusBarLeft(model) {
   let itemsInfo;
@@ -36,36 +34,26 @@ function statusBarLeft(model) {
   return h('span.flex-grow', itemsInfo);
 }
 
-function statusBarRight(model) {
-  if (!model.object.selected) {
-    return null;
-  }
+const statusBarRight = (model) => model.object.selected ? h('span.right', [
+  model.object.selected.name
+]) : null;
 
-  return h('span.right', [
-    model.object.selected.name
-  ]);
-}
-
-export function tableShow(model) {
-  return [
-    h('table.table.table-sm.text-no-select', [
-      h('thead', [
-        h('tr', [
-          h('th', {}, 'Name'),
-          h('th', {style: {width: '6em'}}, 'Quality'),
-        ])
-      ]),
-      h('tbody', [
-        // The main table of the view can be a tree OR the result of a search
-        model.object.searchInput ? searchRows(model) : treeRows(model),
+const tableShow = (model) => [
+  h('table.table.table-sm.text-no-select', [
+    h('thead', [
+      h('tr', [
+        h('th', {}, 'Name'),
+        h('th', {style: {width: '6em'}}, 'Quality'),
       ])
+    ]),
+    h('tbody', [
+      // The main table of the view can be a tree OR the result of a search
+      model.object.searchInput ? searchRows(model) : treeRows(model),
     ])
-  ];
-}
+  ])
+];
 
-function treeRows(model) {
-  return !model.object.tree ? null : model.object.tree.childrens.map(children => treeRow(model, children, 0));
-}
+const treeRows = (model) => !model.object.tree ? null : model.object.tree.childrens.map(children => treeRow(model, children, 0));
 
 function searchRows(model) {
   return model.object.searchResult.map(item => {
@@ -86,21 +74,15 @@ function searchRows(model) {
 }
 
 // Icons used
-function openIcon() {
-  return h('svg.icon.gray', {fill: 'currentcolor', viewBox: '0 0 8 8'},
-    h('path', {d: 'M0 2l4 4 4-4h-8z'})
-  );
-}
-function closedIcon() {
-  return h('svg.icon.gray', {fill: 'currentcolor', viewBox: '0 0 8 8'},
-    h('path', {d: 'M2 0v8l4-4-4-4z'})
-  );
-}
-function objectIcon() {
-  return h('svg.icon.black', {fill: 'currentcolor', viewBox: '0 0 8 8'},
-    h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
-  );
-}
+const openIcon = () => h('svg.icon.gray', {fill: 'currentcolor', viewBox: '0 0 8 8'},
+  h('path', {d: 'M0 2l4 4 4-4h-8z'})
+);
+const closedIcon = () => h('svg.icon.gray', {fill: 'currentcolor', viewBox: '0 0 8 8'},
+  h('path', {d: 'M2 0v8l4-4-4-4z'})
+);
+const objectIcon = () => h('svg.icon.black', {fill: 'currentcolor', viewBox: '0 0 8 8'},
+  h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
+);
 
 // flatten the tree in a functional way
 function treeRow(model, tree, level) {

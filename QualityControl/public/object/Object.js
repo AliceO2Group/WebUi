@@ -1,4 +1,6 @@
-import {Observable, fetchClient, WebSocketClient} from '/js/src/index.js';
+/* global: JSROOT */
+
+import {Observable, fetchClient, WebSocketClient, RemoteData} from '/js/src/index.js';
 
 import ObjectTree from './ObjectTree.class.js'
 
@@ -11,7 +13,7 @@ export default class Object_ extends Observable {
     this.list = null;
     this.tree = null; // ObjectTree
     this.selected = null; // object - id of object
-    this.objects = {}; // name -> {object full content} or {error:}
+    this.objects = {}; // objectName -> RemoteData
     this.objectsReferences = {}; // object name -> number of
     this.informationService = null; // null or {...}, null means not loaded yet
     this.listOnline = []; // intersection of informationService and list
@@ -97,19 +99,18 @@ export default class Object_ extends Observable {
       return;
     }
 
-    const req = fetchClient(`/api/readObjectData?objectName=${objectName}`, {method: 'POST'});
-    this.model.loader.watchPromise(req);
-    const res = await req;
-    const json = await res.text();
-    if (res.ok) {
-      const object = JSROOT.parse(json);
-      this.objects[objectName] = object;
-    } else if (res.status === 404) {
-      this.objects[objectName] = {error: 'Object not found'};
+    // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
+
+    const {result, ok, status} = await this.model.loader.post(`/api/readObjectData?objectName=${objectName}`);
+    if (ok) {
+      // link JSROOT methods to object
+      this.objects[objectName] = RemoteData.Success(JSROOT.JSONR_unref(result));
+    } else if (status === 404) {
+      this.objects[objectName] = RemoteData.Failure('Object not found');
     } else {
-      const error = JSON.parse(json);
-      this.objects[objectName] = error;
+      this.objects[objectName] = RemoteData.Failure(result.error);
     }
+
     this.notify();
   }
 
@@ -121,20 +122,22 @@ export default class Object_ extends Observable {
       return;
     }
 
-    const reqUrl = new URL('/api/readObjectsData', window.location);
-    for (let name of objectsNames) {
-      reqUrl.searchParams.append('objectName', name);
+    const {result, ok, status} = await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
+    if (!ok) {
+      // it should be always status=200 for this request
+      alert('Failed to refresh plots when contacting server');
+      return;
     }
-    const req = fetchClient(reqUrl, {method: 'GET'});
-    this.model.loader.watchPromise(req);
-    const res = await req;
-    const json = await res.text();
-    const objects = JSROOT.parse(json); // JSROOT methods
-    const objectsRaw = JSON.parse(json);
 
+    const objects = JSROOT.JSONR_unref(result);
     for (let name in objects) {
-      this.objects[name] = objects[name] || {error: 'Object not found'};
+      if (objects[name].error) {
+        this.objects[name] = RemoteData.Failure(objects[name].error);
+      } else {
+        this.objects[name] = RemoteData.Success(objects[name]);
+      }
     }
+
     this.notify();
   }
 
@@ -159,7 +162,7 @@ export default class Object_ extends Observable {
    * @param {string} name - name of the object
    */
   invalidObject(name) {
-    this.objects[name] = {error: 'JSROOT is unable to draw this object'};
+    this.objects[name] = RemoteData.Failure('JSROOT was unable to draw this object');
     this.notify();
   }
 

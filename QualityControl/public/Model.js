@@ -1,10 +1,7 @@
-import sessionService from '/js/src/sessionService.js';
-import {Observable, WebSocketClient} from '/js/src/index.js';
+import {sessionService, Observable, WebSocketClient, QueryRouter, Loader} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js'
 import Object_ from './object/Object.js'
-import Loader from './loader/Loader.js'
-import Router from './QueryRouter.class.js'
 
 /**
  * Represents the application's state and actions as a class
@@ -33,7 +30,7 @@ export default class Model extends Observable {
     this.page = null;
 
     // Setup router
-    this.router = new Router();
+    this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.handleLocationChange(); // Init first page
 
