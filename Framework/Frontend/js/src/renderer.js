@@ -66,15 +66,20 @@ function render(element, vnode) {
  * @param {string} attributes.className - Additional class names
  * @param {function} attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
  * @param {function} attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
- * @param {string|Object} attributes.style - If string used, change HTML attribute (`style="..."`). If object used, change DOM property (`style = {}`).
- * @param {Hook} attributes.oncreate - Hook called after a DOM element is created and attached to the document
- * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
- * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
+ * @param {string|Object} attributes.style - `style: "background:red;"` or `style: {background: "red"}`
  * @param {string} attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
  * @param {string} attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
  * @param {string} attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {Hook} attributes.oncreate - Hook called after a DOM element is created and attached to the document
+ * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
+ * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
  * @param {Array.<Vnode|string>|string} children - Children inside this tag
  * @return {Vnode} the Vnode representation
+ * @example
+ * import {h, render} from '/js/src/index.js';
+ * const virtualNode1 = h('h1.text-center', 'World');
+ * render(document.body, virtualNode1);
+ *
  * @example
  * import {h, render} from '/js/src/index.js';
  * const virtualNode1 = h('h1.text-center', 'World');

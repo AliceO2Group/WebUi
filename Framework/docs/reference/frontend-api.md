@@ -113,15 +113,21 @@ it produces a vnode usable by render function.
     - .className <code>string</code> - Additional class names
     - .onclick <code>function</code> - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
     - .oninput <code>function</code> - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
-    - .style <code>string</code> | <code>Object</code> - If string used, change HTML attribute (`style="..."`). If object used, change DOM property (`style = {}`).
-    - .oncreate <code>Hook</code> - Hook called after a DOM element is created and attached to the document
-    - .onupdate <code>Hook</code> - Hook is called after each render, while DOM element is attached to the document
-    - .onremove <code>Hook</code> - Hook is called before a DOM element is removed from the document
+    - .style <code>string</code> | <code>Object</code> - `style: "background:red;"` or `style: {background: "red"}`
     - .href <code>string</code> - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
     - .placeholder <code>string</code> - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
     - .value <code>string</code> - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+    - .oncreate <code>Hook</code> - Hook called after a DOM element is created and attached to the document
+    - .onupdate <code>Hook</code> - Hook is called after each render, while DOM element is attached to the document
+    - .onremove <code>Hook</code> - Hook is called before a DOM element is removed from the document
 - children <code>Array.&lt;(Vnode\|string)&gt;</code> | <code>string</code> - Children inside this tag
 
+**Example**  
+```js
+import {h, render} from '/js/src/index.js';
+const virtualNode1 = h('h1.text-center', 'World');
+render(document.body, virtualNode1);
+```
 **Example**  
 ```js
 import {h, render} from '/js/src/index.js';
