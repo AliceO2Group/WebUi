@@ -54,7 +54,7 @@ function render(element, vnode) {
  *
  * @callback Hook
  * @param {Object} vnode
- * @param {Object} vnode.dom - DOM element
+ * @param {DOMElement} vnode.dom - DOM element you can access
  */
 
 /**

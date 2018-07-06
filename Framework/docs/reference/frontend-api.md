@@ -183,7 +183,7 @@ Don't forget to remove any link to DOM element when `onremove` is called to avoi
 **Params**
 
 - vnode <code>Object</code>
-    - .dom <code>Object</code> - DOM element
+    - .dom <code>DOMElement</code> - DOM element you can access
 
 <a name="module_sessionService"></a>
 
