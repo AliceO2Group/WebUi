@@ -1,11 +1,11 @@
 import {h} from '/js/src/index.js';
-import {callThroughput} from '../common/utils.js';
+import {callRateLimiter} from '../common/utils.js';
 
 export default (model) => h('canvas', {
   width: '10px',
   height: model.log.scrollHeight + 'px',
 
-  onupdate: callThroughput((vnode) => {
+  onupdate: callRateLimiter((vnode) => {
     // no place to paint
     if (!model.log.scrollHeight) {
       return;

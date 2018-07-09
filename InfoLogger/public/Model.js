@@ -2,7 +2,7 @@
 import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, RemoteData} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
-import {callThroughput} from './common/utils.js';
+import {callRateLimiter} from './common/utils.js';
 
 // The model
 export default class Model extends Observable {
@@ -148,7 +148,7 @@ export default class Model extends Observable {
 
   updateRouteOnModelChange() {
     // Model can change very often and updating router to often can throw errors
-    callThroughput(() => {
+    callRateLimiter(() => {
       // replace current URL, we don't want one history slot per change
       // do it silently, don't notify model which is the source of this action
       this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);

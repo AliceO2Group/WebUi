@@ -6,12 +6,12 @@
  * @param {string} time - ms
  * @return {function} lambda function to be called to call `fn`
  * @example
- * let f = callThroughput((arg) => console.log('called', arg), 1000);
+ * let f = callRateLimiter((arg) => console.log('called', arg), 1000);
  * 00:00:00 f(1);f(2);f(3);f(4);
  * 00:00:00 called 1
  * 00:00:01 called 4
  */
-export function callThroughput(fn, time) {
+export function callRateLimiter(fn, time) {
   let timer;
   let lastCall;
   return (...args) => {
