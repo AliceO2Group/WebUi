@@ -65,6 +65,43 @@ describe('InfoLogger', function () {
     assert.strictEqual(search, '?q={"level":{"max":1}}');
   });
 
+  describe('LogFilter', async () => {
+    it('parses dates', async () => {
+      // default Geneva time
+      const $since = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('timestamp', 'since', '01/02/04');
+        return model.log.filter.criterias.timestamp.$since.toISOString();
+      });
+      assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
+    });
+
+    it('parses numbers to integers', async () => {
+      const $max = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', '12');
+        return model.log.filter.criterias.level.$max;
+      });
+      assert.strictEqual($max, 12);
+    });
+
+    it('parses empty keyword to null', async () => {
+      const $match = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('pid', 'match', '');
+        return model.log.filter.criterias.pid.$match;
+      });
+      assert.strictEqual($match, null);
+    });
+
+    it('parses keywords to array', async () => {
+      const $match = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('pid', 'match', '123 456');
+        return model.log.filter.criterias.pid.$match;
+      });
+      assert.strictEqual($match.length, 2);
+      assert.strictEqual($match[0], '123');
+      assert.strictEqual($match[1], '456');
+    });
+  });
+
   describe('utils.js', async () => {
     it('can be injected', async () => {
       const watchDogInjection = page.waitForFunction('window.utils');
