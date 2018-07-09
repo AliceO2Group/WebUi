@@ -64,6 +64,16 @@ module.exports = class LiveDataSource extends EventEmitter {
     this.client.on('end', () => {
       log.error('Connection to infoLoggerServer ended');
     });
+
+    this.client.on('error', (error) => {
+      if (error.code === 'ENOTFOUND') {
+        throw new Error(`Unable to lookup InfoLoggerServer host (${options.host})`);
+      }
+      if (error.code === 'ECONNREFUSED') {
+        throw new Error(`Unable to connect to InfoLoggerServer (${options.host}:${options.port}), connection refused`);
+      }
+      throw error;
+    });
   }
 
   /**
