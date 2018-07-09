@@ -1,10 +1,11 @@
 import {h} from '/js/src/index.js';
+import {callThroughput} from '../common/utils.js';
 
 export default (model) => h('canvas', {
   width: '10px',
   height: model.log.scrollHeight + 'px',
 
-  onupdate(vnode) {
+  onupdate: callThroughput((vnode) => {
     // no place to paint
     if (!model.log.scrollHeight) {
       return;
@@ -43,5 +44,5 @@ export default (model) => h('canvas', {
       ctx.closePath();
       ctx.stroke();
     }
-  },
+  }, 500), // canvas consumes a lot of CPU, 15 FPS is fine, but we put 2 FPS because it's almost a static picture for human eyes
 });
