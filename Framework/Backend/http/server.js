@@ -105,7 +105,6 @@ class HttpServer {
     // Router for static files (can grow with addStaticPath)
     // eslint-disable-next-line
     this.routerStatics = express.Router();
-    this.addStaticPath(require.resolve('mithril'), '/js/mithril.js');
     this.addStaticPath(path.join(__dirname, '../../Frontend'));
     this.app.use(this.routerStatics);
 
