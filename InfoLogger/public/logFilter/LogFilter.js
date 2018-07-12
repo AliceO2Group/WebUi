@@ -51,10 +51,6 @@ export default class LogFilter extends Observable {
     this.notify();
   }
 
-  testLog(log) {
-    return true;
-  }
-
   /**
    * Exports all filled filters inputs
    * @return {Object} minimal filter object
