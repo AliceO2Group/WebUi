@@ -164,13 +164,4 @@ describe('HTTP server', () => {
       done();
     }
   });
-
-  it('Ensure that mithril is present at /js/mithril.js', (done) => {
-    http.get('http://localhost:' + config.http.port + '/js/mithril.js',
-      (res) => {
-        assert.strictEqual(res.statusCode, 200);
-        done();
-      }
-    );
-  });
 });
