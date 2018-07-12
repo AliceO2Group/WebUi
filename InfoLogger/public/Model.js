@@ -2,6 +2,7 @@
 import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, RemoteData} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
+import {callRateLimiter} from './common/utils.js';
 
 // The model
 export default class Model extends Observable {
@@ -29,9 +30,6 @@ export default class Model extends Observable {
     // Setup keyboard dispatcher
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
 
-    // Setup window size listener - view needs redraw for smart scrolling
-    window.addEventListener('resize', this.notify.bind(this));
-
     // Setup WS connexion
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
@@ -47,7 +45,9 @@ export default class Model extends Observable {
     this.detectServices();
 
     // update router on model change
-    this.observe(this.updateRouteOnModelChange.bind(this));
+    // Model can change very often we protect router with callRateLimiter
+    // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
+    this.observe(callRateLimiter(() => this.updateRouteOnModelChange(), 500));
   }
 
   /**
@@ -146,7 +146,6 @@ export default class Model extends Observable {
   }
 
   updateRouteOnModelChange() {
-    // replace current URL, we don't want one history slot per change
     // do it silently, don't notify model which is the source of this action
     this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
   }
