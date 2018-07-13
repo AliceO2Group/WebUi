@@ -1,8 +1,11 @@
-import {h} from '/js/src/index.js';
+import {h, switchCase} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import switchCase from '../common/switchCase.js';
 import showTableItem from '../common/showTableItem.js';
+
+/**
+ * @file Page to show 1 environment (content and header)
+ */
 
 export let header = (model) => [
   h('.w-50 text-center', [
@@ -27,6 +30,7 @@ const showContent = (model, item) => [
   showControl(model, item)
 ];
 
+// List of buttons, each one is an action to do on the current environment `item`
 const showControl = (model, item) =>   h('.m4', [
   h('h4', 'Control'),
   h('', [
