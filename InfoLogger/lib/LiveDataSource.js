@@ -2,29 +2,7 @@ const net = require('net');
 const EventEmitter = require('events');
 const {log} = require('@aliceo2/web-ui');
 
-const protocols = [
-  {
-    version: '1.4',
-    fields: [
-      {name: 'severity', type: String},
-      {name: 'level', type: Number},
-      {name: 'timestamp', type: String},
-      {name: 'hostname', type: String},
-      {name: 'rolename', type: String},
-      {name: 'pid', type: Number},
-      {name: 'username', type: String},
-      {name: 'system', type: String},
-      {name: 'facility', type: String},
-      {name: 'detector', type: String},
-      {name: 'partition', type: String},
-      {name: 'run', type: Number},
-      {name: 'errcode', type: Number},
-      {name: 'errline', type: Number},
-      {name: 'errsource', type: String},
-      {name: 'message', type: String}
-    ]
-  }
-];
+const protocols = require('./protocols.js');
 
 /* @class LiveDataSource
  * Connects to server

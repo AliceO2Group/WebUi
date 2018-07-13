@@ -21,23 +21,45 @@ function connectionListener(client) {
     const timestamp = (new Date()).getTime() / 1000; // seconds
     const nextLogTimeout = 500 + (Math.random() * -500); // [0 ; 500]ms
 
-    client.write(`*1.4#` +
-      `${log.severity || ''}#` +
-      `${log.level || ''}#` +
-      `${timestamp || ''}#` +
-      `${log.hostname || ''}#` +
-      `${log.rolename || ''}#` +
-      `${log.pid || ''}#` +
-      `${log.username || ''}#` +
-      `${log.system || ''}#` +
-      `${log.facility || ''}#` +
-      `${log.detector || ''}#` +
-      `${log.partition || ''}#` +
-      `${log.run || ''}#` +
-      `${log.errcode || ''}#` +
-      `${log.errline || ''}#` +
-      `${log.errsource || ''}#` +
-      `${log.message || ''}\r\n`);
+    // switch protocol after each log sent to try both protocols
+    if (currentLogIndex % 2 === 1) {
+      client.write(`*1.4#` +
+        `${log.severity || ''}#` +
+        `${log.level || ''}#` +
+        `${timestamp || ''}#` +
+        `${log.hostname || ''}#` +
+        `${log.rolename || ''}#` +
+        `${log.pid || ''}#` +
+        `${log.username || ''}#` +
+        `${log.system || ''}#` +
+        `${log.facility || ''}#` +
+        `${log.detector || ''}#` +
+        `${log.partition || ''}#` +
+        `${log.run || ''}#` +
+        `${log.errcode || ''}#` +
+        `${log.errline || ''}#` +
+        `${log.errsource || ''}#` +
+        `${log.message || ''}\r\n`);
+    } else {
+      client.write(`*1.3#` +
+        `${log.severity || ''}#` +
+        `${log.level || ''}#` +
+        `${timestamp || ''}#` +
+        `${log.hostname || ''}#` +
+        `${log.rolename || ''}#` +
+        `${log.pid || ''}#` +
+        `${log.username || ''}#` +
+        `${log.system || ''}#` +
+        `${log.facility || ''}#` +
+        `${log.detector || ''}#` +
+        `${log.partition || ''}#` +
+        `#` + // dest field
+        `${log.run || ''}#` +
+        `${log.errcode || ''}#` +
+        `${log.errline || ''}#` +
+        `${log.errsource || ''}#` +
+        `${log.message || ''}\r\n`);
+    }
 
     currentLogIndex++;
     timer = setTimeout(sendNextLog, nextLogTimeout);

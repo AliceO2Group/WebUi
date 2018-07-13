@@ -249,5 +249,6 @@ export default class LogFilter extends Observable {
         $max: 1, // 0, 1, 6, 11, 21
       },
     };
+    this.notify();
   }
 }

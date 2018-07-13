@@ -1,6 +1,6 @@
 # InfoLogger GUI (ILG)
 
-Web user interface of [InfoLogger](https://github.com/AliceO2Group/InfoLogger) logging system. It supports:
+Web user interface of [InfoLogger](https://github.com/AliceO2Group/InfoLogger) logging system with protocol 1.3 and 1.4 . It supports:
 - Querying historical logs from a database
 - Receiving Real-Time logs from an TCP endpoint over [InfoLogger protocol](https://github.com/AliceO2Group/InfoLogger/blob/master/src/infoLoggerMessage.c)
 

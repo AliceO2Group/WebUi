@@ -2,9 +2,6 @@ const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
 const {spawn} = require('child_process');
-const path = require('path');
-
-const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
 
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
@@ -35,6 +32,9 @@ describe('InfoLogger', function () {
       subprocessOutput += chunk.toString();
     });
 
+    // Start infologgerserver simulator
+    require('./live-simulator/infoLoggerServer.js');
+
     // Start browser to test UI
     browser = await puppeteer.launch({
       headless: true
@@ -62,6 +62,7 @@ describe('InfoLogger', function () {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
+
     assert.strictEqual(search, '?q={"level":{"max":1}}');
   });
 
@@ -72,6 +73,7 @@ describe('InfoLogger', function () {
         window.model.log.filter.setCriteria('timestamp', 'since', '01/02/04');
         return model.log.filter.criterias.timestamp.$since.toISOString();
       });
+
       assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
     });
 
@@ -80,6 +82,7 @@ describe('InfoLogger', function () {
         window.model.log.filter.setCriteria('level', 'max', '12');
         return model.log.filter.criterias.level.$max;
       });
+
       assert.strictEqual($max, 12);
     });
 
@@ -88,6 +91,7 @@ describe('InfoLogger', function () {
         window.model.log.filter.setCriteria('pid', 'match', '');
         return model.log.filter.criterias.pid.$match;
       });
+
       assert.strictEqual($match, null);
     });
 
@@ -96,10 +100,83 @@ describe('InfoLogger', function () {
         window.model.log.filter.setCriteria('pid', 'match', '123 456');
         return model.log.filter.criterias.pid.$match;
       });
+
       assert.strictEqual($match.length, 2);
       assert.strictEqual($match[0], '123');
       assert.strictEqual($match[1], '456');
     });
+
+    it('can be reset and set again', async () => {
+      const criterias = await page.evaluate(() => {
+        window.model.log.filter.resetCriterias();
+        window.model.log.filter.setCriteria('level', 'max', '21');
+        return model.log.filter.criterias;
+      });
+
+      assert.strictEqual(criterias.pid.match, '');
+      assert.strictEqual(criterias.pid.$match, null);
+      assert.strictEqual(criterias.level.max, '21');
+      assert.strictEqual(criterias.level.$max, 21);
+      assert.strictEqual(criterias.timestamp.since, '');
+      assert.strictEqual(criterias.timestamp.$since, null);
+    });
+  });
+
+  describe('Live mode', () => {
+    it('can be activated because it is configured and smilator is started', async () => {
+      const liveEnabled = await page.evaluate(() => {
+        window.model.log.liveStart();
+        return model.log.liveEnabled;
+      });
+
+      assert.strictEqual(liveEnabled, true);
+    });
+
+    it('cannot be activated twice', async () => {
+      const thrown = await page.evaluate(() => {
+        try {
+          window.model.log.liveStart();
+          return false;
+        } catch(e) {
+          return true;
+        }
+      });
+
+      assert.strictEqual(thrown, true);
+    });
+
+    it('should have filled some logs via WS with the level "debug"', async () => {
+      // check level is still 21 after LogFilter tests
+      const criterias = await page.evaluate(() => {
+        window.model.log.filter.resetCriterias();
+        window.model.log.filter.setCriteria('level', 'max', '21');
+        return model.log.filter.criterias;
+      });
+
+      assert.strictEqual(criterias.level.max, '21');
+      assert.strictEqual(criterias.level.$max, 21);
+
+      // Wait for logs and count them (2-3 maybe, it's random)
+      await page.waitFor(1500); // simulator is set to ~500ms per log
+      const list = await page.evaluate(() => {
+        return model.log.list;
+      });
+
+      assert.strictEqual(!!list.length, true);
+    });
+  });
+
+  describe('Query mode', () => {
+    it('should fail because it is not configured', async () => {
+      try {
+        await page.evaluate(async () => {
+          return await window.model.log.query();
+        });
+        assert.fail();
+      } catch(e) {
+        // code failed, so it is a successful test
+      }
+    })
   });
 
   describe('utils.js', async () => {

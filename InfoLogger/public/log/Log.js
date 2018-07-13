@@ -232,7 +232,17 @@ export default class Log extends Observable {
     this.notify();
   }
 
+  /**
+   * Query database according to filters.
+   * Only is service is available and configured on server side.
+   * If live mode is enabled, it is turned off.
+   * `list` is then reset and filled with result.
+   */
   async query() {
+    if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.query) {
+      throw new Error('Query service is not available');
+    }
+
     this.queryResult = RemoteData.Loading();
     this.notify();
 
