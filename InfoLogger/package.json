@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Infologger GUI to query and stream log events",
   "homepage": "https://alice-o2.web.cern.ch",
   "main": "index.js",
@@ -10,12 +10,12 @@
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "simul": "node test/live-simulator/infoLoggerServer.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
-    "mocha": "mocha $(find test -name 'mocha-*.js')"
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js')"
   },
   "author": "Vladimir Kosmala",
   "license": "ISC",
   "dependencies": {
-    "@aliceo2/web-ui": "^1.2.1"
+    "@aliceo2/web-ui": "^1.2.2"
   },
   "devDependencies": {
     "eslint": "^4.19.1",

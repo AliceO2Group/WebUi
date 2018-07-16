@@ -1,6 +1,6 @@
 const process = require('process');
 const {spawn} = require('child_process');
-const protocols = require('./infologger-protocols.js').protocols;
+const protocols = require('./infologger-protocols.js');
 
 /**
  * Implements InfoLogger protocol

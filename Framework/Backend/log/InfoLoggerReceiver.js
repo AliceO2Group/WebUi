@@ -1,39 +1,17 @@
 const net = require('net');
 const EventEmitter = require('events');
-const {log} = require('@aliceo2/web-ui');
+const log = require('./log.js');
 
-const protocols = [
-  {
-    version: '1.4',
-    fields: [
-      {name: 'severity', type: String},
-      {name: 'level', type: Number},
-      {name: 'timestamp', type: String},
-      {name: 'hostname', type: String},
-      {name: 'rolename', type: String},
-      {name: 'pid', type: Number},
-      {name: 'username', type: String},
-      {name: 'system', type: String},
-      {name: 'facility', type: String},
-      {name: 'detector', type: String},
-      {name: 'partition', type: String},
-      {name: 'run', type: Number},
-      {name: 'errcode', type: Number},
-      {name: 'errline', type: Number},
-      {name: 'errsource', type: String},
-      {name: 'message', type: String}
-    ]
-  }
-];
+const protocols = require('./infologger-protocols.js');
 
-/* @class LiveDataSource
+/* @class InfoLoggerReceiver
  * Connects to server
  * Stream data
  * Parse data
  * Emit row ony by one
  */
 
-module.exports = class LiveDataSource extends EventEmitter {
+module.exports = class InfoLoggerReceiver extends EventEmitter {
   /**
    * Initialize, without connecting.
    */
@@ -111,6 +89,7 @@ module.exports = class LiveDataSource extends EventEmitter {
 
   /**
    * Parse an input string trame to corresponding object
+   * Empty fields are ignored.
    * Example of input:
    * *1.4#I##1505140368.399439#aido2db##143388#root#########test Mon Sep 11 16:32:48 CEST 2017
    * Example of output:
@@ -141,7 +120,7 @@ module.exports = class LiveDataSource extends EventEmitter {
     }
 
     // Get trame content by removing the protocol's header and footer
-    const content = trame.substr(5, trame.length - 5 - 2);
+    const content = trame.substr(5, trame.length - 5 - 1);
     const fields = content.split('#');
 
     // Check trame integrity (number of fields)
@@ -154,8 +133,10 @@ module.exports = class LiveDataSource extends EventEmitter {
     // Parse message
     const message = {};
     trameProtocol.fields.forEach((fieldDefinition, i) => {
-      if (fieldDefinition.type === Number) {
-        message[fieldDefinition.name] = parseInt(fields[i], 10);
+      if (fields[i] === '') {
+        return;
+      } else if (fieldDefinition.type === Number) {
+        message[fieldDefinition.name] = parseFloat(fields[i]);
       } else {
         message[fieldDefinition.name] = fields[i];
       }
