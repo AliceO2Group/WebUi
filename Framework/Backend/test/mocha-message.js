@@ -17,13 +17,13 @@ describe('WebSocket message', () => {
   it('Parse message', () => {
     const message = {
       command: 'test',
-      test: 'value',
+      payload: {test: 'value'},
       token: 'token'
     };
     new WebSocketMessage().parse(JSON.stringify(message))
       .then((res) => {
         assert.equal(res.getCommand(), message.command);
-        assert.equal(res.getPayload().test, message.test);
+        assert.equal(res.getPayload().test, message.payload.test);
         assert.equal(res.getToken(), message.token);
       }, () => {
         assert.fail('promise should be resolved');

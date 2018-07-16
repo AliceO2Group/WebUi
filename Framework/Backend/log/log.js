@@ -1,9 +1,13 @@
 const fs = require('fs');
 const Winston = require('./winston.js');
-const InfoLoggerSender = require('./infologger-sender.js');
+const InfoLoggerSender = require('./InfoLoggerSender.js');
+const InfoLoggerReceiver = require('./InfoLoggerReceiver.js');
 
 let winston = null;
 let infologger = null;
+
+exports.InfoLoggerSender = InfoLoggerSender;
+exports.InfoLoggerReceiver = InfoLoggerReceiver;
 
 exports.configure = function(config) {
   if (config && config.winston) {
