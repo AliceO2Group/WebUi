@@ -62,6 +62,7 @@ describe('Logging: InfoLogger', () => {
 
   it('Parse message 1.3', () => {
     const receiver = new InfoLoggerReceiver();
+    // eslint-disable-next-line max-len
     const message = '*1.3#I##1505140368.399439#o2test#O2#143388#root#DAQ#P2#Alice#PHY#dest##123#8#source.cpp#test\n';
     const expected = {
       severity: 'I',
