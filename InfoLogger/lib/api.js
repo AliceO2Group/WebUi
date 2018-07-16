@@ -1,7 +1,7 @@
 const {log, WebSocketMessage} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
-const LiveDataSource = require('./LiveDataSource.js');
+const InfoLoggerReceiver = log.InfoLoggerReceiver;
 
 let querySource = null;
 let liveSource = null;
@@ -15,7 +15,7 @@ if (config.mysql) {
 
 if (config.infoLoggerServer) {
   log.info(`InfoLogger config found, connecting to live source`);
-  liveSource = new LiveDataSource();
+  liveSource = new InfoLoggerReceiver();
   liveSource.connect(config.infoLoggerServer);
 } else {
   log.info(`InfoLogger config not found, continue without live source`);

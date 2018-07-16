@@ -111,9 +111,6 @@ export default class LogFilter extends Observable {
 
       for (const field in criterias) {
         let logValue = log[field];
-        if (logValue === undefined) {
-          throw new Error(`log to filter has no field "${field}"`);
-        }
 
         for (const operator in criterias[field]) {
           let criteriaValue = criterias[field][operator];
@@ -123,18 +120,47 @@ export default class LogFilter extends Observable {
             continue;
           }
 
-          if (operator === '$match' && criteriaValue.indexOf(logValue) === -1) {
-            return false;
-          } else if (operator === '$exclude' && logValue && criteriaValue.indexOf(logValue) >= 0) {
-            return false;
-          } else if (operator === '$since' && new Date(logValue * 1000) < new Date(criteriaValue * 1000)) {
-            return false;
-          } else if (operator === '$until' && new Date(logValue * 1000) > new Date(criteriaValue * 1000)) {
-            return false;
-          } else if (operator === '$min' && parseInt(logValue, 10) < parseInt(criteriaValue, 10)) {
-            return false;
-          } else if (operator === '$max' && parseInt(logValue, 10) > parseInt(criteriaValue, 10)) {
-            return false;
+          // logValue is sometime required, undefined means test fails and log is rejected
+          switch(operator) {
+            case '$match':
+              if (logValue === undefined || criteriaValue.indexOf(logValue) === -1) {
+                return false;
+              }
+              break;
+
+            case '$exclude':
+              if (logValue !== undefined && criteriaValue.indexOf(logValue) >= 0) {
+                return false;
+              }
+              break;
+
+            case '$since':
+              if (logValue === undefined || parseIlDate(logValue) < parseIlDate(criteriaValue)) {
+                return false;
+              }
+              break;
+
+            case '$until':
+              if (logValue === undefined || parseIlDate(logValue) > parseIlDate(criteriaValue)) {
+                return false;
+              }
+              break;
+
+            case '$min':
+              if (logValue === undefined || parseInt(logValue, 10) < parseInt(criteriaValue, 10)) {
+                return false;
+              }
+              break;
+
+            case '$max':
+              if (logValue === undefined || parseInt(logValue, 10) > parseInt(criteriaValue, 10)) {
+                return false;
+              }
+              break;
+
+            default:
+              continue;
+              break;
           }
         }
       }
@@ -251,4 +277,13 @@ export default class LogFilter extends Observable {
     };
     this.notify();
   }
+}
+
+/**
+ * Transform timestamp of infologger into js Date
+ * @param {number} timestamp
+ * @return {Date}
+ */
+function parseIlDate(timestamp) {
+  return new Date(timestamp * 1000);
 }
