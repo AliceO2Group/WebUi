@@ -1,8 +1,11 @@
-import {h} from '/js/src/index.js';
+import {h, switchCase} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import switchCase from '../common/switchCase.js';
 import showTableList from '../common/showTableList.js';
+
+/**
+ * @file Page to show form of a new environment (content and header)
+ */
 
 export let header = (model) => [
   h('.w-50 text-center', [
@@ -13,6 +16,7 @@ export let header = (model) => [
   ])
 ];
 
+// Validation of data is made by Control server itself
 export let content = (model) => h('.scroll-y.absolute-fill', [
   h('form.m4.measure', {onsubmit: () => false}, [
     h('.form-group', [
@@ -30,11 +34,11 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
       disabled: model.environment.itemNew.isLoading(),
       onclick: () => model.environment.newEnvironment()
     }, 'Create'),
-    switchCase(model.environment.itemNew.getState(), {
-      'NOT_ASKED': () => null,
-      'LOADING': () => null,
-      'SUCCESS': () => null,
-      'FAILURE': () => h('p.danger', model.environment.itemNew.getPayload()),
-    })()
+    model.environment.itemNew.match({
+      NotAsked: () => null,
+      Loading: () => null,
+      Success: () => null,
+      Failure: (error) => h('p.danger', error),
+    })
   ])
 ]);

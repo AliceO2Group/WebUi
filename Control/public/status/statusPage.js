@@ -1,8 +1,11 @@
-import {h} from '/js/src/index.js';
+import {h, switchCase} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import switchCase from '../common/switchCase.js';
 import showTableItem from '../common/showTableItem.js';
+
+/**
+ * @file Page to FrameworkInfo (content and header)
+ */
 
 export let header = (model) => [
   h('.w-50 text-center', [
