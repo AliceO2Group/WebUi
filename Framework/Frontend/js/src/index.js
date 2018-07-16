@@ -1,7 +1,3 @@
-// mithril function 'm' will be injected into window
-// it is used by renderer as an abstracted engine
-import '/js/mithril.js';
-
 // Design patterns
 export {default as Observable} from './Observable.js';
 export {default as EventEmitter} from './EventEmitter.js';
