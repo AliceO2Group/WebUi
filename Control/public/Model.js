@@ -6,8 +6,14 @@ import Environment from './environment/Environment.js';
 import Role from './role/Role.js';
 import Status from './status/Status.js';
 
-// The model
+/**
+ * Root of model tree
+ * Handle global events: keyboard, websocket and router location change
+ */
 export default class Model extends Observable {
+  /**
+   * Load all sub-models and bind event handlers
+   */
   constructor() {
     super();
 

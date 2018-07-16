@@ -1,6 +1,12 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
-export default class Environment extends Observable {
+/**
+ * Model representing FrameworkInfo (or status, to be seen in future what is this)
+ */
+export default class FrameworkInfo extends Observable {
+  /**
+   * Initialize `item` to NotAsked
+   */
   constructor(model) {
     super();
 
@@ -8,6 +14,9 @@ export default class Environment extends Observable {
     this.item = RemoteData.NotAsked();
   }
 
+  /**
+   * Load FrameworkInfo into `item`
+   */
   async getFrameworkInfo() {
     this.item = RemoteData.Loading();
     this.notify();

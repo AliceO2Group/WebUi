@@ -1,6 +1,12 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
+/**
+ * Shadow model of Padlock, synchronize with the web server which contains the real one
+ */
 export default class Lock extends Observable {
+  /**
+   * Initialize lock state to NotAsked
+   */
   constructor(model) {
     super();
 
@@ -12,11 +18,18 @@ export default class Lock extends Observable {
     this.padlockState = RemoteData.NotAsked();
   }
 
+  /**
+   * Set padlock state from ajax or websocket as a RemoteData
+   * @param {string} padlockState - object representing PadLock from server
+   */
   setPadlockState(padlockState) {
     this.padlockState = RemoteData.Success(padlockState);
     this.notify();
   }
 
+  /**
+   * Load Padlock state from server
+   */
   async synchronizeState() {
     this.padlockState = RemoteData.Loading();
     this.notify();

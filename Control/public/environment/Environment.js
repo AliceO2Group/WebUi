@@ -1,6 +1,12 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
+/**
+ * Model representing Environment CRUD
+ */
 export default class Environment extends Observable {
+  /**
+   * Initialize all ajax calls to "NotAsked" type
+   */
   constructor(model) {
     super();
 
@@ -12,6 +18,9 @@ export default class Environment extends Observable {
     this.itemForm = {};
   }
 
+  /**
+   * Load all environements into `list` as RemoteData
+   */
   async getEnvironments() {
     this.list = RemoteData.Loading();
     this.notify();
@@ -26,6 +35,10 @@ export default class Environment extends Observable {
     this.notify();
   }
 
+  /**
+   * Load one environement into `item` as RemoteData
+   * @param {Object} body - See protobuf definition for properties
+   */
   async getEnvironment(body) {
     this.item = RemoteData.Loading();
     this.notify();
@@ -41,6 +54,10 @@ export default class Environment extends Observable {
     this.notify();
   }
 
+  /**
+   * Control a remote environement, store action result into `itemControl` as RemoteData
+   * @param {Object} body - See protobuf definition for properties
+   */
   async controlEnvironment(body) {
     this.itemControl = RemoteData.Loading();
     this.notify();
@@ -55,6 +72,11 @@ export default class Environment extends Observable {
     this.notify();
   }
 
+  /**
+   * Create a new remote environement, creation action result into `itemNew` as RemoteData
+   * Form data must be stored inside `this.itemForm`
+   * See protobuf definition for properties of `this.itemForm` as body
+   */
   async newEnvironment() {
     this.itemNew = RemoteData.Loading();
     this.notify();
@@ -69,11 +91,20 @@ export default class Environment extends Observable {
     this.model.router.go(`?page=environment&id=${result.id}`);
   }
 
+  /**
+   * Set property of environement form, used for creation or update
+   * @param {string} property
+   * @param {string} value
+   */
   setForm(property, value) {
     this.itemForm[property] = value;
     this.notify();
   }
 
+  /**
+   * Destroy a remote environement, store action result into `this.itemControl` as RemoteData
+   * @param {Object} body - See protobuf definition for properties
+   */
   async destroyEnvironment(body) {
     this.itemControl = RemoteData.Loading();
     this.notify();

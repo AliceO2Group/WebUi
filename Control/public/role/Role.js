@@ -1,6 +1,12 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
-export default class Environment extends Observable {
+/**
+ * Model representing Role CRUD
+ */
+export default class Role extends Observable {
+  /**
+   * Initialize `list` to NotAsked
+   */
   constructor(model) {
     super();
 
@@ -8,6 +14,9 @@ export default class Environment extends Observable {
     this.list = RemoteData.NotAsked();
   }
 
+  /**
+   * Load roles into `list` as RemoteData
+   */
   async getRoles() {
     this.list = RemoteData.Loading();
     this.notify();
