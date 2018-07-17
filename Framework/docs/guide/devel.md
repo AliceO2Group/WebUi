@@ -1,12 +1,12 @@
 # Development environment
-This document describes development environment for the Framework and projects using it. It also mentions good practices that should be followed by the developers.
+This document describes development environment for the `WebUi` Framework and projects depending on it. It also provides good practices which developers are encouraged to folllow.
 
 ## Tests
-Source code should be covered by unit tests and/or integration tests. The following frameworks are used in the project:
+Source code should be covered by unit tests and/or integration tests. The following test utilities are used in the project:
 
 * [Puppeteer](https://github.com/GoogleChrome/puppeteer) [API](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md) (front-end integration)
-* [Mocha](https://mochajs.org) (front-end and back-end)
-* [Assert](https://nodejs.org/api/assert.html) from NodeJS for assertion tests inside Mocha
+* [Mocha](https://mochajs.org) (front-end and back-end unit tests)
+* [Assert](https://nodejs.org/api/assert.html) native NodeJS assertion library for Mocha
 
 The source code of unit tests is kept in `Backend/test/` and `Frontend/test/` directories. The filename should prefixed with `mocha-`.
 
@@ -16,28 +16,17 @@ The project uses [ESLint](http://eslint.org) to validate JavaScript syntax and c
 ## Documentation
 Documentation is handled with help of [JSDoc 3](http://usejsdoc.org) API generator.
 
-## Watcher
-For convenient development cycle server is restarted after each modification. Client side can be refreshed with CTRL+R or CMD+R.
+## Code monitor
+[Nodemon](http://nodemon.io/) provides convenient development cycle server by restarting server after source code modification modification. Browser page can be refreshed with CTRL+R or CMD+R.
 
-* [Nodemon](http://nodemon.io/)
-
-## Build system
-[npm scripts](https://docs.npmjs.com/misc/scripts) are used to automate tasks, here is an example of basic commands:
+## NPM scripts
+[npm scripts](https://docs.npmjs.com/misc/scripts) are used to automate tasks:
 * `npm start` starts the server in production
-* `npm run dev` starts server in watch mode
-* `npm run test` runs eslint and mocha tests
-* `npm run eslint` checks source code
-* `npm run mocha` starts tests from front-end and back-end
-* `npm run doc` will generate all documentation
-
-Those tasks can be sub-divised if needed (-frontend or -backend for example).
-
-Scripts are specified in `package.json` file. Execute a `npm install` before using them to install the tools needed.
-
-```bash
-npm install
-npm test
-```
+* `npm run dev` starts server in watch mode (nodemon enable)
+* `npm run eslint` runs linter
+* `npm run mocha` starts front-end and back-end unit tests
+* `npm run test` runs both: `npm run mocha` and `npm run eslint`
+* `npm run doc` generates source code documentation (JSDoc)
 
 ## Continuous integration
 [Travis CI](https://travis-ci.org/AliceO2Group/WebUi) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.travis.yml` file.
