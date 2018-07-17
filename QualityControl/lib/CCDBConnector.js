@@ -1,4 +1,5 @@
 const http = require('http');
+const {log} = require('@aliceo2/web-ui');
 
 /**
  * Gateway for all CCDB calls
@@ -33,8 +34,20 @@ class CCDBConnector {
    * @return {Promise.<Array.<Object>, Error>}
    */
   async listObjects() {
-    const itemTransform = (result2) => ({name: result2.path});
-    const listTransform = (result) => result.objects.map(itemTransform);
+    const itemTransform = (item) => {
+      if (!item.path) {
+        log.warn(`CCDB returned an empty ROOT object path, ignoring`);
+        return null;
+      }
+      if (item.path.indexOf('/') === -1) {
+        log.warn(`CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
+        return null;
+      }
+
+      return {name: item.path};
+    };
+    const itemFilter = (item) => !!item;
+    const listTransform = (result) => result.objects.map(itemTransform).filter(itemFilter);
     return this.httpGetJson('/latest/.*').then(listTransform);
   }
 
