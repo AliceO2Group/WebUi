@@ -5,8 +5,8 @@ import tableColGroup from './tableColGroup.js';
 
 const ROW_HEIGHT = 18; // sync with CSS value
 
-export default (model) => h('.tableContainer.scroll-y.flex-grow', tableContainerHooks(model),
-  h('.tableContent', {style: {height: model.log.list.length * ROW_HEIGHT + 'px', position: 'relative'}},
+export default (model) => h('.tableLogsContent.scroll-y.flex-grow', tableContainerHooks(model),
+  h('div', {style: {height: model.log.list.length * ROW_HEIGHT + 'px', position: 'relative'}},
     h('table.table-logs-content', {style: {position: 'absolute', top: model.log.scrollTop - (model.log.scrollTop % ROW_HEIGHT) + 'px'}},
       tableColGroup(model),
       h('tbody', [
@@ -32,13 +32,13 @@ const tableLogLine = (model, row) => h('tr.row-hover', {id: 'row-' + pointerId(r
   model.log.columns.errcode && h('td.cell.cell-bordered', row.errcode),
   model.log.columns.errline && h('td.cell.cell-bordered', row.errline),
   model.log.columns.errsource && h('td.cell.cell-bordered', row.errsource),
-  model.log.columns.message && h('td.cell.cell-bordered', row.message),
+  model.log.columns.message && h('td.cell.cell-bordered', {title: row.message}, row.message),
 ]);
 
-// cycle hooks for .tableContainer on "smart scrolling"
+// cycle hooks for .logs-container on "smart scrolling"
 const tableContainerHooks = (model) => ({
   oncreate(vnode) {
-    // report to model scrolling infos of .tableContainer
+    // report to model scrolling infos of .logs-container
     const onTableScroll = () => {
       const container = vnode.dom;
       const height = container.getBoundingClientRect().height;

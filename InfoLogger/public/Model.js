@@ -21,6 +21,8 @@ export default class Model extends Observable {
     this.timezone = new Timezone(this);
     this.timezone.bubbleTo(this);
 
+    this.inspectorEnabled = false;
+
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
@@ -145,8 +147,19 @@ export default class Model extends Observable {
     }
   }
 
+  /**
+   * When model change (filters), update address bar with the filter
+   * do it silently to avoid infinite loop
+   */
   updateRouteOnModelChange() {
-    // do it silently, don't notify model which is the source of this action
     this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+  }
+
+  /**
+   * Toggle inspector on the right
+   */
+  toggleInspector() {
+    this.inspectorEnabled = !this.inspectorEnabled;
+    this.notify();
   }
 }
