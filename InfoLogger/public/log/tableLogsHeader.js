@@ -1,6 +1,9 @@
 import {h} from '/js/src/index.js';
 
+import tableColGroup from './tableColGroup.js';
+
 export default (model) => h('table.table-logs-header', [
+  tableColGroup(model),
   h('tbody', [
     h('tr', [
       h('td.cell.text-ellipsis.cell-xs', 'Severity'),
