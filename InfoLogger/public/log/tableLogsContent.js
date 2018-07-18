@@ -1,12 +1,14 @@
 import {h} from '/js/src/index.js';
 
 import {severityClass, severityLabel} from './severityUtils.js';
+import tableColGroup from './tableColGroup.js';
 
 const ROW_HEIGHT = 18; // sync with CSS value
 
 export default (model) => h('.tableContainer.scroll-y.flex-grow', tableContainerHooks(model),
   h('.tableContent', {style: {height: model.log.list.length * ROW_HEIGHT + 'px', position: 'relative'}},
     h('table.table-logs-content', {style: {position: 'absolute', top: model.log.scrollTop - (model.log.scrollTop % ROW_HEIGHT) + 'px'}},
+      tableColGroup(model),
       h('tbody', [
         model.log.list.slice(Math.floor(model.log.scrollTop / ROW_HEIGHT), Math.floor(model.log.scrollTop / ROW_HEIGHT) + ((Math.floor(model.log.scrollHeight / ROW_HEIGHT) * 2) + 1)).map((row) => tableLogLine(model, row))
       ]),
@@ -15,21 +17,21 @@ export default (model) => h('.tableContainer.scroll-y.flex-grow', tableContainer
 );
 
 const tableLogLine = (model, row) => h('tr.row-hover', {id: 'row-' + pointerId(row), className: model.log.item === row ? 'row-selected' : '', onclick: () => model.log.setItem(row)}, [
-  h('td.cell.text-ellipsis.cell-xs.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
-  model.log.columns.date && h('td.cell.cell-bordered.cell-m', model.timezone.format(row.timestamp, 'date')),
-  model.log.columns.time && h('td.cell.cell-bordered.cell-m', model.timezone.format(row.timestamp, 'time')),
-  model.log.columns.hostname && h('td.cell.cell-bordered.cell-m', row.hostname),
-  model.log.columns.rolename && h('td.cell.cell-bordered.cell-m', row.rolename),
-  model.log.columns.pid && h('td.cell.cell-bordered.cell-s', row.pid),
-  model.log.columns.username && h('td.cell.cell-bordered.cell-m', row.username),
-  model.log.columns.system && h('td.cell.cell-bordered.cell-s', row.system),
-  model.log.columns.facility && h('td.cell.cell-bordered.cell-m', row.facility),
-  model.log.columns.detector && h('td.cell.cell-bordered.cell-s', row.detector),
-  model.log.columns.partition && h('td.cell.cell-bordered.cell-m', row.partition),
-  model.log.columns.run && h('td.cell.cell-bordered.cell-s', row.run),
-  model.log.columns.errcode && h('td.cell.cell-bordered.cell-s', row.errcode),
-  model.log.columns.errline && h('td.cell.cell-bordered.cell-s', row.errline),
-  model.log.columns.errsource && h('td.cell.cell-bordered.cell-m', row.errsource),
+  h('td.cell.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
+  model.log.columns.date && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
+  model.log.columns.time && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'time')),
+  model.log.columns.hostname && h('td.cell.cell-bordered', row.hostname),
+  model.log.columns.rolename && h('td.cell.cell-bordered', row.rolename),
+  model.log.columns.pid && h('td.cell.cell-bordered', row.pid),
+  model.log.columns.username && h('td.cell.cell-bordered', row.username),
+  model.log.columns.system && h('td.cell.cell-bordered', row.system),
+  model.log.columns.facility && h('td.cell.cell-bordered', row.facility),
+  model.log.columns.detector && h('td.cell.cell-bordered', row.detector),
+  model.log.columns.partition && h('td.cell.cell-bordered', row.partition),
+  model.log.columns.run && h('td.cell.cell-bordered', row.run),
+  model.log.columns.errcode && h('td.cell.cell-bordered', row.errcode),
+  model.log.columns.errline && h('td.cell.cell-bordered', row.errline),
+  model.log.columns.errsource && h('td.cell.cell-bordered', row.errsource),
   model.log.columns.message && h('td.cell.cell-bordered', row.message),
 ]);
 
