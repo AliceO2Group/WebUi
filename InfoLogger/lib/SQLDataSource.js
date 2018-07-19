@@ -79,10 +79,10 @@ module.exports = class SQLDataSource {
             criterias.push(`\`${field}\`<=?`);
             break;
           case '$match':
-            criterias.push(this.matchToSql(field, filters[field][operator]));
+            criterias.push(`\`${field}\` IN (?)`);
             break;
           case '$exclude':
-            criterias.push(this.excludeToSql(field, filters[field][operator]));
+            criterias.push(`(NOT(\`${field}\` IN (?)) OR \`${field}\` IS NULL)`);
             break;
           default:
             log.warn(`unkown operator ${operator}`);
@@ -92,29 +92,6 @@ module.exports = class SQLDataSource {
     }
 
     return {values, criterias};
-  }
-
-  /**
-   * Convert $match to sql condition
-   * @param {string} field
-   * @param {Array.<string>} values
-   * @return {string} blabla
-   */
-  matchToSql(field, values) {
-    const sql = `\`${field}\` IN (?)`;
-    return sql;
-  }
-
-  /**
-   * Convert $exclude to sql condition
-   * @param {string} field
-   * @param {Array.<string>} values
-   * @return {string} blabla
-   */
-  excludeToSql(field, values) {
-    // If field is null, don't exclude the value
-    const sql = `(NOT(\`${field}\` IN (?)) OR \`${field}\` IS NULL)`;
-    return sql;
   }
 
   /**
