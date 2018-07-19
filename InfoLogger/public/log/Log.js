@@ -34,12 +34,14 @@ export default class Log extends Observable {
     };
 
     this.limit = 1000;
+    this.applicationLimit = 100000; // browser can be slow is `list` array is bigger
 
     this.queryResult = RemoteData.NotAsked();
 
     this.list = [];
     this.item = null;
-    this.autoScrollToItem = false;
+    this.autoScrollToItem = false; // go to an item
+    this.autoScrollLive = false; // go at bottom on Live mode
     this.resetStats();
 
     this.scrollTop = 0; // position of table scrollbar
@@ -315,9 +317,22 @@ export default class Log extends Observable {
     this.notify();
   }
 
+  /**
+   * Add a log to the list to be shown on screen
+   * Keep only `limit` logs
+   * @param {object} log
+   */
   addLog(log) {
     this.addStats(log);
     this.list.push(log);
+    if (this.list.length > this.limit) {
+      this.list.splice(0, this.list.length - this.limit);
+    }
+    this.notify();
+  }
+
+  toggleAutoScroll() {
+    this.autoScrollLive = !this.autoScrollLive;
     this.notify();
   }
 }
