@@ -79,10 +79,10 @@ module.exports = class SQLDataSource {
             criterias.push(`\`${field}\`<=?`);
             break;
           case '$match':
-            criterias.push(this.matchToSql(field, filters[field][operator]));
+            criterias.push(`\`${field}\` IN (?)`);
             break;
           case '$exclude':
-            criterias.push(this.excludeToSql(field, filters[field][operator]));
+            criterias.push(`(NOT(\`${field}\` IN (?)) OR \`${field}\` IS NULL)`);
             break;
           default:
             log.warn(`unkown operator ${operator}`);
@@ -92,32 +92,6 @@ module.exports = class SQLDataSource {
     }
 
     return {values, criterias};
-  }
-
-  /**
-   * Convert $match to sql condition
-   * @param {string} field
-   * @param {Array.<string>} values
-   * @return {string} blabla
-   */
-  matchToSql(field, values) {
-    // If field is null, don't exclude the value
-    const placeholders = values.map(() => '?').join(',');
-    const sql = `\`${field}\` IN (${placeholders})`;
-    return sql;
-  }
-
-  /**
-   * Convert $exclude to sql condition
-   * @param {string} field
-   * @param {Array.<string>} values
-   * @return {string} blabla
-   */
-  excludeToSql(field, values) {
-    // If field is null, don't exclude the value
-    const placeholders = values.map(() => '?').join(',');
-    const sql = `(NOT(\`${field}\` IN (${placeholders})) OR \`${field}\` IS NULL)`;
-    return sql;
   }
 
   /**
@@ -150,13 +124,13 @@ module.exports = class SQLDataSource {
     // The rows asked with a limit
     const requestRows = `SELECT * FROM \`messages\` ${criteriasString}
       ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
-    log.info(`requestRows: ${requestRows} [${values.join(',')}]`);
+    log.info(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
     const rows = await this.connection.query(requestRows, values);
 
     // Count how many rows could be found, limit to 100k anyway
     const requestCount = `SELECT COUNT(*) as total FROM
       (SELECT 1 FROM \`messages\` ${criteriasString} LIMIT 100001) t1`;
-    log.info(`requestCount: ${requestCount} [${values.join(',')}]`);
+    log.info(`requestCount: ${requestCount} ${JSON.stringify(values)}`);
     const resultCount = await this.connection.query(requestCount, values);
     let total = parseInt(resultCount[0].total, 10);
     let more = false;
@@ -168,6 +142,9 @@ module.exports = class SQLDataSource {
     }
 
     const endTime = Date.now(); // ms
+    const totalTime = endTime - startTime; // ms
+
+    log.info(`Query done in ${totalTime}ms`);
 
     return {
       rows,
@@ -175,7 +152,7 @@ module.exports = class SQLDataSource {
       count: rows.length,
       more,
       limit: options.limit,
-      time: endTime - startTime // ms
+      time: totalTime // ms
     };
   }
 };

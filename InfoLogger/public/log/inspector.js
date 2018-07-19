@@ -30,4 +30,4 @@ export default (model) => model.log.item ? h('', [
     ])
   ),
   h('.p2.f7', h('', model.log.item.message))
-]) : null;
+]) : h('', {className: 'f6 text-center p3'}, 'Click on a log to show its properties');

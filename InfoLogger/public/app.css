@@ -8,7 +8,12 @@
 /* includes buttons and input */
 .table-filters { width: 100%; }
 
-.table-logs-header { width: 100%; border-collapse: collapse; border-bottom: 1px solid #aaa; }
+/* logs div */
+.logs-container { cursor: default; }
+.logs-content { border-top: 1px solid #aaa; }
+
+/* logs tables */
+.table-logs-header { width: 100%; border-collapse: collapse; }
 .table-logs-header td { padding: 0.3rem 0.2rem; }
 .table-logs-content { width: 100%; border-collapse: collapse; }
 .table-logs-content td { }

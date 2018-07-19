@@ -5,7 +5,7 @@ export default (model) => [
   ' ',
   liveButton(model),
   ' ',
-  h('button.btn', {onclick: () => model.log.empty()}, 'Empty'),
+  h('button.btn', {onclick: () => model.log.empty()}, 'Clear'),
   h('span.mh3'),
   h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.firstError(), title: 'Go to first error (ALT + left arrow)'}, '❮❮'),
   ' ',
@@ -27,7 +27,7 @@ const queryButton = (model) => h('button.btn.btn-primary', model.servicesResult.
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
   Success: (services) => ({
-    title: !services.query ? 'Query service not configured' : '',
+    title: services.query ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !services.query || model.log.queryResult.isLoading(),
     className: model.log.queryResult.isLoading() ? 'loading' : '',
     onclick: () => model.log.query()
@@ -46,7 +46,7 @@ const liveButton = (model) => h('button.btn', model.servicesResult.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
   Success: (services) => ({
-    title: !services.live ? 'Live service not configured' : '',
+    title: services.live ? 'Stream logs with filtering' : 'Live service not configured',
     disabled: !services.live || model.log.queryResult.isLoading(),
     className: !model.ws.authed ? 'loading' : (model.log.liveEnabled ? 'active' : ''),
     onclick: () => model.log.liveEnabled ? model.log.liveStop() : model.log.liveStart()
