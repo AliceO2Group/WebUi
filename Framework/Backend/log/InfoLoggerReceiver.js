@@ -72,19 +72,19 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
    * @fires LiveDataSource#message
    */
   onData(data) {
-    const message = this.parse(data.toString());
-
-    if (!message) {
-      return; // not a valid message
+    const messages = data.toString().split('\n');
+    for (let message of messages) {
+      if (!message) {
+        continue;
+      }
+      /**
+      * Message event containing log properties
+      *
+      * @event LiveDataSource#message
+      * @type {object}
+      */
+      this.emit('message', this.parse(message + '\n'));
     }
-
-    /**
-     * Message event containing log properties
-     *
-     * @event LiveDataSource#message
-     * @type {object}
-     */
-    this.emit('message', message);
   }
 
   /**
