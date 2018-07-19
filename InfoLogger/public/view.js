@@ -22,18 +22,18 @@ export default (model) => h('.flex-column absolute-fill', [
       commandFilters(model)
     ]),
   ]),
-  h('div.flex-grow.flex-row.shadow-level0', [
+  h('div.flex-grow.flex-row.shadow-level0.logs-container', [
     h('main.flex-grow.flex-column.transition-background-color', {className: (model.log.queryResult.isLoading()) ? 'bg-gray' : ''}, [
       // table fixed header
       tableLogsHeader(model),
 
       // table scrollable content
-      h('.flex-row.flex-grow', [
+      h('.flex-row.flex-grow.logs-content', [
         tableLogsContent(model),
         tableLogsScrollMap(model),
       ])
     ]),
-    h('aside.sidebar', [
+    h('aside.sidebar', {style: {width: model.inspectorEnabled ? '' : '0rem'}}, [
       h('.sidebar-content.scroll-y', [
         inspector(model)
       ])

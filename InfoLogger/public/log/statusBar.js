@@ -1,14 +1,28 @@
-import {h} from '/js/src/index.js';
+import {h, icon} from '/js/src/index.js';
 
 export default (model) => [
+  h('.flex-row', [
+    h('.w-50', statusLogs(model)),
+    h('.w-50.text-right', applicationMessage(model), iconSidebar()),
+  ]),
+];
+
+const statusLogs = (model) => [
   model.log.queryResult.match({
     NotAsked: () => null,
     Loading: () => 'Loading...',
     Success: (result) => [statusQuery(model, result), statusStats(model)],
     Failure: (error) => h('.danger', error),
   }),
-  model.log.liveEnabled && [statusLive(model), statusStats(model)]
+  model.log.liveEnabled && [statusLive(model), statusStats(model)],
 ];
+
+const applicationMessage = (model) => model.log.list.length > model.log.applicationLimit
+ ? h('span.danger', `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `)
+ : null;
+
+const iconSidebar = (svg) => h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 480 480', onclick: () => model.toggleInspector()},
+  h('path', {d: 'M0,32v416h480V32H0z M288,416H32V64h256V416z M448,416H320V64h128V416z'}));
 
 const statusQuery = (model, result) => [
   `${result.count} messages out of ${result.total}${result.more ? '+' : ''} (${(result.time / 1000).toFixed(2)} seconds) `,

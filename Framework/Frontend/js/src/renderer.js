@@ -7,7 +7,7 @@
 
 // mithril function 'm' will be injected into window
 // it is used by renderer as an abstracted engine
-import '/js/lib/mithril.js';
+import '../lib/mithril.js';
 
 if (!window.m) {
   throw new Error('mithril must be loaded into window');
