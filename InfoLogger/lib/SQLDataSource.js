@@ -101,7 +101,6 @@ module.exports = class SQLDataSource {
    * @return {string} blabla
    */
   matchToSql(field, values) {
-    const placeholders = values.map(() => '?').join(',');
     const sql = `\`${field}\` IN (?)`;
     return sql;
   }
@@ -114,8 +113,7 @@ module.exports = class SQLDataSource {
    */
   excludeToSql(field, values) {
     // If field is null, don't exclude the value
-    const placeholders = values.map(() => '?').join(',');
-    const sql = `(NOT(\`${field}\` IN (${placeholders})) OR \`${field}\` IS NULL)`;
+    const sql = `(NOT(\`${field}\` IN (?)) OR \`${field}\` IS NULL)`;
     return sql;
   }
 
