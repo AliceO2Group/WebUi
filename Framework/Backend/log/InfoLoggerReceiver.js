@@ -20,6 +20,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     // Declare properties
     this.client = null;
+    this.buffer = '';
   }
 
   /**
@@ -33,7 +34,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     }
 
     this.client = net.createConnection(options);
-    this.client.on('data', this.onData.bind(this));
+    this.client.on('data', (messages) => this.onData(messages));
 
     this.client.on('connect', () => {
       log.info('Connected to infoLoggerServer');
@@ -72,7 +73,16 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
    * @fires LiveDataSource#message
    */
   onData(data) {
-    const messages = data.toString().split('\n');
+    let dataString = this.buffer + data.toString();
+    this.buffer = '';
+    // detect whether the last log is chopped in the middle
+    if (dataString[dataString.length - 1] !== '\n') {
+      const indexLast = dataString.lastIndexOf('\n');
+      this.buffer = dataString.substring(indexLast);
+      dataString = dataString.substring(0, indexLast);
+    }
+    const messages = dataString.split('\n');
+
     for (let message of messages) {
       if (!message) {
         continue;

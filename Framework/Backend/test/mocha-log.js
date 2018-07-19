@@ -97,7 +97,7 @@ describe('Logging: InfoLogger', () => {
       assert.strictEqual(parsed.facility, 'pauseAndResetRun');
       assert.strictEqual(parsed.partition, 'PHYSICS_1');
       assert.strictEqual(parsed.run, 289724);
-      if (counter == 3) {
+      if (counter === 3) {
         done();
       }
     });
@@ -108,6 +108,65 @@ describe('Logging: InfoLogger', () => {
 *1.3#I#6#1531982951.482111#aldaqpc134#ldc-TPC-C-15#45919#alicedaq#DAQ#pauseAndResetRun#TPC#PHYSICS_1##289724##91#pauseAndResetRun.c#POST_PAR completed
 *1.3#I#6#1531982951.169333#aldaqpc119#ldc-TPC-C-0#7780#alicedaq#DAQ#pauseAndResetRun#TPC#PHYSICS_1##289724##91#pauseAndResetRun.c#POST_PAR completed`;
     receiver.onData(messages);
+    /* eslint-enable max-len */
+  });
+
+  it('Parse chopped log', (done) => {
+    const receiver = new InfoLoggerReceiver();
+    const message = '*1.3#I##1505140368.399439#o2test#O2#143388#ro';
+    const message2 = 'ot#DAQ#P2#Alice#PHY#dest##123#8#source.cpp#test\n';
+    const expected = {
+      severity: 'I',
+      timestamp: 1505140368.399439,
+      hostname: 'o2test',
+      rolename: 'O2',
+      pid: 143388,
+      username: 'root',
+      system: 'DAQ',
+      facility: 'P2',
+      detector: 'Alice',
+      partition: 'PHY',
+      dest: 'dest',
+      errcode: 123,
+      errline: 8,
+      errsource: 'source.cpp',
+      message: 'test'
+    };
+    let count = 0;
+    receiver.on('message', (parsed) => {
+      assert.deepStrictEqual(parsed, expected);
+      count++;
+      if (count === 2) {
+        done();
+      }
+    });
+    receiver.onData(message);
+    receiver.onData(message2);
+    receiver.onData(message);
+    receiver.onData(message2);
+  });
+
+  it('Parse multiple logs, last one chopped', (done) => {
+    const receiver = new InfoLoggerReceiver();
+    let counter = 0;
+    receiver.on('message', (parsed) => {
+      counter++;
+      assert.strictEqual(parsed.facility, 'pauseAndResetRun');
+      assert.strictEqual(parsed.partition, 'PHYSICS_1');
+      assert.strictEqual(parsed.run, 289724);
+      if (counter === 3) {
+        done();
+      }
+    });
+    const messages =
+      /* eslint-disable max-len */
+      `*1.3#I#6#1531982951.042664#aldaqpc031#ldc-TRD-5#37971#alicedaq#DAQ#pauseAndResetRun#TRD#PHYSICS_1##289724##91#pauseAndResetRun.c#POST_PAR completed
+*1.3#I#6#1531982951.033947#aldaqpc029#ldc-TRD-3#38035#alicedaq#DAQ#pauseAndResetRun#TRD#PHYSICS_1##289724##91#pauseAndResetRun.c#POST_PAR completed
+*1.3#I#6#1531982951.482111#aldaqpc134#ldc-TPC-C-15#45919#alicedaq#DAQ#pauseAndResetRun#TPC#PHYSICS_1##289724##91#pauseAndResetRun.c#POST_PAR completed
+*1.3#I#6#1531982951.169333#aldaqpc119#ldc-TPC-C-0#7780#alice`;
+    const messages2 = 'daq#DAQ#pauseAndResetRun#TPC#PHYSICS_1##289724##91#pauseAndResetRun.c#POST_PAR completed\n';
+    receiver.onData(messages);
+    receiver.onData(messages2);
     /* eslint-enable max-len */
   });
 });
