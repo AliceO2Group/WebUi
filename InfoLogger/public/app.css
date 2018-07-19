@@ -35,7 +35,8 @@ td, th {max-width: 0; /* allow ellipsis on tables */vertical-align: top;}
 .cell-m { width: 7rem; }
 .cell-l { width: 16rem; }
 
-.cell:last-child { width: initial; }
+/* last column fills space */
+.cell-xs:last-child, .cell-s:last-child, .cell-m:last-child, .cell-l:last-child { width: initial; }
 
 .row-hover:hover { background-color: rgba(0,0,0,.075); }
 .row-selected, .row-selected:hover { background-color: #007bff; color: white; }
