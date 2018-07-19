@@ -20,6 +20,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     // Declare properties
     this.client = null;
+    this.buffer = '';
   }
 
   /**
@@ -33,7 +34,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     }
 
     this.client = net.createConnection(options);
-    this.client.on('data', this.onData.bind(this));
+    this.client.on('data', (messages) => this.onData(messages));
 
     this.client.on('connect', () => {
       log.info('Connected to infoLoggerServer');
@@ -72,67 +73,76 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
    * @fires LiveDataSource#message
    */
   onData(data) {
-    const message = this.parse(data.toString());
-
-    if (!message) {
-      return; // not a valid message
+    let dataString = this.buffer + data.toString();
+    this.buffer = '';
+    // detect whether the last log is chopped in the middle
+    if (dataString[dataString.length - 1] !== '\n') {
+      const indexLast = dataString.lastIndexOf('\n');
+      this.buffer = dataString.substring(indexLast);
+      dataString = dataString.substring(0, indexLast);
     }
+    const messages = dataString.split('\n');
 
-    /**
-     * Message event containing log properties
-     *
-     * @event LiveDataSource#message
-     * @type {object}
-     */
-    this.emit('message', message);
+    for (let message of messages) {
+      if (!message) {
+        continue;
+      }
+      /**
+      * Message event containing log properties
+      *
+      * @event LiveDataSource#message
+      * @type {object}
+      */
+      this.emit('message', this.parse(message + '\n'));
+    }
   }
 
   /**
-   * Parse an input string trame to corresponding object
+   * Parse an input string frame to corresponding object
    * Empty fields are ignored.
    * Example of input:
    * *1.4#I##1505140368.399439#aido2db##143388#root#########test Mon Sep 11 16:32:48 CEST 2017
    * Example of output:
    * {severity: 'I', hostname: 'aido2db', ...}
-   * @param {string} trame
+   * @param {string} frame
    * @return {Object}
    */
-  parse(trame) {
-    // Check trame integrity (header and footer)
-    if (trame[0] !== '*') {
-      log.warn(`Parsing: discard uncomplete trame (length=${trame.length}), must begins with *`);
+  parse(frame) {
+    // Check frame integrity (header and footer)
+    if (frame[0] !== '*') {
+      log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must begins with *`);
       return;
     }
 
-    if (trame[trame.length - 1] !== '\n') {
-      log.warn(`Parsing: discard uncomplete trame (length=${trame.length}), must ends with \\n`);
+    if (frame[frame.length - 1] !== '\n') {
+      log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must ends with \\n`);
       return;
     }
 
     // Check if we support this protocol version
-    const trameVersion = trame.substr(1, 3);
-    const trameProtocol = protocols.find((protocol) => protocol.version === trameVersion);
-    if (!trameProtocol) {
+    const frameVersion = frame.substr(1, 3);
+    const frameProtocol = protocols.find((protocol) => protocol.version === frameVersion);
+    if (!frameProtocol) {
       const protocolsVersions = protocols.map((protocol) => protocol.version);
-      log.warn(`Parsing: unreconized protocol, found "${trameVersion}",
+      log.warn(`Parsing: unreconized protocol, found "${frameVersion}",
         support ${protocolsVersions.join(', ')}`);
       return;
     }
 
-    // Get trame content by removing the protocol's header and footer
-    const content = trame.substr(5, trame.length - 5 - 1);
+    // Get frame content by removing the protocol's header and footer
+    const content = frame.substr(5, frame.length - 5 - 1);
     const fields = content.split('#');
 
-    // Check trame integrity (number of fields)
-    if (fields.length !== trameProtocol.fields.length) {
-      log.warn(`Parsing: expected ${trameProtocol.fields.length} fields for
-        protocol version ${trameProtocol.version}, found ${fields.length}`);
+    // Check frame integrity (number of fields)
+    if (fields.length !== frameProtocol.fields.length) {
+      log.warn(`Parsing: expected ${frameProtocol.fields.length} fields for
+        protocol version ${frameProtocol.version}, found ${fields.length}`);
       return;
     }
 
     // Parse message
     const message = {};
-    trameProtocol.fields.forEach((fieldDefinition, i) => {
+    frameProtocol.fields.forEach((fieldDefinition, i) => {
       if (fields[i] === '') {
         return;
       } else if (fieldDefinition.type === Number) {
