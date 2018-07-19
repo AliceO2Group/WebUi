@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Infologger GUI to query and stream log events",
   "homepage": "https://alice-o2.web.cern.ch",
   "main": "index.js",
@@ -15,7 +15,7 @@
   "author": "Vladimir Kosmala",
   "license": "ISC",
   "dependencies": {
-    "@aliceo2/web-ui": "^1.2.2"
+    "@aliceo2/web-ui": "^1.2.4"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
