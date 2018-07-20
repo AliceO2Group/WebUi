@@ -51,24 +51,14 @@ function treeTable(model) {
   ]);
 }
 
-const treeRows = (model) => !model.object.tree ? null : model.object.tree.childrens.map(children => treeRow(model, children, 0));
-
-function searchRows(model) {
-  return !model.object.searchResult ? null : model.object.searchResult.map(item => {
-    const path = item.name;
-    const selectItem = () => model.object.select(item);
-    const color = item.status === 'active' ? 'success' : 'alert';
-    const className = item && item === model.object.selected ? 'table-primary' : '';
-
-    return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
-      h('td.highlight.text-ellipsis', [
-        iconBarChart(),
-        ' ',
-        item.name
-      ])
-    ]);
-  });
-}
+// for the keys to be effective, we need one big array, array of array does not work
+// so each array returned by treeRow call must be flatten in one unique array
+const treeRows = (model) => model.object.tree
+  ? model.object.tree.childrens.reduce(
+      (flatArray, children) => flatArray.concat(treeRow(model, children, 0)),
+      []
+    )
+  : null;
 
 // Flatten the tree in a functional way
 // Tree is traversed in depth-first with pre-order (root then subtrees)
@@ -95,7 +85,7 @@ function treeRow(model, tree, level) {
   const ondragstart = tree.object ? (e) => { const newItem = model.layout.addItem(tree.object.name); model.layout.moveTabObjectStart(newItem); } : null;
 
   const attr = {
-    key: path,
+    key: `key-sidebar-tree-${path}`,
     title: path,
     onclick,
     class: className,
@@ -112,3 +102,36 @@ function treeRow(model, tree, level) {
   ];
 }
 
+function searchRows(model) {
+  return !model.object.searchResult ? null : model.object.searchResult.map(item => {
+    const path = item.name;
+    const color = item.status === 'active' ? 'success' : 'alert';
+    const className = item && item === model.object.selected ? 'table-primary' : '';
+
+    // UI events
+    const onclick = () => model.object.select(item);
+    const ondblclick = () => model.layout.addItem(item.name);
+    const ondragstart = (e) => {
+      const newItem = model.layout.addItem(item.name);
+      model.layout.moveTabObjectStart(newItem);
+    };
+
+    const attr = {
+      key: `key-sidebar-tree-${path}`,
+      title: path,
+      onclick,
+      class: className,
+      draggable: true,
+      ondragstart,
+      ondblclick
+    };
+
+    return h('tr', attr, [
+      h('td.highlight.text-ellipsis', [
+        iconBarChart(),
+        ' ',
+        item.name
+      ])
+    ]);
+  });
+}

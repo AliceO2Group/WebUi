@@ -53,25 +53,14 @@ const tableShow = (model) => [
   ])
 ];
 
-const treeRows = (model) => !model.object.tree ? null : model.object.tree.childrens.map(children => treeRow(model, children, 0));
-
-function searchRows(model) {
-  return model.object.searchResult.map(item => {
-    const path = item.name;
-    const selectItem = () => model.object.select(item);
-    const color = item.quality === 'good' ? 'success' : 'danger';
-    const className = item && item === model.object.selected ? 'table-primary' : '';
-
-    return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
-      h('td.highlight', [
-        objectIcon(),
-        ' ',
-        item.name
-      ]),
-      h('td.highlight', {class: color}, item.quality),
-    ]);
-  });
-}
+// for the keys to be effective, we need one big array, array of array does not work
+// so each array returned by treeRow call must be flatten in one unique array
+const treeRows = (model) => model.object.tree
+  ? model.object.tree.childrens.reduce(
+      (flatArray, children) => flatArray.concat(treeRow(model, children, 0)),
+      []
+    )
+  : null;
 
 // Icons used
 const openIcon = () => h('svg.icon.gray', {fill: 'currentcolor', viewBox: '0 0 8 8'},
@@ -114,3 +103,20 @@ function treeRow(model, tree, level) {
   ];
 }
 
+function searchRows(model) {
+  return model.object.searchResult.map(item => {
+    const path = item.name;
+    const selectItem = () => model.object.select(item);
+    const color = item.quality === 'good' ? 'success' : 'danger';
+    const className = item && item === model.object.selected ? 'table-primary' : '';
+
+    return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
+      h('td.highlight', [
+        objectIcon(),
+        ' ',
+        item.name
+      ]),
+      h('td.highlight', {class: color}, item.quality),
+    ]);
+  });
+}
