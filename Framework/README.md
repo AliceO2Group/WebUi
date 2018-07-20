@@ -45,6 +45,7 @@ npm install @aliceo2/web-ui
 
 ### Getting started
 - [Overview](docs/guide/overview.md)
+- [Demo (frontend only)](http://jsfiddle.net/vkosmala/7dm0yve6/)
 - [Starting a new project](docs/skeleton/README.md)
 
 ### Tutorials

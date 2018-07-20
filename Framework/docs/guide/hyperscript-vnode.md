@@ -40,14 +40,41 @@ import {h, mount, Observable} from '/js/src/index.js';
 const model = new Observable();
 const view = (model) => h('h1.title', `hello ${model.name}`);
 mount(document.body, view, model);
-model.name = 'Joueur du Grenier';
+model.name = 'Alice';
 model.notify();
 ```
 
-This example will show a simple title, see "skeleton" inside docs for more complete example.
+This example will show a simple title, [here is the result as a demo](http://jsfiddle.net/vkosmala/dskb92co/).
+
+You will notice we use an `Observable` model. When we `notify` a change, `mount` will update the view according to the new state.
+Usually, we don't call directly `model.notify()` by hand but with a call coming from the view (a click, an input).
+We can listen to those events by attaching an handler (anonymous function) to an element: `onclick: () => action()`.
+
+```js
+import {h, mount, Observable} from '/js/src/index.js';
+class Model extends Observable {
+  constructor() {
+    super();
+    this.count = 0;
+  }
+
+  increment() {
+    this.count++;
+    this.notify();
+  }
+}
+const view = (model) => h('button', {onclick: () => model.increment()}, `${this.count} ++`);
+mount(document.body, view, model);
+```
+
+The result is a counter we can increment.
+[Here is a demo](http://jsfiddle.net/vkosmala/0ouLtv7r/) of this concept, with CSS and a decrement function in addition to the code above.
+
+The template engine flow can be seen as a cycle:
+![Cycle](../images/cycle.jpeg)
 
 See [Components](components.md) guide to learn more about re-usability and maintenance.
-See [API Reference for JS](../reference/frontend-api.md) for function prototypes.
+See [API Reference for JS](../reference/frontend-api.md#module_renderer..h) for function prototypes.
 See [skeleton](../skeleton/) for function project bootstrap.
 
 ## Tools
