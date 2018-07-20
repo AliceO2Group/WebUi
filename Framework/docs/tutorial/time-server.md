@@ -7,7 +7,7 @@ This tutorial explains how to develop a time server. The server provides the tim
 You will learn:
 * How to create a new project based on this framework
 * How to launch your project
-* How to build a web user interface using [hyperscript](../guide/hyperscript-vnode.md)
+* How to build a web user interface using [hyperscript](../guide/template-engine.md)
 * How server communicates with client
 
 ### Starting a new project
@@ -215,10 +215,10 @@ If you need to create additional model just follow the guide on [how to scale](.
 Open `public/view.js` file.
 This requires basic knowledge of CSS and the DOM tree.
 
-At first import the [hyperscript](../guide/hyperscript-vnode.md) function `h()` which represent the DOM elements. The `h()` function accepts three arguments:
+At first import the [hyperscript](../guide/template-engine.md) function `h()` which represent the DOM elements. The `h()` function accepts three arguments:
 1. Tag name
 2. Object attributes
-3. List of [vnodes](../guide/hyperscript-vnode.md) which can be recursively created by `h()`.
+3. List of [vnodes](../guide/template-engine.md) which can be recursively created by `h()`.
 
 Then the `view` function is specified. It receives Model as argument.
 ```js
