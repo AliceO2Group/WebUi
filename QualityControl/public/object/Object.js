@@ -21,7 +21,7 @@ export default class Object_ extends Observable {
     this.onlineModeAvailable = false; // true if data are coming from server
 
     this.searchInput = ''; // string - content of input search
-    this.searchResult = []; // array - result list of search
+    this.searchResult = []; // array<object> - result list of search
 
     this.refreshTimer = 0;
     this.refreshInterval = 0; // seconds
