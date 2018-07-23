@@ -2,7 +2,7 @@
 
 Component is a part of UI like a menu, form, etc. Thanks to Hyperscript it is also a pure JavaScript function which returns a vnode.
 
-Let's define a [vnode with Hyperscript](hyperscript-vnode.md):
+Let's define a [vnode with Hyperscript](template-engine.md):
 
 ```js
 h('h1', {class: 'title'}, 'Hello')
