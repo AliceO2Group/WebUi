@@ -20,3 +20,5 @@ export {default as Loader} from './Loader.js';
 
 // All icons helpers, namespaced with prefix 'icon*'
 export * from './icons.js';
+
+export * from './chart.js';
