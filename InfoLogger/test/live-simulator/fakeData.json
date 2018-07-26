@@ -19,7 +19,7 @@
     "message": "Mon Feb 22 10:54:00 2016 (1456134840): BeamMode: NO BEAM; BeamType: ; ParticleTypeB1: ; ParticleTypeB2: ; BetaStar: ; Eng: 0 GeV; FillN: -999; FillScheme: ; NbunchesInt: 0; NbunchesNotIntB1: 0; NbunchesNotIntB2: 0; InteracIst I(B1): 0; InteracTot I(B1): 0; InteracIst I(B2): 0; InteracTot I(B2): 0; NotInteracIst I(B1): 0; NotInteracTot I(B1): 0; NotInteracIst I(B2): 0; NotInteracTot I(B2): 0; PostMortemN: 1; LHCAdjust: STANDBY; LHCBeamDump: STANDBY; LHCInjection: STANDBY; DIPconnected Flag: 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
   },
   {
-    "severity": "I",
+    "severity": "E",
     "level": "6",
     "timestamp": "1456134840.001556",
     "hostname": "aldaqdip01",
@@ -57,7 +57,7 @@
     "message": "Mon Feb 22 10:55:00 2016 (1456134900): BeamMode: NO BEAM; BeamType: ; ParticleTypeB1: ; ParticleTypeB2: ; BetaStar: ; Eng: 0 GeV; FillN: -999; FillScheme: ; NbunchesInt: 0; NbunchesNotIntB1: 0; NbunchesNotIntB2: 0; InteracIst I(B1): 0; InteracTot I(B1): 0; InteracIst I(B2): 0; InteracTot I(B2): 0; NotInteracIst I(B1): 0; NotInteracTot I(B1): 0; NotInteracIst I(B2): 0; NotInteracTot I(B2): 0; PostMortemN: 1; LHCAdjust: STANDBY; LHCBeamDump: STANDBY; LHCInjection: STANDBY; DIPconnected Flag: 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
   },
   {
-    "severity": "I",
+    "severity": "F",
     "level": "6",
     "timestamp": "1456134900.002248",
     "hostname": "aldaqdip01",
@@ -323,7 +323,7 @@
     "message": "BC_Interacting:"
   },
   {
-    "severity": "I",
+    "severity": "E",
     "level": "6",
     "timestamp": "1456135260.001317",
     "hostname": "aldaqdip01",
@@ -5472,7 +5472,7 @@
     "message": "BC_Interacting:"
   },
   {
-    "severity": "I",
+    "severity": "E",
     "level": "6",
     "timestamp": "1456136520.001890",
     "hostname": "aldaqdip01",
