@@ -39,3 +39,8 @@ The versions of [dependencies](https://david-dm.org/AliceO2Group/WebUi) and [dev
 
 ## Source management
 [Github](https://github.com/AliceO2Group/WebUi) is used for managing sources and [npm](https://www.npmjs.com/settings/aliceo2/packages) for releases.
+
+## `npm run dev`
+
+- On Framework this command will start a little web server to have the ability to work on static files like CSS or charts.
+- On projects using Framework it will start web server of the application like in production but with a code monitor enabled (see above).
