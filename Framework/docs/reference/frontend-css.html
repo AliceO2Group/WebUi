@@ -51,6 +51,7 @@
   <p class="f4">.f4 or h4</p>
   <p class="f5">.f5 or h5 (default, 1rem, 16px)</p>
   <p class="f6">.f6 or h6</p>
+  <p class="f7">.f7 (very small and dense)</p>
 
   <hr />
   <a name="text"></a>
@@ -76,6 +77,7 @@
   <p class="measure">All colors of the framework are available with their name directly.<p>
 
   <p class="primary">.primary</p>
+  <p class="success">.success</p>
   <p class="warning">.warning</p>
   <p class="danger">.danger</p>
   <p class="black">.black</p>
@@ -88,6 +90,7 @@
   <p class="measure">All text colors are available as background colors with the prefix bg-*, more grays are available to allow layout visual partitions.<p>
 
   <p class="bg-primary">.bg-primary</p>
+  <p class="bg-success">.bg-warning</p>
   <p class="bg-warning">.bg-warning</p>
   <p class="bg-danger">.bg-danger</p>
   <p class="bg-black">.bg-black</p>
@@ -341,8 +344,9 @@
   <hr>
   <a name="shadow"></a>
   <h2>Shadow</h2>
-  <p>Shadow is a way to elevate contents and stack them, for example a menu is above the rest of the page which scrolls below.</p>
+  <p class="measure">Shadow is a way to elevate contents and stack them, for example a menu is above the rest of the page which scrolls below. A z-index is associated so a small shadow is always below a wide shadow.</p>
 
+  <p class="shadow-level0">.shadow-level0</p>
   <p class="shadow-level1">.shadow-level1</p>
   <p class="shadow-level2">.shadow-level2</p>
 
@@ -551,7 +555,7 @@
 
   <div class="relative" style="height: 600px"><!-- this element represents body -->
     <div class="flex-column absolute-fill">
-      <div class="bg-white flex-row p2 shadow-level2 level2">
+      <div class="bg-white flex-row p2 shadow-level2">
         <div class="flex-grow text-left">
           <button class="btn">
             <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 1v1h8v-1h-8zm0 2.969v1h8v-1h-8zm0 3v1h8v-1h-8z" name="expand-right" /></svg>

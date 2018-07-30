@@ -311,6 +311,7 @@ Network loader, count current requests, handle errors, make ajax requests
     * [`loader._promiseSuccess(data)`](#Loader+_promiseSuccess) ⇒ <code>Any</code>
     * [`loader._promiseError(err)`](#Loader+_promiseError)
     * [`loader.post(url, body)`](#Loader+post) ⇒ <code>object</code>
+    * [`loader.get(url, query)`](#Loader+get) ⇒ <code>object</code>
     * [`loader.observe(callback)`](#Observable+observe)
     * [`loader.unobserve(callback)`](#Observable+unobserve)
     * [`loader.notify()`](#Observable+notify)
@@ -371,6 +372,24 @@ Do a POST request with `body` as JSON content.
 import {Loader} from '/js/src/index.js';
 const loader = new Loader();
 const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
+```
+<a name="Loader+get"></a>
+
+### `loader.get(url, query)` ⇒ <code>object</code>
+Do a GET request with `query` as query content.
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Returns**: <code>object</code> - result, ok, status  
+**Params**
+
+- url <code>string</code> - any URL part
+- query <code>object</code> - content
+
+**Example**  
+```js
+import {Loader} from '/js/src/index.js';
+const loader = new Loader();
+const {result, ok} = await loader.get('/api/foo', {bar: 123, baz: 456})
 ```
 <a name="Observable+observe"></a>
 
