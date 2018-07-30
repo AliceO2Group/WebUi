@@ -42,7 +42,7 @@ const queryButton = (model) => h('button.btn.btn-primary', model.servicesResult.
  * - query lookup
  * - websocket status
  */
-const liveButton = (model) => h('button.btn', model.servicesResult.match({
+const liveButton = (model) => h('button.btn.btn-primary', model.servicesResult.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
   Success: (services) => ({
