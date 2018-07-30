@@ -42,6 +42,7 @@ export default class Log extends Observable {
     this.item = null;
     this.autoScrollToItem = false; // go to an item
     this.autoScrollLive = false; // go at bottom on Live mode
+    this.liveEnabled = false;
     this.resetStats();
 
     this.scrollTop = 0; // position of table scrollbar
@@ -118,27 +119,27 @@ export default class Log extends Observable {
   }
 
   /**
-   * Set `item` as first row in the `list` to have an error
+   * Set `item` as first row in the `list` to have an error/fatal
    * if no error, do nothing.
    */
   firstError() {
-    if (!this.stats.error) {
+    if (!this.stats.error && !this.stats.fatal) {
       return;
     }
 
-    this.item = this.list.find((item) => item.severity === 'E');
+    this.item = this.list.find((item) => item.severity === 'E' || item.severity === 'F');
     this.autoScrollToItem = true;
     this.notify();
   }
 
   /**
-   * Find previous `item` in `list` to have an error
+   * Find previous `item` in `list` to have an error/fatal
    * starting from current `item`.
-   * if no current `item`, find last error.
+   * if no current `item`, find last error/fatal.
    * if no error, do nothing.
    */
   previousError() {
-    if (!this.stats.error) {
+    if (!this.stats.error && !this.stats.fatal) {
       return;
     }
 
@@ -150,7 +151,7 @@ export default class Log extends Observable {
     const currentIndex = this.list.indexOf(this.item);
     // find previous one, if any
     for (let i = currentIndex - 1; i >= 0; i--) {
-      if (this.list[i].severity === 'E') {
+      if (this.list[i].severity === 'E' || this.list[i].severity === 'F') {
         this.item = this.list[i];
         this.autoScrollToItem = true;
         this.notify();
@@ -160,13 +161,13 @@ export default class Log extends Observable {
   }
 
   /**
-   * Find next `item` in `list` to have an error
+   * Find next `item` in `list` to have an error/fatal
    * starting from current `item`.
-   * if no current `item`, find first error.
+   * if no current `item`, find first error/fatal.
    * if no error, do nothing.
    */
   nextError() {
-    if (!this.stats.error) {
+    if (!this.stats.error && !this.stats.fatal) {
       return;
     }
 
@@ -178,7 +179,7 @@ export default class Log extends Observable {
     const currentIndex = this.list.indexOf(this.item);
     // find next one, if any
     for (let i = currentIndex + 1; i < this.list.length; i++) {
-      if (this.list[i].severity === 'E') {
+      if (this.list[i].severity === 'E' || this.list[i].severity === 'F') {
         this.item = this.list[i];
         this.autoScrollToItem = true;
         this.notify();
@@ -188,17 +189,17 @@ export default class Log extends Observable {
   }
 
   /**
-   * Set `item` as first row in the `list` to have an error
+   * Set `item` as first row in the `list` to have an error/fatal
    * if no error, do nothing.
    */
   lastError() {
-    if (!this.stats.error) {
+    if (!this.stats.error && !this.stats.fatal) {
       return;
     }
 
     for (let i = this.list.length - 1; i >= 0; --i) {
       const item = this.list[i];
-      if (item.severity === 'E') {
+      if (item.severity === 'E' || item.severity === 'F') {
         this.item = item;
         break;
       }

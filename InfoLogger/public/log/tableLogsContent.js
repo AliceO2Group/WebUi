@@ -67,27 +67,7 @@ const tableContainerHooks = (model) => ({
   },
 
   onupdate(vnode) {
-    // Auto-scroll like a magnet at bottom
-    // When scrolling was quite at bottom at previous draw, scroll to bottom for this draw
-    if (model.log.list.length * ROW_HEIGHT - (model.log.scrollHeight + model.log.scrollTop) <=  ROW_HEIGHT * 2) {
-      // we want to scroll at maximum bottom of list
-      vnode.dom.scrollTo(0, ROW_HEIGHT * model.log.applicationLimit);
-    } else if (model.log.item && model.log.autoScrollToItem) {
-      // we want to scroll to `item`
-      // give-up if already done (DOM memorize previous auto-scroll)
-      // because DOM accepts only strings, we create a unique string identifier
-      const itemId = String(pointerId(model.log.item));
-      if (vnode.dom.dataset.selectedItemId === itemId) {
-        return;
-      }
-      vnode.dom.dataset.selectedItemId = itemId;
-
-      // scroll to an index * height of row, centered
-      const index = model.log.list.indexOf(model.log.item);
-      const positionRow = ROW_HEIGHT * index;
-      const halfView = model.log.scrollHeight / 2;
-      vnode.dom.scrollTo(0, positionRow - halfView);
-    }
+    autoscrollManager(model, vnode);
   },
 
   ondestroy(vnode) {
@@ -96,6 +76,46 @@ const tableContainerHooks = (model) => ({
     window.removeEventListener('resize', vnode.dom.onTableScroll);
   }
 });
+
+// Handle scroll to selected item or auto-scroll to bottom
+// 'Autoscroll' is higher priority over 'scroll to selected item'
+const autoscrollManager = (model, vnode) => {
+  // Autoscroll to bottom in live mode
+  if (model.log.autoScrollLive && model.log.liveEnabled && model.log.list.length) {
+    // Scroll only if last element is a new one
+    const previousLastLogId = vnode.dom.dataset.lastLogId;
+    const currentLastLogId = String(pointerId(model.log.list[model.log.list.length - 1]));
+
+    if (previousLastLogId !== currentLastLogId) {
+      // scroll at maximum bottom possible
+      vnode.dom.scrollTo(0, ROW_HEIGHT * model.log.applicationLimit);
+      vnode.dom.dataset.lastLogId = currentLastLogId;
+    }
+
+    // don't try to scroll to selected item when auto-scroll is ON
+    return;
+  }
+
+  // Autoscroll to selected item
+  if (model.log.item) {
+    // Scroll only if we did not previously, save last try in DOM dataset
+    const previousSelectedItemId = vnode.dom.dataset.selectedItemId;
+    const currentSelectedItemId = String(pointerId(model.log.item));
+
+    if (previousSelectedItemId !== currentSelectedItemId && model.log.autoScrollToItem) {
+      // scroll to an index * height of row, centered
+      const index = model.log.list.indexOf(model.log.item);
+      const positionRow = ROW_HEIGHT * index;
+      const halfView = model.log.scrollHeight / 2;
+      vnode.dom.scrollTo(0, positionRow - halfView);
+    }
+
+    // Save the fact that we changed `item`
+    if (previousSelectedItemId !== currentSelectedItemId) {
+      vnode.dom.dataset.selectedItemId = currentSelectedItemId;
+    }
+  }
+};
 
 let pointers = new WeakMap();
 let currentAddress = 0;
