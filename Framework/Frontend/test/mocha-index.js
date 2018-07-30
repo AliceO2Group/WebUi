@@ -33,7 +33,7 @@ describe('Framework Frontend', function() {
         </script>`);
       } else if (request.url === '/api/ok.json?token=TOKEN') {
         response.setHeader('Content-type', 'application/json');
-        return response.end(`{"ok": true}`);
+        return response.end(`{"ok": "${request.method}"}`);
       } else {
         fs.readFile(path.join(__dirname, '..', request.url), (error, content) => {
           if (error) {
@@ -245,10 +245,17 @@ describe('Framework Frontend', function() {
   });
 
   describe('Loader class (and fetchClient, sessionService)', function() {
-    it('sends request to web server', async () => {
+    it('loads session token', async () => {
       await page.evaluate(async () => {
         window.router.go('?personid=PERSONID&name=NAME&token=TOKEN', true, true);
         sessionService.loadAndHideParameters();
+        window.result = sessionService.get().token;
+      });
+      await page.waitForFunction(`window.result === 'TOKEN'`);
+    });
+
+    it('sends POST to web server', async () => {
+      await page.evaluate(async () => {
         const loader = new Loader();
         const {result, ok, status} = await loader.post('/api/ok.json');
         if (!ok) {
@@ -256,7 +263,19 @@ describe('Framework Frontend', function() {
         }
         window.result = result.ok;
       });
-      await page.waitForFunction(`window.result === true`);
+      await page.waitForFunction(`window.result === 'POST'`);
+    });
+
+    it('sends GET to web server', async () => {
+      await page.evaluate(async () => {
+        const loader = new Loader();
+        const {result, ok, status} = await loader.get('/api/ok.json');
+        if (!ok) {
+          throw new Error(`unable to send request to server, got status ${status}`);
+        }
+        window.result = result.ok;
+      });
+      await page.waitForFunction(`window.result === 'GET'`);
     });
   });
 
