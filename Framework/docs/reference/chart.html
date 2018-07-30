@@ -1,0 +1,68 @@
+<!doctype html>
+<title>ChartTimeSerie</title>
+
+<script type="module">
+import {mount, h, Observable, chartTimeSerie} from '../../Frontend/js/src/index.js';
+
+const view = (model) => [
+  h('', 'chartTimeSerie() example'),
+  h('div', {style: {margin: '1em'}}, [
+    chartTimeSerie({
+      serie: model.serie1,
+      title: 'Sinus',
+      colorPrimary: 'red',
+      width: '800',
+    }),
+  ]),
+  h('div', {style: {margin: '1em'}}, [
+    chartTimeSerie({
+      serie: model.serie2,
+      title: 'Random',
+      colorPrimary: 'blue',
+      width: '800',
+    }),
+  ]),
+  h('div', {style: {margin: '1em'}}, [
+    chartTimeSerie({
+      serie: model.serie3,
+      title: 'Sinus rounded',
+      colorPrimary: 'green',
+      width: '800',
+    }),
+  ]),
+  h('div', {style: {margin: '1em'}}, [
+    chartTimeSerie({
+      serie: model.serie1,
+      title: 'Sinus',
+      colorPrimary: 'red',
+      width: '800',
+      timeScale: 100,
+    }),
+  ]),
+];
+
+const model = new Observable();
+model.serie1 = [];
+model.serie2 = [];
+model.serie3 = [];
+model.notify();
+
+let i = 0;
+setInterval(() => {
+  i++;
+  model.serie1.push({value: Math.cos(i / 10), timestamp: Date.now()});
+  model.serie2.push({value: Math.random() * 10, timestamp: Date.now()});
+  model.serie3.push({value: Math.round(Math.cos(i / 10)), timestamp: Date.now()});
+
+  model.serie1.splice(0, model.serie1.length - 800);
+  model.serie2.splice(0, model.serie1.length - 800);
+  model.serie3.splice(0, model.serie1.length - 800);
+
+  model.notify();
+}, 33);
+
+mount(document.body, view, model, false);
+
+window.model = model;
+
+</script>
