@@ -75,16 +75,7 @@ class Loader extends Observable {
       body: JSON.stringify(body)
     };
 
-    const request = fetchClient(url, options);
-    this.watchPromise(request);
-    const response = await request;
-    try {
-      const result = await response.json();
-      return {ok: response.ok, result: result, status: response.status};
-    } catch (error) {
-      // Usually JSON is wrong
-      return {ok: false, result: {message: error.message}, status: response.status};
-    }
+    return await this._request(url, options);
   }
 
   /**
@@ -110,16 +101,51 @@ class Loader extends Observable {
       },
     };
 
+    return await this._request(url, options);
+  }
+
+  /**
+   * Wrapper around fetchClient to watch how many requests are established, handle errors and parse json content
+   * @param {string} url - any URL part
+   * @param {object} query - content
+   * @return {object} result, ok, status
+   */
+  async _request(url, options) {
     const request = fetchClient(url, options);
     this.watchPromise(request);
-    const response = await request;
+
+    let response;
     try {
-      const result = await response.json();
-      return {ok: response.ok, result: result, status: response.status};
+      response = await request;
     } catch (error) {
-      // Usually JSON is wrong
-      return {ok: false, result: {message: error.message}, status: response.status};
+      // handle connection error
+      console.error(`Connection to server failed`, error);
+      return {ok: false, result: {message: `Connection to server failed, please retry or ask administrator`}, status: 0};
     }
+
+    // handle server error
+    if (!response.ok) {
+      let recoverMessage = '';
+      if (response.status === 403) {
+        recoverMessage = ', please reload to connect';
+      } else if (response.status >= 500) {
+        recoverMessage = ', please call administrator';
+      }
+
+      return {ok: false, result: {message: `Request to server failed: ${response.status} ${response.statusText}${recoverMessage}`}, status: response.status};
+    }
+
+    let result;
+    try {
+      result = await response.json();
+    } catch (error) {
+      // handle JSON error
+      console.error(`Parsing result from server failed`, error);
+      return {ok: false, result: {message: `Parsing result from server failed`}, status: response.status};
+    }
+
+    // OK!
+    return {ok: response.ok, result: result, status: response.status};
   }
 }
 
