@@ -174,8 +174,14 @@ class WebSocket {
   broadcast(message) {
     this.server.clients.forEach(function(client) {
       if (typeof client.filter === 'function') {
-        if (!client.filter(message)) {
-          return;
+        // Handle function execution error, filter comes from WS
+        try {
+          if (!client.filter(message)) {
+            return; // don't send
+          }
+        } catch(error) {
+          log.error(`filter sent by client is corrupted, skipping broadcast for this one: ${error}`);
+          return; // don't send
         }
       }
       client.send(JSON.stringify(message.json));
