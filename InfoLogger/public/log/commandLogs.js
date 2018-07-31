@@ -7,13 +7,13 @@ export default (model) => [
   ' ',
   h('button.btn', {onclick: () => model.log.empty()}, 'Clear'),
   h('span.mh3'),
-  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.firstError(), title: 'Go to first error (ALT + left arrow)'}, '❮❮'),
+  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.firstError(), title: 'Go to first error/fatal (ALT + left arrow)'}, '❮❮'),
   ' ',
-  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.previousError(), title: 'Go to previous error (left arrow)'}, '❮'),
+  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.previousError(), title: 'Go to previous error/fatal (left arrow)'}, '❮'),
   ' ',
-  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.nextError(), title: 'Go to next error (left arrow)'}, '❯'),
+  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.nextError(), title: 'Go to next error/fatal (left arrow)'}, '❯'),
   ' ',
-  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.lastError(), title: 'Go to last error (ALT + right arrow)'}, '❯❯'),
+  h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.lastError(), title: 'Go to last error/fatal (ALT + right arrow)'}, '❯❯'),
   ' ',
 ];
 
@@ -42,7 +42,7 @@ const queryButton = (model) => h('button.btn.btn-primary', model.servicesResult.
  * - query lookup
  * - websocket status
  */
-const liveButton = (model) => h('button.btn', model.servicesResult.match({
+const liveButton = (model) => h('button.btn.btn-primary', model.servicesResult.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
   Success: (services) => ({

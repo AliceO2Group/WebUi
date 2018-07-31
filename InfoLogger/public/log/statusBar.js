@@ -3,7 +3,7 @@ import {h, icon} from '/js/src/index.js';
 export default (model) => [
   h('.flex-row', [
     h('.w-50', statusLogs(model)),
-    h('.w-50.text-right', applicationMessage(model), iconSidebar()),
+    h('.w-50.text-right', applicationMessage(model), applicationOptions(model)),
   ]),
 ];
 
@@ -21,8 +21,19 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
  ? h('span.danger', `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `)
  : null;
 
-const iconSidebar = (svg) => h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 480 480', onclick: () => model.toggleInspector()},
-  h('path', {d: 'M0,32v416h480V32H0z M288,416H32V64h256V416z M448,416H320V64h128V416z'}));
+const applicationOptions = (model) => [
+  h('label.d-inline', {title: 'Scroll down in live mode on new log incoming'}, h('input', {
+    type: 'checkbox',
+    checked: model.log.autoScrollLive,
+    onchange: () => model.log.toggleAutoScroll()
+  }), ' Autoscroll'),
+  h('span.mh1'),
+  h('label.d-inline', {title: 'Show details of selecte log'}, h('input', {
+    type: 'checkbox',
+    checked: model.inspectorEnabled,
+    onchange: () => model.toggleInspector()
+  }), ' Inspector'),
+];
 
 const statusQuery = (model, result) => [
   `${result.count} messages out of ${result.total}${result.more ? '+' : ''} (${(result.time / 1000).toFixed(2)} seconds) `,

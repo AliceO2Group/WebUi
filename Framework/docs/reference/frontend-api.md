@@ -43,6 +43,24 @@ is emitted.</p>
 ## Functions
 
 <dl>
+<dt><a href="#chartTimeSerie">`chartTimeSerie(userOptions, width, height, serie, title, timeScale, colorPrimary, colorSecondary, background)`</a> ⇒ <code>vnode</code></dt>
+<dd><p>Displays time-serie based chart of recent data
+with a sliding window. Time scale (x) must be specified and
+value scale (y) is automatic to fill height.
+Value: {value:number, timestamp:number:ms}</p>
+</dd>
+<dt><a href="#draw">`draw(dom, options)`</a></dt>
+<dd><p>Draw chartTimeSerie to the specified dom element with options</p>
+</dd>
+<dt><a href="#drawLegend">`drawLegend(ctx, titleText, legendText, left, top, width, height, color)`</a></dt>
+<dd><p>Part of chartTimeSerie, draw the title and scaling</p>
+</dd>
+<dt><a href="#drawGrid">`drawGrid(ctx, width, height, color)`</a></dt>
+<dd><p>Part of chartTimeSerie, draw the axis</p>
+</dd>
+<dt><a href="#drawCurve">`drawCurve(ctx, serie, max, min, width, height, color, timeScale)`</a></dt>
+<dd><p>Part of chartTimeSerie, draw the curve</p>
+</dd>
 <dt><a href="#tryCompatibility">`tryCompatibility(stringCode)`</a></dt>
 <dd><p>Try to execute a string code with eval, on failure redirect to the compatibility page.</p>
 </dd>
@@ -293,6 +311,7 @@ Network loader, count current requests, handle errors, make ajax requests
     * [`loader._promiseSuccess(data)`](#Loader+_promiseSuccess) ⇒ <code>Any</code>
     * [`loader._promiseError(err)`](#Loader+_promiseError)
     * [`loader.post(url, body)`](#Loader+post) ⇒ <code>object</code>
+    * [`loader.get(url, query)`](#Loader+get) ⇒ <code>object</code>
     * [`loader.observe(callback)`](#Observable+observe)
     * [`loader.unobserve(callback)`](#Observable+unobserve)
     * [`loader.notify()`](#Observable+notify)
@@ -353,6 +372,24 @@ Do a POST request with `body` as JSON content.
 import {Loader} from '/js/src/index.js';
 const loader = new Loader();
 const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
+```
+<a name="Loader+get"></a>
+
+### `loader.get(url, query)` ⇒ <code>object</code>
+Do a GET request with `query` as query content.
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Returns**: <code>object</code> - result, ok, status  
+**Params**
+
+- url <code>string</code> - any URL part
+- query <code>object</code> - content
+
+**Example**  
+```js
+import {Loader} from '/js/src/index.js';
+const loader = new Loader();
+const {result, ok} = await loader.get('/api/foo', {bar: 123, baz: 456})
 ```
 <a name="Observable+observe"></a>
 
@@ -956,6 +993,97 @@ sessionService is also refreshed.
 
 - command <code>string</code>  
 - payload <code>object</code>  
+
+<a name="chartTimeSerie"></a>
+
+## `chartTimeSerie(userOptions, width, height, serie, title, timeScale, colorPrimary, colorSecondary, background)` ⇒ <code>vnode</code>
+Displays time-serie based chart of recent data
+with a sliding window. Time scale (x) must be specified and
+value scale (y) is automatic to fill height.
+Value: {value:number, timestamp:number:ms}
+
+**Kind**: global function  
+**Returns**: <code>vnode</code> - canvas element as a virtual node  
+**Params**
+
+- userOptions <code>Object</code> - all options to draw the chart
+- width <code>number</code> - size of canvas
+- height <code>number</code> - size of canvas
+- serie <code>Array.&lt;Values&gt;</code> - timestamp in ms
+- title <code>string</code> - to be printed on corner bottom left
+- timeScale <code>number</code> - ms/div for x axis, div is half height
+- colorPrimary <code>string</code> - color of curve
+- colorSecondary <code>string</code> - color of axis and labels
+- background <code>string</code> - color of background
+
+**Example**  
+```js
+chartTimeSerie({
+  serie: [{value: Math.random(), timestamp: Date.now()}],
+  title: 'Random',
+  colorPrimary: 'blue',
+  width: '800',
+  width: '200',
+  timeScale: 1000,
+})
+```
+<a name="draw"></a>
+
+## `draw(dom, options)`
+Draw chartTimeSerie to the specified dom element with options
+
+**Kind**: global function  
+**Params**
+
+- dom <code>DOMElement</code>
+- options <code>Object</code> - See chartTimeSerie options
+
+<a name="drawLegend"></a>
+
+## `drawLegend(ctx, titleText, legendText, left, top, width, height, color)`
+Part of chartTimeSerie, draw the title and scaling
+
+**Kind**: global function  
+**Params**
+
+- ctx <code>CanvasRenderingContext2D</code>
+- titleText <code>string</code> - title at bottom left
+- legendText <code>string</code> - legend at bottom right
+- left <code>number</code> - position of legend
+- top <code>number</code> - position of legend
+- width <code>number</code> - width of legend
+- height <code>number</code> - height of legend
+- color <code>string</code> - color of texts
+
+<a name="drawGrid"></a>
+
+## `drawGrid(ctx, width, height, color)`
+Part of chartTimeSerie, draw the axis
+
+**Kind**: global function  
+**Params**
+
+- ctx <code>CanvasRenderingContext2D</code>
+- width <code>number</code> - width of the available area
+- height <code>number</code> - height of the available area
+- color <code>string</code> - color of axis
+
+<a name="drawCurve"></a>
+
+## `drawCurve(ctx, serie, max, min, width, height, color, timeScale)`
+Part of chartTimeSerie, draw the curve
+
+**Kind**: global function  
+**Params**
+
+- ctx <code>CanvasRenderingContext2D</code>
+- serie <code>Array</code> - data
+- max <code>number</code> - max value of serie
+- min <code>number</code> - min value of serie
+- width <code>number</code> - width of the available area
+- height <code>number</code> - height of the available area
+- color <code>string</code> - color of curve
+- timeScale <code>number</code> - ms
 
 <a name="tryCompatibility"></a>
 
