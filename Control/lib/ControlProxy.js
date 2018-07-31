@@ -5,7 +5,7 @@ const path = require('path');
 const {log} = require('@aliceo2/web-ui');
 
 const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
-const TIMEOUT_CALLS = 1000; // ms
+const TIMEOUT_READY = 2000; // ms
 
 /**
  * Encapsulate gRPC calls to O2 Control
@@ -15,8 +15,13 @@ class ControlProxy {
    * Create gRPC client
    * https://grpc.io/grpc/node/grpc.Client.html
    * @param {Object} config - Contains `hostname` and `port`
+   * @param {Object} config.hostname -
+   * @param {Object} config.port -
+   * @param {Object} config.timeout - used for gRPC deadline, in ms
    */
   constructor(config) {
+    this.config = config;
+
     let octlProto;
     try {
       octlProto = grpc.load(PROTO_PATH, 'proto', {convertFieldsToCamelCase: true});
@@ -31,7 +36,7 @@ class ControlProxy {
     const address = `${config.hostname}:${config.port}`;
     const credentials = grpc.credentials.createInsecure();
     this.client = new octlProto.octl.Octl(address, credentials);
-    this.client.waitForReady(Date.now() + 2000, (error) => {
+    this.client.waitForReady(Date.now() + TIMEOUT_READY, (error) => {
       if (error) {
         throw error;
       }
@@ -56,7 +61,7 @@ class ControlProxy {
     this[methodName] = (args) => {
       args = args || {};
       const options = {
-        deadline: Date.now() + TIMEOUT_CALLS
+        deadline: Date.now() + this.config.timeout
       };
 
       return new Promise((resolve, reject) => {
