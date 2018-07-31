@@ -1,5 +1,6 @@
 // Doc: https://grpc.io/grpc/node/grpc.html
-const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
+const grpcLibrary = require('grpc');
 const path = require('path');
 
 const {log} = require('@aliceo2/web-ui');
@@ -22,19 +23,16 @@ class ControlProxy {
   constructor(config) {
     this.config = config;
 
-    let octlProto;
-    try {
-      octlProto = grpc.load(PROTO_PATH, 'proto', {convertFieldsToCamelCase: true});
-    } catch (error) {
-      log.error(`Unable to init gRPC from proto file`);
-      throw error;
-    }
+    const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+      keepCase: false, // change to camel case
+    });
+    const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
 
     this.connectionReady = false;
     this.connectionError = null;
 
     const address = `${config.hostname}:${config.port}`;
-    const credentials = grpc.credentials.createInsecure();
+    const credentials = grpcLibrary.credentials.createInsecure();
     this.client = new octlProto.octl.Octl(address, credentials);
     this.client.waitForReady(Date.now() + TIMEOUT_READY, (error) => {
       if (error) {
