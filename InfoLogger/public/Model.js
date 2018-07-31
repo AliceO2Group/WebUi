@@ -49,7 +49,7 @@ export default class Model extends Observable {
     // update router on model change
     // Model can change very often we protect router with callRateLimiter
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
-    this.observe(callRateLimiter(() => this.updateRouteOnModelChange(), 500));
+    this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
   }
 
   /**
