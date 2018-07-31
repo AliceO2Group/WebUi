@@ -5,7 +5,7 @@ const path = require('path');
 const {log} = require('@aliceo2/web-ui');
 
 const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
-const TIMEOUT_READY = 2000; // ms
+const TIMEOUT_READY = 2000; // ms, time to stop waiting for a connection between client and server
 
 /**
  * Encapsulate gRPC calls to O2 Control
