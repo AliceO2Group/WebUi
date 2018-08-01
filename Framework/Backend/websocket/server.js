@@ -179,8 +179,8 @@ class WebSocket {
           if (!client.filter(message)) {
             return; // don't send
           }
-        } catch(error) {
-          log.error(`filter sent by client is corrupted, skipping broadcast for this one: ${error}`);
+        } catch (error) {
+          log.error(`filter's client corrupted, skipping his broadcast: ${error}`);
           return; // don't send
         }
       }
