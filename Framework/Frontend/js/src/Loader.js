@@ -120,16 +120,16 @@ class Loader extends Observable {
     } catch (error) {
       // handle connection error
       console.error(`Connection to server failed`, error);
-      return {ok: false, result: {message: `Connection to server failed, please retry or ask administrator`}, status: 0};
+      return {ok: false, result: {message: `Connection to server failed, please try again`}, status: 0};
     }
 
     // handle server error
     if (!response.ok) {
       let recoverMessage = '';
       if (response.status === 403) {
-        recoverMessage = ', please reload to connect';
+        recoverMessage = ', try reloading the page';
       } else if (response.status >= 500) {
-        recoverMessage = ', please call administrator';
+        recoverMessage = ', contact administrator';
       }
 
       return {ok: false, result: {message: `Request to server failed: ${response.status} ${response.statusText}${recoverMessage}`}, status: response.status};
