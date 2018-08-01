@@ -16,6 +16,10 @@
 <dd><p>Class EventEmitter for event-driven architecture
 Similar to the one provided by NodeJS</p>
 </dd>
+<dt><a href="#AjaxResult">AjaxResult</a></dt>
+<dd><p>DTO representing result of an Ajax call
+Used as output of Loader calls</p>
+</dd>
 <dt><a href="#Loader">Loader</a> ⇐ <code><a href="#Observable">Observable</a></code></dt>
 <dd><p>Network loader, count current requests, handle errors, make ajax requests</p>
 </dd>
@@ -297,6 +301,25 @@ in the order they were registered, passing the supplied arguments to each
 - eventName <code>string</code>
             - .args <code>any</code> - arguments to be passed to the listeners
 
+<a name="AjaxResult"></a>
+
+## AjaxResult
+DTO representing result of an Ajax call
+Used as output of Loader calls
+
+**Kind**: global class  
+**See**: [Loader](#Loader)  
+<a name="new_AjaxResult_new"></a>
+
+### `new AjaxResult(ok, status, result)`
+Constructor
+
+**Params**
+
+- ok <code>boolean</code> - status code between 200 and 299
+- status <code>number</code> - 200, 404, etc. 0 if connection failed
+- result <code>object</code> - object from server
+
 <a name="Loader"></a>
 
 ## Loader ⇐ [<code>Observable</code>](#Observable)
@@ -310,8 +333,9 @@ Network loader, count current requests, handle errors, make ajax requests
     * [`loader.watchPromise(promise)`](#Loader+watchPromise)
     * [`loader._promiseSuccess(data)`](#Loader+_promiseSuccess) ⇒ <code>Any</code>
     * [`loader._promiseError(err)`](#Loader+_promiseError)
-    * [`loader.post(url, body)`](#Loader+post) ⇒ <code>object</code>
-    * [`loader.get(url, query)`](#Loader+get) ⇒ <code>object</code>
+    * [`loader.post(url, body)`](#Loader+post) ⇒ [<code>AjaxResult</code>](#AjaxResult)
+    * [`loader.get(url, query)`](#Loader+get) ⇒ [<code>AjaxResult</code>](#AjaxResult)
+    * [`loader._request(url, options)`](#Loader+_request) ⇒ [<code>AjaxResult</code>](#AjaxResult)
     * [`loader.observe(callback)`](#Observable+observe)
     * [`loader.unobserve(callback)`](#Observable+unobserve)
     * [`loader.notify()`](#Observable+notify)
@@ -357,11 +381,12 @@ Private method. decrease `activePromises` by 1
 
 <a name="Loader+post"></a>
 
-### `loader.post(url, body)` ⇒ <code>object</code>
+### `loader.post(url, body)` ⇒ [<code>AjaxResult</code>](#AjaxResult)
 Do a POST request with `body` as JSON content.
 
 **Kind**: instance method of [<code>Loader</code>](#Loader)  
-**Returns**: <code>object</code> - result, ok, status  
+**Returns**: [<code>AjaxResult</code>](#AjaxResult) - result, ok, status  
+**See**: [AjaxResult](#AjaxResult)  
 **Params**
 
 - url <code>string</code> - any URL part
@@ -375,11 +400,12 @@ const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
 ```
 <a name="Loader+get"></a>
 
-### `loader.get(url, query)` ⇒ <code>object</code>
+### `loader.get(url, query)` ⇒ [<code>AjaxResult</code>](#AjaxResult)
 Do a GET request with `query` as query content.
 
 **Kind**: instance method of [<code>Loader</code>](#Loader)  
-**Returns**: <code>object</code> - result, ok, status  
+**Returns**: [<code>AjaxResult</code>](#AjaxResult) - result, ok, status  
+**See**: [AjaxResult](#AjaxResult)  
 **Params**
 
 - url <code>string</code> - any URL part
@@ -391,6 +417,19 @@ import {Loader} from '/js/src/index.js';
 const loader = new Loader();
 const {result, ok} = await loader.get('/api/foo', {bar: 123, baz: 456})
 ```
+<a name="Loader+_request"></a>
+
+### `loader._request(url, options)` ⇒ [<code>AjaxResult</code>](#AjaxResult)
+Wrapper around fetchClient to watch how many requests are established,
+handle errors and parse json content
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Returns**: [<code>AjaxResult</code>](#AjaxResult) - result, ok, status  
+**Params**
+
+- url <code>string</code> - any URL part
+- options <code>object</code> - options passed to native fetch API
+
 <a name="Observable+observe"></a>
 
 ### `loader.observe(callback)`
