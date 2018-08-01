@@ -36,7 +36,7 @@ const tableLogLine = (model, row) => h('tr.row-hover', {className: model.log.ite
   model.log.columns.detector && h('td.cell.cell-bordered', row.detector),
   model.log.columns.partition && h('td.cell.cell-bordered', row.partition),
   model.log.columns.run && h('td.cell.cell-bordered', row.run),
-  model.log.columns.errcode && h('td.cell.cell-bordered', row.errcode),
+  model.log.columns.errcode && h('td.cell.cell-bordered', h('a', {href: `https://alice-daq.web.cern.ch/error_codes/${row.errcode}?from=ILG`, target: '_blank'}, row.errcode)),
   model.log.columns.errline && h('td.cell.cell-bordered', row.errline),
   model.log.columns.errsource && h('td.cell.cell-bordered', row.errsource),
   model.log.columns.message && h('td.cell.cell-bordered', {title: row.message}, row.message),
