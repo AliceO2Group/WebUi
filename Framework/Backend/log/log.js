@@ -18,11 +18,18 @@ exports.configure = function(config) {
   }
 };
 
-exports.debug = function(log) {
+/**
+ *  Create default Winston instance
+ */
+function createWinstonInstance() {
   if (!winston) {
     winston = new Winston();
-    winston.instance.log('warn', 'Created default instance of logger');
+    winston.instance.warn('Created default instance of logger');
   }
+}
+
+exports.debug = function(log) {
+  createWinstonInstance();
   winston.instance.log('debug', log);
 
   if (infologger) {
@@ -35,11 +42,8 @@ exports.debug = function(log) {
 };
 
 exports.warn = function(log) {
-  if (!winston) {
-    winston = new Winston();
-    winston.instance.log('warn', 'Created default instance of logger');
-  }
-  winston.instance.log('warn', log);
+  createWinstonInstance();
+  winston.instance.warn(log);
 
   if (infologger) {
     const logObj = {
@@ -51,11 +55,8 @@ exports.warn = function(log) {
 };
 
 exports.info = function(log) {
-  if (!winston) {
-    winston = new Winston();
-    winston.instance.log('warn', 'Created default instance of logger');
-  }
-  winston.instance.log('info', log);
+  createWinstonInstance();
+  winston.instance.info(log);
 
   if (infologger) {
     const logObj = {
@@ -67,11 +68,8 @@ exports.info = function(log) {
 };
 
 exports.error = function(log) {
-  if (!winston) {
-    winston = new Winston();
-    winston.instance.log('warn', 'Created default instance of logger');
-  }
-  winston.instance.log('error', log);
+  createWinstonInstance();
+  winston.instance.error(log);
 
   if (infologger) {
     const logObj = {
