@@ -35,12 +35,8 @@ export default class Model extends Observable {
     // Setup WS connexion
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
-    this.ws.addListener('authed', () => {
-      console.log('WS ready');
-      this.ws.setFilter(function(message) {
-        return message.payload.severity === 'E';
-      });
-    });
+    this.ws.addListener('authed', this.handleWSAuthed.bind(this));
+    this.ws.addListener('close', this.handleWSClose.bind(this));
 
     this.servicesResult = RemoteData.NotAsked(); // Success({query, live})
 
@@ -50,6 +46,23 @@ export default class Model extends Observable {
     // Model can change very often we protect router with callRateLimiter
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
     this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
+  }
+
+  /**
+   * Handle websocket authentification success
+   */
+  handleWSAuthed() {
+    console.log('WS ready');
+
+    // Tell server not to stream by default
+    this.ws.setFilter(() => false);
+  }
+
+  /**
+   * Handle websocket close event
+   */
+  handleWSClose() {
+    alert(`Connection to server has been lost. Please reload the page.`); // TODO: notifications instead of alert
   }
 
   /**
