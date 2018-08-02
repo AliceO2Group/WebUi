@@ -22,6 +22,8 @@ module.exports = {
     port: 7777
   },
 
+  // dbFile: '<PATH_TO>/db.json', // absolute path where to save layouts, default same directory
+
   // jwt: {
   //   secret: '<secret>',
   //   issuer: 'alice-o2-gui',
@@ -47,7 +49,7 @@ module.exports = {
   //   }
   // },
 
-  // listingConnector: 'mysql', // ccdb or mysql or amore (default mysql)
+  // listingConnector: 'mysql', // ccdb or mysql or amore (default mysql) for listing objects
 
   // ccdb: {
   //   hostname: '<ccdb hostname>',
