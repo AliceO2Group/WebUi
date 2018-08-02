@@ -7,7 +7,7 @@ const api = require('./lib/api.js');
 // -------------------------------------------------------
 
 // Start server HTTP and bind WebSocket to it
-const http = new HttpServer(config.http);
+const http = new HttpServer(config.http, config.jwt, config.oAuth);
 const ws = new WebSocket(http);
 
 // Expose application to /
