@@ -9,8 +9,7 @@ const os = require('os');
 class JsonFileConnector {
   /**
    * Initialize connector by synchronizing DB file and its internal state
-   * @param {string} argName - blabla
-   * @return {string} blabla
+   * @param {string} pathname - path to JSON DB file
    */
   constructor(pathname) {
     // Path of the file to store data
