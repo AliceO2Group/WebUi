@@ -257,7 +257,7 @@ class HttpServer {
       })
       .catch((error) => {
         // Handles invalid oAuth code parameters
-        log.warn(error);
+        log.warn(`OAuth failed: ${error.message}`);
         res.status(401).send(
           `OAuth failed: ${error.message}, beware refreshing the page with one-time code parameter`
         );
