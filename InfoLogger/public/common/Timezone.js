@@ -74,14 +74,14 @@ export default class Timezone extends Observable {
     if (regDateResult) {
       date.date(parseInt(regDateResult[1], 10)); // mandatory day
       if (regDateResult[3]) { // optional month
-        date.months(parseInt(regDateResult[3], 10) - 1); // zero-based
+        date.month(parseInt(regDateResult[3], 10) - 1); // zero-based
       }
       if (regDateResult[5]) { // optional year
         let newYear = parseInt(regDateResult[5], 10); // zero-based
         if (newYear < 100) { // 20 => 2020
           newYear += 2000;
         }
-        date.years(newYear);
+        date.year(newYear);
       }
 
       // Midnight of this day

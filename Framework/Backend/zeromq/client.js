@@ -21,20 +21,21 @@ class ZeroMQClient extends EventEmitter {
     this.connected = false;
     this.socket = zmq.socket(type);
     this.socket.monitor(1000); // monitor socket every 1s
+    this.socket.setsockopt(zmq.ZMQ_RECONNECT_IVL, 2000);
     this.socket.on('connect', (fd, endpoint) => this.connect(endpoint));
     this.socket.on('close', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('disconnect', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('connect_delay', () => {
-      log.debug('ZMQ: Connection to the socket is pending...');
+      log.debug(this.getName() + 'Connection to the socket is pending...');
     });
 
     this.socket.on('connect_retry', () => {
-      log.debug('ZMQ: Socket is being reconnected...');
+      log.info(this.getName() + 'Socket is being reconnected...');
       this.connected = false;
     });
 
     this.socket.connect('tcp://' + ip + ':' + port);
-    log.debug('Connecting to tcp://' + ip + ':' + port + '...');
+    log.debug(this.getName() + 'Connecting to tcp://' + ip + ':' + port + '...');
     if (type == 'sub') {
       this.socket.subscribe('');
     }
@@ -42,11 +43,18 @@ class ZeroMQClient extends EventEmitter {
   }
 
   /**
+   * @return {string} Provide formatted class name
+   */
+  getName() {
+    return '[' + this.constructor.name + '] ';
+  }
+
+  /**
    * On-connect event handler.
    * @param {string} endpoint
    */
   connect(endpoint) {
-    log.debug('ZMQ: Connected to', endpoint);
+    log.info(this.getName() + 'Connected to ' + endpoint);
     this.connected = true;
   }
 
@@ -56,7 +64,7 @@ class ZeroMQClient extends EventEmitter {
    */
   disconnect(endpoint) {
     if (this.connected) {
-      log.debug('ZMQ: Disconnected from', endpoint);
+      log.info(this.getName() + 'Disconnected from ' + endpoint);
     }
     this.connected = false;
   }
@@ -67,7 +75,7 @@ class ZeroMQClient extends EventEmitter {
    */
   onmessage(message) {
     if (typeof message === 'undefined') {
-      log.debug('ZMQ: Cannot send undefined message');
+      log.debug(this.getName() + 'Cannot send undefined message');
       return;
     }
     this.emit('message', message.toString());
@@ -79,7 +87,7 @@ class ZeroMQClient extends EventEmitter {
    */
   send(message) {
     if (!this.connected) {
-      log.debug('ZMQ: Could not send message as the connection is not estabilished');
+      log.debug(this.getName() + 'Could not send message as socket is not open');
       return;
     }
     this.socket.send(message);
