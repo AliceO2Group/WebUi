@@ -18,6 +18,16 @@ Where
    * [`issuer`] - name of token issuer
    * [`maxAge`] - token refresh expiration time (as time literal)
 
+## Config example
+```
+jwt: {
+  secret: '<secret>',
+  issuer: 'alice-o2-gui',
+  expiration: '1d',
+  maxAge: '1d'
+}
+```
+
 ### Code example
 ```js
 // Include module
