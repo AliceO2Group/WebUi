@@ -109,6 +109,15 @@ export default class LogFilter extends Observable {
       const log = message.payload;
       const criterias = 'DATA_PLACEHOLDER';
 
+      /**
+       * Transform timestamp of infologger into javascript Date object
+       * @param {number} timestamp
+       * @return {Date}
+       */
+      function parseInfoLoggerDate(timestamp) {
+        return new Date(timestamp * 1000);
+      }
+
       for (const field in criterias) {
         let logValue = log[field];
 
@@ -135,13 +144,13 @@ export default class LogFilter extends Observable {
               break;
 
             case '$since':
-              if (logValue === undefined || parseIlDate(logValue) < parseIlDate(criteriaValue)) {
+              if (logValue === undefined || parseInfoLoggerDate(logValue) < parseInfoLoggerDate(criteriaValue)) {
                 return false;
               }
               break;
 
             case '$until':
-              if (logValue === undefined || parseIlDate(logValue) > parseIlDate(criteriaValue)) {
+              if (logValue === undefined || parseInfoLoggerDate(logValue) > parseInfoLoggerDate(criteriaValue)) {
                 return false;
               }
               break;
@@ -277,13 +286,4 @@ export default class LogFilter extends Observable {
     };
     this.notify();
   }
-}
-
-/**
- * Transform timestamp of infologger into js Date
- * @param {number} timestamp
- * @return {Date}
- */
-function parseIlDate(timestamp) {
-  return new Date(timestamp * 1000);
 }
