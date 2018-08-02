@@ -22,7 +22,7 @@ module.exports = {
     port: 7777
   },
 
-  // dbFile: '<PATH_TO>/db.json', // absolute path where to save layouts, default same directory
+  // dbFile: '/var/db/qcg-db.json', // absolute path where to save layouts, default = root of this app
 
   // jwt: {
   //   secret: '<secret>',
