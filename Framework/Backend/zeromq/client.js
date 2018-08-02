@@ -46,7 +46,7 @@ class ZeroMQClient extends EventEmitter {
    * @param {string} endpoint
    */
   connect(endpoint) {
-    log.debug('ZMQ: Connected to', endpoint);
+    log.debug('ZMQ: Connected to ' + endpoint);
     this.connected = true;
   }
 
@@ -56,7 +56,7 @@ class ZeroMQClient extends EventEmitter {
    */
   disconnect(endpoint) {
     if (this.connected) {
-      log.debug('ZMQ: Disconnected from', endpoint);
+      log.debug('ZMQ: Disconnected from ' + endpoint);
     }
     this.connected = false;
   }
