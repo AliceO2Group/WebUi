@@ -22,7 +22,8 @@ try {
   process.exit(1);
 }
 
-log.info(`Reading config file "${configFile}"`);
 const config = require(configFile);
+log.configure(config);
+log.info(`Read config file "${configFile}"`);
 
 module.exports = config;
