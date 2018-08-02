@@ -7,7 +7,11 @@ const os = require('os');
  * Store layouts inside JSON based file with atomic write
  */
 class JsonFileConnector {
-
+  /**
+   * Initialize connector by synchronizing DB file and its internal state
+   * @param {string} argName - blabla
+   * @return {string} blabla
+   */
   constructor(pathname) {
     // Path of the file to store data
     this.pathname = path.join(pathname);
@@ -24,6 +28,9 @@ class JsonFileConnector {
     this._syncFileAndInternalState();
   }
 
+  /**
+   * Synchronize DB file content and `this.data` property
+   */
   async _syncFileAndInternalState() {
     await this._readFromFile();
     await this._writeToFile();
@@ -41,8 +48,8 @@ class JsonFileConnector {
         if (err) {
           // file does not exist, it's ok, we will create it
           if (err.code === 'ENOENT') {
-            console.log('DB file does not exist, will create one');
-            return;
+            log.info('DB file does not exist, will create one');
+            return resolve();
           }
 
           // other errors reading
@@ -77,11 +84,11 @@ class JsonFileConnector {
 
       fs.writeFile(this.pathnameTmp, dataToFile, (err) => {
         if (err) {
-          throw err;
+          return reject(err);
         }
         fs.rename(this.pathnameTmp, this.pathname, (err) => {
           if (err) {
-            throw err;
+            return reject(err);
           }
           log.info(`DB file updated`);
           resolve();
