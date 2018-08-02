@@ -2,7 +2,7 @@
 This module supports CERN OAuth 2.0 flow and CERN egroup authorization.
 It protects the static content (REST API calls and WebSocket messages are protected by JWT token).
 
-### Instace
+### Instance
 ```js
 new OAuth(OAUTH_CONF);
 ```
@@ -21,3 +21,24 @@ Where:
       * `userPath` - user resource path
       * `groupPath` - group resource path
       * `port` - resource server port
+
+### Config example
+```
+oAuth: {
+  secret: '<secret>',
+  id: '<id>',
+  tokenHost: 'https://oauth.web.cern.ch',
+  tokenPath: '/OAuth/Token',
+  authorizePath: '/OAuth/Authorize',
+  redirect_uri: '<redirect_uri>',
+  scope: 'https://oauthresource.web.cern.ch/api/User',
+  state: '<state>',
+  egroup: '<e-group>',
+  resource: {
+    hostname: 'oauthresource.web.cern.ch',
+    userPath: '/api/User',
+    groupPath: '/api/Groups',
+    port: 443
+  }
+}
+```
