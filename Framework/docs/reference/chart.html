@@ -16,6 +16,15 @@ const view = (model) => [
   ]),
   h('div', {style: {margin: '1em'}}, [
     chartTimeSerie({
+      serie: model.serie1,
+      title: 'Sinus',
+      colorPrimary: 'red',
+      width: '800',
+      timeScale: 100,
+    }),
+  ]),
+  h('div', {style: {margin: '1em'}}, [
+    chartTimeSerie({
       serie: model.serie2,
       title: 'Random',
       colorPrimary: 'blue',
@@ -28,15 +37,6 @@ const view = (model) => [
       title: 'Sinus rounded',
       colorPrimary: 'green',
       width: '800',
-    }),
-  ]),
-  h('div', {style: {margin: '1em'}}, [
-    chartTimeSerie({
-      serie: model.serie1,
-      title: 'Sinus',
-      colorPrimary: 'red',
-      width: '800',
-      timeScale: 100,
     }),
   ]),
 ];
@@ -55,13 +55,13 @@ setInterval(() => {
   model.serie3.push({value: Math.round(Math.cos(i / 10)), timestamp: Date.now()});
 
   model.serie1.splice(0, model.serie1.length - 800);
-  model.serie2.splice(0, model.serie1.length - 800);
-  model.serie3.splice(0, model.serie1.length - 800);
+  model.serie2.splice(0, model.serie2.length - 800);
+  model.serie3.splice(0, model.serie3.length - 800);
 
   model.notify();
 }, 33);
 
-mount(document.body, view, model, false);
+mount(document.body, view, model, true);
 
 window.model = model;
 

@@ -68,6 +68,7 @@ npm install @aliceo2/web-ui
 - [Ajax](./docs/guide/async-calls.md) - Asynchronously fetch data from the server
 - [WebSocket client](./docs/guide/websocket-client.md) - Connect to WebSocket server
 - [Routing](./docs/guide/front-router.md) - Let you manage many pages in one application
+- [Chart drawing](./docs/guide/charts.md) - Draw time based plots
 
 ### API Reference
 * [Backend JS](docs/reference/backend.md)
