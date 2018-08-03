@@ -37,7 +37,7 @@ Then, open your browser and navigate to [http://localhost:8080](http://localhost
 * `index.js` - Server's root file
 * `public/Model.js` - Front-end model
 * `public/view.js` - Front-end view
-* `public/index.html` - Main front-end web pages, also contains simple controller
+* `public/index.html` - Main front-end web page, also contains simple controller
 
 ### Server side explained
 
