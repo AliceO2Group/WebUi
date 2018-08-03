@@ -78,11 +78,11 @@ npm install --save @aliceo2/web-ui
 - [Routing](./docs/guide/front-router.md) - Let you manage many pages in one application
 
 ### API Reference
-* [Backend JS](docs/reference/backend.md)
-* [Frontend JS](docs/reference/frontend-api.md)
+* [Backend JS](./docs/reference/backend.md)
+* [Frontend JS](./docs/reference/frontend-api.md)
 * [Frontend CSS](https://aliceo2group.github.io/WebUi/Framework/docs/reference/frontend-css.html)
 * [Frontend classes overview](./docs/images/front-arch.dot.png)
 
 ### Documentation for developers
-* [Development environment](docs/guide/devel.md)
-* [Authentication and authorization](guide/auth.md)
+* [Development environment](./docs/guide/devel.md)
+* [Authentication and authorization](./docs/guide/auth.md)
