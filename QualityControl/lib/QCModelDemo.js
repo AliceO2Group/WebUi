@@ -110,7 +110,7 @@ function readLayout(layoutName) {
  * @param {Layout} data
  * @return {Object} Empty details
  */
-function writeLayout(layoutName, data) {
+function updateLayout(layoutName, data) {
   const layout = layouts.find((layout) => layout.name === layoutName);
   if (!layout) {
     throw new Error('layout not found');
@@ -269,7 +269,7 @@ module.exports.readObjectData = readObjectData;
 module.exports.listObjects = listObjects;
 
 module.exports.readLayout = readLayout;
-module.exports.writeLayout = writeLayout;
+module.exports.updateLayout = updateLayout;
 module.exports.listLayouts = listLayouts;
 module.exports.createLayout = createLayout;
 module.exports.deleteLayout = deleteLayout;

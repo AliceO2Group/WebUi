@@ -104,6 +104,17 @@ class JsonFileConnector {
    * @return {Object} Empty details
    */
   async createLayout(layout) {
+    if (!layout.id) {
+      throw new Error(`layout id is mondatory`);
+    }
+    if (!layout.name) {
+      throw new Error(`layout name is mondatory`);
+    }
+
+    if (await this.readLayout(layout.name)) {
+      throw new Error(`layout with this name (${layout.name}) already exists`);
+    }
+
     this.data.layouts.push(layout);
     this._writeToFile();
     return {};
@@ -139,7 +150,7 @@ class JsonFileConnector {
    * @param {Layout} data
    * @return {Object} Empty details
    */
-  async writeLayout(layoutName, data) {
+  async updateLayout(layoutName, data) {
     const layout = this.data.layouts.find((layout) => layout.name === layoutName);
     if (!layout) {
       throw new Error('layout not found');

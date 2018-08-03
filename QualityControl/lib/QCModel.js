@@ -53,7 +53,7 @@ if (config.listingConnector === 'ccdb') {
 // --------------------------------------------------------
 
 module.exports.readLayout = jsonDb.readLayout.bind(jsonDb);
-module.exports.writeLayout = jsonDb.writeLayout.bind(jsonDb);
+module.exports.updateLayout = jsonDb.updateLayout.bind(jsonDb);
 module.exports.listLayouts = jsonDb.listLayouts.bind(jsonDb);
 module.exports.createLayout = jsonDb.createLayout.bind(jsonDb);
 module.exports.deleteLayout = jsonDb.deleteLayout.bind(jsonDb);

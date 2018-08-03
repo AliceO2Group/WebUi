@@ -76,10 +76,6 @@ export default class Layout extends Observable {
       throw new Error('layoutName parameter is mandatory');
     }
 
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    };
     const body = assertLayout({
       id: objectId(),
       name: layoutName,
@@ -91,9 +87,12 @@ export default class Layout extends Observable {
         objects: [],
       }]
     });
-    const req = fetchClient(`/api/layout`, {method: 'POST', headers, body: JSON.stringify(body)});
-    this.model.loader.watchPromise(req);
-    const res = await req;
+
+    const {result, ok} = await this.model.loader.post('/api/layout', body);
+    if (!ok) {
+      alert(result.error || 'Unable to create layout');
+      return;
+    }
 
     // Read the new layout created
     await this.loadItem(layoutName);

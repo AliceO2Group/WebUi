@@ -9,7 +9,7 @@ module.exports.setup = (http) => {
   http.post('/readObjectsData', readObjectsData);
   http.post('/listObjects', listObjects);
   http.post('/readLayout', readLayout);
-  http.post('/writeLayout', writeLayout);
+  http.post('/writeLayout', updateLayout);
   http.post('/listLayouts', listLayouts);
   http.delete('/layout/:name', deleteLayout);
   http.post('/layout', createLayout);
@@ -126,7 +126,7 @@ function readLayout(req, res) {
  * @param {Request} req
  * @param {Response} res
  */
-function writeLayout(req, res) {
+function updateLayout(req, res) {
   const layoutName = req.query.layoutName;
   const data = req.body;
 
@@ -140,7 +140,7 @@ function writeLayout(req, res) {
     return;
   }
 
-  model.writeLayout(layoutName, data)
+  model.updateLayout(layoutName, data)
     .then((data) => res.status(200).json(data))
     .catch((err) => errorHandler(err, res));
 }
@@ -190,7 +190,7 @@ function createLayout(req, res) {
 
   model.createLayout(layout)
     .then((data) => res.status(201).json(data))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => errorHandler(err, res, 409));
 }
 
 /**
@@ -198,10 +198,12 @@ function createLayout(req, res) {
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
  */
-function errorHandler(err, res) {
-  if (err.stack) {
-    log.trace(err);
+function errorHandler(err, res, status = 500) {
+  if (status === 500) {
+    if (err.stack) {
+      log.trace(err);
+    }
+    log.error(err.message || err);
   }
-  log.error(err.message || err);
-  res.status(500).send({error: err});
+  res.status(status).send({error: err.message || err});
 }
