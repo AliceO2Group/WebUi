@@ -55,7 +55,7 @@ npm install --save @aliceo2/web-ui
 ```
 
 ### Getting started
-* [Start a new project](docs/skeleton/README.md)
+* [Hello World](./docs/tutorial/hello-world.md)
 * [Tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
 * [Advanced frontend demo (JSFiddle)](http://jsfiddle.net/awegrzyn/kytn60v8/)
 

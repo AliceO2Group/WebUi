@@ -1,33 +1,45 @@
 # Tutorial - Time server
-
-This tutorial explains how to develop a time server. The server provides the time either by:
-* response to HTTP request
-* WebSocket protocol server push
+This tutorial coverts development of a simple time server. The server provides time from two sources:
+* HTTP server on a request
+* WebSocket server via server push
 
 You will learn:
-* How to create a new project based on this framework
-* How to launch your project
-* How to build a web user interface using [hyperscript](../guide/template-engine.md)
-* How server communicates with client
+* How to create a new project based on `WebUi` framework
+* How to build a web user interface using MVC and [hyperscript](../guide/template-engine.md)
+* How to communicate with server using Ajax and WebSockets
 
-### Starting a new project
+## Fetch project template
 
-At first, use the [project skeleton](../skeleton/README.md) to start a new project.
+```bash
+mkdir newproject
+git clone https://github.com/AliceO2Group/WebUi.git
+cp -R WebUi/Framework/docs/tutorial/* ./newproject
+cd newproject
+```
 
-This will provide you with basic web application. Start the server and open the application in the browser. You can click on `++` and `--` to change the local counter.
-You can also click on the two other buttons to request the server to push a current time.
+### 2. Add the framework to dependency list
+
+```bash
+npm init
+npm install --save @aliceo2/web-ui
+```
+More details about `npm init` wizard in the [official documentation](https://docs.npmjs.com/files/package.json).
+
+### 3. Launch the application
+
+Start the server: `node index.js`.
+
+Then, open your browser and navigate to [http://localhost:8080](http://localhost:8080). You should see the final result. Click on `++` and `--` to change the local counter, or use two other buttons to request the date.
 
 ### Files overview
+* `package.json` - NodeJS file with dependencies and scripts
+* `config.js` - Application configuration file (HTTP endpoint configuration)
+* `index.js` - Server's root file
+* `public/Model.js` - Front-end model
+* `public/view.js` - Front-end view
+* `public/index.html` - Main front-end web pages, also contains simple controller
 
-* package.json - dependencies and scripts
-* config.js - basic configuration
-* index.js - server main file
-* public - folder with client side application
-* public/Model.js - the root class of the model
-* public/view.js - the root function of the view
-* public/index.html - main web pages, contains controller
-
-### Explaining server side
+### Server side explained
 
 Open the `index.js` file.
 
@@ -36,26 +48,27 @@ The first line is responsible for importing framework modules: `HttpServer`, `Lo
 const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 ```
 
-Then, the configuration file is loaded. It is good practice to include it in the root file of the project. Prefer using a `js` file instead of `json` to allow comments on values.
+Then, the configuration file is loaded. It is good practice to include it in the root file of the project.
 ```js
 const config = require('./config.js');
 ```
 
+#### HTTP
 Afterwards an instance of the HTTP server is created and `./public` folder served (`http://localhost:8080/`).
 ```js
-const httpServer = new HttpServer(config.http, config.jwt);
+const httpServer = new HttpServer(config.httpM);
 httpServer.addStaticPath('./public');
 ```
 
-Next step defines of HTTP POST path (accessible by `/api/getDate`) which provides current time.
+Next step defines HTTP POST path (accessible with `/api` prefix - `/api/getDate`) which provides current time.
 ```js
 httpServer.post('/getDate', (req, res) => {
   res.json({date: new Date()});
 });
 ```
-
-The other way of communicating with the server is the WebSocket protocol. It allows to work in request-reply mode or broadcast the data to all connected clients.
-The code below will start pushing the current time every 100ms as a "server-date" message when server receives "stream-date" command from a client. If the command is received once again it will stop the updates.
+#### WebSockets
+It's also possible to speak with the server using WebSocket protocol. It happens either in request-reply mode or as server broadcast (to all connected clients).
+The code below accepts `stream-date` as a signal to start sending time information. It will push the current time every 100ms with message command  set to `server-date`. If the `stream-date` command is received once again it will stop the updates.
 
 ```js
 const wsServer = new WebSocket(httpServer);
@@ -73,15 +86,15 @@ wsServer.bind('stream-date', (body) => {
 
   streamTimer = setInterval(() => {
     wsServer.broadcast(
-      new WebSocketMessage(200).setCommand('server-date').setPayload({date: new Date()})
+      new WebSocketMessage().setCommand('server-date').setPayload({date: new Date()})
     );
   }, 100);
 });
 ```
 
-### Explaining client side - Controller
+### Client side explained - Controller
 
-Open `public/index.html` file. In the 3rd line CSS bootstrap is imported
+Open `public/index.html` file. In the 3rd line CSS bootstrap is imported.
 ```html
 <link rel="stylesheet" href="/css/src/bootstrap.css">
 ```
