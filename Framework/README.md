@@ -55,21 +55,21 @@ npm install --save @aliceo2/web-ui
 ```
 
 ### Getting started
-* [Hello World](./docs/tutorial/hello-world.md)
+* [Hello World (JSFiddle)](http://jsfiddle.net/awegrzyn/Ly1scmg4/)
 * [Tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
 * [Advanced frontend demo (JSFiddle)](http://jsfiddle.net/awegrzyn/kytn60v8/)
 
 ### Backend guide
-* [HTTPS server](./docs/guide/http-server.md) - serves custom REST API, supports TLS
-* [JSON Web Tokens](./docs/guide/json-tokens.md) - secures HTTP requests and WebSocket messages with a JWT token
-* [Logging](./docs/guide/logging.md) - stores log messages in a file or pushes them to InfoLogger service
-* [OAuth](./docs/guide/oauth.md) - provides authentication via CERN oAuth and authorization via e-grups
-* [WebSockets](./docs/guide/websockets.md) - provides bi-directional communication between browsers and server using WebSocket protocol
-* [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client to providing `sub` or `req` socket patterns
+* [HTTPS server](./docs/guide/http-server.md) - Serves custom REST API, supports TLS
+* [JSON Web Tokens](./docs/guide/json-tokens.md) - Secures HTTP requests and WebSocket messages with a JWT token
+* [Logging](./docs/guide/logging.md) - Stores log messages in a file or pushes them to InfoLogger service
+* [OAuth](./docs/guide/oauth.md) - Provides authentication via CERN oAuth and authorization via e-grups
+* [WebSockets](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
+* [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 
 ### Frontend guide
-- [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript (no HTML) and observable model
+- [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript and observable model
 - [Components](./docs/guide/components.md) - Split and reuse elements
 - [Scaling the application](./docs/guide/scale-app.md) - Scale the code of your application
 - [Debug](./docs/guide/debug.md) - Debug the application with browser's tools
