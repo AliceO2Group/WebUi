@@ -79,7 +79,7 @@ class JsonFileConnector {
     await this.lock.acquire();
 
     await new Promise((resolve, reject) => {
-      const dataToFile = JSON.stringify(this.data, null, 2);
+      const dataToFile = JSON.stringify(this.data, null, 1);
 
       fs.writeFile(this.pathnameTmp, dataToFile, (err) => {
         if (err) {
