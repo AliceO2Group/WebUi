@@ -1,11 +1,12 @@
 # Starting a new project
 
-A template project is available quickly bootstrap a new project. Sample code has been provided that can be adjusted to your needs.
+This template was made available quick project bootstrap. Sample code is provided and can be adjusted to the needs.
 
 ### 1. Fetch skeleton template
 ...that contains a minimal code.
 
 ```bash
+mkdir newproject
 git clone https://github.com/AliceO2Group/WebUi.git
 cp -R WebUi/Framework/docs/skeleton ./newproject
 cd newproject
@@ -17,16 +18,15 @@ cd newproject
 npm init
 npm install --save @aliceo2/web-ui
 ```
-To learn how to follow `npm init` wizard in the [official documentation](https://docs.npmjs.com/files/package.json).
+More details about `npm init` wizard in the [official documentation](https://docs.npmjs.com/files/package.json).
 
 ### 3. Launch the application
 
-First, start the server
-
+1. Start the server
 ```bash
 node index.js
 ```
 
-Then, open your browser and navigate to [http://localhost:8080](http://localhost:8080).
+2. Open your browser and navigate to [http://localhost:8080](http://localhost:8080).
 
-To build a sample application step-by-step follow [Time server tutorial](../tutorial/time-server.md).
+##### Continue by following step-by-step tutorial and build [Time server using Ajax and WebSockets](../tutorial/time-server.md).

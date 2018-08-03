@@ -6,7 +6,20 @@
 [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/master/graph/badge.svg)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
-The goal of ALICE O<sup>2</sup> UI framework is to identify library and framework sets and develop the core functionalities of common [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) Web Applications.
+### Overview
+
+The goal of this UI framework is to identify library and framework sets, provide the core functionalities and building blocks to easily create rich web application for the [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) project.
+
+##### Server-side features
+- REST and WebSocket API
+- Authentication via CERN OAuth 2.0 and authorization via CERN e-groups
+- Communication integrity ensured by JSON Web Tokens
+- External resource access: MySQL, ZeroMQ, gRPC
+
+##### Client side-features
+- User interface CSS building blocks in accordance with ALICE standards
+- Asynchronous data fetching (Ajax) and bi-directional socket (WebSockets)
+- MVC engine with a "diffing" algorithm
 
 ### System requirements
 * `nodejs` >= 8.9.4
@@ -35,21 +48,16 @@ brew install zeromq node
 - Firefox 54 (**!** Navigate to `about:config` set value `true` of `dom.moduleScripts.enabled` preference)
 - Edge 16
 - Safari 10.1
-- iOS Safari
-- Chrome Android 62
 
 ### Installation
 ```
-npm install @aliceo2/web-ui
+npm install --save @aliceo2/web-ui
 ```
 
 ### Getting started
-- [Overview](docs/guide/overview.md)
-- [Demo (frontend only)](http://jsfiddle.net/vkosmala/7dm0yve6/)
-- [Starting a new project](docs/skeleton/README.md)
-
-### Tutorials
-* [Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
+* [Start a new project](docs/skeleton/README.md)
+* [Tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
+* [Advanced frontend demo (JSFiddle)](http://jsfiddle.net/awegrzyn/kytn60v8/)
 
 ### Backend guide
 * [HTTPS server](./docs/guide/http-server.md) - serves custom REST API, supports TLS
