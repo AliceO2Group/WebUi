@@ -197,7 +197,6 @@ function drawCurve(ctx, serie, max, min, width, height, color, timeScale) {
     firstPoint = false;
 
     if (minTimestamp > point.timestamp) {
-      console.log('pointIndex:', pointIndex);
       break;
     }
   }
