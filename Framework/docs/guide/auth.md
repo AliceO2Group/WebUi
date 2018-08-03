@@ -1,7 +1,7 @@
 # Authentication and authorization flow
 The full authorization and authentication flow is presented below.
 
-![Authentication and authorization flow](./images/auth.png "Authentication and authorization flow")
+![Authentication and authorization flow](../images/auth.png "Authentication and authorization flow")
 
 ## OAuth
 Connecting users are authenticated (authorized in OAuth terminology) by OAuth service, which in the end of the process grants the web-application with [Access Token](https://auth0.com/docs/tokens/access-token). Access Token is used to retrieve the following user details from the Resource server:
@@ -28,9 +28,9 @@ Each JSON Web Token has its expiration time. When token is expired it can no lon
 ## Successful
 In case the token is expired it is verified once again based on *maxAge* parameter (expiration check is suppressed). The *maxAge* parameter >> *expiration*. If the verification is successful the new token (with the same user details) is created and transfered to Browser application.
 
-![Successful token refresh](./images/token-refresh.png "Successful token refresh")
+![Successful token refresh](../images/token-refresh.png "Successful token refresh")
 
 ## Unsuccessful
 If the token is older than indicated by *maxAge* the user is forced to re-login.
 
-![Unsuccessful token refresh](./images/token-refresh-fail.png "Unsuccessful token refresh")
+![Unsuccessful token refresh](../images/token-refresh-fail.png "Unsuccessful token refresh")
