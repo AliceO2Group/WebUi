@@ -197,6 +197,7 @@ function createLayout(req, res) {
  * Global HTTP error handler, sends status 500
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
+ * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
 function errorHandler(err, res, status = 500) {
   if (status === 500) {
