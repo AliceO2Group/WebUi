@@ -2,7 +2,8 @@
 
 The Framework includes a chart drawing tool for time based series.
 
-[See demo on jsfiddle](http://jsfiddle.net/vkosmala/dhpe5gzb/)
+- [See demo on jsfiddle](http://jsfiddle.net/vkosmala/dhpe5gzb/)
+- [Full API documentation](../reference/frontend-api.md#chartTimeSerie)
 
 ## Usage
 
