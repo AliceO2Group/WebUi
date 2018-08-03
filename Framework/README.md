@@ -55,7 +55,7 @@ npm install --save @aliceo2/web-ui
 ```
 
 ### Getting started
-* [Hello World (JSFiddle)](http://jsfiddle.net/awegrzyn/Ly1scmg4/)
+* [Hello World (JSFiddle)](http://jsfiddle.net/awegrzyn/3zxnua6b/)
 * [Tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
 * [Advanced frontend demo (JSFiddle)](http://jsfiddle.net/awegrzyn/kytn60v8/)
 
