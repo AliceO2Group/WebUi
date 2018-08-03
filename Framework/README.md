@@ -85,4 +85,4 @@ npm install --save @aliceo2/web-ui
 
 ### Documentation for developers
 * [Development environment](docs/guide/devel.md)
-* [Functional architecture and data flow](docs/ARCH.md)
+* [Authentication and authorization](guide/auth.md)

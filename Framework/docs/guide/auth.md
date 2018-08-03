@@ -1,21 +1,3 @@
-# Architecture
-The functional architecture of the web-application is shown below.
-
-![Control GUI Architecture](./images/architecture.png "Control GUI Architecture")
-
-The web-application requires presence of three external services:
-
- * OAuth - [OAuth 2.0](https://oauth.net/2/) service to authorize connecting users
- * Resource - resource server that provides user details (including additional authorization data - e-group membership) based on OAuth access token
- * O<sup>2</sup> Control Agent - the O<sup>2</sup> process that manages the Control subsystem
-
-and it consists of three modules:
-
- * Browser app - the application running in user's browser, easily extensible via jQuery Widgets
- * HTTP server - takes part in [OAuth 2.0](https://oauth.net/2/) flow and provides REST API
- * WebSocket server - provides bi-directional connection between browser and the server via WebSocket protocol - [RFC 6455](https://tools.ietf.org/html/rfc6455). It's also entry point to O<sup>2</sup> Control subsystem via [ZeroMQ](http://zeromq.org/intro:read-the-manual) protocol
-
-
 # Authentication and authorization flow
 The full authorization and authentication flow is presented below.
 
