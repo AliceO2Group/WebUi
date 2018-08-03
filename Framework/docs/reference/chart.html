@@ -1,12 +1,13 @@
 <!doctype html>
 <title>ChartTimeSerie</title>
+<link rel="stylesheet" href="../../Frontend/css/src/bootstrap.css">
 
 <script type="module">
 import {mount, h, Observable, chartTimeSerie} from '../../Frontend/js/src/index.js';
 
+// Example of chart integration with template engine
 const view = (model) => [
-  h('', 'chartTimeSerie() example'),
-  h('div', {style: {margin: '1em'}}, [
+  h('div.m4', [
     chartTimeSerie({
       serie: model.serie1,
       title: 'Sinus',
@@ -14,7 +15,7 @@ const view = (model) => [
       width: '800',
     }),
   ]),
-  h('div', {style: {margin: '1em'}}, [
+  h('div.m4', [
     chartTimeSerie({
       serie: model.serie1,
       title: 'Sinus',
@@ -23,7 +24,7 @@ const view = (model) => [
       timeScale: 100,
     }),
   ]),
-  h('div', {style: {margin: '1em'}}, [
+  h('div.m4', [
     chartTimeSerie({
       serie: model.serie2,
       title: 'Random',
@@ -31,7 +32,7 @@ const view = (model) => [
       width: '800',
     }),
   ]),
-  h('div', {style: {margin: '1em'}}, [
+  h('div.m4', [
     chartTimeSerie({
       serie: model.serie3,
       title: 'Sinus rounded',
@@ -41,12 +42,14 @@ const view = (model) => [
   ]),
 ];
 
+// Create some basic model
 const model = new Observable();
 model.serie1 = [];
 model.serie2 = [];
 model.serie3 = [];
 model.notify();
 
+// Add points at 30 FPS but keep only first 800 points for memory leak
 let i = 0;
 setInterval(() => {
   i++;
