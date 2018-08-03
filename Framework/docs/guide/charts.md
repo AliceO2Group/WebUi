@@ -33,4 +33,4 @@ Drawing is optimized for intensive use.
 Recommandations:
 - Keep page drawing time under 15ms (60 FPS)
 - Draw only what will be seen by user, use tabs if needed
-- Reduce number of points density
+- Reduce points density
