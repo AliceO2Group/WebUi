@@ -167,9 +167,6 @@ export default class Layout extends Observable {
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }
-    if (this.item.tabs.length <= 1) {
-      throw new Error(`deleting last tab is forbidden`);
-    }
 
     this.item.tabs[index].name = name;
     this.notify();
