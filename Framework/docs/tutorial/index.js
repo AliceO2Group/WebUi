@@ -44,8 +44,8 @@ wsServer.bind('stream-date', () => {
   // Broadcase the time to all clients every 100ms
   streamTimer = setInterval(() => {
     wsServer.broadcast(
-      new WebSocketMessage(200).setCommand('server-date').setPayload({date: new Date()})
+      new WebSocketMessage().setCommand('server-date').setPayload({date: new Date()})
     );
   }, 100);
-  return new WebSocketMessage(200).setCommand('stream-date');
+  return new WebSocketMessage().setCommand('stream-date');
 });
