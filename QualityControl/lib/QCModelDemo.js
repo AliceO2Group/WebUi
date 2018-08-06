@@ -97,21 +97,21 @@ function listLayouts(filter = {}) {
 
 /**
  * Retrieve a layout or null
- * @param {string} layoutName - layout name
+ * @param {string} layoutId - layout id
  * @return {Layout|null}
  */
-function readLayout(layoutName) {
-  return promiseResolveWithLatency(layouts.find((layout) => layout.name === layoutName));
+function readLayout(layoutId) {
+  return promiseResolveWithLatency(layouts.find((layout) => layout.id === layoutId));
 }
 
 /**
- * Update a single layout by its name
- * @param {string} layoutName
+ * Update a single layout by its id
+ * @param {string} layoutId
  * @param {Layout} data
  * @return {Object} Empty details
  */
-function updateLayout(layoutName, data) {
-  const layout = layouts.find((layout) => layout.name === layoutName);
+function updateLayout(layoutId, data) {
+  const layout = layouts.find((layout) => layout.id === layoutId);
   if (!layout) {
     throw new Error('layout not found');
   }
@@ -120,14 +120,14 @@ function updateLayout(layoutName, data) {
 }
 
 /**
- * Delete a single layout by its name
- * @param {string} layoutName
+ * Delete a single layout by its id
+ * @param {string} layoutId
  * @return {Object} Empty details
  */
-function deleteLayout(layoutName) {
-  const layout = layouts.find((layout) => layout.name === layoutName);
+function deleteLayout(layoutId) {
+  const layout = layouts.find((layout) => layout.id === layoutId);
   if (!layout) {
-    throw new Error(`layout ${layoutName} not found`);
+    throw new Error(`layout ${layoutId} not found`);
   }
   const index = layouts.indexOf(layout);
   layouts.splice(index, 1);

@@ -11,7 +11,7 @@ module.exports.setup = (http) => {
   http.post('/readLayout', readLayout);
   http.post('/writeLayout', updateLayout);
   http.post('/listLayouts', listLayouts);
-  http.delete('/layout/:name', deleteLayout);
+  http.delete('/layout/:layoutId', deleteLayout);
   http.post('/layout', createLayout);
 
   const ws = new WebSocket(http);
@@ -104,34 +104,34 @@ function listLayouts(req, res) {
 }
 
 /**
- * Read a single layout specified by layoutName
+ * Read a single layout specified by layoutId
  * @param {Request} req
  * @param {Response} res
  */
 function readLayout(req, res) {
-  const layoutName = req.body.layoutName;
+  const layoutId = req.body.layoutId;
 
-  if (!layoutName) {
-    res.status(400).send('layoutName parameter is needed');
+  if (!layoutId) {
+    res.status(400).send('layoutId parameter is needed');
     return;
   }
 
-  model.readLayout(layoutName)
+  model.readLayout(layoutId)
     .then((data) => res.status(data ? 200 : 404).json(data))
     .catch((err) => errorHandler(err, res));
 }
 
 /**
- * Update a single layout specified by layoutName and body
+ * Update a single layout specified by layoutId and body
  * @param {Request} req
  * @param {Response} res
  */
 function updateLayout(req, res) {
-  const layoutName = req.query.layoutName;
+  const layoutId = req.query.layoutId;
   const data = req.body;
 
-  if (!layoutName) {
-    res.status(400).send('layoutName parameter is needed');
+  if (!layoutId) {
+    res.status(400).send('layoutId parameter is needed');
     return;
   }
 
@@ -140,25 +140,25 @@ function updateLayout(req, res) {
     return;
   }
 
-  model.updateLayout(layoutName, data)
+  model.updateLayout(layoutId, data)
     .then((data) => res.status(200).json(data))
     .catch((err) => errorHandler(err, res));
 }
 
 /**
- * Delete a single layout specified by name
+ * Delete a single layout specified by layoutId
  * @param {Request} req
  * @param {Response} res
  */
 function deleteLayout(req, res) {
-  const layoutName = req.params.name;
+  const layoutId = req.params.layoutId;
 
-  if (!layoutName) {
-    res.status(400).send('layoutName is needed');
+  if (!layoutId) {
+    res.status(400).send('layoutId is needed');
     return;
   }
 
-  model.deleteLayout(layoutName)
+  model.deleteLayout(layoutId)
     .then((data) => res.status(204).json(data))
     .catch((err) => errorHandler(err, res));
 }

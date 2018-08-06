@@ -88,15 +88,17 @@ describe('QCG', function () {
     it('should have a link to show a layout', async () => {
       await page.evaluate(() => document.querySelector('section table tbody tr a').click());
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=layoutShow&layout=AliRoot%20dashboard');
+      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12&layoutName=AliRoot%20dashboard');
+      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
     });
   });
 
   describe('page layoutShow', () => {
     before(async () => {
-      await page.goto(url + '?page=layoutShow&layout=AliRoot%20dashboard', {waitUntil: 'networkidle0'});
+      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
+      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=layoutShow&layout=AliRoot+dashboard');
+      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12');
     });
 
     it('should have tabs in the header', async () => {
@@ -186,6 +188,5 @@ describe('QCG', function () {
     console.log('Output of server logs for the previous tests:');
     console.log(subprocessOutput);
     subprocess.kill();
-    process.exit(0);
   });
 });

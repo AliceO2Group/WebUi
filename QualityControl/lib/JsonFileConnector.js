@@ -111,12 +111,12 @@ class JsonFileConnector {
       throw new Error(`layout name is mondatory`);
     }
 
-    if (await this.readLayout(layout.name)) {
-      throw new Error(`layout with this name (${layout.name}) already exists`);
+    if (await this.readLayout(layout.id)) {
+      throw new Error(`layout with this id (${layout.id}) already exists`);
     }
 
     this.data.layouts.push(layout);
-    this._writeToFile();
+    await this._writeToFile();
     return {};
   }
 
@@ -136,43 +136,43 @@ class JsonFileConnector {
   }
 
   /**
-   * Retrieve a layout or null
-   * @param {string} layoutName - layout name
-   * @return {Layout|null}
+   * Retrieve a layout or undefined
+   * @param {string} layoutId - layout id
+   * @return {Layout|undefined}
    */
-  async readLayout(layoutName) {
-    return this.data.layouts.find((layout) => layout.name === layoutName);
+  async readLayout(layoutId) {
+    return this.data.layouts.find((layout) => layout.id === layoutId);
   }
 
   /**
-   * Update a single layout by its name
-   * @param {string} layoutName
+   * Update a single layout by its id
+   * @param {string} layoutId
    * @param {Layout} data
    * @return {Object} Empty details
    */
-  async updateLayout(layoutName, data) {
-    const layout = this.data.layouts.find((layout) => layout.name === layoutName);
+  async updateLayout(layoutId, data) {
+    const layout = this.data.layouts.find((layout) => layout.id === layoutId);
     if (!layout) {
       throw new Error('layout not found');
     }
     Object.assign(layout, data);
-    this._writeToFile();
+    await this._writeToFile();
     return {};
   }
 
   /**
-   * Delete a single layout by its name
-   * @param {string} layoutName
+   * Delete a single layout by its id
+   * @param {string} layoutId
    * @return {Object} Empty details
    */
-  async deleteLayout(layoutName) {
-    const layout = this.data.layouts.find((layout) => layout.name === layoutName);
+  async deleteLayout(layoutId) {
+    const layout = this.data.layouts.find((layout) => layout.id === layoutId);
     if (!layout) {
-      throw new Error(`layout ${layoutName} not found`);
+      throw new Error(`layout ${layoutId} not found`);
     }
     const index = this.data.layouts.indexOf(layout);
     this.data.layouts.splice(index, 1);
-    this._writeToFile();
+    await this._writeToFile();
     return {};
   }
 }
