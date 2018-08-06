@@ -1,7 +1,9 @@
 import {h} from '/js/src/index.js';
 import {iconPencil, iconTrash, iconPlus} from '/js/src/icons.js';
 
-export default (model) => model.layout.editEnabled ? toolbarEditMode(model) : toolbarViewMode(model);
+export default (model) => model.layout.item
+  ? (model.layout.editEnabled ? toolbarEditMode(model) : toolbarViewMode(model))
+  : null;
 
 // This is the toolbar in view mode (center and right)
 const toolbarViewMode = (model) => [

@@ -60,9 +60,11 @@ export default class Layout extends Observable {
       throw new Error('layoutName parameter is mandatory');
     }
 
+    this.item = null;
     const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutName: layoutName});
     if (!ok) {
       alert(`unable to load layout "${layoutName}"`);
+      this.model.router.go(`?page=layouts`);
       return;
     }
 
