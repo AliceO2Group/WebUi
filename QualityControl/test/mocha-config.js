@@ -33,13 +33,14 @@ describe('JSON file custom database', () => {
     let layout = TEST_LAYOUT;
     layout.id = 321;
     jsonConfig.createLayout(layout).then(() => {
-      done(); // THIS SHOULD NOT BE POSSIBLE !!!
-    }); 
-  }); 
+    }, () => {
+      done();
+    });
+  });
 
   it('Delete layout', (done) => {
     jsonConfig.deleteLayout("test").then(() => {
       done();
     }); 
-  }); 
+  });
 }); 
