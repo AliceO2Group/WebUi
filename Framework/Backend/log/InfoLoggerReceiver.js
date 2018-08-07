@@ -41,7 +41,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     });
 
     this.client.on('end', () => {
-      log.error('Connection to infoLoggerServer ended');
+      log.error('Connection to infoLoggerServer terminated');
     });
 
     this.client.on('error', (error) => {
