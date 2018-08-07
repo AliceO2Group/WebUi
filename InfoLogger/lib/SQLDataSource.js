@@ -16,7 +16,7 @@ module.exports = class SQLDataSource {
 
     this.connection
       .query('select timestamp from messages LIMIT 1000;')
-      .then((rows) => {
+      .then(() => {
         const url = `${configMySql.host}:${configMySql.port}/${configMySql.database}`;
         log.info(`Connected to infoLogger database ${url}`);
       })
