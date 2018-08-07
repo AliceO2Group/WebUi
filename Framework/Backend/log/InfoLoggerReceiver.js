@@ -47,7 +47,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
       log.error('Connection to infoLoggerServer ended (FIN)');
       this.emit('close');
       this.client.setTimeout(1000, () => {
-        log.info("Quickly reconnecting infoLoggerServer socket...");
+        log.info('Quickly reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       });
     });
@@ -55,7 +55,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     this.client.on('error', (error) => {
       log.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
       this.client.setTimeout(5000, () => {
-        log.info("Reconnecting infoLoggerServer socket...");
+        log.info('Reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       });
     });
