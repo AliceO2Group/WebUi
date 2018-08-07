@@ -15,9 +15,10 @@ module.exports = class SQLDataSource {
     this.connection = new MySQL(configMySql);
 
     this.connection
-      .query('select count(*) as total from messages;')
+      .query('select timestamp from messages LIMIT 1000;')
       .then((rows) => {
-        log.info(`Connected to mysql (${rows[0].total} logs inside ${configMySql.database})`);
+        const url = `${configMySql.host}:${configMySql.port}/${configMySql.database}`;
+        log.info(`Connected to infoLogger database ${url}`);
       })
       .catch((error) => {
         throw error;
