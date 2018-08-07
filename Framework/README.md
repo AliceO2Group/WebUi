@@ -44,10 +44,11 @@ brew install zeromq node
 ```
 
 ### Minimum browser version support
-- Chrome 62
-- Firefox 54 (**!** Navigate to `about:config` set value `true` of `dom.moduleScripts.enabled` preference)
-- Edge 16
+- Chrome 61
+- Firefox 60, (**!** 54-60: Navigate to `about:config` set value `true` of `dom.moduleScripts.enabled` preference)
+- Edge 16 (**!** 15: Enable `Experimental JavaScript Features`)
 - Safari 10.1
+- Opera 47
 
 ### Installation
 ```

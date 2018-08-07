@@ -7,18 +7,18 @@ let querySource = null;
 let liveSource = null;
 
 if (config.mysql) {
-  log.info(`MySQL config found, connecting to SQL source`);
+  log.info(`Detected InfoLogger database configration`);
   querySource = new SQLDataSource(config.mysql);
 } else {
-  log.info(`MySQL config not found, continue without SQL source`);
+  log.warn(`InfoLogger databse config not found, Query mode not available`);
 }
 
 if (config.infoLoggerServer) {
-  log.info(`InfoLogger config found, connecting to live source`);
+  log.info(`InfoLogger server config found`);
   liveSource = new InfoLoggerReceiver();
   liveSource.connect(config.infoLoggerServer);
 } else {
-  log.info(`InfoLogger config not found, continue without live source`);
+  log.warn(`InfoLogger server config not found, Live mode not available`);
 }
 
 module.exports.attachTo = (http, ws) => {
