@@ -120,7 +120,7 @@ module.exports = class SQLDataSource {
     if (criterias.length) {
       criteriasString = `WHERE ${criterias.join(' AND ')}`;
     }
-     /* eslint-disable max-len */
+    /* eslint-disable max-len */
     // The rows asked with a limit
     const requestRows = `SELECT * FROM \`messages\` ${criteriasString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
     log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
