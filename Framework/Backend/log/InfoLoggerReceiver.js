@@ -33,6 +33,9 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
       return;
     }
 
+    this.host = options.host;
+    this.port = options.port;
+
     this.client = net.createConnection(options);
     this.client.on('data', (messages) => this.onData(messages));
 
@@ -42,26 +45,18 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     this.client.on('end', () => {
       log.error('Connection to infoLoggerServer ended (FIN)');
-    });
-
-    this.client.on('close', (hadError) => {
-      let message = 'Connection to infoLoggerServer closed';
-      hadError ? log.error(message + " due to transmission error") : log.warn(message);
-
-      this.client.setTimeout(3000, () => {
-        log.debug("Clent should reconnect");
+      this.client.setTimeout(1000, () => {
+        log.info("Quickly reconnecting infoLoggerServer socket...");
+        this.client.connect(this.port, this.host);
       });
     });
 
     this.client.on('error', (error) => {
-      log.error(`infoLogger server connection error ${error.code}`);
-      if (error.code === 'ENOTFOUND') {
-        throw new Error(`Unable to resolve InfoLoggerServer host ${options.host}`);
-      }
-      if (error.code === 'ECONNREFUSED') {
-        throw new Error(`Connection refused to InfoLoggerServer ${options.host}:${options.port}`);
-      }
-      throw error;
+      log.error(`infoLoggerServer ${options.host}:${options.port} connection error ${error.code}`);
+      this.client.setTimeout(5000, () => {
+        log.info("Reconnecting infoLoggerServer socket...");
+        this.client.connect(this.port, this.host);
+      });
     });
   }
 
