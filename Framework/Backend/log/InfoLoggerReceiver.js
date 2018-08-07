@@ -37,14 +37,24 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     this.client.on('data', (messages) => this.onData(messages));
 
     this.client.on('connect', () => {
-      log.info('Connected to infoLoggerServer');
+      log.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
     });
 
     this.client.on('end', () => {
-      log.error('Connection to infoLoggerServer ended');
+      log.error('Connection to infoLoggerServer ended (FIN)');
+    });
+
+    this.client.on('close', (hadError) => {
+      let message = 'Connection to infoLoggerServer closed';
+      hadError ? log.error(message + " due to transmission error") : log.warn(message);
+
+      this.client.setTimeout(3000, () => {
+        log.debug("Clent should reconnect");
+      });
     });
 
     this.client.on('error', (error) => {
+      log.error(`infoLogger server connection error ${error.code}`);
       if (error.code === 'ENOTFOUND') {
         throw new Error(`Unable to resolve InfoLoggerServer host ${options.host}`);
       }
