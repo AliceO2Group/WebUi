@@ -64,7 +64,7 @@ class ZeroMQClient extends EventEmitter {
    */
   disconnect(endpoint) {
     if (this.connected) {
-      log.info(this.getName() + 'Disconnected from ' + endpoint);
+      log.error(this.getName() + 'Disconnected from ' + endpoint);
     }
     this.connected = false;
   }

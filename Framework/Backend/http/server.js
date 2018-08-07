@@ -39,10 +39,10 @@ class HttpServer {
       };
       this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
       this.enableHttpRedirect();
-      log.debug(`HTTPS server listening on port ${httpConfig.portSecure}`);
+      log.info(`HTTPS server listening on port ${httpConfig.portSecure}`);
     } else {
       this.server = http.createServer(this.app).listen(httpConfig.port);
-      log.debug(`HTTP server listening on port ${httpConfig.port}`);
+      log.info(`HTTP server listening on port ${httpConfig.port}`);
     }
 
     this.templateData = {};
@@ -289,7 +289,7 @@ class HttpServer {
         };
         next();
       }, (error) => {
-        log.warn(`HTTP - ${error.name} : ${error.message}`);
+        log.warn(`HTTP JWT - ${error.name} : ${error.message}`);
         res.status(403).json({message: error.name});
       });
   }
