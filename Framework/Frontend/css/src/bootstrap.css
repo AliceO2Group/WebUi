@@ -155,6 +155,7 @@ h6, .f6 { font-size: .875rem; }
 .success { color: var(--color-success) !important; }
 .white { color: var(--color-white) !important; }
 .gray { color: var(--color-gray) !important; }
+.gray-darker { color: var(--color-gray-darker) !important; }
 .black { color: var(--color-black) !important; }
 
 .bg-primary { background-color: var(--color-primary) !important; }
@@ -229,9 +230,9 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 
 /* dropdown */
 
-.dropdown { position: relative; }
+.dropdown { position: relative; display: inline-block; }
 .dropdown-open > .dropdown-menu { display: block; }
-.dropdown-menu { display: none; position: absolute; top: calc(100% + 0.1rem); left: 0.1rem; z-index: 1000; font-size: 1rem; background-color: #fff; border: 1px solid rgba(0,0,0,.15); border-radius: .25rem; }
+.dropdown-menu { z-index: 300; box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); display: none; position: absolute; top: calc(100% + 0.1rem); left: 0.1rem; z-index: 1000; font-size: 1rem; background-color: #fff; border: 1px solid rgba(0,0,0,.15); border-radius: .25rem; }
 
 /* form */
 
@@ -265,11 +266,18 @@ label { display: block; margin-bottom: 0.5em; }
 .table-sm th, .table-sm td { padding: 0.3em; }
 .table-primary>th, .table-primary>td { background-color: var(--color-primary); color: var(--color-white); }
 
-/* Shadow */
+/* Shadow
+0: content
+1: card of content
+2: topbar
+3: dropdown menu
+https://material.io/design/environment/elevation.html#default-elevations
+*/
 
 .shadow-level0 { z-index: 0; }
 .shadow-level1 { z-index: 100; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2); }
 .shadow-level2 { z-index: 200; box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); }
+.shadow-level3 { z-index: 300; box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2) }
 
 /* Component spinner atomic */
 /* Credit: http://epic-spinners.epicmax.co/ */
