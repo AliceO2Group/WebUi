@@ -53,7 +53,7 @@ class OAuth {
     };
     this.scope = 'https://' + config.resource.hostname + config.resource.userpath;
     this.egroup = config.egroup;
-    log.debug(`OAuth enabled. Authorize: ${config.tokenHost}`);
+    log.info(`OAuth enabled. Authorize: ${config.tokenHost}`);
   }
 
   /**

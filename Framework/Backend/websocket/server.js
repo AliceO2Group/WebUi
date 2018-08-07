@@ -20,7 +20,7 @@ class WebSocket {
     this.http = httpsServer;
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
-    log.debug('WebSocket server started');
+    log.info('WebSocket server started');
     this.callbackArray = [];
     this.bind('filter', (message) => {
       return new WebSocketMessage(200).setCommand(message.getCommand());
