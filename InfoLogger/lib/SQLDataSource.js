@@ -120,18 +120,17 @@ module.exports = class SQLDataSource {
     if (criterias.length) {
       criteriasString = `WHERE ${criterias.join(' AND ')}`;
     }
-
+     /* eslint-disable max-len */
     // The rows asked with a limit
-    const requestRows = `SELECT * FROM \`messages\` ${criteriasString}
-      ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
-    log.info(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
+    const requestRows = `SELECT * FROM \`messages\` ${criteriasString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
+    log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
     const rows = await this.connection.query(requestRows, values);
 
     // Count how many rows could be found, limit to 100k anyway
-    const requestCount = `SELECT COUNT(*) as total FROM
-      (SELECT 1 FROM \`messages\` ${criteriasString} LIMIT 100001) t1`;
-    log.info(`requestCount: ${requestCount} ${JSON.stringify(values)}`);
+    const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriasString} LIMIT 100001) t1`;
+    log.debug(`requestCount: ${requestCount} ${JSON.stringify(values)}`);
     const resultCount = await this.connection.query(requestCount, values);
+    /* eslint-enable max-len */
     let total = parseInt(resultCount[0].total, 10);
     let more = false;
 
@@ -144,7 +143,7 @@ module.exports = class SQLDataSource {
     const endTime = Date.now(); // ms
     const totalTime = endTime - startTime; // ms
 
-    log.info(`Query done in ${totalTime}ms`);
+    log.debug(`Query done in ${totalTime}ms`);
 
     return {
       rows,
