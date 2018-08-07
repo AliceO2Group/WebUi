@@ -23,7 +23,7 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
   h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
   h('.dropdown-menu', [
     h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-    model.session.personid === '0' // anonymous user has id '0'
+    model.session.personid === 0 // anonymous user has id 0
      ? h('p.m3.gray-darker', 'You are connected as anonymous, no authentification needed for this application.')
      : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
   ]),
