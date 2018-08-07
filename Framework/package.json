@@ -14,7 +14,7 @@
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "./node_modules/.bin/mocha --exit ./Frontend/test/",
     "mocha-backend": "./node_modules/.bin/mocha --exit ./Backend/test/",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js Backend/ Frontend/ docs/skeleton/*.js",
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
     "doc-frontend": "./node_modules/.bin/jsdoc2md --files \"./Frontend/**/*.js\" -p list -r list --member-index-format list --name-format --no-gfm -l js > ./docs/reference/frontend-api.md"
   },
   "dependencies": {

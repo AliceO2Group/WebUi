@@ -6,7 +6,7 @@ export default (model) => model.layout.editEnabled ? toolbarEditMode(model) : to
 // This is the toolbar in view mode (center and right)
 const toolbarViewMode = (model) => [
   h('.w-50.text-center', [
-    h('div', [
+    h('div', {class: 'header-layout'}, [
       model.layout.item.tabs.map((tab, i) => toolbarViewModeTab(model, tab, i)),
     ])
   ]),
@@ -38,7 +38,7 @@ const toolbarViewModeTab = (model, tab, i) => {
 const toolbarEditMode = (model) => [
   h('.w-50.text-center', [
     h('div', {class: 'header-layout'}, [
-      model.layout.item.tabs.map((tab, i) => toolbarEditModeTab(model, tab, i)),
+      h('span', model.layout.item.tabs.map((tab, i) => toolbarEditModeTab(model, tab, i))),
       h('.btn-group', [
         tabBtn({class: 'default', onclick: () => {
           const name = prompt('Enter the name of the new tab:');
@@ -46,7 +46,7 @@ const toolbarEditMode = (model) => [
             model.layout.newTab(name);
           }
         }}, iconPlus()),
-      ])
+      ]),
     ])
   ]),
   h('.flex-grow.text-right', [
