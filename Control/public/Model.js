@@ -1,5 +1,5 @@
 // Import frontend framework
-import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader} from '/js/src/index.js';
+import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
 
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
@@ -16,6 +16,9 @@ export default class Model extends Observable {
    */
   constructor() {
     super();
+
+    this.session = sessionService.get();
+    this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
@@ -47,6 +50,8 @@ export default class Model extends Observable {
 
     // Load some initial data
     this.lock.synchronizeState();
+
+    this.accountMenuEnabled = false;
   }
 
   /**
@@ -105,5 +110,13 @@ export default class Model extends Observable {
         this.router.go('?page=status');
         break;
     }
+  }
+
+  /**
+   * Toggle account menu dropdown
+   */
+  toggleAccountMenu() {
+    this.accountMenuEnabled = !this.accountMenuEnabled;
+    this.notify();
   }
 }
