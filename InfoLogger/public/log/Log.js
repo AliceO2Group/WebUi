@@ -280,7 +280,8 @@ export default class Log extends Observable {
   setCriteria(...args) {
     this.filter.setCriteria(...args);
 
-    if (this.liveEnabled && alert(`The current live session will be affected by this new filter.`)) {
+    if (this.liveEnabled) {
+      alert(`The current live session will be affected by this new filter.`);
       this.model.ws.setFilter(this.model.log.filter.toFunction());
     }
   }
