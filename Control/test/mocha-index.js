@@ -129,7 +129,6 @@ describe('Control', function () {
     console.log('---------------------------------------------');
     console.log(subprocessOutput);
     subprocess.kill();
-    process.exit(0);
   });
 });
 
