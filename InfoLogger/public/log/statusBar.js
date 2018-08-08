@@ -54,7 +54,7 @@ const statusQuery = (model, result) => [
 ];
 
 const statusLive = (model, services) => [
-  `(streaming from ${services.streamHostname} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`
+  `(Connected to ${services.streamHostname} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`
 ];
 
 const statusStats = (model) => [
