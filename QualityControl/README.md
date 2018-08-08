@@ -34,9 +34,6 @@ qcg
 5. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
 
----
-
-
 ## Custom configuration
 These steps are necessary only when you don't run QCG on `localhost`.
 

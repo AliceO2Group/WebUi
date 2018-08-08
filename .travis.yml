@@ -32,10 +32,10 @@ before_install:
 - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
 - chmod +x .travis.bash; ./.travis.bash;
 install:
-- if [ -f $TRAVIS_BUILD_DIR/Framework/TEST ]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
-- if [ -f $TRAVIS_BUILD_DIR/Control/TEST ]; then cd $TRAVIS_BUILD_DIR/Control; npm install; fi
-- if [ -f $TRAVIS_BUILD_DIR/QualityControl/TEST ]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm install; fi
-- if [ -f $TRAVIS_BUILD_DIR/InfoLogger/TEST ]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; fi
+- if [[ -f "$TRAVIS_BUILD_DIR/Framework/TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
+- if [[ -f "$TRAVIS_BUILD_DIR/Control/TEST" ]; then cd $TRAVIS_BUILD_DIR/Control; npm install; fi
+- if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm install; fi
+- if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; fi
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
 - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
