@@ -16,8 +16,8 @@ describe('QCG', function () {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(5000);
-  this.slow(1000);
+  this.timeout(10000);
+  this.slow(2000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
   before(async () => {
@@ -107,10 +107,12 @@ describe('QCG', function () {
   });
 
   describe('page layoutShow', () => {
-    before(async () => {
+    before('reset browser to google', async () => {
       // weird bug, if we don't go to external website just here, all next goto will wait forever
       await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
 
+    it('should load', async () => {
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
       await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
@@ -169,10 +171,12 @@ describe('QCG', function () {
   });
 
   describe('page objectTree', () => {
-    before(async () => {
+    before('reset browser to google', async () => {
       // weird bug, if we don't go to external website just here, all next goto will wait forever
       await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
 
+    it('should load', async () => {
       await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=objectTree');
