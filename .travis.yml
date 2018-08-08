@@ -34,7 +34,7 @@ before_install:
 install:
 - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
 - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm install; fi
-- if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; fi
+- if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm install; fi
 - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; fi
 before_script:
 - npm install -g codecov nyc jsdoc-to-markdown
