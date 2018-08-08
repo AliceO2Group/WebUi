@@ -15,7 +15,7 @@ class JsonFileConnector {
     this.pathname = path.join(pathname);
 
     // Path for writing file
-    this.pathnameTmp = path.join(this.pathname, '~tmp');
+    this.pathnameTmp = this.pathname + '~tmp';
 
     // Mirror data from content of JSON file
     this.data = {layouts: []};
