@@ -13,7 +13,7 @@ export default class Model extends Observable {
   constructor() {
     super();
 
-    this.session = sessionService.session;
+    this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
     this.layout = new Layout(this);
@@ -26,7 +26,7 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.sidebar = true;
-    this.route = null;
+    this.accountMenuEnabled = false;
     this.page = null;
 
     // Setup router
@@ -123,6 +123,14 @@ export default class Model extends Observable {
    */
   toggleSidebar() {
     this.sidebar = !this.sidebar;
+    this.notify();
+  }
+
+  /**
+   * Toggle account menu dropdown
+   */
+  toggleAccountMenu() {
+    this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
   }
 }

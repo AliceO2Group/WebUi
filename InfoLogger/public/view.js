@@ -11,15 +11,17 @@ import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 
 // The view
 export default (model) => h('.flex-column absolute-fill', [
-  h('header.bg-gray-lighter-.f7', [
-    tableFilters(model)
-  ]),
-  h('header.bg-gray-lighter-.shadow-level1.p1.flex-row.f7', [
-    h('', [
-      commandLogs(model)
+  h('.shadow-level2', [
+    h('header.f7', [
+      tableFilters(model)
     ]),
-    h('.flex-grow.text-right', [
-      commandFilters(model)
+    h('header.p1.flex-row.f7', [
+      h('', [
+        commandLogs(model)
+      ]),
+      h('.flex-grow.text-right', [
+        commandFilters(model)
+      ]),
     ]),
   ]),
   h('div.flex-grow.flex-row.shadow-level0.logs-container', [

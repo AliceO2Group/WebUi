@@ -1,6 +1,8 @@
-import {h} from '/js/src/index.js';
+import {h, iconPerson} from '/js/src/index.js';
 
 export default (model) => [
+  loginButton(model),
+  h('span.mh3'),
   queryButton(model),
   ' ',
   liveButton(model),
@@ -16,6 +18,16 @@ export default (model) => [
   h('button.btn', {disabled: !model.log.stats.error, onclick: () => model.log.lastError(), title: 'Go to last error/fatal (ALT + right arrow)'}, '❯❯'),
   ' ',
 ];
+
+const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
+  h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
+  h('.dropdown-menu', [
+    h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
+    model.session.personid === 0 // anonymous user has id 0
+     ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
+     : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+  ]),
+]);
 
 /**
  * Query button final state depends on the following states

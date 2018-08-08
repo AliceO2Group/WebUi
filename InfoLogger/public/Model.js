@@ -1,5 +1,5 @@
 // Import frontend framework
-import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, RemoteData} from '/js/src/index.js';
+import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, RemoteData, sessionService} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
@@ -12,6 +12,9 @@ export default class Model extends Observable {
   constructor() {
     super();
 
+    this.session = sessionService.get();
+    this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
+
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
 
@@ -22,6 +25,7 @@ export default class Model extends Observable {
     this.timezone.bubbleTo(this);
 
     this.inspectorEnabled = false;
+    this.accountMenuEnabled = false;
 
     // Setup router
     this.router = new QueryRouter();
@@ -173,6 +177,14 @@ export default class Model extends Observable {
    */
   toggleInspector() {
     this.inspectorEnabled = !this.inspectorEnabled;
+    this.notify();
+  }
+
+  /**
+   * Toggle account menu dropdown
+   */
+  toggleAccountMenu() {
+    this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
   }
 }
