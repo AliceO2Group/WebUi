@@ -24,7 +24,11 @@ if (config.infoLoggerServer) {
 module.exports.attachTo = (http, ws) => {
   // expose available services
   http.post('/services', (req, res) => {
-    res.json({query: !!querySource, live: !!liveSource});
+    res.json({
+      query: !!querySource,
+      live: !!liveSource,
+      streamHostname: config.infoLoggerServer && config.infoLoggerServer.host
+    });
   });
 
   http.post('/query', (req, res) => {
