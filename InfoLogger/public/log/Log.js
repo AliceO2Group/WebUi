@@ -274,13 +274,13 @@ export default class Log extends Observable {
 
   /**
    * Forward call to `filter`, but if live mode is enabled,
-   * ask if filter should be updated for server broadcast
+   * alert user that filtering will be affected
    * @param {Any} ...args - See LogFilter#setCriteria doc
    */
   setCriteria(...args) {
     this.filter.setCriteria(...args);
 
-    if (this.liveEnabled && confirm(`Do you want to apply this filter to current live session?`)) {
+    if (this.liveEnabled && alert(`The current live session will be affected by this new filter.`)) {
       this.model.ws.setFilter(this.model.log.filter.toFunction());
     }
   }
