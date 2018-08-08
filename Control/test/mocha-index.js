@@ -2,8 +2,11 @@ const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
 const {spawn} = require('child_process');
-const grpc = require('grpc');
 const path = require('path');
+
+// Doc: https://grpc.io/grpc/node/grpc.html
+const protoLoader = require('@grpc/proto-loader');
+const grpcLibrary = require('grpc');
 
 const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
 
@@ -28,12 +31,16 @@ describe('Control', function () {
 
   before(async () => {
     // Start gRPC server, this replaces the real Control server written in Go.
-    const server = new grpc.Server();
-    const octlProto = grpc.load(PROTO_PATH, 'proto', {convertFieldsToCamelCase: true});
-    const credentials = grpc.ServerCredentials.createInsecure();
+    const server = new grpcLibrary.Server();
+    const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+      keepCase: false, // change to camel case
+    });
+    const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
+    const credentials = grpcLibrary.ServerCredentials.createInsecure();
     const address = `${config.grpc.hostname}:${config.grpc.port}`;
     server.addService(octlProto.octl.Octl.service, {
       getFrameworkInfo(call, callback) {
+        console.log('call to getFrameworkInfo done');
         calls['getFrameworkInfo'] = true;
         callback(null, {fakeData: 1});
       },
@@ -60,9 +67,22 @@ describe('Control', function () {
 
     // Start browser to test UI
     browser = await puppeteer.launch({
-      headless: true
+      headless: false
     });
     page = await browser.newPage();
+
+    // Listen to browser
+    page.on('error', pageerror => {
+      console.error('        ', pageerror);
+    });
+    page.on('pageerror', pageerror => {
+      console.error('        ', pageerror);
+    });
+    page.on('console', msg => {
+      for (let i = 0; i < msg.args().length; ++i) {
+        console.log(`        ${msg.args()[i]}`);
+      }
+    });
   });
 
   it('should load first page "/"', async () => {
