@@ -21,6 +21,16 @@ class ControlProxy {
    * @param {Object} config.timeout - used for gRPC deadline, in ms
    */
   constructor(config) {
+    if (!config.hostname) {
+      throw new Error(`config hostname is required`);
+    }
+    if (!config.port) {
+      throw new Error(`config port is required`);
+    }
+    if (!config.timeout) {
+      throw new Error(`config timeout is required to be > 0`);
+    }
+
     this.config = config;
 
     const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
