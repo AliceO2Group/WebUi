@@ -272,6 +272,11 @@ export default class Log extends Observable {
     this.notify();
   }
 
+  /**
+   * Forward call to `filter`, but if live mode is enabled,
+   * ask if filter should be updated for server broadcast
+   * @param {Any} ...args - See LogFilter#setCriteria doc
+   */
   setCriteria(...args) {
     this.filter.setCriteria(...args);
 
