@@ -186,6 +186,5 @@ describe('QCG', function () {
     console.log('Output of server logs for the previous tests:');
     console.log(subprocessOutput);
     subprocess.kill();
-    process.exit(0);
   });
 });
