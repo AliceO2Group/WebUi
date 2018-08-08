@@ -8,7 +8,7 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
-    "mocha": "mocha $(find test -name 'mocha-*.js')"
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js')"
   },
   "author": "Adam Wegrzynek",
   "license": "GPL-3.0",
