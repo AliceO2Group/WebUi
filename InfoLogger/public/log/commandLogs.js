@@ -64,4 +64,4 @@ const liveButton = (model) => h('button.btn.btn-primary', model.servicesResult.m
     onclick: () => model.log.liveEnabled ? model.log.liveStop() : model.log.liveStart()
   }),
   Failure: () => ({disabled: true, className: 'danger'}),
-}), 'Live');
+}), 'Live', model.log.liveEnabled ? h('span.success', ' •') : null);
