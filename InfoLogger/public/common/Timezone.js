@@ -152,4 +152,35 @@ export default class Timezone extends Observable {
       return moment(timestamp).tz(tz).format('HH:mm:ss.SSS');
     }
   }
+
+  /**
+   * Compute how much time since the date passed in argument
+   * @param {Date} startingDate
+   * @return {string} example: 1:12:45
+   */
+  formatDuration(startingDate) {
+    const elapsedSeconds = ((new Date()) - startingDate) / 1000;
+    const hours = Math.floor(elapsedSeconds / 3600);
+    const minutes = Math.floor(elapsedSeconds % 3600 / 60);
+    const seconds = Math.floor(elapsedSeconds % 3600 % 60);
+    let output = '';
+
+    if (hours) {
+      output = hours + ':';
+    }
+
+    if (minutes > 9) {
+      output += minutes + ':';
+    } else {
+      output += '0' + minutes + ':';
+    }
+
+    if (seconds > 9) {
+      output += seconds;
+    } else {
+      output += '0' + seconds;
+    }
+
+    return output;
+  }
 }

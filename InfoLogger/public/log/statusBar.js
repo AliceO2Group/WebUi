@@ -7,15 +7,29 @@ export default (model) => [
   ]),
 ];
 
-const statusLogs = (model) => [
-  model.log.queryResult.match({
-    NotAsked: () => null,
-    Loading: () => 'Loading...',
-    Success: (result) => [statusQuery(model, result), statusStats(model)],
-    Failure: (error) => h('.danger', error),
-  }),
-  model.log.liveEnabled && [statusLive(model), statusStats(model)],
-];
+/**
+ * Show information about the logs seen by user:
+ * - source (query or live)
+ * - how many are loaded, how many in database
+ * - timing, hostname, stats, etc.
+ * @param {object} model
+ * @return {vnode}
+ */
+const statusLogs = (model) => model.servicesResult.match({
+  NotAsked: () => 'Loading services...',
+  Loading: () => 'Loading services...',
+  Success: (services) => [
+    statusStats(model),
+    model.log.queryResult.match({
+      NotAsked: () => null,
+      Loading: () => 'Querying server...',
+      Success: (result) => statusQuery(model, result),
+      Failure: (error) => h('.danger', error),
+    }),
+    model.log.liveEnabled && statusLive(model, services),
+  ],
+  Failure: () => h('span.danger', 'Unable to load services'),
+});
 
 const applicationMessage = (model) => model.log.list.length > model.log.applicationLimit
  ? h('span.danger', `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `)
@@ -36,14 +50,15 @@ const applicationOptions = (model) => [
 ];
 
 const statusQuery = (model, result) => [
-  `${result.count} messages out of ${result.total}${result.more ? '+' : ''} (${(result.time / 1000).toFixed(2)} seconds) `,
+  `(loaded out of ${result.total}${result.more ? '+' : ''} in ${(result.time / 1000).toFixed(2)} second${(result.time / 1000) >= 2 ? 's' : ''})`,
 ];
 
-const statusLive = (model) => [
-  `${model.log.list.length} message${model.log.list.length > 1 ? 's' : ''} (live)`
+const statusLive = (model, services) => [
+  `(streaming from ${services.streamHostname} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`
 ];
 
 const statusStats = (model) => [
+  h('span.ph2', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
   h('span.ph2.severity-i', `${model.log.stats.info} info`),
   h('span.ph2.severity-w', `${model.log.stats.warning} warn`),
   h('span.ph2.severity-e', `${model.log.stats.error} error`),

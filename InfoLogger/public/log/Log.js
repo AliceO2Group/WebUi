@@ -43,6 +43,8 @@ export default class Log extends Observable {
     this.autoScrollToItem = false; // go to an item
     this.autoScrollLive = false; // go at bottom on Live mode
     this.liveEnabled = false;
+    this.liveStartedAt = null;
+    this.liveInterval = null; // 1s interval to update chrono
     this.resetStats();
 
     this.scrollTop = 0; // position of table scrollbar
@@ -289,6 +291,12 @@ export default class Log extends Observable {
     this.resetStats();
     this.queryResult = RemoteData.NotAsked(); // empty all data from last query
     this.liveEnabled = true;
+    this.liveStartedAt = new Date();
+
+    // Notify this model each second to force chorno to be updated
+    // because the output of formatDuration() change in time
+    // kill this interval when live mode is off
+    this.liveInterval = setInterval(this.notify.bind(this), 1000);
 
     this.model.ws.setFilter(this.model.log.filter.toFunction());
 
@@ -300,6 +308,7 @@ export default class Log extends Observable {
       throw new Error('Live not enabled');
     }
 
+    clearInterval(this.liveInterval);
     this.liveEnabled = false;
     this.model.ws.setFilter(() => false);
     this.notify();
