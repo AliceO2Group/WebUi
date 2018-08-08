@@ -107,6 +107,11 @@ describe('QCG', function () {
   });
 
   describe('page layoutShow', () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
+
     it('should load', async () => {
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
       await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12', {waitUntil: 'networkidle0'});
@@ -166,6 +171,11 @@ describe('QCG', function () {
   });
 
   describe('page objectTree', () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
+
     it('should load', async () => {
       await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
