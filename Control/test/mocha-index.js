@@ -67,7 +67,7 @@ describe('Control', function () {
 
     // Start browser to test UI
     browser = await puppeteer.launch({
-      headless: false
+      headless: true
     });
     page = await browser.newPage();
 
