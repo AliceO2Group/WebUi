@@ -1,7 +1,6 @@
 const {log} = require('@aliceo2/web-ui');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 
 /**
  * Store layouts inside JSON based file with atomic write
@@ -16,7 +15,7 @@ class JsonFileConnector {
     this.pathname = path.join(pathname);
 
     // Path for writing file
-    this.pathnameTmp = path.join(os.tmpdir(), 'qcg-tmp-db.json');
+    this.pathnameTmp = path.join(this.pathname, '~tmp');
 
     // Mirror data from content of JSON file
     this.data = {layouts: []};
