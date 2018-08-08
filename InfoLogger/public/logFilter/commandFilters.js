@@ -4,31 +4,31 @@ export default (model) => [
   h('.btn-group', [
     h('button.btn', {
       className: !model.log.filter.criterias.severity.match ? 'active' : '',
-      onclick: () => model.log.filter.setCriteria('severity', 'match', ''),
+      onclick: () => model.log.setCriteria('severity', 'match', ''),
       title: 'Match severity info, warnings, errors and fatals (= all logs)'
     }, 'Info'),
     h('button.btn', {
       className: model.log.filter.criterias.severity.match === 'W E F' ? 'active' : '',
-      onclick: () => model.log.filter.setCriteria('severity', 'match', 'W E F'),
+      onclick: () => model.log.setCriteria('severity', 'match', 'W E F'),
       title: 'Match severity warnings, errors and fatals'
     }, 'Warn'),
     h('button.btn', {
       className: model.log.filter.criterias.severity.match === 'E F' ? 'active' : '',
-      onclick: () => model.log.filter.setCriteria('severity', 'match', 'E F'),
+      onclick: () => model.log.setCriteria('severity', 'match', 'E F'),
       title: 'Match severity errors and fatals'
     }, 'Error'),
     h('button.btn', {
       className: model.log.filter.criterias.severity.match === 'F' ? 'active' : '',
-      onclick: () => model.log.filter.setCriteria('severity', 'match', 'F'),
+      onclick: () => model.log.setCriteria('severity', 'match', 'F'),
       title: 'Match severity only fatals'
     }, 'Fatal'),
   ]),
   h('span.mh3'),
   h('.btn-group', [
-    h('button.btn', {className: model.log.filter.criterias.level.max === 1 ? 'active' : '', onclick: () => model.log.filter.setCriteria('level', 'max', 1), title: 'Filter level ≤ 1'}, 'Shift'),
-    h('button.btn', {className: model.log.filter.criterias.level.max === 6 ? 'active' : '', onclick: () => model.log.filter.setCriteria('level', 'max', 6), title: 'Filter level ≤ 6'}, 'Oncall'),
-    h('button.btn', {className: model.log.filter.criterias.level.max === 11 ? 'active' : '', onclick: () => model.log.filter.setCriteria('level', 'max', 11), title: 'Filter level ≤ 11'}, 'Devel'),
-    h('button.btn', {className: model.log.filter.criterias.level.max === 21 ? 'active' : '', onclick: () => model.log.filter.setCriteria('level', 'max', 21), title: 'Filter level ≤ 21'}, 'Debug'),
+    h('button.btn', {className: model.log.filter.criterias.level.max === 1 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 1), title: 'Filter level ≤ 1'}, 'Shift'),
+    h('button.btn', {className: model.log.filter.criterias.level.max === 6 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 6), title: 'Filter level ≤ 6'}, 'Oncall'),
+    h('button.btn', {className: model.log.filter.criterias.level.max === 11 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 11), title: 'Filter level ≤ 11'}, 'Devel'),
+    h('button.btn', {className: model.log.filter.criterias.level.max === 21 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 21), title: 'Filter level ≤ 21'}, 'Debug'),
   ]),
   h('span.mh3'),
   h('.btn-group', [

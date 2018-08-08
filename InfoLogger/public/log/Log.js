@@ -272,6 +272,14 @@ export default class Log extends Observable {
     this.notify();
   }
 
+  setCriteria(...args) {
+    this.filter.setCriteria(...args);
+
+    if (this.liveEnabled && confirm(`Do you want to apply this new filter to current live session?`)) {
+      this.model.ws.setFilter(this.model.log.filter.toFunction());
+    }
+  }
+
   liveStart() {
     // those Errors should be protected by user interface
     if (this.queryResult.isLoading()) {
