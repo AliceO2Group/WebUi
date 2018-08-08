@@ -35,6 +35,19 @@ describe('QCG', function () {
       headless: true
     });
     page = await browser.newPage();
+
+    // Listen to browser
+    page.on('error', pageerror => {
+      console.error('        ', pageerror);
+    });
+    page.on('pageerror', pageerror => {
+      console.error('        ', pageerror);
+    });
+    page.on('console', msg => {
+      for (let i = 0; i < msg.args().length; ++i) {
+        console.log(`        ${msg.args()[i]}`);
+      }
+    });
   });
 
   it('should load first page "/"', async () => {
@@ -95,6 +108,9 @@ describe('QCG', function () {
 
   describe('page layoutShow', () => {
     before(async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
       await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
