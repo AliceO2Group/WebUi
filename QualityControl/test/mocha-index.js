@@ -16,8 +16,8 @@ describe('QCG', function () {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(5000);
-  this.slow(1000);
+  this.timeout(10000);
+  this.slow(2000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
   before(async () => {
@@ -101,18 +101,22 @@ describe('QCG', function () {
     it('should have a link to show a layout', async () => {
       await page.evaluate(() => document.querySelector('section table tbody tr a').click());
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=layoutShow&layout=AliRoot%20dashboard');
+      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12&layoutName=AliRoot%20dashboard');
+      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
     });
   });
 
   describe('page layoutShow', () => {
-    before(async () => {
+    before('reset browser to google', async () => {
       // weird bug, if we don't go to external website just here, all next goto will wait forever
       await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
 
-      await page.goto(url + '?page=layoutShow&layout=AliRoot%20dashboard', {waitUntil: 'networkidle0'});
+    it('should load', async () => {
+      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
+      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=layoutShow&layout=AliRoot+dashboard');
+      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12');
     });
 
     it('should have tabs in the header', async () => {
@@ -167,7 +171,12 @@ describe('QCG', function () {
   });
 
   describe('page objectTree', () => {
-    before(async () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
+
+    it('should load', async () => {
       await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=objectTree');
