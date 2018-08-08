@@ -170,6 +170,9 @@ describe('QCG', function () {
 
   describe('page objectTree', () => {
     before(async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+
       await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=objectTree');
