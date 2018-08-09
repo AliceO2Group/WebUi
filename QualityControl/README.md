@@ -91,9 +91,9 @@ Note: Enabling or disabling OAuth may impacts layout ownership model. When OAuth
 QCG exposes two public REST API which can be read by any other application.
 
 - Get all objects metadata\
-  `curl 'http://localhost:8080/api/listObjects' -X GET`\
-  `[{"name": "AGENT/OBJECT"}]`
-- Get ROOT object in JSON format\
-  `curl 'http://localhost:8080/api/readObjectData?objectName=XXX' -X GET`\
-  `{"_typename":"TCanvas", ...}`
+  Request: `curl 'http://localhost:8080/api/listObjects' -X GET`\
+  Result: `[{"name": "AGENT/OBJECT"}]`
+- Get ROOT object data in JSON format to be used with JSROOT\
+  Request: `curl 'http://localhost:8080/api/readObjectData?objectName=AGENT/OBJECT' -X GET`\
+  Result: `{"_typename":"TCanvas", ...}`
 
