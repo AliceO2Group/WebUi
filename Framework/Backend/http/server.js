@@ -108,7 +108,13 @@ class HttpServer {
     this.addStaticPath(path.join(__dirname, '../../Frontend'));
     this.app.use(this.routerStatics);
 
-    // Router for API (can grow with get, post and delete)
+    // Router for public API (can grow with get, post and delete)
+    // eslint-disable-next-line
+    this.routerPublic = express.Router();
+    this.routerPublic.use(bodyParser.json()); // parse json body for API calls
+    this.app.use('/api', this.routerPublic);
+
+    // Router for secure API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
@@ -166,7 +172,12 @@ class HttpServer {
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
    */
-  get(path, callback) {
+  get(path, callback, options = {}) {
+    if (options.public) {
+      this.routerPublic.get(path, callback);
+      return;
+    }
+
     this.router.get(path, callback);
   }
 
@@ -175,7 +186,12 @@ class HttpServer {
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
    */
-  post(path, callback) {
+  post(path, callback, options = {}) {
+    if (options.public) {
+      this.routerPublic.post(path, callback);
+      return;
+    }
+
     this.router.post(path, callback);
   }
 
