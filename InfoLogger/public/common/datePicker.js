@@ -2,7 +2,7 @@ import {h} from '/js/src/index.js';
 
 export default (model, parsedDate) => h('.datetime-helper.arrow-up-left', [
   h('.datetime-helper-result', [
-    h('span', parsedDate ? model.timezone.format(parsedDate, 'datetime') : 'Which datetime?'),
+    h('span', parsedDate ? model.timezone.format(parsedDate, 'datetime') : 'Which datetime? (CEST / Geneva timezone)'),
   ]),
   h('.datetime-helper-memo', [
     h('span', [

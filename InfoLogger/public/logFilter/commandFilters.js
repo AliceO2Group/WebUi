@@ -37,11 +37,6 @@ export default (model) => [
     h('button.btn', {className: model.log.limit === 100000 ? 'active' : '', onclick: () => model.log.setLimit(100000), title: 'Keep only 100k logs in the view'}, '100K'),
   ]),
   h('span.mh3'),
-  h('.btn-group', [
-    h('button.btn', {className: !model.timezone.local ? 'active' : '', onclick: () => model.timezone.setGeneva(), title: 'Set display timezone to Geneva'}, 'Geneva'),
-    h('button.btn', {className: model.timezone.local ? 'active' : '', onclick: () => model.timezone.setLocal(), title: 'Set display timezone to Local'}, 'Local'),
-  ]),
-  h('span.mh3'),
   h('button.btn', {onclick: () => model.log.filter.resetCriterias(), title: 'Reset date, time, matches, excludes, log levels'}, 'Reset filters'),
 ];
 
