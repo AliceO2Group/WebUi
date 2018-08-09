@@ -47,23 +47,23 @@ is emitted.</p>
 ## Functions
 
 <dl>
-<dt><a href="#chartTimeSerie">`chartTimeSerie(userOptions, width, height, serie, title, timeScale, colorPrimary, colorSecondary, background)`</a> ⇒ <code>vnode</code></dt>
-<dd><p>Displays time-serie based chart of recent data
+<dt><a href="#chartTimeSeries">`chartTimeSeries(userOptions, width, height, series, title, timeWindow, colorPrimary, colorSecondary, background)`</a> ⇒ <code>vnode</code></dt>
+<dd><p>Displays time-series based chart of recent data
 with a sliding window. Time scale (x) must be specified and
 value scale (y) is automatic to fill height.
 Value: {value:number, timestamp:number:ms}</p>
 </dd>
 <dt><a href="#draw">`draw(dom, options)`</a></dt>
-<dd><p>Draw chartTimeSerie to the specified dom element with options</p>
+<dd><p>Draw chartTimeSeries to the specified dom element with options</p>
 </dd>
 <dt><a href="#drawLegend">`drawLegend(ctx, titleText, legendText, left, top, width, height, color)`</a></dt>
-<dd><p>Part of chartTimeSerie, draw the title and scaling</p>
+<dd><p>Part of chartTimeSeries, draw the title and scaling</p>
 </dd>
 <dt><a href="#drawGrid">`drawGrid(ctx, width, height, color)`</a></dt>
-<dd><p>Part of chartTimeSerie, draw the axis</p>
+<dd><p>Part of chartTimeSeries, draw the axis</p>
 </dd>
-<dt><a href="#drawCurve">`drawCurve(ctx, serie, max, min, width, height, color, timeScale)`</a></dt>
-<dd><p>Part of chartTimeSerie, draw the curve</p>
+<dt><a href="#drawCurve">`drawCurve(ctx, series, max, min, width, height, color, timeWindow)`</a></dt>
+<dd><p>Part of chartTimeSeries, draw the curve</p>
 </dd>
 <dt><a href="#tryCompatibility">`tryCompatibility(stringCode)`</a></dt>
 <dd><p>Try to execute a string code with eval, on failure redirect to the compatibility page.</p>
@@ -1033,10 +1033,10 @@ sessionService is also refreshed.
 - command <code>string</code>  
 - payload <code>object</code>  
 
-<a name="chartTimeSerie"></a>
+<a name="chartTimeSeries"></a>
 
-## `chartTimeSerie(userOptions, width, height, serie, title, timeScale, colorPrimary, colorSecondary, background)` ⇒ <code>vnode</code>
-Displays time-serie based chart of recent data
+## `chartTimeSeries(userOptions, width, height, series, title, timeWindow, colorPrimary, colorSecondary, background)` ⇒ <code>vnode</code>
+Displays time-series based chart of recent data
 with a sliding window. Time scale (x) must be specified and
 value scale (y) is automatic to fill height.
 Value: {value:number, timestamp:number:ms}
@@ -1048,39 +1048,39 @@ Value: {value:number, timestamp:number:ms}
 - userOptions <code>Object</code> - all options to draw the chart
 - width <code>number</code> - size of canvas
 - height <code>number</code> - size of canvas
-- serie <code>Array.&lt;Values&gt;</code> - timestamp in ms
+- series <code>Array.&lt;Values&gt;</code> - timestamp in ms
 - title <code>string</code> - to be printed on corner bottom left
-- timeScale <code>number</code> - ms/div for x axis, div is half height
+- timeWindow <code>number</code> - ms/div for x axis, div is half height
 - colorPrimary <code>string</code> - color of curve
 - colorSecondary <code>string</code> - color of axis and labels
 - background <code>string</code> - color of background
 
 **Example**  
 ```js
-chartTimeSerie({
-  serie: [{value: Math.random(), timestamp: Date.now()}],
+chartTimeSeries({
+  series: [{value: Math.random(), timestamp: Date.now()}],
   title: 'Random',
   colorPrimary: 'blue',
   width: '800',
   width: '200',
-  timeScale: 1000,
+  timeWindow: 1000,
 })
 ```
 <a name="draw"></a>
 
 ## `draw(dom, options)`
-Draw chartTimeSerie to the specified dom element with options
+Draw chartTimeSeries to the specified dom element with options
 
 **Kind**: global function  
 **Params**
 
 - dom <code>DOMElement</code>
-- options <code>Object</code> - See chartTimeSerie options
+- options <code>Object</code> - See chartTimeSeries options
 
 <a name="drawLegend"></a>
 
 ## `drawLegend(ctx, titleText, legendText, left, top, width, height, color)`
-Part of chartTimeSerie, draw the title and scaling
+Part of chartTimeSeries, draw the title and scaling
 
 **Kind**: global function  
 **Params**
@@ -1097,7 +1097,7 @@ Part of chartTimeSerie, draw the title and scaling
 <a name="drawGrid"></a>
 
 ## `drawGrid(ctx, width, height, color)`
-Part of chartTimeSerie, draw the axis
+Part of chartTimeSeries, draw the axis
 
 **Kind**: global function  
 **Params**
@@ -1109,20 +1109,20 @@ Part of chartTimeSerie, draw the axis
 
 <a name="drawCurve"></a>
 
-## `drawCurve(ctx, serie, max, min, width, height, color, timeScale)`
-Part of chartTimeSerie, draw the curve
+## `drawCurve(ctx, series, max, min, width, height, color, timeWindow)`
+Part of chartTimeSeries, draw the curve
 
 **Kind**: global function  
 **Params**
 
 - ctx <code>CanvasRenderingContext2D</code>
-- serie <code>Array</code> - data
-- max <code>number</code> - max value of serie
-- min <code>number</code> - min value of serie
+- series <code>Array</code> - data
+- max <code>number</code> - max value of series
+- min <code>number</code> - min value of series
 - width <code>number</code> - width of the available area
 - height <code>number</code> - height of the available area
 - color <code>string</code> - color of curve
-- timeScale <code>number</code> - ms
+- timeWindow <code>number</code> - ms
 
 <a name="tryCompatibility"></a>
 
