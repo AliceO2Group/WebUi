@@ -49,8 +49,8 @@ const tableContainerHooks = (model) => ({
     const onTableScroll = () => {
       const container = vnode.dom;
       const height = container.getBoundingClientRect().height;
-      const scrollTop = container.scrollTop;
-      model.log.setScrollTop(container.scrollTop, height);
+      const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
+      model.log.setScrollTop(scrollTop, height);
     };
 
     // call the function when scrolling is updated
