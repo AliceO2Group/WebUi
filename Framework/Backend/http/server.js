@@ -185,6 +185,8 @@ class HttpServer {
    * Adds POST route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
+   * @param {function} options
+   * @param {function} options.public - true to remove token verification
    */
   post(path, callback, options = {}) {
     if (options.public) {
@@ -199,6 +201,8 @@ class HttpServer {
    * Adds DELETE route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
+   * @param {function} options
+   * @param {function} options.public - true to remove token verification
    */
   delete(path, callback) {
     this.router.delete(path, callback);
