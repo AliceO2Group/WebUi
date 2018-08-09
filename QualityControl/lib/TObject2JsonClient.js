@@ -21,7 +21,6 @@ class TObject2JsonClient extends EventEmitter {
       'dealer'
     );
 
-    this.zmqClient.socket.monitor();
     this.zmqClient.on('message', this._onRawMessage.bind(this));
   }
 
