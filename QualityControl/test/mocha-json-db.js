@@ -16,7 +16,7 @@ let jsonConfig;
 
 describe('JSON file custom database', () => {
   before(() => {
-    // don't keep DB from one test to another
+    // Drop previous DB if exists
     try {
       fs.unlinkSync(CONFIG_FILE);
     } catch (error) {}
@@ -30,7 +30,7 @@ describe('JSON file custom database', () => {
       .catch(done);
   });
 
-  it('Read layout', (done) => {
+  it('Read a layout', (done) => {
     jsonConfig.readLayout(TEST_LAYOUT.id).then((layout) => {
       assert.strictEqual(TEST_LAYOUT.name, layout.name);
       assert.strictEqual(TEST_LAYOUT.owner_name, layout.owner_name);
@@ -40,7 +40,7 @@ describe('JSON file custom database', () => {
     }).catch(done);
   });
 
-  it('Create layout with the same name', (done) => {
+  it('Create a layout with the same name but different ID', (done) => {
     let layout = JSON.parse(JSON.stringify(TEST_LAYOUT));
     layout.id = 321;
     jsonConfig
@@ -49,7 +49,7 @@ describe('JSON file custom database', () => {
       .catch(done);
   });
 
-  it('Create layout with the same id should fail', (done) => {
+  it('Creating layout with the same ID should fail', (done) => {
     let layout = TEST_LAYOUT;
     jsonConfig
       .createLayout(layout)
@@ -64,7 +64,7 @@ describe('JSON file custom database', () => {
       .catch(done);
   });
 
-  it('Read deleted layout returns undefined', (done) => {
+  it('Reading deleted layout returns undefined', (done) => {
     jsonConfig
       .readLayout(TEST_LAYOUT.id)
       .then((result) => result === undefined ? done() : done('should return undefined'))
