@@ -45,7 +45,7 @@ function rows(model) {
               h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
             ),
             ' ',
-            h('a', {href: `?page=layoutShow&layout=${layout.name}`, onclick: e => model.router.handleLinkEvent(e)}, layout.name)
+            h('a', {href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, onclick: e => model.router.handleLinkEvent(e)}, layout.name)
           ]
         ),
         h('td',

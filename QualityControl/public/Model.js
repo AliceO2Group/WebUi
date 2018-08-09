@@ -93,10 +93,11 @@ export default class Model extends Observable {
           });
         break;
       case 'layoutShow':
-        if (!this.router.params.layout) {
+        if (!this.router.params.layoutId) {
+          console.log(`Argument layoutId is URL is missing`);
           return this.router.go('?', true);
         }
-        this.layout.loadItem(this.router.params.layout)
+        this.layout.loadItem(this.router.params.layoutId)
           .then(() => {
             this.page = 'layoutShow';
             this.notify();

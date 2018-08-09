@@ -65,7 +65,7 @@ const myLayoutsMenu = (model) => [
 ];
 
 const myLayoutsMenuItem = (model, layout) => h('a.menu-item', {
-    href: `?page=layoutShow&layout=${encodeURIComponent(layout.name)}`,
+    href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
     onclick: (e) => model.router.handleLinkEvent(e),
     class: model.router.params.layout === layout.name ? 'selected' : ''
   },

@@ -55,14 +55,16 @@ export default class Layout extends Observable {
     this.notify();
   }
 
-  async loadItem(layoutName) {
-    if (!layoutName) {
-      throw new Error('layoutName parameter is mandatory');
+  async loadItem(layoutId) {
+    if (!layoutId) {
+      throw new Error('layoutId parameter is mandatory');
     }
 
-    const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutName: layoutName});
+    this.item = null;
+    const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutId: layoutId});
     if (!ok) {
-      alert(`unable to load layout "${layoutName}"`);
+      alert(`Unable to load layout "${layoutId}"`);
+      this.model.router.go(`?page=layouts`);
       return;
     }
 
@@ -76,11 +78,7 @@ export default class Layout extends Observable {
       throw new Error('layoutName parameter is mandatory');
     }
 
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    };
-    const body = assertLayout({
+    const layout = assertLayout({
       id: objectId(),
       name: layoutName,
       owner_id: this.model.session.personid,
@@ -91,14 +89,17 @@ export default class Layout extends Observable {
         objects: [],
       }]
     });
-    const req = fetchClient(`/api/layout`, {method: 'POST', headers, body: JSON.stringify(body)});
-    this.model.loader.watchPromise(req);
-    const res = await req;
+
+    const {result, ok} = await this.model.loader.post('/api/layout', layout);
+    if (!ok) {
+      alert(result.error || 'Unable to create layout');
+      return;
+    }
 
     // Read the new layout created
-    await this.loadItem(layoutName);
+    await this.loadItem(layout.id);
 
-    this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layoutName)}`, false, true);
+    this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, true);
     this.edit(); // edit the new item after loading page
     this.loadMyList();
   }
@@ -108,7 +109,7 @@ export default class Layout extends Observable {
       throw new Error('no layout to delete');
     }
 
-    const req = fetchClient(`/api/layout/${this.item.name}`, {method: 'DELETE'});
+    const req = fetchClient(`/api/layout/${this.item.id}`, {method: 'DELETE'});
     this.model.loader.watchPromise(req);
     const res = await req;
     // const layout = await res.json();
@@ -124,7 +125,7 @@ export default class Layout extends Observable {
       throw new Error('no layout to save');
     }
 
-    return this.model.loader.watchPromise(fetchClient(`/api/writeLayout?layoutName=${this.item.name}`, {method: 'POST', body: JSON.stringify(this.item),     headers: {
+    return this.model.loader.watchPromise(fetchClient(`/api/writeLayout?layoutId=${this.item.id}`, {method: 'POST', body: JSON.stringify(this.item),     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },})
