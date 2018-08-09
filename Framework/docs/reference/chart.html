@@ -1,40 +1,40 @@
 <!doctype html>
-<title>ChartTimeSerie</title>
+<title>ChartTimeSeries</title>
 <link rel="stylesheet" href="../../Frontend/css/src/bootstrap.css">
 
 <script type="module">
-import {mount, h, Observable, chartTimeSerie} from '../../Frontend/js/src/index.js';
+import {mount, h, Observable, chartTimeSeries} from '../../Frontend/js/src/index.js';
 
 // Example of chart integration with template engine
 const view = (model) => [
   h('div.m4', [
-    chartTimeSerie({
-      serie: model.serie1,
+    chartTimeSeries({
+      series: model.series1,
       title: 'Sinus',
       colorPrimary: 'red',
       width: '800',
     }),
   ]),
   h('div.m4', [
-    chartTimeSerie({
-      serie: model.serie1,
+    chartTimeSeries({
+      series: model.series1,
       title: 'Sinus',
       colorPrimary: 'red',
       width: '800',
-      timeScale: 100,
+      timeWindow: 100,
     }),
   ]),
   h('div.m4', [
-    chartTimeSerie({
-      serie: model.serie2,
+    chartTimeSeries({
+      series: model.series2,
       title: 'Random',
       colorPrimary: 'blue',
       width: '800',
     }),
   ]),
   h('div.m4', [
-    chartTimeSerie({
-      serie: model.serie3,
+    chartTimeSeries({
+      series: model.series3,
       title: 'Sinus rounded',
       colorPrimary: 'green',
       width: '800',
@@ -44,22 +44,22 @@ const view = (model) => [
 
 // Create some basic model
 const model = new Observable();
-model.serie1 = [];
-model.serie2 = [];
-model.serie3 = [];
+model.series1 = [];
+model.series2 = [];
+model.series3 = [];
 model.notify();
 
 // Add points at 30 FPS but keep only first 800 points for memory leak
 let i = 0;
 setInterval(() => {
   i++;
-  model.serie1.push({value: Math.cos(i / 10), timestamp: Date.now()});
-  model.serie2.push({value: Math.random() * 10, timestamp: Date.now()});
-  model.serie3.push({value: Math.round(Math.cos(i / 10)), timestamp: Date.now()});
+  model.series1.push({value: Math.cos(i / 10), timestamp: Date.now()});
+  model.series2.push({value: Math.random() * 10, timestamp: Date.now()});
+  model.series3.push({value: Math.round(Math.cos(i / 10)), timestamp: Date.now()});
 
-  model.serie1.splice(0, model.serie1.length - 800);
-  model.serie2.splice(0, model.serie2.length - 800);
-  model.serie3.splice(0, model.serie3.length - 800);
+  model.series1.splice(0, model.series1.length - 800);
+  model.series2.splice(0, model.series2.length - 800);
+  model.series3.splice(0, model.series3.length - 800);
 
   model.notify();
 }, 33);
