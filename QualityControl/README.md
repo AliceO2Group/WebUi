@@ -85,3 +85,15 @@ Note: Enabling or disabling OAuth may impacts layout ownership model. When OAuth
 - Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
 - Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
+
+## Public API
+
+QCG exposes two public REST API which can be read by any other application.
+
+- Get all objects metadata\
+  `curl 'http://localhost:8080/api/listObjects' -X GET`\
+  `[{"name": "AGENT/OBJECT"}]`
+- Get ROOT object in JSON format\
+  `curl 'http://localhost:8080/api/readObjectData?objectName=XXX' -X GET`\
+  `{"_typename":"TCanvas", ...}`
+
