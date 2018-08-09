@@ -171,6 +171,7 @@ class HttpServer {
    * Adds GET route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
+   * @param {function} options
    * @param {function} options.public - true to remove token verification
    */
   get(path, callback, options = {}) {
