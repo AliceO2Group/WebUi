@@ -114,14 +114,14 @@ export default class Model extends Observable {
     // shortcuts
     switch (e.keyCode) {
       case 37: // left
-        if (e.ctrlKey) {
+        if (e.altKey) {
           this.log.firstError();
         } else {
           this.log.previousError();
         }
         break;
       case 39: // right
-        if (e.ctrlKey) {
+        if (e.altKey) {
           this.log.lastError();
         } else {
           this.log.nextError();
