@@ -126,6 +126,7 @@ export default class Log extends Observable {
    */
   firstError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal message found in the current list.`);
       return;
     }
 
@@ -142,6 +143,7 @@ export default class Log extends Observable {
    */
   previousError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal message found in the current list.`);
       return;
     }
 
@@ -170,6 +172,7 @@ export default class Log extends Observable {
    */
   nextError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal message found in the current list.`);
       return;
     }
 
@@ -196,6 +199,7 @@ export default class Log extends Observable {
    */
   lastError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal message found in the current list.`);
       return;
     }
 
