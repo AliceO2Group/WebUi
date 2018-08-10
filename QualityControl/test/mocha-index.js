@@ -153,8 +153,7 @@ describe('QCG', function () {
 
     it('should have filtered results on input search filled', async () => {
       await page.type('nav input', 'HistoWithRandom');
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 1); // 1 object
+      await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
     });
 
     it('should show normal sidebar after Cancel click', async () => {
@@ -190,8 +189,7 @@ describe('QCG', function () {
 
     it('should have filtered results on input search filled', async () => {
       await page.type('header input', 'HistoWithRandom');
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 1); // 1 object
+      await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 1`, {timeout: 5000});
     });
 
     it('should have a button to activate online mode', async () => {
