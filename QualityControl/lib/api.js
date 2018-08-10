@@ -5,9 +5,9 @@ const config = require('./configProvider.js');
 const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
 
 module.exports.setup = (http) => {
-  http.post('/readObjectData', readObjectData);
+  http.get('/readObjectData', readObjectData, {public: true});
   http.post('/readObjectsData', readObjectsData);
-  http.post('/listObjects', listObjects);
+  http.get('/listObjects', listObjects, {public: true});
   http.post('/readLayout', readLayout);
   http.post('/writeLayout', updateLayout);
   http.post('/listLayouts', listLayouts);

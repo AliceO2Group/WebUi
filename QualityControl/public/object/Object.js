@@ -69,7 +69,7 @@ export default class Object_ extends Observable {
   }
 
   async loadList() {
-    const req = fetchClient(`/api/listObjects?`, {method: 'POST'});
+    const req = fetchClient(`/api/listObjects`, {method: 'GET'});
     this.model.loader.watchPromise(req);
     const res = await req;
     const list = await res.json();
@@ -101,7 +101,7 @@ export default class Object_ extends Observable {
 
     // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
 
-    const {result, ok, status} = await this.model.loader.post(`/api/readObjectData?objectName=${objectName}`);
+    const {result, ok, status} = await this.model.loader.get(`/api/readObjectData?objectName=${objectName}`);
     if (ok) {
       // link JSROOT methods to object
       this.objects[objectName] = RemoteData.Success(JSROOT.JSONR_unref(result));
