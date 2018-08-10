@@ -96,11 +96,10 @@ export default class Layout extends Observable {
       return;
     }
 
-    // Read the new layout created
-    await this.loadItem(layout.id);
+    // Read the new layout created and edit it
+    this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
 
-    this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, true);
-    this.edit(); // edit the new item after loading page
+    // Update user list in background
     this.loadMyList();
   }
 

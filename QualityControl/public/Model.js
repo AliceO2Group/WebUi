@@ -100,6 +100,12 @@ export default class Model extends Observable {
         this.layout.loadItem(this.router.params.layoutId)
           .then(() => {
             this.page = 'layoutShow';
+            if (this.router.params.edit) {
+              this.layout.edit();
+
+              // Replace silently and immediatly URL to remove 'edit' parameter after a layout creation
+              this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}&layoutName=${this.router.params.layoutName}`, true, true);
+            }
             this.notify();
           })
           .catch((err) => {
