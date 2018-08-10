@@ -728,10 +728,10 @@ http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html
     * [`remoteData.isLoading()`](#RemoteData+isLoading) ⇒ <code>boolean</code>
     * [`remoteData.isSuccess()`](#RemoteData+isSuccess) ⇒ <code>boolean</code>
     * [`remoteData.isFailure()`](#RemoteData+isFailure) ⇒ <code>boolean</code>
-    * [`RemoteData.NotAsked()`](#RemoteData.NotAsked) ⇒ [<code>RemoteData</code>](#RemoteData)
-    * [`RemoteData.Loading()`](#RemoteData.Loading) ⇒ [<code>RemoteData</code>](#RemoteData)
-    * [`RemoteData.Success(payload)`](#RemoteData.Success) ⇒ [<code>RemoteData</code>](#RemoteData)
-    * [`RemoteData.Failure(payload)`](#RemoteData.Failure) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.notAsked()`](#RemoteData.notAsked) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.loading()`](#RemoteData.loading) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.success(payload)`](#RemoteData.success) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.failure(payload)`](#RemoteData.failure) ⇒ [<code>RemoteData</code>](#RemoteData)
 
 <a name="new_RemoteData_new"></a>
 
@@ -818,32 +818,36 @@ Test is current kind is a `Success`
 Test is current kind is a `Failure`
 
 **Kind**: instance method of [<code>RemoteData</code>](#RemoteData)  
-<a name="RemoteData.NotAsked"></a>
+<a name="RemoteData.notAsked"></a>
 
-### `RemoteData.NotAsked()` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.notAsked()` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'NotAsked' RemoteData kind
+(NotAsked is not eslint compatible and deprecated, use notAsked)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
-<a name="RemoteData.Loading"></a>
+<a name="RemoteData.loading"></a>
 
-### `RemoteData.Loading()` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.loading()` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'Loading' RemoteData kind
+(Loading is not eslint compatible and deprecated, use loading)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
-<a name="RemoteData.Success"></a>
+<a name="RemoteData.success"></a>
 
-### `RemoteData.Success(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.success(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'Success' RemoteData kind
+(Success is not eslint compatible and deprecated, use success)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
 **Params**
 
 - payload <code>Any</code>
 
-<a name="RemoteData.Failure"></a>
+<a name="RemoteData.failure"></a>
 
-### `RemoteData.Failure(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.failure(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'Failure' RemoteData kind
+(Failure is not eslint compatible and deprecated, use failure)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
 **Params**
