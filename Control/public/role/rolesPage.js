@@ -1,4 +1,4 @@
-import {h, switchCase} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableList from '../common/showTableList.js';
@@ -16,6 +16,12 @@ export let header = (model) => [
   ])
 ];
 
+/**
+ * Content of the page representing roles
+ * Depends of the loading of `model.role.list`
+ * @param {object} model
+ * @return {vnode}
+ */
 export let content = (model) => h('.scroll-y.absolute-fill', [
   model.role.list.match({
     NotAsked: () => null,
@@ -27,5 +33,4 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
 
 const showContent = (model, list) => list.length
   ? showTableList(list)
-  : h('h3.m4', ['No role found.']
-);
+  : h('h3.m4', ['No role found.']);

@@ -1,15 +1,17 @@
-import {h, switchCase} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
 
 /**
  * View of lock button, when taken, show who owns it
+ * @param {Object} model
+ * @return {vnode}
  */
 export default (model) => [
   model.lock.padlockState.match({
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
     Success: (data) => button(model, data),
-    Failure: (error) => null,
+    Failure: (_error) => null,
   })
 ];
 

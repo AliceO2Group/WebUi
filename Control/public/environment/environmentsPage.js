@@ -1,4 +1,4 @@
-import {h, iconPlus, switchCase} from '/js/src/index.js';
+import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableList from '../common/showTableList.js';
@@ -25,7 +25,13 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
   })
 ]);
 
+/**
+ * Show a list of environments with a button to edit each of them
+ * Print a message if the list is empty.
+ * @param {Object} model
+ * @param {Array.<Environment>} list
+ * @return {vnode}
+ */
 const showContent = (model, list) => list.length
   ? showTableList(list, (event, item) => model.router.go(`?page=environment&id=${item.id}`))
-  : h('h3.m4', ['No environment found.']
-);
+  : h('h3.m4', ['No environment found.']);

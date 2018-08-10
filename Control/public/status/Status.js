@@ -6,28 +6,29 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class FrameworkInfo extends Observable {
   /**
    * Initialize `item` to NotAsked
+   * @param {Object} model
    */
   constructor(model) {
     super();
 
     this.model = model;
-    this.item = RemoteData.NotAsked();
+    this.item = RemoteData.notAsked();
   }
 
   /**
    * Load FrameworkInfo into `item`
    */
   async getFrameworkInfo() {
-    this.item = RemoteData.Loading();
+    this.item = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/getFrameworkInfo`);
     if (!ok) {
-      this.item = RemoteData.Failure(result.message);
+      this.item = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.item = RemoteData.Success(result);
+    this.item = RemoteData.success(result);
     this.notify();
   }
 }

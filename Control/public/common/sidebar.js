@@ -3,6 +3,8 @@ import {iconGridFourUp, iconGridThreeUp, iconGridTwoUp, iconExcerpt} from '/js/s
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
+ * @param {Object} model
+ * @return {vnode}
  */
 export default (model) => h('.absolute-fill scroll-y', [
   h('.menu-title', 'Dashboard'),

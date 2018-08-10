@@ -1,4 +1,4 @@
-import {h, switchCase} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableItem from '../common/showTableItem.js';

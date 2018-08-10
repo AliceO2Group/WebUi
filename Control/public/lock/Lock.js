@@ -6,6 +6,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class Lock extends Observable {
   /**
    * Initialize lock state to NotAsked
+ * @param {Observable} model
    */
   constructor(model) {
     super();
@@ -15,7 +16,7 @@ export default class Lock extends Observable {
       lockedBy: null,
       lockedByName: null,
     };
-    this.padlockState = RemoteData.NotAsked();
+    this.padlockState = RemoteData.notAsked();
   }
 
   /**
@@ -23,7 +24,7 @@ export default class Lock extends Observable {
    * @param {string} padlockState - object representing PadLock from server
    */
   setPadlockState(padlockState) {
-    this.padlockState = RemoteData.Success(padlockState);
+    this.padlockState = RemoteData.success(padlockState);
     this.notify();
   }
 
@@ -31,17 +32,17 @@ export default class Lock extends Observable {
    * Load Padlock state from server
    */
   async synchronizeState() {
-    this.padlockState = RemoteData.Loading();
+    this.padlockState = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/lockState`);
     if (!ok) {
-      this.padlockState = RemoteData.Failure(result.message);
+      this.padlockState = RemoteData.failure(result.message);
       this.notify();
       alert('Fatal error while loading LOCK, please reload the page');
       return;
     }
-    this.padlockState = RemoteData.Success(result);
+    this.padlockState = RemoteData.success(result);
     this.notify();
   }
 
@@ -50,7 +51,7 @@ export default class Lock extends Observable {
    * Result of this action will be an update by WS
    */
   async lock() {
-    this.padlockState = RemoteData.Loading();
+    this.padlockState = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/lock`);
@@ -65,7 +66,7 @@ export default class Lock extends Observable {
    * Result of this action will be an update by WS
    */
   async unlock() {
-    this.padlockState = RemoteData.Loading();
+    this.padlockState = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/unlock`);

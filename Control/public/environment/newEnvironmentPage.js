@@ -1,7 +1,4 @@
-import {h, switchCase} from '/js/src/index.js';
-import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
-import showTableList from '../common/showTableList.js';
+import {h} from '/js/src/index.js';
 
 /**
  * @file Page to show form of a new environment (content and header)
