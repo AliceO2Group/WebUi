@@ -6,15 +6,16 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class Environment extends Observable {
   /**
    * Initialize all ajax calls to "NotAsked" type
+   * @param {Observable} model
    */
   constructor(model) {
     super();
 
     this.model = model;
-    this.list = RemoteData.NotAsked();
-    this.item = RemoteData.NotAsked();
-    this.itemControl = RemoteData.NotAsked();
-    this.itemNew = RemoteData.NotAsked();
+    this.list = RemoteData.notAsked();
+    this.item = RemoteData.notAsked();
+    this.itemControl = RemoteData.notAsked();
+    this.itemNew = RemoteData.notAsked();
     this.itemForm = {};
   }
 
@@ -22,16 +23,16 @@ export default class Environment extends Observable {
    * Load all environements into `list` as RemoteData
    */
   async getEnvironments() {
-    this.list = RemoteData.Loading();
+    this.list = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/getEnvironments`);
     if (!ok) {
-      this.list = RemoteData.Failure(result.message);
+      this.list = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.list = RemoteData.Success(result);
+    this.list = RemoteData.success(result);
     this.notify();
   }
 
@@ -40,17 +41,17 @@ export default class Environment extends Observable {
    * @param {Object} body - See protobuf definition for properties
    */
   async getEnvironment(body) {
-    this.item = RemoteData.Loading();
+    this.item = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/getEnvironment`, body);
     if (!ok) {
-      this.item = RemoteData.Failure(result.message);
+      this.item = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.item = RemoteData.Success(result);
-    this.itemControl = RemoteData.NotAsked(); // because item has changed
+    this.item = RemoteData.success(result);
+    this.itemControl = RemoteData.notAsked(); // because item has changed
     this.notify();
   }
 
@@ -59,16 +60,16 @@ export default class Environment extends Observable {
    * @param {Object} body - See protobuf definition for properties
    */
   async controlEnvironment(body) {
-    this.itemControl = RemoteData.Loading();
+    this.itemControl = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/controlEnvironment`, body);
     if (!ok) {
-      this.itemControl = RemoteData.Failure(result.message);
+      this.itemControl = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.itemControl = RemoteData.Success(result);
+    this.itemControl = RemoteData.success(result);
     this.notify();
   }
 
@@ -78,16 +79,16 @@ export default class Environment extends Observable {
    * See protobuf definition for properties of `this.itemForm` as body
    */
   async newEnvironment() {
-    this.itemNew = RemoteData.Loading();
+    this.itemNew = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/newEnvironment`, this.itemForm);
     if (!ok) {
-      this.itemNew = RemoteData.Failure(result.message);
+      this.itemNew = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.itemNew = RemoteData.NotAsked();
+    this.itemNew = RemoteData.notAsked();
     this.model.router.go(`?page=environment&id=${result.id}`);
   }
 
@@ -106,16 +107,16 @@ export default class Environment extends Observable {
    * @param {Object} body - See protobuf definition for properties
    */
   async destroyEnvironment(body) {
-    this.itemControl = RemoteData.Loading();
+    this.itemControl = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/destroyEnvironment`, body);
     if (!ok) {
-      this.itemControl = RemoteData.Failure(result.message);
+      this.itemControl = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.itemControl = RemoteData.NotAsked();
+    this.itemControl = RemoteData.notAsked();
     this.model.router.go(`?page=environments`);
   }
 }

@@ -1,12 +1,15 @@
-import {h, switchCase} from '/js/src/index.js';
-import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
-import showTableList from '../common/showTableList.js';
+import {h} from '/js/src/index.js';
 
 /**
  * @file Page to show form of a new environment (content and header)
  */
 
+/**
+ * Header of page for creating a new environment
+ * No action/button for now, only page title
+ * @param {Object} model
+ * @return {vnode}
+ */
 export let header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'New environment')
@@ -16,7 +19,13 @@ export let header = (model) => [
   ])
 ];
 
-// Validation of data is made by Control server itself
+/**
+ * Simple form for creating a new environment
+ * Shows error message if server failed the creation
+ * Validation of data is made by Control server itself
+ * @param {Object} model
+ * @return {vnode}
+ */
 export let content = (model) => h('.scroll-y.absolute-fill', [
   h('form.m4.measure', {onsubmit: () => false}, [
     h('.form-group', [

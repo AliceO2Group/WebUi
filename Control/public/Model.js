@@ -1,5 +1,5 @@
 // Import frontend framework
-import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
+import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
 
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
@@ -59,11 +59,14 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Delete key + layout page + object select => delete this object
-    if (code === 8 && this.router.params.page === 'layoutShow' && this.layout.editEnabled && this.layout.editingTabObject) {
+    if (code === 8 &&
+        this.router.params.page === 'layoutShow' &&
+        this.layout.editEnabled &&
+        this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
     }
   }
@@ -83,10 +86,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
-    const page = this.router.params.page
-    console.log(`Page changed to ${page}`);
-
-    switch (page) {
+    switch (this.router.params.page) {
       case 'newEnvironment':
         break;
       case 'environments':
