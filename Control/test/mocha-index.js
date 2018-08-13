@@ -65,6 +65,8 @@ describe('Control', function () {
       subprocessOutput += chunk.toString();
     });
 
+    this.ok = true;
+
     // Start browser to test UI
     browser = await puppeteer.launch({
       headless: true
@@ -74,9 +76,11 @@ describe('Control', function () {
     // Listen to browser
     page.on('error', pageerror => {
       console.error('        ', pageerror);
+      this.ok = false;
     });
     page.on('pageerror', pageerror => {
       console.error('        ', pageerror);
+      this.ok = false;
     });
     page.on('console', msg => {
       for (let i = 0; i < msg.args().length; ++i) {
@@ -140,6 +144,14 @@ describe('Control', function () {
     it('should have gotten data from getRoles', async () => {
       assert(calls['getRoles'] === true);
     });
+  });
+
+  beforeEach(() => {
+    this.ok = true;
+  });
+
+  afterEach(() => {
+    if (!this.ok) throw new Error('something went wrong');
   });
 
   after(async () => {
