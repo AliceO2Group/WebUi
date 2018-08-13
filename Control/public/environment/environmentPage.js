@@ -9,6 +9,7 @@ import showTableItem from '../common/showTableItem.js';
 
 /**
  * Header of page showing one environment
+ * Only page title with no action
  * @param {Object} model
  * @return {vnode}
  */

@@ -7,6 +7,12 @@ import showTableItem from '../common/showTableItem.js';
  * @file Page to FrameworkInfo (content and header)
  */
 
+/**
+ * Header of the status page (or frameworkinfo)
+ * Empty for now, no action needed, only page title
+ * @param {Object} model
+ * @return {vnode}
+ */
 export let header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'Status')
@@ -16,6 +22,12 @@ export let header = (model) => [
   ])
 ];
 
+/**
+ * Content of the status page (or frameworkinfo)
+ * Show loading or error on other cases
+ * @param {Object} model
+ * @return {vnode}
+ */
 export let content = (model) => h('.scroll-y.absolute-fill', [
   model.status.item.match({
     NotAsked: () => null,
@@ -25,6 +37,12 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
   })
 ]);
 
+/**
+ * Show status infos with a simple table, one line per property
+ * @param {Object} model
+ * @param {FrameworkInfo} item - status got from server
+ * @return {vnode}
+ */
 const showContent = (model, item) => [
   showTableItem(item)
 ];
