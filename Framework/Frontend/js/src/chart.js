@@ -204,12 +204,29 @@ function drawCurve(ctx, series, max, min, width, height, color, timeWindow) {
   ctx.closePath();
 }
 
-// point: {value:number, timestamp:number:ms}
+/**
+ * Comparaison function to sort points by `timestamp` field
+ * @param {Object} pointA - {value:number, timestamp:number:ms}
+ * @param {Object} pointB - {value:number, timestamp:number:ms}
+ * @return {number}
+ */
 const sortByTimestamp = (pointA, pointB) => pointA.timestamp - pointB.timestamp;
+
+/**
+ * Find the maximum '.value' of array of points
+ * @param {Array.<Point>} points
+ * @return {number}
+ */
 const maxOf = (points) => points.reduce(
   (max, point) => point.value > max ? point.value : max,
   -Infinity
 );
+
+/**
+ * Find the minimum '.value' of array of points
+ * @param {Array.<Point>} points
+ * @return {number}
+ */
 const minOf = (points) => points.reduce(
   (min, point) => point.value < min ? point.value : min,
   +Infinity
