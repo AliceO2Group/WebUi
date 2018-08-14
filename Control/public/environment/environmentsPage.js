@@ -1,4 +1,4 @@
-import {h, iconPlus, switchCase} from '/js/src/index.js';
+import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableList from '../common/showTableList.js';
@@ -7,6 +7,12 @@ import showTableList from '../common/showTableList.js';
  * @file Page to show a list of environments (content and header)
  */
 
+/**
+ * Header of page showing list of environments
+ * With one button to create a new environment and page title
+ * @param {Object} model
+ * @return {vnode}
+ */
 export let header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'Environments')
@@ -16,6 +22,11 @@ export let header = (model) => [
   ])
 ];
 
+/**
+ * Scrollable list of environments or page loading/error otherwise
+ * @param {Object} model
+ * @return {vnode}
+ */
 export let content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.list.match({
     NotAsked: () => null,
@@ -25,7 +36,13 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
   })
 ]);
 
+/**
+ * Show a list of environments with a button to edit each of them
+ * Print a message if the list is empty.
+ * @param {Object} model
+ * @param {Array.<Environment>} list
+ * @return {vnode}
+ */
 const showContent = (model, list) => list.length
   ? showTableList(list, (event, item) => model.router.go(`?page=environment&id=${item.id}`))
-  : h('h3.m4', ['No environment found.']
-);
+  : h('h3.m4', ['No environment found.']);
