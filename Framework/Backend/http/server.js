@@ -39,10 +39,10 @@ class HttpServer {
       };
       this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
       this.enableHttpRedirect();
-      log.info(`HTTPS server listening on port ${httpConfig.portSecure}`);
+      log.info(`Secure server listening on port ${httpConfig.portSecure}`);
     } else {
       this.server = http.createServer(this.app).listen(httpConfig.port);
-      log.info(`HTTP server listening on port ${httpConfig.port}`);
+      log.info(`Server listening on port ${httpConfig.port}`);
     }
 
     this.templateData = {};
@@ -129,7 +129,7 @@ class HttpServer {
 
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
-      log.error(`Request ${req.originalUrl} went wrong: ${err.message || err}`);
+      log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
       log.trace(err);
       res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
     });
@@ -316,7 +316,7 @@ class HttpServer {
         };
         next();
       }, (error) => {
-        log.warn(`HTTP JWT - ${error.name} : ${error.message}`);
+        log.warn(`${error.name} : ${error.message}`);
         res.status(403).json({message: error.name});
       });
   }
