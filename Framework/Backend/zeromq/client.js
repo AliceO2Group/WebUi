@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const zmq = require('zeromq');
-const log = new (require('./../log/log.js'))('ZeroMQ');
+const log = new (require('./../log/Log.js'))('ZeroMQ');
 
 /**
  * ZeroMQ client that communicates with Control Master prcess via one of two supported
@@ -26,16 +26,16 @@ class ZeroMQClient extends EventEmitter {
     this.socket.on('close', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('disconnect', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('connect_delay', () => {
-      log.debug(this.getName() + 'Connection to the socket is pending...');
+      log.debug('Connection to the socket is pending...');
     });
 
     this.socket.on('connect_retry', () => {
-      log.info(this.getName() + 'Socket is being reconnected...');
+      log.info('Socket is being reconnected...');
       this.connected = false;
     });
 
     this.socket.connect('tcp://' + ip + ':' + port);
-    log.debug(this.getName() + 'Connecting to tcp://' + ip + ':' + port + '...');
+    log.debug('Connecting to tcp://' + ip + ':' + port + '...');
     if (type == 'sub') {
       this.socket.subscribe('');
     }
@@ -43,18 +43,11 @@ class ZeroMQClient extends EventEmitter {
   }
 
   /**
-   * @return {string} Provide formatted class name
-   */
-  getName() {
-    return '[' + this.constructor.name + '] ';
-  }
-
-  /**
    * On-connect event handler.
    * @param {string} endpoint
    */
   connect(endpoint) {
-    log.info(this.getName() + 'Connected to ' + endpoint);
+    log.info('Connected to ' + endpoint);
     this.connected = true;
   }
 
@@ -64,7 +57,7 @@ class ZeroMQClient extends EventEmitter {
    */
   disconnect(endpoint) {
     if (this.connected) {
-      log.error(this.getName() + 'Disconnected from ' + endpoint);
+      log.error('Disconnected from ' + endpoint);
     }
     this.connected = false;
   }
@@ -75,7 +68,7 @@ class ZeroMQClient extends EventEmitter {
    */
   onmessage(message) {
     if (typeof message === 'undefined') {
-      log.debug(this.getName() + 'Cannot send undefined message');
+      log.debug('Cannot send undefined message');
       return;
     }
     this.emit('message', message.toString());
@@ -87,7 +80,7 @@ class ZeroMQClient extends EventEmitter {
    */
   send(message) {
     if (!this.connected) {
-      log.debug(this.getName() + 'Could not send message as socket is not open');
+      log.debug('Could not send message as socket is not open');
       return;
     }
     this.socket.send(message);

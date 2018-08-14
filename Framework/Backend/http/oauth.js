@@ -1,7 +1,7 @@
 const https = require('https');
 const oauth2 = require('simple-oauth2');
 const assert = require('assert');
-const log = new (require('./../log/log.js'))('OAuth');
+const log = new (require('./../log/Log.js'))('OAuth');
 
 /**
  * Authenticates users via CERN OAuth 2.0.
