@@ -13,6 +13,12 @@ The source code of unit tests is kept in `Backend/test/` and `Frontend/test/` di
 ## Linting
 The project uses [ESLint](http://eslint.org) to validate JavaScript syntax and coding style. The rules are defined in `.eslint` file and follow O<sup>2</sup> JavaScript Coding Guideline.
 
+Exceptions can be added to lines and files:
+- `/* eslint max-len: 0 */` removes maximum length for current file
+- `/* eslint-disable */` removes eslint from current file
+- `// eslint-disable-next-line` removes eslint from next line
+- `// eslint-disable-next-line max-len` removes eslint maximum length from next line
+
 ## Documentation
 Documentation is handled with help of [JSDoc 3](http://usejsdoc.org) API generator.
 
