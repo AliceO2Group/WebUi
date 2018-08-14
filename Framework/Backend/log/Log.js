@@ -10,8 +10,11 @@ let infologger = null;
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class Log {
-
-  
+  /**
+   * Sets the label and constructs default winston instance
+   * @constructor
+   * @param {string} label
+   */
   constructor(label = null) {
     this.label = label;
     if (!winston) {
@@ -20,6 +23,10 @@ class Log {
     }
   }
 
+  /**
+   * Configures Winston and InfoLogger instances
+   * @param {object} config
+   */
   static configure(config) {
     if (config && config.winston) {
       winston = new Winston(config.winston);
@@ -29,6 +36,10 @@ class Log {
     }
   }
 
+  /**
+   * Debug severity log
+   * @param {string} log
+   */
   debug(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.debug(message);
@@ -39,6 +50,10 @@ class Log {
     }
   }
 
+  /**
+   * Information severity log
+   * @param {string} log
+   */
   info(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.info(message);
@@ -49,6 +64,10 @@ class Log {
     }
   }
 
+  /**
+   * Warning severity log
+   * @param {string} log
+   */
   warn(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.warn(message);
@@ -59,6 +78,10 @@ class Log {
     }
   }
 
+  /**
+   * Error severity log
+   * @param {string} log
+   */
   error(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.error(message);
@@ -69,8 +92,11 @@ class Log {
     }
   }
 
+  /**
+   * Prints more details, for debugging purposes
+   * @param {object} err
+   */
   static trace(err) {
-    // Print more information for debugging
     // eslint-disable-next-line
     console.trace(err);
   }

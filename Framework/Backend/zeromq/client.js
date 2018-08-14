@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const zmq = require('zeromq');
-const log = require('./../log/log.js');
+const log = new (require('./../log/log.js'))('ZeroMQ');
 
 /**
  * ZeroMQ client that communicates with Control Master prcess via one of two supported
