@@ -1,3 +1,5 @@
+/* eslint max-len: 0 */
+
 import {h} from '/js/src/index.js';
 
 import datePicker from '../common/datePicker.js';

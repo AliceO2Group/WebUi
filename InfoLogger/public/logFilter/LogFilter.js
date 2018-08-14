@@ -1,6 +1,29 @@
 import {Observable} from '/js/src/index.js';
 
+/**
+ * @typedef Criteria
+ * @type {object}
+ * @property {object} field - field name like pid, username, timestamp
+ * @property {string} field.operator - $match, $excluse, $since, $until, $min, $max
+ */
+
+/**
+ * @typedef Criterias
+ * @type {Array.<Criteria>}
+ */
+
+/**
+ * This class stores raw filters from user (strings) and parsed ones (like Date object).
+ * It can generate a function to filter "messages" to be used
+ * on server side.
+ * It can also import and export an object representing its internal state,
+ * this is used to save this state on ILG URL bar.
+ */
 export default class LogFilter extends Observable {
+  /**
+   * Instanciate a LogFilter with criterias reset to empty or minimal value
+   * @param {Observable} model
+   */
   constructor(model) {
     super();
 
@@ -45,7 +68,6 @@ export default class LogFilter extends Observable {
         break;
       default:
         throw new Error('unkown operator');
-        break;
     }
 
     this.notify();
@@ -60,7 +82,9 @@ export default class LogFilter extends Observable {
     const criterias = JSON.parse(JSON.stringify(this.criterias));
 
     // clean-up the whole structure
+    // eslint-disable-next-line guard-for-in
     for (let field in criterias) {
+      // eslint-disable-next-line guard-for-in
       for (let operator in criterias[field]) {
         // remote parsed properties (generated with fromJSON)
         if (operator.includes('$')) {
@@ -82,11 +106,17 @@ export default class LogFilter extends Observable {
     return criterias;
   }
 
+  /**
+   * Set criterias according to object passed as argument
+   * @param {Criterias} criterias
+   */
   fromObject(criterias) {
     this.resetCriterias();
 
     // copy values to inner filters
+    // eslint-disable-next-line guard-for-in
     for (let field in criterias) {
+      // eslint-disable-next-line guard-for-in
       for (let operator in criterias[field]) {
         this.setCriteria(field, operator, criterias[field][operator]);
       }
@@ -98,13 +128,15 @@ export default class LogFilter extends Observable {
   /**
    * Generates a function to filter a log passed as argument to it
    * Output of function is boolean.
-   * @return {Function(WebSocketMessage.<{log}>).<boolean>}
+   * @return {function.<WebSocketMessage, boolean>}
    */
   toFunction() {
-    const criterias = this.criterias;
-
-    // This function will be stringified then sent to server so it can filter logs
-    // 'DATA_PLACEHOLDER' will be replaced by the stringified filters too so the function contains de data
+    /**
+     * This function will be stringified then sent to server so it can filter logs
+     * 'DATA_PLACEHOLDER' will be replaced by the stringified filters too so the function contains de data
+     * @param {Object} message
+     * @return {boolean} true if message passes criterias
+     */
     function filterFunction(message) {
       const log = message.payload;
       const criterias = 'DATA_PLACEHOLDER';
@@ -118,9 +150,11 @@ export default class LogFilter extends Observable {
         return new Date(timestamp * 1000);
       }
 
+      // eslint-disable-next-line guard-for-in
       for (const field in criterias) {
         let logValue = log[field];
 
+        // eslint-disable-next-line guard-for-in
         for (const operator in criterias[field]) {
           let criteriaValue = criterias[field][operator];
 
@@ -130,7 +164,7 @@ export default class LogFilter extends Observable {
           }
 
           // logValue is sometime required, undefined means test fails and log is rejected
-          switch(operator) {
+          switch (operator) {
             case '$match':
               if (logValue === undefined || criteriaValue.indexOf(logValue) === -1) {
                 return false;
@@ -169,7 +203,6 @@ export default class LogFilter extends Observable {
 
             default:
               continue;
-              break;
           }
         }
       }
@@ -183,6 +216,10 @@ export default class LogFilter extends Observable {
     return functionPure;
   }
 
+  /**
+   * Reset all filters from the current LogFilter instance to there
+   * original state: empty or exclusive for other criterias.
+   */
   resetCriterias() {
     this.criterias = {
       timestamp: {
@@ -196,12 +233,6 @@ export default class LogFilter extends Observable {
         exclude: '',
         $match: null,
         $exclude: null,
-      },
-      hostname: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null
       },
       rolename: {
         match: '',

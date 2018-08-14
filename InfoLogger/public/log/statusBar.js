@@ -1,5 +1,11 @@
-import {h, icon} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 
+/**
+ * Bottom bar, showing status of the log's list and its details,
+ * some application messages and some basic options like auto-scroll checkbox.
+ * @param {Object} model
+ * @return {vnode}
+ */
 export default (model) => [
   h('.flex-row', [
     h('.w-50', statusLogs(model)),
@@ -31,10 +37,21 @@ const statusLogs = (model) => model.servicesResult.match({
   Failure: () => h('span.danger', 'Unable to load services'),
 });
 
+/**
+ * Application message, could be deprecated when notification is implemented
+ * @param {Object} model
+ * @return {vnode}
+ */
 const applicationMessage = (model) => model.log.list.length > model.log.applicationLimit
- ? h('span.danger', `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `)
- : null;
+  ? h('span.danger', `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `)
+  : null;
 
+/**
+ * Show some application preferences: auto-scroll and inspector checkboxes
+ * (could be evolve into a preference panel in the future if more options are added)
+ * @param {Object} model
+ * @return {vnode}
+ */
 const applicationOptions = (model) => [
   h('label.d-inline', {title: 'Scroll down in live mode on new log incoming'}, h('input', {
     type: 'checkbox',
@@ -49,14 +66,32 @@ const applicationOptions = (model) => [
   }), ' Inspector'),
 ];
 
-const statusQuery = (model, result) => [
-  `(loaded out of ${result.total}${result.more ? '+' : ''} in ${(result.time / 1000).toFixed(2)} second${(result.time / 1000) >= 2 ? 's' : ''})`,
-];
+/**
+ * Status for query mode, showing how many logs are really in DB and how much time it took to load it
+ * @param {Object} model
+ * @param {Object} result - raw query result from server with its meta data
+ * @return {vnode}
+ */
+const statusQuery = (model, result) => `\
+(loaded out of ${result.total}${result.more ? '+' : ''} \
+in ${(result.time / 1000).toFixed(2)} second${(result.time / 1000) >= 2 ? 's' : ''})\
+`;
 
+/**
+ * Status of live mode with hostname of streaming source and date it started
+ * @param {Object} model
+ * @param {Object} services - service discovery information of what is enabled in this ILG instance
+ * @return {vnode}
+ */
 const statusLive = (model, services) => [
   `(Connected to ${services.streamHostname} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`
 ];
 
+/**
+ * Status of the log's list (independant of mode): how many global and how many per severity
+ * @param {Object} model
+ * @return {vnode}
+ */
 const statusStats = (model) => [
   h('span.ph2', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
   h('span.ph2.severity-i', `${model.log.stats.info} info`),

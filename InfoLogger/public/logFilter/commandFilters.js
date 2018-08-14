@@ -1,42 +1,84 @@
 import {h} from '/js/src/index.js';
 
+/**
+ * Filtering main options, in toolbar, top-right.
+ * - severity
+ * - level
+ * - limit
+ * - reset
+ * @param {Object} model
+ * @return {vnode}
+ */
 export default (model) => [
   h('.btn-group', [
-    h('button.btn', {
-      className: !model.log.filter.criterias.severity.match ? 'active' : '',
-      onclick: () => model.log.setCriteria('severity', 'match', ''),
-      title: 'Match severity info, warnings, errors and fatals (= all logs)'
-    }, 'Info'),
-    h('button.btn', {
-      className: model.log.filter.criterias.severity.match === 'W E F' ? 'active' : '',
-      onclick: () => model.log.setCriteria('severity', 'match', 'W E F'),
-      title: 'Match severity warnings, errors and fatals'
-    }, 'Warn'),
-    h('button.btn', {
-      className: model.log.filter.criterias.severity.match === 'E F' ? 'active' : '',
-      onclick: () => model.log.setCriteria('severity', 'match', 'E F'),
-      title: 'Match severity errors and fatals'
-    }, 'Error'),
-    h('button.btn', {
-      className: model.log.filter.criterias.severity.match === 'F' ? 'active' : '',
-      onclick: () => model.log.setCriteria('severity', 'match', 'F'),
-      title: 'Match severity only fatals'
-    }, 'Fatal'),
+    buttonSeverity(model, 'Info', 'Match severity info, warnings, errors and fatals (= all logs)', ''),
+    buttonSeverity(model, 'Warn', 'Match severity warnings, errors and fatals', 'W E F'),
+    buttonSeverity(model, 'Error', 'Match severity errors and fatals', 'E F'),
+    buttonSeverity(model, 'Fatal', 'Match severity only fatals', 'F'),
   ]),
   h('span.mh3'),
   h('.btn-group', [
-    h('button.btn', {className: model.log.filter.criterias.level.max === 1 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 1), title: 'Filter level ≤ 1'}, 'Shift'),
-    h('button.btn', {className: model.log.filter.criterias.level.max === 6 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 6), title: 'Filter level ≤ 6'}, 'Oncall'),
-    h('button.btn', {className: model.log.filter.criterias.level.max === 11 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 11), title: 'Filter level ≤ 11'}, 'Devel'),
-    h('button.btn', {className: model.log.filter.criterias.level.max === 21 ? 'active' : '', onclick: () => model.log.setCriteria('level', 'max', 21), title: 'Filter level ≤ 21'}, 'Debug'),
+    buttonFilterLevel(model, 'Shift', 1),
+    buttonFilterLevel(model, 'Oncall', 6),
+    buttonFilterLevel(model, 'Devel', 11),
+    buttonFilterLevel(model, 'Debug', 21),
   ]),
   h('span.mh3'),
   h('.btn-group', [
-    h('button.btn', {className: model.log.limit === 1000 ? 'active' : '', onclick: () => model.log.setLimit(1000), title: 'Keep only 1k logs in the view'}, '1k'),
-    h('button.btn', {className: model.log.limit === 10000 ? 'active' : '', onclick: () => model.log.setLimit(10000), title: 'Keep only 10k logs in the view'}, '10k'),
-    h('button.btn', {className: model.log.limit === 100000 ? 'active' : '', onclick: () => model.log.setLimit(100000), title: 'Keep only 100k logs in the view'}, '100K'),
+    buttonLogLimit(model, '1k', 1000),
+    buttonLogLimit(model, '10k', 10000),
+    buttonLogLimit(model, '100k', 100000),
   ]),
   h('span.mh3'),
-  h('button.btn', {onclick: () => model.log.filter.resetCriterias(), title: 'Reset date, time, matches, excludes, log levels'}, 'Reset filters'),
+  buttonReset(model),
 ];
 
+/**
+ * Makes a button to set severity
+ * @param {Object} model
+ * @param {string} label - button's label
+ * @param {string} title - button's title on mouse over
+ * @param {string} value - a char to represent severity: W E F or I, can be many with spaces like 'W E'
+ * @return {vnode}
+ */
+const buttonSeverity = (model, label, title, value) => h('button.btn', {
+  className: model.log.filter.criterias.severity.match === value ? 'active' : '',
+  onclick: () => model.log.setCriteria('severity', 'match', value),
+  title: title
+}, label);
+
+/**
+ * Makes a button to set filtering level (shifter, debug, etc) with number
+ * @param {Object} model
+ * @param {string} label - button's label
+ * @param {number} value - maximum level of filtering, from 1 to 21
+ * @return {vnode}
+ */
+const buttonFilterLevel = (model, label, value) => h('button.btn', {
+  className: model.log.filter.criterias.level.max === value ? 'active' : '',
+  onclick: () => model.log.setCriteria('level', 'max', value),
+  title: `Filter level ≤ ${value}`
+}, label);
+
+/**
+ * Makes a button to set log limit, maximum logs in memory
+ * @param {Object} model
+ * @param {string} label - button's label
+ * @param {number} limit - how much logs to keep in memory
+ * @return {vnode}
+ */
+const buttonLogLimit = (model, label, limit) => h('button.btn', {
+  className: model.log.limit === limit ? 'active' : '',
+  onclick: () => model.log.setLimit(limit),
+  title: `Keep only ${label} logs in the view`
+}, label);
+
+/**
+ * Makes a button to reset filters
+ * @param {Object} model
+ * @return {vnode}
+ */
+const buttonReset = (model) => h('button.btn', {
+  onclick: () => model.log.filter.resetCriterias(),
+  title: 'Reset date, time, matches, excludes, log levels'
+}, 'Reset filters');
