@@ -6,11 +6,21 @@ import appHeader from './common/appHeader.js';
 import sidebar from './common/sidebar.js';
 
 // Page specific views (contents and headers)
-import {content as rolesContent, header as rolesHeader} from './role/rolesPage.js';
-import {content as environmentsContent, header as environmentsHeader} from './environment/environmentsPage.js';
-import {content as environmentContent, header as environmentHeader} from './environment/environmentPage.js';
-import {content as newEnvironmentContent, header as newEnvironmentHeader} from './environment/newEnvironmentPage.js';
-import {content as statusContent, header as statusHeader} from './status/statusPage.js';
+import {
+  content as rolesContent,
+  header as rolesHeader} from './role/rolesPage.js';
+import {
+  content as environmentsContent,
+  header as environmentsHeader} from './environment/environmentsPage.js';
+import {
+  content as environmentContent,
+  header as environmentHeader} from './environment/environmentPage.js';
+import {
+  content as newEnvironmentContent,
+  header as newEnvironmentHeader} from './environment/newEnvironmentPage.js';
+import {
+  content as statusContent,
+  header as statusHeader} from './status/statusPage.js';
 
 /**
  * Main view layout

@@ -1,4 +1,4 @@
-/* eslint max-len:0 */
+/* eslint max-len:0, require-jsdoc:0 */
 import {h} from './index.js';
 
 // SVG icon wrapper

@@ -84,6 +84,9 @@ module.exports.attachTo = (http, ws) => {
     broadcastPadState();
   });
 
+  /**
+   * Send to all users state of Pad via Websocket
+   */
   const broadcastPadState = () => {
     const msg = new WebSocketMessage();
     msg.command = 'padlock-update';
