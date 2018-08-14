@@ -5,11 +5,16 @@ const InfoLoggerSender = require('./InfoLoggerSender.js');
 let winston = null;
 let infologger = null;
 
+/**
+ * Handles loging, prints out in console, saves to file or sends to cerntral InfoLogger instance
+ * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
+ */
 class Log {
 
+  
   constructor(label = null) {
     this.label = label;
-    if (!winston) { 
+    if (!winston) {
       winston = new Winston();
       winston.instance.warn('Created default instance of logger');
     }
