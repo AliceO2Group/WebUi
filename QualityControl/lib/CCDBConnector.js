@@ -1,5 +1,5 @@
 const http = require('http');
-const {log} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControlCCDB');
 
 /**
  * Gateway for all CCDB calls
@@ -34,6 +34,12 @@ class CCDBConnector {
    * @return {Promise.<Array.<Object>, Error>}
    */
   async listObjects() {
+    /**
+     * Transforms objects received from CCDB to a QCG normalized one
+     * with additional verification of content
+     * @param {Object} item - from CCDB
+     * @return {Object} to QCG use
+     */
     const itemTransform = (item) => {
       if (!item.path) {
         log.warn(`CCDB returned an empty ROOT object path, ignoring`);
@@ -46,7 +52,19 @@ class CCDBConnector {
 
       return {name: item.path};
     };
+
+    /**
+     * Filter predicate to allow only non-null values
+     * @param {Any} item
+     * @return {boolean}
+     */
     const itemFilter = (item) => !!item;
+    /**
+     * Clean objects'list from CCDB and check content before giving to QCG
+     * wrong paths are checked and empty items are removed
+     * @param {Array.<Object>} result - from CCDB
+     * @return {Array.<Object>}
+     */
     const listTransform = (result) => result.objects.map(itemTransform).filter(itemFilter);
     return this.httpGetJson('/latest/.*').then(listTransform);
   }
@@ -68,6 +86,11 @@ class CCDBConnector {
         }
       };
 
+      /**
+       * Generic handler for client http requests,
+       * buffers response, checks status code and parses JSON
+       * @param {Response} response
+       */
       const requestHandler = (response) => {
         if (response.statusCode < 200 || response.statusCode > 299) {
           reject(new Error('Non-2xx status code: ' + response.statusCode));
