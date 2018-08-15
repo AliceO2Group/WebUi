@@ -3,7 +3,7 @@ const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('grpc');
 const path = require('path');
 
-const {log} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('ControlProxy');
 
 const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
 const TIMEOUT_READY = 2000; // ms, time to stop waiting for a connection between client and server
