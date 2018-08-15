@@ -1,9 +1,10 @@
 const assert = require('assert');
 const fs = require('fs');
-const log = require('./../log/log.js');
+const Log = require('./../log/Log.js');
 const config = require('./../config-default.json');
 const process = require('process');
-const {InfoLoggerSender, InfoLoggerReceiver} = require('./../log/log.js');
+const InfoLoggerSender = require('./../log/InfoLoggerSender.js');
+const InfoLoggerReceiver = require('./../log/InfoLoggerReceiver.js');
 
 const configLocal = {
   winston: {
@@ -15,8 +16,9 @@ const configLocal = {
 
 describe('Logging: winston', () => {
   it('Generate error file (winston)', (done) => {
-    log.configure(configLocal);
-    log.error('Test error winston');
+    Log.configure(configLocal);
+    const logger = new Log('test-winston');
+    logger.error('Test error winston');
     setTimeout(() => {
       assert.ok(fs.existsSync('./error.log'));
       done();
@@ -26,9 +28,10 @@ describe('Logging: winston', () => {
 
 describe('Logging: InfoLogger', () => {
   it('Fail on instance creation', (done) => {
-    log.configure(config.log);
+    Log.configure(config.log);
+    const logger = new Log('test-infologger');
     setTimeout(() => {
-      log.error('Test error InfoLogger');
+      logger.error('Test error InfoLogger');
       done();
     }, 100);
   });

@@ -1,6 +1,6 @@
 const WebSocketServer = require('ws').Server;
 const url = require('url');
-const log = require('./../log/log.js');
+const log = new (require('./../log/Log.js'))('WebSocket');
 const WebSocketMessage = require('./message.js');
 
 /**
@@ -20,7 +20,7 @@ class WebSocket {
     this.http = httpsServer;
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
-    log.info('WebSocket server started');
+    log.info('Server started');
     this.callbackArray = [];
     this.bind('filter', (message) => {
       return new WebSocketMessage(200).setCommand(message.getCommand());
@@ -44,7 +44,7 @@ class WebSocket {
    */
   bind(name, callback) {
     if (this.callbackArray.hasOwnProperty(name)) {
-      throw Error('WebSocket callback already exists.');
+      throw Error('Callback already exists.');
     }
     this.callbackArray[name] = callback;
   }
@@ -61,7 +61,7 @@ class WebSocket {
         .then((data) => {
           // 2. Transfer decoded JWT data to request
           Object.assign(req, data);
-          log.debug(`${data.id}: command [${req.getCommand()}] processing`);
+          log.debug(`ID ${data.id} processing "${req.getCommand()}"`);
           // 3. Check whether callback exists
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
             const res = this.callbackArray[req.getCommand()](req);
@@ -99,9 +99,9 @@ class WebSocket {
         client.on('message', (message) => this.onmessage(message, client));
         client.on('close', () => this.onclose());
         client.on('pong', () => client.isAlive = true);
-        client.on('error', (err) => log.error(`WebSocket - Connection ${err.code}`));
+        client.on('error', (err) => log.error(`Connection ${err.code}`));
       }, (error) => {
-        log.warn(`WebSocket - ${error.name} : ${error.message}`);
+        log.warn(`${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -127,19 +127,19 @@ class WebSocket {
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              log.debug(`WebSocket - [${response.getCommand()}/${response.getCode()}] sent`);
+              log.debug(`Sent ${response.getCommand()}/${response.getCode()}`);
               // 5. Send back to a client
               client.send(JSON.stringify(response.json));
             }
           }, (response) => {
             // 6. If generating response fails
-            throw new Error(`Websocket - processRequest failed: ${response.message}`);
+            throw new Error(`Processing request failed: ${response.message}`);
           });
       }, (failed) => {
         // 7. If parsing message fails
         client.send(JSON.stringify(failed.json));
       }).catch((error) => {
-        log.warn(`WebSocket - ${error.name} : ${error.message}`);
+        log.warn(`${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -164,7 +164,7 @@ class WebSocket {
    * @param {object} client - disconnected client
    */
   onclose() {
-    log.info('WebSocket - disconnected');
+    log.info('Client disconnected');
   }
 
   /**
@@ -186,7 +186,7 @@ class WebSocket {
       }
       client.send(JSON.stringify(message.json));
     });
-    log.debug(`WebSocket - [${message.getCommand()}/${message.getCode()}] broadcast`);
+    log.debug(`Broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
 module.exports = WebSocket;
