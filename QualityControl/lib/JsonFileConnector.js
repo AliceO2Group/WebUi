@@ -1,4 +1,4 @@
-const {log} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControlJson');
 const fs = require('fs');
 const path = require('path');
 

@@ -1,5 +1,6 @@
-const {log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
+const {Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
+const log = new Log('QualityControl');
 
 // Load data source (demo or DB)
 const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');

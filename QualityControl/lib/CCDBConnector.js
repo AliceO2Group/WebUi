@@ -1,5 +1,5 @@
 const http = require('http');
-const {log} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControlCCDB');
 
 /**
  * Gateway for all CCDB calls
