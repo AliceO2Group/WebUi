@@ -1,4 +1,4 @@
-import {h, switchCase, frameDebouncer} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 
 import tableFilters from './logFilter/tableFilters.js';
 import commandFilters from './logFilter/commandFilters.js';
@@ -25,7 +25,9 @@ export default (model) => h('.flex-column absolute-fill', [
     ]),
   ]),
   h('div.flex-grow.flex-row.shadow-level0.logs-container', [
-    h('main.flex-grow.flex-column.transition-background-color', {className: (model.log.queryResult.isLoading()) ? 'bg-gray' : ''}, [
+    h('main.flex-grow.flex-column.transition-background-color', {
+      className: (model.log.queryResult.isLoading()) ? 'bg-gray' : ''
+    }, [
       // table fixed header
       tableLogsHeader(model),
 

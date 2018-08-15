@@ -1,8 +1,16 @@
-/* global: moment */
+/* global moment */
 
 import {Observable} from '/js/src/index.js';
 
+/**
+ * Parses inputs from user and format datetimes to timzeone selected
+ * @param {Object} model
+ * @return {vnode}
+ */
 export default class Timezone extends Observable {
+  /**
+   * Instanciate with timezone to Geneva (Europe/Zurich)
+   */
   constructor() {
     super();
 
@@ -10,12 +18,18 @@ export default class Timezone extends Observable {
     this.local = false;
   }
 
+  /**
+   * Set timezone to Geneva
+   */
   setGeneva() {
     this.current = 'Europe/Zurich';
     this.local = false;
     this.notify();
   }
 
+  /**
+   * Set timezone to local (user's PC)
+   */
   setLocal() {
     this.current = moment.tz.guess(); // might be Geneva!
     this.local = true;
@@ -24,7 +38,18 @@ export default class Timezone extends Observable {
 
   /**
    * Parse a human date string and returns a javascript Date, default date is now
-   * @param {string} human date - Eg: -5m means five minutes ago
+   * See datePicker.js for allowed inputs
+   * [DD/[MM[/YYYY]]] = > absolute day midnight
+   * [hh:[mm[:ss[.mmm]]] = > absolute time
+   * [N]d] => relative days
+   * [N]h] => relative hours
+   * [N]m] => relative minutes
+   * [N]s] => relative seconds
+   * 2/9/12 => 20:00 2nd Septembre 2012, 8pm
+   * 2/ 20: => 2nd of this month, 8pm
+   * 1d 6:00 => yesterday at 6am
+   * 5m => five minutes ago
+   * @param {string} humanString - Eg: "-5m" means five minutes ago
    * @param {string} tz - optional timezone
    * @return {date} the parsed date or null if empty
    */
@@ -107,7 +132,6 @@ export default class Timezone extends Observable {
     for (let i = 0, relative; relative = relatives[i]; i++) {
       const regResult = relative.reg.exec(humanString);
       if (regResult) {
-
         const sign = regResult[1]; // sign is mandatory
         const number = parseInt(regResult[2] || 1, 10); // empty means one in human language
 

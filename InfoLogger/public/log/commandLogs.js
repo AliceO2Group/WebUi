@@ -9,23 +9,44 @@ export default (model) => [
   ' ',
   h('button.btn', {onclick: () => model.log.empty()}, 'Clear'),
   h('span.mh3'),
-  h('button.btn', {disabled: !model.log.list.length, onclick: () => model.log.firstError(), title: 'Go to first error/fatal (ALT + left arrow)'}, '|←'),
+  h('button.btn', {
+    disabled: !model.log.list.length,
+    onclick: () => model.log.firstError(),
+    title: 'Go to first error/fatal (ALT + left arrow)'
+  }, '|←'),
   ' ',
-  h('button.btn', {disabled: !model.log.list.length, onclick: () => model.log.previousError(), title: 'Go to previous error/fatal (left arrow)'}, '←'),
+  h('button.btn', {
+    disabled: !model.log.list.length,
+    onclick: () => model.log.previousError(),
+    title: 'Go to previous error/fatal (left arrow)'
+  }, '←'),
   ' ',
-  h('button.btn', {disabled: !model.log.list.length, onclick: () => model.log.nextError(), title: 'Go to next error/fatal (left arrow)'}, '→'),
+  h('button.btn', {
+    disabled: !model.log.list.length,
+    onclick: () => model.log.nextError(),
+    title: 'Go to next error/fatal (left arrow)'
+  }, '→'),
   ' ',
-  h('button.btn', {disabled: !model.log.list.length, onclick: () => model.log.lastError(), title: 'Go to last error/fatal (ALT + right arrow)'}, '→|'),
+  h('button.btn', {
+    disabled: !model.log.list.length,
+    onclick: () => model.log.lastError(),
+    title: 'Go to last error/fatal (ALT + right arrow)'
+  }, '→|'),
   ' ',
 ];
 
+/**
+ * Button dropdown to show current user and logout link
+ * @param {Object} model
+ * @return {vnode}
+ */
 const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
   h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
   h('.dropdown-menu', [
     h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
     model.session.personid === 0 // anonymous user has id 0
-     ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-     : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+      ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
+      : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
   ]),
 ]);
 
@@ -34,6 +55,8 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
  * - services lookup
  * - services result
  * - query lookup
+ * @param {Object} model
+ * @return {vnode}
  */
 const queryButton = (model) => h('button.btn.btn-primary', model.servicesResult.match({
   NotAsked: () => ({disabled: true}),
@@ -53,6 +76,8 @@ const queryButton = (model) => h('button.btn.btn-primary', model.servicesResult.
  * - services result
  * - query lookup
  * - websocket status
+ * @param {Object} model
+ * @return {vnode}
  */
 const liveButton = (model) => h('button.btn.btn-primary', model.servicesResult.match({
   NotAsked: () => ({disabled: true}),
