@@ -1,4 +1,6 @@
-const log = new (require('@aliceo2/web-ui').Log)('ControlConfig');
+const {Log} = require('@aliceo2/web-ui');
+const log = new Log('ControlConfig');
+
 const fs = require('fs');
 const path = require('path');
 
