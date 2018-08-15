@@ -19,7 +19,7 @@ if (process.argv.length >= 3 && /\.js$/.test(process.argv[2])) {
 try {
   configFile = fs.realpathSync(configFile);
 } catch (err) {
-  Log.trace(`Unable to read config file: ${err.message}`);
+  log.error(`Unable to read config file: ${err.message}`);
   process.exit(1);
 }
 
