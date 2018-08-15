@@ -12,4 +12,13 @@ module.exports = {
     port: 9090,
     timeout: 20000, // ms, gRPC deadline for service calls
   },
+
+  // JWT manages user's session duration
+  // https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/json-tokens.md
+  jwt: {
+    secret: '<secret>',
+    issuer: 'alice-o2-gui',
+    expiration: '1d',
+    maxAge: '1d'
+  },
 };
