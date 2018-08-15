@@ -5,6 +5,10 @@ const log = new Log('QualityControl');
 // Load data source (demo or DB)
 const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
 
+/**
+ * Adds paths and binds websocket to instance of HttpServer passed
+ * @param {HttpServer} http
+ */
 module.exports.setup = (http) => {
   http.get('/readObjectData', readObjectData, {public: true});
   http.post('/readObjectsData', readObjectsData);
@@ -53,7 +57,11 @@ function readObjectsData(req, res) {
     objectsNames = [objectsNames];
   }
 
-  // Retrieve data, in case of error or not found, put message on 'error' field
+  /**
+   * Retrieves data or provides {error} object on failure
+   * @param {Object} name - name path of object and its agent
+   * @return {Promise.<Object>}
+   */
   const safeRetriever = (name) => model.readObjectData(name)
     .then((data) => !data ? {error: 'Object not found'} : data)
     .catch((err) => ({error: err}));
