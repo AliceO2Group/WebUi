@@ -6,7 +6,7 @@ const MySQLConnector = require('./MySQLConnector.js');
 const AMOREConnector = require('./AMOREConnector.js');
 const JsonFileConnector = require('./JsonFileConnector.js');
 
-const {log} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 
 // --------------------------------------------------------
 // Initialization of model according to config file

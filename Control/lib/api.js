@@ -1,4 +1,5 @@
-const {log, WebSocketMessage} = require('@aliceo2/web-ui');
+const {WebSocketMessage} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 const Padlock = require('./Padlock.js');
 const ControlProxy = require('./ControlProxy.js');
