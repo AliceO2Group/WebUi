@@ -1,7 +1,7 @@
-const {log, WebSocketMessage} = require('@aliceo2/web-ui');
+const {Log, WebSocketMessage, InfoLoggerReceiver} = require('@aliceo2/web-ui');
+const log = new Log('InfoLogger');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
-const InfoLoggerReceiver = log.InfoLoggerReceiver;
 
 let querySource = null;
 let liveSource = null;

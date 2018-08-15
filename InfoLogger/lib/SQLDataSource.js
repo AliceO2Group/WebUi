@@ -1,4 +1,5 @@
-const {log, MySQL} = require('@aliceo2/web-ui');
+const {MySQL} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('InfoLoggerSQLSource');
 
 module.exports = class SQLDataSource {
   /**
