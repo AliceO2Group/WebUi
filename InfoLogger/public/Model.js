@@ -153,6 +153,9 @@ export default class Model extends Observable {
       this.log.addLog(message.payload);
       return;
     }
+    if (message.command === 'il-server-close') {
+      alert(`Connection between backend and InfoLogger server has been lost`);
+    }
   }
 
   /**
