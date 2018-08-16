@@ -182,7 +182,7 @@ class WebSocket {
             return; // don't send
           }
         } catch (error) {
-          log.error(`Client's filter  corrupted, skipping broadcast: ${error}`);
+          log.error(`Client's filter corrupted, skipping broadcast: ${error}`);
           return; // don't send
         }
       }
@@ -192,7 +192,7 @@ class WebSocket {
   }
 
   /**
-   * Boardcase messges to all connected clients
+   * Broadcasts messges to all connected clients.
    * @param {string} message
    */
   unfilteredBroadcast(message) {
