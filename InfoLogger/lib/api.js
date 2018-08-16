@@ -56,7 +56,9 @@ module.exports.attachTo = (http, ws) => {
     });
 
     liveSource.on('close', () => {
-      ws.boradcast(new WebSocketMessage().setCommand('close'));
+      const msg = new WebSocketMessage();
+      msg.command = 'il-server-close';
+      ws.unfilteredBroadcast(msg);
     });
   }
 };
