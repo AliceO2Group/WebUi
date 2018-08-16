@@ -7,7 +7,7 @@
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "mocha": "mocha --exit test/mocha-*"
   },
   "author": "Vladimir Kosmala",
