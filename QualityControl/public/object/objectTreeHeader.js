@@ -1,12 +1,21 @@
 import {h} from '/js/src/index.js';
 import {iconProject} from '/js/src/icons.js';
 
+/**
+ * Shows header for the objects tree page, buttons allow to open/close the entire tree,
+ * filter only 'online' objects thanks to information service and a search input allow to filter
+ * by name.
+ * @param {Object} model
+ * @return {vnode}
+ */
 export default function objectTreeHeader(model) {
   if (!model.object.list) {
     return null;
   }
 
-  const howMany = model.object.searchInput ? `${model.object.searchResult.length} found of ${model.object.list.length}` : `${model.object.list.length} items`;
+  const howMany = model.object.searchInput
+    ? `${model.object.searchResult.length} found of ${model.object.list.length}`
+    : `${model.object.list.length} items`;
 
   return [
     h('.w-50.text-center', [
@@ -17,13 +26,22 @@ export default function objectTreeHeader(model) {
     h('.flex-grow.text-right', [
       model.object.onlineModeAvailable && h('button.btn', {
         title: 'Toggle online / offline mode',
-        onclick: e => model.object.toggleMode(),
+        onclick: () => model.object.toggleMode(),
         class: (model.object.onlineMode ? 'active' : '')
       }, 'Online'),
       ' ',
-      h('button.btn', {title: 'Open or close whole tree', onclick: e => model.object.tree.toggleAll(), disabled: !!model.object.searchInput}, iconProject()),
+      h('button.btn', {
+        title: 'Open or close whole tree',
+        onclick: () => model.object.tree.toggleAll(),
+        disabled: !!model.object.searchInput
+      }, iconProject()),
       ' ',
-      h('input.form-control.form-inline.mh1.w-33', {placeholder: 'Search', type: 'text', value: model.object.searchInput, oninput: (e) => model.object.search(e.target.value)})
+      h('input.form-control.form-inline.mh1.w-33', {
+        placeholder: 'Search',
+        type: 'text',
+        value: model.object.searchInput,
+        oninput: (e) => model.object.search(e.target.value)
+      })
     ]),
   ];
 }

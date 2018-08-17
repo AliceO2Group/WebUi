@@ -1,5 +1,10 @@
 import {h} from '/js/src/index.js';
 
+/**
+ * Form too edit properties of an object, this fits well inside the sidebar
+ * @param {Object} model
+ * @return {vnode}
+ */
 export default function objectPropertiesSidebar(model) {
   const tabObject = model.layout.editingTabObject;
 
@@ -56,6 +61,14 @@ export default function objectPropertiesSidebar(model) {
   ]);
 }
 
+/**
+ * Shows a button to change size width and height e.g.: "1x3"
+ * @param {Object} model
+ * @param {Object} tabObject - the tabOject to be changed
+ * @param {number} width - size the button will handle
+ * @param {number} height - size the button will handle
+ * @return {vnode}
+ */
 const btnSize = (model, tabObject, width, height) => h('.form-check.w-33', [
   h('input.form-check-input', {
     type: 'radio',
@@ -66,6 +79,13 @@ const btnSize = (model, tabObject, width, height) => h('.form-check.w-33', [
   h('label', {for: tabObject.id + width + height}, `${width}x${height}`)
 ]);
 
+/**
+ * Shows a button to toggle a jsroot option like grid or scale
+ * @param {Object} model
+ * @param {Object} tabObject - the tabOject to be changed
+ * @param {string} option - jsroot option
+ * @return {vnode}
+ */
 const btnOption = (model, tabObject, option) => h('.form-check.w-33', [
   h('input.form-check-input', {
     type: 'checkbox',

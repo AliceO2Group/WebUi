@@ -1,10 +1,16 @@
-/* global: JSROOT */
+/* global JSROOT */
 
-import {Observable, fetchClient, WebSocketClient, RemoteData} from '/js/src/index.js';
+import {Observable, fetchClient, RemoteData} from '/js/src/index.js';
 
-import ObjectTree from './ObjectTree.class.js'
-
+import ObjectTree from './ObjectTree.class.js';
+/**
+ * Model namespace for all about QC's objects (not javascript objects)
+ */
 export default class Object_ extends Observable {
+  /**
+   * Initialize model with empty values
+   * @param {Object} model
+   */
   constructor(model) {
     super();
 
@@ -40,7 +46,7 @@ export default class Object_ extends Observable {
   /**
    * Set IS data
    * {DAQ01/EquipmentSize/ACORDE/ACORDE: {}, DAQ01/EquipmentSize/ITSSDD/ITSSDD: {},…}
-   * @param {Map<path:string, object>} informationService
+   * @param {Object.<string, object>} informationService - key is an object name (A/B/C)
    */
   setInformationService(informationService) {
     this.informationService = informationService;
@@ -49,6 +55,13 @@ export default class Object_ extends Observable {
     this.notify();
   }
 
+  /**
+   * Computes the final list of objects to be seen by user depending on those factors:
+   * - online filter enabled
+   * - online objects according to information service
+   * - search input from user
+   * If any of those changes, this method should be called to update the outputs.
+   */
   _computeFilters() {
     if (this.onlineMode && this.tree && this.informationService) {
       this.tree.clearAllIS();
@@ -62,12 +75,15 @@ export default class Object_ extends Observable {
     if (this.searchInput) {
       const listSource = (this.onlineMode ? this.listOnline : this.list) || []; // with fallback
       const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
-      this.searchResult = listSource.filter(item => {
+      this.searchResult = listSource.filter((item) => {
         return item.name.match(fuzzyRegex);
       });
     }
   }
 
+  /**
+   * Ask server for all available objects, fills `tree` of objects
+   */
   async loadList() {
     const req = fetchClient(`/api/listObjects`, {method: 'GET'});
     this.model.loader.watchPromise(req);
@@ -89,7 +105,6 @@ export default class Object_ extends Observable {
    * Load full content of an object in-memory, do nothing if already in.
    * Also adds a reference to this object.
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
-   * @return {Promise}
    */
   async loadObject(objectName) {
     if (!this.objectsReferences[objectName]) {
@@ -104,11 +119,12 @@ export default class Object_ extends Observable {
     const {result, ok, status} = await this.model.loader.get(`/api/readObjectData?objectName=${objectName}`);
     if (ok) {
       // link JSROOT methods to object
-      this.objects[objectName] = RemoteData.Success(JSROOT.JSONR_unref(result));
+      // eslint-disable-next-line
+      this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result));
     } else if (status === 404) {
-      this.objects[objectName] = RemoteData.Failure('Object not found');
+      this.objects[objectName] = RemoteData.failure('Object not found');
     } else {
-      this.objects[objectName] = RemoteData.Failure(result.error);
+      this.objects[objectName] = RemoteData.failure(result.error);
     }
 
     this.notify();
@@ -116,25 +132,27 @@ export default class Object_ extends Observable {
 
   /**
    * Reload currently used objects which have a number of references greater or equal to 1
+   * @param {Array.<string>} objectsNames - e.g. /FULL/OBJECT/PATH
    */
   async loadObjects(objectsNames) {
     if (!objectsNames || !objectsNames.length) {
       return;
     }
 
-    const {result, ok, status} = await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
+    const {result, ok} = await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
     if (!ok) {
       // it should be always status=200 for this request
       alert('Failed to refresh plots when contacting server');
       return;
     }
 
+    // eslint-disable-next-line
     const objects = JSROOT.JSONR_unref(result);
     for (let name in objects) {
       if (objects[name].error) {
-        this.objects[name] = RemoteData.Failure(objects[name].error);
+        this.objects[name] = RemoteData.failure(objects[name].error);
       } else {
-        this.objects[name] = RemoteData.Success(objects[name]);
+        this.objects[name] = RemoteData.success(objects[name]);
       }
     }
 
@@ -162,10 +180,15 @@ export default class Object_ extends Observable {
    * @param {string} name - name of the object
    */
   invalidObject(name) {
-    this.objects[name] = RemoteData.Failure('JSROOT was unable to draw this object');
+    this.objects[name] = RemoteData.failure('JSROOT was unable to draw this object');
     this.notify();
   }
 
+  /**
+   * Set the interval to update objects currently loaded and shown to user,
+   * this will reload only data associated to them
+   * @param {number} intervalSeconds - in seconds
+   */
   setRefreshInterval(intervalSeconds) {
     // Stop any other timer
     clearTimeout(this.refreshTimer);
@@ -178,7 +201,9 @@ export default class Object_ extends Observable {
 
     // Start new timer
     this.refreshInterval = intervalSeconds;
-    this.refreshTimer = setTimeout(() => {this.setRefreshInterval(this.refreshInterval);}, this.refreshInterval * 1000);
+    this.refreshTimer = setTimeout(() => {
+      this.setRefreshInterval(this.refreshInterval);
+    }, this.refreshInterval * 1000);
     this.notify();
 
     // Refreshed currently seen objects
@@ -188,11 +213,19 @@ export default class Object_ extends Observable {
     // interpret new cycle when this number changes
   }
 
+  /**
+   * Set the current selected object by user
+   * @param {Object} object
+   */
   select(object) {
     this.selected = object;
     this.notify();
   }
 
+  /**
+   * Set the current user search string and compute next visible list of objects
+   * @param {string} searchInput
+   */
   search(searchInput) {
     this.searchInput = searchInput;
     this._computeFilters();

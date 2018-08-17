@@ -82,7 +82,7 @@ class CCDBConnector {
         path: path,
         method: 'GET',
         headers: {
-          'Accept': 'application/json'
+          Accept: 'application/json'
         }
       };
 
