@@ -46,7 +46,17 @@ describe('Control', function () {
       },
       getEnvironments(call, callback) {
         calls['getEnvironments'] = true;
-        callback(null, {fakeData: 1});
+        const responseData = {
+          frameworkId: '74917838-27cb-414d-bfcd-7e74f85d4926-0000',
+          environments:[
+            {
+              id: '6f6d6387-6577-11e8-993a-f07959157220',
+              createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
+              state: 'CONFIGURED',
+            }
+          ]
+        };
+        callback(null, responseData);
       },
       getRoles(call, callback) {
         calls['getRoles'] = true;
