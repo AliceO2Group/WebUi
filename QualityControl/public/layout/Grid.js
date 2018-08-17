@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export default function GridList(items, options) {
   /**
    * A GridList manages the two-dimensional positions from a list of items,

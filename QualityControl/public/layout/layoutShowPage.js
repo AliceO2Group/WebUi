@@ -5,32 +5,43 @@ import {iconArrowLeft, iconArrowTop} from '/js/src/icons.js';
 const cellHeight = 100 / 3 * 0.95; // %, put some margin at bottom to see below
 const cellWidth = 100 / 3; // %
 
-/*
-LayoutShow is composed of:
-- 1 canvasView
-- 1 subcanvasView
-- N chartView
-*/
+/**
+ * Exposes the page that shows one layout and its tabs (one at a time), this page can be in edit mode
+ * LayoutShow is composed of:
+ * - 1 main view function (the page itself)
+ * - 1 subcanvasView to bind listeners and set a fixed height of page to allow dragging inside free space
+ * - N chartView, one per chart with jsroot inside
+ * @param {Object} model
+ * @return {vnode}
+ */
+export default (model) => h('.scroll-y.absolute-fill.bg-gray-light', {id: 'canvas'}, subcanvasView(model));
 
-export default function canvasView(model) {
-  return h('.scroll-y.absolute-fill.bg-gray-light', {id: 'canvas'}, subcanvasView(model));
-}
+/**
+ * Simple placeholder when the layout is empty
+ * @param {Object} model
+ * @return {vnode}
+ */
+const emptyListViewMode = (model) => h('.m4', [
+  h('h1', 'Empty list'),
+  h('p', 'Owner can edit this tab to add objects to see.')
+]);
 
-function emptyListViewMode(model) {
-  return h('.m4', [
-    h('h1', 'Empty list'),
-    h('p', 'Owner can edit this tab to add objects to see.')
-  ]);
-}
+/**
+ * Placeholder for empty layout in edit mode
+ * @param {Object} model
+ * @return {vnode}
+ */
+const emptyListEditMode = (model) => h('.m4', [
+  h('h1', 'Empty list'),
+  h('p', [iconArrowLeft(), ' Add new objects from the sidebar tree.']),
+  h('p', ['You can also add/remove tabs or save/delete this layout on the navbar. ', iconArrowTop()]),
+]);
 
-function emptyListEditMode(model) {
-  return h('.m4', [
-    h('h1', 'Empty list'),
-    h('p', [iconArrowLeft(), ' Add new objects from the sidebar tree.']),
-    h('p', ['You can also add/remove tabs or save/delete this layout on the navbar. ', iconArrowTop()]),
-  ]);
-}
-
+/**
+ * Container of the different charts, height is fixed and listeners allow dragging
+ * @param {Object} model
+ * @return {vnode}
+ */
 function subcanvasView(model) {
   if (!model.layout.tab) {
     return;
@@ -54,6 +65,11 @@ function subcanvasView(model) {
       height: `${cellHeight * model.layout.gridList.grid.length}%`
     },
     id: 'subcanvas',
+
+    /**
+     * Listens to dragover event to update model of moving chart position and compute grid state
+     * @param {DragEvent} e - https://developer.mozilla.org/fr/docs/Web/Events/dragover
+     */
     ondragover(e) {
       // Warning CPU heavy function: getBoundingClientRect and offsetHeight re-compute layout
       // it is ok to use them on user interactions like clicks or drags
@@ -86,7 +102,11 @@ function subcanvasView(model) {
       // console.log(x, y, pageX, canvasDimensions.x);
       model.layout.moveTabObjectToPosition(x, y);
     },
-    ondragend(e) {
+
+    /**
+     * Listens to dragend event to end any transparent moving chart from UI and other computing inside model
+     */
+    ondragend() {
       model.layout.moveTabObjectStop();
     }
   };
@@ -94,6 +114,14 @@ function subcanvasView(model) {
   return h('div', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject)));
 }
 
+/**
+ * Shows a jsroot plot, with an overlay on edit mode to allow dragging events instead of dragging jsroot content with the mouse.
+ * Dragging to desktop is forbidden, but could be added.
+ * Position of chart is absolute to allow smooth mouvements when arrangement changes.
+ * @param {Object} model
+ * @param {Object} tabObject - to be drawn with jsroot
+ * @return {vnode}
+ */
 function chartView(model, tabObject) {
   const key = 'key'+tabObject.id;
 
@@ -126,7 +154,9 @@ function chartView(model, tabObject) {
   };
 
   const attrsInternal = {
-    class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id ? 'object-selected object-selectable' : 'object-selectable'
+    class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id
+      ? 'object-selected object-selectable'
+      : 'object-selectable'
   };
 
   return h('.absolute.animate-dimensions-position', attrs, [
@@ -138,14 +168,29 @@ function chartView(model, tabObject) {
   ]);
 }
 
+/**
+ * Predicat to sort objects by id
+ * @param {Object} a
+ * @param {Object} b
+ * @return {number}
+ */
 function compareById(a, b) {
-  if (a.id < b.id)
+  if (a.id < b.id) {
     return -1;
-  if (a.id > b.id)
+  }
+
+  if (a.id > b.id) {
     return 1;
+  }
+
   return 0;
 }
 
+/**
+ * Creates a copy of array and sort it by id's object
+ * @param {Array.<Object>} array
+ * @return {Array.<Object>} copy
+ */
 function cloneSortById(array) {
   return array.concat().sort(compareById);
 }

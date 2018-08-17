@@ -1,10 +1,11 @@
 /**
  * Generates a new ObjectId
+ * @return {string} 16 random chars, base 16
  */
 export function objectId() {
-  var timestamp = (new Date().getTime() / 1000 | 0).toString(16);
+  const timestamp = (new Date().getTime() / 1000 | 0).toString(16);
   return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function() {
-      return (Math.random() * 16 | 0).toString(16);
+    return (Math.random() * 16 | 0).toString(16);
   }).toLowerCase();
 }
 
@@ -26,13 +27,12 @@ export function clone(obj) {
  */
 export function timerDebouncer(fn, time) {
   let timer;
-  return function() {
-    const args = arguments;
+  return function(...args) {
     if (timer) {
       clearTimeout(timer);
     }
     timer = setTimeout(function() {
-      fn.apply(null, args);
+      fn(...args); // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters
     }, time);
   };
 }

@@ -46,10 +46,15 @@
     "port": 3306
   },
   "log": {
+      "winston": {
+        "file": "./error.log",
+        "fileLvl": "error",
+        "consoleLvl": "debug"
+    },
     "infologger": {
       "host": "127.0.0.1",
       "port": 6102,
-      "execPath": "/bin/log"
+      "sender": "/tmp/infoLoggerD.socket"
     }
   }
 }
