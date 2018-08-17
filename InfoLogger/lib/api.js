@@ -1,7 +1,7 @@
-const {log, WebSocketMessage} = require('@aliceo2/web-ui');
+const {Log, WebSocketMessage, InfoLoggerReceiver} = require('@aliceo2/web-ui');
+const log = new Log('InfoLogger');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
-const InfoLoggerReceiver = log.InfoLoggerReceiver;
 
 let querySource = null;
 let liveSource = null;
@@ -53,6 +53,10 @@ module.exports.attachTo = (http, ws) => {
       msg.command = 'live-log';
       msg.payload = message;
       ws.broadcast(msg);
+    });
+
+    liveSource.on('close', () => {
+      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-close'));
     });
   }
 };

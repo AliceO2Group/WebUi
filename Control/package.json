@@ -7,7 +7,7 @@
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')"
   },
   "author": "Adam Wegrzynek",
@@ -15,7 +15,7 @@
   "repository": "AliceO2Group/WebUi",
   "homepage": "https://alice-o2.web.cern.ch",
   "dependencies": {
-    "@aliceo2/web-ui": "^1.4.1",
+    "@aliceo2/web-ui": "^1.6.1",
     "@grpc/proto-loader": "^0.3.0",
     "grpc": "^1.13.1"
   },

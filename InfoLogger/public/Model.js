@@ -1,10 +1,13 @@
 // Import frontend framework
-import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, RemoteData, sessionService} from '/js/src/index.js';
+import {Observable, WebSocketClient, QueryRouter,
+  Loader, RemoteData, sessionService} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
 
-// The model
+/**
+ * Main model of InfoLoggerGui, contains sub-models modules
+ */
 export default class Model extends Observable {
   /**
    * Instanciate main model containing other models and native events
@@ -42,7 +45,7 @@ export default class Model extends Observable {
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
-    this.servicesResult = RemoteData.NotAsked(); // Success({query, live})
+    this.servicesResult = RemoteData.notAsked(); // Success({query, live})
 
     this.detectServices();
 
@@ -56,8 +59,6 @@ export default class Model extends Observable {
    * Handle websocket authentification success
    */
   handleWSAuthed() {
-    console.log('WS ready');
-
     // Tell server not to stream by default
     this.ws.setFilter(() => false);
   }
@@ -74,7 +75,7 @@ export default class Model extends Observable {
    * Currently: query and live data sources.
    */
   async detectServices() {
-    this.servicesResult = RemoteData.Loading();
+    this.servicesResult = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.loader.post(`/api/services`);
@@ -82,7 +83,7 @@ export default class Model extends Observable {
       alert(`Unable to start application, web server is not reachable`);
       return;
     }
-    this.servicesResult = RemoteData.Success(result);
+    this.servicesResult = RemoteData.success(result);
     this.notify();
 
     // auto-query if service available
@@ -96,7 +97,7 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Enter
@@ -151,6 +152,9 @@ export default class Model extends Observable {
     if (message.command === 'live-log') {
       this.log.addLog(message.payload);
       return;
+    }
+    if (message.command === 'il-server-close') {
+      alert(`Connection between backend and InfoLogger server has been lost`);
     }
   }
 

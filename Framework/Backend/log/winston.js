@@ -15,8 +15,12 @@ class Winston {
     }
     config.consoleLvl = config.consoleLvl || 'debug';
 
-    const consoleFormatter = winston.format.printf((info) => {
-      return `${info.timestamp} ${info.level}: ${info.message}`;
+    const consoleFormatter = winston.format.printf((log) => {
+      if (log.hasOwnProperty('label')) {
+        return `${log.timestamp} ${log.level}: [${log.label}] ${log.message}`;
+      } else {
+        return `${log.timestamp} ${log.level}: ${log.message}`;
+      }
     });
 
     let transports = [

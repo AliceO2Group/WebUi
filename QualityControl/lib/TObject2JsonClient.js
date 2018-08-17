@@ -61,6 +61,11 @@ class TObject2JsonClient extends EventEmitter {
         fail('Timeout loading object from TObject2Json');
       }, ZMQ_TIMEOUT);
 
+      /**
+       * Listens to messages from zmq server and resolves promise
+       * if it corresponds to local `path` context
+       * @param {Object} message
+       */
       const handler = (message) => {
         // de-multiplexe
         if (message.request && message.request === path) {
