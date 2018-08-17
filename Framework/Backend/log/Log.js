@@ -1,4 +1,3 @@
-const fs = require('fs');
 const Winston = require('./winston.js');
 const InfoLoggerSender = require('./InfoLoggerSender.js');
 
@@ -31,8 +30,8 @@ class Log {
     if (config && config.winston) {
       winston = new Winston(config.winston);
     }
-    if (!infologger && config && config.infologger && fs.existsSync(config.infologger.execPath)) {
-      infologger = new InfoLoggerSender(winston, config.infologger.execPath);
+    if (!infologger && config && config.infologger) {
+      infologger = new InfoLoggerSender(winston, config.infologger.sender);
     }
   }
 
