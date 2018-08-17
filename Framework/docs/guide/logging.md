@@ -1,7 +1,8 @@
 # Backend - Logging module
 Logging module handles log in a two ways:
  * Prints or saves log in a file using `winston` library (default mode)
- * Sends logs to `InfoLogger` infrastructure (requires configuration)
+ * Receives logs from `InfoLogger` server
+ * Sends logs to `InfoLogger` daemon over named socket
 
 ### Configuration
 Configuring logger is optional and required only when non default behavior of logger is desired.
@@ -16,7 +17,9 @@ Where:
      * [`fileLvl`] - file log level
      * [`consoleLvl`] - console log level
    * [`infologger`] - InfoLogger configuration variables
-     * `execPath` - path to the log executable
+     * `sender` - UNIX name socket of InfoLoggerD
+     * [`port`] - InfoLogger server port
+     * [`host`] - InfoLogger server host
 
 ### Code example
 ```js
