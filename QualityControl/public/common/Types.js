@@ -3,12 +3,22 @@ Javascript is weakly-typed.
 Properties of an object can be checked
 */
 
+/**
+ * Checks type of passed argument
+ * @param {Array.<Layout>} array
+ * @return {boolean} true is correct
+ */
 export function assertLayouts(array) {
   assertArray(array);
   array.forEach((item) => assertLayout(item));
   return array;
 }
 
+/**
+ * Checks type of passed argument
+ * @param {Layout} obj
+ * @return {boolean} true is correct
+ */
 export function assertLayout(obj) {
   assertString(obj.id);
   assertString(obj.name);
@@ -18,12 +28,22 @@ export function assertLayout(obj) {
   return obj;
 }
 
+/**
+ * Checks type of passed argument
+ * @param {Array.<Tab>} array
+ * @return {boolean} true is correct
+ */
 export function assertTabs(array) {
   assertArray(array);
   array.forEach((item) => assertTab(item));
   return array;
 }
 
+/**
+ * Checks type of passed argument
+ * @param {Tab} obj
+ * @return {boolean} true is correct
+ */
 export function assertTab(obj) {
   assertString(obj.id);
   assertString(obj.name);
@@ -31,6 +51,11 @@ export function assertTab(obj) {
   return obj;
 }
 
+/**
+ * Checks type of passed argument
+ * @param {TabObject} obj
+ * @return {boolean} true is correct
+ */
 export function assertTabObject(obj) {
   assertString(obj.id);
   assertString(obj.name);
@@ -44,18 +69,39 @@ export function assertTabObject(obj) {
 
 // Primive types
 
+/**
+ * Checks type of passed argument
+ * @param {number} value
+ * @return {boolean} true is correct
+ */
 export function assertNumber(value) {
-  if (typeof value !== 'number') throw new TypeError(`value must be a number, found ${typeof value}`);
+  if (typeof value !== 'number') {
+    throw new TypeError(`value must be a number, found ${typeof value}`);
+  }
   return value;
 }
 
+/**
+ * Checks type of passed argument
+ * @param {string} value
+ * @return {boolean} true is correct
+ */
 export function assertString(value) {
-  if (typeof value !== 'string') throw new TypeError(`value must be a string, found ${typeof value}`);
+  if (typeof value !== 'string') {
+    throw new TypeError(`value must be a string, found ${typeof value}`);
+  }
   return value;
 }
 
+/**
+ * Checks type of passed argument
+ * @param {array} value
+ * @return {boolean} true is correct
+ */
 export function assertArray(value) {
-  if (!Array.isArray(value)) throw new TypeError(`value must be an array, found ${typeof value}`);
+  if (!Array.isArray(value)) {
+    throw new TypeError(`value must be an array, found ${typeof value}`);
+  }
   return value;
 }
 
