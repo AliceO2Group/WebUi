@@ -163,7 +163,11 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         // (cleanup might not be loaded yet)
         JSROOT.cleanup(dom);
       }
-      JSROOT.redraw(dom, objectRemoteData.payload, tabObject.options.join(';'), (painter) => {
+
+      // Use user's definied options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
+      const options = [...tabObject.options, 'f'].join(';');
+
+      JSROOT.redraw(dom, objectRemoteData.payload, options, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
