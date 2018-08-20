@@ -117,7 +117,7 @@ export function draw(model, tabObject, options) {
     // on success, JSROOT will erase all DOM inside div and put its own
   }
 
-  return h('div.relative', attributes, content);
+  return h('div.relative.jsroot-container', attributes, content);
 }
 
 /**

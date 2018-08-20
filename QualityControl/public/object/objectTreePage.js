@@ -152,4 +152,3 @@ function treeRow(model, tree, level) {
     ...childrens
   ];
 }
-

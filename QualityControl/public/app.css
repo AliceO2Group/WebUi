@@ -21,8 +21,6 @@
 /* Show plots gradually */
 .jsroot { animation-name: appearance; animation-duration: 0.2s; }
 
-/*
-updates on JS side:
-- fetchClient with JSON headers
-- sessionService.get() ajouter un argument pour avoir une clé en particulier
-*/
+/* overwrite jsroot styles */
+.jsroot-container {}
+.jsroot-container pre { background-color: initial; }
