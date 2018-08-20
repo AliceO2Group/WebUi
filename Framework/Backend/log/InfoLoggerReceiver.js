@@ -1,6 +1,6 @@
 const net = require('net');
 const EventEmitter = require('events');
-const log = require('./log.js');
+const log = new (require('./Log.js'))('InfoLoggerReceiver');
 
 const protocols = require('./infologger-protocols.js');
 
@@ -33,25 +33,31 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
       return;
     }
 
+    this.host = options.host;
+    this.port = options.port;
+
     this.client = net.createConnection(options);
     this.client.on('data', (messages) => this.onData(messages));
 
     this.client.on('connect', () => {
-      log.info('Connected to infoLoggerServer');
+      log.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
     });
 
     this.client.on('end', () => {
-      log.error('Connection to infoLoggerServer ended');
+      log.error('Connection to infoLoggerServer ended (FIN)');
+      this.emit('close');
+      this.client.setTimeout(1000, () => {
+        log.info('Quickly reconnecting infoLoggerServer socket...');
+        this.client.connect(this.port, this.host);
+      });
     });
 
     this.client.on('error', (error) => {
-      if (error.code === 'ENOTFOUND') {
-        throw new Error(`Unable to resolve InfoLoggerServer host ${options.host}`);
-      }
-      if (error.code === 'ECONNREFUSED') {
-        throw new Error(`Connection refused to InfoLoggerServer ${options.host}:${options.port}`);
-      }
-      throw error;
+      log.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
+      this.client.setTimeout(5000, () => {
+        log.info('Reconnecting infoLoggerServer socket...');
+        this.client.connect(this.port, this.host);
+      });
     });
   }
 

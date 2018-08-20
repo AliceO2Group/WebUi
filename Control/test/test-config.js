@@ -5,10 +5,11 @@ module.exports = {
     hostname: 'localhost',
     // key: './cert/key.pem',
     // cert: './cert/cert.pem',
-    tls: false
+    tls: false,
   },
   grpc: {
     hostname: 'localhost',
-    port: 9090
+    port: 9090,
+    timeout: 10000,
   },
 };

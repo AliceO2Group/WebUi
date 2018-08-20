@@ -7,13 +7,13 @@
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/",
-    "mocha": "mocha $(find test -name 'mocha-*.js')"
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
+    "mocha": "mocha --exit test/mocha-*"
   },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/web-ui": "^1.3.0",
+    "@aliceo2/web-ui": "^1.6.1",
     "jsroot": "^5.4.2",
     "zeromq": "4.6.0"
   },

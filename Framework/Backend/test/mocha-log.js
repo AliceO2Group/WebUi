@@ -1,22 +1,19 @@
 const assert = require('assert');
 const fs = require('fs');
-const log = require('./../log/log.js');
+const Log = require('./../log/Log.js');
 const config = require('./../config-default.json');
-const process = require('process');
-const {InfoLoggerSender, InfoLoggerReceiver} = require('./../log/log.js');
+const InfoLoggerReceiver = require('./../log/InfoLoggerReceiver.js');
+const InfoLoggerSender = require('./../log/InfoLoggerSender.js');
+const Winston = require('./../log/winston.js');
 
-const configLocal = {
-  winston: {
-    file: './error.log',
-    fileLvl: 'error',
-    consoleLvl: 'debug'
-  }
-};
+let skip = true;
 
 describe('Logging: winston', () => {
   it('Generate error file (winston)', (done) => {
-    log.configure(configLocal);
-    log.error('Test error winston');
+    const winstonConf = {winston: config.log.winston};
+    Log.configure(winstonConf);
+    const logger = new Log('test-winston');
+    logger.error('Test error winston');
     setTimeout(() => {
       assert.ok(fs.existsSync('./error.log'));
       done();
@@ -24,22 +21,19 @@ describe('Logging: winston', () => {
   });
 });
 
-describe('Logging: InfoLogger', () => {
-  it('Fail on instance creation', (done) => {
-    log.configure(config.log);
-    setTimeout(() => {
-      log.error('Test error InfoLogger');
-      done();
-    }, 100);
+describe('Logging: InfoLogger sender', () => {
+  it('Send log over named socket', function() {
+    if (skip) {
+      this.skip(); // eslint-disable-line no-invalid-this
+    }
+    const winston = new Winston();
+    const sender = new InfoLoggerSender(winston, config.log.infologger.sender);
+    sender.send({severity: 'D', message: 'test', rolename: 'il-sender-test'});
+    sender.close();
   });
+});
 
-  it('Prepare bash command', () => {
-    const sender = new InfoLoggerSender('log');
-    const log = {severity: 'E', message: 'test-log'};
-    const expected = ['-oSeverity=E', '-oSystem=Web', `-oFacility=Node ${process.version}`];
-    assert.deepStrictEqual(expected, sender.format(log));
-  });
-
+describe('Logging: InfoLogger protocol', () => {
   it('Parse protocol 1.4 with empty fields', () => {
     const receiver = new InfoLoggerReceiver();
     const message = '*1.4#I##1505140368.399439#o2test#O2#143388#root#DAQ#P2##PHY##123###test\n';

@@ -1,17 +1,22 @@
-const {log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
+const {Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
+const log = new Log('QualityControl');
 
 // Load data source (demo or DB)
 const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
 
+/**
+ * Adds paths and binds websocket to instance of HttpServer passed
+ * @param {HttpServer} http
+ */
 module.exports.setup = (http) => {
-  http.post('/readObjectData', readObjectData);
+  http.get('/readObjectData', readObjectData, {public: true});
   http.post('/readObjectsData', readObjectsData);
-  http.post('/listObjects', listObjects);
+  http.get('/listObjects', listObjects, {public: true});
   http.post('/readLayout', readLayout);
-  http.post('/writeLayout', writeLayout);
+  http.post('/writeLayout', updateLayout);
   http.post('/listLayouts', listLayouts);
-  http.delete('/layout/:name', deleteLayout);
+  http.delete('/layout/:layoutId', deleteLayout);
   http.post('/layout', createLayout);
 
   const ws = new WebSocket(http);
@@ -52,7 +57,11 @@ function readObjectsData(req, res) {
     objectsNames = [objectsNames];
   }
 
-  // Retrieve data, in case of error or not found, put message on 'error' field
+  /**
+   * Retrieves data or provides {error} object on failure
+   * @param {Object} name - name path of object and its agent
+   * @return {Promise.<Object>}
+   */
   const safeRetriever = (name) => model.readObjectData(name)
     .then((data) => !data ? {error: 'Object not found'} : data)
     .catch((err) => ({error: err}));
@@ -104,34 +113,34 @@ function listLayouts(req, res) {
 }
 
 /**
- * Read a single layout specified by layoutName
+ * Read a single layout specified by layoutId
  * @param {Request} req
  * @param {Response} res
  */
 function readLayout(req, res) {
-  const layoutName = req.body.layoutName;
+  const layoutId = req.body.layoutId;
 
-  if (!layoutName) {
-    res.status(400).send('layoutName parameter is needed');
+  if (!layoutId) {
+    res.status(400).send('layoutId parameter is needed');
     return;
   }
 
-  model.readLayout(layoutName)
+  model.readLayout(layoutId)
     .then((data) => res.status(data ? 200 : 404).json(data))
     .catch((err) => errorHandler(err, res));
 }
 
 /**
- * Update a single layout specified by layoutName and body
+ * Update a single layout specified by layoutId and body
  * @param {Request} req
  * @param {Response} res
  */
-function writeLayout(req, res) {
-  const layoutName = req.query.layoutName;
+function updateLayout(req, res) {
+  const layoutId = req.query.layoutId;
   const data = req.body;
 
-  if (!layoutName) {
-    res.status(400).send('layoutName parameter is needed');
+  if (!layoutId) {
+    res.status(400).send('layoutId parameter is needed');
     return;
   }
 
@@ -140,25 +149,25 @@ function writeLayout(req, res) {
     return;
   }
 
-  model.writeLayout(layoutName, data)
+  model.updateLayout(layoutId, data)
     .then((data) => res.status(200).json(data))
     .catch((err) => errorHandler(err, res));
 }
 
 /**
- * Delete a single layout specified by name
+ * Delete a single layout specified by layoutId
  * @param {Request} req
  * @param {Response} res
  */
 function deleteLayout(req, res) {
-  const layoutName = req.params.name;
+  const layoutId = req.params.layoutId;
 
-  if (!layoutName) {
-    res.status(400).send('layoutName is needed');
+  if (!layoutId) {
+    res.status(400).send('layoutId is needed');
     return;
   }
 
-  model.deleteLayout(layoutName)
+  model.deleteLayout(layoutId)
     .then((data) => res.status(204).json(data))
     .catch((err) => errorHandler(err, res));
 }
@@ -190,18 +199,21 @@ function createLayout(req, res) {
 
   model.createLayout(layout)
     .then((data) => res.status(201).json(data))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => errorHandler(err, res, 409));
 }
 
 /**
  * Global HTTP error handler, sends status 500
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
+ * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
-function errorHandler(err, res) {
-  if (err.stack) {
-    log.trace(err);
+function errorHandler(err, res, status = 500) {
+  if (status === 500) {
+    if (err.stack) {
+      log.trace(err);
+    }
+    log.error(err.message || err);
   }
-  log.error(err.message || err);
-  res.status(500).send({error: err});
+  res.status(status).send({error: err.message || err});
 }

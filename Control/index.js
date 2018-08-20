@@ -6,7 +6,7 @@ const api = require('./lib/api.js');
 
 // -------------------------------------------------------
 
-const http = new HttpServer(config.http);
+const http = new HttpServer(config.http, config.jwt, config.oAuth);
 const ws = new WebSocket(http);
 http.addStaticPath(path.join(__dirname, 'public'));
 api.attachTo(http, ws);

@@ -34,9 +34,6 @@ qcg
 5. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
 
----
-
-
 ## Custom configuration
 These steps are necessary only when you don't run QCG on `localhost`.
 
@@ -88,3 +85,15 @@ Note: Enabling or disabling OAuth may impacts layout ownership model. When OAuth
 - Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
 - Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
+
+## Public API
+
+QCG exposes two public REST API which can be read by any other application.
+
+- Get all objects metadata\
+  Request: `curl 'http://localhost:8080/api/listObjects' -X GET`\
+  Result: `[{"name": "AGENT/OBJECT"}]`
+- Get ROOT object data in JSON format to be used with JSROOT\
+  Request: `curl 'http://localhost:8080/api/readObjectData?objectName=AGENT/OBJECT' -X GET`\
+  Result: `{"_typename":"TCanvas", ...}`
+

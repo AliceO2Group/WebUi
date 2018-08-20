@@ -1,7 +1,7 @@
 import {sessionService, Observable, WebSocketClient, QueryRouter, Loader} from '/js/src/index.js';
 
-import Layout from './layout/Layout.js'
-import Object_ from './object/Object.js'
+import Layout from './layout/Layout.js';
+import Object_ from './object/Object.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -13,7 +13,7 @@ export default class Model extends Observable {
   constructor() {
     super();
 
-    this.session = sessionService.session;
+    this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
     this.layout = new Layout(this);
@@ -26,7 +26,7 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.sidebar = true;
-    this.route = null;
+    this.accountMenuEnabled = false;
     this.page = null;
 
     // Setup router
@@ -40,7 +40,9 @@ export default class Model extends Observable {
     // Setup WS connexion
     this.ws = new WebSocketClient();
     this.ws.addListener('authed', () => {
-      this.ws.setFilter(() => {return true;});
+      this.ws.setFilter(() => {
+        return true;
+      });
     });
     this.ws.addListener('command', this.handleWSCommand.bind(this));
 
@@ -54,11 +56,14 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Delete key + layout page + object select => delete this object
-    if (code === 8 && this.router.params.page === 'layoutShow' && this.layout.editEnabled && this.layout.editingTabObject) {
+    if (code === 8 &&
+      this.router.params.page === 'layoutShow' &&
+      this.layout.editEnabled &&
+      this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
     }
   }
@@ -78,10 +83,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
-    const page = this.router.params.page
-    console.log(`Page changed to ${page}`);
-
-    switch (page) {
+    switch (this.router.params.page) {
       case 'layoutList':
         this.layout.loadList()
           .then(() => {
@@ -93,16 +95,25 @@ export default class Model extends Observable {
           });
         break;
       case 'layoutShow':
-        if (!this.router.params.layout) {
-          return this.router.go('?', true);
+        if (!this.router.params.layoutId) {
+          // TODO: notification(`Argument layoutId is URL is missing`);
+          this.router.go('?', true);
+          return;
         }
-        this.layout.loadItem(this.router.params.layout)
+        this.layout.loadItem(this.router.params.layoutId)
           .then(() => {
             this.page = 'layoutShow';
+            if (this.router.params.edit) {
+              this.layout.edit();
+
+              // Replace silently and immediatly URL to remove 'edit' parameter after a layout creation
+              // eslint-disable-next-line
+              this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}&layoutName=${this.router.params.layoutName}`, true, true);
+            }
             this.notify();
           })
-          .catch((err) => {
-            console.log(err);
+          .catch((_error) => {
+            // TODO: notification(error)
             this.router.go('?page=layoutList');
           });
         break;
@@ -122,6 +133,14 @@ export default class Model extends Observable {
    */
   toggleSidebar() {
     this.sidebar = !this.sidebar;
+    this.notify();
+  }
+
+  /**
+   * Toggle account menu dropdown
+   */
+  toggleAccountMenu() {
+    this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
   }
 }

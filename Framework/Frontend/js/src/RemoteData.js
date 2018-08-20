@@ -102,40 +102,44 @@ class RemoteData {
 
 /**
  * Factory to create new 'NotAsked' RemoteData kind
+ * (NotAsked is not eslint compatible and deprecated, use notAsked)
  * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static
  */
-RemoteData.NotAsked = () => new RemoteData('NotAsked');
+RemoteData.notAsked = RemoteData.NotAsked = () => new RemoteData('NotAsked');
 
 /**
  * Factory to create new 'Loading' RemoteData kind
+ * (Loading is not eslint compatible and deprecated, use loading)
  * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static
  */
-RemoteData.Loading = () => new RemoteData('Loading');
+RemoteData.loading = RemoteData.Loading = () => new RemoteData('Loading');
 
 /**
  * Factory to create new 'Success' RemoteData kind
+ * (Success is not eslint compatible and deprecated, use success)
  * @param {Any} payload
  * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static
  */
-RemoteData.Success = (payload) => new RemoteData('Success', payload);
+RemoteData.success = RemoteData.Success = (payload) => new RemoteData('Success', payload);
 
 /**
  * Factory to create new 'Failure' RemoteData kind
+ * (Failure is not eslint compatible and deprecated, use failure)
  * @param {Any} payload
  * @return {RemoteData}
  * @function
  * @memberof RemoteData
  * @static
  */
-RemoteData.Failure = (payload) => new RemoteData('Failure', payload);
+RemoteData.failure = RemoteData.Failure = (payload) => new RemoteData('Failure', payload);
 
 export default RemoteData;

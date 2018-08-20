@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const zmq = require('zeromq');
-const log = require('./../log/log.js');
+const log = new (require('./../log/Log.js'))('ZeroMQ');
 
 /**
  * ZeroMQ client that communicates with Control Master prcess via one of two supported
@@ -21,15 +21,16 @@ class ZeroMQClient extends EventEmitter {
     this.connected = false;
     this.socket = zmq.socket(type);
     this.socket.monitor(1000); // monitor socket every 1s
+    this.socket.setsockopt(zmq.ZMQ_RECONNECT_IVL, 2000);
     this.socket.on('connect', (fd, endpoint) => this.connect(endpoint));
     this.socket.on('close', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('disconnect', (fd, endpoint) => this.disconnect(endpoint));
     this.socket.on('connect_delay', () => {
-      log.debug('ZMQ: Connection to the socket is pending...');
+      log.debug('Connection to the socket is pending...');
     });
 
     this.socket.on('connect_retry', () => {
-      log.debug('ZMQ: Socket is being reconnected...');
+      log.info('Socket is being reconnected...');
       this.connected = false;
     });
 
@@ -46,7 +47,7 @@ class ZeroMQClient extends EventEmitter {
    * @param {string} endpoint
    */
   connect(endpoint) {
-    log.debug('ZMQ: Connected to', endpoint);
+    log.info('Connected to ' + endpoint);
     this.connected = true;
   }
 
@@ -56,7 +57,7 @@ class ZeroMQClient extends EventEmitter {
    */
   disconnect(endpoint) {
     if (this.connected) {
-      log.debug('ZMQ: Disconnected from', endpoint);
+      log.error('Disconnected from ' + endpoint);
     }
     this.connected = false;
   }
@@ -67,7 +68,7 @@ class ZeroMQClient extends EventEmitter {
    */
   onmessage(message) {
     if (typeof message === 'undefined') {
-      log.debug('ZMQ: Cannot send undefined message');
+      log.debug('Cannot send undefined message');
       return;
     }
     this.emit('message', message.toString());
@@ -79,7 +80,7 @@ class ZeroMQClient extends EventEmitter {
    */
   send(message) {
     if (!this.connected) {
-      log.debug('ZMQ: Could not send message as the connection is not estabilished');
+      log.debug('Could not send message as socket is not open');
       return;
     }
     this.socket.send(message);

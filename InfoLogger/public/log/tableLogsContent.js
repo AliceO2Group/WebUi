@@ -1,29 +1,70 @@
 import {h} from '/js/src/index.js';
 
-import {severityClass, severityLabel} from './severityUtils.js';
+import {severityClass} from './severityUtils.js';
 import tableColGroup from './tableColGroup.js';
 
 const ROW_HEIGHT = 18; // sync with CSS value
 
+/**
+ * Main content of ILG - simulates a big table scrolling.
+ * .tableLogsContent is the scrolling area with hooks to listen to scroll changes
+ * .tableLogsContentPlaceholder just fills .tableLogsContent with the height of all logs
+ * .table-logs-content is the actual floating content, part of all logs, always on sight of user
+ * Only some logs are displayed so user think he is scrolling on all logs, but in fact
+ * he is only viewing ~30 logs window moving with scrolling. This allow good performance.
+ * @param {Object} model
+ * @return {vnode}
+ */
 export default (model) => h('.tableLogsContent.scroll-y.flex-grow', tableContainerHooks(model),
-  h('div', {style: {height: model.log.list.length * ROW_HEIGHT + 'px', position: 'relative'}},
-    h('table.table-logs-content', {style: {position: 'absolute', top: model.log.scrollTop - (model.log.scrollTop % ROW_HEIGHT) + 'px'}},
+  h('div.tableLogsContentPlaceholder', {
+    style: {
+      height: model.log.list.length * ROW_HEIGHT + 'px',
+      position: 'relative'
+    }
+  }, [
+    h('table.table-logs-content', scrollStyling(model),
       tableColGroup(model),
       h('tbody', [
         listLogsInViewportOnly(model).map((row) => tableLogLine(model, row))
       ]),
     )
-  ),
+  ]),
 );
 
-// Returns an array of logs to be drawn according to scrolling infos
-// ceil() and + 1 ensure we see top and bottom logs coming
+/**
+ * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder
+ * @param {Object} model
+ * @return {Object} properties of floating table
+ */
+const scrollStyling = (model) => ({
+  style: {
+    position: 'absolute',
+    top: model.log.scrollTop - (model.log.scrollTop % ROW_HEIGHT) + 'px'
+  }
+});
+
+/**
+ * Returns an array of logs that are indeed visible to user, hidden top and hidden bottom logs
+ * are not present in this array output
+ * ceil() and + 1 ensure we see top and bottom logs coming
+ * @param {Object} model
+ * @return {Array.<Log>}
+ */
 const listLogsInViewportOnly = (model) => model.log.list.slice(
   Math.floor(model.log.scrollTop / ROW_HEIGHT),
   Math.floor(model.log.scrollTop / ROW_HEIGHT) + Math.ceil(model.log.scrollHeight / ROW_HEIGHT) + 1
 );
 
-const tableLogLine = (model, row) => h('tr.row-hover', {className: model.log.item === row ? 'row-selected' : '', onclick: () => model.log.setItem(row)}, [
+/**
+ * Creates a line of log with tag <tr> and its columns <td> if enabled.
+ * @param {Object} model
+ * @param {Log} row - a row of this table is a raw log
+ * @return {vnode}
+ */
+const tableLogLine = (model, row) => h('tr.row-hover', {
+  className: model.log.item === row ? 'row-selected' : '',
+  onclick: () => model.log.setItem(row)
+}, [
   h('td.cell.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
   model.log.columns.date && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
   model.log.columns.time && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'time')),
@@ -36,21 +77,43 @@ const tableLogLine = (model, row) => h('tr.row-hover', {className: model.log.ite
   model.log.columns.detector && h('td.cell.cell-bordered', row.detector),
   model.log.columns.partition && h('td.cell.cell-bordered', row.partition),
   model.log.columns.run && h('td.cell.cell-bordered', row.run),
-  model.log.columns.errcode && h('td.cell.cell-bordered', row.errcode),
+  model.log.columns.errcode && h('td.cell.cell-bordered', linkToWikiErrors(row.errcode)),
   model.log.columns.errline && h('td.cell.cell-bordered', row.errline),
   model.log.columns.errsource && h('td.cell.cell-bordered', row.errsource),
   model.log.columns.message && h('td.cell.cell-bordered', {title: row.message}, row.message),
 ]);
 
-// cycle hooks for .logs-container on "smart scrolling"
+/**
+ * Creates link of error code to open in a new tab the wiki page associated
+ * @param {number} errcode
+ * @return {vnode}
+ */
+const linkToWikiErrors = (errcode) => h('a', {
+  href: `https://alice-daq.web.cern.ch/error_codes/${errcode}?from=ILG`,
+  target: '_blank'},
+errcode);
+
+/**
+ * Hooks of .tableLogsContent for "smart scrolling"
+ * This notifies model of its size and scrolling position to compute logs to draw
+ * @param {Object} model
+ * @return {Object} object containing hooks
+ */
 const tableContainerHooks = (model) => ({
+  /**
+   * Hook. Listen to events needed for handling scrolling like window size change
+   * And set scroll change handler to internal state of dom element
+   * @param {vnode} vnode
+   */
   oncreate(vnode) {
-    // report to model scrolling infos of .logs-container
+    /**
+     * THis handler allow to notify model of element scrolling change (.tableLogsContent)
+     */
     const onTableScroll = () => {
       const container = vnode.dom;
       const height = container.getBoundingClientRect().height;
-      const scrollTop = container.scrollTop;
-      model.log.setScrollTop(container.scrollTop, height);
+      const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
+      model.log.setScrollTop(scrollTop, height);
     };
 
     // call the function when scrolling is updated
@@ -66,19 +129,30 @@ const tableContainerHooks = (model) => ({
     onTableScroll();
   },
 
+  /**
+   * Hook. Update scrolling strategy on model change
+   * @param {vnode} vnode
+   */
   onupdate(vnode) {
     autoscrollManager(model, vnode);
   },
 
+  /**
+   * Hook. Remove listeners when element is destroyed
+   * @param {vnode} vnode
+   */
   ondestroy(vnode) {
-    // never forget to remove listeners when observer is destroyed
     vnode.dom.removeEventListener('scroll', vnode.dom.onTableScroll);
     window.removeEventListener('resize', vnode.dom.onTableScroll);
   }
 });
 
-// Handle scroll to selected item or auto-scroll to bottom
-// 'Autoscroll' is higher priority over 'scroll to selected item'
+/**
+ * Handle scrolling to selected item or auto-scroll to bottom
+ * 'Autoscroll' is higher priority over 'scroll to selected item'
+ * @param {Object} model
+ * @param {vnode} vnode
+ */
 const autoscrollManager = (model, vnode) => {
   // Autoscroll to bottom in live mode
   if (model.log.autoScrollLive && model.log.liveEnabled && model.log.list.length) {

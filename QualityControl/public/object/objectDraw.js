@@ -1,5 +1,7 @@
+/* global JSROOT */
+
 import {h} from '/js/src/index.js';
-import {timerDebouncer, objectId, clone, pointerId} from '../common/utils.js';
+import {timerDebouncer, pointerId} from '../common/utils.js';
 
 /**
  * Draw an object using JSROOT.
@@ -47,6 +49,10 @@ export function draw(model, tabObject, options) {
       width: options.width
     },
 
+    /**
+     * Called when vnode has been created as a DOM element
+     * @param {vnode} vnode
+     */
     oncreate(vnode) {
       // ask model to load data to be shown
       model.object.loadObject(tabObject.name);
@@ -67,12 +73,20 @@ export function draw(model, tabObject, options) {
       resizeOnSizeUpdate(model, vnode.dom, tabObject);
     },
 
+    /**
+     * Called when vnode might be updated
+     * @param {vnode} vnode
+     */
     onupdate(vnode) {
       // JSROOT setup
       redrawOnDataUpdate(model, vnode.dom, tabObject);
       resizeOnSizeUpdate(model, vnode.dom, tabObject);
     },
 
+    /**
+     * Called when vnode is removed from DOM tree
+     * @param {vnode} vnode
+     */
     onremove(vnode) {
       // tell model we don't need those data anymore and free memory if needed
       model.object.unloadObject(tabObject.name);
@@ -106,8 +120,14 @@ export function draw(model, tabObject, options) {
   return h('div.relative.jsroot-container', attributes, content);
 }
 
-// Apply a JSROOT resize when view goes from one size state to another
-// State is stored DOM dataset of element
+/**
+ * Vnode update hook
+ * Apply a JSROOT resize when view goes from one size state to another
+ * State is stored DOM dataset of element
+ * @param {Object} model
+ * @param {Object} dom - the div containing jsroot plot
+ * @param {Object} tabObject - tabObject to be redrawn inside dom
+ */
 function resizeOnSizeUpdate(model, dom, tabObject) {
   const resizeHash = fingerprintResize(tabObject);
 
@@ -117,8 +137,14 @@ function resizeOnSizeUpdate(model, dom, tabObject) {
   }
 }
 
-// Apply a JSROOT redraw when view goes from one data state to another
-// State is stored DOM dataset of element
+/**
+ * Vnode update hook.
+ * Apply a JSROOT redraw when view goes from one data state to another
+ * State is stored DOM dataset of element
+ * @param {Object} model
+ * @param {Object} dom - the div containing jsroot plot
+ * @param {Object} tabObject - tabObject to be redrawn inside dom
+ */
 function redrawOnDataUpdate(model, dom, tabObject) {
   const objectRemoteData = model.object.objects[tabObject.name];
 
@@ -130,7 +156,6 @@ function redrawOnDataUpdate(model, dom, tabObject) {
 
   if (objectRemoteData && objectRemoteData.isSuccess() &&
     (shouldRedraw || shouldCleanRedraw)) {
-
     setTimeout(() => {
       if (shouldCleanRedraw && JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
@@ -138,7 +163,11 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         // (cleanup might not be loaded yet)
         JSROOT.cleanup(dom);
       }
-      JSROOT.redraw(dom, objectRemoteData.payload, tabObject.options.join(';'), (painter) => {
+
+      // Use user's definied options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
+      const options = [...tabObject.options, 'f'].join(';');
+
+      JSROOT.redraw(dom, objectRemoteData.payload, options, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
@@ -151,33 +180,51 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   }
 }
 
-// Replacement fingerprint.
-// When it changes, element should be replaced
-// - tabObject.id (associated to .name) is dependency of oncreate and onremove to load/unload
+/**
+ * Generates a replacement fingerprint.
+ * When it changes, element should be replaced
+ * - tabObject.id (associated to .name) is dependency of oncreate and onremove to load/unload
+ * @param {Object} tabObject
+ * @return {vnode}
+ */
 function fingerprintReplacement(tabObject) {
   return `${tabObject.id}`;
 }
 
-// Resize fingerprint.
-// When it changes, JSROOT should resize canvas
-// - tabObject.w and tabObject.h change size
+/**
+ * Generates a resize fingerprint.
+ * When it changes, JSROOT should resize canvas
+ * - tabObject.w and tabObject.h change size
+ * @param {Object} tabObject
+ * @return {vnode}
+ */
 function fingerprintResize(tabObject) {
   return `${tabObject.w}:${tabObject.h}`;
 }
 
-// Redraw fingerprint.
-// When it changes, JSROOT should redraw canvas
-// - object data could be replaced on data refresh
-// - tabObject.options change requires redraw
+/**
+ * Generates a redraw fingerprint.
+ * When it changes, JSROOT should redraw canvas
+ * - object data could be replaced on data refresh
+ * - tabObject.options change requires redraw
+ * @param {Object} model
+ * @param {Object} tabObject
+ * @return {string}
+ */
 function fingerprintRedraw(model, tabObject) {
   const drawData = model.object.objects[tabObject.name];
   const dataPointerId = drawData ? pointerId(drawData) : null;
   return `${dataPointerId}`;
 }
 
-// Clean redraw fingerprint.
-// When it changes, JSROOT should clean and redraw canvas
-// - tabObject.options change requires clean-redraw, not just redraw
+/**
+ * Generates a clean redraw fingerprint.
+ * When it changes, JSROOT should clean and redraw canvas
+ * - tabObject.options change requires clean-redraw, not just redraw
+ * @param {Object} model
+ * @param {Object} tabObject
+ * @return {string}
+ */
 function fingerprintCleanRedraw(model, tabObject) {
   const drawOptions = tabObject.options.join(';');
   return `${drawOptions}`;

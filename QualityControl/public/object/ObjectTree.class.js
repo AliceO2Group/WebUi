@@ -1,6 +1,17 @@
 import {Observable} from '/js/src/index.js';
 
+/**
+ * This class allows to transforms objects names (A/B/C) into a tree that can have
+ * some behaviours like open/close nodes or add meta-data like information service
+ * for online objects. It also allows to update all those objects without creating
+ * a new tree.
+ */
 export default class ObjectTree extends Observable {
+  /**
+   * Instanciate tree with a root node called `name`, empty by default
+   * @param {string} name - root name
+   * @param {ObjectTree} parent - optional parent node
+   */
   constructor(name, parent) {
     super();
     this.name = name || ''; // like 'B'
@@ -21,7 +32,7 @@ export default class ObjectTree extends Observable {
    */
   clearAllIS() {
     this.informationService = null;
-    this.childrens.forEach(children => children.clearAllIS());
+    this.childrens.forEach((children) => children.clearAllIS());
     this.notify();
   }
 
@@ -29,7 +40,7 @@ export default class ObjectTree extends Observable {
    * Update the tree with data passed
    * Example of data passed:
    * {DAQ01/EquipmentSize/ACORDE/ACORDE: {}, DAQ01/EquipmentSize/ITSSDD/ITSSDD: {},…}
-   * @param {object} arg - blabla
+   * @param {object} informationService - blabla
    * @return {number} # of nodes associated to their IS data
    */
   updateAllIS(informationService) {
@@ -69,7 +80,7 @@ export default class ObjectTree extends Observable {
    */
   openAll() {
     this.open = true;
-    this.childrens.forEach(chidren => chidren.openAll());
+    this.childrens.forEach((chidren) => chidren.openAll());
     this.notify();
   }
 
@@ -78,15 +89,15 @@ export default class ObjectTree extends Observable {
    */
   closeAll() {
     this.open = false;
-    this.childrens.forEach(chidren => chidren.closeAll());
+    this.childrens.forEach((chidren) => chidren.closeAll());
     this.notify();
   }
 
   /**
    * Add recursively an object inside a tree
-   * @param {object} object - The object to be inserted, property name must exist
-   * @param {array of string} path - Path of the object to dig in before assigning to a tree node, if null object.name is used
-   * @param {array of string} pathParent - Path of the current tree node, if null object.name is used
+   * @param {Object} object - The object to be inserted, property name must exist
+   * @param {Array.<string>} path - Path of the object to dig in before assigning to a tree node, if null object.name is used
+   * @param {Array.<string>} pathParent - Path of the current tree node, if null object.name is used
    *
    * Example of recurvive call:
    *  addChildren(o) // begin insert 'A/B'
@@ -121,7 +132,7 @@ export default class ObjectTree extends Observable {
     // Case we need to pass to subtree
     const name = path.shift();
     const fullPath = [...pathParent, name];
-    let subtree = this.childrens.find(children => children.name === name);
+    let subtree = this.childrens.find((children) => children.name === name);
 
     // Subtree does not exist yet
     if (!subtree) {
@@ -131,14 +142,18 @@ export default class ObjectTree extends Observable {
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
       this.childrens.push(subtree);
-      subtree.observe(e => this.notify());
+      subtree.observe(() => this.notify());
     }
 
     // Pass to children
     subtree.addChildren(object, path, fullPath);
   }
 
+  /**
+   * Add a list of objects by calling `addChildren`
+   * @param {Array} objects
+   */
   addChildrens(objects) {
-    objects.forEach(object => this.addChildren(object));
+    objects.forEach((object) => this.addChildren(object));
   }
 }

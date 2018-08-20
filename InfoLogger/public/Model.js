@@ -1,16 +1,22 @@
 // Import frontend framework
-import {Observable, WebSocketClient, fetchClient, QueryRouter, Loader, RemoteData} from '/js/src/index.js';
+import {Observable, WebSocketClient, QueryRouter,
+  Loader, RemoteData, sessionService} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
 
-// The model
+/**
+ * Main model of InfoLoggerGui, contains sub-models modules
+ */
 export default class Model extends Observable {
   /**
    * Instanciate main model containing other models and native events
    */
   constructor() {
     super();
+
+    this.session = sessionService.get();
+    this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
@@ -22,6 +28,7 @@ export default class Model extends Observable {
     this.timezone.bubbleTo(this);
 
     this.inspectorEnabled = false;
+    this.accountMenuEnabled = false;
 
     // Setup router
     this.router = new QueryRouter();
@@ -35,21 +42,32 @@ export default class Model extends Observable {
     // Setup WS connexion
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
-    this.ws.addListener('authed', () => {
-      console.log('WS ready');
-      this.ws.setFilter(function(message) {
-        return message.payload.severity === 'E';
-      });
-    });
+    this.ws.addListener('authed', this.handleWSAuthed.bind(this));
+    this.ws.addListener('close', this.handleWSClose.bind(this));
 
-    this.servicesResult = RemoteData.NotAsked(); // Success({query, live})
+    this.servicesResult = RemoteData.notAsked(); // Success({query, live})
 
     this.detectServices();
 
     // update router on model change
     // Model can change very often we protect router with callRateLimiter
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
-    this.observe(callRateLimiter(() => this.updateRouteOnModelChange(), 500));
+    this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
+  }
+
+  /**
+   * Handle websocket authentification success
+   */
+  handleWSAuthed() {
+    // Tell server not to stream by default
+    this.ws.setFilter(() => false);
+  }
+
+  /**
+   * Handle websocket close event
+   */
+  handleWSClose() {
+    alert(`Connection to server has been lost. Please reload the page.`); // TODO: notifications instead of alert
   }
 
   /**
@@ -57,7 +75,7 @@ export default class Model extends Observable {
    * Currently: query and live data sources.
    */
   async detectServices() {
-    this.servicesResult = RemoteData.Loading();
+    this.servicesResult = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.loader.post(`/api/services`);
@@ -65,7 +83,7 @@ export default class Model extends Observable {
       alert(`Unable to start application, web server is not reachable`);
       return;
     }
-    this.servicesResult = RemoteData.Success(result);
+    this.servicesResult = RemoteData.success(result);
     this.notify();
 
     // auto-query if service available
@@ -79,7 +97,7 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Enter
@@ -97,14 +115,14 @@ export default class Model extends Observable {
     // shortcuts
     switch (e.keyCode) {
       case 37: // left
-        if (e.ctrlKey) {
+        if (e.altKey) {
           this.log.firstError();
         } else {
           this.log.previousError();
         }
         break;
       case 39: // right
-        if (e.ctrlKey) {
+        if (e.altKey) {
           this.log.lastError();
         } else {
           this.log.nextError();
@@ -135,6 +153,9 @@ export default class Model extends Observable {
       this.log.addLog(message.payload);
       return;
     }
+    if (message.command === 'il-server-close') {
+      alert(`Connection between backend and InfoLogger server has been lost`);
+    }
   }
 
   /**
@@ -160,6 +181,14 @@ export default class Model extends Observable {
    */
   toggleInspector() {
     this.inspectorEnabled = !this.inspectorEnabled;
+    this.notify();
+  }
+
+  /**
+   * Toggle account menu dropdown
+   */
+  toggleAccountMenu() {
+    this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
   }
 }

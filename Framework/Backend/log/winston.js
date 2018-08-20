@@ -15,8 +15,12 @@ class Winston {
     }
     config.consoleLvl = config.consoleLvl || 'debug';
 
-    const consoleFormat = winston.format.printf((info) => {
-      return `${info.timestamp} ${info.level}: ${info.message}`;
+    const consoleFormatter = winston.format.printf((log) => {
+      if (log.hasOwnProperty('label')) {
+        return `${log.timestamp} ${log.level}: [${log.label}] ${log.message}`;
+      } else {
+        return `${log.timestamp} ${log.level}: ${log.message}`;
+      }
     });
 
     let transports = [
@@ -25,15 +29,21 @@ class Winston {
         format: winston.format.combine(
           winston.format.timestamp(),
           winston.format.colorize(),
-          consoleFormat
+          consoleFormatter
         )}
       )
     ];
 
     if (config.file) {
-      transports.push(new winston.transports.File(
-        {filename: config.file, level: config.fileLvl}
-      ));
+      config.fileLvl = config.fileLvl || 'info';
+      transports.push(new winston.transports.File({
+        filename: config.file,
+        level: config.fileLvl,
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.prettyPrint()
+        )
+      }));
     }
 
     this.instance = winston.createLogger({

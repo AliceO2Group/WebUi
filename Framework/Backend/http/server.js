@@ -3,7 +3,7 @@ const http = require('http');
 const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
-const log = require('./../log/log.js');
+const log = new (require('./../log/Log.js'))('HTTP');
 const JwtToken = require('./../jwt/token.js');
 const OAuth = require('./oauth.js');
 const path = require('path');
@@ -39,10 +39,10 @@ class HttpServer {
       };
       this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
       this.enableHttpRedirect();
-      log.debug(`HTTPS server listening on port ${httpConfig.portSecure}`);
+      log.info(`Secure server listening on port ${httpConfig.portSecure}`);
     } else {
       this.server = http.createServer(this.app).listen(httpConfig.port);
-      log.debug(`HTTP server listening on port ${httpConfig.port}`);
+      log.info(`Server listening on port ${httpConfig.port}`);
     }
 
     this.templateData = {};
@@ -108,7 +108,13 @@ class HttpServer {
     this.addStaticPath(path.join(__dirname, '../../Frontend'));
     this.app.use(this.routerStatics);
 
-    // Router for API (can grow with get, post and delete)
+    // Router for public API (can grow with get, post and delete)
+    // eslint-disable-next-line
+    this.routerPublic = express.Router();
+    this.routerPublic.use(bodyParser.json()); // parse json body for API calls
+    this.app.use('/api', this.routerPublic);
+
+    // Router for secure API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
@@ -123,7 +129,7 @@ class HttpServer {
 
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
-      log.error(`Request ${req.originalUrl} went wrong: ${err.message || err}`);
+      log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
       log.trace(err);
       res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
     });
@@ -165,8 +171,15 @@ class HttpServer {
    * Adds GET route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
+   * @param {function} options
+   * @param {function} options.public - true to remove token verification
    */
-  get(path, callback) {
+  get(path, callback, options = {}) {
+    if (options.public) {
+      this.routerPublic.get(path, callback);
+      return;
+    }
+
     this.router.get(path, callback);
   }
 
@@ -174,8 +187,15 @@ class HttpServer {
    * Adds POST route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
+   * @param {function} options
+   * @param {function} options.public - true to remove token verification
    */
-  post(path, callback) {
+  post(path, callback, options = {}) {
+    if (options.public) {
+      this.routerPublic.post(path, callback);
+      return;
+    }
+
     this.router.post(path, callback);
   }
 
@@ -183,8 +203,15 @@ class HttpServer {
    * Adds DELETE route with authentification (req.query.token must be provided)
    * @param {string} path - path that the callback will be bound to
    * @param {function} callback - function (that receives req and res parameters)
+   * @param {function} options
+   * @param {function} options.public - true to remove token verification
    */
-  delete(path, callback) {
+  delete(path, callback, options = {}) {
+    if (options.public) {
+      this.routerPublic.delete(path, callback);
+      return;
+    }
+
     this.router.delete(path, callback);
   }
 
@@ -257,7 +284,7 @@ class HttpServer {
       })
       .catch((error) => {
         // Handles invalid oAuth code parameters
-        log.warn(error);
+        log.warn(`OAuth failed: ${error.message}`);
         res.status(401).send(
           `OAuth failed: ${error.message}, beware refreshing the page with one-time code parameter`
         );
@@ -289,7 +316,7 @@ class HttpServer {
         };
         next();
       }, (error) => {
-        log.warn(`HTTP - ${error.name} : ${error.message}`);
+        log.warn(`${error.name} : ${error.message}`);
         res.status(403).json({message: error.name});
       });
   }

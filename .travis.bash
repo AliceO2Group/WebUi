@@ -32,5 +32,5 @@ done
 get_changed_projects_list $TRAVIS_BRANCH
 
 for project in ${CHANGED_PROJECTS[@]}; do
-  cd ${project}; touch TEST; cd ..; echo "Testing ${project}"
+  cd ${project}; touch _TEST; cd ..; echo "Testing ${project}"
 done

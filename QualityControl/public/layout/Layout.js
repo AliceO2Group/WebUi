@@ -1,10 +1,18 @@
-import {Observable, fetchClient, WebSocketClient, RemoteData} from '/js/src/index.js';
+import {Observable, fetchClient, RemoteData} from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import {objectId, clone} from '../common/utils.js';
 import {assertTabObject, assertLayout, assertLayouts} from '../common/Types.js';
 
+/**
+ * Model namespace with all requests to load or create layouts, compute their position on a grid,
+ * and search them.
+ */
 export default class Layout extends Observable {
+  /**
+   * Initialize with empty values
+   * @param {Object} model
+   */
   constructor(model) {
     super();
 
@@ -14,7 +22,7 @@ export default class Layout extends Observable {
     this.item = null; // layout containing an array of tabs
     this.tab = null; // pointer to a tab from `item`
 
-    this.myList = RemoteData.NotAsked(); // array of layouts
+    this.myList = RemoteData.notAsked(); // array of layouts
 
     this.searchInput = '';
     this.searchResult = null; // null means no search, sub-array of `list`
@@ -31,6 +39,9 @@ export default class Layout extends Observable {
     // gridList.grid.length: integer, number of rows
   }
 
+  /**
+   * Load all available layouts shared by users inside `list`
+   */
   async loadList() {
     const {result, ok} = await this.model.loader.post('/api/listLayouts');
     if (!ok) {
@@ -42,27 +53,36 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Load layouts of current user inside `myList`
+   */
   async loadMyList() {
-    this.myList = RemoteData.Loading();
+    this.myList = RemoteData.loading();
 
     const {result, ok} = await this.model.loader.post('/api/listLayouts', {owner_id: this.model.session.personid});
     if (!ok) {
-      this.myList = RemoteData.Failure('Unable to load layouts of user');
+      this.myList = RemoteData.failure('Unable to load layouts of user');
     } else {
-      this.myList = RemoteData.Success(assertLayouts(result));
+      this.myList = RemoteData.success(assertLayouts(result));
     }
 
     this.notify();
   }
 
-  async loadItem(layoutName) {
-    if (!layoutName) {
-      throw new Error('layoutName parameter is mandatory');
+  /**
+   * Load a single layout inside `item` and make its first tab selected
+   * @param {number} layoutId
+   */
+  async loadItem(layoutId) {
+    if (!layoutId) {
+      throw new Error('layoutId parameter is mandatory');
     }
 
-    const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutName: layoutName});
+    this.item = null;
+    const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutId: layoutId});
     if (!ok) {
-      alert(`unable to load layout "${layoutName}"`);
+      alert(`Unable to load layout "${layoutId}"`);
+      this.model.router.go(`?page=layouts`);
       return;
     }
 
@@ -71,16 +91,16 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Creates a new empty layout with a name, go to its own page in edit mode afterward
+   * @param {string} layoutName
+   */
   async newItem(layoutName) {
     if (!layoutName) {
       throw new Error('layoutName parameter is mandatory');
     }
 
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    };
-    const body = assertLayout({
+    const layout = assertLayout({
       id: objectId(),
       name: layoutName,
       owner_id: this.model.session.personid,
@@ -91,27 +111,31 @@ export default class Layout extends Observable {
         objects: [],
       }]
     });
-    const req = fetchClient(`/api/layout`, {method: 'POST', headers, body: JSON.stringify(body)});
-    this.model.loader.watchPromise(req);
-    const res = await req;
 
-    // Read the new layout created
-    await this.loadItem(layoutName);
+    const {result, ok} = await this.model.loader.post('/api/layout', layout);
+    if (!ok) {
+      alert(result.error || 'Unable to create layout');
+      return;
+    }
 
-    this.model.router.go(`?page=layoutShow&layout=${encodeURIComponent(layoutName)}`, false, true);
-    this.edit(); // edit the new item after loading page
+    // Read the new layout created and edit it
+    this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
+
+    // Update user list in background
     this.loadMyList();
   }
 
+  /**
+   * Delete current layout inside `item` from the server
+   */
   async deleteItem() {
     if (!this.item) {
       throw new Error('no layout to delete');
     }
 
-    const req = fetchClient(`/api/layout/${this.item.name}`, {method: 'DELETE'});
+    const req = fetchClient(`/api/layout/${this.item.id}`, {method: 'DELETE'});
     this.model.loader.watchPromise(req);
-    const res = await req;
-    // const layout = await res.json();
+    await req;
 
     this.model.router.go(`?page=layouts`);
     this.loadMyList();
@@ -119,27 +143,45 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Save current `item` layout to server
+   */
   saveItem() {
     if (!this.item) {
       throw new Error('no layout to save');
     }
 
-    return this.model.loader.watchPromise(fetchClient(`/api/writeLayout?layoutName=${this.item.name}`, {method: 'POST', body: JSON.stringify(this.item),     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },})
-      .then(res => res.json())
-      .then(item => {
+    const options = {
+      method: 'POST',
+      body: JSON.stringify(this.item),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const request = fetchClient(`/api/writeLayout?layoutId=${this.item.id}`, options);
+    this.model.loader.watchPromise(request);
+
+    request
+      .then((res) => res.json())
+      .then(() => {
         this.notify();
-      })
-    );
+      });
   }
 
+  /**
+   * Compute grid positoins of the current tab selected
+   */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
     this.gridList.resizeGrid(3);
   }
 
+  /**
+   * Select a tab of the current layout `item`
+   * @param {number} index - index of array `item.tabs`
+   */
   selectTab(index) {
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
@@ -150,6 +192,10 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Delete a tab by index from the current selected layout `item`
+   * @param {number} index - index of array `item.tabs`
+   */
   deleteTab(index) {
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
@@ -162,18 +208,24 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Rename tab of the current selected layout `item`
+   * @param {index} index - index of array `item.tabs`
+   * @param {string} name
+   */
   renameTab(index, name) {
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
-    }
-    if (this.item.tabs.length <= 1) {
-      throw new Error(`deleting last tab is forbidden`);
     }
 
     this.item.tabs[index].name = name;
     this.notify();
   }
 
+  /**
+   * Creates a new tab inside the current layout `item`
+   * @param {string} name
+   */
   newTab(name) {
     if (!name) {
       throw new Error(`tab name is required`);
@@ -186,6 +238,12 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Set uset input for search and use a fuzzy algo to filter list of layouts.
+   * Result is set inside `searchResult`.
+   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
+   * @param {string} searchInput
+   */
   search(searchInput) {
     this.searchInput = searchInput;
 
@@ -196,12 +254,12 @@ export default class Layout extends Observable {
     }
 
     const fuzzyRegex = new RegExp(searchInput.split('').join('.*?'), 'i');
-    this.searchResult = this.list.filter(item => item.name.match(fuzzyRegex));
+    this.searchResult = this.list.filter((item) => item.name.match(fuzzyRegex));
     this.notify();
   }
 
   /**
-   * Creates a deep clone of current `item` to edit it without side effect.
+   * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
    */
   edit() {
     if (!this.item) {
@@ -220,13 +278,12 @@ export default class Layout extends Observable {
   save() {
     this.editEnabled = false;
     this.editingTabObject = null;
-    console.log('save layout', this.item);
     this.saveItem();
     this.notify();
   }
 
   /**
-   * Ends editing and replaces the current layout by the original before editing
+   * Ends editing and replaces the current layout by the original that was backed-up before editing
    */
   cancelEdit() {
     this.editEnabled = false;
@@ -236,6 +293,11 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Add a new object chart
+   * @param {string} objectName - name of object like a/b/c
+   * @return {Object} the new tabObject created
+   */
   addItem(objectName) {
     const newTabObject = assertTabObject({
       id: objectId(),
@@ -285,7 +347,7 @@ export default class Layout extends Observable {
 
     // restoration of positions by mutating so we keep references
     this.tab.objects.forEach((obj) => {
-      const originalClone = this.originalItems.find(tabObject => tabObject.id === obj.id);
+      const originalClone = this.originalItems.find((tabObject) => tabObject.id === obj.id);
       obj.x = originalClone.x;
       obj.y = originalClone.y;
       obj.h = originalClone.h;
@@ -298,11 +360,22 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Set size of tabObject and compute new positions in the grid
+   * @param {Object} tabObject
+   * @param {number} w - width
+   * @param {number} h - height
+   */
   resizeTabObject(tabObject, w, h) {
     this.gridList.resizeItem(tabObject, {w, h});
     this.notify();
   }
 
+  /**
+   * Toggle a jsroot option of a tabObject
+   * @param {Object} tabObject
+   * @param {string} option
+   */
   toggleTabObjectOption(tabObject, option) {
     const index = tabObject.options.indexOf(option);
     if (index >= 0) {
@@ -313,16 +386,24 @@ export default class Layout extends Observable {
     this.notify();
   }
 
+  /**
+   * Edit a tabObject from current tab from current layout, sidebar will show its properties
+   * @param {Object} tabObject
+   */
   editTabObject(tabObject) {
     this.editingTabObject = tabObject;
     this.notify();
   }
 
+  /**
+   * Delete a tabObject from current tab from current layout
+   * @param {Object} tabObject
+   */
   deleteTabObject(tabObject) {
     if (tabObject === this.editingTabObject) {
       this.editingTabObject = null;
     }
-    this.tab.objects = this.tab.objects.filter(item => item.id !== tabObject.id);
+    this.tab.objects = this.tab.objects.filter((item) => item.id !== tabObject.id);
     this.sortObjectsOfCurrentTab();
     this.notify();
   }

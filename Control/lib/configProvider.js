@@ -1,4 +1,6 @@
-const {log} = require('@aliceo2/web-ui');
+const {Log} = require('@aliceo2/web-ui');
+const log = new Log('ControlConfig');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -22,7 +24,8 @@ try {
   process.exit(1);
 }
 
-log.info(`Reading config file "${configFile}"`);
 const config = require(configFile);
+Log.configure(config);
+log.info(`Read config file "${configFile}"`);
 
 module.exports = config;

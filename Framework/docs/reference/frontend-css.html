@@ -81,6 +81,7 @@
   <p class="warning">.warning</p>
   <p class="danger">.danger</p>
   <p class="black">.black</p>
+  <p class="gray-darker">.gray-darker</p>
   <p class="gray">.gray</p>
   <p class="white">.white</p>
 
@@ -104,8 +105,8 @@
   <a name="buttons"></a>
   <h2>Buttons</h2>
   <p class="measure">The .btn class is designed to be used with <code>&lt;button&gt;</code> elements.
-    Buttons can have many native states according to mouse position: <code>:hover</code>, <code>:active</code> and <code>:disabled</code>.
-    A fourth is called <code>.selected</code> and can activated with a CSS class.<p>
+    Buttons can have different states: <code>.active</code>, <code>.selected</code>, <code>.loading</code> (class name) and <code>disabled</code> (HTML attribute).<p>
+  <p class="measure">Three colors are available, <code>.btn</code> might be used everywhere, <code>.btn.btn-primary</code> for main buttons and <code>.btn.btn-danger</code> for destructive actions.</p>
 
   <p>
     Normal:<br/>
@@ -134,21 +135,31 @@
 
   <p>
     Group buttons together:<br/>
+    <script>
+      function toggleGroup(el) {
+        document.querySelectorAll('.btn-group .btn').forEach(n => n.classList.remove('active'));
+        el.classList.add('active')
+      }
+    </script>
     <div class="btn-group">
-      <button class="btn">.button</button>
-      <button class="btn active">.button.active</button>
-      <button class="btn ">.button</button>
+      <button class="btn" onclick="toggleGroup(this)">.button</button>
+      <button class="btn active" onclick="toggleGroup(this)">.button.active</button>
+      <button class="btn " onclick="toggleGroup(this)">.button</button>
     </div>
   </p>
 
   <p>Tabs:<br/>
-    <button class="btn btn-tab">Menu 1</button>
-    <button class="btn btn-tab selected">Menu 2</button>
-    <button class="btn btn-tab ">Menu 3</button>
-    <button class="btn btn-tab ">Menu 4</button>
-    <button class="btn btn-tab ">Menu 5</button>
-    <button class="btn btn-tab loading">Menu 6</button>
-    <button class="btn btn-tab loading">Menu 7</button>
+    <script>
+      function toggleTabs(el) {
+        document.querySelectorAll('.btn-tab').forEach(n => n.classList.remove('selected'));
+        el.classList.add('selected')
+      }
+    </script>
+    <button class="btn btn-tab" onclick="toggleTabs(this)">Menu 1</button>
+    <button class="btn btn-tab selected" onclick="toggleTabs(this)">Menu 2</button>
+    <button class="btn btn-tab " onclick="toggleTabs(this)">Menu 3</button>
+    <button class="btn btn-tab " onclick="toggleTabs(this)">Menu 4</button>
+    <button class="btn btn-tab " onclick="toggleTabs(this)">Menu 5</button>
   </p>
 
   <p>Menu:<br/>
@@ -169,6 +180,25 @@
       <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M0 0v4h4v-4h-4zm5 2v3h-3v1h4v-4h-1zm2 2v3h-3v1h4v-4h-1z"></path></svg>
       <span>Item 4</span>
     </a>
+  </p>
+
+  <p>Dropdown:<br>
+    <div class="dropdown">
+      <button class="btn" onclick="document.querySelector('.dropdown').classList.toggle('dropdown-open')">
+        <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M4 0c-1.105 0-2 1.119-2 2.5s.895 2.5 2 2.5 2-1.119 2-2.5-.895-2.5-2-2.5zm-2.094 5c-1.07.04-1.906.92-1.906 2v1h8v-1c0-1.08-.836-1.96-1.906-2-.54.61-1.284 1-2.094 1-.81 0-1.554-.39-2.094-1z"></path></svg>
+        Samantha Carter
+      </button>
+      <div class="dropdown-menu">
+        <a href="#" class="menu-item ">
+          <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M4 0c-1.105 0-2 1.119-2 2.5s.895 2.5 2 2.5 2-1.119 2-2.5-.895-2.5-2-2.5zm-2.094 5c-1.07.04-1.906.92-1.906 2v1h8v-1c0-1.08-.836-1.96-1.906-2-.54.61-1.284 1-2.094 1-.81 0-1.554-.39-2.094-1z"></path></svg>
+          <span>Profil</span>
+        </a>
+        <a href="#" class="menu-item">
+          <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M3 0v1h4v5h-4v1h5v-7h-5zm-1 2l-2 1.5 2 1.5v-1h4v-1h-4v-1z"></path></svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
   </p>
 
   <a href="javascipt:;">link to external website</a><br>

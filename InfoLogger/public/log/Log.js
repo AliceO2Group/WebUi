@@ -1,7 +1,14 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
 
+/**
+ * Model Log, encapsulate all log management and queries
+ */
 export default class Log extends Observable {
+  /**
+   * Instanciate Log class and its internal LogFilter
+   * @param {Object} model
+   */
   constructor(model) {
     super();
 
@@ -36,19 +43,24 @@ export default class Log extends Observable {
     this.limit = 1000;
     this.applicationLimit = 100000; // browser can be slow is `list` array is bigger
 
-    this.queryResult = RemoteData.NotAsked();
+    this.queryResult = RemoteData.notAsked();
 
     this.list = [];
     this.item = null;
     this.autoScrollToItem = false; // go to an item
     this.autoScrollLive = false; // go at bottom on Live mode
     this.liveEnabled = false;
+    this.liveStartedAt = null;
+    this.liveInterval = null; // 1s interval to update chrono
     this.resetStats();
 
     this.scrollTop = 0; // position of table scrollbar
     this.scrollHeight = 0; // height of content viewed in the scroll table
   }
 
+  /**
+   * Set all stats severities to 0
+   */
   resetStats() {
     this.stats = {
       info: 0,
@@ -58,8 +70,12 @@ export default class Log extends Observable {
     };
   }
 
+  /**
+   * Increments stats of the severity of the log passed
+   * @param {Log} log
+   */
   addStats(log) {
-    switch(log.severity) {
+    switch (log.severity) {
       case 'F':
         this.stats.fatal++;
         break;
@@ -84,6 +100,11 @@ export default class Log extends Observable {
     this.notify();
   }
 
+  /**
+   * Used to display of not timestamp input panel
+   * @param {string} property
+   * @param {boolean} value
+   */
   setFocus(property, value) {
     this.focus[property] = value;
     this.notify();
@@ -124,6 +145,7 @@ export default class Log extends Observable {
    */
   firstError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal found.`);
       return;
     }
 
@@ -140,6 +162,7 @@ export default class Log extends Observable {
    */
   previousError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal found.`);
       return;
     }
 
@@ -168,6 +191,7 @@ export default class Log extends Observable {
    */
   nextError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal found.`);
       return;
     }
 
@@ -194,6 +218,7 @@ export default class Log extends Observable {
    */
   lastError() {
     if (!this.stats.error && !this.stats.fatal) {
+      alert(`No error or fatal found.`);
       return;
     }
 
@@ -246,7 +271,7 @@ export default class Log extends Observable {
       throw new Error('Query service is not available');
     }
 
-    this.queryResult = RemoteData.Loading();
+    this.queryResult = RemoteData.loading();
     this.notify();
 
     if (this.liveEnabled) {
@@ -259,17 +284,35 @@ export default class Log extends Observable {
     };
     const {result, ok} = await this.model.loader.post(`/api/query`, queryArguments);
     if (!ok) {
-      this.queryResult = RemoteData.Failure(result.message);
+      this.queryResult = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.queryResult = RemoteData.Success(result);
+    this.queryResult = RemoteData.success(result);
     this.list = result.rows;
     this.resetStats();
     result.rows.forEach(this.addStats.bind(this));
     this.notify();
   }
 
+  /**
+   * Forward call to `filter`, but if live mode is enabled,
+   * alert user that filtering will be affected
+   * @param {Any} ...args - See LogFilter#setCriteria doc
+   */
+  setCriteria(...args) {
+    this.filter.setCriteria(...args);
+
+    if (this.liveEnabled) {
+      this.model.ws.setFilter(this.model.log.filter.toFunction());
+      alert(`The current live session has been adapted to the new filter configuration.`);
+    }
+  }
+
+  /**
+   * Starts a live mode session by sending filters to server to allow streaming.
+   * Clears also log list.
+   */
   liveStart() {
     // those Errors should be protected by user interface
     if (this.queryResult.isLoading()) {
@@ -287,34 +330,52 @@ export default class Log extends Observable {
 
     this.list = [];
     this.resetStats();
-    this.queryResult = RemoteData.NotAsked(); // empty all data from last query
+    this.queryResult = RemoteData.notAsked(); // empty all data from last query
     this.liveEnabled = true;
+    this.liveStartedAt = new Date();
+
+    // Notify this model each second to force chorno to be updated
+    // because the output of formatDuration() change in time
+    // kill this interval when live mode is off
+    this.liveInterval = setInterval(this.notify.bind(this), 1000);
 
     this.model.ws.setFilter(this.model.log.filter.toFunction());
 
     this.notify();
   }
 
+  /**
+   * Stops live mode if it was enabled by stopping streaming from server
+   */
   liveStop() {
     if (!this.liveEnabled) {
       throw new Error('Live not enabled');
     }
 
+    clearInterval(this.liveInterval);
     this.liveEnabled = false;
     this.model.ws.setFilter(() => false);
     this.notify();
   }
 
+  /**
+   * Set log's table UI sizes to allow log scrolling
+   * @param {number} scrollTop - position of the user's scroll cursor
+   * @param {number} scrollHeight - height of table's viewport (not content height which is higher)
+   */
   setScrollTop(scrollTop, scrollHeight) {
     this.scrollTop = scrollTop;
     this.scrollHeight = scrollHeight;
     this.notify();
   }
 
+  /**
+   * Empty the list of all logs, reset stats and clear query mode request if any.
+   */
   empty() {
     this.list = [];
     this.resetStats();
-    this.queryResult = RemoteData.NotAsked();
+    this.queryResult = RemoteData.notAsked();
     this.notify();
   }
 
@@ -332,6 +393,9 @@ export default class Log extends Observable {
     this.notify();
   }
 
+  /**
+   * Enable or disable auto-scroll for live mode, a checkbox is used to control it
+   */
   toggleAutoScroll() {
     this.autoScrollLive = !this.autoScrollLive;
     this.notify();

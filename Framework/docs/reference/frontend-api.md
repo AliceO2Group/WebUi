@@ -16,6 +16,10 @@
 <dd><p>Class EventEmitter for event-driven architecture
 Similar to the one provided by NodeJS</p>
 </dd>
+<dt><a href="#AjaxResult">AjaxResult</a></dt>
+<dd><p>DTO representing result of an Ajax call
+Used as output of Loader calls</p>
+</dd>
 <dt><a href="#Loader">Loader</a> ⇐ <code><a href="#Observable">Observable</a></code></dt>
 <dd><p>Network loader, count current requests, handle errors, make ajax requests</p>
 </dd>
@@ -43,23 +47,23 @@ is emitted.</p>
 ## Functions
 
 <dl>
-<dt><a href="#chartTimeSerie">`chartTimeSerie(userOptions, width, height, serie, title, timeScale, colorPrimary, colorSecondary, background)`</a> ⇒ <code>vnode</code></dt>
-<dd><p>Displays time-serie based chart of recent data
+<dt><a href="#chartTimeSeries">`chartTimeSeries(userOptions, width, height, series, title, timeWindow, colorPrimary, colorSecondary, background)`</a> ⇒ <code>vnode</code></dt>
+<dd><p>Displays time-series based chart of recent data
 with a sliding window. Time scale (x) must be specified and
 value scale (y) is automatic to fill height.
 Value: {value:number, timestamp:number:ms}</p>
 </dd>
 <dt><a href="#draw">`draw(dom, options)`</a></dt>
-<dd><p>Draw chartTimeSerie to the specified dom element with options</p>
+<dd><p>Draw chartTimeSeries to the specified dom element with options</p>
 </dd>
 <dt><a href="#drawLegend">`drawLegend(ctx, titleText, legendText, left, top, width, height, color)`</a></dt>
-<dd><p>Part of chartTimeSerie, draw the title and scaling</p>
+<dd><p>Part of chartTimeSeries, draw the title and scaling</p>
 </dd>
 <dt><a href="#drawGrid">`drawGrid(ctx, width, height, color)`</a></dt>
-<dd><p>Part of chartTimeSerie, draw the axis</p>
+<dd><p>Part of chartTimeSeries, draw the axis</p>
 </dd>
-<dt><a href="#drawCurve">`drawCurve(ctx, serie, max, min, width, height, color, timeScale)`</a></dt>
-<dd><p>Part of chartTimeSerie, draw the curve</p>
+<dt><a href="#drawCurve">`drawCurve(ctx, series, max, min, width, height, color, timeWindow)`</a></dt>
+<dd><p>Part of chartTimeSeries, draw the curve</p>
 </dd>
 <dt><a href="#tryCompatibility">`tryCompatibility(stringCode)`</a></dt>
 <dd><p>Try to execute a string code with eval, on failure redirect to the compatibility page.</p>
@@ -297,6 +301,25 @@ in the order they were registered, passing the supplied arguments to each
 - eventName <code>string</code>
             - .args <code>any</code> - arguments to be passed to the listeners
 
+<a name="AjaxResult"></a>
+
+## AjaxResult
+DTO representing result of an Ajax call
+Used as output of Loader calls
+
+**Kind**: global class  
+**See**: [Loader](#Loader)  
+<a name="new_AjaxResult_new"></a>
+
+### `new AjaxResult(ok, status, result)`
+Constructor
+
+**Params**
+
+- ok <code>boolean</code> - status code between 200 and 299
+- status <code>number</code> - 200, 404, etc. 0 if connection failed
+- result <code>object</code> - object from server
+
 <a name="Loader"></a>
 
 ## Loader ⇐ [<code>Observable</code>](#Observable)
@@ -310,8 +333,9 @@ Network loader, count current requests, handle errors, make ajax requests
     * [`loader.watchPromise(promise)`](#Loader+watchPromise)
     * [`loader._promiseSuccess(data)`](#Loader+_promiseSuccess) ⇒ <code>Any</code>
     * [`loader._promiseError(err)`](#Loader+_promiseError)
-    * [`loader.post(url, body)`](#Loader+post) ⇒ <code>object</code>
-    * [`loader.get(url, query)`](#Loader+get) ⇒ <code>object</code>
+    * [`loader.post(url, body)`](#Loader+post) ⇒ [<code>AjaxResult</code>](#AjaxResult)
+    * [`loader.get(url, query)`](#Loader+get) ⇒ [<code>AjaxResult</code>](#AjaxResult)
+    * [`loader._request(url, options)`](#Loader+_request) ⇒ [<code>AjaxResult</code>](#AjaxResult)
     * [`loader.observe(callback)`](#Observable+observe)
     * [`loader.unobserve(callback)`](#Observable+unobserve)
     * [`loader.notify()`](#Observable+notify)
@@ -357,11 +381,12 @@ Private method. decrease `activePromises` by 1
 
 <a name="Loader+post"></a>
 
-### `loader.post(url, body)` ⇒ <code>object</code>
+### `loader.post(url, body)` ⇒ [<code>AjaxResult</code>](#AjaxResult)
 Do a POST request with `body` as JSON content.
 
 **Kind**: instance method of [<code>Loader</code>](#Loader)  
-**Returns**: <code>object</code> - result, ok, status  
+**Returns**: [<code>AjaxResult</code>](#AjaxResult) - result, ok, status  
+**See**: [AjaxResult](#AjaxResult)  
 **Params**
 
 - url <code>string</code> - any URL part
@@ -375,11 +400,12 @@ const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
 ```
 <a name="Loader+get"></a>
 
-### `loader.get(url, query)` ⇒ <code>object</code>
+### `loader.get(url, query)` ⇒ [<code>AjaxResult</code>](#AjaxResult)
 Do a GET request with `query` as query content.
 
 **Kind**: instance method of [<code>Loader</code>](#Loader)  
-**Returns**: <code>object</code> - result, ok, status  
+**Returns**: [<code>AjaxResult</code>](#AjaxResult) - result, ok, status  
+**See**: [AjaxResult](#AjaxResult)  
 **Params**
 
 - url <code>string</code> - any URL part
@@ -391,6 +417,19 @@ import {Loader} from '/js/src/index.js';
 const loader = new Loader();
 const {result, ok} = await loader.get('/api/foo', {bar: 123, baz: 456})
 ```
+<a name="Loader+_request"></a>
+
+### `loader._request(url, options)` ⇒ [<code>AjaxResult</code>](#AjaxResult)
+Wrapper around fetchClient to watch how many requests are established,
+handle errors and parse json content
+
+**Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Returns**: [<code>AjaxResult</code>](#AjaxResult) - result, ok, status  
+**Params**
+
+- url <code>string</code> - any URL part
+- options <code>object</code> - options passed to native fetch API
+
 <a name="Observable+observe"></a>
 
 ### `loader.observe(callback)`
@@ -689,10 +728,10 @@ http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html
     * [`remoteData.isLoading()`](#RemoteData+isLoading) ⇒ <code>boolean</code>
     * [`remoteData.isSuccess()`](#RemoteData+isSuccess) ⇒ <code>boolean</code>
     * [`remoteData.isFailure()`](#RemoteData+isFailure) ⇒ <code>boolean</code>
-    * [`RemoteData.NotAsked()`](#RemoteData.NotAsked) ⇒ [<code>RemoteData</code>](#RemoteData)
-    * [`RemoteData.Loading()`](#RemoteData.Loading) ⇒ [<code>RemoteData</code>](#RemoteData)
-    * [`RemoteData.Success(payload)`](#RemoteData.Success) ⇒ [<code>RemoteData</code>](#RemoteData)
-    * [`RemoteData.Failure(payload)`](#RemoteData.Failure) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.notAsked()`](#RemoteData.notAsked) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.loading()`](#RemoteData.loading) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.success(payload)`](#RemoteData.success) ⇒ [<code>RemoteData</code>](#RemoteData)
+    * [`RemoteData.failure(payload)`](#RemoteData.failure) ⇒ [<code>RemoteData</code>](#RemoteData)
 
 <a name="new_RemoteData_new"></a>
 
@@ -779,32 +818,36 @@ Test is current kind is a `Success`
 Test is current kind is a `Failure`
 
 **Kind**: instance method of [<code>RemoteData</code>](#RemoteData)  
-<a name="RemoteData.NotAsked"></a>
+<a name="RemoteData.notAsked"></a>
 
-### `RemoteData.NotAsked()` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.notAsked()` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'NotAsked' RemoteData kind
+(NotAsked is not eslint compatible and deprecated, use notAsked)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
-<a name="RemoteData.Loading"></a>
+<a name="RemoteData.loading"></a>
 
-### `RemoteData.Loading()` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.loading()` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'Loading' RemoteData kind
+(Loading is not eslint compatible and deprecated, use loading)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
-<a name="RemoteData.Success"></a>
+<a name="RemoteData.success"></a>
 
-### `RemoteData.Success(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.success(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'Success' RemoteData kind
+(Success is not eslint compatible and deprecated, use success)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
 **Params**
 
 - payload <code>Any</code>
 
-<a name="RemoteData.Failure"></a>
+<a name="RemoteData.failure"></a>
 
-### `RemoteData.Failure(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
+### `RemoteData.failure(payload)` ⇒ [<code>RemoteData</code>](#RemoteData)
 Factory to create new 'Failure' RemoteData kind
+(Failure is not eslint compatible and deprecated, use failure)
 
 **Kind**: static method of [<code>RemoteData</code>](#RemoteData)  
 **Params**
@@ -994,10 +1037,10 @@ sessionService is also refreshed.
 - command <code>string</code>  
 - payload <code>object</code>  
 
-<a name="chartTimeSerie"></a>
+<a name="chartTimeSeries"></a>
 
-## `chartTimeSerie(userOptions, width, height, serie, title, timeScale, colorPrimary, colorSecondary, background)` ⇒ <code>vnode</code>
-Displays time-serie based chart of recent data
+## `chartTimeSeries(userOptions, width, height, series, title, timeWindow, colorPrimary, colorSecondary, background)` ⇒ <code>vnode</code>
+Displays time-series based chart of recent data
 with a sliding window. Time scale (x) must be specified and
 value scale (y) is automatic to fill height.
 Value: {value:number, timestamp:number:ms}
@@ -1009,39 +1052,39 @@ Value: {value:number, timestamp:number:ms}
 - userOptions <code>Object</code> - all options to draw the chart
 - width <code>number</code> - size of canvas
 - height <code>number</code> - size of canvas
-- serie <code>Array.&lt;Values&gt;</code> - timestamp in ms
+- series <code>Array.&lt;Values&gt;</code> - timestamp in ms
 - title <code>string</code> - to be printed on corner bottom left
-- timeScale <code>number</code> - ms/div for x axis, div is half height
+- timeWindow <code>number</code> - ms/div for x axis, div is half height
 - colorPrimary <code>string</code> - color of curve
 - colorSecondary <code>string</code> - color of axis and labels
 - background <code>string</code> - color of background
 
 **Example**  
 ```js
-chartTimeSerie({
-  serie: [{value: Math.random(), timestamp: Date.now()}],
+chartTimeSeries({
+  series: [{value: Math.random(), timestamp: Date.now()}],
   title: 'Random',
   colorPrimary: 'blue',
   width: '800',
   width: '200',
-  timeScale: 1000,
+  timeWindow: 1000,
 })
 ```
 <a name="draw"></a>
 
 ## `draw(dom, options)`
-Draw chartTimeSerie to the specified dom element with options
+Draw chartTimeSeries to the specified dom element with options
 
 **Kind**: global function  
 **Params**
 
 - dom <code>DOMElement</code>
-- options <code>Object</code> - See chartTimeSerie options
+- options <code>Object</code> - See chartTimeSeries options
 
 <a name="drawLegend"></a>
 
 ## `drawLegend(ctx, titleText, legendText, left, top, width, height, color)`
-Part of chartTimeSerie, draw the title and scaling
+Part of chartTimeSeries, draw the title and scaling
 
 **Kind**: global function  
 **Params**
@@ -1058,7 +1101,7 @@ Part of chartTimeSerie, draw the title and scaling
 <a name="drawGrid"></a>
 
 ## `drawGrid(ctx, width, height, color)`
-Part of chartTimeSerie, draw the axis
+Part of chartTimeSeries, draw the axis
 
 **Kind**: global function  
 **Params**
@@ -1070,20 +1113,20 @@ Part of chartTimeSerie, draw the axis
 
 <a name="drawCurve"></a>
 
-## `drawCurve(ctx, serie, max, min, width, height, color, timeScale)`
-Part of chartTimeSerie, draw the curve
+## `drawCurve(ctx, series, max, min, width, height, color, timeWindow)`
+Part of chartTimeSeries, draw the curve
 
 **Kind**: global function  
 **Params**
 
 - ctx <code>CanvasRenderingContext2D</code>
-- serie <code>Array</code> - data
-- max <code>number</code> - max value of serie
-- min <code>number</code> - min value of serie
+- series <code>Array</code> - data
+- max <code>number</code> - max value of series
+- min <code>number</code> - min value of series
 - width <code>number</code> - width of the available area
 - height <code>number</code> - height of the available area
 - color <code>string</code> - color of curve
-- timeScale <code>number</code> - ms
+- timeWindow <code>number</code> - ms
 
 <a name="tryCompatibility"></a>
 
