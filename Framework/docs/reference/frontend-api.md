@@ -23,6 +23,10 @@ Used as output of Loader calls</p>
 <dt><a href="#Loader">Loader</a> ⇐ <code><a href="#Observable">Observable</a></code></dt>
 <dd><p>Network loader, count current requests, handle errors, make ajax requests</p>
 </dd>
+<dt><a href="#Notification">Notification</a> ⇐ <code><a href="#Observable">Observable</a></code></dt>
+<dd><p>Container of notification with time management
+Only 1 notification is handled at once.</p>
+</dd>
 <dt><a href="#Observable">Observable</a></dt>
 <dd><p>Simple Observable class to notify others listening for changes</p>
 </dd>
@@ -41,6 +45,15 @@ Search parameters can be read directly via <code>params</code>, for example:
 It also handles session token by adding it in the handshake request
 from sessionService transparently for developer. Authentification is done when <code>authed</code> event
 is emitted.</p>
+</dd>
+</dl>
+
+## Constants
+
+<dl>
+<dt><a href="#notification">`notification`</a> ⇒ <code>vnode</code></dt>
+<dd><p>Shows notification according to <code>notificationInstance</code>. Because of its absolute position it should
+be placed as first element inside body.</p>
 </dd>
 </dl>
 
@@ -64,6 +77,15 @@ Value: {value:number, timestamp:number:ms}</p>
 </dd>
 <dt><a href="#drawCurve">`drawCurve(ctx, series, max, min, width, height, color, timeWindow)`</a></dt>
 <dd><p>Part of chartTimeSeries, draw the curve</p>
+</dd>
+<dt><a href="#sortByTimestamp">`sortByTimestamp(pointA, pointB)`</a> ⇒ <code>number</code></dt>
+<dd><p>Comparaison function to sort points by <code>timestamp</code> field</p>
+</dd>
+<dt><a href="#maxOf">`maxOf(points)`</a> ⇒ <code>number</code></dt>
+<dd><p>Find the maximum &#39;.value&#39; of array of points</p>
+</dd>
+<dt><a href="#minOf">`minOf(points)`</a> ⇒ <code>number</code></dt>
+<dd><p>Find the minimum &#39;.value&#39; of array of points</p>
 </dd>
 <dt><a href="#tryCompatibility">`tryCompatibility(stringCode)`</a></dt>
 <dd><p>Try to execute a string code with eval, on failure redirect to the compatibility page.</p>
@@ -462,6 +484,93 @@ Notify every observer that something changed
 All notifications from `this` will be notified to `observer`.
 
 **Kind**: instance method of [<code>Loader</code>](#Loader)  
+**Params**
+
+- observer [<code>Observable</code>](#Observable) - the observable object which will notify its observers
+
+**Example**  
+```js
+const model1 = new Observable();
+const model2 = new Observable();
+const model3 = new Observable();
+model1.bubbleTo(model2);
+model2.bubbleTo(model3);
+model1.notify(); // model1, model2 and model3 notified
+```
+<a name="Notification"></a>
+
+## Notification ⇐ [<code>Observable</code>](#Observable)
+Container of notification with time management
+Only 1 notification is handled at once.
+
+**Kind**: global class  
+**Extends**: [<code>Observable</code>](#Observable)  
+
+* [Notification](#Notification) ⇐ [<code>Observable</code>](#Observable)
+    * [`new exports.Notification()`](#new_Notification_new)
+    * [`notification.show(message, type, duration)`](#Notification+show)
+    * [`notification.hide()`](#Notification+hide)
+    * [`notification.observe(callback)`](#Observable+observe)
+    * [`notification.unobserve(callback)`](#Observable+unobserve)
+    * [`notification.notify()`](#Observable+notify)
+    * [`notification.bubbleTo(observer)`](#Observable+bubbleTo)
+
+<a name="new_Notification_new"></a>
+
+### `new exports.Notification()`
+Initialize with empty notification
+
+<a name="Notification+show"></a>
+
+### `notification.show(message, type, duration)`
+Set notification as opened with content and type
+
+**Kind**: instance method of [<code>Notification</code>](#Notification)  
+**Params**
+
+- message <code>string</code> - what to say
+- type <code>string</code> - how to say (danger, warning, success, primary)
+- duration <code>number</code> - optional, how much time to show it (ms), can be Infinity
+
+<a name="Notification+hide"></a>
+
+### `notification.hide()`
+Set notification as hidden before countdown ends
+(by a click on notification for example)
+
+**Kind**: instance method of [<code>Notification</code>](#Notification)  
+<a name="Observable+observe"></a>
+
+### `notification.observe(callback)`
+Add an observer
+
+**Kind**: instance method of [<code>Notification</code>](#Notification)  
+**Params**
+
+- callback <code>function</code> - will be called for each notification
+
+<a name="Observable+unobserve"></a>
+
+### `notification.unobserve(callback)`
+Remove an observer
+
+**Kind**: instance method of [<code>Notification</code>](#Notification)  
+**Params**
+
+- callback <code>function</code> - the callback to remove
+
+<a name="Observable+notify"></a>
+
+### `notification.notify()`
+Notify every observer that something changed
+
+**Kind**: instance method of [<code>Notification</code>](#Notification)  
+<a name="Observable+bubbleTo"></a>
+
+### `notification.bubbleTo(observer)`
+All notifications from `this` will be notified to `observer`.
+
+**Kind**: instance method of [<code>Notification</code>](#Notification)  
 **Params**
 
 - observer [<code>Observable</code>](#Observable) - the observable object which will notify its observers
@@ -1037,6 +1146,36 @@ sessionService is also refreshed.
 - command <code>string</code>  
 - payload <code>object</code>  
 
+<a name="notification"></a>
+
+## `notification` ⇒ <code>vnode</code>
+Shows notification according to `notificationInstance`. Because of its absolute position it should
+be placed as first element inside body.
+
+**Kind**: global constant  
+**Params**
+
+- notificationInstance [<code>Notification</code>](#Notification)
+
+**Example**  
+```js
+import {mount, h, Notification, notification} from '../../Frontend/js/src/index.js';
+
+const view = (model) => [
+  notification(model),
+  h('div.m4', [
+    h('button', {onclick: () => model.show('An admin has taken lock form you.', 'primary')}, 'Show primary'),
+    h('button', {onclick: () => model.show('Environment has been created.', 'success')}, 'Show success'),
+    h('button', {onclick: () => model.show('Unable to create, please check inputs and retry.', 'warning')}, 'Show warning'),
+    h('button', {onclick: () => model.show('Server connection has been lost.', 'danger')}, 'Show danger'),
+  ]),
+];
+
+// Create some basic model
+const model = new Notification();
+
+mount(document.body, view, model, true);
+```
 <a name="chartTimeSeries"></a>
 
 ## `chartTimeSeries(userOptions, width, height, series, title, timeWindow, colorPrimary, colorSecondary, background)` ⇒ <code>vnode</code>
@@ -1127,6 +1266,37 @@ Part of chartTimeSeries, draw the curve
 - height <code>number</code> - height of the available area
 - color <code>string</code> - color of curve
 - timeWindow <code>number</code> - ms
+
+<a name="sortByTimestamp"></a>
+
+## `sortByTimestamp(pointA, pointB)` ⇒ <code>number</code>
+Comparaison function to sort points by `timestamp` field
+
+**Kind**: global function  
+**Params**
+
+- pointA <code>Object</code> - {value:number, timestamp:number:ms}
+- pointB <code>Object</code> - {value:number, timestamp:number:ms}
+
+<a name="maxOf"></a>
+
+## `maxOf(points)` ⇒ <code>number</code>
+Find the maximum '.value' of array of points
+
+**Kind**: global function  
+**Params**
+
+- points <code>Array.&lt;Point&gt;</code>
+
+<a name="minOf"></a>
+
+## `minOf(points)` ⇒ <code>number</code>
+Find the minimum '.value' of array of points
+
+**Kind**: global function  
+**Params**
+
+- points <code>Array.&lt;Point&gt;</code>
 
 <a name="tryCompatibility"></a>
 

@@ -59,3 +59,4 @@ console.log(`Server listening on port ${port}`);
 console.log(`Development pages at:`);
 console.log(`- http://localhost:${port}/docs/reference/chart.html`);
 console.log(`- http://localhost:${port}/docs/reference/frontend-css.html`);
+console.log(`- http://localhost:${port}/docs/reference/notification.html`);

@@ -254,6 +254,31 @@ label { display: block; margin-bottom: 0.5em; }
 .sidebar-extend { width: 30em; }
 .sidebar-extend .sidebar-content { width: 30em; }
 
+/* Component Notification */
+/* moves to screen to get user attention */
+/* 'display none' in .notification-close allow after animation to click though notification on other content */
+/* 'user-select none' in .notification allow to click through the div while centering content */
+
+.notification { position: absolute; top: 2em; width: 100%; text-align: center; cursor: pointer; pointer-events: none; }
+.notification-content { transition: opacity 0.8s cubic-bezier(0.18, 0.89, 0.34, 1.11), filter 0.8s cubic-bezier(0.18, 0.89, 0.34, 1.11); }
+.notification-open { display: inline; opacity: 1; filter: blur(0); pointer-events: all; }
+.notification-close { display: inline; opacity: 0; filter: blur(5em); pointer-events: none;  }
+
+/*.notification { position: absolute; display: none; width: 100%; text-align: center; cursor: default; pointer-events: none; }
+.notification-content { pointer-events: all; }
+.notification-open { display: block; top: 2em; animation: notification-open 0.8s 1 cubic-bezier(0.18, 0.89, 0.34, 1.11); }
+.notification-close {  top: 2em; opacity: 0; filter: blur(1em); animation: notification-close 0.8s 1 cubic-bezier(0.18, 0.89, 0.34, 1.11); }
+
+@keyframes notification-open {
+  from { top: -5em; }
+  to { top: 2em; }
+}
+
+@keyframes notification-close {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(1em); }
+}*/
+
 /* Basic table */
 
 .table { border-collapse: collapse; width: 100%; margin-bottom: 1em; border-radius: 0; }

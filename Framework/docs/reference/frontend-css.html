@@ -30,6 +30,7 @@
     <p><b>Components</b></p>
     <div><a href="#applayout">App layout</a></div>
     <div><a href="#apploading">App loading</a></div>
+    <div><a href="#notification">Notification</a></div>
     <div><a href="#icons">Icons</a></div>
   </div>
 </div>
@@ -677,6 +678,33 @@
         </div>
       </div>
       <div class="f5">Loading...</div>
+    </div>
+  </div>
+
+  <hr>
+  <a name="notification"></a>
+  <h2>Notification</h2>
+  <p class="measure-wide">Notification informs user of an event without blocking interraction like <code>alert()</code>.</p>
+  <p class="measure-wide">
+    Notification has 3 states: initial (not displayed), opened (shows with animation) and closed (hides with animation).
+    Because of its absolute position, it should be placed on a top element inside body. In the following example, its position
+    is absolutly relative to the gray area.<br>
+    <button class="btn" onclick="
+      document.querySelector('.notification .notification-content').classList.add('notification-open');
+      document.querySelector('.notification .notification-content').classList.remove('notification-close');
+    ">.notification.notification-open</button>
+    <button class="btn" onclick="
+      document.querySelector('.notification .notification-content').classList.remove('notification-open');
+      document.querySelector('.notification .notification-content').classList.add('notification-close');
+    ">.notification.notification-close</button>
+  </p>
+
+  <div class="relative bg-gray-lighter" style="height: 600px"><!-- this element represents body -->
+    <div class="notification text-no-select">
+      <span class="notification-content notification-open shadow-level3 bg-danger white br2 p2" onclick="
+      document.querySelector('.notification .notification-content').classList.remove('notification-open');
+      document.querySelector('.notification .notification-content').classList.add('notification-close');
+    ">Server connection has been lost. Please reload page.</span>
     </div>
   </div>
 
