@@ -95,15 +95,29 @@ const treeRows = (model) => !model.object.tree
 function searchRows(model) {
   return !model.object.searchResult ? null : model.object.searchResult.map((item)=> {
     const path = item.name;
+    const className = item && item === model.object.selected ? 'table-primary' : '';
 
     /**
      * Handler when line is clicked by user
      * @return {Any}
      */
-    const selectItem = () => model.object.select(item);
-    const className = item && item === model.object.selected ? 'table-primary' : '';
+    const onclick = () => model.object.select(item);
 
-    return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
+    /**
+     * On double click object is added to tab
+     * @return {Any}
+     */
+    const ondblclick = () => model.layout.addItem(item.name);
+
+    /**
+     * On drag start, inform model of the object moving
+     */
+    const ondragstart = () => {
+      const newItem = model.layout.addItem(item.name);
+      model.layout.moveTabObjectStart(newItem);
+    };
+
+    return h('tr', {key: path, title: path, onclick, ondblclick, ondragstart, class: className, draggable: true}, [
       h('td.highlight.text-ellipsis', [
         iconBarChart(),
         ' ',
@@ -149,7 +163,7 @@ function treeRow(model, tree, level) {
   } : null;
 
   const attr = {
-    key: path,
+    key: `key-sidebar-tree-${path}`,
     title: path,
     onclick,
     class: className,
@@ -165,4 +179,3 @@ function treeRow(model, tree, level) {
     ...subtree
   ];
 }
-

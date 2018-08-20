@@ -144,6 +144,7 @@ const graphs = {
   hpx: require('./demoData/hpx.json'),
   root0: require('./demoData/root0.json'),
   alice: require('./demoData/alice.json'),
+  string: require('./demoData/string.json'),
 };
 
 setInterval(() => {
@@ -163,6 +164,7 @@ const objects = [
   {name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', quality: 'good', data: graphs.canvas_tf1},
   {name: 'DAQ01/EquipmentSize/TOF/TOF', quality: 'good', data: graphs.histo},
   {name: 'DAQ01/EquipmentSize/TPC/TPC', quality: 'good', data: graphs.gaussian},
+  {name: 'DAQ01/EquipmentSize/TPC/STRING', quality: 'good', data: graphs.string},
   {name: 'DAQ01/EventSize/ACORDE/ACORDE', quality: 'good', data: graphs.canvas_tf1},
   {name: 'DAQ01/EventSize/CPV/CPV', quality: 'good', data: graphs.hpx},
   {name: 'DAQ01/EventSize/HMPID/HMPID', quality: 'good', data: graphs.gaussian},
