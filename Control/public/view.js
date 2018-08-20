@@ -51,11 +51,11 @@ export default function view(model) {
 const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
   switchCase(model.router.params.page, {
-    'roles': rolesHeader,
-    'environments': environmentsHeader,
-    'environment': environmentHeader,
-    'newEnvironment': newEnvironmentHeader,
-    'status': statusHeader
+    roles: rolesHeader,
+    environments: environmentsHeader,
+    environment: environmentHeader,
+    newEnvironment: newEnvironmentHeader,
+    status: statusHeader
   })(model)
 ]);
 
@@ -66,10 +66,10 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
  */
 const content = (model) => [
   switchCase(model.router.params.page, {
-    'roles': rolesContent,
-    'environments': environmentsContent,
-    'environment': environmentContent,
-    'newEnvironment': newEnvironmentContent,
-    'status': statusContent
+    roles: rolesContent,
+    environments: environmentsContent,
+    environment: environmentContent,
+    newEnvironment: newEnvironmentContent,
+    status: statusContent
   })(model)
 ];
