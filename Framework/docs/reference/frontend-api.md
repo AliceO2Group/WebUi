@@ -520,17 +520,37 @@ Only 1 notification is handled at once.
 ### `new exports.Notification()`
 Initialize with empty notification
 
+**Example**  
+```js
+import {mount, h, Notification, notification} from '../../Frontend/js/src/index.js';
+
+const view = (model) => [
+  notification(model),
+  h('div.m4', [
+    h('button', {onclick: () => model.show('An admin has taken lock form you.', 'primary')}, 'Show primary'),
+    h('button', {onclick: () => model.show('Environment has been created.', 'success')}, 'Show success'),
+    h('button', {onclick: () => model.show('Unable to create, please check inputs and retry.', 'warning')}, 'Show warning'),
+    h('button', {onclick: () => model.show('Server connection has been lost.', 'danger')}, 'Show danger'),
+  ]),
+];
+
+// Create some basic model
+const model = new Notification();
+
+mount(document.body, view, model, true);
+```
 <a name="Notification+show"></a>
 
 ### `notification.show(message, type, duration)`
-Set notification as opened with content and type
+Set notification as opened with content and type.
+`duration` for `danger` type should be set to Infinity if error is fatal for application (not working until reload)
 
 **Kind**: instance method of [<code>Notification</code>](#Notification)  
 **Params**
 
 - message <code>string</code> - what to say
 - type <code>string</code> - how to say (danger, warning, success, primary)
-- duration <code>number</code> - optional, how much time to show it (ms), can be Infinity
+- duration <code>number</code> - optional, how much time to show it (ms), Infinity for unlimited time.
 
 <a name="Notification+hide"></a>
 
