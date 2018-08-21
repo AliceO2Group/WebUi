@@ -1,4 +1,4 @@
-import {h} from '/js/src/index.js';
+import {h, notification} from '/js/src/index.js';
 
 import sidebar from './common/sidebar.js';
 import header from './common/header.js';
@@ -13,15 +13,18 @@ import objectTreePage from './object/objectTreePage.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('.absolute-fill.flex-column', [
-  h('header.shadow-level2.level2', [
-    header(model),
+export default (model) => [
+  h('.absolute-fill.flex-column', [
+    h('header.shadow-level2.level2', [
+      header(model),
+    ]),
+    h('.flex-grow.flex-row.outline-gray', [
+      sidebar(model),
+      h('section.outline-gray.flex-grow.relative', page(model))
+    ])
   ]),
-  h('.flex-grow.flex-row.outline-gray', [
-    sidebar(model),
-    h('section.outline-gray.flex-grow.relative', page(model))
-  ])
-]);
+  notification(model.notification),
+];
 
 /**
  * Switch between pages of QCG according to router parameters

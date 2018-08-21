@@ -1,4 +1,4 @@
-import {sessionService, Observable, WebSocketClient, QueryRouter, Loader} from '/js/src/index.js';
+import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
 import Object_ from './object/Object.js';
@@ -24,6 +24,9 @@ export default class Model extends Observable {
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
+
+    this.notification = new Notification(this);
+    this.notification.bubbleTo(this);
 
     this.sidebar = true;
     this.accountMenuEnabled = false;
@@ -90,7 +93,7 @@ export default class Model extends Observable {
    * Handle close event from WS when connection has been lost (server restart, etc.)
    */
   handleWSClose() {
-    alert(`Connection to server has been lost, please reload the page.`);
+    this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
   }
 
   /**
@@ -103,10 +106,7 @@ export default class Model extends Observable {
           .then(() => {
             this.page = 'layoutList';
             this.notify();
-          })
-          .catch(() => {
-
-          });
+          }).catch(() => true); // error is handled inside loadList
         break;
       case 'layoutShow':
         if (!this.router.params.layoutId) {
@@ -125,14 +125,11 @@ export default class Model extends Observable {
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}&layoutName=${this.router.params.layoutName}`, true, true);
             }
             this.notify();
-          })
-          .catch((_error) => {
-            // TODO: notification(error)
-            this.router.go('?page=layoutList');
-          });
+          }).catch(() => true); // error is handled inside loadItem
         break;
       case 'objectTree':
         this.page = 'objectTree';
+        // data are already loaded at begening
         this.notify();
         break;
       default:
