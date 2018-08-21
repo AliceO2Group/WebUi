@@ -18,7 +18,7 @@
     <div><a href="#radius">Radius</a></div>
     <div><a href="#display">Display</a></div>
     <div><a href="#effects">Effects</a></div>
-    <div><a href="#shadow">Shadow</a></div>
+    <div><a href="#levels">Levels</a></div>
 
     <p><b>Layout</b></p>
     <div><a href="#position">Position</a></div>
@@ -65,7 +65,8 @@
 
   <h4>Text utilities</h4>
   <p class="text-ellipsis w-50">.text-ellipsis This is a long text which will be truncated. This is a long text which will be truncated. This is a long text which will be truncated.</p>
-  <p class="text-no-select">.text-no-select</p>
+  <p class="text-no-select">.text-no-select Impossible to select, useful to remove from copy/paste selection or apply on buttons</p>
+  <p class=" text-light">.text-light Makes small fonts more readable in some situations</p>
 
   <h4>Text measure</h4>
   <p class="measure-narrow"><b>.measure-narrow</b> Anything from 45 to 75 characters is widely regarded as a satisfactory length of line for a single-column page… the 66-character line (counting both letters and spaces) is widely regarded as ideal. For multiple-column work, a better average is 40-50 characters.</p>
@@ -373,13 +374,22 @@
   <p>.appearance will show the item slowly, once</p>
 
   <hr>
-  <a name="shadow"></a>
-  <h2>Shadow</h2>
-  <p class="measure">Shadow is a way to elevate contents and stack them, for example a menu is above the rest of the page which scrolls below. A z-index is associated so a small shadow is always below a wide shadow.</p>
+  <a name="levels"></a>
+  <h2>Levels</h2>
+  <p class="measure">Levels is a way to elevate contents and stack them, for example a menu is above the rest of the page which scrolls below.
+   See <a href="https://material.io/design/environment/elevation.html#default-elevations">Material Design</a>.</p>
 
-  <p class="shadow-level0">.shadow-level0</p>
-  <p class="shadow-level1">.shadow-level1</p>
-  <p class="shadow-level2">.shadow-level2</p>
+  <p class="shadow-level0">.shadow-level0 for content (z-index and shadow)</p>
+  <p class="shadow-level1">.shadow-level1 for card of content</p>
+  <p class="shadow-level2">.shadow-level2 for topbar</p>
+  <p class="shadow-level3">.shadow-level3 for dropdown menu</p>
+  <p class="shadow-level4">.shadow-level4 for notification</p>
+
+  <p class="level0">.level0 (only z-index)</p>
+  <p class="level1">.level1</p>
+  <p class="level2">.level2</p>
+  <p class="level3">.level3</p>
+  <p class="level4">.level4</p>
 
   <hr>
   <a name="position"></a>
@@ -700,7 +710,7 @@
   </p>
 
   <div class="relative bg-gray-lighter" style="height: 600px"><!-- this element represents body -->
-    <div class="notification text-no-select">
+    <div class="notification text-no-select text-light">
       <span class="notification-content notification-open shadow-level3 bg-danger white br2 p2" onclick="
       document.querySelector('.notification .notification-content').classList.remove('notification-open');
       document.querySelector('.notification .notification-content').classList.add('notification-close');
