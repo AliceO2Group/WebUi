@@ -39,11 +39,8 @@ export default class Model extends Observable {
 
     // Setup WS connexion
     this.ws = new WebSocketClient();
-    this.ws.addListener('authed', () => {
-      this.ws.setFilter(() => {
-        return true;
-      });
-    });
+    this.ws.addListener('authed', this.handleWSAuthed.bind(this));
+    this.ws.addListener('close', this.handleWSClose.bind(this));
     this.ws.addListener('command', this.handleWSCommand.bind(this));
 
     // Init data
@@ -77,6 +74,23 @@ export default class Model extends Observable {
       this.object.setInformationService(message.payload);
       return;
     }
+  }
+
+  /**
+   * Handle authed event from WS when connection is ready to be used,
+   */
+  handleWSAuthed() {
+    // subscribe to all notifications from server (information service)
+    this.ws.setFilter(() => {
+      return true;
+    });
+  }
+
+  /**
+   * Handle close event from WS when connection has been lost (server restart, etc.)
+   */
+  handleWSClose() {
+    alert(`Connection to server has been lost, please reload the page.`);
   }
 
   /**

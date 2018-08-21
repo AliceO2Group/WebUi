@@ -25,4 +25,13 @@ module.exports = {
     host: 'localhost',
     port: 6102
   },
+
+  // JWT manages user's session duration
+  // https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/json-tokens.md
+  // jwt: {
+  //   secret: '<secret>',
+  //   issuer: 'alice-o2-gui',
+  //   expiration: '1d',
+  //   maxAge: '1d'
+  // },
 };
