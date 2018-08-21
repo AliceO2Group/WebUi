@@ -46,7 +46,17 @@ describe('Control', function () {
       },
       getEnvironments(call, callback) {
         calls['getEnvironments'] = true;
-        callback(null, {fakeData: 1});
+        const responseData = {
+          frameworkId: '74917838-27cb-414d-bfcd-7e74f85d4926-0000',
+          environments:[
+            {
+              id: '6f6d6387-6577-11e8-993a-f07959157220',
+              createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
+              state: 'CONFIGURED',
+            }
+          ]
+        };
+        callback(null, responseData);
       },
       getRoles(call, callback) {
         calls['getRoles'] = true;
@@ -65,6 +75,8 @@ describe('Control', function () {
       subprocessOutput += chunk.toString();
     });
 
+    this.ok = true;
+
     // Start browser to test UI
     browser = await puppeteer.launch({
       headless: true
@@ -74,9 +86,11 @@ describe('Control', function () {
     // Listen to browser
     page.on('error', pageerror => {
       console.error('        ', pageerror);
+      this.ok = false;
     });
     page.on('pageerror', pageerror => {
       console.error('        ', pageerror);
+      this.ok = false;
     });
     page.on('console', msg => {
       for (let i = 0; i < msg.args().length; ++i) {
@@ -140,6 +154,14 @@ describe('Control', function () {
     it('should have gotten data from getRoles', async () => {
       assert(calls['getRoles'] === true);
     });
+  });
+
+  beforeEach(() => {
+    this.ok = true;
+  });
+
+  afterEach(() => {
+    if (!this.ok) throw new Error('something went wrong');
   });
 
   after(async () => {
