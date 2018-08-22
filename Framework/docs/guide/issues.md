@@ -1,6 +1,6 @@
 # Common issues
 
-This list should be updated when a difficult and rare problem happen to speed up resolution next time.
+This list should be updated when a difficult and rare problem happens to speed up resolution next time.
 
 ###### `npm install` gets error "Unexpected end of JSON input while parsing near ..."
 Start `npm cache clean --force`
