@@ -28,4 +28,4 @@ export default (model) => [
  */
 const howManyItems = (model) => model.layout.searchResult
   ? `${model.layout.searchResult.length} found of ${model.layout.list.length}`
-  : `${model.layout.list.length} items`;
+  : `${model.layout.list && model.layout.list.length} items`;

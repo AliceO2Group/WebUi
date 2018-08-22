@@ -54,6 +54,7 @@ button, input, optgroup, select, textarea { margin: 0; font-family: inherit; fon
 .text-center  { text-align: center; }
 .text-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .text-no-select { user-select: none; }
+.text-light { font-weight: lighter; }
 
 /* font scale */
 h1, .f1 { font-size: 3rem; }
@@ -254,6 +255,16 @@ label { display: block; margin-bottom: 0.5em; }
 .sidebar-extend { width: 30em; }
 .sidebar-extend .sidebar-content { width: 30em; }
 
+/* Component Notification */
+/* moves to screen to get user attention */
+/* 'display none' in .notification-close allow after animation to click though notification on other content */
+/* 'user-select none' in .notification allow to click through the div while centering content */
+
+.notification { position: absolute; top: 2em; width: 100%; text-align: center; cursor: pointer; pointer-events: none; }
+.notification-content { transition: opacity 0.8s cubic-bezier(0.18, 0.89, 0.34, 1.11), filter 0.8s cubic-bezier(0.18, 0.89, 0.34, 1.11); }
+.notification-open { display: inline; opacity: 1; filter: blur(0); pointer-events: all; }
+.notification-close { display: inline; opacity: 0; filter: blur(5em); pointer-events: none;  }
+
 /* Basic table */
 
 .table { border-collapse: collapse; width: 100%; margin-bottom: 1em; border-radius: 0; }
@@ -271,6 +282,7 @@ label { display: block; margin-bottom: 0.5em; }
 1: card of content
 2: topbar
 3: dropdown menu
+4: notification
 https://material.io/design/environment/elevation.html#default-elevations
 */
 
@@ -278,6 +290,13 @@ https://material.io/design/environment/elevation.html#default-elevations
 .shadow-level1 { z-index: 100; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2); }
 .shadow-level2 { z-index: 200; box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); }
 .shadow-level3 { z-index: 300; box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2) }
+.shadow-level4 { z-index: 400; box-shadow: 0 16px 34px 4px rgba(0,0,0,0.14), 0 6px 28px 4px rgba(0,0,0,0.12), 0 10px 10px -6px rgba(0,0,0,0.2) }
+
+.level0 { z-index: 0; }
+.level1 { z-index: 100; }
+.level2 { z-index: 200; }
+.level3 { z-index: 300; }
+.level4 { z-index: 400; }
 
 /* Component spinner atomic */
 /* Credit: http://epic-spinners.epicmax.co/ */

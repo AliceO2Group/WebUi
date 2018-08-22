@@ -89,7 +89,7 @@ class Loader extends Observable {
     const options = {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
@@ -118,7 +118,7 @@ class Loader extends Observable {
     const options = {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     };
 

@@ -108,20 +108,6 @@ const toolbarEditModeTab = (model, tab, i) => {
    * @return {nothing}
    */
   const selectTab = () => model.layout.selectTab(i);
-  /**
-   * Handler when user click on trash icon
-   * ASk confirmation before sending to model
-   */
-  let deleteTab = () => {
-    if (model.layout.item.tabs.length <= 1) {
-      alert(`Please, add another tab before deleting the last one`);
-      return;
-    }
-
-    if (confirm('Are you sure to delete this tab?')) {
-      model.layout.deleteTab(i);
-    }
-  };
 
   /**
    * Handler when user click on rename icon
@@ -143,7 +129,7 @@ const toolbarEditModeTab = (model, tab, i) => {
       }, iconPencil()),
       selected && h('button.br-pill.ph2.btn.btn-tab', {
         class: linkClass,
-        onclick: deleteTab,
+        onclick: () => model.layout.deleteTab(i),
         title: 'Delete tab'
       }, iconTrash()),
     ]),
