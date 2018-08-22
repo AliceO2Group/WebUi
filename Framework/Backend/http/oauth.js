@@ -115,7 +115,7 @@ class OAuth {
         method: 'GET',
         headers: {
           'Content-Type': 'text',
-          'Authorization': 'Bearer ' + token
+          Authorization: 'Bearer ' + token
         }
       };
       Object.assign(postOptions, options);

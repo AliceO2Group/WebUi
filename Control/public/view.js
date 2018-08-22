@@ -1,5 +1,5 @@
 // Framework
-import {h, switchCase} from '/js/src/index.js';
+import {h, switchCase, notification} from '/js/src/index.js';
 
 // Common app helpers
 import appHeader from './common/appHeader.js';
@@ -27,8 +27,9 @@ import {
  * @param {object} model - representing current application state
  * @return {vnode} application view to be drawn according to model
  */
-export default function view(model) {
-  return h('.flex-column absolute-fill', [
+export default (model) => [
+  notification(model.notification),
+  h('.flex-column absolute-fill', [
     header(model),
     h('.flex-grow flex-row', [
       h('.sidebar', [
@@ -40,8 +41,8 @@ export default function view(model) {
         content(model)
       ])
     ]),
-  ]);
-}
+  ])
+];
 
 /**
  * Top header with app menu on the left and page menu for the rest

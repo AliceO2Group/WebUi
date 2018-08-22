@@ -30,7 +30,7 @@ const statusLogs = (model) => model.servicesResult.match({
       NotAsked: () => null,
       Loading: () => 'Querying server...',
       Success: (result) => statusQuery(model, result),
-      Failure: (error) => h('.danger', error),
+      Failure: () => null, // notification
     }),
     model.log.liveEnabled && statusLive(model, services),
   ],

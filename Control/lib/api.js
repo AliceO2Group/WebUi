@@ -1,5 +1,6 @@
 const {WebSocketMessage} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)('Control');
+const {trace} = require('@aliceo2/web-ui').Log;
 
 const Padlock = require('./Padlock.js');
 const ControlProxy = require('./ControlProxy.js');
@@ -105,7 +106,7 @@ module.exports.attachTo = (http, ws) => {
 function errorHandler(err, res, status = 500) {
   if (status === 500) {
     if (err.stack) {
-      log.trace(err);
+      trace(err);
     }
     log.error(err.message || err);
   }

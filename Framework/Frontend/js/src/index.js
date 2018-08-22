@@ -22,3 +22,4 @@ export {default as Loader} from './Loader.js';
 export * from './icons.js';
 
 export * from './chart.js';
+export * from './Notification.js';

@@ -45,7 +45,8 @@ export default class Layout extends Observable {
   async loadList() {
     const {result, ok} = await this.model.loader.post('/api/listLayouts');
     if (!ok) {
-      alert('unable to load layouts');
+      this.model.notification.show(`Unable to load layouts.`, 'danger', Infinity);
+      this.list = [];
       return;
     }
 
@@ -61,7 +62,8 @@ export default class Layout extends Observable {
 
     const {result, ok} = await this.model.loader.post('/api/listLayouts', {owner_id: this.model.session.personid});
     if (!ok) {
-      this.myList = RemoteData.failure('Unable to load layouts of user');
+      this.model.notification.show(`Unable to load your personnal layouts.`, 'danger', Infinity);
+      this.myList = RemoteData.failure();
     } else {
       this.myList = RemoteData.success(assertLayouts(result));
     }
@@ -81,9 +83,9 @@ export default class Layout extends Observable {
     this.item = null;
     const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutId: layoutId});
     if (!ok) {
-      alert(`Unable to load layout "${layoutId}"`);
+      this.model.notification.show(`Unable to load layout, it might have been deleted.`, 'warning');
       this.model.router.go(`?page=layouts`);
-      return;
+      throw new Error(result.message);
     }
 
     this.item = assertLayout(result);
@@ -114,7 +116,7 @@ export default class Layout extends Observable {
 
     const {result, ok} = await this.model.loader.post('/api/layout', layout);
     if (!ok) {
-      alert(result.error || 'Unable to create layout');
+      this.model.notification.show(result.error || 'Unable to create layout', 'danger', Infinity);
       return;
     }
 
@@ -137,6 +139,7 @@ export default class Layout extends Observable {
     this.model.loader.watchPromise(req);
     await req;
 
+    this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success');
     this.model.router.go(`?page=layouts`);
     this.loadMyList();
     this.editEnabled = false;
@@ -166,6 +169,7 @@ export default class Layout extends Observable {
     request
       .then((res) => res.json())
       .then(() => {
+        this.model.notification.show(`Layout "${this.item.name}" has been saved.`, 'success');
         this.notify();
       });
   }
@@ -197,11 +201,18 @@ export default class Layout extends Observable {
    * @param {number} index - index of array `item.tabs`
    */
   deleteTab(index) {
+    if (this.item.tabs.length <= 1) {
+      this.model.notification.show(`Please, add another tab before deleting the last one`, 'primary');
+      return;
+    }
+
+    if (!confirm('Are you sure to delete this tab?')) {
+      return;
+    }
+
+    // impossible normally
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
-    }
-    if (this.item.tabs.length <= 1) {
-      throw new Error(`deleting last tab is forbidden`);
     }
 
     this.item.tabs.splice(index, 1);

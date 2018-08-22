@@ -1,0 +1,24 @@
+<!doctype html>
+<title>Notification</title>
+<link rel="stylesheet" href="../../Frontend/css/src/bootstrap.css">
+
+<script type="module">
+import {mount, h, switchCase, Notification, notification} from '../../Frontend/js/src/index.js';
+
+const view = (model) => [
+  notification(model),
+  h('div.m4', [
+    h('button', {onclick: () => model.show('An admin has taken lock form you.', 'primary')}, 'Show primary'),
+    h('button', {onclick: () => model.show('Environment has been created.', 'success')}, 'Show success'),
+    h('button', {onclick: () => model.show('Unable to create, please check inputs and retry.', 'warning')}, 'Show warning'),
+    h('button', {onclick: () => model.show('Server connection has been lost.', 'danger')}, 'Show danger'),
+  ]),
+];
+
+// Create some basic model
+const model = new Notification();
+
+mount(document.body, view, model, true);
+window.model = model;
+
+</script>

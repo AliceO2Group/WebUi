@@ -142,7 +142,7 @@ export default class Object_ extends Observable {
     const {result, ok} = await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
     if (!ok) {
       // it should be always status=200 for this request
-      alert('Failed to refresh plots when contacting server');
+      this.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
       return;
     }
 

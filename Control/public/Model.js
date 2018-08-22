@@ -1,5 +1,5 @@
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
+import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, Notification} from '/js/src/index.js';
 
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
@@ -35,6 +35,9 @@ export default class Model extends Observable {
     this.status = new Status(this);
     this.status.bubbleTo(this);
 
+    this.notification = new Notification(this);
+    this.notification.bubbleTo(this);
+
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
@@ -47,6 +50,7 @@ export default class Model extends Observable {
     // Setup WS connexion
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
+    this.ws.addListener('close', this.handleWSClose.bind(this));
 
     // Load some initial data
     this.lock.synchronizeState();
@@ -83,6 +87,13 @@ export default class Model extends Observable {
   }
 
   /**
+   * Handle close event from WS when connection has been lost (server restart, etc.)
+   */
+  handleWSClose() {
+    this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
+  }
+
+  /**
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
@@ -94,7 +105,7 @@ export default class Model extends Observable {
         break;
       case 'environment':
         if (!this.router.params.id) {
-          alert('id is missing, going to list instead');
+          this.notification.show('The id in URL is missing, going to list instead', 'warning');
           this.router.go('?page=environments');
           return;
         }

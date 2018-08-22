@@ -20,6 +20,9 @@ let page;
 // if they are tested just after their initialization.
 
 describe('Framework Frontend', function() {
+  this.timeout(5000);
+  this.slow(1000);
+
   // Start a web server to serve frontend
   // We don't use backend to avoid side effects from it
   before(function(done) {
@@ -241,6 +244,40 @@ describe('Framework Frontend', function() {
         window.router = router; // save for later use in tests
       });
       await page.waitForFunction(`window.notification === 'list'`);
+    });
+  });
+
+  describe('Notification class', function() {
+    before('can be instanciated', async () => {
+      await page.evaluate(() => {
+        window.notification = new Notification();
+      });
+    });
+
+    it('is hidden at first', async () => {
+      // await page.evaluate(() => {
+      //   window.notification = '';
+      //   const router = new QueryRouter();
+      //   router.observe(() => {
+      //     window.notification = router.params.page;
+      //   });
+      //   router.go('?page=list', true); // replace current URL to avoid loosing Framework injection
+      //   window.router = router; // save for later use in tests
+      // });
+      await page.waitForFunction(`window.notification.state === 'hidden'`);
+    });
+
+    it('is shown on new success message', async () => {
+      await page.evaluate(() => {
+        window.notification.show('Warp Drive Mr. Scott', 'success', 4000);
+      });
+      await page.waitForFunction(`window.notification.state === 'shown'`);
+      await page.waitForFunction(`window.notification.type === 'success'`);
+    });
+
+    it('stays for 4 seconds', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 4000));
+      await page.waitForFunction(`window.notification.state === 'hidden'`);
     });
   });
 

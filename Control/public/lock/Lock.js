@@ -12,11 +12,7 @@ export default class Lock extends Observable {
     super();
 
     this.model = model;
-    this.padlockState = { // Padlock state updated from server
-      lockedBy: null,
-      lockedByName: null,
-    };
-    this.padlockState = RemoteData.notAsked();
+    this.padlockState = RemoteData.notAsked(); // {lockedBy, lockedByName}
   }
 
   /**
@@ -39,7 +35,7 @@ export default class Lock extends Observable {
     if (!ok) {
       this.padlockState = RemoteData.failure(result.message);
       this.notify();
-      alert('Fatal error while loading LOCK, please reload the page');
+      this.model.notification.show('Fatal error while loading LOCK, please reload the page', 'danger', Infinity);
       return;
     }
     this.padlockState = RemoteData.success(result);
@@ -56,9 +52,11 @@ export default class Lock extends Observable {
 
     const {result, ok} = await this.model.loader.post(`/api/lock`);
     if (!ok) {
-      alert(result.message);
+      this.model.notification.show(result.message, 'danger');
       return;
     }
+
+    this.model.notification.show(`Lock taken`, 'success');
   }
 
   /**
@@ -71,8 +69,10 @@ export default class Lock extends Observable {
 
     const {result, ok} = await this.model.loader.post(`/api/unlock`);
     if (!ok) {
-      alert(result.message);
+      this.model.notification.show(result.message, 'danger');
       return;
     }
+
+    this.model.notification.show(`Lock released`, 'success');
   }
 }
