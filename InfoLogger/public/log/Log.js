@@ -145,7 +145,7 @@ export default class Log extends Observable {
    */
   firstError() {
     if (!this.stats.error && !this.stats.fatal) {
-      alert(`No error or fatal found.`);
+      this.model.notification.show(`No error or fatal found.`, 'primary');
       return;
     }
 
@@ -162,7 +162,7 @@ export default class Log extends Observable {
    */
   previousError() {
     if (!this.stats.error && !this.stats.fatal) {
-      alert(`No error or fatal found.`);
+      this.model.notification.show(`No error or fatal found.`, 'primary');
       return;
     }
 
@@ -191,7 +191,7 @@ export default class Log extends Observable {
    */
   nextError() {
     if (!this.stats.error && !this.stats.fatal) {
-      alert(`No error or fatal found.`);
+      this.model.notification.show(`No error or fatal found.`, 'primary');
       return;
     }
 
@@ -218,7 +218,7 @@ export default class Log extends Observable {
    */
   lastError() {
     if (!this.stats.error && !this.stats.fatal) {
-      alert(`No error or fatal found.`);
+      this.model.notification.show(`No error or fatal found.`, 'primary');
       return;
     }
 
@@ -284,6 +284,7 @@ export default class Log extends Observable {
     };
     const {result, ok} = await this.model.loader.post(`/api/query`, queryArguments);
     if (!ok) {
+      this.model.notification.show(`Server error, unable to query logs`, 'danger');
       this.queryResult = RemoteData.failure(result.message);
       this.notify();
       return;
@@ -305,7 +306,7 @@ export default class Log extends Observable {
 
     if (this.liveEnabled) {
       this.model.ws.setFilter(this.model.log.filter.toFunction());
-      alert(`The current live session has been adapted to the new filter configuration.`);
+      this.model.notification.show(`The current live session has been adapted to the new filter configuration.`, 'primary');
     }
   }
 

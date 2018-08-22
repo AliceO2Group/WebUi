@@ -1,6 +1,6 @@
 // Import frontend framework
 import {Observable, WebSocketClient, QueryRouter,
-  Loader, RemoteData, sessionService} from '/js/src/index.js';
+  Loader, RemoteData, sessionService, Notification} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
@@ -26,6 +26,9 @@ export default class Model extends Observable {
 
     this.timezone = new Timezone(this);
     this.timezone.bubbleTo(this);
+
+    this.notification = new Notification(this);
+    this.notification.bubbleTo(this);
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
@@ -67,7 +70,7 @@ export default class Model extends Observable {
    * Handle websocket close event
    */
   handleWSClose() {
-    alert(`Connection to server has been lost. Please reload the page.`); // TODO: notifications instead of alert
+    this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
   }
 
   /**
@@ -80,9 +83,14 @@ export default class Model extends Observable {
 
     const {result, ok} = await this.loader.post(`/api/services`);
     if (!ok) {
-      alert(`Unable to start application, web server is not reachable`);
+      this.notification.show(`Unable to load services and start application`, 'danger', Infinity);
       return;
     }
+
+    if (!result.query && !result.live) {
+      this.notification.show(`No service configured`, 'danger', Infinity);
+    }
+
     this.servicesResult = RemoteData.success(result);
     this.notify();
 
@@ -154,7 +162,7 @@ export default class Model extends Observable {
       return;
     }
     if (message.command === 'il-server-close') {
-      alert(`Connection between backend and InfoLogger server has been lost`);
+      this.notification.show(`Connection between backend and InfoLogger server has been lost`, 'warning');
     }
   }
 
