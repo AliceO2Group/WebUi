@@ -50,6 +50,7 @@ export default class Model extends Observable {
     // Setup WS connexion
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
+    this.ws.addListener('close', this.handleWSClose.bind(this));
 
     // Load some initial data
     this.lock.synchronizeState();
@@ -83,6 +84,13 @@ export default class Model extends Observable {
       this.lock.setPadlockState(message.payload);
       return;
     }
+  }
+
+  /**
+   * Handle close event from WS when connection has been lost (server restart, etc.)
+   */
+  handleWSClose() {
+    this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
   }
 
   /**
