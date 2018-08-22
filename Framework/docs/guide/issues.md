@@ -1,9 +1,9 @@
-# Common issues
+# Known issues
 
-This list should be updated when a difficult and rare problem happens to speed up resolution next time.
+This list should be updated when a rare problem occures to speed up resolution next time.
 
-###### `npm install` gets error "Unexpected end of JSON input while parsing near ..."
-Start `npm cache clean --force`
+###### `npm install` outputs error "Unexpected end of JSON input while parsing near ..."
+Run `npm cache clean --force`
 
 ###### UI gets duplicated elements after each click
 The use of array of array of vnode might break the template engine. Avoid `h('div', [[h('span')]])`. Prefer `h('div', [h('span')])`.
