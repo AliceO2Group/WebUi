@@ -1,5 +1,5 @@
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
+import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, Notification} from '/js/src/index.js';
 
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
@@ -34,6 +34,9 @@ export default class Model extends Observable {
 
     this.status = new Status(this);
     this.status.bubbleTo(this);
+
+    this.notification = new Notification(this);
+    this.notification.bubbleTo(this);
 
     // Setup router
     this.router = new QueryRouter();
@@ -94,7 +97,7 @@ export default class Model extends Observable {
         break;
       case 'environment':
         if (!this.router.params.id) {
-          alert('id is missing, going to list instead');
+          this.notification.show('The id in URL is missing, going to list instead', 'warning');
           this.router.go('?page=environments');
           return;
         }
