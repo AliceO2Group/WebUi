@@ -49,4 +49,4 @@ export default (model) => [
       statusBar(model)
     ]),
   ]),
-]
+];
