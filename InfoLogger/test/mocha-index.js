@@ -11,7 +11,7 @@ const {spawn} = require('child_process');
 // Network and rendering can have delays this can leads to random failures
 // if they are tested just after their initialization.
 
-describe('InfoLogger', function () {
+describe('InfoLogger', function() {
   let browser;
   let page;
   let subprocess; // web-server runs into a subprocess
@@ -19,8 +19,6 @@ describe('InfoLogger', function () {
   this.timeout(5000);
   this.slow(1000);
   const baseUrl = 'http://' + config.http.hostname + ':' + config.http.port + '/';
-
-  const calls = {}; // Object.<string:method, bool:flag> memorize that gRPC methods have been called indeed
 
   before(async () => {
     // Start web-server in background
@@ -48,7 +46,7 @@ describe('InfoLogger', function () {
       try {
         await page.goto(baseUrl, {waitUntil: 'networkidle0'});
         break; // conneciton ok, this test passed
-      } catch(e) {
+      } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
           continue; // try again
@@ -63,7 +61,7 @@ describe('InfoLogger', function () {
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.strictEqual(search, '?q={"level":{"max":1}}');
+    assert.strictEqual(search, '?q={"severity":{"match":"I W E F"},"level":{"max":1}}');
   });
 
   describe('LogFilter', async () => {
@@ -71,7 +69,7 @@ describe('InfoLogger', function () {
       // default Geneva time
       const $since = await page.evaluate(() => {
         window.model.log.filter.setCriteria('timestamp', 'since', '01/02/04');
-        return model.log.filter.criterias.timestamp.$since.toISOString();
+        return window.model.log.filter.criterias.timestamp.$since.toISOString();
       });
 
       assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
@@ -80,7 +78,7 @@ describe('InfoLogger', function () {
     it('parses numbers to integers', async () => {
       const $max = await page.evaluate(() => {
         window.model.log.filter.setCriteria('level', 'max', '12');
-        return model.log.filter.criterias.level.$max;
+        return window.model.log.filter.criterias.level.$max;
       });
 
       assert.strictEqual($max, 12);
@@ -89,7 +87,7 @@ describe('InfoLogger', function () {
     it('parses empty keyword to null', async () => {
       const $match = await page.evaluate(() => {
         window.model.log.filter.setCriteria('pid', 'match', '');
-        return model.log.filter.criterias.pid.$match;
+        return window.model.log.filter.criterias.pid.$match;
       });
 
       assert.strictEqual($match, null);
@@ -98,7 +96,7 @@ describe('InfoLogger', function () {
     it('parses keywords to array', async () => {
       const $match = await page.evaluate(() => {
         window.model.log.filter.setCriteria('pid', 'match', '123 456');
-        return model.log.filter.criterias.pid.$match;
+        return window.model.log.filter.criterias.pid.$match;
       });
 
       assert.strictEqual($match.length, 2);
@@ -110,7 +108,7 @@ describe('InfoLogger', function () {
       const criterias = await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
         window.model.log.filter.setCriteria('level', 'max', '21');
-        return model.log.filter.criterias;
+        return window.model.log.filter.criterias;
       });
 
       assert.strictEqual(criterias.pid.match, '');
@@ -126,7 +124,7 @@ describe('InfoLogger', function () {
     it('can be activated because it is configured and smilator is started', async () => {
       const liveEnabled = await page.evaluate(() => {
         window.model.log.liveStart();
-        return model.log.liveEnabled;
+        return window.model.log.liveEnabled;
       });
 
       assert.strictEqual(liveEnabled, true);
@@ -137,7 +135,7 @@ describe('InfoLogger', function () {
         try {
           window.model.log.liveStart();
           return false;
-        } catch(e) {
+        } catch (e) {
           return true;
         }
       });
@@ -150,7 +148,7 @@ describe('InfoLogger', function () {
       const criterias = await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
         window.model.log.filter.setCriteria('level', 'max', '21');
-        return model.log.filter.criterias;
+        return window.model.log.filter.criterias;
       });
 
       assert.strictEqual(criterias.level.max, '21');
@@ -159,7 +157,7 @@ describe('InfoLogger', function () {
       // Wait for logs and count them (2-3 maybe, it's random)
       await page.waitFor(1500); // simulator is set to ~500ms per log
       const list = await page.evaluate(() => {
-        return model.log.list;
+        return window.model.log.list;
       });
 
       assert.strictEqual(!!list.length, true);
@@ -173,10 +171,10 @@ describe('InfoLogger', function () {
           return await window.model.log.query();
         });
         assert.fail();
-      } catch(e) {
+      } catch (e) {
         // code failed, so it is a successful test
       }
-    })
+    });
   });
 
   describe('utils.js', async () => {
@@ -208,7 +206,7 @@ describe('InfoLogger', function () {
         return window.testCounter;
       });
       assert.strictEqual(counter, 2);
-    })
+    });
   });
 
   after(async () => {
