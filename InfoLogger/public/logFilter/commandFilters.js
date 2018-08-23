@@ -11,10 +11,10 @@ import {h} from '/js/src/index.js';
  */
 export default (model) => [
   h('.btn-group', [
-    buttonSeverity(model, 'Info', 'Match severity info, warnings, errors and fatals (= all logs)', ''),
-    buttonSeverity(model, 'Warn', 'Match severity warnings, errors and fatals', 'W E F'),
-    buttonSeverity(model, 'Error', 'Match severity errors and fatals', 'E F'),
-    buttonSeverity(model, 'Fatal', 'Match severity only fatals', 'F'),
+    buttonSeverity(model, 'Info', 'Match severity infos', 'I'),
+    buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
+    buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
+    buttonSeverity(model, 'Fatal', 'Match severity fatals', 'F'),
   ]),
   h('span.mh3'),
   h('.btn-group', [
@@ -34,7 +34,7 @@ export default (model) => [
 ];
 
 /**
- * Makes a button to set severity
+ * Makes a button to toggle severity
  * @param {Object} model
  * @param {string} label - button's label
  * @param {string} title - button's title on mouse over
@@ -42,8 +42,8 @@ export default (model) => [
  * @return {vnode}
  */
 const buttonSeverity = (model, label, title, value) => h('button.btn', {
-  className: model.log.filter.criterias.severity.match === value ? 'active' : '',
-  onclick: () => model.log.setCriteria('severity', 'match', value),
+  className: model.log.filter.criterias.severity.match.includes(value) ? 'active' : '',
+  onclick: () => model.log.setCriteria('severity', 'matchToggle', value),
   title: title
 }, label);
 
