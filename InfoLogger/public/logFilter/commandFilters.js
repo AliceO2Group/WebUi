@@ -43,7 +43,10 @@ export default (model) => [
  */
 const buttonSeverity = (model, label, title, value) => h('button.btn', {
   className: model.log.filter.criterias.severity.match.includes(value) ? 'active' : '',
-  onclick: () => model.log.setCriteria('severity', 'matchToggle', value),
+  onclick: (e) => {
+    model.log.setCriteria('severity', 'matchToggle', value);
+    e.target.blur(); // remove focus so user can 'enter' without actually toggle again the button
+  },
   title: title
 }, label);
 
