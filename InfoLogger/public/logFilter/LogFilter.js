@@ -37,7 +37,7 @@ export default class LogFilter extends Observable {
    * For each field+operator a parsed property in criterias is made with associated cast (Date, number, Array).
    * @param {string} field
    * @param {string} operator
-   * @param {Any} value
+   * @param {string} value
    * @example
    * setCriteria('severity', 'match', 'W E F')
    * // severity is W or E or F
@@ -307,8 +307,8 @@ export default class LogFilter extends Observable {
         $exclude: null
       },
       severity: {
-        match: '',
-        $match: null,
+        match: 'I W E F',
+        $match: ['W', 'I', 'E', 'F'],
       },
       level: {
         max: 1, // 0, 1, 6, 11, 21

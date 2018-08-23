@@ -297,12 +297,32 @@ export default class Log extends Observable {
   }
 
   /**
-   * Forward call to `filter`, but if live mode is enabled,
-   * alert user that filtering will be affected
-   * @param {Any} ...args - See LogFilter#setCriteria doc
+   * Forward call to `this.filter.setCriteria`. If live mode is enabled,
+   * alert user that filtering will be affected. Handle matchToggle and
+   * converts to match operator.
+   * See LogFilter#setCriteria doc
+   * @param {string} field
+   * @param {string} operator
+   * @param {string} value
    */
-  setCriteria(...args) {
-    this.filter.setCriteria(...args);
+  setCriteria(field, operator, value) {
+    // convert matchToggle to match by toggling a word in or off the search string
+    // example: 'E F' with toggle of 'W' gives 'E F W'
+    if (operator === 'matchToggle') {
+      operator = 'match';
+      if (this.filter.criterias.severity.$match) {
+        const copy = this.filter.criterias.severity.$match.concat();
+        const index = copy.indexOf(value);
+        if (index === -1) {
+          copy.push(value);
+        } else {
+          copy.splice(index, 1);
+        }
+        value = copy.join(' ');
+      }
+    }
+
+    this.filter.setCriteria(field, operator, value);
 
     if (this.liveEnabled) {
       this.model.ws.setFilter(this.model.log.filter.toFunction());
