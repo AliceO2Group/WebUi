@@ -6,7 +6,7 @@ const InfoLoggerReceiver = require('./../log/InfoLoggerReceiver.js');
 const InfoLoggerSender = require('./../log/InfoLoggerSender.js');
 const Winston = require('./../log/winston.js');
 
-let skip = true;
+const skip = true;
 
 describe('Logging: winston', () => {
   it('Generate error file (winston)', (done) => {

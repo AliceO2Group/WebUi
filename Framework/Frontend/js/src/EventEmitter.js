@@ -38,8 +38,8 @@ class EventEmitter {
       return this;
     }
 
-    let listeners = this.listeners.get(eventName);
-    let index = listeners.indexOf(listener);
+    const listeners = this.listeners.get(eventName);
+    const index = listeners.indexOf(listener);
 
     if (index === -1) {
       // listener not found
@@ -64,7 +64,7 @@ class EventEmitter {
       return false;
     }
 
-    let listeners = this.listeners.get(eventName);
+    const listeners = this.listeners.get(eventName);
     listeners.forEach((listener) => {
       listener(...args);
     });

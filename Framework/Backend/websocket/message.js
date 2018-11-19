@@ -156,7 +156,7 @@ class WebSocketMessage {
    * @return {object} response
    */
   get json() {
-    let jsonResponse = {
+    const jsonResponse = {
       code: this._code
     };
     if (this._message != '') {

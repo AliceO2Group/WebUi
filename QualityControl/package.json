@@ -13,7 +13,7 @@
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/web-ui": "1.7.0",
+    "@aliceo2/web-ui": "1.7.2",
     "jsroot": "^5.5.1",
     "zeromq": "4.6.0"
   },

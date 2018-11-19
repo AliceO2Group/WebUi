@@ -168,12 +168,12 @@ function drawCurve(ctx, series, max, min, width, height, color, timeWindow) {
   const diff = max - min || 1; // relative range of Y axis, div zero avoided with 1
   let firstPoint = true;
   series.sort(sortByTimestamp); // index 0 is older, higher is newer
-  let divSize = height / 2; // pixels per division for X axis
-  let numberOfDivs = width / divSize; // # of division on X axis for the space available
+  const divSize = height / 2; // pixels per division for X axis
+  const numberOfDivs = width / divSize; // # of division on X axis for the space available
 
-  let maxTimestamp = Date.now(); // maximum value on X axis (timestamp)
-  let totalTimeWindow = numberOfDivs * timeWindow; // how much time represented on the plot (ms)
-  let minTimestamp = maxTimestamp - totalTimeWindow; // minimum value on X axis (timestamp)
+  const maxTimestamp = Date.now(); // maximum value on X axis (timestamp)
+  const totalTimeWindow = numberOfDivs * timeWindow; // how much time represented on the plot (ms)
+  const minTimestamp = maxTimestamp - totalTimeWindow; // minimum value on X axis (timestamp)
 
   // draw points starting from the most recent (right) to older (left)
   // until curbe overflow avaialble space or until there is no more points

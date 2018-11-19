@@ -125,7 +125,7 @@ class QueryRouter extends Observable {
     const url = new URL(this.location);
     const entries = url.searchParams.entries();
     this.params = {};
-    for (let pair of entries) {
+    for (const pair of entries) {
       this.params[pair[0]] = pair[1];
     }
     this.notify();

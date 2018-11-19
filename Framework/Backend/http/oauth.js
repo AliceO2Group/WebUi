@@ -119,7 +119,7 @@ class OAuth {
         }
       };
       Object.assign(postOptions, options);
-      let response = [];
+      const response = [];
       const req = https.request(postOptions, (res) => {
         res.on('data', (chunk) => {
           response.push(chunk);

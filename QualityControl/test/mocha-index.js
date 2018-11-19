@@ -32,9 +32,7 @@ describe('QCG', function () {
 
     this.ok = true;
     // Start browser to test UI
-    browser = await puppeteer.launch({
-      headless: true
-    });
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
 
     // Listen to browser

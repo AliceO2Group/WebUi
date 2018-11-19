@@ -23,7 +23,7 @@ class Winston {
       }
     });
 
-    let transports = [
+    const transports = [
       new (winston.transports.Console)({
         level: config.consoleLvl,
         format: winston.format.combine(

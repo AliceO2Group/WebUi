@@ -89,7 +89,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     }
     const messages = dataString.split('\n');
 
-    for (let message of messages) {
+    for (const message of messages) {
       if (!message) {
         continue;
       }

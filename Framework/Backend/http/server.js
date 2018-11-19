@@ -143,7 +143,7 @@ class HttpServer {
    * @return {object} redirection
    */
   addDefaultUserData(req, res, next) {
-    let query = req.query;
+    const query = req.query;
     if (!query.token) {
       query.personid = 0;
       query.name = 'Anonymous';
