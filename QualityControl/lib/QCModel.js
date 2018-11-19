@@ -13,11 +13,6 @@ const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 
-if (!config.mysql) {
-  throw new Error('MySQL config is mandatory at least for layout saving');
-}
-const mysql = new MySQLConnector(config.mysql);
-
 if (!config.tobject2json) {
   throw new Error('TObject2Json config is mandatory');
 }
@@ -46,6 +41,7 @@ if (config.listingConnector === 'ccdb') {
   const amore = new AMOREConnector(config.amore);
   module.exports.listObjects = amore.listObjects.bind(amore);
 } else {
+  const mysql = new MySQLConnector(config.mysql);
   log.info('Object listing: using MySQL');
   module.exports.listObjects = mysql.listObjects.bind(mysql);
 }
