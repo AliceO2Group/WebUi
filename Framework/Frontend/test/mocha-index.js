@@ -60,9 +60,7 @@ describe('Framework Frontend', function() {
 
   // Start browser to test UI
   before(async function() {
-    browser = await puppeteer.launch({
-      headless: true
-    });
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
     page.on('requestfailed', (request) => {
       console.error(`Navigator failed to load ${request.url()}`);

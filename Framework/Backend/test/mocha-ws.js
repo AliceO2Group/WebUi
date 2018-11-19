@@ -19,7 +19,7 @@ describe('websocket', () => {
     http = new HttpServer(config.http, config.jwt);
     ws = new WebSocket(http, config.jwt, 'localhost');
     ws.bind('test', (message) => {
-      let res = new WebSocketMessage().setCommand(message.getCommand());
+      const res = new WebSocketMessage().setCommand(message.getCommand());
       return res;
     });
 
@@ -28,7 +28,7 @@ describe('websocket', () => {
     });
 
     ws.bind('broadcast', (message) => {
-      let res = new WebSocketMessage().setCommand(message.getCommand()).setBroadcast();
+      const res = new WebSocketMessage().setCommand(message.getCommand()).setBroadcast();
       return res;
     });
   });
