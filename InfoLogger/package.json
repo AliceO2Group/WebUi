@@ -21,7 +21,6 @@
     "eslint": "^5.2.0",
     "eslint-config-google": "^0.9.1",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.3",
     "puppeteer": "^1.6.0"
   }
 }
