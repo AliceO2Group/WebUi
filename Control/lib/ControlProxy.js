@@ -43,21 +43,18 @@ class ControlProxy {
 
     const address = `${config.hostname}:${config.port}`;
     const credentials = grpcLibrary.credentials.createInsecure();
-    this.client = new octlProto.octl.Octl(address, credentials);
-    this.client.waitForReady(Date.now() + TIMEOUT_READY, (error) => {
-      if (error) {
-        throw error;
-      }
+    this.client = new octlProto.o2control.Control(address, credentials);
+    this.client.waitForReady(Date.now() + TIMEOUT_READY, () => {
       log.debug(`gRPC connected to ${address}`);
     });
 
-    this._setupControlMethod('getRoles');
-    this._setupControlMethod('getFrameworkInfo');
-    this._setupControlMethod('getEnvironments');
-    this._setupControlMethod('getEnvironment');
-    this._setupControlMethod('newEnvironment');
-    this._setupControlMethod('controlEnvironment');
-    this._setupControlMethod('destroyEnvironment');
+    this._setupControlMethod('GetRoles');
+    this._setupControlMethod('GetFrameworkInfo');
+    this._setupControlMethod('GetEnvironments');
+    this._setupControlMethod('GetEnvironment');
+    this._setupControlMethod('NewEnvironment');
+    this._setupControlMethod('ControlEnvironment');
+    this._setupControlMethod('DestroyEnvironment');
   }
 
   /**

@@ -15,43 +15,43 @@ const octl = new ControlProxy(config.grpc);
 
 module.exports.attachTo = (http, ws) => {
   http.post('/getEnvironments', (req, res) => {
-    octl.getEnvironments(req.body)
+    octl.GetEnvironments(req.body)
       .then((environments) => res.json(environments))
       .catch((error) => errorHandler(error, res));
   });
 
   http.post('/controlEnvironment', (req, res) => {
-    octl.controlEnvironment(req.body)
+    octl.ControlEnvironment(req.body)
       .then((environments) => res.json(environments))
       .catch((error) => errorHandler(error, res));
   });
 
   http.post('/newEnvironment', (req, res) => {
-    octl.newEnvironment(req.body)
+    octl.NewEnvironment(req.body)
       .then((environment) => res.json(environment))
       .catch((error) => errorHandler(error, res));
   });
 
   http.post('/destroyEnvironment', (req, res) => {
-    octl.destroyEnvironment(req.body)
+    octl.DestroyEnvironment(req.body)
       .then((environment) => res.json(environment))
       .catch((error) => errorHandler(error, res));
   });
 
   http.post('/getEnvironment', (req, res) => {
-    octl.getEnvironment(req.body)
+    octl.GetEnvironment(req.body)
       .then((environment) => res.json(environment))
       .catch((error) => errorHandler(error, res));
   });
 
   http.post('/getRoles', (req, res) => {
-    octl.getRoles(req.body)
+    octl.GetRoles(req.body)
       .then((roles) => res.json(roles))
       .catch((error) => errorHandler(error, res));
   });
 
   http.post('/getFrameworkInfo', (req, res) => {
-    octl.getFrameworkInfo(req.body)
+    octl.GetFrameworkInfo(req.body)
       .then((roles) => res.json(roles))
       .catch((error) => errorHandler(error, res));
   });

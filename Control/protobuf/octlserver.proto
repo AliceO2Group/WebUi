@@ -1,5 +1,5 @@
 /*
- * === This file is part of octl <https://github.com/teo/octl> ===
+ * === This file is part of ALICE O² ===
  *
  * Copyright 2018 CERN and copyright holders of ALICE O².
  * Author: Teo Mrnjavac <teo.mrnjavac@cern.ch>
@@ -24,8 +24,8 @@
 
 syntax = "proto3";
 
-package octl;
-option java_package = "ch.cern.alice.octl.rpcserver";
+package o2control;
+option java_package = "ch.cern.alice.o2.control.rpcserver";
 option go_package = "pb";
 
 //////////////// Common event messages ///////////////
@@ -33,13 +33,9 @@ option go_package = "pb";
 message Event_MesosHeartbeat {
 }
 
-message Event_GenericMessage {
-    string message = 1;
-}
-
 //////////////////////////////////////////////////////
 
-service Octl {
+service Control {
     rpc TrackStatus (StatusRequest) returns (stream StatusReply) {}
     rpc GetFrameworkInfo (GetFrameworkInfoRequest) returns (GetFrameworkInfoReply) {}
     rpc Teardown (TeardownRequest) returns (TeardownReply) {}
@@ -49,7 +45,7 @@ service Octl {
     rpc ControlEnvironment (ControlEnvironmentRequest) returns (ControlEnvironmentReply) {}
     rpc ModifyEnvironment (ModifyEnvironmentRequest) returns (ModifyEnvironmentReply) {}
     rpc DestroyEnvironment (DestroyEnvironmentRequest) returns (DestroyEnvironmentReply) {}
-    rpc GetRoles (GetRolesRequest) returns (GetRolesReply) {}
+    rpc GetTasks (GetTasksRequest) returns (GetTasksReply) {}
 }
 
 message StatusRequest {}
@@ -67,8 +63,7 @@ message StatusUpdate {
     Level level = 1;
     oneof Event {
         Event_MesosHeartbeat mesosHeartbeat = 2;
-        Event_GenericMessage genericMessage = 3;
-        //TODO add other events here and in octlevents.proto
+        //TODO add other events here and in events.proto
     }
 }
 
@@ -76,7 +71,7 @@ message GetFrameworkInfoRequest {}
 message GetFrameworkInfoReply {
     string frameworkId = 1;
     int32 environmentsCount = 2;
-    int32 rolesCount = 3;
+    int32 tasksCount = 3;
     string state = 4;
 }
 
@@ -94,11 +89,11 @@ message EnvironmentInfo {
     string id = 1;
     string createdWhen = 2;
     string state = 3;
-    repeated string roles = 4;
+    repeated string tasks = 4;
 }
 
 message NewEnvironmentRequest {
-    repeated string roles = 1;
+    string workflow = 1;
 }
 message NewEnvironmentReply {
     string id = 1;
@@ -116,17 +111,23 @@ message ControlEnvironmentRequest {
     string id = 1;
     enum Optype {
         NOOP = 0;
-        START_ENVIRONMENT = 1;
-        STOP_ENVIRONMENT = 2;
+        START_ACTIVITY = 1;
+        STOP_ACTIVITY = 2;
         CONFIGURE = 3;
+        RESET = 4;
+        GO_ERROR = 5;
     }
     Optype type = 2;
 }
-message ControlEnvironmentReply {}
+message ControlEnvironmentReply {
+    string id = 1;
+    string state = 2;
+}
 
 message ModifyEnvironmentRequest {
     string id = 1;
     repeated EnvironmentOperation operations = 2;
+    bool reconfigureAll = 3;
 }
 message EnvironmentOperation {
     enum Optype {
@@ -139,6 +140,8 @@ message EnvironmentOperation {
 }
 message ModifyEnvironmentReply {
     repeated EnvironmentOperation failedOperations = 1;
+    string id = 2;
+    string state = 3;
 }
 
 message DestroyEnvironmentRequest {
@@ -146,13 +149,12 @@ message DestroyEnvironmentRequest {
 }
 message DestroyEnvironmentReply {}
 
-message GetRolesRequest {}
-message GetRolesReply {
-    repeated RoleInfo roles = 1;
+message GetTasksRequest {}
+message GetTasksReply {
+    repeated TaskInfo tasks = 1;
 }
-message RoleInfo {
+message TaskInfo {
     string name = 1;
-    string condition = 2;
-    string state = 3;
-    string hostname = 4;
+    bool locked = 2;
+    string hostname = 3;
 }
