@@ -5,7 +5,7 @@ const path = require('path');
 
 const log = new (require('@aliceo2/web-ui').Log)('ControlProxy');
 
-const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
+const PROTO_PATH = path.join(__dirname, '../protobuf/o2control.proto');
 const TIMEOUT_READY = 2000; // ms, time to stop waiting for a connection between client and server
 
 /**
@@ -35,6 +35,7 @@ class ControlProxy {
 
     const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
       keepCase: false, // change to camel case
+      arrays: true
     });
     const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
 
@@ -44,7 +45,10 @@ class ControlProxy {
     const address = `${config.hostname}:${config.port}`;
     const credentials = grpcLibrary.credentials.createInsecure();
     this.client = new octlProto.o2control.Control(address, credentials);
-    this.client.waitForReady(Date.now() + TIMEOUT_READY, () => {
+    this.client.waitForReady(Date.now() + TIMEOUT_READY, (error) => {
+      if (error) {
+        throw error;
+      }
       log.debug(`gRPC connected to ${address}`);
     });
 
@@ -55,6 +59,7 @@ class ControlProxy {
     this._setupControlMethod('NewEnvironment');
     this._setupControlMethod('ControlEnvironment');
     this._setupControlMethod('DestroyEnvironment');
+    this._setupControlMethod('GetWorkflowTemplates');
   }
 
   /**

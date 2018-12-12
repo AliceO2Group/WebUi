@@ -1,8 +1,7 @@
 import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import showTableList from '../common/showTableList.js';
-
+import showTableItem from '../common/showTableItem.js';
 /**
  * @file Page to show a list of environments (content and header)
  */
@@ -15,11 +14,10 @@ import showTableList from '../common/showTableList.js';
  */
 export let header = (model) => [
   h('.w-50 text-center', [
-    h('h4', 'Environments')
+    h('h4', 'Workflows')
   ]),
   h('.flex-grow text-right', [
-    h('button.btn', {onclick: () => model.router.go('?page=newEnvironment')}, iconPlus())
-  ])
+  ]) 
 ];
 
 /**
@@ -28,10 +26,10 @@ export let header = (model) => [
  * @return {vnode}
  */
 export let content = (model) => h('.scroll-y.absolute-fill', [
-  model.environment.list.match({
+  model.workflow.list.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showContent(model, data.environments),
+    Success: (data) => showContent(model, data.workflowTemplates),
     Failure: (error) => pageError(error),
   })
 ]);
@@ -43,6 +41,6 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
  * @param {Array.<Environment>} list
  * @return {vnode}
  */
-const showContent = (model, list) => (list && Object.keys(list).length > 0)
-  ? showTableList(list, (event, item) => model.router.go(`?page=environment&id=${item.id}`))
-  : h('h3.m4', ['No environments found.']);
+const showContent = (model, list) => list.length
+  ? showTableItem(list)
+  : h('h3.m4', ['No workflows found.']);

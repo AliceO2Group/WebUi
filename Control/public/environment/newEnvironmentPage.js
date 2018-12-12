@@ -34,7 +34,7 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
         id: 'rolesInput',
         type: 'text',
         placeholder: 'roles separated by comma',
-        oninput: (e) => model.environment.setForm('roles', e.target.value),
+        oninput: (e) => model.environment.setForm('workflowTemplate', e.target.value),
         value: model.environment.itemForm.roles
       }),
     ]),

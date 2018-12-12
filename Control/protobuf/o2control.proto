@@ -37,17 +37,29 @@ message Event_MesosHeartbeat {
 
 service Control {
     rpc TrackStatus (StatusRequest) returns (stream StatusReply) {}
+
     rpc GetFrameworkInfo (GetFrameworkInfoRequest) returns (GetFrameworkInfoReply) {}
     rpc Teardown (TeardownRequest) returns (TeardownReply) {}
+
     rpc GetEnvironments (GetEnvironmentsRequest) returns (GetEnvironmentsReply) {}
     rpc NewEnvironment (NewEnvironmentRequest) returns (NewEnvironmentReply) {}
     rpc GetEnvironment (GetEnvironmentRequest) returns (GetEnvironmentReply) {}
     rpc ControlEnvironment (ControlEnvironmentRequest) returns (ControlEnvironmentReply) {}
     rpc ModifyEnvironment (ModifyEnvironmentRequest) returns (ModifyEnvironmentReply) {}
     rpc DestroyEnvironment (DestroyEnvironmentRequest) returns (DestroyEnvironmentReply) {}
+
     rpc GetTasks (GetTasksRequest) returns (GetTasksReply) {}
+    rpc GetTask(GetTaskRequest) returns (GetTaskReply) {}
+    rpc CleanupTasks(CleanupTasksRequest) returns (CleanupTasksReply) {}
+
+    rpc GetRoles (GetRolesRequest) returns (GetRolesReply) {}
+
+    rpc GetWorkflowTemplates (GetWorkflowTemplatesRequest) returns (GetWorkflowTemplatesReply) {}
 }
 
+////////////////////////////////////////
+// Global status
+////////////////////////////////////////
 message StatusRequest {}
 message StatusReply {
     string state = 1;
@@ -67,19 +79,27 @@ message StatusUpdate {
     }
 }
 
+////////////////////////////////////////
+// Framework
+////////////////////////////////////////
 message GetFrameworkInfoRequest {}
 message GetFrameworkInfoReply {
     string frameworkId = 1;
     int32 environmentsCount = 2;
     int32 tasksCount = 3;
     string state = 4;
+    int32 hostsCount = 5;
 }
 
+// Not implemented yet
 message TeardownRequest {
     string reason = 1;
 }
 message TeardownReply {}
 
+////////////////////////////////////////
+// Environment
+////////////////////////////////////////
 message GetEnvironmentsRequest {}
 message GetEnvironmentsReply {
     string frameworkId = 1;
@@ -89,15 +109,15 @@ message EnvironmentInfo {
     string id = 1;
     string createdWhen = 2;
     string state = 3;
-    repeated string tasks = 4;
+    repeated ShortTaskInfo tasks = 4;
+    string rootRole = 5;
 }
 
 message NewEnvironmentRequest {
-    string workflow = 1;
+    string workflowTemplate = 1;
 }
 message NewEnvironmentReply {
-    string id = 1;
-    string state = 2;
+    EnvironmentInfo environment = 1;
 }
 
 message GetEnvironmentRequest {
@@ -105,6 +125,7 @@ message GetEnvironmentRequest {
 }
 message GetEnvironmentReply {
     EnvironmentInfo environment = 1;
+    RoleInfo workflow = 2;
 }
 
 message ControlEnvironmentRequest {
@@ -149,12 +170,93 @@ message DestroyEnvironmentRequest {
 }
 message DestroyEnvironmentReply {}
 
-message GetTasksRequest {}
-message GetTasksReply {
-    repeated TaskInfo tasks = 1;
-}
-message TaskInfo {
+////////////////////////////////////////
+// Tasks
+////////////////////////////////////////
+message ShortTaskInfo {
     string name = 1;
     bool locked = 2;
-    string hostname = 3;
+    string taskId = 3;
+    string status = 4;
+    string state = 5;
+    string className = 6;
+    TaskDeploymentInfo deploymentInfo = 7;
+}
+message TaskDeploymentInfo {
+    string hostname = 1;
+    string agentId = 2;
+    string offerId = 3;
+    string executorId = 4;
+}
+
+message GetTasksRequest {}
+message GetTasksReply {
+    repeated ShortTaskInfo tasks = 1;
+}
+message GetTaskRequest {
+    string taskId = 1;
+}
+message GetTaskReply {
+    TaskInfo task = 1;
+}
+
+message TaskClassInfo {
+    string name = 1;
+    string controlMode = 2;
+}
+message CommandInfo {
+    repeated string env = 1;
+    bool shell = 2;
+    string value = 3;
+    repeated string arguments = 4;
+    string user = 5;
+}
+message ChannelInfo {
+    string name = 1;
+    string type = 2;
+    string target = 3;
+}
+message TaskInfo {
+    ShortTaskInfo shortInfo = 1;
+    TaskClassInfo classInfo = 2;
+    repeated ChannelInfo inboundChannels = 3;
+    repeated ChannelInfo outboundChannels = 4;
+    CommandInfo commandInfo = 5;
+    string taskPath = 6;
+    string envId = 7;
+}
+
+message CleanupTasksRequest {
+    repeated string taskIds = 1;
+}
+message CleanupTasksReply {
+    repeated ShortTaskInfo killedTasks = 1;
+    repeated ShortTaskInfo runningTasks = 2;
+}
+
+////////////////////////////////////////
+// Roles
+////////////////////////////////////////
+message GetRolesRequest {
+    string envId = 1;
+    string pathSpec = 2;
+}
+
+message RoleInfo {
+    string name = 1;
+    string status = 2;
+    string state = 3;
+    string fullPath = 4;
+    repeated string taskIds = 5;
+    repeated RoleInfo roles = 6;
+}
+
+message GetRolesReply {
+    repeated RoleInfo roles = 1;
+}
+
+message GetWorkflowTemplatesRequest{}
+
+message GetWorkflowTemplatesReply{
+    repeated string workflowTemplates = 1;
 }

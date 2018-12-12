@@ -5,6 +5,7 @@ import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import Role from './role/Role.js';
 import Status from './status/Status.js';
+import Workflow from './workflow/Workflow.js';
 
 /**
  * Root of model tree
@@ -28,6 +29,9 @@ export default class Model extends Observable {
 
     this.environment = new Environment(this);
     this.environment.bubbleTo(this);
+
+    this.workflow = new Workflow(this);
+    this.workflow.bubbleTo(this);
 
     this.role = new Role(this);
     this.role.bubbleTo(this);
@@ -110,6 +114,9 @@ export default class Model extends Observable {
           return;
         }
         this.environment.getEnvironment({id: this.router.params.id});
+        break;
+      case 'workflows':
+        this.workflow.get();
         break;
       case 'roles':
         this.role.getRoles();
