@@ -2,7 +2,7 @@ import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableItem from '../common/showTableItem.js';
-
+import showTableList from '../common/showTableList.js';
 /**
  * @file Page to show 1 environment (content and header)
  */
@@ -15,7 +15,7 @@ import showTableItem from '../common/showTableItem.js';
  */
 export let header = (model) => [
   h('.w-50 text-center', [
-    h('h4', 'Environment')
+    h('h4', 'Environment details')
   ]),
   h('.flex-grow text-right', [
 
@@ -44,6 +44,8 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
  */
 const showContent = (model, item) => [
   showTableItem(item),
+  h('.m4', [ h('h4', 'Tasks')]),
+  showTableList(item.tasks),
   showControl(model, item)
 ];
 

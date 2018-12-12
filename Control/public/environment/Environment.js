@@ -89,7 +89,7 @@ export default class Environment extends Observable {
       return;
     }
     this.itemNew = RemoteData.notAsked();
-    this.model.router.go(`?page=environment&id=${result.id}`);
+    this.model.router.go(`?page=environment&id=${result.environment.id}`);
   }
 
   /**
