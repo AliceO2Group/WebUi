@@ -1,7 +1,7 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
- * Model representing Role CRUD
+ * Model representing Workflow
  */
 export default class Workflow extends Observable {
   /**
@@ -16,7 +16,7 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Load roles into `list` as RemoteData
+   * Load workflows into `list` as RemoteData
    */
   async get() {
     this.list = RemoteData.loading();

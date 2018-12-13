@@ -13,7 +13,7 @@ import showTableItem from '../common/showTableItem.js';
  * @param {Object} model
  * @return {vnode}
  */
-export let header = (model) => [
+export const header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'Status')
   ]),
@@ -28,7 +28,7 @@ export let header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export let content = (model) => h('.scroll-y.absolute-fill', [
+export const content = (model) => h('.scroll-y.absolute-fill', [
   model.status.item.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),

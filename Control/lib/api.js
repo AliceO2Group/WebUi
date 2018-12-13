@@ -44,12 +44,6 @@ module.exports.attachTo = (http, ws) => {
       .catch((error) => errorHandler(error, res));
   });
 
-  http.post('/GetRoles', (req, res) => {
-    octl.GetRoles(req.body)
-      .then((roles) => res.json(roles))
-      .catch((error) => errorHandler(error, res));
-  });
-
   http.post('/GetFrameworkInfo', (req, res) => {
     octl.GetFrameworkInfo(req.body)
       .then((roles) => res.json(roles))

@@ -1,5 +1,5 @@
 import {h} from '/js/src/index.js';
-import {iconGridThreeUp, iconGridTwoUp, iconExcerpt, iconListRich} from '/js/src/icons.js';
+import {iconGridTwoUp, iconExcerpt, iconListRich} from '/js/src/icons.js';
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
@@ -19,7 +19,7 @@ export default (model) => h('.absolute-fill scroll-y', [
   ]),
 
   h('.menu-title', 'Control'),
-    h('a.menu-item', {
+  h('a.menu-item', {
     href: '?page=workflows',
     onclick: (e) => model.router.handleLinkEvent(e),
     class: model.router.params.page === 'workdlows' ? 'selected' : ''
@@ -36,14 +36,5 @@ export default (model) => h('.absolute-fill scroll-y', [
     iconGridTwoUp(),
     ' ',
     'Environments'
-  ]),
-  h('a.menu-item', {
-    href: '?page=roles',
-    onclick: (e) => model.router.handleLinkEvent(e),
-    class: model.router.params.page === 'roles' ? 'selected' : ''
-  }, [
-    iconGridThreeUp(),
-    ' ',
-    'Roles'
   ])
 ]);
