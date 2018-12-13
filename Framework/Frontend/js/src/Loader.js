@@ -150,7 +150,7 @@ class Loader extends Observable {
       let upstreamMessage = {};
       try {
         upstreamMessage = await response.json();
-      } finally {
+      } catch (e) {
         upstreamMessage.message = 'Server provided no deatils';
       }
 
