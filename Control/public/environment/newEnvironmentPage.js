@@ -29,14 +29,23 @@ export let header = (model) => [
 export let content = (model) => h('.scroll-y.absolute-fill', [
   h('form.m4.measure', {onsubmit: () => false}, [
     h('.form-group', [
-      h('label', {for: 'rolesInput'}, 'Roles'),
+      h('label', {for: 'rolesInput'}, 'Select workflow'),
       h('input.form-control', {
         id: 'rolesInput',
         type: 'text',
-        placeholder: 'roles separated by comma',
+        list: 'workflowsList',
+        autocomplete: 'off',
         oninput: (e) => model.environment.setForm('workflowTemplate', e.target.value),
         value: model.environment.itemForm.roles
       }),
+      h('datalist', {id: 'workflowsList'}, [
+        model.workflow.list.match({
+          NotAsked: () => null,
+          Loading: () => null,
+          Success: (data) => Object.keys(data.workflowTemplates).map((workflow) => h('option', data.workflowTemplates[workflow])),
+          Failure: (error) => null
+        })
+       ])
     ]),
     h('button.btn.btn-primary', {
       class: model.environment.itemNew.isLoading() ? 'loading' : '',

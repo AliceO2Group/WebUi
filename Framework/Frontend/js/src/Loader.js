@@ -125,7 +125,7 @@ class Loader extends Observable {
     return await this._request(url, options);
   }
 
-  /**
+  /*
    * Wrapper around fetchClient to watch how many requests are established,
    * handle errors and parse json content
    * @param {string} url - any URL part
@@ -147,15 +147,15 @@ class Loader extends Observable {
 
     // handle server error-
     if (!response.ok) {
-      let recoverMessage = '';
-      if (response.status === 403) {
-        recoverMessage = ', try reloading the page';
-      } else if (response.status >= 500) {
-        recoverMessage = ', contact administrator';
+      let upstreamMessage = {};
+      try {
+        upstreamMessage = await response.json();
+      } catch {
+        upstreamMessage.message = 'Server provided no deatils';
       }
 
       // eslint-disable-next-line
-      const message = `Request to server failed: ${response.status} ${response.statusText}${recoverMessage}`;
+      const message = `Request to server failed (${response.status} ${response.statusText}): ${upstreamMessage.message}`;
       return new AjaxResult(false, response.status, {message});
     }
 

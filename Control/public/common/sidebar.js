@@ -1,5 +1,5 @@
 import {h} from '/js/src/index.js';
-import {iconGridFourUp, iconGridThreeUp, iconGridTwoUp, iconExcerpt, iconListRich} from '/js/src/icons.js';
+import {iconGridThreeUp, iconGridTwoUp, iconExcerpt, iconListRich} from '/js/src/icons.js';
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
@@ -45,10 +45,5 @@ export default (model) => h('.absolute-fill scroll-y', [
     iconGridThreeUp(),
     ' ',
     'Roles'
-  ]),
-  h('a.menu-item', [
-    iconGridFourUp(),
-    ' ',
-    '...'
-  ]),
+  ])
 ]);

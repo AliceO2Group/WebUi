@@ -103,6 +103,7 @@ export default class Model extends Observable {
   handleLocationChange() {
     switch (this.router.params.page) {
       case 'newEnvironment':
+        this.workflow.get();
         break;
       case 'environments':
         this.environment.getEnvironments();

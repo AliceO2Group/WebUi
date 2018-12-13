@@ -23,7 +23,7 @@ module.exports.attachTo = (http, ws) => {
   http.post('/ControlEnvironment', (req, res) => {
     octl.ControlEnvironment(req.body)
       .then((environments) => res.json(environments))
-      .catch((error) => errorHandler(error, res));
+      .catch((error) => errorHandler(error, res, 504));
   });
 
   http.post('/NewEnvironment', (req, res) => {
@@ -110,7 +110,7 @@ module.exports.attachTo = (http, ws) => {
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
 function errorHandler(err, res, status = 500) {
-  if (status === 500) {
+  if (status > 500) {
     if (err.stack) {
       trace(err);
     }

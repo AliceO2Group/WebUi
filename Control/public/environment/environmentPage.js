@@ -43,10 +43,11 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode}
  */
 const showContent = (model, item) => [
+  showControl(model, item),
+  h('.m2', h('h4', 'Details')),
   showTableItem(item),
-  h('.m4', [ h('h4', 'Tasks')]),
+  h('.m2', h('h4', 'Tasks')),
   showTableList(item.tasks),
-  showControl(model, item)
 ];
 
 /**
@@ -55,14 +56,14 @@ const showContent = (model, item) => [
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showControl = (model, item) => h('.m4', [
+const showControl = (model, item) => h('.m2 .p2', [
   h('h4', 'Control'),
   h('', [
     h('button.btn',
       {
         class: model.environment.itemControl.isLoading() ? 'loading' : '',
         disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'START_ENVIRONMENT'})
+        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'START_ACTIVITY'})
       },
       'START'
     ),
@@ -71,7 +72,7 @@ const showControl = (model, item) => h('.m4', [
       {
         class: model.environment.itemControl.isLoading() ? 'loading' : '',
         disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'STOP_ENVIRONMENT'})
+        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'STOP_ACTIVITY'})
       },
       'STOP'
     ),
@@ -83,6 +84,15 @@ const showControl = (model, item) => h('.m4', [
         onclick: () => model.environment.controlEnvironment({id: item.id, type: 'CONFIGURE'})
       },
       'CONFIGURE'
+    ),
+    ' ',
+    h('button.btn',
+      {
+        class: model.environment.itemControl.isLoading() ? 'loading' : '',
+        disabled: model.environment.itemControl.isLoading(),
+        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'RESET'})
+      },
+      'RESET'
     ),
     ' ',
     h('button.btn.btn-danger',
@@ -98,7 +108,7 @@ const showControl = (model, item) => h('.m4', [
   model.environment.itemControl.match({
     NotAsked: () => null,
     Loading: () => null,
-    Success: (_data) => h('.primary', 'done'),
+    Success: (_data) => null,
     Failure: (error) => h('p.danger', error),
   })
 ]);
