@@ -12,7 +12,7 @@ if (!config.grpc) {
 
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
-
+/* eslint-disable new-cap */
 module.exports.attachTo = (http, ws) => {
   http.post('/GetEnvironments', (req, res) => {
     octl.GetEnvironments(req.body)
@@ -49,7 +49,7 @@ module.exports.attachTo = (http, ws) => {
       .then((roles) => res.json(roles))
       .catch((error) => errorHandler(error, res));
   });
-
+  /* eslint-enable no-use-before-define */
   http.post('/GetWorkflows', (req, res) => {
     octl.GetWorkflowTemplates(req.body)
       .then((workflows) => res.json(workflows))
