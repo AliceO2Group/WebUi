@@ -125,7 +125,7 @@ class Loader extends Observable {
     return await this._request(url, options);
   }
 
-  /*
+  /**
    * Wrapper around fetchClient to watch how many requests are established,
    * handle errors and parse json content
    * @param {string} url - any URL part
@@ -150,7 +150,7 @@ class Loader extends Observable {
       let upstreamMessage = {};
       try {
         upstreamMessage = await response.json();
-      } catch {
+      } finally {
         upstreamMessage.message = 'Server provided no deatils';
       }
 
