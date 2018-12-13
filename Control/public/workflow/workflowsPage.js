@@ -2,47 +2,45 @@ import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableItem from '../common/showTableItem.js';
-
 /**
- * @file Page to FrameworkInfo (content and header)
+ * @file Page to show a list of environments (content and header)
  */
 
 /**
- * Header of the status page (or frameworkinfo)
- * Empty for now, no action needed, only page title
+ * Header of page showing list of environments
+ * With one button to create a new environment and page title
  * @param {Object} model
  * @return {vnode}
  */
 export const header = (model) => [
   h('.w-50 text-center', [
-    h('h4', 'Status')
+    h('h4', 'Workflows')
   ]),
   h('.flex-grow text-right', [
-
   ])
 ];
 
 /**
- * Content of the status page (or frameworkinfo)
- * Show loading or error on other cases
+ * Scrollable list of environments or page loading/error otherwise
  * @param {Object} model
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill', [
-  model.status.item.match({
+  model.workflow.list.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showContent(model, data),
+    Success: (data) => showContent(model, data.workflowTemplates),
     Failure: (error) => pageError(error),
   })
 ]);
 
 /**
- * Show status infos with a simple table, one line per property
+ * Show a list of environments with a button to edit each of them
+ * Print a message if the list is empty.
  * @param {Object} model
- * @param {FrameworkInfo} item - status got from server
+ * @param {Array.<Environment>} list
  * @return {vnode}
  */
-const showContent = (model, item) => [
-  showTableItem(item)
-];
+const showContent = (model, list) => list.length
+  ? showTableItem(list)
+  : h('h3.m4', ['No workflows found.']);

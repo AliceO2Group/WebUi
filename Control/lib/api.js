@@ -12,47 +12,47 @@ if (!config.grpc) {
 
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
-
+/* eslint-disable new-cap */
 module.exports.attachTo = (http, ws) => {
-  http.post('/getEnvironments', (req, res) => {
-    octl.getEnvironments(req.body)
+  http.post('/GetEnvironments', (req, res) => {
+    octl.GetEnvironments(req.body)
       .then((environments) => res.json(environments))
       .catch((error) => errorHandler(error, res));
   });
 
-  http.post('/controlEnvironment', (req, res) => {
-    octl.controlEnvironment(req.body)
+  http.post('/ControlEnvironment', (req, res) => {
+    octl.ControlEnvironment(req.body)
       .then((environments) => res.json(environments))
-      .catch((error) => errorHandler(error, res));
+      .catch((error) => errorHandler(error, res, 504));
   });
 
-  http.post('/newEnvironment', (req, res) => {
-    octl.newEnvironment(req.body)
+  http.post('/NewEnvironment', (req, res) => {
+    octl.NewEnvironment(req.body)
       .then((environment) => res.json(environment))
       .catch((error) => errorHandler(error, res));
   });
 
-  http.post('/destroyEnvironment', (req, res) => {
-    octl.destroyEnvironment(req.body)
+  http.post('/DestroyEnvironment', (req, res) => {
+    octl.DestroyEnvironment(req.body)
       .then((environment) => res.json(environment))
       .catch((error) => errorHandler(error, res));
   });
 
-  http.post('/getEnvironment', (req, res) => {
-    octl.getEnvironment(req.body)
+  http.post('/GetEnvironment', (req, res) => {
+    octl.GetEnvironment(req.body)
       .then((environment) => res.json(environment))
       .catch((error) => errorHandler(error, res));
   });
 
-  http.post('/getRoles', (req, res) => {
-    octl.getRoles(req.body)
+  http.post('/GetFrameworkInfo', (req, res) => {
+    octl.GetFrameworkInfo(req.body)
       .then((roles) => res.json(roles))
       .catch((error) => errorHandler(error, res));
   });
-
-  http.post('/getFrameworkInfo', (req, res) => {
-    octl.getFrameworkInfo(req.body)
-      .then((roles) => res.json(roles))
+  /* eslint-enable no-use-before-define */
+  http.post('/GetWorkflows', (req, res) => {
+    octl.GetWorkflowTemplates(req.body)
+      .then((workflows) => res.json(workflows))
       .catch((error) => errorHandler(error, res));
   });
 
@@ -104,7 +104,7 @@ module.exports.attachTo = (http, ws) => {
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
 function errorHandler(err, res, status = 500) {
-  if (status === 500) {
+  if (status > 500) {
     if (err.stack) {
       trace(err);
     }

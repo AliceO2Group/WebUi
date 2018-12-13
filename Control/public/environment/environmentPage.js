@@ -2,7 +2,7 @@ import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableItem from '../common/showTableItem.js';
-
+import showTableList from '../common/showTableList.js';
 /**
  * @file Page to show 1 environment (content and header)
  */
@@ -13,9 +13,9 @@ import showTableItem from '../common/showTableItem.js';
  * @param {Object} model
  * @return {vnode}
  */
-export let header = (model) => [
+export const header = (model) => [
   h('.w-50 text-center', [
-    h('h4', 'Environment')
+    h('h4', 'Environment details')
   ]),
   h('.flex-grow text-right', [
 
@@ -27,7 +27,7 @@ export let header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export let content = (model) => h('.scroll-y.absolute-fill', [
+export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
@@ -43,8 +43,11 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode}
  */
 const showContent = (model, item) => [
+  showControl(model, item),
+  h('.m2', h('h4', 'Details')),
   showTableItem(item),
-  showControl(model, item)
+  h('.m2', h('h4', 'Tasks')),
+  showTableList(item.tasks),
 ];
 
 /**
@@ -53,14 +56,14 @@ const showContent = (model, item) => [
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showControl = (model, item) => h('.m4', [
+const showControl = (model, item) => h('.m2 .p2', [
   h('h4', 'Control'),
   h('', [
     h('button.btn',
       {
         class: model.environment.itemControl.isLoading() ? 'loading' : '',
         disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'START_ENVIRONMENT'})
+        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'START_ACTIVITY'})
       },
       'START'
     ),
@@ -69,7 +72,7 @@ const showControl = (model, item) => h('.m4', [
       {
         class: model.environment.itemControl.isLoading() ? 'loading' : '',
         disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'STOP_ENVIRONMENT'})
+        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'STOP_ACTIVITY'})
       },
       'STOP'
     ),
@@ -81,6 +84,15 @@ const showControl = (model, item) => h('.m4', [
         onclick: () => model.environment.controlEnvironment({id: item.id, type: 'CONFIGURE'})
       },
       'CONFIGURE'
+    ),
+    ' ',
+    h('button.btn',
+      {
+        class: model.environment.itemControl.isLoading() ? 'loading' : '',
+        disabled: model.environment.itemControl.isLoading(),
+        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'RESET'})
+      },
+      'RESET'
     ),
     ' ',
     h('button.btn.btn-danger',
@@ -96,7 +108,7 @@ const showControl = (model, item) => h('.m4', [
   model.environment.itemControl.match({
     NotAsked: () => null,
     Loading: () => null,
-    Success: (_data) => h('.primary', 'done'),
+    Success: (_data) => null,
     Failure: (error) => h('p.danger', error),
   })
 ]);

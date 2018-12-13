@@ -7,8 +7,8 @@ import sidebar from './common/sidebar.js';
 
 // Page specific views (contents and headers)
 import {
-  content as rolesContent,
-  header as rolesHeader} from './role/rolesPage.js';
+  content as workflowsContent,
+  header as workflowsHeader} from './workflow/workflowsPage.js';
 import {
   content as environmentsContent,
   header as environmentsHeader} from './environment/environmentsPage.js';
@@ -52,7 +52,7 @@ export default (model) => [
 const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
   switchCase(model.router.params.page, {
-    roles: rolesHeader,
+    workflows: workflowsHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
     newEnvironment: newEnvironmentHeader,
@@ -67,7 +67,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
  */
 const content = (model) => [
   switchCase(model.router.params.page, {
-    roles: rolesContent,
+    workflows: workflowsContent,
     environments: environmentsContent,
     environment: environmentContent,
     newEnvironment: newEnvironmentContent,
