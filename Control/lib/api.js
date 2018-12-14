@@ -12,49 +12,16 @@ if (!config.grpc) {
 
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
-/* eslint-disable new-cap */
+
 module.exports.attachTo = (http, ws) => {
-  http.post('/GetEnvironments', (req, res) => {
-    octl.GetEnvironments(req.body)
-      .then((environments) => res.json(environments))
-      .catch((error) => errorHandler(error, res));
-  });
-
-  http.post('/ControlEnvironment', (req, res) => {
-    octl.ControlEnvironment(req.body)
-      .then((environments) => res.json(environments))
-      .catch((error) => errorHandler(error, res, 504));
-  });
-
-  http.post('/NewEnvironment', (req, res) => {
-    octl.NewEnvironment(req.body)
-      .then((environment) => res.json(environment))
-      .catch((error) => errorHandler(error, res));
-  });
-
-  http.post('/DestroyEnvironment', (req, res) => {
-    octl.DestroyEnvironment(req.body)
-      .then((environment) => res.json(environment))
-      .catch((error) => errorHandler(error, res));
-  });
-
-  http.post('/GetEnvironment', (req, res) => {
-    octl.GetEnvironment(req.body)
-      .then((environment) => res.json(environment))
-      .catch((error) => errorHandler(error, res));
-  });
-
-  http.post('/GetFrameworkInfo', (req, res) => {
-    octl.GetFrameworkInfo(req.body)
-      .then((roles) => res.json(roles))
-      .catch((error) => errorHandler(error, res));
-  });
-  /* eslint-enable no-use-before-define */
-  http.post('/GetWorkflows', (req, res) => {
-    octl.GetWorkflowTemplates(req.body)
-      .then((workflows) => res.json(workflows))
-      .catch((error) => errorHandler(error, res));
-  });
+  // Map Control gRPC methods
+  for (const method of octl.methods) {
+    http.post(`/${method}`, (req, res) => {
+      octl[method](req.body)
+        .then((response) => res.json(response))
+        .catch((error) => errorHandler(error, res, 504));
+    });
+  }
 
   http.post('/lockState', (req, res) => {
     res.json(pad);

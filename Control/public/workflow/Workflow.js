@@ -22,7 +22,7 @@ export default class Workflow extends Observable {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/GetWorkflows`);
+    const {result, ok} = await this.model.loader.post(`/api/GetWorkflowTemplates`);
     if (!ok) {
       this.list = RemoteData.failure(result.message);
       this.notify();
