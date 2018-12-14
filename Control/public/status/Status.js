@@ -22,7 +22,7 @@ export default class FrameworkInfo extends Observable {
     this.item = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/getFrameworkInfo`);
+    const {result, ok} = await this.model.loader.post(`/api/GetFrameworkInfo`);
     if (!ok) {
       this.item = RemoteData.failure(result.message);
       this.notify();

@@ -8,7 +8,7 @@ const path = require('path');
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('grpc');
 
-const PROTO_PATH = path.join(__dirname, '../protobuf/octlserver.proto');
+const PROTO_PATH = path.join(__dirname, '../protobuf/o2control.proto');
 
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
@@ -38,7 +38,7 @@ describe('Control', function () {
     const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
     const credentials = grpcLibrary.ServerCredentials.createInsecure();
     const address = `${config.grpc.hostname}:${config.grpc.port}`;
-    server.addService(octlProto.octl.Octl.service, {
+    server.addService(octlProto.o2control.Control.service, {
       getFrameworkInfo(call, callback) {
         console.log('call to getFrameworkInfo done');
         calls['getFrameworkInfo'] = true;
@@ -57,10 +57,6 @@ describe('Control', function () {
           ]
         };
         callback(null, responseData);
-      },
-      getRoles(call, callback) {
-        calls['getRoles'] = true;
-        callback(null, {fakeData: 1});
       },
     });
     server.bind(address, credentials);
@@ -139,18 +135,6 @@ describe('Control', function () {
 
     it('should have gotten data from getEnvironments', async () => {
       assert(calls['getEnvironments'] === true);
-    });
-  });
-
-  describe('page roles', () => {
-    it('should load', async () => {
-      await page.goto(url + '?page=roles', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=roles');
-    });
-
-    it('should have gotten data from getRoles', async () => {
-      assert(calls['getRoles'] === true);
     });
   });
 

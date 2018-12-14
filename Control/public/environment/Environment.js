@@ -26,7 +26,7 @@ export default class Environment extends Observable {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/getEnvironments`);
+    const {result, ok} = await this.model.loader.post(`/api/GetEnvironments`);
     if (!ok) {
       this.list = RemoteData.failure(result.message);
       this.notify();
@@ -44,7 +44,7 @@ export default class Environment extends Observable {
     this.item = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/getEnvironment`, body);
+    const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
     if (!ok) {
       this.item = RemoteData.failure(result.message);
       this.notify();
@@ -63,13 +63,15 @@ export default class Environment extends Observable {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/controlEnvironment`, body);
+    const {result, ok} = await this.model.loader.post(`/api/ControlEnvironment`, body);
     if (!ok) {
       this.itemControl = RemoteData.failure(result.message);
       this.notify();
       return;
     }
     this.itemControl = RemoteData.success(result);
+    this.itemNew = RemoteData.notAsked();
+    this.model.router.go(`?page=environment&id=${result.id}`);
     this.notify();
   }
 
@@ -82,14 +84,14 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/newEnvironment`, this.itemForm);
+    const {result, ok} = await this.model.loader.post(`/api/NewEnvironment`, this.itemForm);
     if (!ok) {
       this.itemNew = RemoteData.failure(result.message);
       this.notify();
       return;
     }
     this.itemNew = RemoteData.notAsked();
-    this.model.router.go(`?page=environment&id=${result.id}`);
+    this.model.router.go(`?page=environment&id=${result.environment.id}`);
   }
 
   /**
@@ -110,7 +112,7 @@ export default class Environment extends Observable {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/destroyEnvironment`, body);
+    const {result, ok} = await this.model.loader.post(`/api/DestroyEnvironment`, body);
     if (!ok) {
       this.itemControl = RemoteData.failure(result.message);
       this.notify();

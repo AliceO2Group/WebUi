@@ -1,9 +1,9 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
- * Model representing Role CRUD
+ * Model representing Workflow
  */
-export default class Role extends Observable {
+export default class Workflow extends Observable {
   /**
    * Initialize `list` to NotAsked
    * @param {Object} model
@@ -16,13 +16,13 @@ export default class Role extends Observable {
   }
 
   /**
-   * Load roles into `list` as RemoteData
+   * Load workflows into `list` as RemoteData
    */
-  async getRoles() {
+  async get() {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/getRoles`);
+    const {result, ok} = await this.model.loader.post(`/api/GetWorkflows`);
     if (!ok) {
       this.list = RemoteData.failure(result.message);
       this.notify();

@@ -3,8 +3,8 @@ import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, Notifi
 
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
-import Role from './role/Role.js';
 import Status from './status/Status.js';
+import Workflow from './workflow/Workflow.js';
 
 /**
  * Root of model tree
@@ -29,8 +29,8 @@ export default class Model extends Observable {
     this.environment = new Environment(this);
     this.environment.bubbleTo(this);
 
-    this.role = new Role(this);
-    this.role.bubbleTo(this);
+    this.workflow = new Workflow(this);
+    this.workflow.bubbleTo(this);
 
     this.status = new Status(this);
     this.status.bubbleTo(this);
@@ -99,6 +99,7 @@ export default class Model extends Observable {
   handleLocationChange() {
     switch (this.router.params.page) {
       case 'newEnvironment':
+        this.workflow.get();
         break;
       case 'environments':
         this.environment.getEnvironments();
@@ -111,8 +112,8 @@ export default class Model extends Observable {
         }
         this.environment.getEnvironment({id: this.router.params.id});
         break;
-      case 'roles':
-        this.role.getRoles();
+      case 'workflows':
+        this.workflow.get();
         break;
       case 'status':
         this.status.getFrameworkInfo();

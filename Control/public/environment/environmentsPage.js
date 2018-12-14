@@ -13,7 +13,7 @@ import showTableList from '../common/showTableList.js';
  * @param {Object} model
  * @return {vnode}
  */
-export let header = (model) => [
+export const header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'Environments')
   ]),
@@ -27,7 +27,7 @@ export let header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export let content = (model) => h('.scroll-y.absolute-fill', [
+export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.list.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
@@ -43,6 +43,6 @@ export let content = (model) => h('.scroll-y.absolute-fill', [
  * @param {Array.<Environment>} list
  * @return {vnode}
  */
-const showContent = (model, list) => list.length
+const showContent = (model, list) => (list && Object.keys(list).length > 0)
   ? showTableList(list, (event, item) => model.router.go(`?page=environment&id=${item.id}`))
-  : h('h3.m4', ['No environment found.']);
+  : h('h3.m4', ['No environments found.']);
