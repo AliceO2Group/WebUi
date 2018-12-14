@@ -1,3 +1,4 @@
+/* eslint-disable */
 ;(function() {
 "use strict"
 function Vnode(tag, key, attrs0, children0, text, dom) {
