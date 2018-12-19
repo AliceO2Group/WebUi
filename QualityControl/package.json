@@ -15,6 +15,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "1.7.2",
     "jsroot": "^5.5.1",
+    "node-addon-api": "^1.6.2",
     "zeromq": "4.6.0"
   },
   "devDependencies": {

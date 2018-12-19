@@ -13,11 +13,6 @@ const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 
-if (!config.tobject2json) {
-  throw new Error('TObject2Json config is mandatory');
-}
-const tObject2JsonClient = new TObject2JsonClient(config.tobject2json);
-
 const is = new InformationServiceState();
 if (config.informationService) {
   log.info('Information service: starting synchronization');
@@ -33,6 +28,9 @@ if (config.listingConnector === 'ccdb') {
   }
   const ccdb = new CCDBConnector(config.ccdb);
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
+
+  const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
+  module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
 } else if (config.listingConnector === 'amore') {
   log.info('Object listing: using AMORE');
   if (!config.amore) {
@@ -44,6 +42,9 @@ if (config.listingConnector === 'ccdb') {
   const mysql = new MySQLConnector(config.mysql);
   log.info('Object listing: using MySQL');
   module.exports.listObjects = mysql.listObjects.bind(mysql);
+
+  const tObject2JsonClient = new TObject2JsonClient('mysql', config.mysql);
+  module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
 }
 
 // --------------------------------------------------------
@@ -55,5 +56,3 @@ module.exports.createLayout = jsonDb.createLayout.bind(jsonDb);
 module.exports.deleteLayout = jsonDb.deleteLayout.bind(jsonDb);
 
 module.exports.informationService = is;
-
-module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
