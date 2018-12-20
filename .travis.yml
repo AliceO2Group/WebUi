@@ -43,7 +43,7 @@ before_script:
 script:
 - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm test; fi
 - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm test; fi
-- if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; npm test; fi
+- if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" lib/TObject2JsonClient.js; npm test; fi
 - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; fi
 after_success:
 - cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
