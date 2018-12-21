@@ -11,11 +11,11 @@ class TObject2JsonClient {
    * @param {Object} config - {host, port}
    */
   constructor(connector, config) {
-    if (connector == "ccdb") {
-      connector = "CCDB";
+    if (connector == 'ccdb') {
+      connector = 'CCDB';
     }
-    if (connector == "mysql") {
-      connector = "MySQL";
+    if (connector == 'mysql') {
+      connector = 'MySQL';
     }
     tobject2json.init(connector, config.hostname + ':' + config.port, '', '', '');
   }
