@@ -19,14 +19,10 @@ aliBuild build qcg --default o2-dataflow
 ```
 alienv enter qcg/latest-o2-dataflow
 ```
-2. Run `TObject2Json` (it converts Objects into JSRoot readable format)
-```
-tobject2json --backend mysql://qc_user:qc_user@localhost/quality_control --zeromq-server tcp://127.0.0.1:7777
-```
 
-3. (Run `Information Service` if you need Online mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
+2. (Run `Information Service` if you need Online mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
 
-4. Run QCG server
+3. Run QCG server
 ```
 qcg
 ```
@@ -56,22 +52,7 @@ Edit `informationService` section to define custom:
 - `host`name
 - `port`
 
-of Information Service publish and reponse socket.
-
-#### TObject2Json
-In order to customise hostname and port of `TObject2Json` follow these two steps:
-
-1. Edit `tobject2json` section of configuration file to define custom:
- - `host`name
- - `port` number
-
-2. Run `TObject2Json` with updated parameters
-```
-tobject2json --backend mysql://<loign>:<password>@<hostname>:<port>/<database> --zeromq-server tcp://<host>:<port>
-```
-WHERE:
- - `backend` is a Quality Control database URL
- - `zeromq-server` which provides communication between `TObject2Json` and the GUI; it must match with `host` and `port` that you set up in `1.`.
+of Information Service publish and response socket.
 
 #### CERN OAuth
 - Register your application in the [CERN OAuth service](https://sso-management.web.cern.ch/OAuth/RegisterOAuthClient.aspx)
@@ -96,4 +77,3 @@ QCG exposes two public REST API which can be read by any other application.
 - Get ROOT object data in JSON format to be used with JSROOT\
   Request: `curl 'http://localhost:8080/api/readObjectData?objectName=AGENT/OBJECT' -X GET`\
   Result: `{"_typename":"TCanvas", ...}`
-
