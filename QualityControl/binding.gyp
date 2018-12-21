@@ -1,30 +1,31 @@
 {
   "variables": {
-    "dep_root%": '$(QUALITYCONTROL_ROOT)'
+    "qc_root%": '$(QUALITYCONTROL_ROOT)',
+    "root_include%": '$(ROOTSYS)/include'
   },
   'targets': [
     {   
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "<@(dep_root)/include"],
+      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "<@(qc_root)/include", "<@(root_include)", "$(CONFIGURATION_ROOT)/include" ],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       'target_name': 'tobject2json',
       'sources': [ 'tobject2json.cc' ],
       'conditions': [
         ['OS=="linux"', {
           "libraries": [
-            "-ltobject2json",
-            "-L<@(dep_root)/lib"
+            "-lQualityControl",
+            "-L<@(qc_root)/lib"
           ], 
           'cflags_cc': [ '-std=c++1z' ],
         }],
         ['OS=="mac"', {
           "libraries": [
-            "-ltobject2json",
-            "-L<@(dep_root)/lib",
-            "-Wl,-rpath,<@(dep_root)/lib",
+            "-lQualityControl",
+            "-L<@(qc_root)/lib",
+            "-Wl,-rpath,<@(qc_root)/lib",
           ],
           'xcode_settings': {
             'OTHER_CFLAGS': [
-              '-std=c++17', '-stdlib=libc++'
+              '-std=c++17', '-stdlib=libc++', '-frtti'
             ]
           }
         }]
