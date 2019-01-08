@@ -22,7 +22,7 @@ if (config.informationService) {
 }
 
 if (config.listingConnector === 'ccdb') {
-  log.info('Object listing: using CCDB');
+  log.info('Object listing: CCDB');
   if (!config.ccdb) {
     throw new Error('CCDB config is mandatory');
   }
@@ -32,7 +32,7 @@ if (config.listingConnector === 'ccdb') {
   const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
   module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
 } else if (config.listingConnector === 'amore') {
-  log.info('Object listing: using AMORE');
+  log.info('Object listing: AMORE');
   if (!config.amore) {
     throw new Error('AMORE config is mandatory');
   }
@@ -40,7 +40,7 @@ if (config.listingConnector === 'ccdb') {
   module.exports.listObjects = amore.listObjects.bind(amore);
 } else {
   const mysql = new MySQLConnector(config.mysql);
-  log.info('Object listing: using MySQL');
+  log.info('Object listing: MySQL');
   module.exports.listObjects = mysql.listObjects.bind(mysql);
 
   const tObject2JsonClient = new TObject2JsonClient('mysql', config.mysql);

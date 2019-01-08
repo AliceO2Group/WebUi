@@ -17,9 +17,11 @@ module.exports = {
     database: 'quality_control'
   },
 
-  tobject2json: {
-    host: '127.0.0.1',
-    port: 7777
+  listingConnector: 'ccdb', // ccdb or mysql or amore (default mysql) for listing objects
+
+  ccdb: {
+    hostname: 'localhost',
+    port: 8080
   },
 
   // dbFile: '/var/db/qcg-db.json', // absolute path where to save layouts, default = root of this app
@@ -49,13 +51,6 @@ module.exports = {
   //     groupPath: '/api/Groups',
   //     port: 443
   //   }
-  // },
-
-  // listingConnector: 'mysql', // ccdb or mysql or amore (default mysql) for listing objects
-
-  // ccdb: {
-  //   hostname: '<ccdb hostname>',
-  //   port: 8080
   // },
 
   // amore: {
