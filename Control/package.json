@@ -1,7 +1,7 @@
 {
   "name": "@aliceo2/control",
   "description": "ALICE O2 Control GUI",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
