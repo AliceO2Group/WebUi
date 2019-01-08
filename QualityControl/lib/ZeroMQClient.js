@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const zmq = require('zeromq');
-const log = new (require('./../log/Log.js'))('ZeroMQ');
+const log = new (require('@aliceo2/web-ui').Log)('ZeroMQ');
 
 /**
  * ZeroMQ client that communicates with Control Master prcess via one of two supported
