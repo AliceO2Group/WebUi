@@ -17,7 +17,6 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
 } else {
   config.demoData = false;
 }
-log.info(`TObject2JSON URL: ${config.tobject2json.host}`);
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.oAuth);
