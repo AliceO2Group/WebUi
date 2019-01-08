@@ -25,14 +25,13 @@ The goal of this UI framework is to identify library and framework sets, provide
 * `nodejs` >= 8.9.4
 
 #### CERN CentOS 7
-Then, download `nodejs` from https://nodejs.org/en/download/ unarchive it and add `bin` directory your `PATH`
+Install nodejs:
 ```
-curl -O https://nodejs.org/dist/v8.11.1/node-v8.11.1-linux-x64.tar.gz
-tar xvf node-v8.11.1-linux-x64.tar.gz
-export PATH=`pwd`/node-v8.11.1-linux-x64/bin:$PATH
+sudo curl -sL https://rpm.nodesource.com/setup_10.x | bash -
+sudo yum install -y nodejs
 ```
 #### macOS
-Install packages using `brew`
+Install nodejs using `brew`
 ```
 brew install node
 ```
