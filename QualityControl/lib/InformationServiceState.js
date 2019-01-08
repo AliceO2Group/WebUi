@@ -1,4 +1,4 @@
-const ZeroMQClient = require('@aliceo2/web-ui').ZeroMQClient;
+const ZeroMQClient = require('./ZeroMQClient.js');
 
 const EventEmitter = require('events');
 
