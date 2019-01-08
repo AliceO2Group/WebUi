@@ -5,7 +5,7 @@
   },
   'targets': [
     {   
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "<@(qc_root)/include", "<@(root_include)", "$(CONFIGURATION_ROOT)/include" ],
+      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "<@(qc_root)/include", "<@(root_include)", "$(CONFIGURATION_ROOT)/include", "$(COMMON_O2_ROOT)/include", "$(BOOST_ROOT)/include" ],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       'target_name': 'tobject2json',
       'sources': [ 'tobject2json.cc' ],
@@ -15,7 +15,7 @@
             "-lQualityControl",
             "-L<@(qc_root)/lib"
           ], 
-          'cflags_cc': [ '-std=c++1z' ],
+          'cflags_cc': [ '-std=c++1z', '-frtti' ],
         }],
         ['OS=="mac"', {
           "libraries": [
