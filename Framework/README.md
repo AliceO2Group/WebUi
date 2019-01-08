@@ -14,7 +14,7 @@ The goal of this UI framework is to identify library and framework sets, provide
 - REST and WebSocket API
 - Authentication via CERN OAuth 2.0 and authorization via CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
-- External resource access: MySQL, ZeroMQ, gRPC
+- External resource access: MySQL, gRPC
 
 ##### Client side-features
 - User interface CSS building blocks in accordance with ALICE standards
@@ -23,14 +23,8 @@ The goal of this UI framework is to identify library and framework sets, provide
 
 ### System requirements
 * `nodejs` >= 8.9.4
-* `zeromq-devel` >= 4.0 (optional, see [zeromq](docs/ZMQ.md) module docs for more details)
 
 #### CERN CentOS 7
-Install `zeromq-devel`
-```
-sudo yum install zeromq-devel
-```
-
 Then, download `nodejs` from https://nodejs.org/en/download/ unarchive it and add `bin` directory your `PATH`
 ```
 curl -O https://nodejs.org/dist/v8.11.1/node-v8.11.1-linux-x64.tar.gz
@@ -40,7 +34,7 @@ export PATH=`pwd`/node-v8.11.1-linux-x64/bin:$PATH
 #### macOS
 Install packages using `brew`
 ```
-brew install zeromq node
+brew install node
 ```
 
 ### Minimum browser version support
@@ -66,7 +60,6 @@ npm install --save @aliceo2/web-ui
 * [Logging](./docs/guide/logging.md) - Stores log messages in a file or pushes them to InfoLogger service
 * [OAuth](./docs/guide/oauth.md) - Provides authentication via CERN oAuth and authorization via e-grups
 * [WebSockets](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
-* [ZeroMQ](./docs/guide/zeromq.md) - ZeroMQ client
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 
 ### Frontend guide

@@ -5,7 +5,6 @@
  */
 
 'use strict';
-const ZeroMQClient = require('./zeromq/client');
 const WebSocket = require('./websocket/server');
 const HttpServer = require('./http/server');
 const WebSocketMessage = require('./websocket/message.js');
@@ -15,7 +14,6 @@ const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
 const MySQL = require('./db/mysql.js');
 const JwtToken = require('./jwt/token.js');
 
-exports.ZeroMQClient = ZeroMQClient;
 exports.WebSocket = WebSocket;
 exports.HttpServer = HttpServer;
 exports.WebSocketMessage = WebSocketMessage;
