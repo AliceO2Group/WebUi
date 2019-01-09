@@ -29,7 +29,7 @@ const button = (model, padlockState) => typeof padlockState.lockedBy !== 'number
     onclick: () => model.lock.lock()
   }, iconLockUnlocked())
   : h('button.btn', {
-    title: `Lock is talken by ${padlockState.lockedByName} (id ${padlockState.lockedBy})`,
+    title: `Lock is taken by ${padlockState.lockedByName} (id ${padlockState.lockedBy})`,
     onclick: () => model.lock.unlock()
   }, iconLockLocked());
 
