@@ -175,6 +175,9 @@ a:hover { color: var(--color-blue); text-decoration: underline; }
 
 /* SVG icons - scale as a font */
 svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
+.fill-primary { fill: 'currentcolor'; }
+.fill-green { fill: var(--color-success); }
+.fill-orange { fill: var(--color-orange); }
 
 /* button */
 

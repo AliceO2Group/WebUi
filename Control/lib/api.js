@@ -17,6 +17,13 @@ module.exports.attachTo = (http, ws) => {
   // Map Control gRPC methods
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
+      // disallow 'not-Get' methods if not owning the lock
+      if (!method.startsWith('Get')) {
+        if (req.session.personid != pad.lockedBy) {
+          errorHandler(`Control is locked by ${pad.lockedByName}`, res, 403);
+          return;
+        }
+      }
       octl[method](req.body)
         .then((response) => res.json(response))
         .catch((error) => errorHandler(error, res, 504));
@@ -33,7 +40,7 @@ module.exports.attachTo = (http, ws) => {
       log.info(`Lock taken by ${req.session.name}`);
       res.json({ok: true});
     } catch (error) {
-      log.warn(`Unable to take lock by ${req.session.name}: ${error}`);
+      log.warn(`Unable to lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.toString()});
       return;
     }
@@ -43,7 +50,7 @@ module.exports.attachTo = (http, ws) => {
   http.post('/unlock', (req, res) => {
     try {
       pad.unlockBy(req.session.personid);
-      log.info(`Lock given away by ${req.session.name}`);
+      log.info(`Lock released by ${req.session.name}`);
       res.json({ok: true});
     } catch (error) {
       log.warn(`Unable to give away lock by ${req.session.name}: ${error}`);
@@ -57,10 +64,9 @@ module.exports.attachTo = (http, ws) => {
    * Send to all users state of Pad via Websocket
    */
   const broadcastPadState = () => {
-    const msg = new WebSocketMessage();
-    msg.command = 'padlock-update';
-    msg.payload = pad;
-    ws.broadcast(msg);
+    ws.broadcast(
+      new WebSocketMessage().setCommand('padlock-update').setPayload(pad)
+    );
   };
 };
 

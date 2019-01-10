@@ -2,7 +2,7 @@
 import {h} from './index.js';
 
 // SVG icon wrapper
-export const icon = (svg) => h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'}, svg);
+export const icon = (svg, className = 'fill-primary') => h('svg.icon', {className: className, viewBox: '0 0 8 8'}, svg);
 
 // SVG icons
 export const iconAccountLogin = () => icon(h('path', {d: 'M3 0v1h4v5h-4v1h5v-7h-5zm1 2v1h-4v1h4v1l2-1.5-2-1.5z'}));
@@ -135,7 +135,7 @@ export const iconLinkIntact = () => icon(h('path', {d: 'M5.875.031c-.184.01-.354
 export const iconListRich = () => icon(h('path', {d: 'M0 0v3h3v-3h-3zm4 0v1h4v-1h-4zm0 2v1h3v-1h-3zm-4 2v3h3v-3h-3zm4 0v1h4v-1h-4zm0 2v1h3v-1h-3z'}));
 export const iconList = () => icon(h('path', {d: 'M.5 0c-.276 0-.5.224-.5.5s.224.5.5.5.5-.224.5-.5-.224-.5-.5-.5zm1.5 0v1h6v-1h-6zm-1.5 2c-.276 0-.5.224-.5.5s.224.5.5.5.5-.224.5-.5-.224-.5-.5-.5zm1.5 0v1h6v-1h-6zm-1.5 2c-.276 0-.5.224-.5.5s.224.5.5.5.5-.224.5-.5-.224-.5-.5-.5zm1.5 0v1h6v-1h-6zm-1.5 2c-.276 0-.5.224-.5.5s.224.5.5.5.5-.224.5-.5-.224-.5-.5-.5zm1.5 0v1h6v-1h-6z'}));
 export const iconLocation = () => icon(h('path', {d: 'M8 0l-8 4 3 1 1 3 4-8z'}));
-export const iconLockLocked = () => icon(h('path', {d: 'M4 0c-1.099 0-2 .901-2 2v1h-1v4h6v-4h-1v-1c0-1.099-.901-2-2-2zm0 1c.561 0 1 .439 1 1v1h-2v-1c0-.561.439-1 1-1z'}));
+export const iconLockLocked = (className) => icon(h('path', {d: 'M4 0c-1.099 0-2 .901-2 2v1h-1v4h6v-4h-1v-1c0-1.099-.901-2-2-2zm0 1c.561 0 1 .439 1 1v1h-2v-1c0-.561.439-1 1-1z'}), className);
 export const iconLockUnlocked = () => icon(h('path', {d: 'M4 0c-1.099 0-2 .901-2 2h1c0-.561.439-1 1-1 .561 0 1 .439 1 1v2h-4v4h6v-4h-1v-2c0-1.099-.901-2-2-2z'}));
 export const iconLoopCircular = () => icon(h('path', {d: 'M4 1c-1.651 0-3 1.349-3 3h-1l1.5 2 1.5-2h-1c0-1.109.891-2 2-2v-1zm2.5 1l-1.5 2h1c0 1.109-.891 2-2 2v1c1.651 0 3-1.349 3-3h1l-1.5-2z'}));
 export const iconLoopSquare = () => icon(h('path', {d: 'M1 0v2h1v-1h4v2h-1l1.5 2.5 1.5-2.5h-1v-3h-6zm.5 2.5l-1.5 2.5h1v3h6v-2h-1v1h-4v-2h1l-1.5-2.5z'}));

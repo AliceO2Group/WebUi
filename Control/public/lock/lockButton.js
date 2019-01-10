@@ -31,7 +31,7 @@ const button = (model, padlockState) => typeof padlockState.lockedBy !== 'number
   : h('button.btn', {
     title: `Lock is taken by ${padlockState.lockedByName} (id ${padlockState.lockedBy})`,
     onclick: () => model.lock.unlock()
-  }, iconLockLocked());
+  }, (model.session.personid == padlockState.lockedBy) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'));
 
 /**
  * Simple loading button
