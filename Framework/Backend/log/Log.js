@@ -95,7 +95,7 @@ class Log {
    * Prints more details, for debugging purposes
    * @param {object} err
    */
-  static trace(err) {
+  trace(err) {
     // eslint-disable-next-line
     console.trace(err);
   }
