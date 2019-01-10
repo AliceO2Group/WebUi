@@ -48,7 +48,7 @@ log.error('An error has occurred');
 Static methods:
 ```js
 Log.configure(<LOG_CONF>);
-Log.trace(<Error>);
+log.trace(<Error>);
 ```
 
 Class members:
