@@ -19,6 +19,10 @@ module.exports.attachTo = (http, ws) => {
     http.post(`/${method}`, (req, res) => {
       // disallow 'not-Get' methods if not owning the lock
       if (!method.startsWith('Get')) {
+        if (pad.lockedBy == null) {
+          errorHandler(`Control is not locked`, res, 403);
+          return;
+        }
         if (req.session.personid != pad.lockedBy) {
           errorHandler(`Control is locked by ${pad.lockedByName}`, res, 403);
           return;
