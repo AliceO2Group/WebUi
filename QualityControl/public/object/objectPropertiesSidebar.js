@@ -40,8 +40,9 @@ export default function objectPropertiesSidebar(model) {
         btnOption(model, tabObject, 'gridx'), ' ',
         btnOption(model, tabObject, 'gridy'), ' ',
       ]),
-      h('', [
+      h('.flex-row', [
         btnOption(model, tabObject, 'lego'), ' ',
+        btnOption(model, tabObject, 'colz'), ' ',
       ]),
       h('', [
         btnOption(model, tabObject, 'stat'), ' ',
