@@ -1,4 +1,4 @@
-const tobject2json = require('../build/Release/tobject2json.node');
+const tobject2json = require('../tobject2json.node');
 
 /**
  * Connect to a TObject2Json server and send requests though TCP/IP
