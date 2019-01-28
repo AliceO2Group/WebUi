@@ -4,7 +4,7 @@ const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui'
 // Define configuration for JWT tokens and HTTP server
 const config = require('./config.js');
 
-/// Get logger instance
+// Get logger instance
 const log = new Log('Tutorial');
 
 // HTTP server
