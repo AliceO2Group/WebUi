@@ -30,6 +30,7 @@ class WebSocketMessage {
         || (parsed.command == '')) {
         this._code = 400;
         this._command = 'error';
+        // eslint-disable-next-line prefer-promise-reject-errors
         reject(this);
         return;
       }
