@@ -52,14 +52,14 @@ class ControlProxy {
       log.debug(`gRPC connected to ${address}`);
     });
 
-    this._setupControlMethod('GetRoles');
-    this._setupControlMethod('GetFrameworkInfo');
-    this._setupControlMethod('GetEnvironments');
-    this._setupControlMethod('GetEnvironment');
-    this._setupControlMethod('NewEnvironment');
-    this._setupControlMethod('ControlEnvironment');
-    this._setupControlMethod('DestroyEnvironment');
-    this._setupControlMethod('GetWorkflowTemplates');
+    // set all the available gRPC methods
+    this.methods = Object.keys(octlProto.o2control.Control.prototype).filter((item) => {
+      return !(item.charAt(0) == '$');
+    });
+
+    for (const method of this.methods) {
+      this._setupControlMethod(method);
+    }
   }
 
   /**
