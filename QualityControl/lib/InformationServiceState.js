@@ -82,7 +82,7 @@ class InformationServiceState extends EventEmitter {
     this.reqConnexion.on('message', (json) => {
       const parsed = JSON.parse(json);
       this.clear();
-      for (let task of parsed.tasks) {
+      for (const task of parsed.tasks) {
         const agentName = task.name;
         task.objects.forEach((object) => {
           this.upsert(`${agentName}/${object.id}`, object);

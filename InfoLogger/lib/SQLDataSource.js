@@ -54,12 +54,12 @@ module.exports = class SQLDataSource {
     const values = [];
     const criterias = [];
 
-    for (let field in filters) {
+    for (const field in filters) {
       if (!filters.hasOwnProperty(field)) {
         continue;
       }
 
-      for (let operator in filters[field]) {
+      for (const operator in filters[field]) {
         if (filters[field][operator] === null || !operator.includes('$')) {
           continue;
         }

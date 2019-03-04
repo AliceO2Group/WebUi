@@ -148,7 +148,7 @@ export default class Object_ extends Observable {
 
     // eslint-disable-next-line
     const objects = JSROOT.JSONR_unref(result);
-    for (let name in objects) {
+    for (const name in objects) {
       if (objects[name].error) {
         this.objects[name] = RemoteData.failure(objects[name].error);
       } else {

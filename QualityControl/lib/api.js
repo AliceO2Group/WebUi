@@ -102,7 +102,7 @@ function readObjectData(req, res) {
  * @param {Response} res
  */
 function listLayouts(req, res) {
-  let filter = {};
+  const filter = {};
   if (req.body.owner_id !== undefined) {
     filter.owner_id = parseInt(req.body.owner_id, 10);
   }

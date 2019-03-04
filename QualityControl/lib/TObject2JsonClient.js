@@ -27,19 +27,19 @@ class TObject2JsonClient {
    */
   retrieve(path) {
     if (!path || path.indexOf('/') === -1) {
-      return Promise.reject('Path should contain a slash at least');
+      return Promise.reject(new Error('Path should contain a slash at least'));
     }
 
     return new Promise((resolve, fail) => {
       tobject2json.get(path, (error, result) => {
         if (error) {
-          fail('TObject2Json C++ module failed');
+          fail(new Error('TObject2Json C++ module failed'));
         } else {
           let message;
           try {
             message = JSON.parse(result);
           } catch (e) {
-            fail('JSON decoding failed');
+            fail(new Error('JSON decoding failed'));
           }
           resolve(message);
         }

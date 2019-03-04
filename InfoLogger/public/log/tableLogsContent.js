@@ -191,7 +191,7 @@ const autoscrollManager = (model, vnode) => {
   }
 };
 
-let pointers = new WeakMap();
+const pointers = new WeakMap();
 let currentAddress = 0;
 
 /**
