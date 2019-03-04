@@ -37,7 +37,7 @@ export function timerDebouncer(fn, time) {
   };
 }
 
-let pointers = new WeakMap();
+const pointers = new WeakMap();
 let currentAddress = 0;
 
 /**

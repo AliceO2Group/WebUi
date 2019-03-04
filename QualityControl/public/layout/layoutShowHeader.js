@@ -112,8 +112,8 @@ const toolbarEditModeTab = (model, tab, i) => {
   /**
    * Handler when user click on rename icon
    */
-  let renameTab = () => {
-    let newName = prompt('Enter a new name for this tab:', tab.name);
+  const renameTab = () => {
+    const newName = prompt('Enter a new name for this tab:', tab.name);
     if (newName) {
       model.layout.renameTab(i, newName);
     }

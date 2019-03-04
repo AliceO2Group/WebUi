@@ -7,7 +7,7 @@ import {h} from '/js/src/index.js';
  * @param {function(DOMEvent, item)} onclick - (optional) add a button for each line with object as argument
  * @return {vnode} table view
  */
-export default(list, onclick) => h('table.table', [
+export default (list, onclick) => h('table.table', [
   h('thead', [
     h('tr', [
       Object.keys(list[0]).map((columnName) => h('th', columnName)),

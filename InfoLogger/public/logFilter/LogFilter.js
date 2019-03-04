@@ -83,9 +83,9 @@ export default class LogFilter extends Observable {
 
     // clean-up the whole structure
     // eslint-disable-next-line guard-for-in
-    for (let field in criterias) {
+    for (const field in criterias) {
       // eslint-disable-next-line guard-for-in
-      for (let operator in criterias[field]) {
+      for (const operator in criterias[field]) {
         // remote parsed properties (generated with fromJSON)
         if (operator.includes('$')) {
           delete criterias[field][operator];
@@ -115,9 +115,9 @@ export default class LogFilter extends Observable {
 
     // copy values to inner filters
     // eslint-disable-next-line guard-for-in
-    for (let field in criterias) {
+    for (const field in criterias) {
       // eslint-disable-next-line guard-for-in
-      for (let operator in criterias[field]) {
+      for (const operator in criterias[field]) {
         this.setCriteria(field, operator, criterias[field][operator]);
       }
     }
@@ -152,11 +152,11 @@ export default class LogFilter extends Observable {
 
       // eslint-disable-next-line guard-for-in
       for (const field in criterias) {
-        let logValue = log[field];
+        const logValue = log[field];
 
         // eslint-disable-next-line guard-for-in
         for (const operator in criterias[field]) {
-          let criteriaValue = criterias[field][operator];
+          const criteriaValue = criterias[field][operator];
 
           // don't apply criterias not set
           if (criteriaValue === null) {

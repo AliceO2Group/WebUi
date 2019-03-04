@@ -44,7 +44,7 @@ export default class ObjectTree extends Observable {
    * @return {number} # of nodes associated to their IS data
    */
   updateAllIS(informationService) {
-    for (let [pathString, data] of Object.entries(informationService)) {
+    for (const [pathString, data] of Object.entries(informationService)) {
       if (pathString === this.pathString) {
         this.informationService = data; // exact match
         return 1;
