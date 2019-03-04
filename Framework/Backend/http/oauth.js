@@ -22,7 +22,6 @@ class OAuth {
     assert(config.tokenPath, 'Missing config value: oAuth.tokenPath');
     assert(config.authorizePath, 'Missing config value: oAuth.authorizePath');
     assert(config.redirect_uri, 'Missing config value: oAuth.redirect_uri');
-    assert(config.egroup, 'Missing config value: oAuth.egroup');
     assert(config.resource.port, 'Missing config value: oAuth.resource.port');
     assert(config.resource.hostname, 'Missing config value: oAuth.resource.hostname');
     assert(config.resource.userPath, 'Missing config value: oAuth.resource.userPath');
@@ -52,8 +51,8 @@ class OAuth {
       path: config.resource.groupPath
     };
     this.scope = 'https://' + config.resource.hostname + config.resource.userpath;
-    this.egroup = config.egroup;
-    log.info(`OAuth enabled. Authorize: ${config.tokenHost}`);
+    config.egroup ? this.egroup = config.egroup : config.egroup = '[none]';
+    log.info(`OAuth enabled: ${config.tokenHost}, egroup: ${config.egroup}`);
   }
 
   /**
@@ -92,10 +91,11 @@ class OAuth {
           };
 
           // E-group authorization (verify that user is subscribed to the e-group)
-          if (!details.group.groups.find((group) => group === this.egroup)) {
-            reject(new Error('e-groups restriction'));
+          if (this.egroup) {
+            if (!details.group.groups.find((group) => group === this.egroup)) {
+              reject(new Error('e-groups restriction'));
+            }
           }
-
           resolve(details);
         }).catch((error) => {
           reject(error);
