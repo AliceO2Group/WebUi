@@ -24,7 +24,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure --prefix=$LDHACK --without-libsodium; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir /usr/local/etc/my.cnf.d; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir /usr/local/etc/my.cnf.d; sudo mkdir /var/mysql; sudo ln -s /tmp/mysql.sock /var/mysql/mysql.sock; fi
   - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
   - chmod +x .travis.bash; ./.travis.bash;
 install:
