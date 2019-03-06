@@ -1,6 +1,6 @@
 # Frontend - Charts
 
-The frontend allows plotting time series. See how to works in a [demo](https://aliceo2group.github.io/WebUi/Framework/docs/reference/chart.html).
+The frontend allows plotting time series. See how to works in a [demo](https://aliceo2group.github.io/WebUi/Framework/docs/demo/chart.html).
 Full API is available in the [Frontend reference](../reference/frontend-api.md#chartTimeSeries).
 
 ## Usage
