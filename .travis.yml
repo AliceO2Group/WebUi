@@ -4,14 +4,14 @@ addons:
   - mariadb: '10.0'
 os:
   - linux
-    deploy:
-      provider: pages
-      skip_cleanup: true
-      github_token: $GITHUB_TOKEN
-      local_dir: Framework/Frontend/
-      on:
-        branch: dev
   - osx
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: Framework/Frontend/
+  on:
+    branch: dev
 language: node_js
 node_js: '8.9.4'
 env:
