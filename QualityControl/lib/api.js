@@ -211,7 +211,7 @@ function createLayout(req, res) {
 function errorHandler(err, res, status = 500) {
   if (status === 500) {
     if (err.stack) {
-      log.trace(err);
+      Log.trace(err);
     }
     log.error(err.message || err);
   }

@@ -130,7 +130,7 @@ class HttpServer {
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
       log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
-      log.trace(err);
+      Log.trace(err);
       res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
     });
   }
