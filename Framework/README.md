@@ -49,9 +49,8 @@ npm install --save @aliceo2/web-ui
 ```
 
 ### Getting started
-* [Hello World (JSFiddle)](http://jsfiddle.net/awegrzyn/3zxnua6b/)
-* [Tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
-* [Advanced frontend demo (JSFiddle)](http://jsfiddle.net/awegrzyn/kytn60v8/)
+* [Step-by-step tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
+* [Advanced frontend demo)](https://aliceo2group.github.io/WebUi/Framework/docs/demo/frontend.html)
 
 ### Backend guide
 * [HTTPS server](./docs/guide/http-server.md) - Serves custom REST API, supports TLS
