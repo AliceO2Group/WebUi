@@ -48,7 +48,7 @@ model.name = 'Alice';
 model.notify();
 ```
 
-This example will show a simple title, [here is the result as a demo](http://jsfiddle.net/vkosmala/dskb92co/).
+This example will show a simple title, [here is the result as a demo](https://aliceo2group.github.io/WebUi/Framework/docs/demo/template-1.html).
 
 You will notice we use an `Observable` model. When we `notify` a change, `mount` will update the view according to the new state.
 Usually, we don't call directly `model.notify()` by hand but with a call coming from the view (a click, an input).
@@ -72,7 +72,7 @@ mount(document.body, view, model);
 ```
 
 The result is a counter we can increment.
-[Here is a demo](http://jsfiddle.net/vkosmala/0ouLtv7r/) of this concept, with CSS and a decrement function in addition to the code above.
+[Here is a demo](https://aliceo2group.github.io/WebUi/Framework/docs/demo/template-2.html) of this concept, with CSS and a decrement function in addition to the code above.
 
 The template engine flow can be seen as a cycle:
 ![Cycle](../images/cycle.jpeg)

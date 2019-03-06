@@ -1,0 +1,12 @@
+<!doctype html>
+
+<script type="module">
+// Import Framework tools
+import {mount, h, Observable} from '../../Frontend/js/src/index.js';
+
+const model = new Observable();
+const view = (model) => h('h1.title', `hello ${model.name}`);
+mount(document.body, view, model);
+model.name = 'Alice';
+model.notify();
+</script>

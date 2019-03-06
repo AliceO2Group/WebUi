@@ -12,11 +12,11 @@ The goal of this UI framework is to identify library and framework sets, provide
 
 ##### Server-side features
 - REST and WebSocket API
-- Authentication via CERN OAuth 2.0 and authorization via CERN e-groups
+- Authentication via CERN OAuth 2.0 and authorisation via CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
 - External resource access: MySQL, gRPC
 
-##### Client side-features
+##### Client-side features
 - User interface CSS building blocks in accordance with ALICE standards
 - Asynchronous data fetching (Ajax) and bi-directional socket (WebSockets)
 - MVC engine with a "diffing" algorithm
@@ -24,22 +24,20 @@ The goal of this UI framework is to identify library and framework sets, provide
 ### System requirements
 * `nodejs` >= 8.9.4
 
-#### CERN CentOS 7
-Install nodejs:
+#### CentOS 7
 ```
 sudo curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 sudo yum install -y nodejs
 ```
 #### macOS
-Install nodejs using `brew`
 ```
 brew install node
 ```
 
 ### Minimum browser version support
 - Chrome 61
-- Firefox 60, (**!** 54-60: Navigate to `about:config` set value `true` of `dom.moduleScripts.enabled` preference)
-- Edge 16 (**!** 15: Enable `Experimental JavaScript Features`)
+- Firefox 60
+- Edge 16
 - Safari 10.1
 - Opera 47
 
@@ -49,15 +47,14 @@ npm install --save @aliceo2/web-ui
 ```
 
 ### Getting started
-* [Hello World (JSFiddle)](http://jsfiddle.net/awegrzyn/3zxnua6b/)
-* [Tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
-* [Advanced frontend demo (JSFiddle)](http://jsfiddle.net/awegrzyn/kytn60v8/)
+* [Step-by-step tutorial: Time server using Ajax and WebSockets](./docs/tutorial/time-server.md)
+* [Advanced frontend demo](https://aliceo2group.github.io/WebUi/Framework/docs/demo/frontend.html)
 
 ### Backend guide
 * [HTTPS server](./docs/guide/http-server.md) - Serves custom REST API, supports TLS
 * [JSON Web Tokens](./docs/guide/json-tokens.md) - Secures HTTP requests and WebSocket messages with a JWT token
 * [Logging](./docs/guide/logging.md) - Stores log messages in a file or pushes them to InfoLogger service
-* [OAuth](./docs/guide/oauth.md) - Provides authentication via CERN oAuth and authorization via e-grups
+* [OAuth](./docs/guide/oauth.md) - Provides authentication via CERN oAuth and authorisation via e-groups
 * [WebSockets](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 
@@ -69,7 +66,7 @@ npm install --save @aliceo2/web-ui
 - [Ajax](./docs/guide/async-calls.md) - Asynchronously fetch data from the server
 - [WebSocket client](./docs/guide/websocket-client.md) - Connect to WebSocket server
 - [Routing](./docs/guide/front-router.md) - Let you manage many pages in one application
-- [Charts](./docs/guide/charts.md) - Plot timeseries
+- [Charts](./docs/guide/charts.md) - Plot time-series
 
 ### API Reference
 * [Backend JS](./docs/reference/backend.md)
