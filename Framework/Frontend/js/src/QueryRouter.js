@@ -1,27 +1,19 @@
+/**
+ * @license
+ * Copyright CERN and copyright holders of ALICE O2. This software is
+ * distributed under the terms of the GNU General Public License v3 (GPL
+ * Version 3), copied verbatim in the file "COPYING".
+ *
+ * See http://alice-o2.web.cern.ch/license for full licensing information.
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* Global: window */
 
 import Observable from './Observable.js';
-
-/*
-Recall from NodeJS doc: https://nodejs.org/api/url.html
-┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                            href                                             │
-├──────────┬──┬─────────────────────┬─────────────────────┬───────────────────────────┬───────┤
-│ protocol │  │        auth         │        host         │           path            │ hash  │
-│          │  │                     ├──────────────┬──────┼──────────┬────────────────┤       │
-│          │  │                     │   hostname   │ port │ pathname │     search     │       │
-│          │  │                     │              │      │          ├─┬──────────────┤       │
-│          │  │                     │              │      │          │ │    query     │       │
-"  https:   //    user   :   pass   @ sub.host.com : 8080   /p/a/t/h  ?  query=string   #hash "
-│          │  │          │          │   hostname   │ port │          │                │       │
-│          │  │          │          ├──────────────┴──────┤          │                │       │
-│ protocol │  │ username │ password │        host         │          │                │       │
-├──────────┴──┼──────────┴──────────┼─────────────────────┤          │                │       │
-│   origin    │                     │       origin        │ pathname │     search     │ hash  │
-├─────────────┴─────────────────────┴─────────────────────┴──────────┴────────────────┴───────┤
-│                                            href                                             │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘
-*/
 
 /**
  * Router handle query history for Single Page Application (SPA)
