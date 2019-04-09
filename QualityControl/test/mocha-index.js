@@ -146,6 +146,12 @@ describe('QCG', function () {
       assert.deepStrictEqual(count, 3);
     });
 
+    it('should have input field for changing layout name in edit mode', async () => {
+      await page.waitForSelector('header > div > div:nth-child(3) > input', {timeout: 5000});
+      const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
+      assert.deepStrictEqual(count, 1);
+    });
+
     it('should have a tree sidebar in edit mode', async () => {
       await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
       const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
