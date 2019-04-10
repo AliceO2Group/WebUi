@@ -76,27 +76,30 @@ const toolbarEditMode = (model) => [
     ])
   ]),
   h('.flex-grow.text-right', [
-    h('input.form-control.form-inline.mh1', {
+    h('input.w-33.form-control.form-inline', {
       type: 'text',
       value: model.layout.item.name,
       oninput: (e) => model.layout.item.name = e.target.value
     }
     ),
-    h('button.btn.btn-danger.mh1', {
-      onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()
-    },
-    'Delete'
-    ),
-    h('button.btn.btn-primary.mh1', {
-      onclick: () => model.layout.save()
-    },
-    'Save'
-    ),
-    h('button.btn.mh1', {
-      onclick: () => model.layout.cancelEdit()
-    },
-    'Cancel'
-    ),
+    h('.btn-group.m1', [
+      h('.btn.btn-danger', {
+        onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()
+      },
+      h('span.danger', {
+      }, iconTrash()),
+      'Delete'
+      ),
+      h('.btn.btn-primary', {
+        onclick: () => model.layout.save()
+      },
+      'Save'
+      ),
+      h('.btn', {
+        onclick: () => model.layout.cancelEdit()
+      },
+      'Cancel')
+    ])
   ]),
 ];
 
