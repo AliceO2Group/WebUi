@@ -80,17 +80,22 @@ const toolbarEditMode = (model) => [
       type: 'text',
       value: model.layout.item.name,
       oninput: (e) => model.layout.item.name = e.target.value
-    }),
+    }
+    ),
     h('button.btn.btn-danger.mh1', {
       onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()
-    }, 'Delete'
+    },
+    'Delete'
     ),
     h('button.btn.btn-primary.mh1', {
       onclick: () => model.layout.save()
-    }, 'Save'
+    },
+    'Save'
     ),
-    h('button.btn.mh1', {onclick: () => model.layout.cancelEdit()},
-      'Cancel'
+    h('button.btn.mh1', {
+      onclick: () => model.layout.cancelEdit()
+    },
+    'Cancel'
     ),
   ]),
 ];
