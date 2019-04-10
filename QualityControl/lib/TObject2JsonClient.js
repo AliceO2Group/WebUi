@@ -24,6 +24,7 @@ class TObject2JsonClient {
   /**
    * Prefeches objects form the database
    * This is workaround for seg. fault when asynchronous converting objects straigh after server launch
+   * @param {Object} ccdb CCDB connection
    */
   prefetch(ccdb) {
     ccdb.listObjects().then(async (result) => {
