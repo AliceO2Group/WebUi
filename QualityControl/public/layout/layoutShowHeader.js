@@ -86,8 +86,6 @@ const toolbarEditMode = (model) => [
       h('.btn.btn-danger', {
         onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()
       },
-      h('span.danger', {
-      }, iconTrash()),
       'Delete'
       ),
       h('.btn.btn-primary', {
