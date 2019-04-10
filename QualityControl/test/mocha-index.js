@@ -140,12 +140,6 @@ describe('QCG', function () {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button').click());
     });
 
-    it('should have 3 buttons in edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > button', {timeout: 5000});
-      const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > button').length);
-      assert.deepStrictEqual(count, 3);
-    });
-
     it('should have input field for changing layout name in edit mode', async () => {
       await page.waitForSelector('header > div > div:nth-child(3) > input', {timeout: 5000});
       const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
