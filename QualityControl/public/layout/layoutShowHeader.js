@@ -76,7 +76,7 @@ const toolbarEditMode = (model) => [
     ])
   ]),
   h('.flex-grow.text-right', [
-    h('input.w-33.form-control.form-inline', {
+    h('input.form-control.form-inline', {
       type: 'text',
       value: model.layout.item.name,
       oninput: (e) => model.layout.item.name = e.target.value
