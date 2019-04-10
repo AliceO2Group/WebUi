@@ -122,6 +122,7 @@ h6, .f6 { font-size: .875rem; }
 .w-33 {  width:  33%; }
 .w-50 {  width:  50%; }
 .w-100 { width: 100%; }
+.w-wrapped { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 /* padding */
 .p0 { padding: 0; }
