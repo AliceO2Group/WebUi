@@ -97,7 +97,7 @@ const myLayoutsMenu = (model) => [
  * @param {Object} layout
  * @return {vnode}
  */
-const myLayoutsMenuItem = (model, layout) => h('a.menu-item', {
+const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
   href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
   onclick: (e) => model.router.handleLinkEvent(e),
   class: model.router.params.layout === layout.name ? 'selected' : ''
