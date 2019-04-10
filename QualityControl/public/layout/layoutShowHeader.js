@@ -76,13 +76,11 @@ const toolbarEditMode = (model) => [
     ])
   ]),
   h('.flex-grow.text-right', [
-    // h('b', model.layout.item.name),
     h('input.form-control.form-inline.mh1', {
       type: 'text',
       value: model.layout.item.name,
       oninput: (e) => model.layout.item.name = e.target.value
     }),
-    '',
     h('button.btn.btn-danger.mh1', {
       onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()
     }, 'Delete'

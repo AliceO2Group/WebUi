@@ -7,8 +7,8 @@ const CONFIG_FILE = path.join(__dirname, 'db.json.temp');
 
 const TEST_LAYOUT = {
   id: 123,
-  name: "test",
-  owner_name: "tests-boss",
+  name: 'test',
+  owner_name: 'tests-boss',
   owner_id: 1
 };
 
@@ -19,7 +19,7 @@ describe('JSON file custom database', () => {
     // Drop previous DB if exists
     try {
       fs.unlinkSync(CONFIG_FILE);
-    } catch (error) {}
+    } catch (error) { }
     jsonConfig = new JsonFileConnector(CONFIG_FILE);
   });
 
@@ -41,7 +41,7 @@ describe('JSON file custom database', () => {
   });
 
   it('Create a layout with the same name but different ID', (done) => {
-    let layout = JSON.parse(JSON.stringify(TEST_LAYOUT));
+    const layout = JSON.parse(JSON.stringify(TEST_LAYOUT));
     layout.id = 321;
     jsonConfig
       .createLayout(layout)
@@ -50,11 +50,23 @@ describe('JSON file custom database', () => {
   });
 
   it('Creating layout with the same ID should fail', (done) => {
-    let layout = TEST_LAYOUT;
+    const layout = TEST_LAYOUT;
     jsonConfig
       .createLayout(layout)
       .then(() => done('should fail'))
       .catch((error) => done());
+  });
+
+  it('should save layout with new name', (done) => {
+    TEST_LAYOUT.name = 'Updated Name';
+    jsonConfig
+      .updateLayout(TEST_LAYOUT.id, TEST_LAYOUT)
+      .catch(done);
+
+    jsonConfig.readLayout(TEST_LAYOUT.id).then((layout) => {
+      assert.strictEqual(TEST_LAYOUT.name, layout.name);
+      done();
+    }).catch(done);
   });
 
   it('Delete layout', (done) => {

@@ -290,6 +290,7 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
+    this.loadMyList();
     this.notify();
   }
 
