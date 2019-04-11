@@ -83,17 +83,17 @@ const toolbarEditMode = (model) => [
     }
     ),
     h('.btn-group.m1', [
-      h('.btn.btn-danger', {
+      h('button.btn.btn-danger', {
         onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()
       },
       'Delete'
       ),
-      h('.btn.btn-primary', {
+      h('button.btn.btn-primary', {
         onclick: () => model.layout.save()
       },
       'Save'
       ),
-      h('.btn', {
+      h('button.btn', {
         onclick: () => model.layout.cancelEdit()
       },
       'Cancel')
