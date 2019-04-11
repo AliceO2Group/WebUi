@@ -158,12 +158,12 @@ describe('QCG', function () {
     });
 
     it('should show normal sidebar after Cancel click', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(3)').click());
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(3)').click());
       await page.waitForSelector('nav .menu-title', {timeout: 5000});
     });
 
     it('should have second tab to be empty (according to demo data)', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) button:nth-child(2)').click());
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
       await page.waitForSelector('section h1', {timeout: 5000});
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
       assert.deepStrictEqual(plotsCount, 0);
