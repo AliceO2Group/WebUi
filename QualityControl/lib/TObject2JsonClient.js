@@ -1,4 +1,5 @@
 const tobject2json = require('../tobject2json.node');
+const log = new (require('@aliceo2/web-ui').Log)('TObject2Json');
 
 /**
  * Connect to a TObject2Json server and send requests though TCP/IP
@@ -18,6 +19,20 @@ class TObject2JsonClient {
       connector = 'MySQL';
     }
     tobject2json.init(connector, config.hostname + ':' + config.port, '', '', '');
+  }
+
+  /**
+   * Prefeches objects form the database
+   * This is workaround for seg. fault when asynchronous converting objects straigh after server launch
+   * @param {Object} ccdb CCDB connection
+   */
+  prefetch(ccdb) {
+    ccdb.listObjects().then(async (result) => {
+      for (const object of result.slice(0, 25)) {
+        log.debug('Prefetching ' + object.name);
+        await this.retrieve(object.name).catch(() => process.exit(1));
+      }
+    });
   }
 
   /**
