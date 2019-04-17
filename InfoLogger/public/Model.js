@@ -105,7 +105,7 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Enter
