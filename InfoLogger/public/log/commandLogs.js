@@ -1,12 +1,16 @@
-import {h, iconPerson} from '/js/src/index.js';
+import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
+import {BUTTON} from '../common/button-states.js';
+
+let queryButtonType = BUTTON.PRIMARY_ACTIVE;
+let liveButtonType = BUTTON.DEFAULT;
+let liveButtonIcon = iconMediaPlay();
 
 export default (model) => [
   loginButton(model),
-  h('span.mh3'),
-  queryButton(model),
-  ' ',
-  liveButton(model),
-  ' ',
+  h('div.btn-group.mh3', [
+    queryButton(model),
+    liveButton(model)
+  ], '' ),
   h('button.btn', {onclick: () => model.log.empty()}, 'Clear'),
   h('span.mh3'),
   h('button.btn', {
@@ -58,14 +62,17 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
  * @param {Object} model
  * @return {vnode}
  */
-const queryButton = (model) => h('button.btn.btn-primary', model.servicesResult.match({
+const queryButton = (model) => h('button.btn', model.servicesResult.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
   Success: (services) => ({
     title: services.query ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !services.query || model.log.queryResult.isLoading(),
-    className: model.log.queryResult.isLoading() ? 'loading' : '',
-    onclick: () => model.log.query()
+    className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
+    onclick: () => {
+      toggleButtonStates(model, false);
+      model.log.query();
+    }
   }),
   Failure: () => ({disabled: true, className: 'danger'}),
 }), 'Query');
@@ -79,14 +86,39 @@ const queryButton = (model) => h('button.btn.btn-primary', model.servicesResult.
  * @param {Object} model
  * @return {vnode}
  */
-const liveButton = (model) => h('button.btn.btn-primary', model.servicesResult.match({
+const liveButton = (model) => h('button.btn', model.servicesResult.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
   Success: (services) => ({
     title: services.live ? 'Stream logs with filtering' : 'Live service not configured',
     disabled: !services.live || model.log.queryResult.isLoading(),
-    className: !model.ws.authed ? 'loading' : (model.log.liveEnabled ? 'active' : ''),
-    onclick: () => model.log.liveEnabled ? model.log.liveStop() : model.log.liveStart()
+    className: !model.ws.authed ? 'loading' : (model.log.liveEnabled ? liveButtonType: BUTTON.DEFAULT ),
+    onclick: () => {
+      toggleButtonStates(model, true);
+      queryButton.className = 'primary';
+      model.log.liveEnabled ? model.log.liveStop() : model.log.liveStart();
+    }
   }),
   Failure: () => ({disabled: true, className: 'danger'}),
-}), 'Live', model.log.liveEnabled ? h('span.success', ' •') : null);
+}), 'Live', ' ', liveButtonIcon);
+
+/**
+ * Method to toggle states of the buttons(Query/Live) depending on the mode the tool is running on
+ * @param {Object} model
+ * @param {boolean} wasLivePressed
+ */
+function toggleButtonStates(model, wasLivePressed) {
+  if (wasLivePressed) {
+    if (model.log.liveEnabled) {
+      liveButtonIcon = iconMediaPlay();
+    } else {
+      liveButtonIcon = iconMediaStop();
+    }
+    queryButtonType = BUTTON.DEFAULT;
+    liveButtonType = BUTTON.SUCCESS_ACTIVE;
+  } else {
+    queryButtonType = BUTTON.PRIMARY_ACTIVE;
+    liveButtonType = BUTTON.DEFAULT;
+    liveButtonIcon = iconMediaPlay();
+  }
+}
