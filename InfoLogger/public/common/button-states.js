@@ -1,5 +1,5 @@
 export const BUTTON = {
-  PRIMARY_ACTIVE: 'btn-primary active',
-  SUCCESS_ACTIVE: ' btn-success active',
+  PRIMARY_ACTIVE: 'btn-primary',
+  SUCCESS_ACTIVE: ' btn-success',
   DEFAULT: 'btn-default'
 };
