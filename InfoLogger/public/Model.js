@@ -105,7 +105,7 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Enter
@@ -136,16 +136,18 @@ export default class Model extends Observable {
           this.log.nextError();
         }
         break;
-
       case 38: // top
         e.preventDefault(); // avoid scroll
         this.log.previousItem();
         break;
       case 40: // bottom
+        if (e.altKey) {
+          this.log.goToLastItem();
+        } else {
+          this.log.nextItem();
+        }
         e.preventDefault(); // avoid scroll
-        this.log.nextItem();
         break;
-
       case 13: // ENTER
         this.log.query();
         break;

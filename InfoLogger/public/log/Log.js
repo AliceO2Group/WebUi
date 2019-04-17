@@ -238,24 +238,33 @@ export default class Log extends Observable {
    * Select previous `item` after current `item` or first of `list`
    */
   previousItem() {
-    if (!this.list.length) {
-      return;
-    }
-
-    this.item = this.list[Math.max(this.list.indexOf(this.item) - 1, 0)];
-    this.autoScrollToItem = true;
-    this.notify();
+    this.goToItem(Math.max(this.list.indexOf(this.item) - 1, 0));
   }
 
   /**
    * Select next `item` after current `item` or first of `list`
    */
   nextItem() {
-    if (!this.list.length) {
+    this.goToItem(Math.min(this.list.indexOf(this.item) + 1, this.list.length - 1));
+  }
+
+  /**
+ * Select last `item` from the `list`
+ */
+  goToLastItem() {
+    this.goToItem(this.list.length - 1);
+  }
+
+  /**
+   * Go to the `item` in the `list` with the corresponding index
+   * @param {Number} index
+   */
+  goToItem(index) {
+    if (!this.list.length || index >= this.list.length) {
       return;
     }
 
-    this.item = this.list[Math.min(this.list.indexOf(this.item) + 1, this.list.length - 1)];
+    this.item = this.list[index];
     this.autoScrollToItem = true;
     this.notify();
   }
