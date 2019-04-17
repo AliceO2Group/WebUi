@@ -109,6 +109,7 @@ const liveButton = (model) => h('button.btn', model.servicesResult.match({
  */
 function toggleButtonStates(model, wasLivePressed) {
   if (wasLivePressed) {
+    model.log.filter.resetCriterias();
     if (model.log.liveEnabled) {
       liveButtonIcon = iconMediaPlay();
     } else {

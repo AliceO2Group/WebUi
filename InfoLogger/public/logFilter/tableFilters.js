@@ -25,7 +25,7 @@ export default (model) => h('table.table-filters', [
       h('td', h('button.btn.w-100', {className: model.log.columns.errsource ? 'active' : '', onclick: () => model.log.toggleColumn('errsource')}, 'ErrSource')),
       h('td', h('button.btn.w-100', {className: model.log.columns.message ? 'active' : '', onclick: () => model.log.toggleColumn('message')}, 'Message')),
     ]),
-    h('tr', [
+    h('tr', {className: model.log.liveEnabled? 'd-none':''}, [
       h('td.relative',
         model.log.focus.timestampSince && datePicker(model, model.log.filter.criterias.timestamp.$since),
         h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampSince', true), onblur: () => model.log.setFocus('timestampSince', false), oninput: (e) => model.log.filter.setCriteria('timestamp', 'since', e.target.value), placeholder: 'from', value: model.log.filter.criterias.timestamp.since})),
@@ -43,7 +43,7 @@ export default (model) => h('table.table-filters', [
       h('td', h('input.form-control', {type: 'text', oninput: (e) => model.log.filter.setCriteria('errsource', 'match', e.target.value), value: model.log.filter.criterias.errsource.match})),
       h('td', h('input.form-control', {type: 'text', oninput: (e) => model.log.filter.setCriteria('message', 'match', e.target.value), value: model.log.filter.criterias.message.match})),
     ]),
-    h('tr', [
+    h('tr', {className: model.log.liveEnabled? 'd-none':''}, [
       h('td.relative',
         model.log.focus.timestampUntil && datePicker(model, model.log.filter.criterias.timestamp.$until),
         h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampUntil', true), onblur: () => model.log.setFocus('timestampUntil', false), oninput: (e) => model.log.filter.setCriteria('timestamp', 'until', e.target.value), placeholder: 'to', value: model.log.filter.criterias.timestamp.until})),

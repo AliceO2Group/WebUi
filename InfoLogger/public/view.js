@@ -14,9 +14,6 @@ export default (model) => [
   notification(model.notification),
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
-      h('header.f7', [
-        tableFilters(model)
-      ]),
       h('header.p1.flex-row.f7', [
         h('', [
           commandLogs(model)
@@ -24,6 +21,9 @@ export default (model) => [
         h('.flex-grow.text-right', [
           commandFilters(model)
         ]),
+      ]),
+      h('header.f7', [
+        tableFilters(model)
       ]),
     ]),
     h('div.flex-grow.flex-row.shadow-level0.logs-container', [
