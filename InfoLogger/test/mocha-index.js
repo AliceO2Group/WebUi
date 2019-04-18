@@ -54,16 +54,16 @@ describe('InfoLogger', function() {
     }
   });
 
-  it('should have redirected to default page "/?q={"level":{"max":1}}"', async function() {
+  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"},"level":{"max":1}}"', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.strictEqual(search, '?q={"severity":{"match":"I W E F"},"level":{"max":1}}');
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"},"level":{"max":1}}');
   });
 
   describe('LogFilter', async () => {
-    it('parses dates', async () => {
+    it('should parse dates in format DD/MM/YY', async () => {
       // default Geneva time
       const $since = await page.evaluate(() => {
         window.model.log.filter.setCriteria('timestamp', 'since', '01/02/04');
@@ -73,7 +73,17 @@ describe('InfoLogger', function() {
       assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
     });
 
-    it('parses numbers to integers', async () => {
+    it('should parse dates in format DD/MM/YYTHH:MM', async () => {
+      // default Geneva time
+      const $since = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('timestamp', 'since', '01/02/04T00:00');
+        return window.model.log.filter.criterias.timestamp.$since.toISOString();
+      });
+
+      assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
+    });
+
+    it('should parse numbers to integers', async () => {
       const $max = await page.evaluate(() => {
         window.model.log.filter.setCriteria('level', 'max', '12');
         return window.model.log.filter.criterias.level.$max;
@@ -82,7 +92,7 @@ describe('InfoLogger', function() {
       assert.strictEqual($max, 12);
     });
 
-    it('parses empty keyword to null', async () => {
+    it('should parse empty keyword to null', async () => {
       const $match = await page.evaluate(() => {
         window.model.log.filter.setCriteria('pid', 'match', '');
         return window.model.log.filter.criterias.pid.$match;
@@ -91,18 +101,36 @@ describe('InfoLogger', function() {
       assert.strictEqual($match, null);
     });
 
-    it('parses keywords to array', async () => {
+    it('should parse keyword', async () => {
       const $match = await page.evaluate(() => {
-        window.model.log.filter.setCriteria('pid', 'match', '123 456');
+        window.model.log.filter.setCriteria('pid', 'match', '1234');
         return window.model.log.filter.criterias.pid.$match;
       });
 
-      assert.strictEqual($match.length, 2);
-      assert.strictEqual($match[0], '123');
-      assert.strictEqual($match[1], '456');
+      assert.strictEqual($match, '1234');
     });
 
-    it('can be reset and set again', async () => {
+    it('should parse no keywords to null', async () => {
+      const $in = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('pid', 'in', '');
+        return window.model.log.filter.criterias.pid.$in;
+      });
+
+      assert.strictEqual($in, null);
+    });
+
+    it('parses keywords to array', async () => {
+      const $in = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('pid', 'in', '123 456');
+        return window.model.log.filter.criterias.pid.$in;
+      });
+
+      assert.strictEqual($in.length, 2);
+      assert.strictEqual($in[0], '123');
+      assert.strictEqual($in[1], '456');
+    });
+
+    it('should reset filters and set them again', async () => {
       const criterias = await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
         window.model.log.filter.setCriteria('level', 'max', '21');
@@ -119,7 +147,7 @@ describe('InfoLogger', function() {
   });
 
   describe('Live mode', () => {
-    it('can be activated because it is configured and smilator is started', async () => {
+    it('can be activated because it is configured and simulator is started', async () => {
       const liveEnabled = await page.evaluate(() => {
         window.model.log.liveStart();
         return window.model.log.liveEnabled;
@@ -162,50 +190,49 @@ describe('InfoLogger', function() {
     });
   });
 
+
   describe('Query mode', () => {
     it('should fail because it is not configured', async () => {
-      try {
-        await page.evaluate(async () => {
-          return await window.model.log.query();
-        });
-        assert.fail();
-      } catch (e) {
-        // code failed, so it is a successful test
-      }
+      const test = await page.evaluate(async () => {
+        return window.model.log.liveEnabled;
+      });
+      assert.strictEqual(test, "fsda");
+      assert.fail('Query service is not available');
+      // code failed, so it is a successful test
     });
   });
 
-  describe('utils.js', async () => {
-    it('can be injected', async () => {
-      const watchDogInjection = page.waitForFunction('window.utils');
-      await page.evaluate(() => {
-        const script = document.createElement('script');
-        script.type = 'module';
-        const content = document.createTextNode('import * as utils from "/common/utils.js"; window.utils = utils;');
-        script.appendChild(content);
-        document.getElementsByTagName('head')[0].appendChild(script);
-      });
-      await watchDogInjection;
-    });
+  // describe('utils.js', async () => {
+  //   it('can be injected', async () => {
+  //     const watchDogInjection = page.waitForFunction('window.utils');
+  //     await page.evaluate(() => {
+  //       const script = document.createElement('script');
+  //       script.type = 'module';
+  //       const content = document.createTextNode('import * as utils from "/common/utils.js"; window.utils = utils;');
+  //       script.appendChild(content);
+  //       document.getElementsByTagName('head')[0].appendChild(script);
+  //     });
+  //     await watchDogInjection;
+  //   });
 
-    it('has a callRateLimiter to limit function calls per window', async () => {
-      let counter = await page.evaluate(() => {
-        window.testCounter = 0;
-        window.testFunction = window.utils.callRateLimiter(() => window.testCounter++, 100);
-        window.testFunction();
-        window.testFunction();
-        window.testFunction(); // 3 calls but counter will increase by 2 only at the end
-        return window.testCounter;
-      });
-      assert.strictEqual(counter, 1);
+  //   it('has a callRateLimiter to limit function calls per window', async () => {
+  //     let counter = await page.evaluate(() => {
+  //       window.testCounter = 0;
+  //       window.testFunction = window.utils.callRateLimiter(() => window.testCounter++, 100);
+  //       window.testFunction();
+  //       window.testFunction();
+  //       window.testFunction(); // 3 calls but counter will increase by 2 only at the end
+  //       return window.testCounter;
+  //     });
+  //     assert.strictEqual(counter, 1);
 
-      await page.waitFor(200);
-      counter = await page.evaluate(() => {
-        return window.testCounter;
-      });
-      assert.strictEqual(counter, 2);
-    });
-  });
+  //     await page.waitFor(200);
+  //     counter = await page.evaluate(() => {
+  //       return window.testCounter;
+  //     });
+  //     assert.strictEqual(counter, 2);
+  //   });
+  // });
 
   after(async () => {
     await browser.close();

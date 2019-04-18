@@ -6,7 +6,7 @@ import LogFilter from '../logFilter/LogFilter.js';
  */
 export default class Log extends Observable {
   /**
-   * Instanciate Log class and its internal LogFilter
+   * Instantiate Log class and its internal LogFilter
    * @param {Object} model
    */
   constructor(model) {
@@ -270,7 +270,6 @@ export default class Log extends Observable {
     if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.query) {
       throw new Error('Query service is not available');
     }
-
     this.queryResult = RemoteData.loading();
     this.notify();
 
@@ -306,22 +305,16 @@ export default class Log extends Observable {
    * @param {string} value
    */
   setCriteria(field, operator, value) {
-    // convert matchToggle to match by toggling a word in or off the search string
-    // example: 'E F' with toggle of 'W' gives 'E F W'
-    if (operator === 'matchToggle') {
-      operator = 'match';
-      if (this.filter.criterias.severity.$match) {
-        const copy = this.filter.criterias.severity.$match.concat();
-        const index = copy.indexOf(value);
-        if (index === -1) {
-          copy.push(value);
-        } else {
-          copy.splice(index, 1);
-        }
-        value = copy.join(' ');
+    if (operator === 'in' && this.filter.criterias.severity.$in) {
+      const copy = this.filter.criterias.severity.$in.concat();
+      const index = copy.indexOf(value);
+      if (index === -1) {
+        copy.push(value);
+      } else {
+        copy.splice(index, 1);
       }
+      value = copy.join(' ');
     }
-
     this.filter.setCriteria(field, operator, value);
 
     if (this.liveEnabled) {

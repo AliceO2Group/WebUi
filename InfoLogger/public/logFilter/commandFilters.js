@@ -11,10 +11,10 @@ import {h} from '/js/src/index.js';
  */
 export default (model) => [
   h('.btn-group', [
-    buttonSeverity(model, 'Info', 'Match severity infos', 'I'),
+    buttonSeverity(model, 'Info', 'Match severity info', 'I'),
     buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
     buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
-    buttonSeverity(model, 'Fatal', 'Match severity fatals', 'F'),
+    buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F'),
   ]),
   h('span.mh3'),
   h('.btn-group', [
@@ -42,9 +42,9 @@ export default (model) => [
  * @return {vnode}
  */
 const buttonSeverity = (model, label, title, value) => h('button.btn', {
-  className: model.log.filter.criterias.severity.match.includes(value) ? 'active' : '',
+  className: model.log.filter.criterias.severity.in.includes(value) ? 'active' : '',
   onclick: (e) => {
-    model.log.setCriteria('severity', 'matchToggle', value);
+    model.log.setCriteria('severity', 'in', value);
     e.target.blur(); // remove focus so user can 'enter' without actually toggle again the button
   },
   title: title
