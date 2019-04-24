@@ -15,8 +15,7 @@
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/web-ui": "1.8.2",
-    "sinon": "^7.3.2"
+    "@aliceo2/web-ui": "1.8.2"
   },
   "devDependencies": {
     "eslint": "^5.15.0",
