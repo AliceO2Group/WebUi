@@ -297,8 +297,7 @@ export default class Log extends Observable {
 
   /**
    * Forward call to `this.filter.setCriteria`. If live mode is enabled,
-   * alert user that filtering will be affected. Handle matchToggle and
-   * converts to match operator.
+   * alert user that filtering will be affected.
    * See LogFilter#setCriteria doc
    * @param {string} field
    * @param {string} operator

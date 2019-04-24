@@ -43,7 +43,7 @@ describe('InfoLogger', function() {
     for (let i = 0; i < 10; i++) {
       try {
         await page.goto(baseUrl, {waitUntil: 'networkidle0'});
-        break; // conneciton ok, this test passed
+        break; // connection ok, this test passed
       } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
@@ -143,6 +143,8 @@ describe('InfoLogger', function() {
       assert.strictEqual(criterias.level.$max, 21);
       assert.strictEqual(criterias.timestamp.since, '');
       assert.strictEqual(criterias.timestamp.$since, null);
+      assert.strictEqual(criterias.severity.in, 'I W E F');
+      assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
     });
   });
 
@@ -188,51 +190,65 @@ describe('InfoLogger', function() {
 
       assert.strictEqual(!!list.length, true);
     });
+
+    after(async () => {
+      const liveEnabled = await page.evaluate(() => {
+        try {
+          window.model.log.liveStop();
+          return window.model.log.liveEnabled;
+        } catch (e) {
+          return true;
+        }
+      });
+      assert.strictEqual(liveEnabled, false);
+    });
   });
 
 
   describe('Query mode', () => {
     it('should fail because it is not configured', async () => {
-      const test = await page.evaluate(async () => {
-        return window.model.log.liveEnabled;
-      });
-      assert.strictEqual(test, "fsda");
-      assert.fail('Query service is not available');
-      // code failed, so it is a successful test
+      try {
+        await page.evaluate(async () => {
+          return await window.model.log.query();
+        });
+        assert.fail();
+      } catch (e) {
+        // code failed, so it is a successful test
+      }
     });
   });
 
-  // describe('utils.js', async () => {
-  //   it('can be injected', async () => {
-  //     const watchDogInjection = page.waitForFunction('window.utils');
-  //     await page.evaluate(() => {
-  //       const script = document.createElement('script');
-  //       script.type = 'module';
-  //       const content = document.createTextNode('import * as utils from "/common/utils.js"; window.utils = utils;');
-  //       script.appendChild(content);
-  //       document.getElementsByTagName('head')[0].appendChild(script);
-  //     });
-  //     await watchDogInjection;
-  //   });
+  describe('utils.js', async () => {
+    it('can be injected', async () => {
+      const watchDogInjection = page.waitForFunction('window.utils');
+      await page.evaluate(() => {
+        const script = document.createElement('script');
+        script.type = 'module';
+        const content = document.createTextNode('import * as utils from "/common/utils.js"; window.utils = utils;');
+        script.appendChild(content);
+        document.getElementsByTagName('head')[0].appendChild(script);
+      });
+      await watchDogInjection;
+    });
 
-  //   it('has a callRateLimiter to limit function calls per window', async () => {
-  //     let counter = await page.evaluate(() => {
-  //       window.testCounter = 0;
-  //       window.testFunction = window.utils.callRateLimiter(() => window.testCounter++, 100);
-  //       window.testFunction();
-  //       window.testFunction();
-  //       window.testFunction(); // 3 calls but counter will increase by 2 only at the end
-  //       return window.testCounter;
-  //     });
-  //     assert.strictEqual(counter, 1);
+    it('has a callRateLimiter to limit function calls per window', async () => {
+      let counter = await page.evaluate(() => {
+        window.testCounter = 0;
+        window.testFunction = window.utils.callRateLimiter(() => window.testCounter++, 100);
+        window.testFunction();
+        window.testFunction();
+        window.testFunction(); // 3 calls but counter will increase by 2 only at the end
+        return window.testCounter;
+      });
+      assert.strictEqual(counter, 1);
 
-  //     await page.waitFor(200);
-  //     counter = await page.evaluate(() => {
-  //       return window.testCounter;
-  //     });
-  //     assert.strictEqual(counter, 2);
-  //   });
-  // });
+      await page.waitFor(200);
+      counter = await page.evaluate(() => {
+        return window.testCounter;
+      });
+      assert.strictEqual(counter, 2);
+    });
+  });
 
   after(async () => {
     await browser.close();
