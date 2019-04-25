@@ -96,6 +96,9 @@ export default class LogFilter extends Observable {
         // remote empty inputs
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
+        } else if (operator ==='match') {
+          // replace % with acceptable URI version %25
+          criterias[field][operator] = criterias[field][operator].replace('%', '%25');
         }
 
         // remove empty fields
