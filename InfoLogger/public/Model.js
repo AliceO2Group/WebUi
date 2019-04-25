@@ -26,13 +26,14 @@ export default class Model extends Observable {
 
     this.timezone = new Timezone(this);
     this.timezone.bubbleTo(this);
+    this.isTimeInMs = false;
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
-
+    
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
@@ -197,6 +198,14 @@ export default class Model extends Observable {
    */
   toggleAccountMenu() {
     this.accountMenuEnabled = !this.accountMenuEnabled;
+    this.notify();
+  }
+
+  /**
+   * fds
+   */
+  toggleTimeFormat() {
+    this.isTimeInMs = !this.isTimeInMs;
     this.notify();
   }
 }
