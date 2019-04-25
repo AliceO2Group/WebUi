@@ -26,7 +26,8 @@ export default class Model extends Observable {
 
     this.timezone = new Timezone(this);
     this.timezone.bubbleTo(this);
-    this.isTimeInMs = false;
+    this.isTimeDropDownEnabled = false;
+    this.timeFormat = 'time-ms';
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
@@ -205,7 +206,7 @@ export default class Model extends Observable {
    * fds
    */
   toggleTimeFormat() {
-    this.isTimeInMs = !this.isTimeInMs;
+    this.isTimeDropDownEnabled = !this.isTimeDropDownEnabled;
     this.notify();
   }
 }

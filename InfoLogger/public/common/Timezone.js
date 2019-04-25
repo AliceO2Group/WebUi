@@ -172,8 +172,10 @@ export default class Timezone extends Observable {
       return moment(timestamp).tz(tz).format('DD/MM/GGGG HH:mm:ss.SSS zz');
     } else if (format === 'date') {
       return moment(timestamp).tz(tz).format('DD/MM/GGGG');
-    } else {// time
+    } else if (format ==='time-ms') {
       return moment(timestamp).tz(tz).format('HH:mm:ss.SSS');
+    } else {// time
+      return moment(timestamp).tz(tz).format('HH:mm:ss');
     }
   }
 

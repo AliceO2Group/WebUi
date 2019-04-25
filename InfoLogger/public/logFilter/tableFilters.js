@@ -8,16 +8,17 @@ export default (model) => h('table.table-filters', [
   h('tbody', [
     h('tr', [
       h('td', [
-        h('.btn-group.w-100', [
-          h('button.btn.w-50', {className: model.log.columns.date ? 'active' : '', onclick: () => model.log.toggleColumn('date')}, 'Date'),
-          h('button.btn.w-50', {className: model.log.columns.time ? 'active' : '', onclick: () => model.log.toggleColumn('time')}, 'Time'),
+        h('button.btn.w-50', {className: model.log.columns.date ? 'active' : '', onclick: () => model.log.toggleColumn('date')}, 'Date'),
+        h('.btn-group.w-50', [
+          h('button.btn.w-75', {className: model.log.columns.time ? 'active' : '', onclick: () => model.log.toggleColumn('time')}, 'Time'),
           h('button.btn.dropdown.w-25', {
-            class: model.isTimeInMs ? 'dropdown-open active' : '',
+            class: model.isTimeDropDownEnabled ? 'dropdown-open active' : '',
+            style: 'padding:0.1em',
             onclick: () => model.toggleTimeFormat()
           }, iconChevronBottom(),
           h('.dropdown-menu', [
-            h('a.menu-item.text-ellipsis', `HH:mm:ss`),
-            h('a.menu-item.text-ellipsis', `HH:mm:ss.SSS`),
+            h('a.menu-item.text-ellipsis', {className: model.timeFormat === 'time' ? 'selected' : '', onclick: () => model.timeFormat = 'time'}, `HH:mm:ss`),
+            h('a.menu-item.text-ellipsis', {className: model.timeFormat === 'time-ms' ? 'selected' : '', onclick: () => model.timeFormat = 'time-ms'}, `HH:mm:ss.SSS`),
           ])
           )
         ])

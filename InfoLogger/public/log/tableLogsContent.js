@@ -67,7 +67,7 @@ const tableLogLine = (model, row) => h('tr.row-hover', {
 }, [
   h('td.cell.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
   model.log.columns.date && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
-  model.log.columns.time && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'time')),
+  model.log.columns.time && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, model.timeFormat)),
   model.log.columns.hostname && h('td.cell.cell-bordered', row.hostname),
   model.log.columns.rolename && h('td.cell.cell-bordered', row.rolename),
   model.log.columns.pid && h('td.cell.cell-bordered', row.pid),
