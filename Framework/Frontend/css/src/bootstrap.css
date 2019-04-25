@@ -121,6 +121,7 @@ h6, .f6 { font-size: .875rem; }
 .w-25 {  width:  25%; }
 .w-33 {  width:  33%; }
 .w-50 {  width:  50%; }
+.w-75 {  width:  75%; }
 .w-100 { width: 100%; }
 .w-wrapped { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
@@ -188,7 +189,7 @@ a:hover { color: var(--color-blue); text-decoration: underline; }
 
 /* SVG icons - scale as a font */
 svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
-.fill-primary { fill: 'currentcolor'; }
+.fill-primary { fill: currentcolor; }
 .fill-green { fill: var(--color-success); }
 .fill-orange { fill: var(--color-orange); }
 
