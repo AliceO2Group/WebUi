@@ -97,8 +97,8 @@ export default class LogFilter extends Observable {
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
         } else if (operator ==='match') {
-          // replace % with acceptable URI version %25
-          criterias[field][operator] = criterias[field][operator].replace('%', '%25');
+          // encode potential breaking characters
+          criterias[field][operator] = encodeURI(criterias[field][operator]);
         }
 
         // remove empty fields
