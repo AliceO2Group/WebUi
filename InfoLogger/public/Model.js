@@ -32,7 +32,7 @@ export default class Model extends Observable {
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
-    
+
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
