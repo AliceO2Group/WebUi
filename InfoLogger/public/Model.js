@@ -26,8 +26,6 @@ export default class Model extends Observable {
 
     this.timezone = new Timezone(this);
     this.timezone.bubbleTo(this);
-    this.isTimeDropDownEnabled = false;
-    this.timeFormat = 'time-ms';
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
@@ -199,14 +197,6 @@ export default class Model extends Observable {
    */
   toggleAccountMenu() {
     this.accountMenuEnabled = !this.accountMenuEnabled;
-    this.notify();
-  }
-
-  /**
-   * fds
-   */
-  toggleTimeFormat() {
-    this.isTimeDropDownEnabled = !this.isTimeDropDownEnabled;
     this.notify();
   }
 }

@@ -3,6 +3,7 @@
 import {h, iconChevronBottom} from '/js/src/index.js';
 
 import datePicker from '../common/datePicker.js';
+import {TIME_S, TIME_MS} from '../common/Timezone.js';
 
 export default (model) => h('table.table-filters', [
   h('tbody', [
@@ -12,13 +13,25 @@ export default (model) => h('table.table-filters', [
         h('.btn-group.w-50', [
           h('button.btn.w-75', {className: model.log.columns.time ? 'active' : '', onclick: () => model.log.toggleColumn('time')}, 'Time'),
           h('button.btn.dropdown.w-25', {
-            class: model.isTimeDropDownEnabled ? 'dropdown-open active' : '',
+            className: model.log.isTimeDropdownEnabled ? 'dropdown-open active' : '',
             style: 'padding:0.1em',
-            onclick: () => model.toggleTimeFormat()
+            onclick: () => model.log.toggleTimeFormat()
           }, iconChevronBottom(),
           h('.dropdown-menu', [
-            h('a.menu-item.text-ellipsis', {className: model.timeFormat === 'time' ? 'selected' : '', onclick: () => model.timeFormat = 'time'}, `HH:mm:ss`),
-            h('a.menu-item.text-ellipsis', {className: model.timeFormat === 'time-ms' ? 'selected' : '', onclick: () => model.timeFormat = 'time-ms'}, `HH:mm:ss.SSS`),
+            h('a.menu-item.text-ellipsis', {
+              className: model.log.timeFormat === TIME_S ? 'selected' : '',
+              onclick: () => {
+                model.log.timeFormat = TIME_S;
+                model.log.setColumnVisibility('time', true);
+              }
+            }, `HH:mm:ss`),
+            h('a.menu-item.text-ellipsis', {
+              className: model.log.timeFormat === TIME_MS ? 'selected' : '',
+              onclick: () => {
+                model.log.timeFormat = TIME_MS;
+                model.log.setColumnVisibility('time', true);
+              }
+            }, `HH:mm:ss.SSS`),
           ])
           )
         ])
