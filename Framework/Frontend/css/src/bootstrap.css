@@ -224,11 +224,6 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 .btn.btn-danger:active, .btn.btn-danger.active { background-color: var(--color-danger-dark); color: var(--color-white); }
 .btn.btn-danger[disabled] { background-image: linear-gradient(var(--color-danger), var(--color-danger-dark)); color: var(--color-white); border: 1px solid var(--color-danger-dark); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
 
-.btn.btn-success { color: var(--color-success); }
-.btn.btn-success:hover { background-color: var(--color-success); color: var(--color-white); }
-.btn.btn-success:active, .btn.btn-success.active { background-color: var(--color-success); color: var(--color-white); }
-.btn.btn-success[disabled] { background-image: linear-gradient(var(--color-success), var(--color-success)); color: var(--color-white); border: 1px solid var(--color-success-dark); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
-
 .btn.loading, .btn.loading:focus, .btn.loading:hover { color: transparent !important; }
 .btn.loading::after { left: calc(50% - (1em / 2)); top: calc(50% - (1em / 2)); position: absolute!important; animation: spinAround .5s infinite linear; border: 2px solid #0000003d; border-radius: 100%; border-right-color: transparent; border-top-color: transparent; content: ""; display: block; height: 1em; width: 1em; }
 

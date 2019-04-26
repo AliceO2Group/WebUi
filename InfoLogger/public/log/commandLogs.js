@@ -1,7 +1,7 @@
 import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 import {BUTTON} from '../common/button-states.js';
 
-let queryButtonType = BUTTON.PRIMARY_ACTIVE;
+let queryButtonType = BUTTON.PRIMARY;
 let liveButtonType = BUTTON.DEFAULT;
 let liveButtonIcon = iconMediaPlay();
 
@@ -92,7 +92,7 @@ const liveButton = (model) => h('button.btn', model.servicesResult.match({
   Success: (services) => ({
     title: services.live ? 'Stream logs with filtering' : 'Live service not configured',
     disabled: !services.live || model.log.queryResult.isLoading(),
-    className: !model.ws.authed ? 'loading' : (model.log.liveEnabled ? liveButtonType: BUTTON.DEFAULT ),
+    className: !model.ws.authed ? 'loading' : liveButtonType,
     onclick: () => {
       toggleButtonStates(model, true);
       queryButton.className = 'primary';
@@ -109,15 +109,16 @@ const liveButton = (model) => h('button.btn', model.servicesResult.match({
  */
 function toggleButtonStates(model, wasLivePressed) {
   if (wasLivePressed) {
+    queryButtonType = BUTTON.DEFAULT;
     if (model.log.liveEnabled) {
       liveButtonIcon = iconMediaPlay();
+      liveButtonType = BUTTON.DANGER;
     } else {
       liveButtonIcon = iconMediaStop();
+      liveButtonType = BUTTON.DANGER_ACTIVE;
     }
-    queryButtonType = BUTTON.DEFAULT;
-    liveButtonType = BUTTON.SUCCESS_ACTIVE;
   } else {
-    queryButtonType = BUTTON.PRIMARY_ACTIVE;
+    queryButtonType = BUTTON.PRIMARY;
     liveButtonType = BUTTON.DEFAULT;
     liveButtonIcon = iconMediaPlay();
   }
