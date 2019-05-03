@@ -1,5 +1,4 @@
 const tobject2json = require('../tobject2json.node');
-const log = new (require('@aliceo2/web-ui').Log)('TObject2Json');
 
 /**
  * Connect to a TObject2Json server and send requests though TCP/IP
