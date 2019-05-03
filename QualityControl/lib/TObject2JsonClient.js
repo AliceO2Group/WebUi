@@ -22,20 +22,6 @@ class TObject2JsonClient {
   }
 
   /**
-   * Prefeches objects form the database
-   * This is workaround for seg. fault when asynchronous converting objects straigh after server launch
-   * @param {Object} ccdb CCDB connection
-   */
-  prefetch(ccdb) {
-    ccdb.listObjects().then(async (result) => {
-      for (const object of result.slice(0, 25)) {
-        log.debug('Prefetching ' + object.name);
-        await this.retrieve(object.name).catch(() => process.exit(1));
-      }
-    });
-  }
-
-  /**
    * Get JSON-encoded ROOT object using QualityControl/TObject2Json C++ module
    * @param {string} path - object's path (agentName/objectName)
    * @return {Promise.<Object|null, string>} The root data, null is not found
