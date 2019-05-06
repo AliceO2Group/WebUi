@@ -125,7 +125,7 @@ function toggleButtonStates(model, wasLivePressed) {
   }
 
   /**
-   * Method to change types of the buttons based on the mode being ran
+   * Method to change types of the buttons based on the mode being run
    * @param {String} queryType Type of the Query Button
    * @param {String} liveType Type of the Live Button
    * @param {Icon} liveIcon Icon of the Live Button
