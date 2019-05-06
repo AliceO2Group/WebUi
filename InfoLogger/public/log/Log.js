@@ -302,6 +302,7 @@ export default class Log extends Observable {
     this.list = result.rows;
     this.resetStats();
     result.rows.forEach(this.addStats.bind(this));
+    this.goToLastItem();
     this.notify();
   }
 
