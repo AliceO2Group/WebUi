@@ -1,6 +1,6 @@
 import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 import {BUTTON} from '../common/button-states.js';
-import { MODE } from '../constants/Mode.js';
+import {MODE} from '../constants/Mode.js';
 
 let queryButtonType = BUTTON.PRIMARY;
 let liveButtonType = BUTTON.DEFAULT;
@@ -101,8 +101,8 @@ const liveButton = (model) => h('button.btn', model.servicesResult.match({
     className: !model.ws.authed ? 'loading' : liveButtonType,
     onclick: () => {
       toggleButtonStates(model, true);
-      queryButton.className = 'primary';
-      model.log.mode === MODE.LIVE ? model.log.liveStop() : model.log.liveStart();
+      console.log("Mode is: " + model.log.activeMode);
+      (model.log.activeMode === MODE.QUERY || model.log.activeMode === MODE.LIVE.PAUSED) ? model.log.liveStart() : model.log.liveStop();
     }
   }),
   Failure: () => ({disabled: true, className: 'danger'}),

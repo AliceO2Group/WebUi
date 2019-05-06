@@ -1,7 +1,7 @@
 export const MODE = {
   LIVE: {
-    RUNNING: 'running',
-    PAUSED: 'paused'
+    RUNNING: 'Running',
+    PAUSED: 'Paused'
   },
   QUERY: 'Query'
 };
