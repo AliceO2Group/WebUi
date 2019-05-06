@@ -37,6 +37,11 @@ export default (model) => [
     title: 'Go to last error/fatal (ALT + right arrow)'
   }, '→|'),
   ' ',
+  h('button.btn', {
+    disabled: !model.log.list.length,
+    onclick: () => model.log.goToLastItem(),
+    title: 'Go to last log message (ALT + down arrow)'
+  }, '↓')
 ];
 
 /**

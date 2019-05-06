@@ -30,7 +30,6 @@ if (config.listingConnector === 'ccdb') {
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
 
   const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
-  tObject2JsonClient.prefetch(ccdb);
   module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
 } else if (config.listingConnector === 'amore') {
   log.info('Object listing: AMORE');

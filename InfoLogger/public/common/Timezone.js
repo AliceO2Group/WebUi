@@ -2,6 +2,8 @@
 
 import {Observable} from '/js/src/index.js';
 
+export const TIME_MS = 'time-ms';
+export const TIME_S = 'time-s';
 /**
  * Parses inputs from user and format datetimes to timzeone selected
  * @param {Object} model
@@ -172,8 +174,10 @@ export default class Timezone extends Observable {
       return moment(timestamp).tz(tz).format('DD/MM/GGGG HH:mm:ss.SSS zz');
     } else if (format === 'date') {
       return moment(timestamp).tz(tz).format('DD/MM/GGGG');
-    } else {// time
+    } else if (format === TIME_MS) {
       return moment(timestamp).tz(tz).format('HH:mm:ss.SSS');
+    } else {// TIME_S
+      return moment(timestamp).tz(tz).format('HH:mm:ss');
     }
   }
 
