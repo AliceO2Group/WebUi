@@ -136,14 +136,17 @@ export default class Model extends Observable {
           this.log.nextError();
         }
         break;
-
       case 38: // top
         e.preventDefault(); // avoid scroll
         this.log.previousItem();
         break;
       case 40: // bottom
+        if (e.altKey) {
+          this.log.goToLastItem();
+        } else {
+          this.log.nextItem();
+        }
         e.preventDefault(); // avoid scroll
-        this.log.nextItem();
         break;
     }
   }
