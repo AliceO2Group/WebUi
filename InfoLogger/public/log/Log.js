@@ -408,7 +408,6 @@ export default class Log extends Observable {
    * Stops live mode if it was enabled by stopping streaming from server
    */
   liveStop() {
-    console.log("Stopping live");
     if (!this.liveEnabled) {
       throw new Error('Live not enabled');
     }

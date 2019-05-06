@@ -75,10 +75,7 @@ const queryButton = (model) => h('button.btn', model.servicesResult.match({
     title: services.query ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !services.query || model.log.queryResult.isLoading(),
     className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
-    onclick: () => {
-      toggleButtonStates(model, false);
-      model.log.query();
-    }
+    onclick: () => toggleButtonStates(model, false)
   }),
   Failure: () => ({disabled: true, className: 'danger'}),
 }), 'Query');
@@ -99,11 +96,7 @@ const liveButton = (model) => h('button.btn', model.servicesResult.match({
     title: services.live ? 'Stream logs with filtering' : 'Live service not configured',
     disabled: !services.live || model.log.queryResult.isLoading(),
     className: !model.ws.authed ? 'loading' : liveButtonType,
-    onclick: () => {
-      toggleButtonStates(model, true);
-      console.log("Mode is: " + model.log.activeMode);
-      (model.log.activeMode === MODE.QUERY || model.log.activeMode === MODE.LIVE.PAUSED) ? model.log.liveStart() : model.log.liveStop();
-    }
+    onclick: () => toggleButtonStates(model, true)
   }),
   Failure: () => ({disabled: true, className: 'danger'}),
 }), 'Live', ' ', liveButtonIcon);
@@ -115,17 +108,34 @@ const liveButton = (model) => h('button.btn', model.servicesResult.match({
  */
 function toggleButtonStates(model, wasLivePressed) {
   if (wasLivePressed) {
-    queryButtonType = BUTTON.DEFAULT;
-    if (model.log.liveEnabled) {
-      liveButtonIcon = iconMediaPlay();
-      liveButtonType = BUTTON.DANGER;
-    } else {
-      liveButtonIcon = iconMediaStop();
-      liveButtonType = BUTTON.DANGER_ACTIVE;
+    switch (model.log.activeMode) {
+      case MODE.QUERY:
+      case MODE.LIVE.PAUSED:
+        setButtonsType(BUTTON.DEFAULT, BUTTON.DANGER_ACTIVE, iconMediaStop());
+        model.log.activeMode = MODE.LIVE.RUNNING;
+        model.log.liveStart();
+        break;
+      case MODE.LIVE.RUNNING:
+        setButtonsType(BUTTON.DEFAULT, BUTTON.DANGER, iconMediaPlay());
+        model.log.activeMode = MODE.LIVE.PAUSED;
+        model.log.liveStop();
+        break;
     }
   } else {
-    queryButtonType = BUTTON.PRIMARY;
-    liveButtonType = BUTTON.DEFAULT;
-    liveButtonIcon = iconMediaPlay();
+    setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
+    model.log.activeMode = MODE.QUERY;
+    model.log.query();
+  }
+
+  /**
+   * Method to change types of the buttons based on the mode being ran
+   * @param {String} queryType Type of the Query Button
+   * @param {String} liveType Type of the Live Button
+   * @param {Icon} liveIcon Icon of the Live Button
+   */
+  function setButtonsType(queryType, liveType, liveIcon) {
+    queryButtonType = queryType;
+    liveButtonType = liveType;
+    liveButtonIcon = liveIcon;
   }
 }
