@@ -1,5 +1,6 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
+import {MODE} from '../constants/Mode.js';
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -44,6 +45,8 @@ export default class Log extends Observable {
     this.applicationLimit = 100000; // browser can be slow is `list` array is bigger
 
     this.queryResult = RemoteData.notAsked();
+
+    this.activeMode = MODE.QUERY;
 
     this.list = [];
     this.item = null;
