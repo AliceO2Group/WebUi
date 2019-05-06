@@ -1,5 +1,6 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
+import {TIME_MS} from '../common/Timezone.js';
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -39,6 +40,9 @@ export default class Log extends Observable {
       timestampSince: false,
       timestampUntil: false,
     };
+
+    this.isTimeDropdownEnabled = false;
+    this.timeFormat = TIME_MS;
 
     this.limit = 1000;
     this.applicationLimit = 100000; // browser can be slow is `list` array is bigger
@@ -97,6 +101,25 @@ export default class Log extends Observable {
    */
   toggleColumn(fieldName) {
     this.columns[fieldName] = !this.columns[fieldName];
+    this.notify();
+  }
+
+  /**
+   * Set column visibility based on `isVisible`.
+   * Hide the column if no value is passed
+   * @param {string} fieldName - column of which the visibility will be set
+   * @param {boolean} isVisible - hide/show the column
+   */
+  setColumnVisibility(fieldName, isVisible = false) {
+    this.columns[fieldName] = isVisible;
+    this.notify();
+  }
+
+  /**
+   * Show/Hide dropdown for time(s/ms) selection
+   */
+  toggleTimeFormat() {
+    this.isTimeDropdownEnabled = !this.isTimeDropdownEnabled;
     this.notify();
   }
 
