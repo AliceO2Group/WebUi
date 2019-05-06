@@ -1,5 +1,6 @@
 #include <napi.h>
 #include <QualityControl/DatabaseFactory.h>
+#include <TROOT.h>
 #include <iostream>
 
 using namespace o2::quality_control::core;
@@ -12,6 +13,7 @@ public:
   TObjectAsyncWorker(const Napi::Function& callback, const std::string& arg0)
   : Napi::AsyncWorker(callback), path(arg0), output()
   {
+    ROOT::EnableThreadSafety();
   }
 
 protected:
