@@ -22,12 +22,6 @@ describe('QC CXX module and CCDB test suite', function () {
     }); 
   });
 
-  it('treats 20 objects (SYNC)', async () => {
-    for (const object of objects) {
-      await tobject2json.retrieve(object.name);
-    }
-  }).timeout(30000);
-
   it('treats 20 objects (ASYNC)', (done) => {
     let counter = 1;
     for (const object of objects) {
@@ -37,6 +31,12 @@ describe('QC CXX module and CCDB test suite', function () {
           done();
         }
       });
+    }
+  }).timeout(30000);
+
+  it('treats 20 objects (SYNC)', async () => {
+    for (const object of objects) {
+      await tobject2json.retrieve(object.name);
     }
   }).timeout(30000);
 });
