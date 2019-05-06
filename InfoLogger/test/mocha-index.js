@@ -1,3 +1,4 @@
+
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
@@ -120,12 +121,12 @@ describe('InfoLogger', function() {
 
   describe('Live mode', () => {
     it('can be activated because it is configured and smilator is started', async () => {
-      const liveEnabled = await page.evaluate(() => {
+      const activeMode = await page.evaluate(() => {
         window.model.log.liveStart();
-        return window.model.log.liveEnabled;
+        return window.model.log.activeMode;
       });
 
-      assert.strictEqual(liveEnabled, true);
+      assert.strictEqual(activeMode, 'Running');
     });
 
     it('cannot be activated twice', async () => {

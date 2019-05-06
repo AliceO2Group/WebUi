@@ -1,6 +1,6 @@
 import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
-import {BUTTON} from '../common/button-states.js';
-import {MODE} from '../constants/Mode.js';
+import {BUTTON} from '../constants/button-states.const.js';
+import {MODE} from '../constants/mode.const.js';
 
 let queryButtonType = BUTTON.PRIMARY;
 let liveButtonType = BUTTON.DEFAULT;
@@ -112,19 +112,16 @@ function toggleButtonStates(model, wasLivePressed) {
       case MODE.QUERY:
       case MODE.LIVE.PAUSED:
         setButtonsType(BUTTON.DEFAULT, BUTTON.DANGER_ACTIVE, iconMediaStop());
-        model.log.activeMode = MODE.LIVE.RUNNING;
-        model.log.liveStart();
+        model.log.updateLogMode(MODE.LIVE.RUNNING);
         break;
       case MODE.LIVE.RUNNING:
         setButtonsType(BUTTON.DEFAULT, BUTTON.DANGER, iconMediaPlay());
-        model.log.activeMode = MODE.LIVE.PAUSED;
-        model.log.liveStop();
+        model.log.updateLogMode(MODE.LIVE.PAUSED);
         break;
     }
   } else {
     setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
-    model.log.activeMode = MODE.QUERY;
-    model.log.query();
+    model.log.updateLogMode(MODE.QUERY);
   }
 
   /**

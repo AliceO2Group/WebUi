@@ -1,6 +1,6 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
-import {MODE} from '../constants/Mode.js';
+import {MODE} from '../constants/mode.const.js';
 import {TIME_MS} from '../common/Timezone.js';
 
 /**
@@ -50,13 +50,12 @@ export default class Log extends Observable {
 
     this.queryResult = RemoteData.notAsked();
 
-    this.activeMode = MODE.QUERY;
 
     this.list = [];
     this.item = null;
     this.autoScrollToItem = false; // go to an item
     this.autoScrollLive = false; // go at bottom on Live mode
-    this.liveEnabled = false;
+    this.activeMode = MODE.QUERY;
     this.liveStartedAt = null;
     this.liveInterval = null; // 1s interval to update chrono
     this.resetStats();
@@ -309,8 +308,8 @@ export default class Log extends Observable {
     this.queryResult = RemoteData.loading();
     this.notify();
 
-    if (this.liveEnabled) {
-      this.liveStop();
+    if (this.isLiveModeRunning()) {
+      this.liveStop(MODE.QUERY);
     }
 
     const queryArguments = {
@@ -360,7 +359,7 @@ export default class Log extends Observable {
 
     this.filter.setCriteria(field, operator, value);
 
-    if (this.liveEnabled) {
+    if (this.isLiveModeRunning()) {
       this.model.ws.setFilter(this.model.log.filter.toFunction());
       this.model.notification.show(
         `The current live session has been adapted to the new filter configuration.`,
@@ -384,14 +383,14 @@ export default class Log extends Observable {
     if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.live) {
       throw new Error('Live service is not available');
     }
-    if (this.liveEnabled) {
+    if (this.isLiveModeRunning()) {
       throw new Error('Live already enabled');
     }
 
     this.list = [];
     this.resetStats();
     this.queryResult = RemoteData.notAsked(); // empty all data from last query
-    this.liveEnabled = true;
+    this.activeMode = MODE.LIVE.RUNNING;
     this.liveStartedAt = new Date();
 
     // Notify this model each second to force chorno to be updated
@@ -406,16 +405,31 @@ export default class Log extends Observable {
 
   /**
    * Stops live mode if it was enabled by stopping streaming from server
+   * @param {MODE} mode to switch to
    */
-  liveStop() {
-    if (!this.liveEnabled) {
+  liveStop(mode) {
+    if (!this.isLiveModeRunning()) {
       throw new Error('Live not enabled');
     }
-
+    this.activeMode = mode;
     clearInterval(this.liveInterval);
-    this.liveEnabled = false;
     this.model.ws.setFilter(() => false);
     this.notify();
+  }
+
+  /**
+   * Function to return true if user is in liveMode or false if it is in queryMode
+   * @return {boolean} is it running in live mode
+   */
+  isLiveModeEnabled() {
+    return this.activeMode === MODE.LIVE.RUNNING || this.activeMode === MODE.LIVE.PAUSED;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isLiveModeRunning() {
+    return this.activeMode === MODE.LIVE.RUNNING;
   }
 
   /**
@@ -459,5 +473,23 @@ export default class Log extends Observable {
   toggleAutoScroll() {
     this.autoScrollLive = !this.autoScrollLive;
     this.notify();
+  }
+
+  /**
+   * Method to update the state of the selected mode
+   * @param {MODE} mode mode that will be enabled
+   */
+  updateLogMode(mode) {
+    switch (mode) {
+      case MODE.LIVE.RUNNING:
+        this.liveStart();
+        break;
+      case MODE.LIVE.PAUSED:
+        this.liveStop(mode);
+        break;
+      case MODE.QUERY:
+        this.query();
+        break;
+    }
   }
 }

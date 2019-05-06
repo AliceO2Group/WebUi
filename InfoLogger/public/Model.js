@@ -109,7 +109,7 @@ export default class Model extends Observable {
     const code = e.keyCode;
 
     // Enter
-    if (code === 13 && !this.log.liveEnabled) {
+    if (code === 13 && !this.log.isLiveModeEnabled()) {
       this.log.query();
     }
 
