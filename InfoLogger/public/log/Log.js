@@ -1,5 +1,6 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
+import {MODE} from '../constants/mode.const.js';
 import {TIME_MS} from '../common/Timezone.js';
 
 /**
@@ -7,7 +8,7 @@ import {TIME_MS} from '../common/Timezone.js';
  */
 export default class Log extends Observable {
   /**
-   * Instanciate Log class and its internal LogFilter
+   * Instantiate Log class and its internal LogFilter
    * @param {Object} model
    */
   constructor(model) {
@@ -49,11 +50,12 @@ export default class Log extends Observable {
 
     this.queryResult = RemoteData.notAsked();
 
+
     this.list = [];
     this.item = null;
     this.autoScrollToItem = false; // go to an item
     this.autoScrollLive = false; // go at bottom on Live mode
-    this.liveEnabled = false;
+    this.activeMode = MODE.QUERY;
     this.liveStartedAt = null;
     this.liveInterval = null; // 1s interval to update chrono
     this.resetStats();
@@ -302,12 +304,11 @@ export default class Log extends Observable {
     if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.query) {
       throw new Error('Query service is not available');
     }
-
     this.queryResult = RemoteData.loading();
     this.notify();
 
-    if (this.liveEnabled) {
-      this.liveStop();
+    if (this.isLiveModeRunning()) {
+      this.liveStop(MODE.QUERY);
     }
 
     const queryArguments = {
@@ -331,33 +332,26 @@ export default class Log extends Observable {
 
   /**
    * Forward call to `this.filter.setCriteria`. If live mode is enabled,
-   * alert user that filtering will be affected. Handle matchToggle and
-   * converts to match operator.
+   * alert user that filtering will be affected.
    * See LogFilter#setCriteria doc
    * @param {string} field
    * @param {string} operator
    * @param {string} value
    */
   setCriteria(field, operator, value) {
-    // convert matchToggle to match by toggling a word in or off the search string
-    // example: 'E F' with toggle of 'W' gives 'E F W'
-    if (operator === 'matchToggle') {
-      operator = 'match';
-      if (this.filter.criterias.severity.$match) {
-        const copy = this.filter.criterias.severity.$match.concat();
-        const index = copy.indexOf(value);
-        if (index === -1) {
-          copy.push(value);
-        } else {
-          copy.splice(index, 1);
-        }
-        value = copy.join(' ');
+    if (operator === 'in' && this.filter.criterias.severity.$in) {
+      const copy = this.filter.criterias.severity.$in.concat();
+      const index = copy.indexOf(value);
+      if (index === -1) {
+        copy.push(value);
+      } else {
+        copy.splice(index, 1);
       }
+      value = copy.join(' ');
     }
-
     this.filter.setCriteria(field, operator, value);
 
-    if (this.liveEnabled) {
+    if (this.isLiveModeRunning()) {
       this.model.ws.setFilter(this.model.log.filter.toFunction());
       this.model.notification.show(
         `The current live session has been adapted to the new filter configuration.`,
@@ -381,14 +375,14 @@ export default class Log extends Observable {
     if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.live) {
       throw new Error('Live service is not available');
     }
-    if (this.liveEnabled) {
+    if (this.isLiveModeRunning()) {
       throw new Error('Live already enabled');
     }
 
     this.list = [];
     this.resetStats();
     this.queryResult = RemoteData.notAsked(); // empty all data from last query
-    this.liveEnabled = true;
+    this.activeMode = MODE.LIVE.RUNNING;
     this.liveStartedAt = new Date();
 
     // Notify this model each second to force chorno to be updated
@@ -403,16 +397,32 @@ export default class Log extends Observable {
 
   /**
    * Stops live mode if it was enabled by stopping streaming from server
+   * @param {MODE} mode to switch to
    */
-  liveStop() {
-    if (!this.liveEnabled) {
+  liveStop(mode = MODE.QUERY) {
+    if (!this.isLiveModeRunning()) {
       throw new Error('Live not enabled');
     }
-
+    this.activeMode = mode;
     clearInterval(this.liveInterval);
-    this.liveEnabled = false;
     this.model.ws.setFilter(() => false);
     this.notify();
+  }
+
+  /**
+   * Method to check if current mode is Live (Running/Paused)
+   * @return {boolean} is it live mode
+   */
+  isLiveModeEnabled() {
+    return this.activeMode === MODE.LIVE.RUNNING || this.activeMode === MODE.LIVE.PAUSED;
+  }
+
+  /**
+   * Method to check if current selected mode is live and is running
+   * @return {boolean} is live mode running
+   */
+  isLiveModeRunning() {
+    return this.activeMode === MODE.LIVE.RUNNING;
   }
 
   /**
@@ -456,5 +466,22 @@ export default class Log extends Observable {
   toggleAutoScroll() {
     this.autoScrollLive = !this.autoScrollLive;
     this.notify();
+  }
+
+  /**
+   * Method to update the state of the selected mode
+   * @param {MODE} mode that will be enabled
+   */
+  updateLogMode(mode) {
+    switch (mode) {
+      case MODE.LIVE.RUNNING:
+        this.liveStart();
+        break;
+      case MODE.LIVE.PAUSED:
+        this.liveStop(mode);
+        break;
+      default:
+        this.query();
+    }
   }
 }

@@ -155,7 +155,7 @@ const tableContainerHooks = (model) => ({
  */
 const autoscrollManager = (model, vnode) => {
   // Autoscroll to bottom in live mode
-  if (model.log.autoScrollLive && model.log.liveEnabled && model.log.list.length) {
+  if (model.log.autoScrollLive && model.log.isLiveModeRunning() && model.log.list.length) {
     // Scroll only if last element is a new one
     const previousLastLogId = vnode.dom.dataset.lastLogId;
     const currentLastLogId = String(pointerId(model.log.list[model.log.list.length - 1]));
