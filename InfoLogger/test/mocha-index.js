@@ -161,6 +161,36 @@ describe('InfoLogger', function() {
 
       assert.strictEqual(!!list.length, true);
     });
+
+    it('should go to mode live in paused state', async () => {
+      const activeMode = await page.evaluate(() => {
+        window.model.log.liveStop('Paused');
+        return window.model.log.activeMode;
+      });
+
+      assert.strictEqual(activeMode, 'Paused');
+    });
+
+    it('should go to mode query', async () => {
+      const activeMode = await page.evaluate(() => {
+        window.model.log.liveStart();
+        window.model.log.liveStop('Query');
+        return window.model.log.activeMode;
+      });
+
+      assert.strictEqual(activeMode, 'Query');
+    });
+
+
+    it('should go to mode query if mode not specified', async () => {
+      const activeMode = await page.evaluate(() => {
+        window.model.log.liveStart();
+        window.model.log.liveStop();
+        return window.model.log.activeMode;
+      });
+
+      assert.strictEqual(activeMode, 'Query');
+    });
   });
 
   describe('Query mode', () => {
