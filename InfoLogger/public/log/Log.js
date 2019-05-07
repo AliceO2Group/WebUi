@@ -309,6 +309,8 @@ export default class Log extends Observable {
 
     if (this.isLiveModeRunning()) {
       this.liveStop(MODE.QUERY);
+    } else {
+      this.activeMode = MODE.QUERY;
     }
 
     const queryArguments = {
@@ -324,6 +326,7 @@ export default class Log extends Observable {
     }
     this.queryResult = RemoteData.success(result);
     this.list = result.rows;
+
     this.resetStats();
     result.rows.forEach(this.addStats.bind(this));
     this.goToLastItem();
