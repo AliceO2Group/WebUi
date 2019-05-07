@@ -1,3 +1,4 @@
+
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
@@ -165,12 +166,12 @@ describe('InfoLogger', function() {
 
   describe('Live mode', () => {
     it('can be activated because it is configured and simulator is started', async () => {
-      const liveEnabled = await page.evaluate(() => {
+      const activeMode = await page.evaluate(() => {
         window.model.log.liveStart();
-        return window.model.log.liveEnabled;
+        return window.model.log.activeMode;
       });
 
-      assert.strictEqual(liveEnabled, true);
+      assert.strictEqual(activeMode, 'Running');
     });
 
     it('cannot be activated twice', async () => {
@@ -206,16 +207,34 @@ describe('InfoLogger', function() {
       assert.strictEqual(!!list.length, true);
     });
 
-    after(async () => {
-      const liveEnabled = await page.evaluate(() => {
-        try {
-          window.model.log.liveStop();
-          return window.model.log.liveEnabled;
-        } catch (e) {
-          return true;
-        }
+    it('should go to mode live in paused state', async () => {
+      const activeMode = await page.evaluate(() => {
+        window.model.log.liveStop('Paused');
+        return window.model.log.activeMode;
       });
-      assert.strictEqual(liveEnabled, false);
+
+      assert.strictEqual(activeMode, 'Paused');
+    });
+
+    it('should go to mode query', async () => {
+      const activeMode = await page.evaluate(() => {
+        window.model.log.liveStart();
+        window.model.log.liveStop('Query');
+        return window.model.log.activeMode;
+      });
+
+      assert.strictEqual(activeMode, 'Query');
+    });
+
+
+    it('should go to mode query if mode not specified', async () => {
+      const activeMode = await page.evaluate(() => {
+        window.model.log.liveStart();
+        window.model.log.liveStop();
+        return window.model.log.activeMode;
+      });
+
+      assert.strictEqual(activeMode, 'Query');
     });
   });
 
