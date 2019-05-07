@@ -480,9 +480,8 @@ export default class Log extends Observable {
       case MODE.LIVE.PAUSED:
         this.liveStop(mode);
         break;
-      case MODE.QUERY:
+      default:
         this.query();
-        break;
     }
   }
 }
