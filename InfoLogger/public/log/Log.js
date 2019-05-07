@@ -407,7 +407,7 @@ export default class Log extends Observable {
    * Stops live mode if it was enabled by stopping streaming from server
    * @param {MODE} mode to switch to
    */
-  liveStop(mode) {
+  liveStop(mode = MODE.QUERY) {
     if (!this.isLiveModeRunning()) {
       throw new Error('Live not enabled');
     }
@@ -418,15 +418,16 @@ export default class Log extends Observable {
   }
 
   /**
-   * Function to return true if user is in liveMode or false if it is in queryMode
-   * @return {boolean} is it running in live mode
+   * Method to check if current mode is Live (Running/Paused)
+   * @return {boolean} is it live mode
    */
   isLiveModeEnabled() {
     return this.activeMode === MODE.LIVE.RUNNING || this.activeMode === MODE.LIVE.PAUSED;
   }
 
   /**
-   * @return {boolean}
+   * Method to check if current selected mode is live and is running
+   * @return {boolean} is live mode running
    */
   isLiveModeRunning() {
     return this.activeMode === MODE.LIVE.RUNNING;
@@ -477,7 +478,7 @@ export default class Log extends Observable {
 
   /**
    * Method to update the state of the selected mode
-   * @param {MODE} mode mode that will be enabled
+   * @param {MODE} mode that will be enabled
    */
   updateLogMode(mode) {
     switch (mode) {
