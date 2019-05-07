@@ -4,7 +4,7 @@ import {Observable} from '/js/src/index.js';
  * @typedef Criteria
  * @type {object}
  * @property {object} field - field name like pid, username, timestamp
- * @property {string} field.operator - $match, $excluse, $since, $until, $min, $max
+ * @property {string} field.operator - $match, $exclude, $since, $until, $min, $max, $in
  */
 
 /**
@@ -21,7 +21,7 @@ import {Observable} from '/js/src/index.js';
  */
 export default class LogFilter extends Observable {
   /**
-   * Instanciate a LogFilter with criterias reset to empty or minimal value
+   * Instantiate a LogFilter with criterias reset to empty or minimal value
    * @param {Observable} model
    */
   constructor(model) {
@@ -39,13 +39,12 @@ export default class LogFilter extends Observable {
    * @param {string} operator
    * @param {string} value
    * @example
-   * setCriteria('severity', 'match', 'W E F')
+   * setCriteria('severity', 'in', 'W E F')
    * // severity is W or E or F
    * //
    */
   setCriteria(field, operator, value) {
     this.criterias[field][operator] = value;
-
     // auto-complete other properties / parse
     switch (operator) {
       case 'since':
@@ -61,13 +60,16 @@ export default class LogFilter extends Observable {
         this.criterias[field]['$max'] = parseInt(value, 10);
         break;
       case 'match':
-        this.criterias[field]['$match'] = value ? value.split(' ') : null;
+        this.criterias[field]['$match'] = value ? value : null;
         break;
       case 'exclude':
-        this.criterias[field]['$exclude'] = value ? value.split(' ') : null;
+        this.criterias[field]['$exclude'] = value ? value : null;
+        break;
+      case 'in':
+        this.criterias[field]['$in'] = value ? value.split(' ') : null;
         break;
       default:
-        throw new Error('unkown operator');
+        throw new Error('unknown operator');
     }
 
     this.notify();
@@ -94,6 +96,9 @@ export default class LogFilter extends Observable {
         // remote empty inputs
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
+        } else if (operator ==='match') {
+          // encode potential breaking characters
+          criterias[field][operator] = encodeURI(criterias[field][operator]);
         }
 
         // remove empty fields
@@ -112,7 +117,6 @@ export default class LogFilter extends Observable {
    */
   fromObject(criterias) {
     this.resetCriterias();
-
     // copy values to inner filters
     // eslint-disable-next-line guard-for-in
     for (const field in criterias) {
@@ -166,6 +170,7 @@ export default class LogFilter extends Observable {
           // logValue is sometime required, undefined means test fails and log is rejected
           switch (operator) {
             case '$match':
+            case '$in':
               if (logValue === undefined || criteriaValue.indexOf(logValue) === -1) {
                 return false;
               }
@@ -200,7 +205,6 @@ export default class LogFilter extends Observable {
                 return false;
               }
               break;
-
             default:
               continue;
           }
@@ -307,8 +311,8 @@ export default class LogFilter extends Observable {
         $exclude: null
       },
       severity: {
-        match: 'I W E F',
-        $match: ['W', 'I', 'E', 'F'],
+        in: 'I W E F',
+        $in: ['W', 'I', 'E', 'F'],
       },
       level: {
         max: 1, // 0, 1, 6, 11, 21

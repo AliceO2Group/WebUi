@@ -43,7 +43,7 @@ describe('InfoLogger', function() {
     for (let i = 0; i < 10; i++) {
       try {
         await page.goto(baseUrl, {waitUntil: 'networkidle0'});
-        break; // conneciton ok, this test passed
+        break; // connection ok, this test passed
       } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
@@ -54,16 +54,31 @@ describe('InfoLogger', function() {
     }
   });
 
-  it('should have redirected to default page "/?q={"level":{"max":1}}"', async function() {
+  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"},"level":{"max":1}}"', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.strictEqual(search, '?q={"severity":{"match":"I W E F"},"level":{"max":1}}');
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"},"level":{"max":1}}');
   });
 
   describe('LogFilter', async () => {
-    it('parses dates', async () => {
+    it('should update URI with new encoded criteria', async () => {
+      /* eslint-disable max-len */
+      const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
+      const expectedParams = '?q={%22hostname%22:{%22match%22:%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+      /* eslint-enable max-len */
+      const searchParams = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('hostname', 'match', '%ald_qdip01%');
+        window.model.updateRouteOnModelChange();
+        return window.location.search;
+      });
+
+      assert.strictEqual(searchParams, expectedParams);
+      assert.strictEqual(decodeURI(searchParams), decodedParams);
+    });
+
+    it('should parse dates in format DD/MM/YY', async () => {
       // default Geneva time
       const $since = await page.evaluate(() => {
         window.model.log.filter.setCriteria('timestamp', 'since', '01/02/04');
@@ -73,16 +88,27 @@ describe('InfoLogger', function() {
       assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
     });
 
-    it('parses numbers to integers', async () => {
-      const $max = await page.evaluate(() => {
-        window.model.log.filter.setCriteria('level', 'max', '12');
-        return window.model.log.filter.criterias.level.$max;
+    it('should parse dates in format DD/MM/YYTHH:MM', async () => {
+      // default Geneva time
+      const $since = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('timestamp', 'since', '01/02/04T00:00');
+        return window.model.log.filter.criterias.timestamp.$since.toISOString();
       });
 
-      assert.strictEqual($max, 12);
+      assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
     });
 
-    it('parses empty keyword to null', async () => {
+    it('should parse numbers to integers', async () => {
+      const level = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', 12);
+        return window.model.log.filter.criterias.level;
+      });
+
+      assert.strictEqual(level.$max, 12);
+      assert.strictEqual(level.max, 12);
+    });
+
+    it('should parse empty keyword to null', async () => {
       const $match = await page.evaluate(() => {
         window.model.log.filter.setCriteria('pid', 'match', '');
         return window.model.log.filter.criterias.pid.$match;
@@ -91,35 +117,54 @@ describe('InfoLogger', function() {
       assert.strictEqual($match, null);
     });
 
-    it('parses keywords to array', async () => {
+    it('should parse keyword', async () => {
       const $match = await page.evaluate(() => {
-        window.model.log.filter.setCriteria('pid', 'match', '123 456');
+        window.model.log.filter.setCriteria('pid', 'match', '1234');
         return window.model.log.filter.criterias.pid.$match;
       });
 
-      assert.strictEqual($match.length, 2);
-      assert.strictEqual($match[0], '123');
-      assert.strictEqual($match[1], '456');
+      assert.strictEqual($match, '1234');
     });
 
-    it('can be reset and set again', async () => {
+    it('should parse no keywords to null', async () => {
+      const $in = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('pid', 'in', '');
+        return window.model.log.filter.criterias.pid.$in;
+      });
+
+      assert.strictEqual($in, null);
+    });
+
+    it('should parse keywords to array', async () => {
+      const $in = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('pid', 'in', '123 456');
+        return window.model.log.filter.criterias.pid.$in;
+      });
+
+      assert.strictEqual($in.length, 2);
+      assert.strictEqual($in ['123', '456']);
+    });
+
+    it('should reset filters and set them again', async () => {
       const criterias = await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
-        window.model.log.filter.setCriteria('level', 'max', '21');
+        window.model.log.filter.setCriteria('level', 'max', 21);
         return window.model.log.filter.criterias;
       });
 
       assert.strictEqual(criterias.pid.match, '');
       assert.strictEqual(criterias.pid.$match, null);
-      assert.strictEqual(criterias.level.max, '21');
+      assert.strictEqual(criterias.level.max, 21);
       assert.strictEqual(criterias.level.$max, 21);
       assert.strictEqual(criterias.timestamp.since, '');
       assert.strictEqual(criterias.timestamp.$since, null);
+      assert.strictEqual(criterias.severity.in, 'I W E F');
+      assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
     });
   });
 
   describe('Live mode', () => {
-    it('can be activated because it is configured and smilator is started', async () => {
+    it('can be activated because it is configured and simulator is started', async () => {
       const liveEnabled = await page.evaluate(() => {
         window.model.log.liveStart();
         return window.model.log.liveEnabled;
@@ -145,11 +190,11 @@ describe('InfoLogger', function() {
       // check level is still 21 after LogFilter tests
       const criterias = await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
-        window.model.log.filter.setCriteria('level', 'max', '21');
+        window.model.log.filter.setCriteria('level', 'max', 21);
         return window.model.log.filter.criterias;
       });
 
-      assert.strictEqual(criterias.level.max, '21');
+      assert.strictEqual(criterias.level.max, 21);
       assert.strictEqual(criterias.level.$max, 21);
 
       // Wait for logs and count them (2-3 maybe, it's random)
@@ -160,7 +205,20 @@ describe('InfoLogger', function() {
 
       assert.strictEqual(!!list.length, true);
     });
+
+    after(async () => {
+      const liveEnabled = await page.evaluate(() => {
+        try {
+          window.model.log.liveStop();
+          return window.model.log.liveEnabled;
+        } catch (e) {
+          return true;
+        }
+      });
+      assert.strictEqual(liveEnabled, false);
+    });
   });
+
 
   describe('Query mode', () => {
     it('should fail because it is not configured', async () => {
