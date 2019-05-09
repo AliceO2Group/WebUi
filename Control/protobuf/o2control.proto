@@ -83,12 +83,22 @@ message StatusUpdate {
 // Framework
 ////////////////////////////////////////
 message GetFrameworkInfoRequest {}
+message Version {
+    int32 major = 1;
+    int32 minor = 2;
+    int32 patch = 3;
+    string build = 4;
+    string productName = 5;
+    string versionStr = 6;
+}
 message GetFrameworkInfoReply {
     string frameworkId = 1;
     int32 environmentsCount = 2;
     int32 tasksCount = 3;
     string state = 4;
     int32 hostsCount = 5;
+    string instanceName = 6;
+    Version version = 7;
 }
 
 // Not implemented yet

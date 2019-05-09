@@ -9,6 +9,7 @@ import {h} from '/js/src/index.js';
 export default (item) => h('table.table', [
   h('tbody', Object.keys(item).map((columnName) => h('tr', [
     h('th', columnName),
-    typeof item[columnName] === 'object' ? h('td', item[columnName].length) : h('td', item[columnName])
+    typeof item[columnName] === 'object' ?
+      h('td', JSON.stringify(item[columnName], null, 2)) : h('td', item[columnName])
   ]))),
 ]);
