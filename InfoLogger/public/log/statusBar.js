@@ -59,7 +59,7 @@ const applicationOptions = (model) => [
     onchange: () => model.log.toggleAutoScroll()
   }), ' Autoscroll'),
   h('span.mh1'),
-  h('label.d-inline', {title: 'Show details of selecte log'}, h('input', {
+  h('label.d-inline', {title: 'Show details of selected log'}, h('input', {
     type: 'checkbox',
     checked: model.inspectorEnabled,
     onchange: () => model.toggleInspector()
