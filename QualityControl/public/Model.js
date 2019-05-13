@@ -1,7 +1,7 @@
 import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
-import Object_ from './object/Object.js';
+import QCObject from './object/QCObject.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -19,7 +19,7 @@ export default class Model extends Observable {
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
 
-    this.object = new Object_(this);
+    this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
     this.loader = new Loader(this);
@@ -40,11 +40,10 @@ export default class Model extends Observable {
     // Setup keyboard dispatcher
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
 
-    // Setup WS connexion
+    // Setup WS connection
     this.ws = new WebSocketClient();
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
-    this.ws.addListener('command', this.handleWSCommand.bind(this));
 
     // Init data
     this.object.loadList();
@@ -65,17 +64,6 @@ export default class Model extends Observable {
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
-    }
-  }
-
-  /**
-   * Delegates sub-model actions depending on incoming command from server
-   * @param {WebSocketMessage} message
-   */
-  handleWSCommand(message) {
-    if (message.command === 'information-service') {
-      this.object.setInformationService(message.payload);
-      return;
     }
   }
 
@@ -120,7 +108,7 @@ export default class Model extends Observable {
             if (this.router.params.edit) {
               this.layout.edit();
 
-              // Replace silently and immediatly URL to remove 'edit' parameter after a layout creation
+              // Replace silently and immediately URL to remove 'edit' parameter after a layout creation
               // eslint-disable-next-line
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}&layoutName=${this.router.params.layoutName}`, true, true);
             }
@@ -129,7 +117,7 @@ export default class Model extends Observable {
         break;
       case 'objectTree':
         this.page = 'objectTree';
-        // data are already loaded at begening
+        // data are already loaded at beginning
         this.notify();
         break;
       default:

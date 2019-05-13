@@ -55,7 +55,7 @@ export function draw(model, tabObject, options) {
      */
     oncreate(vnode) {
       // ask model to load data to be shown
-      model.object.loadObject(tabObject.name);
+      model.object.addObjectByName(tabObject.name);
 
       // setup resize function
       vnode.dom.onresize = timerDebouncer(() => {
@@ -89,7 +89,7 @@ export function draw(model, tabObject, options) {
      */
     onremove(vnode) {
       // tell model we don't need those data anymore and free memory if needed
-      model.object.unloadObject(tabObject.name);
+      model.object.removeObjectByName(tabObject.name);
 
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {

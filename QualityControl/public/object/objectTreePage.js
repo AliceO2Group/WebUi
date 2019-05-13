@@ -32,7 +32,7 @@ function statusBarLeft(model) {
 
   if (!model.object.list) {
     itemsInfo = 'Loading objects...';
-  } else if (model.object.onlineMode) {
+  } else if (model.object.isOnlineModeEnabled) {
     if (!model.object.informationService) {
       itemsInfo = 'Waiting information service state...';
     } else if (model.object.searchInput) {
@@ -126,7 +126,7 @@ function searchRows(model) {
  */
 function treeRow(model, tree, level) {
   // Don't show nodes without IS in online mode
-  if (model.object.onlineMode && !tree.informationService) {
+  if (model.object.isOnlineModeEnabled && !tree.informationService) {
     return null;
   }
 

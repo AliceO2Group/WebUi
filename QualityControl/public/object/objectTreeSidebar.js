@@ -29,12 +29,12 @@ const searchForm = (model) => [
     value: model.object.searchInput,
     oninput: (e) => model.object.search(e.target.value)
   }),
-  model.object.onlineModeAvailable && h('.form-check.f6', [
+  h('.form-check.f6', [
     h('input.form-check-input', {
       type: 'checkbox',
       id: 'inputOnlineOnlyTreeSidebar',
       onchange: () => model.object.toggleMode(),
-      checked: model.object.onlineMode
+      checked: model.object.isOnlineModeEnabled
     }),
     h('label.form-check-label', {for: 'inputOnlineOnlyTreeSidebar'}, [
       'Online only'
@@ -139,7 +139,7 @@ function searchRows(model) {
  */
 function treeRow(model, tree, level) {
   // Don't show nodes without IS in online mode
-  if (model.object.onlineMode && !tree.informationService) {
+  if (model.object.isOnlineModeEnabled && !tree.informationService) {
     return null;
   }
 

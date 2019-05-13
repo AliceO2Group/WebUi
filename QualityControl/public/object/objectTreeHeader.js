@@ -19,15 +19,15 @@ export default function objectTreeHeader(model) {
 
   return [
     h('.w-50.text-center', [
-      h('b.f4', 'Objects'),
+      h('b.f4', 'Objects2'),
       ' ',
       h('span', `(${howMany})`),
     ]),
     h('.flex-grow.text-right', [
-      model.object.onlineModeAvailable && h('button.btn', {
+      h('button.btn', {
         title: 'Toggle online / offline mode',
         onclick: () => model.object.toggleMode(),
-        class: (model.object.onlineMode ? 'active' : '')
+        // class: (model.object.isOnlineModeEnabled ? 'active' : '')
       }, 'Online'),
       ' ',
       h('button.btn', {
