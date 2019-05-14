@@ -1,5 +1,5 @@
 import {h} from '/js/src/index.js';
-import {iconPencil, iconTrash, iconPlus} from '/js/src/icons.js';
+import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan} from '/js/src/icons.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
@@ -24,13 +24,20 @@ const toolbarViewMode = (model) => [
   h('.flex-grow.text-right', [
     h('b.f4', model.layout.item.name),
     ' ',
-    // Show edit button only for owner of the layout shown
-    model.session.personid == model.layout.item.owner_id && h('button.btn', {onclick: () => model.layout.edit()},
-      [
-        iconPencil()
-      ]
-    ),
-  ]),
+    // Show group button edit/duplicate only for owner of the layout shown
+    h('.btn-group', [
+      h('button.btn.btn-default', {
+        onclick: () => model.layout.duplicate( model.layout.item.id),
+        title: 'Duplicate layout'
+      },
+      iconLayers()),
+      model.session.personid == model.layout.item.owner_id && h('button.btn.btn-primary', {
+        onclick: () => model.layout.edit(),
+        title: 'Edit layout'
+      },
+      iconPencil())
+    ])
+  ])
 ];
 
 /**
@@ -83,21 +90,24 @@ const toolbarEditMode = (model) => [
     }
     ),
     h('.btn-group.m1', [
-      h('button.btn.btn-danger', {
-        onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem()
-      },
-      'Delete'
-      ),
       h('button.btn.btn-primary', {
-        onclick: () => model.layout.save()
+        onclick: () => model.layout.save(),
+        title: 'Save layout'
       },
-      'Save'
+      iconCheck()
       ),
       h('button.btn', {
-        onclick: () => model.layout.cancelEdit()
+        onclick: () => model.layout.cancelEdit(),
+        title: 'Cancel'
       },
-      'Cancel')
-    ])
+      iconBan()),
+    ]),
+    h('button.btn.btn-danger', {
+      onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
+      title: 'Delete layout'
+    },
+    iconTrash()
+    )
   ]),
 ];
 
