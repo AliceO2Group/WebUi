@@ -8,8 +8,9 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 
 
 ## Installation
-1. Install QualityControl using `aliBuild` and configure database with [following instructions](https://github.com/AliceO2Group/QualityControl/blob/master/README.md).
-2. Install QCG
+1. Make sure `python` 2.x is available (`node-gyp` does not support `python` 3 for the time-being)
+2. Install QualityControl using `aliBuild` and configure database with [following instructions](https://github.com/AliceO2Group/QualityControl/blob/master/README.md).
+3. Install QCG
 ```
 aliBuild build qcg --default o2-dataflow
 ```
