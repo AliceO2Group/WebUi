@@ -122,7 +122,7 @@ export default class Model extends Observable {
             if (this.router.params.edit) {
               this.layout.edit();
 
-              // Replace silently and immediatly URL to remove 'edit' parameter after a layout creation
+              // Replace silently and immediately URL to remove 'edit' parameter after a layout creation
               // eslint-disable-next-line
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}&layoutName=${this.router.params.layoutName}`, true, true);
             }

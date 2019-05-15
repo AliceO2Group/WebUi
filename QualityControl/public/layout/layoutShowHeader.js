@@ -27,7 +27,10 @@ const toolbarViewMode = (model) => [
     // Show group button edit/duplicate only for owner of the layout shown
     h('.btn-group', [
       h('button.btn.btn-default', {
-        onclick: () => model.layout.duplicate(model.layout.item.id),
+        onclick: () => {
+          const nameForNewLayout = prompt('Choose a name for the new layout:').trim();
+          model.layout.duplicate(nameForNewLayout);
+        },
         title: 'Duplicate layout'
       },
       iconLayers()),
