@@ -1,4 +1,4 @@
-import {assertLayout, assertLayouts} from '../common/Types.js';
+import {assertLayouts} from '../common/Types.js';
 import {fetchClient, RemoteData} from '/js/src/index.js';
 
 /**
@@ -19,7 +19,7 @@ export default class LayoutService {
    */
   async getLayouts() {
     const {result, ok} = await this.loader.post('/api/listLayouts');
-    return this.parseResult(assertLayouts(result), ok);
+    return this.parseResult(result, ok);
   }
 
   /**
@@ -29,7 +29,11 @@ export default class LayoutService {
    */
   async getLayoutsByUserId(userId) {
     const {result, ok} = await this.loader.post('/api/listLayouts', {owner_id: userId});
-    return this.parseResult(assertLayouts(result), ok);
+    if (!ok) {
+      return RemoteData.failure(result.error);
+    } else {
+      return RemoteData.success(assertLayouts(result));
+    }
   }
 
   /**
@@ -38,7 +42,7 @@ export default class LayoutService {
    */
   async getLayoutById(layoutId) {
     const {result, ok} = await this.loader.post('/api/readLayout', {layoutId: layoutId});
-    return this.parseResult(assertLayout(result), ok);
+    return this.parseResult(result, ok);
   }
 
   /**
@@ -56,7 +60,7 @@ export default class LayoutService {
    * @param {JSON} layoutItem
    * @return {RemoteData}
    */
-  async saveLayoutById(layoutItem) {
+  async saveLayout(layoutItem) {
     const {result, ok} = await this.loader.post(`/api/writeLayout?layoutId=${layoutItem.id}`, layoutItem);
     return this.parseResult(result, ok);
   }
@@ -72,7 +76,7 @@ export default class LayoutService {
   }
 
   /**
-   * Method which will return RemoteData object based on the status it is provided
+   * Method which will return RemoteData object based on the status of the request
    * @param {Object} result
    * @param {boolean} ok
    * @return {RemoteData}
@@ -81,7 +85,7 @@ export default class LayoutService {
     if (!ok) {
       return RemoteData.failure(result.error);
     } else {
-      return RemoteData.success(assertLayouts(result));
+      return RemoteData.success(result);
     }
   }
 }

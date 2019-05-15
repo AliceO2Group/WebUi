@@ -1,4 +1,4 @@
-import {Observable, fetchClient, RemoteData} from '/js/src/index.js';
+import {Observable, RemoteData} from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import {objectId, clone} from '../common/utils.js';
@@ -28,7 +28,7 @@ export default class Layout extends Observable {
     this.searchResult = null; // null means no search, sub-array of `list`
 
     this.editEnabled = false; // activate UI for adding, dragging and deleting tabObjects inside the current tab
-    this.editingTabObject = null; // pointer to a tabObject beeing modified
+    this.editingTabObject = null; // pointer to a tabObject being modified
     this.editOriginalClone = null; // contains a deep clone of item before editing
 
     // https://github.com/hootsuite/grid
@@ -43,15 +43,15 @@ export default class Layout extends Observable {
    * Load all available layouts shared by users inside `list`
    */
   async loadList() {
-    const {result, ok} = await this.model.loader.post('/api/listLayouts');
-    if (!ok) {
+    const result = await this.model.layoutService.getLayouts();
+
+    if (result.isSuccess()) {
+      this.list = assertLayouts(result.payload);
+      this.notify();
+    } else {
       this.model.notification.show(`Unable to load layouts.`, 'danger', Infinity);
       this.list = [];
-      return;
     }
-
-    this.list = assertLayouts(result);
-    this.notify();
   }
 
   /**
@@ -59,15 +59,10 @@ export default class Layout extends Observable {
    */
   async loadMyList() {
     this.myList = RemoteData.loading();
-
-    const {result, ok} = await this.model.loader.post('/api/listLayouts', {owner_id: this.model.session.personid});
-    if (!ok) {
-      this.model.notification.show(`Unable to load your personnal layouts.`, 'danger', Infinity);
-      this.myList = RemoteData.failure();
-    } else {
-      this.myList = RemoteData.success(assertLayouts(result));
+    this.myList = await this.model.layoutService.getLayoutsByUserId(this.model.session.personid);
+    if (!this.myList.isSuccess()) {
+      this.model.notification.show(`Unable to load your personal layouts.`, 'danger', Infinity);
     }
-
     this.notify();
   }
 
@@ -76,21 +71,22 @@ export default class Layout extends Observable {
    * @param {number} layoutId
    */
   async loadItem(layoutId) {
-    if (!layoutId) {
-      throw new Error('layoutId parameter is mandatory');
-    }
-
     this.item = null;
-    const {result, ok} = await this.model.loader.post('/api/readLayout', {layoutId: layoutId});
-    if (!ok) {
+    if (!layoutId) {
       this.model.notification.show(`Unable to load layout, it might have been deleted.`, 'warning');
       this.model.router.go(`?page=layouts`);
-      throw new Error(result.message);
-    }
+    } else {
+      const result = await this.model.layoutService.getLayoutById(layoutId);
 
-    this.item = assertLayout(result);
-    this.selectTab(0);
-    this.notify();
+      if (result.isSuccess()) {
+        this.item = assertLayout(result.payload);
+        this.selectTab(0);
+        this.notify();
+      } else {
+        this.model.notification.show(`Unable to load layout, it might have been deleted.`, 'warning');
+        this.model.router.go(`?page=layouts`);
+      }
+    }
   }
 
   /**
@@ -99,32 +95,32 @@ export default class Layout extends Observable {
    */
   async newItem(layoutName) {
     if (!layoutName) {
-      throw new Error('layoutName parameter is mandatory');
-    }
-
-    const layout = assertLayout({
-      id: objectId(),
-      name: layoutName,
-      owner_id: this.model.session.personid,
-      owner_name: this.model.session.name,
-      tabs: [{
+      this.model.notification.show(`Layout was not created due to invalid name`, 'warning');
+    } else {
+      const layout = assertLayout({
         id: objectId(),
-        name: 'main',
-        objects: [],
-      }]
-    });
+        name: layoutName,
+        owner_id: this.model.session.personid,
+        owner_name: this.model.session.name,
+        tabs: [{
+          id: objectId(),
+          name: 'main',
+          objects: [],
+        }]
+      });
 
-    const {result, ok} = await this.model.loader.post('/api/layout', layout);
-    if (!ok) {
-      this.model.notification.show(result.error || 'Unable to create layout', 'danger', Infinity);
-      return;
+      const result = await this.model.layoutService.createNewLayout(layout);
+      if (result.isFailure()) {
+        this.model.notification.show(result.error || 'Unable to create layout', 'danger', Infinity);
+        return;
+      }
+
+      // Read the new layout created and edit it
+      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
+
+      // Update user list in background
+      this.loadMyList();
     }
-
-    // Read the new layout created and edit it
-    this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
-
-    // Update user list in background
-    this.loadMyList();
   }
 
   /**
@@ -134,10 +130,7 @@ export default class Layout extends Observable {
     if (!this.item) {
       throw new Error('no layout to delete');
     }
-
-    const req = fetchClient(`/api/layout/${this.item.id}`, {method: 'DELETE'});
-    this.model.loader.watchPromise(req);
-    await req;
+    await this.model.layoutService.removeLayoutById(this.item.id);
 
     this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success');
     this.model.router.go(`?page=layouts`);
@@ -149,33 +142,22 @@ export default class Layout extends Observable {
   /**
    * Save current `item` layout to server
    */
-  saveItem() {
+  async saveItem() {
     if (!this.item) {
       throw new Error('no layout to save');
     }
-
-    const options = {
-      method: 'POST',
-      body: JSON.stringify(this.item),
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      }
-    };
-
-    const request = fetchClient(`/api/writeLayout?layoutId=${this.item.id}`, options);
-    this.model.loader.watchPromise(request);
-
-    request
-      .then((res) => res.json())
-      .then(() => {
-        this.model.notification.show(`Layout "${this.item.name}" has been saved.`, 'success');
-        this.notify();
-      });
+    const result = await this.model.layoutService.saveLayout(this.item);
+    if (result.isSuccess()) {
+      this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
+      this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}&layoutName=${this.item.name}`, true, true);
+      this.notify();
+    } else {
+      this.model.notification.show(`Layout "${this.item.name}" has not been saved.`, 'danger');
+    }
   }
 
   /**
-   * Compute grid positoins of the current tab selected
+   * Compute grid positions of the current tab selected
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
@@ -243,7 +225,8 @@ export default class Layout extends Observable {
     }
 
     this.item.tabs.push({
-      name,
+      id: objectId(),
+      name: name,
       objects: []
     });
     this.notify();
@@ -418,5 +401,50 @@ export default class Layout extends Observable {
     this.tab.objects = this.tab.objects.filter((item) => item.id !== tabObject.id);
     this.sortObjectsOfCurrentTab();
     this.notify();
+  }
+
+  /**
+   * Method to duplicate an existing layout
+   * @param {String} layoutName - name of the new layout tha tis being created
+   */
+  async duplicate(layoutName) {
+    if (!layoutName) {
+      this.model.notification.show(`Layout was not duplicated due to invalid/missing new name`, 'warning');
+      return;
+    }
+    const itemToDuplicate = clone(this.item);
+
+    // Create tabs for new layout
+    const tabs = [];
+
+    itemToDuplicate.tabs.forEach(function(tab) {
+      const duplicatedTab = {
+        id: objectId(),
+        name: tab.name,
+        objects: clone(tab.objects)
+      };
+      tabs.push(duplicatedTab);
+    });
+
+    // Create new duplicated layout
+    const layout = assertLayout({
+      id: objectId(),
+      name: layoutName,
+      owner_id: this.model.session.personid,
+      owner_name: this.model.session.name,
+      tabs: tabs
+    });
+
+    const result = await this.model.layoutService.createNewLayout(layout);
+    // TODO Newly created item should be sent back by the API. This will prevent having to reload the item again below
+    if (result.isSuccess()) {
+      await this.loadItem(layout.id);
+      this.model.notification.show(`Layout "${itemToDuplicate.name}" `+
+        `has been successfully duplicated into "${this.item.name}".`, 'success');
+      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, false);
+      this.loadMyList();
+    } else {
+      this.model.notification.show(`Layout "${itemToDuplicate.name}" has not been duplicated.`, 'danger');
+    }
   }
 }
