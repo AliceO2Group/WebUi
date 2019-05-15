@@ -1,6 +1,7 @@
 import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
+import LayoutService from './services/Layout.service.js';
 import Object_ from './object/Object.js';
 
 /**
@@ -16,14 +17,15 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
-    this.layout = new Layout(this);
-    this.layout.bubbleTo(this);
-
     this.object = new Object_(this);
     this.object.bubbleTo(this);
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
+
+    this.layout = new Layout(this);
+    this.layout.bubbleTo(this);
+    this.layoutService = new LayoutService(this.loader);
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);

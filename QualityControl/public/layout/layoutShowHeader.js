@@ -35,7 +35,13 @@ const toolbarViewMode = (model) => [
         onclick: () => model.layout.edit(),
         title: 'Edit layout'
       },
-      iconPencil())
+      iconPencil()),
+      model.session.personid == model.layout.item.owner_id && h('button.btn.btn-danger', {
+        onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
+        title: 'Delete layout'
+      },
+      iconTrash()
+      )
     ])
   ])
 ];
@@ -101,13 +107,7 @@ const toolbarEditMode = (model) => [
         title: 'Cancel'
       },
       iconBan()),
-    ]),
-    h('button.btn.btn-danger', {
-      onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
-      title: 'Delete layout'
-    },
-    iconTrash()
-    )
+    ])
   ]),
 ];
 
