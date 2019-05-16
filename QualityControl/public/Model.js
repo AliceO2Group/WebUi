@@ -2,6 +2,7 @@ import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notifi
 
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
+import LayoutService from './services/Layout.service.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -24,6 +25,10 @@ export default class Model extends Observable {
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
+
+    this.layout = new Layout(this);
+    this.layout.bubbleTo(this);
+    this.layoutService = new LayoutService(this.loader);
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
