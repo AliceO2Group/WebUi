@@ -95,7 +95,7 @@ export default class Layout extends Observable {
    */
   async newItem(layoutName) {
     if (!layoutName) {
-      this.model.notification.show(`Layout was not created due to invalid name`, 'warning');
+      this.model.notification.show(`A new layout was not created due to invalid name`, 'warning');
     } else {
       const layout = assertLayout({
         id: objectId(),
