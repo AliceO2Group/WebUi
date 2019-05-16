@@ -150,8 +150,8 @@ describe('QCG', function () {
 
     it('should have one edit button in the header to go in edit mode', async () => {
       await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
-      const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
-      assert.deepStrictEqual(deleteButton, 'Edit layout');
+      const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
+      assert.deepStrictEqual(editButton, 'Edit layout');
     });
 
     // Begin: Edit Mode; TODO Split in multiple cases
