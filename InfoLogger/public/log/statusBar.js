@@ -32,7 +32,7 @@ const statusLogs = (model) => model.servicesResult.match({
       Success: (result) => statusQuery(model, result),
       Failure: () => null, // notification
     }),
-    model.log.liveEnabled && statusLive(model, services),
+    model.log.isLiveModeRunning() && statusLive(model, services),
   ],
   Failure: () => h('span.danger', 'Unable to load services'),
 });
@@ -59,7 +59,7 @@ const applicationOptions = (model) => [
     onchange: () => model.log.toggleAutoScroll()
   }), ' Autoscroll'),
   h('span.mh1'),
-  h('label.d-inline', {title: 'Show details of selecte log'}, h('input', {
+  h('label.d-inline', {title: 'Show details of selected log'}, h('input', {
     type: 'checkbox',
     checked: model.inspectorEnabled,
     onchange: () => model.toggleInspector()

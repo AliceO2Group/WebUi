@@ -67,7 +67,7 @@ const tableLogLine = (model, row) => h('tr.row-hover', {
 }, [
   h('td.cell.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
   model.log.columns.date && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
-  model.log.columns.time && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'time')),
+  model.log.columns.time && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, model.log.timeFormat)),
   model.log.columns.hostname && h('td.cell.cell-bordered', row.hostname),
   model.log.columns.rolename && h('td.cell.cell-bordered', row.rolename),
   model.log.columns.pid && h('td.cell.cell-bordered', row.pid),
@@ -155,7 +155,7 @@ const tableContainerHooks = (model) => ({
  */
 const autoscrollManager = (model, vnode) => {
   // Autoscroll to bottom in live mode
-  if (model.log.autoScrollLive && model.log.liveEnabled && model.log.list.length) {
+  if (model.log.autoScrollLive && model.log.isLiveModeRunning() && model.log.list.length) {
     // Scroll only if last element is a new one
     const previousLastLogId = vnode.dom.dataset.lastLogId;
     const currentLastLogId = String(pointerId(model.log.list[model.log.list.length - 1]));

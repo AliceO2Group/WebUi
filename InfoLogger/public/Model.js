@@ -109,7 +109,7 @@ export default class Model extends Observable {
     const code = e.keyCode;
 
     // Enter
-    if (code === 13) {
+    if (code === 13 && !this.log.isLiveModeEnabled()) {
       this.log.query();
     }
 
@@ -136,18 +136,17 @@ export default class Model extends Observable {
           this.log.nextError();
         }
         break;
-
       case 38: // top
         e.preventDefault(); // avoid scroll
         this.log.previousItem();
         break;
       case 40: // bottom
+        if (e.altKey) {
+          this.log.goToLastItem();
+        } else {
+          this.log.nextItem();
+        }
         e.preventDefault(); // avoid scroll
-        this.log.nextItem();
-        break;
-
-      case 13: // ENTER
-        this.log.query();
         break;
     }
   }
