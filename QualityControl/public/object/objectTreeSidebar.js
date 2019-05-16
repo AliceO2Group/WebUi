@@ -28,18 +28,7 @@ const searchForm = (model) => [
     type: 'text',
     value: model.object.searchInput,
     oninput: (e) => model.object.search(e.target.value)
-  }),
-  h('.form-check.f6', [
-    h('input.form-check-input', {
-      type: 'checkbox',
-      id: 'inputOnlineOnlyTreeSidebar',
-      onchange: () => model.object.toggleMode(),
-      checked: model.object.isOnlineModeEnabled
-    }),
-    h('label.form-check-label', {for: 'inputOnlineOnlyTreeSidebar'}, [
-      'Online only'
-    ])
-  ])
+  })
 ];
 
 /**

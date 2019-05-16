@@ -25,12 +25,6 @@ export default function objectTreeHeader(model) {
     ]),
     h('.flex-grow.text-right', [
       h('button.btn', {
-        title: 'Toggle online / offline mode',
-        onclick: () => model.object.toggleMode(),
-        // class: (model.object.isOnlineModeEnabled ? 'active' : '')
-      }, 'Online'),
-      ' ',
-      h('button.btn', {
         title: 'Open or close whole tree',
         onclick: () => model.object.tree.toggleAll(),
         disabled: !!model.object.searchInput
