@@ -150,8 +150,6 @@ export default class QCObject extends Observable {
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
   async loadObjects(objectsName) {
-    console.log("loading again");
-    console.log(objectsName);
     if (!objectsName || !objectsName.length) {
       return;
     }
