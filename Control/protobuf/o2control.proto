@@ -121,6 +121,7 @@ message EnvironmentInfo {
     string state = 3;
     repeated ShortTaskInfo tasks = 4;
     string rootRole = 5;
+    uint64 currentRunNumber = 6;
 }
 
 message NewEnvironmentRequest {
@@ -153,6 +154,7 @@ message ControlEnvironmentRequest {
 message ControlEnvironmentReply {
     string id = 1;
     string state = 2;
+    uint64 currentRunNumber = 3;
 }
 
 message ModifyEnvironmentRequest {
