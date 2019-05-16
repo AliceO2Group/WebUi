@@ -125,19 +125,39 @@ describe('QCG', function () {
       assert(tabsCount > 1);
     });
 
-    it('should have one edit button in the header', async () => {
-      const buttonCount = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > button').length);
-      assert.deepStrictEqual(buttonCount, 1);
-    });
-
     it('should have jsroot svg plots in the section', async () => {
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
       assert(plotsCount > 1);
     });
 
+    it('should have a button group containing three buttons in the header', async () => {
+      const buttonCount = await page.evaluate(() =>
+        document.querySelectorAll('header > div > div:nth-child(3) > div.btn-group > button').length);
+      assert.deepStrictEqual(buttonCount, 3);
+    });
+
+    it('should have one duplicate button in the header to create a new duplicated layout', async () => {
+      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
+      const duplicateButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)').title);
+      assert.deepStrictEqual(duplicateButton, 'Duplicate layout');
+    });
+
+    it('should have one delete button in the header to delete layout', async () => {
+      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
+      const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
+      assert.deepStrictEqual(deleteButton, 'Delete layout');
+    });
+
     it('should have one edit button in the header to go in edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button').click());
+      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
+      const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
+      assert.deepStrictEqual(editButton, 'Edit layout');
+    });
+
+    // Begin: Edit Mode; TODO Split in multiple cases
+    it('should have one edit button in the header to go in edit mode', async () => {
+      await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(1)', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
     });
 
     it('should have input field for changing layout name in edit mode', async () => {
@@ -158,7 +178,7 @@ describe('QCG', function () {
     });
 
     it('should show normal sidebar after Cancel click', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(3)').click());
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
       await page.waitForSelector('nav .menu-title', {timeout: 5000});
     });
 
