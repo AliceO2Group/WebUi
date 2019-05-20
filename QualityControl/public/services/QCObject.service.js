@@ -2,6 +2,7 @@ import {fetchClient} from '/js/src/index.js';
 
 /**
  * Quality Control Object service to get/send data
+ * TODO Use remoteData
  */
 export default class QCObjectService {
   /**
@@ -18,6 +19,17 @@ export default class QCObjectService {
    */
   async getObjects() {
     const req = fetchClient(`/api/listObjects`, {method: 'GET'});
+    this.model.loader.watchPromise(req);
+    const res = await req;
+    return await res.json();
+  }
+
+  /**
+   * Ask server for all available objects
+   * @return {JSON} List of Objects
+   */
+  async getOnlineObjects() {
+    const req = fetchClient(`/api/listOnlineObjects`, {method: 'GET'});
     this.model.loader.watchPromise(req);
     const res = await req;
     return await res.json();

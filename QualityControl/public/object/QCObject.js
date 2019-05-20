@@ -47,18 +47,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Set IS data
-   * {DAQ01/EquipmentSize/ACORDE/ACORDE: {}, DAQ01/EquipmentSize/ITSSDD/ITSSDD: {},…}
-   * @param {Object.<string, object>} informationService - key is an object name (A/B/C)
-   */
-  setInformationService(informationService) {
-    this.informationService = informationService;
-    this.onlineModeAvailable = true;
-    this._computeFilters();
-    this.notify();
-  }
-
-  /**
    * Computes the final list of objects to be seen by user depending on those factors:
    * - online filter enabled
    * - online objects according to information service
@@ -66,15 +54,10 @@ export default class QCObject extends Observable {
    * If any of those changes, this method should be called to update the outputs.
    */
   _computeFilters() {
-    if (this.isOnlineModeEnabled && this.tree && this.informationService) {
+    if (this.isOnlineModeEnabled && this.tree) {
       this.tree.clearAllIS();
       this.tree.updateAllIS(this.informationService);
     }
-
-    if (this.isOnlineModeEnabled && this.list && this.informationService) {
-      this.listOnline = this.list.filter((item) => this.informationService[item.name]);
-    }
-
     if (this.searchInput) {
       const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
       const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
@@ -88,12 +71,16 @@ export default class QCObject extends Observable {
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
-    const objects = await this.qcObjectService.getObjects();
+    let objects;
+    if (!this.isOnlineModeEnabled) {
+      objects = await this.qcObjectService.getObjects();
+    } else {
+      objects = await this.qcObjectService.getOnlineObjects();
+    }
     if (!this.tree) {
       this.tree = new ObjectTree('database');
       this.tree.bubbleTo(this);
     }
-
     this.tree.addChildrens(objects);
     this.list = objects;
     this._computeFilters();

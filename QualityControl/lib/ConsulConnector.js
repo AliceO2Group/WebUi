@@ -2,7 +2,7 @@ const http = require('http');
 const log = new (require('@aliceo2/web-ui').Log)('ConsulConnector');
 
 /**
- * Gateway for all Consul calls
+ * Gateway for all Consul Calls
  */
 class ConsulConnector {
   /**
@@ -35,6 +35,13 @@ class ConsulConnector {
     //   throw new Error('Unable to check status of Consul\'s leader agent: ' + err);
     // });
     return true;
+  }
+
+  /**
+   * @return {Promise.<Array.<Object>, Error>}
+   */
+  async listOnlineObjects() {
+    return ['test', 'test2'];
   }
 }
 

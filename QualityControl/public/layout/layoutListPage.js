@@ -23,21 +23,13 @@ function table(model) {
         h('thead',
           h('tr',
             [
-              h('th',
-                'Name'
-              ),
-              h('th',
-                'Owner'
-              ),
-              h('th',
-                'Popularity'
-              )
+              h('th', 'Name'),
+              h('th', 'Owner'),
+              h('th', 'Popularity')
             ]
           )
         ),
-        h('tbody',
-          rows(model)
-        )
+        h('tbody', rows(model))
       ]
     )
   ];

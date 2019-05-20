@@ -20,6 +20,9 @@ const consulService = new ConsulConnector(config.consul);
 if (config.consul) {
   if (consulService.checkStatus()) {
     log.info('Consul Service: Up and Running');
+    // TODO Adauga aici un list live objects
+    module.exports.listOnlineObjects = consulService.listOnlineObjects.bind(consulService);
+    // Si apoi chemi live objects cand e nevoie
   } else {
     log.info('Consul Service: Not Reachable');
   }
