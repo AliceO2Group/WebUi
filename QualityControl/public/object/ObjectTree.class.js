@@ -2,8 +2,7 @@ import {Observable} from '/js/src/index.js';
 
 /**
  * This class allows to transforms objects names (A/B/C) into a tree that can have
- * some behaviours like open/close nodes or add meta-data like information service
- * for online objects. It also allows to update all those objects without creating
+ * some behaviours like open/close nodes. It also allows to update all those objects without creating
  * a new tree.
  */
 export default class ObjectTree extends Observable {
@@ -23,41 +22,6 @@ export default class ObjectTree extends Observable {
     this.pathString = ''; // 'A/B'
 
     this.quality = null; // most negative quality from this subtree
-
-    this.informationService = null;
-  }
-
-  /**
-   * Erase all information service data of the tree
-   */
-  clearAllIS() {
-    this.informationService = null;
-    this.childrens.forEach((children) => children.clearAllIS());
-    this.notify();
-  }
-
-  /**
-   * Update the tree with data passed
-   * Example of data passed:
-   * {DAQ01/EquipmentSize/ACORDE/ACORDE: {}, DAQ01/EquipmentSize/ITSSDD/ITSSDD: {},…}
-   * @param {object} informationService - blabla
-   * @return {number} # of nodes associated to their IS data
-   */
-  updateAllIS(informationService) {
-    for (const [pathString, data] of Object.entries(informationService)) {
-      if (pathString === this.pathString) {
-        this.informationService = data; // exact match
-        return 1;
-      }
-
-      if (pathString.startsWith(this.pathString)) {
-        this.informationService = data; // one of children match
-        return this.childrens.reduce((total, children) => total + children.updateAllIS(informationService), 0);
-      }
-
-      // try next line
-    }
-    return 0;
   }
 
   /**

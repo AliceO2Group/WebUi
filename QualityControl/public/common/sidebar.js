@@ -114,7 +114,9 @@ const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
  * @return {vnode}
  */
 const refreshOptions = (model) => [
-  h('.menu-title', [
+  h('.menu-title', {
+    style: model.object.isOnlineModeEnabled ?'' : 'visibility: hidden'
+  }, [
     h('span.highlight', {
       key: 'timer' + model.object.refreshTimer,
       title: 'timer' + model.object.refreshTimer
@@ -127,7 +129,7 @@ const refreshOptions = (model) => [
       value: model.object.refreshInterval,
       oninput: (e) => model.object.setRefreshInterval(e.target.value)
     }),
-    h('button.btn.w-100', {
+    h('button.btn.w-100.btn-primary', {
       type: 'button',
       onclick: () => model.object.setRefreshInterval(model.object.refreshInterval)
     }, 'Refresh now'),

@@ -1,5 +1,4 @@
 const config = require('./configProvider.js');
-const InformationServiceState = require('./InformationServiceState.js');
 const ConsulConnector = require('./ConsulConnector.js');
 const TObject2JsonClient = require('./TObject2JsonClient.js');
 const CCDBConnector = require('./CCDBConnector.js');
@@ -14,27 +13,11 @@ const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 
-const consulService = new ConsulConnector(config.consul);
-
-// Add Consul as a service
 if (config.consul) {
-  if (consulService.checkStatus()) {
-    log.info('Consul Service: Up and Running');
-    // TODO Adauga aici un list live objects
-    module.exports.listOnlineObjects = consulService.listOnlineObjects.bind(consulService);
-    // Si apoi chemi live objects cand e nevoie
-  } else {
-    log.info('Consul Service: Not Reachable');
-  }
+  const consulService = new ConsulConnector(config.consul);
+  module.exports.listOnlineObjects = consulService.listOnlineObjects.bind(consulService);
 } else {
-  log.info('Consul Service: No Configuration Found');
-}
-const is = new InformationServiceState();
-if (config.informationService) {
-  log.info('Information service: starting synchronization');
-  is.startSynchronization(config.informationService);
-} else {
-  log.info('Information service: no configuration found');
+  log.error('Consul Service: No Configuration Found');
 }
 
 if (config.listingConnector === 'ccdb') {
@@ -70,6 +53,3 @@ module.exports.updateLayout = jsonDb.updateLayout.bind(jsonDb);
 module.exports.listLayouts = jsonDb.listLayouts.bind(jsonDb);
 module.exports.createLayout = jsonDb.createLayout.bind(jsonDb);
 module.exports.deleteLayout = jsonDb.deleteLayout.bind(jsonDb);
-
-module.exports.consulService = consulService;
-module.exports.informationService = is;

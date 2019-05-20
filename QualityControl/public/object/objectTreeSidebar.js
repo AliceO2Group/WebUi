@@ -127,11 +127,6 @@ function searchRows(model) {
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
-  // Don't show nodes without IS in online mode
-  if (model.object.isOnlineModeEnabled && !tree.informationService) {
-    return null;
-  }
-
   // Tree construction
   const levelDeeper = level + 1;
   const subtree = tree.open ? tree.childrens.map((children) => treeRow(model, children, levelDeeper)) : [];

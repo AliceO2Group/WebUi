@@ -13,21 +13,12 @@ module.exports.setup = (http) => {
   http.get('/readObjectData', readObjectData, {public: true});
   http.post('/readObjectsData', readObjectsData);
   http.get('/listObjects', listObjects, {public: true});
-  http.get('listOnlineObjects', listOnlineObjects);
+  http.get('/listOnlineObjects', listOnlineObjects);
   http.post('/readLayout', readLayout);
   http.post('/writeLayout', updateLayout);
   http.post('/listLayouts', listLayouts);
   http.delete('/layout/:layoutId', deleteLayout);
   http.post('/layout', createLayout);
-
-  const ws = new WebSocket(http);
-  model.informationService.on('updated', (state) => {
-    const message = new WebSocketMessage(200);
-    message.command = 'information-service';
-    message.payload = state;
-    ws.broadcast(message);
-  });
-};
 
 /**
  * List all objects without data
@@ -35,19 +26,17 @@ module.exports.setup = (http) => {
  * @param {Response} res
  */
 function listObjects(req, res) {
-  console.log(model);
   model.listObjects()
     .then((data) => res.status(200).json(data))
     .catch((err) => errorHandler(err, res));
 }
 
 /**
- *
+ * List all Online objects
  * @param {*} req
  * @param {*} res
  */
 function listOnlineObjects(req, res) {
-  console.log("Cerem online)");
   model.listOnlineObjects()
     .then((data) => res.status(200).json(data))
     .catch((err) => errorHandler(err, res));

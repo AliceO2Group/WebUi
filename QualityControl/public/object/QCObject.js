@@ -16,6 +16,7 @@ export default class QCObject extends Observable {
 
     this.model = model;
 
+    this.currentList = [];
     this.list = null;
     this.tree = null; // ObjectTree
 
@@ -24,8 +25,7 @@ export default class QCObject extends Observable {
     this.objectsReferences = {}; // object name -> number of each object being
     this.qcObjectService = new QCObjectService(model);
 
-    this.informationService = null; // null or {...}, null means not loaded yet
-    this.listOnline = []; // intersection of informationService and list
+    this.listOnline = []; // list of online objects name
     this.isOnlineModeEnabled = false; // show only online objects or all (offline)
     this.onlineModeAvailable = false; // true if data are coming from server
 
@@ -42,7 +42,8 @@ export default class QCObject extends Observable {
    */
   toggleMode() {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    this._computeFilters();
+    this.selected = null;
+    this.loadList();
     this.notify();
   }
 
@@ -54,10 +55,6 @@ export default class QCObject extends Observable {
    * If any of those changes, this method should be called to update the outputs.
    */
   _computeFilters() {
-    if (this.isOnlineModeEnabled && this.tree) {
-      this.tree.clearAllIS();
-      this.tree.updateAllIS(this.informationService);
-    }
     if (this.searchInput) {
       const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
       const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
@@ -71,18 +68,18 @@ export default class QCObject extends Observable {
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
-    let objects;
+    let objects = [];
     if (!this.isOnlineModeEnabled) {
       objects = await this.qcObjectService.getObjects();
+      this.list = objects;
     } else {
       objects = await this.qcObjectService.getOnlineObjects();
+      this.listOnline = objects;
     }
-    if (!this.tree) {
-      this.tree = new ObjectTree('database');
-      this.tree.bubbleTo(this);
-    }
+    this.tree = new ObjectTree('database');
+    this.tree.bubbleTo(this);
     this.tree.addChildrens(objects);
-    this.list = objects;
+    this.currentList = objects;
     this._computeFilters();
     this.notify();
   }
@@ -104,6 +101,7 @@ export default class QCObject extends Observable {
 
     const {result, ok, status} = await this.qcObjectService.getObjectByName(objectName);
     if (ok) {
+      // TODO Move on service side
       // link JSROOT methods to object
       // eslint-disable-next-line
       this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result));
@@ -143,6 +141,7 @@ export default class QCObject extends Observable {
 
     const {result, ok} = await this.qcObjectService.getObjectsByName(objectsName);
     if (!ok) {
+      // TODO move on service side
       // it should be always status=200 for this request
       this.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
       return;
@@ -192,8 +191,11 @@ export default class QCObject extends Observable {
     }, this.refreshInterval * 1000);
     this.notify();
 
-    // Refreshed currently seen objects
-    this.loadObjects(Object.keys(this.objects));
+    if (this.isOnlineModeEnabled) {
+      // Refreshed currently seen objects
+      this.loadObjects(Object.keys(this.objects));
+      this.loadList();
+    }
 
     // refreshTimer is a timer id (number) and is also used in the view to
     // interpret new cycle when this number changes

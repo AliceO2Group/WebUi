@@ -58,16 +58,5 @@ module.exports = {
   //   user: '<login>',
   //   password: '<pwd>',
   //   database: 'AMORE'
-  // },
-
-  // informationService: {
-  //   server: {
-  //     host: 'localhost',
-  //     port: 5562,
-  //   },
-  //   publisher: {
-  //     host: 'localhost',
-  //     port: 5561,
-  //   }
   // }
 };

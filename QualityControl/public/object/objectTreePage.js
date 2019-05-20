@@ -29,21 +29,12 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
  */
 function statusBarLeft(model) {
   let itemsInfo;
-
-  if (!model.object.list) {
+  if (!model.object.currentList) {
     itemsInfo = 'Loading objects...';
-  } else if (model.object.isOnlineModeEnabled) {
-    if (!model.object.informationService) {
-      itemsInfo = 'Waiting information service state...';
-    } else if (model.object.searchInput) {
-      itemsInfo = `${model.object.searchResult.length} found of ${model.object.listOnline.length} items (online mode)`;
-    } else {
-      itemsInfo = `${model.object.listOnline.length} items (online mode)`;
-    }
   } else if (model.object.searchInput) {
-    itemsInfo = `${model.object.searchResult.length} found of ${model.object.list.length} items`;
+    itemsInfo = `${model.object.searchResult.length} found of ${model.object.currentList.length} items`;
   } else {
-    itemsInfo = `${model.object.list.length} items`;
+    itemsInfo = `${model.object.currentList.length} items`;
   }
 
   return h('span.flex-grow', itemsInfo);
@@ -125,11 +116,6 @@ function searchRows(model) {
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
-  // Don't show nodes without IS in online mode
-  if (model.object.isOnlineModeEnabled && !tree.informationService) {
-    return null;
-  }
-
   const color = tree.quality === 'good' ? 'success' : 'danger';
   const padding = `${level}em`;
   const levelDeeper = level + 1;

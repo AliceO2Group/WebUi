@@ -9,17 +9,17 @@ import {iconProject} from '/js/src/icons.js';
  * @return {vnode}
  */
 export default function objectTreeHeader(model) {
-  if (!model.object.list) {
+  if (!model.object.currentList) {
     return null;
   }
 
   const howMany = model.object.searchInput
-    ? `${model.object.searchResult.length} found of ${model.object.list.length}`
-    : `${model.object.list.length} items`;
+    ? `${model.object.searchResult.length} found of ${model.object.currentList.length}`
+    : `${model.object.currentList.length} items`;
 
   return [
     h('.w-50.text-center', [
-      h('b.f4', 'Objects2'),
+      h('b.f4', 'Objects'),
       ' ',
       h('span', `(${howMany})`),
     ]),

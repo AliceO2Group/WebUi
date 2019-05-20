@@ -32,7 +32,8 @@ export default class QCObjectService {
     const req = fetchClient(`/api/listOnlineObjects`, {method: 'GET'});
     this.model.loader.watchPromise(req);
     const res = await req;
-    return await res.json();
+    const test = await res.json();
+    return test;
   }
 
   /**

@@ -1,12 +1,11 @@
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('ConsulConnector');
 
 /**
  * Gateway for all Consul Calls
  */
 class ConsulConnector {
   /**
-   * Setup and test Consul connection
+   * Setup Consul Configuration
    * @param {Object} config - {hostname, port}
    */
   constructor(config) {
@@ -22,26 +21,78 @@ class ConsulConnector {
 
     this.hostname = config.hostname;
     this.port = config.port;
+    this.isConsulUpAndRunning();
   }
 
   /**
-   * 
+   * Method to test Consul status
    */
-  async checkStatus() {
-    // const prom = await this.httpGetJson('/v1/status/leader').then(console.log("test"));
-    // console.log(prom);
-    // const connectionTest = this.httpGetJson('/v1/status/leader');
-    // connectionTest.catch((err) => {
-    //   throw new Error('Unable to check status of Consul\'s leader agent: ' + err);
-    // });
-    return true;
+  async isConsulUpAndRunning() {
+    const connection = this.httpGetJson('/v1/status/leader');
+    connection.catch((err) => {
+      throw new Error('Unable to connect to Consul: ' + err);
+    });
   }
 
   /**
    * @return {Promise.<Array.<Object>, Error>}
    */
   async listOnlineObjects() {
-    return ['test', 'test2'];
+    return this.httpGetJson('/v1/agent/services').then((services) => {
+      const tags = [];
+      for (const serviceName in services) {
+        if (services[serviceName].Tags && services[serviceName].Tags.length > 0) {
+          const tagsToBeAdded = services[serviceName].Tags;
+          tagsToBeAdded.forEach((tag) => tags.push({name: tag}));
+        }
+      }
+      return tags;
+    });
+  }
+
+  /**
+   * Util to get JSON data (parsed) from CCDB server
+   * @param {string} path - path en CCDB server
+   * @return {Promise.<Object, Error>} JSON response
+   */
+  async httpGetJson(path) {
+    return new Promise((resolve, reject) => {
+      const requestOptions = {
+        hostname: this.hostname,
+        port: this.port,
+        path: path,
+        method: 'GET',
+        headers: {
+          Accept: 'application/json'
+        }
+      };
+
+      /**
+       * Generic handler for client http requests,
+       * buffers response, checks status code and parses JSON
+       * @param {Response} response
+       */
+      const requestHandler = (response) => {
+        if (response.statusCode < 200 || response.statusCode > 299) {
+          reject(new Error('Non-2xx status code: ' + response.statusCode));
+          return;
+        }
+        const bodyChunks = [];
+        response.on('data', (chunk) => bodyChunks.push(chunk));
+        response.on('end', () => {
+          try {
+            const body = JSON.parse(bodyChunks.join(''));
+            resolve(body);
+          } catch (e) {
+            reject(new Error('Unable to parse JSON'));
+          }
+        });
+      };
+
+      const request = http.request(requestOptions, requestHandler);
+      request.on('error', (err) => reject(err));
+      request.end();
+    });
   }
 }
 
