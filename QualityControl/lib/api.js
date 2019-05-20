@@ -1,4 +1,4 @@
-const {Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
+const {Log, WebSocket} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
 const log = new Log('QualityControl');
 
@@ -19,8 +19,8 @@ module.exports.setup = (http) => {
   http.post('/listLayouts', listLayouts);
   http.delete('/layout/:layoutId', deleteLayout);
   http.post('/layout', createLayout);
+  new WebSocket(http);
 };
-
 
 /**
  * List all objects without data
