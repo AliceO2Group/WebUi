@@ -19,6 +19,8 @@ module.exports.setup = (http) => {
   http.post('/listLayouts', listLayouts);
   http.delete('/layout/:layoutId', deleteLayout);
   http.post('/layout', createLayout);
+};
+
 
 /**
  * List all objects without data
@@ -32,7 +34,7 @@ function listObjects(req, res) {
 }
 
 /**
- * List all Online objects
+ * List all Online objects' name
  * @param {*} req
  * @param {*} res
  */
