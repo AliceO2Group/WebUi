@@ -1,6 +1,7 @@
 const {WebSocketMessage} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)('Control');
 const {trace} = require('@aliceo2/web-ui').Log;
+const Long = require('long');
 
 const Padlock = require('./Padlock.js');
 const ControlProxy = require('./ControlProxy.js');
@@ -29,7 +30,7 @@ module.exports.attachTo = (http, ws) => {
         }
       }
       octl[method](req.body)
-        .then((response) => res.json(response))
+        .then((response) => res.json(parseForLongValues(response)))
         .catch((error) => errorHandler(error, res, 504));
     });
   }
@@ -88,4 +89,24 @@ function errorHandler(err, res, status = 500) {
     log.error(err.message || err);
   }
   res.status(status).send({message: err.message || err});
+}
+
+/**
+ * Method to convert Long currentRunNumber to Numbers due to JSON incompatibility
+ * @param {Object} response
+ * @return {Object}
+ */
+function parseForLongValues(response) {
+  if (response && response.environment) {
+    if (response.environment.currentRunNumber && Long.isLong(response.environment.currentRunNumber)) {
+      response.environment.currentRunNumber = response.environment.currentRunNumber.toNumber();
+    }
+  } else if (response && response.environments) {
+    response.environments.forEach(function(environment) {
+      if (environment.currentRunNumber && Long.isLong(environment.currentRunNumber)) {
+        environment.currentRunNumber = environment.currentRunNumber.toNumber();
+      }
+    });
+  }
+  return response;
 }
