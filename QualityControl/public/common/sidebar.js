@@ -132,7 +132,7 @@ const refreshOptions = (model) => [
     h('button.btn.w-100.btn-primary', {
       type: 'button',
       onclick: () => model.object.setRefreshInterval(model.object.refreshInterval)
-    }, 'Refresh now'),
+    }, 'Refresh objects now'),
   ]),
 ];
 

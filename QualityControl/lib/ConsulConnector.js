@@ -25,23 +25,28 @@ class ConsulConnector {
   }
 
   /**
-   * Method to test Consul status
+   * Method to test Consul agent leader is working
    */
   async isConsulUpAndRunning() {
-    const connection = this.httpGetJson('/v1/status/leader');
+    const connection = await this.httpGetJson('/v1/status/leader');
     connection.catch((err) => {
       throw new Error('Unable to connect to Consul: ' + err);
     });
   }
 
   /**
+   * Method to return a promise containing the names of the objects in online mode
+   * Format:
+   * [
+   *  {name: parentName/childName}
+   * ]
    * @return {Promise.<Array.<Object>, Error>}
    */
   async listOnlineObjects() {
     return this.httpGetJson('/v1/agent/services').then((services) => {
       const tags = [];
       for (const serviceName in services) {
-        if (services[serviceName].Tags && services[serviceName].Tags.length > 0) {
+        if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
           const tagsToBeAdded = services[serviceName].Tags;
           tagsToBeAdded.forEach((tag) => tags.push({name: tag}));
         }
@@ -51,8 +56,8 @@ class ConsulConnector {
   }
 
   /**
-   * Util to get JSON data (parsed) from CCDB server
-   * @param {string} path - path en CCDB server
+   * Util to get JSON data (parsed) from Consul server
+   * @param {string} path - path en Consul server
    * @return {Promise.<Object, Error>} JSON response
    */
   async httpGetJson(path) {
