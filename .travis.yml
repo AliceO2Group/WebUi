@@ -6,7 +6,7 @@ os:
   - linux
   - osx
 language: node_js
-node_js: '8.9.4'
+node_js: '12.1.0'
 env:
   matrix:
   - ZMQ="4.1.6" ZMQ_REPO="zeromq4-1"
