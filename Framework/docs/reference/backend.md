@@ -20,23 +20,52 @@ It&#39;s based on HTTP status codes.</p>
 <dd><p>It represents WebSocket server (RFC 6455).
 In addition, it provides custom authentication with JWT tokens.</p>
 </dd>
-<dt><a href="#ZeroMQClient">ZeroMQClient</a></dt>
-<dd><p>ZeroMQ client that communicates with Control Master prcess via one of two supported
-socket patterns (sub and req).</p>
-</dd>
 <dt><a href="#MySQL">MySQL</a></dt>
 <dd><p>MySQL pool wrapper</p>
 </dd>
-<dt><a href="#InfoLoggerReceiver">InfoLoggerReceiver</a></dt>
-<dd><p>Implements InfoLogger protocol</p>
-</dd>
 <dt><a href="#InfoLoggerSender">InfoLoggerSender</a></dt>
-<dd><p>Implements InfoLogger protocol</p>
+<dd><p>Sends InfoLogger logs to InfoLoggerD over UNIX named socket</p>
+</dd>
+<dt><a href="#Log">Log</a></dt>
+<dd><p>Handles loging, prints out in console, saves to file or sends to cerntral InfoLogger instance</p>
 </dd>
 <dt><a href="#Winston">Winston</a></dt>
 <dd><p>Creates Winston logger
 Uses two transports file and console (if properly configured)</p>
 </dd>
+</dl>
+
+## Constants
+
+<dl>
+<dt><a href="#https">https</a></dt>
+<dd></dd>
+<dt><a href="#fs">fs</a></dt>
+<dd></dd>
+<dt><a href="#jwt">jwt</a></dt>
+<dd></dd>
+<dt><a href="#WebSocketServer">WebSocketServer</a></dt>
+<dd></dd>
+<dt><a href="#MySQL">MySQL</a></dt>
+<dd></dd>
+<dt><a href="#config">config</a></dt>
+<dd></dd>
+<dt><a href="#assert">assert</a></dt>
+<dd></dd>
+<dt><a href="#assert">assert</a></dt>
+<dd></dd>
+<dt><a href="#config">config</a></dt>
+<dd></dd>
+<dt><a href="#mysql">mysql</a></dt>
+<dd></dd>
+<dt><a href="#net">net</a></dt>
+<dd></dd>
+<dt><a href="#protocols">protocols</a></dt>
+<dd></dd>
+<dt><a href="#Winston">Winston</a></dt>
+<dd></dd>
+<dt><a href="#winston">winston</a></dt>
+<dd></dd>
 </dl>
 
 <a name="OAuth"></a>
@@ -123,9 +152,9 @@ Each request is authenticated with JWT token.
     * [.specifyRoutes()](#HttpServer+specifyRoutes)
     * [.addDefaultUserData(req, res, next)](#HttpServer+addDefaultUserData) ⇒ <code>object</code>
     * [.addStaticPath(localPath, uriPath)](#HttpServer+addStaticPath)
-    * [.get(path, callback)](#HttpServer+get)
-    * [.post(path, callback)](#HttpServer+post)
-    * [.delete(path, callback)](#HttpServer+delete)
+    * [.get(path, callback, options)](#HttpServer+get)
+    * [.post(path, callback, options)](#HttpServer+post)
+    * [.delete(path, callback, options)](#HttpServer+delete)
     * [.enableHttpRedirect()](#HttpServer+enableHttpRedirect)
     * [.oAuthAuthorize(req, res, next)](#HttpServer+oAuthAuthorize) ⇒ <code>object</code>
     * [.oAuthCallback(req, res)](#HttpServer+oAuthCallback) ⇒ <code>object</code>
@@ -208,7 +237,7 @@ Serves local static path under specified URI path
 
 <a name="HttpServer+get"></a>
 
-### httpServer.get(path, callback)
+### httpServer.get(path, callback, options)
 Adds GET route with authentification (req.query.token must be provided)
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
@@ -217,10 +246,12 @@ Adds GET route with authentification (req.query.token must be provided)
 | --- | --- | --- |
 | path | <code>string</code> | path that the callback will be bound to |
 | callback | <code>function</code> | function (that receives req and res parameters) |
+| options | <code>function</code> |  |
+| options.public | <code>function</code> | true to remove token verification |
 
 <a name="HttpServer+post"></a>
 
-### httpServer.post(path, callback)
+### httpServer.post(path, callback, options)
 Adds POST route with authentification (req.query.token must be provided)
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
@@ -229,10 +260,12 @@ Adds POST route with authentification (req.query.token must be provided)
 | --- | --- | --- |
 | path | <code>string</code> | path that the callback will be bound to |
 | callback | <code>function</code> | function (that receives req and res parameters) |
+| options | <code>function</code> |  |
+| options.public | <code>function</code> | true to remove token verification |
 
 <a name="HttpServer+delete"></a>
 
-### httpServer.delete(path, callback)
+### httpServer.delete(path, callback, options)
 Adds DELETE route with authentification (req.query.token must be provided)
 
 **Kind**: instance method of [<code>HttpServer</code>](#HttpServer)  
@@ -241,6 +274,8 @@ Adds DELETE route with authentification (req.query.token must be provided)
 | --- | --- | --- |
 | path | <code>string</code> | path that the callback will be bound to |
 | callback | <code>function</code> | function (that receives req and res parameters) |
+| options | <code>function</code> |  |
+| options.public | <code>function</code> | true to remove token verification |
 
 <a name="HttpServer+enableHttpRedirect"></a>
 
@@ -376,6 +411,11 @@ It's based on HTTP status codes.
 
 * [WebSocketMessage](#WebSocketMessage)
     * [new WebSocketMessage(code)](#new_WebSocketMessage_new)
+    * [.code](#WebSocketMessage+code) ⇒ <code>number</code>
+    * [.command](#WebSocketMessage+command)
+    * [.command](#WebSocketMessage+command) ⇒ <code>string</code>
+    * [.payload](#WebSocketMessage+payload)
+    * [.payload](#WebSocketMessage+payload) ⇒ <code>object</code>
     * [.json](#WebSocketMessage+json) ⇒ <code>object</code>
     * [.parse(json)](#WebSocketMessage+parse) ⇒ <code>object</code>
     * [.getCode()](#WebSocketMessage+getCode) ⇒ <code>number</code>
@@ -398,6 +438,43 @@ Sets initial variables.
 | --- | --- | --- | --- |
 | code | <code>number</code> | <code>200</code> | response code (based on HTTP) |
 
+<a name="WebSocketMessage+code"></a>
+
+### webSocketMessage.code ⇒ <code>number</code>
+**Kind**: instance property of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>number</code> - code  
+<a name="WebSocketMessage+command"></a>
+
+### webSocketMessage.command
+Command setter.
+
+**Kind**: instance property of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | user request command |
+
+<a name="WebSocketMessage+command"></a>
+
+### webSocketMessage.command ⇒ <code>string</code>
+**Kind**: instance property of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>string</code> - command  
+<a name="WebSocketMessage+payload"></a>
+
+### webSocketMessage.payload
+Payload setter.
+
+**Kind**: instance property of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+
+| Param | Type |
+| --- | --- |
+| payload | <code>object</code> | 
+
+<a name="WebSocketMessage+payload"></a>
+
+### webSocketMessage.payload ⇒ <code>object</code>
+**Kind**: instance property of [<code>WebSocketMessage</code>](#WebSocketMessage)  
+**Returns**: <code>object</code> - payload  
 <a name="WebSocketMessage+json"></a>
 
 ### webSocketMessage.json ⇒ <code>object</code>
@@ -502,6 +579,7 @@ In addition, it provides custom authentication with JWT tokens.
     * [.ping()](#WebSocket+ping)
     * [.onclose(client)](#WebSocket+onclose)
     * [.broadcast(message)](#WebSocket+broadcast)
+    * [.unfilteredBroadcast(message)](#WebSocket+unfilteredBroadcast)
 
 <a name="new_WebSocket_new"></a>
 
@@ -592,6 +670,7 @@ Handles client disconnection.
 
 ### webSocket.broadcast(message)
 Broadcasts the message to all connected clients.
+Send messages that match the filter.
 
 **Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  
 
@@ -599,73 +678,12 @@ Broadcasts the message to all connected clients.
 | --- | --- |
 | message | <code>string</code> | 
 
-<a name="ZeroMQClient"></a>
+<a name="WebSocket+unfilteredBroadcast"></a>
 
-## ZeroMQClient
-ZeroMQ client that communicates with Control Master prcess via one of two supported
-socket patterns (sub and req).
+### webSocket.unfilteredBroadcast(message)
+Broadcasts messges to all connected clients.
 
-**Kind**: global class  
-**Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
-
-* [ZeroMQClient](#ZeroMQClient)
-    * [new ZeroMQClient(ip, port, type)](#new_ZeroMQClient_new)
-    * [.connect(endpoint)](#ZeroMQClient+connect)
-    * [.disconnect(endpoint)](#ZeroMQClient+disconnect)
-    * [.onmessage(message)](#ZeroMQClient+onmessage)
-    * [.send(message)](#ZeroMQClient+send)
-
-<a name="new_ZeroMQClient_new"></a>
-
-### new ZeroMQClient(ip, port, type)
-Connects to ZeroMQ socket and binds class methods to ZeroMQ events.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| ip | <code>string</code> | hostname |
-| port | <code>number</code> | port number |
-| type | <code>bool</code> | socket type, true = sub. false = req |
-
-<a name="ZeroMQClient+connect"></a>
-
-### zeroMQClient.connect(endpoint)
-On-connect event handler.
-
-**Kind**: instance method of [<code>ZeroMQClient</code>](#ZeroMQClient)  
-
-| Param | Type |
-| --- | --- |
-| endpoint | <code>string</code> | 
-
-<a name="ZeroMQClient+disconnect"></a>
-
-### zeroMQClient.disconnect(endpoint)
-On-disconnect event handler.
-
-**Kind**: instance method of [<code>ZeroMQClient</code>](#ZeroMQClient)  
-
-| Param | Type |
-| --- | --- |
-| endpoint | <code>string</code> | 
-
-<a name="ZeroMQClient+onmessage"></a>
-
-### zeroMQClient.onmessage(message)
-On-message event handler.
-
-**Kind**: instance method of [<code>ZeroMQClient</code>](#ZeroMQClient)  
-
-| Param | Type |
-| --- | --- |
-| message | <code>string</code> | 
-
-<a name="ZeroMQClient+send"></a>
-
-### zeroMQClient.send(message)
-Sends message via socket.
-
-**Kind**: instance method of [<code>ZeroMQClient</code>](#ZeroMQClient)  
+**Kind**: instance method of [<code>WebSocket</code>](#WebSocket)  
 
 | Param | Type |
 | --- | --- |
@@ -719,82 +737,19 @@ Smothly terminates connection pool
 <a name="MySQL+errorHandler"></a>
 
 ### mySQL.errorHandler(err) ⇒ <code>string</code>
-The purpose is to translate Error object from mysql to more human one
-so we can send it to final user when it can be recovered
+The purpose is to translate MySQL errors to more human readable format
 
 **Kind**: instance method of [<code>MySQL</code>](#MySQL)  
-**Returns**: <code>string</code> - the new state of this source instance  
+**Returns**: <code>string</code> - Clear error message  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | err | <code>Error</code> | the error from a catch or callback |
 
-<a name="InfoLoggerReceiver"></a>
-
-## InfoLoggerReceiver
-Implements InfoLogger protocol
-
-**Kind**: global class  
-
-* [InfoLoggerReceiver](#InfoLoggerReceiver)
-    * [new InfoLoggerReceiver(winston)](#new_InfoLoggerReceiver_new)
-    * [.connect(options)](#InfoLoggerReceiver+connect)
-    * [.onmessage(data)](#InfoLoggerReceiver+onmessage)
-    * [.disconnect()](#InfoLoggerReceiver+disconnect)
-    * [.parse(frame)](#InfoLoggerReceiver+parse) ⇒ <code>object</code>
-
-<a name="new_InfoLoggerReceiver_new"></a>
-
-### new InfoLoggerReceiver(winston)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| winston | <code>object</code> | local loging object |
-
-<a name="InfoLoggerReceiver+connect"></a>
-
-### infoLoggerReceiver.connect(options)
-Connects to InfoLogger server or deamon (TCP socket)
-
-**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> | TCP options according to net package |
-
-<a name="InfoLoggerReceiver+onmessage"></a>
-
-### infoLoggerReceiver.onmessage(data)
-Handles frames received from InfoLogger server
-
-**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>object</code> | InfoLogger frame |
-
-<a name="InfoLoggerReceiver+disconnect"></a>
-
-### infoLoggerReceiver.disconnect()
-Disconnection from the socket
-
-**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
-<a name="InfoLoggerReceiver+parse"></a>
-
-### infoLoggerReceiver.parse(frame) ⇒ <code>object</code>
-Parses InfoLogger protocol string into an Object
-
-**Kind**: instance method of [<code>InfoLoggerReceiver</code>](#InfoLoggerReceiver)  
-**Returns**: <code>object</code> - Object including all frame fileds  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| frame | <code>string</code> | InfoLogger frame |
-
 <a name="InfoLoggerSender"></a>
 
 ## InfoLoggerSender
-Implements InfoLogger protocol
+Sends InfoLogger logs to InfoLoggerD over UNIX named socket
 
 **Kind**: global class  
 
@@ -802,6 +757,7 @@ Implements InfoLogger protocol
     * [new InfoLoggerSender(winston, path)](#new_InfoLoggerSender_new)
     * [.format(fields, version)](#InfoLoggerSender+format) ⇒ <code>string</code>
     * [.send(log)](#InfoLoggerSender+send)
+    * [.close()](#InfoLoggerSender+close)
 
 <a name="new_InfoLoggerSender_new"></a>
 
@@ -815,14 +771,14 @@ Implements InfoLogger protocol
 <a name="InfoLoggerSender+format"></a>
 
 ### infoLoggerSender.format(fields, version) ⇒ <code>string</code>
-Formats an Object into protocol frame
+Formats an log object into InfoLogger log frame
 
 **Kind**: instance method of [<code>InfoLoggerSender</code>](#InfoLoggerSender)  
 **Returns**: <code>string</code> - InfoLogger protocol frame  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| fields | <code>object</code> |  | Object including InfoLogger protocol fields |
+| fields | <code>object</code> |  | log object |
 | version | <code>string</code> | <code>&quot;1.4&quot;</code> | protocol version |
 
 <a name="InfoLoggerSender+send"></a>
@@ -835,6 +791,107 @@ Sends log message
 | Param | Type | Description |
 | --- | --- | --- |
 | log | <code>object</code> | message as Object |
+
+<a name="InfoLoggerSender+close"></a>
+
+### infoLoggerSender.close()
+Smoothly closes the connection
+
+**Kind**: instance method of [<code>InfoLoggerSender</code>](#InfoLoggerSender)  
+<a name="Log"></a>
+
+## Log
+Handles loging, prints out in console, saves to file or sends to cerntral InfoLogger instance
+
+**Kind**: global class  
+**Author**: Adam Wegrzynek <adam.wegrzynek@cern.ch>  
+
+* [Log](#Log)
+    * [new Log(label)](#new_Log_new)
+    * _instance_
+        * [.debug(log)](#Log+debug)
+        * [.info(log)](#Log+info)
+        * [.warn(log)](#Log+warn)
+        * [.error(log)](#Log+error)
+        * [.trace(err)](#Log+trace)
+    * _static_
+        * [.configure(config)](#Log.configure)
+
+<a name="new_Log_new"></a>
+
+### new Log(label)
+Sets the label and constructs default winston instance
+
+
+| Param | Type | Default |
+| --- | --- | --- |
+| label | <code>string</code> | <code>null</code> | 
+
+<a name="Log+debug"></a>
+
+### log.debug(log)
+Debug severity log
+
+**Kind**: instance method of [<code>Log</code>](#Log)  
+
+| Param | Type |
+| --- | --- |
+| log | <code>string</code> | 
+
+<a name="Log+info"></a>
+
+### log.info(log)
+Information severity log
+
+**Kind**: instance method of [<code>Log</code>](#Log)  
+
+| Param | Type |
+| --- | --- |
+| log | <code>string</code> | 
+
+<a name="Log+warn"></a>
+
+### log.warn(log)
+Warning severity log
+
+**Kind**: instance method of [<code>Log</code>](#Log)  
+
+| Param | Type |
+| --- | --- |
+| log | <code>string</code> | 
+
+<a name="Log+error"></a>
+
+### log.error(log)
+Error severity log
+
+**Kind**: instance method of [<code>Log</code>](#Log)  
+
+| Param | Type |
+| --- | --- |
+| log | <code>string</code> | 
+
+<a name="Log+trace"></a>
+
+### log.trace(err)
+Prints more details, for debugging purposes
+
+**Kind**: instance method of [<code>Log</code>](#Log)  
+
+| Param | Type |
+| --- | --- |
+| err | <code>object</code> | 
+
+<a name="Log.configure"></a>
+
+### Log.configure(config)
+Configures Winston and InfoLogger instances
+
+**Kind**: static method of [<code>Log</code>](#Log)  
+
+| Param | Type |
+| --- | --- |
+| config | <code>object</code> | 
 
 <a name="Winston"></a>
 
@@ -854,3 +911,244 @@ Creates two transports and constructs a logger
 | --- | --- | --- |
 | config | <code>object</code> | configuration for console and file transports |
 
+<a name="https"></a>
+
+## https
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="fs"></a>
+
+## fs
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="jwt"></a>
+
+## jwt
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="WebSocketServer"></a>
+
+## WebSocketServer
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="MySQL"></a>
+
+## MySQL
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+
+* [MySQL](#MySQL)
+    * [new MySQL(config)](#new_MySQL_new)
+    * [.query(query, parameters)](#MySQL+query) ⇒ <code>object</code>
+    * [.close()](#MySQL+close)
+    * [.errorHandler(err)](#MySQL+errorHandler) ⇒ <code>string</code>
+
+<a name="new_MySQL_new"></a>
+
+### new MySQL(config)
+Creates pool of connections
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config | <code>object</code> | configuration object including hostname, username, password and database name. |
+
+<a name="MySQL+query"></a>
+
+### mySQL.query(query, parameters) ⇒ <code>object</code>
+Prepares and executes query.
+Sets up 60s timeout.
+
+**Kind**: instance method of [<code>MySQL</code>](#MySQL)  
+**Returns**: <code>object</code> - promise  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| query | <code>string</code> | SQL query |
+| parameters | <code>array</code> | parameters to be boud to the query |
+
+<a name="MySQL+close"></a>
+
+### mySQL.close()
+Smothly terminates connection pool
+
+**Kind**: instance method of [<code>MySQL</code>](#MySQL)  
+<a name="MySQL+errorHandler"></a>
+
+### mySQL.errorHandler(err) ⇒ <code>string</code>
+The purpose is to translate MySQL errors to more human readable format
+
+**Kind**: instance method of [<code>MySQL</code>](#MySQL)  
+**Returns**: <code>string</code> - Clear error message  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>Error</code> | the error from a catch or callback |
+
+<a name="config"></a>
+
+## config
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="assert"></a>
+
+## assert
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="assert"></a>
+
+## assert
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="config"></a>
+
+## config
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="mysql"></a>
+
+## mysql
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="net"></a>
+
+## net
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="protocols"></a>
+
+## protocols
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="Winston"></a>
+
+## Winston
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
+<a name="new_Winston_new"></a>
+
+### new Winston(config)
+Creates two transports and constructs a logger
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config | <code>object</code> | configuration for console and file transports |
+
+<a name="winston"></a>
+
+## winston
+**Kind**: global constant  
+**License**: Copyright CERN and copyright holders of ALICE O2. This software is
+distributed under the terms of the GNU General Public License v3 (GPL
+Version 3), copied verbatim in the file &quot;COPYING&quot;.
+
+See http://alice-o2.web.cern.ch/license for full licensing information.
+
+In applying this license CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.  
