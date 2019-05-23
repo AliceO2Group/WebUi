@@ -43,7 +43,7 @@ script:
   - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; fi
 after_success:
   - cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js websocket/*.js test/*.js db/*.js log/*.js > ../docs/reference/backend.md
-  - cd $TRAVIS_BUILD_DIR/Framework; nyc ./node_modules/.bin/mocha Backend/test
+  - cd $TRAVIS_BUILD_DIR/Framework; npm run coverage
   - cd $TRAVIS_BUILD_DIR/Framework; nyc report --reporter=text-lcov > coverage.lcov && codecov
 notifications:
   email: false
