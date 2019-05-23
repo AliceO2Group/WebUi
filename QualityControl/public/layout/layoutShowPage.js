@@ -117,7 +117,7 @@ function subcanvasView(model) {
 /**
  * Shows a jsroot plot, with an overlay on edit mode to allow dragging events instead of dragging jsroot content with the mouse.
  * Dragging to desktop is forbidden, but could be added.
- * Position of chart is absolute to allow smooth mouvements when arrangement changes.
+ * Position of chart is absolute to allow smooth movements when arrangement changes.
  * @param {Object} model
  * @param {Object} tabObject - to be drawn with jsroot
  * @return {vnode}
@@ -153,23 +153,26 @@ function chartView(model, tabObject) {
     onremove: () => 1 // fix strange bug with unlimited redraws when layout contains only one chart (!!!)
   };
 
+  let className = '';
+  className += model.object.listOnline.map((item) => item.name).includes(tabObject.name) ? 'object-online ' : '';
+  className += model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id
+    ? 'object-selected object-selectable '
+    : 'object-selectable ';
   const attrsInternal = {
-    class: model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id
-      ? 'object-selected object-selectable'
-      : 'object-selectable'
+    class: className
   };
 
   return h('.absolute.animate-dimensions-position', attrs, [
     // super-container of jsroot data
     h('.bg-white.m1.absolute-fill.shadow-level1.br3', attrsInternal, draw(model, tabObject)),
 
-    // transparent layer to drag&drop in edit mode, avoid interraction with jsroot
+    // transparent layer to drag&drop in edit mode, avoid interaction with jsroot
     model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3')
   ]);
 }
 
 /**
- * Predicat to sort objects by id
+ * Predicate to sort objects by id
  * @param {Object} a
  * @param {Object} b
  * @return {number}

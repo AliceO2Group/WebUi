@@ -71,6 +71,7 @@ export default class QCObject extends Observable {
     let objects = [];
     if (!this.isOnlineModeEnabled) {
       objects = await this.qcObjectService.getObjects();
+      this.listOnline = [];
       this.list = objects;
     } else {
       objects = await this.qcObjectService.getOnlineObjects();
