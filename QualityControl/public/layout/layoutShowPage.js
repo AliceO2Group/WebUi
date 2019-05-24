@@ -123,7 +123,7 @@ function subcanvasView(model) {
  * @return {vnode}
  */
 function chartView(model, tabObject) {
-  const key = 'key'+tabObject.id;
+  const key = 'key' + tabObject.id;
 
   // Position and size are produced by GridList in the model
   const style = {
@@ -154,7 +154,7 @@ function chartView(model, tabObject) {
   };
 
   let className = '';
-  className += model.object.listOnline.map((item) => item.name).includes(tabObject.name) ? 'object-online ' : '';
+  className += model.object.isObjectInOnlineList(tabObject.name) ? 'object-online ' : '';
   className += model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id
     ? 'object-selected object-selectable '
     : 'object-selectable ';

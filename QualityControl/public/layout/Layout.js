@@ -417,7 +417,7 @@ export default class Layout extends Observable {
     // Create tabs for new layout
     const tabs = [];
 
-    itemToDuplicate.tabs.forEach(function(tab) {
+    itemToDuplicate.tabs.forEach(function (tab) {
       const duplicatedTab = {
         id: objectId(),
         name: tab.name,
@@ -439,12 +439,25 @@ export default class Layout extends Observable {
     // TODO Newly created item should be sent back by the API. This will prevent having to reload the item again below
     if (result.isSuccess()) {
       await this.loadItem(layout.id);
-      this.model.notification.show(`Layout "${itemToDuplicate.name}" `+
+      this.model.notification.show(`Layout "${itemToDuplicate.name}" ` +
         `has been successfully duplicated into "${this.item.name}".`, 'success');
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, false);
       this.loadMyList();
     } else {
       this.model.notification.show(`Layout "${itemToDuplicate.name}" has not been duplicated.`, 'danger');
     }
+  }
+
+  /**
+   * Method to check if passed layout contains any objects in online mode
+   * @param {Layout} layout
+   * @param {Object} model
+   * @return {boolean}
+   */
+  doesLayoutContainOnlineObjects(layout) {
+    return layout.tabs.map((tab) => tab.objects) //
+      .flatMap((objects) => objects) //
+      .map((object) => object.name) //
+      .some((objectName) => this.model.object.isObjectInOnlineList(objectName));
   }
 }

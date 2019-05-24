@@ -1,4 +1,5 @@
 import {h} from '/js/src/index.js';
+import {iconBarChart} from '/js/src/icons.js';
 
 /**
  * Shows a list of layouts
@@ -12,7 +13,7 @@ export default function layouts(model) {
 }
 
 /**
- * Shows a table containging layouts, one per line
+ * Shows a table containing layouts, one per line
  * @param {Object} model
  * @return {vnode}
  */
@@ -48,16 +49,17 @@ function rows(model) {
       [
         h('td.w-33',
           [
-            h('svg.icon', {fill: 'currentcolor', viewBox: '0 0 8 8'},
-              h('path', {d: 'M0 0v7h8v-1h-7v-6h-1zm5 0v5h2v-5h-2zm-3 2v3h2v-3h-2z'})
-            ),
-            ' ',
-            h('a', {
-              href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
-              onclick: (e) => model.router.handleLinkEvent(e)
-            }, layout.name)
-          ]
-        ),
+            h('', {
+              class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'danger' : ''
+            }, [
+              iconBarChart(),
+              ' ',
+              h('a', {
+                href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
+                onclick: (e) => model.router.handleLinkEvent(e)
+              }, layout.name)
+            ])
+          ]),
         h('td',
           layout.owner_name
         ),
