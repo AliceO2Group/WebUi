@@ -18,7 +18,8 @@ export default class QCObject extends Observable {
 
     this.currentList = [];
     this.list = null;
-    this.tree = null; // ObjectTree
+    this.tree = null; // ObjectTree for ObjectView
+    this.sideTree = null; //ObjectTree for EditLayoutView
 
     this.selected = null; // object - id of object
     this.objects = {}; // objectName -> RemoteData
@@ -48,6 +49,20 @@ export default class QCObject extends Observable {
   }
 
   /**
+   * Method to display sideTree(edit layout mode) based on onlineList / offlineList
+   * @param {boolean} isOnlineListRequested
+   */
+  toggleSideTree(isOnlineListRequested) {
+    this.sideTree = new ObjectTree('database');
+    this.sideTree.bubbleTo(this);
+    if (isOnlineListRequested) {
+      this.sideTree.addChildrens(this.listOnline);
+    } else {
+      this.sideTree.addChildrens(this.list);
+    }
+  }
+
+  /**
    * Computes the final list of objects to be seen by user depending on those factors:
    * - online filter enabled
    * - online objects according to information service
@@ -69,17 +84,23 @@ export default class QCObject extends Observable {
    */
   async loadList() {
     let objects = [];
+    const offlineObjects = await this.qcObjectService.getObjects();
+    this.list = offlineObjects;
+
+    const onlineObjects = await this.qcObjectService.getOnlineObjects();
+    this.listOnline = onlineObjects;
+
     if (!this.isOnlineModeEnabled) {
-      objects = await this.qcObjectService.getObjects();
-      this.listOnline = [];
-      this.list = objects;
+      objects = offlineObjects;
     } else {
-      objects = await this.qcObjectService.getOnlineObjects();
-      this.listOnline = objects;
+      objects = onlineObjects;
     }
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
     this.tree.addChildrens(objects);
+    this.sideTree = new ObjectTree('database');
+    this.sideTree.bubbleTo(this);
+    this.sideTree.addChildrens(objects);
     this.currentList = objects;
     this._computeFilters();
     this.notify();
@@ -219,5 +240,14 @@ export default class QCObject extends Observable {
     this.searchInput = searchInput;
     this._computeFilters();
     this.notify();
+  }
+
+  /**
+   * Method to check if an object is in online mode
+   * @param {string} objectName format: QcTask/example
+   * @return {boolean}
+   */
+  isObjectInOnlineList(objectName) {
+    return this.isOnlineModeEnabled && this.listOnline.map((item) => item.name).includes(objectName);
   }
 }

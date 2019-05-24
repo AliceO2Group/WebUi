@@ -20,7 +20,6 @@ export default class ObjectTree extends Observable {
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
-
     this.quality = null; // most negative quality from this subtree
   }
 
