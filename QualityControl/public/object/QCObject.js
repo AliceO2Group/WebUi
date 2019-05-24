@@ -100,7 +100,7 @@ export default class QCObject extends Observable {
     this.tree.addChildrens(objects);
     this.sideTree = new ObjectTree('database');
     this.sideTree.bubbleTo(this);
-    this.sideTree.addChildrens(objects);
+    this.sideTree.addChildrens(offlineObjects);
     this.currentList = objects;
     this._computeFilters();
     this.notify();
