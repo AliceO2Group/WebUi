@@ -28,7 +28,7 @@ class ConsulConnector {
    * Method to test Consul agent leader is working
    */
   async isConsulUpAndRunning() {
-    const connection = await this.httpGetJson('/v1/status/leader');
+    const connection = this.httpGetJson('/v1/status/leader');
     connection.catch((err) => {
       throw new Error('Unable to connect to Consul: ' + err);
     });
