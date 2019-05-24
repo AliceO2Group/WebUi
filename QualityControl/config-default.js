@@ -24,6 +24,11 @@ module.exports = {
     port: 8080
   },
 
+  consul: {
+    hostname: 'locahost',
+    port: 8500
+  }
+
   // dbFile: '/var/db/qcg-db.json', // absolute path where to save layouts, default = root of this app
 
   // JWT manages user's session duration
