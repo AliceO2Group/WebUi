@@ -14,5 +14,9 @@ module.exports = {
   tobject2json: {
     host: 'localhost',
     port: 7777
+  },
+  consul: {
+    hostname: 'localhost',
+    port: 7777
   }
 };

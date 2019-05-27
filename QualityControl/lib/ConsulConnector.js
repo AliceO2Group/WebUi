@@ -18,10 +18,8 @@ class ConsulConnector {
     if (!config.port) {
       throw new Error('Empty port in Consul config');
     }
-
     this.hostname = config.hostname;
     this.port = config.port;
-    this.isConsulUpAndRunning();
   }
 
   /**
@@ -43,16 +41,7 @@ class ConsulConnector {
    * @return {Promise.<Array.<Object>, Error>}
    */
   async listOnlineObjects() {
-    return this.httpGetJson('/v1/agent/services').then((services) => {
-      const tags = [];
-      for (const serviceName in services) {
-        if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
-          const tagsToBeAdded = services[serviceName].Tags;
-          tagsToBeAdded.forEach((tag) => tags.push({name: tag}));
-        }
-      }
-      return tags;
-    });
+    return this.httpGetJson('/v1/agent/services').then((services) => this.getTagsFromServices(services));
   }
 
   /**
@@ -98,6 +87,22 @@ class ConsulConnector {
       request.on('error', (err) => reject(err));
       request.end();
     });
+  }
+
+  /**
+   * Method to extract the tags from a service list. This represents objects that are in online mode.
+   * @param {*} services
+   * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
+   */
+  getTagsFromServices(services) {
+    const tags = [];
+    for (const serviceName in services) {
+      if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
+        const tagsToBeAdded = services[serviceName].Tags;
+        tagsToBeAdded.forEach((tag) => tags.push({name: tag}));
+      }
+    }
+    return tags;
   }
 }
 
