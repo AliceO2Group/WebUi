@@ -101,7 +101,9 @@ class CCDBConnector {
         response.on('data', (chunk) => bodyChunks.push(chunk));
         response.on('end', () => {
           try {
-            const body = JSON.parse(bodyChunks.join(''));
+            let body = bodyChunks.join('');
+            body = body.replace('?_', '');
+            body = JSON.parse(bodyChunks.join(''));
             resolve(body);
           } catch (e) {
             reject(new Error('Unable to parse JSON'));

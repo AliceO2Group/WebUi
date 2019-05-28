@@ -91,7 +91,7 @@ class ConsulConnector {
 
   /**
    * Method to extract the tags from a service list. This represents objects that are in online mode.
-   * @param {*} services
+   * @param {JSON} services
    * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
    */
   getTagsFromServices(services) {

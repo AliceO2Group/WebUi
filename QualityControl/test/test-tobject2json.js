@@ -19,7 +19,7 @@ describe('QC CXX module and CCDB test suite', function () {
   it('treats 1 object', (done) => {
     tobject2json.retrieve(objects[1].name).then(() => {
       done();
-    }); 
+    });
   });
 
   it('treats 20 objects (ASYNC)', (done) => {

@@ -19,7 +19,7 @@ export default class QCObject extends Observable {
     this.currentList = [];
     this.list = null;
     this.tree = null; // ObjectTree for ObjectView
-    this.sideTree = null; //ObjectTree for EditLayoutView
+    this.sideTree = null; // ObjectTree for EditLayoutView
 
     this.selected = null; // object - id of object
     this.objects = {}; // objectName -> RemoteData
@@ -43,8 +43,12 @@ export default class QCObject extends Observable {
    */
   toggleMode() {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
+    if (this.isObjectInOnlineList) {
+      this.loadOnlineList();
+    } else {
+      this.loadList();
+    }
     this.selected = null;
-    this.loadList();
     this.notify();
   }
 
@@ -83,27 +87,34 @@ export default class QCObject extends Observable {
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
-    let objects = [];
     const offlineObjects = await this.qcObjectService.getObjects();
     this.list = offlineObjects;
 
-    const onlineObjects = await this.qcObjectService.getOnlineObjects();
-    this.listOnline = onlineObjects;
-
-    if (!this.isOnlineModeEnabled) {
-      objects = offlineObjects;
-    } else {
-      objects = onlineObjects;
-    }
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
-    this.tree.addChildrens(objects);
-    this.sideTree = new ObjectTree('database');
+    this.tree.addChildrens(offlineObjects);
+
+    this.sideTree = new ObjectTree('online');
     this.sideTree.bubbleTo(this);
     this.sideTree.addChildrens(offlineObjects);
-    this.currentList = objects;
+
+    this.currentList = offlineObjects;
     this._computeFilters();
     this.notify();
+  }
+
+  /**
+   * Ask server for online objects and fills tree with them
+   */
+  async loadOnlineList() {
+    const onlineObjects = await this.qcObjectService.getOnlineObjects();
+
+    this.tree = new ObjectTree('database');
+    this.tree.bubbleTo(this);
+    this.tree.addChildrens(onlineObjects);
+
+    this.listOnline = onlineObjects;
+    this.currentList = onlineObjects;
   }
 
   /**
@@ -248,6 +259,6 @@ export default class QCObject extends Observable {
    * @return {boolean}
    */
   isObjectInOnlineList(objectName) {
-    return this.isOnlineModeEnabled && this.listOnline.map((item) => item.name).includes(objectName);
+    return this.isOnlineModeEnabled && this.listOnline && this.listOnline.map((item) => item.name).includes(objectName);
   }
 }

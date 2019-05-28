@@ -8,7 +8,7 @@ import {draw} from './objectDraw.js';
  * @return {vnode}
  */
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
-  h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()}, [
+  h('.flex-row.flex-grow', {oncreate: () => console.log("Nu mai")}, [
     h('.flex-grow.scroll-y', tableShow(model)),
     h('.animate-width.scroll-y', {
       style: {

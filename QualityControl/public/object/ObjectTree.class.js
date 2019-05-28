@@ -119,4 +119,8 @@ export default class ObjectTree extends Observable {
   addChildrens(objects) {
     objects.forEach((object) => this.addChildren(object));
   }
+
+  emptyTree() {
+    this.childrens = [];
+  }
 }

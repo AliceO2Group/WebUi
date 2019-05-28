@@ -56,7 +56,7 @@ const commonHeader = (model) => h('.flex-grow', [
  * @param {Object} model
  * @return {vnode}
  */
-const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
+const loginButton = (model) => h('.dropdown', {title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
   h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
   h('.dropdown-menu', [
     h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
@@ -74,7 +74,8 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
 const onlineButton = (model) => h('button.btn',
   {
     className: onlineButtonStyle,
-    onclick: () => toggleOnlineButton(model)
+    onclick: () => toggleOnlineButton(model),
+    title: 'Online'
   },
   'Online',
   ' ',

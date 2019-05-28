@@ -127,6 +127,7 @@ export default class Layout extends Observable {
    * Delete current layout inside `item` from the server
    */
   async deleteItem() {
+    console.log("Mamaie");
     if (!this.item) {
       throw new Error('no layout to delete');
     }
@@ -451,13 +452,16 @@ export default class Layout extends Observable {
   /**
    * Method to check if passed layout contains any objects in online mode
    * @param {Layout} layout
-   * @param {Object} model
    * @return {boolean}
    */
   doesLayoutContainOnlineObjects(layout) {
-    return layout.tabs.map((tab) => tab.objects) //
-      .flatMap((objects) => objects) //
-      .map((object) => object.name) //
-      .some((objectName) => this.model.object.isObjectInOnlineList(objectName));
+    if (layout && layout.tabs && layout.tabs.length > 0) {
+      return layout.tabs
+        .map((tab) => tab.objects)
+        .some((objects) =>
+          objects.map((object) => object.name)
+            .some((name) => this.model.object.isObjectInOnlineList(name)));
+    }
+    return false;
   }
 }
