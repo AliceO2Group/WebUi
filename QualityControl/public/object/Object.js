@@ -1,6 +1,6 @@
 /* global JSROOT */
 
-import {Observable, fetchClient, RemoteData} from '/js/src/index.js';
+import {Observable, RemoteData} from '/js/src/index.js';
 
 import ObjectTree from './ObjectTree.class.js';
 /**
@@ -85,10 +85,13 @@ export default class Object_ extends Observable {
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
-    const req = fetchClient(`/api/listObjects`, {method: 'GET'});
-    this.model.loader.watchPromise(req);
-    const res = await req;
-    const list = await res.json();
+    let list = [];
+    const {result, ok} = await this.model.loader.get('/api/listObjects');
+    if (ok) {
+      list = result;
+    } else {
+      this.model.notification.show(`Failed to retrieve list of objects due to ${result.message}`, 'danger', Infinity);
+    }
 
     if (!this.tree) {
       this.tree = new ObjectTree('database');
@@ -142,7 +145,7 @@ export default class Object_ extends Observable {
     const {result, ok} = await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
     if (!ok) {
       // it should be always status=200 for this request
-      this.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
+      this.model.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
       return;
     }
 
