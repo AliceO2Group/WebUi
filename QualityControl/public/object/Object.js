@@ -125,9 +125,11 @@ export default class Object_ extends Observable {
       // eslint-disable-next-line
       this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result));
     } else if (status === 404) {
-      this.objects[objectName] = RemoteData.failure('Object not found');
+      const message = `Object "${objectName}" could not be found.`;
+      this.objects[objectName] = RemoteData.failure(message);
     } else {
-      this.objects[objectName] = RemoteData.failure(result.error);
+      const message = `Object "${objectName}" could not be displayed. ${result.message}`;
+      this.objects[objectName] = RemoteData.failure(message);
     }
 
     this.notify();
