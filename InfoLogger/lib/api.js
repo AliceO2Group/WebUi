@@ -43,7 +43,7 @@ module.exports.attachTo = (http, ws) => {
    * @param {Error} error
    */
   function handleError(res, error) {
-    Log.trace(error);
+    log.trace(error);
     res.status(500).json({message: error.message});
   }
 
