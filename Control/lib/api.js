@@ -1,6 +1,5 @@
 const {WebSocketMessage} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)('Control');
-const {trace} = require('@aliceo2/web-ui').Log;
 const Long = require('long');
 
 const Padlock = require('./Padlock.js');
@@ -84,7 +83,7 @@ module.exports.attachTo = (http, ws) => {
 function errorHandler(err, res, status = 500) {
   if (status > 500) {
     if (err.stack) {
-      trace(err);
+      log.trace(err);
     }
     log.error(err.message || err);
   }
