@@ -4,14 +4,14 @@ import pageError from '../common/pageError.js';
 import showTableItem from '../common/showTableItem.js';
 import showTableList from '../common/showTableList.js';
 /**
-* @file Page to show 1 environment (content and header)
+ * @file Page to show 1 environment (content and header)
 */
 
 /**
-* Header of page showing one environment
-* Only page title with no action
-* @param {Object} model
-* @return {vnode}
+ * Header of page showing one environment
+ * Only page title with no action
+ * @param {Object} model
+ * @return {vnode}
 */
 export const header = (model) => [
   h('.w-50 text-center', [
@@ -23,9 +23,9 @@ export const header = (model) => [
 ];
 
 /**
-* Content page showing one environment
-* @param {Object} model
-* @return {vnode}
+ * Content page showing one environment
+ * @param {Object} model
+ * @return {vnode}
 */
 export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
@@ -37,10 +37,10 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 ]);
 
 /**
-* Show all properties of environment and buttons for its actions at bottom
-* @param {Object} model
-* @param {Environment} item - environment to show on this page
-* @return {vnode}
+ * Show all properties of environment and buttons for its actions at bottom
+ * @param {Object} model
+ * @param {Environment} item - environment to show on this page
+ * @return {vnode}
 */
 const showContent = (model, item) => [
   showControl(model, item),
@@ -51,10 +51,10 @@ const showContent = (model, item) => [
 ];
 
 /**
-* List of buttons, each one is an action to do on the current environment `item`
-* @param {Object} model
-* @param {Environment} item - environment to show on this page
-* @return {vnode}
+ * List of buttons, each one is an action to do on the current environment `item`
+ * @param {Object} model
+ * @param {Environment} item - environment to show on this page
+ * @return {vnode}
 */
 const showControl = (model, item) => h('.m2 .p2', [
   h('h4', 'Control'),
