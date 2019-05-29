@@ -2,6 +2,7 @@
 
 import {Observable, RemoteData} from '/js/src/index.js';
 import QCObjectService from './../services/QCObject.service.js';
+
 import ObjectTree from './ObjectTree.class.js';
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -90,6 +91,11 @@ export default class QCObject extends Observable {
     const offlineObjects = await this.qcObjectService.getObjects();
     this.list = offlineObjects;
 
+    if (!this.tree) {
+      this.tree = new ObjectTree('database');
+      this.tree.bubbleTo(this);
+    }
+
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
     this.tree.addChildrens(offlineObjects);
@@ -139,9 +145,11 @@ export default class QCObject extends Observable {
       // eslint-disable-next-line
       this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result));
     } else if (status === 404) {
-      this.objects[objectName] = RemoteData.failure('Object not found');
+      const message = `Object "${objectName}" could not be found.`;
+      this.objects[objectName] = RemoteData.failure(message);
     } else {
-      this.objects[objectName] = RemoteData.failure(result.error);
+      const message = `Object "${objectName}" could not be displayed. ${result.message}`;
+      this.objects[objectName] = RemoteData.failure(message);
     }
 
     this.notify();
@@ -176,7 +184,7 @@ export default class QCObject extends Observable {
     if (!ok) {
       // TODO move on service side
       // it should be always status=200 for this request
-      this.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
+      this.model.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
       return;
     }
 

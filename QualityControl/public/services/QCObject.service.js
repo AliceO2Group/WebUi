@@ -18,10 +18,13 @@ export default class QCObjectService {
    * @return {JSON} List of Objects
    */
   async getObjects() {
-    const req = fetchClient(`/api/listObjects`, {method: 'GET'});
-    this.model.loader.watchPromise(req);
-    const res = await req;
-    return await res.json();
+    const {result, ok} = await this.model.loader.get('/api/listObjects');
+    if (ok) {
+      return [];
+    } else {
+      this.model.notification.show(`Failed to retrieve list of objects due to ${result.message}`, 'danger', Infinity);
+    }
+    return result;
   }
 
   /**

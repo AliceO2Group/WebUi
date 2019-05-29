@@ -8,7 +8,7 @@
   "homepage": "https://alice-o2.web.cern.ch",
   "scripts": {
     "test": "npm run eslint && npm run mocha",
-    "coverage": "./node_modules/.bin/nyc ./node_modules/mocha/bin/mocha Backend/test/ --exit",
+    "coverage": "nyc ./node_modules/.bin/mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "./node_modules/.bin/mocha --exit ./Frontend/test/",
     "mocha-backend": "./node_modules/.bin/mocha --exit ./Backend/test/",
