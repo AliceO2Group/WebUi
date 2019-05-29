@@ -5,14 +5,14 @@ import showTableItem from '../common/showTableItem.js';
 import showTableList from '../common/showTableList.js';
 /**
  * @file Page to show 1 environment (content and header)
-*/
+ */
 
 /**
  * Header of page showing one environment
  * Only page title with no action
  * @param {Object} model
  * @return {vnode}
-*/
+ */
 export const header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'Environment details')
@@ -26,7 +26,7 @@ export const header = (model) => [
  * Content page showing one environment
  * @param {Object} model
  * @return {vnode}
-*/
+ */
 export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
@@ -41,7 +41,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  * @param {Object} model
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
-*/
+ */
 const showContent = (model, item) => [
   showControl(model, item),
   h('.m2', h('h4', 'Details')),
@@ -55,7 +55,7 @@ const showContent = (model, item) => [
  * @param {Object} model
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
-*/
+ */
 const showControl = (model, item) => h('.m2 .p2', [
   h('h4', 'Control'),
   h('div.flex-row',
