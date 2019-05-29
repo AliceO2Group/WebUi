@@ -108,7 +108,8 @@ const showControl = (model, item) => h('.m2 .p2', [
         },
         iconTrash()
       ),
-    )),
+    )
+  ),
   model.environment.itemControl.match({
     NotAsked: () => null,
     Loading: () => null,
