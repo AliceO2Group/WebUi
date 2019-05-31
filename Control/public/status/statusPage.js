@@ -42,4 +42,3 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
 const showContent = (model, item) => [
   showTableItem(item)
 ];
-
