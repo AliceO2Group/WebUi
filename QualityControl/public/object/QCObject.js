@@ -25,7 +25,7 @@ export default class QCObject extends Observable {
     this.selected = null; // object - id of object
     this.objects = {}; // objectName -> RemoteData
     this.objectsReferences = {}; // object name -> number of each object being
-    this.qcObjectService = new QCObjectService(model);
+    this.qcObjectService = new QCObjectService(this.model);
 
     this.listOnline = []; // list of online objects name
     this.isOnlineModeEnabled = false; // show only online objects or all (offline)
@@ -44,7 +44,7 @@ export default class QCObject extends Observable {
    */
   toggleMode() {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    if (this.isObjectInOnlineList) {
+    if (this.isOnlineModeEnabled) {
       this.loadOnlineList();
     } else {
       this.loadList();
@@ -88,13 +88,14 @@ export default class QCObject extends Observable {
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
-    const offlineObjects = await this.qcObjectService.getObjects();
-    this.list = offlineObjects;
-
-    if (!this.tree) {
-      this.tree = new ObjectTree('database');
-      this.tree.bubbleTo(this);
+    let offlineObjects = [];
+    const result = await this.qcObjectService.getObjects();
+    if (result.isSuccess()) {
+      offlineObjects = result.payload;
+    } else {
+      this.model.notification.show(`Failed to retrieve list of objects due to ${result.message}`, 'danger', Infinity);
     }
+    this.list = offlineObjects;
 
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
@@ -113,8 +114,14 @@ export default class QCObject extends Observable {
    * Ask server for online objects and fills tree with them
    */
   async loadOnlineList() {
-    const onlineObjects = await this.qcObjectService.getOnlineObjects();
-
+    let onlineObjects = [];
+    const result = await this.qcObjectService.getOnlineObjects();
+    if (result.isSuccess()) {
+      onlineObjects = result.payload;
+    } else {
+      const failureMessage = `Failed to retrieve list of online objects due to ${result.message}`;
+      this.model.notification.show(failureMessage, 'danger', Infinity);
+    }
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
     this.tree.addChildrens(onlineObjects);
@@ -138,20 +145,14 @@ export default class QCObject extends Observable {
 
     // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
 
-    const {result, ok, status} = await this.qcObjectService.getObjectByName(objectName);
-    if (ok) {
-      // TODO Move on service side
+    const result = await this.qcObjectService.getObjectByName(objectName);
+    if (result.isSuccess()) {
       // link JSROOT methods to object
       // eslint-disable-next-line
-      this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result));
-    } else if (status === 404) {
-      const message = `Object "${objectName}" could not be found.`;
-      this.objects[objectName] = RemoteData.failure(message);
+      this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result.payload));
     } else {
-      const message = `Object "${objectName}" could not be displayed. ${result.message}`;
-      this.objects[objectName] = RemoteData.failure(message);
+      this.objects[objectName] = result;
     }
-
     this.notify();
   }
 
@@ -180,16 +181,15 @@ export default class QCObject extends Observable {
       return;
     }
 
-    const {result, ok} = await this.qcObjectService.getObjectsByName(objectsName);
-    if (!ok) {
-      // TODO move on service side
+    const result = await this.qcObjectService.getObjectsByName(objectsName);
+    if (!result.isSuccess()) {
       // it should be always status=200 for this request
       this.model.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
       return;
     }
 
     // eslint-disable-next-line
-    const objects = JSROOT.JSONR_unref(result);
+    const objects = JSROOT.JSONR_unref(result.payload);
     for (const name in objects) {
       if (objects[name].error) {
         this.objects[name] = RemoteData.failure(objects[name].error);

@@ -1,4 +1,4 @@
-import {fetchClient} from '/js/src/index.js';
+import {RemoteData} from '/js/src/index.js';
 
 /**
  * Quality Control Object service to get/send data
@@ -20,11 +20,10 @@ export default class QCObjectService {
   async getObjects() {
     const {result, ok} = await this.model.loader.get('/api/listObjects');
     if (ok) {
-      return [];
+      return RemoteData.success(result);
     } else {
-      this.model.notification.show(`Failed to retrieve list of objects due to ${result.message}`, 'danger', Infinity);
+      return RemoteData.failure(result);
     }
-    return result;
   }
 
   /**
@@ -32,11 +31,12 @@ export default class QCObjectService {
    * @return {JSON} List of Objects
    */
   async getOnlineObjects() {
-    const req = fetchClient(`/api/listOnlineObjects`, {method: 'GET'});
-    this.model.loader.watchPromise(req);
-    const res = await req;
-    const test = await res.json();
-    return test;
+    const {result, ok} = await this.model.loader.get('/api/listOnlineObjects');
+    if (ok) {
+      return RemoteData.success(result);
+    } else {
+      return RemoteData.failure(result);
+    }
   }
 
   /**
@@ -45,7 +45,14 @@ export default class QCObjectService {
   * @return {JSON} {result, ok, status}
   */
   async getObjectByName(objectName) {
-    return await this.model.loader.get(`/api/readObjectData?objectName=${objectName}`);
+    const {result, ok, status} = await this.model.loader.get(`/api/readObjectData?objectName=${objectName}`);
+    if (ok) {
+      return RemoteData.success(result);
+    } else if (status === 404) {
+      return RemoteData.failure(`Object "${objectName}" could not be found.`);
+    } else {
+      return RemoteData.failure(`Object "${objectName}" could not be displayed. ${result.message}`);
+    }
   }
 
   /**
@@ -53,6 +60,11 @@ export default class QCObjectService {
    * @param {[string]} objectsNames
    */
   async getObjectsByName(objectsNames) {
-    return await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
+    const {result, ok} = await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
+    if (ok) {
+      return RemoteData.success(result);
+    } else {
+      return RemoteData.failure(result);
+    }
   }
 }
