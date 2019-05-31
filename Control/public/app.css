@@ -2,10 +2,16 @@
  * App specific CSS styles
  */
 
+.pageLoading {
+  font-size: 10em;
+  color: var(--color-dark);
+  margin: var(--space-l);
+  line-height: 1;
+}
 
-
-.pageLoading { font-size: 35em; color: var(--color-gray-lighter); margin: var(--space-l); line-height: 1;
-                      animation-name: appearance; animation-duration: 1.0s; animation-iteration-count: infinite; animation-direction: alternate; }
-
-.pageError { font-size: 25em; color: var(--color-gray-lighter); margin: var(--space-l); line-height: 1; }
-
+.pageError {
+  font-size: 10em;
+  color: var(--color-dark);
+  margin: var(--space-l);
+  line-height: 1;
+}
