@@ -18,7 +18,8 @@ module.exports.attachTo = (http, ws) => {
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
       if (!octl.connectionReady) {
-        errorHandler(`GRPC module is not connected`, octl.connectionReady, 500);
+        errorHandler(`GRPC module is not connected`, res, 503);
+        return;
       }
       // disallow 'not-Get' methods if not owning the lock
       if (!method.startsWith('Get')) {

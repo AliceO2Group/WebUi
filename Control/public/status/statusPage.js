@@ -28,8 +28,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
   model.status.item.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: () => pageError("test"),
-    // Success: (data) => showContent(model, data),
+    Success: (data) => showContent(model, data),
     Failure: (error) => pageError(error),
   })
 ]);
