@@ -197,7 +197,7 @@
       <div class="dropdown-menu">
         <a href="#" class="menu-item ">
           <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M4 0c-1.105 0-2 1.119-2 2.5s.895 2.5 2 2.5 2-1.119 2-2.5-.895-2.5-2-2.5zm-2.094 5c-1.07.04-1.906.92-1.906 2v1h8v-1c0-1.08-.836-1.96-1.906-2-.54.61-1.284 1-2.094 1-.81 0-1.554-.39-2.094-1z"></path></svg>
-          <span>Profil</span>
+          <span>Profile</span>
         </a>
         <a href="#" class="menu-item">
           <svg fill="currentcolor" viewBox="0 0 8 8" class="icon"><path d="M3 0v1h4v5h-4v1h5v-7h-5zm-1 2l-2 1.5 2 1.5v-1h4v-1h-4v-1z"></path></svg>
@@ -214,7 +214,7 @@
   <h2>Form inputs</h2>
   <p class="measure">Forms are a way to have user inputs in addition to buttons.
     Always put a <code>&lt;label&gt;</code> tag with a <code>for</code> attribute associated to the <code>id</code> of the <code>&lt;input&gt;</code> it is targeting.
-    It helps the user to click, espacially for checkboxes which are small.
+    It helps the user to click, especially for checkboxes which are small.
     <code>&lt;form&gt;</code> tag is not useful in single page application, except for a reset button which needs it.<p>
 
 
@@ -360,7 +360,7 @@
   <h2>Display</h2>
   <p class="measure">The display specifies the type of rendering box used for an element.</p>
 
-  <p class="">.d-none (will turn off the display of element and its childs)</p>
+  <p class="">.d-none (will turn off the display of element and its children)</p>
   <p class="">.d-inline (span default behavior)</p>
   <p class="">.d-inline-block (button, img, input default behavior)</p>
   <p class="">.d-block (div default behavior)</p>
@@ -402,7 +402,7 @@
 
   <p class=""><code>.relative</code> is positioned relative to its normal position</p>
   <p class=""><code>.absolute</code> is positioned relative to the nearest positioned ancestor</p>
-  <p class=""><code>.absolute-fill</code> will fill completly its nearest parent which has .relative</p>
+  <p class=""><code>.absolute-fill</code> will fill completely its nearest parent which has .relative</p>
 
   <hr />
   <a name="flex"></a>
@@ -509,7 +509,7 @@
   <h2>Scroll</h2>
   <p>This should always be applied to layouts before content to avoid overflow.</p>
 
-  <p class=""><code>.scroll-y</code> only show vertical scroll bar (recommanded)</p>
+  <p class=""><code>.scroll-y</code> only show vertical scroll bar (recommended)</p>
   <p class=""><code>.scroll-auto</code> add scroll bars if needed</p>
   <p class=""><code>.scroll-off</code> just hide all overflow</p>
 
@@ -665,7 +665,7 @@
             <p class="measure">Example of basic layout with toolbar and one sidebar.</p>
             <p class="measure">The sidebar can be closed with <code>.sidebar-closed</code> and the layout is free.
               In the current example the menu is inside a scrollable container but we could imagine the sidebar to be
-              splitted in half to preview some element at the bottom and have a menu at the top.</p>
+              split in half to preview some element at the bottom and have a menu at the top.</p>
             <p class="measure">Sidebar can also grow is more place is needed, use <code>.sidebar-extend</code>
               or just specify the width you want with a style attribute.</p>
             <p class="measure">Only flex (<code>.flex-row</code> or <code>.flex-column</code> with <code>.flex-grow</code>)
@@ -699,11 +699,11 @@
   <hr>
   <a name="notification"></a>
   <h2>Notification</h2>
-  <p class="measure-wide">Notification informs user of an event without blocking interraction like <code>alert()</code>.</p>
+  <p class="measure-wide">Notification informs user of an event without blocking interaction like <code>alert()</code>.</p>
   <p class="measure-wide">
     Notification has 3 states: initial (not displayed), opened (shows with animation) and closed (hides with animation).
     Because of its absolute position, it should be placed on a top element inside body. In the following example, its position
-    is absolutly relative to the gray area.<br>
+    is absolutely relative to the gray area.<br>
     <button class="btn" onclick="
       document.querySelector('.notification .notification-content').classList.add('notification-open');
       document.querySelector('.notification .notification-content').classList.remove('notification-close');
