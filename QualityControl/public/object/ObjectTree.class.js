@@ -7,7 +7,7 @@ import {Observable} from '/js/src/index.js';
  */
 export default class ObjectTree extends Observable {
   /**
-   * Instanciate tree with a root node called `name`, empty by default
+   * Instantiate tree with a root node called `name`, empty by default
    * @param {string} name - root name
    * @param {ObjectTree} parent - optional parent node
    */
@@ -25,7 +25,7 @@ export default class ObjectTree extends Observable {
     this.name = name || ''; // like 'B'
     this.object = null;
     this.open = false;
-    this.childrens = []; // <Array<ObjectTree>>
+    this.children = []; // <Array<ObjectTree>>
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
@@ -51,7 +51,7 @@ export default class ObjectTree extends Observable {
    */
   openAll() {
     this.open = true;
-    this.childrens.forEach((chidren) => chidren.openAll());
+    this.children.forEach((child) => child.openAll());
     this.notify();
   }
 
@@ -60,7 +60,7 @@ export default class ObjectTree extends Observable {
    */
   closeAll() {
     this.open = false;
-    this.childrens.forEach((chidren) => chidren.closeAll());
+    this.children.forEach((child) => child.closeAll());
     this.notify();
   }
 
@@ -103,7 +103,7 @@ export default class ObjectTree extends Observable {
     // Case we need to pass to subtree
     const name = path.shift();
     const fullPath = [...pathParent, name];
-    let subtree = this.childrens.find((children) => children.name === name);
+    let subtree = this.children.find((children) => children.name === name);
 
     // Subtree does not exist yet
     if (!subtree) {
@@ -112,7 +112,7 @@ export default class ObjectTree extends Observable {
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
-      this.childrens.push(subtree);
+      this.children.push(subtree);
       subtree.observe(() => this.notify());
     }
 

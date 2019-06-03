@@ -76,7 +76,7 @@ const tableShow = (model) => [
  */
 const treeRows = (model) => !model.object.tree
   ? null
-  : model.object.tree.childrens.map((children) => treeRow(model, children, 0));
+  : model.object.tree.children.map((children) => treeRow(model, children, 0));
 /**
  * Shows a line <tr> for search mode (no indentation)
  * @param {Object} model
@@ -121,7 +121,7 @@ function treeRow(model, tree, level) {
   const levelDeeper = level + 1;
   const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
   const iconWrapper = h('span', {style: {paddingLeft: padding}}, icon);
-  const childrens = tree.open ? tree.childrens.map((children) => treeRow(model, children, levelDeeper)) : [];
+  const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
   const path = tree.path.join('/');
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
@@ -135,6 +135,6 @@ function treeRow(model, tree, level) {
       ]),
       h('td.highlight', {class: color}, tree.quality),
     ]),
-    ...childrens
+    ...children
   ];
 }

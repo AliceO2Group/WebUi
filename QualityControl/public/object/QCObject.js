@@ -55,6 +55,7 @@ export default class QCObject extends Observable {
       clearTimeout(this.refreshTimer);
     }
     this.selected = null;
+    this.searchInput = '';
     this.notify();
   }
 
@@ -63,11 +64,12 @@ export default class QCObject extends Observable {
    * @param {boolean} isOnlineListRequested
    */
   toggleSideTree(isOnlineListRequested) {
-    this.sideTree.emptyTree();
     this.sideTree.bubbleTo(this);
     if (isOnlineListRequested) {
+      this.sideTree.initTree('online');
       this.sideTree.addChildren(this.listOnline);
     } else {
+      this.sideTree.initTree('database');
       this.sideTree.addChildren(this.list);
     }
   }
@@ -82,12 +84,6 @@ export default class QCObject extends Observable {
   _computeFilters() {
     if (this.searchInput) {
       const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
-      console.log("Lista este");
-      console.log(listSource);
-      console.log("Online");
-      console.log(this.listOnline);
-      console.log("listSource");
-      console.log(this.list);
       const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
       this.searchResult = listSource.filter((item) => {
         return item.name.match(fuzzyRegex);

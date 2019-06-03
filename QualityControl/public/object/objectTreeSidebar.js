@@ -84,7 +84,7 @@ function treeTable(model) {
  */
 const treeRows = (model) => !model.object.sideTree
   ? null
-  : model.object.sideTree.childrens.map((children) => treeRow(model, children, 0));
+  : model.object.sideTree.children.map((children) => treeRow(model, children, 0));
 
 /**
  * Shows a line <tr> for search mode (no indentation)
@@ -139,7 +139,7 @@ function searchRows(model) {
 function treeRow(model, sideTree, level) {
   // sideTree construction
   const levelDeeper = level + 1;
-  const subtree = sideTree.open ? sideTree.childrens.map((children) => treeRow(model, children, levelDeeper)) : [];
+  const subtree = sideTree.open ? sideTree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
 
   // UI construction
   const icon = sideTree.object ? iconBarChart() : (sideTree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
