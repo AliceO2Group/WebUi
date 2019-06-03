@@ -35,8 +35,8 @@ function listObjects(req, res) {
 
 /**
  * List all Online objects' name
- * @param {*} req
- * @param {*} res
+ * @param {Request} req
+ * @param {Response} res
  */
 function listOnlineObjects(req, res) {
   model.listOnlineObjects()

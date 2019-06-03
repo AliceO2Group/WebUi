@@ -107,7 +107,7 @@ export default class QCObject extends Observable {
     this.tree.initTree('database');
     this.tree.addChildren(offlineObjects);
 
-    this.sideTree.initTree('online');
+    this.sideTree.initTree('database');
     this.sideTree.addChildren(offlineObjects);
 
     this.currentList = offlineObjects;
@@ -128,7 +128,7 @@ export default class QCObject extends Observable {
       this.model.notification.show(failureMessage, 'danger', Infinity);
     }
 
-    this.tree.initTree('database');
+    this.tree.initTree('online');
     this.tree.addChildren(onlineObjects);
 
     this.listOnline = onlineObjects;

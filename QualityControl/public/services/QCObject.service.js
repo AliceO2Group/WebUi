@@ -2,7 +2,6 @@ import {RemoteData} from '/js/src/index.js';
 
 /**
  * Quality Control Object service to get/send data
- * TODO Use remoteData
  */
 export default class QCObjectService {
   /**
@@ -33,8 +32,7 @@ export default class QCObjectService {
   async getOnlineObjects() {
     const {result, ok} = await this.model.loader.get('/api/listOnlineObjects');
     if (ok) {
-      const t= [{"name":"QcTask/example"}, {"name":"ITSRAWDS/example"}, {"name":"ITSRAWDS/HIGMAP0Lay0"}, {"name":"QCClusterTask/ClusNumEtaPhiLay2"}];
-      return RemoteData.success(t);
+      return RemoteData.success(result);
     } else {
       return RemoteData.failure(result);
     }

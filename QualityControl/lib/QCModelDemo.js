@@ -107,16 +107,12 @@ function updateLayout(layoutId, data) {
  * @return {Object} Empty details
  */
 function deleteLayout(layoutId) {
-  console.log("Mammaie")
-  console.log(layoutId)
   const layout = layouts.find((layout) => layout.id === layoutId);
-  console.log(layout);
   if (!layout) {
     throw new Error(`layout ${layoutId} not found`);
   }
   const index = layouts.indexOf(layout);
   layouts.splice(index, 1);
-  console.log(layouts);
   return promiseResolveWithLatency({});
 }
 

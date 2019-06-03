@@ -1,5 +1,5 @@
-const ConsulConnector = require('./../../lib/ConsulConnector.js');
-const config = require('./../test-config.js');
+const ConsulConnector = require('../lib/ConsulConnector.js');
+const config = require('./test-config.js');
 const assert = require('assert');
 
 describe('Consul Connector test suite', function() {
