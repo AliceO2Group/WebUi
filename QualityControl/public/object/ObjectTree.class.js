@@ -13,6 +13,15 @@ export default class ObjectTree extends Observable {
    */
   constructor(name, parent) {
     super();
+    this.initTree(name, parent);
+  }
+
+  /**
+   * fdsa
+   * @param {string} name
+   * @param {string} parent
+   */
+  initTree(name, parent) {
     this.name = name || ''; // like 'B'
     this.object = null;
     this.open = false;
@@ -22,7 +31,6 @@ export default class ObjectTree extends Observable {
     this.pathString = ''; // 'A/B'
     this.quality = null; // most negative quality from this subtree
   }
-
   /**
    * Toggle this node (open/close)
    */
@@ -63,19 +71,19 @@ export default class ObjectTree extends Observable {
    * @param {Array.<string>} pathParent - Path of the current tree node, if null object.name is used
    *
    * Example of recurvive call:
-   *  addChildren(o) // begin insert 'A/B'
-   *  addChildren(o, ['A', 'B'], [])
-   *  addChildren(o, ['B'], ['A'])
-   *  addChildren(o, [], ['A', 'B']) // end inserting, affecting B
+   *  addChild(o) // begin insert 'A/B'
+   *  addChild(o, ['A', 'B'], [])
+   *  addChild(o, ['B'], ['A'])
+   *  addChild(o, [], ['A', 'B']) // end inserting, affecting B
    */
-  addChildren(object, path, pathParent) {
+  addChild(object, path, pathParent) {
     // Fill the path argument through recursive call
     if (!path) {
       if (!object.name) {
         throw new Error('Object name must exist');
       }
       path = object.name.split('/');
-      this.addChildren(object, path, []);
+      this.addChild(object, path, []);
       this.notify();
       return;
     }
@@ -99,7 +107,7 @@ export default class ObjectTree extends Observable {
 
     // Subtree does not exist yet
     if (!subtree) {
-      // Create it and push as children
+      // Create it and push as child
       // Listen also for changes to bubble it until root
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
@@ -108,19 +116,15 @@ export default class ObjectTree extends Observable {
       subtree.observe(() => this.notify());
     }
 
-    // Pass to children
-    subtree.addChildren(object, path, fullPath);
+    // Pass to child
+    subtree.addChild(object, path, fullPath);
   }
 
   /**
-   * Add a list of objects by calling `addChildren`
+   * Add a list of objects by calling `addChild`
    * @param {Array} objects
    */
-  addChildrens(objects) {
-    objects.forEach((object) => this.addChildren(object));
-  }
-
-  emptyTree() {
-    this.childrens = [];
+  addChildren(objects) {
+    objects.forEach((object) => this.addChild(object));
   }
 }

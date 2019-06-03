@@ -33,7 +33,8 @@ export default class QCObjectService {
   async getOnlineObjects() {
     const {result, ok} = await this.model.loader.get('/api/listOnlineObjects');
     if (ok) {
-      return RemoteData.success(result);
+      const t= [{"name":"QcTask/example"}, {"name":"ITSRAWDS/example"}, {"name":"ITSRAWDS/HIGMAP0Lay0"}, {"name":"QCClusterTask/ClusNumEtaPhiLay2"}];
+      return RemoteData.success(t);
     } else {
       return RemoteData.failure(result);
     }

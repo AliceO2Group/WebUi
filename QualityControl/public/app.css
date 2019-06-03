@@ -10,7 +10,7 @@
 }
 
 .object-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
-.object-online { border: 0.15em solid var(--color-danger); transition: border 0s; }
+.object-online { border: 0.15em solid var(--color-success); transition: border 0s; }
 .object-selected { border: 0.3em solid var(--color-primary); }
 .object-edit-layer { cursor: move; opacity: 0; }
 

@@ -127,7 +127,6 @@ export default class Layout extends Observable {
    * Delete current layout inside `item` from the server
    */
   async deleteItem() {
-    console.log("Mamaie");
     if (!this.item) {
       throw new Error('no layout to delete');
     }
@@ -418,7 +417,7 @@ export default class Layout extends Observable {
     // Create tabs for new layout
     const tabs = [];
 
-    itemToDuplicate.tabs.forEach(function (tab) {
+    itemToDuplicate.tabs.forEach(function(tab) {
       const duplicatedTab = {
         id: objectId(),
         name: tab.name,

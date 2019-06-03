@@ -50,7 +50,7 @@ function rows(model) {
         h('td.w-33',
           [
             h('', {
-              class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'danger' : ''
+              class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''
             }, [
               iconBarChart(),
               ' ',

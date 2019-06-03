@@ -19,8 +19,6 @@ export default class QCObject extends Observable {
 
     this.currentList = [];
     this.list = null;
-    this.tree = null; // ObjectTree for ObjectView
-    this.sideTree = null; // ObjectTree for EditLayoutView
 
     this.selected = null; // object - id of object
     this.objects = {}; // objectName -> RemoteData
@@ -36,7 +34,12 @@ export default class QCObject extends Observable {
 
     this.refreshTimer = 0;
     this.refreshInterval = 0; // seconds
-    this.setRefreshInterval(60);
+
+    this.tree = new ObjectTree('database');
+    this.tree.bubbleTo(this);
+
+    this.sideTree = new ObjectTree('online');
+    this.sideTree.bubbleTo(this);
   }
 
   /**
@@ -46,8 +49,10 @@ export default class QCObject extends Observable {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
     if (this.isOnlineModeEnabled) {
       this.loadOnlineList();
+      this.setRefreshInterval(60);
     } else {
       this.loadList();
+      clearTimeout(this.refreshTimer);
     }
     this.selected = null;
     this.notify();
@@ -58,12 +63,12 @@ export default class QCObject extends Observable {
    * @param {boolean} isOnlineListRequested
    */
   toggleSideTree(isOnlineListRequested) {
-    this.sideTree = new ObjectTree('database');
+    this.sideTree.emptyTree();
     this.sideTree.bubbleTo(this);
     if (isOnlineListRequested) {
-      this.sideTree.addChildrens(this.listOnline);
+      this.sideTree.addChildren(this.listOnline);
     } else {
-      this.sideTree.addChildrens(this.list);
+      this.sideTree.addChildren(this.list);
     }
   }
 
@@ -77,6 +82,12 @@ export default class QCObject extends Observable {
   _computeFilters() {
     if (this.searchInput) {
       const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
+      console.log("Lista este");
+      console.log(listSource);
+      console.log("Online");
+      console.log(this.listOnline);
+      console.log("listSource");
+      console.log(this.list);
       const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
       this.searchResult = listSource.filter((item) => {
         return item.name.match(fuzzyRegex);
@@ -97,13 +108,11 @@ export default class QCObject extends Observable {
     }
     this.list = offlineObjects;
 
-    this.tree = new ObjectTree('database');
-    this.tree.bubbleTo(this);
-    this.tree.addChildrens(offlineObjects);
+    this.tree.initTree('database');
+    this.tree.addChildren(offlineObjects);
 
-    this.sideTree = new ObjectTree('online');
-    this.sideTree.bubbleTo(this);
-    this.sideTree.addChildrens(offlineObjects);
+    this.sideTree.initTree('online');
+    this.sideTree.addChildren(offlineObjects);
 
     this.currentList = offlineObjects;
     this._computeFilters();
@@ -122,9 +131,9 @@ export default class QCObject extends Observable {
       const failureMessage = `Failed to retrieve list of online objects due to ${result.message}`;
       this.model.notification.show(failureMessage, 'danger', Infinity);
     }
-    this.tree = new ObjectTree('database');
-    this.tree.bubbleTo(this);
-    this.tree.addChildrens(onlineObjects);
+
+    this.tree.initTree('database');
+    this.tree.addChildren(onlineObjects);
 
     this.listOnline = onlineObjects;
     this.currentList = onlineObjects;
@@ -232,11 +241,9 @@ export default class QCObject extends Observable {
     }, this.refreshInterval * 1000);
     this.notify();
 
-    if (this.isOnlineModeEnabled) {
-      // Refreshed currently seen objects
-      this.loadObjects(Object.keys(this.objects));
-      this.loadList();
-    }
+    // Refreshed currently seen objects
+    this.loadObjects(Object.keys(this.objects));
+    this.loadOnlineList();
 
     // refreshTimer is a timer id (number) and is also used in the view to
     // interpret new cycle when this number changes

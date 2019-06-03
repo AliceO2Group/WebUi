@@ -3,7 +3,7 @@ import {draw} from './objectDraw.js';
 import {iconCaretBottom, iconCaretRight, iconBarChart} from '/js/src/icons.js';
 
 /**
- * Tree of object, searcheable, inside the sidebar.
+ * Tree of object, searchable, inside the sidebar.
  * Used to find objects and add them inside a layout
  * with page=layoutShow in edit mode.
  * It also contains a preview of selected object.
