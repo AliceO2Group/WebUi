@@ -18,7 +18,7 @@ module.exports.attachTo = (http, ws) => {
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
       if (!octl.connectionReady) {
-        errorHandler(`GRPC module is not connected`, res, 503);
+        errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
         return;
       }
       // disallow 'not-Get' methods if not owning the lock
