@@ -6,13 +6,17 @@ import lockButton from '../lock/lockButton.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('.flex-grow text-left', [
-  loginButton(model),
-  ' ',
-  lockButton(model),
-  ' ',
-  h('span.f4 gray', 'Control')
-]);
+export default (model) => h('.flex-grow text-left',
+  {
+    style: 'width: 15em'
+  },
+  [
+    loginButton(model),
+    ' ',
+    lockButton(model),
+    ' ',
+    h('span.f4 gray', 'Control')
+  ]);
 
 /**
  * Login button on top left

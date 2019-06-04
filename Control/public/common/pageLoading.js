@@ -1,8 +1,19 @@
 import {h} from '/js/src/index.js';
-import {iconExcerpt} from '/js/src/icons.js';
 
 /**
  * Generic page loading placeholder
  * @return {vnode}
  */
-export default () => h('span.pageLoading', iconExcerpt());
+export default () => h('span.pageLoading',
+  h('.atom-spinner',
+    h('.spinner-inner',
+      [
+        h('.spinner-line'),
+        h('.spinner-line'),
+        h('.spinner-line'),
+        h('.spinner-circle',
+          h('div', '●')
+        )
+      ]
+    )
+  ));

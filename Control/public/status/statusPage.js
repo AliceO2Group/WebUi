@@ -14,12 +14,8 @@ import showTableItem from '../common/showTableItem.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', [
-    h('h4', 'Status')
-  ]),
-  h('.flex-grow text-right', [
-
-  ])
+  h('.w-50 text-center', h('h4', 'Status')),
+  h('.flex-grow text-right', [])
 ];
 
 /**
@@ -28,7 +24,7 @@ export const header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill', [
+export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
   model.status.item.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
