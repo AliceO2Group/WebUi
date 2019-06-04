@@ -14,7 +14,7 @@
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/web-ui": "1.8.4",
+    "@aliceo2/web-ui": "1.8.5",
     "jsroot": "^5.6.3",
     "node-addon-api": "^1.6.2"
   },

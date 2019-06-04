@@ -17,7 +17,7 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * fdsa
+   * Method to instantiate/reset the tree
    * @param {string} name
    * @param {string} parent
    */
