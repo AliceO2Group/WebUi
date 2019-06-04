@@ -21,7 +21,7 @@ export default (model) => [
     buttonFilterLevel(model, 'Shift', 1),
     buttonFilterLevel(model, 'Oncall', 6),
     buttonFilterLevel(model, 'Devel', 11),
-    buttonFilterLevel(model, 'Debug', 21),
+    buttonFilterLevel(model, 'Debug', null),
   ]),
   h('span.mh3'),
   h('.btn-group', [
