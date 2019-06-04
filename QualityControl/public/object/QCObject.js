@@ -95,24 +95,28 @@ export default class QCObject extends Observable {
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
-    let offlineObjects = [];
-    const result = await this.qcObjectService.getObjects();
-    if (result.isSuccess()) {
-      offlineObjects = result.payload;
+    if (!this.isOnlineModeEnabled) {
+      let offlineObjects = [];
+      const result = await this.qcObjectService.getObjects();
+      if (result.isSuccess()) {
+        offlineObjects = result.payload;
+      } else {
+        this.model.notification.show(`Failed to retrieve list of objects due to ${result.message}`, 'danger', Infinity);
+      }
+      this.list = offlineObjects;
+
+      this.tree.initTree('database');
+      this.tree.addChildren(offlineObjects);
+
+      this.sideTree.initTree('database');
+      this.sideTree.addChildren(offlineObjects);
+
+      this.currentList = offlineObjects;
+      this._computeFilters();
+      this.notify();
     } else {
-      this.model.notification.show(`Failed to retrieve list of objects due to ${result.message}`, 'danger', Infinity);
+      this.loadOnlineList();
     }
-    this.list = offlineObjects;
-
-    this.tree.initTree('database');
-    this.tree.addChildren(offlineObjects);
-
-    this.sideTree.initTree('database');
-    this.sideTree.addChildren(offlineObjects);
-
-    this.currentList = offlineObjects;
-    this._computeFilters();
-    this.notify();
   }
 
   /**
