@@ -1,4 +1,4 @@
-import {h} from '/js/src/index.js';
+import {h, iconTrash} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableItem from '../common/showTableItem.js';
@@ -58,53 +58,58 @@ const showContent = (model, item) => [
  */
 const showControl = (model, item) => h('.m2 .p2', [
   h('h4', 'Control'),
-  h('', [
-    h('button.btn',
-      {
-        class: model.environment.itemControl.isLoading() ? 'loading' : '',
-        disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'START_ACTIVITY'})
-      },
-      'START'
+  h('div.flex-row',
+    h('div.flex-grow',
+      [
+        h('button.btn',
+          {
+            class: model.environment.itemControl.isLoading() ? 'loading' : '',
+            disabled: model.environment.itemControl.isLoading(),
+            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'START_ACTIVITY'})
+          },
+          'START'
+        ),
+        ' ',
+        h('button.btn',
+          {
+            class: model.environment.itemControl.isLoading() ? 'loading' : '',
+            disabled: model.environment.itemControl.isLoading(),
+            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'STOP_ACTIVITY'})
+          },
+          'STOP'
+        ),
+        ' ',
+        h('button.btn',
+          {
+            class: model.environment.itemControl.isLoading() ? 'loading' : '',
+            disabled: model.environment.itemControl.isLoading(),
+            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'CONFIGURE'})
+          },
+          'CONFIGURE'
+        ),
+        ' ',
+        h('button.btn',
+          {
+            class: model.environment.itemControl.isLoading() ? 'loading' : '',
+            disabled: model.environment.itemControl.isLoading(),
+            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'RESET'})
+          },
+          'RESET'
+        )
+      ]
     ),
-    ' ',
-    h('button.btn',
-      {
-        class: model.environment.itemControl.isLoading() ? 'loading' : '',
-        disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'STOP_ACTIVITY'})
-      },
-      'STOP'
-    ),
-    ' ',
-    h('button.btn',
-      {
-        class: model.environment.itemControl.isLoading() ? 'loading' : '',
-        disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'CONFIGURE'})
-      },
-      'CONFIGURE'
-    ),
-    ' ',
-    h('button.btn',
-      {
-        class: model.environment.itemControl.isLoading() ? 'loading' : '',
-        disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.controlEnvironment({id: item.id, type: 'RESET'})
-      },
-      'RESET'
-    ),
-    ' ',
-    h('button.btn.btn-danger',
-      {
-        class: model.environment.itemControl.isLoading() ? 'loading' : '',
-        disabled: model.environment.itemControl.isLoading(),
-        onclick: () => model.environment.destroyEnvironment({id: item.id})
-      },
-      'DELETE'
-    ),
-    ' ',
-  ]),
+    h('div.flex-grow.text-right',
+      h('button.btn.btn-danger',
+        {
+          class: model.environment.itemControl.isLoading() ? 'loading' : '',
+          disabled: model.environment.itemControl.isLoading(),
+          onclick: () => confirm('Are you sure to delete this environment?')
+            && model.environment.destroyEnvironment({id: item.id})
+        },
+        iconTrash()
+      ),
+    )
+  ),
   model.environment.itemControl.match({
     NotAsked: () => null,
     Loading: () => null,
