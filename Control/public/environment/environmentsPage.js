@@ -27,7 +27,7 @@ export const header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill', [
+export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
   model.environment.list.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),

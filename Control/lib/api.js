@@ -16,6 +16,10 @@ module.exports.attachTo = (http, ws) => {
   // Map Control gRPC methods
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
+      if (!octl.connectionReady) {
+        errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
+        return;
+      }
       // disallow 'not-Get' methods if not owning the lock
       if (!method.startsWith('Get')) {
         if (pad.lockedBy == null) {
