@@ -109,9 +109,9 @@ describe('Control', function () {
     }
   });
 
-  it('should have redirected to default page "/?page=status"', async () => {
+  it('should have redirected to default page "/?page=environments"', async () => {
     const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=status');
+    assert(location.search === '?page=environments');
   });
 
   describe('page status', () => {

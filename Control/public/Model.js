@@ -119,7 +119,7 @@ export default class Model extends Observable {
         this.status.getFrameworkInfo();
         break;
       default:
-        this.router.go('?page=status');
+        this.router.go('?page=environments');
         break;
     }
   }
