@@ -16,20 +16,21 @@
     "doc-frontend": "jsdoc2md --files \"./Frontend/**/*.js\" -p list -r list --member-index-format list --name-format --no-gfm -l js > ./docs/reference/frontend-api.md"
   },
   "dependencies": {
-    "body-parser": "^1.18.3",
-    "express": "^4.16.4",
-    "helmet": "^3.15.1",
-    "jsonwebtoken": "^8.5.0",
-    "mysql": "^2.16.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "helmet": "^3.18.0",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.17.1",
+    "npm-check-updates": "^3.1.10",
     "simple-oauth2": "^2.2.1",
     "winston": "^3.2.1",
-    "ws": "^6.1.4"
+    "ws": "^7.0.0"
   },
   "devDependencies": {
-    "eslint": "^5.14.1",
-    "eslint-config-google": "^0.12.0",
+    "eslint": "^5.16.0",
+    "eslint-config-google": "^0.13.0",
     "mocha": "^6.1.4",
-    "puppeteer": "^1.12.2"
+    "puppeteer": "^1.17.0"
   },
   "main": "Backend/index.js"
 }
