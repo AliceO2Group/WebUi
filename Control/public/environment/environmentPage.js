@@ -61,7 +61,7 @@ const showControl = (model, item) => h('.m2 .p2', [
   h('div.flex-row',
     h('div.flex-grow',
       [
-        h('button.btn',
+        h('button.btn.btn-success',
           {
             class: model.environment.itemControl.isLoading() ? 'loading' : '',
             disabled: model.environment.itemControl.isLoading(),
@@ -70,7 +70,7 @@ const showControl = (model, item) => h('.m2 .p2', [
           'START'
         ),
         ' ',
-        h('button.btn',
+        h('button.btn.btn-danger',
           {
             class: model.environment.itemControl.isLoading() ? 'loading' : '',
             disabled: model.environment.itemControl.isLoading(),
@@ -79,7 +79,7 @@ const showControl = (model, item) => h('.m2 .p2', [
           'STOP'
         ),
         ' ',
-        h('button.btn',
+        h('button.btn.btn-warning',
           {
             class: model.environment.itemControl.isLoading() ? 'loading' : '',
             disabled: model.environment.itemControl.isLoading(),
