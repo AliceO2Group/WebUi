@@ -22,7 +22,7 @@ export default (model) => h('.absolute-fill scroll-y', [
   h('a.menu-item', {
     href: '?page=workflows',
     onclick: (e) => model.router.handleLinkEvent(e),
-    class: model.router.params.page === 'workdlows' ? 'selected' : ''
+    class: model.router.params.page === 'workflows' ? 'selected' : ''
   }, [
     iconListRich(),
     ' ',
