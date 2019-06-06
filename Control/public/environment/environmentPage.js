@@ -91,25 +91,26 @@ const showEnvDetailsTable = (item) => h('table.table', [
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showControl = (environment, item) => h('.mv2.p2.flex-row', [
-  h('div.flex-grow',
-    [
-      h('h4', 'Control'),
-      controlButton('.btn-success', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
-      controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
-      controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'STANDBY'), ' ',
-      controlButton('', environment, item, 'RESET', 'RESET', 'CONFIGURED'), ' '
-    ]
-  ),
-  h('div.flex-grow.text-right',
-    h('button.btn.btn-danger',
-      {
-        class: environment.itemControl.isLoading() ? 'loading' : '',
-        disabled: environment.itemControl.isLoading(),
-        onclick: () => confirm('Are you sure to delete this environment?')
-          && environment.destroyEnvironment({id: item.id})
-      },
-      iconTrash()
+const showControl = (environment, item) => h('.mv2.p2', [
+  h('div.flex-row',
+    h('div.flex-grow',
+      [
+        controlButton('.btn-success', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
+        controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
+        controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'STANDBY'), ' ',
+        controlButton('', environment, item, 'RESET', 'RESET', 'CONFIGURED'), ' '
+      ]
+    ),
+    h('div.flex-grow.text-right',
+      h('button.btn.btn-danger',
+        {
+          class: environment.itemControl.isLoading() ? 'loading' : '',
+          disabled: environment.itemControl.isLoading(),
+          onclick: () => confirm('Are you sure to delete this environment?')
+            && environment.destroyEnvironment({id: item.id})
+        },
+        iconTrash()
+      )
     )
   ),
   environment.itemControl.match({
