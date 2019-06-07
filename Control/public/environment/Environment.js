@@ -66,7 +66,6 @@ export default class Environment extends Observable {
     if (!ok) {
       this.itemControl = RemoteData.failure(result.message);
       this.notify();
-
       return;
     }
     this.itemControl = RemoteData.success(result);
