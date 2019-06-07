@@ -71,7 +71,7 @@ module.exports.attachTo = (http, ws) => {
   });
 
   http.get('/PlotsList', (req, res) => {
-    if (config.grafana || !config.grafana.hostname || !config.grafana.port) {
+    if (!config.grafana || !config.grafana.hostname || !config.grafana.port) {
       log.error('Grafana configuration missing');
       res.status(403).json({message: 'Grafana configuration missing'});
     } else {
