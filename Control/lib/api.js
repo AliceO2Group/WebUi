@@ -8,6 +8,9 @@ const config = require('./configProvider.js');
 if (!config.grpc) {
   throw new Error('grpc field in config file is needed');
 }
+if (!config.grafana) {
+  log.error('Grafana configuration missing');
+}
 
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
@@ -65,6 +68,27 @@ module.exports.attachTo = (http, ws) => {
       return;
     }
     broadcastPadState();
+  });
+
+  http.get('/PlotsList', (req, res) => {
+    if (!config.grafana || !config.http.hostname || !config.grafana.port) {
+      log.error('Grafana configuration missing');
+      res.status(403).json({message: 'Grafana configuration missing'});
+    } else {
+      const hostPort = `http://${config.http.hostname}:${config.grafana.port}/`;
+      const valueOne = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=6 ';
+      const valueTwo = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=4';
+      const plot = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=5';
+      const theme = '&refresh=30s&theme=light';
+      const response =
+        [
+          hostPort + valueOne + theme,
+          hostPort + valueTwo + theme,
+          hostPort + plot + theme
+        ];
+      res.status(200).json(response);
+    }
+    return;
   });
 
   /**
