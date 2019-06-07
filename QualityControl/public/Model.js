@@ -52,6 +52,7 @@ export default class Model extends Observable {
 
     // Init data
     this.object.loadList();
+    this.object.checkOnlineStatus();
     this.layout.loadMyList();
   }
 

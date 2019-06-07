@@ -17,6 +17,7 @@ if (config.consul) {
   const consulService = new ConsulConnector(config.consul);
   consulService.isConsulUpAndRunning();
   module.exports.listOnlineObjects = consulService.listOnlineObjects.bind(consulService);
+  module.exports.isOnlineModeConnectionAlive = consulService.isConsulUpAndRunning.bind(consulService);
 } else {
   log.error('Consul Service: No Configuration Found');
 }

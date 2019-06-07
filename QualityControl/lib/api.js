@@ -14,6 +14,7 @@ module.exports.setup = (http) => {
   http.post('/readObjectsData', readObjectsData);
   http.get('/listObjects', listObjects, {public: true});
   http.get('/listOnlineObjects', listOnlineObjects);
+  http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
   http.post('/readLayout', readLayout);
   http.post('/writeLayout', updateLayout);
   http.post('/listLayouts', listLayouts);
@@ -41,6 +42,17 @@ function listObjects(req, res) {
 function listOnlineObjects(req, res) {
   model.listOnlineObjects()
     .then((data) => res.status(200).json(data))
+    .catch((err) => errorHandler(err, res));
+}
+
+/**
+ * Check the state of OnlineMode
+ * @param {Request} req
+ * @param {Response} res
+ */
+function isOnlineModeConnectionAlive(req, res) {
+  model.isOnlineModeConnectionAlive()
+    .then(() => res.status(200).json({running: true}))
     .catch((err) => errorHandler(err, res));
 }
 

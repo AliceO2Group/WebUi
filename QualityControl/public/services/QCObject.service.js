@@ -39,6 +39,18 @@ export default class QCObjectService {
   }
 
   /**
+   * Ask server for online mode service status
+   */
+  async isOnlineModeConnectionAlive() {
+    const {ok} = await this.model.loader.get('/api/isOnlineModeConnectionAlive');
+    if (ok) {
+      return RemoteData.success(ok);
+    } else {
+      return RemoteData.failure(ok);
+    }
+  }
+
+  /**
   * Ask server for an object by name
   * @param {string} objectName
   * @return {JSON} {result, ok, status}

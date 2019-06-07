@@ -27,7 +27,7 @@ class ConsulConnector {
    */
   async isConsulUpAndRunning() {
     const connection = this.httpGetJson('/v1/status/leader');
-    connection.catch((err) => {
+    return connection.catch((err) => {
       throw new Error('Unable to connect to Consul: ' + err);
     });
   }

@@ -79,7 +79,8 @@ const onlineButton = (model) => h('button.btn',
   {
     className: onlineButtonStyle,
     onclick: () => toggleOnlineButton(model),
-    title: 'Online'
+    title: 'Online',
+    style: model.object.isOnlineModeConnectionAlive ? '' : 'display: none'
   },
   'Online',
   ' ',

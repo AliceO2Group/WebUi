@@ -26,6 +26,7 @@ export default class QCObject extends Observable {
     this.qcObjectService = new QCObjectService(this.model);
 
     this.listOnline = []; // list of online objects name
+    this.isOnlineModeConnectionAlive = false;
     this.isOnlineModeEnabled = false; // show only online objects or all (offline)
     this.onlineModeAvailable = false; // true if data are coming from server
 
@@ -116,6 +117,18 @@ export default class QCObject extends Observable {
       this.notify();
     } else {
       this.loadOnlineList();
+    }
+  }
+
+  /**
+   * Method to check if OnlineService Connection is alive
+   */
+  async checkOnlineStatus() {
+    const result = await this.qcObjectService.isOnlineModeConnectionAlive();
+    if (result.isSuccess()) {
+      this.isOnlineModeConnectionAlive = true;
+    } else {
+      this.isOnlineModeConnectionAlive = false;
     }
   }
 
