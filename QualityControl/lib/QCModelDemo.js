@@ -46,6 +46,13 @@ function listObjects() {
 }
 
 /**
+ * WC
+ * @return {Array<Layout>}
+ */
+function isOnlineModeConnectionAlive() {
+  return promiseResolveWithLatency({running: true});
+}
+/**
  * Create a layout
  * @param {Layout} layout
  * @return {Object} Empty details
@@ -252,6 +259,7 @@ const layouts = [
 module.exports.readObjectData = readObjectData;
 module.exports.listObjects = listObjects;
 module.exports.listOnlineObjects = listObjects;
+module.exports.isOnlineModeConnectionAlive = isOnlineModeConnectionAlive;
 
 module.exports.readLayout = readLayout;
 module.exports.updateLayout = updateLayout;
