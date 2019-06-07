@@ -71,8 +71,6 @@ export default class Environment extends Observable {
     }
     this.itemControl = RemoteData.success(result);
     this.itemNew = RemoteData.notAsked();
-    console.log("result.id");
-    console.log(result.id);
     this.model.router.go(`?page=environment&id=${result.id}`);
     this.notify();
   }

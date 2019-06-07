@@ -29,7 +29,7 @@ describe('Control', function() {
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
   const calls = {}; // Object.<string:method, bool:flag> memorize that gRPC methods have been called indeed
-  let envTest = {
+  const envTest = {
     environment: {
       id: '6f6d6387-6577-11e8-993a-f07959157220',
       createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
@@ -68,12 +68,6 @@ describe('Control', function() {
         callback(null, {id: envTest.environment.id});
       },
       getEnvironment(call, callback) {
-        console.log("Am revenit de unde am plecat dar in TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST");
-      /**
-      O lua oare din lista? Sau de unde ia environment cand load pagina?
-
-      */
-        console.log(envTest);
         calls['getEnvironment'] = true;
         callback(null, envTest);
       }
@@ -215,7 +209,7 @@ describe('Control', function() {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
-      await page.waitFor(1000);
+      // await page.waitFor(1000);
       const state = await page.evaluate(() => {
         return window.model.environment.item.payload.environment.state;
       });
@@ -223,11 +217,7 @@ describe('Control', function() {
     });
 
     it('should have gotten data from controlEnvironment', async () => {
-      await page.waitFor(9000);
-
-     
       assert(calls['controlEnvironment'] === true);
-
     });
 
     // it('should have one button hidden for START in state RUNNING', async () => {

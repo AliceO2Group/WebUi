@@ -31,8 +31,6 @@ module.exports.attachTo = (http, ws) => {
           return;
         }
       }
-      console.log("MTHOD IS")
-      console.log(req.body);
       octl[method](req.body)
         .then((response) => res.json(response))
         .catch((error) => errorHandler(error, res, 504));
