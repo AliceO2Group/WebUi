@@ -42,7 +42,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode}
  */
 const showContent = (model, item) => [
-  showControl(model, item),
+  showControl(model.environment, item),
   h('.m2', h('h4', 'Details')),
   showEnvDetailsTable(item),
   h('.m2', h('h4', 'Tasks')),
@@ -87,68 +87,60 @@ const showEnvDetailsTable = (item) => h('table.table', [
 
 /**
  * List of buttons, each one is an action to do on the current environment `item`
- * @param {Object} model
+ * @param {Object} environment
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showControl = (model, item) => h('.m2 .p2', [
-  h('h4', 'Control'),
+const showControl = (environment, item) => h('.mv2.p2', [
   h('div.flex-row',
     h('div.flex-grow',
       [
-        h('button.btn.btn-success',
-          {
-            class: model.environment.itemControl.isLoading() ? 'loading' : '',
-            disabled: model.environment.itemControl.isLoading(),
-            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'START_ACTIVITY'})
-          },
-          'START'
-        ),
-        ' ',
-        h('button.btn.btn-danger',
-          {
-            class: model.environment.itemControl.isLoading() ? 'loading' : '',
-            disabled: model.environment.itemControl.isLoading(),
-            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'STOP_ACTIVITY'})
-          },
-          'STOP'
-        ),
-        ' ',
-        h('button.btn.btn-warning',
-          {
-            class: model.environment.itemControl.isLoading() ? 'loading' : '',
-            disabled: model.environment.itemControl.isLoading(),
-            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'CONFIGURE'})
-          },
-          'CONFIGURE'
-        ),
-        ' ',
-        h('button.btn',
-          {
-            class: model.environment.itemControl.isLoading() ? 'loading' : '',
-            disabled: model.environment.itemControl.isLoading(),
-            onclick: () => model.environment.controlEnvironment({id: item.id, type: 'RESET'})
-          },
-          'RESET'
-        )
+        controlButton('.btn-success', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
+        controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
+        controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'STANDBY'), ' ',
+        controlButton('', environment, item, 'RESET', 'RESET', 'CONFIGURED'), ' '
       ]
     ),
     h('div.flex-grow.text-right',
       h('button.btn.btn-danger',
         {
-          class: model.environment.itemControl.isLoading() ? 'loading' : '',
-          disabled: model.environment.itemControl.isLoading(),
+          class: environment.itemControl.isLoading() ? 'loading' : '',
+          disabled: environment.itemControl.isLoading(),
           onclick: () => confirm('Are you sure to delete this environment?')
-            && model.environment.destroyEnvironment({id: item.id})
+            && environment.destroyEnvironment({id: item.id})
         },
         iconTrash()
-      ),
+      )
     )
   ),
-  model.environment.itemControl.match({
+  environment.itemControl.match({
     NotAsked: () => null,
     Loading: () => null,
     Success: (_data) => null,
     Failure: (error) => h('p.danger', error),
   })
 ]);
+
+/**
+ * Makes a button to toggle severity
+ * @param {string} buttonType
+ * @param {Object} environment
+ * @param {Object} item
+ * @param {string} label - button's label
+ * @param {string} type - action
+ * @param {string} stateToHide - state in which button should not be displayed
+ * @return {vnode}
+ */
+const controlButton = (buttonType, environment, item, label, type, stateToHide) =>
+  h(`button.btn${buttonType}`,
+    {
+      class: environment.itemControl.isLoading() ? 'loading' : '',
+      disabled: environment.itemControl.isLoading(),
+      style: item.state !== stateToHide ? 'display: none;' : '',
+      onclick: () => {
+        environment.controlEnvironment({id: item.id, type: type});
+      },
+      title: item.state !== stateToHide ? `'${label}' cannot be used in state '${item.state}'` : label
+    },
+    label
+  );

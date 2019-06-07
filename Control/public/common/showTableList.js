@@ -11,7 +11,7 @@ import parseObject from './utils.js';
 export default (list, onclick) => h('table.table', [
   h('thead', [
     h('tr', [
-      Object.keys(list[0]).map((columnName) => h('th', columnName)),
+      list.length > 0 && Object.keys(list[0]).map((columnName) => h('th', columnName)),
       onclick && h('th', '')
     ])
   ]),
