@@ -43,7 +43,12 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  */
 const showContent = (model, item) => [
   showControl(model.environment, item),
-  showEmbeddedGraphs(model),
+  model.environment.plots.match({
+    NotAsked: () => null,
+    Loading: () => null,
+    Success: (data) => showEmbeddedGraphs(data),
+    Failure: () => null,
+  }),
   showEnvDetailsTable(item),
   h('.m2', h('h4', 'Tasks')),
   showTableList(item.tasks),
@@ -51,10 +56,10 @@ const showContent = (model, item) => [
 
 /**
  * Method to display pltos from Graphana
- * @param {Object} model
+ * @param {Array<String>} data
  * @return {vnode}
  */
-const showEmbeddedGraphs = (model) =>
+const showEmbeddedGraphs = (data) =>
   h('.m2',
     h('h4', 'Details'),
     h('.flex-row',
@@ -66,14 +71,14 @@ const showEmbeddedGraphs = (model) =>
           h('.w-50',
             h('iframe',
               {
-                src: 'http://adam-test.cern.ch:3000/d-solo/uHUjCFiWk/readout?orgId=1&panelId=6&refresh=30s&theme=light',
+                src: data[0],
                 style: 'width: 100%; height: 100%; border: 0'
               }
             )),
           h('.w-50',
             h('iframe',
               {
-                src: 'http://adam-test.cern.ch:3000/d-solo/uHUjCFiWk/readout?orgId=1&panelId=4&refresh=30s&theme=light',
+                src: data[1],
                 style: 'width: 100%; height: 100%; border: 0'
               }
             ))
@@ -82,7 +87,7 @@ const showEmbeddedGraphs = (model) =>
         h('.flex-grow',
           h('iframe',
             {
-              src: 'http://adam-test.cern.ch:3000/d-solo/uHUjCFiWk/readout?orgId=1&panelId=5&refresh=30s&theme=light',
+              src: data[2],
               style: 'width: 100%; height: 100%; border: 0'
             }
           )
@@ -103,7 +108,7 @@ const showEnvDetailsTable = (item) =>
           h('td', item.tasks.length)
         ]),
         h('tr', [
-          h('th', 'id'),
+          h('th', 'ID'),
           h('td', item.id)
         ]),
         h('tr', [
