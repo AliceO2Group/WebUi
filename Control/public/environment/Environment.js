@@ -43,7 +43,6 @@ export default class Environment extends Observable {
   async getEnvironment(body) {
     this.item = RemoteData.loading();
     this.notify();
-
     const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
     if (!ok) {
       this.item = RemoteData.failure(result.message);
