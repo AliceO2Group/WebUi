@@ -43,7 +43,6 @@ export default class Environment extends Observable {
   async getEnvironment(body) {
     this.item = RemoteData.loading();
     this.notify();
-
     const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
     if (!ok) {
       this.item = RemoteData.failure(result.message);
@@ -67,10 +66,13 @@ export default class Environment extends Observable {
     if (!ok) {
       this.itemControl = RemoteData.failure(result.message);
       this.notify();
+
       return;
     }
     this.itemControl = RemoteData.success(result);
     this.itemNew = RemoteData.notAsked();
+    console.log("result.id");
+    console.log(result.id);
     this.model.router.go(`?page=environment&id=${result.id}`);
     this.notify();
   }

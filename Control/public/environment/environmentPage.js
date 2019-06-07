@@ -137,8 +137,10 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
       class: environment.itemControl.isLoading() ? 'loading' : '',
       disabled: environment.itemControl.isLoading(),
       style: item.state !== stateToHide ? 'display: none;' : '',
-      onclick: () => environment.controlEnvironment({id: item.id, type: type}),
-      title: `'${label}' cannot be used in state '${item.state}'`
+      onclick: () => {
+        environment.controlEnvironment({id: item.id, type: type});
+      },
+      title: item.state !== stateToHide ? `'${label}' cannot be used in state '${item.state}'` : label
     },
     label
   );

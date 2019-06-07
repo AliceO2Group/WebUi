@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
@@ -18,17 +19,25 @@ const PROTO_PATH = path.join(__dirname, '../protobuf/o2control.proto');
 // Network and rendering can have delays this can leads to random failures
 // if they are tested just after their initialization.
 
-describe('Control', function () {
+describe('Control', function() {
   let browser;
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(5000);
+  this.timeout(25000);
   this.slow(1000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
   const calls = {}; // Object.<string:method, bool:flag> memorize that gRPC methods have been called indeed
-
+  let envTest = {
+    environment: {
+      id: '6f6d6387-6577-11e8-993a-f07959157220',
+      createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
+      state: 'CONFIGURED',
+      tasks: []
+    },
+    workflow: {}
+  };
   before(async () => {
     // Start gRPC server, this replaces the real Control server written in Go.
     const server = new grpcLibrary.Server();
@@ -40,7 +49,6 @@ describe('Control', function () {
     const address = `${config.grpc.hostname}:${config.grpc.port}`;
     server.addService(octlProto.o2control.Control.service, {
       getFrameworkInfo(call, callback) {
-        console.log('call to getFrameworkInfo done');
         calls['getFrameworkInfo'] = true;
         callback(null, {fakeData: 1});
       },
@@ -48,16 +56,27 @@ describe('Control', function () {
         calls['getEnvironments'] = true;
         const responseData = {
           frameworkId: '74917838-27cb-414d-bfcd-7e74f85d4926-0000',
-          environments:[
-            {
-              id: '6f6d6387-6577-11e8-993a-f07959157220',
-              createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
-              state: 'CONFIGURED',
-            }
-          ]
+          environments: [envTest]
         };
         callback(null, responseData);
       },
+      controlEnvironment(call, callback) {
+        calls['controlEnvironment'] = true;
+        if (call.request.type === 1) {
+          envTest.environment.state = 'RUNNING';
+        }
+        callback(null, {id: envTest.environment.id});
+      },
+      getEnvironment(call, callback) {
+        console.log("Am revenit de unde am plecat dar in TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST");
+      /**
+      O lua oare din lista? Sau de unde ia environment cand load pagina?
+
+      */
+        console.log(envTest);
+        calls['getEnvironment'] = true;
+        callback(null, envTest);
+      }
     });
     server.bind(address, credentials);
     server.start();
@@ -99,7 +118,7 @@ describe('Control', function () {
       try {
         await page.goto(url, {waitUntil: 'networkidle0'});
         break; // conneciton ok, this test passed
-      } catch(e) {
+      } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
           continue; // try again
@@ -109,33 +128,151 @@ describe('Control', function () {
     }
   });
 
-  it('should have redirected to default page "/?page=environments"', async () => {
-    const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=environments');
-  });
+  // it('should have redirected to default page "/?page=environments"', async () => {
+  //   const location = await page.evaluate(() => window.location);
+  //   assert(location.search === '?page=environments');
+  // });
 
-  describe('page status', () => {
+  // describe('page status', () => {
+  //   it('should load', async () => {
+  //     await page.goto(url + '?page=status', {waitUntil: 'networkidle0'});
+  //     const location = await page.evaluate(() => window.location);
+  //     assert(location.search === '?page=status');
+  //   });
+
+
+  //   it('should have gotten data from getEnvironments', async () => {
+  //     assert(calls['getFrameworkInfo'] === true);
+  //   });
+  // });
+
+  // describe('page environments', () => {
+  //   it('should load', async () => {
+  //     await page.goto(url + '?page=environments', {waitUntil: 'networkidle0'});
+  //     const location = await page.evaluate(() => window.location);
+  //     assert(location.search === '?page=environments');
+  //   });
+
+  //   it('should have gotten data from getEnvironments', async () => {
+  //     assert(calls['getEnvironments'] === true);
+  //   });
+  // });
+
+  describe('page environment', () => {
     it('should load', async () => {
-      await page.goto(url + '?page=status', {waitUntil: 'networkidle0'});
+      await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=status');
+      assert(location.search === '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
     });
 
     it('should have gotten data from getEnvironments', async () => {
-      assert(calls['getFrameworkInfo'] === true);
-    });
-  });
-
-  describe('page environments', () => {
-    it('should load', async () => {
-      await page.goto(url + '?page=environments', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=environments');
+      assert(calls['getEnvironment'] === true);
     });
 
-    it('should have gotten data from getEnvironments', async () => {
-      assert(calls['getEnvironments'] === true);
+    it('should have one button for locking', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
+      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
+      assert.deepStrictEqual(lockButton, 'Lock is free');
     });
+
+    it('should click LOCK button', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
+      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
+      assert.deepStrictEqual(lockButton, '');
+    });
+
+    // // CONFIGURED STATE
+    // it('should have one button for START in state CONFIGURED', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
+    //   const startButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(1)').title);
+    //   assert.deepStrictEqual(startButton, 'START');
+    // });
+
+    // it('should have one button hidden for STOP in state CONFIGURED', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
+    //   const stopButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(2)').title);
+    //   const stopButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(2)').style);
+    //   assert.deepStrictEqual(stopButtonTitle, `'STOP' cannot be used in state 'CONFIGURED'`);
+    //   assert.deepStrictEqual(stopButtonStyle, {0: 'display'});
+    // });
+
+    // it('should have one button hidden for CONFIGURE in state CONFIGURED', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
+    //   const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(3)').title);
+    //   const configureButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(3)').style);
+    //   assert.deepStrictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'CONFIGURED'`);
+    //   assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
+    // });
+
+    // it('should have one button for RESET in state CONFIGURED', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
+    //   const configuredStateButtons = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(4)').title);
+    //   assert.deepStrictEqual(configuredStateButtons, 'RESET');
+    // });
+
+    // RUNNING STATE
+    it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
+      await page.waitFor(1000);
+      const state = await page.evaluate(() => {
+        return window.model.environment.item.payload.environment.state;
+      });
+      assert.deepStrictEqual(state, 'RUNNING');
+    });
+
+    it('should have gotten data from controlEnvironment', async () => {
+      await page.waitFor(9000);
+
+     
+      assert(calls['controlEnvironment'] === true);
+
+    });
+
+    // it('should have one button hidden for START in state RUNNING', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
+    //   const startButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').title);
+    //   const startButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').style);
+    //   assert.deepStrictEqual(startButtonTitle, `'START' cannot be used in state 'RUNNING'`);
+    //   assert.deepStrictEqual(startButtonStyle, {0: 'display'});
+    // });
+
+    // it('should have one button for STOP in state RUNNING', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
+    //   const stopButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(2)').title);
+    //   assert.deepStrictEqual(stopButton, 'STOP');
+    // });
+
+    // it('should have one button hidden for CONFIGURE in state RUNNING', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
+    //   const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').title);
+    //   const configureButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').style);
+    //   assert.deepStrictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'RUNNING'`);
+    //   assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
+    // });
+
+    // it('should have one button hidden for RESET in state RUNNING', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
+    //   const resetButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
+    //   const resetButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').style);
+    //   assert.deepStrictEqual(resetButtonTitle, `'RESET' cannot be used in state 'RUNNING'`);
+    //   assert.deepStrictEqual(resetButtonStyle, {0: 'display'});
+    // });
+
+    // STANDBY STATE
+
+    // it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
+    //   // click STOP
+    //   await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)').click());
+    //   // click RESET
+    //   await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
+    //   const state = await page.evaluate(() => {
+    //     return window.model.environment.item.payload.environment.state;
+    //   });
+    //   assert.deepStrictEqual(state, 'STANDBY');
+    // });
   });
 
   beforeEach(() => {
