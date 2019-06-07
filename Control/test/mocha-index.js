@@ -321,6 +321,14 @@ describe('Control', function() {
       assert.deepStrictEqual(resetButtonTitle, `'RESET' cannot be used in state 'STANDBY'`);
       assert.deepStrictEqual(resetButtonStyle, {0: 'display'});
     });
+
+    it('should click LOCK button to remove control', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
+      await page.waitFor(200);
+      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
+      assert.deepStrictEqual(lockButton, 'Lock is free');
+    });
   });
 
   beforeEach(() => {
