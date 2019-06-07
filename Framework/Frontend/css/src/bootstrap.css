@@ -34,6 +34,7 @@
   --color-primary: var(--color-blue);
   --color-primary-dark: #2b84bf;
   --color-warning: var(--color-orange);
+  --color-warning-darker: #cb5b10;
   --color-danger: var(--color-red);
   --color-danger-dark: #b51822;
   --color-success: var(--color-green);
@@ -231,6 +232,12 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 .btn.btn-success:hover { background-color: var(--color-success); color: var(--color-white); }
 .btn.btn-success:active, .btn.btn-success.active { background-color: var(--color-success-dark); color: var(--color-white); }
 .btn.btn-success[disabled] { background-image: linear-gradient(var(--color-success), var(--color-success-dark)); color: var(--color-white); border: 1px solid var(--color-success-dark); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
+
+.btn.btn-warning { color: var(--color-warning); }
+.btn.btn-warning:hover { background-color: var(--color-warning); color: var(--color-white); }
+.btn.btn-warning:active,
+.btn.btn-warning.active { background-color: var(--color-warning-darker); color: var(--color-white); }
+.btn.btn-warning[disabled] { background-image: linear-gradient(var(--color-warning), var(--color-warning-darker)); color: var(--color-white); border: 1px solid var(--color-warning-dark); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
 
 .btn.loading, .btn.loading:focus, .btn.loading:hover { color: transparent !important; }
 .btn.loading::after { left: calc(50% - (1em / 2)); top: calc(50% - (1em / 2)); position: absolute!important; animation: spinAround .5s infinite linear; border: 2px solid #0000003d; border-radius: 100%; border-right-color: transparent; border-top-color: transparent; content: ""; display: block; height: 1em; width: 1em; }

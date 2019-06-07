@@ -1,7 +1,6 @@
 import {h, iconTrash} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import showTableItem from '../common/showTableItem.js';
 import showTableList from '../common/showTableList.js';
 /**
  * @file Page to show 1 environment (content and header)
@@ -45,10 +44,46 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 const showContent = (model, item) => [
   showControl(model, item),
   h('.m2', h('h4', 'Details')),
-  showTableItem(item),
+  showEnvDetailsTable(item),
   h('.m2', h('h4', 'Tasks')),
   showTableList(item.tasks),
 ];
+
+/**
+ * Table to display Environment details
+ * @param {Object} item - object to be shown
+ * @return {vnode} table view
+ */
+const showEnvDetailsTable = (item) => h('table.table', [
+  h('tbody', [
+    h('tr', [
+      h('th', 'Number of Tasks'),
+      h('td', item.tasks.length)
+    ]),
+    h('tr', [
+      h('th', 'id'),
+      h('td', item.id)
+    ]),
+    h('tr', [
+      h('th', 'Created'),
+      h('td', new Date(item.createdWhen).toLocaleString())
+    ]),
+    h('tr', [
+      h('th', 'State'),
+      h('td', {class: item.state === 'RUNNING' ? 'success' : (item.state === 'CONFIGURED' ? 'warning' : '')},
+        item.state)
+    ]),
+    h('tr', [
+      h('th', 'Root Role'),
+      h('td', item.rootRole)
+    ]),
+    item.currentRunNumber && h('tr', [
+      h('th', 'Current Run Number'),
+      h('td', item.currentRunNumber
+      )
+    ])
+  ])
+]);
 
 /**
  * List of buttons, each one is an action to do on the current environment `item`
@@ -61,7 +96,7 @@ const showControl = (model, item) => h('.m2 .p2', [
   h('div.flex-row',
     h('div.flex-grow',
       [
-        h('button.btn',
+        h('button.btn.btn-success',
           {
             class: model.environment.itemControl.isLoading() ? 'loading' : '',
             disabled: model.environment.itemControl.isLoading(),
@@ -70,7 +105,7 @@ const showControl = (model, item) => h('.m2 .p2', [
           'START'
         ),
         ' ',
-        h('button.btn',
+        h('button.btn.btn-danger',
           {
             class: model.environment.itemControl.isLoading() ? 'loading' : '',
             disabled: model.environment.itemControl.isLoading(),
@@ -79,7 +114,7 @@ const showControl = (model, item) => h('.m2 .p2', [
           'STOP'
         ),
         ' ',
-        h('button.btn',
+        h('button.btn.btn-warning',
           {
             class: model.environment.itemControl.isLoading() ? 'loading' : '',
             disabled: model.environment.itemControl.isLoading(),
