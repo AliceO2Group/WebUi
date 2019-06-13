@@ -69,10 +69,11 @@ export default class Log extends Observable {
    */
   resetStats() {
     this.stats = {
+      debug: 0,
       info: 0,
       warning: 0,
       error: 0,
-      fatal: 0,
+      fatal: 0
     };
   }
 
@@ -94,6 +95,8 @@ export default class Log extends Observable {
       case 'I':
         this.stats.info++;
         break;
+      case 'D':
+        this.stats.debug++;
     }
   }
 
