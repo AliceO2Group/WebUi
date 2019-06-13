@@ -19,7 +19,14 @@ export default (list, onclick) => h('table.table', [
     Object.keys(item).map(
       (columnName) => typeof item[columnName] === 'object'
         ? h('td', parseObject(item[columnName], columnName))
-        : h('td', item[columnName])
+        : h('td',
+          columnName === 'state' && {
+            class: (item[columnName] === 'RUNNING' ? 'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
+            style: 'font-weight: bold;'
+          },
+          item[columnName]
+
+        )
     ),
     onclick && h('td', h('button.btn', {onclick: (event) => onclick(event, item)}, 'Details'))
   ]))),
