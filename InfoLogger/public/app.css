@@ -44,7 +44,7 @@ td, th {max-width: 0; /* allow ellipsis on tables */vertical-align: top;}
 .cell-xs:last-child, .cell-s:last-child, .cell-m:last-child, .cell-l:last-child { width: initial; }
 
 .row-hover:hover { background-color: rgba(0,0,0,.075); }
-.row-selected, .row-selected:hover { background-color: #007bff; color: white; font-weight: bold; }
+.row-selected, .row-selected:hover { background-color: #007bff; color: white; }
 
 
 .table-max { width: 100%; }
