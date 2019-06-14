@@ -11,10 +11,11 @@ import {h} from '/js/src/index.js';
  */
 export default (model) => [
   h('.btn-group', [
+    buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
     buttonSeverity(model, 'Info', 'Match severity info', 'I'),
     buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
     buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
-    buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F'),
+    buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F')
   ]),
   h('span.mh3'),
   h('.btn-group', [
