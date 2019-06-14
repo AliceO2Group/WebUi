@@ -315,8 +315,8 @@ export default class LogFilter extends Observable {
         $in: ['D', 'W', 'I', 'E', 'F'],
       },
       level: {
-        max: 1, // 0, 1, 6, 11, 21
-        $max: 1, // 0, 1, 6, 11, 21
+        max: null, // 0, 1, 6, 11, 21
+        $max: null, // 0, 1, 6, 11, 21
       },
     };
     this.notify();
