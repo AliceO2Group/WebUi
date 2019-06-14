@@ -103,6 +103,15 @@ const showEnvDetailsTable = (item) =>
   h('.pv3',
     h('table.table', [
       h('tbody', [
+        item.currentRunNumber && h('tr', [
+          h('th', 'Current Run Number'),
+          h('td',
+            {
+              class: 'badge bg-success white'
+            },
+            item.currentRunNumber
+          )
+        ]),
         h('tr', [
           h('th', 'Number of Tasks'),
           h('td', item.tasks.length)
@@ -127,11 +136,6 @@ const showEnvDetailsTable = (item) =>
         h('tr', [
           h('th', 'Root Role'),
           h('td', item.rootRole)
-        ]),
-        item.currentRunNumber && h('tr', [
-          h('th', 'Current Run Number'),
-          h('td', item.currentRunNumber
-          )
         ])
       ])
     ]
