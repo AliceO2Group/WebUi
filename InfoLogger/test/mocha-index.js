@@ -66,7 +66,7 @@ describe('InfoLogger', function() {
   describe('LogFilter', async () => {
     it('should update URI with new encoded criteria', async () => {
       /* eslint-disable max-len */
-      const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
+      const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"D I W E F"}}';
       const expectedParams = '?q={%22hostname%22:{%22match%22:%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22D%20I%20W%20E%20F%22}}';
       /* eslint-enable max-len */
       const searchParams = await page.evaluate(() => {
