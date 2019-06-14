@@ -128,7 +128,7 @@ export default class Model extends Observable {
         break;
       default:
         // default route, replace the current one not handled
-        this.router.go('?page=layoutList', true);
+        this.router.go('?page=objectTree', true);
         break;
     }
   }

@@ -1,7 +1,7 @@
 {
   "name": "@aliceo2/control",
   "description": "ALICE O2 Control GUI",
-  "version": "1.0.3",
+  "version": "1.1.1",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -15,7 +15,7 @@
   "repository": "AliceO2Group/WebUi",
   "homepage": "https://alice-o2.web.cern.ch",
   "dependencies": {
-    "@aliceo2/web-ui": "1.8.6",
+    "@aliceo2/web-ui": "1.8.9",
     "@grpc/proto-loader": "^0.4.0",
     "grpc": "^1.18.0"
   },

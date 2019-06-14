@@ -17,10 +17,11 @@ export default class Environment extends Observable {
     this.itemControl = RemoteData.notAsked();
     this.itemNew = RemoteData.notAsked();
     this.itemForm = {};
+    this.plots = RemoteData.notAsked();
   }
 
   /**
-   * Load all environements into `list` as RemoteData
+   * Load all environments into `list` as RemoteData
    */
   async getEnvironments() {
     this.list = RemoteData.loading();
@@ -37,10 +38,11 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Load one environement into `item` as RemoteData
+   * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
   async getEnvironment(body) {
+    this.getPlotsList();
     this.item = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
@@ -55,7 +57,7 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Control a remote environement, store action result into `itemControl` as RemoteData
+   * Control a remote environment, store action result into `itemControl` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
   async controlEnvironment(body) {
@@ -75,7 +77,7 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Create a new remote environement, creation action result into `itemNew` as RemoteData
+   * Create a new remote environment, creation action result into `itemNew` as RemoteData
    * Form data must be stored inside `this.itemForm`
    * See protobuf definition for properties of `this.itemForm` as body
    */
@@ -94,7 +96,7 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Set property of environement form, used for creation or update
+   * Set property of environment form, used for creation or update
    * @param {string} property
    * @param {string} value
    */
@@ -104,7 +106,7 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Destroy a remote environement, store action result into `this.itemControl` as RemoteData
+   * Destroy a remote environment, store action result into `this.itemControl` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
   async destroyEnvironment(body) {
@@ -119,5 +121,19 @@ export default class Environment extends Observable {
     }
     this.itemControl = RemoteData.notAsked();
     this.model.router.go(`?page=environments`);
+  }
+
+  /**
+   * Method to retrieve plots source list
+   */
+  async getPlotsList() {
+    this.plots = RemoteData.loading();
+    const {result, ok} = await this.model.loader.get(`/api/PlotsList`);
+    if (!ok) {
+      this.plots = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.plots = RemoteData.success(result);
   }
 }

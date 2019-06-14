@@ -43,47 +43,104 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  */
 const showContent = (model, item) => [
   showControl(model.environment, item),
-  h('.m2', h('h4', 'Details')),
+  model.environment.plots.match({
+    NotAsked: () => null,
+    Loading: () => null,
+    Success: (data) => showEmbeddedGraphs(data),
+    Failure: () => null,
+  }),
   showEnvDetailsTable(item),
   h('.m2', h('h4', 'Tasks')),
   showTableList(item.tasks),
 ];
 
 /**
+ * Method to display pltos from Graphana
+ * @param {Array<String>} data
+ * @return {vnode}
+ */
+const showEmbeddedGraphs = (data) =>
+  h('.m2',
+    h('h4', 'Details'),
+    h('.flex-row',
+      {
+        style: 'height: 15em;'
+      },
+      [
+        h('.w-33.flex-row', [
+          h('.w-50',
+            h('iframe',
+              {
+                src: data[0],
+                style: 'width: 100%; height: 100%; border: 0'
+              }
+            )),
+          h('.w-50',
+            h('iframe',
+              {
+                src: data[1],
+                style: 'width: 100%; height: 100%; border: 0'
+              }
+            ))
+        ]),
+        // Large Plot
+        h('.flex-grow',
+          h('iframe',
+            {
+              src: data[2],
+              style: 'width: 100%; height: 100%; border: 0'
+            }
+          )
+        )])
+  );
+
+/**
  * Table to display Environment details
  * @param {Object} item - object to be shown
  * @return {vnode} table view
  */
-const showEnvDetailsTable = (item) => h('table.table', [
-  h('tbody', [
-    h('tr', [
-      h('th', 'Number of Tasks'),
-      h('td', item.tasks.length)
-    ]),
-    h('tr', [
-      h('th', 'id'),
-      h('td', item.id)
-    ]),
-    h('tr', [
-      h('th', 'Created'),
-      h('td', new Date(item.createdWhen).toLocaleString())
-    ]),
-    h('tr', [
-      h('th', 'State'),
-      h('td', {class: item.state === 'RUNNING' ? 'success' : (item.state === 'CONFIGURED' ? 'warning' : '')},
-        item.state)
-    ]),
-    h('tr', [
-      h('th', 'Root Role'),
-      h('td', item.rootRole)
-    ]),
-    item.currentRunNumber && h('tr', [
-      h('th', 'Current Run Number'),
-      h('td', item.currentRunNumber
-      )
-    ])
-  ])
-]);
+const showEnvDetailsTable = (item) =>
+  h('.pv3',
+    h('table.table', [
+      h('tbody', [
+        item.currentRunNumber && h('tr', [
+          h('th', 'Current Run Number'),
+          h('td',
+            {
+              class: 'badge bg-success white'
+            },
+            item.currentRunNumber
+          )
+        ]),
+        h('tr', [
+          h('th', 'Number of Tasks'),
+          h('td', item.tasks.length)
+        ]),
+        h('tr', [
+          h('th', 'ID'),
+          h('td', item.id)
+        ]),
+        h('tr', [
+          h('th', 'Created'),
+          h('td', new Date(item.createdWhen).toLocaleString())
+        ]),
+        h('tr', [
+          h('th', 'State'),
+          h('td',
+            {
+              class: item.state === 'RUNNING' ? 'success' : (item.state === 'CONFIGURED' ? 'warning' : ''),
+              style: 'font-weight: bold;'
+            },
+            item.state)
+        ]),
+        h('tr', [
+          h('th', 'Root Role'),
+          h('td', item.rootRole)
+        ])
+      ])
+    ]
+    )
+  );
 
 /**
  * List of buttons, each one is an action to do on the current environment `item`
@@ -91,7 +148,7 @@ const showEnvDetailsTable = (item) => h('table.table', [
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showControl = (environment, item) => h('.mv2.p2', [
+const showControl = (environment, item) => h('.mv2.pv3.ph2', [
   h('div.flex-row',
     h('div.flex-grow',
       [

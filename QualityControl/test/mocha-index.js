@@ -68,9 +68,9 @@ describe('QCG', function() {
     }
   });
 
-  it('should have redirected to default page "/?page=layoutList"', async () => {
+  it('should have redirected to default page "/?page=objectTree"', async () => {
     const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=layoutList');
+    assert(location.search === '?page=objectTree');
   });
 
   it('should have a layout with header, sidebar and section', async () => {
