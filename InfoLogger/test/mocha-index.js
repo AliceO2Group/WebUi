@@ -55,19 +55,19 @@ describe('InfoLogger', function() {
     }
   });
 
-  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"},"level":{"max":1}}"', async function() {
+  it('should have redirected to default page "/?q={"severity":{"in":"D I W E F"},"level":{"max":1}}"', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"},"level":{"max":1}}');
+    assert.strictEqual(search, '?q={"severity":{"in":"D I W E F"},"level":{"max":1}}');
   });
 
   describe('LogFilter', async () => {
     it('should update URI with new encoded criteria', async () => {
       /* eslint-disable max-len */
-      const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
-      const expectedParams = '?q={%22hostname%22:{%22match%22:%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+      const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"D I W E F"},"level":{"max":1}}';
+      const expectedParams = '?q={%22hostname%22:{%22match%22:%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22D%20I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
       /* eslint-enable max-len */
       const searchParams = await page.evaluate(() => {
         window.model.log.filter.setCriteria('hostname', 'match', '%ald_qdip01%');
@@ -159,8 +159,8 @@ describe('InfoLogger', function() {
       assert.strictEqual(criterias.level.$max, 21);
       assert.strictEqual(criterias.timestamp.since, '');
       assert.strictEqual(criterias.timestamp.$since, null);
-      assert.strictEqual(criterias.severity.in, 'I W E F');
-      assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
+      assert.strictEqual(criterias.severity.in, 'D I W E F');
+      assert.deepStrictEqual(criterias.severity.$in, ['D', 'W', 'I', 'E', 'F']);
     });
   });
 
