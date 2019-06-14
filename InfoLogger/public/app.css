@@ -62,11 +62,13 @@ footer { border-top: 1px solid var(--color-gray); }
 
 
 /* specific colors to InfoLogger */
-.severity-i { color: #17a2b8; }
-.severity-w { color: #ffc107; }
-.severity-e { color: #dc3545; }
-.severity-f { color: #9c27b0; }
-.severity-i-bg { background-color: #17a2b8; color: white; }
-.severity-w-bg { background-color: #ffc107; color: white; }
-.severity-e-bg { background-color: #dc3545; color: white; }
-.severity-f-bg { background-color: #9c27b0; color: white; }
+.severity-d { color: grey; font-weight: 600; }
+.severity-i { color: #17a2b8; font-weight: 600; }
+.severity-w { color: #ffc107; font-weight: 600; }
+.severity-e { color: #dc3545; font-weight: 600; }
+.severity-f { color: #9c27b0; font-weight: 600; }
+.severity-d-bg { background-color: grey; color: white; font-weight: 600; }
+.severity-i-bg { background-color: #17a2b8; color: white; font-weight: 600; }
+.severity-w-bg { background-color: #ffc107; color: white; font-weight: 600; }
+.severity-e-bg { background-color: #dc3545; color: white; font-weight: 600; }
+.severity-f-bg { background-color: #9c27b0; color: white; font-weight: 600; }

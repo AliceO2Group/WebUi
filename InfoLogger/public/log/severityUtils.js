@@ -22,4 +22,5 @@ export const severityLabel = (severity) => switchCase(severity, {
   W: 'warning',
   E: 'error',
   F: 'fatal',
+  D: 'debug'
 });

@@ -311,12 +311,12 @@ export default class LogFilter extends Observable {
         $exclude: null
       },
       severity: {
-        in: 'I W E F',
-        $in: ['W', 'I', 'E', 'F'],
+        in: 'D I W E F',
+        $in: ['D', 'W', 'I', 'E', 'F'],
       },
       level: {
-        max: 1, // 0, 1, 6, 11, 21
-        $max: 1, // 0, 1, 6, 11, 21
+        max: null, // 0, 1, 6, 11, 21
+        $max: null, // 0, 1, 6, 11, 21
       },
     };
     this.notify();
