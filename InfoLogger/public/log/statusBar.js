@@ -94,8 +94,9 @@ const statusLive = (model, services) => [
  */
 const statusStats = (model) => [
   h('span.ph2', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
+  h('span.ph2.severity-d', `${model.log.stats.debug} debug`),
   h('span.ph2.severity-i', `${model.log.stats.info} info`),
   h('span.ph2.severity-w', `${model.log.stats.warning} warn`),
   h('span.ph2.severity-e', `${model.log.stats.error} error`),
-  h('span.ph2.severity-f', `${model.log.stats.fatal} fatal`),
+  h('span.ph2.severity-f', `${model.log.stats.fatal} fatal`)
 ];

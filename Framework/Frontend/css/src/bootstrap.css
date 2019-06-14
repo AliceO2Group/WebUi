@@ -252,6 +252,10 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 .btn.btn-tab.selected { color: var(--color-primary); }
 .btn.btn-tab.selected::after { content: ""; display: block; border: 1px solid var(--color-blue); border-radius: 1em; position: absolute; left: 0; right: 0; bottom: -2px;}
 
+/* badge */
+
+.badge { display: inline-block; padding: .25em .4em; font-weight: 700; line-height: 1; text-align: center; white-space: nowrap; vertical-align: baseline; border-radius: .25rem; }
+
 /* menu */
 
 .menu-title { text-transform: uppercase; height: 2em; line-height: 2em; color: var(--color-gray-dark); padding-left: 1em; font-size: .75em; font-weight: 100; margin: 0.5em; user-select: none; }
