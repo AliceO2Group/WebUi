@@ -4,6 +4,7 @@ const log = new (require('@aliceo2/web-ui').Log)('Control');
 const Padlock = require('./Padlock.js');
 const ControlProxy = require('./ControlProxy.js');
 const config = require('./configProvider.js');
+const http = require('http');
 
 if (!config.grpc) {
   throw new Error('grpc field in config file is needed');
@@ -75,20 +76,26 @@ module.exports.attachTo = (http, ws) => {
       log.error('Grafana configuration missing');
       res.status(403).json({message: 'Grafana configuration missing'});
     } else {
-      const hostPort = `http://${config.http.hostname}:${config.grafana.port}/`;
-      const valueOne = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=6 ';
-      const valueTwo = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=4';
-      const plot = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=5';
-      const theme = '&refresh=30s&theme=light';
-      const response =
-        [
-          hostPort + valueOne + theme,
-          hostPort + valueTwo + theme,
-          hostPort + plot + theme
-        ];
-      res.status(200).json(response);
+      const host = config.http.hostname;
+      const port = config.grafana.port;
+      httpGetJson(host, port, '/api/health')
+        .then((result) => {
+          log.info(`Grafana is up and running: ${result}`);
+          const hostPort = `http://${host}:${port}/`;
+          const valueOne = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=6 ';
+          const valueTwo = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=4';
+          const plot = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=5';
+          const theme = '&refresh=30s&theme=light';
+          const response =
+            [
+              hostPort + valueOne + theme,
+              hostPort + valueTwo + theme,
+              hostPort + plot + theme
+            ];
+          res.status(200).json(response);
+        });
+      return;
     }
-    return;
   });
 
   /**
@@ -115,4 +122,51 @@ function errorHandler(err, res, status = 500) {
     log.error(err.message || err);
   }
   res.status(status).send({message: err.message || err});
+}
+
+/**
+  * Util to get JSON data (parsed) from server
+  * @param {string} host - hostname of the server
+  * @param {number} port - port of the server
+  * @param {string} path - path of the server request
+  * @return {Promise.<Object, Error>} JSON response
+  */
+function httpGetJson(host, port, path) {
+  return new Promise((resolve, reject) => {
+    const requestOptions = {
+      hostname: host,
+      port: port,
+      path: path,
+      method: 'GET',
+      headers: {
+        Accept: 'application/json'
+      }
+    };
+    /**
+     * Generic handler for client http requests,
+     * buffers response, checks status code and parses JSON
+     * @param {Response} response
+     */
+    const requestHandler = (response) => {
+      if (response.statusCode < 200 || response.statusCode > 299) {
+        reject(new Error('Non-2xx status code: ' + response.statusCode));
+        return;
+      }
+
+      const bodyChunks = [];
+      response.on('data', (chunk) => bodyChunks.push(chunk));
+      response.on('end', () => {
+        try {
+          const body = JSON.parse(bodyChunks.join(''));
+          resolve(body);
+        } catch (e) {
+          reject(new Error('Unable to parse JSON'));
+        }
+      });
+    };
+
+    const request = http.request(requestOptions, requestHandler);
+    request.on('error', (err) => reject(err));
+    request.end();
+  });
 }
