@@ -16,7 +16,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "1.8.9",
     "jsroot": "^5.7.0",
-    "node-addon-api": "^1.6.2"
+    "node-addon-api": "^1.6.3"
   },
   "devDependencies": {
     "concurrently": "^4.1.0",
