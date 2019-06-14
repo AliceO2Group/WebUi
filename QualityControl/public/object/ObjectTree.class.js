@@ -2,64 +2,35 @@ import {Observable} from '/js/src/index.js';
 
 /**
  * This class allows to transforms objects names (A/B/C) into a tree that can have
- * some behaviours like open/close nodes or add meta-data like information service
- * for online objects. It also allows to update all those objects without creating
+ * some behaviours like open/close nodes. It also allows to update all those objects without creating
  * a new tree.
  */
 export default class ObjectTree extends Observable {
   /**
-   * Instanciate tree with a root node called `name`, empty by default
+   * Instantiate tree with a root node called `name`, empty by default
    * @param {string} name - root name
    * @param {ObjectTree} parent - optional parent node
    */
   constructor(name, parent) {
     super();
+    this.initTree(name, parent);
+  }
+
+  /**
+   * Method to instantiate/reset the tree
+   * @param {string} name
+   * @param {string} parent
+   */
+  initTree(name, parent) {
     this.name = name || ''; // like 'B'
     this.object = null;
     this.open = false;
-    this.childrens = []; // <Array<ObjectTree>>
+    this.children = []; // <Array<ObjectTree>>
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
-
     this.quality = null; // most negative quality from this subtree
-
-    this.informationService = null;
   }
-
-  /**
-   * Erase all information service data of the tree
-   */
-  clearAllIS() {
-    this.informationService = null;
-    this.childrens.forEach((children) => children.clearAllIS());
-    this.notify();
-  }
-
-  /**
-   * Update the tree with data passed
-   * Example of data passed:
-   * {DAQ01/EquipmentSize/ACORDE/ACORDE: {}, DAQ01/EquipmentSize/ITSSDD/ITSSDD: {},…}
-   * @param {object} informationService - blabla
-   * @return {number} # of nodes associated to their IS data
-   */
-  updateAllIS(informationService) {
-    for (const [pathString, data] of Object.entries(informationService)) {
-      if (pathString === this.pathString) {
-        this.informationService = data; // exact match
-        return 1;
-      }
-
-      if (pathString.startsWith(this.pathString)) {
-        this.informationService = data; // one of children match
-        return this.childrens.reduce((total, children) => total + children.updateAllIS(informationService), 0);
-      }
-
-      // try next line
-    }
-    return 0;
-  }
-
   /**
    * Toggle this node (open/close)
    */
@@ -80,7 +51,7 @@ export default class ObjectTree extends Observable {
    */
   openAll() {
     this.open = true;
-    this.childrens.forEach((chidren) => chidren.openAll());
+    this.children.forEach((child) => child.openAll());
     this.notify();
   }
 
@@ -89,7 +60,7 @@ export default class ObjectTree extends Observable {
    */
   closeAll() {
     this.open = false;
-    this.childrens.forEach((chidren) => chidren.closeAll());
+    this.children.forEach((child) => child.closeAll());
     this.notify();
   }
 
@@ -100,19 +71,19 @@ export default class ObjectTree extends Observable {
    * @param {Array.<string>} pathParent - Path of the current tree node, if null object.name is used
    *
    * Example of recurvive call:
-   *  addChildren(o) // begin insert 'A/B'
-   *  addChildren(o, ['A', 'B'], [])
-   *  addChildren(o, ['B'], ['A'])
-   *  addChildren(o, [], ['A', 'B']) // end inserting, affecting B
+   *  addChild(o) // begin insert 'A/B'
+   *  addChild(o, ['A', 'B'], [])
+   *  addChild(o, ['B'], ['A'])
+   *  addChild(o, [], ['A', 'B']) // end inserting, affecting B
    */
-  addChildren(object, path, pathParent) {
+  addChild(object, path, pathParent) {
     // Fill the path argument through recursive call
     if (!path) {
       if (!object.name) {
         throw new Error('Object name must exist');
       }
       path = object.name.split('/');
-      this.addChildren(object, path, []);
+      this.addChild(object, path, []);
       this.notify();
       return;
     }
@@ -132,28 +103,28 @@ export default class ObjectTree extends Observable {
     // Case we need to pass to subtree
     const name = path.shift();
     const fullPath = [...pathParent, name];
-    let subtree = this.childrens.find((children) => children.name === name);
+    let subtree = this.children.find((children) => children.name === name);
 
     // Subtree does not exist yet
     if (!subtree) {
-      // Create it and push as children
+      // Create it and push as child
       // Listen also for changes to bubble it until root
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
-      this.childrens.push(subtree);
+      this.children.push(subtree);
       subtree.observe(() => this.notify());
     }
 
-    // Pass to children
-    subtree.addChildren(object, path, fullPath);
+    // Pass to child
+    subtree.addChild(object, path, fullPath);
   }
 
   /**
-   * Add a list of objects by calling `addChildren`
+   * Add a list of objects by calling `addChild`
    * @param {Array} objects
    */
-  addChildrens(objects) {
-    objects.forEach((object) => this.addChildren(object));
+  addChildren(objects) {
+    objects.forEach((object) => this.addChild(object));
   }
 }

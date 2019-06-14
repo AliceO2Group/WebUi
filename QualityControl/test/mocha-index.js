@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
@@ -11,7 +12,7 @@ const {spawn} = require('child_process');
 // Network and rendering can have delays this can leads to random failures
 // if they are tested just after their initialization.
 
-describe('QCG', function () {
+describe('QCG', function() {
   let browser;
   let page;
   let subprocess; // web-server runs into a subprocess
@@ -57,7 +58,7 @@ describe('QCG', function () {
       try {
         await page.goto(url, {waitUntil: 'networkidle0'});
         break; // conneciton ok, this test passed
-      } catch(e) {
+      } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
           continue; // try again
@@ -88,6 +89,13 @@ describe('QCG', function () {
       assert(location.search === '?page=layoutList');
     });
 
+    it('should have a button for the Online mode in the header', async () => {
+      await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)', {timeout: 5000});
+      const onlineButton = await page.evaluate(() =>
+        document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)').title);
+      assert.deepStrictEqual(onlineButton, 'Online');
+    });
+
     it('should have a table with rows', async () => {
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
       assert(rowsCount > 1);
@@ -115,9 +123,9 @@ describe('QCG', function () {
 
     it('should load', async () => {
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
-      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12', {waitUntil: 'networkidle0'});
+      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12&layoutName=AliRoot%20dashboard', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12');
+      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12&layoutName=AliRoot+dashboard');
     });
 
     it('should have tabs in the header', async () => {
@@ -128,6 +136,13 @@ describe('QCG', function () {
     it('should have jsroot svg plots in the section', async () => {
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
       assert(plotsCount > 1);
+    });
+
+    it('should have second tab to be empty (according to demo data)', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
+      await page.waitForSelector('section h1', {timeout: 5000});
+      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+      assert.deepStrictEqual(plotsCount, 0);
     });
 
     it('should have a button group containing three buttons in the header', async () => {
@@ -154,8 +169,8 @@ describe('QCG', function () {
       assert.deepStrictEqual(editButton, 'Edit layout');
     });
 
-    // Begin: Edit Mode; TODO Split in multiple cases
-    it('should have one edit button in the header to go in edit mode', async () => {
+    // Begin: Edit Mode;
+    it('should click the edit button in the header and enter edit mode', async () => {
       await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(1)', {timeout: 5000});
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
     });
@@ -181,13 +196,6 @@ describe('QCG', function () {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
       await page.waitForSelector('nav .menu-title', {timeout: 5000});
     });
-
-    it('should have second tab to be empty (according to demo data)', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
-      await page.waitForSelector('section h1', {timeout: 5000});
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert.deepStrictEqual(plotsCount, 0);
-    });
   });
 
   describe('page objectTree', () => {
@@ -212,21 +220,11 @@ describe('QCG', function () {
       await page.type('header input', 'HistoWithRandom');
       await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 1`, {timeout: 5000});
     });
-
-    it('should have a button to activate online mode', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > button:nth-child(1)').click());
-      await page.waitForSelector('header > div > div:nth-child(3) > button.active', {timeout: 5000});
-    });
-
-    it('should have nothing to show in online mode with the previous search', async () => {
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 0);
-    });
   });
 
   beforeEach(() => {
     this.ok = true;
-  }); 
+  });
 
   afterEach(() => {
     if (!this.ok) throw new Error('something went wrong');

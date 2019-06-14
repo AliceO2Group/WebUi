@@ -1,4 +1,4 @@
-import {h, iconMenu, iconPerson} from '/js/src/index.js';
+import {h, iconMenu, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 
 import spinner from '../loader/spinner.js';
 import layoutShowHeader from '../layout/layoutShowHeader.js';
@@ -18,6 +18,8 @@ export default (model) => h('.flex-row.p2', [
   headerSpecific(model)
 ]);
 
+let onlineButtonIcon = iconMediaPlay();
+let onlineButtonStyle = 'btn-default';
 /**
  * Shows the page specific header (center and right side)
  * @param {Object} model
@@ -33,7 +35,7 @@ const headerSpecific = (model) => {
 };
 
 /**
- * Shows app header, common to all pages (profil button + app title)
+ * Shows app header, common to all pages (profile button + app title)
  * @param {Object} model
  * @return {vnode}
  */
@@ -42,21 +44,62 @@ const commonHeader = (model) => h('.flex-grow', [
   ' ',
   h('button.btn.mh1', {onclick: () => model.toggleSidebar()}, iconMenu()),
   ' ',
+  onlineButton(model),
+  ' ',
   h('span.f4.gray', 'Quality Control'),
   model.loader.active && h('span.f4.mh1.gray', spinner())
+  // TODO To be redesigned. It is not visible in case of error and UI is hanging
 ]);
 
 /**
- * Shows profil button to logout or check who is the current owner of session
+ * Shows profile button to logout or check who is the current owner of session
  * @param {Object} model
  * @return {vnode}
  */
-const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
-  h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
-  h('.dropdown-menu', [
-    h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-    model.session.personid === 0 // anonymous user has id 0
-      ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-      : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
-  ]),
-]);
+const loginButton = (model) =>
+  h('.dropdown',
+    {
+      title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : ''
+    }, [
+      h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
+      h('.dropdown-menu', [
+        h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
+        model.session.personid === 0 // anonymous user has id 0
+          ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
+          : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+      ]),
+    ]);
+
+/**
+ * Create button which will allow user to enable/disable online mode
+ * @param {Object} model
+ * @return {vnode}
+ */
+const onlineButton = (model) => h('button.btn',
+  {
+    className: onlineButtonStyle,
+    onclick: () => toggleOnlineButton(model),
+    title: 'Online',
+    style: model.object.isOnlineModeConnectionAlive ? '' : 'display: none'
+  },
+  'Online',
+  ' ',
+  onlineButtonIcon
+);
+
+/**
+ * Action to disable/enable online mode
+ * @param {Object} model
+ */
+function toggleOnlineButton(model) {
+  model.object.toggleMode();
+  switch (model.object.isOnlineModeEnabled) {
+    case true:
+      onlineButtonStyle = 'btn-success';
+      onlineButtonIcon = iconMediaStop();
+      break;
+    default:
+      onlineButtonStyle = 'btn-default';
+      onlineButtonIcon = iconMediaPlay();
+  }
+}

@@ -1,4 +1,3 @@
-const InformationServiceState = require('./InformationServiceState.js');
 
 // force user accounts during demo
 const ownerIdUser1 = 0;
@@ -12,23 +11,6 @@ const ownerNameUser2 = 'Samantha Smith';
  */
 
 // --------------------------------------------------------
-
-const is = new InformationServiceState();
-
-// Change manually IS to simulate changing data
-setInterval(() => {
-  is.clear();
-
-  is.upsert('DAQ01/EquipmentSize/ACORDE/ACORDE', {});
-  is.upsert('DAQ01/EquipmentSize/ITSSDD/ITSSDD', {});
-  is.upsert('TOFQAshifter/Default/hTOFrefMap', {});
-
-  if (Math.random() > 0.5) {
-    is.upsert('TOFQAshifter/Default/hTOFRRawsTime', {});
-    is.upsert('DAQ01/EventSize/TPC/TPC', {});
-  }
-  is.emit('updated', is.getState());
-}, 1000);
 
 /**
  * Fake promise latency
@@ -63,6 +45,13 @@ function listObjects() {
   }));
 }
 
+/**
+ * WC
+ * @return {Array<Layout>}
+ */
+function isOnlineModeConnectionAlive() {
+  return promiseResolveWithLatency({running: true});
+}
 /**
  * Create a layout
  * @param {Layout} layout
@@ -269,11 +258,11 @@ const layouts = [
 
 module.exports.readObjectData = readObjectData;
 module.exports.listObjects = listObjects;
+module.exports.listOnlineObjects = listObjects;
+module.exports.isOnlineModeConnectionAlive = isOnlineModeConnectionAlive;
 
 module.exports.readLayout = readLayout;
 module.exports.updateLayout = updateLayout;
 module.exports.listLayouts = listLayouts;
 module.exports.createLayout = createLayout;
 module.exports.deleteLayout = deleteLayout;
-
-module.exports.informationService = is;

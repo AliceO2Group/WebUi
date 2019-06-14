@@ -3,7 +3,7 @@ import {draw} from './objectDraw.js';
 import {iconCaretBottom, iconCaretRight, iconBarChart} from '/js/src/icons.js';
 
 /**
- * Tree of object, searcheable, inside the sidebar.
+ * Tree of object, searchable, inside the sidebar.
  * Used to find objects and add them inside a layout
  * with page=layoutShow in edit mode.
  * It also contains a preview of selected object.
@@ -29,12 +29,11 @@ const searchForm = (model) => [
     value: model.object.searchInput,
     oninput: (e) => model.object.search(e.target.value)
   }),
-  model.object.onlineModeAvailable && h('.form-check.f6', [
+  model.object.isOnlineModeEnabled && h('.form-check.f6', [
     h('input.form-check-input', {
       type: 'checkbox',
       id: 'inputOnlineOnlyTreeSidebar',
-      onchange: () => model.object.toggleMode(),
-      checked: model.object.onlineMode
+      onchange: (e) => model.object.toggleSideTree(e.target.checked)
     }),
     h('label.form-check-label', {for: 'inputOnlineOnlyTreeSidebar'}, [
       'Online only'
@@ -83,9 +82,9 @@ function treeTable(model) {
  * @param {Object} model
  * @return {vnode}
  */
-const treeRows = (model) => !model.object.tree
+const treeRows = (model) => !model.object.sideTree
   ? null
-  : model.object.tree.childrens.map((children) => treeRow(model, children, 0));
+  : model.object.sideTree.children.map((children) => treeRow(model, children, 0));
 
 /**
  * Shows a line <tr> for search mode (no indentation)
@@ -133,32 +132,27 @@ function searchRows(model) {
  * Indentation is added according to tree level during recurcive call of treeRow
  * Tree is traversed in depth-first with pre-order (root then subtrees)
  * @param {Object} model
- * @param {ObjectTree} tree - data-structure containaing an object per node
+ * @param {ObjectTree} sideTree - data-structure containaing an object per node
  * @param {number} level - used for indentation within recurcive call of treeRow
  * @return {vnode}
  */
-function treeRow(model, tree, level) {
-  // Don't show nodes without IS in online mode
-  if (model.object.onlineMode && !tree.informationService) {
-    return null;
-  }
-
-  // Tree construction
+function treeRow(model, sideTree, level) {
+  // sideTree construction
   const levelDeeper = level + 1;
-  const subtree = tree.open ? tree.childrens.map((children) => treeRow(model, children, levelDeeper)) : [];
+  const subtree = sideTree.open ? sideTree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
 
   // UI construction
-  const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
+  const icon = sideTree.object ? iconBarChart() : (sideTree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
   const iconWrapper = h('span', {style: {paddingLeft: `${level}em`}}, icon);
-  const path = tree.path.join('/');
-  const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
-  const draggable = !!tree.object;
+  const path = sideTree.path.join('/');
+  const className = sideTree.object && sideTree.object === model.object.selected ? 'table-primary' : '';
+  const draggable = !!sideTree.object;
 
   // UI events
-  const onclick = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
-  const ondblclick = tree.object ? () => model.layout.addItem(tree.object.name) : null;
-  const ondragstart = tree.object ? () => {
-    const newItem = model.layout.addItem(tree.object.name);
+  const onclick = sideTree.object ? () => model.object.select(sideTree.object) : () => sideTree.toggle();
+  const ondblclick = sideTree.object ? () => model.layout.addItem(sideTree.object.name) : null;
+  const ondragstart = sideTree.object ? () => {
+    const newItem = model.layout.addItem(sideTree.object.name);
     model.layout.moveTabObjectStart(newItem);
   } : null;
 
@@ -174,7 +168,7 @@ function treeRow(model, tree, level) {
 
   return [
     h('tr', attr, [
-      h('td.text-ellipsis', [iconWrapper, ' ', tree.name])
+      h('td.text-ellipsis', [iconWrapper, ' ', sideTree.name])
     ]),
     ...subtree
   ];

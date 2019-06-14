@@ -29,21 +29,12 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
  */
 function statusBarLeft(model) {
   let itemsInfo;
-
-  if (!model.object.list) {
+  if (!model.object.currentList) {
     itemsInfo = 'Loading objects...';
-  } else if (model.object.onlineMode) {
-    if (!model.object.informationService) {
-      itemsInfo = 'Waiting information service state...';
-    } else if (model.object.searchInput) {
-      itemsInfo = `${model.object.searchResult.length} found of ${model.object.listOnline.length} items (online mode)`;
-    } else {
-      itemsInfo = `${model.object.listOnline.length} items (online mode)`;
-    }
   } else if (model.object.searchInput) {
-    itemsInfo = `${model.object.searchResult.length} found of ${model.object.list.length} items`;
+    itemsInfo = `${model.object.searchResult.length} found of ${model.object.currentList.length} items`;
   } else {
-    itemsInfo = `${model.object.list.length} items`;
+    itemsInfo = `${model.object.currentList.length} items`;
   }
 
   return h('span.flex-grow', itemsInfo);
@@ -85,7 +76,7 @@ const tableShow = (model) => [
  */
 const treeRows = (model) => !model.object.tree
   ? null
-  : model.object.tree.childrens.map((children) => treeRow(model, children, 0));
+  : model.object.tree.children.map((children) => treeRow(model, children, 0));
 /**
  * Shows a line <tr> for search mode (no indentation)
  * @param {Object} model
@@ -125,17 +116,12 @@ function searchRows(model) {
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
-  // Don't show nodes without IS in online mode
-  if (model.object.onlineMode && !tree.informationService) {
-    return null;
-  }
-
   const color = tree.quality === 'good' ? 'success' : 'danger';
   const padding = `${level}em`;
   const levelDeeper = level + 1;
   const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
   const iconWrapper = h('span', {style: {paddingLeft: padding}}, icon);
-  const childrens = tree.open ? tree.childrens.map((children) => treeRow(model, children, levelDeeper)) : [];
+  const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
   const path = tree.path.join('/');
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
@@ -149,6 +135,6 @@ function treeRow(model, tree, level) {
       ]),
       h('td.highlight', {class: color}, tree.quality),
     ]),
-    ...childrens
+    ...children
   ];
 }

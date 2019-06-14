@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 addons:
   - chrome: stable
   - mariadb: '10.0'
@@ -7,24 +7,10 @@ os:
   - osx
 language: node_js
 node_js: '10.15.3'
-env:
-  matrix:
-  - ZMQ="4.1.6" ZMQ_REPO="zeromq4-1"
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install mariadb; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir /usr/local/etc/my.cnf.d; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mysql.server start; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install zeromq; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CC=/usr/bin/clang; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CXX=/usr/bin/clang++; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir ldlocal; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LDHACK=`pwd`/ldlocal; export LD_RUN_PATH=$LDHACK/lib; export LD_LIBRARY_PATH=$LDHACK/lib; export PKG_CONFIG_PATH=$LDHACK/lib/pkgconfig; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/zeromq/$ZMQ_REPO/releases/download/v$ZMQ/zeromq-$ZMQ.tar.gz; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar xzvf zeromq-$ZMQ.tar.gz; cd zeromq-$ZMQ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./autogen.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure --prefix=$LDHACK --without-libsodium; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
   - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
   - chmod +x .travis.bash; ./.travis.bash;
 install:
@@ -43,8 +29,8 @@ script:
   - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; fi
 after_success:
   - cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js websocket/*.js test/*.js db/*.js log/*.js > ../docs/reference/backend.md
-  - cd $TRAVIS_BUILD_DIR/Framework; npm run coverage
-  - cd $TRAVIS_BUILD_DIR/Framework; nyc report --reporter=text-lcov > coverage.lcov && codecov
+  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm run coverage; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then nyc report --reporter=text-lcov > coverage.lcov && codecov; fi
 notifications:
   email: false
   slack:

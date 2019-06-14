@@ -9,13 +9,13 @@ import {iconProject} from '/js/src/icons.js';
  * @return {vnode}
  */
 export default function objectTreeHeader(model) {
-  if (!model.object.list) {
+  if (!model.object.currentList) {
     return null;
   }
 
   const howMany = model.object.searchInput
-    ? `${model.object.searchResult.length} found of ${model.object.list.length}`
-    : `${model.object.list.length} items`;
+    ? `${model.object.searchResult.length} found of ${model.object.currentList.length}`
+    : `${model.object.currentList.length} items`;
 
   return [
     h('.w-50.text-center', [
@@ -24,12 +24,6 @@ export default function objectTreeHeader(model) {
       h('span', `(${howMany})`),
     ]),
     h('.flex-grow.text-right', [
-      model.object.onlineModeAvailable && h('button.btn', {
-        title: 'Toggle online / offline mode',
-        onclick: () => model.object.toggleMode(),
-        class: (model.object.onlineMode ? 'active' : '')
-      }, 'Online'),
-      ' ',
       h('button.btn', {
         title: 'Open or close whole tree',
         onclick: () => model.object.tree.toggleAll(),

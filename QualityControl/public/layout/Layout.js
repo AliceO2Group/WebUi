@@ -439,12 +439,28 @@ export default class Layout extends Observable {
     // TODO Newly created item should be sent back by the API. This will prevent having to reload the item again below
     if (result.isSuccess()) {
       await this.loadItem(layout.id);
-      this.model.notification.show(`Layout "${itemToDuplicate.name}" `+
+      this.model.notification.show(`Layout "${itemToDuplicate.name}" ` +
         `has been successfully duplicated into "${this.item.name}".`, 'success');
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, false);
       this.loadMyList();
     } else {
       this.model.notification.show(`Layout "${itemToDuplicate.name}" has not been duplicated.`, 'danger');
     }
+  }
+
+  /**
+   * Method to check if passed layout contains any objects in online mode
+   * @param {Layout} layout
+   * @return {boolean}
+   */
+  doesLayoutContainOnlineObjects(layout) {
+    if (layout && layout.tabs && layout.tabs.length > 0) {
+      return layout.tabs
+        .map((tab) => tab.objects)
+        .some((objects) =>
+          objects.map((object) => object.name)
+            .some((name) => this.model.object.isObjectInOnlineList(name)));
+    }
+    return false;
   }
 }
