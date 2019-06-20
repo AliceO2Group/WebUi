@@ -43,7 +43,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  */
 const showContent = (model, item) => [
   showControl(model.environment, item),
-  model.environment.plots.match({
+  item.state === 'RUNNING' && model.environment.plots.match({
     NotAsked: () => null,
     Loading: () => null,
     Success: (data) => showEmbeddedGraphs(data),
