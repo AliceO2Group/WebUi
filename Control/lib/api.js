@@ -85,7 +85,7 @@ module.exports.attachTo = (http, ws) => {
           const valueOne = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=6 ';
           const valueTwo = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=4';
           const plot = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=5';
-          const theme = '&refresh=30s&theme=light';
+          const theme = '&refresh=5s&theme=light';
           const response =
             [
               hostPort + valueOne + theme,
