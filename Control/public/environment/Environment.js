@@ -115,6 +115,7 @@ export default class Environment extends Observable {
 
     const {result, ok} = await this.model.loader.post(`/api/DestroyEnvironment`, body);
     if (!ok) {
+      this.model.notification.show(result.message, 'danger', 5000);
       this.itemControl = RemoteData.failure(result.message);
       this.notify();
       return;

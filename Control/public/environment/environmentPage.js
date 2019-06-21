@@ -1,4 +1,4 @@
-import {h, iconTrash} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 import showTableList from '../common/showTableList.js';
@@ -157,17 +157,6 @@ const showControl = (environment, item) => h('.mv2.pv3.ph2', [
         controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'STANDBY'), ' ',
         controlButton('', environment, item, 'RESET', 'RESET', 'CONFIGURED'), ' '
       ]
-    ),
-    h('div.flex-grow.text-right',
-      h('button.btn.btn-danger',
-        {
-          class: environment.itemControl.isLoading() ? 'loading' : '',
-          disabled: environment.itemControl.isLoading(),
-          onclick: () => confirm('Are you sure to delete this environment?')
-            && environment.destroyEnvironment({id: item.id})
-        },
-        iconTrash()
-      )
     )
   ),
   environment.itemControl.match({
