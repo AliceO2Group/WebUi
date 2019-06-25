@@ -99,39 +99,24 @@ class JsonFileConnector {
 
   /**
    * Create a layout
-   * @param {Layout} layout
+   * @param {Layout} newLayout
    * @return {Object} Empty details
    */
-  async createLayout(layout) {
-    if (!layout.id) {
-      throw new Error(`layout id is mondatory`);
+  async createLayout(newLayout) {
+    if (!newLayout.id) {
+      throw new Error(`layout id is mandatory`);
     }
-    if (!layout.name) {
-      throw new Error(`layout name is mondatory`);
+    if (!newLayout.name) {
+      throw new Error(`layout name is mandatory`);
     }
 
-    if (await this.readLayout(layout.id)) {
+    const layout = this.data.layouts.find((layout) => layout.id === newLayout.id);
+    if (layout) {
       throw new Error(`layout with this id (${layout.id}) already exists`);
     }
-
-    this.data.layouts.push(layout);
+    this.data.layouts.push(newLayout);
     await this._writeToFile();
-    return {};
-  }
-
-  /**
-   * List layouts, can be filtered
-   * @param {Object} filter - undefined or {owner_id: XXX}
-   * @return {Array<Layout>}
-   */
-  async listLayouts(filter = {}) {
-    return this.data.layouts.filter((layout) => {
-      if (filter.owner_id !== undefined && layout.owner_id !== filter.owner_id) {
-        return false;
-      }
-
-      return true;
-    });
+    return newLayout;
   }
 
   /**
@@ -140,7 +125,11 @@ class JsonFileConnector {
    * @return {Layout|undefined}
    */
   async readLayout(layoutId) {
-    return this.data.layouts.find((layout) => layout.id === layoutId);
+    const layout = this.data.layouts.find((layout) => layout.id === layoutId);
+    if (!layout) {
+      throw new Error(`layout (${layoutId}) not found`);
+    }
+    return layout;
   }
 
   /**
@@ -150,13 +139,10 @@ class JsonFileConnector {
    * @return {Object} Empty details
    */
   async updateLayout(layoutId, data) {
-    const layout = this.data.layouts.find((layout) => layout.id === layoutId);
-    if (!layout) {
-      throw new Error('layout not found');
-    }
+    const layout = await this.readLayout(layoutId);
     Object.assign(layout, data);
-    await this._writeToFile();
-    return {};
+    this._writeToFile();
+    return layoutId;
   }
 
   /**
@@ -165,19 +151,26 @@ class JsonFileConnector {
    * @return {Object} Empty details
    */
   async deleteLayout(layoutId) {
-    const layout = this.data.layouts.find((layout) => layout.id === layoutId);
-    if (!layout) {
-      throw new Error(`layout ${layoutId} not found`);
-    }
+    const layout = await this.readLayout(layoutId);
     const index = this.data.layouts.indexOf(layout);
     this.data.layouts.splice(index, 1);
     await this._writeToFile();
-    return {};
+    return layoutId;
+  }
+
+  /**
+   * List layouts, can be filtered
+   * @param {Object} filter - undefined or {owner_id: XXX}
+   * @return {Array<Layout>}
+   */
+  async listLayouts(filter = {}) {
+    return this.data.layouts.filter((layout) =>
+      filter.owner_id === undefined || layout.owner_id === filter.owner_id);
   }
 }
 
 /**
- * Simple Lock blocked Promise for exclusive access to ressource
+ * Simple Lock blocked Promise for exclusive access to resource
  * @example
  * let lock = new Lock();
  * lock.acquire();

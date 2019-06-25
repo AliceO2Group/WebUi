@@ -19,71 +19,156 @@ describe('JSON file custom database', () => {
     // Drop previous DB if exists
     try {
       fs.unlinkSync(CONFIG_FILE);
-    } catch (error) { }
+    } catch (error) {}
     jsonConfig = new JsonFileConnector(CONFIG_FILE);
   });
 
-  it('Create a new layout', (done) => {
-    jsonConfig
-      .createLayout(TEST_LAYOUT)
-      .then(() => done())
-      .catch(done);
+  describe('Creating a new Layout', () => {
+    it('should throw an error if layout id is not provided', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.createLayout({});
+      }, new Error('layout id is mandatory'));
+    });
+
+    it('should throw an error if layout id is not provided', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.createLayout({id: 'id'});
+      }, new Error('layout name is mandatory'));
+    });
+
+    it('should successfully create a new layout', () => {
+      return assert.doesNotReject(async () => {
+        await jsonConfig.createLayout(TEST_LAYOUT);
+        const createdLayout = await jsonConfig.readLayout(TEST_LAYOUT.id);
+        assert.deepStrictEqual(jsonConfig.data.layouts.length, 1);
+        assert.deepStrictEqual(createdLayout, TEST_LAYOUT);
+      });
+    });
+
+    it('should throw an error when creating a new layout with the same id as an existing layout', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.createLayout(TEST_LAYOUT);
+      }, new Error('layout with this id (123) already exists'));
+    });
+
+    it('should successfully create a layout with the same name but different ID', () => {
+      const layout = JSON.parse(JSON.stringify(TEST_LAYOUT));
+      layout.id = 321;
+      return assert.doesNotReject(async () => {
+        await jsonConfig.createLayout(layout);
+        const createdLayout = await jsonConfig.readLayout(layout.id);
+        assert.deepStrictEqual(jsonConfig.data.layouts.length, 2);
+        assert.deepStrictEqual(createdLayout, layout);
+      });
+    });
   });
 
-  it('Read a layout', (done) => {
-    jsonConfig.readLayout(TEST_LAYOUT.id).then((layout) => {
-      assert.strictEqual(TEST_LAYOUT.name, layout.name);
-      assert.strictEqual(TEST_LAYOUT.owner_name, layout.owner_name);
-      assert.strictEqual(TEST_LAYOUT.id, layout.id);
-      assert.strictEqual(TEST_LAYOUT.owner_id, layout.owner_id);
-      done();
-    }).catch(done);
+  describe('Reading/Updating/Deleting a Layout', () => {
+    it('should successfully read a layout by id', (done) => {
+      jsonConfig.readLayout(TEST_LAYOUT.id).then((layout) => {
+        assert.deepStrictEqual(TEST_LAYOUT, layout);
+        done();
+      }).catch(done);
+    });
+
+    it('should throw an error if no layout was found by an id', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.readLayout(111);
+      }, new Error('layout (111) not found'));
+    });
+
+    it('should throw an error when trying to update an inexistent layout by id', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.updateLayout(111, TEST_LAYOUT);
+      }, new Error('layout (111) not found'));
+    });
+
+    it('should successfully update an existing layout by id with a new name', () => {
+      TEST_LAYOUT.name = 'Updated Name';
+      return assert.doesNotReject(async () => {
+        const updatedLayoutId = await jsonConfig.updateLayout(TEST_LAYOUT.id, TEST_LAYOUT);
+        assert.deepStrictEqual(updatedLayoutId, TEST_LAYOUT.id);
+        const updatedLayout = await jsonConfig.readLayout(TEST_LAYOUT.id);
+        assert.deepStrictEqual(TEST_LAYOUT.name, updatedLayout.name);
+      });
+    });
+
+    it('should throw an error when trying to delete an inexistent layout by id', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.deleteLayout(111, TEST_LAYOUT);
+      }, new Error('layout (111) not found'));
+    });
+
+    it('should successfully delete a layout by id', () => {
+      return assert.doesNotReject(async () => {
+        const removedLayoutId = await jsonConfig.deleteLayout(TEST_LAYOUT.id);
+        assert.deepStrictEqual(removedLayoutId, TEST_LAYOUT.id);
+      });
+    });
   });
 
-  it('Create a layout with the same name but different ID', (done) => {
-    const layout = JSON.parse(JSON.stringify(TEST_LAYOUT));
-    layout.id = 321;
-    jsonConfig
-      .createLayout(layout)
-      .then(() => done())
-      .catch(done);
+  describe('Listing all existing layouts', () => {
+    it('should successfully list all existing layouts with no filter', () => {
+      return assert.doesNotReject(async () => {
+        const layouts = await jsonConfig.listLayouts();
+        const expectedLayouts = [{id: 321, name: 'test', owner_name: 'tests-boss', owner_id: 1}];
+        assert.deepStrictEqual(expectedLayouts, layouts);
+      });
+    });
+
+    it('should successfully list all existing layouts based on give filter', () => {
+      return assert.doesNotReject(async () => {
+        const layouts = await jsonConfig.listLayouts({owner_id: ''});
+        const expectedLayouts = [];
+        assert.deepStrictEqual(expectedLayouts, layouts);
+      });
+    });
   });
 
-  it('Creating layout with the same ID should fail', (done) => {
-    const layout = TEST_LAYOUT;
-    jsonConfig
-      .createLayout(layout)
-      .then(() => done('should fail'))
-      .catch((error) => done());
-  });
+  describe('Testing read/write to fs', () => {
+    it('should reject when layouts are missing from data with error of bad data format ', async () => {
+      return assert.rejects(async () => {
+        jsonConfig.data = '{}';
+        await jsonConfig._writeToFile();
+        await jsonConfig._readFromFile();
+      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
+    });
 
-  it('should save layout with new name', (done) => {
-    TEST_LAYOUT.name = 'Updated Name';
-    jsonConfig
-      .updateLayout(TEST_LAYOUT.id, TEST_LAYOUT)
-      .catch(done);
+    it('should reject when there is no data with error of bad data format ', async () => {
+      return assert.rejects(async () => {
+        jsonConfig.data = '';
+        await jsonConfig._writeToFile();
+        await jsonConfig._readFromFile();
+      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
+    });
 
-    jsonConfig.readLayout(TEST_LAYOUT.id).then((layout) => {
-      assert.strictEqual(TEST_LAYOUT.name, layout.name);
-      done();
-    }).catch(done);
-  });
+    it('should reject when data.layouts is not an Array with error of bad data format ', async () => {
+      return assert.rejects(async () => {
+        jsonConfig.data = {layouts: 'test'};
+        await jsonConfig._writeToFile();
+        await jsonConfig._readFromFile();
+      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
+    });
 
-  it('Delete layout', (done) => {
-    jsonConfig
-      .deleteLayout(TEST_LAYOUT.id)
-      .then(() => done())
-      .catch(done);
-  });
+    it('should reject when there is missing data with error of bad JSON format ', async () => {
+      return assert.rejects(async () => {
+        jsonConfig.data = undefined;
+        await jsonConfig._writeToFile();
+        await jsonConfig._readFromFile();
+      }, new Error(`Unable to parse DB file ${CONFIG_FILE}`));
+    });
 
-  it('Reading deleted layout returns undefined', (done) => {
-    jsonConfig
-      .readLayout(TEST_LAYOUT.id)
-      .then((result) => result === undefined ? done() : done('should return undefined'))
-      .catch(done);
-  });
+    it('should successfully read layouts from data', async () => {
+      return assert.doesNotReject(async () => {
+        jsonConfig.data = {layouts: []};
+        await jsonConfig._writeToFile();
+        await jsonConfig._readFromFile();
+      });
+    });
 
-  after(() => {
-    fs.unlinkSync(CONFIG_FILE);
+    after(() => {
+      fs.unlinkSync(CONFIG_FILE);
+    });
   });
 });
+
