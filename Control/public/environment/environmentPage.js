@@ -43,12 +43,31 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  */
 const showContent = (model, item) => [
   showControl(model.environment, item),
-  item.state === 'RUNNING' && model.environment.plots.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Success: (data) => showEmbeddedGraphs(data),
-    Failure: () => null,
-  }),
+  item.state === 'RUNNING' &&
+  h('.m2.flex-row',
+    {
+      style: 'height: 10em;'
+    }, [
+      h('.grafana-font.m1.flex-column',
+        {
+          style: 'width: 15%;'
+        }, [
+          h('', {style: 'height:40%'}, 'Run Number'),
+          h('',
+            h('.badge.success',
+              {style: 'font-size:35px'},
+              item.currentRunNumber)
+          )
+        ]
+      ),
+      model.environment.plots.match({
+        NotAsked: () => null,
+        Loading: () => null,
+        Success: (data) => showEmbeddedGraphs(data),
+        Failure: () => null,
+      })
+    ]
+  ),
   showEnvDetailsTable(item),
   h('.m2', h('h4', 'Tasks')),
   showTableList(item.tasks),
@@ -60,39 +79,31 @@ const showContent = (model, item) => [
  * @return {vnode}
  */
 const showEmbeddedGraphs = (data) =>
-  h('.m2',
-    h('h4', 'Details'),
+  [
     h('.flex-row',
-      {
-        style: 'height: 15em;'
-      },
+      {style: 'width:30%;'},
       [
-        h('.w-33.flex-row', [
-          h('.w-50',
-            h('iframe',
-              {
-                src: data[0],
-                style: 'width: 100%; height: 100%; border: 0'
-              }
-            )),
-          h('.w-50',
-            h('iframe',
-              {
-                src: data[1],
-                style: 'width: 100%; height: 100%; border: 0'
-              }
-            ))
-        ]),
-        // Large Plot
-        h('.flex-grow',
-          h('iframe',
-            {
-              src: data[2],
-              style: 'width: 100%; height: 100%; border: 0'
-            }
-          )
-        )])
-  );
+        h('iframe.w-50',
+          {
+            src: data[0],
+            style: 'height: 100%; border: 0;'
+          }
+        ),
+        h('iframe.w-50',
+          {
+            src: data[1],
+            style: 'height: 100%; border: 0;'
+          }
+        )
+      ]),
+    // Large Plot
+    h('iframe.flex-grow',
+      {
+        src: data[2],
+        style: 'height: 100%; border: 0'
+      }
+    )
+  ];
 
 /**
  * Table to display Environment details
@@ -103,15 +114,6 @@ const showEnvDetailsTable = (item) =>
   h('.pv3',
     h('table.table', [
       h('tbody', [
-        item.currentRunNumber && h('tr', [
-          h('th', 'Current Run Number'),
-          h('td',
-            {
-              class: 'badge bg-success white'
-            },
-            item.currentRunNumber
-          )
-        ]),
         h('tr', [
           h('th', 'Number of Tasks'),
           h('td', item.tasks.length)
