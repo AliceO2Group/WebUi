@@ -54,8 +54,8 @@ const showContent = (model, item) => [
         }, [
           h('', {style: 'height:40%'}, 'Run Number'),
           h('',
-            h('.badge.success',
-              {style: 'font-size:35px'},
+            h('.badge.bg-success.white',
+              {style: 'font-size:45px'},
               item.currentRunNumber)
           )
         ]
