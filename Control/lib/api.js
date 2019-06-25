@@ -3,6 +3,8 @@ const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 const Padlock = require('./Padlock.js');
 const ControlProxy = require('./ControlProxy.js');
+const KafkaConnector = require('../lib/KafkaConnector.js');
+
 const config = require('./configProvider.js');
 const http = require('http');
 
@@ -15,8 +17,11 @@ if (!config.grafana) {
 
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
+const kafka = new KafkaConnector(config.kafka);
 
-module.exports.attachTo = (http, ws) => {
+module.exports.setup = (http, ws) => {
+  http.get('/isKafkaRunning', isKafkaRunning);
+
   // Map Control gRPC methods
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
@@ -169,4 +174,15 @@ function httpGetJson(host, port, path) {
     request.on('error', (err) => reject(err));
     request.end();
   });
+}
+
+/**
+ * Check status of Kafka Producer
+ * @param {Request} req
+ * @param {Response} res
+ */
+function isKafkaRunning(req, res) {
+  kafka.isKafkaProducerUpAndRunning()
+    .then((data) => res.status(200).json(data))
+    .catch((err) => errorHandler(err, res));
 }

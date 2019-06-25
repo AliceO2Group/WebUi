@@ -1,3 +1,4 @@
+
 module.exports = {
   http: {
     port: 8080,
@@ -12,4 +13,8 @@ module.exports = {
     port: 9090,
     timeout: 10000,
   },
+  kafka: {
+    hostname: 'localhost',
+    port: 9092
+  }
 };

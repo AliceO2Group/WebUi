@@ -22,6 +22,7 @@
   "devDependencies": {
     "eslint": "^5.15.0",
     "eslint-config-google": "^0.12.0",
+    "kafka-node": "^4.1.3",
     "mocha": "^6.0.2",
     "puppeteer": "^1.12.2"
   }
