@@ -1,7 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const JsonFileConnector = require('./../lib/JsonFileConnector.js');
+const JsonFileConnector = require('../../lib/JsonFileConnector.js');
 
 const CONFIG_FILE = path.join(__dirname, 'db.json.temp');
 

@@ -8,7 +8,7 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "nyc --reporter=lcov mocha --exit test/mocha-*",
+    "mocha": "nyc --reporter=lcov mocha --exit test/**/mocha-*",
     "postinstall": "mv build/Release/tobject2json.node ."
   },
   "nyc": {
