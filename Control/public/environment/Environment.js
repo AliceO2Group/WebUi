@@ -18,6 +18,7 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.notAsked();
     this.itemForm = {};
     this.plots = RemoteData.notAsked();
+    this.currentTask = RemoteData.notAsked();
   }
 
   /**
@@ -136,5 +137,23 @@ export default class Environment extends Observable {
       return;
     }
     this.plots = RemoteData.success(result);
+  }
+
+  /**
+   * Load Task into `item`
+   * @param {JSON} body
+  */
+  async getTask(body) {
+    this.currentTask = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
+    if (!ok) {
+      this.currentTask = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.currentTask = RemoteData.success(result);
+    this.notify();
   }
 }

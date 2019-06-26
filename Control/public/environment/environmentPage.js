@@ -1,7 +1,8 @@
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import showTableList from '../common/showTableList.js';
+import parseObject from './../common/utils.js';
+import showTableItem from '../common/showTableItem.js';
 /**
  * @file Page to show 1 environment (content and header)
  */
@@ -30,28 +31,35 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showContent(model, data.environment),
+    Success: (data) => showContent(model.environment, data.environment),
     Failure: (error) => pageError(error),
   })
 ]);
 
 /**
  * Show all properties of environment and buttons for its actions at bottom
- * @param {Object} model
+ * @param {Object} environment
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showContent = (model, item) => [
-  showControl(model.environment, item),
-  item.state === 'RUNNING' && model.environment.plots.match({
+const showContent = (environment, item) => [
+  showControl(environment, item),
+  item.state === 'RUNNING' && environment.plots.match({
     NotAsked: () => null,
     Loading: () => null,
     Success: (data) => showEmbeddedGraphs(data),
     Failure: () => null,
   }),
   showEnvDetailsTable(item),
-  h('.m2', h('h4', 'Tasks')),
-  showTableList(item.tasks),
+  h('.m2', [
+    h('h4', 'Tasks'),
+    h('.flex-row.flex-grow',
+      h('.flex-grow', {},
+        tasks(environment, item.tasks, [
+          (event, item) => {
+            environment.getTask({taskId: item.taskId});
+          }])))
+  ]),
 ];
 
 /**
@@ -190,3 +198,61 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
     },
     label
   );
+
+/**
+ * Test
+ * @param {model} task
+ * @return {vnode}
+ */
+const displayTaskDetails = (task) =>
+  task.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (data) => showTableItem(data.task),
+    Failure: (error) => pageError(error),
+  });
+
+
+/**
+ * t
+ * @param {object} task
+ * @return {vnode}
+ */
+const test = (task) => h('', task.task.commandInfo.arguments[0]);
+/**
+ * test
+ * @param {t} list
+ * @param {t} actions
+ * @return {vnode}
+ */
+const tasks = (environment, list, actions) => list.map((task) =>
+  h('', [
+    h('table.table', [
+      h('thead', [
+        h('tr',
+          [
+            list.length > 0 && Object.keys(list[0]).map((columnName) => h('th', {style: 'text-align:center'}, columnName)),
+            actions && h('th.text-center', {style: 'text-align:center'}, 'Actions')
+          ]
+        )
+      ]),
+      h('tbody', list.map((item) => h('tr', [
+        Object.keys(item).map(
+          (columnName) => typeof item[columnName] === 'object'
+            ? h('td', parseObject(item[columnName], columnName))
+            : h('td',
+              columnName === 'state' && {
+                class: (item[columnName] === 'RUNNING' ? 'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
+                style: 'font-weight: bold;'
+              },
+              item[columnName]
+            )
+        ),
+        actions && h('td.btn-group',
+          h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details'))
+      ]))),
+    ]
+    ),
+    displayTaskDetails(environment.currentTask)
+  ])
+);

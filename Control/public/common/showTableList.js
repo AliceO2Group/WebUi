@@ -31,7 +31,7 @@ export default (list, actions) => h('table.table', [
     ),
     actions && h('td.btn-group',
       h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details'),
-      item.state !== 'RUNNING' && h('button.btn.btn-danger', {onclick: (event) => actions[1](event, item)}, 'Shutdown'),
+      item.state !== 'RUNNING' && actions.length >= 2 && h('button.btn.btn-danger', {onclick: (event) => actions[1](event, item)}, 'Shutdown'),
     )
   ]))),
 ]);
