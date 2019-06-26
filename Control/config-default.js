@@ -17,8 +17,8 @@ module.exports = {
     port: 3000
   },
   kafka: {
-    hostname: 'localhost',
-    port: 9092
+    hostname: 'localhost', // 3 host names 1 unique stirng
+    port: 9092,
   }
 
   // JWT manages user's session duration

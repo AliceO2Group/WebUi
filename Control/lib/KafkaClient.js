@@ -1,3 +1,4 @@
+const kafka = require('kafka-client');
 /**
  * Gateway for all Kafka Consumer calls
  */
@@ -26,6 +27,13 @@ class KafkaConnector {
    */
   async isKafkaProducerUpAndRunning() {
     return false;
+  }
+
+  /**
+   * Initialize kafka client
+   */
+  async initializeKafkaClient() {
+    const client = new kafka.KafkaClient({kafkaHost: '10.3.100.196:9092'});
   }
 }
 
