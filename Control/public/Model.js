@@ -5,6 +5,7 @@ import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import Status from './status/Status.js';
 import Workflow from './workflow/Workflow.js';
+import TaskService from './services/Task.service.js';
 
 /**
  * Root of model tree
@@ -37,6 +38,9 @@ export default class Model extends Observable {
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
+
+    this.taskService = new TaskService(this);
+    this.taskService.bubbleTo(this);
 
     // Setup router
     this.router = new QueryRouter();
@@ -116,6 +120,7 @@ export default class Model extends Observable {
         this.workflow.get();
         break;
       case 'status':
+        this.taskService.getTask();
         this.status.getFrameworkInfo();
         break;
       default:
