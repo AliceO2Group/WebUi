@@ -1,6 +1,6 @@
 // Import frontend framework
 import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
-import {Notification as AliceNotification} from '/js/src/index.js';
+import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import Status from './status/Status.js';
@@ -35,7 +35,7 @@ export default class Model extends Observable {
     this.status = new Status(this);
     this.status.bubbleTo(this);
 
-    this.notification = new AliceNotification(this);
+    this.notification = new O2Notification(this);
     this.notification.bubbleTo(this);
     this.checkBrowserNotificationPermissions();
 
@@ -66,7 +66,6 @@ export default class Model extends Observable {
   handleKeyboardDown(e) {
     // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
-    this.show("Test");
 
     // Delete key + layout page + object select => delete this object
     if (code === 8 &&
@@ -143,10 +142,7 @@ export default class Model extends Observable {
    * @param {String} message
    */
   show(message) {
-    const t = new Notification('Title', {body: 'body', icon: 'test.png'});
-    t.onclick = (event) => {
-      console.log("CLICK")
-    };
+    new Notification('AliECS', {body: message, icon: 'test.png'});
   }
 
   /**

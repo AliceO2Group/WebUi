@@ -53,9 +53,9 @@ class KafkaConnector {
     const consumerGroup = new kafka.ConsumerGroup(options, 'notifications');
 
     consumerGroup.on('message', (message) => this.notifyUsers(message));
-    consumerGroup.on('connect', () => log.info('[Kafka] - ConsumerGroup successfully connected'));
-    consumerGroup.on('error', (error) => log.error(`[Kafka] - Error on ${error}`));
-    consumerGroup.on('offsetOutOfRange', (error) => log.error(`[Kafka] - OffsetOutOfRange on ${error}`));
+    consumerGroup.on('connect', () => log.info('ConsumerGroup successfully connected'));
+    consumerGroup.on('error', (error) => log.error(`Error on ${error}`));
+    consumerGroup.on('offsetOutOfRange', (error) => log.error(`OffsetOutOfRange on ${error}`));
   }
 
   /**
