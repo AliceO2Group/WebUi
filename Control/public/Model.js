@@ -1,6 +1,6 @@
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, Notification} from '/js/src/index.js';
-
+import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
+import {Notification as AliceNotification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import Status from './status/Status.js';
@@ -35,8 +35,9 @@ export default class Model extends Observable {
     this.status = new Status(this);
     this.status.bubbleTo(this);
 
-    this.notification = new Notification(this);
+    this.notification = new AliceNotification(this);
     this.notification.bubbleTo(this);
+    this.checkBrowserNotificationPermissions();
 
     // Setup router
     this.router = new QueryRouter();
@@ -65,12 +66,13 @@ export default class Model extends Observable {
   handleKeyboardDown(e) {
     // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
+    this.show("Test");
 
     // Delete key + layout page + object select => delete this object
     if (code === 8 &&
-        this.router.params.page === 'layoutShow' &&
-        this.layout.editEnabled &&
-        this.layout.editingTabObject) {
+      this.router.params.page === 'layoutShow' &&
+      this.layout.editEnabled &&
+      this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
     }
   }
@@ -82,6 +84,9 @@ export default class Model extends Observable {
   handleWSCommand(message) {
     if (message.command === 'padlock-update') {
       this.lock.setPadlockState(message.payload);
+      return;
+    } else if (message.command === 'notification') {
+      this.show(message.payload);
       return;
     }
   }
@@ -130,5 +135,26 @@ export default class Model extends Observable {
   toggleAccountMenu() {
     this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
+  }
+
+
+  /**
+   * Display a browser notification(Notification - Web API)
+   * @param {String} message
+   */
+  show(message) {
+    const t = new Notification('Title', {body: 'body', icon: 'test.png'});
+    t.onclick = (event) => {
+      console.log("CLICK")
+    };
+  }
+
+  /**
+   * After pages load check if the user enabled notifications
+   */
+  checkBrowserNotificationPermissions() {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
   }
 }

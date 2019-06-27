@@ -1,5 +1,6 @@
 const kafka = require('kafka-node');
-const log = new (require('@aliceo2/web-ui').Log)('gRPC');
+const {WebSocketMessage} = require('@aliceo2/web-ui');
+const log = new (require('@aliceo2/web-ui').Log)('Kafka');
 /**
  * Gateway for all Kafka Consumer calls
  */
@@ -7,8 +8,9 @@ class KafkaConnector {
   /**
    * Setup KafkaConnector
    * @param {JSON} config - {hostname, port}
+   * @param {WebSocket} webSocket
    */
-  constructor(config) {
+  constructor(config, webSocket) {
     if (!config) {
       throw new Error('[Kafka] - Missing configuration');
     }
@@ -30,7 +32,7 @@ class KafkaConnector {
     this.topic = config.topic;
     this.groupId = config.groupId;
     this.consumerGroup = null;
-    this.initializeKafkaConsumerGroup();
+    this.webSocket = webSocket;
   }
 
   /**
@@ -50,7 +52,7 @@ class KafkaConnector {
     };
     const consumerGroup = new kafka.ConsumerGroup(options, 'notifications');
 
-    consumerGroup.on('message', (message) => this.onMessage(message));
+    consumerGroup.on('message', (message) => this.notifyUsers(message));
     consumerGroup.on('connect', () => log.info('[Kafka] - ConsumerGroup successfully connected'));
     consumerGroup.on('error', (error) => log.error(`[Kafka] - Error on ${error}`));
     consumerGroup.on('offsetOutOfRange', (error) => log.error(`[Kafka] - OffsetOutOfRange on ${error}`));
@@ -60,9 +62,14 @@ class KafkaConnector {
    * Method to be executed when a message was received
    * @param {string} message
    */
-  onMessage(message) {
+  notifyUsers(message) {
     // send message on UI
-    log.info(message);
+    const msgJSON = JSON.parse(message.value);
+    const msg = new WebSocketMessage();
+    msg.command = 'notification';
+    msg.payload = msgJSON.description;
+    log.info(msgJSON.description);
+    this.webSocket.broadcast(msg);
   }
 
   /**
