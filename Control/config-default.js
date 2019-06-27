@@ -17,8 +17,10 @@ module.exports = {
     port: 3000
   },
   kafka: {
-    hostname: 'localhost', // 3 host names 1 unique stirng
+    hostnames: 'localhost', // can be a string with multiple hostnames delimited by comma
     port: 9092,
+    topic: 'notifications',
+    groupId: 'flp-kafka-notifications'
   }
 
   // JWT manages user's session duration
