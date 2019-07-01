@@ -173,14 +173,3 @@ function httpGetJson(host, port, path) {
     request.end();
   });
 }
-
-/**
- * Check status of Kafka Producer
- * @param {Request} req
- * @param {Response} res
- */
-function isKafkaRunning(req, res) {
-  kafka.isKafkaProducerUpAndRunning()
-    .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
-}

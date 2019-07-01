@@ -34,13 +34,6 @@ class KafkaConnector {
   }
 
   /**
-   * // TODO Method to check if expected Kafka Producer is healthy
-   */
-  async isKafkaProducerUpAndRunning() {
-    return false;
-  }
-
-  /**
    * Initialize kafka client
    */
   initializeKafkaConsumerGroup() {
