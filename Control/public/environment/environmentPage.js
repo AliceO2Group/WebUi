@@ -42,8 +42,8 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showContent = (model, item) => [
-  showControl(model.environment, item),
+const showContent = (environment, item) => [
+  showControl(environment, item),
   item.state === 'RUNNING' &&
   h('.m2.flex-row',
     {
@@ -61,7 +61,7 @@ const showContent = (model, item) => [
           )
         ]
       ),
-      model.environment.plots.match({
+      environment.plots.match({
         NotAsked: () => null,
         Loading: () => null,
         Success: (data) => showEmbeddedGraphs(data),
@@ -74,10 +74,10 @@ const showContent = (model, item) => [
     h('h4', 'Tasks'),
     h('.flex-row.flex-grow',
       h('.flex-grow', {},
-        displayTableOfTasks(model.environment, item.tasks, [
+        displayTableOfTasks(environment, item.tasks, [
           (event, item) => {
             //show/hide component
-            model.environment.getTask({taskId: item.taskId});
+            environment.getTask({taskId: item.taskId});
           }]
         )
       )
