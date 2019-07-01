@@ -57,6 +57,7 @@ const showContent = (environment, item) => [
       h('.flex-grow', {},
         tasks(environment, item.tasks, [
           (event, item) => {
+            //show/hide component
             environment.getTask({taskId: item.taskId});
           }])))
   ]),
@@ -208,7 +209,7 @@ const displayTaskDetails = (task) =>
   task.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showTableItem(data.task),
+    Success: (data) => showTableItem(data),
     Failure: (error) => pageError(error),
   });
 

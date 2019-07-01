@@ -153,7 +153,17 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
-    this.currentTask = RemoteData.success(result);
+    delete result.task.commandInfo.shell;
+    // result.task.commandInfo.shell = '\n testare zx\n testare'
+    // white-space: pre-wrap;
+
+    //open close action
+    // I would also advise stringifying env as a \n-separated list, and arguments as a space separated one
+    result.task.commandInfo.env = ['env1', 'env2', 'env3'];
+    result.task.commandInfo.env = result.task.commandInfo.env.join('\n');
+    result.task.commandInfo.arguments.push('file:/home/flp/readout.cfg');
+    result.task.commandInfo.arguments = result.task.commandInfo.arguments.join(' ');
+    this.currentTask = RemoteData.success(result.task.commandInfo);
     this.notify();
   }
 }
