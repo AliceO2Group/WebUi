@@ -52,6 +52,9 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
+    console.log("Result);")
+    result.environment.tasks.push(result.environment.tasks[0]);
+    console.log(result);
     this.item = RemoteData.success(result);
     this.itemControl = RemoteData.notAsked(); // because item has changed
     this.notify();

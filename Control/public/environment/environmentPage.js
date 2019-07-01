@@ -51,7 +51,7 @@ const showContent = (environment, item) => [
     Failure: () => null,
   }),
   showEnvDetailsTable(item),
-  h('.m2', [
+  h('.m2.p2.shadow-level1', [
     h('h4', 'Tasks'),
     h('.flex-row.flex-grow',
       h('.flex-grow', {},
@@ -109,7 +109,7 @@ const showEmbeddedGraphs = (data) =>
  * @return {vnode} table view
  */
 const showEnvDetailsTable = (item) =>
-  h('.pv3',
+  h('.pv3.m2.shadow-level1',
     h('table.table', [
       h('tbody', [
         item.currentRunNumber && h('tr', [
@@ -209,7 +209,7 @@ const displayTaskDetails = (task) =>
   task.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showTableItem(data),
+    Success: (data) => h('pre', JSON.stringify(data)),
     Failure: (error) => pageError(error),
   });
 
@@ -226,34 +226,34 @@ const test = (task) => h('', task.task.commandInfo.arguments[0]);
  * @param {t} actions
  * @return {vnode}
  */
-const tasks = (environment, list, actions) => list.map((task) =>
-  h('', [
-    h('table.table', [
-      h('thead', [
-        h('tr',
-          [
-            list.length > 0 && Object.keys(list[0]).map((columnName) => h('th', {style: 'text-align:center'}, columnName)),
-            actions && h('th.text-center', {style: 'text-align:center'}, 'Actions')
-          ]
-        )
-      ]),
-      h('tbody', list.map((item) => h('tr', [
-        Object.keys(item).map(
-          (columnName) => typeof item[columnName] === 'object'
-            ? h('td', parseObject(item[columnName], columnName))
-            : h('td',
-              columnName === 'state' && {
-                class: (item[columnName] === 'RUNNING' ? 'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
-                style: 'font-weight: bold;'
-              },
-              item[columnName]
-            )
-        ),
-        actions && h('td.btn-group',
-          h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details'))
-      ]))),
-    ]
-    ),
-    displayTaskDetails(environment.currentTask)
-  ])
-);
+const tasks = (environment, list, actions) => h('', [
+  h('table.table', [
+    h('thead', [
+      h('tr',
+        [
+          list.length > 0 && Object.keys(list[0]).map(
+            (columnName) => h('th', {style: 'text-align:center'}, columnName)),
+          actions && h('th.text-center', {style: 'text-align:center'}, 'actions')
+        ]
+      )
+    ]),
+    h('tbody', list.map((item) => h('tr', [
+      Object.keys(item).map(
+        (columnName) => typeof item[columnName] === 'object'
+          ? h('td', parseObject(item[columnName], columnName))
+          : h('td',
+            columnName === 'state' && {
+              class: (item[columnName] === 'RUNNING' ? 'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
+              style: 'font-weight: bold;'
+            },
+            item[columnName]
+          )
+      ),
+      actions && h('td.btn-group',
+        h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details')),
+      displayTaskDetails(environment.currentTask)
+
+    ]))),
+  ]
+  )
+]);
