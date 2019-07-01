@@ -53,7 +53,8 @@ export default class Environment extends Observable {
       return;
     }
     console.log("Result);")
-    result.environment.tasks.push(result.environment.tasks[0]);
+    result.environment.tasks.push(JSON.parse(JSON.stringify(result.environment.tasks[0])));
+    result.environment.tasks[0].taskId = 'test'
     console.log(result);
     this.item = RemoteData.success(result);
     this.itemControl = RemoteData.notAsked(); // because item has changed
@@ -159,13 +160,11 @@ export default class Environment extends Observable {
     delete result.task.commandInfo.shell;
     // result.task.commandInfo.shell = '\n testare zx\n testare'
     // white-space: pre-wrap;
-
-    //open close action
-    // I would also advise stringifying env as a \n-separated list, and arguments as a space separated one
     result.task.commandInfo.env = ['env1', 'env2', 'env3'];
     result.task.commandInfo.env = result.task.commandInfo.env.join('\n');
     result.task.commandInfo.arguments.push('file:/home/flp/readout.cfg');
     result.task.commandInfo.arguments = result.task.commandInfo.arguments.join(' ');
+    result.task.commandInfo.taskId = '92df4798-9bf3-11e9-9c3f-02163e018d4a'
     this.currentTask = RemoteData.success(result.task.commandInfo);
     this.notify();
   }

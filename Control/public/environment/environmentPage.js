@@ -51,15 +51,18 @@ const showContent = (environment, item) => [
     Failure: () => null,
   }),
   showEnvDetailsTable(item),
-  h('.m2.p2.shadow-level1', [
+  h('.m2.p2', [
     h('h4', 'Tasks'),
     h('.flex-row.flex-grow',
       h('.flex-grow', {},
-        tasks(environment, item.tasks, [
+        displayTableOfTasks(environment, item.tasks, [
           (event, item) => {
             //show/hide component
             environment.getTask({taskId: item.taskId});
-          }])))
+          }]
+        )
+      )
+    )
   ]),
 ];
 
@@ -109,7 +112,7 @@ const showEmbeddedGraphs = (data) =>
  * @return {vnode} table view
  */
 const showEnvDetailsTable = (item) =>
-  h('.pv3.m2.shadow-level1',
+  h('.pv3.m2',
     h('table.table', [
       h('tbody', [
         item.currentRunNumber && h('tr', [
@@ -201,33 +204,14 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
   );
 
 /**
- * Test
- * @param {model} task
+ * Method to create and display the a table with tasks
+ * @param {Object} environment
+ * @param {Array<Object>} list
+ * @param {Array<Actions>} actions
  * @return {vnode}
  */
-const displayTaskDetails = (task) =>
-  task.match({
-    NotAsked: () => null,
-    Loading: () => pageLoading(),
-    Success: (data) => h('pre', JSON.stringify(data)),
-    Failure: (error) => pageError(error),
-  });
-
-
-/**
- * t
- * @param {object} task
- * @return {vnode}
- */
-const test = (task) => h('', task.task.commandInfo.arguments[0]);
-/**
- * test
- * @param {t} list
- * @param {t} actions
- * @return {vnode}
- */
-const tasks = (environment, list, actions) => h('', [
-  h('table.table', [
+const displayTableOfTasks = (environment, list, actions) => h('', [
+  h('table.table.table-sm', [
     h('thead', [
       h('tr',
         [
@@ -237,7 +221,7 @@ const tasks = (environment, list, actions) => h('', [
         ]
       )
     ]),
-    h('tbody', list.map((item) => h('tr', [
+    h('tbody', list.map((item) => [h('tr', [
       Object.keys(item).map(
         (columnName) => typeof item[columnName] === 'object'
           ? h('td', parseObject(item[columnName], columnName))
@@ -251,9 +235,25 @@ const tasks = (environment, list, actions) => h('', [
       ),
       actions && h('td.btn-group',
         h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details')),
-      displayTaskDetails(environment.currentTask)
-
-    ]))),
+    ]),
+    environment.currentTask.match({
+      NotAsked: () => null,
+      Loading: () => null,
+      Success: (data) => data.taskId === item.taskId && displayTaskDetails(data),
+      Failure: (error) =>null,
+    })
+    ],
+    )),
   ]
   )
 ]);
+
+/**
+ * Method to display an expandable area with details about a selected task
+ * @param {Object} task
+ * @return {vnode}
+ */
+const displayTaskDetails = (task) =>
+  h('tr.m5',
+    h('td', {colspan: 8}, showTableItem(task))
+  );
