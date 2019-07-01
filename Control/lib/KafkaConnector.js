@@ -61,7 +61,7 @@ class KafkaConnector {
    * @param {string} message
    */
   onMessage(message) {
-    // send message on UI
+    // TODO: [OGUI-358] send message on UI
     log.info(message);
   }
 

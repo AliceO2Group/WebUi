@@ -20,8 +20,6 @@ const octl = new ControlProxy(config.grpc);
 const kafka = new KafkaConnector(config.kafka);
 
 module.exports.setup = (http, ws) => {
-  http.get('/isKafkaRunning', isKafkaRunning);
-
   // Map Control gRPC methods
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
