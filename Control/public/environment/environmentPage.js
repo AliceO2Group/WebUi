@@ -38,27 +38,46 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 
 /**
  * Show all properties of environment and buttons for its actions at bottom
- * @param {Object} environment
+ * @param {Object} model
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showContent = (environment, item) => [
-  showControl(environment, item),
-  item.state === 'RUNNING' && environment.plots.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Success: (data) => showEmbeddedGraphs(data),
-    Failure: () => null,
-  }),
+const showContent = (model, item) => [
+  showControl(model.environment, item),
+  item.state === 'RUNNING' &&
+  h('.m2.flex-row',
+    {
+      style: 'height: 10em;'
+    }, [
+      h('.grafana-font.m1.flex-column',
+        {
+          style: 'width: 15%;'
+        }, [
+          h('', {style: 'height:40%'}, 'Run Number'),
+          h('',
+            h('.badge.bg-success.white',
+              {style: 'font-size:45px'},
+              item.currentRunNumber)
+          )
+        ]
+      ),
+      model.environment.plots.match({
+        NotAsked: () => null,
+        Loading: () => null,
+        Success: (data) => showEmbeddedGraphs(data),
+        Failure: () => null,
+      })
+    ]
+  ),
   showEnvDetailsTable(item),
   h('.m2.p2', [
     h('h4', 'Tasks'),
     h('.flex-row.flex-grow',
       h('.flex-grow', {},
-        displayTableOfTasks(environment, item.tasks, [
+        displayTableOfTasks(model.environment, item.tasks, [
           (event, item) => {
             //show/hide component
-            environment.getTask({taskId: item.taskId});
+            model.environment.getTask({taskId: item.taskId});
           }]
         )
       )
@@ -72,39 +91,31 @@ const showContent = (environment, item) => [
  * @return {vnode}
  */
 const showEmbeddedGraphs = (data) =>
-  h('.m2',
-    h('h4', 'Details'),
+  [
     h('.flex-row',
-      {
-        style: 'height: 15em;'
-      },
+      {style: 'width:30%;'},
       [
-        h('.w-33.flex-row', [
-          h('.w-50',
-            h('iframe',
-              {
-                src: data[0],
-                style: 'width: 100%; height: 100%; border: 0'
-              }
-            )),
-          h('.w-50',
-            h('iframe',
-              {
-                src: data[1],
-                style: 'width: 100%; height: 100%; border: 0'
-              }
-            ))
-        ]),
-        // Large Plot
-        h('.flex-grow',
-          h('iframe',
-            {
-              src: data[2],
-              style: 'width: 100%; height: 100%; border: 0'
-            }
-          )
-        )])
-  );
+        h('iframe.w-50',
+          {
+            src: data[0],
+            style: 'height: 100%; border: 0;'
+          }
+        ),
+        h('iframe.w-50',
+          {
+            src: data[1],
+            style: 'height: 100%; border: 0;'
+          }
+        )
+      ]),
+    // Large Plot
+    h('iframe.flex-grow',
+      {
+        src: data[2],
+        style: 'height: 100%; border: 0'
+      }
+    )
+  ];
 
 /**
  * Table to display Environment details
@@ -115,15 +126,6 @@ const showEnvDetailsTable = (item) =>
   h('.pv3.m2',
     h('table.table', [
       h('tbody', [
-        item.currentRunNumber && h('tr', [
-          h('th', 'Current Run Number'),
-          h('td',
-            {
-              class: 'badge bg-success white'
-            },
-            item.currentRunNumber
-          )
-        ]),
         h('tr', [
           h('th', 'Number of Tasks'),
           h('td', item.tasks.length)
