@@ -15,3 +15,12 @@
   margin: var(--space-l);
   line-height: 1;
 }
+
+.grafana-font {
+  font-family: Roboto, Helvetica Neue, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #52545c;
+  font-weight: 515;
+  text-align: center;
+}
