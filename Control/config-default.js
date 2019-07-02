@@ -15,6 +15,12 @@ module.exports = {
   grafana: {
     hostname: 'localhost',
     port: 3000
+  },
+  kafka: {
+    hostnames: 'localhost', // can be a string with multiple hostnames delimited by comma
+    port: 9092,
+    topic: 'notifications',
+    groupId: 'flp-kafka-notifications'
   }
 
   // JWT manages user's session duration

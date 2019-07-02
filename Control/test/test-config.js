@@ -1,3 +1,4 @@
+
 module.exports = {
   http: {
     port: 8080,
@@ -12,4 +13,10 @@ module.exports = {
     port: 9090,
     timeout: 10000,
   },
+  kafka: {
+    hostnames: 'localhost',
+    port: 9092,
+    topic: 'notifications',
+    groupId: 'flp-kafka-notifications'
+  }
 };

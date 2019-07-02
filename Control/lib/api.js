@@ -3,6 +3,8 @@ const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 const Padlock = require('./Padlock.js');
 const ControlProxy = require('./ControlProxy.js');
+const KafkaConnector = require('../lib/KafkaConnector.js');
+
 const config = require('./configProvider.js');
 const http = require('http');
 
@@ -16,7 +18,11 @@ if (!config.grafana) {
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
 
-module.exports.attachTo = (http, ws) => {
+
+module.exports.setup = (http, ws) => {
+  const kafka = new KafkaConnector(config.kafka, ws);
+  kafka.initializeKafkaConsumerGroup();
+
   // Map Control gRPC methods
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
@@ -99,6 +105,9 @@ module.exports.attachTo = (http, ws) => {
   const broadcastPadState = () => {
     ws.broadcast(
       new WebSocketMessage().setCommand('padlock-update').setPayload(pad)
+    );
+    ws.broadcast(
+      new WebSocketMessage().setCommand('notification').setPayload(pad)
     );
   };
 };
