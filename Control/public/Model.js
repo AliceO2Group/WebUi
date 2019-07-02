@@ -136,13 +136,12 @@ export default class Model extends Observable {
     this.notify();
   }
 
-
   /**
    * Display a browser notification(Notification - Web API)
    * @param {String} message
    */
   show(message) {
-    new Notification('AliECS', {body: message, icon: 'test.png'});
+    new Notification('AliECS', {body: message});
   }
 
   /**
