@@ -38,7 +38,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 
 /**
  * Show all properties of environment and buttons for its actions at bottom
- * @param {Object} model
+ * @param {Object} environment
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
@@ -242,10 +242,8 @@ const displayTableOfTasks = (environment, list, actions) => h('', [
       NotAsked: () => null,
       Loading: () => null,
       Success: (data) => data.taskId === item.taskId && displayTaskDetails(data),
-      Failure: (error) =>null,
-    })
-    ],
-    )),
+      Failure: (error) => null,
+    })])),
   ]
   )
 ]);
