@@ -76,7 +76,6 @@ const showContent = (environment, item) => [
       h('.flex-grow', {},
         displayTableOfTasks(environment, item.tasks, [
           (event, item) => {
-            //show/hide component
             environment.getTask({taskId: item.taskId});
           }]
         )
@@ -229,20 +228,26 @@ const displayTableOfTasks = (environment, list, actions) => h('', [
           ? h('td', parseObject(item[columnName], columnName))
           : h('td',
             columnName === 'state' && {
-              class: (item[columnName] === 'RUNNING' ? 'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
+              class: (item[columnName] === 'RUNNING' ?
+                'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
               style: 'font-weight: bold;'
             },
             item[columnName]
           )
       ),
       actions && h('td.btn-group',
-        h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details')),
+        h('button.btn.btn-primary',
+          {
+            onclick: (event) => actions[0](event, item)
+          },
+          environment.wasTaskQueried(item.taskId) ? 'Close' : 'More')),
     ]),
     environment.currentTask.match({
       NotAsked: () => null,
       Loading: () => null,
-      Success: (data) => data.taskId === item.taskId && displayTaskDetails(data),
-      Failure: (error) => null,
+      Success: (data) => environment.wasTaskQueried(item.taskId)
+        && displayTaskDetails(data.filter((task) => task.taskId === item.taskId)[0]),
+      Failure: (error) => pageError(error),
     })])),
   ]
   )

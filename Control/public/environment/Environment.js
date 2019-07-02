@@ -52,10 +52,6 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
-    console.log("Result);")
-    result.environment.tasks.push(JSON.parse(JSON.stringify(result.environment.tasks[0])));
-    result.environment.tasks[0].taskId = 'test'
-    console.log(result);
     this.item = RemoteData.success(result);
     this.itemControl = RemoteData.notAsked(); // because item has changed
     this.notify();
@@ -148,24 +144,40 @@ export default class Environment extends Observable {
    * @param {JSON} body
   */
   async getTask(body) {
-    this.currentTask = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
-    if (!ok) {
-      this.currentTask = RemoteData.failure(result.message);
-      this.notify();
-      return;
+    const existingTasks = [];
+    if (this.currentTask.isSuccess()) {
+      existingTasks.push(...this.currentTask.payload);
     }
-    delete result.task.commandInfo.shell;
-    // result.task.commandInfo.shell = '\n testare zx\n testare'
-    // white-space: pre-wrap;
-    result.task.commandInfo.env = ['env1', 'env2', 'env3'];
-    result.task.commandInfo.env = result.task.commandInfo.env.join('\n');
-    result.task.commandInfo.arguments.push('file:/home/flp/readout.cfg');
-    result.task.commandInfo.arguments = result.task.commandInfo.arguments.join(' ');
-    result.task.commandInfo.taskId = '92df4798-9bf3-11e9-9c3f-02163e018d4a'
-    this.currentTask = RemoteData.success(result.task.commandInfo);
+    const indexOfSelectedTask = existingTasks.map((task) => task.taskId).indexOf(body.taskId);
+    if (indexOfSelectedTask >= 0) {
+      existingTasks.splice(indexOfSelectedTask, 1);
+    } else {
+      this.currentTask = RemoteData.loading();
+      this.notify();
+
+      const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
+      if (!ok) {
+        existingTasks.push({taskId: body.taskId, message: result.message});
+      } else {
+        delete result.task.commandInfo.shell;
+        result.task.commandInfo.env = result.task.commandInfo.env.join('\n');
+        result.task.commandInfo.arguments = result.task.commandInfo.arguments.join(' ');
+        result.task.commandInfo.taskId = result.task.shortInfo.taskId;
+        existingTasks.push(result.task.commandInfo);
+      }
+    }
+    this.currentTask = RemoteData.success(existingTasks);
     this.notify();
+  }
+
+  /**
+   * Method to check if a task was already queried by its id
+   * @param {string} taskId
+   * @return {boolean}
+   */
+  wasTaskQueried(taskId) {
+    return this.currentTask.isSuccess() &&
+      this.currentTask.payload.filter((task) => task.taskId === taskId).length > 0 ?
+      true : false;
   }
 }
