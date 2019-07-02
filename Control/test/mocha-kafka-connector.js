@@ -4,34 +4,22 @@ const assert = require('assert');
 
 describe('Kafka Connector test suite', function() {
   describe('Check Initialization of KafkaConnector', function() {
-    it('should throw error due to no config being passed', function() {
-      assert.throws(() => {
+    it('should not throw error if entire kafka field is missing from configuration', function() {
+      assert.doesNotThrow(() => {
         new KafkaConnector();
-      }, new Error('[Kafka] - Missing configuration'));
+      });
     });
 
-    it('should throw error due to missing hostnames in config', function() {
+    it('should throw error due to missing all mandatory fields in config', function() {
       assert.throws(() => {
         new KafkaConnector({});
-      }, new Error('[Kafka] - Missing hostnames'));
+      }, new Error('[Kafka] Missing mandatory fields from configuration: hostnames,port,topic,groupId'));
     });
 
-    it('should throw error due to missing port in config', function() {
+    it('should throw error due to missing mandatory fields in config', function() {
       assert.throws(() => {
-        new KafkaConnector({hostnames: 'localhost'});
-      }, new Error('[Kafka] - Missing port'));
-    });
-
-    it('should throw error due to missing topic in config', function() {
-      assert.throws(() => {
-        new KafkaConnector({hostnames: 'localhost', port: 9092});
-      }, new Error('[Kafka] - Missing topic'));
-    });
-
-    it('should throw error due to missing groupId in config', function() {
-      assert.throws(() => {
-        new KafkaConnector({hostnames: 'localhost', port: 9092, topic: 'notifications'});
-      }, new Error('[Kafka] - Missing groupId'));
+        new KafkaConnector({hostnames: 'localhost', topic: 'notifications'});
+      }, new Error('[Kafka] Missing mandatory fields from configuration: port,groupId'));
     });
 
     it('should successfully create a kafka connector', function() {

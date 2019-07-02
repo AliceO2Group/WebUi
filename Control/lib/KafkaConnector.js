@@ -1,34 +1,39 @@
 const kafka = require('kafka-node');
-const log = new (require('@aliceo2/web-ui').Log)('gRPC');
+const log = new (require('@aliceo2/web-ui').Log)('Kafka');
 /**
  * Gateway for all Kafka Consumer calls
  */
 class KafkaConnector {
   /**
    * Setup KafkaConnector
-   * @param {JSON} config - {hostname, port}
+   * @param {JSON} kafkaConfig - {hostname, port}
    */
-  constructor(config) {
-    if (!config) {
-      throw new Error('[Kafka] - Missing configuration');
+  constructor(kafkaConfig) {
+    if (!kafkaConfig) {
+      log.error('Missing configuration');
+      return;
     }
-    if (!config.hostnames) {
-      throw new Error('[Kafka] - Missing hostnames');
+    const missingConfigFields = [];
+    if (!kafkaConfig.hostnames) {
+      missingConfigFields.push('hostnames');
     }
-    if (!config.port) {
-      throw new Error('[Kafka] - Missing port');
+    if (!kafkaConfig.port) {
+      missingConfigFields.push('port');
     }
-    if (!config.topic) {
-      throw new Error('[Kafka] - Missing topic');
+    if (!kafkaConfig.topic) {
+      missingConfigFields.push('topic');
     }
-    if (!config.groupId) {
-      throw new Error('[Kafka] - Missing groupId');
+    if (!kafkaConfig.groupId) {
+      missingConfigFields.push('groupId');
+    }
+    if (missingConfigFields.length > 0) {
+      throw new Error(`[Kafka] Missing mandatory fields from configuration: ${missingConfigFields}`);
     }
 
-    this.brokers = this._getHostNamesList(config.hostnames, config.port);
-    this.port = config.port;
-    this.topic = config.topic;
-    this.groupId = config.groupId;
+    this.brokers = this._getHostNamesList(kafkaConfig.hostnames, kafkaConfig.port);
+    this.port = kafkaConfig.port;
+    this.topic = kafkaConfig.topic;
+    this.groupId = kafkaConfig.groupId;
     this.consumerGroup = null;
     this.initializeKafkaConsumerGroup();
   }
@@ -51,9 +56,9 @@ class KafkaConnector {
     const consumerGroup = new kafka.ConsumerGroup(options, 'notifications');
 
     consumerGroup.on('message', (message) => this.onMessage(message));
-    consumerGroup.on('connect', () => log.info('[Kafka] - ConsumerGroup successfully connected'));
-    consumerGroup.on('error', (error) => log.error(`[Kafka] - Error on ${error}`));
-    consumerGroup.on('offsetOutOfRange', (error) => log.error(`[Kafka] - OffsetOutOfRange on ${error}`));
+    consumerGroup.on('connect', () => log.info(`ConsumerGroup successfully connected to topic ${this.topic}`));
+    consumerGroup.on('error', (error) => log.error(`Error on ${error}`));
+    consumerGroup.on('offsetOutOfRange', (error) => log.error(`OffsetOutOfRange on ${error}`));
   }
 
   /**
@@ -62,7 +67,8 @@ class KafkaConnector {
    */
   onMessage(message) {
     // TODO: [OGUI-358] send message on UI
-    log.info(message);
+    const messageDescription = JSON.stringify(JSON.parse(message.value).description);
+    log.debug(messageDescription);
   }
 
   /**
