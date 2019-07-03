@@ -242,7 +242,7 @@ const displayTableOfTasks = (environment, list, actions) => h('', [
           },
           environment.wasTaskQueried(item.taskId) ? 'Close' : 'More')),
     ]),
-    environment.currentTask.match({
+    environment.currentTasks.match({
       NotAsked: () => null,
       Loading: () => null,
       Success: (data) => environment.wasTaskQueried(item.taskId)

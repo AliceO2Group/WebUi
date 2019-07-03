@@ -7,7 +7,7 @@ import parseObject from './utils.js';
  * @param {Object} item - object to be shown
  * @return {vnode} table view
  */
-export default (item) => h('table.table-primary.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
+export default (item) => h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
   h('tbody', Object.keys(item).map((columnName) => h('tr', [
     h('th', columnName),
     typeof item[columnName] === 'object' ?

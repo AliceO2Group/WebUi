@@ -18,7 +18,7 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.notAsked();
     this.itemForm = {};
     this.plots = RemoteData.notAsked();
-    this.currentTask = RemoteData.notAsked();
+    this.currentTasks = RemoteData.notAsked();
   }
 
   /**
@@ -145,14 +145,14 @@ export default class Environment extends Observable {
   */
   async getTask(body) {
     const existingTasks = [];
-    if (this.currentTask.isSuccess()) {
-      existingTasks.push(...this.currentTask.payload);
+    if (this.currentTasks.isSuccess()) {
+      existingTasks.push(...this.currentTasks.payload);
     }
     const indexOfSelectedTask = existingTasks.map((task) => task.taskId).indexOf(body.taskId);
     if (indexOfSelectedTask >= 0) {
       existingTasks.splice(indexOfSelectedTask, 1);
     } else {
-      this.currentTask = RemoteData.loading();
+      this.currentTasks = RemoteData.loading();
       this.notify();
 
       const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
@@ -166,7 +166,7 @@ export default class Environment extends Observable {
         existingTasks.push(result.task.commandInfo);
       }
     }
-    this.currentTask = RemoteData.success(existingTasks);
+    this.currentTasks = RemoteData.success(existingTasks);
     this.notify();
   }
 
@@ -176,8 +176,8 @@ export default class Environment extends Observable {
    * @return {boolean}
    */
   wasTaskQueried(taskId) {
-    return this.currentTask.isSuccess() &&
-      this.currentTask.payload.filter((task) => task.taskId === taskId).length > 0 ?
+    return this.currentTasks.isSuccess() &&
+      this.currentTasks.payload.filter((task) => task.taskId === taskId).length > 0 ?
       true : false;
   }
 }
