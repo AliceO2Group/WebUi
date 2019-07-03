@@ -19,6 +19,8 @@ export default class Environment extends Observable {
     this.itemForm = {};
     this.plots = RemoteData.notAsked();
     this.currentTasks = RemoteData.notAsked();
+
+    this.getPlotsList();
   }
 
   /**
@@ -43,7 +45,6 @@ export default class Environment extends Observable {
    * @param {Object} body - See protobuf definition for properties
    */
   async getEnvironment(body) {
-    this.getPlotsList();
     this.item = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
