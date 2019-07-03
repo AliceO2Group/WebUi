@@ -86,7 +86,7 @@ module.exports.setup = (http, ws) => {
       const port = config.grafana.port;
       httpGetJson(host, port, '/api/health')
         .then((result) => {
-          log.info(`Grafana is up and running: ${result}`);
+          log.info(`Grafana is up and running on version: ${result.version}`);
           const hostPort = `http://${host}:${port}/`;
           const valueOne = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=6 ';
           const valueTwo = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=4';
@@ -105,9 +105,6 @@ module.exports.setup = (http, ws) => {
   const broadcastPadState = () => {
     ws.broadcast(
       new WebSocketMessage().setCommand('padlock-update').setPayload(pad)
-    );
-    ws.broadcast(
-      new WebSocketMessage().setCommand('notification').setPayload(pad)
     );
   };
 };
