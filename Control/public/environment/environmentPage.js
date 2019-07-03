@@ -205,7 +205,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
   );
 
 /**
- * Method to create and display the a table with tasks
+ * Method to create and display a table with tasks
  * @param {Object} environment
  * @param {Array<Object>} list
  * @param {Array<Actions>} actions
@@ -246,7 +246,7 @@ const displayTableOfTasks = (environment, list, actions) => h('', [
       NotAsked: () => null,
       Loading: () => null,
       Success: (data) => environment.task.getIndexOfTask(item.taskId) >= 0
-        && displayTaskDetails(data.filter((task) => task.taskId === item.taskId)[0]),
+        && displayTaskDetails(data.filter((task) => task.taskId === item.taskId)[0], Object.keys(list[0]).length),
       Failure: (error) => pageError(error),
     })])),
   ]
@@ -254,11 +254,12 @@ const displayTableOfTasks = (environment, list, actions) => h('', [
 ]);
 
 /**
- * Method to display an expandable area with details about a selected task
+ * Method to display an expandable table with details about a selected task
  * @param {Object} task
+ * @param {number} colSpan
  * @return {vnode}
  */
-const displayTaskDetails = (task) =>
+const displayTaskDetails = (task, colSpan) =>
   h('tr.m5',
-    h('td', {colspan: 8}, showTableItem(task))
+    h('td', {colspan: ++colSpan}, showTableItem(task))
   );

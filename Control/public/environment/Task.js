@@ -23,7 +23,7 @@ export default class Task extends Observable {
   async updateOpenedTasks(body) {
     const indexOfSelectedTask = this.getIndexOfTask(body.taskId);
 
-    if (indexOfSelectedTask >= 0) {
+    if (indexOfSelectedTask >= 0) { // if Task is already opened then remove from list
       this.openedTasks.splice(indexOfSelectedTask, 1);
     } else {
       this.getTaskById(body);
@@ -33,7 +33,7 @@ export default class Task extends Observable {
   }
 
   /**
-   * Method to retrieve index of a task in the existing queried task list
+   * Method to retrieve index of a task in the existing opened task list
    * @param {string} taskId
    * @return {number}
    */
@@ -46,7 +46,7 @@ export default class Task extends Observable {
    * @param {JSON} body {taskId: string}
    */
   async getTaskById(body) {
-    // Use session storage
+    // TODO Use local storage
     this.remoteTasks = RemoteData.loading();
     this.notify();
 

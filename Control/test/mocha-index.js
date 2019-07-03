@@ -82,6 +82,7 @@ describe('Control', function() {
         calls['getEnvironment'] = true;
         callback(null, envTest);
       }
+      // getPlot?
     });
     server.bind(address, credentials);
     server.start();
@@ -160,6 +161,10 @@ describe('Control', function() {
 
     it('should have gotten data from getEnvironments', async () => {
       assert(calls['getEnvironments'] === true);
+    });
+
+    it('should have gotten data from getPlotList', async () => {
+      assert(calls['getPlotList'] === true);
     });
   });
 
