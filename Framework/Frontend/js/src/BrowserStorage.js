@@ -39,7 +39,7 @@ export default class BrowserStorage {
    */
   removeLocalItem(key) {
     if (this._isParameterValid(key)) {
-      this.localStorage.removeItem(key);
+      this.localStorage.removeItem(`${this.label}-${key}`);
     }
   }
 
@@ -49,7 +49,7 @@ export default class BrowserStorage {
    */
   removeSessionItem(key) {
     if (this._isParameterValid(key)) {
-      this.sessionStorage.removeItem(key);
+      this.sessionStorage.removeItem(`${this.label}-${key}`);
     }
   }
 
@@ -139,7 +139,7 @@ export default class BrowserStorage {
    */
   _setItem(key, value, locationLabel) {
     const valueAsString = JSON.stringify(value);
-    if (this._parameter(key) && this._isParameterValid(valueAsString)) {
+    if (this._isParameterValid(key) && this._isParameterValid(valueAsString)) {
       switch (locationLabel) {
         case 'localStorage':
           this.localStorage.setItem(`${this.label}-${key}`, valueAsString);
@@ -160,7 +160,7 @@ export default class BrowserStorage {
    * @return {boolean}
    */
   _isParameterValid(parameter) {
-    if (!parameter || parameter.trim().length === 0 || typeof parameter !== 'string') {
+    if (!parameter || typeof parameter !== 'string' || parameter.trim().length === 0) {
       return false;
     }
     return true;
