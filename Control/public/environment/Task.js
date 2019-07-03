@@ -1,4 +1,4 @@
-import {Observable, RemoteData} from '/js/src/index.js';
+import {BrowserStorage, Observable, RemoteData} from '/js/src/index.js';
 
 /**
  * Model representing Task CRUD
@@ -12,6 +12,7 @@ export default class Task extends Observable {
     super();
 
     this.model = model;
+    this.storage = new BrowserStorage('AliECS');
     this.remoteTasks = RemoteData.notAsked();
     this.openedTasks = [];
   }
@@ -26,7 +27,13 @@ export default class Task extends Observable {
     if (indexOfSelectedTask >= 0) { // if Task is already opened then remove from list
       this.openedTasks.splice(indexOfSelectedTask, 1);
     } else {
-      this.getTaskById(body);
+      const commandInfo = this.storage.getLocalItem(body.taskId);
+      if (commandInfo) {
+        this.openedTasks.push(commandInfo);
+        this.remoteTasks = RemoteData.success(this.openedTasks);
+      } else {
+        this.getTaskById(body);
+      }
     }
     this.remoteTasks = RemoteData.success(this.openedTasks);
     this.notify();
@@ -46,7 +53,6 @@ export default class Task extends Observable {
    * @param {JSON} body {taskId: string}
    */
   async getTaskById(body) {
-    // TODO Use local storage
     this.remoteTasks = RemoteData.loading();
     this.notify();
 
@@ -55,6 +61,7 @@ export default class Task extends Observable {
       this.openedTasks.push({taskId: body.taskId, message: result.message});
     } else {
       const commandInfo = this.parseTaskCommandInfo(result.task.commandInfo, body.taskId);
+      this.storage.setLocalItem(body.taskId, commandInfo);
       this.openedTasks.push(commandInfo);
     }
     this.remoteTasks = RemoteData.success(this.openedTasks);
