@@ -76,7 +76,7 @@ const showContent = (environment, item) => [
       h('.flex-grow', {},
         displayTableOfTasks(environment, item.tasks, [
           (event, item) => {
-            environment.getTask({taskId: item.taskId});
+            environment.task.updateOpenedTasks({taskId: item.taskId});
           }]
         )
       )
@@ -240,12 +240,12 @@ const displayTableOfTasks = (environment, list, actions) => h('', [
           {
             onclick: (event) => actions[0](event, item)
           },
-          environment.wasTaskQueried(item.taskId) ? 'Close' : 'More')),
+          environment.task.getIndexOfTask(item.taskId) >= 0 ? 'Close' : 'More')),
     ]),
-    environment.currentTasks.match({
+    environment.task.remoteTasks.match({
       NotAsked: () => null,
       Loading: () => null,
-      Success: (data) => environment.wasTaskQueried(item.taskId)
+      Success: (data) => environment.task.getIndexOfTask(item.taskId) >= 0
         && displayTaskDetails(data.filter((task) => task.taskId === item.taskId)[0]),
       Failure: (error) => pageError(error),
     })])),

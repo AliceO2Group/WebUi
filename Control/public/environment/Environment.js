@@ -1,4 +1,5 @@
 import {Observable, RemoteData} from '/js/src/index.js';
+import Task from './Task.js';
 
 /**
  * Model representing Environment CRUD
@@ -11,6 +12,9 @@ export default class Environment extends Observable {
   constructor(model) {
     super();
 
+    this.task = new Task(model);
+    this.task.bubbleTo(model);
+
     this.model = model;
     this.list = RemoteData.notAsked();
     this.item = RemoteData.notAsked();
@@ -18,7 +22,6 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.notAsked();
     this.itemForm = {};
     this.plots = RemoteData.notAsked();
-    this.currentTasks = RemoteData.notAsked();
 
     this.getPlotsList();
   }
@@ -138,47 +141,5 @@ export default class Environment extends Observable {
       return;
     }
     this.plots = RemoteData.success(result);
-  }
-
-  /**
-   * Load Task into `item`
-   * @param {JSON} body
-  */
-  async getTask(body) {
-    const existingTasks = [];
-    if (this.currentTasks.isSuccess()) {
-      existingTasks.push(...this.currentTasks.payload);
-    }
-    const indexOfSelectedTask = existingTasks.map((task) => task.taskId).indexOf(body.taskId);
-    if (indexOfSelectedTask >= 0) {
-      existingTasks.splice(indexOfSelectedTask, 1);
-    } else {
-      this.currentTasks = RemoteData.loading();
-      this.notify();
-
-      const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
-      if (!ok) {
-        existingTasks.push({taskId: body.taskId, message: result.message});
-      } else {
-        delete result.task.commandInfo.shell;
-        result.task.commandInfo.env = result.task.commandInfo.env.join('\n');
-        result.task.commandInfo.arguments = result.task.commandInfo.arguments.join(' ');
-        result.task.commandInfo.taskId = result.task.shortInfo.taskId;
-        existingTasks.push(result.task.commandInfo);
-      }
-    }
-    this.currentTasks = RemoteData.success(existingTasks);
-    this.notify();
-  }
-
-  /**
-   * Method to check if a task was already queried by its id
-   * @param {string} taskId
-   * @return {boolean}
-   */
-  wasTaskQueried(taskId) {
-    return this.currentTasks.isSuccess() &&
-      this.currentTasks.payload.filter((task) => task.taskId === taskId).length > 0 ?
-      true : false;
   }
 }
