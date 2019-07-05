@@ -123,7 +123,7 @@ describe('Framework Frontend', function() {
       assert.strictEqual(result, '<a href="http://google.com">click me</a>');
     });
 
-    it('updates previous tag content', async() => {
+    it('updates previous tag content', async () => {
       const result = await page.evaluate(() => {
         render(window.document.body, h('a', {href: 'http://google.com/go'}, 'click me 2'));
         return window.document.body.innerHTML;
@@ -131,7 +131,7 @@ describe('Framework Frontend', function() {
       assert.strictEqual(result, '<a href="http://google.com/go">click me 2</a>');
     });
 
-    it('updates previous tag but keep element', async() => {
+    it('updates previous tag but keep element', async () => {
       const result = await page.evaluate(() => {
         return window.saveElement === window.document.body.firstElementChild;
       });
@@ -324,6 +324,103 @@ describe('Framework Frontend', function() {
         window.result = result.ok;
       });
       await page.waitForFunction(`window.result === 'GET'`);
+    });
+  });
+
+  describe('BrowserStorage class', function() {
+    it('should successfully create a BrowserStorage instance', async () => {
+      await page.evaluate(async () => {
+        const storage = new BrowserStorage();
+      });
+    });
+
+    it('should successfully set (key,value) in localStorage & sessionStorage', async () => {
+      const storage = await page.evaluate(async () => {
+        const storage = new BrowserStorage('TEST');
+        storage.setLocalItem('local', {value: 'localValue'});
+        storage.setLocalItem('localRemove', {value: 'localValue'});
+        storage.setLocalItem('localClear', {value: 'localValue'});
+        storage.setSessionItem('session', {value: 'sessionValue'});
+        storage.setSessionItem('sessionClear', {value: 'sessionValue'});
+        storage.setSessionItem('sessionRemove', {value: 'sessionValue'});
+
+        const expectedLocalValue = JSON.parse(window.localStorage.getItem('TEST-local'));
+        const expectedSessionValue = JSON.parse(window.sessionStorage.getItem('TEST-session'));
+        return [expectedLocalValue, expectedSessionValue];
+      });
+      assert.deepStrictEqual(storage[0], {value: 'localValue'});
+      assert.deepStrictEqual(storage[1], {value: 'sessionValue'});
+    });
+
+    it('should successfully return false and not set (key, value) when using bad key', async () => {
+      const isSet = await page.evaluate(async () => {
+        const storage = new BrowserStorage('TEST');
+        const emptyKey = storage.setLocalItem('', {value: 'localValue'});
+        const undefinedKey = storage.setLocalItem(undefined, {value: 'localValue'});
+        const nullKey = storage.setLocalItem(null, {value: 'localValue'});
+        const whiteSpaceKey = storage.setLocalItem('  ', {value: 'localValue'});
+        const nonStringKey = storage.setLocalItem(22, {value: 'localValue'});
+        return emptyKey || undefinedKey || nullKey || whiteSpaceKey || nonStringKey;
+      });
+      assert.deepStrictEqual(isSet, false);
+    });
+
+    it('should successfully return false and not set (key, value) when using bad value', async () => {
+      const isSet = await page.evaluate(async () => {
+        const storage = new BrowserStorage('TEST');
+        return storage.setLocalItem('key', undefined);
+      });
+      assert.deepStrictEqual(isSet, false);
+    });
+
+    it('should successfully retrieve item as JSON from local & session storage based on key', async () => {
+      const storage = await page.evaluate(async () => {
+        const storage = new BrowserStorage('TEST');
+        const localValue = storage.getLocalItem('local');
+        const sessionValue = storage.getSessionItem('session');
+        return [localValue, sessionValue];
+      });
+      assert.deepStrictEqual(storage[0].value, 'localValue');
+      assert.deepStrictEqual(storage[1].value, 'sessionValue');
+    });
+
+    it('should successfully return null if key does not exist', async () => {
+      const storage = await page.evaluate(async () => {
+        const storage = new BrowserStorage('TEST');
+        const localValue = storage.getLocalItem('no-key');
+        const sessionValue = storage.getSessionItem('no-key');
+        return [localValue, sessionValue];
+      });
+      assert.deepStrictEqual(storage[0], null);
+      assert.deepStrictEqual(storage[1], null);
+    });
+
+    it('should successfully remove (key, value) from local & session storage based on key', async () => {
+      const storage = await page.evaluate(async () => {
+        const storage = new BrowserStorage('TEST');
+        const localValue = storage.getLocalItem('local');
+        const sessionValue = storage.getSessionItem('session');
+        storage.removeLocalItem('localRemove');
+        storage.removeSessionItem('sessionRemove');
+        const localRemoved = storage.getLocalItem('localRemove');
+        const sessionRemoved = storage.getSessionItem('sessionRemove');
+        return [localValue, localRemoved, sessionValue, sessionRemoved];
+      });
+      assert.deepStrictEqual(storage, [{value: 'localValue'}, null, {value: 'sessionValue'}, null]);
+    });
+
+    it('should successfully clear local & session storage', async () => {
+      const storage = await page.evaluate(async () => {
+        const storage = new BrowserStorage('TEST');
+        const localValue = window.localStorage.length;
+        const sessionValue = window.localStorage.length;
+        storage.clearLocalStorage();
+        storage.clearSessionStorage();
+        const localEmpty = window.localStorage.length;
+        const sessionEmpty = window.localStorage.length;
+        return [localValue, localEmpty, sessionValue, sessionEmpty];
+      });
+      assert.deepStrictEqual(storage, [2, 0, 2, 0]);
     });
   });
 
