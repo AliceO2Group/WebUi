@@ -12,13 +12,6 @@
     "coverage": "nyc --reporter=lcov mocha --exit test/**/mocha-*",
     "postinstall": "mv build/Release/tobject2json.node ."
   },
-  "nyc": {
-    "all": true,
-    "include": [
-      "lib/*.js",
-      "public/**/*.js"
-    ]
-  },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
   "dependencies": {
