@@ -17,6 +17,6 @@ module.exports = {
   },
   consul: {
     hostname: 'localhost',
-    port: 8500
+    port: 7777
   }
 };
