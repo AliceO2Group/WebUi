@@ -30,9 +30,8 @@ export default class Task extends Observable {
       const commandInfo = this.storage.getLocalItem(body.taskId);
       if (commandInfo) {
         this.openedTasks.push(commandInfo);
-        this.remoteTasks = RemoteData.success(this.openedTasks);
       } else {
-        this.getTaskById(body);
+        await this.getTaskById(body);
       }
     }
     this.remoteTasks = RemoteData.success(this.openedTasks);
@@ -64,8 +63,6 @@ export default class Task extends Observable {
       this.storage.setLocalItem(body.taskId, commandInfo);
       this.openedTasks.push(commandInfo);
     }
-    this.remoteTasks = RemoteData.success(this.openedTasks);
-    this.notify();
   }
 
   /**
