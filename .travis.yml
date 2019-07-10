@@ -3,7 +3,7 @@ addons:
   - chrome: stable
   - mariadb: '10.0'
 os:
-  - linux
+  # - linux
   - osx
 language: node_js
 node_js: '10.15.3'
@@ -30,7 +30,7 @@ before_script:
   - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
   - cd $TRAVIS_BUILD_DIR/Framework/Backend/test; rm mocha-ws.js; sed -i -e 's/const skip = true/const skip = false/g' mocha-db.js
 script:
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "Is not a PULL REQUEST" fi'
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "Is not a PULL REQUEST" fi
   - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm test; fi
   - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm test; fi
   - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" lib/TObject2JsonClient.js; npm test; fi
