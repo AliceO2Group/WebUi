@@ -45,12 +45,9 @@ after_success:
       cd $TRAVIS_BUILD_DIR/Framework; npm run coverage; 
       # fi
       # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
-      nyc report --reporter=text-lcov > coverage.lcov && codecov; 
       # fi
       cd $TRAVIS_BUILD_DIR/QualityControl; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" lib/TObject2JsonClient.js; npm run coverage; 
-      nyc report --reporter=text-lcov > coverage.lcov && codecov; 
       cd $TRAVIS_BUILD_DIR/Control; npm run coverage; 
-      nyc report --reporter=text-lcov > coverage.lcov && codecov; 
       cd $TRAVIS_BUILD_DIR/InfoLogger; npm run coverage; 
       nyc report --reporter=text-lcov > coverage.lcov && codecov; 
     fi
