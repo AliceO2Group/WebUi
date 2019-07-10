@@ -3,7 +3,7 @@ addons:
   - chrome: stable
   - mariadb: '10.0'
 os:
-  # - linux
+  - linux
   - osx
 language: node_js
 node_js: '10.15.3'
@@ -16,18 +16,10 @@ before_install:
   - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
   - chmod +x .travis.bash; ./.travis.bash;
 install:
-  # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
-  - cd $TRAVIS_BUILD_DIR/Framework; npm install;
-  # fi
-  # - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then 
-  - cd $TRAVIS_BUILD_DIR/Control; npm install; 
-  # fi
-  # - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then 
-  - cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i.bak -e '7d' package.json; npm install; 
-  # fi
-  # - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then 
-  - cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; 
-  # fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm install; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then  cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i.bak -e '7d' package.json; npm install; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; fi
 before_script:
   - npm install -g codecov nyc jsdoc-to-markdown
   - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
@@ -41,18 +33,10 @@ after_success:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js websocket/*.js test/*.js db/*.js log/*.js > ../docs/reference/backend.md
-      # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
-      cd $TRAVIS_BUILD_DIR/Framework; npm run coverage; 
-      nyc report --reporter=text-lcov > coverage.lcov 
-      # fi
-      # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
-      # fi
-      cd $TRAVIS_BUILD_DIR/QualityControl; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" lib/TObject2JsonClient.js; npm run coverage; 
-      nyc report --reporter=text-lcov > coverage.lcov 
-      cd $TRAVIS_BUILD_DIR/Control; npm run coverage; 
-      nyc report --reporter=text-lcov > coverage.lcov 
-      cd $TRAVIS_BUILD_DIR/InfoLogger; npm run coverage; 
-      nyc report --reporter=text-lcov > coverage.lcov 
+      if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm run coverage; nyc report --reporter=text-lcov > coverage.lcov fi
+      if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" lib/TObject2JsonClient.js; npm run coverage; nyc report --reporter=text-lcov > coverage.lcov; fi
+      if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm run coverage; nyc report --reporter=text-lcov > coverage.lcov; fi
+      if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm run coverage; nyc report --reporter=text-lcov > coverage.lcov; fi;
       codecov; 
     fi
 notifications:

@@ -1,15 +1,13 @@
 codecov:
   notify:
-    after_n_builds: 1
+    after_n_builds: 
 
 coverage:
   precision: 2
   round: nearest
   range: 70...90
   status:
-    project: 
-      framework:
-        paths: Backend/test
+    project: true
     patch: true
     target: 80
     changes: false
