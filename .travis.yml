@@ -8,8 +8,11 @@ os:
 language: node_js
 node_js: '10.15.3'
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install mariadb; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mysql.server start; fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      HOMEBREW_NO_AUTO_UPDATE=1 brew install mariadb;
+      mysql.server start;
+    fi
   - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
   - chmod +x .travis.bash; ./.travis.bash;
 install:
@@ -42,9 +45,12 @@ after_success:
       cd $TRAVIS_BUILD_DIR/Framework; npm run coverage; 
       # fi
       # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
+      nyc report --reporter=text-lcov > coverage.lcov && codecov; 
       # fi
       cd $TRAVIS_BUILD_DIR/QualityControl; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" lib/TObject2JsonClient.js; npm run coverage; 
+      nyc report --reporter=text-lcov > coverage.lcov && codecov; 
       cd $TRAVIS_BUILD_DIR/Control; npm run coverage; 
+      nyc report --reporter=text-lcov > coverage.lcov && codecov; 
       cd $TRAVIS_BUILD_DIR/InfoLogger; npm run coverage; 
       nyc report --reporter=text-lcov > coverage.lcov && codecov; 
     fi
