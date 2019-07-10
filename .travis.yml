@@ -13,10 +13,18 @@ before_install:
   - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
   - chmod +x .travis.bash; ./.travis.bash;
 install:
-  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
-  - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm install; fi
-  - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i.bak -e '7d' package.json; npm install; fi
-  - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; fi
+  # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
+  - cd $TRAVIS_BUILD_DIR/Framework; npm install;
+  # fi
+  # - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then 
+  - cd $TRAVIS_BUILD_DIR/Control; npm install; 
+  # fi
+  # - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then 
+  - cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i.bak -e '7d' package.json; npm install; 
+  # fi
+  # - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then 
+  - cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; 
+  # fi
 before_script:
   - npm install -g codecov nyc jsdoc-to-markdown
   - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
@@ -28,8 +36,18 @@ script:
   - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; fi
 after_success:
   - cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js websocket/*.js test/*.js db/*.js log/*.js > ../docs/reference/backend.md
-  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm run coverage; fi
-  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then nyc report --reporter=text-lcov > coverage.lcov && codecov; fi
+  # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
+  - cd $TRAVIS_BUILD_DIR/Framework; npm run coverage; 
+  # fi
+  # - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then 
+  - nyc report --reporter=text-lcov > coverage.lcov && codecov; 
+  # fi
+  - cd $TRAVIS_BUILD_DIR/QualityControl; npm run coverage; 
+  - nyc report --reporter=text-lcov > coverage.lcov && codecov; 
+  - cd $TRAVIS_BUILD_DIR/Control; npm run coverage; 
+  - nyc report --reporter=text-lcov > coverage.lcov && codecov; 
+  - cd $TRAVIS_BUILD_DIR/InfoLogger; npm run coverage; 
+  - nyc report --reporter=text-lcov > coverage.lcov && codecov; 
 notifications:
   email: false
   slack:

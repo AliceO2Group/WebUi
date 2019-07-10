@@ -5,11 +5,13 @@ codecov:
 coverage:
   precision: 2
   round: nearest
-  range: 60...90
+  range: 50...90
   status:
     project: true
     patch: true
+    target: 80
     changes: false
+    threshold: 0
 
 ignore:
   - docs/*
