@@ -7,7 +7,9 @@ coverage:
   round: nearest
   range: 70...90
   status:
-    project: true
+    project: 
+      framework:
+        paths: Backend/test
     patch: true
     target: 80
     changes: false
