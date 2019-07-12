@@ -11,7 +11,7 @@ coverage:
       default: false
       framework:
         target: 90%
-        paths: "Framework/Backend/test"
+        paths: "Framework/Backend"
     patch: true
     target: 80
     changes: false
