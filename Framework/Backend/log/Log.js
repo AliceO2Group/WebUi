@@ -112,6 +112,16 @@ class Log {
     // eslint-disable-next-line
     console.trace(err);
   }
+
+  /**
+   * Test
+   */
+  testMethod() {
+    const a = 1;
+    if (a == 1) {
+      return;
+    }
+  }
 }
 
 module.exports = Log;
