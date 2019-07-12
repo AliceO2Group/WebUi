@@ -88,9 +88,9 @@ module.exports.setup = (http, ws) => {
         .then((result) => {
           log.info(`Grafana is up and running on version: ${result.version}`);
           const hostPort = `http://${host}:${port}/`;
-          const valueOne = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=6 ';
-          const valueTwo = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=4';
-          const plot = 'd-solo/uHUjCFiWk/readout?orgId=1&panelId=5';
+          const valueOne = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=6 ';
+          const valueTwo = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=8';
+          const plot = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=4';
           const theme = '&refresh=5s&theme=light';
           const response = [hostPort + valueOne + theme, hostPort + valueTwo + theme, hostPort + plot + theme];
           res.status(200).json(response);

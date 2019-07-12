@@ -4,12 +4,13 @@
   "description": "O2 Quality Control Web User Interface",
   "main": "index.js",
   "scripts": {
+    "postinstall": "mv build/Release/tobject2json.node .",
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit test/mocha-*",
-    "postinstall": "mv build/Release/tobject2json.node ."
+    "coverage": "nyc --reporter=lcov npm run mocha",    
+    "mocha": "mocha --exit test/**/mocha-*"
   },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
@@ -22,7 +23,9 @@
     "concurrently": "^4.1.0",
     "eslint": "^5.15.0",
     "eslint-config-google": "^0.12.0",
-    "mocha": "^6.0.2",
+    "mocha": "^6.1.4",
+    "nock": "^10.0.6",
+    "nyc": "^14.1.1",
     "puppeteer": "^1.12.2"
   }
 }

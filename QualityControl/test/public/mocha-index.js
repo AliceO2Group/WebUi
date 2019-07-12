@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
-const config = require('./test-config.js');
+const config = require('../test-config.js');
 const {spawn} = require('child_process');
 
 // APIs:
