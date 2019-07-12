@@ -10,16 +10,19 @@ coverage:
     project: 
       default: false
       Framework:
-        target: 90%
+        target: 50%
         paths: "Framework/Backend"
         threshold: null
       QualityControl:
+        target: 69%
         paths: "QualityControl"
         threshold: null
       InfoLogger:
+        target: 41%
         paths: "InfoLogger"
         threshold: null
       Control:
+        target: 70%
         paths: "Control"
         threshold: null
     patch: true
