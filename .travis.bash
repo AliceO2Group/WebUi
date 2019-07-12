@@ -2,6 +2,7 @@
 
 get_changed_projects_list () {
   UPSTREAM_BRANCH="$1"
+  echo "Incepem functia $UPSTREAM_BRANCH"
 
   # get list of files changed
   CHANGED_FILES=$(git diff --name-only HEAD $(git merge-base HEAD ${UPSTREAM_BRANCH}))
@@ -29,9 +30,9 @@ get_changed_projects_list () {
 for b in `git branch -r | grep -v -- '->'`; do
   git branch --track ${b##origin/} $b || true;
 done
-
+echo "CURRENT BRANCH IS: $TRAVIS_BRANCH"
 get_changed_projects_list $TRAVIS_BRANCH
 
-for project in ${CHANGED_PROJECTS[@]}; do
-  cd ${project}; touch _TEST; cd ..; echo "Testing ${project}"
-done
+# for project in ${CHANGED_PROJECTS[@]}; do
+#   cd ${project}; touch _TEST; cd ..; echo "Testing ${project}"
+# done
