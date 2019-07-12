@@ -82,7 +82,6 @@ describe('Control', function() {
         calls['getEnvironment'] = true;
         callback(null, envTest);
       }
-      // getPlot?
     });
     server.bind(address, credentials);
     server.start();
@@ -146,8 +145,7 @@ describe('Control', function() {
       assert(location.search === '?page=status');
     });
 
-
-    it('should have gotten data from getEnvironments', async () => {
+    it('should have gotten data from getFrameworkInfo', async () => {
       assert(calls['getFrameworkInfo'] === true);
     });
   });
@@ -162,10 +160,6 @@ describe('Control', function() {
     it('should have gotten data from getEnvironments', async () => {
       assert(calls['getEnvironments'] === true);
     });
-
-    it('should have gotten data from getPlotList', async () => {
-      assert(calls['getPlotList'] === true);
-    });
   });
 
   describe('page environment', () => {
@@ -175,7 +169,7 @@ describe('Control', function() {
       assert(location.search === '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
     });
 
-    it('should have gotten data from getEnvironments', async () => {
+    it('should have gotten data from getEnvironment', async () => {
       assert(calls['getEnvironment'] === true);
     });
 
