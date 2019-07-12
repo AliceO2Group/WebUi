@@ -5,11 +5,12 @@ get_changed_projects_list () {
 
   # get list of files changed
   CHANGED_FILES=$(git diff --name-only HEAD $(git merge-base HEAD ${UPSTREAM_BRANCH}))
+  echo "These are the changed files: $CHANGED_FILES"
   for dir in $CHANGED_FILES; do
 
     # remove filenames
     dir=$(dirname $dir);
-
+    echo "These are the changed directories $dir"
     # keep root directories only
     dir=$(echo "$dir" | awk -F "/" '{print $1}');
 
@@ -19,7 +20,7 @@ get_changed_projects_list () {
 
   # remove duplicates
   CHANGED_PROJECTS=($(echo "${CHANGED_PROJECTS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '));
-
+  echo "THese are the changed directories"
   # remove "." from array
   CHANGED_PROJECTS=("${CHANGED_PROJECTS[@]/.}");
 }
