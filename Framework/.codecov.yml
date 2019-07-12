@@ -10,31 +10,21 @@ coverage:
     project: 
       default: false
       Framework:
-        target: 50%
-        flags: Framework
+        target: 90%
+        paths: "Framework/Backend"
+        threshold: null
       QualityControl:
-        flags: QualityControl
-        target: 40%
+        paths: "QualityControl"
+        threshold: null
       InfoLogger:
-        flags: InfoLogger
-        target: 70%
+        paths: "InfoLogger"
+        threshold: null
       Control:
-        flags: Control
-        target: 70%
+        paths: "Control"
+        threshold: null
     patch: true
-    target: 80
     changes: false
     threshold: 0
-
-flags:
-  Framework:
-    paths: "Framework/Backend"
-  QualityControl:
-    paths: "QualityControl"
-  InfoLogger:
-    paths: "InfoLogger"
-  Control:
-    paths: "Control"
 
 ignore:
   - docs/*
