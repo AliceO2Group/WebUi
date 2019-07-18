@@ -1,0 +1,36 @@
+codecov:
+  notify:
+    after_n_builds: 1
+
+coverage:
+  precision: 2
+  round: nearest
+  range: 70...90
+  status:
+    project: 
+      default: false
+      Framework:
+        target: 50%
+        paths: "Framework/Backend"
+        threshold: null
+      QualityControl:
+        target: 69%
+        paths: "QualityControl"
+        threshold: null
+      InfoLogger:
+        target: 41%
+        paths: "InfoLogger"
+        threshold: null
+      Control:
+        target: 70%
+        paths: "Control"
+        threshold: null
+    patch: true
+    changes: false
+    threshold: 0
+
+ignore:
+  - docs/*
+  - node_modules/*
+
+comment: false
