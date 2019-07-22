@@ -2,7 +2,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const SQLDataSource = require('../../lib/SQLDataSource.js');
 const {MySQL} = require('@aliceo2/web-ui');
-const config = require('./../test-config.js');
+const config = require('./lib-test-config.js');
 
 
 describe('SQLDataSource', () => {
