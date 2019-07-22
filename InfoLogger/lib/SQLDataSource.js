@@ -1,4 +1,3 @@
-const {MySQL} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)('InfoLoggerSQLSource');
 
 module.exports = class SQLDataSource {
@@ -6,25 +5,31 @@ module.exports = class SQLDataSource {
    * Instantiate SQL data source and connect to database
    * MySQL options: https://github.com/mysqljs/mysql#connection-options
    * Limit option
+   * @param {Object} connection - mysql connection
    * @param {Object} configMySql - mysql config
    */
-  constructor(configMySql) {
-    if (!configMySql) {
-      throw new Error('MySQL config is required to query logs');
-    }
+  constructor(connection, configMySql) {
+    this.configMySql = configMySql;
+    this.connection = connection;
+  }
 
-    this.connection = new MySQL(configMySql);
-
-    this.connection
+  /**
+   * Method to check if mysql driver connection is up
+   * @return {Promise} with the results
+   */
+  async isConnectionUpAndRunning() {
+    return await this.connection
       .query('select timestamp from messages LIMIT 1000;')
       .then(() => {
-        const url = `${configMySql.host}:${configMySql.port}/${configMySql.database}`;
+        const url = `${this.configMySql.host}:${this.configMySql.port}/${this.configMySql.database}`;
         log.info(`Connected to infoLogger database ${url}`);
       })
       .catch((error) => {
+        log.error(error);
         throw error;
       });
   }
+
 
   /**
    * Translates `filters` from client side to SQL condition to put on WHERE clause
@@ -53,15 +58,13 @@ module.exports = class SQLDataSource {
    * @param {Object} filters - {...}
    * @return {Object} {values, criteria}
    */
-  filtersToSqlConditions(filters) {
+  _filtersToSqlConditions(filters) {
     const values = [];
     const criteria = [];
-
     for (const field in filters) {
       if (!filters.hasOwnProperty(field)) {
         continue;
       }
-
       for (const operator in filters[field]) {
         if (filters[field][operator] === null || !operator.includes('$')) {
           continue;
@@ -98,7 +101,6 @@ module.exports = class SQLDataSource {
         }
       }
     }
-
     return {values, criteria};
   }
 
@@ -120,26 +122,15 @@ module.exports = class SQLDataSource {
     }
     options = Object.assign({}, {limit: 100}, options);
 
-    let criteriaString = '';
     const startTime = Date.now(); // ms
+    const {criteria, values} = this._filtersToSqlConditions(filters);
+    const criteriaString = this._getCriteriaAsString(criteria);
 
-    const {criteria, values} = this.filtersToSqlConditions(filters);
+    const rows = await this._queryMessagesOnOptions(criteriaString, options, values);
 
-    if (criteria.length) {
-      criteriaString = `WHERE ${criteria.join(' AND ')}`;
-    }
-    /* eslint-disable max-len */
-    // The rows asked with a limit
-    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
-    log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
-    const rows = await this.connection.query(requestRows, values);
+    const resultCount = await this._countMessagesOnOptions(criteriaString, values);
 
-    // Count how many rows could be found, limit to 100k anyway
-    const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
-    log.debug(`requestCount: ${requestCount} ${JSON.stringify(values)}`);
-    const resultCount = await this.connection.query(requestCount, values);
-    /* eslint-enable max-len */
-    let total = parseInt(resultCount[0].total, 10);
+    let total = parseInt(resultCount[0].total);
     let more = false;
 
     // "more" flag indicates more rows available
@@ -148,9 +139,7 @@ module.exports = class SQLDataSource {
       more = true;
     }
 
-    const endTime = Date.now(); // ms
-    const totalTime = endTime - startTime; // ms
-
+    const totalTime = Date.now() - startTime; // ms
     log.debug(`Query done in ${totalTime}ms`);
 
     return {
@@ -161,6 +150,53 @@ module.exports = class SQLDataSource {
       limit: options.limit,
       time: totalTime // ms
     };
+  }
+
+  /**
+   * Method to fill criteria and return it as string
+   * @param {Array} criteria Array of criteria set by the user
+   * @return {string}
+   */
+  _getCriteriaAsString(criteria) {
+    return (criteria && criteria.length) ? `WHERE ${criteria.join(' AND ')}` : '';
+  }
+
+  /**
+   * Method to retrieve the messages based on passed Options
+   * @param {string} criteriaString as a string
+   * @param {Object} options containing limit on messages
+   * @param {Array} values of filter parameters
+   * @return {Promise} rows
+   */
+  _queryMessagesOnOptions(criteriaString, options, values) {
+    /* eslint-disable max-len */
+    // The rows asked with a limit
+    const requestRows = `SELECT * from (SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT ${options.limit}) as reordered ORDER BY \`TIMESTAMP\` ASC`;
+    /* eslint-enable max-len */
+    log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
+    return this.connection.query(requestRows, values)
+      .then((data) => data)
+      .catch((error) => {
+        log.error(error);
+        return [];
+      });
+  }
+
+  /**
+   * Count how many rows could be found, limit to 100k anyway
+   * @param {string} criteriaString as a string
+   * @param {Array} values of filter parameters
+   * @return {Promise}
+   */
+  _countMessagesOnOptions(criteriaString, values) {
+    const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
+    log.debug(`requestCount: ${requestCount} ${JSON.stringify(values)}`);
+    return this.connection.query(requestCount, values)
+      .then((data) => data)
+      .catch((error) => {
+        log.error(error);
+        return [{total: -1}];
+      });
   }
 };
 
