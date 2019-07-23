@@ -2,13 +2,16 @@ const {Log, WebSocketMessage, InfoLoggerReceiver} = require('@aliceo2/web-ui');
 const log = new Log('InfoLogger');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
+const {MySQL} = require('@aliceo2/web-ui');
 
 let querySource = null;
 let liveSource = null;
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);
-  querySource = new SQLDataSource(config.mysql);
+  const connection = new MySQL(config.mysql);
+  querySource = new SQLDataSource(connection, config.mysql);
+  querySource.isConnectionUpAndRunning();
 } else {
   log.warn(`InfoLogger databse config not found, Query mode not available`);
 }

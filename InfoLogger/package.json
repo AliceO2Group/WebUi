@@ -11,7 +11,8 @@
     "simul": "node test/live-simulator/infoLoggerServer.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
-    "coverage": "nyc npm run mocha"
+    "coverage": "nyc npm run mocha",
+    "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
@@ -23,6 +24,7 @@
     "eslint-config-google": "^0.12.0",
     "mocha": "^6.0.2",
     "nyc": "^14.1.1",
-    "puppeteer": "^1.12.2"
+    "puppeteer": "^1.12.2",
+    "sinon": "^7.3.2"
   }
 }
