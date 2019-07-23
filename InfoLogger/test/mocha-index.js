@@ -17,7 +17,7 @@ describe('InfoLogger', function() {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(5000);
+  this.timeout(15000);
   this.slow(1000);
   const baseUrl = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
@@ -60,7 +60,7 @@ describe('InfoLogger', function() {
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.strictEqual(search, '?q={"severity":{"in":"D I W E F"}}');
+    assert.deepStrictEqual(search, '?q={"severity":{"in":"D I W E F"}}');
   });
 
   describe('LogFilter', async () => {
@@ -75,8 +75,8 @@ describe('InfoLogger', function() {
         return window.location.search;
       });
 
-      assert.strictEqual(searchParams, expectedParams);
-      assert.strictEqual(decodeURI(searchParams), decodedParams);
+      assert.deepStrictEqual(searchParams, expectedParams);
+      assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
     });
 
     it('should parse dates in format DD/MM/YY', async () => {
@@ -86,7 +86,7 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias.timestamp.$since.toISOString();
       });
 
-      assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
+      assert.deepStrictEqual($since, '2004-01-31T23:00:00.000Z');
     });
 
     it('should parse dates in format DD/MM/YYTHH:MM', async () => {
@@ -96,7 +96,7 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias.timestamp.$since.toISOString();
       });
 
-      assert.strictEqual($since, '2004-01-31T23:00:00.000Z');
+      assert.deepStrictEqual($since, '2004-01-31T23:00:00.000Z');
     });
 
     it('should parse numbers to integers', async () => {
@@ -105,8 +105,8 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias.level;
       });
 
-      assert.strictEqual(level.$max, 12);
-      assert.strictEqual(level.max, 12);
+      assert.deepStrictEqual(level.$max, 12);
+      assert.deepStrictEqual(level.max, 12);
     });
 
     it('should parse empty keyword to null', async () => {
@@ -115,7 +115,7 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias.pid.$match;
       });
 
-      assert.strictEqual($match, null);
+      assert.deepStrictEqual($match, null);
     });
 
     it('should parse keyword', async () => {
@@ -124,7 +124,7 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias.pid.$match;
       });
 
-      assert.strictEqual($match, '1234');
+      assert.deepStrictEqual($match, '1234');
     });
 
     it('should parse no keywords to null', async () => {
@@ -133,7 +133,7 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias.pid.$in;
       });
 
-      assert.strictEqual($in, null);
+      assert.deepStrictEqual($in, null);
     });
 
     it('should parse keywords to array', async () => {
@@ -141,7 +141,8 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('pid', 'in', '123 456');
         return window.model.log.filter.criterias.pid.$in;
       });
-      assert.strictEqual($in.length, 2);
+      
+      assert.deepStrictEqual($in.length, 2);
       assert.deepStrictEqual($in, ['123', '456']);
     });
 
@@ -152,13 +153,13 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias;
       });
 
-      assert.strictEqual(criterias.pid.match, '');
-      assert.strictEqual(criterias.pid.$match, null);
-      assert.strictEqual(criterias.level.max, 21);
-      assert.strictEqual(criterias.level.$max, 21);
-      assert.strictEqual(criterias.timestamp.since, '');
-      assert.strictEqual(criterias.timestamp.$since, null);
-      assert.strictEqual(criterias.severity.in, 'D I W E F');
+      assert.deepStrictEqual(criterias.pid.match, '');
+      assert.deepStrictEqual(criterias.pid.$match, null);
+      assert.deepStrictEqual(criterias.level.max, 21);
+      assert.deepStrictEqual(criterias.level.$max, 21);
+      assert.deepStrictEqual(criterias.timestamp.since, '');
+      assert.deepStrictEqual(criterias.timestamp.$since, null);
+      assert.deepStrictEqual(criterias.severity.in, 'D I W E F');
       assert.deepStrictEqual(criterias.severity.$in, ['D', 'W', 'I', 'E', 'F']);
     });
   });
@@ -170,7 +171,7 @@ describe('InfoLogger', function() {
         return window.model.log.activeMode;
       });
 
-      assert.strictEqual(activeMode, 'Running');
+      assert.deepStrictEqual(activeMode, 'Running');
     });
 
     it('cannot be activated twice', async () => {
@@ -183,7 +184,7 @@ describe('InfoLogger', function() {
         }
       });
 
-      assert.strictEqual(thrown, true);
+      assert.deepStrictEqual(thrown, true);
     });
 
     it('should have filled some logs via WS with the level "debug"', async () => {
@@ -194,16 +195,62 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias;
       });
 
-      assert.strictEqual(criterias.level.max, 21);
-      assert.strictEqual(criterias.level.$max, 21);
+      assert.deepStrictEqual(criterias.level.max, 21);
+      assert.deepStrictEqual(criterias.level.$max, 21);
 
       // Wait for logs and count them (2-3 maybe, it's random)
-      await page.waitFor(1500); // simulator is set to ~500ms per log
+      await page.waitFor(1500); // simulator is set to ~100ms per log
       const list = await page.evaluate(() => {
         return window.model.log.list;
       });
+      assert.deepStrictEqual(!!list.length, true);
+    });
 
-      assert.strictEqual(!!list.length, true);
+    it('should filter messages based on `hostname` matching `aldaqdip01`', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Query'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriterias();
+        window.model.log.filter.setCriteria('hostname', 'match', 'aldaqdip01');
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitFor(3000);
+      const list = await page.evaluate(() => window.model.log.list);
+      const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqdip01');
+      assert.deepStrictEqual(list.length > 0, true);
+      assert.deepStrictEqual(isHostNameMatching, true);
+    });
+
+    it('should filter messages based on `hostname` excluding `aldaqdip01`', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Query'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriterias();
+        window.model.log.filter.setCriteria('hostname', 'exclude', 'aldaqdip01');
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitFor(3000);
+      const list = await page.evaluate(() => window.model.log.list);
+      const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname !== 'aldaqdip01');
+
+      assert.deepStrictEqual(list.length > 0, true);
+      assert.deepStrictEqual(isHostNameMatching, true);
+    });
+
+    it('should filter messages based on SQL Wildcards `hostname` excluding `%ldaqdip%` and username matching `a_iceda_`', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Query'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriterias();
+        window.model.log.filter.setCriteria('hostname', 'exclude', '%ldaqdip%');
+        window.model.log.filter.setCriteria('username', 'match', 'a_iceda_');
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitFor(3000);
+      const list = await page.evaluate(() => window.model.log.list);
+      const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
+      const isUserNameMatching = list.map((element) => element.username).every((username) => new RegExp('a.iceda.').test(username));
+
+      assert.deepStrictEqual(list.length > 0, true);
+      assert.deepStrictEqual(isHostNameMatching, true);
+      assert.deepStrictEqual(isUserNameMatching, true);
     });
 
     it('should go to mode live in paused state', async () => {
@@ -212,7 +259,7 @@ describe('InfoLogger', function() {
         return window.model.log.activeMode;
       });
 
-      assert.strictEqual(activeMode, 'Paused');
+      assert.deepStrictEqual(activeMode, 'Paused');
     });
 
     it('should go to mode query', async () => {
@@ -222,7 +269,7 @@ describe('InfoLogger', function() {
         return window.model.log.activeMode;
       });
 
-      assert.strictEqual(activeMode, 'Query');
+      assert.deepStrictEqual(activeMode, 'Query');
     });
 
 
@@ -233,7 +280,7 @@ describe('InfoLogger', function() {
         return window.model.log.activeMode;
       });
 
-      assert.strictEqual(activeMode, 'Query');
+      assert.deepStrictEqual(activeMode, 'Query');
     });
   });
 
@@ -273,13 +320,13 @@ describe('InfoLogger', function() {
         window.testFunction(); // 3 calls but counter will increase by 2 only at the end
         return window.testCounter;
       });
-      assert.strictEqual(counter, 1);
+      assert.deepStrictEqual(counter, 1);
 
       await page.waitFor(200);
       counter = await page.evaluate(() => {
         return window.testCounter;
       });
-      assert.strictEqual(counter, 2);
+      assert.deepStrictEqual(counter, 2);
     });
   });
 
