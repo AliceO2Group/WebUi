@@ -247,7 +247,7 @@ describe('InfoLogger', function() {
       const list = await page.evaluate(() => window.model.log.list);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
       const isUserNameMatching = list.map((element) => element.username).every((username) => new RegExp('a.iceda.').test(username));
-      console.log(list);
+
       assert.deepStrictEqual(list.length > 0, true);
       assert.deepStrictEqual(isHostNameMatching, true);
       assert.deepStrictEqual(isUserNameMatching, true);
