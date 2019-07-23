@@ -141,9 +141,8 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('pid', 'in', '123 456');
         return window.model.log.filter.criterias.pid.$in;
       });
-
       assert.strictEqual($in.length, 2);
-      assert.strictEqual($in ['123', '456']);
+      assert.deepEqual($in, ['123', '456']);
     });
 
     it('should reset filters and set them again', async () => {
