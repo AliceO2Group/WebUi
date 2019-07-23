@@ -1,19 +1,11 @@
 const assert = require('assert');
 const sinon = require('sinon');
+const config = require('../../config-default.js');
 const SQLDataSource = require('../../lib/SQLDataSource.js');
 const {MySQL} = require('@aliceo2/web-ui');
 
 
 describe('SQLDataSource', () => {
-  const config = {
-    mysql: {
-      host: 'localhost',
-      user: 'root',
-      password: 'admintest',
-      database: 'INFOLOGGER',
-      port: 8909
-    }
-  };
   const filters = {
     timestamp: {
       since: -5,
