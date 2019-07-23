@@ -7,7 +7,6 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false
   },
-
   infoLoggerServer: {
     host: 'localhost',
     port: 6102
