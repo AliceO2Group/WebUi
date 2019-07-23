@@ -142,7 +142,7 @@ describe('InfoLogger', function() {
         return window.model.log.filter.criterias.pid.$in;
       });
       assert.strictEqual($in.length, 2);
-      assert.deepEqual($in, ['123', '456']);
+      assert.deepStrictEqual($in, ['123', '456']);
     });
 
     it('should reset filters and set them again', async () => {
