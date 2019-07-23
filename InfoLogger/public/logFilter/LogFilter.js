@@ -96,7 +96,7 @@ export default class LogFilter extends Observable {
         // remote empty inputs
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
-        } else if (operator ==='match') {
+        } else if (operator === 'match') {
           // encode potential breaking characters
           criterias[field][operator] = encodeURI(criterias[field][operator]);
         }
@@ -154,6 +154,17 @@ export default class LogFilter extends Observable {
         return new Date(timestamp * 1000);
       }
 
+      /**
+       * Method to generate criteria value as Regex
+       * @param {string} criteria Criteria passed in by user
+       * @return {RegExp}
+       */
+      function generateRegexCriteriaValue(criteria) {
+        criteria = criteria.replace(new RegExp('%', 'g'), '.*');
+        criteria = criteria.replace(new RegExp('_', 'g'), '.');
+        return new RegExp(criteria);
+      }
+
       // eslint-disable-next-line guard-for-in
       for (const field in criterias) {
         const logValue = log[field];
@@ -161,7 +172,6 @@ export default class LogFilter extends Observable {
         // eslint-disable-next-line guard-for-in
         for (const operator in criterias[field]) {
           const criteriaValue = criterias[field][operator];
-
           // don't apply criterias not set
           if (criteriaValue === null) {
             continue;
@@ -169,15 +179,19 @@ export default class LogFilter extends Observable {
 
           // logValue is sometime required, undefined means test fails and log is rejected
           switch (operator) {
-            case '$match':
             case '$in':
-              if (logValue === undefined || criteriaValue.indexOf(logValue) === -1) {
+              if (logValue === undefined || !criteriaValue.includes(logValue)) {
+                return false;
+              }
+              break;
+            case '$match':
+              if (logValue === undefined || !generateRegexCriteriaValue(criteriaValue).test(logValue)) {
                 return false;
               }
               break;
 
             case '$exclude':
-              if (logValue !== undefined && criteriaValue.indexOf(logValue) >= 0) {
+              if (logValue !== undefined && generateRegexCriteriaValue(criteriaValue).test(logValue)) {
                 return false;
               }
               break;
