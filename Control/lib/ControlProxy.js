@@ -50,9 +50,9 @@ class ControlProxy {
         log.error(`Connection to gRPC server (${address}) timedout`);
         this.connectionError = error;
       } else {
+        log.info(`gRPC connected to ${address}`);
         this.connectionReady = true;
       }
-      log.debug(`gRPC connected to ${address}`);
     });
 
     // set all the available gRPC methods

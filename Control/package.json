@@ -1,7 +1,7 @@
 {
   "name": "@aliceo2/control",
   "description": "ALICE O2 Control GUI",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -16,7 +16,7 @@
   "repository": "AliceO2Group/WebUi",
   "homepage": "https://alice-o2.web.cern.ch",
   "dependencies": {
-    "@aliceo2/web-ui": "1.8.9",
+    "@aliceo2/web-ui": "1.9.0",
     "@grpc/proto-loader": "^0.4.0",
     "grpc": "^1.18.0",
     "kafka-node": "^4.1.3"

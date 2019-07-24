@@ -1,4 +1,5 @@
 import {Observable, RemoteData} from '/js/src/index.js';
+import Task from './Task.js';
 
 /**
  * Model representing Environment CRUD
@@ -11,6 +12,9 @@ export default class Environment extends Observable {
   constructor(model) {
     super();
 
+    this.task = new Task(model);
+    this.task.bubbleTo(model);
+
     this.model = model;
     this.list = RemoteData.notAsked();
     this.item = RemoteData.notAsked();
@@ -18,6 +22,8 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.notAsked();
     this.itemForm = {};
     this.plots = RemoteData.notAsked();
+
+    this.getPlotsList();
   }
 
   /**
@@ -42,7 +48,6 @@ export default class Environment extends Observable {
    * @param {Object} body - See protobuf definition for properties
    */
   async getEnvironment(body) {
-    this.getPlotsList();
     this.item = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
