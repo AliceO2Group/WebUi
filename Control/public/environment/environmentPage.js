@@ -62,10 +62,12 @@ const showContent = (environment, item) => [
         ]
       ),
       environment.plots.match({
-        NotAsked: () => null,
+        NotAsked: () => h('.w-100.text-center.grafana-font', 'Grafana plots were not loaded, please refresh the page'),
         Loading: () => null,
         Success: (data) => showEmbeddedGraphs(data),
-        Failure: () => null,
+        Failure: () => h('.w-100.text-center.grafana-font',
+          'Grafana plots were not loaded, please contact an administrator'
+        ),
       })
     ]
   ),
