@@ -162,7 +162,16 @@ export default class LogFilter extends Observable {
       function generateRegexCriteriaValue(criteria) {
         criteria = criteria.replace(new RegExp('%', 'g'), '.*');
         criteria = criteria.replace(new RegExp('_', 'g'), '.');
-        return new RegExp(criteria);
+        return new RegExp('^' + criteria + '$');
+      }
+
+      /**
+       * Method to replace all new lines from a log value
+       * @param {string} logValue
+       * @return {string}
+       */
+      function removeNewLinesFrom(logValue) {
+        return logValue.replace(/\r?\n|\r/g, '');
       }
 
       // eslint-disable-next-line guard-for-in
@@ -185,13 +194,15 @@ export default class LogFilter extends Observable {
               }
               break;
             case '$match':
-              if (logValue === undefined || !generateRegexCriteriaValue(criteriaValue).test(logValue)) {
+              if (logValue === undefined ||
+                !generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
                 return false;
               }
               break;
 
             case '$exclude':
-              if (logValue !== undefined && generateRegexCriteriaValue(criteriaValue).test(logValue)) {
+              if (logValue !== undefined &&
+                generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
                 return false;
               }
               break;
