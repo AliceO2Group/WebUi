@@ -365,6 +365,7 @@ export default class Log extends Observable {
       }
       value = copy.join(' ');
     }
+    this.model.log.filter.filtersChanged = true;
     this.filter.setCriteria(field, operator, value);
 
     if (this.isLiveModeRunning()) {
@@ -382,6 +383,7 @@ export default class Log extends Observable {
    * Clears also log list.
    */
   liveStart() {
+    this.model.log.filter.filtersChanged = false;
     // those Errors should be protected by user interface
     if (this.queryResult.isLoading()) {
       throw new Error('Query is loading, wait before starting live');

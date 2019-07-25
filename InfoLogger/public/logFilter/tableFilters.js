@@ -45,14 +45,14 @@ export default (model) => h('table.table-filters', [
     h('tr', {className: model.log.isLiveModeRunning() ? 'd-none' : ''}, [
       h('td.relative',
         model.log.focus.timestampSince && datePicker(model, model.log.filter.criterias.timestamp.$since),
-        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampSince', true), onblur: () => model.log.setFocus('timestampSince', false), oninput: (e) => model.log.filter.setCriteria('timestamp', 'since', e.target.value), placeholder: 'from', value: model.log.filter.criterias.timestamp.since})),
-      filterLabels.map((label) => createInputField(model.log.filter, label.toLowerCase(), 'match')),
+        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampSince', true), onblur: () => model.log.setFocus('timestampSince', false), oninput: (e) => model.log.setCriteria('timestamp', 'since', e.target.value), placeholder: 'from', value: model.log.filter.criterias.timestamp.since})),
+      filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'match')),
     ]),
     h('tr', {className: model.log.isLiveModeRunning() ? 'd-none' : ''}, [
       h('td.relative',
         model.log.focus.timestampUntil && datePicker(model, model.log.filter.criterias.timestamp.$until),
-        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampUntil', true), onblur: () => model.log.setFocus('timestampUntil', false), oninput: (e) => model.log.filter.setCriteria('timestamp', 'until', e.target.value), placeholder: 'to', value: model.log.filter.criterias.timestamp.until})),
-      filterLabels.map((label) => createInputField(model.log.filter, label.toLowerCase(), 'exclude')),
+        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampUntil', true), onblur: () => model.log.setFocus('timestampUntil', false), oninput: (e) => model.log.setCriteria('timestamp', 'until', e.target.value), placeholder: 'to', value: model.log.filter.criterias.timestamp.until})),
+      filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'exclude')),
     ])
   ])
 ]);
@@ -70,15 +70,15 @@ const createClickableLabel = (log, label) => h('td', h('button.btn.w-100', {
 
 /**
 * Generate a match input field within a td element
-* @param {object} filter
+* @param {object} log
 * @param {string} field
 * @param {string} command
 * @return {vnode}
 */
-const createInputField = (filter, field, command) => h('td', h('input.form-control', {
+const createInputField = (log, field, command) => h('td', h('input.form-control', {
   type: 'text',
-  oninput: (e) => filter.setCriteria(field, command, e.target.value),
+  oninput: (e) => log.setCriteria(field, command, e.target.value),
   onkeydown: (e) => e.stopPropagation(),
-  value: filter.criterias[field][command],
+  value: log.filter.criterias[field][command],
   placeholder: field === 'hostname' ? command : ''
 }));

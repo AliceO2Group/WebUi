@@ -52,7 +52,6 @@ export default class LogFilter extends Observable {
    * //
    */
   setCriteria(field, operator, value) {
-    this.model.log.filter.filtersChanged = true;
     this.criterias[field][operator] = value;
     // auto-complete other properties / parse
     switch (operator) {
