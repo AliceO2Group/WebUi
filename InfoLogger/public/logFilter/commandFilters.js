@@ -10,28 +10,34 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export default (model) => [
-  h('.btn-group', [
-    buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
-    buttonSeverity(model, 'Info', 'Match severity info', 'I'),
-    buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
-    buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
-    buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F')
-  ]),
-  h('span.mh3'),
-  h('.btn-group', [
-    buttonFilterLevel(model, 'Shift', 1),
-    buttonFilterLevel(model, 'Oncall', 6),
-    buttonFilterLevel(model, 'Devel', 11),
-    buttonFilterLevel(model, 'Debug', null),
-  ]),
-  h('span.mh3'),
-  h('.btn-group', [
-    buttonLogLimit(model, '1k', 1000),
-    buttonLogLimit(model, '10k', 10000),
-    buttonLogLimit(model, '100k', 100000),
-  ]),
-  h('span.mh3'),
-  buttonReset(model),
+  model.log.isActiveModeQuery() && model.log.filter.didFiltersChange() &&
+  h('.mh3.animate-color-change.flex-grow', {
+    style: 'display: inline-flex'
+  },
+    'Filters changed. Query again for updated results'),
+  h('.flex-grow', {style: 'display:inline-flex'},
+    h('.btn-group', [
+      buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
+      buttonSeverity(model, 'Info', 'Match severity info', 'I'),
+      buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
+      buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
+      buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F')
+    ]),
+    h('span.mh3'),
+    h('.btn-group', [
+      buttonFilterLevel(model, 'Shift', 1),
+      buttonFilterLevel(model, 'Oncall', 6),
+      buttonFilterLevel(model, 'Devel', 11),
+      buttonFilterLevel(model, 'Debug', null),
+    ]),
+    h('span.mh3'),
+    h('.btn-group', [
+      buttonLogLimit(model, '1k', 1000),
+      buttonLogLimit(model, '10k', 10000),
+      buttonLogLimit(model, '100k', 100000),
+    ]),
+    h('span.mh3'),
+    buttonReset(model))
 ];
 
 /**

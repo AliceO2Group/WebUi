@@ -28,10 +28,18 @@ export default class LogFilter extends Observable {
     super();
 
     this.model = model;
+    this.filtersChanged = false;
 
     this.resetCriterias();
   }
 
+  /**
+   * Method to check if filters were changed without querying
+   * @return {boolean}
+   */
+  didFiltersChange() {
+    return this.filtersChanged;
+  }
   /**
    * Set a filter criteria for a field with an operator and value.
    * For each field+operator a parsed property in criterias is made with associated cast (Date, number, Array).
@@ -44,6 +52,7 @@ export default class LogFilter extends Observable {
    * //
    */
   setCriteria(field, operator, value) {
+    this.model.log.filter.filtersChanged = true;
     this.criterias[field][operator] = value;
     // auto-complete other properties / parse
     switch (operator) {

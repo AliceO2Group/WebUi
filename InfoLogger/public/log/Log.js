@@ -65,6 +65,14 @@ export default class Log extends Observable {
   }
 
   /**
+   * Method to return if the current mode is Query
+   * @return {boolean}
+   */
+  isActiveModeQuery() {
+    return this.activeMode === MODE.QUERY;
+  }
+
+  /**
    * Set all stats severities to 0
    */
   resetStats() {
@@ -164,6 +172,7 @@ export default class Log extends Observable {
    */
   setLimit(limit) {
     this.limit = limit;
+    this.model.log.filter.filtersChanged = true;
     this.notify();
   }
 
@@ -327,6 +336,7 @@ export default class Log extends Observable {
       this.notify();
       return;
     }
+    this.model.log.filter.filtersChanged = false;
     this.queryResult = RemoteData.success(result);
     this.list = result.rows;
 
