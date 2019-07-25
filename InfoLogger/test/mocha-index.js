@@ -206,8 +206,8 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(!!list.length, true);
     });
 
-    it('should filter messages based on `hostname` matching `aldaqdip01`', async () => {
-      await page.evaluate(() => window.model.log.liveStop('Query'));
+    it('should filter messages based on `hostname` matching `aldaqdip01` from live -> paused -> live', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
       await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
         window.model.log.filter.setCriteria('hostname', 'match', 'aldaqdip01');
@@ -220,7 +220,7 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(isHostNameMatching, true);
     });
 
-    it('should filter messages based on `hostname` excluding `aldaqdip01`', async () => {
+    it('should filter messages based on `hostname` excluding `aldaqdip01` from live -> query -> live', async () => {
       await page.evaluate(() => window.model.log.liveStop('Query'));
       await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
@@ -235,14 +235,13 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(isHostNameMatching, true);
     });
 
-    it('should filter messages based on SQL Wildcards `hostname` excluding `%ldaqdip%` and username matching `a_iceda_`', async () => {
-      await page.evaluate(() => window.model.log.liveStop('Query'));
+    it('should filter messages based on SQL Wildcards `hostname` excluding `%ldaqdip%` and username matching `a_iceda_` without changing state of live mode', async () => {
+      await page.evaluate(() => window.model.log.filter.resetCriterias());
       await page.evaluate(() => {
-        window.model.log.filter.resetCriterias();
-        window.model.log.filter.setCriteria('hostname', 'exclude', '%ldaqdip%');
-        window.model.log.filter.setCriteria('username', 'match', 'a_iceda_');
+        window.model.log.setCriteria('hostname', 'exclude', '%ldaqdip%');
+        window.model.log.setCriteria('username', 'match', 'a_iceda_');
+        window.model.log.empty();
       });
-      await page.evaluate(() => window.model.log.liveStart());
       await page.waitFor(3000);
       const list = await page.evaluate(() => window.model.log.list);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
@@ -271,7 +270,6 @@ describe('InfoLogger', function() {
 
       assert.deepStrictEqual(activeMode, 'Query');
     });
-
 
     it('should go to mode query if mode not specified', async () => {
       const activeMode = await page.evaluate(() => {
