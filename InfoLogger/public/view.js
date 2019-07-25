@@ -15,30 +15,28 @@ export default (model) => [
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
       h('header.p1.flex-row.f7', [
-        h('', [
-          commandLogs(model)
-        ]),
-        h('.flex-grow.text-right', [
-          commandFilters(model)
-        ]),
+        h('', commandLogs(model)),
+        h('.flex-grow',
+          {
+            style: 'display: flex; flex-direction:row-reverse;'
+          }, commandFilters(model)),
       ]),
-      h('header.f7', [
-        tableFilters(model)
-      ]),
+      h('header.f7', tableFilters(model)),
     ]),
     h('div.flex-grow.flex-row.shadow-level0.logs-container', [
-      h('main.flex-grow.flex-column.transition-background-color', {
-        className: (model.log.queryResult.isLoading()) ? 'bg-gray' : ''
-      }, [
-        // table fixed header
-        tableLogsHeader(model),
+      h('main.flex-grow.flex-column.transition-background-color',
+        {
+          className: (model.log.queryResult.isLoading()) ? 'bg-gray' : ''
+        }, [
+          // table fixed header
+          tableLogsHeader(model),
 
-        // table scrollable content
-        h('.flex-row.flex-grow.logs-content', [
-          tableLogsContent(model),
-          tableLogsScrollMap(model),
-        ])
-      ]),
+          // table scrollable content
+          h('.flex-row.flex-grow.logs-content', [
+            tableLogsContent(model),
+            tableLogsScrollMap(model),
+          ])
+        ]),
       h('aside.sidebar', {style: {width: model.inspectorEnabled ? '' : '0rem'}}, [
         h('.sidebar-content.scroll-y', [
           inspector(model)

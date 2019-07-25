@@ -371,7 +371,8 @@ export default class Log extends Observable {
       this.model.ws.setFilter(this.model.log.filter.toFunction());
       this.model.notification.show(
         `The current live session has been adapted to the new filter configuration.`,
-        'primary'
+        'primary',
+        2000
       );
     }
   }

@@ -10,12 +10,7 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export default (model) => [
-  model.log.isActiveModeQuery() && model.log.filter.didFiltersChange() &&
-  h('.mh3.animate-color-change.flex-grow', {
-    style: 'display: inline-flex'
-  },
-    'Filters changed. Query again for updated results'),
-  h('.flex-grow', {style: 'display:inline-flex'},
+  h('',
     h('.btn-group', [
       buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
       buttonSeverity(model, 'Info', 'Match severity info', 'I'),
@@ -37,7 +32,13 @@ export default (model) => [
       buttonLogLimit(model, '100k', 100000),
     ]),
     h('span.mh3'),
-    buttonReset(model))
+    buttonReset(model)),
+  model.log.isActiveModeQuery() && model.log.filter.didFiltersChange() &&
+  h('.mh3.animate-color-change.text-center',
+    {
+      style: 'flex-grow: 1;'
+    },
+    'Filters changed. Query again for updated results'),
 ];
 
 /**
