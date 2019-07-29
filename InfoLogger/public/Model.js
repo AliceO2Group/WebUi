@@ -116,7 +116,7 @@ export default class Model extends Observable {
     // don't listen to keys when it comes from an input (they transform into letters)
     // except spacial ones which are not chars
     // http://www.foreui.com/articles/Key_Code_Table.htm
-    if (e.target.tagName.toLowerCase() === 'input' && e.keyCode > 47) {
+    if (e.target.tagName.toLowerCase() === 'input') {
       return;
     }
 
