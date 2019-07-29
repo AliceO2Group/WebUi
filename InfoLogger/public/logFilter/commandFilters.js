@@ -32,13 +32,7 @@ export default (model) => [
       buttonLogLimit(model, '100k', 100000),
     ]),
     h('span.mh3'),
-    buttonReset(model)),
-  model.log.isActiveModeQuery() && model.log.filter.didFiltersChange() &&
-  h('.mh3.animate-color-change.text-center',
-    {
-      style: 'flex-grow: 1;'
-    },
-    'Filters changed. Query again for updated results'),
+    buttonReset(model))
 ];
 
 /**

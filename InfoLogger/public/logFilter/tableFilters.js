@@ -77,7 +77,11 @@ const createClickableLabel = (log, label) => h('td', h('button.btn.w-100', {
 */
 const createInputField = (log, field, command) => h('td', h('input.form-control', {
   type: 'text',
-  oninput: (e) => log.setCriteria(field, command, e.target.value),
+  // oninput: (e) => log.setCriteria(field, command, e.target.value),
+  onblur: (e) => {
+    console.log(e.target.value);
+    log.setCriteria(field, command, e.target.value);
+  },
   value: log.filter.criterias[field][command],
   placeholder: field === 'hostname' ? command : ''
 }));

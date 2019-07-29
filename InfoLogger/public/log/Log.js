@@ -172,7 +172,6 @@ export default class Log extends Observable {
    */
   setLimit(limit) {
     this.limit = limit;
-    this.model.log.filter.filtersChanged = true;
     this.notify();
   }
 
@@ -336,7 +335,6 @@ export default class Log extends Observable {
       this.notify();
       return;
     }
-    this.model.log.filter.filtersChanged = false;
     this.queryResult = RemoteData.success(result);
     this.list = result.rows;
 
@@ -365,16 +363,14 @@ export default class Log extends Observable {
       }
       value = copy.join(' ');
     }
-    this.model.log.filter.filtersChanged = true;
     this.filter.setCriteria(field, operator, value);
 
     if (this.isLiveModeRunning()) {
       this.model.ws.setFilter(this.model.log.filter.toFunction());
       this.model.notification.show(
-        `The current live session has been adapted to the new filter configuration.`,
-        'primary',
-        2000
-      );
+        `The current live session has been adapted to the new filter configuration.`, 'primary', 2000);
+    } else {
+      this.model.notification.show(`Filters changed. Query again for updated results`, 'primary', 2000);
     }
   }
 
@@ -383,7 +379,6 @@ export default class Log extends Observable {
    * Clears also log list.
    */
   liveStart() {
-    this.model.log.filter.filtersChanged = false;
     // those Errors should be protected by user interface
     if (this.queryResult.isLoading()) {
       throw new Error('Query is loading, wait before starting live');
