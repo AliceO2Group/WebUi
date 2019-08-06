@@ -4,23 +4,6 @@
 
 .transition-background-color { transition: background-color 0.5s ease; }
 
-.animate-color-change {
-  color: #757575;
-  animation: color-change-animation 1.5s steps(5, start) 3;
-  -webkit-animation: color-change-animation 1.5s steps(5, start) 3;
-}
-@keyframes color-change-animation {
-  0% {color: #d62631}
-  50% {color: #757575;}
-  100% {color: #d62631;}
-}
-@-webkit-keyframes color-change-animation {
-  0% {color: #d62631}
-  50% {color: #757575;}
-  100% {color: #d62631;}
-}
-
-
 /* includes buttons and input */
 .table-filters { width: 100%; }
 
