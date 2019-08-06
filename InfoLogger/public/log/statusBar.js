@@ -26,12 +26,6 @@ const statusLogs = (model) => model.servicesResult.match({
   Loading: () => 'Loading services...',
   Success: (services) => [
     statusStats(model),
-    model.log.queryResult.match({
-      NotAsked: () => null,
-      Loading: () => 'Querying server...',
-      Success: (result) => statusQuery(model, result),
-      Failure: () => null, // notification
-    }),
     model.log.isLiveModeRunning() && statusLive(model, services),
   ],
   Failure: () => h('span.danger', 'Unable to load services'),
@@ -74,7 +68,7 @@ const applicationOptions = (model) => [
  */
 const statusQuery = (model, result) => `\
 (loaded out of ${result.total}${result.more ? '+' : ''} \
-in ${(result.time / 1000).toFixed(2)} second${(result.time / 1000) >= 2 ? 's' : ''})\
+in ${(result.time / 1000).toFixed(2)} second(s)${(result.time / 1000) >= 2 ? 's' : ''})\
 `;
 
 /**
@@ -94,6 +88,12 @@ const statusLive = (model, services) => [
  */
 const statusStats = (model) => [
   h('span.ph2', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
+  model.log.queryResult.match({
+    NotAsked: () => null,
+    Loading: () => 'Querying server...',
+    Success: (result) => statusQuery(model, result),
+    Failure: () => null, // notification
+  }),
   h('span.ph2.severity-d', `${model.log.stats.debug} debug`),
   h('span.ph2.severity-i', `${model.log.stats.info} info`),
   h('span.ph2.severity-w', `${model.log.stats.warning} warn`),
