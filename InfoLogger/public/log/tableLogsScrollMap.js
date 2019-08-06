@@ -73,9 +73,10 @@ const draw = (model, dom) => {
   const incrementRatio = Math.max(1, Math.floor(model.log.list.length / model.log.scrollHeight));
   for (let i = 0; i < listLength; i += incrementRatio) {
     switch (model.log.list[i].severity) {
+      case 'D':
       case 'I':
         // ctx.strokeStyle = 'rgba(23, 162, 184, 0.05)';
-        continue; // info is useless to draw
+        continue; // info and debug is useless to draw
       case 'W':
         ctx.strokeStyle = 'rgba(255, 152, 0, 1)';
         break;
