@@ -33,46 +33,52 @@ export default class LogFilter extends Observable {
   }
 
   /**
-   * Set a filter criteria for a field with an operator and value.
+   * Set a filter criteria for a field with an operator and value only if the new value is different than the current one.
    * For each field+operator a parsed property in criterias is made with associated cast (Date, number, Array).
    * @param {string} field
    * @param {string} operator
    * @param {string} value
+   * @return {boolean}
    * @example
    * setCriteria('severity', 'in', 'W E F')
    * // severity is W or E or F
    * //
    */
   setCriteria(field, operator, value) {
-    this.criterias[field][operator] = value;
-    // auto-complete other properties / parse
-    switch (operator) {
-      case 'since':
-        this.criterias[field]['$since'] = this.model.timezone.parse(value);
-        break;
-      case 'until':
-        this.criterias[field]['$until'] = this.model.timezone.parse(value);
-        break;
-      case 'min':
-        this.criterias[field]['$min'] = parseInt(value, 10);
-        break;
-      case 'max':
-        this.criterias[field]['$max'] = parseInt(value, 10);
-        break;
-      case 'match':
-        this.criterias[field]['$match'] = value ? value : null;
-        break;
-      case 'exclude':
-        this.criterias[field]['$exclude'] = value ? value : null;
-        break;
-      case 'in':
-        this.criterias[field]['$in'] = value ? value.split(' ') : null;
-        break;
-      default:
-        throw new Error('unknown operator');
-    }
+    if (this.criterias[field][operator] !== value) {
+      this.criterias[field][operator] = value;
+      // auto-complete other properties / parse
+      switch (operator) {
+        case 'since':
+          this.criterias[field]['$since'] = this.model.timezone.parse(value);
+          break;
+        case 'until':
+          this.criterias[field]['$until'] = this.model.timezone.parse(value);
+          break;
+        case 'min':
+          this.criterias[field]['$min'] = parseInt(value, 10);
+          break;
+        case 'max':
+          this.criterias[field]['$max'] = parseInt(value, 10);
+          break;
+        case 'match':
+          this.criterias[field]['$match'] = value ? value : null;
+          break;
+        case 'exclude':
+          this.criterias[field]['$exclude'] = value ? value : null;
+          break;
+        case 'in':
+          this.criterias[field]['$in'] = value ? value.split(' ') : null;
+          break;
+        default:
+          throw new Error('unknown operator');
+      }
 
-    this.notify();
+      this.notify();
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**

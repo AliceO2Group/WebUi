@@ -363,14 +363,14 @@ export default class Log extends Observable {
       }
       value = copy.join(' ');
     }
-    this.filter.setCriteria(field, operator, value);
-
-    if (this.isLiveModeRunning()) {
-      this.model.ws.setFilter(this.model.log.filter.toFunction());
-      this.model.notification.show(
-        `The current live session has been adapted to the new filter configuration.`, 'primary', 2000);
-    } else {
-      this.model.notification.show(`Filters changed. Query again for updated results`, 'primary', 2000);
+    if (this.filter.setCriteria(field, operator, value)) {
+      if (this.isLiveModeRunning()) {
+        this.model.ws.setFilter(this.model.log.filter.toFunction());
+        this.model.notification.show(
+          `The current live session has been adapted to the new filter configuration.`, 'primary', 2000);
+      } else if (this.isActiveModeQuery()) {
+        this.model.notification.show(`Filters have changed. Query again for updated results`, 'primary', 2000);
+      }
     }
   }
 
