@@ -45,13 +45,13 @@ export default (model) => h('table.table-filters', [
     h('tr', [
       h('td.relative',
         model.log.focus.timestampSince && datePicker(model, model.log.filter.criterias.timestamp.$since),
-        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampSince', true), onblur: () => model.log.setFocus('timestampSince', false), oninput: (e) => model.log.filter.setCriteria('timestamp', 'since', e.target.value), placeholder: 'from', value: model.log.filter.criterias.timestamp.since})),
+        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampSince', true), onblur: () => model.log.setFocus('timestampSince', false), oninput: (e) => model.log.setCriteria('timestamp', 'since', e.target.value), placeholder: 'from', value: model.log.filter.criterias.timestamp.since})),
       filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'match')),
     ]),
     h('tr', [
       h('td.relative',
         model.log.focus.timestampUntil && datePicker(model, model.log.filter.criterias.timestamp.$until),
-        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampUntil', true), onblur: () => model.log.setFocus('timestampUntil', false), oninput: (e) => model.log.filter.setCriteria('timestamp', 'until', e.target.value), placeholder: 'to', value: model.log.filter.criterias.timestamp.until})),
+        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampUntil', true), onblur: () => model.log.setFocus('timestampUntil', false), oninput: (e) => model.log.setCriteria('timestamp', 'until', e.target.value), placeholder: 'to', value: model.log.filter.criterias.timestamp.until})),
       filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'exclude')),
     ])
   ])
@@ -77,9 +77,7 @@ const createClickableLabel = (log, label) => h('td', h('button.btn.w-100', {
 */
 const createInputField = (log, field, command) => h('td', h('input.form-control', {
   type: 'text',
-  oninput: (e) => log.filter.setCriteria(field, command, e.target.value),
-  onkeydown: (e) => e.stopPropagation(),
-  onblur: (e) => log.setCriteria(field, command, e.target.value),
-  value: log.filter.criterias[field][command],
+  oninput: (e) => log.setCriteria(field, command, e.target.value),
+  value: log.filter.criterias[field][command].slice(),
   placeholder: field === 'hostname' ? command : ''
 }));
