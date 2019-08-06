@@ -13,7 +13,7 @@ before_install:
       HOMEBREW_NO_AUTO_UPDATE=1 brew install mariadb;
       mysql.server start;
     fi
-  - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
+  - mysql -uroot -e "CREATE DATABASE INFOLOGGER;"
   - chmod +x .travis.bash; ./.travis.bash;
 install:
   - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
