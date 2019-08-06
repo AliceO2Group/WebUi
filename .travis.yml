@@ -7,6 +7,8 @@ os:
   - osx
 language: node_js
 node_js: '10.15.3'
+services:
+  - mysql
 before_install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
