@@ -2,7 +2,7 @@
   "name": "@aliceo2/qc",
   "version": "1.5.0",
   "description": "O2 Quality Control Web User Interface",
-  "main": "index.js",
+  "main": "export.js",
   "scripts": {
     "postinstall": "mv build/Release/tobject2json.node .",
     "install": "unset PYTHONHOME PYTHONPATH PYTHONUSERBASE; node-gyp rebuild",
