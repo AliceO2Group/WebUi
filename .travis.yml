@@ -20,7 +20,7 @@ before_install:
 install:
   - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
   - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm install; fi
-  - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then  cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i.bak -e '7d' package.json; npm install; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then  cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i.bak -e '7,8d' package.json; npm install; fi
   - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; fi
 before_script:
   - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
