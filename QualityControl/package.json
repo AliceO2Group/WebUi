@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "mv build/Release/tobject2json.node .",
+    "install": "unset PYTHONHOME PYTHONPATH PYTHONUSERBASE; node-gyp rebuild",
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "coverage": "nyc npm run mocha",    
+    "coverage": "nyc npm run mocha",
     "mocha": "mocha --exit test/**/mocha-*"
   },
   "author": "Vladimir Kosmala",
