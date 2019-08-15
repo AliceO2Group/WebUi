@@ -9,8 +9,9 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "coverage": "nyc npm run mocha",    
-    "mocha": "mocha --exit test/**/mocha-*"
+    "coverage": "nyc npm run mocha",
+    "mocha": "mocha --exit test/**/mocha-*",
+    "install": "unset PYTHONHOME PYTHONPATH PYTHONUSERBASE; node-gyp rebuild"
   },
   "author": "Vladimir Kosmala",
   "license": "GPL-3.0",
