@@ -9,10 +9,13 @@
   100% { opacity: 1; }
 }
 
-.object-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
-.object-online { border: 0.15em solid var(--color-success); transition: border 0s; }
-.object-selected { border: 0.3em solid var(--color-primary); }
-.object-edit-layer { cursor: move; opacity: 0; }
+.object-selectable { cursor: pointer; text-decoration: none;}
+.object-selectable:hover { cursor: pointer; background-color: var(--color-gray-dark) !important; color: var(--color-gray-lighter);}
+
+.layout-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
+.layout-online { border: 0.15em solid var(--color-success); transition: border 0s; }
+.layout-selected { border: 0.3em solid var(--color-primary); }
+.layout-edit-layer { cursor: move; opacity: 0; }
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 
