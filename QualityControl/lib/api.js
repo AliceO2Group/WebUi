@@ -35,14 +35,18 @@ function listObjects(req, res) {
 }
 
 /**
- * List all Online objects' name
+ * List all Online objects' name if online mode is enabled
  * @param {Request} req
  * @param {Response} res
  */
 function listOnlineObjects(req, res) {
-  model.listOnlineObjects()
-    .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
+  if (typeof model.listOnlineObjects !== 'undefined') {
+    model.listOnlineObjects()
+      .then((data) => res.status(200).json(data))
+      .catch((err) => errorHandler(err, res));
+  } else {
+    errorHandler('Online mode is not enabled', res, 404);
+  }
 }
 
 /**
@@ -51,9 +55,13 @@ function listOnlineObjects(req, res) {
  * @param {Response} res
  */
 function isOnlineModeConnectionAlive(req, res) {
-  model.isOnlineModeConnectionAlive()
-    .then(() => res.status(200).json({running: true}))
-    .catch((err) => errorHandler(err, res));
+  if (typeof model.isOnlineModeConnectionAlive !== 'undefined') {
+    model.isOnlineModeConnectionAlive()
+      .then(() => res.status(200).json({running: true}))
+      .catch((err) => errorHandler(err, res));
+  } else {
+    errorHandler('Online mode is not enabled', res, 404);
+  }
 }
 
 /**
