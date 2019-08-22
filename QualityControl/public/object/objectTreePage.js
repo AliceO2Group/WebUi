@@ -146,7 +146,7 @@ function treeRow(model, tree, level) {
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
   return [
-    h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
+    h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight', [
         iconWrapper,
         ' ',
