@@ -91,12 +91,10 @@ function getRootObject(model) {
     model.router.params.objectName ?
       h('',
         {
-          oncreate: () => {
-            model.object.select(model.router.params.objectName);
-          },
-          style: 'widht: 100%; height: 100%'
+          oncreate: () => model.object.select({name: model.router.params.objectName}),
+          style: 'widht: 100%; height: 100%',
         },
-        model.object.selected ? draw(model, model.router.params.objectName) : null)
+        model.object.selected ? draw(model, model.object.selected.name) : null)
       : errorLoadingObject(''));
 }
 
