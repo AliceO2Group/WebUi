@@ -167,7 +167,7 @@ function treeRow(model, sideTree, level) {
   };
 
   return [
-    h('tr', attr, [
+    h('tr.object-selectable', attr, [
       h('td.text-ellipsis', [iconWrapper, ' ', sideTree.name])
     ]),
     ...subtree
