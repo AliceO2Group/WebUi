@@ -1,4 +1,4 @@
-import {h, iconBarChart, iconCaretRight, iconCaretBottom} from '/js/src/index.js';
+import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
 
 /**
@@ -10,17 +10,36 @@ import {draw} from './objectDraw.js';
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
   h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()}, [
     h('.flex-grow.scroll-y', tableShow(model)),
-    h('.animate-width.scroll-y', {
-      style: {
-        width: model.object.selected ? '50%' : 0
-      }
-    }, model.object.selected ? draw(model, model.object.selected.name) : null)
+    h('.animate-width.scroll-y',
+      {
+        style: {
+          width: model.object.selected ? '50%' : 0
+        }
+      },
+      model.object.selected ? drawComponent(model) : null)
   ]),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),
     statusBarRight(model),
   ])
 ]);
+
+/**
+ * Test
+ * @param {Object} model 
+ * @return {vnode}
+ */
+function drawComponent(model) {
+  return h('',
+    {
+      style: 'height:100%; display: flex; flex-direction: column'
+    }, [
+      h('.p3.text-right.object-selectable',
+        {
+          style: 'padding-bottom:0'
+        }, iconResizeBoth()),
+      draw(model, model.object.selected.name)]);
+}
 
 /**
  * Shows status of current tree with its options (online, loaded, how many)
