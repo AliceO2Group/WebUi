@@ -239,7 +239,7 @@ describe('QCG', function() {
       assert.deepStrictEqual(result.location.search, '?page=objectView');
       assert.deepStrictEqual(result.message, 'Please pass an objectName parameter');
       assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-      assert.deepStrictEqual(result.backButtonTitle, 'Go back to QCG');
+      assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
     });
 
     it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
@@ -284,6 +284,36 @@ describe('QCG', function() {
         };
       });
       assert.deepStrictEqual(result.location, '?page=objectTree');
+      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+    });
+
+    it('should update button text to "Go back to layout" if layoutId parameter is provided', async () => {
+      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
+      const layoutId = '5aba4a059b755d517e76ea10';
+      await page.goto(url + `?page=objectView&objectName=${objectName}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+
+      const result = await page.evaluate(() => {
+        const backButtonTitle = document.querySelector('div div div a').title;
+        return {
+          location: window.location.search,
+          backButtonTitle: backButtonTitle
+        };
+      });
+      assert.deepStrictEqual(result.location, `?page=objectView&objectName=DAQ01%2FEquipmentSize%2FCPV%2FCPV&layoutId=5aba4a059b755d517e76ea10`);
+      assert.deepStrictEqual(result.backButtonTitle, 'Go back to layout');
+    });
+
+    it('should take back the user to page=layoutShow when clicking "Go back to layout" (object passed and selected)', async () => {
+      await page.evaluate(() => document.querySelector('div div div a').click());
+      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
+      const layoutId = '5aba4a059b755d517e76ea10';
+      const result = await page.evaluate(() => {
+        return {
+          location: window.location.search,
+          objectSelected: window.model.object.selected
+        };
+      });
+      assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
       assert.deepStrictEqual(result.objectSelected, {name: objectName});
     });
   });

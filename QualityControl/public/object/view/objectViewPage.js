@@ -47,7 +47,9 @@ function getBackToQCGButton(model) {
     h('a.btn',
       {
         title: model.router.params.layoutId ? 'Go back to layout' : 'Go back to all objects',
-        href: model.router.params.layoutId ? `?page=layoutShow&layoutId=${model.router.params.layoutId}` : '?page=objectTree',
+        href: model.router.params.layoutId ?
+          `?page=layoutShow&layoutId=${model.router.params.layoutId}`
+          : '?page=objectTree',
         onclick: (e) => {
           model.router.handleLinkEvent(e);
         }
