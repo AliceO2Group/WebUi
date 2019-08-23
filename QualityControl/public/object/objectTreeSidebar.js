@@ -1,6 +1,6 @@
 import {h} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
-import {iconCaretBottom, iconCaretRight, iconBarChart} from '/js/src/icons.js';
+import {iconCaretBottom, iconCaretRight, iconBarChart, iconResizeBoth} from '/js/src/icons.js';
 
 /**
  * Tree of object, searchable, inside the sidebar.
@@ -51,7 +51,28 @@ function objectPreview(model) {
     return null;
   }
 
-  return h('.bg-white', {style: {height: '10em'}}, draw(model, model.object.selected.name));
+  return h('.bg-white', {style: {height: '10em'}}, drawComponent(model, model.object.selected.name));
+}
+
+/**
+ * Method to generate a component containing a header with actions and a jsroot plot
+ * @param {Object} model
+ * @param {String} tabObject
+ * @return {vnode}
+ */
+function drawComponent(model, tabObject) {
+  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
+    [
+      h('.text-right.', {style: 'padding: .25rem .25rem 0rem .25rem'},
+        h('a.btn',
+          {
+            style: 'padding: 0.25em 0.5em',
+            title: 'Open object plot in full screen',
+            href: `?page=objectView&objectName=${tabObject}&layoutId=${model.router.params.layoutId}`,
+            onclick: (e) => model.router.handleLinkEvent(e)
+          }, h('span.f7', iconResizeBoth()))),
+      h('', {style: 'height:100%; display: flex; flex-direction: column'},
+        draw(model, tabObject))]);
 }
 
 /**
