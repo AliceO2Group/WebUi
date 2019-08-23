@@ -47,6 +47,7 @@ export default class Layout extends Observable {
 
     if (result.isSuccess()) {
       this.list = assertLayouts(result.payload);
+      this.model.folders.list.get('All Layouts').list = this.list;
       this.notify();
     } else {
       this.model.notification.show(`Unable to load layouts.`, 'danger', Infinity);
@@ -63,6 +64,7 @@ export default class Layout extends Observable {
     if (!this.myList.isSuccess()) {
       this.model.notification.show(`Unable to load your personal layouts.`, 'danger', Infinity);
     }
+    this.model.folders.list.get('My Layouts').list = this.myList.payload;
     this.notify();
   }
 

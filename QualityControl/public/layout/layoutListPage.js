@@ -12,7 +12,7 @@ export default function layouts(model) {
       style: 'display: flex; flex-direction: column'
     },
     [
-      Array.from(model.folders.list.values()).map((folder) => createFolder(model, folder, []))
+      Array.from(model.folders.list.values()).map((folder) => createFolder(model, folder, folder.list))
     ]
   );
 }
@@ -25,12 +25,12 @@ export default function layouts(model) {
  * @return {vnode}
  */
 function createFolder(model, folder, listOfLayouts) {
-  return h('.m3.shadow-level3.br3',
+  return h('.m2.shadow-level3.br3',
     {style: 'display:flex; flex-direction:column;'},
     [
       createHeaderOfFolder(model, folder),
       ' ',
-      folder.isOpened ? table(model) : null
+      folder.isOpened ? table(model, listOfLayouts) : null
     ]
   );
 }
@@ -42,7 +42,7 @@ function createFolder(model, folder, listOfLayouts) {
  * @return {vnode}
  */
 function createHeaderOfFolder(model, folder) {
-  return h('.bg-gray-light.p3',
+  return h('.bg-gray-light.p2',
     {style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row'},
     [
       h('b', {style: 'flex-grow:1;'}, folder.title),
@@ -58,9 +58,10 @@ function createHeaderOfFolder(model, folder) {
 /**
  * Shows a table containing layouts, one per line
  * @param {Object} model
+ * @param {Array<Object>} listOfLayouts
  * @return {vnode}
  */
-function table(model) {
+function table(model, listOfLayouts) {
   return [
     h('table.table',
       [
@@ -73,7 +74,7 @@ function table(model) {
             ]
           )
         ),
-        h('tbody', rows(model))
+        h('tbody', rows(model, listOfLayouts))
       ]
     )
   ];
@@ -82,19 +83,22 @@ function table(model) {
 /**
  * Shows layouts as table lines
  * @param {Object} model
+ * @param {Array<Object>} listOfLayouts
  * @return {vnode}
  */
-function rows(model) {
-  return (model.layout.searchResult || model.layout.list).map((layout) => {
+function rows(model, listOfLayouts) {
+  return (model.layout.searchResult || listOfLayouts).map((layout) => {
     const key = `key${layout.name}`;
 
     return h('tr', {key: key},
       [
         h('td.w-33',
           [
-            h('', {
-              class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''
-            }, [
+            h('',
+              {
+                class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''
+              },
+              [
                 iconBarChart(),
                 ' ',
                 h('a', {
