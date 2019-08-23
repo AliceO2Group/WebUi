@@ -46,13 +46,19 @@ function getBackToQCGButton(model) {
   return h('.w-25',
     h('a.btn',
       {
-        title: 'Go back to QCG',
-        href: `?page=objectTree`,
+        title: model.router.params.layoutId ? 'Go back to layout' : 'Go back to all objects',
+        href: model.router.params.layoutId ? `?page=layoutShow&layoutId=${model.router.params.layoutId}` : '?page=objectTree',
         onclick: (e) => {
           model.router.handleLinkEvent(e);
         }
       },
-      [iconArrowThickLeft(), ' ', 'Back to QCG']));
+      [
+        iconArrowThickLeft(),
+        ' ',
+        model.router.params.layoutId ? 'Back to layout' : 'Back to QCG'
+      ]
+    )
+  );
 }
 
 /**
