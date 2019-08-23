@@ -51,7 +51,7 @@ function objectPreview(model) {
     return null;
   }
 
-  return h('.bg-white', {style: {height: '10em'}}, drawComponent(model, model.object.selected.name));
+  return h('.bg-white', {style: {height: '20em'}}, drawComponent(model, model.object.selected.name));
 }
 
 /**
