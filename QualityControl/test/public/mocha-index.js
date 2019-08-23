@@ -76,7 +76,6 @@ describe('QCG', function() {
   it('should have a layout with header, sidebar and section', async () => {
     const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
     const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);
-    const sectionContent = await page.evaluate(() => document.querySelector('section').innerHTML);
 
     assert(headerContent.includes('Quality Control'));
     assert(sidebarContent.includes('Explore'));
@@ -219,6 +218,73 @@ describe('QCG', function() {
     it('should have filtered results on input search filled', async () => {
       await page.type('header input', 'HistoWithRandom');
       await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 1`, {timeout: 5000});
+    });
+  });
+
+  describe('page objectView', () => {
+    it('should load page=objectView and display error message & icon due to missing objectName parameter', async () => {
+      await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
+      const result = await page.evaluate(() => {
+        const errorMessage = document.querySelector('div div b').textContent;
+        const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+        const backButtonTitle = document.querySelector('div div div a').title;
+
+        return {
+          location: window.location,
+          message: errorMessage,
+          iconClassList: iconClassList,
+          backButtonTitle: backButtonTitle
+        };
+      });
+      assert.deepStrictEqual(result.location.search, '?page=objectView');
+      assert.deepStrictEqual(result.message, 'Please pass an objectName parameter');
+      assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+      assert.deepStrictEqual(result.backButtonTitle, 'Go back to QCG');
+    });
+
+    it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
+      await page.evaluate(() => document.querySelector('div div div a').click());
+
+      const result = await page.evaluate(() => {
+        return {
+          location: window.location.search,
+          objectSelected: window.model.object.selected
+        };
+      });
+      assert.deepStrictEqual(result.location, '?page=objectTree');
+      assert.deepStrictEqual(result.objectSelected, null);
+    });
+
+    it('should load page=objectView and display a plot when a parameter objectName is passed', async () => {
+      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
+      await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
+      const result = await page.evaluate(() => {
+        const title = document.querySelector('div div b').textContent;
+        const rootPlotClassList = document.querySelector('div div:nth-child(2) div div').classList;
+        const objectSelected = window.model.object.selected;
+        return {
+          title: title,
+          rootPlotClassList: rootPlotClassList,
+          objectSelected: objectSelected
+        };
+      });
+      assert.deepStrictEqual(result.title, objectName);
+      assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
+      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+    });
+
+    it('should take back the user to page=objectTree when clicking "Back To QCG" (object passed and selected)', async () => {
+      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
+      await page.evaluate(() => document.querySelector('div div div a').click());
+
+      const result = await page.evaluate(() => {
+        return {
+          location: window.location.search,
+          objectSelected: window.model.object.selected
+        };
+      });
+      assert.deepStrictEqual(result.location, '?page=objectTree');
+      assert.deepStrictEqual(result.objectSelected, {name: objectName});
     });
   });
 
