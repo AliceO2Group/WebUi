@@ -8,12 +8,8 @@ import {draw} from './objectDraw.js';
  * @return {vnode}
  */
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
-  h('.flex-row.flex-grow',
-    {
-      oncreate: () => {
-        model.object.loadList();
-      }
-    }, [
+  h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()},
+    [
       h('.flex-grow.scroll-y', tableShow(model)),
       h('.animate-width.scroll-y',
         {
@@ -22,7 +18,8 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
           }
         },
         model.object.selected ? drawComponent(model) : null)
-    ]),
+    ]
+  ),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),
     statusBarRight(model),

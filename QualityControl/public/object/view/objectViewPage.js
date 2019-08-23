@@ -6,10 +6,7 @@ import {draw} from './../objectDraw.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('.p2.absolute-fill',
-  {
-    style: 'display: flex; flex-direction: column',
-  },
+export default (model) => h('.p2.absolute-fill', {style: 'display: flex; flex-direction: column'},
   [
     getActionsHeader(model),
     getRootObject(model)
@@ -35,7 +32,7 @@ function getActionsHeader(model) {
   return h('', {style: 'display: flex'},
     [
       getBackToQCGButton(model),
-      h('b.text-center.w-33', getObjectTitle(model)),
+      h('b.text-center.w-50', getObjectTitle(model)),
       getCopyURLToClipboardButton(model)
     ]);
 }
@@ -46,7 +43,7 @@ function getActionsHeader(model) {
  * @return {vnode}
  */
 function getBackToQCGButton(model) {
-  return h('.w-33',
+  return h('.w-25',
     h('a.btn',
       {
         title: 'Go back to QCG',
@@ -64,7 +61,7 @@ function getBackToQCGButton(model) {
  * @return {vnode}
  */
 function getCopyURLToClipboardButton(model) {
-  return h('.w-33', {style: 'display: flex; justify-content: flex-end'},
+  return h('.w-25', {style: 'display: flex; justify-content: flex-end'},
     h('button.btn',
       {
         title: 'Copy URL Object',
