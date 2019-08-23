@@ -55,7 +55,6 @@ function getBackToQCGButton(model) {
         title: 'Go back to QCG',
         href: `?page=objectTree`,
         onclick: (e) => {
-          model.object.select(null);
           model.router.handleLinkEvent(e);
         }
       },

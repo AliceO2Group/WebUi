@@ -12,7 +12,6 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
     {
       oncreate: () => {
         model.object.loadList();
-        // model.object.select(null);
       }
     }, [
       h('.flex-grow.scroll-y', tableShow(model)),
@@ -46,7 +45,6 @@ function drawComponent(model) {
             title: 'Open object plot in full screen',
             href: `?page=objectView&objectName=${model.object.selected.name}`,
             onclick: (e) => {
-              model.object.select(null);
               model.router.handleLinkEvent(e);
             }
           }, iconResizeBoth())),
