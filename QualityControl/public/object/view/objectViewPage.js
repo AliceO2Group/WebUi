@@ -2,17 +2,13 @@ import {h, iconBook, iconCircleX, iconArrowThickLeft} from '/js/src/index.js';
 import {draw} from './../objectDraw.js';
 
 /**
- * Shows a page to explore though a tree of objects with a preview on the right if clicked
- * and a status bar for selected object name and # of objects
+ * Shows a page to view an object on the whole page
  * @param {Object} model
  * @return {vnode}
  */
 export default (model) => h('.p2.absolute-fill',
   {
-    style: {
-      display: 'flex',
-      'flex-direction': 'column',
-    }
+    style: 'display: flex; flex-direction: column',
   },
   [
     getActionsHeader(model),
@@ -21,7 +17,8 @@ export default (model) => h('.p2.absolute-fill',
 
 
 /**
- * Display the full path of the selected object
+ * Display the full path of the selected object or display a message
+ * to inform the user expected parameter was not passed
  * @param {Object} model
  * @return {string}
  */
@@ -91,14 +88,14 @@ function getRootObject(model) {
       h('',
         {
           oncreate: () => model.object.select({name: model.router.params.objectName}),
-          style: 'widht: 100%; height: 100%',
+          style: 'width: 100%; height: 100%',
         },
         model.object.selected ? draw(model, model.object.selected.name) : null)
       : errorLoadingObject(''));
 }
 
 /**
- * Display error message
+ * Display error message & icon
  * @param {String} errorMessage
  * @return {vnode}
  */

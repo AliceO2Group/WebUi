@@ -30,28 +30,22 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
 ]);
 
 /**
- * Test
+ * Method to generate a component containing a header with actions and a jsroot plot
  * @param {Object} model
  * @return {vnode}
  */
 function drawComponent(model) {
-  return h('',
-    {
-      style: 'height:100%; display: flex; flex-direction: column'
-    }, [
+  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
+    [
       h('.p3.text-right.', {style: 'padding-bottom: 0'},
         h('a.btn',
           {
             title: 'Open object plot in full screen',
             href: `?page=objectView&objectName=${model.object.selected.name}`,
-            onclick: (e) => {
-              model.router.handleLinkEvent(e);
-            }
+            onclick: (e) => model.router.handleLinkEvent(e)
           }, iconResizeBoth())),
-      h('',
-        {
-          style: 'height:100%; display: flex; flex-direction: column'
-        }, draw(model, model.object.selected.name))]);
+      h('', {style: 'height:100%; display: flex; flex-direction: column'},
+        draw(model, model.object.selected.name))]);
 }
 
 /**
