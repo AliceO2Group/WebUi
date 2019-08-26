@@ -47,7 +47,7 @@ export default class Layout extends Observable {
 
     if (result.isSuccess()) {
       this.list = assertLayouts(result.payload);
-      this.model.folders.list.get('All Layouts').list = this.list;
+      this.model.folder.map.get('All Layouts').list = this.list;
       this.notify();
     } else {
       this.model.notification.show(`Unable to load layouts.`, 'danger', Infinity);
@@ -64,7 +64,7 @@ export default class Layout extends Observable {
     if (!this.myList.isSuccess()) {
       this.model.notification.show(`Unable to load your personal layouts.`, 'danger', Infinity);
     }
-    this.model.folders.list.get('My Layouts').list = this.myList.payload;
+    this.model.folder.map.get('My Layouts').list = this.myList.payload;
     this.notify();
   }
 
@@ -242,15 +242,9 @@ export default class Layout extends Observable {
    */
   search(searchInput) {
     this.searchInput = searchInput;
-
-    if (!searchInput) {
-      this.searchResult = null;
-      this.notify();
-      return;
-    }
-
-    const fuzzyRegex = new RegExp(searchInput.split('').join('.*?'), 'i');
-    this.searchResult = this.list.filter((item) => item.name.match(fuzzyRegex));
+    this.model.folder.map.forEach((folder) => {
+      folder.searchInput = new RegExp(searchInput, 'i');
+    });
     this.notify();
   }
 

@@ -12,7 +12,7 @@ export default function layouts(model) {
       style: 'display: flex; flex-direction: column'
     },
     [
-      Array.from(model.folders.list.values()).map((folder) => createFolder(model, folder, folder.list))
+      Array.from(model.folder.map.values()).map((folder) => createFolder(model, folder, folder.list))
     ]
   );
 }
@@ -30,7 +30,7 @@ function createFolder(model, folder, listOfLayouts) {
     [
       createHeaderOfFolder(model, folder),
       ' ',
-      folder.isOpened ? table(model, listOfLayouts) : null
+      folder.isOpened ? table(model, listOfLayouts.filter((item) => item.name.match(folder.searchInput))) : null
     ]
   );
 }
@@ -42,15 +42,16 @@ function createFolder(model, folder, listOfLayouts) {
  * @return {vnode}
  */
 function createHeaderOfFolder(model, folder) {
-  return h('.bg-gray-light.p2',
-    {style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row'},
+  return h('.bg-gray-light.p2.object-selectable',
+    {
+      style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row',
+      onclick: () => model.folder.toggleFolder(folder.title)
+    },
     [
-      h('b', {style: 'flex-grow:1;'}, folder.title),
-      ' ',
-      h('button.btn', {
-        style: ' text-align: right',
-        onclick: () => model.folders.toggleFolder(folder.title)
-      }, folder.isOpened ? iconChevronTop() : iconChevronBottom())
+      h('b', {style: 'flex-grow:1;'}, [
+        h('span', {
+          style: ' text-align: right',
+        }, folder.isOpened ? iconChevronTop() : iconChevronBottom()), ' ', folder.title]),
     ]
   );
 }
@@ -87,33 +88,28 @@ function table(model, listOfLayouts) {
  * @return {vnode}
  */
 function rows(model, listOfLayouts) {
-  return (model.layout.searchResult || listOfLayouts).map((layout) => {
-    const key = `key${layout.name}`;
-
-    return h('tr', {key: key},
-      [
-        h('td.w-33',
-          [
-            h('',
-              {
-                class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''
-              },
-              [
-                iconBarChart(),
-                ' ',
-                h('a', {
-                  href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
-                  onclick: (e) => model.router.handleLinkEvent(e)
-                }, layout.name)
-              ])
-          ]),
-        h('td',
-          layout.owner_name
-        ),
-        h('td',
-          layout.popularity
-        )
+  return (!listOfLayouts || listOfLayouts <= 0) ?
+    h('tr', [
+      h('td.w-50', 'No layouts found'),
+      h('td.w-25', ''),
+      h('td.w-25', '')
+    ])
+    :
+    listOfLayouts.map((layout) => {
+      const key = `key${layout.name}`;
+      return h('tr', {key: key}, [
+        h('td.w-50', [
+          h('', {class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''}, [
+            iconBarChart(), ' ',
+            h('a', {
+              href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
+              onclick: (e) => model.router.handleLinkEvent(e)
+            }, layout.name)
+          ])
+        ]),
+        h('td.w-25', layout.owner_name),
+        h('td.w-25', layout.popularity)
       ]
-    );
-  });
+      );
+    });
 }

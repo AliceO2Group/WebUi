@@ -3,7 +3,7 @@ import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notifi
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
-import Folders from './folder/Folders.js';
+import Folder from './folder/Folder.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -24,10 +24,10 @@ export default class Model extends Observable {
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
 
-    this.folders = new Folders(this);
-    this.folders.addFolder({title: 'My Layouts', isOpened: true});
-    this.folders.addFolder({title: 'All Layouts', isOpened: false});
-    this.folders.bubbleTo(this);
+    this.folder = new Folder(this);
+    this.folder.addFolder({title: 'My Layouts', isOpened: true, list: [], searchInput: ''});
+    this.folder.addFolder({title: 'All Layouts', isOpened: false, list: [], searchInput: ''});
+    this.folder.bubbleTo(this);
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
