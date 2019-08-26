@@ -1,7 +1,7 @@
 import {Observable} from '/js/src/index.js';
 
 /**
- * Model namespace with all requests to load or create layouts, compute their position on a grid,
+ * Model namespace for Folder type,
  * and search them.
  */
 export default class Folder extends Observable {

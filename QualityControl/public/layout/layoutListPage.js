@@ -7,18 +7,16 @@ import {iconBarChart, iconChevronBottom, iconChevronTop} from '/js/src/icons.js'
  * @return {vnode}
  */
 export default function layouts(model) {
-  return h('.scroll-y.absolute-fill',
-    {
-      style: 'display: flex; flex-direction: column'
-    },
-    [
-      Array.from(model.folder.map.values()).map((folder) => createFolder(model, folder, folder.list))
-    ]
+  return h('.scroll-y.absolute-fill', {
+    style: 'display: flex; flex-direction: column'
+  }, [
+    Array.from(model.folder.map.values()).map((folder) => createFolder(model, folder, folder.list))
+  ]
   );
 }
 
 /**
- * Method to create a folder with containing various layouts
+ * Method to create a folder with various layouts
  * @param {Object} model
  * @param {JSON} folder
  * @param {Array<Layout>} listOfLayouts
