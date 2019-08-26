@@ -34,15 +34,20 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
 function drawComponent(model) {
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
-      h('.p3.text-right.', {style: 'padding-bottom: 0'},
+      h('.p1.text-right.resize-button', {style: 'padding-bottom: 0; p right: 0%;'},
         h('a.btn',
           {
             title: 'Open object plot in full screen',
             href: `?page=objectView&objectName=${model.object.selected.name}`,
             onclick: (e) => model.router.handleLinkEvent(e)
-          }, iconResizeBoth())),
+          }, iconResizeBoth()
+        )
+      ),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, model.object.selected.name))]);
+        draw(model, model.object.selected.name)
+      )
+    ]
+  );
 }
 
 /**

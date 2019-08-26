@@ -63,7 +63,7 @@ function objectPreview(model) {
 function drawComponent(model, tabObject) {
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
-      h('.text-right.', {style: 'padding: .25rem .25rem 0rem .25rem'},
+      h('.text-right', {style: 'padding: .25rem .25rem 0rem .25rem'},
         h('a.btn',
           {
             style: 'padding: 0.25em 0.5em',

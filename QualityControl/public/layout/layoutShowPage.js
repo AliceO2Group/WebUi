@@ -180,17 +180,16 @@ function chartView(model, tabObject) {
 function drawComponent(model, tabObject) {
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
-      h('.text-right.', {style: 'padding: .25rem .25rem 0rem .25rem'},
-        h('a.btn',
-          {
-            title: 'Open object plot in full screen',
-            href: `?page=objectView&objectName=${tabObject.name}&layoutId=${model.router.params.layoutId}`,
-            onclick: (e) => model.router.handleLinkEvent(e)
-          }, iconResizeBoth())),
-      h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, tabObject))]);
+      h('.text-right.resize-element.resize-button', {style: 'display: none; padding: .25rem .25rem 0rem .25rem;'},
+        h('a.btn', {
+          title: 'Open object plot in full screen',
+          href: `?page=objectView&objectName=${tabObject.name}&layoutId=${model.router.params.layoutId}`,
+          onclick: (e) => model.router.handleLinkEvent(e)
+        }, iconResizeBoth())),
+      h('.jsrootdiv', {style: 'z-index: 90; height:100%; display: flex; flex-direction: column'},
+        draw(model, tabObject)),
+    ]);
 }
-
 
 /**
  * Predicate to sort objects by id
