@@ -6,6 +6,7 @@ import header from './common/header.js';
 import layoutListPage from './layout/layoutListPage.js';
 import layoutShowPage from './layout/layoutShowPage.js';
 import objectTreePage from './object/objectTreePage.js';
+import objectViewPage from './object/view/objectViewPage.js';
 
 
 /**
@@ -14,15 +15,16 @@ import objectTreePage from './object/objectTreePage.js';
  * @return {vnode}
  */
 export default (model) => [
-  h('.absolute-fill.flex-column', [
-    h('header.shadow-level2.level2', [
-      header(model),
+  model.page === 'objectView' ? objectViewPage(model) :
+    h('.absolute-fill.flex-column', [
+      h('header.shadow-level2.level2', [
+        header(model),
+      ]),
+      h('.flex-grow.flex-row.outline-gray', [
+        sidebar(model),
+        h('section.outline-gray.flex-grow.relative', page(model))
+      ])
     ]),
-    h('.flex-grow.flex-row.outline-gray', [
-      sidebar(model),
-      h('section.outline-gray.flex-grow.relative', page(model))
-    ])
-  ]),
   notification(model.notification),
 ];
 
