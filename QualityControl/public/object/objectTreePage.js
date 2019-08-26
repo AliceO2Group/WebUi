@@ -1,4 +1,4 @@
-import {h, iconBarChart, iconCaretRight, iconCaretBottom} from '/js/src/index.js';
+import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
 
 /**
@@ -8,19 +8,47 @@ import {draw} from './objectDraw.js';
  * @return {vnode}
  */
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
-  h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()}, [
-    h('.flex-grow.scroll-y', tableShow(model)),
-    h('.animate-width.scroll-y', {
-      style: {
-        width: model.object.selected ? '50%' : 0
-      }
-    }, model.object.selected ? draw(model, model.object.selected.name) : null)
-  ]),
+  h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()},
+    [
+      h('.flex-grow.scroll-y', tableShow(model)),
+      h('.animate-width.scroll-y',
+        {
+          style: {
+            width: model.object.selected ? '50%' : 0
+          }
+        },
+        model.object.selected ? drawComponent(model) : null)
+    ]
+  ),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),
     statusBarRight(model),
   ])
 ]);
+
+/**
+ * Method to generate a component containing a header with actions and a jsroot plot
+ * @param {Object} model
+ * @return {vnode}
+ */
+function drawComponent(model) {
+  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
+    [
+      h('.p1.text-right.resize-button', {style: 'padding-bottom: 0; p right: 0%;'},
+        h('a.btn',
+          {
+            title: 'Open object plot in full screen',
+            href: `?page=objectView&objectName=${model.object.selected.name}`,
+            onclick: (e) => model.router.handleLinkEvent(e)
+          }, iconResizeBoth()
+        )
+      ),
+      h('', {style: 'height:100%; display: flex; flex-direction: column'},
+        draw(model, model.object.selected.name)
+      )
+    ]
+  );
+}
 
 /**
  * Shows status of current tree with its options (online, loaded, how many)

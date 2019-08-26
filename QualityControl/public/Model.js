@@ -126,7 +126,11 @@ export default class Model extends Observable {
         break;
       case 'objectTree':
         this.page = 'objectTree';
-        // data are already loaded at beginning
+        // data is already loaded at beginning
+        this.notify();
+        break;
+      case 'objectView':
+        this.page = 'objectView';
         this.notify();
         break;
       default:

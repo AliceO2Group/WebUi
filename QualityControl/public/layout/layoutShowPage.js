@@ -1,6 +1,6 @@
 import {h} from '/js/src/index.js';
 import {draw} from '../object/objectDraw.js';
-import {iconArrowLeft, iconArrowTop} from '/js/src/icons.js';
+import {iconArrowLeft, iconArrowTop, iconResizeBoth} from '/js/src/icons.js';
 
 const cellHeight = 100 / 3 * 0.95; // %, put some margin at bottom to see below
 const cellWidth = 100 / 3; // %
@@ -164,11 +164,32 @@ function chartView(model, tabObject) {
 
   return h('.absolute.animate-dimensions-position', attrs, [
     // super-container of jsroot data
-    h('.bg-white.m1.absolute-fill.shadow-level1.br3', attrsInternal, draw(model, tabObject)),
+    h('.bg-white.m1.absolute-fill.shadow-level1.br3', attrsInternal, drawComponent(model, tabObject)),
 
     // transparent layer to drag&drop in edit mode, avoid interaction with jsroot
     model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3')
   ]);
+}
+
+/**
+ * Method to generate a component containing a header with actions and a jsroot plot
+ * @param {Object} model
+ * @param {String} tabObject
+ * @return {vnode}
+ */
+function drawComponent(model, tabObject) {
+  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
+    [
+      h('.jsrootdiv', {style: 'z-index: 90; height:100%; display: flex; flex-direction: column'},
+        draw(model, tabObject)),
+      h('.text-right.resize-element.resize-button', {style: 'display: none; padding: .25rem .25rem 0rem .25rem;'},
+        h('a.btn', {
+          title: 'Open object plot in full screen',
+          href: `?page=objectView&objectName=${tabObject.name}&layoutId=${model.router.params.layoutId}`,
+          onclick: (e) => model.router.handleLinkEvent(e)
+        }, iconResizeBoth())),
+
+    ]);
 }
 
 /**

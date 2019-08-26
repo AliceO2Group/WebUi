@@ -28,3 +28,6 @@
 /* overwrite jsroot styles */
 .jsroot-container {}
 .jsroot-container pre { background-color: initial; }
+.jsrootdiv:hover + .resize-element, .resize-element:hover{ display: block !important; }
+
+.resize-button { position: absolute; right: 0%; z-index:100}
