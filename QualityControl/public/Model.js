@@ -3,6 +3,7 @@ import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notifi
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
+import Folder from './folder/Folder.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -17,14 +18,16 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
-    this.layout = new Layout(this);
-    this.layout.bubbleTo(this);
-
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
+
+    this.folder = new Folder(this);
+    this.folder.addFolder({title: 'My Layouts', isOpened: true, list: [], searchInput: ''});
+    this.folder.addFolder({title: 'All Layouts', isOpened: false, list: [], searchInput: ''});
+    this.folder.bubbleTo(this);
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
