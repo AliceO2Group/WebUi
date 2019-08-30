@@ -95,7 +95,7 @@ const toolbarEditMode = (model) => [
     h('input.form-control.form-inline', {
       type: 'text',
       value: model.layout.item.name,
-      oninput: (e) => model.layout.item.name = e.target.value
+      oninput: (e) => model.layout.item.name = e.target.value.trim()
     }
     ),
     h('.btn-group.m1', [
