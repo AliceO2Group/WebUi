@@ -92,7 +92,8 @@ const tableShow = (model) => [
     ]),
     h('tbody', [
       // The main table of the view can be a tree OR the result of a search
-      model.object.searchInput ? searchRows(model) : treeRows(model),
+      treeRows(model),
+      searchRows(model),
     ])
   ])
 ];
@@ -105,6 +106,7 @@ const tableShow = (model) => [
 const treeRows = (model) => !model.object.tree
   ? null
   : model.object.tree.children.map((children) => treeRow(model, children, 0));
+
 /**
  * Shows a line <tr> for search mode (no indentation)
  * @param {Object} model
@@ -122,7 +124,7 @@ function searchRows(model) {
     const color = item.quality === 'good' ? 'success' : 'danger';
     const className = item && item === model.object.selected ? 'table-primary' : '';
 
-    return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
+    return h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight', [
         iconBarChart(),
         ' ',
@@ -135,12 +137,12 @@ function searchRows(model) {
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
- * sub-nodes of `tree` as additionnals lines if they are open in the tree.
- * Indentation is added according to tree level during recurcive call of treeRow
+ * sub-nodes of `tree` as additional lines if they are open in the tree.
+ * Indentation is added according to tree level during recursive call of treeRow
  * Tree is traversed in depth-first with pre-order (root then subtrees)
  * @param {Object} model
- * @param {ObjectTree} tree - data-structure containaing an object per node
- * @param {number} level - used for indentation within recurcive call of treeRow
+ * @param {ObjectTree} tree - data-structure containing an object per node
+ * @param {number} level - used for indentation within recursive call of treeRow
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
@@ -154,7 +156,7 @@ function treeRow(model, tree, level) {
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
-  return [
+  return model.object.searchInput ? [] : [
     h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight', [
         iconWrapper,
