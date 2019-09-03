@@ -89,6 +89,8 @@ export default class QCObject extends Observable {
       this.searchResult = listSource.filter((item) => {
         return item.name.match(fuzzyRegex);
       });
+    } else {
+      this.searchResult = [];
     }
   }
 

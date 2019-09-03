@@ -1,4 +1,4 @@
-import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
+import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconX} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
 
 /**
@@ -92,7 +92,8 @@ const tableShow = (model) => [
     ]),
     h('tbody', [
       // The main table of the view can be a tree OR the result of a search
-      model.object.searchInput ? searchRows(model) : treeRows(model),
+      treeRows(model),
+      searchRows(model),
     ])
   ])
 ];
@@ -105,6 +106,7 @@ const tableShow = (model) => [
 const treeRows = (model) => !model.object.tree
   ? null
   : model.object.tree.children.map((children) => treeRow(model, children, 0));
+
 /**
  * Shows a line <tr> for search mode (no indentation)
  * @param {Object} model
@@ -154,7 +156,7 @@ function treeRow(model, tree, level) {
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
-  return [
+  return model.object.searchInput ? [] : [
     h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight', [
         iconWrapper,
