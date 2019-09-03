@@ -1,4 +1,4 @@
-import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconX} from '/js/src/index.js';
+import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
 
 /**
@@ -124,7 +124,7 @@ function searchRows(model) {
     const color = item.quality === 'good' ? 'success' : 'danger';
     const className = item && item === model.object.selected ? 'table-primary' : '';
 
-    return h('tr', {key: path, title: path, onclick: selectItem, class: className}, [
+    return h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight', [
         iconBarChart(),
         ' ',
@@ -137,12 +137,12 @@ function searchRows(model) {
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
- * sub-nodes of `tree` as additionnals lines if they are open in the tree.
- * Indentation is added according to tree level during recurcive call of treeRow
+ * sub-nodes of `tree` as additional lines if they are open in the tree.
+ * Indentation is added according to tree level during recursive call of treeRow
  * Tree is traversed in depth-first with pre-order (root then subtrees)
  * @param {Object} model
- * @param {ObjectTree} tree - data-structure containaing an object per node
- * @param {number} level - used for indentation within recurcive call of treeRow
+ * @param {ObjectTree} tree - data-structure containing an object per node
+ * @param {number} level - used for indentation within recursive call of treeRow
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
