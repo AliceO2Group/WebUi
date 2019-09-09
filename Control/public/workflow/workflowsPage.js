@@ -29,7 +29,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
   model.workflow.list.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showContent(model, data.workflowTemplates.sort()),
+    Success: (data) => showContent(model, data.workflowTemplates.map((workflow) => workflow.template).sort()),
     Failure: (error) => pageError(error),
   })
 ]);

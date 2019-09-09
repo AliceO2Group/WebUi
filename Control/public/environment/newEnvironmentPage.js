@@ -36,8 +36,9 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
         model.workflow.list.match({
           NotAsked: () => null,
           Loading: () => null,
-          Success: (data) => Object.keys(data.workflowTemplates.sort()).map((workflow) =>
-            h('option', data.workflowTemplates[workflow])),
+          Success: (data) => Object.keys(
+            data.workflowTemplates.map((workflow) => workflow.template).sort())
+            .map((workflow) => h('option', data.workflowTemplates.map((workflow) => workflow.template)[workflow])),
           Failure: () => null
         })
       ]),
