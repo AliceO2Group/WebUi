@@ -55,6 +55,12 @@ service Control {
     rpc GetRoles (GetRolesRequest) returns (GetRolesReply) {}
 
     rpc GetWorkflowTemplates (GetWorkflowTemplatesRequest) returns (GetWorkflowTemplatesReply) {}
+
+    rpc ListRepos(ListReposRequest) returns (ListReposReply) {}
+    rpc AddRepo(AddRepoRequest) returns (AddRepoReply) {}
+    rpc RemoveRepo(RemoveRepoRequest) returns (RemoveRepoReply) {}
+    rpc RefreshRepos(RefreshReposRequest) returns (RefreshReposReply) {}
+    rpc SetDefaultRepo(SetDefaultRepoRequest) returns (SetDefaultRepoReply) {}
 }
 
 ////////////////////////////////////////
@@ -179,8 +185,11 @@ message ModifyEnvironmentReply {
 
 message DestroyEnvironmentRequest {
     string id = 1;
+    bool keepTasks = 2;
 }
-message DestroyEnvironmentReply {}
+message DestroyEnvironmentReply {
+    CleanupTasksReply cleanupTasksReply = 1;
+}
 
 ////////////////////////////////////////
 // Tasks
@@ -269,6 +278,59 @@ message GetRolesReply {
 
 message GetWorkflowTemplatesRequest{}
 
+message WorkflowTemplateInfo {
+    string repo = 1;
+    string template = 2;
+}
+
 message GetWorkflowTemplatesReply{
-    repeated string workflowTemplates = 1;
+    repeated WorkflowTemplateInfo workflowTemplates = 1;
+}
+
+////////////////////////////////////////
+// Repos
+////////////////////////////////////////
+
+message ListReposRequest {}
+
+message RepoInfo {
+    string name = 1;
+    bool default = 2;
+}
+
+message ListReposReply {
+    repeated RepoInfo repos = 1;
+}
+
+message AddRepoRequest {
+    string name = 1;
+}
+
+message AddRepoReply {
+    string errorString = 1;
+}
+
+message RemoveRepoRequest {
+    int32 index = 1;
+}
+
+message RemoveRepoReply {
+    bool ok = 1;
+    string newDefaultRepo = 2;
+}
+
+message RefreshReposRequest {
+    int32 index = 1;
+}
+
+message RefreshReposReply {
+    string errorString = 1;
+}
+
+message SetDefaultRepoRequest {
+    int32 index = 1;
+}
+
+message SetDefaultRepoReply {
+    string errorString = 1;
 }
