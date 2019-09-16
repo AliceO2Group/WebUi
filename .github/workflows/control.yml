@@ -1,9 +1,10 @@
 name: Control
 
 on:
-  pull_request:
+  push:
     paths:
-      - '*'
+      - 'Control/*'
+      - '.github/workflows/control.yml'
 
 jobs:
   build_module:
