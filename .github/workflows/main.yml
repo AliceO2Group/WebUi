@@ -1,13 +1,6 @@
 name: Build and test Control GUI
 
-on:
-  pull_request:
-    branches:
-      - master
-      - dev
-  paths:
-    - 'Control/*'
-
+on: [push, pull_request]
 jobs:
   build:
   runs-on: ${{ matrix.os }}
