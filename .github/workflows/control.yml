@@ -2,9 +2,6 @@ name: Control
 
 on:
   pull_request:
-    branches:
-      - master
-      - dev
     paths:
       - '*'
 
