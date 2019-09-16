@@ -4,11 +4,11 @@ on: [push, pull_request]
 jobs:
   build_module:
     name: Build Control module
-      runs-on: ${{ matrix.os }}
-      strategy:
-        matrix:
-          os: [ubuntu-18.04, macOS-10.14]
-          node: [10, 12]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macOS-10.14]
+        node: [10, 12]
     steps:
       - uses: actions/checkout@v1
       - name: Setup node
