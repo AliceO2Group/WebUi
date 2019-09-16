@@ -2,17 +2,18 @@ name: Build and test Control GUI
 
 on: [push, pull_request]
 jobs:
-  build:
-  runs-on: ${{ matrix.os }}
-  strategy:
-    matrix:
-      os: [ubuntu-18.04, macOS-10.14]
-      node: [10, 12]
-  steps:
-    - uses: actions/checkout@v1
-    - name: Setup node
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node }}
-    - run: npm install
-    - run: npm test
+  build_module:
+    name: Build Control module
+      runs-on: ${{ matrix.os }}
+      strategy:
+        matrix:
+          os: [ubuntu-18.04, macOS-10.14]
+          node: [10, 12]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install
+      - run: npm test
