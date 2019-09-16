@@ -23,7 +23,6 @@ jobs:
       - run: (cd Control; npm test )
   coverage:
     runs-on: ubuntu-18.04
-    node: [10]
     steps:
       - run: (cd Control; npm run coverage )
       - run: (cd Control; nyc report --reporter=text-lcov > coverage.lcov)
