@@ -101,7 +101,7 @@ describe('QCG', function() {
     });
 
     it('should have a table with one row after filtering', async () => {
-      await page.type('header input', 'PWG-HF');
+      await page.type('header input', 'AliRoot');
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
       assert(rowsCount === 1);
     });
@@ -109,8 +109,8 @@ describe('QCG', function() {
     it('should have a link to show a layout', async () => {
       await page.evaluate(() => document.querySelector('section table tbody tr a').click());
       const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12&layoutName=PWG-HF');
-      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
+      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=PWG-HF');
+      // id 5aba4a059b755d517e76ea10 is set in QCModelDemo
     });
   });
 
