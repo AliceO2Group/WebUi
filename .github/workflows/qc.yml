@@ -6,7 +6,7 @@ on:
       - 'QualityControl/*'
       - 'QualityControl/*/*'
       - 'QualityControl/*/*/*'
-      - '.github/workflows/control.yml'
+      - '.github/workflows/qc.yml'
 
 jobs:
   test:

@@ -6,7 +6,7 @@ on:
       - 'Framework/*'
       - 'Framework/*/*'
       - 'Framework/*/*/*'
-      - '.github/workflows/control.yml'
+      - '.github/workflows/framework.yml'
 
 jobs:
   test:

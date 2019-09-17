@@ -6,7 +6,7 @@ on:
       - 'InfoLogger/*'
       - 'InfoLogger/*/*'
       - 'InfoLogger/*/*/*'
-      - '.github/workflows/control.yml'
+      - '.github/workflows/infologger.yml'
 
 jobs:
   test:

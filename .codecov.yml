@@ -7,7 +7,7 @@ coverage:
   round: nearest
   range: 70...90
   status:
-    project: 
+    project:
       default: false
       Framework:
         target: 50%
