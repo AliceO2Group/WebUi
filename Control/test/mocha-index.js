@@ -193,9 +193,9 @@ describe('Control', function() {
     it('should click LOCK button', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitFor(200);
+      await page.waitFor(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.deepStrictEqual(lockButton, '');
+      assert.deepStrictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
     });
 
     // CONFIGURED STATE
@@ -325,7 +325,7 @@ describe('Control', function() {
     it('should click LOCK button to remove control', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitFor(200);
+      await page.waitFor(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       assert.deepStrictEqual(lockButton, 'Lock is free');
     });
