@@ -109,7 +109,7 @@ describe('QCG', function() {
     it('should have a link to show a layout', async () => {
       await page.evaluate(() => document.querySelector('section table tbody tr a').click());
       const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=PWG-HF');
+      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
       // id 5aba4a059b755d517e76ea10 is set in QCModelDemo
     });
   });
@@ -122,9 +122,9 @@ describe('QCG', function() {
 
     it('should load', async () => {
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
-      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12&layoutName=AliRoot%20dashboard', {waitUntil: 'networkidle0'});
+      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea12&layoutName=AliRoot+dashboard');
+      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
     });
 
     it('should have tabs in the header', async () => {
