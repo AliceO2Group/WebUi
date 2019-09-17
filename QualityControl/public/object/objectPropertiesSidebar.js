@@ -45,7 +45,7 @@ export default function objectPropertiesSidebar(model) {
         btnOption(model, tabObject, 'colz'), ' ',
       ]),
       h('', [
-        btnOption(model, tabObject, 'stat'), ' ',
+        btnOption(model, tabObject, 'stats'), ' ',
       ]),
     ]),
 
@@ -65,7 +65,7 @@ export default function objectPropertiesSidebar(model) {
 /**
  * Shows a button to change size width and height e.g.: "1x3"
  * @param {Object} model
- * @param {Object} tabObject - the tabOject to be changed
+ * @param {Object} tabObject - the tabObject to be changed
  * @param {number} width - size the button will handle
  * @param {number} height - size the button will handle
  * @return {vnode}
