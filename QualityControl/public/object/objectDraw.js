@@ -186,14 +186,6 @@ function redrawOnDataUpdate(model, dom, tabObject) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
         }
-        //  else {
-        //   const stat = painter.FindStat();
-        //   const statPainter = painter.FindPainterFor(stat);
-        //   if (statPainter) {
-        //     console.log("INCLUDE STAT " + options.includes('stat'));
-        //     statPainter.Enabled = options.includes('stat') ? true : false;
-        //   }
-        // }
       });
     }, 0);
 
