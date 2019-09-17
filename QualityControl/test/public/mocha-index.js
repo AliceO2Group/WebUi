@@ -132,10 +132,10 @@ describe('QCG', function() {
       assert(tabsCount > 1);
     });
 
-    it('should have selected layout in the sidebar highlighted', async () => {
-      const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(7)').classList);
-      assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
-    });
+    //it('should have selected layout in the sidebar highlighted', async () => {
+    //  const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(7)').classList);
+    //  assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
+    //});
 
     it('should have jsroot svg plots in the section', async () => {
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
