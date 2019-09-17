@@ -102,6 +102,7 @@ describe('QCG', function() {
 
     it('should have a table with one row after filtering', async () => {
       await page.type('header input', 'AliRoot');
+      await page.waitFor(200);
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
       assert(rowsCount === 1);
     });
