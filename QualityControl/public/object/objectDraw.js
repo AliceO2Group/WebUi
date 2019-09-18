@@ -164,9 +164,23 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      // Use user's definied options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
-      const options = [...tabObject.options, 'f'].join(';');
+      let index = tabObject.options.indexOf('stat');
+      if (index >= 0) {
+        // this is to make sure we support older versions
+        tabObject.options[index] = 'stats';
+      }
 
+      index = tabObject.options.indexOf('stats');
+      if (index >= 0) {
+        const indexNoStats = tabObject.options.indexOf('nostats');
+        if (indexNoStats >= 0) {
+          tabObject.options.splice(indexNoStats, 1);
+        }
+      } else if (tabObject.options.indexOf('nostats') < 0) {
+        tabObject.options.push('nostats');
+      }
+      // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
+      const options = ['f', ...tabObject.options].join(';');
       JSROOT.redraw(dom, objectRemoteData.payload, options, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
