@@ -179,6 +179,12 @@ function redrawOnDataUpdate(model, dom, tabObject) {
       } else if (tabObject.options.indexOf('nostats') < 0) {
         tabObject.options.push('nostats');
       }
+
+      index = tabObject.options.indexOf('alp');
+      if (objectRemoteData.payload._typename === 'TGraph' && index < 0) {
+        tabObject.options.push('alp');
+      }
+
       // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
       const options = ['f', ...tabObject.options].join(';');
       JSROOT.redraw(dom, objectRemoteData.payload, options, (painter) => {
