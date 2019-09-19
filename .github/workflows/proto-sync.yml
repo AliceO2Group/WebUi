@@ -2,7 +2,7 @@ name: Sync proto file from Control core
 
 on:
   schedule:
-    - cron:  '* 23 * * * 1-5'
+    - cron: '* 7 * * 1-5'
 
 jobs:
   check-changes:
