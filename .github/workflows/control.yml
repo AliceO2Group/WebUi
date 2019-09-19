@@ -1,0 +1,39 @@
+name: Control
+
+on:
+  push:
+    paths:
+      - 'Control/*'
+      - 'Control/*/*'
+      - 'Control/*/*/*'
+      - '.github/workflows/control.yml'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macOS-10.14]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - run: (cd Control; npm install )
+      - run: (cd Control; npm test )
+  coverage:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - run: (cd Control; npm install )
+      - run: (cd Control; npm run coverage )
+      - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: Control/coverage.lcov

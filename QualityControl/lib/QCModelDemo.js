@@ -221,11 +221,11 @@ const tabs = [
 
 const layouts = [
   {id: '5aba4a059b755d517e76ea10',
-    owner_id: ownerIdUser1, name: 'PWG-HF', owner_name: ownerNameUser1, tabs: tabs},
+    owner_id: ownerIdUser1, name: 'AliRoot', owner_name: ownerNameUser1, tabs: tabs},
   {id: '5aba4a059b755d517e76ea11',
     owner_id: ownerIdUser1, name: 'PWG-GA', owner_name: ownerNameUser1, tabs: tabs},
   {id: '5aba4a059b755d517e76ea12',
-    owner_id: ownerIdUser1, name: 'AliRoot dashboard', owner_name: ownerNameUser1, tabs: tabs},
+    owner_id: ownerIdUser1, name: 'PWG-HF', owner_name: ownerNameUser1, tabs: tabs},
   {id: '5aba4a059b755d517e76ea13',
     owner_id: ownerIdUser1, name: 'PWG-CF', owner_name: ownerNameUser1, tabs: tabs},
   {id: '5aba4a059b755d517e76ea14',
