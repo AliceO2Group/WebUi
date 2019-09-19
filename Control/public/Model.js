@@ -117,7 +117,7 @@ export default class Model extends Observable {
         this.environment.getEnvironment({id: this.router.params.id});
         break;
       case 'workflows':
-        this.workflow.get();
+        this.workflow.getAsMap();
         break;
       case 'status':
         this.status.getFrameworkInfo();

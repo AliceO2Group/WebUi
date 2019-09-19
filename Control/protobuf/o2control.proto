@@ -276,11 +276,17 @@ message GetRolesReply {
     repeated RoleInfo roles = 1;
 }
 
-message GetWorkflowTemplatesRequest{}
+message GetWorkflowTemplatesRequest{
+    string repoPattern = 1;
+    string revisionPattern = 2;
+    bool allBranches = 3;
+    bool allTags = 4;
+}
 
 message WorkflowTemplateInfo {
     string repo = 1;
     string template = 2;
+    string revision = 3;
 }
 
 message GetWorkflowTemplatesReply{

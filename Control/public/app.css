@@ -24,3 +24,7 @@
   font-weight: 515;
   text-align: center;
 }
+
+tr:hover td {
+  background-color: var(--color-gray-light)
+}
