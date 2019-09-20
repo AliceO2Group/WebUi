@@ -10,33 +10,92 @@ export default class Workflow extends Observable {
    */
   constructor(model) {
     super();
-
     this.model = model;
+
+    this.repoList = RemoteData.notAsked();
     this.list = RemoteData.notAsked();
     this.map = RemoteData.notAsked();
-    this.viewAll = false;
-    this.inputReg = new RegExp('');
-    this.revisionReg = new RegExp('');
-    this.templateReg = new RegExp('');
+
+    this.repository = {
+      isSelectionOpen: false,
+      regex: new RegExp(),
+      selected: ''
+    };
+    this.revision = {
+      isSelectionOpen: false,
+      regex: new RegExp(),
+      selected: ''
+    };
+    this.template = {
+      isSelectionOpen: false,
+      regex: new RegExp(),
+      selected: ''
+    };
   }
 
+  /**
+   * Updates the selected repository with the new user selection
+   * @param {string} inputField
+   * @param {string} selectedRepo
+   */
+  updateRepositorySelection(inputField, selectedRepo) {
+    switch (inputField) {
+      case 'repository':
+        this.repository.regex = new RegExp('^' + selectedRepo);
+        this.repository.selected = selectedRepo;
+        this.repository.isSelectionOpen = !this.repository.isSelectionOpen;
+        break;
+    }
+    // this.toggleInputDropdown(inputField);
+  }
+
+  /**
+   * Method to update regex for filtering input dropdown values
+   * @param {string} inputField
+   * @param {string} input
+   */
+  updateInputSearch(inputField, input) {
+    switch (inputField) {
+      case 'repository':
+        this.repository.regex = new RegExp('^' + input);
+        this.repository.selected = input;
+        break;
+    }
+    this.notify();
+  }
+
+  /**
+   * Toggle if an input dropdown should be opened or closed
+   * @param {JSON} inputField
+   * @param {boolean} option
+   */
+  setInputDropdownVisibility(inputField, option) {
+    switch (inputField) {
+      case 'repository':
+        this.repository.isSelectionOpen = option;
+        break;
+    }
+    this.notify();
+  }
+
+  /**
+   * Load repositories into `repoList` as RemoteData
+   */
+  async getRepositoriesList() {
+    this.repoList = await this.remoteDataPostRequest(this.repoList, `/api/ListRepos`, {});
+    if (this.repoList.isSuccess()) {
+      this.repository.selected = this.repoList.payload.repos.find((repository) => repository.default).name;
+      this.repository.regex = new RegExp('^' + this.repository.selected);
+    }
+    this.getAsMap();
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
   /**
    * Load workflows into `list` as RemoteData
    */
   async get() {
-    this.list = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/GetWorkflowTemplates`);
-    if (!ok) {
-      this.list = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-
-    this.list = RemoteData.success(result);
-    this.getAsMap();
-    this.notify();
+    this.list = await this.remoteDataPostRequest(this.repoList, `/api/GetWorkflowTemplates`, {});
   }
 
   /**
@@ -121,5 +180,38 @@ export default class Workflow extends Observable {
         break;
     }
     this.notify();
+  }
+
+  /**
+   * Close all dropdowns
+   */
+  hideAllDropdowns() {
+    console.log("CHEMAT")
+    this.repository.isSelectionOpen = false;
+    this.revision.isSelectionOpen = false;
+    this.template.isSelectionOpen = false;
+    this.notify();
+  }
+
+  /**
+   * Method to load a RemoteData object with data
+   * @param {RemoteData} remoteDataItem - Item in which data will be loaded
+   * @param {string} callString - API call as string
+   * @param {JSON} options - options for the POST request
+   */
+  async remoteDataPostRequest(remoteDataItem, callString, options) {
+    remoteDataItem = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(callString, options);
+    if (!ok) {
+      remoteDataItem = RemoteData.failure(result.message);
+      this.notify();
+      return remoteDataItem;
+    } else {
+      remoteDataItem = RemoteData.success(result);
+      this.notify();
+      return remoteDataItem;
+    }
   }
 }
