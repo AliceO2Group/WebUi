@@ -1,7 +1,7 @@
 name: InfoLogger
 
 on:
-  push:
+  pull_request:
     paths:
       - 'InfoLogger/*'
       - 'InfoLogger/*/*'
