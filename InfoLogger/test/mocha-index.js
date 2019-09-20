@@ -216,8 +216,8 @@ describe('InfoLogger', function() {
       await page.waitFor(3000);
       const list = await page.evaluate(() => window.model.log.list);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqdip01');
-      assert.deepStrictEqual(list.length > 0, true);
-      assert.deepStrictEqual(isHostNameMatching, true);
+      assert.ok(list.length > 0);
+      assert.ok(isHostNameMatching);
     });
 
     it('should filter messages based on `hostname` excluding `aldaqdip01` from live -> query -> live', async () => {
@@ -231,8 +231,8 @@ describe('InfoLogger', function() {
       const list = await page.evaluate(() => window.model.log.list);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname !== 'aldaqdip01');
 
-      assert.deepStrictEqual(list.length > 0, true);
-      assert.deepStrictEqual(isHostNameMatching, true);
+      assert.ok(list.length > 0);
+      assert.ok(isHostNameMatching);
     });
 
     it('should filter messages based on SQL Wildcards `hostname` excluding `%ldaqdip%` and username matching `a_iceda_` without changing state of live mode', async () => {
@@ -247,9 +247,9 @@ describe('InfoLogger', function() {
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
       const isUserNameMatching = list.map((element) => element.username).every((username) => new RegExp('a.iceda.').test(username));
 
-      assert.deepStrictEqual(list.length > 0, true);
-      assert.deepStrictEqual(isHostNameMatching, true);
-      assert.deepStrictEqual(isUserNameMatching, true);
+      assert.ok(list.length > 0);
+      assert.ok(isHostNameMatching);
+      assert.ok(isUserNameMatching);
     });
 
     it('should go to mode live in paused state', async () => {
