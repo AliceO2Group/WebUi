@@ -213,7 +213,7 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('hostname', 'match', 'aldaqdip01');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitFor(5000);
+      await page.waitFor(8000);
       const list = await page.evaluate(() => window.model.log.list);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqdip01');
       console.log(list);
