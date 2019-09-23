@@ -115,6 +115,7 @@ export default class Model extends Observable {
         break;
       case 'workflows':
         this.workflow.getRepositoriesList();
+        this.workflow.getAllTemplatesAsMap();
         break;
       case 'status':
         this.status.getFrameworkInfo();
