@@ -33,19 +33,19 @@ describe('QCG', function() {
 
     this.ok = true;
     // Start browser to test UI
-    browser = await puppeteer.launch({headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
 
     // Listen to browser
-    page.on('error', pageerror => {
+    page.on('error', (pageerror) => {
       console.error('        ', pageerror);
       this.ok = false;
     });
-    page.on('pageerror', pageerror => {
+    page.on('pageerror', (pageerror) => {
       console.error('        ', pageerror);
       this.ok = false;
     });
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       for (let i = 0; i < msg.args().length; ++i) {
         console.log(`        ${msg.args()[i]}`);
       }
