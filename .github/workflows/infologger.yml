@@ -1,7 +1,7 @@
 name: InfoLogger
 
 on:
-  push:
+  pull_request:
     paths:
       - 'InfoLogger/*'
       - 'InfoLogger/*/*'
@@ -10,11 +10,9 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-18.04, macOS-10.14]
+    runs-on: ubuntu-18.04
     steps:
+      - run: mysql -uroot -proot -e "CREATE DATABASE INFOLOGGER;"
       - uses: actions/checkout@v1
       - name: Setup node
         uses: actions/setup-node@v1
