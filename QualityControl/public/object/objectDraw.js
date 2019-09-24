@@ -184,6 +184,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
       if (objectRemoteData.payload._typename === 'TGraph' && index < 0) {
         tabObject.options.push('alp');
       }
+      // test change
 
       // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
       const options = ['f', ...tabObject.options].join(';');
