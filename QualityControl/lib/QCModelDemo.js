@@ -2,8 +2,8 @@
 // force user accounts during demo
 const ownerIdUser1 = 0;
 const ownerNameUser1 = 'John Doe';
-const ownerIdUser2 = 101;
-const ownerNameUser2 = 'Samantha Smith';
+// const ownerIdUser2 = 101;
+// const ownerNameUser2 = 'Samantha Smith';
 
 /**
  * This is a static model running without any datastore to make tests locally for example.
