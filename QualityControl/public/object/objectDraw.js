@@ -164,27 +164,27 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      let index = tabObject.options.indexOf('stat');
-      if (index >= 0) {
-        // this is to make sure we support older versions
-        tabObject.options[index] = 'stats';
-      }
+      // let index = tabObject.options.indexOf('stat');
+      // if (index >= 0) {
+      //   // this is to make sure we support older versions
+      //   tabObject.options[index] = 'stats';
+      // }
 
-      index = tabObject.options.indexOf('stats');
-      if (index >= 0) {
-        const indexNoStats = tabObject.options.indexOf('nostats');
-        if (indexNoStats >= 0) {
-          tabObject.options.splice(indexNoStats, 1);
-        }
-      } else if (tabObject.options.indexOf('nostats') < 0) {
-        tabObject.options.push('nostats');
-      }
+      // index = tabObject.options.indexOf('stats');
+      // if (index >= 0) {
+      //   const indexNoStats = tabObject.options.indexOf('nostats');
+      //   if (indexNoStats >= 0) {
+      //     tabObject.options.splice(indexNoStats, 1);
+      //   }
+      // } else if (tabObject.options.indexOf('nostats') < 0) {
+      //   tabObject.options.push('nostats');
+      // }
 
-      index = tabObject.options.indexOf('alp');
-      if (objectRemoteData.payload._typename === 'TGraph' && index < 0) {
-        tabObject.options.push('alp');
-      }
-      // test change
+      // index = tabObject.options.indexOf('alp');
+      // if (objectRemoteData.payload._typename === 'TGraph' && index < 0) {
+      //   tabObject.options.push('alp');
+      // }
+      // // test change
 
       // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
       const options = ['f', ...tabObject.options].join(';');
