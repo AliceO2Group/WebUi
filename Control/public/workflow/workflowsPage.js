@@ -11,7 +11,7 @@ import pageError from '../common/pageError.js';
  * @param {Object} model
  * @return {vnode}
  */
-export const header = (model) => h('h4.w-100 text-center', 'Workflows');
+export const header = (model) => h('h4.w-100 text-center', 'New Environment');
 
 /**
 * Form with inputs for creating a new environment
@@ -45,88 +45,86 @@ const showTemplatesValidation = (model, repoList) =>
 
 /**
  * Method which creates a dropdown of repositories
- * @param {Object} model
+ * @param {Object} workflow
  * @param {Array<JSON>} repoList
  * @return {vnode}
  */
-const repositoryDropdownList = (model, repoList) =>
+const repositoryDropdownList = (workflow, repoList) =>
   h('.m2.text-left.w-50', [ // Dropdown Repositories
     h('h5', 'Repository:'),
     h('select.form-control', {
       style: 'cursor: pointer',
-      onchange: (e) => model.workflow.setRepository(e.target.value)
+      onchange: (e) => workflow.setRepository(e.target.value)
     }, [
       repoList.map((repository) => repository.name)
         .map((repository) => h('option', {
-          selected: repository === model.workflow.form.repository ? true : false
+          selected: repository === workflow.form.repository ? true : false
         }, repository))
     ])
   ]);
 
 /**
  * Method which creates a combo box (input + dropdown) of repositories
- * @param {Object} model
+ * @param {Object} workflow
  * @param {JSON} templatesMap
  * @param {string} repository
  * @return {vnode}
  */
-const revisionComboBox = (model, templatesMap, repository) =>
+const revisionComboBox = (workflow, templatesMap, repository) =>
   h('.m2.text-left', [ // Dropdown Revisions
     h('h5', 'Revision:'),
-    !templatesMap[repository] ?
-      errorComponent('No revisions found for this repository. Please contact an administrator') :
-      h('.w-50', {style: 'display:flex; flex-direction: row;'}, [
-        h('.dropdown', {
-          style: 'flex-grow: 1;',
-          onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
-          class: model.workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
-        }, [
-          h('input.form-control', {
-            type: 'text',
-            style: 'z-index:100',
-            value: model.workflow.form.revision,
-            onkeyup: (e) => model.workflow.updateInputSearch('revision', e.target.value),
-            onclick: (e) => {
-              model.workflow.setRevisionInputDropdownVisibility('revision', true);
-              e.stopPropagation();
-            }
-          }),
-          h('.dropdown-menu.w-100',
-            Object.keys(templatesMap[repository])
-              .filter((name) => name.match(model.workflow.revision.regex))
-              .map((revision) =>
-                h('a.menu-item', {
-                  class: revision === model.workflow.form.revision ? 'selected' : '',
-                  onclick: () => model.workflow.updateInputSelection('revision', revision),
-                }, revision)
-              )
-          ),
-        ]),
-        h('button.btn.mh2', {
-          style: {
-            display: model.workflow.isInputCommitFormat() ? '' : 'none'
-          },
-          onclick: () => model.workflow.requestCommitTemplates()
-        }, iconActionRedo())
+    h('.w-50', {style: 'display:flex; flex-direction: row;'}, [
+      h('.dropdown', {
+        style: 'flex-grow: 1;',
+        onclick: () => workflow.setRevisionInputDropdownVisibility(false),
+        class: workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
+      }, [
+        h('input.form-control', {
+          type: 'text',
+          style: 'z-index:100',
+          value: workflow.form.revision,
+          onkeyup: (e) => workflow.updateInputSearch('revision', e.target.value),
+          onclick: (e) => {
+            workflow.setRevisionInputDropdownVisibility('revision', true);
+            e.stopPropagation();
+          }
+        }),
+        h('.dropdown-menu.w-100',
+          Object.keys(templatesMap[repository])
+            .filter((name) => name.match(workflow.revision.regex))
+            .map((revision) =>
+              h('a.menu-item', {
+                class: revision === workflow.form.revision ? 'selected' : '',
+                onclick: () => workflow.updateInputSelection('revision', revision),
+              }, revision)
+            )
+        ),
       ]),
+      h('button.btn.mh2', {
+        style: {
+          display: workflow.isInputCommitFormat() ? '' : 'none'
+        },
+        onclick: () => workflow.requestCommitTemplates()
+      }, iconActionRedo())
+    ]),
   ]);
 
 /**
  * Method to create the template Area List
- * @param {Object} model
+ * @param {Object} workflow
  * @param {JSON} templatesMap
  * @param {string} repository
  * @param {string} revision
  * @return {vnode}
  */
-const templateAreaList = (model, templatesMap, repository, revision) =>
+const templateAreaList = (workflow, templatesMap, repository, revision) =>
   h('.m2.text-left.w-50', [ // Dropdown Template
     h('h5', {style: '', for: ''}, 'Template:'),
     h('.shadow-level1.pv1',
       Object.values(templatesMap[repository][revision]).map((template) =>
         h('a.menu-item', {
-          className: model.workflow.form.template === template ? 'selected' : null,
-          onclick: () => model.workflow.setTemplate(template)
+          className: workflow.form.template === template ? 'selected' : null,
+          onclick: () => workflow.setTemplate(template)
         }, template))
     )
   ]);
@@ -143,28 +141,30 @@ const showControlForm = (model, repoList, templatesMap) =>
     style: 'display: flex; flex-direction: column; z-index : -1',
     onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
   }, [
-    repositoryDropdownList(model, repoList),
-    revisionComboBox(model, templatesMap, model.workflow.form.repository),
-    model.workflow.isRevisionCorrect() ?
-      templateAreaList(model, templatesMap, model.workflow.form.repository, model.workflow.form.revision)
-      : null,
-    h('.mv2', [
-      h('button.btn.btn-primary',
-        {
-          class: model.environment.itemNew.isLoading() ? 'loading' : '',
-          disabled: model.environment.itemNew.isLoading() || !model.workflow.isInputSelected(),
-          onclick: () => model.workflow.createNewEnvironment(),
-        },
-        'Create New Environment'),
-      model.environment.itemNew.match({
-        NotAsked: () => null,
-        Loading: () => null,
-        Success: () => null,
-        Failure: (error) => errorComponent(error),
-      })
-    ]
-    )
-  ]);
+    repositoryDropdownList(model.workflow, repoList),
+    !templatesMap[model.workflow.form.repository] ?
+      errorComponent('No revisions found for this repository. Please contact an administrator') :
+      h('', [
+        revisionComboBox(model.workflow, templatesMap, model.workflow.form.repository),
+        model.workflow.isRevisionCorrect() ?
+          templateAreaList(model.workflow, templatesMap, model.workflow.form.repository, model.workflow.form.revision)
+          : errorComponent('No templates found for this repository.'),
+        h('.mv2', [
+          h('button.btn.btn-primary',
+            {
+              class: model.environment.itemNew.isLoading() ? 'loading' : '',
+              disabled: model.environment.itemNew.isLoading() || !model.workflow.isInputSelected(),
+              onclick: () => model.workflow.createNewEnvironment(),
+            },
+            'Create'),
+          model.environment.itemNew.match({
+            NotAsked: () => null,
+            Loading: () => null,
+            Success: () => null,
+            Failure: (error) => errorComponent(error),
+          })
+        ])
+      ])]);
 
 /**
  * Display a red error message

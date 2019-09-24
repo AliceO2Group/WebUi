@@ -251,18 +251,24 @@ export default class Workflow extends Observable {
    */
   getMapFromList(list) {
     const map = {};
-    Object.values(list.workflowTemplates).forEach((object) => {
-      if (map[object.repo]) {
-        if (map[object.repo][object.revision]) {
-          const templates = map[object.repo][object.revision];
-          templates.push(object.template);
-          map[object.repo][object.revision] = templates;
+    Object.values(list.workflowTemplates).forEach((element) => {
+      if (!element.revision) {
+        element.revision = 'default-revision';
+      }
+      if (!element.repo) {
+        element.repo = 'default-repository';
+      }
+      if (map[element.repo]) {
+        if (map[element.repo][element.revision]) {
+          const templates = map[element.repo][element.revision];
+          templates.push(element.template);
+          map[element.repo][element.revision] = templates;
         } else {
-          map[object.repo][object.revision] = [object.template];
+          map[element.repo][element.revision] = [element.template];
         }
       } else {
-        map[object.repo] = {};
-        map[object.repo][object.revision] = [object.template];
+        map[element.repo] = {};
+        map[element.repo][element.revision] = [element.template];
       }
     });
     return map;
