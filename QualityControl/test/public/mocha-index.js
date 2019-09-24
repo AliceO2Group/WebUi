@@ -17,7 +17,7 @@ describe('QCG', function() {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(10000);
+  this.timeout(100000);
   this.slow(2000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
@@ -33,7 +33,7 @@ describe('QCG', function() {
 
     this.ok = true;
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
 
     // Listen to browser
