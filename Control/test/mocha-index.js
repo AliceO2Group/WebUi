@@ -351,11 +351,11 @@ describe('Control', function() {
     });
   });
 
-  describe('page workflows', () => {
+  describe('page newEnvironment', () => {
     it('should load', async () => {
-      await page.goto(url + '?page=workflows', {waitUntil: 'networkidle0'});
+      await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=workflows');
+      assert(location.search === '?page=newEnvironment');
     });
 
     it('should have gotten data from `GetWorkflowTemplates`', async () => {

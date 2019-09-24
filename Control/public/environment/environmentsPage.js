@@ -18,7 +18,7 @@ export const header = (model) => [
     h('h4', 'Environments')
   ]),
   h('.flex-grow text-right', [
-    h('button.btn', {onclick: () => model.router.go('?page=workflows')}, iconPlus())
+    h('button.btn', {onclick: () => model.router.go('?page=newEnvironment')}, iconPlus())
   ])
 ];
 

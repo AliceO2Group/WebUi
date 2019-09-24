@@ -49,7 +49,7 @@ export default (model) => [
 const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
   switchCase(model.router.params.page, {
-    workflows: workflowsHeader,
+    newEnvironment: workflowsHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
     status: statusHeader
@@ -63,7 +63,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
  */
 const content = (model) => [
   switchCase(model.router.params.page, {
-    workflows: workflowsContent,
+    newEnvironment: workflowsContent,
     environments: environmentsContent,
     environment: environmentContent,
     status: statusContent

@@ -113,7 +113,7 @@ export default class Model extends Observable {
         }
         this.environment.getEnvironment({id: this.router.params.id});
         break;
-      case 'workflows':
+      case 'newEnvironment':
         this.workflow.getRepositoriesList();
         this.workflow.getAllTemplatesAsMap();
         break;

@@ -20,16 +20,13 @@ export default (model) => h('.absolute-fill scroll-y', [
 
   h('h5.menu-title-large', 'Environments'),
   h('a.menu-item', {
-    href: '?page=workflows',
-    onclick: (e) => {
-      model.workflows.useAll = false;
-      model.router.handleLinkEvent(e);
-    },
-    class: model.router.params.page === 'workflows' ? 'selected' : ''
+    href: '?page=newEnvironment',
+    onclick: (e) => model.router.handleLinkEvent(e),
+    class: model.router.params.page === 'newEnvironment' ? 'selected' : ''
   }, [
     iconPlus(),
     ' ',
-    'Create New'
+    'Create'
   ]),
   h('a.menu-item', {
     href: '?page=environments',

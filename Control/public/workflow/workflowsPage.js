@@ -137,8 +137,8 @@ const templateAreaList = (workflow, templatesMap, repository, revision) =>
  * @return {vnode}
  */
 const showControlForm = (model, repoList, templatesMap) =>
-  h('.form-group.shadow-level1.p3', {
-    style: 'display: flex; flex-direction: column; z-index : -1',
+  h('.form-group.p3.absolute-fill', {
+    style: 'display: flex; flex-direction: column; ',
     onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
   }, [
     repositoryDropdownList(model.workflow, repoList),
@@ -146,7 +146,8 @@ const showControlForm = (model, repoList, templatesMap) =>
       errorComponent('No revisions found for this repository. Please contact an administrator') :
       h('', [
         revisionComboBox(model.workflow, templatesMap, model.workflow.form.repository),
-        model.workflow.isRevisionCorrect() ?
+        (model.workflow.isRevisionCorrect() &&
+          Object.values(templatesMap[model.workflow.form.repository][model.workflow.form.revision]).length !== 0) ?
           templateAreaList(model.workflow, templatesMap, model.workflow.form.repository, model.workflow.form.revision)
           : errorComponent('No templates found for this repository.'),
         h('.mv2', [
