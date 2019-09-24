@@ -39,7 +39,7 @@ const showTemplatesValidation = (model, repoList) =>
     NotAsked: () => null,
     Loading: () => pageLoading(),
     Failure: (error) => pageError(error),
-    Success: (templatesMap) => (Object.keys(model.workflow.templatesMap.payload).length === 0)
+    Success: (templatesMap) => (Object.keys(templatesMap).length === 0)
       ? h('h3.m4', ['No templates/revisions found.']) : showControlForm(model, repoList, templatesMap)
   });
 
@@ -73,42 +73,42 @@ const repositoryDropdownList = (model, repoList) =>
 const revisionComboBox = (model, templatesMap, repository) =>
   h('.m2.text-left', [ // Dropdown Revisions
     h('h5', 'Revision:'),
-    h('.w-50', {style: 'display:flex; flex-direction: row;'}, [
-      h('.dropdown', {
-        style: 'flex-grow: 1;',
-        onclick: () => model.workflow.closeAllDropdowns(),
-        class: model.workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
-      }, [
-        !templatesMap[repository] ?
-          errorComponent('No revisions found for this repository. Please contact an administrator') :
+    !templatesMap[repository] ?
+      errorComponent('No revisions found for this repository. Please contact an administrator') :
+      h('.w-50', {style: 'display:flex; flex-direction: row;'}, [
+        h('.dropdown', {
+          style: 'flex-grow: 1;',
+          onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
+          class: model.workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
+        }, [
           h('input.form-control', {
             type: 'text',
             style: 'z-index:100',
-            value: model.workflow.revision.selected,
+            value: model.workflow.form.revision,
             onkeyup: (e) => model.workflow.updateInputSearch('revision', e.target.value),
             onclick: (e) => {
-              model.workflow.setInputDropdownVisibility('revision', true);
+              model.workflow.setRevisionInputDropdownVisibility('revision', true);
               e.stopPropagation();
             }
           }),
-        h('.dropdown-menu.w-100',
-          Object.keys(templatesMap[repository])
-            .filter((name) => name.match(model.workflow.revision.regex))
-            .map((revision) =>
-              h('a.menu-item', {
-                class: revision === model.workflow.revision.selected ? 'selected' : '',
-                onclick: () => model.workflow.updateInputSelection('revision', revision),
-              }, revision)
-            )
-        ),
+          h('.dropdown-menu.w-100',
+            Object.keys(templatesMap[repository])
+              .filter((name) => name.match(model.workflow.revision.regex))
+              .map((revision) =>
+                h('a.menu-item', {
+                  class: revision === model.workflow.form.revision ? 'selected' : '',
+                  onclick: () => model.workflow.updateInputSelection('revision', revision),
+                }, revision)
+              )
+          ),
+        ]),
+        h('button.btn.mh2', {
+          style: {
+            display: model.workflow.isInputCommitFormat() ? '' : 'none'
+          },
+          onclick: () => model.workflow.requestCommitTemplates()
+        }, iconActionRedo())
       ]),
-      h('button.btn.mh2', {
-        style: {
-          display: model.workflow.form.revision.startsWith('#') ? '' : 'none'
-        },
-        onclick: () => model.workflow.requestCommitTemplates()
-      }, iconActionRedo())
-    ]),
   ]);
 
 /**
@@ -141,12 +141,12 @@ const templateAreaList = (model, templatesMap, repository, revision) =>
 const showControlForm = (model, repoList, templatesMap) =>
   h('.form-group.shadow-level1.p3', {
     style: 'display: flex; flex-direction: column; z-index : -1',
-    onclick: () => model.workflow.closeAllDropdowns(),
+    onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
   }, [
     repositoryDropdownList(model, repoList),
     revisionComboBox(model, templatesMap, model.workflow.form.repository),
     model.workflow.isRevisionCorrect() ?
-      templateAreaList(model, templatesMap, model.workflow.form.repository, model.workflow.revision.selected)
+      templateAreaList(model, templatesMap, model.workflow.form.repository, model.workflow.form.revision)
       : null,
     h('.mv2', [
       h('button.btn.btn-primary',

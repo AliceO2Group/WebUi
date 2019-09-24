@@ -28,3 +28,15 @@
 tr:hover td {
   background-color: var(--color-gray-light)
 }
+
+.menu-title-large {
+  text-transform: uppercase;
+  height: 2em;
+  line-height: 2em;
+  color: var(--color-gray-darker);
+  padding-left: 1em;
+  font-size: 0.9em;
+  font-weight: 100;
+  margin: 0.5em;
+  user-select: none;
+}

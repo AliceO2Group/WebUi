@@ -18,13 +18,12 @@ export default class Workflow extends Observable {
 
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp(),
-      selected: ''
+      regex: new RegExp('^master'),
     };
 
     this.form = {
       repository: '',
-      revision: '',
+      revision: 'master',
       template: ''
     };
   }
@@ -35,6 +34,8 @@ export default class Workflow extends Observable {
    */
   setRepository(repository) {
     this.form.repository = repository;
+    this.resetErrorMessage();
+    this.setTemplate('');
     this.resetRevision();
     this.notify();
   }
@@ -45,19 +46,23 @@ export default class Workflow extends Observable {
    */
   setTemplate(template) {
     this.form.template = template;
-    this.notify;
+    this.notify();
   }
 
+  /**
+   * Reset `itemNew` to `NotAsked`
+   */
+  resetErrorMessage() {
+    this.model.environment.itemNew = RemoteData.notAsked();
+  }
   /**
    * Reset revision when user selects a different repository
    */
   resetRevision() {
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp(),
-      selected: ''
+      regex: new RegExp('^master')
     };
-    this.notify();
   }
   /**
    * Updates the selected repository with the new user selection
@@ -71,14 +76,13 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Returns true/false if revision selected by the user is a commit or exists
+   * Returns true/false if revision selected by the user exists
    * @return {boolean}
    */
   isRevisionCorrect() {
     return this.templatesMap.isSuccess()
       && this.templatesMap.payload[this.form.repository]
-      && this.templatesMap.payload[this.form.repository][this.revision.selected]
-      && !this.revision.selected.startsWith('#');
+      && this.templatesMap.payload[this.form.repository][this.form.revision];
   }
 
   /**
@@ -87,37 +91,27 @@ export default class Workflow extends Observable {
    * @param {string} input - input from user used for autocomplete
    */
   updateInputSearch(inputField, input) {
-    if (input === '#') {
-      this.revision.isSelectionOpen = false;
-    }
     this.revision.regex = new RegExp('^' + input);
-    this.revision.selected = input;
     this.form.revision = input;
     this.notify();
   }
 
   /**
    * Set the state of a dropdown (close/opened)
-   * @param {JSON} inputField - dropdown that should change state
    * @param {boolean} option - true - open / false - close
    */
-  setInputDropdownVisibility(inputField, option) {
-    // true la una false la celelalte÷
-    // maybe add arrows & enter commands to input
-    switch (inputField) {
-      case 'revision':
-        this.revision.isSelectionOpen = option;
-        break;
-    }
+  setRevisionInputDropdownVisibility(option) {
+    this.revision.isSelectionOpen = option;
     this.notify();
   }
 
   /**
-   * Method to close all dropdowns if users focuses on different part of screen
+   * Match regex to see if revision is in a commit format
+   * @return {boolean}
    */
-  closeAllDropdowns() {
-    this.revision.isSelectionOpen = false;
-    this.notify();
+  isInputCommitFormat() {
+    const reg = new RegExp('[a-f0-9]{40}');
+    return this.form.revision.match(reg);
   }
 
   /**
@@ -125,9 +119,9 @@ export default class Workflow extends Observable {
    * @return {boolean}
    */
   isInputSelected() {
-    return this.form.repository !== ''
-      && this.form.revision !== ''
-      && (this.form.revision.startsWith('#') || this.form.template !== '');
+    return this.form.repository.trim() !== ''
+      && this.form.revision.trim() !== ''
+      && this.form.template.trim() !== '';
   }
 
   /**
@@ -140,10 +134,7 @@ export default class Workflow extends Observable {
       this.model.environment.itemNew = RemoteData.failure('Selected repository does not exist');
     } else {
       const revision = this.form.revision;
-      if (revision.startsWith('#')) {
-        const path = templates + '/' + revision;
-        // this.model.environment.newEnvironment(path);
-      } else if (!templates[repository][revision]) {
+      if (!templates[repository][revision]) {
         this.model.environment.itemNew = RemoteData.failure('Selected revision does not exist for this repository');
       } else {
         const template = this.form.template;
@@ -165,7 +156,7 @@ export default class Workflow extends Observable {
   requestCommitTemplates() {
     const options = {
       repoPattern: this.form.repository,
-      revisionPattern: this.form.revision.substring(1),
+      revisionPattern: this.form.revision,
       allBranches: false,
       allTags: false
     };
@@ -177,24 +168,23 @@ export default class Workflow extends Observable {
    */
 
   /**
-   * Load workflows into `list` as RemoteData
-   */
-  async get() {
-    this.list = await this.remoteDataPostRequest(this.repoList, `/api/GetWorkflowTemplates`, {});
-  }
-
-  /**
    * Load repositories into `repoList` as RemoteData
    */
   async getRepositoriesList() {
     this.repoList = await this.remoteDataPostRequest(this.repoList, `/api/ListRepos`, {});
     if (this.repoList.isSuccess()) {
-      this.form.repository = this.repoList.payload.repos.find((repository) => repository.default).name;
+      // Set first repository the default one or first from the list if default does not exist
+      const repository = this.repoList.payload.repos.find((repository) => repository.default);
+      if (repository) {
+        this.form.repository = repository.name;
+      } else if (this.repoList.payload.repos.length > 0) {
+        this.form.repository = this.repoList.payload.repos[0].name;
+      }
     }
   }
 
   /**
-  * Load all templates from all repositoris & all revisions into `map` as RemoteData
+  * Load all templates from all repositories & all revisions into `map` as RemoteData
   * @param {JSON} options
   */
   async getAllTemplatesAsMap(options) {
@@ -206,6 +196,7 @@ export default class Workflow extends Observable {
         allTags: false
       };
     }
+    const tempMap = this.templatesMap.payload;
     this.templatesMap = RemoteData.loading();
     this.notify();
 
@@ -215,37 +206,14 @@ export default class Workflow extends Observable {
       this.notify();
       return;
     }
-    const map = {};
-    Object.values(result.workflowTemplates).forEach((element) => {
-      const existRepo = map[element.repo];
-      if (existRepo) {
-        const existRevision = map[element.repo][element.revision];
-        if (existRevision) {
-          const ar = map[element.repo][element.revision];
-          ar.push(element.template);
-          map[element.repo][element.revision] = ar;
-        } else {
-          map[element.repo][element.revision] = [element.template];
-        }
-      } else {
-        map[element.repo] = {};
-        map[element.repo][element.revision] = [element.template];
-      }
-    });
 
-    if (!this.templatesMap.isNotAsked()) {
-      Object.keys(map).forEach((key) => {
-        Object.keys(map[key]).forEach((secondKey) => {
-          map[key]['#' + secondKey] = map[key][secondKey];
-          delete map[key][secondKey];
-        });
-      });
+    let map = this.getMapFromList(result);
+    if (tempMap) {
+      map = this.mergeMaps(map, tempMap);
       this.templatesMap = RemoteData.success(map);
     } else {
       this.templatesMap = RemoteData.success(map);
-
     }
-
     this.notify();
   }
 
@@ -269,5 +237,51 @@ export default class Workflow extends Observable {
       this.notify();
       return remoteDataItem;
     }
+  }
+
+  /**
+   * Helpers
+   */
+
+  /**
+   * Group list of repository in a JSON object by
+   * repository and revision as keys
+   * @param {Array<JSON>} list
+   * @return {JSON}
+   */
+  getMapFromList(list) {
+    const map = {};
+    Object.values(list.workflowTemplates).forEach((object) => {
+      if (map[object.repo]) {
+        if (map[object.repo][object.revision]) {
+          const templates = map[object.repo][object.revision];
+          templates.push(object.template);
+          map[object.repo][object.revision] = templates;
+        } else {
+          map[object.repo][object.revision] = [object.template];
+        }
+      } else {
+        map[object.repo] = {};
+        map[object.repo][object.revision] = [object.template];
+      }
+    });
+    return map;
+  }
+
+  /**
+   * Method to merge 2 maps
+   * @param {JSON} map
+   * @param {JSON} tempMap
+   * @return {JSON}
+   */
+  mergeMaps(map, tempMap) {
+    Object.keys(tempMap).forEach((tempKey) => {
+      Object.keys(map).filter((key) => key === tempKey).forEach((key) => {
+        Object.keys(tempMap[key]).forEach((revisionKey) => {
+          map[key][revisionKey] = tempMap[key][revisionKey];
+        });
+      });
+    });
+    return map;
   }
 }

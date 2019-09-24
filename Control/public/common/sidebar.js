@@ -1,5 +1,5 @@
 import {h} from '/js/src/index.js';
-import {iconGridTwoUp, iconExcerpt, iconListRich} from '/js/src/icons.js';
+import {iconGridTwoUp, iconExcerpt, iconPlus} from '/js/src/icons.js';
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
@@ -7,7 +7,7 @@ import {iconGridTwoUp, iconExcerpt, iconListRich} from '/js/src/icons.js';
  * @return {vnode}
  */
 export default (model) => h('.absolute-fill scroll-y', [
-  h('.menu-title', 'Dashboard'),
+  h('.menu-title-large', 'Dashboard'),
   h('a.menu-item', {
     href: '?page=status',
     onclick: (e) => model.router.handleLinkEvent(e),
@@ -18,7 +18,7 @@ export default (model) => h('.absolute-fill scroll-y', [
     'Status'
   ]),
 
-  h('.menu-title', 'Control'),
+  h('h5.menu-title-large', 'Environments'),
   h('a.menu-item', {
     href: '?page=workflows',
     onclick: (e) => {
@@ -27,9 +27,9 @@ export default (model) => h('.absolute-fill scroll-y', [
     },
     class: model.router.params.page === 'workflows' ? 'selected' : ''
   }, [
-    iconListRich(),
+    iconPlus(),
     ' ',
-    'Workflows'
+    'Create New'
   ]),
   h('a.menu-item', {
     href: '?page=environments',
@@ -38,6 +38,6 @@ export default (model) => h('.absolute-fill scroll-y', [
   }, [
     iconGridTwoUp(),
     ' ',
-    'Environments'
+    'Active'
   ])
 ]);

@@ -86,7 +86,6 @@ export default class Environment extends Observable {
    * @param {string} itemForm
    */
   async newEnvironment(itemForm) {
-    console.log(itemForm)
     this.itemNew = RemoteData.loading();
     this.notify();
 
