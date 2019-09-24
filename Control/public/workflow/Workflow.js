@@ -139,7 +139,12 @@ export default class Workflow extends Observable {
       } else {
         const template = this.form.template;
         if (template !== '') {
-          const path = repository + 'workflows/' + template + '@' + revision;
+          let path = '';
+          if (revision === '(no-revision-by-default)') {
+            path = repository + 'workflows/' + template;
+          } else {
+            path = repository + 'workflows/' + template + '@' + revision;
+          }
           this.model.environment.newEnvironment({workflowTemplate: path});
         } else {
           this.model.environment.itemNew =
@@ -253,10 +258,7 @@ export default class Workflow extends Observable {
     const map = {};
     Object.values(list.workflowTemplates).forEach((element) => {
       if (!element.revision) {
-        element.revision = 'default-revision';
-      }
-      if (!element.repo) {
-        element.repo = 'default-repository';
+        element.revision = '(no-revision-by-default)';
       }
       if (map[element.repo]) {
         if (map[element.repo][element.revision]) {
