@@ -36,8 +36,19 @@ describe('Control', function() {
       state: 'CONFIGURED',
       tasks: []
     },
-    workflow: {}
+    workflow: {},
+    workflowTemplates: {
+      workflowTemplates: [
+        {repo: 'gitlab.cern.ch/kalexopo/AliECS_conf/', template: 'prettyreadout-1', revision: 'master'}
+      ]
+    },
+    listRepos: {
+      repos: [
+        {name: 'github.com/AliceO2Group/ControlWorkflows/', default: true},
+        {name: 'gitlab.cern.ch/kalexopo/AliECS_conf/'}]
+    }
   };
+
   before(async () => {
     // Start gRPC server, this replaces the real Control server written in Go.
     const server = new grpcLibrary.Server();
@@ -81,7 +92,16 @@ describe('Control', function() {
       getEnvironment(call, callback) {
         calls['getEnvironment'] = true;
         callback(null, envTest);
-      }
+      },
+      getWorkflowTemplates(call, callback) {
+        calls['getWorkflowTemplates'] = true;
+        callback(null, envTest.workflowTemplates);
+      },
+      listRepos(call, callback) {
+        calls['listRepos'] = true;
+        callback(null, envTest.listRepos);
+      },
+
     });
     server.bind(address, credentials);
     server.start();
@@ -330,6 +350,50 @@ describe('Control', function() {
       assert.deepStrictEqual(lockButton, 'Lock is free');
     });
   });
+
+  describe('page workflows', () => {
+    it('should load', async () => {
+      await page.goto(url + '?page=workflows', {waitUntil: 'networkidle0'});
+      const location = await page.evaluate(() => window.location);
+      assert(location.search === '?page=workflows');
+    });
+
+    it('should have gotten data from `GetWorkflowTemplates`', async () => {
+      assert(calls['getWorkflowTemplates'] === true);
+    });
+
+    it('should have gotten data from `ListRepos`', async () => {
+      assert(calls['listRepos'] === true);
+    });
+
+    it('should successfully request and parse a list of template objects', async () => {
+      const templatesMap = await page.evaluate(() => {
+        return window.model.workflow.templatesMap;
+      });
+      const expectedMap = {
+        kind: 'Success', payload:
+          {'gitlab.cern.ch/kalexopo/AliECS_conf/': {master: ['prettyreadout-1']}}
+      };
+      assert.deepStrictEqual(templatesMap, expectedMap);
+    });
+
+    it('should successfully request and parse a list of repositories objects', async () => {
+      const repositories = await page.evaluate(() => {
+        return window.model.workflow.repoList;
+      });
+      const expectedRepositories = {
+        kind: 'Success',
+        payload: {
+          repos: [
+            {name: 'github.com/AliceO2Group/ControlWorkflows/', default: true},
+            {name: 'gitlab.cern.ch/kalexopo/AliECS_conf/'}
+          ]
+        }
+      };
+      assert.deepStrictEqual(repositories, expectedRepositories);
+    });
+  });
+
 
   beforeEach(() => {
     this.ok = true;
