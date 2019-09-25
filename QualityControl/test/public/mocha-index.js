@@ -129,28 +129,28 @@ describe('QCG', function() {
       assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
     });
 
-    it('should have tabs in the header', async () => {
+    // it('should have tabs in the header', async () => {
       
-      const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
-      assert(tabsCount > 1);
-    });
+    //   const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
+    //   assert(tabsCount > 1);
+    // });
 
-    it('should have selected layout in the sidebar highlighted', async () => {
-      const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(5)').classList);
-      assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
-    });
+    // it('should have selected layout in the sidebar highlighted', async () => {
+    //   const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(5)').classList);
+    //   assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
+    // });
 
-    it('should have jsroot svg plots in the section', async () => {
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert(plotsCount > 1);
-    });
+    // it('should have jsroot svg plots in the section', async () => {
+    //   const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+    //   assert(plotsCount > 1);
+    // });
 
-    it('should have second tab to be empty (according to demo data)', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
-      await page.waitForSelector('section h1', {timeout: 5000});
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert.deepStrictEqual(plotsCount, 0);
-    });
+    // it('should have second tab to be empty (according to demo data)', async () => {
+    //   await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
+    //   await page.waitForSelector('section h1', {timeout: 5000});
+    //   const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+    //   assert.deepStrictEqual(plotsCount, 0);
+    // });
 
     // it('should have a button group containing three buttons in the header', async () => {
     //   const buttonCount = await page.evaluate(() =>
