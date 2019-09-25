@@ -11,5 +11,18 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 
 ## Installation
 ```
-aliBuild build ecsg --default o2-dataflow
+npm install @aliceo2/control
+```
+
+## Integration with Notification Service
+
+This feature requires HTTPS.
+
+Kafka configuration:
+```javascript
+kafka: {
+  hostnames: 'test.cern.ch',
+  port: 9092,
+  topic: 'webui'
+}
 ```

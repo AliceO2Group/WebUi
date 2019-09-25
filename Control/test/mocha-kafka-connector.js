@@ -13,13 +13,13 @@ describe('Kafka Connector test suite', function() {
     it('should throw error due to missing all mandatory fields in config', function() {
       assert.throws(() => {
         new KafkaConnector({});
-      }, new Error('[Kafka] Missing mandatory fields from configuration: hostnames,port,topic,groupId'));
+      }, new Error('[Kafka] Missing mandatory fields from configuration: hostnames,port,topic'));
     });
 
     it('should throw error due to missing mandatory fields in config', function() {
       assert.throws(() => {
         new KafkaConnector({hostnames: 'localhost', topic: 'notifications'});
-      }, new Error('[Kafka] Missing mandatory fields from configuration: port,groupId'));
+      }, new Error('[Kafka] Missing mandatory fields from configuration: port'));
     });
 
     it('should successfully create a kafka connector', function() {
@@ -27,7 +27,6 @@ describe('Kafka Connector test suite', function() {
       assert.deepStrictEqual(kafka.brokers, 'localhost:9092');
       assert.deepStrictEqual(kafka.port, 9092);
       assert.deepStrictEqual(kafka.topic, 'notifications');
-      assert.deepStrictEqual(kafka.groupId, 'flp-kafka-notifications');
     });
   });
 
