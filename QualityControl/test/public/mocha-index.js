@@ -68,18 +68,18 @@ describe('QCG', function() {
     }
   });
 
-  // it('should have redirected to default page "/?page=objectTree"', async () => {
-  //   const location = await page.evaluate(() => window.location);
-  //   assert(location.search === '?page=objectTree');
-  // });
+  it('should have redirected to default page "/?page=objectTree"', async () => {
+    const location = await page.evaluate(() => window.location);
+    assert(location.search === '?page=objectTree');
+  });
 
-  // it('should have a layout with header, sidebar and section', async () => {
-  //   const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
-  //   const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);
+  it('should have a layout with header, sidebar and section', async () => {
+    const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
+    const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);
 
-  //   assert(headerContent.includes('Quality Control'));
-  //   assert(sidebarContent.includes('Explore'));
-  // });
+    assert(headerContent.includes('Quality Control'));
+    assert(sidebarContent.includes('Explore'));
+  });
 
   // describe('page layoutList', () => {
   //   before(async () => {
