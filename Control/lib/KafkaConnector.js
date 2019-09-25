@@ -25,9 +25,6 @@ class KafkaConnector {
     if (!kafkaConfig.topic) {
       missingConfigFields.push('topic');
     }
-    if (!kafkaConfig.groupId) {
-      missingConfigFields.push('groupId');
-    }
     if (missingConfigFields.length > 0) {
       throw new Error(`[Kafka] Missing mandatory fields from configuration: ${missingConfigFields}`);
     }
@@ -35,7 +32,6 @@ class KafkaConnector {
     this.brokers = this._getHostNamesList(kafkaConfig.hostnames, kafkaConfig.port);
     this.port = kafkaConfig.port;
     this.topic = kafkaConfig.topic;
-    this.groupId = kafkaConfig.groupId;
     this.consumerGroup = null;
     this.webSocket = webSocket;
   }
@@ -45,10 +41,9 @@ class KafkaConnector {
    */
   initializeKafkaConsumerGroup() {
     const options = {
-      kafkaHost: this.brokers,
-      groupId: this.groupId
+      kafkaHost: this.brokers
     };
-    const consumerGroup = new kafka.ConsumerGroup(options, 'notifications');
+    const consumerGroup = new kafka.ConsumerGroup(options, this.topic);
 
     consumerGroup.on('message', (message) => this.notifyUsers(message));
     consumerGroup.on('connect', () => log.info(`ConsumerGroup successfully connected to topic ${this.topic}`));
