@@ -161,8 +161,8 @@ const objects = [
   // {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', quality: 'good', data: graphs.histo},
   // {name: 'DAQ01/EventSize/TOF/TOF', quality: 'bad', data: graphs.gaussian},
   // {name: 'DAQ01/EventSize/TPC/TPC', quality: 'good', data: graphs.canvas_tf1},
-  // {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', quality: 'good', data: graphs.hpx},
-  {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', quality: 'good', data: graphs.canvas_tf1},
+  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', quality: 'good', data: graphs.hpx},
+  // {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', quality: 'good', data: graphs.canvas_tf1},
   // {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', quality: 'good', data: graphs.gaussian},
   // {name: 'DAQ01/_EquimentSizeSummmary', quality: 'bad', data: graphs.gaussian},
   // {name: 'DAQ01/_EventSizeClusters', quality: 'bad', data: graphs.canvas_tf1},
@@ -187,10 +187,10 @@ const objects = [
 ];
 
 const tabObject = [
-  // {id: '5aba4a059b755d517e76ef51',
-  //   options: ['logx'], name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', x: 0, y: 0, w: 2, h: 1},
-  {id: '5aba4a059b755d517e76ef52',
-    options: ['logy'], name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef51',
+    options: ['logx'], name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', x: 0, y: 0, w: 2, h: 1},
+  // {id: '5aba4a059b755d517e76ef52',
+    // options: ['logy'], name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1},
   // {id: '5aba4a059b755d517e76ef53',
   //   options: ['gridx', 'lego'], name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
   // {id: '5aba4a059b755d517e76ef54',
