@@ -125,12 +125,12 @@ describe('QCG', function() {
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
       await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      await page.screenshot({path: 'buddy-screenshot.png'});
-
+      // await page.screenshot({path: 'buddy-screenshot.png'});
       assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
     });
 
     it('should have tabs in the header', async () => {
+      
       const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
       assert(tabsCount > 1);
     });
