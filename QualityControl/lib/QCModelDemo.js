@@ -190,7 +190,7 @@ const tabObject = [
   {id: '5aba4a059b755d517e76ef51',
     options: ['logx'], name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', x: 0, y: 0, w: 2, h: 1},
   // {id: '5aba4a059b755d517e76ef52',
-    // options: ['logy'], name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1},
+  //  options: ['logy'], name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1},
   // {id: '5aba4a059b755d517e76ef53',
   //   options: ['gridx', 'lego'], name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
   // {id: '5aba4a059b755d517e76ef54',
