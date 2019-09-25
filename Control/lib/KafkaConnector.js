@@ -43,7 +43,7 @@ class KafkaConnector {
     const options = {
       kafkaHost: this.brokers
     };
-    const consumerGroup = new kafka.ConsumerGroup(options, this.topic);
+    const consumerGroup = new kafka.ConsumerGroup(options, [this.topic]);
 
     consumerGroup.on('message', (message) => this.notifyUsers(message));
     consumerGroup.on('connect', () => log.info(`ConsumerGroup successfully connected to topic ${this.topic}`));
@@ -63,6 +63,14 @@ class KafkaConnector {
     msg.command = 'notification';
     msg.payload = msgJSON.description;
     this.webSocket.broadcast(msg);
+  }
+
+  /**
+   * Check if Kafka was correctly configured
+   * @return {boolean}
+   */
+  isKafkaConfigured() {
+    return (this.port !== undefined && this.topic !== undefined && this.brokers !== undefined);
   }
 
   /**

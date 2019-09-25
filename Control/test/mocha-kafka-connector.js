@@ -49,5 +49,14 @@ describe('Kafka Connector test suite', function() {
       const brokers = kafka._getHostNamesList(hostnames, 9092);
       assert.deepStrictEqual(brokers, expectedHostNames);
     });
+
+    it('should return true when kafka is properly configured', () => {
+      assert.deepStrictEqual(kafka.isKafkaConfigured(), true);
+    });
+
+    it('should return false for kafka not being properly configured', () => {
+      const kafka = new KafkaConnector();
+      assert.deepStrictEqual(kafka.isKafkaConfigured(), false);
+    });
   });
 });

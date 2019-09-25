@@ -21,8 +21,9 @@ const octl = new ControlProxy(config.grpc);
 
 module.exports.setup = (http, ws) => {
   const kafka = new KafkaConnector(config.kafka, ws);
-  kafka.initializeKafkaConsumerGroup();
-
+  if (kafka.isKafkaConfigured()) {
+    kafka.initializeKafkaConsumerGroup();
+  }
   // Map Control gRPC methods
   for (const method of octl.methods) {
     http.post(`/${method}`, (req, res) => {
