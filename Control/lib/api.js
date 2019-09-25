@@ -31,7 +31,7 @@ module.exports.setup = (http, ws) => {
         return;
       }
       // disallow 'not-Get' methods if not owning the lock
-      if (!method.startsWith('Get')) {
+      if (!method.startsWith('Get') && method !== 'ListRepos') {
         if (pad.lockedBy == null) {
           errorHandler(`Control is not locked`, res, 403);
           return;

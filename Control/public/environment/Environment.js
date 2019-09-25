@@ -20,7 +20,6 @@ export default class Environment extends Observable {
     this.item = RemoteData.notAsked();
     this.itemControl = RemoteData.notAsked();
     this.itemNew = RemoteData.notAsked();
-    this.itemForm = {};
     this.plots = RemoteData.notAsked();
 
     this.getPlotsList();
@@ -83,14 +82,14 @@ export default class Environment extends Observable {
 
   /**
    * Create a new remote environment, creation action result into `itemNew` as RemoteData
-   * Form data must be stored inside `this.itemForm`
-   * See protobuf definition for properties of `this.itemForm` as body
+   * See protobuf definition for properties of `itemForm` as body
+   * @param {string} itemForm
    */
-  async newEnvironment() {
+  async newEnvironment(itemForm) {
     this.itemNew = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/NewEnvironment`, this.itemForm);
+    const {result, ok} = await this.model.loader.post(`/api/NewEnvironment`, itemForm);
     if (!ok) {
       this.itemNew = RemoteData.failure(result.message);
       this.notify();
@@ -98,16 +97,6 @@ export default class Environment extends Observable {
     }
     this.itemNew = RemoteData.notAsked();
     this.model.router.go(`?page=environment&id=${result.environment.id}`);
-  }
-
-  /**
-   * Set property of environment form, used for creation or update
-   * @param {string} property
-   * @param {string} value
-   */
-  setForm(property, value) {
-    this.itemForm[property] = value;
-    this.notify();
   }
 
   /**
