@@ -102,9 +102,6 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     switch (this.router.params.page) {
-      case 'newEnvironment':
-        this.workflow.get();
-        break;
       case 'environments':
         this.environment.getEnvironments();
         break;
@@ -116,8 +113,9 @@ export default class Model extends Observable {
         }
         this.environment.getEnvironment({id: this.router.params.id});
         break;
-      case 'workflows':
-        this.workflow.get();
+      case 'newEnvironment':
+        this.workflow.getRepositoriesList();
+        this.workflow.getAllTemplatesAsMap();
         break;
       case 'status':
         this.status.getFrameworkInfo();

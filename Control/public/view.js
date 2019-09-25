@@ -16,9 +16,6 @@ import {
   content as environmentContent,
   header as environmentHeader} from './environment/environmentPage.js';
 import {
-  content as newEnvironmentContent,
-  header as newEnvironmentHeader} from './environment/newEnvironmentPage.js';
-import {
   content as statusContent,
   header as statusHeader} from './status/statusPage.js';
 
@@ -52,10 +49,9 @@ export default (model) => [
 const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
   switchCase(model.router.params.page, {
-    workflows: workflowsHeader,
+    newEnvironment: workflowsHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
-    newEnvironment: newEnvironmentHeader,
     status: statusHeader
   })(model)
 ]);
@@ -67,10 +63,9 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
  */
 const content = (model) => [
   switchCase(model.router.params.page, {
-    workflows: workflowsContent,
+    newEnvironment: workflowsContent,
     environments: environmentsContent,
     environment: environmentContent,
-    newEnvironment: newEnvironmentContent,
     status: statusContent
   })(model)
 ];
