@@ -213,7 +213,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
  * @param {Array<Actions>} actions
  * @return {vnode}
  */
-const displayTableOfTasks = (environment, list, actions) => h('', [
+const displayTableOfTasks = (environment, list, actions) => h('.scroll-auto', [
   h('table.table.table-sm', [
     h('thead', [
       h('tr',
@@ -237,7 +237,7 @@ const displayTableOfTasks = (environment, list, actions) => h('', [
             item[columnName]
           )
       ),
-      actions && h('td.btn-group',
+      actions && h('td',
         h('button.btn.btn-primary',
           {
             onclick: (event) => actions[0](event, item)
