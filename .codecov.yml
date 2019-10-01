@@ -11,7 +11,7 @@ coverage:
       default: false
       Framework:
         target: 50%
-        paths: "Framework/Backend"
+        paths: "Framework"
         threshold: null
         if_not_found: success
       QualityControl:
