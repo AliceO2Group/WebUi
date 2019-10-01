@@ -1,5 +1,7 @@
 # InfoLogger GUI (ILG)
 
+[![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/InfoLogger/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)
+
 Web user interface of [InfoLogger](https://github.com/AliceO2Group/InfoLogger) logging system. It interfaces with the system using two modes:
 - **Query**: Querying historical logs from a database
 - **Live**: Receiving Real-Time logs from a TCP endpoint over InfoLogger protocol (v1.3, v1.4)
