@@ -25,7 +25,7 @@ coverage:
         threshold: null
         if_not_found: success
       Control:
-        target: 70%
+        target: 69%
         paths: "Control"
         threshold: null
         if_not_found: success
