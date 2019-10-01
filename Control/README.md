@@ -1,5 +1,7 @@
 # Control GUI
 
+[![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/Control/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)
+
 This is a prototype of Control GUI. It aims to replace current ECS HI and provide intuitive way of controlling the O<sup>2</sup> data taking.
 
 It communicates with [Control agent](https://github.com/AliceO2Group/Control) over gRPC.
