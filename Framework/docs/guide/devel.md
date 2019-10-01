@@ -38,7 +38,7 @@ Documentation is handled with help of [JSDoc 3](http://usejsdoc.org) API generat
 [Travis CI](https://travis-ci.org/AliceO2Group/WebUi) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.travis.yml` file.
 
 ## Dependencies status
-The versions of [dependencies](https://david-dm.org/AliceO2Group/WebUi) and [development dependencies](https://david-dm.org/AliceO2Group/WebUi?type=dev) are monitored by David service.
+The status of the dependencies can be shown by running `ncu` command of [npm-check-updates](https://www.npmjs.com/package/npm-check-updates) package.
 
 ## Test coverage
 [Instambul](https://www.npmjs.com/package/istanbul) module together with [codecov](https://codecov.io) service are used to generate coverage reports of nodejs unit tests.
