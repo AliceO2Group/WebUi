@@ -11,20 +11,24 @@ coverage:
       default: false
       Framework:
         target: 50%
-        paths: "Framework/Backend"
+        paths: "Framework"
         threshold: null
+        if_not_found: success
       QualityControl:
         target: 69%
         paths: "QualityControl"
         threshold: null
+        if_not_found: success
       InfoLogger:
         target: 41%
         paths: "InfoLogger"
         threshold: null
+        if_not_found: success
       Control:
-        target: 70%
+        target: 69%
         paths: "Control"
         threshold: null
+        if_not_found: success
     patch: true
     changes: false
     threshold: 0
