@@ -116,6 +116,7 @@ export default class Model extends Observable {
       case 'newEnvironment':
         this.workflow.getRepositoriesList();
         this.workflow.getAllTemplatesAsMap();
+        this.workflow.resetErrorMessage();
         break;
       case 'status':
         this.status.getFrameworkInfo();
