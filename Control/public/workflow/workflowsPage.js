@@ -1,4 +1,4 @@
-import {h, iconCircleX, iconActionRedo} from '/js/src/index.js';
+import {h, iconCircleX, iconActionRedo, iconReload} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 /**
@@ -52,14 +52,22 @@ const showTemplatesValidation = (model, repoList) =>
 const repositoryDropdownList = (workflow, repoList) =>
   h('.m2.text-left.w-50', [ // Dropdown Repositories
     h('h5', 'Repository:'),
-    h('select.form-control', {
-      style: 'cursor: pointer',
-      onchange: (e) => workflow.setRepository(e.target.value)
-    }, [
-      repoList.map((repository) => repository.name)
-        .map((repository) => h('option', {
-          selected: repository === workflow.form.repository ? true : false
-        }, repository))
+    h('', {style: 'display: flex; flex-direction: row'}, [
+      h('select.form-control', {
+        style: 'cursor: pointer',
+        onchange: (e) => workflow.setRepository(e.target.value)
+      }, [
+        repoList.map((repository) => repository.name)
+          .map((repository) => h('option', {
+            selected: repository === workflow.form.repository ? true : false
+          }, repository))
+      ]),
+      h('button.btn', {
+        title: 'Refresh repositories',
+        class: workflow.refreshedRepositories.isLoading() ? 'loading' : '',
+        disabled: workflow.refreshedRepositories.isLoading(),
+        onclick: () => workflow.refreshRepositories()
+      }, iconReload())
     ])
   ]);
 
