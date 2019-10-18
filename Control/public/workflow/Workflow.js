@@ -181,7 +181,7 @@ export default class Workflow extends Observable {
     if ( this.refreshedRepositories.isSuccess()) {
       this.getRepositoriesList();
     } else {
-      this.model.notification.show(this.refreshedRepositories.payload.message, 'danger', 5000);
+      this.model.notification.show(this.refreshedRepositories.payload, 'danger', 5000);
     }
   }
 
