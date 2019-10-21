@@ -177,8 +177,8 @@ export default class Workflow extends Observable {
    * Request to refresh repositories list from AliECS Core
    */
   async refreshRepositories() {
-    this.refreshedRepositories = await this.remoteDataPostRequest( this.refreshedRepositories, `/api/RefreshRepos`, {});
-    if ( this.refreshedRepositories.isSuccess()) {
+    this.refreshedRepositories = await this.remoteDataPostRequest(this.refreshedRepositories, `/api/RefreshRepos`, {});
+    if (this.refreshedRepositories.isSuccess()) {
       this.getRepositoriesList();
     } else {
       this.model.notification.show(this.refreshedRepositories.payload, 'danger', 5000);
