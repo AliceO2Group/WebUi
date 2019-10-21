@@ -57,10 +57,10 @@ service Control {
     rpc GetWorkflowTemplates (GetWorkflowTemplatesRequest) returns (GetWorkflowTemplatesReply) {}
 
     rpc ListRepos(ListReposRequest) returns (ListReposReply) {}
-    rpc AddRepo(AddRepoRequest) returns (AddRepoReply) {}
+    rpc AddRepo(AddRepoRequest) returns (Empty) {}
     rpc RemoveRepo(RemoveRepoRequest) returns (RemoveRepoReply) {}
-    rpc RefreshRepos(RefreshReposRequest) returns (RefreshReposReply) {}
-    rpc SetDefaultRepo(SetDefaultRepoRequest) returns (SetDefaultRepoReply) {}
+    rpc RefreshRepos(RefreshReposRequest) returns (Empty) {}
+    rpc SetDefaultRepo(SetDefaultRepoRequest) returns (Empty) {}
 }
 
 ////////////////////////////////////////
@@ -312,31 +312,22 @@ message AddRepoRequest {
     string name = 1;
 }
 
-message AddRepoReply {
-    string errorString = 1;
-}
-
 message RemoveRepoRequest {
     int32 index = 1;
 }
 
 message RemoveRepoReply {
-    bool ok = 1;
-    string newDefaultRepo = 2;
+    string newDefaultRepo = 1;
 }
 
 message RefreshReposRequest {
     int32 index = 1;
 }
 
-message RefreshReposReply {
-    string errorString = 1;
-}
-
 message SetDefaultRepoRequest {
     int32 index = 1;
 }
 
-message SetDefaultRepoReply {
-    string errorString = 1;
+message Empty {
+
 }
