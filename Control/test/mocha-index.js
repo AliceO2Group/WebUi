@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
@@ -28,7 +29,7 @@ describe('Control', function() {
   this.slow(1000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
-  const calls = {}; // Object.<string:method, bool:flag> memorize that gRPC methods have been called indeed
+  let calls = {}; // Object.<string:method, bool:flag> memorize that gRPC methods have been called indeed
   const envTest = {
     environment: {
       id: '6f6d6387-6577-11e8-993a-f07959157220',
@@ -48,7 +49,7 @@ describe('Control', function() {
         {name: 'gitlab.cern.ch/kalexopo/AliECS_conf/'}]
     }
   };
-
+  let refreshCall = 0;
   before(async () => {
     // Start gRPC server, this replaces the real Control server written in Go.
     const server = new grpcLibrary.Server();
@@ -101,7 +102,14 @@ describe('Control', function() {
         calls['listRepos'] = true;
         callback(null, envTest.listRepos);
       },
-
+      refreshRepos(call, callback) {
+        calls['refreshRepos'] = true;
+        if (refreshCall++ === 0) {
+          callback(null, {});
+        } else {
+          callback(new Error('504: Unable to refresh repositories'), {});
+        }
+      },
     });
     server.bind(address, credentials);
     server.start();
@@ -352,18 +360,16 @@ describe('Control', function() {
   });
 
   describe('page newEnvironment', () => {
-    it('should load', async () => {
+    beforeEach(() => {
+      calls = {};
+    });
+
+    it('should successfully load newEnvironment page and needed resources', async () => {
       await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=newEnvironment');
-    });
-
-    it('should have gotten data from `GetWorkflowTemplates`', async () => {
-      assert(calls['getWorkflowTemplates'] === true);
-    });
-
-    it('should have gotten data from `ListRepos`', async () => {
-      assert(calls['listRepos'] === true);
+      assert.deepStrictEqual(calls['getWorkflowTemplates'], true);
+      assert.deepStrictEqual(calls['listRepos'], true);
     });
 
     it('should successfully request and parse a list of template objects', async () => {
@@ -392,8 +398,42 @@ describe('Control', function() {
       };
       assert.deepStrictEqual(repositories, expectedRepositories);
     });
-  });
 
+    it('should successfully display `Refresh repositories` button', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button', {timeout: 5000});
+      const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button').title);
+      assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
+    });
+
+    it('should successfully request LOCK', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
+      await page.waitFor(500);
+      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
+      assert.deepStrictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
+    });
+
+    it('should successfully request refresh of repositories and request repositories list again', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button', {timeout: 5000});
+      await page.evaluate(() => document.querySelector(
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button').click());
+      await page.waitFor(1000);
+      assert(calls['refreshRepos'] === true);
+      assert(calls['listRepos'] === true);
+    });
+
+    it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button', {timeout: 5000});
+      await page.evaluate(() => document.querySelector(
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button').click());
+      await page.waitFor(500);
+      const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
+      assert.deepStrictEqual(calls['refreshRepos'], true);
+      assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (504 Gateway Timeout): 2 UNKNOWN: 504: Unable to refresh repositories'});
+      assert.deepStrictEqual(calls['listRepos'], undefined);
+    });
+  });
 
   beforeEach(() => {
     this.ok = true;
