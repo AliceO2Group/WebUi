@@ -59,8 +59,12 @@ const repositoryDropdownList = (workflow, repoList) =>
       }, [
         repoList.map((repository) => repository.name)
           .map((repository) => h('option', {
+<<<<<<< HEAD
             selected: repository === workflow.form.repository ? true : false,
             value: repository
+=======
+            selected: repository === workflow.form.repository ? true : false
+>>>>>>> defb259006540e1327059f5038e31a7bd6756ea8
           }, repository))
       ]),
       h('button.btn', {
