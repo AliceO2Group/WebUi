@@ -1,3 +1,5 @@
+/* eslint-disable no-invalid-this */
+/* eslint-disable no-console */
 /* eslint-disable require-jsdoc */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
