@@ -13,6 +13,7 @@ export default class Workflow extends Observable {
     this.model = model;
 
     this.repoList = RemoteData.notAsked();
+    this.refreshedRepositories = RemoteData.notAsked();
     this.list = RemoteData.notAsked();
     this.templatesMap = RemoteData.notAsked();
 
@@ -171,6 +172,18 @@ export default class Workflow extends Observable {
   /**
    * HTTP Requests
    */
+
+  /**
+   * Request to refresh repositories list from AliECS Core
+   */
+  async refreshRepositories() {
+    this.refreshedRepositories = await this.remoteDataPostRequest(this.refreshedRepositories, `/api/RefreshRepos`, {});
+    if (this.refreshedRepositories.isSuccess()) {
+      this.getRepositoriesList();
+    } else {
+      this.model.notification.show(this.refreshedRepositories.payload, 'danger', 5000);
+    }
+  }
 
   /**
    * Load repositories into `repoList` as RemoteData
