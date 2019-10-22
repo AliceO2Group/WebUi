@@ -12,13 +12,15 @@ describe('`pageEnvironments` test-suite', () => {
     calls = test.helpers.calls;
   });
 
+  beforeEach(() => {
+    // reset grpc calls
+    calls['getEnvironments'] = undefined;
+  });
+
   it('should load', async () => {
     await page.goto(url + '?page=environments', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     assert(location.search === '?page=environments');
-  });
-
-  it('should have gotten data from getEnvironments', async () => {
     assert(calls['getEnvironments'] === true);
   });
 });

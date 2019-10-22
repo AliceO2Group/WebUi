@@ -1,7 +1,8 @@
+/* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
 
-describe('`pageEnvironment` test-suite', () => {
+describe('`pageEnvironment` test-suite', async () => {
   let url;
   let page;
   let calls;
@@ -12,13 +13,16 @@ describe('`pageEnvironment` test-suite', () => {
     calls = test.helpers.calls;
   });
 
-  it('should load', async () => {
+  beforeEach(() => {
+    // reset grpc calls
+    calls['controlEnvironment'] = undefined;
+    calls['getEnvironment'] = undefined;
+  });
+
+  it('should successfully load and request data for environment', async () => {
     await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     assert(location.search === '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
-  });
-
-  it('should have gotten data from getEnvironment', async () => {
     assert(calls['getEnvironment'] === true);
   });
 
@@ -85,9 +89,6 @@ describe('`pageEnvironment` test-suite', () => {
       return window.model.environment.item.payload.environment.state;
     });
     assert.deepStrictEqual(state, 'RUNNING');
-  });
-
-  it('should have gotten data from controlEnvironment', async () => {
     assert(calls['controlEnvironment'] === true);
   });
 

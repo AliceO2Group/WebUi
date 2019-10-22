@@ -12,13 +12,15 @@ describe('`pageStatus` test-suite', () => {
     calls = test.helpers.calls;
   });
 
+  beforeEach(() => {
+    // reset grpc calls
+    calls['getFrameworkInfo'] = undefined;
+  });
+
   it('should load', async () => {
     await page.goto(url + '?page=status', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=status');
-  });
-
-  it('should have gotten data from getFrameworkInfo', async () => {
     assert(calls['getFrameworkInfo'] === true);
+    assert(location.search === '?page=status');
   });
 });

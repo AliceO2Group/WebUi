@@ -1,5 +1,6 @@
 /* eslint-disable no-invalid-this */
 /* eslint-disable no-console */
+/* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
@@ -36,21 +37,22 @@ describe('Control', function() {
       id: '6f6d6387-6577-11e8-993a-f07959157220',
       createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
       state: 'CONFIGURED',
-      tasks: []
+      tasks: [],
+      rootRole: 'copy-push'
     },
     workflow: {},
     workflowTemplates: {
       workflowTemplates: [
-        {repo: 'gitlab.cern.ch/kalexopo/AliECS_conf/', template: 'prettyreadout-1', revision: 'master'}
+        {repo: 'git.cern.ch/some-user/some-repo/', template: 'prettyreadout-1', revision: 'master'},
       ]
     },
     listRepos: {
       repos: [
-        {name: 'github.com/AliceO2Group/ControlWorkflows/', default: true},
-        {name: 'gitlab.cern.ch/kalexopo/AliECS_conf/'}]
+        {name: 'git.cern.ch/some-user/some-repo/', default: true},
+        {name: 'git.com/alice-user/alice-repo/'}]
     }
   };
-
+  let refreshCall = 0;
   before(async () => {
     // Start gRPC server, this replaces the real Control server written in Go.
     const server = new grpcLibrary.Server();
@@ -97,7 +99,7 @@ describe('Control', function() {
       },
       newEnvironment(call, callback) {
         calls['newEnvironment'] = true;
-        callback(null, envTest.environment);
+        callback(null, {environment: envTest.environment});
       },
       getWorkflowTemplates(call, callback) {
         calls['getWorkflowTemplates'] = true;
@@ -107,7 +109,14 @@ describe('Control', function() {
         calls['listRepos'] = true;
         callback(null, envTest.listRepos);
       },
-
+      refreshRepos(call, callback) {
+        calls['refreshRepos'] = true;
+        if (refreshCall++ === 0) {
+          callback(new Error('504: Unable to refresh repositories'), {});
+        } else {
+          callback(null, {});
+        }
+      },
     });
     server.bind(address, credentials);
     server.start();
@@ -124,7 +133,7 @@ describe('Control', function() {
     this.ok = true;
 
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
 
     // Listen to browser
@@ -171,9 +180,9 @@ describe('Control', function() {
   });
 
   require('./public/page-status-mocha');
+  require('./public/page-environment-mocha');
   require('./public/page-environments-mocha');
   require('./public/page-new-environment-mocha');
-  require('./public/page-environment-mocha');
 
   beforeEach(() => {
     this.ok = true;
