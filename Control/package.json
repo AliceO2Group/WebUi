@@ -8,7 +8,7 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-i*.js')",
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "nyc npm run mocha"
   },
   "author": "Adam Wegrzynek",
