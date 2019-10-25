@@ -35,7 +35,7 @@ describe('InfoLogger', function() {
     require('./live-simulator/infoLoggerServer.js');
 
     // Start browser to test UI
-    browser = await puppeteer.launch({headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
   });
 
