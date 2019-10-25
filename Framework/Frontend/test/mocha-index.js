@@ -33,7 +33,7 @@ let page;
 // if they are tested just after their initialization.
 
 describe('Framework Frontend', function() {
-  this.timeout(5000);
+  this.timeout(20000);
   this.slow(1000);
 
   // Start a web server to serve frontend
