@@ -10,7 +10,7 @@ coverage:
     project:
       default: false
       Framework:
-        target: 50%
+        target: 55%
         paths: "Framework"
         threshold: null
         if_not_found: success
@@ -20,12 +20,12 @@ coverage:
         threshold: null
         if_not_found: success
       InfoLogger:
-        target: 41%
+        target: 80%
         paths: "InfoLogger"
         threshold: null
         if_not_found: success
       Control:
-        target: 69%
+        target: 70%
         paths: "Control"
         threshold: null
         if_not_found: success

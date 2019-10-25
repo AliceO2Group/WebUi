@@ -10,7 +10,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macOS-10.14]
     steps:
       - run: mysql -uroot -proot -e "CREATE DATABASE INFOLOGGER;"
       - uses: actions/checkout@v1
