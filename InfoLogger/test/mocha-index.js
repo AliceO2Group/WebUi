@@ -17,7 +17,7 @@ describe('InfoLogger', function() {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(20000);
+  this.timeout(30000);
   this.slow(1000);
   const baseUrl = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
@@ -35,7 +35,7 @@ describe('InfoLogger', function() {
     require('./live-simulator/infoLoggerServer.js');
 
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
   });
 
@@ -213,9 +213,9 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('hostname', 'match', 'aldaqdip01');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitFor(10000);
+      await page.waitFor(12000);
       const list = await page.evaluate(() => window.model.log.list);
-      await page.waitFor(10000);
+      await page.waitFor(1000);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqdip01');
       assert.ok(list.length > 0);
       assert.ok(isHostNameMatching);
