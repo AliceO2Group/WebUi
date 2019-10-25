@@ -59,7 +59,8 @@ const repositoryDropdownList = (workflow, repoList) =>
       }, [
         repoList.map((repository) => repository.name)
           .map((repository) => h('option', {
-            selected: repository === workflow.form.repository ? true : false
+            selected: repository === workflow.form.repository ? true : false,
+            value: repository
           }, repository))
       ]),
       h('button.btn', {
@@ -164,6 +165,7 @@ const showControlForm = (model, repoList, templatesMap) =>
               class: model.environment.itemNew.isLoading() ? 'loading' : '',
               disabled: model.environment.itemNew.isLoading() || !model.workflow.isInputSelected(),
               onclick: () => model.workflow.createNewEnvironment(),
+              title: 'Create'
             },
             'Create'),
           model.environment.itemNew.match({
