@@ -115,93 +115,93 @@ describe('QCG', function() {
     });
   });
 
-  describe('page layoutShow', () => {
-    before('reset browser to google', async () => {
-      // weird bug, if we don't go to external website just here, all next goto will wait forever
-      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-    });
+  // describe('page layoutShow', () => {
+  //   before('reset browser to google', async () => {
+  //     // weird bug, if we don't go to external website just here, all next goto will wait forever
+  //     await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+  //   });
 
-    it('should load', async () => {
-      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
-      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
-    });
+  //   it('should load', async () => {
+  //     // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
+  //     await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
+  //     const location = await page.evaluate(() => window.location);
+  //     assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+  //   });
 
-    it('should have tabs in the header', async () => {
-      const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
-      assert(tabsCount > 1);
-    });
+  //   it('should have tabs in the header', async () => {
+  //     const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
+  //     assert(tabsCount > 1);
+  //   });
 
-    it('should have selected layout in the sidebar highlighted', async () => {
-      const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(5)').classList);
-      assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
-    });
+  //   it('should have selected layout in the sidebar highlighted', async () => {
+  //     const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(5)').classList);
+  //     assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
+  //   });
 
-    it('should have jsroot svg plots in the section', async () => {
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert(plotsCount > 1);
-    });
+  //   it('should have jsroot svg plots in the section', async () => {
+  //     const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+  //     assert(plotsCount > 1);
+  //   });
 
-    it('should have second tab to be empty (according to demo data)', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
-      await page.waitForSelector('section h1', {timeout: 5000});
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert.deepStrictEqual(plotsCount, 0);
-    });
+  //   it('should have second tab to be empty (according to demo data)', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
+  //     await page.waitForSelector('section h1', {timeout: 5000});
+  //     const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+  //     assert.deepStrictEqual(plotsCount, 0);
+  //   });
 
-    it('should have a button group containing three buttons in the header', async () => {
-      const buttonCount = await page.evaluate(() =>
-        document.querySelectorAll('header > div > div:nth-child(3) > div.btn-group > button').length);
-      assert.deepStrictEqual(buttonCount, 3);
-    });
+  //   it('should have a button group containing three buttons in the header', async () => {
+  //     const buttonCount = await page.evaluate(() =>
+  //       document.querySelectorAll('header > div > div:nth-child(3) > div.btn-group > button').length);
+  //     assert.deepStrictEqual(buttonCount, 3);
+  //   });
 
-    it('should have one duplicate button in the header to create a new duplicated layout', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
-      const duplicateButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)').title);
-      assert.deepStrictEqual(duplicateButton, 'Duplicate layout');
-    });
+  //   it('should have one duplicate button in the header to create a new duplicated layout', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
+  //     const duplicateButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)').title);
+  //     assert.deepStrictEqual(duplicateButton, 'Duplicate layout');
+  //   });
 
-    it('should have one delete button in the header to delete layout', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
-      const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
-      assert.deepStrictEqual(deleteButton, 'Delete layout');
-    });
+  //   it('should have one delete button in the header to delete layout', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
+  //     const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
+  //     assert.deepStrictEqual(deleteButton, 'Delete layout');
+  //   });
 
-    it('should have one edit button in the header to go in edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
-      const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
-      assert.deepStrictEqual(editButton, 'Edit layout');
-    });
+  //   it('should have one edit button in the header to go in edit mode', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
+  //     const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
+  //     assert.deepStrictEqual(editButton, 'Edit layout');
+  //   });
 
-    // Begin: Edit Mode;
-    it('should click the edit button in the header and enter edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(1)', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
-    });
+  //   // Begin: Edit Mode;
+  //   it('should click the edit button in the header and enter edit mode', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(1)', {timeout: 5000});
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
+  //   });
 
-    it('should have input field for changing layout name in edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > input', {timeout: 5000});
-      const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
-      assert.deepStrictEqual(count, 1);
-    });
+  //   it('should have input field for changing layout name in edit mode', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > input', {timeout: 5000});
+  //     const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
+  //     assert.deepStrictEqual(count, 1);
+  //   });
 
-    it('should have a tree sidebar in edit mode', async () => {
-      await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 4); // 4 agents
-    });
+  //   it('should have a tree sidebar in edit mode', async () => {
+  //     await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
+  //     const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
+  //     assert.deepStrictEqual(rowsCount, 4); // 4 agents
+  //   });
 
-    it('should have filtered results on input search filled', async () => {
-      await page.type('nav input', 'HistoWithRandom');
-      await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
-    });
+  //   it('should have filtered results on input search filled', async () => {
+  //     await page.type('nav input', 'HistoWithRandom');
+  //     await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
+  //   });
 
-    it('should show normal sidebar after Cancel click', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
-      await page.waitForSelector('nav .menu-title', {timeout: 5000});
-    });
-  });
+  //   it('should show normal sidebar after Cancel click', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
+  //     await page.waitForSelector('nav .menu-title', {timeout: 5000});
+  //   });
+  // });
 
   describe('page objectTree', () => {
     before('reset browser to google', async () => {

@@ -10,7 +10,7 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "coverage": "nyc npm run mocha --max-old-space-size=2048",
+    "coverage": "nyc npm run mocha",
     "mocha": "mocha --exit test/**/mocha-*"
   },
   "author": "Vladimir Kosmala",
