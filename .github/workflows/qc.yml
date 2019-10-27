@@ -31,7 +31,6 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - run: (cd QualityControl; export NODE_OPTIONS=–max_old_space_size=4096)
       - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
       - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '7,8d' package.json)
       - run: (cd QualityControl; npm install )
