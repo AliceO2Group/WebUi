@@ -23,7 +23,7 @@ describe('QCG', function() {
 
   before(async () => {
     // Start web-server in background
-    subprocess = spawn('node', ['index.js', 'test/test-config.js', ' -max_old_space_size=2048'], {stdio: 'pipe'});
+    subprocess = spawn('node', ['index.js', 'test/test-config.js', '--max-old-space-size=4096'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => {
       subprocessOutput += chunk.toString();
     });
