@@ -36,7 +36,7 @@ jobs:
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd QualityControl; bash <(curl -s https://codecov.io/bash) -t secrets.CODECOV_TOKEN)
+      - run: (cd QualityControl; bash <(curl -s https://codecov.io/bash))
       # - name: Upload coverage to Codecov
       #   uses: codecov/codecov-action@v1.0.2
       #   with:
