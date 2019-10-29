@@ -35,7 +35,7 @@ describe('InfoLogger', function() {
     require('./live-simulator/infoLoggerServer.js');
 
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
   });
 
@@ -141,7 +141,7 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('pid', 'in', '123 456');
         return window.model.log.filter.criterias.pid.$in;
       });
-      
+
       assert.deepStrictEqual($in.length, 2);
       assert.deepStrictEqual($in, ['123', '456']);
     });
@@ -206,17 +206,17 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(!!list.length, true);
     });
 
-    it('should filter messages based on `hostname` matching `aldaqdip01` from live -> paused -> live', async () => {
+    it('should filter messages based on `hostname` matching `aldaqecs01-v1` from live -> paused -> live', async () => {
       await page.evaluate(() => window.model.log.liveStop('Paused'));
       await page.evaluate(() => {
         window.model.log.filter.resetCriterias();
-        window.model.log.filter.setCriteria('hostname', 'match', 'aldaqdip01');
+        window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
       });
       await page.evaluate(() => window.model.log.liveStart());
       await page.waitFor(5000);
       const list = await page.evaluate(() => window.model.log.list);
       await page.waitFor(1000);
-      const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqdip01');
+      const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');
       assert.ok(list.length > 0);
       assert.ok(isHostNameMatching);
     });

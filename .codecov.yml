@@ -15,12 +15,12 @@ coverage:
         threshold: null
         if_not_found: success
       QualityControl:
-        target: 69%
+        target: 68%
         paths: "QualityControl"
         threshold: null
         if_not_found: success
       InfoLogger:
-        target: 41%
+        target: 85%
         paths: "InfoLogger"
         threshold: null
         if_not_found: success
