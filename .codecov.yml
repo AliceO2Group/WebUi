@@ -15,7 +15,7 @@ coverage:
         threshold: null
         if_not_found: success
       QualityControl:
-        target: 69%
+        target: 68%
         paths: "QualityControl"
         threshold: null
         if_not_found: success
