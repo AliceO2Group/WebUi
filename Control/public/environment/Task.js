@@ -60,6 +60,7 @@ export default class Task extends Observable {
       this.openedTasks.push({taskId: body.taskId, message: result.message});
     } else {
       const commandInfo = this.parseTaskCommandInfo(result.task.commandInfo, body.taskId);
+      commandInfo.className = result.task.classInfo.name;
       this.storage.setLocalItem(body.taskId, commandInfo);
       this.openedTasks.push(commandInfo);
     }
