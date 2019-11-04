@@ -84,6 +84,8 @@ const buttonLogLimit = (model, label, limit) => h('button.btn', {
  * @return {vnode}
  */
 const buttonReset = (model) => h('button.btn', {
-  onclick: () => model.log.filter.resetCriterias(),
+  onclick: (e) => {
+    model.log.filter.resetCriterias(e);
+  },
   title: 'Reset date, time, matches, excludes, log levels'
 }, 'Reset filters');
