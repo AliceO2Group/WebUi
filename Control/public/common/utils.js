@@ -10,8 +10,6 @@ export default function parseObject(item, key) {
       return item.length;
     case 'version':
       return item.productName + ' v' + item.versionStr + '(revision ' + item.build + ')';
-    case 'deploymentInfo':
-      return item.hostname;
     default:
       return JSON.stringify(item);
   }

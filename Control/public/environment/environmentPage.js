@@ -48,11 +48,13 @@ const showContent = (environment, item) => [
   h('.m2.flex-row',
     {
       style: 'height: 10em;'
-    }, [
+    },
+    [
       h('.grafana-font.m1.flex-column',
         {
           style: 'width: 15%;'
-        }, [
+        },
+        [
           h('', {style: 'height:40%'}, 'Run Number'),
           h('',
             h('.badge.bg-success.white',
@@ -227,17 +229,21 @@ const displayTableOfTasks = (environment, list, actions) => h('.scroll-auto', [
     h('tbody', list.map((item) => [h('tr', [
       Object.keys(item).map(
         (columnName) => typeof item[columnName] === 'object'
-          ? h('td', parseObject(item[columnName], columnName))
+          ? h('td', {style: 'text-align:center'}, JSON.stringify(item[columnName]))
           : h('td',
-            columnName === 'state' && {
-              class: (item[columnName] === 'RUNNING' ?
-                'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
-              style: 'font-weight: bold;'
-            },
+            columnName === 'state' ?
+              {
+                class: (item[columnName] === 'RUNNING' ?
+                  'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
+                style: 'font-weight: bold; text-align:center'
+              }
+              : {
+                style: 'text-align: center'
+              },
             item[columnName]
           )
       ),
-      actions && h('td',
+      actions && h('td', {style: 'text-align:center'},
         h('button.btn.btn-primary',
           {
             onclick: (event) => actions[0](event, item)
