@@ -55,6 +55,9 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
+    await result.environment.tasks.forEach((task) => {
+      this.task.getTaskById({taskId: task.taskId});
+    });
     this.item = RemoteData.success(this.parseEnvResult(result));
     this.itemControl = RemoteData.notAsked(); // because item has changed
     this.notify();
@@ -67,10 +70,6 @@ export default class Environment extends Observable {
    */
   parseEnvResult(result) {
     result.environment.tasks.forEach((task) => {
-      delete task.className;
-      // delete task.taskId;
-      task.hostName = task.deploymentInfo.hostname;
-      delete task.deploymentInfo;
       const regex = new RegExp(`tasks.*@`);
       const tasksAndName = task.name.match(regex);
       if (tasksAndName) {

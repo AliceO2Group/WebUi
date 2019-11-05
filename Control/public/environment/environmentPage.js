@@ -1,7 +1,6 @@
-import {h} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronTop, iconCircleX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import parseObject from './../common/utils.js';
 import showTableItem from '../common/showTableItem.js';
 /**
  * @file Page to show 1 environment (content and header)
@@ -74,22 +73,18 @@ const showContent = (environment, item) => [
     ]
   ),
   showEnvDetailsTable(item),
-  h('.m2.p2', [
+  h('.m2', [
     h('h4', 'Tasks'),
     h('.flex-row.flex-grow',
-      h('.flex-grow', {},
-        displayTableOfTasks(environment, item.tasks, [
-          (event, item) => {
-            environment.task.updateOpenedTasks({taskId: item.taskId});
-          }]
-        )
+      h('.flex-grow',
+        showEnvTasksTable(environment, item.tasks)
       )
-    )
+    ),
   ]),
 ];
 
 /**
- * Method to display pltos from Graphana
+ * Method to display plots from Grafana
  * @param {Array<String>} data
  * @return {vnode}
  */
@@ -126,7 +121,7 @@ const showEmbeddedGraphs = (data) =>
  * @return {vnode} table view
  */
 const showEnvDetailsTable = (item) =>
-  h('.pv3.m2',
+  h('.m2.mv4.shadow-level1',
     h('table.table', [
       h('tbody', [
         h('tr', [
@@ -209,65 +204,64 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
   );
 
 /**
- * Method to create and display a table with tasks
+ * Method to create and display a table with tasks details
  * @param {Object} environment
- * @param {Array<Object>} list
- * @param {Array<Actions>} actions
+ * @param {Array<Object>} tasks
  * @return {vnode}
  */
-const displayTableOfTasks = (environment, list, actions) => h('.scroll-auto', [
-  h('table.table.table-sm', [
-    h('thead', [
+const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1', [
+  h('table.table.table-sm', {style: 'margin:0'}, [
+    h('thead',
       h('tr',
         [
-          list.length > 0 && Object.keys(list[0]).map(
-            (columnName) => h('th', {style: 'text-align:center'}, columnName)),
-          actions && h('th.text-center', {style: 'text-align:center'}, 'actions')
+          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'Args', 'More']
+            .map((header) => h('th', {style: 'text-align: center'}, header))
         ]
       )
-    ]),
-    h('tbody', list.map((item) => [h('tr', [
-      Object.keys(item).map(
-        (columnName) => typeof item[columnName] === 'object'
-          ? h('td', {style: 'text-align:center'}, JSON.stringify(item[columnName]))
-          : h('td',
-            columnName === 'state' ?
-              {
-                class: (item[columnName] === 'RUNNING' ?
-                  'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
-                style: 'font-weight: bold; text-align:center'
-              }
-              : {
-                style: 'text-align: center'
-              },
-            item[columnName]
-          )
-      ),
-      actions && h('td', {style: 'text-align:center'},
-        h('button.btn.btn-primary',
-          {
-            onclick: (event) => actions[0](event, item)
-          },
-          environment.task.getIndexOfTask(item.taskId) >= 0 ? 'Close' : 'More')),
-    ]),
-    environment.task.remoteTasks.match({
-      NotAsked: () => null,
-      Loading: () => null,
-      Success: (data) => environment.task.getIndexOfTask(item.taskId) >= 0
-        && displayTaskDetails(data.filter((task) => task.taskId === item.taskId)[0], Object.keys(list[0]).length),
-      Failure: (error) => pageError(error),
-    })])),
-  ]
-  )
+    ),
+    h('tbody', [
+      tasks.map((task) => [h('tr', [
+        h('td', {style: 'text-align:center'}, task.name),
+        h('td', {style: 'text-align:center'}, task.locked),
+        h('td', {style: 'text-align:center'}, task.status),
+        h('td', {
+          class: (task.state === 'RUNNING' ?
+            'success' : (task.state === 'CONFIGURED' ? 'warning' : '')),
+          style: 'font-weight: bold; text-align:center'
+        }, task.state),
+        h('td', {style: 'text-align:center'}, task.deploymentInfo.hostname),
+        environment.task.list[task.taskId] && environment.task.list[task.taskId].match({
+          NotAsked: () => null,
+          Loading: () => h('td', {style: 'font-size: 0.25em;text-align:center'}, pageLoading()),
+          Success: (data) => h('td', {style: 'text-align:center'}, data.arguments),
+          Failure: (_error) => h('td', {style: 'text-align:center', title: 'Could not load arguments'}, iconCircleX()),
+        }),
+        h('td', {style: 'text-align:center'},
+          h('button.btn.btn-default', {
+            title: 'More Details',
+            onclick: () => environment.task.toggleTaskView(task.taskId),
+          }, environment.task.openedTasks[task.taskId] ? iconChevronTop() : iconChevronBottom())
+        ),
+      ]),
+      environment.task.openedTasks[task.taskId] && environment.task.list[task.taskId] &&
+      addTaskDetailsTable(environment, task),
+      ]),
+    ])
+  ])
 ]);
 
 /**
- * Method to display an expandable table with details about a selected task
- * @param {Object} task
- * @param {number} colSpan
+ *  Method to display an expandable table with details about a selected task if request was successful
+ *  Otherwise display loading or error message
+ * @param {Object} environment
+ * @param {JSON} task
  * @return {vnode}
  */
-const displayTaskDetails = (task, colSpan) =>
-  h('tr.m5',
-    h('td', {colspan: ++colSpan}, showTableItem(task))
-  );
+const addTaskDetailsTable = (environment, task) => h('tr', environment.task.list[task.taskId].match({
+  NotAsked: () => null,
+  Loading: () => h('td.shadow-level3.m5', {style: 'font-size: 0.25em; text-align: center;', colspan: 7}, pageLoading()),
+  Success: (data) => h('td', {colspan: 7}, showTableItem(data)),
+  Failure: (_error) => h('td.shadow-level3.m5',
+    {style: 'text-align: center;', colspan: 7, title: 'Could not load arguments'},
+    [iconCircleX(), ' ', _error]),
+}));
