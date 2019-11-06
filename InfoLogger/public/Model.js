@@ -151,7 +151,7 @@ export default class Model extends Observable {
         e.preventDefault(); // avoid scroll
         break;
       case 67:
-        if (e.metaKey) {
+        if (e.metaKey || e.ctrlKey) {
           navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
         }
         break;
