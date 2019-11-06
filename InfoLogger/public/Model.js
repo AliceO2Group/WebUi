@@ -1,8 +1,6 @@
 // Import frontend framework
-import {
-  Observable, WebSocketClient, QueryRouter,
-  Loader, RemoteData, sessionService, Notification
-} from '/js/src/index.js';
+import {Observable, WebSocketClient, QueryRouter,
+  Loader, RemoteData, sessionService, Notification} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
