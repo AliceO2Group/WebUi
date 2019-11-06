@@ -498,4 +498,30 @@ export default class Log extends Observable {
         this.query();
     }
   }
+
+  /**
+   * Method which will create a table alike string with the elements displayed in the table of the current item
+   * @return {string}
+   */
+  displayedItemFieldsToString() {
+    let message = '| ' + this.item['severity'];
+    Object.keys(this.columns)
+      .filter((key) => this.columns[key])
+      .forEach((key) => {
+        const item = this.item[key];
+        if (key === 'time') {
+          const timestamp = this.item['timestamp'];
+          message += ' | ' + this.model.timezone.format(timestamp, this.timeFormat);
+        } else if (key === 'date') {
+          const timestamp = this.item['timestamp'];
+          message += ' | ' + this.model.timezone.format(timestamp, 'date');
+        } else if (item) {
+          message += ' | ' + item;
+        } else {
+          message += ' | ';
+        }
+      });
+    message += ' |';
+    return message;
+  }
 }
