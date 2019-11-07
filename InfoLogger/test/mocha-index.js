@@ -55,19 +55,19 @@ describe('InfoLogger', function() {
     }
   });
 
-  it('should have redirected to default page "/?q={"severity":{"in":"D I W E F"}}"', async function() {
+  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"}}"', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.deepStrictEqual(search, '?q={"severity":{"in":"D I W E F"}}');
+    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"}}');
   });
 
   describe('LogFilter', async () => {
     it('should update URI with new encoded criteria', async () => {
       /* eslint-disable max-len */
-      const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"D I W E F"}}';
-      const expectedParams = '?q={%22hostname%22:{%22match%22:%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22D%20I%20W%20E%20F%22}}';
+      const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
+      const expectedParams = '?q={%22hostname%22:{%22match%22:%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
       /* eslint-enable max-len */
       const searchParams = await page.evaluate(() => {
         window.model.log.filter.setCriteria('hostname', 'match', '%ald_qdip01%');
@@ -159,8 +159,8 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(criterias.level.$max, 21);
       assert.deepStrictEqual(criterias.timestamp.since, '');
       assert.deepStrictEqual(criterias.timestamp.$since, null);
-      assert.deepStrictEqual(criterias.severity.in, 'D I W E F');
-      assert.deepStrictEqual(criterias.severity.$in, ['D', 'W', 'I', 'E', 'F']);
+      assert.deepStrictEqual(criterias.severity.in, 'I W E F');
+      assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
     });
   });
 
