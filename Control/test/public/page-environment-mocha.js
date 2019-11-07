@@ -179,4 +179,35 @@ describe('`pageEnvironment` test-suite', async () => {
     const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
     assert.deepStrictEqual(lockButton, 'Lock is free');
   });
+
+  describe('Utils within Environment class', async () => {
+    it('should replace task name if regex is matched', async () => {
+      const tagModified = await page.evaluate(() => {
+        const result = {};
+        result['environment'] = {};
+        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment.parseEnvResult(result).environment.tasks[0].name;
+      });
+      assert.strictEqual(tagModified, 'readout');
+    });
+    it('should not replace task name due to regex not matching the name (missing tasks/ group)', async () => {
+      const tagModified = await page.evaluate(() => {
+        const result = {};
+        result['environment'] = {};
+        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment.parseEnvResult(result).environment.tasks[0].name;
+      });
+      assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
+    });
+
+    it('should not replace task name due to regex not matching the name (missing @ character)', async () => {
+      const tagModified = await page.evaluate(() => {
+        const result = {};
+        result['environment'] = {};
+        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment.parseEnvResult(result).environment.tasks[0].name;
+      });
+      assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
+    });
+  });
 });

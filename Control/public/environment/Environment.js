@@ -70,7 +70,7 @@ export default class Environment extends Observable {
    */
   parseEnvResult(result) {
     result.environment.tasks.forEach((task) => {
-      const regex = new RegExp(`tasks.*@`);
+      const regex = new RegExp(`tasks/.*@`);
       const tasksAndName = task.name.match(regex);
       if (tasksAndName) {
         task.name = tasksAndName[0].replace('tasks/', '').replace('@', '');
