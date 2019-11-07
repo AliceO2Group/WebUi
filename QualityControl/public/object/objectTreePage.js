@@ -165,6 +165,6 @@ function treeRow(model, tree, level) {
       ]),
       h('td.highlight', {class: color}, tree.quality),
     ]),
-    ...children
+    children
   ];
 }

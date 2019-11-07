@@ -39,10 +39,11 @@ export default function objectTreeHeader(model) {
         h('button.btn', {onclick: () => model.object.toggleSortDropdown()},
           ['Sort by', ' ', iconSortDescending()]),
         h('.dropdown-menu.text-left', [
-          h('a.menu-item', {style: 'white-space: nowrap ;', onclick: () => model.object.sortTree('createTime', 1)}, [iconArrowBottom(), ' ', 'Creation']),
-          h('a.menu-item', {style: 'white-space: nowrap ;', onclick: () => model.object.sortTree('createTime', -1)}, [iconArrowTop()], ' ', 'Creation'),
-          h('a.menu-item', {style: 'white-space: nowrap ;', onclick: () => model.object.sortTree('name', 1)}, [iconArrowBottom(), ' ', 'Name']),
-          h('a.menu-item', {style: 'white-space: nowrap ;', onclick: () => model.object.sortTree('name', -1)}, [iconArrowTop(), ' ', 'Name']),
+          sortMenuItem(model, 'Created Time', 'Sort by time of creation ASC', iconArrowTop(), 'creationTime', 1),
+          sortMenuItem(model, 'Created Time', 'Sort by time of creation DESC', iconArrowBottom(), 'creationTime', -1),
+          sortMenuItem(model, 'Name', 'Sort by name ASC', iconArrowTop(), 'name', 1),
+          sortMenuItem(model, 'Name', 'Sort by name DESC', iconArrowBottom(), 'name', -1),
+
         ]),
       ]),
       ' ',
@@ -61,3 +62,19 @@ export default function objectTreeHeader(model) {
     ]),
   ];
 }
+
+/**
+ * Create a menu-item for sort-by dropdown
+ * @param {Object} model
+ * @param {string} shortTitle - title that gets displayed to the user
+ * @param {*} title - title that gets displayed to the user on hover
+ * @param {*} icon
+ * @param {*} field - field by which sorting should happen
+ * @param {*} order - {-1/1}/{DESC/ASC}
+ * @return {vnode}
+ */
+const sortMenuItem = (model, shortTitle, title, icon, field, order) => h('a.menu-item', {
+  title: title, style: 'white-space: nowrap;', onclick: () => model.object.sortTree(field, order)
+}, [
+  shortTitle, ' ', icon
+]);
