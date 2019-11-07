@@ -10,6 +10,7 @@ export const severityClass = (severity) => switchCase(severity, {
   W: 'severity-w-bg',
   E: 'severity-e-bg',
   F: 'severity-f-bg',
+  D: 'severity-d'
 });
 
 /**

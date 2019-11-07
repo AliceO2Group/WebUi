@@ -27,7 +27,7 @@ export default class Log extends Observable {
       pid: false,
       username: false,
       system: true,
-      facility: false,
+      facility: true,
       detector: false,
       partition: false,
       run: false,
