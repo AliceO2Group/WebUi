@@ -151,8 +151,9 @@ export default class Model extends Observable {
         e.preventDefault(); // avoid scroll
         break;
       case 67:
-        if (e.metaKey || e.ctrlKey) {
+        if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '') {
           navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
+          this.notification.show('Message has been successfully copied to clipboard', 'success', 1500);
         }
         break;
     }
