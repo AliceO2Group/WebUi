@@ -163,18 +163,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to check if OnlineService Connection is alive
-   */
-  async checkOnlineStatus() {
-    const result = await this.qcObjectService.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
-    }
-  }
-
-  /**
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
@@ -206,6 +194,18 @@ export default class QCObject extends Observable {
       this.notify();
     } else {
       this.loadOnlineList();
+    }
+  }
+
+  /**
+   * Method to check if OnlineService Connection is alive
+   */
+  async checkOnlineStatus() {
+    const result = await this.qcObjectService.isOnlineModeConnectionAlive();
+    if (result.isSuccess()) {
+      this.isOnlineModeConnectionAlive = true;
+    } else {
+      this.isOnlineModeConnectionAlive = false;
     }
   }
 

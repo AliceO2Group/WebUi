@@ -23,16 +23,17 @@ export default function objectTreeHeader(model) {
       ' ',
       h('span', `(${howMany})`),
     ]),
-    h('.flex-grow.text-right', {
-    }, [
+    h('.flex-grow.text-right', [
       h('.dropdown', {
         title: 'Sort by', class: model.object.sortBy.open ? 'dropdown-open' : ''
       }, [
         h('button.btn', {onclick: () => model.object.toggleSortDropdown()},
           [model.object.sortBy.title, ' ', model.object.sortBy.icon]),
         h('.dropdown-menu.text-left', [
-          !model.object.isOnlineModeEnabled && sortMenuItem(model, 'Created Time', 'Sort by time of creation ASC', iconArrowTop(), 'createTime', 1),
-          !model.object.isOnlineModeEnabled && sortMenuItem(model, 'Created Time', 'Sort by time of creation DESC', iconArrowBottom(), 'createTime', -1),
+          !model.object.isOnlineModeEnabled
+          && sortMenuItem(model, 'Created Time', 'Sort by time of creation ASC', iconArrowTop(), 'createTime', 1),
+          !model.object.isOnlineModeEnabled
+          && sortMenuItem(model, 'Created Time', 'Sort by time of creation DESC', iconArrowBottom(), 'createTime', -1),
           sortMenuItem(model, 'Name', 'Sort by name ASC', iconArrowTop(), 'name', 1),
           sortMenuItem(model, 'Name', 'Sort by name DESC', iconArrowBottom(), 'name', -1),
 
