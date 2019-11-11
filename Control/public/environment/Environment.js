@@ -55,9 +55,29 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
-    this.item = RemoteData.success(result);
+    await result.environment.tasks.forEach((task) => {
+      this.task.getTaskById({taskId: task.taskId});
+    });
+    this.item = RemoteData.success(this.parseEnvResult(result));
     this.itemControl = RemoteData.notAsked(); // because item has changed
     this.notify();
+  }
+
+  /**
+   * Method to remove and parse fields from environment result
+   * @param {JSON} result
+   * @return {JSON}
+   */
+  parseEnvResult(result) {
+    result.environment.tasks.forEach((task) => {
+      const regex = new RegExp(`tasks/.*@`);
+      const tasksAndName = task.name.match(regex);
+      if (tasksAndName) {
+        task.name = tasksAndName[0].replace('tasks/', '').replace('@', '');
+      }
+    });
+
+    return result;
   }
 
   /**
