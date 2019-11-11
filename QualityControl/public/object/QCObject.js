@@ -195,6 +195,13 @@ export default class QCObject extends Observable {
       this.sideTree.addChildren(offlineObjects);
 
       this.currentList = offlineObjects;
+      this.sortBy = {
+        field: 'name',
+        title: 'Name',
+        order: 1,
+        icon: iconArrowTop(),
+        open: false
+      };
       this._computeFilters();
       this.notify();
     } else {
