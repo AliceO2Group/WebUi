@@ -1,6 +1,6 @@
 /* global JSROOT */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
 import QCObjectService from './../services/QCObject.service.js';
 
 import ObjectTree from './ObjectTree.class.js';
@@ -32,6 +32,13 @@ export default class QCObject extends Observable {
 
     this.searchInput = ''; // string - content of input search
     this.searchResult = []; // array<object> - result list of search
+    this.sortBy = {
+      field: 'name',
+      title: 'Name',
+      order: 1,
+      icon: iconArrowTop(),
+      open: false
+    };
 
     this.refreshTimer = 0;
     this.refreshInterval = 0; // seconds
@@ -76,6 +83,14 @@ export default class QCObject extends Observable {
   }
 
   /**
+   * Toggle the display of the sort by dropdown
+   */
+  toggleSortDropdown() {
+    this.sortBy.open = !this.sortBy.open;
+    this.notify();
+  }
+
+  /**
    * Computes the final list of objects to be seen by user depending on those factors:
    * - online filter enabled
    * - online objects according to information service
@@ -91,6 +106,71 @@ export default class QCObject extends Observable {
       });
     } else {
       this.searchResult = [];
+    }
+  }
+
+  /**
+   * Method to sort a list of JSON objects by one of its fields
+   * @param {Array<JSON>} listSource
+   * @param {string} field
+   * @param {string} order
+   */
+  sortListByField(listSource, field, order) {
+    listSource.sort((a, b) => {
+      if (field === 'createTime') {
+        if (a[field] < b[field]) {
+          return -1 * order;
+        } else {
+          return 1 * order;
+        }
+      } else if (field === 'name') {
+        if (a[field].toUpperCase() < b[field].toUpperCase()) {
+          return -1 * order;
+        } else {
+          return 1 * order;
+        }
+      }
+    });
+  }
+
+  /**
+   * Sort Tree of Objects by specified field and order
+   * @param {string} title
+   * @param {string} field
+   * @param {number} order {-1; 1}
+   * @param {function} icon
+   */
+  sortTree(title, field, order, icon) {
+    this.sortListByField(this.currentList, field, order);
+    if (!this.isOnlineModeEnabled) {
+      this.tree.initTree('database');
+      this.tree.addChildren(this.currentList);
+    } else {
+      this.tree.initTree('online');
+      this.tree.addChildren(this.currentList);
+    }
+
+    this._computeFilters();
+
+    this.sortBy = {
+      field: field,
+      title: title,
+      order: order,
+      icon: icon,
+      open: false
+    };
+    this.notify();
+  }
+
+  /**
+   * Method to check if OnlineService Connection is alive
+   */
+  async checkOnlineStatus() {
+    const result = await this.qcObjectService.isOnlineModeConnectionAlive();
+    if (result.isSuccess()) {
+      this.isOnlineModeConnectionAlive = true;
+    } else {
+      this.isOnlineModeConnectionAlive = false;
     }
   }
 
@@ -123,56 +203,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Sort Tree of Objects by specified field and order
-   * @param {string} field
-   * @param {number} order {-1; 1}
-   */
-  sortTree(field, order) {
-    // ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // potential problems are the fact that:
-    // *What happens in online mode? We do not have creation time sent to consul
-    // * Tree works really bad with rearranging them
-    // ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    this.list = this.list.sort((a, b) => {
-      if (field === 'createTime') {
-        if (a[field] < b[field]) {
-          return -1 * order;
-        } else {
-          return 1 * order;
-        }
-      } else if (field === 'name') {
-        if (a[field].toUpperCase() < b[field].toUpperCase()) {
-          return -1 * order;
-        } else {
-          return 1 * order;
-        }
-      }
-    });
-
-    this.tree.initTree('database');
-    this.notify();
-    this.tree.addChildren(this.list);
-    this.notify();
-
-    this.currentList = this.list;
-    this._computeFilters();
-    this.toggleSortDropdown();
-    this.notify();
-  }
-
-  /**
-   * Method to check if OnlineService Connection is alive
-   */
-  async checkOnlineStatus() {
-    const result = await this.qcObjectService.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
-    }
-  }
-
-  /**
    * Ask server for online objects and fills tree with them
    */
   async loadOnlineList() {
@@ -180,6 +210,14 @@ export default class QCObject extends Observable {
     const result = await this.qcObjectService.getOnlineObjects();
     if (result.isSuccess()) {
       onlineObjects = result.payload;
+      this.sortListByField(onlineObjects, 'name', 1);
+      this.sortBy = {
+        field: 'name',
+        title: 'Name',
+        order: 1,
+        icon: iconArrowTop(),
+        open: false
+      };
     } else {
       const failureMessage = `Failed to retrieve list of online objects due to ${result.message}`;
       this.model.notification.show(failureMessage, 'danger', Infinity);
@@ -190,6 +228,7 @@ export default class QCObject extends Observable {
 
     this.listOnline = onlineObjects;
     this.currentList = onlineObjects;
+    this.search('');
   }
 
   /**
@@ -328,13 +367,5 @@ export default class QCObject extends Observable {
    */
   isObjectInOnlineList(objectName) {
     return this.isOnlineModeEnabled && this.listOnline && this.listOnline.map((item) => item.name).includes(objectName);
-  }
-
-  /**
-   * Toggle the display of the sort by dropdown
-   */
-  toggleSortDropdown() {
-    this.sortDropdown = !this.sortDropdown;
-    this.notify();
   }
 }
