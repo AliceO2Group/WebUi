@@ -74,10 +74,9 @@ function getCopyURLToClipboardButton(model) {
       {
         title: 'Copy URL Object',
         onclick: () => {
-          model.notification.show('Object location has been copied to clipboard', 'primary', 2000);
-          // TODO: Add copy to clipboard functionality
-        },
-        style: 'display: none'
+          model.notification.show('URL has been successfully copied to clipboard', 'success', 1500);
+          navigator.clipboard.writeText(model.router.getUrl().href);
+        }
       },
       [iconBook(), ' ', 'Copy URL']));
 }
