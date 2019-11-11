@@ -13,38 +13,17 @@ export default class Task extends Observable {
 
     this.model = model;
     this.storage = new BrowserStorage('AliECS');
-    this.remoteTasks = RemoteData.notAsked();
-    this.openedTasks = [];
+    this.openedTasks = {};
+    this.list = {}; // map of (taskId, RemoteData)
   }
 
   /**
-   * Load Task into list of tasks
-   * @param {JSON} body {taskId: <string>}
-  */
-  async updateOpenedTasks(body) {
-    const indexOfSelectedTask = this.getIndexOfTask(body.taskId);
-
-    if (indexOfSelectedTask >= 0) { // if Task is already opened then remove from list
-      this.openedTasks.splice(indexOfSelectedTask, 1);
-    } else {
-      const commandInfo = this.storage.getLocalItem(body.taskId);
-      if (commandInfo) {
-        this.openedTasks.push(commandInfo);
-      } else {
-        await this.getTaskById(body);
-      }
-    }
-    this.remoteTasks = RemoteData.success(this.openedTasks);
-    this.notify();
-  }
-
-  /**
-   * Method to retrieve index of a task in the existing opened task list
+   * Toggle the view of a task by its id
    * @param {string} taskId
-   * @return {number}
-   */
-  getIndexOfTask(taskId) {
-    return this.openedTasks.map((task) => task.taskId).indexOf(taskId);
+  */
+  async toggleTaskView(taskId) {
+    this.openedTasks[taskId] = !this.openedTasks[taskId];
+    this.notify();
   }
 
   /**
@@ -52,17 +31,19 @@ export default class Task extends Observable {
    * @param {JSON} body {taskId: string}
    */
   async getTaskById(body) {
-    this.remoteTasks = RemoteData.loading();
+    this.list[body.taskId] = RemoteData.loading();
+    this.openedTasks[body.taskId] = false;
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
-    if (!ok) {
-      this.openedTasks.push({taskId: body.taskId, message: result.message});
+    if (ok) {
+      this.list[body.taskId] = RemoteData.failure(result.message);
     } else {
       const commandInfo = this.parseTaskCommandInfo(result.task.commandInfo, body.taskId);
-      this.storage.setLocalItem(body.taskId, commandInfo);
-      this.openedTasks.push(commandInfo);
+      commandInfo.className = result.task.classInfo.name;
+      this.list[body.taskId] = RemoteData.success(commandInfo);
     }
+    this.notify();
   }
 
   /**
