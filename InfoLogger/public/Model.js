@@ -1,6 +1,8 @@
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter,
-  Loader, RemoteData, sessionService, Notification} from '/js/src/index.js';
+import {
+  Observable, WebSocketClient, QueryRouter,
+  Loader, RemoteData, sessionService, Notification
+} from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
@@ -105,7 +107,7 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // console.log(`e.code=${e.code}, e.key=${e.key},e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Enter
@@ -147,6 +149,12 @@ export default class Model extends Observable {
           this.log.nextItem();
         }
         e.preventDefault(); // avoid scroll
+        break;
+      case 67:
+        if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '') {
+          navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
+          this.notification.show('Message has been successfully copied to clipboard', 'success', 1500);
+        }
         break;
     }
   }
