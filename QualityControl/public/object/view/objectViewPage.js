@@ -33,7 +33,7 @@ function getActionsHeader(model) {
     [
       getBackToQCGButton(model),
       h('b.text-center.w-50', getObjectTitle(model)),
-      getCopyURLToClipboardButton(model)
+      model.isContextSecure() && getCopyURLToClipboardButton(model)
     ]);
 }
 

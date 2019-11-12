@@ -155,4 +155,13 @@ export default class Model extends Observable {
     this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
   }
+
+  /**
+   * Method to check if connection is secure to enable certain improvements
+   * e.g navigator.clipboard, notifications, service workers
+   * @return {boolean}
+   */
+  isContextSecure() {
+    return window.isSecureContext;
+  }
 }
