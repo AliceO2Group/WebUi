@@ -151,7 +151,7 @@ export default class Model extends Observable {
         e.preventDefault(); // avoid scroll
         break;
       case 67:
-        if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '') {
+        if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '' && this.isContextSecure()) {
           navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
           this.notification.show('Message has been successfully copied to clipboard', 'success', 1500);
         }
@@ -205,5 +205,14 @@ export default class Model extends Observable {
   toggleAccountMenu() {
     this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
+  }
+
+  /**
+   * Method to check if connection is secure to enable certain improvements
+   * e.g navigator.clipboard, notifications, service workers
+   * @return {boolean}
+   */
+  isContextSecure() {
+    return window.isSecureContext;
   }
 }
