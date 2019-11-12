@@ -151,7 +151,7 @@ export default class Model extends Observable {
         e.preventDefault(); // avoid scroll
         break;
       case 67:
-        if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '' && this.isContextSecure()) {
+        if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '' && this.isSecureContext()) {
           navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
           this.notification.show('Message has been successfully copied to clipboard', 'success', 1500);
         }
@@ -212,7 +212,7 @@ export default class Model extends Observable {
    * e.g navigator.clipboard, notifications, service workers
    * @return {boolean}
    */
-  isContextSecure() {
+  isSecureContext() {
     return window.isSecureContext;
   }
 }
