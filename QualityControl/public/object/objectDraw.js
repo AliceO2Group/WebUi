@@ -177,7 +177,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
           tabObject.options.splice(indexNoStats, 1);
         }
       } else if (tabObject.options.indexOf('nostats') < 0) {
-        tabObject.options.push('nostats');
+        tabObject.options.push('stats');
       }
 
       index = tabObject.options.indexOf('alp');
