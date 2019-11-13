@@ -35,6 +35,7 @@ export default function objectPropertiesSidebar(model) {
       h('.flex-row', [
         btnOption(model, tabObject, 'logx'), ' ',
         btnOption(model, tabObject, 'logy'), ' ',
+        btnOption(model, tabObject, 'logz'), ' ',
       ]),
       h('.flex-row', [
         btnOption(model, tabObject, 'gridx'), ' ',
@@ -45,7 +46,7 @@ export default function objectPropertiesSidebar(model) {
         btnOption(model, tabObject, 'colz'), ' ',
       ]),
       h('', [
-        btnOption(model, tabObject, 'stats'), ' ',
+        btnOption(model, tabObject, 'stat'), ' ',
       ]),
     ]),
 

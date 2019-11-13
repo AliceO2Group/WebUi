@@ -27,12 +27,16 @@ export function draw(model, tabObject, options) {
   };
 
   options = Object.assign({}, defaultOptions, options);
-
+  const drawingOptions = [];
+  if (options.stat) {
+    drawingOptions.push('stat');
+    delete options.stat;
+  }
   if (typeof tabObject === 'string') {
     tabObject = {
       id: tabObject,
       name: tabObject,
-      options: [],
+      options: drawingOptions,
       x: 0,
       y: 0,
       h: 0,
@@ -164,23 +168,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      let index = tabObject.options.indexOf('stat');
-      if (index >= 0) {
-        // this is to make sure we support older versions
-        tabObject.options[index] = 'stats';
-      }
-
-      index = tabObject.options.indexOf('stats');
-      if (index >= 0) {
-        const indexNoStats = tabObject.options.indexOf('nostats');
-        if (indexNoStats >= 0) {
-          tabObject.options.splice(indexNoStats, 1);
-        }
-      } else if (tabObject.options.indexOf('nostats') < 0) {
-        tabObject.options.push('nostats');
-      }
-
-      index = tabObject.options.indexOf('alp');
+      const index = tabObject.options.indexOf('alp');
       if (objectRemoteData.payload._typename === 'TGraph' && index < 0) {
         tabObject.options.push('alp');
       }

@@ -44,7 +44,7 @@ function drawComponent(model) {
         )
       ),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, model.object.selected.name)
+        draw(model, model.object.selected.name, {stat: true})
       )
     ]
   );
@@ -165,6 +165,6 @@ function treeRow(model, tree, level) {
       ]),
       h('td.highlight', {class: color}, tree.quality),
     ]),
-    ...children
+    children
   ];
 }

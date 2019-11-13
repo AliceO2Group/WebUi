@@ -1,3 +1,4 @@
+/* eslint-disable arrow-parens */
 /* eslint-disable max-len */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
@@ -33,7 +34,7 @@ describe('QCG', function() {
 
     this.ok = true;
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
 
     // Listen to browser
@@ -221,9 +222,79 @@ describe('QCG', function() {
       assert.deepStrictEqual(rowsCount, 4); // 4 agents
     });
 
+    it('should have a button to sort by (default "Name" ASC)', async () => {
+      const sortByButtonTitle = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div').title);
+      assert.strictEqual(sortByButtonTitle, 'Sort by');
+    });
+
+    it('should have first element in tree as "DAQ01/EquipmentSize/ACORDE/ACORDE"', async () => {
+      const firstElement = await page.evaluate(() => window.model.object.currentList[0]);
+      assert.strictEqual(firstElement.name, 'DAQ01/EquipmentSize/ACORDE/ACORDE');
+    });
+
+    it('should sort list of histograms by name in descending order', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(4)').click());
+      const sorted = await page.evaluate(() => {
+        return {
+          list: window.model.object.currentList,
+          sort: window.model.object.sortBy
+        };
+      });
+      assert.strictEqual(sorted.sort.title, 'Name');
+      assert.strictEqual(sorted.sort.order, -1);
+      assert.strictEqual(sorted.sort.field, 'name');
+      assert.strictEqual(sorted.list[0].name, 'TST01/Default/hTOFRRawTimeVsTRM3671');
+    });
+
+    it('should sort list of histograms by name in ascending order', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(3)').click());
+      const sorted = await page.evaluate(() => {
+        return {
+          list: window.model.object.currentList,
+          sort: window.model.object.sortBy
+        };
+      });
+      assert.strictEqual(sorted.sort.title, 'Name');
+      assert.strictEqual(sorted.sort.order, 1);
+      assert.strictEqual(sorted.sort.field, 'name');
+      assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
+    });
+
+    it('should sort list of histograms by created time in descending order', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(2)').click());
+      const sorted = await page.evaluate(() => {
+        return {
+          list: window.model.object.currentList,
+          sort: window.model.object.sortBy
+        };
+      });
+      assert.strictEqual(sorted.sort.title, 'Created Time');
+      assert.strictEqual(sorted.sort.order, -1);
+      assert.strictEqual(sorted.sort.field, 'createTime');
+      assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/2499');
+    });
+
+    it('should sort list of histograms by created time in ascending order', async () => {
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(1)').click());
+      const sorted = await page.evaluate(() => {
+        return {
+          list: window.model.object.currentList,
+          sort: window.model.object.sortBy
+        };
+      });
+      assert.strictEqual(sorted.sort.title, 'Created Time');
+      assert.strictEqual(sorted.sort.order, 1);
+      assert.strictEqual(sorted.sort.field, 'createTime');
+      assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
+    });
+
     it('should have filtered results on input search filled', async () => {
-      await page.type('header input', 'HistoWithRandom');
-      await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 1`, {timeout: 5000});
+      await page.type('header input', 'BIGTREE');
+      await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 2500`, {timeout: 5000});
     });
   });
 

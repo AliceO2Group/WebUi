@@ -41,7 +41,7 @@ function readObjectData(name) {
  */
 function listObjects() {
   return promiseResolveWithLatency(objects.map((object) => {
-    return {name: object.name, quality: object.quality};
+    return {name: object.name, createTime: object.createTime};
   }));
 }
 
@@ -146,43 +146,43 @@ setInterval(() => {
 }, 100);
 
 const objects = [
-  {name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', quality: 'good', data: graphs.histo},
-  {name: 'DAQ01/EquipmentSize/CPV/CPV', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EquipmentSize/HMPID/HMPID', quality: 'good', data: graphs.gaussian},
-  {name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', quality: 'good', data: graphs.hpx},
-  {name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EquipmentSize/TOF/TOF', quality: 'good', data: graphs.histo},
-  {name: 'DAQ01/EquipmentSize/TPC/TPC', quality: 'good', data: graphs.gaussian},
-  {name: 'DAQ01/EquipmentSize/TPC/STRING', quality: 'good', data: graphs.string},
-  {name: 'DAQ01/EventSize/ACORDE/ACORDE', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EventSize/CPV/CPV', quality: 'good', data: graphs.hpx},
-  {name: 'DAQ01/EventSize/HMPID/HMPID', quality: 'good', data: graphs.gaussian},
-  {name: 'DAQ01/EventSize/ITSSDD/ITSSDD', quality: 'good', data: graphs.root0},
-  {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', quality: 'good', data: graphs.histo},
-  {name: 'DAQ01/EventSize/TOF/TOF', quality: 'bad', data: graphs.gaussian},
-  {name: 'DAQ01/EventSize/TPC/TPC', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', quality: 'good', data: graphs.hpx},
-  {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', quality: 'good', data: graphs.gaussian},
-  {name: 'DAQ01/_EquimentSizeSummmary', quality: 'bad', data: graphs.gaussian},
-  {name: 'DAQ01/_EventSizeClusters', quality: 'bad', data: graphs.canvas_tf1},
-  {name: 'DAQ01/HistoWithRandom', quality: 'bad', data: graphs.histo},
-  {name: 'TOFQAshifter/Default/hTOFRRawHitMap', quality: 'good', data: graphs.gaussian},
-  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM035', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM3671', quality: 'good', data: graphs.root0},
-  {name: 'TOFQAshifter/Default/hTOFRRaws', quality: 'good', data: graphs.histo},
-  {name: 'TOFQAshifter/Default/hTOFRRawsTime', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'TOFQAshifter/Default/hTOFRRawsToT', quality: 'bad', data: graphs.hpx},
-  {name: 'TOFQAshifter/Default/hTOFrefMap', quality: 'bad', data: graphs.histo},
-  {name: 'TST01/Default/hTOFRRawHitMap', quality: 'good', data: graphs.histo},
-  {name: 'TST01/Default/hTOFRRawTimeVsTRM035', quality: 'good', data: graphs.root0},
-  {name: 'TST01/Default/hTOFRRawTimeVsTRM3671', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'TST01/Default/hTOFRRaws', quality: 'good', data: graphs.gaussian},
-  {name: 'TST01/Default/hTOFRRawsTime', quality: 'good', data: graphs.canvas_tf1},
-  {name: 'TST01/Default/hTOFRRawsToT', quality: 'good', data: graphs.histo},
-  {name: 'TST01/Default/hTOFrefMap', quality: 'good', data: graphs.hpx},
+  {name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', createTime: 2, data: graphs.histo},
+  {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, data: graphs.canvas_tf1},
+  {name: 'DAQ01/EquipmentSize/HMPID/HMPID', createTime: 4, data: graphs.gaussian},
+  {name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', createTime: 5, data: graphs.hpx},
+  {name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', createTime: 6, data: graphs.canvas_tf1},
+  {name: 'DAQ01/EquipmentSize/TOF/TOF', createTime: 7, data: graphs.histo},
+  {name: 'DAQ01/EquipmentSize/TPC/TPC', createTime: 8, data: graphs.gaussian},
+  {name: 'DAQ01/EquipmentSize/TPC/STRING', createTime: 9, data: graphs.string},
+  {name: 'DAQ01/EventSize/ACORDE/ACORDE', createTime: 10, data: graphs.canvas_tf1},
+  {name: 'DAQ01/EventSize/CPV/CPV', createTime: 11, data: graphs.hpx},
+  {name: 'DAQ01/EventSize/HMPID/HMPID', createTime: 12, data: graphs.gaussian},
+  {name: 'DAQ01/EventSize/ITSSDD/ITSSDD', createTime: 13, data: graphs.root0},
+  {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', createTime: 14, data: graphs.histo},
+  {name: 'DAQ01/EventSize/TOF/TOF', createTime: 15, data: graphs.gaussian},
+  {name: 'DAQ01/EventSize/TPC/TPC', createTime: 16, data: graphs.canvas_tf1},
+  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', createTime: 17, data: graphs.hpx},
+  {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', createTime: 18, data: graphs.canvas_tf1},
+  {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', createTime: 19, data: graphs.gaussian},
+  {name: 'DAQ01/_EquimentSizeSummmary', createTime: 11, data: graphs.gaussian},
+  {name: 'DAQ01/_EventSizeClusters', createTime: 12, data: graphs.canvas_tf1},
+  {name: 'DAQ01/HistoWithRandom', createTime: 13, data: graphs.histo},
+  {name: 'TOFQAshifter/Default/hTOFRRawHitMap', createTime: 14, data: graphs.gaussian},
+  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM035', createTime: 15, data: graphs.canvas_tf1},
+  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM3671', createTime: 11, data: graphs.root0},
+  {name: 'TOFQAshifter/Default/hTOFRRaws', createTime: 12, data: graphs.histo},
+  {name: 'TOFQAshifter/Default/hTOFRRawsTime', createTime: 11, data: graphs.canvas_tf1},
+  {name: 'TOFQAshifter/Default/hTOFRRawsToT', createTime: 13, data: graphs.hpx},
+  {name: 'TOFQAshifter/Default/hTOFrefMap', createTime: 14, data: graphs.histo},
+  {name: 'TST01/Default/hTOFRRawHitMap', createTime: 15, data: graphs.histo},
+  {name: 'TST01/Default/hTOFRRawTimeVsTRM035', createTime: 14, data: graphs.root0},
+  {name: 'TST01/Default/hTOFRRawTimeVsTRM3671', createTime: 14, data: graphs.canvas_tf1},
+  {name: 'TST01/Default/hTOFRRaws', createTime: 11, data: graphs.gaussian},
+  {name: 'TST01/Default/hTOFRRawsTime', createTime: 21, data: graphs.canvas_tf1},
+  {name: 'TST01/Default/hTOFRRawsToT', createTime: 21, data: graphs.histo},
+  {name: 'TST01/Default/hTOFrefMap', createTime: 21, data: graphs.hpx},
   ...Array.from({length: 2500}, (x, i) => (
-    {name: `BIGTREE/120KB/${i}`, quality: 'good', data: graphs.hpx}
+    {name: `BIGTREE/120KB/${i}`, createTime: i, data: graphs.hpx}
   ))
 ];
 

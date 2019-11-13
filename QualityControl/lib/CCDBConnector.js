@@ -49,8 +49,7 @@ class CCDBConnector {
         log.warn(`CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
         return null;
       }
-
-      return {name: item.path};
+      return {name: item.path, createTime: item.createTime};
     };
 
     /**
