@@ -33,7 +33,7 @@ function getActionsHeader(model) {
     [
       getBackToQCGButton(model),
       h('b.text-center.w-50', getObjectTitle(model)),
-      getCopyURLToClipboardButton(model)
+      model.isContextSecure() && getCopyURLToClipboardButton(model)
     ]);
 }
 
@@ -74,10 +74,9 @@ function getCopyURLToClipboardButton(model) {
       {
         title: 'Copy URL Object',
         onclick: () => {
-          model.notification.show('Object location has been copied to clipboard', 'primary', 2000);
-          // TODO: Add copy to clipboard functionality
-        },
-        style: 'display: none'
+          model.notification.show('URL has been successfully copied to clipboard', 'success', 1500);
+          navigator.clipboard.writeText(model.router.getUrl().href);
+        }
       },
       [iconBook(), ' ', 'Copy URL']));
 }
@@ -95,7 +94,7 @@ function getRootObject(model) {
           oncreate: () => model.object.select({name: model.router.params.objectName}),
           style: 'width: 100%; height: 100%',
         },
-        model.object.selected ? draw(model, model.object.selected.name) : null)
+        model.object.selected ? draw(model, model.object.selected.name, {stat: true}) : null)
       : errorLoadingObject(''));
 }
 
