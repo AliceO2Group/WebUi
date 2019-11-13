@@ -45,7 +45,7 @@ export default function objectPropertiesSidebar(model) {
         btnOption(model, tabObject, 'colz'), ' ',
       ]),
       h('', [
-        btnOption(model, tabObject, 'stats'), ' ',
+        btnOption(model, tabObject, 'stat'), ' ',
       ]),
     ]),
 

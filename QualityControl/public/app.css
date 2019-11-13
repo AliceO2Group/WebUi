@@ -17,6 +17,8 @@
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
+.object-online { border: 0.15em solid var(--color-success); transition: border 0s; }
+
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 
 /* Force jsroot's background to be transparent */
