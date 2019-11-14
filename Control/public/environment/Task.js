@@ -36,7 +36,7 @@ export default class Task extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
-    if (ok) {
+    if (!ok) {
       this.list[body.taskId] = RemoteData.failure(result.message);
     } else {
       const commandInfo = this.parseTaskCommandInfo(result.task.commandInfo, body.taskId);
