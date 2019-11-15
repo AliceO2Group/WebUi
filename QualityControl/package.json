@@ -5,7 +5,7 @@
   "main": "export.js",
   "scripts": {
     "postinstall": "mv build/Release/tobject2json.node .",
-    "install": "unset PYTHONHOME PYTHONPATH PYTHONUSERBASE; node-gyp rebuild",
+    "install": "node-gyp rebuild --jobs max",
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
