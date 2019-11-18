@@ -161,7 +161,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   if (objectRemoteData && objectRemoteData.isSuccess() &&
     (shouldRedraw || shouldCleanRedraw)) {
     setTimeout(() => {
-      if (shouldCleanRedraw && JSROOT.cleanup) {
+      if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
         // Official redraw will keep options whenever they changed, we don't want this.
         // (cleanup might not be loaded yet)
