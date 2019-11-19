@@ -7,13 +7,15 @@ on:
       - 'Control/*/*'
       - 'Control/*/*/*'
       - '.github/workflows/control.yml'
+  push:
+    branches:
+      - 'master'
+      - 'dev'
+      - 'feature/OGUI-431-improve-gh-pipeline'
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-18.04, macOS-latest]
+    runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
       - name: Setup node
@@ -26,15 +28,11 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
         with:
           node-version: '12.x'
       - run: (cd Control; npm install )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1.0.2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: Control/coverage.lcov
-          flags: control
+      - run: (cd Control; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
