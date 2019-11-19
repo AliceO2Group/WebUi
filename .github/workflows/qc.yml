@@ -7,6 +7,16 @@ on:
       - 'QualityControl/*/*'
       - 'QualityControl/*/*/*'
       - '.github/workflows/qc.yml'
+  push:
+    branches:
+      - 'master'
+      - 'dev'
+      - 'feature/OGUI-431-improve-gh-pipeline'
+    paths:
+      - 'QualityControl/*'
+      - 'QualityControl/*/*'
+      - 'QualityControl/*/*/*'
+      - '.github/workflows/qc.yml'
 
 jobs:
   test:

@@ -11,10 +11,15 @@ on:
     branches:
       - 'master'
       - 'dev'
+    paths:
+      - 'Control/*'
+      - 'Control/*/*'
+      - 'Control/*/*/*'
+      - '.github/workflows/control.yml'
 
 jobs:
   test:
-    name: Run tests on macos-latest
+    name: Tests on macos-latest
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
@@ -25,7 +30,7 @@ jobs:
       - run: (cd Control; npm install )
       - run: (cd Control; npm test )
   coverage:
-    name: Run tests and upload coverage on ubuntu-18.04
+    name: Tests & coverage on ubuntu-18.04
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
