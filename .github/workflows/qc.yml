@@ -11,7 +11,6 @@ on:
     branches:
       - 'master'
       - 'dev'
-      - 'feature/OGUI-431-improve-gh-pipeline'
     paths:
       - 'QualityControl/*'
       - 'QualityControl/*/*'
@@ -20,7 +19,7 @@ on:
 
 jobs:
   test:
-    name: Run tests on ubuntu-18.04
+    name: Tests on ubuntu-18.04
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
@@ -33,7 +32,7 @@ jobs:
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm test )
   coverage:
-    name: Run tests and upload coverage on macOS-latest
+    name: Tests && coverage on macOS-latest
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1

@@ -11,7 +11,7 @@
     "simul": "node test/live-simulator/infoLoggerServer.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
-    "coverage": "nyc npm run mocha",
+    "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "author": "Vladimir Kosmala",
