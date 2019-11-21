@@ -238,6 +238,10 @@ function getFrameworkInfo(req, res) {
     errorHandler('Unable to retrieve configuration of the framework', res, 502);
   } else {
     const result = {};
+    if (process.env.npm_package_version) {
+      result.qcg = {};
+      result.qcg.version = process.env.npm_package_version;
+    }
     if (config.ccdb) {
       result.ccdb = config.ccdb;
     }

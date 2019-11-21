@@ -414,6 +414,7 @@ describe('QCG', function() {
         ccdb: {hostname: 'ccdb', port: 8500}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);
+      delete config.payload.qcg;
       assert.deepStrictEqual(config.payload, expConfig);
     });
   });
