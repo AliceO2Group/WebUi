@@ -4,6 +4,7 @@ import spinner from '../loader/spinner.js';
 import layoutShowHeader from '../layout/layoutShowHeader.js';
 import layoutListHeader from '../layout/layoutListHeader.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
+import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -30,6 +31,7 @@ const headerSpecific = (model) => {
     case 'layoutList': return layoutListHeader(model);
     case 'layoutShow': return layoutShowHeader(model);
     case 'objectTree': return objectTreeHeader(model);
+    case 'frameworkInfo': return frameworkInfoHeader(model);
     default: return null;
   }
 };
@@ -61,14 +63,14 @@ const loginButton = (model) =>
     {
       title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : ''
     }, [
-      h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
-      h('.dropdown-menu', [
-        h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-        model.session.personid === 0 // anonymous user has id 0
-          ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-          : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
-      ]),
-    ]);
+    h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
+    h('.dropdown-menu', [
+      h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
+      model.session.personid === 0 // anonymous user has id 0
+        ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
+        : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+    ]),
+  ]);
 
 /**
  * Create button which will allow user to enable/disable online mode

@@ -2,7 +2,7 @@ import {h} from '/js/src/index.js';
 
 import objectTreeSidebar from '../object/objectTreeSidebar.js';
 import objectPropertiesSidebar from '../object/objectPropertiesSidebar.js';
-import {iconLayers, iconPlus, iconBarChart} from '/js/src/icons.js';
+import {iconLayers, iconPlus, iconBarChart, iconExcerpt} from '/js/src/icons.js';
 
 /**
  * Shows sidebar of application, can be object property editor in edit mode or a tree of objects
@@ -31,7 +31,7 @@ export default function sidebar(model) {
 
   // General case with an optional menu on the left
   return h('nav.sidebar', {class: model.sidebar ? '' : 'sidebar-closed'}, [
-    h('.sidebar-content.scroll-y', [
+    h('.sidebar-content.scroll-y.flex-column', [
       sidebarMenu(model)
     ])
   ]);
@@ -46,6 +46,7 @@ const sidebarMenu = (model) => [
   exploreMenu(model),
   myLayoutsMenu(model),
   refreshOptions(model),
+  statusMenu(model)
 ];
 
 /**
@@ -59,16 +60,14 @@ const exploreMenu = (model) => [
     href: '?page=layoutList',
     onclick: (e) => model.router.handleLinkEvent(e),
     class: model.page === 'layoutList' ? 'selected' : ''
-  },
-  [
+  }, [
     iconLayers(), ' ', h('span', 'Layouts')
   ]),
   h('a.menu-item', {
     href: '?page=objectTree',
     onclick: (e) => model.router.handleLinkEvent(e),
     class: model.page === 'objectTree' ? 'selected' : ''
-  },
-  [
+  }, [
     iconBarChart(), ' ', h('span', 'Objects')
   ]),
 ];
@@ -92,6 +91,20 @@ const myLayoutsMenu = (model) => [
 ];
 
 /**
+ * Show link to status page
+ * @param {Object} model
+ * @return {vnode}
+ */
+const statusMenu = (model) =>
+  h('a.menu-item', {
+    href: '?page=frameworkInfo',
+    onclick: (e) => model.router.handleLinkEvent(e),
+    class: model.page === 'frameworkInfo' ? 'selected' : ''
+  }, [
+    iconExcerpt(), ' ', h('span', 'Framework Info')
+  ]);
+
+/**
  * Shows one link to a layout
  * @param {Object} model
  * @param {Object} layout
@@ -101,8 +114,7 @@ const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
   href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
   onclick: (e) => model.router.handleLinkEvent(e),
   class: model.router.params.layoutId === layout.id ? 'selected' : ''
-},
-[
+}, [
   iconLayers(), ' ', h('span', layout.name)
 ]);
 
@@ -115,7 +127,7 @@ const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
  */
 const refreshOptions = (model) => [
   h('.menu-title', {
-    style: model.object.isOnlineModeEnabled ?'' : 'visibility: hidden'
+    style: model.object.isOnlineModeEnabled ? 'flex-grow:1' : 'visibility: hidden; flex-grow:1'
   }, [
     h('span.highlight', {
       key: 'timer' + model.object.refreshTimer,
