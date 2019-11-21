@@ -8,7 +8,7 @@ import spinner from '../loader/spinner.js';
  */
 export default (model) => [
   h('.w-50.flex-row.justify-center', [
-    h('b.f4.ph2', 'Framework Info'),
+    h('b.f4.ph2', 'About'),
     model.frameworkInfo.item.isLoading() &&
     h('.f4', spinner()),
   ]),

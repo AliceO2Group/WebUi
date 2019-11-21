@@ -97,11 +97,11 @@ const myLayoutsMenu = (model) => [
  */
 const statusMenu = (model) =>
   h('a.menu-item', {
-    href: '?page=frameworkInfo',
+    href: '?page=about',
     onclick: (e) => model.router.handleLinkEvent(e),
-    class: model.page === 'frameworkInfo' ? 'selected' : ''
+    class: model.page === 'about' ? 'selected' : ''
   }, [
-    iconExcerpt(), ' ', h('span', 'Framework Info')
+    iconExcerpt(), ' ', h('span', 'About')
   ]);
 
 /**

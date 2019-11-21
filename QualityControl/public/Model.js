@@ -137,8 +137,8 @@ export default class Model extends Observable {
         this.page = 'objectView';
         this.notify();
         break;
-      case 'frameworkInfo':
-        this.page = 'frameworkInfo';
+      case 'about':
+        this.page = 'about';
         this.frameworkInfo.getFrameworkInfo();
         this.notify();
         break;

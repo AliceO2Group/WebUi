@@ -402,9 +402,9 @@ describe('QCG', function() {
     });
 
     it('should load', async () => {
-      await page.goto(url + '?page=frameworkInfo', {waitUntil: 'networkidle0'});
+      await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=frameworkInfo');
+      assert.deepStrictEqual(location.search, '?page=about');
     });
 
     it('should have a frameworkInfo item with config fields', async () => {
