@@ -7,30 +7,38 @@ on:
       - 'QualityControl/*/*'
       - 'QualityControl/*/*/*'
       - '.github/workflows/qc.yml'
+  push:
+    branches:
+      - 'master'
+      - 'dev'
+    paths:
+      - 'QualityControl/*'
+      - 'QualityControl/*/*'
+      - 'QualityControl/*/*/*'
+      - '.github/workflows/qc.yml'
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-18.04, macOS-latest]
+    name: Tests on ubuntu-18.04
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '10.x'
+          node-version: '12.x'
       - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
       - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '7,8d' package.json)
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm test )
   coverage:
+    name: Tests && coverage on macOS-latest
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
-          node-version: '10.x'
+          node-version: '12.x'
       - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
       - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '7,8d' package.json)
       - run: (cd QualityControl; npm install )
