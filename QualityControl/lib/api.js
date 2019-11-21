@@ -234,7 +234,7 @@ function createLayout(req, res) {
  * @param {Response} res
  */
 function getFrameworkInfo(req, res) {
-  if (config) {
+  if (!config) {
     errorHandler('Unable to retrieve configuration of the framework', res, 502);
   } else {
     const result = {};
