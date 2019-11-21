@@ -18,5 +18,9 @@ module.exports = {
   consul: {
     hostname: 'localhost',
     port: 8500
+  },
+  ccdb: {
+    hostname: 'ccdb',
+    port: 8500
   }
 };

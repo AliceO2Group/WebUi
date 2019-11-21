@@ -4,6 +4,7 @@ import spinner from '../loader/spinner.js';
 import layoutShowHeader from '../layout/layoutShowHeader.js';
 import layoutListHeader from '../layout/layoutListHeader.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
+import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -30,6 +31,7 @@ const headerSpecific = (model) => {
     case 'layoutList': return layoutListHeader(model);
     case 'layoutShow': return layoutShowHeader(model);
     case 'objectTree': return objectTreeHeader(model);
+    case 'about': return frameworkInfoHeader(model);
     default: return null;
   }
 };

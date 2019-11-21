@@ -20,6 +20,7 @@ module.exports.setup = (http) => {
   http.post('/listLayouts', listLayouts);
   http.delete('/layout/:layoutId', deleteLayout);
   http.post('/layout', createLayout);
+  http.get('/getFrameworkInfo', getFrameworkInfo);
   new WebSocket(http);
 };
 
@@ -228,6 +229,29 @@ function createLayout(req, res) {
 }
 
 /**
+ * Send back info about the framework
+ * @param {Request} req
+ * @param {Response} res
+ */
+function getFrameworkInfo(req, res) {
+  if (!config) {
+    errorHandler('Unable to retrieve configuration of the framework', res, 502);
+  } else {
+    const result = {};
+    if (config.ccdb) {
+      result.ccdb = config.ccdb;
+    }
+    if (config.http) {
+      result.http = config.http;
+    }
+    if (config.consul) {
+      result.consul = config.consul;
+    }
+    res.status(200).json(result);
+  }
+}
+
+/**
  * Global HTTP error handler, sends status 500
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
@@ -240,5 +264,5 @@ function errorHandler(err, res, status = 500) {
     }
     log.error(err.message || err);
   }
-  res.status(status).send({error: err.message || err});
+  res.status(status).send({message: err.message || err});
 }

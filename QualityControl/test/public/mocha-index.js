@@ -395,6 +395,30 @@ describe('QCG', function() {
     });
   });
 
+  describe('page frameworkInfo', () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
+
+    it('should load', async () => {
+      await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
+      const location = await page.evaluate(() => window.location);
+      assert.deepStrictEqual(location.search, '?page=about');
+    });
+
+    it('should have a frameworkInfo item with config fields', async () => {
+      const expConfig = {
+        http: {port: 8181, hostname: 'localhost', tls: false},
+        consul: {hostname: 'localhost', port: 8500},
+        ccdb: {hostname: 'ccdb', port: 8500}
+      };
+      const config = await page.evaluate(() => window.model.frameworkInfo.item);
+      assert.deepStrictEqual(config.payload, expConfig);
+    });
+  });
+
+
   beforeEach(() => {
     this.ok = true;
   });

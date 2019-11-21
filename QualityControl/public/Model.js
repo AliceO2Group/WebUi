@@ -4,6 +4,7 @@ import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
 import Folder from './folder/Folder.js';
+import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -35,6 +36,9 @@ export default class Model extends Observable {
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
+
+    this.frameworkInfo = new FrameworkInfo(this);
+    this.frameworkInfo.bubbleTo(this);
 
     this.sidebar = true;
     this.accountMenuEnabled = false;
@@ -134,6 +138,11 @@ export default class Model extends Observable {
         break;
       case 'objectView':
         this.page = 'objectView';
+        this.notify();
+        break;
+      case 'about':
+        this.page = 'about';
+        this.frameworkInfo.getFrameworkInfo();
         this.notify();
         break;
       default:
