@@ -1,5 +1,6 @@
 import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
 import {draw} from './objectDraw.js';
+import infoButton from './../common/infoButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -34,15 +35,17 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
 function drawComponent(model) {
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
-      h('.p1.text-right.resize-button', {style: 'padding-bottom: 0; p right: 0%;'},
-        h('a.btn',
-          {
-            title: 'Open object plot in full screen',
-            href: `?page=objectView&objectName=${model.object.selected.name}`,
-            onclick: (e) => model.router.handleLinkEvent(e)
-          }, iconResizeBoth()
-        )
-      ),
+      h('.resize-button.flex-row', [
+        infoButton(model.object),
+        h('.p1.text-left', {style: 'padding-bottom: 0;'},
+          h('a.btn',
+            {
+              title: 'Open object plot in full screen',
+              href: `?page=objectView&objectName=${model.object.selected.name}`,
+              onclick: (e) => model.router.handleLinkEvent(e)
+            }, iconResizeBoth()
+          )
+        )]),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
         draw(model, model.object.selected.name, {stat: true})
       )
