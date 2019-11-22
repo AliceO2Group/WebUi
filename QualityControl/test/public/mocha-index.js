@@ -347,7 +347,7 @@ describe('QCG', function() {
       });
       assert.deepStrictEqual(result.title, objectName);
       assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
     });
 
     it('should take back the user to page=objectTree when clicking "Back To QCG" (object passed and selected)', async () => {
@@ -361,7 +361,7 @@ describe('QCG', function() {
         };
       });
       assert.deepStrictEqual(result.location, '?page=objectTree');
-      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
     });
 
     it('should update button text to "Go back to layout" if layoutId parameter is provided', async () => {
@@ -391,7 +391,7 @@ describe('QCG', function() {
         };
       });
       assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
-      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
     });
   });
 
