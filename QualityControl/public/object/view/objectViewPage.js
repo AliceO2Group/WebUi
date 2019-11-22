@@ -1,5 +1,6 @@
 import {h, iconBook, iconCircleX, iconArrowThickLeft} from '/js/src/index.js';
 import {draw} from './../objectDraw.js';
+import infoButton from './../../common/infoButton.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -32,8 +33,11 @@ function getActionsHeader(model) {
   return h('', {style: 'display: flex'},
     [
       getBackToQCGButton(model),
-      h('b.text-center.w-50', getObjectTitle(model)),
-      model.isContextSecure() && getCopyURLToClipboardButton(model)
+      h('b.text-center', {style: 'flex-grow:1'}, getObjectTitle(model)),
+      h('.flex-row', [
+        infoButton(model.object),
+        model.isContextSecure() && getCopyURLToClipboardButton(model)
+      ])
     ]);
 }
 
@@ -43,7 +47,7 @@ function getActionsHeader(model) {
  * @return {vnode}
  */
 function getBackToQCGButton(model) {
-  return h('.w-25',
+  return h('',
     h('a.btn',
       {
         title: model.router.params.layoutId ? 'Go back to layout' : 'Go back to all objects',
@@ -69,7 +73,7 @@ function getBackToQCGButton(model) {
  * @return {vnode}
  */
 function getCopyURLToClipboardButton(model) {
-  return h('.w-25', {style: 'display: flex; justify-content: flex-end'},
+  return h('.p1', {style: ''},
     h('button.btn',
       {
         title: 'Copy URL Object',
