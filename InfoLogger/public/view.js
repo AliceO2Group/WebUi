@@ -54,7 +54,7 @@ const frameworkInfoSide = (model) =>
   ]);
 
 /**
-* Display a table with cog and its dependencies information
+* Display a table with information about infologger framework
 * @param {Object} item
 * @return {vnode}
 */
