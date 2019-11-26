@@ -34,7 +34,7 @@ describe('QCG', function() {
 
     this.ok = true;
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
     page = await browser.newPage();
 
     // Listen to browser
@@ -82,221 +82,221 @@ describe('QCG', function() {
     assert(sidebarContent.includes('Explore'));
   });
 
-  describe('page layoutList', () => {
-    before(async () => {
-      await page.goto(url + '?page=layoutList', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=layoutList');
-    });
+  // describe('page layoutList', () => {
+  //   before(async () => {
+  //     await page.goto(url + '?page=layoutList', {waitUntil: 'networkidle0'});
+  //     const location = await page.evaluate(() => window.location);
+  //     assert(location.search === '?page=layoutList');
+  //   });
 
-    it('should have a button for the Online mode in the header', async () => {
-      await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)', {timeout: 5000});
-      const onlineButton = await page.evaluate(() =>
-        document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)').title);
-      assert.deepStrictEqual(onlineButton, 'Online');
-    });
+  //   it('should have a button for the Online mode in the header', async () => {
+  //     await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)', {timeout: 5000});
+  //     const onlineButton = await page.evaluate(() =>
+  //       document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)').title);
+  //     assert.deepStrictEqual(onlineButton, 'Online');
+  //   });
 
-    it('should have a table with rows', async () => {
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert(rowsCount > 1);
-    });
+  //   it('should have a table with rows', async () => {
+  //     const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
+  //     assert(rowsCount > 1);
+  //   });
 
-    it('should have a table with one row after filtering', async () => {
-      await page.type('header input', 'AliRoot');
-      await page.waitFor(200);
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert(rowsCount === 1);
-    });
+  //   it('should have a table with one row after filtering', async () => {
+  //     await page.type('header input', 'AliRoot');
+  //     await page.waitFor(200);
+  //     const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
+  //     assert(rowsCount === 1);
+  //   });
 
-    it('should have a link to show a layout', async () => {
-      await page.evaluate(() => document.querySelector('section table tbody tr a').click());
-      const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
-      // id 5aba4a059b755d517e76ea10 is set in QCModelDemo
-    });
-  });
+  //   it('should have a link to show a layout', async () => {
+  //     await page.evaluate(() => document.querySelector('section table tbody tr a').click());
+  //     const location = await page.evaluate(() => window.location);
+  //     assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+  //     // id 5aba4a059b755d517e76ea10 is set in QCModelDemo
+  //   });
+  // });
 
-  describe('page layoutShow', () => {
-    before('reset browser to google', async () => {
-      // weird bug, if we don't go to external website just here, all next goto will wait forever
-      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-    });
+  // describe('page layoutShow', () => {
+  //   before('reset browser to google', async () => {
+  //     // weird bug, if we don't go to external website just here, all next goto will wait forever
+  //     await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+  //   });
 
-    it('should load', async () => {
-      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
-      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
-    });
+  //   it('should load', async () => {
+  //     // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
+  //     await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
+  //     const location = await page.evaluate(() => window.location);
+  //     assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+  //   });
 
-    it('should have tabs in the header', async () => {
-      const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
-      assert(tabsCount > 1);
-    });
+  //   it('should have tabs in the header', async () => {
+  //     const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
+  //     assert(tabsCount > 1);
+  //   });
 
-    it('should have selected layout in the sidebar highlighted', async () => {
-      const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(5)').classList);
-      assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
-    });
+  //   it('should have selected layout in the sidebar highlighted', async () => {
+  //     const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(5)').classList);
+  //     assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
+  //   });
 
-    it('should have jsroot svg plots in the section', async () => {
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert(plotsCount > 1);
-    });
+  //   it('should have jsroot svg plots in the section', async () => {
+  //     const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+  //     assert(plotsCount > 1);
+  //   });
 
-    it('should have second tab to be empty (according to demo data)', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
-      await page.waitForSelector('section h1', {timeout: 5000});
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert.deepStrictEqual(plotsCount, 0);
-    });
+  //   it('should have second tab to be empty (according to demo data)', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
+  //     await page.waitForSelector('section h1', {timeout: 5000});
+  //     const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
+  //     assert.deepStrictEqual(plotsCount, 0);
+  //   });
 
-    it('should have a button group containing three buttons in the header', async () => {
-      const buttonCount = await page.evaluate(() =>
-        document.querySelectorAll('header > div > div:nth-child(3) > div.btn-group > button').length);
-      assert.deepStrictEqual(buttonCount, 3);
-    });
+  //   it('should have a button group containing three buttons in the header', async () => {
+  //     const buttonCount = await page.evaluate(() =>
+  //       document.querySelectorAll('header > div > div:nth-child(3) > div.btn-group > button').length);
+  //     assert.deepStrictEqual(buttonCount, 3);
+  //   });
 
-    it('should have one duplicate button in the header to create a new duplicated layout', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
-      const duplicateButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)').title);
-      assert.deepStrictEqual(duplicateButton, 'Duplicate layout');
-    });
+  //   it('should have one duplicate button in the header to create a new duplicated layout', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
+  //     const duplicateButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)').title);
+  //     assert.deepStrictEqual(duplicateButton, 'Duplicate layout');
+  //   });
 
-    it('should have one delete button in the header to delete layout', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
-      const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
-      assert.deepStrictEqual(deleteButton, 'Delete layout');
-    });
+  //   it('should have one delete button in the header to delete layout', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
+  //     const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
+  //     assert.deepStrictEqual(deleteButton, 'Delete layout');
+  //   });
 
-    it('should have one edit button in the header to go in edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
-      const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
-      assert.deepStrictEqual(editButton, 'Edit layout');
-    });
+  //   it('should have one edit button in the header to go in edit mode', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
+  //     const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
+  //     assert.deepStrictEqual(editButton, 'Edit layout');
+  //   });
 
-    // Begin: Edit Mode;
-    it('should click the edit button in the header and enter edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(1)', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
-    });
+  //   // Begin: Edit Mode;
+  //   it('should click the edit button in the header and enter edit mode', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(1)', {timeout: 5000});
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
+  //   });
 
-    it('should have input field for changing layout name in edit mode', async () => {
-      await page.waitForSelector('header > div > div:nth-child(3) > input', {timeout: 5000});
-      const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
-      assert.deepStrictEqual(count, 1);
-    });
+  //   it('should have input field for changing layout name in edit mode', async () => {
+  //     await page.waitForSelector('header > div > div:nth-child(3) > input', {timeout: 5000});
+  //     const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
+  //     assert.deepStrictEqual(count, 1);
+  //   });
 
-    it('should have a tree sidebar in edit mode', async () => {
-      await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 4); // 4 agents
-    });
+  //   it('should have a tree sidebar in edit mode', async () => {
+  //     await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
+  //     const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
+  //     assert.deepStrictEqual(rowsCount, 4); // 4 agents
+  //   });
 
-    it('should have filtered results on input search filled', async () => {
-      await page.type('nav input', 'HistoWithRandom');
-      await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
-    });
+  //   it('should have filtered results on input search filled', async () => {
+  //     await page.type('nav input', 'HistoWithRandom');
+  //     await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
+  //   });
 
-    it('should show normal sidebar after Cancel click', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
-      await page.waitForSelector('nav .menu-title', {timeout: 5000});
-    });
-  });
+  //   it('should show normal sidebar after Cancel click', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
+  //     await page.waitForSelector('nav .menu-title', {timeout: 5000});
+  //   });
+  // });
 
-  describe('page objectTree', () => {
-    before('reset browser to google', async () => {
-      // weird bug, if we don't go to external website just here, all next goto will wait forever
-      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-    });
+  // describe('page objectTree', () => {
+  //   before('reset browser to google', async () => {
+  //     // weird bug, if we don't go to external website just here, all next goto will wait forever
+  //     await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+  //   });
 
-    it('should load', async () => {
-      await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=objectTree');
-    });
+  //   it('should load', async () => {
+  //     await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
+  //     const location = await page.evaluate(() => window.location);
+  //     assert(location.search === '?page=objectTree');
+  //   });
 
-    it('should have a tree as a table', async () => {
-      await page.waitForSelector('section table tbody tr', {timeout: 5000});
-      const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 4); // 4 agents
-    });
+  //   it('should have a tree as a table', async () => {
+  //     await page.waitForSelector('section table tbody tr', {timeout: 5000});
+  //     const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
+  //     assert.deepStrictEqual(rowsCount, 4); // 4 agents
+  //   });
 
-    it('should have a button to sort by (default "Name" ASC)', async () => {
-      const sortByButtonTitle = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div').title);
-      assert.strictEqual(sortByButtonTitle, 'Sort by');
-    });
+  //   it('should have a button to sort by (default "Name" ASC)', async () => {
+  //     const sortByButtonTitle = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div').title);
+  //     assert.strictEqual(sortByButtonTitle, 'Sort by');
+  //   });
 
-    it('should have first element in tree as "DAQ01/EquipmentSize/ACORDE/ACORDE"', async () => {
-      const firstElement = await page.evaluate(() => window.model.object.currentList[0]);
-      assert.strictEqual(firstElement.name, 'DAQ01/EquipmentSize/ACORDE/ACORDE');
-    });
+  //   it('should have first element in tree as "DAQ01/EquipmentSize/ACORDE/ACORDE"', async () => {
+  //     const firstElement = await page.evaluate(() => window.model.object.currentList[0]);
+  //     assert.strictEqual(firstElement.name, 'DAQ01/EquipmentSize/ACORDE/ACORDE');
+  //   });
 
-    it('should sort list of histograms by name in descending order', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(4)').click());
-      const sorted = await page.evaluate(() => {
-        return {
-          list: window.model.object.currentList,
-          sort: window.model.object.sortBy
-        };
-      });
-      assert.strictEqual(sorted.sort.title, 'Name');
-      assert.strictEqual(sorted.sort.order, -1);
-      assert.strictEqual(sorted.sort.field, 'name');
-      assert.strictEqual(sorted.list[0].name, 'TST01/Default/hTOFRRawTimeVsTRM3671');
-    });
+  //   it('should sort list of histograms by name in descending order', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(4)').click());
+  //     const sorted = await page.evaluate(() => {
+  //       return {
+  //         list: window.model.object.currentList,
+  //         sort: window.model.object.sortBy
+  //       };
+  //     });
+  //     assert.strictEqual(sorted.sort.title, 'Name');
+  //     assert.strictEqual(sorted.sort.order, -1);
+  //     assert.strictEqual(sorted.sort.field, 'name');
+  //     assert.strictEqual(sorted.list[0].name, 'TST01/Default/hTOFRRawTimeVsTRM3671');
+  //   });
 
-    it('should sort list of histograms by name in ascending order', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(3)').click());
-      const sorted = await page.evaluate(() => {
-        return {
-          list: window.model.object.currentList,
-          sort: window.model.object.sortBy
-        };
-      });
-      assert.strictEqual(sorted.sort.title, 'Name');
-      assert.strictEqual(sorted.sort.order, 1);
-      assert.strictEqual(sorted.sort.field, 'name');
-      assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
-    });
+  //   it('should sort list of histograms by name in ascending order', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(3)').click());
+  //     const sorted = await page.evaluate(() => {
+  //       return {
+  //         list: window.model.object.currentList,
+  //         sort: window.model.object.sortBy
+  //       };
+  //     });
+  //     assert.strictEqual(sorted.sort.title, 'Name');
+  //     assert.strictEqual(sorted.sort.order, 1);
+  //     assert.strictEqual(sorted.sort.field, 'name');
+  //     assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
+  //   });
 
-    it('should sort list of histograms by created time in descending order', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(2)').click());
-      const sorted = await page.evaluate(() => {
-        return {
-          list: window.model.object.currentList,
-          sort: window.model.object.sortBy
-        };
-      });
-      assert.strictEqual(sorted.sort.title, 'Created Time');
-      assert.strictEqual(sorted.sort.order, -1);
-      assert.strictEqual(sorted.sort.field, 'createTime');
-      assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/2499');
-    });
+  //   it('should sort list of histograms by created time in descending order', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(2)').click());
+  //     const sorted = await page.evaluate(() => {
+  //       return {
+  //         list: window.model.object.currentList,
+  //         sort: window.model.object.sortBy
+  //       };
+  //     });
+  //     assert.strictEqual(sorted.sort.title, 'Created Time');
+  //     assert.strictEqual(sorted.sort.order, -1);
+  //     assert.strictEqual(sorted.sort.field, 'createTime');
+  //     assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/2499');
+  //   });
 
-    it('should sort list of histograms by created time in ascending order', async () => {
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
-      await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(1)').click());
-      const sorted = await page.evaluate(() => {
-        return {
-          list: window.model.object.currentList,
-          sort: window.model.object.sortBy
-        };
-      });
-      assert.strictEqual(sorted.sort.title, 'Created Time');
-      assert.strictEqual(sorted.sort.order, 1);
-      assert.strictEqual(sorted.sort.field, 'createTime');
-      assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
-    });
+  //   it('should sort list of histograms by created time in ascending order', async () => {
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
+  //     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(1)').click());
+  //     const sorted = await page.evaluate(() => {
+  //       return {
+  //         list: window.model.object.currentList,
+  //         sort: window.model.object.sortBy
+  //       };
+  //     });
+  //     assert.strictEqual(sorted.sort.title, 'Created Time');
+  //     assert.strictEqual(sorted.sort.order, 1);
+  //     assert.strictEqual(sorted.sort.field, 'createTime');
+  //     assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
+  //   });
 
-    it('should have filtered results on input search filled', async () => {
-      await page.type('header input', 'BIGTREE');
-      await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 2500`, {timeout: 5000});
-    });
-  });
+  //   it('should have filtered results on input search filled', async () => {
+  //     await page.type('header input', 'BIGTREE');
+  //     await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 2500`, {timeout: 5000});
+  //   });
+  // });
 
   describe('page objectView', () => {
     it('should load page=objectView and display error message & icon due to missing objectName parameter', async () => {
@@ -337,7 +337,7 @@ describe('QCG', function() {
       await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
       const result = await page.evaluate(() => {
         const title = document.querySelector('div div b').textContent;
-        const rootPlotClassList = document.querySelector('div div:nth-child(2) div div').classList;
+        const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
         const objectSelected = window.model.object.selected;
         return {
           title: title,
@@ -395,29 +395,29 @@ describe('QCG', function() {
     });
   });
 
-  describe('page frameworkInfo', () => {
-    before('reset browser to google', async () => {
-      // weird bug, if we don't go to external website just here, all next goto will wait forever
-      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-    });
+  // describe('page frameworkInfo', () => {
+  //   before('reset browser to google', async () => {
+  //     // weird bug, if we don't go to external website just here, all next goto will wait forever
+  //     await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+  //   });
 
-    it('should load', async () => {
-      await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=about');
-    });
+  //   it('should load', async () => {
+  //     await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
+  //     const location = await page.evaluate(() => window.location);
+  //     assert.deepStrictEqual(location.search, '?page=about');
+  //   });
 
-    it('should have a frameworkInfo item with config fields', async () => {
-      const expConfig = {
-        qcg: {port: 8181, hostname: 'localhost'},
-        consul: {hostname: 'localhost', port: 8500},
-        ccdb: {hostname: 'ccdb', port: 8500}
-      };
-      const config = await page.evaluate(() => window.model.frameworkInfo.item);
-      delete config.payload.qcg.version;
-      assert.deepStrictEqual(config.payload, expConfig);
-    });
-  });
+  //   it('should have a frameworkInfo item with config fields', async () => {
+  //     const expConfig = {
+  //       qcg: {port: 8181, hostname: 'localhost'},
+  //       consul: {hostname: 'localhost', port: 8500},
+  //       ccdb: {hostname: 'ccdb', port: 8500}
+  //     };
+  //     const config = await page.evaluate(() => window.model.frameworkInfo.item);
+  //     delete config.payload.qcg.version;
+  //     assert.deepStrictEqual(config.payload, expConfig);
+  //   });
+  // });
 
 
   beforeEach(() => {
