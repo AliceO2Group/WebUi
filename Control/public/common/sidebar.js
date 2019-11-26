@@ -7,16 +7,6 @@ import {iconGridTwoUp, iconExcerpt, iconPlus} from '/js/src/icons.js';
  * @return {vnode}
  */
 export default (model) => h('.absolute-fill scroll-y.flex-column', [
-  // h('.menu-title-large', 'Dashboard'),
-  // h('a.menu-item', {
-  //   href: '?page=status',
-  //   onclick: (e) => model.router.handleLinkEvent(e),
-  //   class: model.router.params.page === 'status' ? 'selected' : ''
-  // }, [
-  //   iconExcerpt(),
-  //   ' ',
-  //   'Status'
-  // ]),
   h('h5.menu-title-large', 'Environments'),
   createNewEnvMenuItem(model.router),
   listActiveEnvMenuItem(model.router),

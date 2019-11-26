@@ -1,11 +1,11 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
- * Model representing FrameworkInfo (or status, to be seen in future what is this)
+ * Model representing FrameworkInfo
  */
 export default class FrameworkInfo extends Observable {
   /**
-   * Initialize `aliEcs` to NotAsked
+   * Initialize remoteData items to NotAsked
    * @param {Object} model
    */
   constructor(model) {
@@ -34,7 +34,7 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Load
+   * Load ControlGUI and its dependencies data in control-remoteData
    */
   async getFrameworkInfo() {
     this.control = RemoteData.loading();
