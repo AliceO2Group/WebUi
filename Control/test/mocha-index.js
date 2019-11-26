@@ -63,8 +63,8 @@ describe('Control', function() {
     const credentials = grpcLibrary.ServerCredentials.createInsecure();
     const address = `${config.grpc.hostname}:${config.grpc.port}`;
     server.addService(octlProto.o2control.Control.service, {
-      getFrameworkInfo(call, callback) {
-        calls['getFrameworkInfo'] = true;
+      GetFrameworkInfo(call, callback) {
+        calls['GetFrameworkInfo'] = true;
         callback(null, {fakeData: 1});
       },
       getEnvironments(call, callback) {
@@ -179,7 +179,7 @@ describe('Control', function() {
     assert(location.search === '?page=environments');
   });
 
-  require('./public/page-status-mocha');
+  require('./public/page-about-mocha');
   require('./public/page-environment-mocha');
   require('./public/page-environments-mocha');
   require('./public/page-new-environment-mocha');
