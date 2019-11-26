@@ -179,10 +179,10 @@ describe('Control', function() {
     assert(location.search === '?page=environments');
   });
 
-  require('./public/page-about-mocha');
-  require('./public/page-environment-mocha');
-  require('./public/page-environments-mocha');
-  require('./public/page-new-environment-mocha');
+  // require('./public/page-about-mocha');
+  // require('./public/page-environment-mocha');
+  // require('./public/page-environments-mocha');
+  // require('./public/page-new-environment-mocha');
 
   beforeEach(() => {
     this.ok = true;
