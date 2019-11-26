@@ -409,7 +409,7 @@ describe('QCG', function() {
 
     it('should have a frameworkInfo item with config fields', async () => {
       const expConfig = {
-        qcg: {port: 8181, hostname: 'localhost', tls: false},
+        qcg: {port: 8181, hostname: 'localhost'},
         consul: {hostname: 'localhost', port: 8500},
         ccdb: {hostname: 'ccdb', port: 8500}
       };
