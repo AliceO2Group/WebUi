@@ -1,15 +1,17 @@
 const assert = require('assert');
 const test = require('../mocha-index');
 
-describe('`pageAbout` test-suite', () => {
+describe('`pageAbout` test-suite', async () => {
   let url;
   let page;
   let calls;
 
-  before(() => {
+  before(async () => {
     url = test.helpers.url;
     page = test.page;
     calls = test.helpers.calls;
+    // weird bug, if we don't go to external website just here, all next goto will wait forever
+    await page.goto('http://google.com', {waitUntil: 'networkidle0'});
   });
 
   beforeEach(() => {

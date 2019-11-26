@@ -133,7 +133,7 @@ describe('Control', function() {
     this.ok = true;
 
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
     page = await browser.newPage();
 
     // Listen to browser
@@ -179,7 +179,7 @@ describe('Control', function() {
     assert(location.search === '?page=environments');
   });
 
-  // require('./public/page-about-mocha');
+  require('./public/page-about-mocha');
   require('./public/page-environment-mocha');
   require('./public/page-environments-mocha');
   require('./public/page-new-environment-mocha');
