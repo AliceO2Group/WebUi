@@ -15,12 +15,19 @@ export default (object) => object.selected && !object.isOnlineModeEnabled &&
           onclick: () => object.toggleInfoArea()
         }, info()
       ),
-      h('.dropdown-menu', {style: 'right:0.1em; left: auto;white-space: nowrap;'}, [
-        h('.m3.gray-darker', `Path: ${object.selected.name}`),
-        object.selected.lastModified ?
-          h('.m3.gray-darker', `Last modified: ${new Date(object.selected.lastModified).toLocaleString()}`)
-          :
-          h('.m3.gray-darker', 'Last modified: Loading...')
+      h('.dropdown-menu', {style: 'right:0.1em; left: auto; white-space: nowrap;'}, [
+        h('.m2.gray-darker.text-center', [
+          h('.menu-title', {style: 'font-weight: bold'}, 'PATH'),
+          object.selected.name
+        ]),
+        h('.m2.gray-darker.text-center', [
+          h('.menu-title', {style: 'font-weight: bold'}, 'LAST MODIFIED'),
+          object.selected.lastModified ?
+            `${new Date(object.selected.lastModified).toLocaleString()}`
+            :
+            'Loading...'
+        ]),
+
       ]),
     ])
   );

@@ -195,11 +195,18 @@ function drawComponent(model, tabObject) {
               }, info()
             ),
             h('.dropdown-menu', {style: 'right:0.1em; left: auto; white-space: nowrap;'}, [
-              h('.m3.gray-darker', `Path: ${tabObject.name}`),
-              model.object.selected && model.object.selected.lastModified ?
-                h('.m3.gray-darker', `Last modified: ${new Date(model.object.selected.lastModified).toLocaleString()}`)
-                :
-                h('.m3.gray-darker', 'Last modified: Loading...')
+              h('.m2.gray-darker.text-center', [
+                h('.menu-title', {style: 'font-weight: bold'}, 'PATH'),
+                tabObject.name
+              ]),
+              h('.m2.gray-darker.text-center', [
+                h('.menu-title', {style: 'font-weight: bold'}, 'LAST MODIFIED'),
+                model.object.selected && model.object.selected.lastModified ?
+                  `${new Date(model.object.selected.lastModified).toLocaleString()}`
+                  :
+                  'Loading...'
+              ]),
+
             ]),
           ])
         ),
