@@ -3,7 +3,7 @@ import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '
 import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
-import Status from './status/Status.js';
+import FrameworkInfo from './frameworkinfo/FrameworkInfo.js';
 import Workflow from './workflow/Workflow.js';
 
 /**
@@ -32,8 +32,8 @@ export default class Model extends Observable {
     this.workflow = new Workflow(this);
     this.workflow.bubbleTo(this);
 
-    this.status = new Status(this);
-    this.status.bubbleTo(this);
+    this.frameworkInfo = new FrameworkInfo(this);
+    this.frameworkInfo.bubbleTo(this);
 
     this.notification = new O2Notification(this);
     this.notification.bubbleTo(this);
@@ -118,8 +118,9 @@ export default class Model extends Observable {
         this.workflow.getAllTemplatesAsMap();
         this.workflow.resetErrorMessage();
         break;
-      case 'status':
-        this.status.getFrameworkInfo();
+      case 'about':
+        this.frameworkInfo.getFrameworkInfo();
+        this.frameworkInfo.getAliECSInfo();
         break;
       default:
         this.router.go('?page=environments');
