@@ -409,11 +409,12 @@ describe('QCG', function() {
 
     it('should have a frameworkInfo item with config fields', async () => {
       const expConfig = {
-        http: {port: 8181, hostname: 'localhost', tls: false},
+        qcg: {port: 8181, hostname: 'localhost'},
         consul: {hostname: 'localhost', port: 8500},
         ccdb: {hostname: 'ccdb', port: 8500}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);
+      delete config.payload.qcg.version;
       assert.deepStrictEqual(config.payload, expConfig);
     });
   });

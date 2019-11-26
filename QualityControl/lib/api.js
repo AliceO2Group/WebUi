@@ -238,11 +238,17 @@ function getFrameworkInfo(req, res) {
     errorHandler('Unable to retrieve configuration of the framework', res, 502);
   } else {
     const result = {};
-    if (config.ccdb) {
-      result.ccdb = config.ccdb;
+    result.qcg = {};
+
+    if (process.env.npm_package_version) {
+      result.qcg.version = process.env.npm_package_version;
     }
     if (config.http) {
-      result.http = config.http;
+      const qc = {hostname: config.http.hostname, port: config.http.port};
+      result.qcg = Object.assign(result.qcg, qc);
+    }
+    if (config.ccdb) {
+      result.ccdb = config.ccdb;
     }
     if (config.consul) {
       result.consul = config.consul;
