@@ -14,7 +14,7 @@ import showTableItem from '../common/showTableItem.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', h('h4', 'About')),
+  h('.w-50 text-center', h('h4', 'Aboust')),
   h('.flex-grow text-right', [])
 ];
 

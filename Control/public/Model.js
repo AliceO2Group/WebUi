@@ -3,7 +3,7 @@ import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '
 import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
-import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
+import FrameworkInfo from './frameworkinfo/FrameworkInfo.js';
 import Workflow from './workflow/Workflow.js';
 
 /**
