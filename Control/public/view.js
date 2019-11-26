@@ -8,16 +8,20 @@ import sidebar from './common/sidebar.js';
 // Page specific views (contents and headers)
 import {
   content as workflowsContent,
-  header as workflowsHeader} from './workflow/workflowsPage.js';
+  header as workflowsHeader
+} from './workflow/workflowsPage.js';
 import {
   content as environmentsContent,
-  header as environmentsHeader} from './environment/environmentsPage.js';
+  header as environmentsHeader
+} from './environment/environmentsPage.js';
 import {
   content as environmentContent,
-  header as environmentHeader} from './environment/environmentPage.js';
+  header as environmentHeader
+} from './environment/environmentPage.js';
 import {
   content as statusContent,
-  header as statusHeader} from './status/statusPage.js';
+  header as statusHeader
+} from './frameworkInfo/frameworkInfoPage.js';
 
 /**
  * Main view layout
@@ -52,7 +56,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     newEnvironment: workflowsHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
-    status: statusHeader
+    about: statusHeader
   })(model)
 ]);
 
@@ -66,6 +70,6 @@ const content = (model) => [
     newEnvironment: workflowsContent,
     environments: environmentsContent,
     environment: environmentContent,
-    status: statusContent
+    about: statusContent
   })(model)
 ];
