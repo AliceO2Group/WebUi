@@ -17,11 +17,11 @@ export default (object) => object.selected && !object.isOnlineModeEnabled &&
       ),
       h('.dropdown-menu', {style: 'right:0.1em; left: auto; white-space: nowrap;'}, [
         h('.m2.gray-darker.text-center', [
-          h('.menu-title', {style: 'font-weight: bold'}, 'PATH'),
+          h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'PATH'),
           object.selected.name
         ]),
         h('.m2.gray-darker.text-center', [
-          h('.menu-title', {style: 'font-weight: bold'}, 'LAST MODIFIED'),
+          h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'LAST MODIFIED'),
           object.selected.lastModified ?
             `${new Date(object.selected.lastModified).toLocaleString()}`
             :
