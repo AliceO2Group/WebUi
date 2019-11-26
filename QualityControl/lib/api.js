@@ -244,7 +244,8 @@ function getFrameworkInfo(req, res) {
       result.qcg.version = process.env.npm_package_version;
     }
     if (config.http) {
-      result.qcg = Object.assign(result.qcg, config.http);
+      const qc = {hostname: config.http.hostname, port: config.http.port};
+      result.qcg = Object.assign(result.qcg, qc);
     }
     if (config.ccdb) {
       result.ccdb = config.ccdb;
