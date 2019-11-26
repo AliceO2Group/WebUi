@@ -21,6 +21,7 @@ export default class QCObject extends Observable {
     this.list = null;
 
     this.selected = null; // object - id of object
+    this.selectedOpen = false;
     this.objects = {}; // objectName -> RemoteData
     this.objectsReferences = {}; // object name -> number of each object being
     this.qcObjectService = new QCObjectService(this.model);
@@ -64,6 +65,26 @@ export default class QCObject extends Observable {
     }
     this.selected = null;
     this.searchInput = '';
+    this.notify();
+  }
+
+  /**
+   * Method to toggle the box displaying more information about the histogram
+   * @param {string} objectName
+   */
+  toggleInfoArea(objectName) {
+    this.selectedOpen = !this.selectedOpen;
+    this.notify();
+    if (objectName) {
+      if (!this.list) {
+        this.selected = {name: objectName};
+      } else if (this.selectedOpen && this.list
+        && ((this.selected && !this.selected.lastModified)
+          || !this.selected)
+      ) {
+        this.selected = this.list.find((object) => object.name === objectName);
+      }
+    }
     this.notify();
   }
 
@@ -191,6 +212,10 @@ export default class QCObject extends Observable {
         open: false
       };
       this._computeFilters();
+
+      if (this.selected && !this.selected.lastModified) {
+        this.selected = this.list.find((object) => object.name === this.selected.name);
+      }
       this.notify();
     } else {
       this.loadOnlineList();
@@ -353,7 +378,11 @@ export default class QCObject extends Observable {
    * @param {QCObject} object
    */
   select(object) {
-    this.selected = object;
+    if (this.currentList.length > 0) {
+      this.selected = this.currentList.find((obj) => obj.name === object.name);
+    } else {
+      this.selected = object;
+    }
     this.notify();
   }
 

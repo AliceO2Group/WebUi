@@ -15,18 +15,25 @@ export default (model) => h('.p2.absolute-fill.text-center',
 );
 
 /**
- * Display a table with framework information
- * @param {Object} item
- * @return {vnode}
- */
-const showContent = (item) => h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
-  h('tbody', Object.keys(item).map((columnName, index) => [
-    Object.keys(item[columnName]).map((name) =>
-      h('tr', [
-        h('th.w-25', columnName + '.' + name),
-        h('td', JSON.stringify(item[columnName][name])),
+* Display a table with cog and its dependencies information
+* @param {Object} item
+* @return {vnode}
+*/
+const showContent = (item) =>
+  Object.keys(item).map((columnName) => [
+    h('.shadow-level1', [
+      h('table.table', {
+        style: 'white-space: pre-wrap;'
+      }, [
+        h('tbody', [
+          h('tr',
+            h('th.w-25', {style: 'text-decoration: underline'}, columnName.toUpperCase())),
+          Object.keys(item[columnName]).map((name) =>
+            h('tr', [
+              h('th.w-25', name),
+              h('td', JSON.stringify(item[columnName][name])),
+            ])
+          )])
       ])
-    ),
-    (index + 1) < Object.keys(item).length && h('tr', [h('th'), h('td')])
-  ]))
-]);
+    ])
+  ]);

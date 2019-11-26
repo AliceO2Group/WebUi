@@ -337,7 +337,7 @@ describe('QCG', function() {
       await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
       const result = await page.evaluate(() => {
         const title = document.querySelector('div div b').textContent;
-        const rootPlotClassList = document.querySelector('div div:nth-child(2) div div').classList;
+        const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
         const objectSelected = window.model.object.selected;
         return {
           title: title,
@@ -347,7 +347,7 @@ describe('QCG', function() {
       });
       assert.deepStrictEqual(result.title, objectName);
       assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
     });
 
     it('should take back the user to page=objectTree when clicking "Back To QCG" (object passed and selected)', async () => {
@@ -361,7 +361,7 @@ describe('QCG', function() {
         };
       });
       assert.deepStrictEqual(result.location, '?page=objectTree');
-      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
     });
 
     it('should update button text to "Go back to layout" if layoutId parameter is provided', async () => {
@@ -391,7 +391,7 @@ describe('QCG', function() {
         };
       });
       assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
-      assert.deepStrictEqual(result.objectSelected, {name: objectName});
+      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
     });
   });
 
@@ -409,11 +409,12 @@ describe('QCG', function() {
 
     it('should have a frameworkInfo item with config fields', async () => {
       const expConfig = {
-        http: {port: 8181, hostname: 'localhost', tls: false},
+        qcg: {port: 8181, hostname: 'localhost'},
         consul: {hostname: 'localhost', port: 8500},
         ccdb: {hostname: 'ccdb', port: 8500}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);
+      delete config.payload.qcg.version;
       assert.deepStrictEqual(config.payload, expConfig);
     });
   });
