@@ -21,7 +21,7 @@ import {
 import {
   content as statusContent,
   header as statusHeader
-} from './frameworkinfo/frameworkInfoPage.js.js';
+} from './frameworkinfo/frameworkInfoPage.js';
 
 /**
  * Main view layout
