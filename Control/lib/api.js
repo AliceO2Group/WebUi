@@ -121,12 +121,12 @@ module.exports.setup = (http, ws) => {
       errorHandler('Unable to retrieve configuration of the framework', res, 502);
     } else {
       const result = {};
+      result['control-gui'] = {};
       if (process.env.npm_package_version) {
-        result.control = {};
-        result.control.version = process.env.npm_package_version;
+        result['control-gui'].version = process.env.npm_package_version;
       }
       if (config.http) {
-        result.http = config.http;
+        result['control-gui'] = Object.assign(result['control-gui'], config.http);
       }
       if (config.grpc) {
         result.grpc = config.grpc;
