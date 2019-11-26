@@ -100,6 +100,8 @@ module.exports.setup = (http, ws) => {
     }
   });
 
+  http.get('/getFrameworkInfo', getFrameworkInfo);
+
   /**
    * Send to all users state of Pad via Websocket
    */
@@ -108,6 +110,32 @@ module.exports.setup = (http, ws) => {
       new WebSocketMessage().setCommand('padlock-update').setPayload(pad)
     );
   };
+
+  /**
+   * Send back info about the framework
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function getFrameworkInfo(req, res) {
+    if (!config) {
+      errorHandler('Unable to retrieve configuration of the framework', res, 502);
+    } else {
+      const result = {};
+      if (config.http) {
+        result.http = config.http;
+      }
+      if (config.grpc) {
+        result.grpc = config.grpc;
+      }
+      if (config.grafana) {
+        result.grafana = config.grafana;
+      }
+      if (config.kafka) {
+        result.kafka = config.kafka;
+      }
+      res.status(200).json(result);
+    }
+  }
 };
 
 /**
