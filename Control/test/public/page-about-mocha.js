@@ -16,13 +16,13 @@ describe('`pageAbout` test-suite', async () => {
 
   beforeEach(() => {
     // reset grpc calls
-    calls['GetFrameworkInfo'] = undefined;
+    calls['getFrameworkInfo'] = undefined;
   });
 
   it('should load', async () => {
     await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(calls['GetFrameworkInfo'], true);
+    assert.strictEqual(calls['getFrameworkInfo'], true);
     assert.strictEqual(location.search, '?page=about');
   });
 

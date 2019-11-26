@@ -63,8 +63,8 @@ describe('Control', function() {
     const credentials = grpcLibrary.ServerCredentials.createInsecure();
     const address = `${config.grpc.hostname}:${config.grpc.port}`;
     server.addService(octlProto.o2control.Control.service, {
-      GetFrameworkInfo(call, callback) {
-        calls['GetFrameworkInfo'] = true;
+      getFrameworkInfo(call, callback) {
+        calls['getFrameworkInfo'] = true;
         callback(null, {fakeData: 1});
       },
       getEnvironments(call, callback) {
