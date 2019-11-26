@@ -121,6 +121,10 @@ module.exports.setup = (http, ws) => {
       errorHandler('Unable to retrieve configuration of the framework', res, 502);
     } else {
       const result = {};
+      if (process.env.npm_package_version) {
+        result.control = {};
+        result.control.version = process.env.npm_package_version;
+      }
       if (config.http) {
         result.http = config.http;
       }
