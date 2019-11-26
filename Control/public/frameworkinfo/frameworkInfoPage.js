@@ -36,7 +36,6 @@ export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
  */
 const createTableForControlGUIInfo = (frameworkInfo) =>
   h('.p2', [
-    h('h4.pv2', 'Control and its dependencies info'),
     frameworkInfo.control.match({
       NotAsked: () => null,
       Loading: () => pageLoading(),
@@ -52,7 +51,7 @@ const createTableForControlGUIInfo = (frameworkInfo) =>
  */
 const createTableForAliECSInfo = (frameworkInfo) =>
   h('.p2', [
-    h('h4', 'AliECS Core Info'),
+    h('h4', {style: 'text-decoration: underline;'}, 'AliECS Core Info'),
     frameworkInfo.aliEcs.match({
       NotAsked: () => null,
       Loading: () => pageLoading(),
@@ -68,16 +67,20 @@ const createTableForAliECSInfo = (frameworkInfo) =>
  * @return {vnode}
  */
 const showContent = (item) =>
-  h('table.table.shadow-level2', {
-    style: 'white-space: pre-wrap;'
-  }, [
-    h('tbody', Object.keys(item).map((columnName, index) => [
-      Object.keys(item[columnName]).map((name) =>
-        h('tr', [
-          h('th.w-25', columnName + '.' + name),
-          h('td', JSON.stringify(item[columnName][name])),
-        ])
-      ),
-      (index + 1) < Object.keys(item).length && h('tr', [h('th'), h('td')])
-    ]))
+  Object.keys(item).map((columnName) => [
+    h('.shadow-level1', [
+      h('table.table', {
+        style: 'white-space: pre-wrap;'
+      }, [
+        h('tbody', [
+          h('tr',
+            h('th.w-25', {style: 'text-decoration: underline'}, columnName.toUpperCase())),
+          Object.keys(item[columnName]).map((name) =>
+            h('tr', [
+              h('th.w-25', name),
+              h('td', JSON.stringify(item[columnName][name])),
+            ])
+          )])
+      ])
+    ])
   ]);
