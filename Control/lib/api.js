@@ -126,7 +126,8 @@ module.exports.setup = (http, ws) => {
         result['control-gui'].version = process.env.npm_package_version;
       }
       if (config.http) {
-        result['control-gui'] = Object.assign(result['control-gui'], config.http);
+        const con = {hostname: config.http.hostname, port: config.http.port};
+        result['control-gui'] = Object.assign(result['control-gui'], con);
       }
       if (config.grpc) {
         result.grpc = config.grpc;
