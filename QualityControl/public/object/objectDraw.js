@@ -173,9 +173,11 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         tabObject.options.push('alp');
       }
 
-      // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
-      const options = ['f', ...tabObject.options].join(';');
-      JSROOT.redraw(dom, objectRemoteData.payload, options, (painter) => {
+      let drawingOptions = generateDrawingOptions(model, tabObject, objectRemoteData);
+      drawingOptions = drawingOptions.join(';');
+      drawingOptions += ';stat;f';
+
+      JSROOT.redraw(dom, objectRemoteData.payload, drawingOptions, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
@@ -186,6 +188,47 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     dom.dataset.fingerprintRedraw = redrawHash;
     dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
   }
+}
+
+/**
+ * Method to generate drawing options based on where in the application the plot is displayed
+ * @param {Object} model
+ * @param {Object} tabObject
+ * @param {Object} objectRemoteData
+ * @return {Array<string>}
+ */
+function generateDrawingOptions(model, tabObject, objectRemoteData) {
+  let objectOptionList = [];
+  let drawingOptions = [];
+  if (objectRemoteData.payload.fOption !== '') {
+    objectOptionList = objectRemoteData.payload.fOption.split(' ');
+  }
+  switch (model.page) {
+    case 'objectTree':
+      drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+      break;
+    case 'layoutShow': {
+      if (!tabObject.ignoreDefaults) {
+        tabObject.options.forEach((option) => {
+          if (objectOptionList.indexOf(option) < 0) {
+            objectOptionList.push(option);
+          }
+        });
+        drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+      } else {
+        drawingOptions = JSON.parse(JSON.stringify(tabObject.options));
+      }
+      // merge all options or ignore if in layout view and user specifies so
+      break;
+    }
+    case 'objectView':
+      drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+      break;
+    default:
+      drawingOptions = objectOptionList;
+      break;
+  }
+  return drawingOptions;
 }
 
 /**
@@ -235,5 +278,6 @@ function fingerprintRedraw(model, tabObject) {
  */
 function fingerprintCleanRedraw(model, tabObject) {
   const drawOptions = tabObject.options.join(';');
-  return `${drawOptions}`;
+  const ignoreDefaults = tabObject.ignoreDefaults ? true : false;
+  return `${drawOptions},${ignoreDefaults}`;
 }
