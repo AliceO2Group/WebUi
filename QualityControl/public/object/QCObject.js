@@ -404,4 +404,45 @@ export default class QCObject extends Observable {
   isObjectInOnlineList(objectName) {
     return this.isOnlineModeEnabled && this.listOnline && this.listOnline.map((item) => item.name).includes(objectName);
   }
+
+
+  /**
+   * Method to generate drawing options based on where in the application the plot is displayed
+   * @param {Object} tabObject
+   * @param {Object} objectRemoteData
+   * @return {Array<string>}
+   */
+  generateDrawingOptions(tabObject, objectRemoteData) {
+    let objectOptionList = [];
+    let drawingOptions = [];
+    if (objectRemoteData.payload.fOption && objectRemoteData.payload.fOption !== '') {
+      objectOptionList = objectRemoteData.payload.fOption.split(' ');
+    }
+    switch (this.model.page) {
+      case 'objectTree':
+        drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+        break;
+      case 'layoutShow': {
+        if (!tabObject.ignoreDefaults) {
+          tabObject.options.forEach((option) => {
+            if (objectOptionList.indexOf(option) < 0) {
+              objectOptionList.push(option);
+            }
+          });
+          drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+        } else {
+          drawingOptions = JSON.parse(JSON.stringify(tabObject.options));
+        }
+        // merge all options or ignore if in layout view and user specifies so
+        break;
+      }
+      case 'objectView':
+        drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+        break;
+      default:
+        drawingOptions = objectOptionList;
+        break;
+    }
+    return drawingOptions;
+  }
 }

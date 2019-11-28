@@ -378,6 +378,20 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Method to toggle displaying default options
+   * If field does not exist in tabObject, it will be added
+   * @param {Object} tabObject
+   */
+  toggleDefaultOptions(tabObject) {
+    if (tabObject.ignoreDefaults) {
+      tabObject.ignoreDefaults = false;
+    } else {
+      tabObject.ignoreDefaults = true;
+    }
+    this.notify();
+  }
+
+  /**
    * Edit a tabObject from current tab from current layout, sidebar will show its properties
    * @param {Object} tabObject
    */

@@ -420,6 +420,77 @@ describe('QCG', function() {
   });
 
 
+  describe('QCObject - drawing options', async () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
+
+    it('should load', async () => {
+      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
+      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
+      const location = await page.evaluate(() => window.location);
+      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+    });
+
+    it('should merge options on layoutShow and no ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz', 'args', 'coly'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should merge options on layoutShow and false ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        const tabObject = {ignoreDefaults: false, options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz', 'args', 'coly'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should ignore default options on layoutShow and true ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        const tabObject = {ignoreDefaults: true, options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['args', 'coly'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should use only default options on objectTree', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectTree';
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should use only default options on objectView', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+  });
+
   beforeEach(() => {
     this.ok = true;
   });
