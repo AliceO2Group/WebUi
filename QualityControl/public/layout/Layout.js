@@ -23,6 +23,7 @@ export default class Layout extends Observable {
     this.tab = null; // pointer to a tab from `item`
 
     this.myList = RemoteData.notAsked(); // array of layouts
+    this.requestedLayout = RemoteData.notAsked();
 
     this.searchInput = '';
     this.searchResult = null; // null means no search, sub-array of `list`
@@ -65,6 +66,20 @@ export default class Layout extends Observable {
       this.model.notification.show(`Unable to load your personal layouts.`, 'danger', Infinity);
     }
     this.model.folder.map.get('My Layouts').list = this.myList.payload;
+    this.notify();
+  }
+
+  /**
+   * Load data about a layout by its id
+   * @param {string} layoutId
+   */
+  async getLayoutById(layoutId) {
+    this.requestedLayout = RemoteData.loading();
+    this.notify();
+    this.requestedLayout = await this.model.layoutService.getLayoutById(layoutId);
+    if (!this.requestedLayout.isSuccess()) {
+      this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
+    }
     this.notify();
   }
 
