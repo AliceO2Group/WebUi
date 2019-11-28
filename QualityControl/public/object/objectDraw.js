@@ -173,7 +173,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         tabObject.options.push('alp');
       }
 
-      let drawingOptions = generateDrawingOptions(model, tabObject, objectRemoteData);
+      let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
       drawingOptions = drawingOptions.join(';');
       drawingOptions += ';stat;f';
 
@@ -188,47 +188,6 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     dom.dataset.fingerprintRedraw = redrawHash;
     dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
   }
-}
-
-/**
- * Method to generate drawing options based on where in the application the plot is displayed
- * @param {Object} model
- * @param {Object} tabObject
- * @param {Object} objectRemoteData
- * @return {Array<string>}
- */
-function generateDrawingOptions(model, tabObject, objectRemoteData) {
-  let objectOptionList = [];
-  let drawingOptions = [];
-  if (objectRemoteData.payload.fOption && objectRemoteData.payload.fOption !== '') {
-    objectOptionList = objectRemoteData.payload.fOption.split(' ');
-  }
-  switch (model.page) {
-    case 'objectTree':
-      drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
-      break;
-    case 'layoutShow': {
-      if (!tabObject.ignoreDefaults) {
-        tabObject.options.forEach((option) => {
-          if (objectOptionList.indexOf(option) < 0) {
-            objectOptionList.push(option);
-          }
-        });
-        drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
-      } else {
-        drawingOptions = JSON.parse(JSON.stringify(tabObject.options));
-      }
-      // merge all options or ignore if in layout view and user specifies so
-      break;
-    }
-    case 'objectView':
-      drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
-      break;
-    default:
-      drawingOptions = objectOptionList;
-      break;
-  }
-  return drawingOptions;
 }
 
 /**
