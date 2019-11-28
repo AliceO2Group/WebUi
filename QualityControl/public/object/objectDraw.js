@@ -200,7 +200,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
 function generateDrawingOptions(model, tabObject, objectRemoteData) {
   let objectOptionList = [];
   let drawingOptions = [];
-  if (objectRemoteData.payload.fOption !== '') {
+  if (objectRemoteData.payload.fOption && objectRemoteData.payload.fOption !== '') {
     objectOptionList = objectRemoteData.payload.fOption.split(' ');
   }
   switch (model.page) {
