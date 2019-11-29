@@ -80,6 +80,7 @@ export default class Layout extends Observable {
     if (!this.requestedLayout.isSuccess()) {
       this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
     }
+    console.log("Notificam)")
     this.notify();
   }
 

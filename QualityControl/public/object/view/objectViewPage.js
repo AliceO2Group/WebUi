@@ -110,13 +110,12 @@ function getRootObject(model) {
   return h('.text-center', {style: 'flex-grow: 1; height:0;'},
     model.router.params.objectName ?
       // means from objectTree
-      (
-        h('', {
-          oncreate: () => model.object.select({name: model.router.params.objectName}),
-          style: 'width: 100%; height: 100%',
-        }, model.object.selected ?
-          draw(model, model.object.selected.name, {stat: true})
-          : errorLoadingObject(`Object ${model.router.params.objectName} could not be loaded`))
+      h('', {
+        oncreate: () => model.object.select({name: model.router.params.objectName}),
+        style: 'width: 100%; height: 100%',
+      }, model.object.selected ?
+        draw(model, model.object.selected.name, {stat: true})
+        : errorLoadingObject(`Object ${model.router.params.objectName} could not be loaded`)
       )
       :
       // means layout
@@ -124,7 +123,7 @@ function getRootObject(model) {
         model.router.params.layoutId ?
           model.layout.requestedLayout.match({
             NotAsked: () => null,
-            Loading: () => spinner(),
+            Loading: () => h('', spinner()),
             Success: (layout) =>
               model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) ?
                 draw(model, model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId),
@@ -146,6 +145,6 @@ function getRootObject(model) {
  */
 function errorLoadingObject(errorMessage) {
   return h('.flex-column',
-    [h('span.f1', iconCircleX()), h('span.f3', errorMessage)]
+    [h('.f1', iconCircleX()), h('span.f3', errorMessage)]
   );
 }
