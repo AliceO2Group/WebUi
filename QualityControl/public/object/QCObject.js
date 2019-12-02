@@ -439,6 +439,7 @@ export default class QCObject extends Observable {
       case 'objectView': {
         const layoutId = this.model.router.params.layoutId;
         const objectId = this.model.router.params.objectId;
+
         if (!layoutId || !objectId) {
           drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
         } else {

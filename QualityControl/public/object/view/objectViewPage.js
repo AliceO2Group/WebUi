@@ -64,22 +64,19 @@ function getActionsHeader(model) {
  */
 function getBackToQCGButton(model) {
   return h('',
-    h('a.btn',
-      {
-        title: model.router.params.layoutId ? 'Go back to layout' : 'Go back to all objects',
-        href: model.router.params.layoutId ?
-          `?page=layoutShow&layoutId=${model.router.params.layoutId}`
-          : '?page=objectTree',
-        onclick: (e) => {
-          model.router.handleLinkEvent(e);
-        }
-      },
-      [
-        iconArrowThickLeft(),
-        ' ',
-        model.router.params.layoutId ? 'Back to layout' : 'Back to QCG'
-      ]
-    )
+    h('a.btn', {
+      title: model.router.params.layoutId ? 'Go back to layout' : 'Go back to all objects',
+      href: model.router.params.layoutId ?
+        `?page=layoutShow&layoutId=${model.router.params.layoutId}`
+        : '?page=objectTree',
+      onclick: (e) => {
+        model.router.handleLinkEvent(e);
+      }
+    }, [
+      iconArrowThickLeft(),
+      ' ',
+      model.router.params.layoutId ? 'Back to layout' : 'Back to QCG'
+    ])
   );
 }
 
@@ -123,7 +120,7 @@ function getRootObject(model) {
         model.router.params.layoutId ?
           model.layout.requestedLayout.match({
             NotAsked: () => null,
-            Loading: () => h('', spinner()),
+            Loading: () => h('.f1', spinner()),
             Success: () =>
               model.object.selected ?
                 h('', {
