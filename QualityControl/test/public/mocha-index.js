@@ -299,126 +299,242 @@ describe('QCG', function() {
   });
 
   describe('page objectView', () => {
-    it('should load page=objectView and display error message & icon due to missing objectName parameter', async () => {
-      await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
-      const result = await page.evaluate(() => {
-        const errorMessage = document.querySelector('div div b').textContent;
-        const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
-        const backButtonTitle = document.querySelector('div div div a').title;
+    describe('objectView called from objectTree', () => {
+      it('should load page=objectView and display error message & icon due to missing objectName parameter', async () => {
+        await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+          const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+          const backButtonTitle = document.querySelector('div div div a').title;
 
-        return {
-          location: window.location,
-          message: errorMessage,
-          iconClassList: iconClassList,
-          backButtonTitle: backButtonTitle
-        };
+          return {
+            location: window.location,
+            message: errorMessage,
+            iconClassList: iconClassList,
+            backButtonTitle: backButtonTitle
+          };
+        });
+        assert.deepStrictEqual(result.location.search, '?page=objectView');
+        assert.deepStrictEqual(result.message, 'No object name or object ID were provided');
+        assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+        assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
       });
-      assert.deepStrictEqual(result.location.search, '?page=objectView');
-      assert.deepStrictEqual(result.message, 'Please pass an objectName parameter');
-      assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-      assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
+
+      it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
+        await page.evaluate(() => document.querySelector('div div div a').click());
+
+        const result = await page.evaluate(() => {
+          return {
+            location: window.location.search,
+            objectSelected: window.model.object.selected
+          };
+        });
+        assert.deepStrictEqual(result.location, '?page=objectTree');
+        assert.deepStrictEqual(result.objectSelected, null);
+      });
+
+      it('should load page=objectView and display an error message when a parameter objectName is passed but object not found', async () => {
+        const objectName = 'NOT_FOUND_OBJECT';
+        await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const title = document.querySelector('body > div > div:nth-child(2) > div > div > span').textContent;
+          return {
+            title: title,
+          };
+        });
+        assert.deepStrictEqual(result.title, 'Object NOT_FOUND_OBJECT could not be loaded');
+      });
+
+      it('should load page=objectView and display a plot when a parameter objectName is passed', async () => {
+        const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
+        await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const title = document.querySelector('div div b').textContent;
+          const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
+          const objectSelected = window.model.object.selected;
+          return {
+            title: title,
+            rootPlotClassList: rootPlotClassList,
+            objectSelected: objectSelected
+          };
+        });
+        assert.deepStrictEqual(result.title, objectName);
+        assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
+        assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
+      });
+
+      it('should have an info button with full path and last modified when clicked (plot success)', async () => {
+        await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
+
+        const result = await page.evaluate(() => {
+          const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
+          const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
+          const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
+          const dropdownInfoClass = document.querySelector('body > div > div > div:nth-child(3) > div > div').classList;
+          return {
+            title: infoButtonTitle,
+            fullPath: fullPath,
+            lastModified: lastModified,
+            dropdownInfoClass: dropdownInfoClass
+          };
+        });
+        assert.deepStrictEqual(result.title, 'View details about histogram');
+        assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
+        assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
+        assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
+        assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
+        assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
+      });
+
+      describe('objectView called from layoutShow', () => {
+        it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
+          await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
+          const result = await page.evaluate(() => {
+            const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+            const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+            const backButtonTitle = document.querySelector('div div div a').title;
+
+            return {
+              location: window.location,
+              message: errorMessage,
+              iconClassList: iconClassList,
+              backButtonTitle: backButtonTitle
+            };
+          });
+          assert.deepStrictEqual(result.location.search, '?page=objectView');
+          assert.deepStrictEqual(result.message, 'No object name or object ID were provided');
+          assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+          assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
+        });
+
+        it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
+          await page.goto(url + '?page=objectView&objectId=123456', {waitUntil: 'networkidle0'});
+          const result = await page.evaluate(() => {
+            const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+            const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+            const backButtonTitle = document.querySelector('div div div a').title;
+
+            return {
+              location: window.location,
+              message: errorMessage,
+              iconClassList: iconClassList,
+              backButtonTitle: backButtonTitle
+            };
+          });
+          assert.deepStrictEqual(result.location.search, '?page=objectView&objectId=123456');
+          assert.deepStrictEqual(result.message, 'No layout ID was provided');
+          assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+          assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
+        });
+
+        it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
+          await page.evaluate(() => document.querySelector('div div div a').click());
+
+          const result = await page.evaluate(() => {
+            return {
+              location: window.location.search,
+              objectSelected: window.model.object.selected
+            };
+          });
+          assert.deepStrictEqual(result.location, '?page=objectTree');
+          assert.deepStrictEqual(result.objectSelected, null);
+        });
+
+        it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
+          const objectId = '5aba4a059b755d517e76ef54';
+          const layoutId = '5aba4a059b755d517e76ea10';
+          await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+
+          const result = await page.evaluate(() => {
+            const backButtonTitle = document.querySelector('div div div a').title;
+            return {
+              location: window.location.search,
+              backButtonTitle: backButtonTitle
+            };
+          });
+          assert.deepStrictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
+          assert.deepStrictEqual(result.backButtonTitle, 'Go back to layout');
+        });
+
+        it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
+          const layoutId = '5aba4a059b755d517e76ea10';
+          await page.evaluate(() => document.querySelector('div div div a').click());
+
+          const result = await page.evaluate(() => {
+            return {
+              location: window.location.search,
+            };
+          });
+          assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
+        });
+
+        it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
+          const objectId = '5aba4a059b755d517e76ef54';
+          const layoutId = '5aba4a059b755d517e76ea10';
+          await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+          const result = await page.evaluate(() => {
+            const title = document.querySelector('div div b').textContent;
+            const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
+            const objectSelected = window.model.object.selected;
+            return {
+              title: title,
+              rootPlotClassList: rootPlotClassList,
+              objectSelected: objectSelected
+            };
+          });
+          assert.deepStrictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
+          assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
+          assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
+        });
+
+        it('should have an info button with full path and last modified when clicked (plot success)', async () => {
+          await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
+          const result = await page.evaluate(() => {
+            const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
+            const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
+            const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
+            const dropdownInfoClass = document.querySelector('body > div > div > div:nth-child(3) > div > div').classList;
+            return {
+              title: infoButtonTitle,
+              fullPath: fullPath,
+              lastModified: lastModified,
+              dropdownInfoClass: dropdownInfoClass
+            };
+          });
+          assert.deepStrictEqual(result.title, 'View details about histogram');
+          assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
+          assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
+          assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
+          assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
+          assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
+        });
+      });
     });
 
-    it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
-      await page.evaluate(() => document.querySelector('div div div a').click());
-
-      const result = await page.evaluate(() => {
-        return {
-          location: window.location.search,
-          objectSelected: window.model.object.selected
-        };
+    describe('page frameworkInfo', () => {
+      before('reset browser to google', async () => {
+        // weird bug, if we don't go to external website just here, all next goto will wait forever
+        await page.goto('http://google.com', {waitUntil: 'networkidle0'});
       });
-      assert.deepStrictEqual(result.location, '?page=objectTree');
-      assert.deepStrictEqual(result.objectSelected, null);
-    });
 
-    it('should load page=objectView and display a plot when a parameter objectName is passed', async () => {
-      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
-      await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
-      const result = await page.evaluate(() => {
-        const title = document.querySelector('div div b').textContent;
-        const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
-        const objectSelected = window.model.object.selected;
-        return {
-          title: title,
-          rootPlotClassList: rootPlotClassList,
-          objectSelected: objectSelected
-        };
+      it('should load', async () => {
+        await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
+        const location = await page.evaluate(() => window.location);
+        assert.deepStrictEqual(location.search, '?page=about');
       });
-      assert.deepStrictEqual(result.title, objectName);
-      assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
-    });
 
-    it('should take back the user to page=objectTree when clicking "Back To QCG" (object passed and selected)', async () => {
-      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
-      await page.evaluate(() => document.querySelector('div div div a').click());
-
-      const result = await page.evaluate(() => {
-        return {
-          location: window.location.search,
-          objectSelected: window.model.object.selected
+      it('should have a frameworkInfo item with config fields', async () => {
+        const expConfig = {
+          qcg: {port: 8181, hostname: 'localhost'},
+          consul: {hostname: 'localhost', port: 8500},
+          ccdb: {hostname: 'ccdb', port: 8500}
         };
+        const config = await page.evaluate(() => window.model.frameworkInfo.item);
+        delete config.payload.qcg.version;
+        assert.deepStrictEqual(config.payload, expConfig);
       });
-      assert.deepStrictEqual(result.location, '?page=objectTree');
-      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
-    });
-
-    it('should update button text to "Go back to layout" if layoutId parameter is provided', async () => {
-      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
-      const layoutId = '5aba4a059b755d517e76ea10';
-      await page.goto(url + `?page=objectView&objectName=${objectName}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
-
-      const result = await page.evaluate(() => {
-        const backButtonTitle = document.querySelector('div div div a').title;
-        return {
-          location: window.location.search,
-          backButtonTitle: backButtonTitle
-        };
-      });
-      assert.deepStrictEqual(result.location, `?page=objectView&objectName=DAQ01%2FEquipmentSize%2FCPV%2FCPV&layoutId=5aba4a059b755d517e76ea10`);
-      assert.deepStrictEqual(result.backButtonTitle, 'Go back to layout');
-    });
-
-    it('should take back the user to page=layoutShow when clicking "Go back to layout" (object passed and selected)', async () => {
-      await page.evaluate(() => document.querySelector('div div div a').click());
-      const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
-      const layoutId = '5aba4a059b755d517e76ea10';
-      const result = await page.evaluate(() => {
-        return {
-          location: window.location.search,
-          objectSelected: window.model.object.selected
-        };
-      });
-      assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
-      assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
     });
   });
-
-  describe('page frameworkInfo', () => {
-    before('reset browser to google', async () => {
-      // weird bug, if we don't go to external website just here, all next goto will wait forever
-      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-    });
-
-    it('should load', async () => {
-      await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
-      const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=about');
-    });
-
-    it('should have a frameworkInfo item with config fields', async () => {
-      const expConfig = {
-        qcg: {port: 8181, hostname: 'localhost'},
-        consul: {hostname: 'localhost', port: 8500},
-        ccdb: {hostname: 'ccdb', port: 8500}
-      };
-      const config = await page.evaluate(() => window.model.frameworkInfo.item);
-      delete config.payload.qcg.version;
-      assert.deepStrictEqual(config.payload, expConfig);
-    });
-  });
-
 
   describe('QCObject - drawing options', async () => {
     before('reset browser to google', async () => {
@@ -478,15 +594,109 @@ describe('QCG', function() {
       assert.deepStrictEqual(drawingOptions, expDrawingOpts);
     });
 
-    it('should use only default options on objectView', async () => {
+    it('should use only default options on objectView when no layoutId or objectId is set', async () => {
       const drawingOptions = await page.evaluate(() => {
         window.model.page = 'objectView';
+        window.model.router.params.objectId = undefined;
+        window.model.router.params.layoutId = undefined;
         const tabObject = {options: ['args', 'coly']};
         const objectRemoteData = {payload: {fOption: 'lego colz'}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
       const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should use only default options on objectView when no layoutId is set', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.layoutId = undefined;
+        window.model.router.params.objectId = '123';
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+
+    it('should use only default options on objectView when no objectId is set', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = undefined;
+        window.model.router.params.layoutId = '123';
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should merge options on objectView and no ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
+        window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
+        window.model.layout.requestedLayout.kind = 'Success';
+        window.model.layout.requestedLayout.payload = {};
+        window.model.layout.requestedLayout.payload.tabs = [{
+          id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
+            id: '5aba4a059b755d517e76ef54',
+            options: ['gridx'], name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
+          }]
+        }];
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(null, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz', 'gridx'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should merge options on objectView and false ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
+        window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
+        window.model.layout.requestedLayout.kind = 'Success';
+        window.model.layout.requestedLayout.payload = {};
+        window.model.layout.requestedLayout.payload.tabs = [{
+          id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
+            id: '5aba4a059b755d517e76ef54',
+            options: ['gridx'], ignoreDefaults: false, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
+          }]
+        }];
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(null, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['lego', 'colz', 'gridx'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+
+    it('should ignore default options on objectView and true ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
+        window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
+        window.model.layout.requestedLayout.kind = 'Success';
+        window.model.layout.requestedLayout.payload = {};
+        window.model.layout.requestedLayout.payload.tabs = [{
+          id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
+            id: '5aba4a059b755d517e76ef54',
+            options: ['gridx'], ignoreDefaults: true, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
+          }]
+        }];
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(null, objectRemoteData);
+      });
+
+      const expDrawingOpts = ['gridx'];
       assert.deepStrictEqual(drawingOptions, expDrawingOpts);
     });
   });

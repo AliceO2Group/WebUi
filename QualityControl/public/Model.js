@@ -136,10 +136,15 @@ export default class Model extends Observable {
         // data is already loaded at beginning
         this.notify();
         break;
-      case 'objectView':
+      case 'objectView': {
         this.page = 'objectView';
+        const layoutId = this.router.params.layoutId;
+        if (layoutId) {
+          this.layout.getLayoutById(layoutId);
+        }
         this.notify();
         break;
+      }
       case 'about':
         this.page = 'about';
         this.frameworkInfo.getFrameworkInfo();
