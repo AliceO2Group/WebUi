@@ -82,10 +82,9 @@ export default class Layout extends Observable {
       this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
     } else {
       if (this.model.router.params.objectId) {
-        console.log("Req)")
-        console.log(this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload, this.model.router.params.objectId))
         this.model.object.select({
-          name: this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload, this.model.router.params.objectId)
+          name: this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload,
+            this.model.router.params.objectId)
         });
       }
     }
