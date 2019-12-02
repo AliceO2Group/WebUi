@@ -655,7 +655,7 @@ describe('QCG', function() {
       assert.deepStrictEqual(drawingOptions, expDrawingOpts);
     });
 
-    it('should merge options on layoutShow and false ignoreDefaults field', async () => {
+    it('should merge options on objectView and false ignoreDefaults field', async () => {
       const drawingOptions = await page.evaluate(() => {
         window.model.page = 'objectView';
         window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
@@ -676,7 +676,7 @@ describe('QCG', function() {
       assert.deepStrictEqual(drawingOptions, expDrawingOpts);
     });
 
-    it('should ignore default options on layoutShow and true ignoreDefaults field', async () => {
+    it('should ignore default options on objectView and true ignoreDefaults field', async () => {
       const drawingOptions = await page.evaluate(() => {
         window.model.page = 'objectView';
         window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
