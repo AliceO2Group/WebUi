@@ -109,25 +109,28 @@ function getCopyURLToClipboardButton(model) {
 function getRootObject(model) {
   return h('.text-center', {style: 'flex-grow: 1; height:0;'},
     model.router.params.objectName ?
-      // means from objectTree
-      h('', {
-        oncreate: () => model.object.select({name: model.router.params.objectName}),
-        style: 'width: 100%; height: 100%',
-      }, model.object.selected ?
-        draw(model, model.object.selected.name, {stat: true})
-        : errorLoadingObject(`Object ${model.router.params.objectName} could not be loaded`)
-      )
-      :
+      ( // means from objectTree
+        h('', {
+          oncreate: () => model.object.select({name: model.router.params.objectName}),
+          style: 'width: 100%; height: 100%',
+        }, model.object.selected ?
+          draw(model, model.object.selected.name, {stat: true})
+          : errorLoadingObject(`Object ${model.router.params.objectName} could not be loaded`)
+        )
+      ) :
       // means layout
       model.router.params.objectId ?
         model.router.params.layoutId ?
           model.layout.requestedLayout.match({
             NotAsked: () => null,
             Loading: () => h('', spinner()),
-            Success: (layout) =>
-              model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) ?
-                draw(model, model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId),
+            Success: () =>
+              model.object.selected ?
+                h('', {
+                  style: 'width: 100%; height: 100%'
+                }, draw(model, model.object.selected.name,
                   {stat: true})
+                )
                 :
                 errorLoadingObject('Object could not be found'),
             Failure: (error) => errorLoadingObject(error),

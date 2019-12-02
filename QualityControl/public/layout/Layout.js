@@ -70,7 +70,8 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Load data about a layout by its id
+   * Load data about a layout by its id;
+   * Used within ObjectView page hence updating selected object as well
    * @param {string} layoutId
    */
   async getLayoutById(layoutId) {
@@ -79,8 +80,15 @@ export default class Layout extends Observable {
     this.requestedLayout = await this.model.layoutService.getLayoutById(layoutId);
     if (!this.requestedLayout.isSuccess()) {
       this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
+    } else {
+      if (this.model.router.params.objectId) {
+        console.log("Req)")
+        console.log(this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload, this.model.router.params.objectId))
+        this.model.object.select({
+          name: this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload, this.model.router.params.objectId)
+        });
+      }
     }
-    console.log("Notificam)")
     this.notify();
   }
 

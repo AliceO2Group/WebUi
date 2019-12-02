@@ -142,6 +142,7 @@ export default class Model extends Observable {
         if (layoutId) {
           this.layout.getLayoutById(layoutId);
         }
+        this.notify();
         break;
       }
       case 'about':
