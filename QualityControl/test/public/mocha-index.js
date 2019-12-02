@@ -379,8 +379,10 @@ describe('QCG', function() {
           };
         });
         assert.deepStrictEqual(result.title, 'View details about histogram');
-        assert.deepStrictEqual(result.fullPath, 'PATH\nDAQ01/EquipmentSize/CPV/CPV');
-        assert.deepStrictEqual(result.lastModified, 'LAST MODIFIED\n' + new Date(100).toLocaleString('EN'));
+        assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
+        assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
+        assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
+        assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
         assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
       });
 
@@ -487,7 +489,6 @@ describe('QCG', function() {
 
         it('should have an info button with full path and last modified when clicked (plot success)', async () => {
           await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
-          page.await
           const result = await page.evaluate(() => {
             const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
             const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
@@ -501,8 +502,10 @@ describe('QCG', function() {
             };
           });
           assert.deepStrictEqual(result.title, 'View details about histogram');
-          assert.deepStrictEqual(result.fullPath, 'PATH\nDAQ01/EquipmentSize/CPV/CPV');
-          assert.deepStrictEqual(result.lastModified, 'LAST MODIFIED\n' + new Date(100).toLocaleString('EN'));
+          assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
+          assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
+          assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
+          assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
           assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
         });
       });
