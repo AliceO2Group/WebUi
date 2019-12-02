@@ -404,4 +404,88 @@ export default class QCObject extends Observable {
   isObjectInOnlineList(objectName) {
     return this.isOnlineModeEnabled && this.listOnline && this.listOnline.map((item) => item.name).includes(objectName);
   }
+
+
+  /**
+   * Method to generate drawing options based on where in the application the plot is displayed
+   * @param {Object} tabObject
+   * @param {Object} objectRemoteData
+   * @return {Array<string>}
+   */
+  generateDrawingOptions(tabObject, objectRemoteData) {
+    let objectOptionList = [];
+    let drawingOptions = [];
+    if (objectRemoteData.payload.fOption && objectRemoteData.payload.fOption !== '') {
+      objectOptionList = objectRemoteData.payload.fOption.split(' ');
+    }
+    switch (this.model.page) {
+      case 'objectTree':
+        drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+        break;
+      case 'layoutShow': {
+        if (!tabObject.ignoreDefaults) {
+          tabObject.options.forEach((option) => {
+            if (objectOptionList.indexOf(option) < 0) {
+              objectOptionList.push(option);
+            }
+          });
+          drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+        } else {
+          drawingOptions = JSON.parse(JSON.stringify(tabObject.options));
+        }
+        // merge all options or ignore if in layout view and user specifies so
+        break;
+      }
+      case 'objectView': {
+        const layoutId = this.model.router.params.layoutId;
+        const objectId = this.model.router.params.objectId;
+
+        if (!layoutId || !objectId) {
+          drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+        } else {
+          if (this.model.layout.requestedLayout.isSuccess()) {
+            let objectData = {};
+            this.model.layout.requestedLayout.payload.tabs.forEach((tab) => {
+              const obj = tab.objects.find((object) => object.id === objectId);
+              if (obj) {
+                objectData = obj;
+              }
+            });
+            if (!objectData.ignoreDefaults) {
+              objectData.options.forEach((option) => {
+                if (objectOptionList.indexOf(option) < 0) {
+                  objectOptionList.push(option);
+                }
+              });
+              drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
+            } else {
+              drawingOptions = JSON.parse(JSON.stringify(objectData.options));
+            }
+          }
+        }
+        break;
+      }
+      default:
+        drawingOptions = objectOptionList;
+        break;
+    }
+    return drawingOptions;
+  }
+
+  /**
+   * Method to parse through tabs and objects of a layout to return one object by ID
+   * @param {Object} layout
+   * @param {string} objectId
+   * @return {string}
+   */
+  getObjectNameByIdFromLayout(layout, objectId) {
+    let objectName = '';
+    layout.tabs.forEach((tab) => {
+      const obj = tab.objects.find((object) => object.id === objectId);
+      if (obj) {
+        objectName = obj.name;
+      }
+    });
+    return objectName;
+  }
 }

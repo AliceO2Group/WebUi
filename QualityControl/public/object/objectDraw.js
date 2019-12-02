@@ -173,9 +173,11 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         tabObject.options.push('alp');
       }
 
-      // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
-      const options = ['f', ...tabObject.options].join(';');
-      JSROOT.redraw(dom, objectRemoteData.payload, options, (painter) => {
+      let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      drawingOptions = drawingOptions.join(';');
+      drawingOptions += ';stat;f';
+
+      JSROOT.redraw(dom, objectRemoteData.payload, drawingOptions, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
@@ -235,5 +237,6 @@ function fingerprintRedraw(model, tabObject) {
  */
 function fingerprintCleanRedraw(model, tabObject) {
   const drawOptions = tabObject.options.join(';');
-  return `${drawOptions}`;
+  const ignoreDefaults = tabObject.ignoreDefaults ? true : false;
+  return `${drawOptions},${ignoreDefaults}`;
 }

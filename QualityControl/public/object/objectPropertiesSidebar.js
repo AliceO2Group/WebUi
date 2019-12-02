@@ -30,7 +30,10 @@ export default function objectPropertiesSidebar(model) {
 
     h('hr'),
 
-    h('div', 'Options'),
+    h('.flex-row', [
+      h('span', 'Options'),
+      btnIgnoreOptions(model, tabObject)
+    ]),
     h('.p3', [
       h('.flex-row', [
         btnOption(model, tabObject, 'logx'), ' ',
@@ -98,4 +101,23 @@ const btnOption = (model, tabObject, option) => h('.form-check.w-33', [
   h('label', {for: tabObject.id + option}, option)
 ]);
 
-
+/**
+ * Button to ignore all C++ default histogram options
+ * @param {object} model
+ * @param {object} tabObject
+ * @return {vnode}
+ */
+const btnIgnoreOptions = (model, tabObject) =>
+  h('.flex-row.flex-grow', {style: 'justify-content: flex-end'},
+    h('.form-check.tooltip', [
+      h('input.form-check-input', {
+        type: 'checkbox',
+        id: tabObject.id + 'defaults',
+        checked: tabObject.ignoreDefaults,
+        onchange: () => model.layout.toggleDefaultOptions(tabObject)
+      }),
+      h('label.m0', {for: tabObject.id + 'defaults'}, 'Ignore defaults'),
+      h('span.tooltiptext', 'Set on the histogram in C++')
+    ]
+    )
+  );

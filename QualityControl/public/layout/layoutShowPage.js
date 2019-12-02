@@ -212,7 +212,7 @@ function drawComponent(model, tabObject) {
         ),
         h('a.btn', {
           title: 'Open object plot in full screen',
-          href: `?page=objectView&objectName=${tabObject.name}&layoutId=${model.router.params.layoutId}`,
+          href: `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`,
           onclick: (e) => model.router.handleLinkEvent(e)
         }, iconResizeBoth())
       ]),

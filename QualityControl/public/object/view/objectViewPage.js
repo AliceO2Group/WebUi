@@ -1,4 +1,5 @@
 import {h, iconBook, iconCircleX, iconArrowThickLeft} from '/js/src/index.js';
+import spinner from './../../loader/spinner.js';
 import {draw} from './../objectDraw.js';
 import infoButton from './../../common/infoButton.js';
 
@@ -21,7 +22,22 @@ export default (model) => h('.p2.absolute-fill', {style: 'display: flex; flex-di
  * @return {string}
  */
 function getObjectTitle(model) {
-  return model.router.params.objectName ? model.router.params.objectName : 'Please pass an objectName parameter';
+  return model.router.params.objectName ?
+    model.router.params.objectName
+    :
+    (
+      model.router.params.objectId && model.router.params.layoutId &&
+      model.layout.requestedLayout.match({
+        NotAsked: () => null,
+        Loading: () => null,
+        Success: (layout) =>
+          model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) && h('.flex-column', [
+            h('', model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId)),
+            h('.text-light.f7', `(from layout: ${layout.name})`)
+          ]),
+        Failure: () => null
+      })
+    );
 }
 
 /**
@@ -33,7 +49,7 @@ function getActionsHeader(model) {
   return h('', {style: 'display: flex'},
     [
       getBackToQCGButton(model),
-      h('b.text-center', {style: 'flex-grow:1'}, getObjectTitle(model)),
+      h('b.text-center.flex-column', {style: 'flex-grow:1'}, getObjectTitle(model)),
       h('.flex-row', [
         infoButton(model.object),
         model.isContextSecure() && getCopyURLToClipboardButton(model)
@@ -48,22 +64,19 @@ function getActionsHeader(model) {
  */
 function getBackToQCGButton(model) {
   return h('',
-    h('a.btn',
-      {
-        title: model.router.params.layoutId ? 'Go back to layout' : 'Go back to all objects',
-        href: model.router.params.layoutId ?
-          `?page=layoutShow&layoutId=${model.router.params.layoutId}`
-          : '?page=objectTree',
-        onclick: (e) => {
-          model.router.handleLinkEvent(e);
-        }
-      },
-      [
-        iconArrowThickLeft(),
-        ' ',
-        model.router.params.layoutId ? 'Back to layout' : 'Back to QCG'
-      ]
-    )
+    h('a.btn', {
+      title: model.router.params.layoutId ? 'Go back to layout' : 'Go back to all objects',
+      href: model.router.params.layoutId ?
+        `?page=layoutShow&layoutId=${model.router.params.layoutId}`
+        : '?page=objectTree',
+      onclick: (e) => {
+        model.router.handleLinkEvent(e);
+      }
+    }, [
+      iconArrowThickLeft(),
+      ' ',
+      model.router.params.layoutId ? 'Back to layout' : 'Back to QCG'
+    ])
   );
 }
 
@@ -93,13 +106,36 @@ function getCopyURLToClipboardButton(model) {
 function getRootObject(model) {
   return h('.text-center', {style: 'flex-grow: 1; height:0;'},
     model.router.params.objectName ?
-      h('',
-        {
+      ( // means from objectTree
+        h('', {
           oncreate: () => model.object.select({name: model.router.params.objectName}),
           style: 'width: 100%; height: 100%',
-        },
-        model.object.selected ? draw(model, model.object.selected.name, {stat: true}) : null)
-      : errorLoadingObject(''));
+        }, model.object.selected ?
+          draw(model, model.object.selected.name, {stat: true})
+          : errorLoadingObject(`Object ${model.router.params.objectName} could not be loaded`)
+        )
+      ) :
+      // means layout
+      model.router.params.objectId ?
+        model.router.params.layoutId ?
+          model.layout.requestedLayout.match({
+            NotAsked: () => null,
+            Loading: () => h('.f1', spinner()),
+            Success: () =>
+              model.object.selected ?
+                h('', {
+                  style: 'width: 100%; height: 100%'
+                }, draw(model, model.object.selected.name,
+                  {stat: true})
+                )
+                :
+                errorLoadingObject('Object could not be found'),
+            Failure: (error) => errorLoadingObject(error),
+          })
+          :
+          errorLoadingObject('No layout ID was provided')
+        : errorLoadingObject('No object name or object ID were provided')
+  );
 }
 
 /**
@@ -108,8 +144,7 @@ function getRootObject(model) {
  * @return {vnode}
  */
 function errorLoadingObject(errorMessage) {
-  return h('',
-    {style: 'flex-direction: column;font-size: 10em;'},
-    [iconCircleX(), errorMessage]
+  return h('.flex-column',
+    [h('.f1', iconCircleX()), h('span.f3', errorMessage)]
   );
 }

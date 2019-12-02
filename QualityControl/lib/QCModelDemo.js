@@ -32,7 +32,7 @@ function promiseResolveWithLatency(data) {
  */
 function readObjectData(name) {
   const object = objects.find((object) => object.name === `${name}`);
-  return promiseResolveWithLatency(object ? object.data : null);
+  return promiseResolveWithLatency(object ? object.data : 'Object not found');
 }
 
 /**

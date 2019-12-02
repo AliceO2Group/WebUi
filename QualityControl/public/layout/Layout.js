@@ -23,6 +23,7 @@ export default class Layout extends Observable {
     this.tab = null; // pointer to a tab from `item`
 
     this.myList = RemoteData.notAsked(); // array of layouts
+    this.requestedLayout = RemoteData.notAsked();
 
     this.searchInput = '';
     this.searchResult = null; // null means no search, sub-array of `list`
@@ -65,6 +66,28 @@ export default class Layout extends Observable {
       this.model.notification.show(`Unable to load your personal layouts.`, 'danger', Infinity);
     }
     this.model.folder.map.get('My Layouts').list = this.myList.payload;
+    this.notify();
+  }
+
+  /**
+   * Load data about a layout by its id;
+   * Used within ObjectView page hence updating selected object as well
+   * @param {string} layoutId
+   */
+  async getLayoutById(layoutId) {
+    this.requestedLayout = RemoteData.loading();
+    this.notify();
+    this.requestedLayout = await this.model.layoutService.getLayoutById(layoutId);
+    if (!this.requestedLayout.isSuccess()) {
+      this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
+    } else {
+      if (this.model.router.params.objectId) {
+        this.model.object.select({
+          name: this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload,
+            this.model.router.params.objectId)
+        });
+      }
+    }
     this.notify();
   }
 
@@ -373,6 +396,20 @@ export default class Layout extends Observable {
       tabObject.options.splice(index, 1);
     } else {
       tabObject.options.push(option);
+    }
+    this.notify();
+  }
+
+  /**
+   * Method to toggle displaying default options
+   * If field does not exist in tabObject, it will be added
+   * @param {Object} tabObject
+   */
+  toggleDefaultOptions(tabObject) {
+    if (tabObject.ignoreDefaults) {
+      tabObject.ignoreDefaults = false;
+    } else {
+      tabObject.ignoreDefaults = true;
     }
     this.notify();
   }

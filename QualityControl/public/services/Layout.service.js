@@ -83,7 +83,7 @@ export default class LayoutService {
    */
   parseResult(result, ok) {
     if (!ok) {
-      return RemoteData.failure(result.error);
+      return RemoteData.failure(result.error || result.message);
     } else {
       return RemoteData.success(result);
     }
