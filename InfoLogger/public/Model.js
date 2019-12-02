@@ -32,6 +32,10 @@ export default class Model extends Observable {
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
+    this.frameworkInfoEnabled = false;
+    this.frameworkInfo = RemoteData.notAsked();
+    this.getFrameworkInfo();
+
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
 
@@ -101,6 +105,24 @@ export default class Model extends Observable {
       this.log.query();
     }
   }
+
+  /**
+   * Request data about the framework
+   */
+  async getFrameworkInfo() {
+    this.servicesResult = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.loader.get(`/api/getFrameworkInfo`);
+    if (!ok) {
+      this.frameworkInfo = RemoteData.failure(result.message);
+    } else {
+      this.frameworkInfo = RemoteData.success(result);
+    }
+    this.notify();
+    return;
+  }
+
 
   /**
    * Delegates sub-model actions depending on incoming keyboard event
@@ -196,6 +218,14 @@ export default class Model extends Observable {
    */
   toggleInspector() {
     this.inspectorEnabled = !this.inspectorEnabled;
+    this.notify();
+  }
+
+  /**
+   * Toggle framework info on the left
+   */
+  toggleFrameworkInfo() {
+    this.frameworkInfoEnabled = !this.frameworkInfoEnabled;
     this.notify();
   }
 

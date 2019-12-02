@@ -40,10 +40,39 @@ module.exports.attachTo = (http, ws) => {
       .catch((error) => handleError(res, error));
   });
 
+  http.get('/getFrameworkInfo', getFrameworkInfo);
+
+  /**
+   * Method which handles the request for framework information
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function getFrameworkInfo(req, res) {
+    if (!config) {
+      handleError(res, 'Unable to retrieve configuration of the framework', 502);
+    } else {
+      const result = {};
+      result['infoLogger-gui'] = {};
+      if (process.env.npm_package_version) {
+        result['infoLogger-gui'].version = process.env.npm_package_version;
+      }
+      if (config.http) {
+        const il = {hostname: config.http.hostname, port: config.http.port};
+        result['infoLogger-gui'] = Object.assign(result['infoLogger-gui'], il);
+      }
+      if (config.infoLoggerServer) {
+        const ils = {host: config.infoLoggerServer.host, port: config.infoLoggerServer.port};
+        result.infoLoggerServer = ils;
+      }
+      res.status(200).json(result);
+    }
+  }
+
   /**
    * Catch all HTTP errors
    * @param {Object} res
    * @param {Error} error
+   * @param {number} status
    */
   function handleError(res, error) {
     log.trace(error);

@@ -1,4 +1,4 @@
-import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
+import {h, iconPerson, iconMediaPlay, iconMediaStop, info} from '/js/src/index.js';
 import {BUTTON} from '../constants/button-states.const.js';
 import {MODE} from '../constants/mode.const.js';
 
@@ -7,11 +7,14 @@ let liveButtonType = BUTTON.DEFAULT;
 let liveButtonIcon = iconMediaPlay();
 
 export default (model) => [
-  loginButton(model),
+  h('.btn-group', [
+    loginButton(model),
+    infoButton(model)
+  ]),
   h('div.btn-group.mh3', [
     queryButton(model),
     liveButton(model)
-  ], '' ),
+  ], ''),
   h('button.btn', {onclick: () => model.log.empty()}, 'Clear'),
   h('span.mh3'),
   h('button.btn', {
@@ -59,6 +62,17 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
       : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
   ]),
 ]);
+
+/**
+ * Show button to display framework info table
+ * @param {Object} model
+ * @return {vnode}
+ */
+const infoButton = (model) =>
+  h('button.btn', {
+    onclick: () => model.toggleFrameworkInfo(),
+    title: 'Show/Hide details about the framework'
+  }, info());
 
 /**
  * Query button final state depends on the following states
