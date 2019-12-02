@@ -1,6 +1,6 @@
 import {h} from '/js/src/index.js';
 import {draw} from '../object/objectDraw.js';
-import {iconArrowLeft, iconArrowTop, iconResizeBoth} from '/js/src/icons.js';
+import {iconArrowLeft, iconArrowTop, iconResizeBoth, info} from '/js/src/icons.js';
 
 const cellHeight = 100 / 3 * 0.95; // %, put some margin at bottom to see below
 const cellWidth = 100 / 3; // %
@@ -182,13 +182,40 @@ function drawComponent(model, tabObject) {
     [
       h('.jsrootdiv', {style: 'z-index: 90; height:100%; display: flex; flex-direction: column'},
         draw(model, tabObject)),
-      h('.text-right.resize-element.resize-button', {style: 'display: none; padding: .25rem .25rem 0rem .25rem;'},
+      h('.text-right.resize-element.resize-button.flex-row', {
+        style: 'display: none; padding: .25rem .25rem 0rem .25rem;'
+      }, [
+        !model.object.isOnlineModeEnabled &&
+        h('.text-right', {style: 'padding-bottom: 0;'},
+          h('.dropdown.mh1', {class: model.object.selectedOpen ? 'dropdown-open' : ''}, [
+            h('button.btn',
+              {
+                title: 'View details about histogram',
+                onclick: () => model.object.toggleInfoArea(tabObject.name)
+              }, info()
+            ),
+            h('.dropdown-menu', {style: 'right:0.1em; left: auto; white-space: nowrap;'}, [
+              h('.m2.gray-darker.text-center', [
+                h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'PATH'),
+                tabObject.name
+              ]),
+              h('.m2.gray-darker.text-center', [
+                h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'LAST MODIFIED'),
+                model.object.selected && model.object.selected.lastModified ?
+                  `${new Date(model.object.selected.lastModified).toLocaleString()}`
+                  :
+                  'Loading...'
+              ]),
+
+            ]),
+          ])
+        ),
         h('a.btn', {
           title: 'Open object plot in full screen',
-          href: `?page=objectView&objectName=${tabObject.name}&layoutId=${model.router.params.layoutId}`,
+          href: `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`,
           onclick: (e) => model.router.handleLinkEvent(e)
-        }, iconResizeBoth())),
-
+        }, iconResizeBoth())
+      ]),
     ]);
 }
 
