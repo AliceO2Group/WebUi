@@ -198,10 +198,7 @@ function drawComponent(model, tabObject) {
               ]),
               h('.m2.gray-darker.text-center', [
                 h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'LAST MODIFIED'),
-                model.object.selected && model.object.selected.lastModified ?
-                  `${new Date(model.object.selected.lastModified).toLocaleString()}`
-                  :
-                  'Loading...'
+                model.object.getLastModifiedByName(tabObject.name)
               ]),
 
             ]),
