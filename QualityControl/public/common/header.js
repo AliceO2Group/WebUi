@@ -44,8 +44,6 @@ const headerSpecific = (model) => {
 const commonHeader = (model) => h('.flex-grow', [
   loginButton(model),
   ' ',
-  h('button.btn.mh1', {onclick: () => model.toggleSidebar()}, iconMenu()),
-  ' ',
   onlineButton(model),
   ' ',
   h('span.f4.gray', 'Quality Control'),
