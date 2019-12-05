@@ -163,10 +163,9 @@ describe('QCG', function() {
       assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
       assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), true, 'Object full path is not the same');
       assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
-      assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified date is different');
+      assert.strictEqual(result.lastModified.includes('1/1/1970, 1:00:00'), true, 'Last Modified date is different');
       assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'mh1', 2: 'dropdown-open'}, 'Dropdown not opened');
     });
-
 
     it('should have an info button with full path and last modified when clicked on a second plot(plot success)', async () => {
       const result = await page.evaluate(() => {
@@ -187,7 +186,9 @@ describe('QCG', function() {
       assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
       assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), true, 'Object full path is not the same');
       assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
-      assert.strictEqual(result.lastModified.includes(new Date(102).toLocaleString('EN')), true, 'Last Modified date is different');
+      console.log("result.lastModified")
+      console.log(result.lastModified)
+      assert.strictEqual(result.lastModified.includes('1/1/1970, 1:00:01'), true, 'Last Modified date is different');
       assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'mh1', 2: 'dropdown-open'}, 'Dropdown not opened');
     });
 
@@ -429,7 +430,7 @@ describe('QCG', function() {
         assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
         assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
         assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
-        assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
+        assert.deepStrictEqual(result.lastModified.includes('1/1/1970, 1:00:00'), true);
         assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
       });
     });
@@ -554,7 +555,7 @@ describe('QCG', function() {
         assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
         assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
         assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
-        assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
+        assert.deepStrictEqual(result.lastModified.includes('1/1/1970, 1:00:00'), true);
         assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
       });
     });
