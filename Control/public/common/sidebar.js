@@ -23,6 +23,7 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
  */
 const createNewEnvMenuItem = (model) =>
   h('a.menu-item', {
+    title: 'Create',
     style: 'display: flex',
     href: '?page=newEnvironment',
     onclick: (e) => model.router.handleLinkEvent(e),
@@ -37,6 +38,7 @@ const createNewEnvMenuItem = (model) =>
  */
 const listActiveEnvMenuItem = (model) =>
   h('a.menu-item', {
+    title: 'Active',
     style: 'display: flex',
     href: '?page=environments',
     onclick: (e) => model.router.handleLinkEvent(e),
@@ -52,6 +54,7 @@ const listActiveEnvMenuItem = (model) =>
  */
 const aboutMenuItem = (model) =>
   h('a.menu-item', {
+    title: 'About',
     style: 'display: flex',
     href: '?page=about',
     onclick: (e) => model.router.handleLinkEvent(e),
@@ -66,6 +69,7 @@ const aboutMenuItem = (model) =>
 */
 const collapseSidebarMenuItem = (model) =>
   h('a.menu-item', {
+    title: 'Toggle Sidebar',
     onclick: () => model.toggleSideBarMenu(),
   }, model.sideBarMenu ?
     [iconMediaSkipBackward(), itemMenuText('Collapse Sidebar')]
