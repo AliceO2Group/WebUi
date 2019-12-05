@@ -57,6 +57,7 @@ export default class Model extends Observable {
     this.lock.synchronizeState();
 
     this.accountMenuEnabled = false;
+    this.sideBarMenu = true;
   }
 
   /**
@@ -136,6 +137,15 @@ export default class Model extends Observable {
     this.notify();
   }
 
+  /**
+   * Toggles the sidebar size
+   * * minimal - icons only
+   * * normal - icons + text
+   */
+  toggleSideBarMenu() {
+    this.sideBarMenu = !this.sideBarMenu;
+    this.notify();
+  }
   /**
    * Display a browser notification(Notification - Web API)
    * @param {String} message
