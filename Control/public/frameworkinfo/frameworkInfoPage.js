@@ -51,11 +51,10 @@ const createTableForControlGUIInfo = (frameworkInfo) =>
  */
 const createTableForAliECSInfo = (frameworkInfo) =>
   h('.p2', [
-    h('h4', {style: 'text-decoration: underline;'}, 'AliECS Core Info'),
     frameworkInfo.aliEcs.match({
       NotAsked: () => null,
       Loading: () => pageLoading(),
-      Success: (data) => showTableItem(data),
+      Success: (data) => showContent({'AliECS Core Info': data}),
       Failure: (error) => pageError(error),
     })
   ]);
