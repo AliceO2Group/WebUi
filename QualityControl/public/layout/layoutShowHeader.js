@@ -1,5 +1,5 @@
 import {h} from '/js/src/index.js';
-import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan} from '/js/src/icons.js';
+import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan, iconGridTwoUp} from '/js/src/icons.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
@@ -33,17 +33,17 @@ const toolbarViewMode = (model) => [
         },
         title: 'Duplicate layout'
       },
-      iconLayers()),
+        iconLayers()),
       model.session.personid == model.layout.item.owner_id && h('button.btn.btn-primary', {
         onclick: () => model.layout.edit(),
         title: 'Edit layout'
       },
-      iconPencil()),
+        iconPencil()),
       model.session.personid == model.layout.item.owner_id && h('button.btn.btn-danger', {
         onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
         title: 'Delete layout'
       },
-      iconTrash()
+        iconTrash()
       )
     ])
   ])
@@ -82,12 +82,15 @@ const toolbarEditMode = (model) => [
     h('div', {class: 'header-layout'}, [
       h('span', model.layout.item.tabs.map((tab, i) => toolbarEditModeTab(model, tab, i))),
       h('.btn-group', [
-        tabBtn({class: 'default', onclick: () => {
-          const name = prompt('Enter the name of the new tab:');
-          if (name) {
-            model.layout.newTab(name);
+        tabBtn({
+          title: 'Add new tab to this layout',
+          class: 'default', onclick: () => {
+            const name = prompt('Enter the name of the new tab:');
+            if (name) {
+              model.layout.newTab(name);
+            }
           }
-        }}, iconPlus()),
+        }, iconPlus()),
       ]),
     ])
   ]),
@@ -103,13 +106,13 @@ const toolbarEditMode = (model) => [
         onclick: () => model.layout.save(),
         title: 'Save layout'
       },
-      iconCheck()
+        iconCheck()
       ),
       h('button.btn', {
         onclick: () => model.layout.cancelEdit(),
         title: 'Cancel'
       },
-      iconBan()),
+        iconBan()),
     ])
   ]),
 ];
@@ -144,20 +147,41 @@ const toolbarEditModeTab = (model, tab, i) => {
   return [
     h('.btn-group', [
       h('button.br-pill.ph2.btn.btn-tab', {class: linkClass, onclick: selectTab}, tab.name),
-      selected && h('button.br-pill.ph2.btn.btn-tab', {
-        class: linkClass,
-        onclick: renameTab,
-        title: 'Rename tab'
-      }, iconPencil()),
-      selected && h('button.br-pill.ph2.btn.btn-tab', {
-        class: linkClass,
-        onclick: () => model.layout.deleteTab(i),
-        title: 'Delete tab'
-      }, iconTrash()),
+      selected && [
+        h('button.br-pill.ph2.btn.btn-tab', {
+          class: linkClass,
+          onclick: renameTab,
+          title: 'Rename tab'
+        }, iconPencil()),
+        resizeGridTabDropDown(model, tab),
+        h('button.br-pill.ph2.btn.btn-tab', {
+          class: linkClass,
+          onclick: () => model.layout.deleteTab(i),
+          title: 'Delete tab'
+        }, iconTrash()),
+      ]
     ]),
     ' '
   ];
 };
+
+/**
+ * Dropdown for resizing the tab of a layout
+ * @param {Object} model
+ * @param {Object} tab
+ * @return {vnode}
+ */
+const resizeGridTabDropDown = (model, tab) =>
+  h('select.form-control.select-tab', {
+    style: 'cursor: pointer',
+    title: 'Resize grid of the tab',
+    onchange: (e) => model.layout.resizeGridByXY(e.target.value),
+  }, [
+    h('option', {selected: tab && tab.columns === 2, title: 'Resize to have 2 columns', value: 2}, '2 cols'),
+    h('option', {selected: tab && tab.columns === 3, title: 'Resize to have 3 columns', value: 3}, '3 cols'),
+    h('option', {selected: tab && tab.columns === 4, title: 'Resize have 4 columns', value: 4}, '4 cols'),
+    h('option', {selected: tab && tab.columns === 5, title: 'Resize have 5 columns', value: 5}, '5 cols')
+  ]);
 
 /**
  * Single tab button

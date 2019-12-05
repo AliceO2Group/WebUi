@@ -33,10 +33,14 @@ export default class Layout extends Observable {
     this.editOriginalClone = null; // contains a deep clone of item before editing
 
     // https://github.com/hootsuite/grid
+    this.gridListSize = 3;
+
     this.gridList = new GridList([], {
       direction: 'vertical',
-      lanes: 3
+      lanes: this.gridListSize
     });
+    this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
+    this.cellWidth = 100 / this.gridListSize; // %
     // gridList.grid.length: integer, number of rows
   }
 
@@ -182,11 +186,30 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Ceva
+   * @param {string} value
+   */
+  resizeGridByXY(value) {
+    this.gridListSize = parseInt(value);
+    this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
+    this.cellWidth = 100 / this.gridListSize; // %
+    this.gridList.resizeGrid(this.gridListSize);
+    this.tab.columns = this.gridListSize;
+    this.tab.objects.forEach((object) => {
+      if (object.w > this.tab.columns) {
+        object.w = this.tab.columns;
+        object.h = this.tab.columns;
+      }
+    });
+    this.notify();
+  }
+
+  /**
    * Compute grid positions of the current tab selected
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
-    this.gridList.resizeGrid(3);
+    this.gridList.resizeGrid(this.gridListSize);
   }
 
   /**
@@ -199,6 +222,13 @@ export default class Layout extends Observable {
     }
 
     this.tab = this.item.tabs[index];
+    const columns = this.item.tabs[index].columns;
+    if (columns > 0) {
+      this.resizeGridByXY(columns);
+    } else {
+      this.tab.columns = 3; // default
+      this.resizeGridByXY(3);
+    }
     this.sortObjectsOfCurrentTab();
     this.notify();
   }

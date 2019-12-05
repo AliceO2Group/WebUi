@@ -2,9 +2,6 @@ import {h} from '/js/src/index.js';
 import {draw} from '../object/objectDraw.js';
 import {iconArrowLeft, iconArrowTop, iconResizeBoth, info} from '/js/src/icons.js';
 
-const cellHeight = 100 / 3 * 0.95; // %, put some margin at bottom to see below
-const cellWidth = 100 / 3; // %
-
 /**
  * Exposes the page that shows one layout and its tabs (one at a time), this page can be in edit mode
  * LayoutShow is composed of:
@@ -62,7 +59,7 @@ function subcanvasView(model) {
 
   const subcanvasAttributes = {
     style: {
-      height: `${cellHeight * model.layout.gridList.grid.length}%`
+      height: `${model.layout.cellHeight * model.layout.gridList.grid.length}%`
     },
     id: 'subcanvas',
 
@@ -93,11 +90,11 @@ function subcanvasView(model) {
       const canvasX = pageX - canvasDimensions.x;
       const canvasY = pageY - canvasDimensions.y;
 
-      const cellWidth2 = canvasDimensions.width / 3;
+      const cellWidth2 = canvasDimensions.width / model.layout.gridListSize;
 
       // position in the gridList
       const x = Math.floor(canvasX / cellWidth2);
-      const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / 3));
+      const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / model.layout.gridListSize));
 
       // console.log(x, y, pageX, canvasDimensions.x);
       model.layout.moveTabObjectToPosition(x, y);
@@ -127,10 +124,10 @@ function chartView(model, tabObject) {
 
   // Position and size are produced by GridList in the model
   const style = {
-    height: `${cellHeight * tabObject.h}%`,
-    width: `${cellWidth * tabObject.w}%`,
-    top: `${cellHeight * tabObject.y}%`,
-    left: `${cellWidth * tabObject.x}%`,
+    height: `${model.layout.cellHeight * tabObject.h}%`,
+    width: `${model.layout.cellWidth * tabObject.w}%`,
+    top: `${model.layout.cellHeight * tabObject.y}%`,
+    left: `${model.layout.cellWidth * tabObject.x}%`,
     opacity: (model.layout.tabObjectMoving && tabObject.id === model.layout.tabObjectMoving.id ? '0' : '1')
   };
 
