@@ -151,12 +151,10 @@ describe('QCG', function() {
         const infoButtonTitle = document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > button').title;
         const lastModified = document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2)').innerText;
         const path = document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > div > div').innerText;
-        const dropdownInfoClass = document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div').classList;
         return {
           lastModified: lastModified,
           path: path,
           title: infoButtonTitle,
-          dropdownInfoClass: dropdownInfoClass
         };
       });
       assert.strictEqual(result.title, 'View details about histogram', 'Button title is different');
@@ -164,21 +162,17 @@ describe('QCG', function() {
       assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), true, 'Object full path is not the same');
       assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
       assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified date is different');
-      assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'mh1', 2: 'dropdown-open'}, 'Dropdown not opened');
     });
-
 
     it('should have an info button with full path and last modified when clicked on a second plot(plot success)', async () => {
       const result = await page.evaluate(() => {
         const infoButtonTitle = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > button').title;
         const lastModified = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2)').innerText;
         const path = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div').innerText;
-        const dropdownInfoClass = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div').classList;
         return {
           lastModified: lastModified,
           path: path,
           title: infoButtonTitle,
-          dropdownInfoClass: dropdownInfoClass
         };
       });
       // click again to reset for other tests
@@ -188,7 +182,6 @@ describe('QCG', function() {
       assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), true, 'Object full path is not the same');
       assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
       assert.strictEqual(result.lastModified.includes(new Date(1020).toLocaleString('EN')), true, 'Last Modified date is different');
-      assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'mh1', 2: 'dropdown-open'}, 'Dropdown not opened');
     });
 
     it('should have second tab to be empty (according to demo data)', async () => {
@@ -417,20 +410,17 @@ describe('QCG', function() {
           const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
           const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
           const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
-          const dropdownInfoClass = document.querySelector('body > div > div > div:nth-child(3) > div > div').classList;
           return {
             title: infoButtonTitle,
             fullPath: fullPath,
             lastModified: lastModified,
-            dropdownInfoClass: dropdownInfoClass
           };
         });
-        assert.deepStrictEqual(result.title, 'View details about histogram');
-        assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
-        assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
-        assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
+        assert.strictEqual(result.title, 'View details about histogram');
+        assert.strictEqual(result.fullPath.includes('PATH'), true);
+        assert.strictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
+        assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true);
         assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
-        assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
       });
     });
 
@@ -449,10 +439,10 @@ describe('QCG', function() {
             backButtonTitle: backButtonTitle
           };
         });
-        assert.deepStrictEqual(result.location.search, '?page=objectView');
-        assert.deepStrictEqual(result.message, 'No object name or object ID were provided');
+        assert.strictEqual(result.location.search, '?page=objectView');
+        assert.strictEqual(result.message, 'No object name or object ID were provided');
         assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-        assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
+        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
       });
 
       it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
@@ -541,12 +531,10 @@ describe('QCG', function() {
           const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
           const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
           const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
-          const dropdownInfoClass = document.querySelector('body > div > div > div:nth-child(3) > div > div').classList;
           return {
             title: infoButtonTitle,
             fullPath: fullPath,
             lastModified: lastModified,
-            dropdownInfoClass: dropdownInfoClass
           };
         });
         await page.waitFor(200);
@@ -555,7 +543,6 @@ describe('QCG', function() {
         assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
         assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
         assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
-        assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
       });
     });
   });
