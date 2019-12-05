@@ -161,7 +161,7 @@ const objects = [
   {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', createTime: 14, data: graphs.histo, lastModified: 100},
   {name: 'DAQ01/EventSize/TOF/TOF', createTime: 15, data: graphs.gaussian, lastModified: 100},
   {name: 'DAQ01/EventSize/TPC/TPC', createTime: 16, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', createTime: 17, data: graphs.hpx, lastModified: 100},
+  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', createTime: 17, data: graphs.hpx, lastModified: 102},
   {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', createTime: 18, data: graphs.canvas_tf1, lastModified: 100},
   {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', createTime: 19, data: graphs.gaussian, lastModified: 100},
   {name: 'DAQ01/_EquimentSizeSummmary', createTime: 11, data: graphs.gaussian, lastModified: 100},
