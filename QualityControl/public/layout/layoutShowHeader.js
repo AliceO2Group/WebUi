@@ -172,10 +172,10 @@ const resizeGridTabDropDown = (model, tab) =>
     title: 'Resize grid of the tab',
     onchange: (e) => model.layout.resizeGridByXY(e.target.value),
   }, [
-    h('option', {selected: tab && tab.columns === 2, title: 'Resize to have 2 columns', value: 2}, '2 cols'),
-    h('option', {selected: tab && tab.columns === 3, title: 'Resize to have 3 columns', value: 3}, '3 cols'),
-    h('option', {selected: tab && tab.columns === 4, title: 'Resize have 4 columns', value: 4}, '4 cols'),
-    h('option', {selected: tab && tab.columns === 5, title: 'Resize have 5 columns', value: 5}, '5 cols')
+    h('option', {selected: tab && tab.columns === 2, title: 'Resize layout to 2 columns', value: 2}, '2 cols'),
+    h('option', {selected: tab && tab.columns === 3, title: 'Resize layout to 3 columns', value: 3}, '3 cols'),
+    h('option', {selected: tab && tab.columns === 4, title: 'Resize layout to 4 columns', value: 4}, '4 cols'),
+    h('option', {selected: tab && tab.columns === 5, title: 'Resize layout to 5 columns', value: 5}, '5 cols')
   ]);
 
 /**
