@@ -115,7 +115,7 @@ export function draw(model, tabObject, options) {
     ]);
   } else if (objectRemoteData.isFailure()) {
     content = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('.p4', objectRemoteData.payload),
+      h('.p4.f6', objectRemoteData.payload),
     ]);
   } else {
     // on success, JSROOT will erase all DOM inside div and put its own
