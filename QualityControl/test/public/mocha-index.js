@@ -144,6 +144,46 @@ describe('QCG', function() {
       assert(plotsCount > 1);
     });
 
+    it('should have an info button with full path and last modified when clicked (plot success)', async () => {
+      await page.evaluate(() => document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > button').click());
+
+      const result = await page.evaluate(() => {
+        const infoButtonTitle = document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > button').title;
+        const lastModified = document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2)').innerText;
+        const path = document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > div > div').innerText;
+        return {
+          lastModified: lastModified,
+          path: path,
+          title: infoButtonTitle,
+        };
+      });
+      assert.strictEqual(result.title, 'View details about histogram', 'Button title is different');
+      assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
+      assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), true, 'Object full path is not the same');
+      assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
+      assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified date is different');
+    });
+
+    it('should have an info button with full path and last modified when clicked on a second plot(plot success)', async () => {
+      const result = await page.evaluate(() => {
+        const infoButtonTitle = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > button').title;
+        const lastModified = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2)').innerText;
+        const path = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div').innerText;
+        return {
+          lastModified: lastModified,
+          path: path,
+          title: infoButtonTitle,
+        };
+      });
+      // click again to reset for other tests
+      await page.evaluate(() => document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > button').click());
+      assert.strictEqual(result.title, 'View details about histogram', 'Button title is different');
+      assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
+      assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), true, 'Object full path is not the same');
+      assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
+      assert.strictEqual(result.lastModified.includes(new Date(1020).toLocaleString('EN')), true, 'Last Modified date is different');
+    });
+
     it('should have second tab to be empty (according to demo data)', async () => {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
       await page.waitForSelector('section h1', {timeout: 5000});
@@ -370,169 +410,164 @@ describe('QCG', function() {
           const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
           const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
           const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
-          const dropdownInfoClass = document.querySelector('body > div > div > div:nth-child(3) > div > div').classList;
           return {
             title: infoButtonTitle,
             fullPath: fullPath,
             lastModified: lastModified,
-            dropdownInfoClass: dropdownInfoClass
           };
         });
+        assert.strictEqual(result.title, 'View details about histogram');
+        assert.strictEqual(result.fullPath.includes('PATH'), true);
+        assert.strictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
+        assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true);
+        assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
+      });
+    });
+
+    describe('objectView called from layoutShow', () => {
+      it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
+        await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+          const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+          const backButtonTitle = document.querySelector('div div div a').title;
+
+          return {
+            location: window.location,
+            message: errorMessage,
+            iconClassList: iconClassList,
+            backButtonTitle: backButtonTitle
+          };
+        });
+        assert.strictEqual(result.location.search, '?page=objectView');
+        assert.strictEqual(result.message, 'No object name or object ID were provided');
+        assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
+      });
+
+      it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
+        await page.goto(url + '?page=objectView&objectId=123456', {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+          const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+          const backButtonTitle = document.querySelector('div div div a').title;
+
+          return {
+            location: window.location,
+            message: errorMessage,
+            iconClassList: iconClassList,
+            backButtonTitle: backButtonTitle
+          };
+        });
+        assert.deepStrictEqual(result.location.search, '?page=objectView&objectId=123456');
+        assert.deepStrictEqual(result.message, 'No layout ID was provided');
+        assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+        assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
+      });
+
+      it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
+        await page.evaluate(() => document.querySelector('div div div a').click());
+
+        const result = await page.evaluate(() => {
+          return {
+            location: window.location.search,
+            objectSelected: window.model.object.selected
+          };
+        });
+        assert.deepStrictEqual(result.location, '?page=objectTree');
+        assert.deepStrictEqual(result.objectSelected, null);
+      });
+
+      it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
+        const objectId = '5aba4a059b755d517e76ef54';
+        const layoutId = '5aba4a059b755d517e76ea10';
+        await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+
+        const result = await page.evaluate(() => {
+          const backButtonTitle = document.querySelector('div div div a').title;
+          return {
+            location: window.location.search,
+            backButtonTitle: backButtonTitle
+          };
+        });
+        assert.deepStrictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
+        assert.deepStrictEqual(result.backButtonTitle, 'Go back to layout');
+      });
+
+      it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
+        const layoutId = '5aba4a059b755d517e76ea10';
+        await page.evaluate(() => document.querySelector('div div div a').click());
+
+        const result = await page.evaluate(() => {
+          return {
+            location: window.location.search,
+          };
+        });
+        assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
+      });
+
+      it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
+        const objectId = '5aba4a059b755d517e76ef54';
+        const layoutId = '5aba4a059b755d517e76ea10';
+        await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const title = document.querySelector('div div b').textContent;
+          const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
+          const objectSelected = window.model.object.selected;
+          return {
+            title: title,
+            rootPlotClassList: rootPlotClassList,
+            objectSelected: objectSelected
+          };
+        });
+        assert.deepStrictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
+        assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
+        assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
+      });
+
+      it('should have an info button with full path and last modified when clicked (plot success)', async () => {
+        await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
+        const result = await page.evaluate(() => {
+          const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
+          const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
+          const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
+          return {
+            title: infoButtonTitle,
+            fullPath: fullPath,
+            lastModified: lastModified,
+          };
+        });
+        await page.waitFor(200);
         assert.deepStrictEqual(result.title, 'View details about histogram');
         assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
         assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
         assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
         assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
-        assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
-      });
-
-      describe('objectView called from layoutShow', () => {
-        it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
-          await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
-          const result = await page.evaluate(() => {
-            const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
-            const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
-            const backButtonTitle = document.querySelector('div div div a').title;
-
-            return {
-              location: window.location,
-              message: errorMessage,
-              iconClassList: iconClassList,
-              backButtonTitle: backButtonTitle
-            };
-          });
-          assert.deepStrictEqual(result.location.search, '?page=objectView');
-          assert.deepStrictEqual(result.message, 'No object name or object ID were provided');
-          assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-          assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
-        });
-
-        it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
-          await page.goto(url + '?page=objectView&objectId=123456', {waitUntil: 'networkidle0'});
-          const result = await page.evaluate(() => {
-            const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
-            const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
-            const backButtonTitle = document.querySelector('div div div a').title;
-
-            return {
-              location: window.location,
-              message: errorMessage,
-              iconClassList: iconClassList,
-              backButtonTitle: backButtonTitle
-            };
-          });
-          assert.deepStrictEqual(result.location.search, '?page=objectView&objectId=123456');
-          assert.deepStrictEqual(result.message, 'No layout ID was provided');
-          assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-          assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
-        });
-
-        it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
-          await page.evaluate(() => document.querySelector('div div div a').click());
-
-          const result = await page.evaluate(() => {
-            return {
-              location: window.location.search,
-              objectSelected: window.model.object.selected
-            };
-          });
-          assert.deepStrictEqual(result.location, '?page=objectTree');
-          assert.deepStrictEqual(result.objectSelected, null);
-        });
-
-        it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
-          const objectId = '5aba4a059b755d517e76ef54';
-          const layoutId = '5aba4a059b755d517e76ea10';
-          await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
-
-          const result = await page.evaluate(() => {
-            const backButtonTitle = document.querySelector('div div div a').title;
-            return {
-              location: window.location.search,
-              backButtonTitle: backButtonTitle
-            };
-          });
-          assert.deepStrictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
-          assert.deepStrictEqual(result.backButtonTitle, 'Go back to layout');
-        });
-
-        it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
-          const layoutId = '5aba4a059b755d517e76ea10';
-          await page.evaluate(() => document.querySelector('div div div a').click());
-
-          const result = await page.evaluate(() => {
-            return {
-              location: window.location.search,
-            };
-          });
-          assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
-        });
-
-        it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
-          const objectId = '5aba4a059b755d517e76ef54';
-          const layoutId = '5aba4a059b755d517e76ea10';
-          await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
-          const result = await page.evaluate(() => {
-            const title = document.querySelector('div div b').textContent;
-            const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
-            const objectSelected = window.model.object.selected;
-            return {
-              title: title,
-              rootPlotClassList: rootPlotClassList,
-              objectSelected: objectSelected
-            };
-          });
-          assert.deepStrictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
-          assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-          assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
-        });
-
-        it('should have an info button with full path and last modified when clicked (plot success)', async () => {
-          await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
-          const result = await page.evaluate(() => {
-            const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
-            const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
-            const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
-            const dropdownInfoClass = document.querySelector('body > div > div > div:nth-child(3) > div > div').classList;
-            return {
-              title: infoButtonTitle,
-              fullPath: fullPath,
-              lastModified: lastModified,
-              dropdownInfoClass: dropdownInfoClass
-            };
-          });
-          assert.deepStrictEqual(result.title, 'View details about histogram');
-          assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
-          assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
-          assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
-          assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
-          assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'dropdown-open'});
-        });
       });
     });
+  });
 
-    describe('page frameworkInfo', () => {
-      before('reset browser to google', async () => {
-        // weird bug, if we don't go to external website just here, all next goto will wait forever
-        await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-      });
+  describe('page frameworkInfo', () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
 
-      it('should load', async () => {
-        await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
-        const location = await page.evaluate(() => window.location);
-        assert.deepStrictEqual(location.search, '?page=about');
-      });
+    it('should load', async () => {
+      await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
+      const location = await page.evaluate(() => window.location);
+      assert.deepStrictEqual(location.search, '?page=about');
+    });
 
-      it('should have a frameworkInfo item with config fields', async () => {
-        const expConfig = {
-          qcg: {port: 8181, hostname: 'localhost'},
-          consul: {hostname: 'localhost', port: 8500},
-          ccdb: {hostname: 'ccdb', port: 8500}
-        };
-        const config = await page.evaluate(() => window.model.frameworkInfo.item);
-        delete config.payload.qcg.version;
-        assert.deepStrictEqual(config.payload, expConfig);
-      });
+    it('should have a frameworkInfo item with config fields', async () => {
+      const expConfig = {
+        qcg: {port: 8181, hostname: 'localhost'},
+        consul: {hostname: 'localhost', port: 8500},
+        ccdb: {hostname: 'ccdb', port: 8500}
+      };
+      const config = await page.evaluate(() => window.model.frameworkInfo.item);
+      delete config.payload.qcg.version;
+      assert.deepStrictEqual(config.payload, expConfig);
     });
   });
 

@@ -306,6 +306,20 @@ export default class QCObject extends Observable {
   }
 
   /**
+   * Method to search for the object which info was requested for and return lastModified timestamp
+   * @param {string} objectName
+   * @return {string}
+   */
+  getLastModifiedByName(objectName) {
+    const object = this.currentList.find(
+      (object) => object.name === objectName);
+    if (object) {
+      return new Date(object.lastModified).toLocaleString();
+    }
+    return 'Loading...';
+  }
+
+  /**
    * Reload currently used objects which have a number of references greater or equal to 1
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
