@@ -60,9 +60,9 @@ export default class QCObjectService {
     if (ok) {
       return RemoteData.success(result);
     } else if (status === 404) {
-      return RemoteData.failure(`Object "${objectName}" could not be found.`);
+      return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
     } else {
-      return RemoteData.failure(`Object "${objectName}" could not be displayed. ${result.message}`);
+      return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
     }
   }
 

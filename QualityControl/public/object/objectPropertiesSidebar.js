@@ -11,21 +11,12 @@ export default function objectPropertiesSidebar(model) {
   return h('.p2', [
     h('div', 'Size'),
     h('.p3', [
-      h('.flex-row', [
-        btnSize(model, tabObject, 1, 1), ' ',
-        btnSize(model, tabObject, 2, 1), ' ',
-        btnSize(model, tabObject, 3, 1), ' ',
-      ]),
-      h('.flex-row', {class: ''}, [
-        btnSize(model, tabObject, 1, 2), ' ',
-        btnSize(model, tabObject, 2, 2), ' ',
-        btnSize(model, tabObject, 3, 2), ' ',
-      ]),
-      h('.flex-row', [
-        btnSize(model, tabObject, 1, 3), ' ',
-        btnSize(model, tabObject, 2, 3), ' ',
-        btnSize(model, tabObject, 3, 3), ' ',
-      ]),
+      [...Array(model.layout.tab.columns)].map((_, index) =>
+        h('.flex-row', [
+          [...Array(model.layout.tab.columns)].map((_, indexButton) =>
+            btnSize(model, tabObject, index + 1, indexButton + 1), ' ')
+        ])
+      )
     ]),
 
     h('hr'),
