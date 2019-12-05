@@ -1,5 +1,5 @@
 import {h} from '/js/src/index.js';
-import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan, iconGridTwoUp} from '/js/src/icons.js';
+import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan} from '/js/src/icons.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
@@ -32,18 +32,15 @@ const toolbarViewMode = (model) => [
           model.layout.duplicate(nameForNewLayout);
         },
         title: 'Duplicate layout'
-      },
-        iconLayers()),
+      }, iconLayers()),
       model.session.personid == model.layout.item.owner_id && h('button.btn.btn-primary', {
         onclick: () => model.layout.edit(),
         title: 'Edit layout'
-      },
-        iconPencil()),
+      }, iconPencil()),
       model.session.personid == model.layout.item.owner_id && h('button.btn.btn-danger', {
         onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
         title: 'Delete layout'
-      },
-        iconTrash()
+      }, iconTrash()
       )
     ])
   ])
@@ -105,14 +102,12 @@ const toolbarEditMode = (model) => [
       h('button.btn.btn-primary', {
         onclick: () => model.layout.save(),
         title: 'Save layout'
-      },
-        iconCheck()
+      }, iconCheck()
       ),
       h('button.btn', {
         onclick: () => model.layout.cancelEdit(),
         title: 'Cancel'
-      },
-        iconBan()),
+      }, iconBan()),
     ])
   ]),
 ];
