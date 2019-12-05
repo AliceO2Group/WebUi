@@ -2,7 +2,6 @@
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import showTableItem from '../common/showTableItem.js';
 
 /**
  * @file Page to FrameworkInfo(About) (content and header)
