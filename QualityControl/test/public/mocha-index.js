@@ -163,7 +163,7 @@ describe('QCG', function() {
       assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
       assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), true, 'Object full path is not the same');
       assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
-      assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString()), true, 'Last Modified date is different');
+      assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified date is different');
       assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'mh1', 2: 'dropdown-open'}, 'Dropdown not opened');
     });
 
@@ -181,13 +181,14 @@ describe('QCG', function() {
           dropdownInfoClass: dropdownInfoClass
         };
       });
-      await page.waitFor(10000);
       assert.strictEqual(result.title, 'View details about histogram', 'Button title is different');
       assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
       assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), true, 'Object full path is not the same');
       assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
-      assert.strictEqual(result.lastModified.includes(new Date(102).toLocaleString()), true, 'Last Modified date is different');
+      assert.strictEqual(result.lastModified.includes(new Date(102).toLocaleString('EN')), true, 'Last Modified date is different');
       assert.deepStrictEqual(result.dropdownInfoClass, {0: 'dropdown', 1: 'mh1', 2: 'dropdown-open'}, 'Dropdown not opened');
+      await page.evaluate(() => document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > button').click());
+      // click again to reset for other tests
     });
 
     it('should have second tab to be empty (according to demo data)', async () => {
