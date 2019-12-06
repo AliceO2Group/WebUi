@@ -177,6 +177,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
       drawingOptions = drawingOptions.join(';');
       drawingOptions += ';stat';
       if (objectRemoteData.payload._typename !== 'TGraph') {
+        // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
         drawingOptions += ';f';
       }
 
