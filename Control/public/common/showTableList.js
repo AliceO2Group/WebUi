@@ -13,23 +13,23 @@ export default (list, actions) => h('table.table', [
     h('tr',
       [
         list.length > 0 && Object.keys(list[0]).map((columnName) => h('th', {style: 'text-align:center'}, columnName)),
-        actions && h('th.text-center', {style: 'text-align:center'}, 'Actions')
+        actions && h('th', {style: 'text-align:center'}, 'Actions')
       ]
     )
   ]),
   h('tbody', list.map((item) => h('tr', [
     Object.keys(item).map(
       (columnName) => typeof item[columnName] === 'object'
-        ? h('td', parseObject(item[columnName], columnName))
+        ? h('td', {style: 'text-align: center'}, parseObject(item[columnName], columnName))
         : h('td',
-          columnName === 'state' && {
+          columnName === 'state' ? {
             class: (item[columnName] === 'RUNNING' ? 'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
-            style: 'font-weight: bold;'
-          },
+            style: 'font-weight: bold;text-align:center'
+          } : {style: 'text-align:center'},
           item[columnName]
         )
     ),
-    actions && h('td',
+    actions && h('td', {style: 'text-align:center'},
       h('.btn-group',
         h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details'),
         item.state !== 'RUNNING' && actions.length >= 2 && h('button.btn.btn-danger',

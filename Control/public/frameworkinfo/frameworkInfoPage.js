@@ -2,7 +2,6 @@
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
-import showTableItem from '../common/showTableItem.js';
 
 /**
  * @file Page to FrameworkInfo(About) (content and header)
@@ -14,7 +13,7 @@ import showTableItem from '../common/showTableItem.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', h('h4', 'Aboust')),
+  h('.w-50 text-center', h('h4', 'About')),
   h('.flex-grow text-right', [])
 ];
 
@@ -51,11 +50,10 @@ const createTableForControlGUIInfo = (frameworkInfo) =>
  */
 const createTableForAliECSInfo = (frameworkInfo) =>
   h('.p2', [
-    h('h4', {style: 'text-decoration: underline;'}, 'AliECS Core Info'),
     frameworkInfo.aliEcs.match({
       NotAsked: () => null,
       Loading: () => pageLoading(),
-      Success: (data) => showTableItem(data),
+      Success: (data) => showContent({'AliECS Core Info': data}),
       Failure: (error) => pageError(error),
     })
   ]);
