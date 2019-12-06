@@ -36,9 +36,9 @@ td, th {max-width: 0; /* allow ellipsis on tables */vertical-align: top;}
 
 .cell-xs { width: 2rem; }
 .cell-s { width: 4rem; }
-.cell-m { width: 7rem; }
+.cell-m { width: 8rem; }
 .cell-l { width: 16rem; }
-.cell-xl {width: 20rem;}
+.cell-xl { width: 32rem; }
 
 /* last column fills space */
 .cell-xs:last-child, .cell-s:last-child, .cell-m:last-child, .cell-l:last-child { width: initial; }
@@ -72,3 +72,5 @@ footer { border-top: 1px solid var(--color-gray); }
 .severity-w-bg { background-color: #ffc107; color: white; font-weight: 600; }
 .severity-e-bg { background-color: #dc3545; color: white; font-weight: 600; }
 .severity-f-bg { background-color: #9c27b0; color: white; font-weight: 600; }
+
+.resizeWidth:hover { cursor: pointer; background-color: var(--color-gray); }

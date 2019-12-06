@@ -6,13 +6,14 @@ import {
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
+import Table from './table/Table.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
  */
 export default class Model extends Observable {
   /**
-   * Instanciate main model containing other models and native events
+   * Instantiate main model containing other models and native events
    */
   constructor() {
     super();
@@ -25,6 +26,9 @@ export default class Model extends Observable {
 
     this.log = new Log(this);
     this.log.bubbleTo(this);
+
+    this.table = new Table(this);
+    this.table.bubbleTo(this);
 
     this.timezone = new Timezone(this);
     this.timezone.bubbleTo(this);
