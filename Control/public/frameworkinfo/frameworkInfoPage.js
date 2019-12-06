@@ -13,7 +13,7 @@ import pageError from '../common/pageError.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', h('h4', 'Aboust')),
+  h('.w-50 text-center', h('h4', 'About')),
   h('.flex-grow text-right', [])
 ];
 
