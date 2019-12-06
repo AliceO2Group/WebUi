@@ -34,9 +34,13 @@ tr:hover td {
   height: 2em;
   line-height: 2em;
   color: var(--color-gray-darker);
-  padding-left: 1em;
+  padding-left: 0.2em;
   font-size: 0.9em;
   font-weight: 100;
   margin: 0.5em;
   user-select: none;
+}
+
+.sidebar-minimal {
+  width: 3.6em;
 }
