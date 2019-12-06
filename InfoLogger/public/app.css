@@ -38,6 +38,7 @@ td, th {max-width: 0; /* allow ellipsis on tables */vertical-align: top;}
 .cell-s { width: 4rem; }
 .cell-m { width: 7rem; }
 .cell-l { width: 16rem; }
+.cell-xl {width: 20rem;}
 
 /* last column fills space */
 .cell-xs:last-child, .cell-s:last-child, .cell-m:last-child, .cell-l:last-child { width: initial; }

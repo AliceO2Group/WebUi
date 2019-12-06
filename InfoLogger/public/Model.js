@@ -99,11 +99,6 @@ export default class Model extends Observable {
 
     this.servicesResult = RemoteData.success(result);
     this.notify();
-
-    // auto-query if service available
-    if (result.query) {
-      this.log.query();
-    }
   }
 
   /**
