@@ -563,7 +563,8 @@ describe('QCG', function() {
       const expConfig = {
         qcg: {port: 8181, hostname: 'localhost'},
         consul: {hostname: 'localhost', port: 8500},
-        ccdb: {hostname: 'ccdb', port: 8500}
+        ccdb: {hostname: 'ccdb', port: 8500},
+        quality_control: {version: '0.19.5-1'}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);
       delete config.payload.qcg.version;

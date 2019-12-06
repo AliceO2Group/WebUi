@@ -22,5 +22,8 @@ module.exports = {
   ccdb: {
     hostname: 'ccdb',
     port: 8500
+  },
+  quality_control: {
+    version: '0.19.5-1'
   }
 };
