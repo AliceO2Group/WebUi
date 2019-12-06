@@ -64,24 +64,35 @@ const listLogsInViewportOnly = (model) => model.log.list.slice(
 const tableLogLine = (model, row) => h('tr.row-hover', {
   className: model.log.item === row ? 'row-selected' : '',
   onclick: () => model.log.setItem(row)
-}, [
-  h('td.cell.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
-  model.table.colsHeader.date.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
-  model.table.colsHeader.time.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, model.log.timeFormat)),
-  model.table.colsHeader.hostname.visible && h('td.cell.cell-bordered', row.hostname),
-  model.table.colsHeader.rolename.visible && h('td.cell.cell-bordered', row.rolename),
-  model.table.colsHeader.pid.visible && h('td.cell.cell-bordered', row.pid),
-  model.table.colsHeader.username.visible && h('td.cell.cell-bordered', row.username),
-  model.table.colsHeader.system.visible && h('td.cell.cell-bordered', row.system),
-  model.table.colsHeader.facility.visible && h('td.cell.cell-bordered', row.facility),
-  model.table.colsHeader.detector.visible && h('td.cell.cell-bordered', row.detector),
-  model.table.colsHeader.partition.visible && h('td.cell.cell-bordered', row.partition),
-  model.table.colsHeader.run.visible && h('td.cell.cell-bordered', row.run),
-  model.table.colsHeader.errcode.visible && h('td.cell.cell-bordered', linkToWikiErrors(row.errcode)),
-  model.table.colsHeader.errline.visible && h('td.cell.cell-bordered', row.errline),
-  model.table.colsHeader.errsource.visible && h('td.cell.cell-bordered', row.errsource),
-  model.table.colsHeader.message.visible && h('td.cell.cell-bordered', {title: row.message}, row.message),
-]);
+}, tableRows(model, model.table.colsHeader, row));
+
+/**
+ * Array of table rows
+ * @param {Object} model
+ * @param {JSON} colsHeader
+ * @param {object} row
+ * @return {vnode}
+ */
+const tableRows = (model, colsHeader, row) =>
+  [
+    h('td.cell.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
+    colsHeader.date.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
+    colsHeader.time.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, model.log.timeFormat)),
+    colsHeader.hostname.visible && h('td.cell.cell-bordered', row.hostname),
+    colsHeader.rolename.visible && h('td.cell.cell-bordered', row.rolename),
+    colsHeader.pid.visible && h('td.cell.cell-bordered', row.pid),
+    colsHeader.username.visible && h('td.cell.cell-bordered', row.username),
+    colsHeader.system.visible && h('td.cell.cell-bordered', row.system),
+    colsHeader.facility.visible && h('td.cell.cell-bordered', row.facility),
+    colsHeader.detector.visible && h('td.cell.cell-bordered', row.detector),
+    colsHeader.partition.visible && h('td.cell.cell-bordered', row.partition),
+    colsHeader.run.visible && h('td.cell.cell-bordered', row.run),
+    colsHeader.errcode.visible && h('td.cell.cell-bordered', linkToWikiErrors(row.errcode)),
+    colsHeader.errline.visible && h('td.cell.cell-bordered', row.errline),
+    colsHeader.errsource.visible && h('td.cell.cell-bordered', row.errsource),
+    colsHeader.message.visible && h('td.cell.cell-bordered', {title: row.message}, row.message),
+  ];
+
 
 /**
  * Creates link of error code to open in a new tab the wiki page associated
@@ -90,8 +101,8 @@ const tableLogLine = (model, row) => h('tr.row-hover', {
  */
 const linkToWikiErrors = (errcode) => h('a', {
   href: `https://alice-daq.web.cern.ch/error_codes/${errcode}?from=ILG`,
-  target: '_blank'},
-errcode);
+  target: '_blank'
+}, errcode);
 
 /**
  * Hooks of .tableLogsContent for "smart scrolling"

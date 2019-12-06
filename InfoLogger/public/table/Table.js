@@ -71,7 +71,7 @@ export default class Table extends Observable {
     return {
       date: {
         size: 'cell-m',
-        visible: true
+        visible: false
       },
       time: {
         size: 'cell-m',
