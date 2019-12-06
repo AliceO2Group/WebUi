@@ -253,6 +253,9 @@ function getFrameworkInfo(req, res) {
     if (config.consul) {
       result.consul = config.consul;
     }
+    if (config.quality_control) {
+      result.quality_control = config.quality_control;
+    }
     res.status(200).json(result);
   }
 }
