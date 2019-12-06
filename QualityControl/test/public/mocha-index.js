@@ -89,10 +89,10 @@ describe('QCG', function() {
       assert(location.search === '?page=layoutList');
     });
 
-    it('should have a button for the Online mode in the header', async () => {
-      await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)', {timeout: 5000});
+    it('should have a button for online mode in the header', async () => {
+      await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)', {timeout: 5000});
       const onlineButton = await page.evaluate(() =>
-        document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(3)').title);
+        document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)').title);
       assert.deepStrictEqual(onlineButton, 'Online');
     });
 
@@ -135,7 +135,7 @@ describe('QCG', function() {
     });
 
     it('should have selected layout in the sidebar highlighted', async () => {
-      const layoutClassList = await page.evaluate(() => document.querySelector('nav div a:nth-child(5)').classList);
+      const layoutClassList = await page.evaluate(() => document.querySelector('body > div > div > nav > a:nth-child(5)').classList);
       assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
     });
 

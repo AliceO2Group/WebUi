@@ -1,4 +1,4 @@
-import {h, iconMenu, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
+import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 
 import spinner from '../loader/spinner.js';
 import layoutShowHeader from '../layout/layoutShowHeader.js';

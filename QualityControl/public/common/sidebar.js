@@ -157,7 +157,7 @@ const refreshOptions = (model) => [
         oninput: (e) => model.object.setRefreshInterval(e.target.value)
       })
     ],
-    h('button.btn', {
+    h('button.btn.btn-success', {
       type: 'button',
       class: model.sidebar ? 'w-100' : '',
       style: !model.sidebar ? 'margin: 0.25em' : '',
