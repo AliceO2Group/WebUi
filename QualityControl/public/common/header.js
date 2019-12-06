@@ -1,4 +1,4 @@
-import {h, iconMenu, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
+import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 
 import spinner from '../loader/spinner.js';
 import layoutShowHeader from '../layout/layoutShowHeader.js';
@@ -43,8 +43,6 @@ const headerSpecific = (model) => {
  */
 const commonHeader = (model) => h('.flex-grow', [
   loginButton(model),
-  ' ',
-  h('button.btn.mh1', {onclick: () => model.toggleSidebar()}, iconMenu()),
   ' ',
   onlineButton(model),
   ' ',

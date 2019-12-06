@@ -33,11 +33,10 @@ export default (model) => [
   h('.flex-column absolute-fill', [
     header(model),
     h('.flex-grow flex-row', [
-      h('.sidebar', [
-        h('.sidebar-content relative', [
-          sidebar(model)
-        ])
-      ]),
+      h('.sidebar.sidebar-content.relative', {
+        class: model.sideBarMenu ? '' : 'sidebar-minimal'
+      }, sidebar(model)
+      ),
       h('.flex-grow.relative', [
         content(model)
       ])
