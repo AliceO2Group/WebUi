@@ -20,5 +20,5 @@ export default (model) => h('colgroup', [
   model.table.colsHeader.errcode.visible && h(`col.${model.table.colsHeader.errcode.size}`),
   model.table.colsHeader.errline.visible && h(`col.${model.table.colsHeader.errline.size}`),
   model.table.colsHeader.errsource.visible && h(`col.${model.table.colsHeader.errsource.size}`),
-  model.table.colsHeader.message.visible && h(`col.cell-l`),
+  model.table.colsHeader.message.visible && h(`col.${model.table.colsHeader.errsource.size}`),
 ]);

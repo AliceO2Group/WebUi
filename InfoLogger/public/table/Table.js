@@ -49,6 +49,8 @@ export default class Table extends Observable {
       case 'cell-xl':
         this.colsHeader[column].size = 'cell-xs';
         break;
+      default:
+        this.colsHeader[column].size = 'cell-xs';
     }
     this.notify();
   }
@@ -126,7 +128,7 @@ export default class Table extends Observable {
         visible: false,
       },
       message: {
-        size: '', // remaining
+        size: 'cell-xl', // remaining
         visible: true,
       }
     };

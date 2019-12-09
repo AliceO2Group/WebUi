@@ -41,7 +41,8 @@ td, th {max-width: 0; /* allow ellipsis on tables */vertical-align: top;}
 .cell-xl { width: 32rem; }
 
 /* last column fills space */
-.cell-xs:last-child, .cell-s:last-child, .cell-m:last-child, .cell-l:last-child { width: initial; }
+.cell-xs:last-child, .cell-s:last-child, .cell-m:last-child, .cell-l:last-child, .cell-xl:last-child { width: initial; }
+.cell-xs:last-child .resizeWidth, .cell-s:last-child .resizeWidth, .cell-m:last-child .resizeWidth, .cell-l:last-child .resizeWidth, .cell-xl:last-child .resizeWidth { visibility: hidden; }
 
 .row-hover:hover { background-color: rgba(0,0,0,.075); }
 .row-selected, .row-selected:hover { background-color: #007bff; color: white; }
