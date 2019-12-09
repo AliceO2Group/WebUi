@@ -102,7 +102,7 @@ module.exports.attachTo = (http, ws) => {
           errcode: {size: 'cell-s', visible: true},
           errline: {size: 'cell-s', visible: false},
           errsource: {size: 'cell-m', visible: false},
-          message: {size: '', visible: true}
+          message: {size: 'cell-xl', visible: true}
         };
         res.status(200).json({user: 'default', colsHeader: defaultUserConfig});
       }
