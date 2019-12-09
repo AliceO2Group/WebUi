@@ -1,4 +1,4 @@
-import {h, iconPerson, iconMediaPlay, iconMediaStop, info} from '/js/src/index.js';
+import {h, iconPerson, iconMediaPlay, iconMediaStop, info, iconCloudUpload} from '/js/src/index.js';
 import {BUTTON} from '../constants/button-states.const.js';
 import {MODE} from '../constants/mode.const.js';
 
@@ -9,7 +9,8 @@ let liveButtonIcon = iconMediaPlay();
 export default (model) => [
   h('.btn-group', [
     loginButton(model),
-    infoButton(model)
+    infoButton(model),
+    saveUserProfileButton(model)
   ]),
   h('div.btn-group.mh3', [
     queryButton(model),
@@ -73,6 +74,17 @@ const infoButton = (model) =>
     onclick: () => model.toggleFrameworkInfo(),
     title: 'Show/Hide details about the framework'
   }, info());
+
+/**
+ * Button to be pressed by the user when he wants to save a configuration for him/her self
+ * @param {Object} model
+ * @return {vnode}
+ */
+const saveUserProfileButton = (model) =>
+  h('button.btn', {
+    onclick: () => model.saveUserProfile(),
+    title: 'Save the columns size and visibility as your profile'
+  }, iconCloudUpload());
 
 /**
  * Query button final state depends on the following states

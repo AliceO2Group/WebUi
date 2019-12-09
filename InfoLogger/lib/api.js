@@ -42,6 +42,10 @@ module.exports.attachTo = (http, ws) => {
 
   http.get('/getFrameworkInfo', getFrameworkInfo);
 
+  http.get('/getUserProfile', getUserProfile);
+
+  http.post('/saveUserProfile', saveUserProfile);
+
   /**
    * Method which handles the request for framework information
    * @param {Request} req
@@ -66,6 +70,29 @@ module.exports.attachTo = (http, ws) => {
       }
       res.status(200).json(result);
     }
+  }
+
+  /**
+   * Method which handles the request for the user profile
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function getUserProfile(req, res) {
+    // const user = requ.body
+  }
+
+  /**
+ * Method which handles the request for saving the user profile
+ * @param {Request} req
+ * @param {Response} res
+ */
+  function saveUserProfile(req, res) {
+    const user = req.body.user;
+    const profile = req.body.profile;
+    console.log("USER")
+    console.log(user)
+    console.log("Profile")
+    console.log(profile)
   }
 
   /**

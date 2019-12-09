@@ -123,6 +123,41 @@ export default class Model extends Observable {
     return;
   }
 
+  /**
+   * Request data about the user's profile
+   */
+  async getUserProfile() {
+    this.userProfile = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.loader.get(`/api/getUserProfile`);
+    if (!ok) {
+      this.userProfile = RemoteData.failure(result.message);
+    } else {
+      this.userProfile = RemoteData.success(result);
+    }
+    this.notify();
+    return;
+  }
+
+  /**
+   * Request to save the current configuration of the user
+   */
+  async saveUserProfile() {
+    const body = {
+      user: 'anonymous',
+      columnsHeader: this.table.columnsHeader
+    };
+    const {result, ok} = await this.loader.post(`/api/saveUserProfile`, body);
+    if (!ok) {
+      this.notification.show('Profile could not be uploaded', 'danger', 2000);
+    } else {
+      this.notification.show('Profile was saved successfully', 'success', 2000);
+    }
+    this.notify();
+    return;
+  }
+
 
   /**
    * Delegates sub-model actions depending on incoming keyboard event
