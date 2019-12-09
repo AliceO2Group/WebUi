@@ -168,14 +168,18 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      const index = tabObject.options.indexOf('alp');
-      if (objectRemoteData.payload._typename === 'TGraph' && index < 0) {
-        tabObject.options.push('alp');
+      if (objectRemoteData.payload._typename === 'TGraph' &&
+        (objectRemoteData.payload.fOption === '' || objectRemoteData.payload.fOption === undefined)) {
+        objectRemoteData.payload.fOption = 'alp';
       }
 
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
       drawingOptions = drawingOptions.join(';');
-      drawingOptions += ';stat;f';
+      drawingOptions += ';stat';
+      if (objectRemoteData.payload._typename !== 'TGraph') {
+        // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
+        drawingOptions += ';f';
+      }
 
       JSROOT.redraw(dom, objectRemoteData.payload, drawingOptions, (painter) => {
         if (painter === null) {
