@@ -19,24 +19,6 @@ export default class Log extends Observable {
     this.filter = new LogFilter(model);
     this.filter.bubbleTo(this);
 
-    this.columns = { // display or not
-      date: false,
-      time: true,
-      hostname: false,
-      rolename: true,
-      pid: false,
-      username: false,
-      system: true,
-      facility: true,
-      detector: false,
-      partition: false,
-      run: false,
-      errcode: true,
-      errline: false,
-      errsource: false,
-      message: true
-    };
-
     this.focus = { // show date picker on focus
       timestampSince: false,
       timestampUntil: false,
@@ -108,25 +90,6 @@ export default class Log extends Observable {
     }
   }
 
-  /**
-   * Toggle column, displayed or hidden
-   * @param {string} fieldName - field to be set
-   */
-  toggleColumn(fieldName) {
-    this.columns[fieldName] = !this.columns[fieldName];
-    this.notify();
-  }
-
-  /**
-   * Set column visibility based on `isVisible`.
-   * Hide the column if no value is passed
-   * @param {string} fieldName - column of which the visibility will be set
-   * @param {boolean} isVisible - hide/show the column
-   */
-  setColumnVisibility(fieldName, isVisible = false) {
-    this.columns[fieldName] = isVisible;
-    this.notify();
-  }
 
   /**
    * Show/Hide dropdown for time(s/ms) selection
@@ -505,8 +468,8 @@ export default class Log extends Observable {
    */
   displayedItemFieldsToString() {
     let message = '| ' + this.item['severity'];
-    Object.keys(this.columns)
-      .filter((key) => this.columns[key])
+    Object.keys(this.model.table.colsHeader)
+      .filter((key) => this.model.table.colsHeader[key].visible)
       .forEach((key) => {
         const item = this.item[key];
         if (key === 'time') {
