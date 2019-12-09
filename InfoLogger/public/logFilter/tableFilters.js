@@ -11,9 +11,9 @@ export default (model) => h('table.table-filters', [
   h('tbody', [
     h('tr', [
       h('td', [
-        h('button.btn.w-50', {className: model.log.columns.date ? 'active' : '', onclick: () => model.log.toggleColumn('date')}, 'Date'),
+        h('button.btn.w-50', {className: model.table.colsHeader.date.visible ? 'active' : '', onclick: () => model.table.toggleColumn('date')}, 'Date'),
         h('.btn-group.w-50', [
-          h('button.btn.w-75', {className: model.log.columns.time ? 'active' : '', onclick: () => model.log.toggleColumn('time')}, 'Time'),
+          h('button.btn.w-75', {className: model.table.colsHeader.time.visible ? 'active' : '', onclick: () => model.table.toggleColumn('time')}, 'Time'),
           h('button.btn.dropdown.w-25',
             {
               className: model.log.isTimeDropdownEnabled ? 'dropdown-open active' : '',
@@ -40,7 +40,7 @@ export default (model) => h('table.table-filters', [
           )
         ])
       ]),
-      filterLabels.map((label) => createClickableLabel(model.log, label))
+      filterLabels.map((label) => createClickableLabel(model, label))
     ]),
     h('tr', [
       h('td.relative',
@@ -59,13 +59,13 @@ export default (model) => h('table.table-filters', [
 
 /**
  * Method to create a clickable label within a td element
- * @param {object} log
+ * @param {object} model
  * @param {string} label
  * @return {vnode}
  */
-const createClickableLabel = (log, label) => h('td', h('button.btn.w-100', {
-  className: log.columns[label.toLowerCase()] ? 'active' : '',
-  onclick: () => log.toggleColumn(label.toLowerCase())
+const createClickableLabel = (model, label) => h('td', h('button.btn.w-100', {
+  className: model.table.colsHeader[label.toLowerCase()].visible ? 'active' : '',
+  onclick: () => model.table.toggleColumn(label.toLowerCase())
 }, label));
 
 /**
