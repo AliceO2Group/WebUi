@@ -29,6 +29,7 @@ export default class Model extends Observable {
 
     this.table = new Table(this);
     this.table.bubbleTo(this);
+    this.getUserProfile();
 
     this.timezone = new Timezone(this);
     this.timezone.bubbleTo(this);
@@ -128,12 +129,17 @@ export default class Model extends Observable {
   async getUserProfile() {
     this.userProfile = RemoteData.loading();
     this.notify();
-
-    const {result, ok} = await this.loader.get(`/api/getUserProfile`);
+    const user = 'anonymous';
+    const {result, ok} = await this.loader.get(`/api/getUserProfile?user=${user}`); // TODO: Send actual username
     if (!ok) {
       this.userProfile = RemoteData.failure(result.message);
+      this.notification.show('Unable to load your profile. Default profile will be used instead', 'danger', 2000);
     } else {
       this.userProfile = RemoteData.success(result);
+      if (this.userProfile.payload.content.colsHeader) {
+        this.table.colsHeader = this.userProfile.payload.content.colsHeader;
+        this.notification.show('Your profile was loaded successfully', 'success', 2000);
+      }
     }
     this.notify();
     return;
@@ -144,14 +150,14 @@ export default class Model extends Observable {
    */
   async saveUserProfile() {
     const body = {
-      user: 'anonymous',
-      columnsHeader: this.table.columnsHeader
+      user: 'anonymous', // TODO Send actual username
+      content: {colsHeader: this.table.colsHeader}
     };
     const {result, ok} = await this.loader.post(`/api/saveUserProfile`, body);
     if (!ok) {
-      this.notification.show('Profile could not be uploaded', 'danger', 2000);
+      this.notification.show('Profile could not be saved', 'danger', 2000);
     } else {
-      this.notification.show('Profile was saved successfully', 'success', 2000);
+      this.notification.show(result.message, 'success', 2000);
     }
     this.notify();
     return;

@@ -3,9 +3,13 @@ const log = new Log('InfoLogger');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
 const {MySQL} = require('@aliceo2/web-ui');
+const JsonFileConnector = require('./JsonFileConnector.js');
 
 let querySource = null;
 let liveSource = null;
+
+
+const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);
@@ -78,21 +82,59 @@ module.exports.attachTo = (http, ws) => {
    * @param {Response} res
    */
   function getUserProfile(req, res) {
-    // const user = requ.body
+    const user = req.query.user;
+    jsonDb.getProfileByUsername(user).then((profile) => {
+      if (profile) {
+        res.status(200).json(profile);
+      } else {
+        const defaultUserConfig = {
+          date: {size: 'cell-m', visible: false},
+          time: {size: 'cell-m', visible: true},
+          hostname: {size: 'cell-m', visible: false},
+          rolename: {size: 'cell-m', visible: true},
+          pid: {size: 'cell-s', visible: false},
+          username: {size: 'cell-m', visible: false},
+          system: {size: 'cell-s', visible: true},
+          facility: {size: 'cell-m', visible: true},
+          detector: {size: 'cell-s', visible: false},
+          partition: {size: 'cell-m', visible: false},
+          run: {size: 'cell-s', visible: false},
+          errcode: {size: 'cell-s', visible: true},
+          errline: {size: 'cell-s', visible: false},
+          errsource: {size: 'cell-m', visible: false},
+          message: {size: '', visible: true}
+        };
+        res.status(200).json({user: 'default', colsHeader: defaultUserConfig});
+      }
+    })
+      .catch((err) => handleError(res, err));
   }
 
   /**
- * Method which handles the request for saving the user profile
- * @param {Request} req
- * @param {Response} res
- */
+  * Method which handles the request for saving the user profile
+  * @param {Request} req
+  * @param {Response} res
+  */
   function saveUserProfile(req, res) {
     const user = req.body.user;
-    const profile = req.body.profile;
-    console.log("USER")
-    console.log(user)
-    console.log("Profile")
-    console.log(profile)
+    const content = req.body.content;
+    jsonDb.getProfileByUsername(user).then((profile) => {
+      if (!profile) {
+        jsonDb.createNewProfile(user, content)
+          .then((newProfile) => {
+            if (newProfile) {
+              res.status(200).json({message: 'New profile was successfully created and saved'});
+            } else {
+              res.status(500).json({message: 'Profile was not found and a new profile could not be created'});
+            }
+          })
+          .catch((err) => handleError(res, err));
+      } else {
+        jsonDb.updateProfile(user, content)
+          .then(() => res.status(200).json({message: 'Profile updates were saved successfully'}))
+          .catch((err) => handleError(res, err));
+      }
+    }).catch((err) => handleError(res, err));
   }
 
   /**
