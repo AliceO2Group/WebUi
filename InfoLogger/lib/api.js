@@ -3,7 +3,7 @@ const log = new Log('InfoLogger');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
 const {MySQL} = require('@aliceo2/web-ui');
-const JsonFileConnector = require('./JsonFileConnector.js');
+const JsonFileConnector = require('./JSONFileConnector.js');
 
 let querySource = null;
 let liveSource = null;
