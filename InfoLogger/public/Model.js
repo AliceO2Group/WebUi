@@ -159,6 +159,7 @@ export default class Model extends Observable {
     } else {
       this.notification.show(result.message, 'success', 2000);
     }
+    this.accountMenuEnabled = false;
     this.notify();
     return;
   }
@@ -266,6 +267,7 @@ export default class Model extends Observable {
    */
   toggleFrameworkInfo() {
     this.frameworkInfoEnabled = !this.frameworkInfoEnabled;
+    this.accountMenuEnabled = false;
     this.notify();
   }
 
