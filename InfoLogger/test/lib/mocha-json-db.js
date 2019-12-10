@@ -7,8 +7,6 @@ const CONFIG_FILE = path.join(__dirname, 'db.json.temp');
 
 const TEST_PROFILE = {
   username: 'anonymous',
-  createdTimestamp: 1575900896013,
-  lastModifiedTimestamp: 1575901361601,
   content: {
     colsHeader: {
       date: {
@@ -22,6 +20,30 @@ const TEST_PROFILE = {
   }
 };
 
+const TEST_CONTENT = {
+  colsHeader: {
+    date: {
+      visible: true,
+      size: 'cell-m'
+    }, message: {
+      visible: true,
+      size: 'cell-s'
+    }
+  }
+}
+
+const NEW_CONTENT = {
+  colsHeader: {
+    date: {
+      visible: false,
+      size: 'cell-xl'
+    }, message: {
+      visible: false,
+      size: 'cell-xl'
+    }
+  }
+}
+
 let jsonConfig;
 
 describe('JSON file custom database', () => {
@@ -33,115 +55,88 @@ describe('JSON file custom database', () => {
     jsonConfig = new JsonFileConnector(CONFIG_FILE);
   });
 
-  describe('Creating a new Layout', () => {
-    it('should throw an error if layout id is not provided', () => {
+  describe('Creating a new profile', () => {
+    it('should throw an error if username is undefined', () => {
       return assert.rejects(async () => {
-        await jsonConfig.createLayout({});
-      }, new Error('layout id is mandatory'));
+        await jsonConfig.createNewProfile(undefined, TEST_CONTENT);
+      }, new Error('username for profile is mandatory'));
     });
 
-    it('should throw an error if layout id is not provided', () => {
+    it('should throw an error if username is null', () => {
       return assert.rejects(async () => {
-        await jsonConfig.createLayout({id: 'id'});
-      }, new Error('layout name is mandatory'));
+        await jsonConfig.createNewProfile(null, TEST_CONTENT);
+      }, new Error('username for profile is mandatory'));
     });
 
-    it('should successfully create a new layout', () => {
+    it('should throw an error if username contains only white spaces', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.createNewProfile('   ', TEST_CONTENT);
+      }, new Error('username for profile is mandatory'));
+    });
+
+    it('should successfully create a new profile', () => {
       return assert.doesNotReject(async () => {
-        await jsonConfig.createLayout(TEST_LAYOUT);
-        const createdLayout = await jsonConfig.readLayout(TEST_LAYOUT.id);
-        assert.deepStrictEqual(jsonConfig.data.layouts.length, 1);
-        assert.deepStrictEqual(createdLayout, TEST_LAYOUT);
+        await jsonConfig.createNewProfile('anonymous', TEST_CONTENT);
+        const newProfile = await jsonConfig.getProfileByUsername('anonymous');
+
+        assert.ok(newProfile.createdTimestamp);
+        assert.ok(newProfile.lastModifiedTimestamp);
+        assert.deepStrictEqual(newProfile.content, TEST_CONTENT);
+        assert.strictEqual(newProfile.username, 'anonymous');
       });
     });
 
-    it('should throw an error when creating a new layout with the same id as an existing layout', () => {
+    it('should throw an error when creating a new profile with the username as an existing profile', () => {
       return assert.rejects(async () => {
-        await jsonConfig.createLayout(TEST_LAYOUT);
-      }, new Error('layout with this id (123) already exists'));
-    });
-
-    it('should successfully create a layout with the same name but different ID', () => {
-      const layout = JSON.parse(JSON.stringify(TEST_LAYOUT));
-      layout.id = 321;
-      return assert.doesNotReject(async () => {
-        await jsonConfig.createLayout(layout);
-        const createdLayout = await jsonConfig.readLayout(layout.id);
-        assert.deepStrictEqual(jsonConfig.data.layouts.length, 2);
-        assert.deepStrictEqual(createdLayout, layout);
-      });
+        await jsonConfig.createNewProfile('anonymous', TEST_CONTENT);
+      }, new Error('Profile with this username (anonymous) already exists'));
     });
   });
 
-  describe('Reading/Updating/Deleting a Layout', () => {
-    it('should successfully read a layout by id', (done) => {
-      jsonConfig.readLayout(TEST_LAYOUT.id).then((layout) => {
-        assert.deepStrictEqual(TEST_LAYOUT, layout);
+  describe('Get a profile by username', () => {
+    it('should successfully get a profile by username', (done) => {
+      jsonConfig.getProfileByUsername('anonymous').then((profile) => {
+        assert.deepStrictEqual(profile.content, TEST_CONTENT);
+        assert.strictEqual(profile.username, 'anonymous');
         done();
       }).catch(done);
     });
 
-    it('should throw an error if no layout was found by an id', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.readLayout(111);
-      }, new Error('layout (111) not found'));
-    });
-
-    it('should throw an error when trying to update an inexistent layout by id', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.updateLayout(111, TEST_LAYOUT);
-      }, new Error('layout (111) not found'));
-    });
-
-    it('should successfully update an existing layout by id with a new name', () => {
-      TEST_LAYOUT.name = 'Updated Name';
-      return assert.doesNotReject(async () => {
-        const updatedLayoutId = await jsonConfig.updateLayout(TEST_LAYOUT.id, TEST_LAYOUT);
-        assert.deepStrictEqual(updatedLayoutId, TEST_LAYOUT.id);
-        const updatedLayout = await jsonConfig.readLayout(TEST_LAYOUT.id);
-        assert.deepStrictEqual(TEST_LAYOUT.name, updatedLayout.name);
-      });
-    });
-
-    it('should throw an error when trying to delete an inexistent layout by id', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.deleteLayout(111, TEST_LAYOUT);
-      }, new Error('layout (111) not found'));
-    });
-
-    it('should successfully delete a layout by id', () => {
-      return assert.doesNotReject(async () => {
-        const removedLayoutId = await jsonConfig.deleteLayout(TEST_LAYOUT.id);
-        assert.deepStrictEqual(removedLayoutId, TEST_LAYOUT.id);
-      });
+    it('should successfully return undefined if their is no profile associated to requested username', (done) => {
+      jsonConfig.getProfileByUsername('no-user').then((profile) => {
+        assert.strictEqual(profile, undefined);
+        done();
+      }).catch(done);
     });
   });
 
-  describe('Listing all existing layouts', () => {
-    it('should successfully list all existing layouts with no filter', () => {
-      return assert.doesNotReject(async () => {
-        const layouts = await jsonConfig.listLayouts();
-        const expectedLayouts = [{id: 321, name: 'test', owner_name: 'tests-boss', owner_id: 1}];
-        assert.deepStrictEqual(expectedLayouts, layouts);
+  describe('Update a profile by username', () => {
+    it('should successfully update the content and lastModifiedTimestamp of a profile by username', (done) => {
+      jsonConfig.getProfileByUsername('anonymous').then((profile) => {
+        const lastTimestamp = profile.lastModifiedTimestamp;
+        jsonConfig.updateProfile('anonymous', NEW_CONTENT).then((updatedProfile) => {
+          assert.deepStrictEqual(updatedProfile.content, NEW_CONTENT);
+          assert.strictEqual(updatedProfile.username, 'anonymous');
+          assert.ok(updatedProfile.lastModifiedTimestamp > lastTimestamp);
+          done();
+        }).catch(done);
       });
     });
 
-    it('should successfully list all existing layouts based on give filter', () => {
-      return assert.doesNotReject(async () => {
-        const layouts = await jsonConfig.listLayouts({owner_id: ''});
-        const expectedLayouts = [];
-        assert.deepStrictEqual(expectedLayouts, layouts);
-      });
+    it('should throw an error when trying to update a profile which does not exist', () => {
+      return assert.rejects(async () => {
+        await jsonConfig.updateProfile('no-one', TEST_CONTENT);
+      }, new Error('Profile with this username (no-one) cannot be updated as it does not exist'));
     });
   });
 
   describe('Testing read/write to fs', () => {
-    it('should reject when layouts are missing from data with error of bad data format ', async () => {
+    it('should reject when profiles are missing from data with error of bad data format ', async () => {
       return assert.rejects(async () => {
         jsonConfig.data = '{}';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
     it('should reject when there is no data with error of bad data format ', async () => {
@@ -149,15 +144,15 @@ describe('JSON file custom database', () => {
         jsonConfig.data = '';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
-    it('should reject when data.layouts is not an Array with error of bad data format ', async () => {
+    it('should reject when data.profiles is not an Array with error of bad data format ', async () => {
       return assert.rejects(async () => {
-        jsonConfig.data = {layouts: 'test'};
+        jsonConfig.data = {profiles: 'test'};
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
     it('should reject when there is missing data with error of bad JSON format ', async () => {
@@ -168,9 +163,9 @@ describe('JSON file custom database', () => {
       }, new Error(`Unable to parse DB file ${CONFIG_FILE}`));
     });
 
-    it('should successfully read layouts from data', async () => {
+    it('should successfully read profiles from data', async () => {
       return assert.doesNotReject(async () => {
-        jsonConfig.data = {layouts: []};
+        jsonConfig.data = {profiles: []};
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
       });

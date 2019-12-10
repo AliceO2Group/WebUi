@@ -98,13 +98,14 @@ class JsonFileConnector {
   }
 
   /**
-   * TODO Create a new profile
+   * Create a new profile for a user with provided content
+   * Adds created & lastModified timestamps
    * @param {string} username
    * @param {JSON} content
    * @return {boolean}
    */
   async createNewProfile(username, content) {
-    if (!username) {
+    if (!username || !username.trim()) {
       throw new Error(`username for profile is mandatory`);
     }
 
@@ -132,7 +133,6 @@ class JsonFileConnector {
    */
   async getProfileByUsername(username) {
     const profile = this.data.profiles.find((profile) => profile.username === username);
-    console.log(profile);
     if (!profile) {
       return undefined;
     }
@@ -140,17 +140,22 @@ class JsonFileConnector {
   }
 
   /**
-   * Update a single profile by its username
+   * Update a single profile by its username with the provided content
+   * Updates lastModified timestamp
    * @param {string} username
    * @param {JSON} content
    * @return {Object} updatedProfile
    */
   async updateProfile(username, content) {
     const profile = await this.getProfileByUsername(username);
-    Object.assign(profile.content, content);
-    profile.lastModifiedTimestamp = Date.now();
-    this._writeToFile();
-    return profile;
+    if (profile) {
+      Object.assign(profile.content, content);
+      profile.lastModifiedTimestamp = Date.now();
+      this._writeToFile();
+      return profile;
+    } else {
+      throw new Error(`Profile with this username (${username}) cannot be updated as it does not exist`);
+    }
   }
 }
 
