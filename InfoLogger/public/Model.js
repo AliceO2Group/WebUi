@@ -129,8 +129,7 @@ export default class Model extends Observable {
   async getUserProfile() {
     this.userProfile = RemoteData.loading();
     this.notify();
-    const user = 'anonymous';
-    const {result, ok} = await this.loader.get(`/api/getUserProfile?user=${user}`); // TODO: Send actual username
+    const {result, ok} = await this.loader.get(`/api/getUserProfile?user=${this.session.persionId}`);
     if (!ok) {
       this.userProfile = RemoteData.failure(result.message);
       this.notification.show('Unable to load your profile. Default profile will be used instead', 'danger', 2000);
@@ -150,7 +149,7 @@ export default class Model extends Observable {
    */
   async saveUserProfile() {
     const body = {
-      user: 'anonymous', // TODO Send actual username
+      user: this.session.personId,
       content: {colsHeader: this.table.colsHeader}
     };
     const {result, ok} = await this.loader.post(`/api/saveUserProfile`, body);
