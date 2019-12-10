@@ -53,12 +53,6 @@ describe('JSON file custom database', () => {
       }, new Error('username for profile is mandatory'));
     });
 
-    it('should throw an error if username contains only white spaces', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.createNewProfile('   ', TEST_CONTENT);
-      }, new Error('username for profile is mandatory'));
-    });
-
     it('should successfully create a new profile', () => {
       return assert.doesNotReject(async () => {
         await jsonConfig.createNewProfile('anonymous', TEST_CONTENT);

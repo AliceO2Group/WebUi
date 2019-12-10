@@ -105,7 +105,7 @@ class JsonFileConnector {
    * @return {boolean}
    */
   async createNewProfile(username, content) {
-    if (!username || !username.trim()) {
+    if (username == undefined || username == null) {
       throw new Error(`username for profile is mandatory`);
     }
 

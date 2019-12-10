@@ -82,7 +82,7 @@ module.exports.attachTo = (http, ws) => {
    * @param {Response} res
    */
   function getUserProfile(req, res) {
-    const user = req.query.user;
+    const user = parseInt(req.query.user);
     jsonDb.getProfileByUsername(user).then((profile) => {
       if (profile) {
         res.status(200).json(profile);
@@ -104,7 +104,7 @@ module.exports.attachTo = (http, ws) => {
           errsource: {size: 'cell-m', visible: false},
           message: {size: 'cell-xl', visible: true}
         };
-        res.status(200).json({user: 'default', colsHeader: defaultUserConfig});
+        res.status(200).json({user: 'default', content: {colsHeader: defaultUserConfig}});
       }
     })
       .catch((err) => handleError(res, err));
@@ -116,7 +116,7 @@ module.exports.attachTo = (http, ws) => {
   * @param {Response} res
   */
   function saveUserProfile(req, res) {
-    const user = req.body.user;
+    const user = parseInt(req.body.user);
     const content = req.body.content;
     jsonDb.getProfileByUsername(user).then((profile) => {
       if (!profile) {
