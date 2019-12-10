@@ -97,7 +97,11 @@ describe('InfoLogger', function() {
 
     it('should successfully load profile saved for user', async () => {
       await page.goto(baseUrl, {waitUntil: 'networkidle0'});
-      const userProfile = await page.evaluate(() => window.model.userProfile);
+      const userProfile = await page.evaluate(() => {
+        window.model.table.colsHeader.date.size = 'cell-xl';
+        document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(4)').click();
+        return window.model.userProfile;
+      });
       assert.ok(userProfile.payload.content.colsHeader.date.visible);
     });
   });
@@ -321,7 +325,6 @@ describe('InfoLogger', function() {
   //     assert.deepStrictEqual(activeMode, 'Query');
   //   });
   // });
-
 
   // describe('Query mode', () => {
   //   it('should fail because it is not configured', async () => {
