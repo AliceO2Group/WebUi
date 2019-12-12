@@ -295,7 +295,7 @@ label { display: block; margin-bottom: 0.5em; }
 .sidebar .sidebar-content { width: 15em; height: 100%; overflow: hidden; }
 .sidebar-extend { width: 30em; }
 .sidebar-extend .sidebar-content { width: 30em; }
-
+.sidebar-minimal { width: 3.6em; }
 /* Component Notification */
 /* moves to screen to get user attention */
 /* 'display none' in .notification-close allow after animation to click though notification on other content */
