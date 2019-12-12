@@ -34,15 +34,6 @@
 
 .resize-button { position: absolute; right: 0%; z-index: 100 }
 
-.tooltip {position: relative; display: inline-block; border-bottom: 1px dotted black;}
-.tooltip .tooltiptext {visibility: hidden; width: 118px; background-color: #555; color: #fff; text-align: center; padding: 3px; border-radius: 6px; position: absolute; z-index: 1;}
-.tooltiptext::after {content: ""; position: absolute; bottom: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: transparent transparent #555 transparent;}
-.tooltip:hover .tooltiptext {visibility: visible;}
-
 /* Removing borders and arrows from select-dropdown */
 select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';}
 .select-tab {border: 0;border-bottom: 2px solid var(--color-blue);border-radius: 0;margin-bottom: -2px;color: var(--color-blue);}
-
-.sidebar-minimal {
-  width: 3.6em;
-}
