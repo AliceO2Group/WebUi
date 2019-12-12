@@ -10,7 +10,7 @@
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "simul": "node test/live-simulator/infoLoggerServer.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
+    "mocha": "mocha --exit $(find test -name 'mocha-s*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },

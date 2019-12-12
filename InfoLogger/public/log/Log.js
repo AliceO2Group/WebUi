@@ -44,6 +44,8 @@ export default class Log extends Observable {
 
     this.scrollTop = 0; // position of table scrollbar
     this.scrollHeight = 0; // height of content viewed in the scroll table
+
+    this.statusDropdown = false;
   }
 
   /**
@@ -52,6 +54,14 @@ export default class Log extends Observable {
    */
   isActiveModeQuery() {
     return this.activeMode === MODE.QUERY;
+  }
+
+  /**
+   * Toggle a dropdown with the full SQL query
+   */
+  toggleStatusDropdown() {
+    this.statusDropdown = !this.statusDropdown;
+    this.notify();
   }
 
   /**

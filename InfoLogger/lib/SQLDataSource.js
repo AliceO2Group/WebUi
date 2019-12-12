@@ -61,6 +61,7 @@ module.exports = class SQLDataSource {
   _filtersToSqlConditions(filters) {
     const values = [];
     const criteria = [];
+    const criteriaVerbose = [];
     for (const field in filters) {
       if (!filters.hasOwnProperty(field)) {
         continue;
@@ -81,19 +82,24 @@ module.exports = class SQLDataSource {
           case '$min':
           case '$since':
             criteria.push(`\`${field}\`>=?`);
+            criteriaVerbose.push(` \`${field}\`>='${filters[field].since}'`);
             break;
           case '$max':
           case '$until':
             criteria.push(`\`${field}\`<=?`);
+            criteriaVerbose.push(` \`${field}\`<='${filters[field].until}'`);
             break;
           case '$match':
             criteria.push(`\`${field}\` LIKE (?)`);
+            criteriaVerbose.push(` \`${field}\` LIKE '${filters[field].match}'`);
             break;
           case '$exclude':
             criteria.push(`(NOT(\`${field}\` LIKE (?)) OR \`${field}\` IS NULL)`);
+            criteriaVerbose.push(` (NOT(\`${field}\` LIKE '${filters[field].exclude}' OR \`${field.exclude}\` IS NULL)`);
             break;
           case '$in':
             criteria.push(`\`${field}\` IN (?)`);
+            criteriaVerbose.push(` \`${field}\` IN [${filters[field][operator]}]`);
             break;
           default:
             log.warn(`unknown operator ${operator}`);
@@ -101,7 +107,7 @@ module.exports = class SQLDataSource {
         }
       }
     }
-    return {values, criteria};
+    return {values, criteria, criteriaVerbose};
   }
 
   /**
@@ -123,7 +129,7 @@ module.exports = class SQLDataSource {
     options = Object.assign({}, {limit: 100}, options);
 
     const startTime = Date.now(); // ms
-    const {criteria, values} = this._filtersToSqlConditions(filters);
+    const {criteria, values, criteriaVerbose} = this._filtersToSqlConditions(filters);
     const criteriaString = this._getCriteriaAsString(criteria);
 
     const rows = await this._queryMessagesOnOptions(criteriaString, options, values);
@@ -141,14 +147,14 @@ module.exports = class SQLDataSource {
 
     const totalTime = Date.now() - startTime; // ms
     log.debug(`Query done in ${totalTime}ms`);
-
     return {
       rows,
       total: total,
       count: rows.length,
       more,
       limit: options.limit,
-      time: totalTime // ms
+      time: totalTime, // ms
+      queryAsString: this._getSQLQueryAsString(criteriaVerbose, options.limit)
     };
   }
 
@@ -159,6 +165,16 @@ module.exports = class SQLDataSource {
    */
   _getCriteriaAsString(criteria) {
     return (criteria && criteria.length) ? `WHERE ${criteria.join(' AND ')}` : '';
+  }
+
+  /**
+   * Get the SQL Query used as a string
+   * @param {string} criteriaVerbose
+   * @param {JSON} limit
+   * @return {string}
+   */
+  _getSQLQueryAsString(criteriaVerbose, limit) {
+    return `SELECT * FROM \`messages\` WHERE ${criteriaVerbose} ORDER BY \`TIMESTAMP\` DESC LIMIT ${limit}`;
   }
 
   /**
