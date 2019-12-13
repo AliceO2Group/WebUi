@@ -11,4 +11,10 @@ module.exports = {
     host: 'localhost',
     port: 6102
   },
+  jwt: {
+    secret: '<secret>',
+    issuer: 'alice-o2-gui',
+    expiration: '60s',
+    maxAge: '2'
+  },
 };
