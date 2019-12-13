@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "Infologger GUI to query and stream log events",
   "homepage": "https://alice-o2.web.cern.ch",
   "main": "index.js",
@@ -10,7 +10,7 @@
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "simul": "node test/live-simulator/infoLoggerServer.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-s*.js')",
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
