@@ -95,7 +95,8 @@ module.exports = class SQLDataSource {
             break;
           case '$exclude':
             criteria.push(`(NOT(\`${field}\` LIKE (?)) OR \`${field}\` IS NULL)`);
-            criteriaVerbose.push(` (NOT(\`${field}\` LIKE '${filters[field].exclude}' OR \`${field.exclude}\` IS NULL)`);
+            criteriaVerbose.push(` (NOT(\`${field}\` LIKE '${filters[field].exclude}' `
+              + `OR \`${field.exclude}\` IS NULL)`);
             break;
           case '$in':
             criteria.push(`\`${field}\` IN (?)`);
