@@ -121,11 +121,12 @@ describe('InfoLogger', function() {
         await page.goto(baseUrl + `?personid=1&name=test&token=${testToken}`, {waitUntil: 'networkidle0'});
         const userProfile = await page.evaluate(() => {
           window.model.table.colsHeader.date.size = 'cell-xl';
+          document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();
           document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
           return window.model.userProfile;
         });
-        page.waitFor(500);
-        assert.ok(userProfile.payload.content.colsHeader.date.visible);
+        page.waitFor(200);
+        assert.ok(!userProfile.payload.content.colsHeader.date.visible);
       });
     });
   });

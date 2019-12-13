@@ -17,4 +17,5 @@ module.exports = {
     expiration: '60s',
     maxAge: '2'
   },
+  dbFile: './test/testdb.json'
 };
