@@ -54,11 +54,8 @@ const userActionsDropdown = (model) => h('.dropdown', {class: model.accountMenuE
   h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
   h('.dropdown-menu', [
     h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-    model.session.personid === 0 // anonymous user has id 0
-      ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-      : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
     infoMenuItem(model),
-    saveUserProfileMenuItem(model),
+    model.session.personid !== 0 && saveUserProfileMenuItem(model),
   ]),
 ]);
 
