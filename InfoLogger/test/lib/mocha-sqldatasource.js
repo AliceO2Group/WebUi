@@ -89,7 +89,7 @@ describe('SQLDataSource', () => {
 
   describe('Filter to SQL Conditions', () => {
     it('should successfully return empty values & criteria when translating empty filters from client', () => {
-      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions({}), {values: [], criteria: []});
+      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions({}), {values: [], criteria: [], criteriaVerbose: []});
     });
 
     it('should successfully return values & criteria when translating filters from client', () => {
@@ -97,8 +97,15 @@ describe('SQLDataSource', () => {
       const expectedCriteria = ['`timestamp`>=?', '`timestamp`<=?',
         '`hostname` LIKE (?)', '(NOT(`hostname` LIKE (?)) OR `hostname` IS NULL)',
         '`severity` IN (?)', '`level`<=?', '`userId`>=?'];
+      const expectedVerbose = [' `timestamp`>=\'-5\'',
+        ' `timestamp`<=\'-1\'',
+        ' `hostname` LIKE \'test\'',
+        ' (NOT(`hostname` LIKE \'testEx\' OR `undefined` IS NULL)',
+        ' `severity` IN [D,W]',
+        ' `level`<=\'undefined\'',
+        ' `userId`>=\'undefined\''];
       assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(filters),
-        {values: expectedValues, criteria: expectedCriteria});
+        {values: expectedValues, criteria: expectedCriteria, criteriaVerbose: expectedVerbose});
     });
   });
 
@@ -165,7 +172,7 @@ describe('SQLDataSource', () => {
     const requestRows = `SELECT * from (SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT 10) as reordered ORDER BY \`TIMESTAMP\` ASC`;
     const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
     const values = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W']];
-
+    const query = 'SELECT * FROM `messages` WHERE  `timestamp`>=\'-5\', `timestamp`<=\'-1\', `hostname` LIKE \'test\', (NOT(`hostname` LIKE \'testEx\' OR `undefined` IS NULL), `severity` IN [D,W] ORDER BY `TIMESTAMP` DESC LIMIT 10';
     const queryStub = sinon.stub();
     queryStub.withArgs(requestRows, values).resolves([]);
     queryStub.withArgs(requestCount, values).resolves([{total: 10}]);
@@ -179,7 +186,8 @@ describe('SQLDataSource', () => {
       total: 10,
       count: 0,
       more: false,
-      limit: 10
+      limit: 10,
+      queryAsString: query
     };
     delete result.time;
     assert.deepStrictEqual(result, expectedResult);
@@ -191,7 +199,7 @@ describe('SQLDataSource', () => {
     const requestRows = `SELECT * from (SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT 10) as reordered ORDER BY \`TIMESTAMP\` ASC`;
     const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
     const values = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W']];
-
+    const query = 'SELECT * FROM `messages` WHERE  `timestamp`>=\'-5\', `timestamp`<=\'-1\', `hostname` LIKE \'test\', (NOT(`hostname` LIKE \'testEx\' OR `undefined` IS NULL), `severity` IN [D,W] ORDER BY `TIMESTAMP` DESC LIMIT 10';
     const queryStub = sinon.stub();
     queryStub.withArgs(requestRows, values).resolves([]);
     queryStub.withArgs(requestCount, values).resolves([{total: 200000}]);
@@ -205,7 +213,8 @@ describe('SQLDataSource', () => {
       total: 100000,
       count: 0,
       more: true,
-      limit: 10
+      limit: 10,
+      queryAsString: query
     };
     delete result.time;
     assert.deepStrictEqual(result, expectedResult);

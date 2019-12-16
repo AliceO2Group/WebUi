@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "Infologger GUI to query and stream log events",
   "homepage": "https://alice-o2.web.cern.ch",
   "main": "index.js",
