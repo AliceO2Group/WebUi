@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
 const {spawn} = require('child_process');
+const {JwtToken} = require('@aliceo2/web-ui');
 
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
@@ -19,6 +20,9 @@ describe('InfoLogger', function() {
   this.timeout(20000);
   this.slow(1000);
   const baseUrl = 'http://' + config.http.hostname + ':' + config.http.port + '/';
+
+  const jwt = new JwtToken(config.jwt);
+  const testToken = jwt.generateToken(1, 'test', 1);
 
   before(async () => {
     // Start web-server in background
@@ -63,46 +67,67 @@ describe('InfoLogger', function() {
   });
 
   describe('User Actions', async () => {
-    it('have a button in action dropdown button to save user profile', async () => {
-      const profileMenuItem = await page.evaluate(() => {
-        const title = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(4)').title;
-        const text = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(4)').innerText;
-        return {title: title, text: text};
+    describe('User is anonymous', async () => {
+      it('should have a button in action dropdown button to view info about the framework', async () => {
+        const profileMenuItem = await page.evaluate(() => {
+          const title = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(2)').title;
+          const text = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(2)').innerText;
+          return {title: title, text: text};
+        });
+        assert.strictEqual(profileMenuItem.title, 'Show/Hide details about the framework');
+        assert.strictEqual(profileMenuItem.text, 'About');
       });
-      assert.strictEqual(profileMenuItem.title, 'Save the columns size and visibility as your profile');
-      assert.strictEqual(profileMenuItem.text, 'Save Profile');
+
+      it('should not have a button in action dropdown button to save the profile', async () => {
+        const profileMenuItem = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)'));
+        assert.strictEqual(profileMenuItem, null);
+      });
     });
 
-    it('successfully save the profile of the user when pressed the "Save Profile" menu-item', async () => {
-      await page.evaluate(() => {
-        document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();
-        window.model.table.colsHeader.date.visible = true; // modify profile to be checked on reload after save
-        document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(4)').click();
+    describe('User is NOT anonymous', async () => {
+      it('should have a button in action dropdown button to save user profile', async () => {
+        await page.goto(baseUrl + `?personid=1&name=test&token=${testToken}`, {waitUntil: 'networkidle0'});
+        const profileMenuItem = await page.evaluate(() => {
+          const title = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').title;
+          const text = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').innerText;
+          return {title: title, text: text};
+        });
+        assert.strictEqual(profileMenuItem.title, 'Save the columns size and visibility as your profile');
+        assert.strictEqual(profileMenuItem.text, 'Save Profile');
       });
-      await page.waitFor(200);
 
-      const actionDropdownClosed = await page.evaluate(() => window.model.accountMenuEnabled);
-      assert.ok(!actionDropdownClosed);
-    });
+      it('successfully save the profile of the user when pressed the "Save Profile" menu-item', async () => {
+        await page.evaluate(() => {
+          document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();
+          document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
+        });
+        await page.waitFor(200);
 
-    it('have a button in action dropdown button to view info about the framework', async () => {
-      const profileMenuItem = await page.evaluate(() => {
-        const title = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').title;
-        const text = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').innerText;
-        return {title: title, text: text};
+        const actionDropdownClosed = await page.evaluate(() => window.model.accountMenuEnabled);
+        assert.ok(!actionDropdownClosed);
       });
-      assert.strictEqual(profileMenuItem.title, 'Show/Hide details about the framework');
-      assert.strictEqual(profileMenuItem.text, 'About');
-    });
 
-    it('should successfully load profile saved for user', async () => {
-      await page.goto(baseUrl, {waitUntil: 'networkidle0'});
-      const userProfile = await page.evaluate(() => {
-        window.model.table.colsHeader.date.size = 'cell-xl';
-        document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(4)').click();
-        return window.model.userProfile;
+      it('should have a button in action dropdown button to view info about the framework', async () => {
+        const profileMenuItem = await page.evaluate(() => {
+          const title = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(2)').title;
+          const text = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(2)').innerText;
+          return {title: title, text: text};
+        });
+        assert.strictEqual(profileMenuItem.title, 'Show/Hide details about the framework');
+        assert.strictEqual(profileMenuItem.text, 'About');
       });
-      assert.ok(userProfile.payload.content.colsHeader.date.visible);
+
+      it('should successfully load profile saved for user when accessing the page', async () => {
+        await page.goto(baseUrl + `?personid=1&name=test&token=${testToken}`, {waitUntil: 'networkidle0'});
+        const userProfile = await page.evaluate(() => {
+          window.model.table.colsHeader.date.size = 'cell-xl';
+          document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();
+          document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
+          return window.model.userProfile;
+        });
+        page.waitFor(200);
+        assert.ok(!userProfile.payload.content.colsHeader.date.visible);
+      });
     });
   });
 
