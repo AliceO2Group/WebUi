@@ -1,4 +1,4 @@
-import {h, iconPerson, iconMediaPlay, iconMediaStop, info} from '/js/src/index.js';
+import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 import {BUTTON} from '../constants/button-states.const.js';
 import {MODE} from '../constants/mode.const.js';
 
@@ -7,10 +7,7 @@ let liveButtonType = BUTTON.DEFAULT;
 let liveButtonIcon = iconMediaPlay();
 
 export default (model) => [
-  h('.btn-group', [
-    loginButton(model),
-    infoButton(model)
-  ]),
+  userActionsDropdown(model),
   h('div.btn-group.mh3', [
     queryButton(model),
     liveButton(model)
@@ -53,26 +50,36 @@ export default (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
+const userActionsDropdown = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
   h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
   h('.dropdown-menu', [
     h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-    model.session.personid === 0 // anonymous user has id 0
-      ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-      : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+    infoMenuItem(model),
+    model.session.personid !== 0 && saveUserProfileMenuItem(model),
   ]),
 ]);
 
 /**
- * Show button to display framework info table
+ * Show menu item to display framework info table
  * @param {Object} model
  * @return {vnode}
  */
-const infoButton = (model) =>
-  h('button.btn', {
+const infoMenuItem = (model) =>
+  h('.menu-item', {
     onclick: () => model.toggleFrameworkInfo(),
     title: 'Show/Hide details about the framework'
-  }, info());
+  }, 'About');
+
+/**
+ * Show menu item which saves profile of the user
+ * @param {Object} model
+ * @return {vnode}
+ */
+const saveUserProfileMenuItem = (model) =>
+  h('.menu-item', {
+    onclick: () => model.saveUserProfile(),
+    title: 'Save the columns size and visibility as your profile'
+  }, 'Save Profile');
 
 /**
  * Query button final state depends on the following states

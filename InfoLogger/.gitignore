@@ -5,3 +5,5 @@ cert/*
 node_modules
 .nyc*
 coverage*
+db.json
+testdb.json
