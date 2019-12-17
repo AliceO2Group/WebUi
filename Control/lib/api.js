@@ -1,4 +1,4 @@
-const {WebSocketMessage} = require('@aliceo2/web-ui');
+const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 const Padlock = require('./Padlock.js');
@@ -14,6 +14,8 @@ if (!config.grpc) {
 if (!config.grafana) {
   log.error('[Grafana] Configuration is missing');
 }
+let consulService;
+initializeConsulService();
 
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
@@ -101,6 +103,7 @@ module.exports.setup = (http, ws) => {
   });
 
   http.get('/getFrameworkInfo', getFrameworkInfo);
+  http.get('/getCRUs', getCRUs);
 
   /**
    * Send to all users state of Pad via Websocket
@@ -139,6 +142,22 @@ module.exports.setup = (http, ws) => {
         result.kafka = config.kafka;
       }
       res.status(200).json(result);
+    }
+  }
+
+  /**
+   * Method to request all CRUs available in consul KV store
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function getCRUs(req, res) {
+    const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
+    if (consulService) {
+      consulService.getOnlyRawValueByKey(cruPath)
+        .then((data) => res.status(200).json(data))
+        .catch((error) => errorHandler(error, res, 502));
+    } else {
+      errorHandler('Unable to retrieve configuration consul service', res, 502);
     }
   }
 };
@@ -204,4 +223,20 @@ function httpGetJson(host, port, path) {
     request.on('error', (err) => reject(err));
     request.end();
   });
+}
+
+/**
+ * Method to check if consul service can be used
+ */
+function initializeConsulService() {
+  if (!config.consul) {
+    log.error('Consul configuration is missing');
+  } else {
+    consulService = new ConsulService(config.consul);
+    consulService.getConsulLeaderStatus()
+      .then(() => {
+        log.info('Consul service is up and running')
+      })
+      .catch((error) => log.error(`Could not contact Consul Service due to ${error}`));
+  }
 }
