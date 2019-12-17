@@ -20,7 +20,7 @@ protected:
   void Execute() override
   {
     const auto slashIndex = path.find_first_of('/');
-    output = BackendInstance->retrieveJson(path.substr(0, slashIndex), path.substr(slashIndex + 1));
+    output = BackendInstance->retrieveMOJson(path.substr(0, slashIndex), path.substr(slashIndex + 1));
   }
 
   void OnOK() override
@@ -58,7 +58,7 @@ private:
 /// Create backend instance
 void InitBackend(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
-  
+
   if ((info.Length() < 5) && (!info[0].IsString())) {
     Napi::TypeError::New(env, "Invalid argument").ThrowAsJavaScriptException();
   }
@@ -77,7 +77,7 @@ void InitBackend(const Napi::CallbackInfo& info) {
 /// Get JSON-encoded TObject asynchronously
 void GetObject(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
-  
+
   if (info.Length() < 2) {
     Napi::TypeError::New(env, "Invalid argument count").ThrowAsJavaScriptException();
     return;

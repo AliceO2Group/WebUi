@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "description": "O2 Quality Control Web User Interface",
   "main": "export.js",
   "scripts": {
