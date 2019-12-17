@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * @license
  * Copyright CERN and copyright holders of ALICE O2. This software is
