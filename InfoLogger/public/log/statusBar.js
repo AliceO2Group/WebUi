@@ -8,8 +8,9 @@ import {h} from '/js/src/index.js';
  */
 export default (model) => [
   h('.flex-row', [
-    h('.w-50', statusLogs(model)),
-    h('.w-50.text-right', applicationMessage(model), applicationOptions(model)),
+    h('', {style: 'width:40%'}, statusLogs(model)),
+    h('.w-50', {style: 'text-align: center;'}, sqlQuery(model)),
+    h('.flex-grow.text-right', applicationMessage(model), applicationOptions(model)),
   ]),
 ];
 
@@ -30,6 +31,28 @@ const statusLogs = (model) => model.servicesResult.match({
   ],
   Failure: () => h('span.danger', 'Unable to load services'),
 });
+
+/**
+ * Component displaying the SQL query built with the user's filters
+ * @param {Object} model
+ * @return {vnode}
+ */
+const sqlQuery = (model) => model.log.queryResult.match({
+  NotAsked: () => null,
+  Loading: () => null,
+  Success: (data) => h('.dropup.w-100', {
+    class: model.log.statusDropdown ? 'dropup-open' : '',
+  }, [
+    h('.query-item.w-wrapped.ph1', {
+      title: 'Toggle to view full SQL query',
+      style: 'min-width: 0%;',
+      onclick: () => model.log.toggleStatusDropdown()
+    }, data.queryAsString),
+    h('.dropup-menu.p2.gray-darker.text-center.w-100', [
+      h('', {style: 'font-weight: bold'}, 'SQL QUERY'), data.queryAsString])]),
+  Failure: () => null,
+});
+
 
 /**
  * Application message, could be deprecated when notification is implemented
@@ -87,16 +110,16 @@ const statusLive = (model, services) => [
  * @return {vnode}
  */
 const statusStats = (model) => [
-  h('span.ph2', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
+  h('span.ph1', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
   model.log.queryResult.match({
     NotAsked: () => null,
     Loading: () => 'Querying server...',
     Success: (result) => statusQuery(model, result),
     Failure: () => null, // notification
   }),
-  h('span.ph2.severity-d', `${model.log.stats.debug} debug`),
-  h('span.ph2.severity-i', `${model.log.stats.info} info`),
-  h('span.ph2.severity-w', `${model.log.stats.warning} warn`),
-  h('span.ph2.severity-e', `${model.log.stats.error} error`),
-  h('span.ph2.severity-f', `${model.log.stats.fatal} fatal`)
+  h('span.ph1.severity-d', `${model.log.stats.debug} debug`),
+  h('span.ph1.severity-i', `${model.log.stats.info} info`),
+  h('span.ph1.severity-w', `${model.log.stats.warning} warn`),
+  h('span.ph1.severity-e', `${model.log.stats.error} error`),
+  h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`)
 ];

@@ -29,7 +29,7 @@ coverage:
         paths: "Control"
         threshold: null
         if_not_found: success
-    patch: true
+    patch: false
     changes: false
     threshold: 0
 
