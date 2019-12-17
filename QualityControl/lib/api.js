@@ -41,27 +41,30 @@ function listObjects(req, res) {
  * @param {Response} res
  */
 function listOnlineObjects(req, res) {
-  if (typeof model.listOnlineObjects !== 'undefined') {
-    model.listOnlineObjects()
-      .then((data) => res.status(200).json(data))
+  if (typeof model.consulService !== 'undefined') {
+    model.consulService.getServices()
+      .then((services) => {
+        const tags = getTagsFromServices(services);
+        res.status(200).json(tags);
+      })
       .catch((err) => errorHandler(err, res));
   } else {
-    errorHandler('Online mode is not enabled', res, 404);
+    errorHandler('Online mode is not enabled due to missing Consul configuration', res, 503);
   }
 }
 
 /**
- * Check the state of OnlineMode
+ * Check the state of OnlineMode by checking the status of Consul Leading Agent
  * @param {Request} req
  * @param {Response} res
  */
 function isOnlineModeConnectionAlive(req, res) {
-  if (typeof model.isOnlineModeConnectionAlive !== 'undefined') {
-    model.isOnlineModeConnectionAlive()
+  if (typeof model.consulService !== 'undefined') {
+    model.consulService.getConsulLeaderStatus()
       .then(() => res.status(200).json({running: true}))
-      .catch((err) => errorHandler(err, res));
+      .catch((err) => errorHandler(`Unable to retrieve Consul Status: ${err}`, res));
   } else {
-    errorHandler('Online mode is not enabled', res, 404);
+    errorHandler('Online mode is not enabled due to missing Consul configuration', res, 503);
   }
 }
 
@@ -274,4 +277,24 @@ function errorHandler(err, res, status = 500) {
     log.error(err.message || err);
   }
   res.status(status).send({message: err.message || err});
+}
+
+/**
+ * Helpers
+ */
+
+/**
+ * Method to extract the tags from a service list. This represents objects that are in online mode.
+ * @param {JSON} services
+ * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
+ */
+function getTagsFromServices(services) {
+  const tags = [];
+  for (const serviceName in services) {
+    if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
+      const tagsToBeAdded = services[serviceName].Tags;
+      tagsToBeAdded.forEach((tag) => tags.push({name: tag}));
+    }
+  }
+  return tags;
 }
