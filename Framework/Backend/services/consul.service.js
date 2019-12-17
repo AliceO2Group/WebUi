@@ -100,7 +100,7 @@ class ConsulService {
    * @param {string} key
    * @return {Promise.<Array<string>, Error>}
    */
-  async getValueOnlyByKey(key) {
+  async getOnlyRawValueByKey(key) {
     key = this.parseKey(key);
     const getPath = this.kvPath + key + '?raw=true';
     return this.httpGetJson(getPath);

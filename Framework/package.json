@@ -35,7 +35,8 @@
     "eslint-config-google": "^0.13.0",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
-    "puppeteer": "2.0.0"
+    "puppeteer": "2.0.0",
+    "nock": "^10.0.6"
   },
   "main": "Backend/index.js"
 }
