@@ -11,7 +11,6 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('./../log/Log.js'))('Consul');
 const http = require('http');
 
 /**
@@ -20,70 +19,109 @@ const http = require('http');
 class ConsulService {
   /**
    * Setup Consul configuration
-   * @param {string} hostname
-   * @param {number} port
+   * @param {JSON} config
    */
-  constructor(hostname, port) {
-    if (!hostname) {
-      throw new Error('Hostname passed in Consul configuration cannot be empty');
+  constructor(config) {
+    if (!config) {
+      throw new Error('Configuration field cannot be empty');
     }
-    if (!port) {
-      throw new Error('Port passed in Consul configuration cannot be empty');
+    if (!config.hostname) {
+      throw new Error('Hostname field cannot be empty');
     }
-    this.hostname = hostname;
-    this.port = port;
-    this.kvPath = '/v1/kv';
+    if (!config.port) {
+      throw new Error('Port field cannot be empty');
+    }
+    this.hostname = config.hostname;
+    this.port = config.port;
+
     this.servicesPath = '/v1/agent/services';
+    this.kvPath = '/v1/kv/';
+    this.leaderPath = '/v1/status/leader';
   }
-
-
-  /**
-   * Method to extract the tags from a service list. This represents objects that are in online mode.
-   * @param {JSON} services ??????????????????
-   * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
-   */
-  getTagsFromServices(services) {
-    const tags = [];
-    for (const serviceName in services) {
-      if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
-        const tagsToBeAdded = services[serviceName].Tags;
-        tagsToBeAdded.forEach((tag) => tags.push({name: tag}));
-      }
-    }
-    return tags;
-  }
-
-  /**
-   * HTTP API Calls
-   */
 
   /**
    * Returns a promise with regards to the status of the consul leader
    * @return {Promise}
    */
   async getConsulLeaderStatus() {
-    return this.httpGetJson('/v1/status/leader');
+    return this.httpGetJson(this.leaderPath);
   }
 
   /**
-   * Method to return a promise containing the services stored in Consul
-   * @return {Promise.<Array.<Object>, Error>}
+   * Method to return a promise containing all services stored in Consul
+   * * a JSON of Objects representing all services with their metadata
+   * * an error if request was not successful
+   * @return {Promise}
    */
-  async getAllServices() {
+  async getServices() {
     return this.httpGetJson(this.servicesPath);
   }
 
   /**
-   * Method to return a promise containing the names of the objects in online mode
-   * @return {Promise.<Array.<Object>, Error>}
+   * Method to return a Promise containing:
+   * * an array of strings representing all keys in Consul store if request is successful
+   * * an error if request was not successful
+   * @return {Promise.<Array<string>, Error>}
    */
-  async getAllKeys() {
-    return this.httpGetJson(this.servicesPath);
+  async getKeys() {
+    return this.httpGetJson(this.kvPath + '?keys=true');
+  }
+
+  /**
+   * Method to return a Promise containing:
+   * * an array of strings representing all keys that starts with the provided `keyPrefix`
+   * * an error if request was not successful
+   * @param {string} keyPrefix - containing the prefix of the keys requested
+   * @return {Promise.<Array<string>, Error>}
+   */
+  async getKeysByPrefix(keyPrefix) {
+    keyPrefix = this.parseKey(keyPrefix);
+    const getPath = this.kvPath + keyPrefix + '/?keys=true';
+    return this.httpGetJson(getPath);
+  }
+
+  /**
+   * Method to return a Promise containing:
+   * * a JSON object containing the value and metadata stored for the specified key; If key is not found 404 is returned
+   * * an error if request was not successful
+   * @param {string} key
+   * @return {Promise.<Array<string>, Error>}
+   */
+  async getValueObjectByKey(key) {
+    key = this.parseKey(key);
+    const getPath = this.kvPath + key;
+    return this.httpGetJson(getPath);
+  }
+
+  /**
+   * Method to return a Promise containing:
+   * * the raw value stored for the requested key; If key is not found 404 is returned
+   * * an error if request was not successful
+   * @param {string} key
+   * @return {Promise.<Array<string>, Error>}
+   */
+  async getValueOnlyByKey(key) {
+    key = this.parseKey(key);
+    const getPath = this.kvPath + key + '?raw=true';
+    return this.httpGetJson(getPath);
+  }
+
+  /**
+   * Method to return a Promise containing:
+   * * * an `Array<JSON>` containing the value and metadata stored for the objects with the requested keyPrefix;
+   * * an error if request was not successful
+   * @param {string} keyPrefix
+   * @return {Promise.<Array<string>, Error>}
+   */
+  async getValuesByKeyPrefix(keyPrefix) {
+    keyPrefix = this.parseKey(keyPrefix);
+    const getPath = this.kvPath + keyPrefix + '?recurse=true';
+    return this.httpGetJson(getPath);
   }
 
   /**
    * Util to get JSON data (parsed) from Consul server
-   * @param {string} path - path en Consul server
+   * @param {string} path - path to Consul server
    * @return {Promise.<Object, Error>} JSON response
    */
   async httpGetJson(path) {
@@ -92,6 +130,7 @@ class ConsulService {
         hostname: this.hostname,
         port: this.port,
         path: path,
+        qs: {keys: true},
         method: 'GET',
         headers: {
           Accept: 'application/json'
@@ -124,6 +163,25 @@ class ConsulService {
       request.on('error', (err) => reject(err));
       request.end();
     });
+  }
+
+  /**
+   * Helpers
+   */
+
+  /**
+   * Method to check for and remove any `/` from the start and end of a key/keyPrefix
+   * @param {string} key - key or keyPrefix to check
+   * @return {string}
+   */
+  parseKey(key) {
+    if (key.charAt(0) === '/') {
+      key = key.substring(1);
+    }
+    if (key.charAt(key.length - 1) === '/') {
+      key = key.substring(0, key.length - 1);
+    }
+    return key;
   }
 }
 
