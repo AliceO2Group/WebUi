@@ -152,11 +152,12 @@ module.exports.setup = (http, ws) => {
    */
   function getCRUs(req, res) {
     const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
+    const regex = new RegExp(`.*/.*/card`); // TODO Change this to cards
     if (consulService) {
       consulService.getOnlyRawValuesByKeyPrefix(cruPath).then((data) => {
         const crusByHost = {};
         Object.keys(data)
-          .filter((key) => key.substr(key.length - 5, 5) === '/card') // TODO Ask structure
+          .filter((key) => key.match(regex))
           .forEach((key) => {
             const splitKey = key.split('/');
             const hostKey = splitKey[splitKey.length - 2];
