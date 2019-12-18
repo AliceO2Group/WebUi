@@ -133,7 +133,7 @@ class ConsulService {
           const valueDecoded = Buffer.from(object.Value, 'base64').toString('ascii');
           response[key] = valueDecoded;
         }
-      })
+      });
       return response;
     });
   }
