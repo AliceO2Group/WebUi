@@ -13,7 +13,7 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
     model.sideBarMenu ? 'Environments' : 'ENVS'),
   menuItem(model, 'Create', 'newEnvironment', iconPlus()),
   menuItem(model, 'Active', 'environments', iconGridTwoUp()),
-  menuItem(model, 'CRUs', 'configuration', iconCog()),
+  menuItem(model, 'Configuration', 'configuration', iconCog()),
   h('', {style: 'flex-grow:1'}), // empty item to fill in space
   menuItem(model, 'About', 'about', iconExcerpt()),
   collapseSidebarMenuItem(model),

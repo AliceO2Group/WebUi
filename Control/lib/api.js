@@ -166,7 +166,7 @@ module.exports.setup = (http, ws) => {
         res.status(200).json(crusByHost);
       }).catch((error) => errorHandler(error, res, 502));
     } else {
-      errorHandler('Unable to retrieve configuration consul service', res, 502);
+      errorHandler('Unable to retrieve configuration of consul service', res, 502);
     }
   }
 };
@@ -243,9 +243,7 @@ function initializeConsulService() {
   } else {
     consulService = new ConsulService(config.consul);
     consulService.getConsulLeaderStatus()
-      .then(() => {
-        log.info('Consul service is up and running')
-      })
+      .then((data) => log.info(`Consul service is up and running on: ${data}`))
       .catch((error) => log.error(`Could not contact Consul Service due to ${error}`));
   }
 }
