@@ -60,7 +60,6 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * an array of strings representing all keys in Consul store if request is successful
-   * * an error if request was not successful
    * @return {Promise.<Array<string>, Error>}
    */
   async getKeys() {
@@ -70,7 +69,6 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * an array of strings representing all keys that starts with the provided `keyPrefix`
-   * * an error if request was not successful
    * @param {string} keyPrefix - containing the prefix of the keys requested
    * @return {Promise.<Array<string>, Error>}
    */
@@ -82,10 +80,9 @@ class ConsulService {
 
   /**
    * Method to return a Promise containing:
-   * * a JSON object containing the value and metadata stored for the specified key; If key is not found 404 is returned
-   * * an error if request was not successful
+   * * a JSON object containing the Value and metadata stored for the specified key; If key is not found 404 is returned
    * @param {string} key
-   * @return {Promise.<Array<string>, Error>}
+   * @return {Promise.<JSON, Error>}
    */
   async getValueObjectByKey(key) {
     key = this.parseKey(key);
@@ -96,9 +93,8 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * the raw value stored for the requested key; If key is not found 404 is returned
-   * * an error if request was not successful
    * @param {string} key
-   * @return {Promise.<Array<string>, Error>}
+   * @return {Promise.<string, Error>}
    */
   async getOnlyRawValueByKey(key) {
     key = this.parseKey(key);
@@ -109,9 +105,8 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * * an `Array<JSON>` containing the value and metadata stored for the objects with the requested keyPrefix;
-   * * an error if request was not successful
    * @param {string} keyPrefix
-   * @return {Promise.<Array<string>, Error>}
+   * @return {Promise.<Array<JSON>, Error>}
    */
   async getValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
@@ -121,7 +116,7 @@ class ConsulService {
 
   /**
    * Method to return a Promise containing:
-   * * * an `Array<objects>` containing the raw value stored for the objects with the requested keyPrefix;
+   * * * an `Array<string>` containing the raw value stored for the objects with the requested keyPrefix;
    * * an error if request was not successful
    * @param {string} keyPrefix
    * @return {Promise.<Array<string>, Error>}
