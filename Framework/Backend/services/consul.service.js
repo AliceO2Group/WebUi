@@ -119,18 +119,22 @@ class ConsulService {
    * * * an `Array<string>` containing the raw value stored for the objects with the requested keyPrefix;
    * * an error if request was not successful
    * @param {string} keyPrefix
-   * @return {Promise.<Array<string>, Error>}
+   * @return {Promise.<KV<string, string>, Error>}
    */
   async getOnlyRawValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '?recurse=true';
-    return this.httpGetJson(getPath).then((data) => {
-      return data.map((object) => object.Value)
-        .filter((value) => value !== undefined)
-        .map((value) => Buffer.from(value, 'base64').toString('ascii'));
-    });
+    return this.httpGetJson(getPath).then((data) => data.map((object) => {
+      const key = object.Key;
+      const obj = {};
+      obj[key] = undefined;
+      if (object.Value) {
+        const valueDecoded = Buffer.from(object.Value, 'base64').toString('ascii');
+        obj[key] = valueDecoded;
+      }
+      return obj;
+    }));
   }
-
 
   /**
    * Util to get JSON data (parsed) from Consul server

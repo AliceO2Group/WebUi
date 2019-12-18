@@ -154,18 +154,18 @@ describe('Consul Service test suite', function() {
     it('should successfully build the call to retrieve all values with a keyprefix in format `/key/`', function() {
       nock('http://localhost:8080')
         .get('/v1/kv/keyprefix?recurse=true')
-        .reply(200, [{key: 'keyprefix/some'}, {key: 'keyprefix/other'}]);
-      return consul.getValuesByKeyPrefix('/keyprefix/').then((res) => assert.deepStrictEqual(res, [{key: 'keyprefix/some'}, {key: 'keyprefix/other'}]));
+        .reply(200, [{Key: 'keyprefix/some', Value: 'VGVzdFZhbHVl'}, {Key: 'keyprefix/other', Value: 'VGVzdFZhbHVl'}]);
+      return consul.getValuesByKeyPrefix('/keyprefix/').then((res) => assert.deepStrictEqual(res, [{Key: 'keyprefix/some', Value: 'VGVzdFZhbHVl'}, {Key: 'keyprefix/other', Value: 'VGVzdFZhbHVl'}]));
     });
 
     it('should successfully build the call to retrieve all raw values with a keyprefix in format `/key/`', function() {
-      const objectMeta = {key: 'keyprefix/some', Value: 'VGVzdFZhbHVl', lastModified: 123456};
-      const otherObjectMeta = {key: 'keyprefix/other', Value: 'ewogbmFtZTogJ3Rlc3QnLAogdmFsdWU6ICd2YWx1ZScsCn0=', lastModified: 123456};
+      const objectMeta = {Key: 'keyprefix/some', Value: 'VGVzdFZhbHVl', lastModified: 123456};
+      const otherObjectMeta = {Key: 'keyprefix/other', Value: 'ewogbmFtZTogJ3Rlc3QnLAogdmFsdWU6ICd2YWx1ZScsCn0=', lastModified: 123456};
       nock('http://localhost:8080')
         .get('/v1/kv/keyprefix?recurse=true')
         .reply(200, [objectMeta, otherObjectMeta]);
-      const expectedValue = 'TestValue';
-      const expectedOtherValue = '{\n name: \'test\',\n value: \'value\',\n}';
+      const expectedValue = {'keyprefix/some': 'TestValue'};
+      const expectedOtherValue = {'keyprefix/other': '{\n name: \'test\',\n value: \'value\',\n}'};
       return consul.getOnlyRawValuesByKeyPrefix('/keyprefix/').then((res) => assert.deepStrictEqual(res, [expectedValue, expectedOtherValue]));
     });
   });
