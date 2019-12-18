@@ -124,16 +124,18 @@ class ConsulService {
   async getOnlyRawValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '?recurse=true';
-    return this.httpGetJson(getPath).then((data) => data.map((object) => {
-      const key = object.Key;
-      const obj = {};
-      obj[key] = undefined;
-      if (object.Value) {
-        const valueDecoded = Buffer.from(object.Value, 'base64').toString('ascii');
-        obj[key] = valueDecoded;
-      }
-      return obj;
-    }));
+    return this.httpGetJson(getPath).then((data) => {
+      const response = {};
+      data.forEach((object) => {
+        const key = object.Key;
+        response[key] = undefined;
+        if (object.Value) {
+          const valueDecoded = Buffer.from(object.Value, 'base64').toString('ascii');
+          response[key] = valueDecoded;
+        }
+      })
+      return response;
+    });
   }
 
   /**

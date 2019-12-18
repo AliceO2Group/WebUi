@@ -164,9 +164,9 @@ describe('Consul Service test suite', function() {
       nock('http://localhost:8080')
         .get('/v1/kv/keyprefix?recurse=true')
         .reply(200, [objectMeta, otherObjectMeta]);
-      const expectedValue = {'keyprefix/some': 'TestValue'};
-      const expectedOtherValue = {'keyprefix/other': '{\n name: \'test\',\n value: \'value\',\n}'};
-      return consul.getOnlyRawValuesByKeyPrefix('/keyprefix/').then((res) => assert.deepStrictEqual(res, [expectedValue, expectedOtherValue]));
+      const expectedValue = 'TestValue';
+      const expectedOtherValue = '{\n name: \'test\',\n value: \'value\',\n}';
+      return consul.getOnlyRawValuesByKeyPrefix('/keyprefix/').then((res) => assert.deepStrictEqual(res, {'keyprefix/some': expectedValue, 'keyprefix/other': expectedOtherValue}));
     });
   });
 
