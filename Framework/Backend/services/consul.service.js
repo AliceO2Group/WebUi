@@ -120,6 +120,24 @@ class ConsulService {
   }
 
   /**
+   * Method to return a Promise containing:
+   * * * an `Array<objects>` containing the raw value stored for the objects with the requested keyPrefix;
+   * * an error if request was not successful
+   * @param {string} keyPrefix
+   * @return {Promise.<Array<string>, Error>}
+   */
+  async getOnlyRawValuesByKeyPrefix(keyPrefix) {
+    keyPrefix = this.parseKey(keyPrefix);
+    const getPath = this.kvPath + keyPrefix + '?recurse=true';
+    return this.httpGetJson(getPath).then((data) => {
+      return data.map((object) => object.Value)
+        .filter((value) => value !== undefined)
+        .map((value) => Buffer.from(value, 'base64').toString('ascii'));
+    });
+  }
+
+
+  /**
    * Util to get JSON data (parsed) from Consul server
    * @param {string} path - path to Consul server
    * @return {Promise.<Object, Error>} JSON response
