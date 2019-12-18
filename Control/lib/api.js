@@ -153,9 +153,17 @@ module.exports.setup = (http, ws) => {
   function getCRUs(req, res) {
     const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
     if (consulService) {
-      consulService.getOnlyRawValueByKey(cruPath)
-        .then((data) => res.status(200).json(data))
-        .catch((error) => errorHandler(error, res, 502));
+      consulService.getOnlyRawValuesByKeyPrefix(cruPath).then((data) => {
+        const crusByHost = {};
+        Object.keys(data)
+          .filter((key) => key.substr(key.length - 5, 5) === '/card') // TODO Ask structure
+          .forEach((key) => {
+            const splitKey = key.split('/');
+            const hostKey = splitKey[splitKey.length - 2];
+            crusByHost[hostKey] = JSON.parse(data[key]);
+          });
+        res.status(200).json(crusByHost);
+      }).catch((error) => errorHandler(error, res, 502));
     } else {
       errorHandler('Unable to retrieve configuration consul service', res, 502);
     }
