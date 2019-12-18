@@ -1,5 +1,7 @@
 import {h} from '/js/src/index.js';
-import {iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward} from '/js/src/icons.js';
+import {
+  iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog
+} from '/js/src/icons.js';
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
@@ -9,58 +11,33 @@ import {iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSk
 export default (model) => h('.absolute-fill scroll-y.flex-column', [
   h('h5.menu-title-large.mh1',
     model.sideBarMenu ? 'Environments' : 'ENVS'),
-  createNewEnvMenuItem(model),
-  listActiveEnvMenuItem(model),
+  menuItem(model, 'Create', 'newEnvironment', iconPlus()),
+  menuItem(model, 'Active', 'environments', iconGridTwoUp()),
+  menuItem(model, 'CRUs', 'configuration', iconCog()),
   h('', {style: 'flex-grow:1'}), // empty item to fill in space
-  aboutMenuItem(model),
+  menuItem(model, 'About', 'about', iconExcerpt()),
   collapseSidebarMenuItem(model),
 ]);
 
 /**
- * Show link to creating a new environment
+ * Create a menu-item
  * @param {Object} model
+ * @param {string} title
+ * @param {string} pageParam - where onclick() should navigate to
+ * @param {icon} icon
  * @return {vnode}
  */
-const createNewEnvMenuItem = (model) =>
+const menuItem = (model, title, pageParam, icon) =>
   h('a.menu-item', {
-    title: 'Create',
+    title: title,
     style: 'display: flex',
-    href: '?page=newEnvironment',
+    href: `?page=${pageParam}`,
     onclick: (e) => model.router.handleLinkEvent(e),
-    class: model.router.params.page === 'newEnvironment' ? 'selected' : ''
-  }, [h('span', iconPlus()), model.sideBarMenu && itemMenuText('Create')]
-  );
-
-/**
- * Show link to all active environments
- * @param {Object} model
- * @return {vnode}
- */
-const listActiveEnvMenuItem = (model) =>
-  h('a.menu-item', {
-    title: 'Active',
-    style: 'display: flex',
-    href: '?page=environments',
-    onclick: (e) => model.router.handleLinkEvent(e),
-    class: model.router.params.page === 'environments' ? 'selected' : ''
-  }, [h('span', iconGridTwoUp()), model.sideBarMenu && itemMenuText('Active')]
-  );
-
-/**
- * Show link to status page
- * @param {Object} model
- * @param {boolean} extendedSideBar
- * @return {vnode}
- */
-const aboutMenuItem = (model) =>
-  h('a.menu-item', {
-    title: 'About',
-    style: 'display: flex',
-    href: '?page=about',
-    onclick: (e) => model.router.handleLinkEvent(e),
-    class: model.router.params.page === 'about' ? 'selected' : ''
-  }, [h('span', iconExcerpt()), model.sideBarMenu && itemMenuText('About')]
-  );
+    class: model.router.params.page === pageParam ? 'selected' : ''
+  }, [
+    h('span', icon),
+    model.sideBarMenu && itemMenuText(title)
+  ]);
 
 /**
 * Show link to status page
