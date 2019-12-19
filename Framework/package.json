@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "license": "GPL-3.0",
@@ -35,7 +35,8 @@
     "eslint-config-google": "^0.13.0",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
-    "puppeteer": "2.0.0"
+    "puppeteer": "2.0.0",
+    "nock": "11.7.0"
   },
   "main": "Backend/index.js"
 }
