@@ -18,5 +18,10 @@ module.exports = {
     port: 9092,
     topic: 'notifications',
     groupId: 'flp-kafka-notifications'
+  },
+  consul: {
+    hostname: 'localhost',
+    port: 8500,
+    cruPath: 'test/o2/hardware/flps'
   }
 };
