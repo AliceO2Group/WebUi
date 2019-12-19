@@ -1,5 +1,5 @@
-const KafkaConnector = require('../lib/KafkaConnector.js');
-const config = require('./test-config.js').kafka;
+const KafkaConnector = require('./../../lib/KafkaConnector.js');
+const config = require('../test-config.js').kafka;
 const assert = require('assert');
 
 describe('Kafka Connector test suite', function() {

@@ -29,6 +29,10 @@ tr:hover td {
   background-color: var(--color-gray-light)
 }
 
+.actionable-row:hover {
+  cursor: pointer;
+}
+
 .menu-title-large {
   text-transform: uppercase;
   height: 2em;
