@@ -100,7 +100,8 @@ const cruTable = (model, cruMap) =>
           h('th', 'Type'),
           h('th', 'Endpoint'),
           h('th', 'PCI Address'),
-          h('th', 'Firmware')
+          h('th', 'Firmware'),
+          h('th', 'Serial')
         ])
       ]),
       h('tbody.actionable-row', [
@@ -125,6 +126,7 @@ const cruTable = (model, cruMap) =>
             h('td', ''),
             h('td', ''),
             h('td', ''),
+            h('td', ''),
           ]),
           cruMap[hostName].open && Object.keys(cruMap[hostName].objects).map((card) =>
             h('tr', {onclick: () => model.configuration.toggleCRUSelection(hostName, card)}, [
@@ -141,6 +143,7 @@ const cruTable = (model, cruMap) =>
               h('td', cruMap[hostName].objects[card].endpoint),
               h('td', cruMap[hostName].objects[card].pciAddress),
               h('td', cruMap[hostName].objects[card].firmware),
+              h('td', cruMap[hostName].objects[card].serial),
             ]),
           )
           ]
