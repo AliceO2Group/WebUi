@@ -153,7 +153,7 @@ module.exports.setup = (http, ws) => {
   function getCRUs(req, res) {
     if (consulService) {
       const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
-      const regex = new RegExp(`.*/.*/card`); // TODO Change this to cards
+      const regex = new RegExp(`.*/.*/cards`);
       consulService.getOnlyRawValuesByKeyPrefix(cruPath).then((data) => {
         const crusByHost = {};
         Object.keys(data)
