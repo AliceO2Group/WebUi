@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "description": "O2 Quality Control Web User Interface",
   "main": "export.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "license": "GPL-3.0",
   "repository": "AliceO2Group/WebUi",
   "dependencies": {
-    "@aliceo2/web-ui": "1.9.1",
+    "@aliceo2/web-ui": "1.9.2",
     "jsroot": "^5.8.0",
     "node-addon-api": "^1.6.3"
   },
@@ -26,7 +26,6 @@
     "eslint": "^5.15.0",
     "eslint-config-google": "^0.12.0",
     "mocha": "^6.1.4",
-    "nock": "^10.0.6",
     "nyc": "^14.1.1",
     "puppeteer": "2.0.0"
   }
