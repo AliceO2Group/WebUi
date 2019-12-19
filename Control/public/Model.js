@@ -5,6 +5,7 @@ import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import FrameworkInfo from './frameworkinfo/FrameworkInfo.js';
 import Workflow from './workflow/Workflow.js';
+import Configuration from './configuration/Configuration.js';
 
 /**
  * Root of model tree
@@ -25,6 +26,9 @@ export default class Model extends Observable {
 
     this.lock = new Lock(this);
     this.lock.bubbleTo(this);
+
+    this.configuration = new Configuration(this);
+    this.configuration.bubbleTo(this);
 
     this.environment = new Environment(this);
     this.environment.bubbleTo(this);
@@ -122,6 +126,9 @@ export default class Model extends Observable {
       case 'about':
         this.frameworkInfo.getFrameworkInfo();
         this.frameworkInfo.getAliECSInfo();
+        break;
+      case 'configuration':
+        this.configuration.getCRUList();
         break;
       default:
         this.router.go('?page=environments');

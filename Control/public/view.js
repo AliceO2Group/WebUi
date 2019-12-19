@@ -22,6 +22,10 @@ import {
   content as statusContent,
   header as statusHeader
 } from './frameworkinfo/frameworkInfoPage.js';
+import {
+  content as configurationContent,
+  header as configurationHeader
+} from './configuration/configurationPage.js';
 
 /**
  * Main view layout
@@ -55,7 +59,8 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     newEnvironment: workflowsHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
-    about: statusHeader
+    about: statusHeader,
+    configuration: configurationHeader
   })(model)
 ]);
 
@@ -69,6 +74,7 @@ const content = (model) => [
     newEnvironment: workflowsContent,
     environments: environmentsContent,
     environment: environmentContent,
-    about: statusContent
+    about: statusContent,
+    configuration: configurationContent
   })(model)
 ];

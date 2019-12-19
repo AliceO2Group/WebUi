@@ -21,8 +21,12 @@ module.exports = {
     port: 9092,
     topic: 'notifications',
     groupId: 'flp-kafka-notifications'
-  }
-
+  },
+  consul: {
+    hostname: 'localhost',
+    port: 8500,
+    cruPath: 'key/prefix'
+  },
   // JWT manages user's session duration
   // https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/json-tokens.md
   // jwt: {
