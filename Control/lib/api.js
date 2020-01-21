@@ -8,7 +8,7 @@ const KafkaConnector = require('../lib/KafkaConnector.js');
 const config = require('./configProvider.js');
 const http = require('http');
 
-const package = require('./../package.json');
+const projPackage = require('./../package.json');
 
 if (!config.grpc) {
   throw new Error('grpc field in config file is needed');
@@ -128,8 +128,8 @@ module.exports.setup = (http, ws) => {
     } else {
       const result = {};
       result['control-gui'] = {};
-      if (package.version) {
-        result['control-gui'].version = package.version;
+      if (projPackage && projPackage.version) {
+        result['control-gui'].version = projPackage.version;
       }
       if (config.http) {
         const con = {hostname: config.http.hostname, port: config.http.port};

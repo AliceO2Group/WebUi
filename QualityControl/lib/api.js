@@ -1,5 +1,6 @@
 const {Log, WebSocket} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
+const projPackage = require('./../package.json');
 const log = new Log('QualityControl');
 
 // Load data source (demo or DB)
@@ -243,8 +244,8 @@ function getFrameworkInfo(req, res) {
     const result = {};
     result.qcg = {};
 
-    if (process.env.npm_package_version) {
-      result.qcg.version = process.env.npm_package_version;
+    if (projPackage && projPackage.version) {
+      result.qcg.version = projPackage.version;
     }
     if (config.http) {
       const qc = {hostname: config.http.hostname, port: config.http.port};
