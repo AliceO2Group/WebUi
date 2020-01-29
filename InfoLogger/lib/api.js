@@ -4,6 +4,7 @@ const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
 const {MySQL} = require('@aliceo2/web-ui');
 const JsonFileConnector = require('./JSONFileConnector.js');
+const projPackage = require('./../package.json');
 
 let querySource = null;
 let liveSource = null;
@@ -61,8 +62,8 @@ module.exports.attachTo = (http, ws) => {
     } else {
       const result = {};
       result['infoLogger-gui'] = {};
-      if (process.env.npm_package_version) {
-        result['infoLogger-gui'].version = process.env.npm_package_version;
+      if (projPackage && projPackage.version) {
+        result['infoLogger-gui'].version = projPackage.version;
       }
       if (config.http) {
         const il = {hostname: config.http.hostname, port: config.http.port};
