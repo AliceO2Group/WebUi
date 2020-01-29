@@ -105,48 +105,50 @@ const cruTable = (model, cruMap) =>
         ])
       ]),
       h('tbody.actionable-row', [
-        Object.keys(cruMap).map((hostName) =>
-          [h('tr', [
-            h('td.text-center', {
-              title: 'Show/Hide CRUs for this host',
-              onclick: () => model.configuration.toggleHostRow(hostName)
-            }, cruMap[hostName].open ? iconChevronBottom() : iconChevronRight()),
-            h('td', {onclick: () => model.configuration.toggleAllCRUsForHost(hostName)},
-              h('label.d-inline.actionable-row', {title: 'Select / Unselect all CRUs for this host'},
-                h('input.actionable-row', {
-                  type: 'checkbox',
-                  title: 'Select / Unselect all CRUs for this host',
-                  checked: model.configuration.areAllCRUsForHostSelected(hostName), // add from somewhere in JSON
-                })
-              )
-            ),
-            h('td', {onclick: () => model.configuration.toggleAllCRUsForHost(hostName)}, hostName),
-            h('td', ''),
-            h('td', ''),
-            h('td', ''),
-            h('td', ''),
-            h('td', ''),
-            h('td', ''),
-          ]),
-          cruMap[hostName].open && Object.keys(cruMap[hostName].objects).map((card) =>
-            h('tr', {onclick: () => model.configuration.toggleCRUSelection(hostName, card)}, [
+        Object.keys(cruMap).length === 0 ?
+          h('tr', h('td', {colspan: 9, style: 'text-align: center;'}, 'No data found'))
+          : Object.keys(cruMap).map((hostName) =>
+            [h('tr', [
+              h('td.text-center', {
+                title: 'Show/Hide CRUs for this host',
+                onclick: () => model.configuration.toggleHostRow(hostName)
+              }, cruMap[hostName].open ? iconChevronBottom() : iconChevronRight()),
+              h('td', {onclick: () => model.configuration.toggleAllCRUsForHost(hostName)},
+                h('label.d-inline.actionable-row', {title: 'Select / Unselect all CRUs for this host'},
+                  h('input.actionable-row', {
+                    type: 'checkbox',
+                    title: 'Select / Unselect all CRUs for this host',
+                    checked: model.configuration.areAllCRUsForHostSelected(hostName), // add from somewhere in JSON
+                  })
+                )
+              ),
+              h('td', {onclick: () => model.configuration.toggleAllCRUsForHost(hostName)}, hostName),
               h('td', ''),
               h('td', ''),
               h('td', ''),
-              h('td', h('label.d-inline.actionable-row', {title: 'Select / Unselect this CRU'},
-                h('input.actionable-row', {
-                  type: 'checkbox',
-                  title: 'Select / Unselect this CRU',
-                  checked: cruMap[hostName].objects[card].checked,
-                }))),
-              h('td', cruMap[hostName].objects[card].type),
-              h('td', cruMap[hostName].objects[card].endpoint),
-              h('td', cruMap[hostName].objects[card].pciAddress),
-              h('td', cruMap[hostName].objects[card].firmware),
-              h('td', cruMap[hostName].objects[card].serial),
+              h('td', ''),
+              h('td', ''),
+              h('td', ''),
             ]),
-          )
-          ]
-        )])
+            cruMap[hostName].open && Object.keys(cruMap[hostName].objects).map((card) =>
+              h('tr', {onclick: () => model.configuration.toggleCRUSelection(hostName, card)}, [
+                h('td', ''),
+                h('td', ''),
+                h('td', ''),
+                h('td', h('label.d-inline.actionable-row', {title: 'Select / Unselect this CRU'},
+                  h('input.actionable-row', {
+                    type: 'checkbox',
+                    title: 'Select / Unselect this CRU',
+                    checked: cruMap[hostName].objects[card].checked,
+                  }))),
+                h('td', cruMap[hostName].objects[card].type),
+                h('td', cruMap[hostName].objects[card].endpoint),
+                h('td', cruMap[hostName].objects[card].pciAddress),
+                h('td', cruMap[hostName].objects[card].firmware),
+                h('td', cruMap[hostName].objects[card].serial),
+              ]),
+            )
+            ]
+          )])
     ])]
   );
