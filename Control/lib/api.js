@@ -167,7 +167,12 @@ module.exports.setup = (http, ws) => {
             crusByHost[hostKey] = JSON.parse(data[key]);
           });
         res.status(200).json(crusByHost);
-      }).catch((error) => errorHandler(error, res, 502));
+      }).catch((error) => {
+        if (error.message.includes('404')) {
+          errorHandler(`Could not find any CRUs by key ${cruPath}`, res, 404);
+        }
+        errorHandler(error, res, 502);
+      });
     } else {
       errorHandler('Unable to retrieve configuration of consul service', res, 502);
     }

@@ -65,6 +65,7 @@ export default class Workflow extends Observable {
       regex: new RegExp('^master')
     };
   }
+
   /**
    * Updates the selected repository with the new user selection
    * @param {string} inputField - input that should be updated
@@ -180,6 +181,7 @@ export default class Workflow extends Observable {
     this.refreshedRepositories = await this.remoteDataPostRequest(this.refreshedRepositories, `/api/RefreshRepos`, {});
     if (this.refreshedRepositories.isSuccess()) {
       this.getRepositoriesList();
+      this.getAllTemplatesAsMap();
     } else {
       this.model.notification.show(this.refreshedRepositories.payload, 'danger', 5000);
     }
