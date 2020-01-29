@@ -29,7 +29,9 @@ export default class FrameworkInfo extends Observable {
       this.notify();
       return;
     }
-    result.version = this.parseAliEcsVersion(result.version);
+    if (result.version) {
+      result.version = this.parseAliEcsVersion(result.version);
+    }
     this.aliEcs = RemoteData.success(result);
     this.notify();
   }
