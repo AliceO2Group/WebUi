@@ -26,8 +26,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     assert(location.search === '?page=newEnvironment');
-    assert.deepStrictEqual(calls['getWorkflowTemplates'], true);
-    assert.deepStrictEqual(calls['listRepos'], true);
+    assert.ok(calls['getWorkflowTemplates']);
+    assert.ok(calls['listRepos']);
   });
 
   it('should successfully request and parse a list of template objects', async () => {
@@ -64,7 +64,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return {title: button.title, classList: button.classList, disabled: button.disabled};
     });
     assert.strictEqual(button.title, 'Create');
-    assert.strictEqual(button.disabled, true);
+    assert.ok(button.disabled);
     assert.deepStrictEqual(button.classList, {0: 'btn', 1: 'btn-primary'});
   });
 
@@ -146,18 +146,19 @@ describe('`pageNewEnvironment` test-suite', async () => {
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button').click());
     await page.waitFor(500);
     const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
-    assert.deepStrictEqual(calls['refreshRepos'], true);
+    assert.ok(calls['refreshRepos']);
     assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (504 Gateway Timeout): 2 UNKNOWN: 504: Unable to refresh repositories'});
     assert.deepStrictEqual(calls['listRepos'], undefined);
   });
 
-  it('should successfully request refresh of repositories and request repositories list again', async () => {
+  it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button', {timeout: 5000});
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button').click());
     await page.waitFor(1000);
-    assert(calls['refreshRepos'] === true);
-    assert(calls['listRepos'] === true);
+    assert.ok(calls['refreshRepos']);
+    assert.ok(calls['getWorkflowTemplates']);
+    assert.ok(calls['listRepos']);
   });
 
   it('should successfully select a workflow from template list', async () => {
@@ -177,8 +178,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const location = await page.evaluate(() => window.location);
 
     assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
-    assert.strictEqual(calls['newEnvironment'], true);
-    assert.strictEqual(calls['getEnvironment'], true);
+    assert.ok(calls['newEnvironment']);
+    assert.ok(calls['getEnvironment']);
   });
 
   it('should successfully release LOCK', async () => {
