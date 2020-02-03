@@ -12,7 +12,10 @@ export default class Configuration extends Observable {
     super();
 
     this.model = model;
-    this.actionPanel = {};
+    this.actionPanel = {
+      expertMode: false,
+      expertOptions: this.getDefaultExpertOptions()
+    };
     this.cruList = RemoteData.notAsked();
   }
 
@@ -22,6 +25,14 @@ export default class Configuration extends Observable {
    */
   setCommand(command) {
     this.actionPanel.command = command;
+    this.notify();
+  }
+
+  /**
+   * Toggle the Expert Panel for overriding defaults before running roc command
+   */
+  toggleExpertPanel() {
+    this.actionPanel.expertMode = !this.actionPanel.expertMode;
     this.notify();
   }
 
@@ -66,6 +77,51 @@ export default class Configuration extends Observable {
   }
 
   /**
+   * Method to reset all CRUs to an unselected state and hosts to an opened state
+   * @param {Map<string, Map<string, string>>} crusByHost
+   * @return {Map<string, Map<string, string>>}
+   */
+  uncheckAllCRUs(crusByHost) {
+    Object.keys(crusByHost).forEach((hostName) => {
+      const objects = crusByHost[hostName];
+      crusByHost[hostName] = {};
+      crusByHost[hostName].objects = objects;
+      crusByHost[hostName].open = true;
+      Object.keys(crusByHost[hostName].objects).forEach((index) => crusByHost[hostName].objects[index].checked = false);
+    });
+    return crusByHost;
+  }
+
+  /*
+   * Helpers
+   */
+
+  /**
+   * Method to initialize with defaults all expert options
+   * @return {JSON}
+   */
+  getDefaultExpertOptions() {
+    return {
+      allowRejection: false,
+      clock: 'LOCAL',
+      dataPathMode: 'PACKET',
+      downStreamData: 'CTP',
+      gbtMode: 'GBT',
+      gbtMux: 'TTC',
+      links: '',
+      loopback: false,
+      ponUpstream: false,
+      dynOffset: false,
+      onuAddress: '0x0',
+      triggerWindowSize: 1000
+    };
+  }
+
+  /**
+   *  HTTP Requests
+   */
+
+  /**
    * Method to retrieve a list of CRUs from Consul
    */
   async getCRUList() {
@@ -80,21 +136,5 @@ export default class Configuration extends Observable {
     }
     this.cruList = RemoteData.success(this.uncheckAllCRUs(result));
     this.notify();
-  }
-
-  /**
-   * Method to reset all CRUs to an unselected state and hosts to an opened state
-   * @param {Map<string, Map<string, string>>} crusByHost
-   * @return {Map<string, Map<string, string>>}
-   */
-  uncheckAllCRUs(crusByHost) {
-    Object.keys(crusByHost).forEach((hostName) => {
-      const objects = crusByHost[hostName];
-      crusByHost[hostName] = {};
-      crusByHost[hostName].objects = objects;
-      crusByHost[hostName].open = true;
-      Object.keys(crusByHost[hostName].objects).forEach((index) => crusByHost[hostName].objects[index].checked = false);
-    });
-    return crusByHost;
   }
 }

@@ -1,4 +1,4 @@
-import {h, iconChevronBottom, iconChevronRight} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronRight, iconKey} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 /**
@@ -53,9 +53,10 @@ const buildPage = (model, cruMap) =>
  * @return {vnode}
  */
 const actionForm = (model) =>
-  h('.p2.mh2.mv3.shadow-level1',
+  h('.p2.mv3.w-100.shadow-level1',
     [
-      actionDropdown(model)
+      actionPanel(model),
+      expertPanel(model, model.configuration.actionPanel.expertOptions),
     ]
   );
 
@@ -64,10 +65,10 @@ const actionForm = (model) =>
  * @param {Object} model
  * @return {vnode}
  */
-const actionDropdown = (model) =>
-  h('.m2.w-50', [
-    h('h5', 'ROC Action:'),
-    h('', {style: 'display: flex; flex-direction: row;'}, [
+const actionPanel = (model) =>
+  h('.flex-row.w-100.pv2', [
+    h('h4', 'Action:'),
+    h('.w-25.mh2', {style: 'display: flex; flex-direction: row;'}, [
       h('select.form-control', {
         style: 'cursor: pointer',
         onchange: (e) => model.configuration.setCommand(e.target.value)
@@ -79,9 +80,77 @@ const actionDropdown = (model) =>
           selected: 'STATUS' === model.configuration.actionPanel.command ? true : false, value: 'STATUS'
         }, 'roc-status')
       ]),
-      h('button.btn.btn-primary.mh2', {title: 'Run command for the selected CRUs', disabled: true}, 'Run')
+    ]),
+    runPanel(model)
+  ]);
+
+/**
+ * Panel containing running buttons
+ * @param {Object} model
+ * @return {vnode}
+ */
+const runPanel = (model) =>
+  h('.btn-group.mh2', {
+    style: 'justify-content:right; display: flex',
+  }, [
+    h('button.btn.btn-primary', {title: 'Run command for the selected CRUs', disabled: true}, 'Run'),
+    h('button.btn', {
+      onclick: () => model.configuration.toggleExpertPanel(),
+      title: 'Show Expert Panel',
+      disabled: false
+    }, iconKey())
+  ]);
+
+/**
+ * vnode with expert panel allowing the user to change defaults for the command
+ * @param {Object} model
+ * @param {options} options
+ * @return {vnode}
+ */
+const expertPanel = (model, options) =>
+  h('', {
+    style: {
+      transition: 'max-height 0.5s',
+      overflow: 'hidden',
+      'max-height': model.configuration.actionPanel.expertMode ? '50em' : 0,
+      height: 'auto'
+    }
+  }, [
+    h('h4', 'Expert Panel:'),
+    // BEGIN Toggles
+    h('.flex-row.w-100', [
+      toggle(model, 'Allow rejection', model),
+      toggle(model, 'Loopback', model),
+      toggle(model, 'PON Upstream', model),
+      toggle(model, 'DYN Offset', model),
+    ]),
+    // BEGIN: Dropdowns
+    h('.flex-row.w-100.pv2', [
+      dropDown(model, 'Clock Argument', ['LOCAL', 'TTC'], options.clock),
+      dropDown(model, 'Data Path Mode', ['PACKET', 'CONTINUOUS'], options.dataPathMode),
+    ]),
+    h('.flex-row.w-100.pv2', [
+      dropDown(model, 'Down Stream Data', ['CTP', 'PATTERN', 'MIDTRG'], options.downStreamData),
+      dropDown(model, 'GBT Mode', ['GBT', 'WB'], options.gbtMode),
+    ]),
+    h('.flex-row.w-100.pv2', [
+      dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], options.gbtMux),
+    ]),
+    // END: Dropdowns
+    h('.w-100.pv2',
+      slider(model, 1, 4095, 1000, 'Trigger Window Size', model)
+    ),
+
+    h('.flex-row.w-100.pv2', [
+      inputBox(model, 'Links', options.links),
+      inputBox(model, 'ONU Address', options.onuAddress),
+    ]),
+    h('.w-100.pv2', [
+      h('', 'ROC Command:'),
+      h('pre', `roc-command -id=`)
     ])
   ]);
+
 /**
  * vnode with the CRU table
  * @param {Object} model
@@ -89,7 +158,7 @@ const actionDropdown = (model) =>
  * @return {vnode}
  */
 const cruTable = (model, cruMap) =>
-  h('.mh2.shadow-level1', [
+  h('.shadow-level1', [
     h('table.table.table-sm', [
       h('thead', [
         h('tr', [
@@ -152,3 +221,96 @@ const cruTable = (model, cruMap) =>
           )])
     ])]
   );
+
+/*
+Helpers
+*/
+
+/**
+ * Generate a slider based on the provided interval
+ * @param {Object} model
+ * @param {number} min
+ * @param {number} max
+ * @param {number} initValue
+ * @param {string} title
+ * @param {number} field - that should be modified in experts panel
+ * @return {vnode}
+ */
+const slider = (model, min, max, initValue, title) => h('.flex-row.pv2.w-50',
+  [
+    h('.ph1.w-25', title),
+    h('.w-25.mh2',
+      h('input.form-control', {
+        type: 'range',
+        step: 1,
+        min: min,
+        max: max,
+        value: initValue,
+        // oninput: (e) => model.object.setRefreshInterval(e.target.value)
+      })
+    )
+  ]);
+
+/**
+ * Generate a toggle for true/false fields
+ * @param {Object} model
+ * @param {boolean} field
+ * @return {vnode}
+ */
+const toggle = (model, title, field) => h('.pv2.flex-row.w-25',
+  [
+    h('.ph1', title),
+    h('label.switch.switch-flat.pv2',
+      h('input.switch-input', {type: 'checkbox'}),
+      h('span.switch-label', {'data-on': '', 'data-off': ''}),
+      h('span.switch-handle')
+    )
+  ]);
+
+/**
+ * Generate a dropdown list
+ * @param {Object} model
+ * @param {string} title
+ * @param {Array<string>} options
+ * @param {string} field
+ * @return {vnode}
+ */
+const dropDown = (model, title, options, field) =>
+  h('.flex-row.w-50',
+    [
+      h('.p1.w-25', title),
+      h('.w-25.mh2',
+        h('select.form-control', {
+          style: 'cursor: pointer',
+          // onchange: (e) => model.configuration.setCommand(e.target.value)
+        }, [
+          options.map((option) => h('option', {
+            selected: option === field ? true : false, value: option
+          }, option))
+        ])
+      )
+    ]
+  );
+
+/**
+ * Generate a component with an input string box
+ * @param {Object} model
+ * @param {string} title
+ * @param {string} field
+ * @return {vnode}
+ */
+const inputBox = (model, title, field) =>
+  h('.flex-row.w-50', [
+    h('.p1.w-25', title),
+    h('.w-25.mh2',
+      h('input.form-control', {
+        type: 'text',
+        value: field,
+        // onkeyup: (e) => workflow.updateInputSearch('revision', e.target.value),
+        // onclick: (e) => {
+        //   workflow.setRevisionInputDropdownVisibility('revision', true);
+        //   e.stopPropagation();
+        // }
+      }, field)
+    )
+  ]);
