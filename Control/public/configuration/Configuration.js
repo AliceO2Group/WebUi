@@ -13,6 +13,7 @@ export default class Configuration extends Observable {
 
     this.model = model;
     this.actionPanel = {
+      command: 'STATUS',
       expertMode: false,
       expertOptions: this.getDefaultExpertOptions()
     };
@@ -103,16 +104,17 @@ export default class Configuration extends Observable {
   getDefaultExpertOptions() {
     return {
       allowRejection: false,
-      clock: 'LOCAL',
-      dataPathMode: 'PACKET',
-      downStreamData: 'CTP',
-      gbtMode: 'GBT',
-      gbtMux: 'TTC',
-      links: '',
+      cruId: '',
+      clock: '',
+      dataPathMode: '',
+      downStreamData: '',
+      gbtMode: '',
+      gbtMux: '',
+      links: Array(12).fill(false),
       loopback: false,
       ponUpstream: false,
       dynOffset: false,
-      onuAddress: '0x0',
+      onuAddress: '',
       triggerWindowSize: 1000
     };
   }

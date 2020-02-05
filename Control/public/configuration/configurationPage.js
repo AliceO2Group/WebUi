@@ -112,7 +112,7 @@ const expertPanel = (model, options) =>
     style: {
       transition: 'max-height 0.5s',
       overflow: 'hidden',
-      'max-height': model.configuration.actionPanel.expertMode ? '50em' : 0,
+      // 'max-height': model.configuration.actionPanel.expertMode ? '50em' : 0,
       height: 'auto'
     }
   }, [
@@ -138,14 +138,22 @@ const expertPanel = (model, options) =>
     ]),
     // END: Dropdowns
     h('.w-100.pv2',
-      slider(model, 1, 4095, 1000, 'Trigger Window Size', model)
+      inputNumberBox(model, 'Trigger Window Size', 0, 4095, options.triggerWindowSize),
     ),
 
     h('.flex-row.w-100.pv2', [
-      inputBox(model, 'Links', options.links),
-      inputBox(model, 'ONU Address', options.onuAddress),
+      inputTextBox(model, 'CRU-Id', options.cruId),
+      inputTextBox(model, 'ONU Address', options.onuAddress),
     ]),
-    h('.w-100.pv2', [
+    h('.w-100.pv2',
+      h('.flex-row.w-100', [
+        h('.ph1.w-25', 'Links'),
+        h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
+          options.links.map((link, index) => checkBox(model, `Link #${index}`, options.links[index])),
+        ])
+      ])
+    ),
+    h('.w-100.pv2.ph1', [
       h('', 'ROC Command:'),
       h('pre', `roc-command -id=`)
     ])
@@ -278,12 +286,15 @@ const toggle = (model, title, field) => h('.pv2.flex-row.w-25',
 const dropDown = (model, title, options, field) =>
   h('.flex-row.w-50',
     [
-      h('.p1.w-25', title),
-      h('.w-25.mh2',
+      h('.p1.w-33', title),
+      h('.w-50.mh2',
         h('select.form-control', {
           style: 'cursor: pointer',
           // onchange: (e) => model.configuration.setCommand(e.target.value)
         }, [
+          h('option', {
+            selected: '-' === field ? true : false, value: '-'
+          }, '-'),
           options.map((option) => h('option', {
             selected: option === field ? true : false, value: option
           }, option))
@@ -299,9 +310,9 @@ const dropDown = (model, title, options, field) =>
  * @param {string} field
  * @return {vnode}
  */
-const inputBox = (model, title, field) =>
+const inputTextBox = (model, title, field) =>
   h('.flex-row.w-50', [
-    h('.p1.w-25', title),
+    h('.p1.w-33', title),
     h('.w-25.mh2',
       h('input.form-control', {
         type: 'text',
@@ -314,3 +325,45 @@ const inputBox = (model, title, field) =>
       }, field)
     )
   ]);
+
+/**
+* Generate a component with an input string box
+* @param {Object} model
+* @param {string} title
+* @param {number} min
+* @param {number} max
+* @param {string} field
+* @return {vnode}
+*/
+const inputNumberBox = (model, title, min, max, field) =>
+  h('.flex-row.w-50', [
+    h('.p1.w-33', title),
+    h('.w-25.mh2',
+      h('input.form-control', {
+        type: 'number',
+        min: min,
+        max: max,
+        value: field,
+        // onkeyup: (e) => workflow.updateInputSearch('revision', e.target.value),
+        // onclick: (e) => {
+        //   workflow.setRevisionInputDropdownVisibility('revision', true);
+        //   e.stopPropagation();
+        // }
+      }, field)
+    )
+  ]);
+
+/**
+ * Generate a checkbox based on title and field to change
+ * @param {Object} model
+ * @param {string} title
+ * @param {Object} field
+ * @return {vnode}
+ */
+const checkBox = (model, title, field) =>
+  h('label.d-inline.f6.ph1', {style: 'white-space: nowrap', title: `Toggle selection of Link`},
+    h('input', {
+      type: 'checkbox',
+      checked: field,
+      // onchange: () => model.toggleInspector()
+    }), title);
