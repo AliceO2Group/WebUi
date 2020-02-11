@@ -229,14 +229,14 @@ describe('InfoLogger', function() {
     });
   });
 
-  describe('Live mode', () => {
+  describe('Live mode', async () => {
     before(async () => {
       // Start infologgerserver simulator
       require('./live-simulator/infoLoggerServer.js');
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve();
-        }, 4000);
+        }, 6000);
       });
     });
 
