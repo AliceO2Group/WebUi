@@ -37,6 +37,10 @@ describe('InfoLogger', function() {
     // Start browser to test UI
     browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
+
+
+    // Start infologgerserver simulator
+    require('./live-simulator/infoLoggerServer.js');
   });
 
   it('should load first page "/"', async () => {
@@ -230,16 +234,6 @@ describe('InfoLogger', function() {
   });
 
   describe('Live mode', async () => {
-    before(async () => {
-      // Start infologgerserver simulator
-      require('./live-simulator/infoLoggerServer.js');
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 6000);
-      });
-    });
-
     it('can be activated because it is configured and simulator is started', async () => {
       const activeMode = await page.evaluate(() => {
         window.model.log.liveStart();
