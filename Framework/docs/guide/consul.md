@@ -33,9 +33,8 @@ consul.getServices()
   .then(result => console.log(result))
   .catch(err => console.error(err));
 
-/// Get KV Pairs by their prefix
+/// Get only Keys by their prefix
 consul.getKeysByPrefix('o2-keys')
   .then(result => console.log(result))
   .catch(err => console.error(err));
-
 ```

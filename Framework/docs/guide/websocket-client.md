@@ -2,7 +2,7 @@
 
 The `WebSocketClient` class encapsulates communication with the WebSocket server (see backend guide on [WebSocket server](./websockets.md)).
 
-WebSocketClient needs to be authentificated by the server before it can send any requests or receive notifications:
+WebSocketClient needs to be authenticated by the server before it can send any requests or receive notifications:
 
 ```js
 import {WebSocketClient} from '/js/src/index.js';

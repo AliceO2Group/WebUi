@@ -48,7 +48,7 @@ const token = jwt.generateToken(1, 'code-example');
 // Verify a token
 jwt.verify(token)
   .then(() => {
-    cosole.log('Access granted !');
+    console.log('Access granted !');
   });
 }
 ```
