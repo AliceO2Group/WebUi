@@ -157,6 +157,10 @@ module.exports.attachTo = (http, ws) => {
       ws.broadcast(msg);
     });
 
+    liveSource.on('connection-issue', () => {
+      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-connection-issue'));
+    });
+
     liveSource.on('close', () => {
       ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-close'));
     });
