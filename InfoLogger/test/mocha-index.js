@@ -232,12 +232,7 @@ describe('InfoLogger', function() {
   describe('Live mode', () => {
     before(async () => {
       // Start infologgerserver simulator
-      return await new Promise((resolve) => {
-        require('./live-simulator/infoLoggerServer.js');
-        setTimeout(() => {
-          resolve();
-        }, 12000);
-      });
+      require('./live-simulator/infoLoggerServer.js');
     });
 
     it('can be activated because it is configured and simulator is started', async () => {
