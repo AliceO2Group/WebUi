@@ -13,7 +13,7 @@ The goal of this UI framework is to identify library and framework sets, provide
 - REST and WebSocket API
 - Authentication via CERN OAuth 2.0 and authorisation via CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
-- External resource access: MySQL, gRPC
+- External resource access: MySQL, gRPC, Consul
 
 ##### Client-side features
 - User interface CSS building blocks in accordance with ALICE standards
@@ -56,6 +56,7 @@ npm install --save @aliceo2/web-ui
 * [OAuth](./docs/guide/oauth.md) - Provides authentication via CERN oAuth and authorisation via e-groups
 * [WebSockets](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
+* [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
 
 ### Frontend guide
 - [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript and observable model
