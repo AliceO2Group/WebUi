@@ -236,7 +236,7 @@ describe('InfoLogger', function() {
         require('./live-simulator/infoLoggerServer.js');
         setTimeout(() => {
           resolve();
-        }, 9000);
+        }, 12000);
       });
     });
 
