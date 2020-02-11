@@ -34,13 +34,12 @@ describe('InfoLogger', function() {
       subprocessOutput += chunk.toString();
     });
 
+    // Start infologgerserver simulator
+    require('./live-simulator/infoLoggerServer.js');
+
     // Start browser to test UI
     browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
-
-
-    // Start infologgerserver simulator
-    require('./live-simulator/infoLoggerServer.js');
   });
 
   it('should load first page "/"', async () => {
