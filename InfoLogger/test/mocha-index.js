@@ -17,7 +17,7 @@ describe('InfoLogger', function() {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(20000);
+  this.timeout(30000);
   this.slow(1000);
   const baseUrl = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
@@ -236,7 +236,7 @@ describe('InfoLogger', function() {
         require('./live-simulator/infoLoggerServer.js');
         setTimeout(() => {
           resolve();
-        }, 4000);
+        }, 9000);
       });
     });
 
