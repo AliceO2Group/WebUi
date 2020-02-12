@@ -9,13 +9,28 @@
 
 The goal of this UI framework is to identify library and framework sets, provide the core functionalities and building blocks to easily create rich web application for the [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) project.
 
-##### Server-side features
+- [ALICE O<sup>2</sup> Web UI Framework](#alice-osup2sup-web-ui-framework)
+    - [Overview](#overview)
+      - [Server-side features](#server-side-features)
+      - [Client-side features](#client-side-features)
+    - [System requirements](#system-requirements)
+      - [CentOS 7](#centos-7)
+      - [macOS](#macos)
+    - [Minimum browser version support](#minimum-browser-version-support)
+    - [Installation](#installation)
+    - [Getting started](#getting-started)
+    - [Backend guide](#backend-guide)
+    - [Frontend guide](#frontend-guide)
+    - [API Reference](#api-reference)
+    - [Documentation for developers](#documentation-for-developers)
+
+#### Server-side features
 - REST and WebSocket API
 - Authentication via CERN OAuth 2.0 and authorisation via CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
 - External resource access: MySQL, gRPC, Consul
 
-##### Client-side features
+#### Client-side features
 - User interface CSS building blocks in accordance with ALICE standards
 - Asynchronous data fetching (Ajax) and bi-directional socket (WebSockets)
 - MVC engine with a "diffing" algorithm
