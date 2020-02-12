@@ -19,7 +19,7 @@
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "mocha --exit ./Frontend/test/",
     "mocha-backend": "mocha --exit ./Backend/test/",
-    "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
+    "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js"
   },
   "nyc": {
     "exclude": [
