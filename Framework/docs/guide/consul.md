@@ -1,13 +1,12 @@
 # Consul Service
-Manages Read operations for the Key-Value store and Service discovery of Consul. 
+Manages Read operations for the Key-Value store and Service discovery of [Consul](https://www.consul.io/). 
 
-#### Instance
-Import the module
+#### Import the module
 ```js
 require('@aliceo2/web-ui').ConsulService
 ```
 
-Create an instance
+#### Create an instance
 ```js
 new ConsulService({hostname: HOST, port: PORT});
 ```

@@ -5,10 +5,6 @@
 [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/master/graph/badge.svg)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
-### Overview
-
-The goal of this UI framework is to identify library and framework sets, provide the core functionalities and building blocks to easily create rich web application for the [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) project.
-
 - [ALICE O<sup>2</sup> Web UI Framework](#alice-osup2sup-web-ui-framework)
     - [Overview](#overview)
       - [Server-side features](#server-side-features)
@@ -23,6 +19,10 @@ The goal of this UI framework is to identify library and framework sets, provide
     - [Frontend guide](#frontend-guide)
     - [API Reference](#api-reference)
     - [Documentation for developers](#documentation-for-developers)
+
+### Overview
+
+The goal of this UI framework is to identify library and framework sets, provide the core functionalities and building blocks to easily create rich web application for the [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) project.
 
 #### Server-side features
 - REST and WebSocket API
