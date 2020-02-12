@@ -39,9 +39,9 @@ The goal of this UI framework is to identify library and framework sets, provide
 
 #### CentOS 7
 ```
-sudo curl -sL https://rpm.nodesource.com/setup_10.x | bash -
-sudo yum install -y nodejs
+yum install https://rpm.nodesource.com/pub_12.x/el/7/x86_64/nodejs-12.15.0-1nodesource.x86_64.rpm
 ```
+
 #### macOS
 ```
 brew install node
