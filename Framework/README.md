@@ -17,7 +17,7 @@
     - [Getting started](#getting-started)
     - [Backend guide](#backend-guide)
     - [Frontend guide](#frontend-guide)
-    - [API Reference](#api-reference)
+    - [References](#references)
     - [Documentation for developers](#documentation-for-developers)
 
 ### Overview
@@ -83,9 +83,7 @@ npm install --save @aliceo2/web-ui
 - [Routing](./docs/guide/front-router.md) - Let you manage many pages in one application
 - [Charts](./docs/guide/charts.md) - Plot time-series
 
-### API Reference
-* [Backend JS](./docs/reference/backend.md)
-* [Frontend JS](./docs/reference/frontend-api.md)
+### References
 * [Frontend CSS](https://aliceo2group.github.io/WebUi/Framework/docs/reference/frontend-css.html)
 * [Frontend classes overview](./docs/images/front-arch.dot.png)
 

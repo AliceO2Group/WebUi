@@ -7,8 +7,6 @@ HTTP module provided a simple way of creating REST API. In addition, it supports
  - Defining new routes (GET, POST)
  - Passing values to frontend easily
 
-See [API reference](../reference/backend.md#httpserver) for more details.
-
 #### Instance
 ```js
 HttpServer(HTTP_CONF, JWT_CONF, [OAUTH_CONF]);

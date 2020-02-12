@@ -5,8 +5,6 @@ This module is required by [http](http-server.md) and [websockets](websockets.md
  * Verify token and decode encrypted data on the server side
  * Refresh tokens if `maxAge` parameter is not expired
 
-See [API reference](../reference/backend.md##jwttoken) for more details.
-
 ### Instance
 ```js
 JwtToken(JWT_CONF);

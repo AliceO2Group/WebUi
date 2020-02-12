@@ -20,7 +20,6 @@
     "mocha-frontend": "mocha --exit ./Frontend/test/",
     "mocha-backend": "mocha --exit ./Backend/test/",
     "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
-    "doc-frontend": "jsdoc2md --files \"./Frontend/**/*.js\" -p list -r list --member-index-format list --name-format --no-gfm -l js > ./docs/reference/frontend-api.md"
   },
   "nyc": {
     "exclude": [

@@ -142,7 +142,6 @@ First line imports client side of the framework:
 - `fetchClient` to handle Ajax requests
 - `WebSocketClient` to communicate with WebSocket server
 
-See the [JS reference](../reference/frontend-api.md) for more details.
 
 The export keyword of the `Model` class allows it to be imported in other files - see more information on [import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
 
