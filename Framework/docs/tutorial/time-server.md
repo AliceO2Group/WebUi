@@ -142,7 +142,6 @@ First line imports client side of the framework:
 - `fetchClient` to handle Ajax requests
 - `WebSocketClient` to communicate with WebSocket server
 
-See the [JS reference](../reference/frontend-api.md) for more details.
 
 The export keyword of the `Model` class allows it to be imported in other files - see more information on [import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
 
@@ -256,6 +255,6 @@ export default function view(model) {
   );
 }
 ```
-Now focus on the button, each on them specified `onclick` attribute which calls the model's methods. As described in the [Explaining client side - Model](#explainig-client-side---model) section these methods modify the model what causes the controller to re-draw the view by calling the `view` method above.
+Now focus on the button, each on them specified `onclick` attribute which calls the model's methods. As described in the [Explaining client side - Model](#explaining-client-side---model) section these methods modify the model what causes the controller to re-draw the view by calling the `view` method above.
 
 When the application grows the view can easily scale by splitting it into multiple functions and files, see [components guide](../guide/components.md) explaining that.

@@ -26,7 +26,7 @@ The user details provided by the Resource server and privilege level are encoded
 Each JSON Web Token has its expiration time. When token is expired it can no longer be used and must be refreshed.
 
 ## Successful
-In case the token is expired it is verified once again based on *maxAge* parameter (expiration check is suppressed). The *maxAge* parameter >> *expiration*. If the verification is successful the new token (with the same user details) is created and transfered to Browser application.
+In case the token is expired it is verified once again based on *maxAge* parameter (expiration check is suppressed). The *maxAge* parameter >> *expiration*. If the verification is successful the new token (with the same user details) is created and transferred to Browser application.
 
 ![Successful token refresh](../images/token-refresh.png "Successful token refresh")
 

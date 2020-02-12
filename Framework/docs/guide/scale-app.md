@@ -2,7 +2,7 @@
 
 ### Files
 
-In the documentation and [tutorial](../tutorial/time-server.md) a single model and single view are used. A larger application may require multiple models and views. They should be kept in a seperate files. Use `UpperCamelCase` convention for file names that define classes and `camelCase` for others.
+In the documentation and [tutorial](../tutorial/time-server.md) a single model and single view are used. A larger application may require multiple models and views. They should be kept in a separate files. Use `UpperCamelCase` convention for file names that define classes and `camelCase` for others.
 For common things across the application like a header or a menu, a `common` module (folder) can be made for example.
 
 ### View

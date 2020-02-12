@@ -17,7 +17,7 @@ h('h1', {class: 'title'}, 'Hello')
 
 The Hyperscript function produces a virtual-node (vnode). As it is written in JavaScript it supports variables, conditions, etc. just like any other JavaScript program. A vnode is an abstract object representing a DOM element. It can be directly translated into DOM element using a render engine.
 
-Typically, vnodes are then recreated every render cycle, which normally occurs in response to event handlers (clicks) or to data changes (Ajax response). The template enfine diffs a vnode tree against its previous version and only modifies DOM elements in spots where there are changes.
+Typically, vnodes are then recreated every render cycle, which normally occurs in response to event handlers (clicks) or to data changes (Ajax response). The template engine diffs a vnode tree against its previous version and only modifies DOM elements in spots where there are changes.
 
 It may seem wasteful to recreate vnodes so frequently, but as it turns out, modern Javascript engines can create hundreds of thousands of objects in less than a millisecond. On the other hand, modifying the whole DOM is more expensive than creating vnodes.
 
@@ -78,8 +78,6 @@ The template engine flow can be seen as a cycle:
 ![Cycle](../images/cycle.jpeg)
 
 - See [Components](components.md) guide to learn more about re-usability and maintenance.
-- See [API Reference for JS](../reference/frontend-api.md#module_renderer..h) for function prototypes.
-- See [skeleton](../skeleton/) for function project bootstrap.
 
 ## Tools
 
@@ -115,7 +113,7 @@ default export (model) => h('div', [
 
 ## Keys in hyperscript
 
-When manipulating a list of items with Hyperscript, the `key` attribute helps the engine to identify the element. This key should be constant and unique like DB primary key. Do not use array indexes as they may chage (eg. when you sort the array).
+When manipulating a list of items with Hyperscript, the `key` attribute helps the engine to identify the element. This key should be constant and unique like DB primary key. Do not use array indexes as they may change (eg. when you sort the array).
 ```js
 const videoGallery = (videos) => videos.map((video) => {
   return h('video', {src: video.src, key: video.src});
