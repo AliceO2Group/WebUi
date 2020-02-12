@@ -19,9 +19,6 @@ Exceptions can be added to lines and files:
 - `// eslint-disable-next-line` removes eslint from next line
 - `// eslint-disable-next-line max-len` removes eslint maximum length from next line
 
-## Documentation
-Documentation is handled with help of [JSDoc 3](http://usejsdoc.org) API generator.
-
 ## Code monitor
 [Nodemon](http://nodemon.io/) provides convenient development cycle server by restarting server after source code modification modification. Browser page can be refreshed with CTRL+R or CMD+R.
 
@@ -32,7 +29,6 @@ Documentation is handled with help of [JSDoc 3](http://usejsdoc.org) API generat
 * `npm run eslint` runs linter
 * `npm run mocha` starts front-end and back-end unit tests
 * `npm run test` runs both: `npm run mocha` and `npm run eslint`
-* `npm run doc` generates source code documentation (JSDoc)
 
 ## Continuous integration
 [GitHub Actions](https://github.com/AliceO2Group/WebUi/actions?query=workflow%3AFramework) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.github/framework.yml` file.
