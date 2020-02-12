@@ -79,7 +79,6 @@ The template engine flow can be seen as a cycle:
 
 - See [Components](components.md) guide to learn more about re-usability and maintenance.
 - See [API Reference for JS](../reference/frontend-api.md#module_renderer..h) for function prototypes.
-- See [skeleton](../skeleton/) for function project bootstrap.
 
 ## Tools
 

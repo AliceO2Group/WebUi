@@ -35,16 +35,16 @@ Documentation is handled with help of [JSDoc 3](http://usejsdoc.org) API generat
 * `npm run doc` generates source code documentation (JSDoc)
 
 ## Continuous integration
-[Travis CI](https://travis-ci.org/AliceO2Group/WebUi) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.travis.yml` file.
+[GitHub Actions](https://github.com/AliceO2Group/WebUi/actions?query=workflow%3AFramework) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.github/framework.yml` file.
 
 ## Dependencies status
 The status of the dependencies can be shown by running `ncu` command of [npm-check-updates](https://www.npmjs.com/package/npm-check-updates) package.
 
 ## Test coverage
-[Instambul](https://www.npmjs.com/package/istanbul) module together with [codecov](https://codecov.io) service are used to generate coverage reports of nodejs unit tests.
+[Instanbul](https://istanbul.js.org/) module together with [codecov](https://codecov.io) service are used to generate coverage reports of nodejs unit tests.
 
 ## Source management
-[Github](https://github.com/AliceO2Group/WebUi) is used for managing sources and [npm](https://www.npmjs.com/settings/aliceo2/packages) for releases.
+[Github](https://github.com/AliceO2Group/WebUi) is used for managing sources and [npm](https://www.npmjs.com/package/@aliceo2/web-ui) for releases.
 
 ## `npm run dev`
 
