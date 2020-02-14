@@ -48,9 +48,10 @@ class MySQL {
       this.pool.getConnection((error, connection) => {
         if (error) {
           reject(new Error(this.errorHandler(error)));
+        } else {
+          connection.release();
+          resolve();
         }
-        connection.release();
-        resolve();
       });
     });
   }
