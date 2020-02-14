@@ -33,14 +33,25 @@ class MySQL {
     assert(config.database, 'Missing config value: mysql.database');
     config.port = (!config.port) ? 3306 : config.port;
     config.password = (!config.password) ? '' : config.password;
+    config.timeout = (!config.timeout) ? 60000 : config.timeout;
 
     this.config = config;
     this.pool = mysql.createPool(config);
-    this.pool.getConnection((error, connection) => {
-      if (error) {
-        throw new Error(this.errorHandler(error));
-      }
-      connection.release();
+  }
+
+  /**
+   * Method to test connection of mysql connector once initialized
+   * @return {Promise}
+   */
+  testConnection() {
+    return new Promise((resolve, reject) => {
+      this.pool.getConnection((error, connection) => {
+        if (error) {
+          reject(new Error(this.errorHandler(error)));
+        }
+        connection.release();
+        resolve();
+      });
     });
   }
 
@@ -48,14 +59,14 @@ class MySQL {
    * Prepares and executes query.
    * Sets up 60s timeout.
    * @param {string} query - SQL query
-   * @param {array} parameters - parameters to be boud to the query
+   * @param {array} parameters - parameters to be bound to the query
    * @return {object} promise
    */
   query(query, parameters) {
     return new Promise((resolve, reject) => {
       this.pool.query({
         sql: query,
-        timeout: 60000,
+        timeout: this.config.timeout,
         values: parameters
       }, (error, results) => {
         if (error) {
@@ -67,11 +78,10 @@ class MySQL {
   }
 
   /**
-   * Smothly terminates connection pool
+   * Smoothly terminates connection pool
    */
   close() {
-    this.pool.end(() => {
-    });
+    this.pool.end(() => {});
   }
 
   /**
