@@ -5,17 +5,31 @@
 [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/master/graph/badge.svg)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
+  - [Overview](#overview)
+    - [Server-side features](#server-side-features)
+    - [Client-side features](#client-side-features)
+  - [System requirements](#system-requirements)
+    - [CentOS 7](#centos-7)
+    - [macOS](#macos)
+  - [Minimum browser version support](#minimum-browser-version-support)
+  - [Installation](#installation)
+  - [Getting started](#getting-started)
+  - [Backend guide](#backend-guide)
+  - [Frontend guide](#frontend-guide)
+  - [References](#references)
+  - [Documentation for developers](#documentation-for-developers)
+
 ### Overview
 
 The goal of this UI framework is to identify library and framework sets, provide the core functionalities and building blocks to easily create rich web application for the [ALICE O<sup>2</sup>](https://alice-o2.web.cern.ch) project.
 
-##### Server-side features
+#### Server-side features
 - REST and WebSocket API
 - Authentication via CERN OAuth 2.0 and authorisation via CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
-- External resource access: MySQL, gRPC
+- External resource access: MySQL, gRPC, Consul
 
-##### Client-side features
+#### Client-side features
 - User interface CSS building blocks in accordance with ALICE standards
 - Asynchronous data fetching (Ajax) and bi-directional socket (WebSockets)
 - MVC engine with a "diffing" algorithm
@@ -25,9 +39,9 @@ The goal of this UI framework is to identify library and framework sets, provide
 
 #### CentOS 7
 ```
-sudo curl -sL https://rpm.nodesource.com/setup_10.x | bash -
-sudo yum install -y nodejs
+yum install https://rpm.nodesource.com/pub_12.x/el/7/x86_64/nodejs-12.15.0-1nodesource.x86_64.rpm
 ```
+
 #### macOS
 ```
 brew install node
@@ -56,6 +70,7 @@ npm install --save @aliceo2/web-ui
 * [OAuth](./docs/guide/oauth.md) - Provides authentication via CERN oAuth and authorisation via e-groups
 * [WebSockets](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
+* [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
 
 ### Frontend guide
 - [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript and observable model
@@ -67,13 +82,10 @@ npm install --save @aliceo2/web-ui
 - [Routing](./docs/guide/front-router.md) - Let you manage many pages in one application
 - [Charts](./docs/guide/charts.md) - Plot time-series
 
-### API Reference
-* [Backend JS](./docs/reference/backend.md)
-* [Frontend JS](./docs/reference/frontend-api.md)
+### References
 * [Frontend CSS](https://aliceo2group.github.io/WebUi/Framework/docs/reference/frontend-css.html)
 * [Frontend classes overview](./docs/images/front-arch.dot.png)
 
 ### Documentation for developers
 * [Development environment](./docs/guide/devel.md)
 * [Authentication and authorization](./docs/guide/auth.md)
-* [Known issues](./docs/guide/issues.md)

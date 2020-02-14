@@ -98,4 +98,4 @@ const title = () => {
 
 Components are a way to split parts of a view, what allows to scale the application  and arrange it in multiple files.
 
-See the [architecture](./docs/guide/scale-app.md) article to scale the code of your application.
+See the [architecture](./scale-app.md) article to scale the code of your application.

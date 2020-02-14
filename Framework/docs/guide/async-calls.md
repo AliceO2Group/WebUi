@@ -16,7 +16,7 @@ resultPromise.then(function callback(result) {
   // Promise fulfilled, do something with result
 });
 resultPromise.catch(function callback(error) {
-  // handle expections
+  // handle exceptions
 });
 ```
 
