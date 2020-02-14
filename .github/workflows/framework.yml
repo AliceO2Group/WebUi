@@ -27,7 +27,6 @@ jobs:
         with:
           node-version: '12.x'
       - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
-      - run: (cd Framework/Backend/test; rm mocha-ws.js;)
       - run: (cd Framework; npm install )
       - run: (cd Framework; npm test )
   coverage:
