@@ -13,7 +13,7 @@ function connectionListener(client) {
   let timer;
   let currentLogIndex = 0;
 
-  client.on('end', onClientDisconnect);
+  client.on('close', onClientDisconnect);
   sendNextLog();
 
   function sendNextLog() {

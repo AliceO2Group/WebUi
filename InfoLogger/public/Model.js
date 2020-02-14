@@ -7,6 +7,7 @@ import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import {callRateLimiter} from './common/utils.js';
 import Table from './table/Table.js';
+import {MODE} from './constants/mode.const.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -230,11 +231,13 @@ export default class Model extends Observable {
   handleWSCommand(message) {
     if (message.command === 'live-log') {
       this.log.addLog(message.payload);
-      return;
+    } else if (message.command === 'il-server-connection-issue'
+      && this.log.activeMode !== MODE.QUERY) {
+      this.notification.show(`Connection to InfoLogger server is unavailable. Retrying in 5 seconds`, 'warning', 2000);
+    } else if (message.command === 'il-server-close') {
+      this.notification.show(`Connection between backend and InfoLogger server has been lost`, 'warning', 2000);
     }
-    if (message.command === 'il-server-close') {
-      this.notification.show(`Connection between backend and InfoLogger server has been lost`, 'warning');
-    }
+    return;
   }
 
   /**
