@@ -2,7 +2,20 @@
   "name": "@aliceo2/qc",
   "version": "1.6.10",
   "description": "O2 Quality Control Web User Interface",
-  "main": "export.js",
+  "author": "Vladimir Kosmala",
+  "contributors": [
+    "George Raduta",
+    "Adam Wegrzynek"
+  ],
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AliceO2Group/WebUi.git"
+  },
+  "engines": {
+    "node": ">= 8.9.4"
+  },
+  "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "postinstall": "mv build/Release/tobject2json.node .",
     "install": "node-gyp rebuild --jobs max",
@@ -13,9 +26,6 @@
     "coverage": "npm run eslint && nyc npm run mocha",
     "mocha": "mocha --exit test/**/mocha-*"
   },
-  "author": "Vladimir Kosmala",
-  "license": "GPL-3.0",
-  "repository": "AliceO2Group/WebUi",
   "dependencies": {
     "@aliceo2/web-ui": "1.9.2",
     "jsroot": "^5.8.0",
@@ -28,5 +38,6 @@
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
     "puppeteer": "2.0.0"
-  }
+  },
+  "main": "export.js"
 }
