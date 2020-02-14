@@ -29,6 +29,9 @@ export default class FrameworkInfo extends Observable {
       this.notify();
       return;
     }
+    if (result.version) {
+      result.version = this.parseAliEcsVersion(result.version);
+    }
     this.aliEcs = RemoteData.success(result);
     this.notify();
   }
@@ -48,5 +51,24 @@ export default class FrameworkInfo extends Observable {
       this.control = RemoteData.success(result);
     }
     this.notify();
+  }
+
+  /**
+   * Parse the JSON of the version and return it as a string
+   * @param {JSON} versionJSON
+   * @return {string}
+   */
+  parseAliEcsVersion(versionJSON) {
+    let version = '';
+    if (versionJSON.productName) {
+      version += versionJSON.productName;
+    }
+    if (versionJSON.versionStr) {
+      version += ' ' + versionJSON.versionStr;
+    }
+    if (versionJSON.build) {
+      version += ' (revision ' + versionJSON.build + ')';
+    }
+    return version;
   }
 }

@@ -15,7 +15,7 @@ const TEST_CONTENT = {
       size: 'cell-s'
     }
   }
-}
+};
 
 const NEW_CONTENT = {
   colsHeader: {
@@ -27,7 +27,7 @@ const NEW_CONTENT = {
       size: 'cell-xl'
     }
   }
-}
+};
 
 let jsonConfig;
 
