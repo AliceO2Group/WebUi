@@ -18,7 +18,7 @@
     "coverage": "npm run eslint && nyc mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "mocha --exit ./Frontend/test/",
-    "mocha-backend": "mocha --exit ./Backend/test/mocha-mysql.js",
+    "mocha-backend": "mocha --exit ./Backend/test/*.js",
     "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
     "coverage-local": "nyc --reporter=lcov npm run mocha-backend"
   },
