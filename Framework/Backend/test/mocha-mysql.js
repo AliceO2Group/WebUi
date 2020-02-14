@@ -29,7 +29,7 @@ describe('MySQL Data Connector', () => {
       }, new AssertionError({message: 'Missing MySQL config', expected: true, operator: '=='}));
     });
 
-    it('should throw error due to missing configuration parameter: hostname', () => {
+    it('should throw error due to missing configuration parameter: host', () => {
       assert.throws(() => {
         new MySQL({});
       }, new AssertionError({message: 'Missing config value: mysql.host', expected: true, operator: '=='}));
@@ -124,7 +124,7 @@ describe('MySQL Data Connector', () => {
       return assert.rejects(async () => await db.testConnection(), new Error('Access denied for test'));
     });
 
-    it('should throw an error due to table in database not found', () => {
+    it('should throw an error due unidentified error', () => {
       const error = new Error('Test message');
       error.code = 'ER_RANDOM_ERROR';
       const callback = sinon.fake.yields(error, null);
@@ -132,6 +132,9 @@ describe('MySQL Data Connector', () => {
       sinon.replace(db.pool, 'getConnection', callback);
       return assert.rejects(async () =>
         await db.testConnection(), new Error('MySQL error: ER_RANDOM_ERROR, Test message'));
+    });
+    after(() => {
+      db.close();
     });
   });
 
@@ -153,7 +156,7 @@ describe('MySQL Data Connector', () => {
       return assert.doesNotReject(async () => await db.query());
     });
 
-    it('should throw an error due to database not found', () => {
+    it('should throw an error due to issues while querying', () => {
       const error = new Error('Test message');
       error.code = 'ER_RANDOM_ERROR';
       const callback = sinon.fake.yields(error, null);
@@ -161,9 +164,9 @@ describe('MySQL Data Connector', () => {
       sinon.replace(db.pool, 'query', callback);
       return assert.rejects(async () => await db.query(), new Error('MySQL error: ER_RANDOM_ERROR, Test message'));
     });
-  });
 
-  after(() => {
-    db.close();
+    after(() => {
+      db.close();
+    });
   });
 });
