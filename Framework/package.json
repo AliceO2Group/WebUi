@@ -18,8 +18,9 @@
     "coverage": "npm run eslint && nyc mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "mocha --exit ./Frontend/test/",
-    "mocha-backend": "mocha --exit ./Backend/test/",
-    "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js"
+    "mocha-backend": "mocha --exit ./Backend/test/mocha-mysql.js",
+    "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
+    "coverage-local": "nyc --reporter=lcov npm run mocha-backend"
   },
   "nyc": {
     "exclude": [
@@ -41,6 +42,7 @@
     "eslint-config-google": "^0.13.0",
     "mocha": "^6.1.4",
     "nock": "11.7.0",
+    "sinon": "8.1.1",
     "nyc": "^14.1.1",
     "puppeteer": "2.0.0"
   },
