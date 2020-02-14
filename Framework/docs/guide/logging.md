@@ -5,7 +5,7 @@ Logging module handles log in a two ways:
  * Sends logs to `InfoLogger` daemon over named socket
 
 ### Configuration
-Configuring logger is optional and required only when non default behaviour of logger is desired (as sending logs to InfoLogger).
+Configuring logger is optional and required only when non default behavior of logger is desired (as sending logs to InfoLogger).
 The configuration is applied by calling static method:
 ```js
 Log.configure(LOG_CONF);
@@ -23,7 +23,7 @@ Where:
      * [`host`] - InfoLogger server host
 
 ### Logging instance
-In order to easily categorie the logs each logging instance requires a label. Example:
+In order to easily categorize the logs, each logging instance requires a label. Example:
 ```js
 const log = new (require('@aliceo2/web-ui'))('Example');
 ```
