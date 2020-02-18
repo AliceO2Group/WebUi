@@ -19,13 +19,13 @@ const helmet = require('helmet');
 const Log = require('./../log/Log.js');
 const log = new Log('HTTP');
 const JwtToken = require('./../jwt/token.js');
-const OAuth = require('./oauth.js');
+const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
 const bodyParser = require('body-parser');
 
 /**
- * HTTPS server that handles OAuth and provides REST API.
+ * HTTPS server verifies identity using OpenID Connect and provides REST API.
  * Each request is authenticated with JWT token.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
@@ -34,15 +34,15 @@ class HttpServer {
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} httpConfig - configuration of HTTP server
    * @param {object} jwtConfig - configuration of JWT
-   * @param {object} oAuthConfig - configuration of oAuth
+   * @param {object} connectIdConfig - configuration of OpenID Connect
    */
-  constructor(httpConfig, jwtConfig, oAuthConfig = null) {
+  constructor(httpConfig, jwtConfig, connectIdConfig = null) {
     this.app = express();
     this.configureHelmet(httpConfig.hostname);
 
     this.jwt = new JwtToken(jwtConfig);
-    if (oAuthConfig != null) {
-      this.oauth = new OAuth(oAuthConfig);
+    if (connectIdConfig != null) {
+      this.openid = new OpenId(connectIdConfig);
     }
     this.specifyRoutes();
 
@@ -109,9 +109,9 @@ class HttpServer {
    */
   specifyRoutes() {
     // Routes of authorization
-    if (this.oauth) {
-      this.app.get('/', (req, res, next) => this.oAuthAuthorize(req, res, next));
-      this.app.get('/callback', (emitter, code) => this.oAuthCallback(emitter, code));
+    if (this.openid) {
+      this.app.get('/', (req, res, next) => this.ident(req, res, next));
+      this.app.get('/callback', (req, res) => this.identCallback(req, res));
     } else {
       this.app.get('/', (req, res, next) => this.addDefaultUserData(req, res, next));
     }
@@ -166,7 +166,7 @@ class HttpServer {
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);
     }
-    return this.oAuthAuthorize(req, res, next);
+    return this.ident(req, res, next);
   }
 
   /**
@@ -242,65 +242,53 @@ class HttpServer {
   }
 
   /**
-   * Handles oAuth authentication flow (default path of the app: '/')
-   * - If query.code is valid embeds the token and grants the access to the application
-   * - Redirects to the OAuth flow if query.code is not present (origin path != /callback)
-   * - Prints out an error when code is not valid
-   * The query arguments are serialized and kept in the 'state' parameter through OAuth process
+   * Handles authentication flow (default path of the app: '/')
+   * - If JWT query.token is valid it grants the access to the application
+   * - Redirects to the OpenID flow otherwise
+   * @todo The query arguments are serialized and passed to Auth URL
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
-   * @param {object} next - serves static paths when OAuth suceeds
-   * @return {object} redirects to OAuth flow or displays the page if JWT token is valid
+   * @param {object} next - serves static paths when OpenId suceeds
+   * @return {object} redirects to OpenID  flow or displays the page if JWT token is valid
    */
-  oAuthAuthorize(req, res, next) {
+  ident(req, res, next) {
     const query = req.query; // User's arguments
     const token = req.query.token;
 
     if (token && this.jwt.verify(token)) {
       next();
     } else {
-      // Save query params and redirect to the OAuth flow
-      const state = new Buffer(JSON.stringify(query)).toString('base64');
-      return res.redirect(this.oauth.getAuthorizationUri(state));
+      // Redirects to the OpenID flow
+      return res.redirect(this.openid.getAuthUrl(query))
     }
   }
 
   /**
-   * oAuth allback route - when successfully authorized (/callback)
+   * OpenID Connect callback - when successfully authorized (/callback)
    * Redirects to the application deserializes the query parameters from state variable
    * and injects them to the url
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    * @return {object} redirect to address with re-included query string
    */
-  oAuthCallback(req, res) {
-    const code = req.query.code;
-    const state = req.query.state; // base64
-    if (!code || !state) {
-      return res.status(400).send('code and state required');
-    }
+  identCallback(req, res) {
+    this.openid.callback(req).then((tokenSet) => {
+      const details = tokenSet.claims();
 
-    const query = JSON.parse(new Buffer(state, 'base64').toString('ascii'));
+      // Set token and user details in the query
+      const query = {
+        personid: details.cern_person_id,
+        name: details.name,
+        token: this.jwt.generateToken(details.cern_person_id, details.username, 1),
+      };
+      // Concatanates with data directly passed by user
+      Object.assign(query, this.templateData);
 
-    this.oauth.createTokenAndProvideDetails(code)
-      .then((details) => {
-        query.personid = details.user.personid;
-        query.name = details.user.name;
-
-        // Generates JWT token and adds it to the details object
-        query.token = this.jwt.generateToken(details.user.personid, details.user.username, 1);
-
-        // Concatanates details from oAuth flow with data directly passed by user
-        Object.assign(query, this.templateData);
-
-        const homeUrlAuthentified = url.format({pathname: '/', query: query});
-        return res.redirect(homeUrlAuthentified);
-      })
-      .catch((error) => {
-        // Handles invalid oAuth code parameters
-        log.warn(`OAuth failed: ${error.message}`);
-        res.status(401).send(`OAuth failed: ${error.message}`);
-      });
+      return res.redirect(url.format({pathname: '/', query: query}));
+    }).catch((reason) => {
+      log.debug('OpenId failed: ' + reason);
+      res.status(401).send('OpenId failed');
+    });
   }
 
   /**
