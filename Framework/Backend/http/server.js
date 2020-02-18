@@ -244,8 +244,7 @@ class HttpServer {
   /**
    * Handles authentication flow (default path of the app: '/')
    * - If JWT query.token is valid it grants the access to the application
-   * - Redirects to the OpenID flow otherwise
-   * @todo The query arguments are serialized and passed to Auth URL
+   * - Redirects to the OpenID flow otherwise, and sets the current state of URL
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    * @param {object} next - serves static paths when OpenId suceeds
@@ -259,7 +258,8 @@ class HttpServer {
       next();
     } else {
       // Redirects to the OpenID flow
-      return res.redirect(this.openid.getAuthUrl(query))
+      const state = new Buffer(JSON.stringify(query)).toString('base64');
+      return res.redirect(this.openid.getAuthUrl(state))
     }
   }
 
@@ -281,8 +281,13 @@ class HttpServer {
         name: details.name,
         token: this.jwt.generateToken(details.cern_person_id, details.username, 1),
       };
-      // Concatanates with data directly passed by user
+
+      // Read back user params from state
+      const userQuery = JSON.parse(new Buffer(req.query.state, 'base64').toString('ascii'));
+
+      // Concatanates with predefined files and user query
       Object.assign(query, this.templateData);
+      Object.assign(query, userQuery);
 
       return res.redirect(url.format({pathname: '/', query: query}));
     }).catch((reason) => {

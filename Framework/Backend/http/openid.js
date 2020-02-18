@@ -51,12 +51,13 @@ class OpenId {
   /**
    * Provides authorization URL
    */
-  getAuthUrl(query) {
+  getAuthUrl(state) {
     const code_challenge = generators.codeChallenge(this.code_verifier);
     return this.client.authorizationUrl({
       scope: 'openid',
       code_challenge,
       code_challenge_method: 'S256',
+      state: state
     });
   }
 
@@ -65,6 +66,7 @@ class OpenId {
    */
   callback(req) {
     const params = this.client.callbackParams(req);
+    delete params.state;
     const checks = {
       code_verifier: this.code_verifier
     };
