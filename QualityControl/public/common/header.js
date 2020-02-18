@@ -57,18 +57,17 @@ const commonHeader = (model) => h('.flex-grow', [
  * @return {vnode}
  */
 const loginButton = (model) =>
-  h('.dropdown',
-    {
-      title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : ''
-    }, [
-      h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
-      h('.dropdown-menu', [
-        h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-        model.session.personid === 0 // anonymous user has id 0
-          ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-          : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
-      ]),
-    ]);
+  h('.dropdown', {
+    title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : ''
+  }, [
+    h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
+    h('.dropdown-menu', [
+      h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
+      model.session.personid === 0 // anonymous user has id 0
+        ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
+        : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+    ]),
+  ]);
 
 /**
  * Create button which will allow user to enable/disable online mode
@@ -79,7 +78,8 @@ const onlineButton = (model) => h('button.btn',
   {
     className: onlineButtonStyle,
     onclick: () => toggleOnlineButton(model),
-    title: 'Online',
+    disabled: model.object.queryingObjects ? true : false,
+    title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
     style: model.object.isOnlineModeConnectionAlive ? '' : 'display: none'
   },
   'Online',
