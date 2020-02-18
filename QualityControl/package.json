@@ -24,6 +24,7 @@
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "coverage": "npm run eslint && nyc npm run mocha",
+    "coverage-local": "nyc --reporter=lcov npm run mocha",
     "mocha": "mocha --exit test/**/mocha-*"
   },
   "dependencies": {
