@@ -9,18 +9,16 @@ import infoButton from './../common/infoButton.js';
  * @return {vnode}
  */
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
-  h('.flex-row.flex-grow', {oncreate: () => model.object.loadList()},
-    [
-      h('.flex-grow.scroll-y', tableShow(model)),
-      h('.animate-width.scroll-y',
-        {
-          style: {
-            width: model.object.selected ? '50%' : 0
-          }
-        },
-        model.object.selected ? drawComponent(model) : null)
-    ]
-  ),
+  h('.flex-row.flex-grow', [
+    h('.flex-grow.scroll-y', tableShow(model)),
+    h('.animate-width.scroll-y',
+      {
+        style: {
+          width: model.object.selected ? '50%' : 0
+        }
+      },
+      model.object.selected ? drawComponent(model) : null)
+  ]),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),
     statusBarRight(model),
