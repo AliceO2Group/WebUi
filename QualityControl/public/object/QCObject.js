@@ -101,6 +101,7 @@ export default class QCObject extends Observable {
       this.sideTree.initTree('database');
       this.sideTree.addChildren(this.list);
     }
+    this.notify();
   }
 
   /**
