@@ -12,6 +12,9 @@
     "type": "git",
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
+  "engines": {
+    "node": ">= 8.9.4"
+  },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "test": "npm run eslint && npm run mocha",

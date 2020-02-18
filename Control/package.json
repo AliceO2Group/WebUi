@@ -1,8 +1,21 @@
 {
   "name": "@aliceo2/control",
-  "description": "ALICE O2 Control GUI",
   "version": "1.5.1",
-  "main": "index.js",
+  "description": "ALICE O2 Control GUI",
+  "author": "Adam Wegrzynek",
+  "contributors": [
+    "George Raduta",
+    "Vladimir Kosmala"
+  ],
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AliceO2Group/WebUi.git"
+  },
+  "engines": {
+    "node": ">= 8.9.4"
+  },
+  "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
@@ -11,10 +24,6 @@
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha"
   },
-  "author": "Adam Wegrzynek",
-  "license": "GPL-3.0",
-  "repository": "AliceO2Group/WebUi",
-  "homepage": "https://alice-o2.web.cern.ch",
   "dependencies": {
     "@aliceo2/web-ui": "1.9.2",
     "@grpc/proto-loader": "^0.5.3",
@@ -27,5 +36,6 @@
     "mocha": "^6.2.2",
     "nyc": "^14.1.1",
     "puppeteer": "2.0.0"
-  }
+  },
+  "main": "index.js"
 }
