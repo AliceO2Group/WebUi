@@ -27,7 +27,7 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.9.3"
+    "@aliceo2/web-ui": "1.9.4"
   },
   "devDependencies": {
     "eslint": "^5.15.0",
