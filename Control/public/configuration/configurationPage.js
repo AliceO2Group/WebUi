@@ -93,7 +93,11 @@ const runPanel = (model) =>
   h('.btn-group.mh2', {
     style: 'justify-content:right; display: flex',
   }, [
-    h('button.btn.btn-primary', {title: 'Run command for the selected CRUs', disabled: true}, 'Run'),
+    h('button.btn.btn-primary', {
+      title: 'Run command for the selected CRUs',
+      disabled: false,
+      onclick: () => model.configuration.confirmSelectionAndRunCommand()
+    }, 'Run'),
     h('button.btn', {
       onclick: () => model.configuration.toggleExpertPanel(),
       title: 'Show Expert Panel',
@@ -117,39 +121,35 @@ const expertPanel = (model, options) =>
     }
   }, [
     h('h4', 'Expert Panel:'),
-    // BEGIN Toggles
-    h('.flex-row.w-100', [
-      toggle(model, 'Allow rejection', model),
-      toggle(model, 'Loopback', model),
-      toggle(model, 'PON Upstream', model),
-      toggle(model, 'DYN Offset', model),
-    ]),
-    // BEGIN: Dropdowns
     h('.flex-row.w-100.pv2', [
-      dropDown(model, 'Clock Argument', ['LOCAL', 'TTC'], options.clock),
-      dropDown(model, 'Data Path Mode', ['PACKET', 'CONTINUOUS'], options.dataPathMode),
+      dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allowRejection'),
+      dropDown(model, 'Loopback', ['TRUE', 'FALSE'], 'loopback'),
+      dropDown(model, 'PON Upstream', ['TRUE', 'FALSE'], 'ponUpstream'),
     ]),
     h('.flex-row.w-100.pv2', [
-      dropDown(model, 'Down Stream Data', ['CTP', 'PATTERN', 'MIDTRG'], options.downStreamData),
-      dropDown(model, 'GBT Mode', ['GBT', 'WB'], options.gbtMode),
+      dropDown(model, 'DYN Offset', ['TRUE', 'FALSE'], 'dynOffset'),
+      dropDown(model, 'Clock Argument', ['LOCAL', 'TTC'], 'clock'),
+      dropDown(model, 'Data Path Mode', ['PACKET', 'CONTINUOUS'], 'dataPathMode'),
     ]),
     h('.flex-row.w-100.pv2', [
-      dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], options.gbtMux),
+      dropDown(model, 'Down Stream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downStreamData'),
+      dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtMode'),
+      dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtMux'),
     ]),
-    // END: Dropdowns
-    h('.w-100.pv2',
-      inputNumberBox(model, 'Trigger Window Size', 0, 4095, options.triggerWindowSize),
+    h('.flex-row.w-100.pv2',
+      inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'triggerWindowSize'),
+      inputTextBox(model, 'CRU-Id', 'cruId'),
+      inputTextBox(model, 'ONU Address', 'onuAddress'),
     ),
 
     h('.flex-row.w-100.pv2', [
-      inputTextBox(model, 'CRU-Id', options.cruId),
-      inputTextBox(model, 'ONU Address', options.onuAddress),
+
     ]),
     h('.w-100.pv2',
       h('.flex-row.w-100', [
         h('.ph1.w-25', 'Links'),
         h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
-          options.links.map((link, index) => checkBox(model, `Link #${index}`, options.links[index])),
+          options.links.map((link, index) => checkBox(model, `Link #${index}`, index)),
         ])
       ])
     ),
@@ -235,47 +235,6 @@ Helpers
 */
 
 /**
- * Generate a slider based on the provided interval
- * @param {Object} model
- * @param {number} min
- * @param {number} max
- * @param {number} initValue
- * @param {string} title
- * @param {number} field - that should be modified in experts panel
- * @return {vnode}
- */
-const slider = (model, min, max, initValue, title) => h('.flex-row.pv2.w-50',
-  [
-    h('.ph1.w-25', title),
-    h('.w-25.mh2',
-      h('input.form-control', {
-        type: 'range',
-        step: 1,
-        min: min,
-        max: max,
-        value: initValue,
-        // oninput: (e) => model.object.setRefreshInterval(e.target.value)
-      })
-    )
-  ]);
-
-/**
- * Generate a toggle for true/false fields
- * @param {Object} model
- * @param {boolean} field
- * @return {vnode}
- */
-const toggle = (model, title, field) => h('.pv2.flex-row.w-25',
-  [
-    h('.ph1', title),
-    h('label.switch.switch-flat.pv2',
-      h('input.switch-input', {type: 'checkbox'}),
-      h('span.switch-label', {'data-on': '', 'data-off': ''}),
-      h('span.switch-handle')
-    )
-  ]);
-
-/**
  * Generate a dropdown list
  * @param {Object} model
  * @param {string} title
@@ -286,18 +245,18 @@ const toggle = (model, title, field) => h('.pv2.flex-row.w-25',
 const dropDown = (model, title, options, field) =>
   h('.flex-row.w-50',
     [
-      h('.p1.w-33', title),
+      h('.w-33', title),
       h('.w-50.mh2',
         h('select.form-control', {
           style: 'cursor: pointer',
-          // onchange: (e) => model.configuration.setCommand(e.target.value)
+          onchange: (e) => model.configuration.setExpertOptionByField(field, e.target.value)
         }, [
-          h('option', {
-            selected: '-' === field ? true : false, value: '-'
-          }, '-'),
-          options.map((option) => h('option', {
-            selected: option === field ? true : false, value: option
-          }, option))
+          h('option', {selected: '-' === field ? true : false, value: '-'}, '-'),
+          options.map((option) =>
+            h('option', {
+              selected: option === field ? true : false, value: option
+            }, option)
+          )
         ])
       )
     ]
@@ -312,8 +271,8 @@ const dropDown = (model, title, options, field) =>
  */
 const inputTextBox = (model, title, field) =>
   h('.flex-row.w-50', [
-    h('.p1.w-33', title),
-    h('.w-25.mh2',
+    h('.w-33', title),
+    h('.w-50.mh2',
       h('input.form-control', {
         type: 'text',
         value: field,
@@ -337,13 +296,13 @@ const inputTextBox = (model, title, field) =>
 */
 const inputNumberBox = (model, title, min, max, field) =>
   h('.flex-row.w-50', [
-    h('.p1.w-33', title),
-    h('.w-25.mh2',
+    h('.w-33', title),
+    h('.w-50.mh2',
       h('input.form-control', {
         type: 'number',
         min: min,
         max: max,
-        value: field,
+        // value: field,
         // onkeyup: (e) => workflow.updateInputSearch('revision', e.target.value),
         // onclick: (e) => {
         //   workflow.setRevisionInputDropdownVisibility('revision', true);
@@ -357,13 +316,13 @@ const inputNumberBox = (model, title, min, max, field) =>
  * Generate a checkbox based on title and field to change
  * @param {Object} model
  * @param {string} title
- * @param {Object} field
+ * @param {number} index
  * @return {vnode}
  */
-const checkBox = (model, title, field) =>
+const checkBox = (model, title, index) =>
   h('label.d-inline.f6.ph1', {style: 'white-space: nowrap', title: `Toggle selection of Link`},
     h('input', {
       type: 'checkbox',
-      checked: field,
-      // onchange: () => model.toggleInspector()
-    }), title);
+      onchange: () => model.configuration.toggleLinkSelection(index)
+    }), title
+  );

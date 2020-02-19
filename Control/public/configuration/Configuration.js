@@ -17,6 +17,7 @@ export default class Configuration extends Observable {
       expertMode: false,
       expertOptions: this.getDefaultExpertOptions()
     };
+    this.rocStatus = RemoteData.notAsked();
     this.cruList = RemoteData.notAsked();
   }
 
@@ -93,8 +94,48 @@ export default class Configuration extends Observable {
     return crusByHost;
   }
 
+  /**
+   * Method to set the value of a field within the expert panel
+   * @param {String} field
+   * @param {String} value
+   */
+  setExpertOptionByField(field, value) {
+    if (this.isFieldOfTypeBoolean(field)) {
+      this.actionPanel.expertOptions[field] = (value === 'TRUE');
+    } else if (this.isFieldOfTypeUnsignedInteger(field, value)) {
+      this.actionPanel.expertOptions[field] = value;
+    } else if (this.isFieldOfTypeString(field)) {
+
+      this.actionPanel.expertOptions[field] = value;
+    }
+    this.notify();
+  }
+
+  /**
+   * Method to toggle selection of a link
+   * @param {number} index
+   */
+  toggleLinkSelection(index) {
+    this.actionPanel.expertOptions.links[index] = !this.actionPanel.expertOptions.links[index];
+  }
+
+  /**
+   * Method to build the request for AliECS - core and send it
+   */
+  confirmSelectionAndRunCommand() {
+    const rocOptions = {};
+    const request = this.actionPanel.expertOptions;
+    Object.entries(request).forEach(([key, value]) => {
+      if (key === 'links') {
+        //
+      } else if (value !== null && value !== '') {
+        rocOptions[key] = value;
+      }
+    });
+    this.executeCommand(rocOptions);
+  }
   /*
-   * Helpers
+   * Helpers=
    */
 
   /**
@@ -103,7 +144,6 @@ export default class Configuration extends Observable {
    */
   getDefaultExpertOptions() {
     return {
-      allowRejection: false,
       cruId: '',
       clock: '',
       dataPathMode: '',
@@ -111,12 +151,46 @@ export default class Configuration extends Observable {
       gbtMode: '',
       gbtMux: '',
       links: Array(12).fill(false),
-      loopback: false,
-      ponUpstream: false,
-      dynOffset: false,
-      onuAddress: '',
-      triggerWindowSize: 1000
+      allowRejection: null, // bool
+      loopback: null, // bool
+      ponUpstream: null, // bool
+      dynOffset: null, // bool
+      onuAddress: null, // [0, 2^32 - 1]
+      triggerWindowSize: null // [0, 4095]
     };
+  }
+
+  /**
+   * Method to check if values are in expected format and ca be assigned to a boolean type
+   * @param {string} field
+   * @return {boolean}
+   */
+  isFieldOfTypeBoolean(field) {
+    return ['allowRejection', 'loopback', 'ponUpstream', 'dynOffset'].includes(field);
+  }
+
+  /**
+   * Method to check that the field is expecting an uint32_t and that the value respects the criteria
+   * @param {String} field
+   * @param {String} value
+   * @return {boolean}
+   */
+  isFieldOfTypeUnsignedInteger(field, value) {
+    let isValueCorrect = Number.isInteger(value) && value >= 0 && value <= (Math.pow(2, 32) - 1);
+    const isFieldCorrect = ['onuAddress', 'triggerWindowSize'];
+    if (field === 'triggerWindowSize' && value > 4095) {
+      isValueCorrect = false;
+    }
+    return isValueCorrect && isFieldCorrect;
+  }
+
+  /**
+   * Method to check if provided field is part of the ones accepting a string value
+   * @param {string} field
+   * @return {boolean}
+   */
+  isFieldOfTypeString(field) {
+    return ['cruId', 'clock', 'dataPathMode', 'downStreamData', 'gbtMode', 'gbtMux'].includes(field);
   }
 
   /**
@@ -137,6 +211,24 @@ export default class Configuration extends Observable {
       return;
     }
     this.cruList = RemoteData.success(this.uncheckAllCRUs(result));
+    this.notify();
+  }
+
+  /**
+   * Method to execute a ROC command through AliECS - Core
+   * @param {JSON} rocOptions
+   */
+  async executeCommand(rocOptions) {
+    this.rocStatus = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(`/api/executeRocCommand`);
+    if (!ok) {
+      this.rocStatus = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.rocStatus = RemoteData.success(result);
     this.notify();
   }
 }
