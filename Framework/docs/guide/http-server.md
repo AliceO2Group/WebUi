@@ -1,6 +1,6 @@
 # Backend - HTTP module
 HTTP module provided a simple way of creating REST API. In addition, it supports:
- - CERN OAuth 2 authentication and e-groups authorization using [OAuth](oauth.md) module
+ - CERN SSO  authentication and e-groups authorization using [OpenID Connect](openid.md) module
  - JWT token secured requests using [JWT](json-tokens.md) module
  - Protects server by defining: Content Security Policy, DNS Prefetch Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
  - Serving custom static paths
@@ -9,7 +9,7 @@ HTTP module provided a simple way of creating REST API. In addition, it supports
 
 #### Instance
 ```js
-HttpServer(HTTP_CONF, JWT_CONF, [OAUTH_CONF]);
+HttpServer(HTTP_CONF, JWT_CONF, [OPENID_CONF]);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
@@ -20,7 +20,7 @@ Where:
      * [`key`] - private key filepath
      * [`cert`] - certificate filepath
  * `JWT_CONF` JSON Web token configuration is explained in the [jwt](json-tokens.md) module
- * [`OAUTH_CONF`] OAuth configuration is explained in the [oauth](oauth.md) module
+ * [`OPENID_CONF`] OpenID configuration is explained in the [OpenID](openid.md)
 
 #### Server example
 ```js
