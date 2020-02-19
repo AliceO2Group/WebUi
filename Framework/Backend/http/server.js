@@ -278,7 +278,7 @@ class HttpServer {
       const query = {
         personid: details.cern_person_id,
         name: details.name,
-        token: this.jwt.generateToken(details.cern_person_id, details.username, 1),
+        token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, 1),
       };
 
       // Read back user params from state
