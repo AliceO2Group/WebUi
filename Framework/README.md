@@ -34,8 +34,8 @@ The goal of this UI framework is to identify library and framework sets, provide
 - Asynchronous data fetching (Ajax) and bi-directional socket (WebSockets)
 - MVC engine with a "diffing" algorithm
 
-### System requirements
-* `nodejs` >= 8.9.4
+### Backend requirements
+* `nodejs` >= v10.13.0
 
 #### CentOS 7
 ```
