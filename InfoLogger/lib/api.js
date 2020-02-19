@@ -13,11 +13,19 @@ const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json')
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);
-  const connection = new MySQL(config.mysql);
-  querySource = new SQLDataSource(connection, config.mysql);
-  querySource.isConnectionUpAndRunning();
+  const connector = new MySQL(config.mysql);
+  connector.testConnection().then(() => {
+    querySource = new SQLDataSource(connector, config.mysql);
+    querySource.isConnectionUpAndRunning().catch((error) => {
+      log.error(`Unable to instantiate data source due to ${error}`);
+      querySource = null;
+    });
+  }).catch((error) => {
+    log.error(`Unable to connect to mysql due to ${error}`);
+    querySource = null;
+  });
 } else {
-  log.warn(`InfoLogger databse config not found, Query mode not available`);
+  log.warn(`InfoLogger database config not found, Query mode not available`);
 }
 
 if (config.infoLoggerServer) {
@@ -54,9 +62,13 @@ module.exports.attachTo = (http, ws) => {
    * @param {Response} res
    */
   function query(req, res) {
-    querySource.queryFromFilters(req.body.criterias, req.body.options)
-      .then((result) => res.json(result))
-      .catch((error) => handleError(res, error));
+    if (querySource) {
+      querySource.queryFromFilters(req.body.criterias, req.body.options)
+        .then((result) => res.json(result))
+        .catch((error) => handleError(res, error));
+    } else {
+      handleError(res, 'MySQL Data Source is not available');
+    }
   }
 
   /**
