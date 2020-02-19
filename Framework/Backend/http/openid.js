@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const { Issuer, generators } = require('openid-client');
+const {Issuer, generators} = require('openid-client');
 const assert = require('assert');
 const log = new (require('./../log/Log.js'))('OpenID');
 
@@ -20,6 +20,10 @@ const log = new (require('./../log/Log.js'))('OpenID');
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class OpenId {
+  /**
+  * Sets up OpenID Connect based on passed config
+  * @param {object} config - id, secret, welll_known, redirect_uri
+  */
   constructor(config) {
     assert(config.id, 'Missing config value: OpenID.id');
     assert(config.secret, 'Missing config value: OpenID.secret');
@@ -35,27 +39,29 @@ class OpenId {
    */
   createIssuer() {
     Issuer.discover(this.config.well_known)
-    .then((issuer) => {
-      this.client = new issuer.Client({
-        client_id: this.config.id,
-        client_secret: this.config.secret,
-        redirect_uris: [this.config.redirect_uri],
-        response_types: ['code'],
-        id_token_signed_response_alg: "RS256",
-        token_endpoint_auth_method: "client_secret_basic"
+      .then((issuer) => {
+        this.client = new issuer.Client({
+          client_id: this.config.id,
+          client_secret: this.config.secret,
+          redirect_uris: [this.config.redirect_uri],
+          response_types: ['code'],
+          id_token_signed_response_alg: 'RS256',
+          token_endpoint_auth_method: 'client_secret_basic'
+        });
+        log.info('OpenID client initalized');
       });
-      log.info("OpenID client initalized");
-    });
   }
 
   /**
    * Provides authorization URL
+   * @param {string} state - base64 encoded query params passed by user
+   * @return {string} - authorization URL
    */
   getAuthUrl(state) {
-    const code_challenge = generators.codeChallenge(this.code_verifier);
+    const codeChallenge = generators.codeChallenge(this.code_verifier);
     return this.client.authorizationUrl({
       scope: 'openid',
-      code_challenge,
+      codeChallenge,
       code_challenge_method: 'S256',
       state: state
     });
@@ -63,6 +69,8 @@ class OpenId {
 
   /**
    * Handles callback
+   * @param {object} req - callback reqeest object
+   * @return {promise} - promise that handles callback path and returns token set
    */
   callback(req) {
     const params = this.client.callbackParams(req);

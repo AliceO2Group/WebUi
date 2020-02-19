@@ -259,7 +259,7 @@ class HttpServer {
     } else {
       // Redirects to the OpenID flow
       const state = new Buffer(JSON.stringify(query)).toString('base64');
-      return res.redirect(this.openid.getAuthUrl(state))
+      return res.redirect(this.openid.getAuthUrl(state));
     }
   }
 
@@ -269,7 +269,6 @@ class HttpServer {
    * and injects them to the url
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
-   * @return {object} redirect to address with re-included query string
    */
   identCallback(req, res) {
     this.openid.callback(req).then((tokenSet) => {
@@ -289,7 +288,7 @@ class HttpServer {
       Object.assign(query, this.templateData);
       Object.assign(query, userQuery);
 
-      return res.redirect(url.format({pathname: '/', query: query}));
+      res.redirect(url.format({pathname: '/', query: query}));
     }).catch((reason) => {
       log.debug('OpenId failed: ' + reason);
       res.status(401).send('OpenId failed');
