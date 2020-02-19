@@ -93,7 +93,7 @@ describe('QCG', function() {
       await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)', {timeout: 5000});
       const onlineButton = await page.evaluate(() =>
         document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)').title);
-      assert.deepStrictEqual(onlineButton, 'Online');
+      assert.strictEqual(onlineButton, 'Toggle Mode (Online/Offline)');
     });
 
     it('should have a table with rows', async () => {
