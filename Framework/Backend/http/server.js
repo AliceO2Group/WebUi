@@ -278,7 +278,7 @@ class HttpServer {
       const query = {
         personid: details.cern_person_id,
         name: details.name,
-        token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, 1),
+        token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, this.authorise(details)),
       };
 
       // Read back user params from state
@@ -293,6 +293,22 @@ class HttpServer {
       log.debug('OpenId failed: ' + reason);
       res.status(401).send('OpenId failed');
     });
+  }
+
+  /**
+   * Provides access level number for JWT token depending on users' role
+   * @param {object} details - user details
+   * @return {number} - access level based on role
+   */
+  authorise(details) {
+    let accessLevel = 1;
+    if (details.hasOwnProperty('resource_access')) {
+      const roles = details.resource_access[Object.keys(details.resource_access)[0]].roles;
+      if (roles.includes('admin')) {
+        accessLevel = 2;
+      }
+    }
+    return accessLevel;
   }
 
   /**

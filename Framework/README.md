@@ -25,7 +25,7 @@ The goal of this UI framework is to identify library and framework sets, provide
 
 #### Server-side features
 - REST and WebSocket API
-- Authentication via CERN SSO (OpemID Connect) ~~and authorisation via CERN e-groups~~
+- Authentication via CERN SSO (OpenID Connect), authorisation using CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
 - External resource access: MySQL, gRPC, Consul
 
