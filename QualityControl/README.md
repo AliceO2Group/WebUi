@@ -31,28 +31,34 @@ qcg
 
 
 ## Custom configuration
-These steps are necessary only when you don't run QCG on `localhost`.
+These steps are necessary only when you don't run the QCG or the CCDB on `localhost`.
 
-In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/config.js`
+In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/node_modules/@aliceo2/qc/config.js`
 
 #### HTTP
-Edit `http` section to define custom:
-- `port` number
-- `hostname` of your server.
-
-#### MySQL database
-Edit `mysql` section to define custom:
-- MySQL database `host`name
-- `user`name
-- `password`
-- `database` name
+Edit the `http` section to define a custom:
+- `port` number and
+- `hostname`.
 
 #### Information Service
-Edit `informationService` section to define custom:
-- `host`name
+Edit the `informationService` section to define a custom:
+- `host`name and
 - `port`
 
 of Information Service publish and response socket.
+
+#### CCDB database
+Edit the `ccdb` section to define a custom:
+- `host`name and
+- `port`. 
+
+#### MySQL database
+Edit the `mysql` section to define a custom:
+- MySQL database `host`name,
+- `user`name,
+- `password` and
+- `database` name.
+Edit the `listingConnector` to switch it to `mysql`. 
 
 #### CERN OAuth
 - Register your application in the [CERN OAuth service](https://sso-management.web.cern.ch/OAuth/RegisterOAuthClient.aspx)

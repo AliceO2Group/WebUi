@@ -49,6 +49,7 @@ export default class QCObject extends Observable {
 
     this.sideTree = new ObjectTree('online');
     this.sideTree.bubbleTo(this);
+    this.queryingObjects = false;
   }
 
   /**
@@ -57,7 +58,6 @@ export default class QCObject extends Observable {
   toggleMode() {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
     if (this.isOnlineModeEnabled) {
-      this.loadOnlineList();
       this.setRefreshInterval(60);
     } else {
       this.loadList();
@@ -101,6 +101,7 @@ export default class QCObject extends Observable {
       this.sideTree.initTree('database');
       this.sideTree.addChildren(this.list);
     }
+    this.notify();
   }
 
   /**
@@ -188,6 +189,7 @@ export default class QCObject extends Observable {
    */
   async loadList() {
     if (!this.isOnlineModeEnabled) {
+      this.queryingObjects = true;
       let offlineObjects = [];
       const result = await this.qcObjectService.getObjects();
       if (result.isSuccess()) {
@@ -216,6 +218,7 @@ export default class QCObject extends Observable {
       if (this.selected && !this.selected.lastModified) {
         this.selected = this.list.find((object) => object.name === this.selected.name);
       }
+      this.queryingObjects = false;
       this.notify();
     } else {
       this.loadOnlineList();

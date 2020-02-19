@@ -17,7 +17,7 @@ describe('InfoLogger', function() {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(20000);
+  this.timeout(30000);
   this.slow(1000);
   const baseUrl = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
@@ -232,7 +232,7 @@ describe('InfoLogger', function() {
     });
   });
 
-  describe('Live mode', () => {
+  describe('Live mode', async () => {
     it('can be activated because it is configured and simulator is started', async () => {
       const activeMode = await page.evaluate(() => {
         window.model.log.liveStart();
@@ -281,7 +281,7 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitFor(5000);
+      await page.waitFor(7000);
       const list = await page.evaluate(() => window.model.log.list);
       await page.waitFor(1000);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');

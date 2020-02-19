@@ -2,8 +2,20 @@
   "name": "@aliceo2/infologger",
   "version": "1.2.2",
   "description": "Infologger GUI to query and stream log events",
-  "homepage": "https://alice-o2.web.cern.ch",
-  "main": "index.js",
+  "author": "Vladimir Kosmala",
+  "contributors": [
+    "George Raduta",
+    "Adam Wegrzynek"
+  ],
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AliceO2Group/WebUi.git"
+  },
+  "engines": {
+    "node": ">= 8.9.4"
+  },
+  "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
@@ -14,17 +26,16 @@
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
-  "author": "Vladimir Kosmala",
-  "license": "GPL-3.0",
   "dependencies": {
-    "@aliceo2/web-ui": "1.9.1"
+    "@aliceo2/web-ui": "1.9.4"
   },
   "devDependencies": {
     "eslint": "^5.15.0",
     "eslint-config-google": "^0.12.0",
-    "mocha": "^6.2.2",
+    "mocha": "7.0.1",
     "nyc": "^14.1.1",
     "puppeteer": "2.0.0",
     "sinon": "^7.3.2"
-  }
+  },
+  "main": "index.js"
 }

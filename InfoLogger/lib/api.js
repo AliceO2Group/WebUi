@@ -9,16 +9,23 @@ const projPackage = require('./../package.json');
 let querySource = null;
 let liveSource = null;
 
-
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);
-  const connection = new MySQL(config.mysql);
-  querySource = new SQLDataSource(connection, config.mysql);
-  querySource.isConnectionUpAndRunning();
+  const connector = new MySQL(config.mysql);
+  connector.testConnection().then(() => {
+    querySource = new SQLDataSource(connector, config.mysql);
+    querySource.isConnectionUpAndRunning().catch((error) => {
+      log.error(`Unable to instantiate data source due to ${error}`);
+      querySource = null;
+    });
+  }).catch((error) => {
+    log.error(`Unable to connect to mysql due to ${error}`);
+    querySource = null;
+  });
 } else {
-  log.warn(`InfoLogger databse config not found, Query mode not available`);
+  log.warn(`InfoLogger database config not found, Query mode not available`);
 }
 
 if (config.infoLoggerServer) {
@@ -30,26 +37,39 @@ if (config.infoLoggerServer) {
 }
 
 module.exports.attachTo = (http, ws) => {
-  // expose available services
-  http.post('/services', (req, res) => {
+  http.get('/getFrameworkInfo', getFrameworkInfo);
+  http.get('/getUserProfile', getUserProfile);
+  http.post('/services', getServicesStatus);
+  http.post('/query', query);
+  http.post('/saveUserProfile', saveUserProfile);
+
+  /**
+   * Method to send back the status of the current services (e.g query/live)
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function getServicesStatus(req, res) {
     res.json({
       query: !!querySource,
       live: !!liveSource,
       streamHostname: config.infoLoggerServer && config.infoLoggerServer.host
     });
-  });
+  }
 
-  http.post('/query', (req, res) => {
-    querySource.queryFromFilters(req.body.criterias, req.body.options)
-      .then((result) => res.json(result))
-      .catch((error) => handleError(res, error));
-  });
-
-  http.get('/getFrameworkInfo', getFrameworkInfo);
-
-  http.get('/getUserProfile', getUserProfile);
-
-  http.post('/saveUserProfile', saveUserProfile);
+  /**
+   * Method to perform a query on the SQL Data Source
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function query(req, res) {
+    if (querySource) {
+      querySource.queryFromFilters(req.body.criterias, req.body.options)
+        .then((result) => res.json(result))
+        .catch((error) => handleError(res, error));
+    } else {
+      handleError(res, 'MySQL Data Source is not available');
+    }
+  }
 
   /**
    * Method which handles the request for framework information
@@ -155,6 +175,10 @@ module.exports.attachTo = (http, ws) => {
       msg.command = 'live-log';
       msg.payload = message;
       ws.broadcast(msg);
+    });
+
+    liveSource.on('connection-issue', () => {
+      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-connection-issue'));
     });
 
     liveSource.on('close', () => {

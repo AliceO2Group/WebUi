@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<title>Alice Bootstrap Gui</title>
+<title>ALICE Web UI Framework - Frontend Components</title>
 <link rel="stylesheet" href="../../Frontend/css/src/bootstrap.css">
 
 <div class="flex-row absolute-fill">
@@ -110,7 +110,7 @@
   <p class="measure">The .btn class is designed to be used with <code>&lt;button&gt;</code> elements.
     Buttons can have different states: <code>.active</code>, <code>.selected</code>, <code>.loading</code> (class name) and <code>disabled</code> (HTML attribute).<p>
   <p class="measure">Five colors are available, <code>.btn</code> might be used everywhere, <code>.btn.btn-primary</code> for main buttons, <code>.btn.btn-danger</code> for destructive actions</p>,
-  <code>.btn.btn-success</code> for confirmatory actions</p>, <code>.btn.btn-warning</code> for worring actions.</p>
+  <code>.btn.btn-success</code> for confirmatory actions</p>, <code>.btn.btn-warning</code> for worrying actions.</p>
 
   <p>
     Normal:<br/>
@@ -653,8 +653,23 @@
           <button class="btn">
             <svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M3.5 0l-.5 1.188-.281.125-1.188-.5-.719.719.5 1.188-.125.281-1.188.5v1l1.188.5.125.313-.5 1.156.719.719 1.188-.5.281.125.5 1.188h1l.5-1.188.281-.125 1.188.5.719-.719-.5-1.188.125-.281 1.188-.5v-1l-1.188-.5-.125-.281.469-1.188-.688-.719-1.188.5-.281-.125-.5-1.188h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" name="cog" /></svg>
           </button>
-          <button class="btn">?</button>
           <span class="f4 gray">Title</span>
+          <p></p>
+          <span class="f4 gray"> Sidebar Actions</span>
+          <div class="btn-group">
+          <button class="btn" onclick="
+              document.querySelector('div.sidebar').classList = 'div sidebar sidebar-minimal';
+              ">Minimize
+            </button>
+            <button class="btn small" onclick="
+              document.querySelector('div.sidebar').classList = 'div sidebar';
+              ">Maximize
+            </button>
+            <button class="btn" onclick="
+              document.querySelector('div.sidebar').classList = 'div sidebar sidebar-closed';
+              ">Hide
+            </button>
+          </div>
         </div>
 
         <div class="w-50 text-center">
@@ -684,15 +699,6 @@
             <div class="absolute-fill scroll-y">
               <div class="menu-title">Title</div>
               <a class="menu-item selected"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
-              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
-              <div class="menu-title">Title</div>
-              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
-              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
-              <div class="menu-title">Title</div>
-              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
-              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
-              <div class="menu-title">Title</div>
-              <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
               <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>
               <div class="menu-title">Title</div>
               <a class="menu-item"><svg viewBox="0 0 8 8" class="icon" fill="currentcolor"><path d="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3z" name="file" /></svg> Item</a>

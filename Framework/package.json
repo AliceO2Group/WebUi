@@ -1,19 +1,29 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "1.9.2",
+  "version": "1.9.4",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
+  "contributors": [
+    "George Raduta",
+    "Vladimir Kosmala"
+  ],
   "license": "GPL-3.0",
-  "repository": "AliceO2Group/WebUi",
-  "homepage": "https://alice-o2.web.cern.ch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AliceO2Group/WebUi.git"
+  },
+  "engines": {
+    "node": ">= 8.9.4"
+  },
+  "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "test": "npm run eslint && npm run mocha",
     "coverage": "npm run eslint && nyc mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "mocha --exit ./Frontend/test/",
-    "mocha-backend": "mocha --exit ./Backend/test/",
+    "mocha-backend": "mocha --exit ./Backend/test/*.js",
     "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
-    "doc-frontend": "jsdoc2md --files \"./Frontend/**/*.js\" -p list -r list --member-index-format list --name-format --no-gfm -l js > ./docs/reference/frontend-api.md"
+    "coverage-local": "nyc --reporter=lcov npm run mocha-backend"
   },
   "nyc": {
     "exclude": [
@@ -34,9 +44,10 @@
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.13.0",
     "mocha": "^6.1.4",
+    "nock": "11.7.0",
+    "sinon": "8.1.1",
     "nyc": "^14.1.1",
-    "puppeteer": "2.0.0",
-    "nock": "11.7.0"
+    "puppeteer": "2.0.0"
   },
   "main": "Backend/index.js"
 }
