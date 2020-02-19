@@ -133,7 +133,11 @@ module.exports = class SQLDataSource {
     const {criteria, values, criteriaVerbose} = this._filtersToSqlConditions(filters);
     const criteriaString = this._getCriteriaAsString(criteria);
 
-    const rows = await this._queryMessagesOnOptions(criteriaString, options, values);
+    const rows = await this._queryMessagesOnOptions(criteriaString, options, values)
+      .catch((error) => {
+        log.error(error);
+        throw error;
+      });
 
     const resultCount = await this._countMessagesOnOptions(criteriaString, values);
 
@@ -192,11 +196,7 @@ module.exports = class SQLDataSource {
     /* eslint-enable max-len */
     log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
     return this.connection.query(requestRows, values)
-      .then((data) => data)
-      .catch((error) => {
-        log.error(error);
-        return [];
-      });
+      .then((data) => data);
   }
 
   /**

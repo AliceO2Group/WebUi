@@ -2,7 +2,7 @@
   "name": "@aliceo2/infologger",
   "version": "1.2.2",
   "description": "Infologger GUI to query and stream log events",
-  "author":  "Vladimir Kosmala",
+  "author": "Vladimir Kosmala",
   "contributors": [
     "George Raduta",
     "Adam Wegrzynek"
@@ -27,7 +27,7 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.9.1"
+    "@aliceo2/web-ui": "1.9.4"
   },
   "devDependencies": {
     "eslint": "^5.15.0",

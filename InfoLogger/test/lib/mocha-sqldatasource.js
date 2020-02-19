@@ -153,11 +153,20 @@ describe('SQLDataSource', () => {
     assert.deepStrictEqual(queryResult, [{severity: 'W'}, {severity: 'I'}]);
   });
 
-  it('should successfully return empty data when querying mysql driver results in rejected promise', async () => {
+  it('should throw an error when unable to query within private method due to rejected promise', async () => {
     const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().rejects()});
     const sqlDataSource = new SQLDataSource(stub, config.mysql);
-    const queryResult = await sqlDataSource._queryMessagesOnOptions('criteriaString', []);
-    assert.deepStrictEqual(queryResult, []);
+    return assert.rejects(async () => {
+      await sqlDataSource._queryMessagesOnOptions('criteriaString', []);
+    }, new Error('Error'));
+  });
+
+  it('should throw an error when unable to query(API) due to rejected promise', async () => {
+    const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().rejects()});
+    const sqlDataSource = new SQLDataSource(stub, config.mysql);
+    return assert.rejects(async () => {
+      await sqlDataSource.queryFromFilters(realFilters, {limit: 10});
+    }, new Error('Error'));
   });
 
   it('should throw an error if no filters are provided for querying', async () => {

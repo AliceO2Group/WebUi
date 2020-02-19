@@ -281,7 +281,7 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitFor(5000);
+      await page.waitFor(7000);
       const list = await page.evaluate(() => window.model.log.list);
       await page.waitFor(1000);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');
