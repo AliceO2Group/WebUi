@@ -22,7 +22,7 @@ const log = new (require('./../log/Log.js'))('OpenID');
 class OpenId {
   /**
   * Sets up OpenID Connect based on passed config
-  * @param {object} config - id, secret, welll_known, redirect_uri
+  * @param {object} config - id, secret, well_known, redirect_uri
   */
   constructor(config) {
     assert(config.id, 'Missing config value: OpenID.id');
@@ -48,7 +48,7 @@ class OpenId {
           id_token_signed_response_alg: 'RS256',
           token_endpoint_auth_method: 'client_secret_basic'
         });
-        log.info('OpenID client initalized');
+        log.info('OpenID client initialised');
       });
   }
 
@@ -69,7 +69,7 @@ class OpenId {
 
   /**
    * Handles callback
-   * @param {object} req - callback reqeest object
+   * @param {object} req - callback request object
    * @return {promise} - promise that handles callback path and returns token set
    */
   callback(req) {

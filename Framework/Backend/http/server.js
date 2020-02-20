@@ -41,7 +41,7 @@ class HttpServer {
     this.configureHelmet(httpConfig.hostname);
 
     this.jwt = new JwtToken(jwtConfig);
-    if (connectIdConfig != null) {
+    if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
     }
     this.specifyRoutes();
@@ -247,7 +247,7 @@ class HttpServer {
    * - Redirects to the OpenID flow otherwise, and sets the current state of URL
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
-   * @param {object} next - serves static paths when OpenId suceeds
+   * @param {object} next - serves static paths when OpenId succeeds
    * @return {object} redirects to OpenID  flow or displays the page if JWT token is valid
    */
   ident(req, res, next) {
@@ -258,7 +258,7 @@ class HttpServer {
       next();
     } else {
       // Redirects to the OpenID flow
-      const state = new Buffer(JSON.stringify(query)).toString('base64');
+      const state = Buffer.from(JSON.stringify(query)).toString('base64');
       return res.redirect(this.openid.getAuthUrl(state));
     }
   }
@@ -282,15 +282,15 @@ class HttpServer {
       };
 
       // Read back user params from state
-      const userQuery = JSON.parse(new Buffer(req.query.state, 'base64').toString('ascii'));
+      const userQuery = JSON.parse(Buffer.from(req.query.state, 'base64').toString('ascii'));
 
-      // Concatanates with predefined files and user query
+      // Concatenates with predefined files and user query
       Object.assign(query, this.templateData);
       Object.assign(query, userQuery);
 
       res.redirect(url.format({pathname: '/', query: query}));
     }).catch((reason) => {
-      log.debug('OpenId failed: ' + reason);
+      log.error('OpenId failed: ' + reason);
       res.status(401).send('OpenId failed');
     });
   }
