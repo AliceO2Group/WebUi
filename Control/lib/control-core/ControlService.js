@@ -1,4 +1,4 @@
-const log = new (require('@aliceo2/web-ui').Log)('CoreConnector');
+const log = new (require('@aliceo2/web-ui').Log)('ControlService');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -6,7 +6,7 @@ const log = new (require('@aliceo2/web-ui').Log)('CoreConnector');
  * @param {ControlProxy} ctrlProx
  * @return {JSON}
  */
-function CoreConnector(padLock, ctrlProx) {
+function ControlService(padLock, ctrlProx) {
   /**
    * Method to check provided options for command and execute it through AliECS-Core
    * @param {Request} req
@@ -65,4 +65,4 @@ function CoreConnector(padLock, ctrlProx) {
   };
 }
 
-module.exports = CoreConnector;
+module.exports = ControlService;

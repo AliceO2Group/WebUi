@@ -13,7 +13,7 @@ export default class Configuration extends Observable {
 
     this.model = model;
     this.actionPanel = {
-      command: 'STATUS',
+      command: 'CONFIG',
       expertMode: false,
       expertOptions: this.getDefaultExpertOptions()
     };

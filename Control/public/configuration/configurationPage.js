@@ -75,10 +75,7 @@ const actionPanel = (model) =>
       }, [
         h('option', {
           selected: 'CONFIG' === model.configuration.actionPanel.command ? true : false, value: 'CONFIG'
-        }, 'roc-config'),
-        h('option', {
-          selected: 'STATUS' === model.configuration.actionPanel.command ? true : false, value: 'STATUS'
-        }, 'roc-status')
+        }, 'roc-config')
       ]),
     ]),
     runPanel(model)
@@ -137,9 +134,9 @@ const expertPanel = (model, options) =>
       dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtMux'),
     ]),
     h('.flex-row.w-100.pv2',
-      inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'triggerWindowSize'),
       inputTextBox(model, 'CRU-Id', 'cruId'),
-      inputTextBox(model, 'ONU Address', 'onuAddress'),
+      inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'triggerWindowSize'),
+      inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 32 - 1), 'onuAddress'),
     ),
 
     h('.flex-row.w-100.pv2', [
@@ -275,7 +272,7 @@ const inputTextBox = (model, title, field) =>
     h('.w-50.mh2',
       h('input.form-control', {
         type: 'text',
-        value: field,
+        // value: field,
         // onkeyup: (e) => workflow.updateInputSearch('revision', e.target.value),
         // onclick: (e) => {
         //   workflow.setRevisionInputDropdownVisibility('revision', true);

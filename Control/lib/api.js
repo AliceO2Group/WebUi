@@ -3,8 +3,8 @@ const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 const Padlock = require('./Padlock.js');
 const KafkaConnector = require('./KafkaConnector.js');
-const ControlProxy = require('./ControlProxy.js');
-const CoreConnector = require('./CoreConnector.js');
+const ControlProxy = require('./control-core/ControlProxy.js');
+const ControlService = require('./control-core/ControlService.js');
 
 const config = require('./configProvider.js');
 const http = require('http');
@@ -23,7 +23,7 @@ initializeConsulService();
 
 const pad = new Padlock();
 const octl = new ControlProxy(config.grpc);
-const core = new CoreConnector(pad, octl);
+const ctrlService = new ControlService(pad, octl);
 
 
 module.exports.setup = (http, ws) => {
@@ -32,7 +32,7 @@ module.exports.setup = (http, ws) => {
     kafka.initializeKafkaConsumerGroup();
   }
 
-  octl.methods.forEach((method) => http.post(`/${method}`, core.executeCommand));
+  octl.methods.forEach((method) => http.post(`/${method}`, ctrlService.executeCommand));
 
   http.post('/lockState', (req, res) => res.json(pad));
   http.post('/lock', (req, res) => {
@@ -64,7 +64,7 @@ module.exports.setup = (http, ws) => {
   http.get('/PlotsList', getPlots);
   http.get('/getFrameworkInfo', getFrameworkInfo);
   http.get('/getCRUs', getCRUs);
-  http.post('/executeRocCommand', core.executeRocCommand);
+  http.post('/executeRocCommand', ctrlService.executeRocCommand);
 
   /**
    * Send to all users state of Pad via Websocket
