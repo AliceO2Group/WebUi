@@ -67,7 +67,7 @@ class OpenId {
     const codeChallenge = generators.codeChallenge(this.code_verifier);
     return this.client.authorizationUrl({
       scope: 'openid',
-      codeChallenge,
+      code_challenge: codeChallenge,
       code_challenge_method: 'S256',
       state: state
     });
