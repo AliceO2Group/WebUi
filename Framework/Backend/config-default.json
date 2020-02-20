@@ -5,21 +5,11 @@
     "expiration": "60s",
     "maxAge": "2m"
   },
-  "oAuth": {
-    "secret": "<oAuthSecret>",
-    "id": "<oAuthId>",
-    "tokenHost": "https://oauth.web.cern-TEST.ch",
-    "tokenPath": "/OAuth/Token",
-    "authorizePath": "/OAuth/Authorize",
+  "openId": {
+    "secret": "<secret>",
+    "id": "<id>",
     "redirect_uri": "https://redirect.uri/callback",
-    "state": "3(#0/!~",
-    "egroup": "alice-p2info",
-    "resource": {
-      "hostname": "oauthresource.web.cern-TEST.ch",
-      "userPath": "/api/User",
-      "groupPath": "/api/Groups",
-      "port": 8443
-    }
+    "well_known": "http://localhost/.well-known/openid-configuration'"
   },
   "http": {
     "port": 8181,
