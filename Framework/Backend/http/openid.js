@@ -31,25 +31,31 @@ class OpenId {
     assert(config.redirect_uri, 'Missing config value: OpenId.redirect_uri');
     this.config = config;
     this.code_verifier = generators.codeVerifier();
-    this.createIssuer();
   }
 
   /**
    * Create OpenID client based on well-known endpoint
+   * @return {promise} - promise whether OpenID got initialised successfully
    */
   createIssuer() {
-    Issuer.discover(this.config.well_known)
-      .then((issuer) => {
-        this.client = new issuer.Client({
-          client_id: this.config.id,
-          client_secret: this.config.secret,
-          redirect_uris: [this.config.redirect_uri],
-          response_types: ['code'],
-          id_token_signed_response_alg: 'RS256',
-          token_endpoint_auth_method: 'client_secret_basic'
+    return new Promise((resolve, reject) => {
+      Issuer.discover(this.config.well_known)
+        .then((issuer) => {
+          this.client = new issuer.Client({
+            client_id: this.config.id,
+            client_secret: this.config.secret,
+            redirect_uris: [this.config.redirect_uri],
+            response_types: ['code'],
+            id_token_signed_response_alg: 'RS256',
+            token_endpoint_auth_method: 'client_secret_basic'
+          });
+          log.info('OpenID client initialised');
+          resolve();
+        }).catch((error) => {
+          log.error('Initialising OpenID failed: ' + error);
+          reject(error);
         });
-        log.info('OpenID client initialised');
-      });
+    });
   }
 
   /**

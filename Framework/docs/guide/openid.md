@@ -15,7 +15,7 @@ Where:
 
 ### Config example
 ```
-OpenId: {
+openId: {
   secret: '<secret>',
   id: '<id>',
   redirect_uri: 'https://myapp.cern.ch/callback',

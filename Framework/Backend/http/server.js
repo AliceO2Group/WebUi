@@ -43,6 +43,7 @@ class HttpServer {
     this.jwt = new JwtToken(jwtConfig);
     if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
+      this.openid.createIssuer().catch(() => process.exit(1));
     }
     this.specifyRoutes();
 
@@ -290,7 +291,7 @@ class HttpServer {
 
       res.redirect(url.format({pathname: '/', query: query}));
     }).catch((reason) => {
-      log.error('OpenId failed: ' + reason);
+      log.info('OpenId failed: ' + reason);
       res.status(401).send('OpenId failed');
     });
   }
