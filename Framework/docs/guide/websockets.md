@@ -13,11 +13,11 @@ Where:
 // Include requred modules
 const {HttpServer, WebSocket} = require('@aliceo2/web-ui');
 
-// Prepare HTTP, JWT, and oAuth configuration
+// Prepare HTTP, JWT, and OpenId configuration
 ...
 
 // Create instance HTTP server
-const http = new HttpServer(httpConf, jwtConf, oauthConf);
+const http = new HttpServer(httpConf, jwtConf, openIdConf);
 
 // Create instance of WebSocket server
 const ws = new WebSocket(http);
