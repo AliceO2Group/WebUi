@@ -2,22 +2,28 @@ const log = new (require('@aliceo2/web-ui').Log)('ControlService');
 
 /**
  * Gateway for all AliECS - Core calls
- * @param {Padlock} padLock
- * @param {ControlProxy} ctrlProx
- * @return {JSON}
  */
-function ControlService(padLock, ctrlProx) {
+class ControlService {
+  /**
+   * Constructor initializing dependencies
+   * @param {Padlock} padLock
+   * @param {ControlProxy} ctrlProx
+   */
+  constructor(padLock, ctrlProx) {
+    this.padLock = padLock;
+    this.ctrlProx = ctrlProx;
+  }
   /**
    * Method to execute one core-command and send back results
    * @param {Request} req
    * @param {Response} res
    */
-  function executeCommand(req, res) {
-    const method = parseMethodString(req.path);
-    if (isConnectionReady(res) && isLockSetUp(method, req, res)) {
-      ctrlProx[method](req.body)
+  executeCommand(req, res) {
+    const method = this.parseMethodString(req.path);
+    if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
+      this.ctrlProx[method](req.body)
         .then((response) => res.json(response))
-        .catch((error) => errorHandler(error, res, 504));
+        .catch((error) => this.errorHandler(error, res, 504));
     }
   }
 
@@ -26,9 +32,9 @@ function ControlService(padLock, ctrlProx) {
    * @param {Response} res
    * @return {boolean}
    */
-  function isConnectionReady(res) {
-    if (!ctrlProx.connectionReady) {
-      errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
+  isConnectionReady(res) {
+    if (!this.ctrlProx.connectionReady) {
+      this.errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
       return false;
     }
     return true;
@@ -41,15 +47,15 @@ function ControlService(padLock, ctrlProx) {
    * @param {Response} res
    * @return {boolean}
    */
-  function isLockSetUp(method, req, res) {
+  isLockSetUp(method, req, res) {
     // disallow 'not-Get' methods if not owning the lock
     if (!method.startsWith('Get') && method !== 'ListRepos') {
-      if (padLock.lockedBy == null) {
-        errorHandler(`Control is not locked`, res, 403);
+      if (this.padLock.lockedBy == null) {
+        this.errorHandler(`Control is not locked`, res, 403);
         return false;
       }
-      if (req.session.personid != padLock.lockedBy) {
-        errorHandler(`Control is locked by ${padLock.lockedByName}`, res, 403);
+      if (req.session.personid != this.padLock.lockedBy) {
+        this.errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
         return false;
       }
     }
@@ -62,7 +68,7 @@ function ControlService(padLock, ctrlProx) {
   * @param {Response} res - Response object to send to
   * @param {number} status - status code 4xx 5xx, 500 will print to debug
   */
-  function errorHandler(err, res, status = 500) {
+  errorHandler(err, res, status = 500) {
     if (status > 500) {
       if (err.stack) {
         log.trace(err);
@@ -77,17 +83,13 @@ function ControlService(padLock, ctrlProx) {
    * @param {string} method
    * @return {string}
    */
-  function parseMethodString(method) {
+  parseMethodString(method) {
     if (method.indexOf('/') === 0) {
       return method.substring(1, method.length);
     } else {
       return method;
     }
   }
-
-  return {
-    executeCommand
-  };
 }
 
 module.exports = ControlService;
