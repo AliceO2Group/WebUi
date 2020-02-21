@@ -143,7 +143,7 @@ export default class Environment extends Observable {
    */
   async getPlotsList() {
     this.plots = RemoteData.loading();
-    const {result, ok} = await this.model.loader.get(`/api/PlotsList`);
+    const {result, ok} = await this.model.loader.get(`/api/getPlotsList`);
     if (!ok) {
       this.plots = RemoteData.failure(result.message);
       this.notify();
