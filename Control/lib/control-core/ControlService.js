@@ -1,4 +1,5 @@
 const log = new (require('@aliceo2/web-ui').Log)('ControlService');
+const assert = require('assert');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -10,16 +11,18 @@ class ControlService {
    * @param {ControlProxy} ctrlProx
    */
   constructor(padLock, ctrlProx) {
+    assert(padLock, 'Missing PadLock dependency');
+    assert(ctrlProx, 'Missing ControlProxy dependency');
     this.padLock = padLock;
     this.ctrlProx = ctrlProx;
   }
   /**
-   * Method to execute one core-command and send back results
+   * Method to execute command contained by req.path and send back results
    * @param {Request} req
    * @param {Response} res
    */
   executeCommand(req, res) {
-    const method = this.parseMethodString(req.path);
+    const method = this.parseMethodNameString(req.path);
     if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
       this.ctrlProx[method](req.body)
         .then((response) => res.json(response))
@@ -75,16 +78,17 @@ class ControlService {
       }
       log.error(err.message || err);
     }
-    res.status(status).send({message: err.message || err});
+    res.status(status);
+    res.send({message: err.message || err});
   }
 
   /**
-   * Method to remove `/` if exists from method
+   * Method to remove `/` if exists from method name
    * @param {string} method
    * @return {string}
    */
-  parseMethodString(method) {
-    if (method.indexOf('/') === 0) {
+  parseMethodNameString(method) {
+    if (method && method.indexOf('/') === 0) {
       return method.substring(1, method.length);
     } else {
       return method;

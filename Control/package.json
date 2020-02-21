@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/control",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "ALICE O2 Control GUI",
   "author": "Adam Wegrzynek",
   "contributors": [
@@ -21,8 +21,9 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
-    "coverage": "npm run eslint && nyc npm run mocha"
+    "mocha": "mocha --exit $(find test -name 'mocha-control*.js')",
+    "coverage": "npm run eslint && nyc npm run mocha",
+    "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.9.2",
@@ -35,7 +36,8 @@
     "eslint-config-google": "^0.12.0",
     "mocha": "^6.2.2",
     "nyc": "^14.1.1",
-    "puppeteer": "2.0.0"
+    "puppeteer": "2.0.0",
+    "sinon": "9.0.0"
   },
   "main": "index.js"
 }
