@@ -22,15 +22,14 @@ if (!config.grafana) {
 let consulService;
 initializeConsulService();
 
-const pad = new Padlock();
-const octl = new ControlProxy(config.grpc);
-const ctrlService = new ControlService(pad, octl);
+const padLock = new Padlock();
+const ctrlProxy = new ControlProxy(config.grpc);
+const ctrlService = new ControlService(padLock, ctrlProxy);
 
 module.exports.setup = (http, ws) => {
-  octl.methods.forEach((method) =>
-    http.post(`/${method}`, ctrlService.executeCommand)
-  );
-  http.post('/lockState', (req, res) => res.json(pad));
+  ctrlProxy.methods.forEach((method) =>
+    http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res)));
+  http.post('/lockState', (req, res) => res.json(padLock));
   http.post('/lock', lock);
   http.post('/unlock', unlock);
   http.get('/getPlotsList', getPlotsList);
@@ -46,7 +45,7 @@ module.exports.setup = (http, ws) => {
    * Send to all users state of Pad via Websocket
    */
   const broadcastPadState = () => {
-    ws.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(pad));
+    ws.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(padLock));
   };
 
   /**
@@ -56,7 +55,7 @@ module.exports.setup = (http, ws) => {
    */
   function lock(req, res) {
     try {
-      pad.lockBy(req.session.personid, req.session.name);
+      padLock.lockBy(req.session.personid, req.session.name);
       log.info(`Lock taken by ${req.session.name}`);
       res.json({ok: true});
     } catch (error) {
@@ -74,7 +73,7 @@ module.exports.setup = (http, ws) => {
    */
   function unlock(req, res) {
     try {
-      pad.unlockBy(req.session.personid);
+      padLock.unlockBy(req.session.personid);
       log.info(`Lock released by ${req.session.name}`);
       res.json({ok: true});
     } catch (error) {
