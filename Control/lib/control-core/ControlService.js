@@ -17,30 +17,52 @@ function ControlService(padLock, ctrlProx) {
   }
 
   /**
-   * Method to execute one of the core-commands
+   * Method to execute one of the core-commands and use response to send back results
    * @param {Request} req
    * @param {Response} res
    */
   function executeCommand(req, res) {
     const method = req.path.substring(1, req.path.length);
+    if (isConnectionReady(res) && isLockSetUp(method, req, res)) {
+      ctrlProx[method](req.body)
+        .then((response) => res.json(response))
+        .catch((error) => errorHandler(error, res, 504));
+    }
+  }
+
+  /**
+   * Method to check if control-core connection is up and running
+   * @param {Response} res
+   * @return {boolean}
+   */
+  function isConnectionReady(res) {
     if (!ctrlProx.connectionReady) {
       errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
-      return;
+      return false;
     }
+    return true;
+  }
+
+  /**
+   * Method to check if lock is needed and if yes acquired
+   * @param {string} method
+   * @param {Request} req
+   * @param {Response} res
+   * @return {boolean}
+   */
+  function isLockSetUp(method, req, res) {
     // disallow 'not-Get' methods if not owning the lock
     if (!method.startsWith('Get') && method !== 'ListRepos') {
       if (padLock.lockedBy == null) {
         errorHandler(`Control is not locked`, res, 403);
-        return;
+        return false;
       }
       if (req.session.personid != padLock.lockedBy) {
         errorHandler(`Control is locked by ${padLock.lockedByName}`, res, 403);
-        return;
+        return false;
       }
     }
-    ctrlProx[method](req.body)
-      .then((response) => res.json(response))
-      .catch((error) => errorHandler(error, res, 504));
+    return true;
   }
 
   /**
