@@ -9,16 +9,15 @@ jobs:
     name: Create a PR in WebUI repo with updated proto file
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Copy new proto file
       run: |
         git clone https://github.com/AliceO2Group/Control.git AliEcs && cp AliEcs/core/protos/o2control.proto Control/protobuf && rm -rf AliEcs
     - name: Create a PR with updated proto file
-      uses: peter-evans/create-pull-request@v1.1.3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
-        PULL_REQUEST_BRANCH: proto-sync
-        COMMIT_MESSAGE: Sync proto file from Control repo
-        PULL_REQUEST_TITLE: Sync proto file from Control repo
-        PULL_REQUEST_BODY: Sync proto file from Control repo
+      uses: peter-evans/create-pull-request@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: proto-sync
+        commit-message: Sync proto file from Control repo
+        title: Sync proto file from Control repo
+        body: Sync proto file from Control repo
