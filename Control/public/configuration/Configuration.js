@@ -155,6 +155,7 @@ export default class Configuration extends Observable {
       loopback: null, // bool
       ponUpstream: null, // bool
       dynOffset: null, // bool
+      forceConfig: null, // bool
       onuAddress: null, // [0, 2^32 - 1]
       triggerWindowSize: null // [0, 4095]
     };

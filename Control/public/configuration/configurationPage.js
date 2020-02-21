@@ -133,6 +133,9 @@ const expertPanel = (model, options) =>
       dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtMode'),
       dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtMux'),
     ]),
+    h('.flex-row.w-100.pv2', [
+      dropDown(model, 'Force config', ['TRUE', 'FALSE'], 'forceConfig'),
+    ]),
     h('.flex-row.w-100.pv2',
       inputTextBox(model, 'CRU-Id', 'cruId'),
       inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'triggerWindowSize'),
