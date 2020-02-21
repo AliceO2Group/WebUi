@@ -57,10 +57,12 @@ service Control {
     rpc GetWorkflowTemplates (GetWorkflowTemplatesRequest) returns (GetWorkflowTemplatesReply) {}
 
     rpc ListRepos(ListReposRequest) returns (ListReposReply) {}
-    rpc AddRepo(AddRepoRequest) returns (Empty) {}
+    rpc AddRepo(AddRepoRequest) returns (AddRepoReply) {}
     rpc RemoveRepo(RemoveRepoRequest) returns (RemoveRepoReply) {}
     rpc RefreshRepos(RefreshReposRequest) returns (Empty) {}
     rpc SetDefaultRepo(SetDefaultRepoRequest) returns (Empty) {}
+    rpc SetGlobalDefaultRevision(SetGlobalDefaultRevisionRequest) returns (Empty) {}
+    rpc SetRepoDefaultRevision(SetRepoDefaultRevisionRequest) returns (SetRepoDefaultRevisionReply) {}
 }
 
 ////////////////////////////////////////
@@ -302,14 +304,22 @@ message ListReposRequest {}
 message RepoInfo {
     string name = 1;
     bool default = 2;
+    string defaultRevision = 3;
 }
 
 message ListReposReply {
     repeated RepoInfo repos = 1;
+    string globalDefaultRevision = 2;
 }
 
 message AddRepoRequest {
     string name = 1;
+    string defaultRevision = 2;
+}
+
+message AddRepoReply {
+    string newDefaultRevision = 1;
+    string info = 2;
 }
 
 message RemoveRepoRequest {
@@ -326,6 +336,19 @@ message RefreshReposRequest {
 
 message SetDefaultRepoRequest {
     int32 index = 1;
+}
+
+message SetGlobalDefaultRevisionRequest {
+    string revision = 1;
+}
+
+message SetRepoDefaultRevisionRequest {
+    int32 index = 1;
+    string revision = 2;
+}
+
+message SetRepoDefaultRevisionReply {
+    string info = 1;
 }
 
 message Empty {
