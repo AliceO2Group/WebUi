@@ -1,32 +1,32 @@
 const log = new (require('@aliceo2/web-ui').Log)('ControlService');
+const assert = require('assert');
 
 /**
  * Gateway for all AliECS - Core calls
- * @param {Padlock} padLock
- * @param {ControlProxy} ctrlProx
- * @return {JSON}
  */
-function ControlService(padLock, ctrlProx) {
+class ControlService {
   /**
-   * Method to check provided options for command and execute it through AliECS-Core
-   * @param {Request} req
-   * @param {Response} res
+   * Constructor initializing dependencies
+   * @param {Padlock} padLock
+   * @param {ControlProxy} ctrlProx
    */
-  function executeRocCommand(req, res) {
-    res.status(502).send({message: 'Not supported yet'});
+  constructor(padLock, ctrlProx) {
+    assert(padLock, 'Missing PadLock dependency');
+    assert(ctrlProx, 'Missing ControlProxy dependency');
+    this.padLock = padLock;
+    this.ctrlProx = ctrlProx;
   }
-
   /**
-   * Method to execute one of the core-commands and use response to send back results
+   * Method to execute command contained by req.path and send back results
    * @param {Request} req
    * @param {Response} res
    */
-  function executeCommand(req, res) {
-    const method = req.path.substring(1, req.path.length);
-    if (isConnectionReady(res) && isLockSetUp(method, req, res)) {
-      ctrlProx[method](req.body)
+  executeCommand(req, res) {
+    const method = this.parseMethodNameString(req.path);
+    if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
+      this.ctrlProx[method](req.body)
         .then((response) => res.json(response))
-        .catch((error) => errorHandler(error, res, 504));
+        .catch((error) => this.errorHandler(error, res, 504));
     }
   }
 
@@ -35,9 +35,9 @@ function ControlService(padLock, ctrlProx) {
    * @param {Response} res
    * @return {boolean}
    */
-  function isConnectionReady(res) {
-    if (!ctrlProx.connectionReady) {
-      errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
+  isConnectionReady(res) {
+    if (!this.ctrlProx.connectionReady) {
+      this.errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
       return false;
     }
     return true;
@@ -50,15 +50,15 @@ function ControlService(padLock, ctrlProx) {
    * @param {Response} res
    * @return {boolean}
    */
-  function isLockSetUp(method, req, res) {
+  isLockSetUp(method, req, res) {
     // disallow 'not-Get' methods if not owning the lock
     if (!method.startsWith('Get') && method !== 'ListRepos') {
-      if (padLock.lockedBy == null) {
-        errorHandler(`Control is not locked`, res, 403);
+      if (this.padLock.lockedBy == null) {
+        this.errorHandler(`Control is not locked`, res, 403);
         return false;
       }
-      if (req.session.personid != padLock.lockedBy) {
-        errorHandler(`Control is locked by ${padLock.lockedByName}`, res, 403);
+      if (req.session.personid != this.padLock.lockedBy) {
+        this.errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
         return false;
       }
     }
@@ -71,20 +71,29 @@ function ControlService(padLock, ctrlProx) {
   * @param {Response} res - Response object to send to
   * @param {number} status - status code 4xx 5xx, 500 will print to debug
   */
-  function errorHandler(err, res, status = 500) {
+  errorHandler(err, res, status = 500) {
     if (status > 500) {
       if (err.stack) {
         log.trace(err);
       }
       log.error(err.message || err);
     }
-    res.status(status).send({message: err.message || err});
+    res.status(status);
+    res.send({message: err.message || err});
   }
 
-  return {
-    executeRocCommand,
-    executeCommand
-  };
+  /**
+   * Method to remove `/` if exists from method name
+   * @param {string} method
+   * @return {string}
+   */
+  parseMethodNameString(method) {
+    if (method && method.indexOf('/') === 0) {
+      return method.substring(1, method.length);
+    } else {
+      return method;
+    }
+  }
 }
 
 module.exports = ControlService;

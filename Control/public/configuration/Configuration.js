@@ -105,7 +105,6 @@ export default class Configuration extends Observable {
     } else if (this.isFieldOfTypeUnsignedInteger(field, value)) {
       this.actionPanel.expertOptions[field] = value;
     } else if (this.isFieldOfTypeString(field)) {
-
       this.actionPanel.expertOptions[field] = value;
     }
     this.notify();
