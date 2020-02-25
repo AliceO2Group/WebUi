@@ -1,13 +1,15 @@
 const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)('Control');
 
-const Padlock = require('./Padlock.js');
-const ControlProxy = require('./ControlProxy.js');
-const KafkaConnector = require('../lib/KafkaConnector.js');
-
-const config = require('./configProvider.js');
 const http = require('http');
 
+const Padlock = require('./Padlock.js');
+const KafkaConnector = require('./KafkaConnector.js');
+
+const ControlProxy = require('./control-core/ControlProxy.js');
+const ControlService = require('./control-core/ControlService.js');
+
+const config = require('./configProvider.js');
 const projPackage = require('./../package.json');
 
 if (!config.grpc) {
@@ -20,46 +22,40 @@ if (!config.grafana) {
 let consulService;
 initializeConsulService();
 
-const pad = new Padlock();
-const octl = new ControlProxy(config.grpc);
-
+const padLock = new Padlock();
+const ctrlProxy = new ControlProxy(config.grpc);
+const ctrlService = new ControlService(padLock, ctrlProxy);
 
 module.exports.setup = (http, ws) => {
+  ctrlProxy.methods.forEach((method) =>
+    http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res)));
+  http.post('/lockState', (req, res) => res.json(padLock));
+  http.post('/lock', lock);
+  http.post('/unlock', unlock);
+  http.get('/getPlotsList', getPlotsList);
+  http.get('/getFrameworkInfo', getFrameworkInfo);
+  http.get('/getCRUs', getCRUs);
+
   const kafka = new KafkaConnector(config.kafka, ws);
   if (kafka.isKafkaConfigured()) {
     kafka.initializeKafkaConsumerGroup();
   }
-  // Map Control gRPC methods
-  for (const method of octl.methods) {
-    http.post(`/${method}`, (req, res) => {
-      if (!octl.connectionReady) {
-        errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
-        return;
-      }
-      // disallow 'not-Get' methods if not owning the lock
-      if (!method.startsWith('Get') && method !== 'ListRepos') {
-        if (pad.lockedBy == null) {
-          errorHandler(`Control is not locked`, res, 403);
-          return;
-        }
-        if (req.session.personid != pad.lockedBy) {
-          errorHandler(`Control is locked by ${pad.lockedByName}`, res, 403);
-          return;
-        }
-      }
-      octl[method](req.body)
-        .then((response) => res.json(response))
-        .catch((error) => errorHandler(error, res, 504));
-    });
-  }
 
-  http.post('/lockState', (req, res) => {
-    res.json(pad);
-  });
+  /**
+   * Send to all users state of Pad via Websocket
+   */
+  const broadcastPadState = () => {
+    ws.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(padLock));
+  };
 
-  http.post('/lock', (req, res) => {
+  /**
+   * Method to try to acquire lock
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function lock(req, res) {
     try {
-      pad.lockBy(req.session.personid, req.session.name);
+      padLock.lockBy(req.session.personid, req.session.name);
       log.info(`Lock taken by ${req.session.name}`);
       res.json({ok: true});
     } catch (error) {
@@ -68,11 +64,16 @@ module.exports.setup = (http, ws) => {
       return;
     }
     broadcastPadState();
-  });
+  }
 
-  http.post('/unlock', (req, res) => {
+  /**
+   * Method to try to release lock
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function unlock(req, res) {
     try {
-      pad.unlockBy(req.session.personid);
+      padLock.unlockBy(req.session.personid);
       log.info(`Lock released by ${req.session.name}`);
       res.json({ok: true});
     } catch (error) {
@@ -81,103 +82,97 @@ module.exports.setup = (http, ws) => {
       return;
     }
     broadcastPadState();
-  });
-
-  http.get('/PlotsList', (req, res) => {
-    if (!config.grafana || !config.http.hostname || !config.grafana.port) {
-      log.error('[Grafana] Configuration is missing');
-      res.status(503).json({message: 'Plots service configuration is missing'});
-    } else {
-      const host = config.http.hostname;
-      const port = config.grafana.port;
-      httpGetJson(host, port, '/api/health')
-        .then((result) => {
-          log.info(`Grafana is up and running on version: ${result.version}`);
-          const hostPort = `http://${host}:${port}/`;
-          const valueOne = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=6 ';
-          const valueTwo = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=8';
-          const plot = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=4';
-          const theme = '&refresh=5s&theme=light';
-          const response = [hostPort + valueOne + theme, hostPort + valueTwo + theme, hostPort + plot + theme];
-          res.status(200).json(response);
-        }).catch((error) => errorHandler(`[Grafana] - Unable to connect due to ${error}`, res, 503));
-      return;
-    }
-  });
-
-  http.get('/getFrameworkInfo', getFrameworkInfo);
-  http.get('/getCRUs', getCRUs);
-
-  /**
-   * Send to all users state of Pad via Websocket
-   */
-  const broadcastPadState = () => {
-    ws.broadcast(
-      new WebSocketMessage().setCommand('padlock-update').setPayload(pad)
-    );
-  };
-
-  /**
-   * Send back info about the framework
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function getFrameworkInfo(req, res) {
-    if (!config) {
-      errorHandler('Unable to retrieve configuration of the framework', res, 502);
-    } else {
-      const result = {};
-      result['control-gui'] = {};
-      if (projPackage && projPackage.version) {
-        result['control-gui'].version = projPackage.version;
-      }
-      if (config.http) {
-        const con = {hostname: config.http.hostname, port: config.http.port};
-        result['control-gui'] = Object.assign(result['control-gui'], con);
-      }
-      if (config.grpc) {
-        result.grpc = config.grpc;
-      }
-      if (config.grafana) {
-        result.grafana = config.grafana;
-      }
-      if (config.kafka) {
-        result.kafka = config.kafka;
-      }
-      res.status(200).json(result);
-    }
-  }
-
-  /**
-   * Method to request all CRUs available in consul KV store
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function getCRUs(req, res) {
-    if (consulService) {
-      const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
-      const regex = new RegExp(`.*/.*/cards`);
-      consulService.getOnlyRawValuesByKeyPrefix(cruPath).then((data) => {
-        const crusByHost = {};
-        Object.keys(data)
-          .filter((key) => key.match(regex))
-          .forEach((key) => {
-            const splitKey = key.split('/');
-            const hostKey = splitKey[splitKey.length - 2];
-            crusByHost[hostKey] = JSON.parse(data[key]);
-          });
-        res.status(200).json(crusByHost);
-      }).catch((error) => {
-        if (error.message.includes('404')) {
-          errorHandler(`Could not find any CRUs by key ${cruPath}`, res, 404);
-        }
-        errorHandler(error, res, 502);
-      });
-    } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
-    }
   }
 };
+
+/**
+ * Method to build a list of plots source
+ * @param {Request} req
+ * @param {Response} res
+ */
+function getPlotsList(req, res) {
+  if (!config.grafana || !config.http.hostname || !config.grafana.port) {
+    log.error('[Grafana] Configuration is missing');
+    res.status(503).json({message: 'Plots service configuration is missing'});
+  } else {
+    const host = config.http.hostname;
+    const port = config.grafana.port;
+    httpGetJson(host, port, '/api/health')
+      .then((result) => {
+        log.info(`Grafana is up and running on version: ${result.version}`);
+        const hostPort = `http://${host}:${port}/`;
+        const valueOne = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=6 ';
+        const valueTwo = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=8';
+        const plot = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=4';
+        const theme = '&refresh=5s&theme=light';
+        const response = [hostPort + valueOne + theme, hostPort + valueTwo + theme, hostPort + plot + theme];
+        res.status(200).json(response);
+      })
+      .catch((error) => errorHandler(`[Grafana] - Unable to connect due to ${error}`, res, 503));
+    return;
+  }
+}
+
+/**
+ * Send back info about the framework
+ * @param {Request} req
+ * @param {Response} res
+ */
+function getFrameworkInfo(req, res) {
+  if (!config) {
+    errorHandler('Unable to retrieve configuration of the framework', res, 502);
+  } else {
+    const result = {};
+    result['control-gui'] = {};
+    if (projPackage && projPackage.version) {
+      result['control-gui'].version = projPackage.version;
+    }
+    if (config.http) {
+      const con = {hostname: config.http.hostname, port: config.http.port};
+      result['control-gui'] = Object.assign(result['control-gui'], con);
+    }
+    if (config.grpc) {
+      result.grpc = config.grpc;
+    }
+    if (config.grafana) {
+      result.grafana = config.grafana;
+    }
+    if (config.kafka) {
+      result.kafka = config.kafka;
+    }
+    res.status(200).json(result);
+  }
+}
+
+/**
+ * Method to request all CRUs available in consul KV store
+ * @param {Request} req
+ * @param {Response} res
+ */
+function getCRUs(req, res) {
+  if (consulService) {
+    const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
+    const regex = new RegExp(`.*/.*/cards`);
+    consulService.getOnlyRawValuesByKeyPrefix(cruPath).then((data) => {
+      const crusByHost = {};
+      Object.keys(data)
+        .filter((key) => key.match(regex))
+        .forEach((key) => {
+          const splitKey = key.split('/');
+          const hostKey = splitKey[splitKey.length - 2];
+          crusByHost[hostKey] = JSON.parse(data[key]);
+        });
+      res.status(200).json(crusByHost);
+    }).catch((error) => {
+      if (error.message.includes('404')) {
+        errorHandler(`Could not find any CRUs by key ${cruPath}`, res, 404);
+      }
+      errorHandler(error, res, 502);
+    });
+  } else {
+    errorHandler('Unable to retrieve configuration of consul service', res, 502);
+  }
+}
 
 /**
  * Global HTTP error handler, sends status 500
