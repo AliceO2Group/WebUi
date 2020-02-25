@@ -30,7 +30,7 @@ module.exports.setup = (http, ws) => {
   ctrlProxy.methods.forEach((method) =>
     http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res))
   );
-  // http.post('/executeRocCommand', (req, res) => ctrlService.executeRocCommand(req, res));
+  http.post('/executeRocCommand', (req, res) => ctrlService.executeRocCommand(req, res));
   http.post('/lockState', (req, res) => res.json(padLock));
   http.post('/lock', lock);
   http.post('/unlock', unlock);

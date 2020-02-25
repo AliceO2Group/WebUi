@@ -222,7 +222,7 @@ export default class Configuration extends Observable {
     this.rocStatus = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/executeRocCommand`);
+    const {result, ok} = await this.model.loader.post(`/api/executeRocCommand`, rocOptions);
     if (!ok) {
       this.rocStatus = RemoteData.failure(result.message);
       this.notify();

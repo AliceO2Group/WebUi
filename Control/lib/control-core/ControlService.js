@@ -31,6 +31,15 @@ class ControlService {
   }
 
   /**
+  * Method to check provided options for command and execute it through AliECS-Core
+  * @param {Request} req
+  * @param {Response} res
+  */
+  executeRocCommand(req, res) {
+    res.status(502).send({message: 'Not supported yet'});
+  }
+
+  /**
    * Method to check if control-core connection is up and running
    * @param {Response} res
    * @return {boolean}
