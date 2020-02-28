@@ -26,8 +26,6 @@ aliBuild build qcg --default o2-dataflow
 ```
 
 ## Local Configuration
-These steps are necessary only when you don't run the QCG or the CCDB on `localhost`.
-
 In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/node_modules/@aliceo2/qc/config.js`
 
 #### HTTP
@@ -88,11 +86,11 @@ Note: Enabling or disabling OAuth may impact layout ownership model. When OAuth 
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
 ## QCG - Online Mode
-QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. 
+QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will only see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class
 
-For this, as a separate technology it is using [Consul](https://www.consul.io/) for its Service Discovery capabilities. In order to use it, the user will have to modify the `config.js` file [consul](#consul---service-discovery) to specify an up and running Consul instance. 
+For this, as a separate technology, QCG is using [Consul](https://www.consul.io/) for the Service Discovery capabilities. In order to use it, a user will have to modify the `config.js` file, field [consul](#consul---service-discovery), to specify an up and running Consul instance. 
 
-As this functionality is optional, there will be no impact on QCG if a configuration for `Consul` is not provided. A simple warning message will be shown to the user that the configuration is missing
+As this functionality is optional, there will be no impact on QCG if a configuration for `Consul` is not provided. A simple warning message as below will be shown to the user that the configuration is missing
 ```
 2020-02-28T10:19:26.110Z warn: [QualityControlModel] Consul Service: No Configuration Found
 ```
