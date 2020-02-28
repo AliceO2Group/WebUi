@@ -30,21 +30,21 @@ In order to customise the QCG you can edit the following configuration file: `$Q
 
 #### HTTP
 Edit the `http` section to define a custom:
-- `port` number and
-- `hostname`.
+- `hostname`
+- `port` number
 
 #### CCDB database
 Edit the `ccdb` section to define a custom:
-- `host`name and
-- `port`. 
+- `hostname`
+- `port` number 
 
 #### Connector - listingConnector
 Specify the connector that should be used for retrieving objects. Default is `ccdb`.
 
 #### Consul - Service Discovery
 Edit the `consul` section to define a custom:
-- `host`name and
-- `port`
+- `hostname`
+- `port` number
 More on how Consul is being used within QCG here
 
 ## Run QCG locally
