@@ -45,7 +45,8 @@ Specify the connector that should be used for retrieving objects. Default is `cc
 Edit the `consul` section to define a custom:
 - `hostname`
 - `port` number
-More on how Consul is being used within QCG here
+  
+More on how Consul is being used under section [QCG - Online Mode](#qcg---online-mode)
 
 ## Run QCG locally
 1. Load QCG modules
