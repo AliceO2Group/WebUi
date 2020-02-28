@@ -39,6 +39,7 @@ Edit the `ccdb` section to define a custom:
 - `port`. 
 
 #### Connector - listingConnector
+Specify the connector that should be used for retrieving objects. Default is `ccdb`.
 
 #### Consul - Service Discovery
 Edit the `consul` section to define a custom:
