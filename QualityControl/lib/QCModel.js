@@ -22,7 +22,7 @@ if (config.consul) {
     );
   module.exports.consulService = consulService;
 } else {
-  log.error('Consul Service: No Configuration Found');
+  log.warn('Consul Service: No Configuration Found');
   module.exports.consulService = undefined;
 }
 
