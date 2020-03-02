@@ -8,12 +8,11 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   - [Installation](#installation)
   - [Local configuration](#local-configuration)
       - [HTTP](#http)
-      - [CCDB database](#ccdb-database)
-      - [Connector - listingConnector](#connector---listingconnector)
-      - [Consul - Service Discovery](#consul---service-discovery)
+      - [CCDB](#ccdb)
+      - [Listing Connector](#listing-connector)
+      - [Service Discovery](#service-discovery)
   - [Run QCG locally](#run-qcg-locally)
   - [Public API](#public-api)
-  - [CERN OAuth](#cern-oauth)
   - [Enable HTTPS](#enable-https)
   - [QCG - Online Mode](#qcg---online-mode)
 
@@ -29,22 +28,27 @@ aliBuild build qcg --default o2-dataflow
 In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/node_modules/@aliceo2/qc/config.js`
 
 #### HTTP
+Attribute to define the `http` endpoint of the application.
+
 Edit the `http` section to define a custom:
 - `hostname`
-- `port` number
+- `port`
 
-#### CCDB database
+#### CCDB
+Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
+
 Edit the `ccdb` section to define a custom:
 - `hostname`
-- `port` number 
+- `port` 
 
-#### Connector - listingConnector
-Specify the connector that should be used for retrieving objects. Default is `ccdb`.
+#### Listing Connector
+Specify the connector that should be used for retrieving QC objects. Default value for `listingConnector` is `ccdb`.
 
-#### Consul - Service Discovery
+#### Service Discovery
+For the QC - online mode, service discovery from Consul is used. 
 Edit the `consul` section to define a custom:
 - `hostname`
-- `port` number
+- `port`
   
 More on how Consul is being used under section [QCG - Online Mode](#qcg---online-mode)
 
@@ -54,7 +58,7 @@ More on how Consul is being used under section [QCG - Online Mode](#qcg---online
 alienv enter qcg/latest-o2-dataflow
 ```
 
-2. (Run `Information Service` if you need Online mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
+2. (Run `Information Service` if you need Online Mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
 
 3. Run QCG server
 ```
@@ -73,14 +77,6 @@ QCG exposes two public REST API which can be read by any other application.
 - Get ROOT object data in JSON format to be used with JSROOT\
   Request: `curl 'http://localhost:8080/api/readObjectData?objectName=AGENT/OBJECT' -X GET`\
   Result: `{"_typename":"TCanvas", ...}`
-
-## CERN OAuth
-- Register your application in the [CERN OAuth service](https://sso-management.web.cern.ch/OAuth/RegisterOAuthClient.aspx)
-- Provide any `client_id`, eg `qc_gui`
-- Set `redirect_uri` to `https://<YOUR_HOSTNAME>/callback`
-- Fill these values and generated secret into `oAuth` section of `config.js` file.
-  
-Note: Enabling or disabling OAuth may impact layout ownership model. When OAuth is disabled all users share the same `id` (`0`), otherwise `id` equals to CERN Person ID. The layout ownership `id` can be changed directly in the database -  `layout.owner_id`.
 
 ## Enable HTTPS
 - Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
