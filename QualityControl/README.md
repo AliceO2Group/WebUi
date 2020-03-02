@@ -58,7 +58,7 @@ More on how Consul is being used under section [QCG - Online Mode](#qcg---online
 alienv enter qcg/latest-o2-dataflow
 ```
 
-2. (Run `Information Service` if you need Online Mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
+2. (Optional) Run `Service Discovery` if you need Online Mode. For more details use [QualityControl - Service Discovery Doc](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h)
 
 3. Run QCG server
 ```
