@@ -100,12 +100,16 @@ export default class Configuration extends Observable {
    * @param {String} value
    */
   setExpertOptionByField(field, value) {
-    if (this.isFieldOfTypeBoolean(field)) {
-      this.actionPanel.expertOptions[field] = (value === 'TRUE');
-    } else if (this.isFieldOfTypeUnsignedInteger(field, value)) {
-      this.actionPanel.expertOptions[field] = value;
-    } else if (this.isFieldOfTypeString(field)) {
-      this.actionPanel.expertOptions[field] = value;
+    if (value === '-' && this.filedIsValid(field)) {
+      this.actionPanel.expertOptions[field] = '-';
+    } else {
+      if (this.isFieldOfTypeBoolean(field)) {
+        this.actionPanel.expertOptions[field] = (value === 'TRUE');
+      } else if (this.isFieldOfTypeUnsignedInteger(field, value)) {
+        this.actionPanel.expertOptions[field] = value;
+      } else if (this.isFieldOfTypeString(field)) {
+        this.actionPanel.expertOptions[field] = value;
+      }
     }
     this.notify();
   }
@@ -126,8 +130,8 @@ export default class Configuration extends Observable {
     const request = this.actionPanel.expertOptions;
     Object.entries(request).forEach(([key, value]) => {
       if (key === 'links') {
-        //
-      } else if (value !== null && value !== '') {
+        // TODO something about links
+      } else if (value !== null && value !== '' && value !== '-') {
         rocOptions[key] = value;
       }
     });
@@ -158,6 +162,16 @@ export default class Configuration extends Observable {
       onuAddress: null, // [0, 2^32 - 1]
       triggerWindowSize: null // [0, 4095]
     };
+  }
+
+  /**
+   * Confirm field is valid and exist in the list of roc-config options
+   * @param {stirng} field
+   * @return {boolean}
+   */
+  filedIsValid(field) {
+    // TODO Implement me
+    return true;
   }
 
   /**
