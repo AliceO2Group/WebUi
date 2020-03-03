@@ -110,11 +110,11 @@ export default class Configuration extends Observable {
       // type number
       const valueNumber = parseInt(value);
       if (!isNaN(valueNumber)) {
-        if (field === 'onu-address' && valueNumber >= 0 && valueNumber <= (Math.pow(2, 32) - 1)) {
+        if (field === 'onu-address' && valueNumber >= 0 && valueNumber <= (Math.pow(2, 31) - 1)) {
           this.actionPanel.expertOptions[field] = valueNumber;
         } else if (field === 'trigger-window-size' && value >= 0 && value <= 4095) {
           this.actionPanel.expertOptions[field] = valueNumber;
-        } else if (field === 'cru-id' && valueNumber >= 0 && valueNumber <= (Math.pow(2, 32) - 1)) {
+        } else if (field === 'cru-id' && valueNumber >= 0 && valueNumber <= (Math.pow(2, 31) - 1)) {
           this.actionPanel.expertOptions[field] = valueNumber;
         } else {
           this.actionPanel.expertOptions[field] = null;
@@ -175,7 +175,6 @@ export default class Configuration extends Observable {
     return Object.keys(this.actionPanel.expertOptions)
       .filter((option) => {
         const valuesList = this.actionPanel.expertOptions;
-        console.log(valuesList['trigger-window-size'])
         return option !== 'links'
           ? valuesList[option] !== null && valuesList[option] !== '-' && valuesList[option] !== undefined
           : false;
@@ -270,16 +269,6 @@ export default class Configuration extends Observable {
   }
 
   /**
-   * Method to check that the field is expecting an uint32_t and that the value respects the criteria
-   * @param {String} field
-   * @param {String} valueAsString
-   * @return {boolean}
-   */
-  isFieldOfTypeUnsignedInteger(field, valueAsString) {
-
-  }
-
-  /**
    * Method to check if provided field is part of the ones accepting a string value
    * @param {string} field
    * @return {boolean}
@@ -325,6 +314,7 @@ export default class Configuration extends Observable {
       command: command,
       readoutCards: readoutCards
     };
+
     const {result, ok} = await this.model.loader.post(`/api/executeRocCommand`, body);
     this.actionPanel.runButtonDisabled = false;
 

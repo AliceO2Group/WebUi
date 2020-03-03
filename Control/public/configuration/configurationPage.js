@@ -142,9 +142,9 @@ const expertPanel = (model, options) => h('', {
     h('.flex-row.w-50'),
   ]),
   h('.flex-row.w-100.pv2',
-    inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 32 - 1), 'cru-id'),
+    inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 31 - 1), 'cru-id'),
     inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'trigger-window-size'),
-    inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 32 - 1), 'onu-address'),
+    inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 31 - 1), 'onu-address'),
   ),
   h('.w-100.pv2',
     h('.flex-row.w-100', [
@@ -288,7 +288,6 @@ const inputNumberBox = (model, title, min, max, field) =>
         type: 'number',
         min: min,
         max: max,
-        // value: field,
         onkeyup: (e) => model.configuration.setExpertOptionByField(field, e.target.value),
       }, field)
     )
@@ -301,10 +300,10 @@ const inputNumberBox = (model, title, min, max, field) =>
  * @param {number} index
  * @return {vnode}
  */
-const checkBox = (model, title, index) =>
-  h('label.d-inline.f6.ph1', {style: 'white-space: nowrap', title: `Toggle selection of Link ${index}`},
-    h('input', {
-      type: 'checkbox',
-      onchange: () => model.configuration.toggleLinkSelection(index)
-    }), title
-  );
+const checkBox = (model, title, index) => h('label.d-inline.f6.ph1', {
+  style: 'white-space: nowrap',
+  title: `Toggle selection of Link #${index}`
+}, h('input', {
+  type: 'checkbox',
+  onchange: () => model.configuration.toggleLinkSelection(index)
+}), title);
