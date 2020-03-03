@@ -167,7 +167,7 @@ function getCRUs(req, res) {
       res.status(200).json(crusByHost);
     }).catch((error) => {
       if (error.message.includes('404')) {
-        errorHandler(`Could not find any CRUs by key ${cruPath}`, res, 404);
+        errorHandler(`Could not find any Readout Cards by key ${cruPath}`, res, 404);
       }
       errorHandler(error, res, 502);
     });

@@ -82,20 +82,20 @@ export default class Configuration extends Observable {
 
   /**
    * Method to reset all CRUs to an unselected state and their hosts to an opened state
-   * @param {Map<string, Map<string, string>>} crusByHost
+   * @param {Map<string, Map<string, string>>} readoutCardsByHost
    * @return {Map<string, Map<string, string>>}
    */
-  deselectAllReadoutCards(crusByHost) {
-    Object.keys(crusByHost)
+  deselectAllReadoutCards(readoutCardsByHost) {
+    Object.keys(readoutCardsByHost)
       .forEach((hostName) => {
-        const objects = crusByHost[hostName];
-        crusByHost[hostName] = {};
-        crusByHost[hostName].objects = objects;
-        crusByHost[hostName].open = true;
-        Object.keys(crusByHost[hostName].objects)
-          .forEach((index) => crusByHost[hostName].objects[index].checked = false);
+        const objects = readoutCardsByHost[hostName];
+        readoutCardsByHost[hostName] = {};
+        readoutCardsByHost[hostName].objects = objects;
+        readoutCardsByHost[hostName].open = true;
+        Object.keys(readoutCardsByHost[hostName].objects)
+          .forEach((index) => readoutCardsByHost[hostName].objects[index].checked = false);
       });
-    return crusByHost;
+    return readoutCardsByHost;
   }
 
   /**
@@ -213,18 +213,13 @@ export default class Configuration extends Observable {
    */
   getPciAddressOfSelectedReadoutCards() {
     const readoutCards = [];
-    if (this.readoutCardList.isSuccess()) {
-      Object.keys(this.readoutCardList.payload)
-        .forEach((hostName) => {
-          Object.keys(this.readoutCardList.payload[hostName].objects)
-            .filter((index) => this.readoutCardList.payload[hostName].objects[index].checked)
-            .forEach((index) => readoutCards.push(this.readoutCardList.payload[hostName].objects[index].pciAddress));
-        });
-      return readoutCards;
-    } else {
-      // TODO return error?
-    }
-    return [];
+    Object.keys(this.readoutCardList.payload)
+      .forEach((hostName) => {
+        Object.keys(this.readoutCardList.payload[hostName].objects)
+          .filter((index) => this.readoutCardList.payload[hostName].objects[index].checked)
+          .forEach((index) => readoutCards.push(this.readoutCardList.payload[hostName].objects[index].pciAddress));
+      });
+    return readoutCards;
   }
 
   /**
