@@ -36,7 +36,8 @@ class ControlService {
   * @param {Response} res
   */
   executeRocCommand(req, res) {
-    res.status(502).send({message: 'ROC-CONFIG - not supported yet'});
+    res.status(502);
+    res.send({message: 'ROC-CONFIG - not supported yet'});
   }
 
   /**

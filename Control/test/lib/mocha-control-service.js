@@ -176,4 +176,18 @@ describe('Control Service test suite', () => {
       assert.ok(res.json.calledWith(['RepoA', 'RepoB']));
     });
   });
+
+  describe('Check ROC commands execution', () => {
+    let ctrlService = null;
+    const res = {
+      status: sinon.stub().returns(),
+      send: sinon.stub()
+    };
+    it('should send back an error as service is not supported yet', async () => {
+      ctrlService = new ControlService({}, {});
+      await ctrlService.executeRocCommand(null, res);
+      assert.ok(res.status.calledWith(502));
+      assert.ok(res.send.calledWith({message: 'ROC-CONFIG - not supported yet'}));
+    });
+  });
 });
