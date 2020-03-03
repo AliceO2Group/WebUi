@@ -74,6 +74,7 @@ export default class Model extends Observable {
 
     // Delete key + layout page + object select => delete this object
     if (code === 8 &&
+      // TODO Delete what seems to be code copied from QC
       this.router.params.page === 'layoutShow' &&
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
@@ -153,6 +154,7 @@ export default class Model extends Observable {
     this.sideBarMenu = !this.sideBarMenu;
     this.notify();
   }
+
   /**
    * Display a browser notification(Notification - Web API)
    * @param {String} message
