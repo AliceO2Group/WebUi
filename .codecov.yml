@@ -8,24 +8,31 @@ coverage:
   range: 70...90
   status:
     project:
-      Framework:
-        target: 50%
-        threshold: null
-        if_not_found: success
-      QualityControl:
-        target: 60%
-        threshold: null
-        if_not_found: success
-      InfoLogger:
-        target: 70%
-        threshold: null
-        if_not_found: success
-      Control:
-        flags:
-          - control
-        target: 69%
-        threshold: null
-        if_not_found: success
+      target: 67%
+    Framework:
+      flags:
+        - framework 
+      target: 50%
+      threshold: null
+      if_not_found: success
+    QualityControl:
+      flags:
+        - qualitycontrol
+      target: 60%
+      threshold: null
+      if_not_found: success
+    InfoLogger:
+      flags:
+        - infologger
+      target: 70%
+      threshold: null
+      if_not_found: success
+    Control:
+      flags:
+        - control
+      target: 69%
+      threshold: null
+      if_not_found: success
     patch: false
     changes: false
     threshold: 0
