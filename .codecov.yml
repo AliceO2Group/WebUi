@@ -1,38 +1,51 @@
-codecov:
-  notify:
-    after_n_builds: 1
-
 coverage:
   precision: 2
   round: nearest
-  range: 70...90
+  range: 60...90
   status:
     project:
-      default: false
+      default: off
       Framework:
+        flags:
+          - framework 
         target: 50%
-        paths: "Framework"
         threshold: null
         if_not_found: success
       QualityControl:
+        flags:
+          - qualitycontrol
         target: 60%
-        paths: "QualityControl"
         threshold: null
         if_not_found: success
       InfoLogger:
-        target: 85%
-        paths: "InfoLogger"
+        flags:
+          - infologger
+        target: 70%
         threshold: null
         if_not_found: success
       Control:
+        flags:
+          - control
         target: 69%
-        paths: "Control"
         threshold: null
         if_not_found: success
     patch: false
     changes: false
     threshold: 0
 
+flags:
+  control:
+    paths:
+      - Control
+  qualitycontrol:
+    paths:
+      - QualityControl
+  infologger:
+    paths:
+      - InfoLogger
+  framework:
+    paths:
+      - Framework
 ignore:
   - docs/*
   - node_modules/*

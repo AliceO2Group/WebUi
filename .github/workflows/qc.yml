@@ -12,10 +12,7 @@ on:
       - 'master'
       - 'dev'
     paths:
-      - 'QualityControl/*'
-      - 'QualityControl/*/*'
-      - 'QualityControl/*/*/*'
-      - '.github/workflows/qc.yml'
+      - '*'
 
 jobs:
   test:
@@ -32,7 +29,7 @@ jobs:
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm test )
   coverage:
-    name: Tests && coverage on macOS-latest
+    name: Tests & coverage on macOS-latest
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
@@ -44,4 +41,4 @@ jobs:
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd QualityControl; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
+      - run: (cd QualityControl; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F qualitycontrol)
