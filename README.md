@@ -1,6 +1,8 @@
 # ALICE O<sup>2</sup> Web UIs
 
- - [**WebUI Framework**](./Framework)
- - [Control](./Control)
- - [InfoLogger](./InfoLogger)
- - [Quality Control](./QualityControl)
+| Project                             | Build Status                                                                                                                                 | Code Coverage                                                                                                                                   |
+|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| [**WebUI Framework**](./Framework)  | [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/Framework/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)      | [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=framework)](https://codecov.io/gh/AliceO2Group/WebUi)      |
+| [Control](./Control)                | [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/Control/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)        | [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=control)](https://codecov.io/gh/AliceO2Group/WebUi)        |
+| [InfoLogger](./InfoLogger)          | [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/InfoLogger/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)     | [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=infologger)](https://codecov.io/gh/AliceO2Group/WebUi)     |
+| [Quality Control](./QualityControl) | [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/QualityControl/badge.svg)](https://github.com/AliceO2Group/WebUi/actions) | [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=qualitycontrol)](https://codecov.io/gh/AliceO2Group/WebUi) |

@@ -12,10 +12,7 @@ on:
       - 'master'
       - 'dev'
     paths:
-      - 'InfoLogger/*'
-      - 'InfoLogger/*/*'
-      - 'InfoLogger/*/*/*'
-      - '.github/workflows/infologger.yml'
+      - '*'
 jobs:
   test:
     name: Tests on ubuntu-18.04
@@ -40,4 +37,4 @@ jobs:
       - run: (cd InfoLogger; npm install )
       - run: (cd InfoLogger; npm run coverage )
       - run: (cd InfoLogger; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd InfoLogger; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
+      - run: (cd InfoLogger; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F infologger)

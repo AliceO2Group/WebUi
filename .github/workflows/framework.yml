@@ -12,10 +12,7 @@ on:
       - 'master'
       - 'dev'
     paths:
-      - 'Framework/*'
-      - 'Framework/*/*'
-      - 'Framework/*/*/*'
-      - '.github/workflows/framework.yml'
+      - '*'
 jobs:
   test:
     name: Tests on macos-latest    
@@ -40,4 +37,4 @@ jobs:
       - run: (cd Framework; npm install )
       - run: (cd Framework; npm run coverage )
       - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd Framework; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
+      - run: (cd Framework; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F framework)
