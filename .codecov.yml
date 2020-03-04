@@ -18,7 +18,7 @@ coverage:
         threshold: null
         if_not_found: success
       InfoLogger:
-        target: 85%
+        target: 70%
         threshold: null
         if_not_found: success
       Control:
