@@ -1,3 +1,7 @@
+codecov:
+  notify:
+    after_n_builds: 8
+
 coverage:
   precision: 2
   round: nearest
