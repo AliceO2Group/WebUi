@@ -11,17 +11,14 @@ coverage:
       default: false
       Framework:
         target: 50%
-        paths: "Framework"
         threshold: null
         if_not_found: success
       QualityControl:
         target: 60%
-        paths: "QualityControl"
         threshold: null
         if_not_found: success
       InfoLogger:
         target: 85%
-        paths: "InfoLogger"
         threshold: null
         if_not_found: success
       Control:
@@ -35,9 +32,18 @@ coverage:
     threshold: 0
 
 flags:
-  Control:
+  control:
     paths:
       - Control
+  qualitycontrol:
+    paths:
+      - QualityControl
+  infologger:
+    paths:
+      - InfoLogger
+  framework:
+    paths:
+      - Framework
 ignore:
   - docs/*
   - node_modules/*
