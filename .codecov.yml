@@ -4,7 +4,7 @@ coverage:
   range: 70...90
   status:
     project:
-      target: 67%
+      default: off
       Framework:
         flags:
           - framework 
