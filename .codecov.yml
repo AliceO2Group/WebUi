@@ -8,7 +8,6 @@ coverage:
   range: 70...90
   status:
     project:
-      default: false
       Framework:
         target: 50%
         threshold: null
