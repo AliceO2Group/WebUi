@@ -28,13 +28,16 @@ coverage:
         flags:
           - control
         target: 69%
-        paths: "Control"
         threshold: null
         if_not_found: success
     patch: false
     changes: false
     threshold: 0
 
+flags:
+  Control:
+    paths:
+      - Control
 ignore:
   - docs/*
   - node_modules/*
