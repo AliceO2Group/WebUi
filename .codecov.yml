@@ -10,29 +10,23 @@ coverage:
     project:
       default: false
       Framework:
-        flags:
-          - Framework
         target: 50%
         paths: "Framework"
         threshold: null
         if_not_found: success
       QualityControl:
-        flags:
-          - QualityControl
         target: 60%
         paths: "QualityControl"
         threshold: null
         if_not_found: success
       InfoLogger:
-        flags:
-            - InfoLogger
         target: 85%
         paths: "InfoLogger"
         threshold: null
         if_not_found: success
       Control:
         flags:
-          - Control
+          - control
         target: 69%
         paths: "Control"
         threshold: null
