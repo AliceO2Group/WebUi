@@ -12,10 +12,7 @@ on:
       - 'master'
       - 'dev'
     paths:
-      - 'Framework/*'
-      - 'Framework/*/*'
-      - 'Framework/*/*/*'
-      - '.github/workflows/framework.yml'
+      - '*'
 jobs:
   test:
     name: Tests on macos-latest    

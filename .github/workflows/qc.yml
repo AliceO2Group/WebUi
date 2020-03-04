@@ -12,10 +12,7 @@ on:
       - 'master'
       - 'dev'
     paths:
-      - 'QualityControl/*'
-      - 'QualityControl/*/*'
-      - 'QualityControl/*/*/*'
-      - '.github/workflows/qc.yml'
+      - '*'
 
 jobs:
   test:

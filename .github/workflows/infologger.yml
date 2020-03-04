@@ -12,10 +12,7 @@ on:
       - 'master'
       - 'dev'
     paths:
-      - 'InfoLogger/*'
-      - 'InfoLogger/*/*'
-      - 'InfoLogger/*/*/*'
-      - '.github/workflows/infologger.yml'
+      - '*'
 jobs:
   test:
     name: Tests on ubuntu-18.04

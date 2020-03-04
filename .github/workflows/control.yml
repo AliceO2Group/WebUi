@@ -12,10 +12,7 @@ on:
       - 'master'
       - 'dev'
     paths:
-      - 'Control/*'
-      - 'Control/*/*'
-      - 'Control/*/*/*'
-      - '.github/workflows/control.yml'
+      - '*'
 
 jobs:
   test:
