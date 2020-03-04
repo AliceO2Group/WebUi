@@ -2,7 +2,7 @@
 
 
 [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/Framework/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)
-[![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/master/graph/badge.svg)](https://codecov.io/gh/AliceO2Group/WebUi)
+[![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=framework)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
   - [Overview](#overview)
