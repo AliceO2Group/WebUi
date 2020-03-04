@@ -40,4 +40,4 @@ jobs:
       - run: (cd InfoLogger; npm install )
       - run: (cd InfoLogger; npm run coverage )
       - run: (cd InfoLogger; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd InfoLogger; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}) -F InfoLogger
+      - run: (cd InfoLogger; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})

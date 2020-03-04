@@ -41,4 +41,4 @@ jobs:
       - run: (cd Control; npm install )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd Control; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}) -F Control
+      - run: (cd Control; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
