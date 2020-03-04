@@ -32,7 +32,7 @@ jobs:
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm test )
   coverage:
-    name: Tests && coverage on macOS-latest
+    name: Tests & coverage on macOS-latest
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
