@@ -156,8 +156,8 @@ const expertPanel = (model, options) => h('', {
         dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux'),
         h('.w-50')]
       ),
-      h('.flex-row.w-100.p2', [
-        h('', {style: 'width: 12.75%'}, 'Links'),
+      h('.flex-row.w-100.p1', [
+        h('', {style: 'width: 12.5%'}, 'Links'),
         h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
           options.links.map((link, index) => checkBox(model, `Link #${index}`, index)),
         ])
