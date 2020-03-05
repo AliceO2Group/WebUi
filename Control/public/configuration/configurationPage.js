@@ -206,8 +206,18 @@ const readoutCardsTable = (model, readoutCardsMap) =>
     h('table.table.table-sm', [
       h('thead', [
         h('tr', [
-          h('th', {style: 'width:0'}, ''),
-          h('th', {style: 'width:0'}, ''),
+          h('th.actionable-row', {
+            style: 'width:0',
+            title: 'Open / Close all rows by HostName',
+            onclick: () => model.configuration.toggleAllHostRows()
+          }, model.configuration.areAllHostRowsOpened() ? iconChevronBottom() : iconChevronRight()),
+          h('th', {style: 'width:0'},
+            h('input.actionable-row', {
+              type: 'checkbox',
+              title: 'Toggle selection of all hosts',
+              // checked: model.configuration.areAllReadoutCardsForHostSelected(hostName), // add from somewhere in JSON
+            })
+          ),
           h('th', 'Hostname'),
           h('th', {style: 'width:0;'}, ''),
           h('th', 'Type'),
@@ -230,7 +240,7 @@ const readoutCardsTable = (model, readoutCardsMap) =>
                 h('label.d-inline.actionable-row', {title: 'Select / Unselect all CRUs for this host'},
                   h('input.actionable-row', {
                     type: 'checkbox',
-                    title: 'Select / Unselect all CRUs for this host',
+                    title: 'Toggle selection of all CRUs for this host',
                     checked: model.configuration.areAllReadoutCardsForHostSelected(hostName), // add from somewhere in JSON
                   })
                 )
