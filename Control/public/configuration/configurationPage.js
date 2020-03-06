@@ -202,9 +202,9 @@ const displayCommandPanel = (configuration) => h('.w-100', [
  * @return {vnode}
  */
 const readoutCardsTable = (model, readoutCardsMap) =>
-  h('.shadow-level1', [
+  h('.p2', [
     h('table.table.table-sm', [
-      h('thead', [
+      h('thead.panel-title', [
         h('tr', [
           h('th.actionable-row', {
             style: 'width:0',
@@ -215,7 +215,8 @@ const readoutCardsTable = (model, readoutCardsMap) =>
             h('input.actionable-row', {
               type: 'checkbox',
               title: 'Toggle selection of all hosts',
-              // checked: model.configuration.areAllReadoutCardsForHostSelected(hostName), // add from somewhere in JSON
+              onclick: () => model.configuration.toggleSelectionOfAllReadoutCards(),
+              checked: model.configuration.areAllReadoutCardsSelected()
             })
           ),
           h('th', 'Hostname'),
@@ -227,7 +228,7 @@ const readoutCardsTable = (model, readoutCardsMap) =>
           h('th', 'Serial')
         ])
       ]),
-      h('tbody.actionable-row', [
+      h('tbody.actionable-row.panel', [
         Object.keys(readoutCardsMap).length === 0 ?
           h('tr', h('td', {colspan: 9, style: 'text-align: center;'}, 'No data found'))
           : Object.keys(readoutCardsMap).map((hostName) =>
@@ -241,7 +242,7 @@ const readoutCardsTable = (model, readoutCardsMap) =>
                   h('input.actionable-row', {
                     type: 'checkbox',
                     title: 'Toggle selection of all CRUs for this host',
-                    checked: model.configuration.areAllReadoutCardsForHostSelected(hostName), // add from somewhere in JSON
+                    checked: model.configuration.areAllReadoutCardsForHostSelected(hostName),
                   })
                 )
               ),
