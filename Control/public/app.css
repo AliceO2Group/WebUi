@@ -57,3 +57,9 @@ tr:hover td {
 .panel {
   border: 1px solid var(--color-gray-light);
 }
+
+/* tooltip */
+.tooltip .tooltiptext {visibility: hidden; width: auto; background-color: #555; color: #fff; text-align: center; padding: 5px; border-radius: 6px; position: absolute; z-index: 1;}
+.tooltiptext::after {content: ""; position: absolute; bottom: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: transparent transparent #555 transparent;}
+.tooltip:hover .tooltiptext {visibility: visible;}
+.test:hover {cursor: help;}

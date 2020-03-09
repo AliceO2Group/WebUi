@@ -1,4 +1,4 @@
-import {h, iconChevronBottom, iconChevronRight, iconCircleX} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronRight, iconCircleX, info} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 /**
@@ -125,8 +125,8 @@ const expertPanel = (model, options) => h('', {
     h('h5.bg-gray-light.p2.panel-title', 'Clock Settings'),
     h('.flex-row.w-100.p2.panel', [
       inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 31 - 1), 'onu-address'),
-      dropDown(model, 'PON Upstream', ['TRUE', 'FALSE'], 'pon-upstream'),
-      dropDown(model, 'Clock', ['LOCAL', 'TTC'], 'clock'),
+      dropDown(model, 'PON Upstream', ['TRUE', 'FALSE'], 'pon-upstream', 'Enables PON upstream'),
+      dropDown(model, 'Clock', ['LOCAL', 'TTC'], 'clock', 'LOCAL or TTC (LOCAL => CRU internal CLOCK - TTC => CLOCK from LTU'),
     ])
   ]),
   h('.flex-column.mv3', [
@@ -287,10 +287,15 @@ Helpers
  * @param {string} title
  * @param {Array<string>} options
  * @param {string} field
+ * @param {string} help
  * @return {vnode}
  */
-const dropDown = (model, title, options, field) => h('.flex-row.w-50', [
-  h('.w-33', title),
+const dropDown = (model, title, options, field, help) => h('.flex-row.w-50', [
+  h('.w-33.tooltip',
+    [
+      h('label.test', [title, ' ', info()]),
+      h('span.tooltiptext', help)
+    ]),
   h('.w-50.mh2',
     h('select.form-control', {
       style: 'cursor: pointer',
