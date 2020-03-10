@@ -168,9 +168,9 @@ class HttpServer {
   }
 
   /**
-   * Serves local static path under specified URI path
+   * Serves local static file or directory under defined URI
    * @param {string} localPath - local directory to be served
-   * @param {string} uriPath - URI path (optional, '/' as default)
+   * @param {string} [uriPath=/] - URI path
    */
   addStaticPath(localPath, uriPath = '') {
     if (!fs.existsSync(localPath)) {
@@ -180,11 +180,15 @@ class HttpServer {
   }
 
   /**
-   * Adds GET route with authentification (req.query.token must be provided)
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   * @param {function} options
-   * @param {function} options.public - true to remove token verification
+   * Adds GET route using express router
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
    */
   get(path, callback, options = {}) {
     if (options.public) {
@@ -196,11 +200,15 @@ class HttpServer {
   }
 
   /**
-   * Adds POST route with authentification (req.query.token must be provided)
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   * @param {function} options
-   * @param {function} options.public - true to remove token verification
+   * Adds POST route using express router
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
    */
   post(path, callback, options = {}) {
     if (options.public) {
@@ -212,11 +220,15 @@ class HttpServer {
   }
 
   /**
-   * Adds DELETE route with authentification (req.query.token must be provided)
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   * @param {function} options
-   * @param {function} options.public - true to remove token verification
+   * Adds DELETE route using express router
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
    */
   delete(path, callback, options = {}) {
     if (options.public) {

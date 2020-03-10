@@ -1,15 +1,14 @@
 # Backend - HTTP module
-HTTP module provided a simple way of creating REST API. In addition, it supports:
- - CERN SSO  authentication and e-groups authorization using [OpenID Connect](openid.md) module
- - JWT token secured requests using [JWT](json-tokens.md) module
+
  - Protects server by defining: Content Security Policy, DNS Prefetch Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
- - Serving custom static paths
- - Defining new routes (GET, POST)
- - Passing values to frontend easily
+ - Serves custom static paths
+ - Defines new routes (GET, POST, DELETE)
+ - Provides CERN SSO authentication and e-groups authorization using [OpenID Connect module](openid.md)
+ - Secures routers with [JWT token](json-tokens.md)
 
 #### Instance
 ```js
-HttpServer(HTTP_CONF, JWT_CONF, [OPENID_CONF]);
+HttpServer(HTTP_CONF, [JWT_CONF], [OPENID_CONF]);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
@@ -19,31 +18,41 @@ Where:
      * [`portSecure`] - HTTPS port number
      * [`key`] - private key filepath
      * [`cert`] - certificate filepath
- * [`JWT_CONF`] JSON Web token configuration is explained in the [jwt](json-tokens.md) module
- * [`OPENID_CONF`] OpenID configuration is explained in the [OpenID](openid.md)
+ * [`JWT_CONF`] - see [JWT module](json-tokens.md) (note: even though JWT does not require explicit configuration, the token verification mechanism is always turned on)
+ * [`OPENID_CONF`] - see [OpenID Connect module](openid.md)
 
-#### Server example
+
+#### Public methods
+```js
+addStaticPath
+```
+```js
+get
+```
+```js
+post
+```
+```js
+delete
+```
+
+#### Minimal server example
 ```js
 // Include required modules
 const {HttpServer} = require('@aliceo2/web-ui');
 
-// configuration file for simple, unsecured http server
-const httpConf = {
-  port: 8080
-};
-
 // create instance of http server
-const http = new HttpServer(httpConf);
+const http = new HttpServer({
+  port: 8080
+});
 
-// Server public folder under `/pub` URI
-http.addStaticPath('public', 'pub');
+// Server `public` folder
+http.addStaticPath('public');
 ```
 
 #### Route example
 ```js
-http.post('/do-stuff', (req, res) => {
-  console.log(`Request made by ${req.session.name} (${req.session.personid})`);
-  console.log(`Request content is ${req.body}`);
-  res.status(200).json({status: 'done'})
-})
+http.get('/hi', (req, res) => {
+  res.status(200).json({message: 'hi'})
+}, { public: true }); // turns off JWT verification
 ```
