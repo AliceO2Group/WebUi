@@ -34,8 +34,8 @@ class HttpServer {
   /**
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} httpConfig - configuration of HTTP server
-   * @param {object} jwtConfig - configuration of JWT
-   * @param {object} connectIdConfig - configuration of OpenID Connect
+   * @param {object} [jwtConfig] - configuration of JWT
+   * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
     assert(httpConfig, 'Missing HTTP config');

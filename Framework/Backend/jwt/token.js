@@ -20,7 +20,7 @@ class JwtToken {
   /**
    * Stores secret
    * @constructor
-   * @param {object} config - jwt cofiguration object
+   * @param {object} config - cofiguration object
    */
   constructor(config) {
     config = (typeof config == 'undefined') ? {} : config;
