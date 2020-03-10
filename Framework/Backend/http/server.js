@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
 */
 
+const assert = require('assert');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -37,6 +38,11 @@ class HttpServer {
    * @param {object} connectIdConfig - configuration of OpenID Connect
    */
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
+    assert(httpConfig, 'Missing HTTP config');
+    assert(httpConfig.port, 'Missing HTTP config value: port');
+    httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
+    httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
+
     this.app = express();
     this.configureHelmet(httpConfig.hostname);
 
@@ -48,6 +54,8 @@ class HttpServer {
     this.specifyRoutes();
 
     if (httpConfig.tls) {
+      assert(httpConfig.key, 'Missing HTTP config value: key');
+      assert(httpConfig.cert, 'Missing HTTP config value: cert');
       const credentials = {
         key: fs.readFileSync(httpConfig.key),
         cert: fs.readFileSync(httpConfig.cert)
