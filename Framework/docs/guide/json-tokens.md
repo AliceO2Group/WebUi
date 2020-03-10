@@ -1,6 +1,6 @@
 # Backend - JSON Web Token module
 
-**!!** Note: This module is not intended to be used independently but as extension to either [http](http-server.md) or [websockets](websockets.md) module.
+**!!** Note: This module is not intended to be used independently but as extension to either [REST API](http-server.md) or [WebSockets](websockets.md) module.
 
 JSON Web Tokens module secures requests or claims send between client and server.
 The generated tokens includes following encrypted information:
