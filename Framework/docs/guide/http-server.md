@@ -40,9 +40,6 @@ const jwtConf = {...};
 // create instance of http server
 const http = new HttpServer(httpConf, jwtConf);
 
-// pass test value to the frontend (via URL)
-http.passAsUrl('testKey', 'testValue');
-
 // Server public folder under `/pub` URI
 http.addStaticPath('public', 'pub');
 ```
