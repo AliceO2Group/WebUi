@@ -23,11 +23,18 @@ Where:
 
 
 #### Public methods
-- `addStaticPath`
-- `get`
-- `post`
-- `delete`
-
+```js
+addStaticPath
+```
+```js
+get
+```
+```js
+post
+```
+```js
+delete
+```
 
 #### Minimal server example
 ```js
