@@ -4,7 +4,7 @@
  - Serves custom static paths
  - Defines new routes (GET, POST, DELETE)
  - Provides CERN SSO authentication and e-groups authorization using [OpenID Connect module](openid.md)
- - Secures routers with [JWT token](json-tokens.md)
+ - Secures routes with [JWT token](json-tokens.md)
 
 #### Instance
 ```js
@@ -18,7 +18,7 @@ Where:
      * [`portSecure`] - HTTPS port number
      * [`key`] - private key filepath
      * [`cert`] - certificate filepath
- * [`JWT_CONF`] - see [JWT module](json-tokens.md) (note: even though JWT does not require explicit configuration, the token verification mechanism is always turned on)
+ * [`JWT_CONF`] - see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - see [OpenID Connect module](openid.md)
 
 
