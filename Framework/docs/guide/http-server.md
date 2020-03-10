@@ -45,9 +45,7 @@ http.addStaticPath('public');
 
 #### Route example
 ```js
-http.post('/do-stuff', (req, res) => {
-  console.log(`Request made by ${req.session.name} (${req.session.personid})`);
-  console.log(`Request content is ${req.body}`);
-  res.status(200).json({status: 'done'})
-})
+http.get('/hi', (req, res) => {
+  res.status(200).json({message: 'hi'})
+}, { public: true }); // turns off JWT verification
 ```
