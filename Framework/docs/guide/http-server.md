@@ -1,4 +1,4 @@
-# Backend - HTTP module
+# Backend - HTTP (REST API) module
 
  - Protects server by defining: Content Security Policy, DNS Prefetch Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
  - Serves custom static paths
@@ -8,6 +8,7 @@
 
 #### Instance
 ```js
+const {HttpServer} = require('@aliceo2/web-ui');
 HttpServer(HTTP_CONF, [JWT_CONF], [OPENID_CONF]);
 ```
 Where:
