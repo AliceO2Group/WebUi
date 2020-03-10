@@ -1,10 +1,10 @@
 # Backend - HTTP module
-HTTP module provided a simple way of creating REST API. In addition, it supports:
+
  - Protects server by defining: Content Security Policy, DNS Prefetch Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
- - Serving custom static paths
- - Defining new routes (GET, POST)
- - CERN SSO authentication and e-groups authorization using [OpenID Connect module](openid.md)
- - JWT token secured requests using [JWT module](json-tokens.md)
+ - Serves custom static paths
+ - Defines new routes (GET, POST, DELETE)
+ - Provides CERN SSO authentication and e-groups authorization using [OpenID Connect module](openid.md)
+ - Secures routers with [JWT token](json-tokens.md)
 
 #### Instance
 ```js
@@ -18,8 +18,8 @@ Where:
      * [`portSecure`] - HTTPS port number
      * [`key`] - private key filepath
      * [`cert`] - certificate filepath
- * [`JWT_CONF`] JSON Web token configuration is explained in the [jwt](json-tokens.md) module
- * [`OPENID_CONF`] OpenID configuration is explained in the [OpenID](openid.md)
+ * [`JWT_CONF`] - see [JWT module](json-tokens.md) (note: even though JWT does not require explicit configuration, the token verification mechanism is always turned on)
+ * [`OPENID_CONF`] - see [OpenID Connect module](openid.md)
 
 
 #### Public methods
