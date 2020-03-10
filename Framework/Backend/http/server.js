@@ -59,8 +59,6 @@ class HttpServer {
       this.server = http.createServer(this.app).listen(httpConfig.port);
       log.info(`Server listening on port ${httpConfig.port}`);
     }
-
-    this.templateData = {};
   }
 
   /**
@@ -94,15 +92,6 @@ class HttpServer {
         /* eslint-enable */
       }
     }));
-  }
-
-  /**
-   * Passes key-value parameters that are available on front-end side
-   * @param {string} key
-   * @param {string} value
-   */
-  passAsUrl(key, value) {
-    this.templateData[key] = value;
   }
 
   /**
@@ -285,8 +274,7 @@ class HttpServer {
       // Read back user params from state
       const userQuery = JSON.parse(Buffer.from(req.query.state, 'base64').toString('ascii'));
 
-      // Concatenates with predefined files and user query
-      Object.assign(query, this.templateData);
+      // Concatenates with user query
       Object.assign(query, userQuery);
 
       res.redirect(url.format({pathname: '/', query: query}));
