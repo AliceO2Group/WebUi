@@ -10,7 +10,7 @@ WebSocket(HTTP_SERVER);
 Where:
  * `HTTP_SERVER` instance of HTTP server
 
-### WebSocketMessage class
+#### WebSocketMessage class
 The WebSocket messages are represented as WebSocketMessage objects.
 The object consists of following fields:
  * command - message name
@@ -63,27 +63,22 @@ shutdown
 ```
 
 #### Broadcast filtering
+Connecting clients may decide which broadcast messages they receive from server. This can be done by sending "filter" command (use `setFilter` of WebSocketClient from Frontend).
+The filter must be stringified JavaScript function receiving WebSocketMessage object and returning true or false.
 
-### Example
+
+#### Example
 ```js
-// Include requred modules
-const {HttpServer, WebSocket} = require('@aliceo2/web-ui');
-
-// Prepare HTTP, JWT, and OpenId configuration
+// Prepare http server
 ...
-
-// Create instance HTTP server
-const http = new HttpServer(httpConf, jwtConf, openIdConf);
 
 // Create instance of WebSocket server
 const ws = new WebSocket(http);
 
-// Print all messages with topic 'custom-command-from-client'
-ws.bind('custom-command-from-client', (message) => console.log(message));
-
-// Send to all clients
-const msg = new WebSocketMessage();
-msg.command = 'custom-command-from-server';
-msg.payload = {...};
-ws.broadcast(msg);
+// Print all messages with command 'print'
+// ...and send back 'print-response'
+ws.bind('print', (message) => {
+  console.log(message.payload);
+  return new WebSocketMessage().setCommand('print-response').setPayload('hi');
+});
 ```
