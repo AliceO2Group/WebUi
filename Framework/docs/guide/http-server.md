@@ -1,15 +1,14 @@
 # Backend - HTTP module
 HTTP module provided a simple way of creating REST API. In addition, it supports:
- - CERN SSO  authentication and e-groups authorization using [OpenID Connect](openid.md) module
- - JWT token secured requests using [JWT](json-tokens.md) module
  - Protects server by defining: Content Security Policy, DNS Prefetch Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
  - Serving custom static paths
  - Defining new routes (GET, POST)
- - Passing values to frontend easily
+ - CERN SSO authentication and e-groups authorization using [OpenID Connect module](openid.md)
+ - JWT token secured requests using [JWT module](json-tokens.md)
 
 #### Instance
 ```js
-HttpServer(HTTP_CONF, JWT_CONF, [OPENID_CONF]);
+HttpServer(HTTP_CONF, [JWT_CONF], [OPENID_CONF]);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
@@ -22,21 +21,26 @@ Where:
  * [`JWT_CONF`] JSON Web token configuration is explained in the [jwt](json-tokens.md) module
  * [`OPENID_CONF`] OpenID configuration is explained in the [OpenID](openid.md)
 
-#### Server example
+
+#### Public methods
+- `addStaticPath`
+- `get`
+- `post`
+- `delete`
+
+
+#### Minimal server example
 ```js
 // Include required modules
 const {HttpServer} = require('@aliceo2/web-ui');
 
-// configuration file for simple, unsecured http server
-const httpConf = {
-  port: 8080
-};
-
 // create instance of http server
-const http = new HttpServer(httpConf);
+const http = new HttpServer({
+  port: 8080
+});
 
-// Server public folder under `/pub` URI
-http.addStaticPath('public', 'pub');
+// Server `public` folder
+http.addStaticPath('public');
 ```
 
 #### Route example
