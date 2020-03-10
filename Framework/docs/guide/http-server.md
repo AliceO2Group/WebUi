@@ -14,31 +14,26 @@ HttpServer(HTTP_CONF, JWT_CONF, [OPENID_CONF]);
 Where:
  * `HTTP_CONF` consists of following fields:
      * `port` - HTTP port number
-     * `tls` - flag that enables/disables TLS
-     * `hostname` - server's hostname which is required by Content Security Policy
+     * [`tls`] - flag that enables/disables TLS (default: `false`)
+     * [`hostname`] - server's hostname which is required by Content Security Policy (default: `localhost`)
      * [`portSecure`] - HTTPS port number
      * [`key`] - private key filepath
      * [`cert`] - certificate filepath
- * `JWT_CONF` JSON Web token configuration is explained in the [jwt](json-tokens.md) module
+ * [`JWT_CONF`] JSON Web token configuration is explained in the [jwt](json-tokens.md) module
  * [`OPENID_CONF`] OpenID configuration is explained in the [OpenID](openid.md)
 
 #### Server example
 ```js
 // Include required modules
-const {HttpServer, JwtToken} = require('@aliceo2/web-ui');
+const {HttpServer} = require('@aliceo2/web-ui');
 
 // configuration file for simple, unsecured http server
 const httpConf = {
-  port: 8080,
-  tls: false,
-  hostname: 'localhost'
+  port: 8080
 };
 
-// JWT configuration (follow instruction from jwt module)
-const jwtConf = {...};
-
 // create instance of http server
-const http = new HttpServer(httpConf, jwtConf);
+const http = new HttpServer(httpConf);
 
 // Server public folder under `/pub` URI
 http.addStaticPath('public', 'pub');

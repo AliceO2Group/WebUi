@@ -25,10 +25,10 @@ class OpenId {
   * @param {object} config - id, secret, well_known, redirect_uri
   */
   constructor(config) {
-    assert(config.id, 'Missing config value: OpenID.id');
-    assert(config.secret, 'Missing config value: OpenID.secret');
-    assert(config.well_known, 'Missing config value: OpenId.well_known');
-    assert(config.redirect_uri, 'Missing config value: OpenId.redirect_uri');
+    assert(config.id, 'Missing OpenID config value: id');
+    assert(config.secret, 'Missing OpenID config value: secret');
+    assert(config.well_known, 'Missing OpenID config value: well_known');
+    assert(config.redirect_uri, 'Missing OpenID config value: redirect_uri');
     this.config = config;
     this.code_verifier = generators.codeVerifier();
   }
