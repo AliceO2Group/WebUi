@@ -180,7 +180,7 @@ class HttpServer {
   }
 
   /**
-   * Adds GET route using express router
+   * Adds GET route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
    * @param {function} callback   - method that handles request and response: function(req, res);
@@ -200,7 +200,7 @@ class HttpServer {
   }
 
   /**
-   * Adds POST route using express router
+   * Adds POST route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
    * @param {function} callback   - method that handles request and response: function(req, res);
@@ -220,7 +220,7 @@ class HttpServer {
   }
 
   /**
-   * Adds DELETE route using express router
+   * Adds DELETE route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
    * @param {function} callback   - method that handles request and response: function(req, res);

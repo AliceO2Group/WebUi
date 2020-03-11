@@ -22,7 +22,7 @@ Where:
 ### Example
 
 ```js
-const MySQL = require('@aliceo2/web-ui').MySQL;
+const {MySQL} = require('@aliceo2/web-ui');
 const mySql = new MySQL({'host.name', 'username', 'secret_password', 'database'});
 
 /// Insert data

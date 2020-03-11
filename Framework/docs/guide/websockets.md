@@ -8,7 +8,7 @@ const {WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 WebSocket(HTTP_SERVER);
 ```
 Where:
- * `HTTP_SERVER` instance of HTTP server
+ * `HTTP_SERVER` - instance of HTTP server
 
 #### Public methods
 ```js

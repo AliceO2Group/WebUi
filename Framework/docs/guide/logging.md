@@ -6,7 +6,7 @@ Logging module features:
  * Receives logs from `InfoLogger` server endpoint
 
 #### Import module and create default instance
-```
+```js
 new (require('@aliceo2/web-ui').Log)(LOG_NAME);
 ```
 
