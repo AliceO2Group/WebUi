@@ -13,14 +13,13 @@ If OpenID Connect is not used CERN ID is set to `0` and CERN username to `Anonym
 ### Instance
 ```js
 const {JwtToken} = require('@aliceo2/web-ui');
-JwtToken([JWT_CONF]);
+JwtToken([{secret: SECRET, expiration: EXPIRATION, issuer: ISSUER, maxAge: MAXAGE}]);
 ```
 Where
- `JWT_CONF` might include following fields:
-   * [`secret`] - secret passphrase to sign and verify tokens (default: random string)
-   * [`expiration`] - token expiration time as time literal (default: `1d`)
-   * [`issuer`] - name of token issuer (default: `o2-ui`)
-   * [`maxAge`] - token refresh expiration time as time literal (default: `7d`)
+   * [`SECRET`] - secret passphrase to sign and verify tokens (default: random string)
+   * [`EXPIRATION`] - token expiration time as time literal (default: `1d`)
+   * [`ISSUER`] - name of token issuer (default: `o2-ui`)
+   * [`MAXAGE`] - token refresh expiration time as time literal (default: `7d`)
 
 #### JWT token handling by client
 Even though JWT does not require explicit configuration, the token verification mechanism is always turned on.
