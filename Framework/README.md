@@ -68,7 +68,7 @@ npm install --save @aliceo2/web-ui
 * [JSON Web Tokens](./docs/guide/json-tokens.md) - Secures HTTP requests and WebSocket messages with a JWT token
 * [Logging](./docs/guide/logging.md) - Stores log messages in a file or pushes them to InfoLogger service
 * [SSO - OpenID Connect](./docs/guide/openid.md) - Provides authentication using CERN SSO via OpenID Connect
-* [WebSockets](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
+* [WebSocket server](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 * [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
 
