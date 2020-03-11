@@ -57,7 +57,7 @@ getToken
 ```
 
 In addition two methods for encoding and decoding messages to/from JSON are avaialble:
-```json
+```js
 json
 parse
 ```
