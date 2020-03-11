@@ -33,7 +33,7 @@ Use `?` characters as placeholders for values you would like to have escaped and
 mySql.query('SELECT * FROM Layouts WHERE id = ?', [1])
 ```
 
-### Getting feedback from INSERT, UPDATE or DELETE
+#### Getting feedback from INSERT, UPDATE or DELETE
 The following values are available as result of INSERT, UPDATE or DELETE
 - `affectedRows` - affected rows from an INSERT or DELETE
 - `changedRows` - changed rows from an INSERT
