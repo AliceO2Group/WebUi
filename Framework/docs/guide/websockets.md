@@ -1,6 +1,6 @@
 # Backend - WebSocket module
-The purpose of WebSocket server is to communicate with the connected clients via RFC 6455 protocol. The server requires each connection and message to be singed with JWT token.
-In addition, it allows to filter messages broadcast to connected clients.
+WebSocket server communicates with the connected clients via RFC 6455 protocol. The server requires each new connection and message to be singed with JWT token.
+In addition, it allows filtering messages broadcast to connected clients.
 
 #### Instance
 ```js
@@ -9,6 +9,20 @@ WebSocket(HTTP_SERVER);
 ```
 Where:
  * `HTTP_SERVER` instance of HTTP server
+
+#### Public methods
+```js
+bind
+```
+```js
+broadcast
+```
+```js
+unfilteredBroadcast
+```
+```js
+shutdown
+```
 
 #### WebSocketMessage class
 The WebSocket messages are represented as WebSocketMessage objects.
@@ -21,7 +35,7 @@ The object consists of following fields:
  * id - CERN ID (comes from token)
  * username - CERN username (comes from token)
 
-The message can be constructed using following constructor:
+A message can be constructed in following way:
 ```js
 WebSocketMessage(code = 200);
 ```
@@ -48,23 +62,9 @@ json
 parse
 ```
 
-#### Public methods
-```js
-bind
-```
-```js
-broadcast
-```
-```js
-unfilteredBroadcast
-```
-```js
-shutdown
-```
-
 #### Broadcast filtering
-Connecting clients may decide which broadcast messages they receive from server. This can be done by sending "filter" command (use `setFilter` of WebSocketClient from Frontend).
-The filter must be stringified JavaScript function receiving WebSocketMessage object and returning true or false.
+Connecting clients may decide which broadcast messages they receive from server. This can be done by sending "filter" command (use `setFilter` of frontends' WebSocketClient).
+The filter must be passed as stringified JavaScript function receiving WebSocketMessage object and returning true or false.
 
 
 #### Example
@@ -76,9 +76,9 @@ The filter must be stringified JavaScript function receiving WebSocketMessage ob
 const ws = new WebSocket(http);
 
 // Print all messages with command 'print'
-// ...and send back 'print-response'
 ws.bind('print', (message) => {
   console.log(message.payload);
+  // ...and send back 'print-response'
   return new WebSocketMessage().setCommand('print-response').setPayload('hi');
 });
 ```
