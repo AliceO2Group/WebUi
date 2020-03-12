@@ -170,13 +170,17 @@ class HttpServer {
   /**
    * Serves local static file or directory under defined URI
    * @param {string} localPath - local directory to be served
-   * @param {string} [uriPath=/] - URI path
+   * @param {string} [uriPath] - URI path (default path is "/")
    */
-  addStaticPath(localPath, uriPath = '') {
+  addStaticPath(localPath, uriPath) {
     if (!fs.existsSync(localPath)) {
       throw new Error(`static path ${localPath} does not exist`);
     }
-    this.routerStatics.use(path.join('/', uriPath), express.static(localPath));
+    if (uriPath) {
+      this.routerStatics.use(path.join('/', uriPath), express.static(localPath));
+    } else {
+      this.routerStatics.use(express.static(localPath));
+    }
   }
 
   /**
