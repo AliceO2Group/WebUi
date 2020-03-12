@@ -47,4 +47,4 @@ jobs:
         with:
           node-version: '12.x'
       - run: cd Framework; npm install
-      - run: cd Framework; npm run mocha
+      - run: cd Framework; npm test
