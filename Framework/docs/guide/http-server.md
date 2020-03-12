@@ -9,7 +9,7 @@
 #### Instance
 ```js
 const {HttpServer} = require('@aliceo2/web-ui');
-HttpServer({port: PORT[, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT]}, [JWT_CONF], [OPENID_CONF]);
+HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT}, JWT_CONF, OPENID_CONF);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:

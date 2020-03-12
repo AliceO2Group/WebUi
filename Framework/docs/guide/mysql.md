@@ -9,15 +9,15 @@ require('@aliceo2/web-ui').MySQL
 
 Create an instance
 ```js
-MySQL({host: HOST, user: USER, database: DATABASE [, password: PASSWORD, port: PORT]});
+MySQL({host: HOST, user: USER, database: DATABASE, password: PASSWORD, port: PORT});
 ```
 
 Where:
  - `HOST` - database hostname
  - `USER` - database username
- - `PASSWORD` - database password
+ - [`PASSWORD`] - database password
  - `DATABASE` - database name
- - `PORT` - database port number
+ - [`PORT`] - database port number
 
 
 #### Public methods

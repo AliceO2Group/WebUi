@@ -13,7 +13,7 @@ If OpenID Connect is not used CERN ID is set to `0` and CERN username to `Anonym
 ### Instance
 ```js
 const {JwtToken} = require('@aliceo2/web-ui');
-JwtToken([{secret: SECRET, expiration: EXPIRATION, issuer: ISSUER, maxAge: MAXAGE}]);
+JwtToken({secret: SECRET, expiration: EXPIRATION, issuer: ISSUER, maxAge: MAXAGE});
 ```
 Where
    * [`SECRET`] - secret passphrase to sign and verify tokens (default: random string)

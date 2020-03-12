@@ -18,7 +18,7 @@ Configuring logger is optional and required only when non default behavior of lo
 
 ```js
 const {Log} = require('@aliceo2/web-ui');
-Log.configure([{winston: {file: FILE_NAME, fileLvl: FILE_LVL, consoleLvl: CONSOLE_LVL}, infologger: {sender: IL_SENDER, host: IL_RCV_HOST, port: IL_RCV_PORT}}]);
+Log.configure({winston: {file: FILE_NAME, fileLvl: FILE_LVL, consoleLvl: CONSOLE_LVL}, infologger: {sender: IL_SENDER, host: IL_RCV_HOST, port: IL_RCV_PORT}});
 new Log(LOG_NAME);
 ```
 
