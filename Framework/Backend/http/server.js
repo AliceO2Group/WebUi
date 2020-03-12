@@ -268,8 +268,11 @@ class HttpServer {
     const query = req.query; // User's arguments
     const token = req.query.token;
 
-    if (token && this.jwt.verify(token)) {
-      next();
+    if (token) {
+      this.jwt.verify(req.query.token).then(() => next(), (error) => {
+        log.warn(`${error.name} : ${error.message}`);
+        res.status(403).json({message: error.name});
+      });
     } else {
       // Redirects to the OpenID flow
       const state = Buffer.from(JSON.stringify(query)).toString('base64');
