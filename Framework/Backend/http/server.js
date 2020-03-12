@@ -177,7 +177,9 @@ class HttpServer {
       throw new Error(`static path ${localPath} does not exist`);
     }
     if (uriPath) {
-      this.routerStatics.use(path.join('/', uriPath), express.static(localPath));
+      // Workaround for path.join('/', uriPath) as on Windows as it replaces '/' with '\'
+      uriPath = (uriPath.charAt(0) == '/') ? uriPath : '/' + uriPath;
+      this.routerStatics.use(uriPath, express.static(localPath));
     } else {
       this.routerStatics.use(express.static(localPath));
     }
