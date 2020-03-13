@@ -60,6 +60,7 @@ class JwtToken {
    * If maxAge timeouts, the user needs to re-login via OAuth.
    * @param {object} token - expired token
    * @return {object} new token or false in case of failure
+   * @deprecated
    */
   refreshToken(token) {
     return new Promise((resolve, reject) => {
@@ -70,9 +71,10 @@ class JwtToken {
       }, (err, decoded) => {
         if (err) {
           reject(err);
+        } else {
+          decoded.newToken = this.generateToken(decoded.id, decoded.username, decoded.access);
+          resolve(decoded);
         }
-        decoded.newToken = this.generateToken(decoded.id, decoded.username, decoded.access);
-        resolve(decoded);
       });
     });
   }
