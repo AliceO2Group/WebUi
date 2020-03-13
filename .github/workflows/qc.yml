@@ -26,7 +26,7 @@ jobs:
           node-version: '12.x'
       - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
       - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
-      - run: (cd QualityControl; npm install )
+      - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm test )
   coverage:
     name: Tests & coverage on macOS-latest
@@ -38,7 +38,7 @@ jobs:
           node-version: '12.x'
       - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
       - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
-      - run: (cd QualityControl; npm install )
+      - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - run: (cd QualityControl; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F qualitycontrol)

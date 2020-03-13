@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd InfoLogger; npm install )
+      - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm test )
   coverage:
     name: Tests & coverage on ubuntu-18.04
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd InfoLogger; npm install )
+      - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm run coverage )
       - run: (cd InfoLogger; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - run: (cd InfoLogger; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F infologger)
