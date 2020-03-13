@@ -15,8 +15,8 @@ on:
       - '*'
 jobs:
   test:
-    name: Tests on ubuntu-18.04
-    runs-on: ubuntu-18.04
+    name: Tests on ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - run: mysql -uroot -proot -e "CREATE DATABASE INFOLOGGER;"
       - uses: actions/checkout@v1
