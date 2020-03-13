@@ -18,7 +18,6 @@ jobs:
     name: Tests on ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - run: mysql -uroot -proot -e "CREATE DATABASE INFOLOGGER;"
       - uses: actions/checkout@v1
       - name: Setup node
         uses: actions/setup-node@v1
