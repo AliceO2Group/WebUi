@@ -4,14 +4,13 @@ It protects the static content (REST API calls and WebSocket messages are protec
 
 ### Instance
 ```js
-new OpenId(OPENID_CONF);
+new OpenId({secret: SECRET, id: ID, redirect_uri: REDIRECT_URI, well_known: WELL_KNOWN});
 ```
 Where:
- `OPENID_CONF` JSON formatted configuration object with following fields:
-   * `secret` - Application secret
-   * `id` - Application ID
-   * `redirect_uri` - Authentication callback
-   * `well_known` - So-called "well-known" endpoint defining OpenID configuration
+   * `SECRET` - Application secret
+   * `ID` - Application ID
+   * `REDIRECT_URI` - Authentication callback
+   * `WELL_KNOWN` - So-called "well-known" endpoint defining OpenID configuration
 
 ### Config example
 ```

@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '12.x'
       - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
-      - run: (cd Framework; npm install )
+      - run: (cd Framework; npm ci )
       - run: (cd Framework; npm test )
   coverage:
     name: Tests & coverage on ubuntu-18.04
@@ -34,7 +34,17 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd Framework; npm install )
+      - run: (cd Framework; npm ci )
       - run: (cd Framework; npm run coverage )
       - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - run: (cd Framework; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F framework)
+  windows:
+    name: Test on windows-latest
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: cd Framework; npm ci
+      - run: cd Framework; npm test
