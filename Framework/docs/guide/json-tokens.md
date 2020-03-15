@@ -1,52 +1,35 @@
 # Backend - JSON Web Token module
-JSON Web Tokens allow to secure requests or claims send between client and server - see more details at https://jwt.io
-This module is required by [http](http-server.md) and [websockets](websockets.md) modules.
- * Generate JWT tokens that includes encrypted ID, username and auth level
- * Verify token and decode encrypted data on the server side
- * Refresh tokens if `maxAge` parameter is not expired
+
+**!!** Note: This module is not intended to be used independently but as extension to either [REST API](http-server.md) or [WebSockets](websockets.md) module.
+
+JSON Web Tokens module secures requests or claims send between client and server.
+The generated tokens includes following encrypted information:
+ * CERN ID
+ * CERN username
+ * Auth level (currently always set to `0`)
+
+If OpenID Connect is not used CERN ID is set to `0` and CERN username to `Anonymous`.
 
 ### Instance
 ```js
-JwtToken(JWT_CONF);
+const {JwtToken} = require('@aliceo2/web-ui');
+JwtToken({secret: SECRET, expiration: EXPIRATION, issuer: ISSUER, maxAge: MAXAGE});
 ```
 Where
- `JWT_CONF` JSON formatted configuration object for JWT with following defined fields:
-   * `secret` - JWT secret passphrase to sign and verify tokens
-   * `expiration` - token expiration time (as time literal)
-   * [`issuer`] - name of token issuer
-   * [`maxAge`] - token refresh expiration time (as time literal)
+   * [`SECRET`] - secret passphrase to sign and verify tokens (default: random string)
+   * [`EXPIRATION`] - token expiration time as time literal (default: `1d`)
+   * [`ISSUER`] - name of token issuer (default: `o2-ui`)
+   * [`MAXAGE`] - token refresh expiration time as time literal (default: `7d`)
 
-## Config example
-```
-jwt: {
-  secret: '<secret>',
-  issuer: 'alice-o2-gui',
-  expiration: '1d',
-  maxAge: '1d'
-}
-```
+#### JWT token handling by client
+Even though JWT does not require explicit configuration, the token verification mechanism is always turned on.
+The token and user data is supplied to the client when accessing entry page, usually defined using `addStaticPath` (in production the entry page must be protected by OpenID).
+This token needs to be stored in secured place and used for each HTTP request or opening new WebSocket connection.
+If token is not present or is invalid the server will return error 403 with relevant message.
+When using WebUI Frontend all above is handled transparently.
 
-### Code example
-```js
-// Include module
-const {JwtToken} = require('@aliceo2/web-ui');
-
-// JWT configuration
-const jwtConf = {
-  "secret": "secret",
-  "expiration": "1d",
-};
-
-// Create instance of jwt module
-const jwt = new JwtToken(jwtConf);
-
-// Generate a token
-const token = jwt.generateToken(1, 'code-example');
-
-// Verify a token
-jwt.verify(token)
-  .then(() => {
-    console.log('Access granted !');
-  });
-}
-```
+#### Token expiration and refresh
+Token expires after `expiration` time passes. Expired token cannot be used to sign any request, the server will return error message: `TokenExpiredError`.
+It needs to be exchanged to a new one:
+1. By calling `verify` method and providing expired token, but no longer than defined in `maxAge` (this refresh flow is obsolete)
+2. By redirecting to a main page. This is done automatically when using OpenID.
