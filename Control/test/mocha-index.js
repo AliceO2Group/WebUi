@@ -71,7 +71,7 @@ describe('Control', function() {
         calls['getEnvironments'] = true;
         const responseData = {
           frameworkId: '74917838-27cb-414d-bfcd-7e74f85d4926-0000',
-          environments: [envTest]
+          environments: [envTest.environment]
         };
         callback(null, responseData);
       },
@@ -117,6 +117,10 @@ describe('Control', function() {
           callback(null, {});
         }
       },
+      destroyEnvironment(call, callback) {
+        calls['destroyEnvironment'] = true;
+        callback(null, {});
+      }
     });
     server.bind(address, credentials);
     server.start();
