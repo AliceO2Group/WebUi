@@ -111,7 +111,7 @@ const rocStatusPanel = (model) => h('.w-100',
  * @param {options} options
  * @return {vnode}
  */
-const expertPanel = (model, options) => h('', {
+const expertPanel = (model, options) => h('.pv3', {
   class: model.configuration.actionPanel.runButtonDisabled ? 'disabled-content' : '',
   style: {
     transition: 'max-height 0.5s',
@@ -124,27 +124,27 @@ const expertPanel = (model, options) => h('', {
   h('.flex-column', [
     h('h5.bg-gray-light.p2.panel-title', 'Clock Settings'),
     h('.flex-row.w-100.p2.panel', [
-      inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 31 - 1), 'onu-address'),
+      inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 31 - 1), 'onu-address', 'ONU address for PON upstream'),
       dropDown(model, 'PON Upstream', ['TRUE', 'FALSE'], 'pon-upstream', 'Enables PON upstream'),
-      dropDown(model, 'Clock', ['LOCAL', 'TTC'], 'clock', 'LOCAL or TTC (LOCAL => CRU internal CLOCK - TTC => CLOCK from LTU'),
+      dropDown(model, 'Clock', ['LOCAL', 'TTC'], 'clock', 'LOCAL => CRU internal CLOCK ; TTC => CLOCK from LTU'),
     ])
   ]),
   h('.flex-column.mv3', [
     h('h5.panel-title.p2', 'Dataflow Settings'),
     h('.panel.p2', [
       h('.flex-row.w-100', [
-        inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 31 - 1), 'cru-id'),
-        inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'trigger-window-size'),
-        dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allow-rejection'),
+        inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 31 - 1), 'cru-id', '12-bit CRU ID'),
+        inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'trigger-window-size', 'Size of the trigger window in GBT words'),
+        dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allow-rejection', 'Allows HBF (HeartBeat Frame) rejection'),
       ]),
       h('.flex-row.w-100.pv2', [
-        dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata'),
-        dropDown(model, 'Loopback', ['TRUE', 'FALSE'], 'loopback'),
-        dropDown(model, 'Datapath Mode', ['PACKET', 'CONTINUOUS'], 'datapathmode'),
+        dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata', 'CTP, PATTERN, MIDTRG'),
+        dropDown(model, 'Loopback', ['TRUE', 'FALSE'], 'loopback', 'Enables link loopback'),
+        dropDown(model, 'Datapath Mode', ['PACKET', 'CONTINUOUS'], 'datapathmode', 'PACKET, CONTINUOUS'),
       ]),
       h('.flex-row.w-100.pv2', [
-        dropDown(model, 'DYN Offset', ['TRUE', 'FALSE'], 'dyn-offset'),
-        h('.w-50'), h('.w-50'),
+        dropDown(model, 'DYN Offset', ['TRUE', 'FALSE'], 'dyn-offset', 'Enables the dynamic offset'),
+        h('.w-33'), h('.w-33'),
       ]),
     ])
   ]),
@@ -152,12 +152,19 @@ const expertPanel = (model, options) => h('', {
     h('h5.panel-title.p2', 'Link Settings'),
     h('.panel.p2', [
       h('.flex-row.w-100.p2', [
-        dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtmode'),
-        dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux'),
-        h('.w-50')]
+        dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtmode', 'GBT, WB'),
+        dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux', 'TTC, DDG, SWT'),
+        h('.w-33')]
       ),
       h('.flex-row.w-100.p1', [
-        h('', {style: 'width: 12.5%'}, 'Links'),
+        h('.tooltip', {
+          style: 'width: 12.5%;border: 0'
+        }, [
+          h('label', {
+            style: 'cursor: help'
+          }, 'Links'),
+          h('span.tooltiptext', 'Enables checked links')
+        ]),
         h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
           h('label.d-inline.f6.ph1', {style: 'white-space: nowrap', title: `Toggle selection of all links`},
             h('input', {
@@ -173,7 +180,8 @@ const expertPanel = (model, options) => h('', {
   h('.flex-column.mv3', [
     h('h5.panel-title.p2', 'Miscellaneous'),
     h('.flex-row.w-100.p2.panel', [
-      dropDown(model, 'Force config', ['TRUE', 'FALSE'], 'force-config'),
+      dropDown(model, 'Force config', ['TRUE', 'FALSE'], 'force-config',
+        'Flag to force configuration (needed to force the clock configuration)'),
     ]),
     h('.flex-row.w-50'),
     h('.flex-row.w-50'),
@@ -290,26 +298,26 @@ Helpers
  * @param {string} help
  * @return {vnode}
  */
-const dropDown = (model, title, options, field, help) => h('.flex-row.w-50', [
-  h('.w-33.tooltip',
-    [
-      h('label.test', [title, ' ', info()]),
+const dropDown = (model, title, options, field, help) =>
+  h('.flex-row.w-33', [
+    h('.w-33.tooltip', {style: 'border: 0'}, [
+      h('label', {style: 'cursor: help'}, title),
       h('span.tooltiptext', help)
     ]),
-  h('.w-50.mh2',
-    h('select.form-control', {
-      style: 'cursor: pointer',
-      onchange: (e) => model.configuration.setExpertOptionByField(field, e.target.value)
-    }, [
-      h('option', {selected: '-' === field ? true : false, value: '-'}, '-'),
-      options.map((option) =>
-        h('option', {
-          selected: option === field ? true : false, value: option
-        }, option)
-      )
-    ])
-  )
-]);
+    h('.w-50.mh2',
+      h('select.form-control', {
+        style: 'cursor: pointer',
+        onchange: (e) => model.configuration.setExpertOptionByField(field, e.target.value)
+      }, [
+        h('option', {selected: '-' === field ? true : false, value: '-'}, '-'),
+        options.map((option) =>
+          h('option', {
+            selected: option === field ? true : false, value: option
+          }, option)
+        )
+      ])
+    )
+  ]);
 
 /**
 * Generate a component with an input string box of type number
@@ -318,11 +326,15 @@ const dropDown = (model, title, options, field, help) => h('.flex-row.w-50', [
 * @param {number} min
 * @param {number} max
 * @param {string} field
+* @param {string} help
 * @return {vnode}
 */
-const inputNumberBox = (model, title, min, max, field) =>
-  h('.flex-row.w-50', [
-    h('.w-33', title),
+const inputNumberBox = (model, title, min, max, field, help) =>
+  h('.flex-row.w-33', [
+    h('.w-33.tooltip', {style: 'border: 0'}, [
+      h('label', {style: 'cursor: help'}, title),
+      h('span.tooltiptext', help)
+    ]),
     h('.w-50.mh2',
       h('input.form-control', {
         type: 'number',
