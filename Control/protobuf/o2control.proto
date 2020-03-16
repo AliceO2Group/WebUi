@@ -48,6 +48,9 @@ service Control {
     rpc ModifyEnvironment (ModifyEnvironmentRequest) returns (ModifyEnvironmentReply) {}
     rpc DestroyEnvironment (DestroyEnvironmentRequest) returns (DestroyEnvironmentReply) {}
 
+//    rpc SetEnvironmentProperties (SetEnvironmentPropertiesRequest) returns (SetEnvironmentPropertiesReply) {}
+//    rpc GetEnvironmentProperties (GetEnvironmentPropertiesRequest) returns (GetEnvironmentPropertiesReply) {}
+
     rpc GetTasks (GetTasksRequest) returns (GetTasksReply) {}
     rpc GetTask(GetTaskRequest) returns (GetTaskReply) {}
     rpc CleanupTasks(CleanupTasksRequest) returns (CleanupTasksReply) {}
@@ -57,10 +60,12 @@ service Control {
     rpc GetWorkflowTemplates (GetWorkflowTemplatesRequest) returns (GetWorkflowTemplatesReply) {}
 
     rpc ListRepos(ListReposRequest) returns (ListReposReply) {}
-    rpc AddRepo(AddRepoRequest) returns (Empty) {}
+    rpc AddRepo(AddRepoRequest) returns (AddRepoReply) {}
     rpc RemoveRepo(RemoveRepoRequest) returns (RemoveRepoReply) {}
     rpc RefreshRepos(RefreshReposRequest) returns (Empty) {}
     rpc SetDefaultRepo(SetDefaultRepoRequest) returns (Empty) {}
+    rpc SetGlobalDefaultRevision(SetGlobalDefaultRevisionRequest) returns (Empty) {}
+    rpc SetRepoDefaultRevision(SetRepoDefaultRevisionRequest) returns (SetRepoDefaultRevisionReply) {}
 }
 
 ////////////////////////////////////////
@@ -128,10 +133,14 @@ message EnvironmentInfo {
     repeated ShortTaskInfo tasks = 4;
     string rootRole = 5;
     uint32 currentRunNumber = 6;
+    map<string, string> defaults = 7;
+    map<string, string> vars = 8;
+    map<string, string> userVars = 9;
 }
 
 message NewEnvironmentRequest {
     string workflowTemplate = 1;
+    map<string, string> vars = 2;
 }
 message NewEnvironmentReply {
     EnvironmentInfo environment = 1;
@@ -186,10 +195,35 @@ message ModifyEnvironmentReply {
 message DestroyEnvironmentRequest {
     string id = 1;
     bool keepTasks = 2;
+    bool allowInRunningState = 3;
 }
 message DestroyEnvironmentReply {
     CleanupTasksReply cleanupTasksReply = 1;
 }
+
+////////////////////////////////////////
+// Environment, GET/SET properties
+////////////////////////////////////////
+message SetEnvironmentPropertiesRequest {
+    string id = 1;
+    // If properties == nil, the core sets nothing
+    // and reply ok
+    map<string, string> properties = 2;
+}
+message SetEnvironmentPropertiesReply {}
+
+message GetEnvironmentPropertiesRequest {
+    string id = 1;
+    // If len(queries) == 0, we return an
+    // empty map.
+    // To retrieve all KVs, use query '*'
+    repeated string queries = 2;
+    bool excludeGlobals = 3;
+}
+message GetEnvironmentPropertiesReply {
+    map<string, string> properties = 1;
+}
+
 
 ////////////////////////////////////////
 // Tasks
@@ -245,6 +279,7 @@ message TaskInfo {
     CommandInfo commandInfo = 5;
     string taskPath = 6;
     string envId = 7;
+    map<string, string> properties = 9;
 }
 
 message CleanupTasksRequest {
@@ -270,6 +305,9 @@ message RoleInfo {
     string fullPath = 4;
     repeated string taskIds = 5;
     repeated RoleInfo roles = 6;
+    map<string, string> defaults = 7;
+    map<string, string> vars = 8;
+    map<string, string> userVars = 9;
 }
 
 message GetRolesReply {
@@ -302,14 +340,22 @@ message ListReposRequest {}
 message RepoInfo {
     string name = 1;
     bool default = 2;
+    string defaultRevision = 3;
 }
 
 message ListReposReply {
     repeated RepoInfo repos = 1;
+    string globalDefaultRevision = 2;
 }
 
 message AddRepoRequest {
     string name = 1;
+    string defaultRevision = 2;
+}
+
+message AddRepoReply {
+    string newDefaultRevision = 1;
+    string info = 2;
 }
 
 message RemoveRepoRequest {
@@ -326,6 +372,19 @@ message RefreshReposRequest {
 
 message SetDefaultRepoRequest {
     int32 index = 1;
+}
+
+message SetGlobalDefaultRevisionRequest {
+    string revision = 1;
+}
+
+message SetRepoDefaultRevisionRequest {
+    int32 index = 1;
+    string revision = 2;
+}
+
+message SetRepoDefaultRevisionReply {
+    string info = 1;
 }
 
 message Empty {

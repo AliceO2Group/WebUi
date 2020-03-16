@@ -31,11 +31,15 @@ export default (list, actions) => h('table.table', [
     ),
     actions && h('td', {style: 'text-align:center'},
       h('.btn-group',
-        h('button.btn.btn-primary', {onclick: (event) => actions[0](event, item)}, 'Details'),
-        item.state !== 'RUNNING' && actions.length >= 2 && h('button.btn.btn-danger',
-          {
-            onclick: (event) => actions[1](event, item)
-          }, 'Shutdown'),
-      ))
+        h('button.btn.btn-primary', {
+          onclick: (event) => actions[0](event, item),
+          title: 'Open the environment page with more details'
+        }, 'Details'),
+        actions.length >= 2 && h('button.btn.btn-danger', {
+          onclick: (event) => actions[1](event, item),
+          title: 'Shutdown environment'
+        }, 'Shutdown'),
+      )
+    )
   ]))),
 ]);
