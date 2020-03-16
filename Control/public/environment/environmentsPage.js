@@ -44,7 +44,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
  * @return {vnode}
  */
 const showContent = (model, list) => (list && Object.keys(list).length > 0)
-  ? h('.scroll-auto', showTableList(list, [
+  ? h('.scroll-auto', showTableList(model, list, [
     (event, item) => model.router.go(`?page=environment&id=${item.id}`),
     (event, item) =>
       confirm(`Are you sure you want to delete this ${item.state} environment? ` + item.id)
