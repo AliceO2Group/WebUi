@@ -1,4 +1,4 @@
-import {h, iconChevronBottom, iconChevronRight, iconCircleX, info} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronRight, iconCircleX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import pageError from '../common/pageError.js';
 /**
@@ -134,8 +134,10 @@ const expertPanel = (model, options) => h('.pv3', {
     h('.panel.p2', [
       h('.flex-row.w-100', [
         inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 31 - 1), 'cru-id', '12-bit CRU ID'),
-        inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'trigger-window-size', 'Size of the trigger window in GBT words'),
-        dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allow-rejection', 'Allows HBF (HeartBeat Frame) rejection'),
+        inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'trigger-window-size',
+          'Size of the trigger window in GBT words'),
+        dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allow-rejection',
+          'Allows HBF (HeartBeat Frame) rejection'),
       ]),
       h('.flex-row.w-100.pv2', [
         dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata', 'CTP, PATTERN, MIDTRG'),
