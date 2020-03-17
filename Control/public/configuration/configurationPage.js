@@ -47,7 +47,7 @@ const buildPage = (model, readoutCardsMap) => h('.p2', [
  * @param {Object} model
  * @return {vnode}
  */
-const actionForm = (model) => h('.p2.mv3.w-100', [
+const actionForm = (model) => h('.p2.mv3.w-100.shadow-level1', [
   actionPanel(model),
   expertPanel(model, model.configuration.actionPanel.expertOptions),
 ]);
