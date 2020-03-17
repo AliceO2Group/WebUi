@@ -16,6 +16,10 @@
   line-height: 1;
 }
 
+.disabled-content {
+	pointer-events: none;
+	opacity: 0.5;
+}
 .grafana-font {
   font-family: Roboto, Helvetica Neue, Arial, sans-serif;
   font-size: 12px;

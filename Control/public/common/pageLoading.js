@@ -2,9 +2,13 @@ import {h} from '/js/src/index.js';
 
 /**
  * Generic page loading placeholder
+ * @param {number} size
  * @return {vnode}
  */
-export default () => h('span.pageLoading',
+export default (size) => h('span.pageLoading',
+  {
+    style: size ? `font-size: ${size}em` : 'font-size: 10em'
+  },
   h('.atom-spinner',
     h('.spinner-inner',
       [

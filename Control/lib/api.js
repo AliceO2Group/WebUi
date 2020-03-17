@@ -28,7 +28,9 @@ const ctrlService = new ControlService(padLock, ctrlProxy);
 
 module.exports.setup = (http, ws) => {
   ctrlProxy.methods.forEach((method) =>
-    http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res)));
+    http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res))
+  );
+  http.post('/executeRocCommand', (req, res) => ctrlService.executeRocCommand(req, res));
   http.post('/lockState', (req, res) => res.json(padLock));
   http.post('/lock', lock);
   http.post('/unlock', unlock);
@@ -165,11 +167,16 @@ function getCRUs(req, res) {
       res.status(200).json(crusByHost);
     }).catch((error) => {
       if (error.message.includes('404')) {
-        errorHandler(`Could not find any CRUs by key ${cruPath}`, res, 404);
+        log.trace(error);
+        log.error(`Could not find any Readout Cards by key ${cruPath}`);
+        errorHandler(`Could not find any Readout Cards by key ${cruPath}`, res, 404);
+      } else {
+        log.trace(error);
+        errorHandler(error, res, 502);
       }
-      errorHandler(error, res, 502);
     });
   } else {
+    log.error(`Unable to retrieve configuration of consul service`);
     errorHandler('Unable to retrieve configuration of consul service', res, 502);
   }
 }

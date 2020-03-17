@@ -187,6 +187,7 @@ describe('Control', function() {
   require('./public/page-environment-mocha');
   require('./public/page-environments-mocha');
   require('./public/page-new-environment-mocha');
+  require('./public/page-configuration-mocha');
 
   beforeEach(() => {
     this.ok = true;
