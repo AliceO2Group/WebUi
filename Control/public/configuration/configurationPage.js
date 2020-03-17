@@ -165,7 +165,7 @@ const expertPanel = (model, options) => h('', {
               checked: model.configuration.areAllLinksSelected(),
               onchange: () => model.configuration.toggleAllLinksSelection()
             }), 'Toggle all'),
-          options.links.map((link, index) => index !== 12 && checkBox(model, `Link #${index}`, index)),
+          options.links.map((link, index) => index !== 12 && checkBox(model, `#${index}`, index)),
         ])
       ])
     ])
