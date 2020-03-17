@@ -9,29 +9,46 @@ require('@aliceo2/web-ui').MySQL
 
 Create an instance
 ```js
-MySQL({host: HOST, user: USER, database: DATABASE [, password: PASSWORD, port: PORT]});
+MySQL({host: HOST, user: USER, database: DATABASE, password: PASSWORD, port: PORT});
 ```
 
 Where:
  - `HOST` - database hostname
  - `USER` - database username
- - `PASSWORD` - database password
+ - [`PASSWORD`] - database password
  - `DATABASE` - database name
- - `PORT` - database port number
+ - [`PORT`] - database port number
 
-### Example
+
+#### Public methods
 
 ```js
-const MySQL = require('@aliceo2/web-ui').MySQL;
-const mySql = new MySQL({'host.name', 'username', 'secret_password', 'database'});
+query
+```
 
-/// Insert data
-mySql.query('insert into layout (name, owner_id, owner_name, tabs) value (?,?,?,?)', [1, 2, 3, 4])
+#### Escaping values
+Use `?` characters as placeholders for values you would like to have escaped and pass array of values as second parameter to `query` method:
+
+```js
+mySql.query('SELECT * FROM Layouts WHERE id = ?', [1])
+```
+
+#### Getting feedback from INSERT, UPDATE or DELETE
+The following values are available as result of INSERT, UPDATE or DELETE
+- `affectedRows` - affected rows from an INSERT or DELETE
+- `changedRows` - changed rows from an INSERT
+- `insertId` - id of INSERTed row
+
+More details available in here: https://github.com/mysqljs/mysql#table-of-contents
+
+#### Example
+
+```js
+const {MySQL} = require('@aliceo2/web-ui');
+const mySql = new MySQL({host: 'localhost', user: 'root', database: 'test'});
+
+// Insert data
+mySql.query('INSERT INTO layout (name, owner_id, owner_name, tabs) value (?,?,?,?)', [1, 2, 3, 4])
   .then(result => console.log(result))
-  .catch(err => console.error(err));
-
-/// Select previously inserted data
-mySql.query('select * from layout')
-  .then(result => console.log(result)) // [{id: 1, name: 1, owner_id: 2, owner_name: 3, tabs: 4}, ...]
   .catch(err => console.error(err));
 ```

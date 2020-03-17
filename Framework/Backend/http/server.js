@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
 */
 
+const assert = require('assert');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -33,10 +34,15 @@ class HttpServer {
   /**
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} httpConfig - configuration of HTTP server
-   * @param {object} jwtConfig - configuration of JWT
-   * @param {object} connectIdConfig - configuration of OpenID Connect
+   * @param {object} [jwtConfig] - configuration of JWT
+   * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
+    assert(httpConfig, 'Missing HTTP config');
+    assert(httpConfig.port, 'Missing HTTP config value: port');
+    httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
+    httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
+
     this.app = express();
     this.configureHelmet(httpConfig.hostname);
 
@@ -48,6 +54,8 @@ class HttpServer {
     this.specifyRoutes();
 
     if (httpConfig.tls) {
+      assert(httpConfig.key, 'Missing HTTP config value: key');
+      assert(httpConfig.cert, 'Missing HTTP config value: cert');
       const credentials = {
         key: fs.readFileSync(httpConfig.key),
         cert: fs.readFileSync(httpConfig.cert)
@@ -59,8 +67,6 @@ class HttpServer {
       this.server = http.createServer(this.app).listen(httpConfig.port);
       log.info(`Server listening on port ${httpConfig.port}`);
     }
-
-    this.templateData = {};
   }
 
   /**
@@ -94,15 +100,6 @@ class HttpServer {
         /* eslint-enable */
       }
     }));
-  }
-
-  /**
-   * Passes key-value parameters that are available on front-end side
-   * @param {string} key
-   * @param {string} value
-   */
-  passAsUrl(key, value) {
-    this.templateData[key] = value;
   }
 
   /**
@@ -171,23 +168,31 @@ class HttpServer {
   }
 
   /**
-   * Serves local static path under specified URI path
+   * Serves local static file or directory under defined URI
    * @param {string} localPath - local directory to be served
-   * @param {string} uriPath - URI path (optional, '/' as default)
+   * @param {string} [uriPath] - URI path (default path is "/")
    */
-  addStaticPath(localPath, uriPath = '') {
+  addStaticPath(localPath, uriPath) {
     if (!fs.existsSync(localPath)) {
       throw new Error(`static path ${localPath} does not exist`);
     }
-    this.routerStatics.use(path.join('/', uriPath), express.static(localPath));
+    if (uriPath) {
+      this.routerStatics.use(url.resolve('/', uriPath), express.static(localPath));
+    } else {
+      this.routerStatics.use(express.static(localPath));
+    }
   }
 
   /**
-   * Adds GET route with authentification (req.query.token must be provided)
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   * @param {function} options
-   * @param {function} options.public - true to remove token verification
+   * Adds GET route using express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
    */
   get(path, callback, options = {}) {
     if (options.public) {
@@ -199,11 +204,15 @@ class HttpServer {
   }
 
   /**
-   * Adds POST route with authentification (req.query.token must be provided)
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   * @param {function} options
-   * @param {function} options.public - true to remove token verification
+   * Adds POST route using express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
    */
   post(path, callback, options = {}) {
     if (options.public) {
@@ -215,11 +224,15 @@ class HttpServer {
   }
 
   /**
-   * Adds DELETE route with authentification (req.query.token must be provided)
-   * @param {string} path - path that the callback will be bound to
-   * @param {function} callback - function (that receives req and res parameters)
-   * @param {function} options
-   * @param {function} options.public - true to remove token verification
+   * Adds DELETE route using express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
    */
   delete(path, callback, options = {}) {
     if (options.public) {
@@ -255,8 +268,11 @@ class HttpServer {
     const query = req.query; // User's arguments
     const token = req.query.token;
 
-    if (token && this.jwt.verify(token)) {
-      next();
+    if (token) {
+      this.jwt.verify(req.query.token).then(() => next(), (error) => {
+        log.warn(`${error.name} : ${error.message}`);
+        res.status(403).json({message: error.name});
+      });
     } else {
       // Redirects to the OpenID flow
       const state = Buffer.from(JSON.stringify(query)).toString('base64');
@@ -285,8 +301,7 @@ class HttpServer {
       // Read back user params from state
       const userQuery = JSON.parse(Buffer.from(req.query.state, 'base64').toString('ascii'));
 
-      // Concatenates with predefined files and user query
-      Object.assign(query, this.templateData);
+      // Concatenates with user query
       Object.assign(query, userQuery);
 
       res.redirect(url.format({pathname: '/', query: query}));
