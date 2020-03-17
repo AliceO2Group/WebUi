@@ -174,7 +174,7 @@ const expertPanel = (model, options) => h('.pv3', {
               checked: model.configuration.areAllLinksSelected(),
               onchange: () => model.configuration.toggleAllLinksSelection()
             }), 'Toggle all'),
-          options.links.map((link, index) => index !== 12 && checkBox(model, `Link #${index}`, index)),
+          options.links.map((link, index) => index !== 12 && checkBox(model, `#${index}`, index)),
         ])
       ])
     ])

@@ -167,11 +167,16 @@ function getCRUs(req, res) {
       res.status(200).json(crusByHost);
     }).catch((error) => {
       if (error.message.includes('404')) {
+        log.trace(error);
+        log.error(`Could not find any Readout Cards by key ${cruPath}`);
         errorHandler(`Could not find any Readout Cards by key ${cruPath}`, res, 404);
+      } else {
+        log.trace(error);
+        errorHandler(error, res, 502);
       }
-      errorHandler(error, res, 502);
     });
   } else {
+    log.error(`Unable to retrieve configuration of consul service`);
     errorHandler('Unable to retrieve configuration of consul service', res, 502);
   }
 }

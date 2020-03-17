@@ -23,7 +23,7 @@ describe('`pageConfiguration` test-suite', async () => {
         return [errorIcon, errorMessage];
       });
       assert.deepStrictEqual(errorIcon, {0: 'pageError'});
-      assert.strictEqual(errorMessage, 'Request to server failed (502 Bad Gateway): connect ECONNREFUSED 127.0.0.1:8500');
+      assert.strictEqual(errorMessage, 'Request to server failed (502 Bad Gateway): connect ECONNREFUSED 127.0.0.1:8550');
     });
   });
 
