@@ -81,6 +81,46 @@ export default class Configuration extends Observable {
   }
 
   /**
+   * Toggle visibility of the ReadoutCards belonging to the host
+   */
+  toggleAllHostRows() {
+    const areAllHostRowsOpened = this.areAllHostRowsOpened();
+    Object.keys(this.readoutCardList.payload)
+      .forEach((hostName) => this.readoutCardList.payload[hostName].open = !areAllHostRowsOpened);
+    this.notify();
+  }
+
+  /**
+   * Method to check if all host rows are opened
+   * @return {param}
+   */
+  areAllHostRowsOpened() {
+    return Object.keys(this.readoutCardList.payload).every((hostName) => this.readoutCardList.payload[hostName].open);
+  }
+
+  /**
+   * Method to check if all readout cards are selected
+   * @return {boolean}
+   */
+  areAllReadoutCardsSelected() {
+    return Object.keys(this.readoutCardList.payload)
+      .every((hostName) => this.areAllReadoutCardsForHostSelected(hostName));
+  }
+
+  /**
+   * Method to toggle selection of all readout cards
+   */
+  toggleSelectionOfAllReadoutCards() {
+    const areAllSelected = this.areAllReadoutCardsSelected();
+    Object.keys(this.readoutCardList.payload)
+      .forEach((hostName) => {
+        const hosts = this.readoutCardList.payload[hostName].objects;
+        Object.keys(hosts).forEach((index) => hosts[index].checked = !areAllSelected);
+      });
+    this.notify();
+  }
+
+  /**
    * Method to reset all CRUs to an unselected state and their hosts to an opened state
    * @param {Map<string, Map<string, string>>} readoutCardsByHost
    * @return {Map<string, Map<string, string>>}
@@ -97,6 +137,10 @@ export default class Configuration extends Observable {
       });
     return readoutCardsByHost;
   }
+
+  /**
+   * Experts Panel
+   */
 
   /**
    * Method to set the value of a field within the expert panel
