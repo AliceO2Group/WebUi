@@ -138,6 +138,21 @@ export default class Configuration extends Observable {
   }
 
   /**
+   * Method to check if all links are selected
+   * @return {boolean}
+   */
+  areAllLinksSelected() {
+    return this.actionPanel.expertOptions.links.every((linkEnabled) => linkEnabled);
+  }
+
+  /**
+   * Method to toggle the selection of all links
+   */
+  toggleAllLinksSelection() {
+    this.actionPanel.expertOptions.links.fill(!this.areAllLinksSelected());
+    this.notify();
+  }
+  /**
    * Method to build the request for AliECS - core and send it
    * * Build ROC Options
    * * Build list of selected readout cards

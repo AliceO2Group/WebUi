@@ -159,7 +159,13 @@ const expertPanel = (model, options) => h('', {
       h('.flex-row.w-100.p1', [
         h('', {style: 'width: 12.5%'}, 'Links'),
         h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
-          options.links.map((link, index) => checkBox(model, `Link #${index}`, index)),
+          h('label.d-inline.f6.ph1', {style: 'white-space: nowrap', title: `Toggle selection of all links`},
+            h('input', {
+              type: 'checkbox',
+              checked: model.configuration.areAllLinksSelected(),
+              onchange: () => model.configuration.toggleAllLinksSelection()
+            }), 'Toggle all'),
+          options.links.map((link, index) => index !== 12 && checkBox(model, `#${index}`, index)),
         ])
       ])
     ])
@@ -323,5 +329,6 @@ const checkBox = (model, title, index) => h('label.d-inline.f6.ph1', {
   title: `Toggle selection of Link #${index}`
 }, h('input', {
   type: 'checkbox',
+  checked: model.configuration.actionPanel.expertOptions.links[index],
   onchange: () => model.configuration.toggleLinkSelection(index)
 }), title);
