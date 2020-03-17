@@ -50,7 +50,7 @@ class Log {
 
   /**
    * Debug severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   debug(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -64,7 +64,7 @@ class Log {
 
   /**
    * Information severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   info(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -78,7 +78,7 @@ class Log {
 
   /**
    * Warning severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   warn(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -92,7 +92,7 @@ class Log {
 
   /**
    * Error severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   error(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -105,8 +105,8 @@ class Log {
   }
 
   /**
-   * Prints more details, for debugging purposes
-   * @param {object} err
+   * Outputs a stack trace on an object
+   * @param {object} err - any object
    */
   trace(err) {
     // eslint-disable-next-line

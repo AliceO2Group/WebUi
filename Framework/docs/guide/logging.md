@@ -1,60 +1,65 @@
 # Backend - Logging module
-Logging module handles log in a two ways:
- * Prints or saves log in a file using `winston` library (default mode)
- * Receives logs from `InfoLogger` server
+Logging module features:
+ * Prints colored log messages
+ * Saves logs in a file in JSON format
  * Sends logs to `InfoLogger` daemon over named socket
+ * Receives logs from `InfoLogger` server endpoint
 
-### Configuration
-Configuring logger is optional and required only when non default behavior of logger is desired (as sending logs to InfoLogger).
-The configuration is applied by calling static method:
+#### Import module and create default instance
 ```js
-Log.configure(LOG_CONF);
+new (require('@aliceo2/web-ui').Log)(LOG_NAME);
+```
+
+Where `LOG_NAME` is log instance name. This name will prefix each log messsage.
+
+#### Import module and create non-default instance
+
+Configuring logger is optional and required only when non default behavior of logger is desired.
+
+```js
+const {Log} = require('@aliceo2/web-ui');
+Log.configure({winston: {file: FILE_NAME, fileLvl: FILE_LVL, consoleLvl: CONSOLE_LVL}, infologger: {sender: IL_SENDER, host: IL_RCV_HOST, port: IL_RCV_PORT}});
+new Log(LOG_NAME);
 ```
 
 Where:
-`LOG_CONF` that consists of following fields:
-   * [`winston`] - logging to console or file
-     * [`file`] - log filepath
-     * [`fileLvl`] - file log level
-     * [`consoleLvl`] - console log level
-   * [`infologger`] - InfoLogger configuration variables
-     * `sender` - UNIX name socket of InfoLoggerD
-     * [`port`] - InfoLogger server port
-     * [`host`] - InfoLogger server host
+  * [`FILE_NAME`] - path to file where logs will be written
+  * [`FILE_LVL`] - log severity of logs written to file
+  * [`CONSOLE_LVL`] - log severity of logs written to console
+  * [`IL_SENDER` - UNIX name socket of InfoLoggerD
+  * [`IL_RCV_HOST`] - InfoLogger server host
+  * [`IL_RCV_PORT`] - InfoLogger server port
+  * `LOG_NAME` - log instance name
 
-### Logging instance
-In order to easily categorize the logs, each logging instance requires a label. Example:
+
+#### Public methods
+
 ```js
-const log = new (require('@aliceo2/web-ui'))('Example');
+configure
 ```
 
-### Code example
 ```js
-// include logging module
-const {Log} = require('@aliceo2/web-ui');
-
-// enable writing to files (this is done once per app)
-Log.configure({winston: {file: '/tmp/example.log'}});
-
-// create an logger instance
-const log = new Log('Example');
-
-// send error log
-log.error('An error has occurred');
+trace
 ```
 
-### API
-
-Static methods:
 ```js
-Log.configure(<LOG_CONF>);
-log.trace(<Error>);
+debug
 ```
 
-Class members:
 ```js
-log.debug(<String>);
-log.info(<String>);
-log.warn(<String>);
-log.error(<String>);
+info
+```
+
+```js
+warn
+```
+
+```js
+error
+```
+
+#### Example
+```js
+const log = new (require('@aliceo2/web-ui').Log)('example');
+log.error('this is error message');
 ```

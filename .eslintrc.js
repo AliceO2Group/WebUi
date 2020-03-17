@@ -30,6 +30,7 @@ module.exports = {
             "ArrowFunctionExpression": true,
             "FunctionExpression": true
         }
-    }]
+    }],
+    "linebreak-style": "warn"
   }
 }

@@ -1,57 +1,59 @@
-# Backend - HTTP module
-HTTP module provided a simple way of creating REST API. In addition, it supports:
- - CERN SSO  authentication and e-groups authorization using [OpenID Connect](openid.md) module
- - JWT token secured requests using [JWT](json-tokens.md) module
+# Backend - HTTP (REST API) module
+
  - Protects server by defining: Content Security Policy, DNS Prefetch Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
- - Serving custom static paths
- - Defining new routes (GET, POST)
- - Passing values to frontend easily
+ - Serves custom static paths
+ - Defines new routes (GET, POST, DELETE)
+ - Provides CERN SSO authentication and e-groups authorization using [OpenID Connect module](openid.md)
+ - Secures routes with [JWT token](json-tokens.md)
 
 #### Instance
 ```js
-HttpServer(HTTP_CONF, JWT_CONF, [OPENID_CONF]);
+const {HttpServer} = require('@aliceo2/web-ui');
+HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT}, JWT_CONF, OPENID_CONF);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
-     * `port` - HTTP port number
-     * `tls` - flag that enables/disables TLS
-     * `hostname` - server's hostname which is required by Content Security Policy
-     * [`portSecure`] - HTTPS port number
-     * [`key`] - private key filepath
-     * [`cert`] - certificate filepath
- * `JWT_CONF` JSON Web token configuration is explained in the [jwt](json-tokens.md) module
- * [`OPENID_CONF`] OpenID configuration is explained in the [OpenID](openid.md)
+     * `PORT` - HTTP port number
+     * [`HOSTNAME`] - server's hostname which is required by Content Security Policy (default: `localhost`)
+     * [`TLS_ENABLED`] - flag that enables/disables TLS (default: `false`)
+     * [`HTTPS_PORT`] - HTTPS port number, TLS must be enabled
+     * [`TLS_KEY`] - private key filepath, TLS must be enabled
+     * [`TLS_CERT`] - certificate filepath, TLS must be enabled
+ * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
+ * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
 
-#### Server example
+
+#### Public methods
+```js
+addStaticPath
+```
+```js
+get
+```
+```js
+post
+```
+```js
+delete
+```
+
+#### Minimal server example
 ```js
 // Include required modules
-const {HttpServer, JwtToken} = require('@aliceo2/web-ui');
-
-// configuration file for simple, unsecured http server
-const httpConf = {
-  port: 8080,
-  tls: false,
-  hostname: 'localhost'
-};
-
-// JWT configuration (follow instruction from jwt module)
-const jwtConf = {...};
+const {HttpServer} = require('@aliceo2/web-ui');
 
 // create instance of http server
-const http = new HttpServer(httpConf, jwtConf);
+const http = new HttpServer({
+  port: 8080
+});
 
-// pass test value to the frontend (via URL)
-http.passAsUrl('testKey', 'testValue');
-
-// Server public folder under `/pub` URI
-http.addStaticPath('public', 'pub');
+// Server `public` folder
+http.addStaticPath('public');
 ```
 
 #### Route example
 ```js
-http.post('/do-stuff', (req, res) => {
-  console.log(`Request made by ${req.session.name} (${req.session.personid})`);
-  console.log(`Request content is ${req.body}`);
-  res.status(200).json({status: 'done'})
-})
+http.get('/hi', (req, res) => {
+  res.status(200).json({message: 'hi'})
+}, { public: true }); // turns off JWT verification
 ```
