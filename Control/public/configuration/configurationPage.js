@@ -120,40 +120,58 @@ const expertPanel = (model, options) => h('', {
     height: 'auto'
   }
 }, [
-  h('h4', 'Expert Panel:'),
-  h('.flex-row.w-100.pv2', [
-    dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allow-rejection'),
-    dropDown(model, 'Loopback', ['TRUE', 'FALSE'], 'loopback'),
-    dropDown(model, 'PON Upstream', ['TRUE', 'FALSE'], 'pon-upstream'),
+  h('h4.pv2', 'Flags:'),
+  h('.flex-column', [
+    h('h5.bg-gray-light.p2.panel-title', 'Clock Settings'),
+    h('.flex-row.w-100.p2.panel', [
+      inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 31 - 1), 'onu-address'),
+      dropDown(model, 'PON Upstream', ['TRUE', 'FALSE'], 'pon-upstream'),
+      dropDown(model, 'Clock', ['LOCAL', 'TTC'], 'clock'),
+    ])
   ]),
-  h('.flex-row.w-100.pv2', [
-    dropDown(model, 'DYN Offset', ['TRUE', 'FALSE'], 'dyn-offset'),
-    dropDown(model, 'Clock Argument', ['LOCAL', 'TTC'], 'clock'),
-    dropDown(model, 'Datapath Mode', ['PACKET', 'CONTINUOUS'], 'datapathmode'),
+  h('.flex-column.mv3', [
+    h('h5.panel-title.p2', 'Dataflow Settings'),
+    h('.panel.p2', [
+      h('.flex-row.w-100', [
+        inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 31 - 1), 'cru-id'),
+        inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'trigger-window-size'),
+        dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allow-rejection'),
+      ]),
+      h('.flex-row.w-100.pv2', [
+        dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata'),
+        dropDown(model, 'Loopback', ['TRUE', 'FALSE'], 'loopback'),
+        dropDown(model, 'Datapath Mode', ['PACKET', 'CONTINUOUS'], 'datapathmode'),
+      ]),
+      h('.flex-row.w-100.pv2', [
+        dropDown(model, 'DYN Offset', ['TRUE', 'FALSE'], 'dyn-offset'),
+        h('.w-50'), h('.w-50'),
+      ]),
+    ])
   ]),
-  h('.flex-row.w-100.pv2', [
-    dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata'),
-    dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtmode'),
-    dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux'),
-  ]),
-  h('.flex-row.w-100.pv2', [
-    dropDown(model, 'Force config', ['TRUE', 'FALSE'], 'force-config'),
-    h('.flex-row.w-50'),
-    h('.flex-row.w-50'),
-  ]),
-  h('.flex-row.w-100.pv2',
-    inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 31 - 1), 'cru-id'),
-    inputNumberBox(model, 'Trigger Window Size', 0, 4095, 'trigger-window-size'),
-    inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 31 - 1), 'onu-address'),
-  ),
-  h('.w-100.pv2',
-    h('.flex-row.w-100', [
-      h('.ph1.w-25', 'Links'),
-      h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
-        options.links.map((link, index) => checkBox(model, `Link #${index}`, index)),
+  h('.flex-column', [
+    h('h5.panel-title.p2', 'Link Settings'),
+    h('.panel.p2', [
+      h('.flex-row.w-100.p2', [
+        dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtmode'),
+        dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux'),
+        h('.w-50')]
+      ),
+      h('.flex-row.w-100.p1', [
+        h('', {style: 'width: 12.5%'}, 'Links'),
+        h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
+          options.links.map((link, index) => checkBox(model, `Link #${index}`, index)),
+        ])
       ])
     ])
-  ),
+  ]),
+  h('.flex-column.mv3', [
+    h('h5.panel-title.p2', 'Miscellaneous'),
+    h('.flex-row.w-100.p2.panel', [
+      dropDown(model, 'Force config', ['TRUE', 'FALSE'], 'force-config'),
+    ]),
+    h('.flex-row.w-50'),
+    h('.flex-row.w-50'),
+  ]),
   displayCommandPanel(model.configuration),
 ]);
 
@@ -162,9 +180,9 @@ const expertPanel = (model, options) => h('', {
  * @param {Object} configuration
  * @return {vnode}
  */
-const displayCommandPanel = (configuration) => h('.w-100.pv2.ph1', [
-  h('', 'Command:'),
-  h('pre', ['roc-config',
+const displayCommandPanel = (configuration) => h('.w-100', [
+  h('h5.panel-title.p2', 'Command:'),
+  h('.panel.p2', ['roc-config',
     configuration.getSelectedLinks().length > 0 &&
     `  --links ${configuration.getSelectedLinks()}`,
     configuration.getModifiedOptionsAsString()
