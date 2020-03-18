@@ -304,7 +304,7 @@ const dropDown = (model, title, options, field, help = undefined) =>
   h('.flex-row.w-33', [
     h('.w-33', {
       style: 'border: 0',
-      class: help !== '' ? 'tooltip' : ''
+      class: help ? 'tooltip' : ''
     }, [
       h('label', {
         style: help ? 'cursor: help' : ''
