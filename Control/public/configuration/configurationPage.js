@@ -140,9 +140,9 @@ const expertPanel = (model, options) => h('.pv3', {
           'Allows HBF (HeartBeat Frame) rejection'),
       ]),
       h('.flex-row.w-100.pv2', [
-        dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata', 'CTP, PATTERN, MIDTRG'),
+        dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata'),
         dropDown(model, 'Loopback', ['TRUE', 'FALSE'], 'loopback', 'Enables link loopback'),
-        dropDown(model, 'Datapath Mode', ['PACKET', 'CONTINUOUS'], 'datapathmode', 'PACKET, CONTINUOUS'),
+        dropDown(model, 'Datapath Mode', ['PACKET', 'CONTINUOUS'], 'datapathmode'),
       ]),
       h('.flex-row.w-100.pv2', [
         dropDown(model, 'DYN Offset', ['TRUE', 'FALSE'], 'dyn-offset', 'Enables the dynamic offset'),
@@ -154,8 +154,8 @@ const expertPanel = (model, options) => h('.pv3', {
     h('h5.panel-title.p2', 'Link Settings'),
     h('.panel.p2', [
       h('.flex-row.w-100.p2', [
-        dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtmode', 'GBT, WB'),
-        dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux', 'TTC, DDG, SWT'),
+        dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtmode'),
+        dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux'),
         h('.w-33')]
       ),
       h('.flex-row.w-100.p1', [
@@ -300,11 +300,16 @@ Helpers
  * @param {string} help
  * @return {vnode}
  */
-const dropDown = (model, title, options, field, help) =>
+const dropDown = (model, title, options, field, help = undefined) =>
   h('.flex-row.w-33', [
-    h('.w-33.tooltip', {style: 'border: 0'}, [
-      h('label', {style: 'cursor: help'}, title),
-      h('span.tooltiptext', help)
+    h('.w-33', {
+      style: 'border: 0',
+      class: help !== '' ? 'tooltip' : ''
+    }, [
+      h('label', {
+        style: help ? 'cursor: help' : ''
+      }, title),
+      help && h('span.tooltiptext', help)
     ]),
     h('.w-50.mh2',
       h('select.form-control', {
