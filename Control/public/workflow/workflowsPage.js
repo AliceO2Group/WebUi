@@ -113,6 +113,7 @@ const revisionComboBox = (workflow, templatesMap, repository) =>
         style: {
           display: workflow.isInputCommitFormat() ? '' : 'none'
         },
+        title: 'Retrieve workflow templates for this commit',
         onclick: () => workflow.requestCommitTemplates()
       }, iconActionRedo())
     ]),
@@ -158,7 +159,7 @@ const showControlForm = (model, repoList, templatesMap) =>
         (model.workflow.isRevisionCorrect() &&
           Object.values(templatesMap[model.workflow.form.repository][model.workflow.form.revision]).length !== 0) ?
           templateAreaList(model.workflow, templatesMap, model.workflow.form.repository, model.workflow.form.revision)
-          : errorComponent('No templates found for this repository.'),
+          : errorComponent('No templates found for this revision.'),
         h('.mv2', [
           h('button.btn.btn-primary',
             {
