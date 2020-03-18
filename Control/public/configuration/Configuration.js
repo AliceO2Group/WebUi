@@ -154,11 +154,7 @@ export default class Configuration extends Observable {
       // type number
       const valueNumber = parseInt(value);
       if (!isNaN(valueNumber)) {
-        if (field === 'onu-address' && valueNumber >= 0 && valueNumber <= (Math.pow(2, 31) - 1)) {
-          this.actionPanel.expertOptions[field] = valueNumber;
-        } else if (field === 'trigger-window-size' && value >= 0 && value <= 4095) {
-          this.actionPanel.expertOptions[field] = valueNumber;
-        } else if (field === 'cru-id' && valueNumber >= 0 && valueNumber <= (Math.pow(2, 31) - 1)) {
+        if (valueNumber >= 0 && valueNumber <= (Math.pow(2, 31) - 1)) {
           this.actionPanel.expertOptions[field] = valueNumber;
         } else {
           this.actionPanel.expertOptions[field] = null;
@@ -287,7 +283,7 @@ export default class Configuration extends Observable {
    */
   getDefaultExpertOptions() {
     return {
-      'cru-id': '-',
+      'cru-id': '-', // [0, 2^32 - 1]
       clock: '-',
       datapathmode: '-',
       downstreamdata: '-',
@@ -300,7 +296,7 @@ export default class Configuration extends Observable {
       'dyn-offset': null, // bool
       'force-config': null, // bool
       'onu-address': null, // [0, 2^32 - 1]
-      'trigger-window-size': null // [0, 4095]
+      'trigger-window-size': null // [0, 2^32 - 1]
     };
   }
 
