@@ -60,19 +60,19 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should have `Create` button disabled due to no selected workflow', async () => {
     const button = await page.evaluate(() => {
       const button = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(3) > button');
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(4) > button');
       return {title: button.title, classList: button.classList, disabled: button.disabled};
     });
-    assert.strictEqual(button.title, 'Create');
+    assert.strictEqual(button.title, 'Create environment based on selected workflow');
     assert.ok(button.disabled);
     assert.deepStrictEqual(button.classList, {0: 'btn', 1: 'btn-primary'});
   });
 
   it('should successfully select a workflow from template list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').click());
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(3) > div > a').click());
     await page.waitFor(200);
     const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a');
+      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(3) > div > a');
       return {classList: element.classList};
     });
 
@@ -81,7 +81,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should throw error when `Create` button is clicked due to `Control is not locked`', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(3) > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(4) > button').click());
     await page.waitFor(500);
     const errorOnCreation = await page.evaluate(() => window.model.environment.itemNew);
     assert.strictEqual(errorOnCreation.kind, 'Failure');
@@ -91,7 +91,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should display error message due to `Control is not locked`', async () => {
     const errorMessage = await page.evaluate(() => {
       const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(3) > p');
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(4) > p');
       return {text: errorElement.innerText, classList: errorElement.classList};
     });
     assert.strictEqual(errorMessage.text, ' Request to server failed (403 Forbidden): Control is not locked');
@@ -162,10 +162,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully select a workflow from template list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').click());
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(3) > div > a').click());
     await page.waitFor(200);
     const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a');
+      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(3) > div > a');
       return {classList: element.classList};
     });
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'selected'});
@@ -173,7 +173,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully create a new environment', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(3) > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(4) > button').click());
     await page.waitFor(1000);
     const location = await page.evaluate(() => window.location);
 

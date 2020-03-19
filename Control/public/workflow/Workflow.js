@@ -14,7 +14,6 @@ export default class Workflow extends Observable {
 
     this.repoList = RemoteData.notAsked();
     this.refreshedRepositories = RemoteData.notAsked();
-    this.list = RemoteData.notAsked();
     this.templatesMap = RemoteData.notAsked();
 
     this.revision = {
@@ -30,6 +29,15 @@ export default class Workflow extends Observable {
   }
 
   /**
+   * Initialize page and request data
+   */
+  initWorkflowPage() {
+    this.getRepositoriesList();
+    this.getAllTemplatesAsMap();
+    this.resetErrorMessage();
+  }
+
+  /**
    * Method to update selected repository
    * @param {string} repository
    */
@@ -37,7 +45,7 @@ export default class Workflow extends Observable {
     this.form.repository = repository;
     this.resetErrorMessage();
     this.setTemplate('');
-    this.resetRevision();
+    this.resetRevision(repository);
     this.notify();
   }
 
@@ -57,13 +65,32 @@ export default class Workflow extends Observable {
     this.model.environment.itemNew = RemoteData.notAsked();
   }
   /**
-   * Reset revision when user selects a different repository
+   * Reset revision to repository default or global default
+   * @param {string} repository
    */
-  resetRevision() {
+  resetRevision(repository) {
+    let defaultRevision = this.repoList.payload.repos.filter((obj) => obj.name === repository)[0].defaultRevision;
+    const globalDefault = this.repoList.payload.globalDefaultRevision;
+
+    if (!defaultRevision && globalDefault) {
+      defaultRevision = globalDefault;
+    } else if (!defaultRevision && !globalDefault) {
+      defaultRevision = 'master';
+    }
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp('^master')
+      regex: new RegExp(`^${defaultRevision}`)
     };
+    this.form.revision = defaultRevision;
+    this.notify();
+  }
+
+  /**
+   * Method to return current selected revision
+   * @return {string}
+   */
+  getRevision() {
+    return this.form.revision;
   }
 
   /**
@@ -200,6 +227,8 @@ export default class Workflow extends Observable {
       } else if (this.repoList.payload.repos.length > 0) {
         this.form.repository = this.repoList.payload.repos[0].name;
       }
+      const initRepo = this.repoList.payload.repos[0].name;
+      this.resetRevision(initRepo);
     }
   }
 

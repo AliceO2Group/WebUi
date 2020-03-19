@@ -9,7 +9,7 @@
   line-height: 1;
 }
 
-.pageError {
+.errorPage {
   font-size: 10em;
   color: var(--color-dark);
   margin: var(--space-l);

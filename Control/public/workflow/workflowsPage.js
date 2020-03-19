@@ -1,6 +1,8 @@
-import {h, iconCircleX, iconActionRedo, iconReload} from '/js/src/index.js';
+import {h, iconReload} from '/js/src/index.js';
+import revisionPanel from './revisionPanel.js';
+import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
+import errorPage from '../common/errorPage.js';
 /**
  * @file Page to show a form for creating a new environment
  * from existing templates
@@ -15,6 +17,7 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
 
 /**
 * Form with inputs for creating a new environment
+Check that a lits of repositories was retrieved successfully
  * @param {Object} model
  * @return {vnode}
  */
@@ -24,12 +27,12 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
     Loading: () => pageLoading(),
     Success: (repoList) => (repoList.length === 0)
       ? h('h3.m4', ['No repositories found.']) : showTemplatesValidation(model, repoList.repos),
-    Failure: (error) => pageError(error),
+    Failure: (error) => errorPage(error),
   })
 ]);
 
 /**
- *Check that after repositories were requested, templates were loaded succesfully as well
+ * Check that after repositories were requested, templates were loaded successfully
  * @param {Object} model
  * @param {Array<JSON>} repoList - list of Repositories
  * @return {vnode}
@@ -38,10 +41,27 @@ const showTemplatesValidation = (model, repoList) =>
   model.workflow.templatesMap.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Failure: (error) => pageError(error),
+    Failure: (error) => errorPage(error),
     Success: (templatesMap) => (Object.keys(templatesMap).length === 0)
-      ? h('h3.m4', ['No templates/revisions found.']) : showControlForm(model, repoList, templatesMap)
+      ? h('h3.m4', ['No templates/revisions found.']) : showNewEnvironmentForm(model, repoList, templatesMap)
   });
+
+/**
+* Create a form for the user to select inputs for a new environment
+* @param {Object} model
+* @param {RemoteData<Array<JSON>>} repoList
+* @param {RemoteData<Map<String, JSON>>} templatesMap
+* @return {vnode}
+*/
+const showNewEnvironmentForm = (model, repoList, templatesMap) => h('.form-group.p3.absolute-fill', {
+  style: 'display: flex; flex-direction: column; ',
+  onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
+}, [
+  repositoryDropdownList(model.workflow, repoList),
+  revisionPanel(model.workflow, templatesMap, model.workflow.form.repository),
+  templatesPanel(model.workflow, templatesMap),
+  actionableCreateEnvironment(model),
+]);
 
 /**
  * Method which creates a dropdown of repositories
@@ -73,56 +93,21 @@ const repositoryDropdownList = (workflow, repoList) =>
   ]);
 
 /**
- * Method which creates a combo box (input + dropdown) of repositories
- * @param {Object} workflow
- * @param {JSON} templatesMap
- * @param {string} repository
+ * Create the templates panel based on user's selection of revision
+ * @param {RemoteData} workflow
+ * @param {RemoteData<Map<String, JSON>>} templatesMap
  * @return {vnode}
  */
-const revisionComboBox = (workflow, templatesMap, repository) =>
-  h('.m2.text-left', [ // Dropdown Revisions
-    h('h5', 'Revision:'),
-    h('.w-50', {style: 'display:flex; flex-direction: row;'}, [
-      h('.dropdown', {
-        style: 'flex-grow: 1;',
-        onclick: () => workflow.setRevisionInputDropdownVisibility(false),
-        class: workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
-      }, [
-        h('input.form-control', {
-          type: 'text',
-          style: 'z-index:100',
-          value: workflow.form.revision,
-          onkeyup: (e) => workflow.updateInputSearch('revision', e.target.value),
-          onclick: (e) => {
-            workflow.setRevisionInputDropdownVisibility('revision', true);
-            e.stopPropagation();
-          }
-        }),
-        h('.dropdown-menu.w-100',
-          Object.keys(templatesMap[repository])
-            .filter((name) => name.match(workflow.revision.regex))
-            .map((revision) =>
-              h('a.menu-item', {
-                class: revision === workflow.form.revision ? 'selected' : '',
-                onclick: () => workflow.updateInputSelection('revision', revision),
-              }, revision)
-            )
-        ),
-      ]),
-      h('button.btn.mh2', {
-        style: {
-          display: workflow.isInputCommitFormat() ? '' : 'none'
-        },
-        title: 'Retrieve workflow templates for this commit',
-        onclick: () => workflow.requestCommitTemplates()
-      }, iconActionRedo())
-    ]),
-  ]);
+const templatesPanel = (workflow, templatesMap) =>
+  (workflow.isRevisionCorrect() &&
+    Object.values(templatesMap[workflow.form.repository][workflow.form.revision]).length !== 0) ?
+    templateAreaList(workflow, templatesMap, workflow.form.repository, workflow.form.revision)
+    : errorComponent('No templates found for this revision.');
 
 /**
  * Method to create the template Area List
  * @param {Object} workflow
- * @param {JSON} templatesMap
+ * @param {RemoteData<Map<String, JSON>>} templatesMap
  * @param {string} repository
  * @param {string} revision
  * @return {vnode}
@@ -140,48 +125,31 @@ const templateAreaList = (workflow, templatesMap, repository, revision) =>
   ]);
 
 /**
- * Create a form for the user to select inputs for a new environment
+ * Create a panel with:
+ * * a button which creates environment
+ * * a text area in case of failure
  * @param {Object} model
- * @param {Array<JSON>} repoList
- * @param {JSON} templatesMap
  * @return {vnode}
  */
-const showControlForm = (model, repoList, templatesMap) =>
-  h('.form-group.p3.absolute-fill', {
-    style: 'display: flex; flex-direction: column; ',
-    onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
-  }, [
-    repositoryDropdownList(model.workflow, repoList),
-    !templatesMap[model.workflow.form.repository] ?
-      errorComponent('No revisions found for this repository. Please contact an administrator') :
-      h('', [
-        revisionComboBox(model.workflow, templatesMap, model.workflow.form.repository),
-        (model.workflow.isRevisionCorrect() &&
-          Object.values(templatesMap[model.workflow.form.repository][model.workflow.form.revision]).length !== 0) ?
-          templateAreaList(model.workflow, templatesMap, model.workflow.form.repository, model.workflow.form.revision)
-          : errorComponent('No templates found for this revision.'),
-        h('.mv2', [
-          h('button.btn.btn-primary',
-            {
-              class: model.environment.itemNew.isLoading() ? 'loading' : '',
-              disabled: model.environment.itemNew.isLoading() || !model.workflow.isInputSelected(),
-              onclick: () => model.workflow.createNewEnvironment(),
-              title: 'Create'
-            },
-            'Create'),
-          model.environment.itemNew.match({
-            NotAsked: () => null,
-            Loading: () => null,
-            Success: () => null,
-            Failure: (error) => errorComponent(error),
-          })
-        ])
-      ])]);
+const actionableCreateEnvironment = (model) =>
+  h('.mv2', [
+    btnCreateEnvironment(model),
+    model.environment.itemNew.match({
+      NotAsked: () => null,
+      Loading: () => null,
+      Success: () => null,
+      Failure: (error) => errorComponent(error),
+    })
+  ]);
 
 /**
- * Display a red error message
- * @param {string} message
+ * Method to add a button for creation of environment
+ * @param {Object} model
  * @return {vnode}
  */
-const errorComponent = (message) =>
-  h('p.text-center.danger', iconCircleX(), ' ', message);
+const btnCreateEnvironment = (model) => h('button.btn.btn-primary', {
+  class: model.environment.itemNew.isLoading() ? 'loading' : '',
+  disabled: model.environment.itemNew.isLoading() || !model.workflow.isInputSelected(),
+  onclick: () => model.workflow.createNewEnvironment(),
+  title: 'Create environment based on selected workflow'
+}, 'Create');

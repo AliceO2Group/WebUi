@@ -1,6 +1,6 @@
 import {h, iconChevronBottom, iconChevronTop, iconCircleX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
+import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
 /**
  * @file Page to show 1 environment (content and header)
@@ -31,7 +31,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
     NotAsked: () => null,
     Loading: () => pageLoading(),
     Success: (data) => showContent(model.environment, data.environment),
-    Failure: (error) => pageError(error),
+    Failure: (error) => errorPage(error),
   })
 ]);
 
