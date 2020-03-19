@@ -1,6 +1,6 @@
 import {h, iconChevronBottom, iconChevronRight, iconCircleX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
+import errorPage from '../common/errorPage.js';
 /**
  * @file Page to show configuration components (content and header)
  */
@@ -26,7 +26,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
     NotAsked: () => null,
     Loading: () => h('.w-100.text-center', pageLoading()),
     Success: (readoutCardsMap) => buildPage(model, readoutCardsMap),
-    Failure: (error) => h('.w-100.text-center', pageError(error)),
+    Failure: (error) => h('.w-100.text-center', errorPage(error)),
   })
 ]);
 

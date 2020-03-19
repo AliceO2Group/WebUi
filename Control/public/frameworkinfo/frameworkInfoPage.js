@@ -1,7 +1,7 @@
 
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
+import errorPage from '../common/errorPage.js';
 
 /**
  * @file Page to FrameworkInfo(About) (content and header)
@@ -39,7 +39,7 @@ const createTableForControlGUIInfo = (frameworkInfo) =>
       NotAsked: () => null,
       Loading: () => pageLoading(),
       Success: (data) => showContent(data),
-      Failure: (error) => pageError(error),
+      Failure: (error) => errorPage(error),
     }),
   ]);
 
@@ -54,7 +54,7 @@ const createTableForAliECSInfo = (frameworkInfo) =>
       NotAsked: () => null,
       Loading: () => pageLoading(),
       Success: (data) => showContent({'AliECS Core Info': data}),
-      Failure: (error) => pageError(error),
+      Failure: (error) => errorPage(error),
     })
   ]);
 

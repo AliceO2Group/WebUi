@@ -1,6 +1,6 @@
 import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
+import errorPage from '../common/errorPage.js';
 import showTableList from '../common/showTableList.js';
 
 /**
@@ -32,7 +32,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
     NotAsked: () => null,
     Loading: () => pageLoading(),
     Success: (data) => showContent(model, data.environments),
-    Failure: (error) => pageError(error),
+    Failure: (error) => errorPage(error),
   })
 ]);
 
