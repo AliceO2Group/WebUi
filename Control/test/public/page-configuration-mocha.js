@@ -22,7 +22,7 @@ describe('`pageConfiguration` test-suite', async () => {
         const errorMessage = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > p').innerText;
         return [errorIcon, errorMessage];
       });
-      assert.deepStrictEqual(errorIcon, {0: 'pageError'});
+      assert.deepStrictEqual(errorIcon, {0: 'errorPage'});
       assert.strictEqual(errorMessage, 'Request to server failed (502 Bad Gateway): connect ECONNREFUSED 127.0.0.1:8550');
     });
   });
@@ -49,7 +49,7 @@ describe('`pageConfiguration` test-suite', async () => {
         const errorMessage = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > p').innerText;
         return [errorIcon, errorMessage];
       });
-      assert.deepStrictEqual(errorIcon, {0: 'pageError'});
+      assert.deepStrictEqual(errorIcon, {0: 'errorPage'});
       assert.strictEqual(errorMessage, 'Request to server failed (404 Not Found): Could not find any Readout Cards by key test/o2/hardware/flps');
     });
   });
