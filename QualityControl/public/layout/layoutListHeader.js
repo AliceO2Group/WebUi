@@ -1,4 +1,6 @@
 import {h} from '/js/src/index.js';
+import spinner from '../loader/spinner.js';
+
 
 /**
  * Shows header of list of layouts with one search input to filter them
@@ -10,6 +12,7 @@ export default (model) => [
     h('b.f4', 'Layouts'),
     ' ',
     h('span', `(${howManyItems(model)})`),
+    model.loader.active && h('span.f4.mh1', spinner()),
   ]),
   h('.flex-grow.text-right', [
     h('input.form-control.form-inline.mh1.w-33', {
@@ -26,6 +29,4 @@ export default (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-const howManyItems = (model) => model.layout.searchResult
-  ? `${model.layout.searchResult.length} found of ${model.layout.list.length}`
-  : `${model.layout.list && model.layout.list.length} items`;
+const howManyItems = (model) => `${model.layout.list && model.layout.list.length} items`;

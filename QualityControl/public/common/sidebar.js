@@ -44,8 +44,7 @@ export default function sidebar(model) {
 const sidebarMenu = (model) => [
   exploreMenu(model),
   myLayoutsMenu(model),
-  h('.menu-title', ''),
-  refreshOptions(model),
+  model.object.isOnlineModeEnabled ? refreshOptions(model) : h('.menu-title', {style: 'flex-grow:1'}, ''),
   statusMenu(model),
   collapseSidebarMenuItem(model)
 ];
@@ -87,7 +86,10 @@ const myLayoutsMenu = (model) => [
   model.layout.myList.match({
     NotAsked: () => null,
     Loading: () => h('.menu-item', 'Loading...'),
-    Success: (list) => list.map((layout) => myLayoutsMenuItem(model, layout)),
+    Success: (list) =>
+      h('.scroll-y',
+        list.map((layout) => myLayoutsMenuItem(model, layout))
+      ),
     Failure: (error) => h('.menu-item', error),
   }),
   h('a.menu-item', {
@@ -121,14 +123,15 @@ const statusMenu = (model) =>
  * @param {Object} layout
  * @return {vnode}
  */
-const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
-  title: layout.name,
-  href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
-  onclick: (e) => model.router.handleLinkEvent(e),
-  class: model.router.params.layoutId === layout.id ? 'selected' : ''
-}, [
-  h('span', iconLayers()), model.sidebar && itemMenuText(layout.name)
-]);
+const myLayoutsMenuItem = (model, layout) =>
+  h('a.menu-item.w-wrapped', {
+    title: layout.name,
+    href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
+    onclick: (e) => model.router.handleLinkEvent(e),
+    class: model.router.params.layoutId === layout.id ? 'selected' : ''
+  }, [
+    h('span', iconLayers()), model.sidebar && itemMenuText(layout.name)
+  ]);
 
 /**
  * Shows a little form to set interval of refresh of objects,
@@ -140,7 +143,7 @@ const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
 const refreshOptions = (model) => [
   h('', {
     class: model.sidebar ? 'menu-title' : '',
-    style: model.object.isOnlineModeEnabled ? 'flex-grow:1' : 'visibility: hidden; flex-grow:1'
+    style: 'flex-grow:1; height:auto'
   }, [
     model.sidebar &&
     [

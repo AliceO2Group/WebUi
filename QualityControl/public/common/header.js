@@ -1,6 +1,5 @@
 import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 
-import spinner from '../loader/spinner.js';
 import layoutShowHeader from '../layout/layoutShowHeader.js';
 import layoutListHeader from '../layout/layoutListHeader.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
@@ -47,8 +46,6 @@ const commonHeader = (model) => h('.flex-grow', [
   onlineButton(model),
   ' ',
   h('span.f4.gray', 'Quality Control'),
-  model.loader.active && h('span.f4.mh1.gray', spinner())
-  // TODO To be redesigned. It is not visible in case of error and UI is hanging
 ]);
 
 /**
@@ -80,7 +77,7 @@ const onlineButton = (model) => h('button.btn',
     onclick: () => toggleOnlineButton(model),
     disabled: model.object.queryingObjects ? true : false,
     title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.object.isOnlineModeConnectionAlive ? '' : 'display: none'
+    style: !model.object.isOnlineModeConnectionAlive ? '' : 'display: none'
   },
   'Online',
   ' ',
