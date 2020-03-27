@@ -146,13 +146,13 @@ const templateAreaList = (workflow, templatesMap, repository, revision) =>
  */
 const actionableCreateEnvironment = (model) =>
   h('.mv2', [
-    btnCreateEnvironment(model),
     model.environment.itemNew.match({
       NotAsked: () => null,
       Loading: () => null,
       Success: () => null,
       Failure: (error) => errorComponent(error),
-    })
+    }),
+    btnCreateEnvironment(model),
   ]);
 
 /**
@@ -182,14 +182,7 @@ const extraVariablePanel = (model) => {
           onkeyup: (e) => model.workflow.updateVariableValueByKey(key, e.target.value)
         })),
         h('.ph2.danger.actionable-icon', {
-          style: 'hoverable',
-          onclick: () => {
-            const added = model.workflow.removeVariableByKey(key);
-            if (added) {
-              keyString = '';
-              valueString = '';
-            }
-          }
+          onclick: () => model.workflow.removeVariableByKey(key)
         }, iconTrash())
       ])
     )),
