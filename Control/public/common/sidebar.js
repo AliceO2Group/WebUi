@@ -1,7 +1,5 @@
 import {h} from '/js/src/index.js';
-import {
-  iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog
-} from '/js/src/icons.js';
+import {iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward} from '/js/src/icons.js';
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
