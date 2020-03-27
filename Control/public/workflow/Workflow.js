@@ -175,7 +175,7 @@ export default class Workflow extends Observable {
           } else {
             path = repository + 'workflows/' + template + '@' + revision;
           }
-          this.model.environment.newEnvironment({workflowTemplate: path});
+          this.model.environment.newEnvironment({workflowTemplate: path, vars: this.form.variables});
         } else {
           this.model.environment.itemNew =
             RemoteData.failure('Selected template does not exist for this repository & revision');
@@ -209,13 +209,17 @@ export default class Workflow extends Observable {
     const isKeyCorrect = key && key.trim() !== '';
     const isValueCorrect = value && value.trim() !== '';
     if (isKeyCorrect && isValueCorrect) {
-      this.form.variables[key] = value;
-      this.notify();
-      return true;
+      if (!this.form.variables[key]) {
+        this.form.variables[key] = value;
+        this.notify();
+        return true;
+      } else {
+        this.model.notification.show(`Key '${key}' already exists.`, 'danger', 2000);
+      }
     } else {
       this.model.notification.show('Key and Value cannot be empty', 'danger', 2000);
-      return false;
     }
+    return false;
   }
 
   /**
