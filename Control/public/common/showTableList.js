@@ -13,12 +13,10 @@ export default (model, list, actions) => {
   list.forEach((environment) => delete environment.userVars);
   return h('table.table', [
     h('thead', [
-      h('tr',
-        [
-          list.length > 0 && Object.keys(list[0]).map((columnName) => h('th', {style: 'text-align:center'}, columnName)),
-          actions && h('th', {style: 'text-align:center'}, 'Actions')
-        ]
-      )
+      h('tr', [
+        list.length > 0 && Object.keys(list[0]).map((columnName) => h('th', {style: 'text-align:center'}, columnName)),
+        actions && h('th', {style: 'text-align:center'}, 'Actions')
+      ])
     ]),
     h('tbody', list.map((item) => h('tr', [
       Object.keys(item).map(
@@ -26,7 +24,9 @@ export default (model, list, actions) => {
           ? h('td', {style: 'text-align: center'}, parseObject(item[columnName], columnName))
           : h('td',
             columnName === 'state' ? {
-              class: (item[columnName] === 'RUNNING' ? 'success' : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
+              class: (item[columnName] === 'RUNNING' ?
+                'success'
+                : (item[columnName] === 'CONFIGURED' ? 'warning' : '')),
               style: 'font-weight: bold;text-align:center'
             } : {style: 'text-align:center'},
             item[columnName]
