@@ -50,7 +50,7 @@ brew install node
 ### Minimum browser version support
 - Chrome 61
 - Firefox 60
-- Edge 16
+- Edge 80
 - Safari 10.1
 - Opera 47
 

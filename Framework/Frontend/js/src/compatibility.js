@@ -47,3 +47,9 @@ if (window.nomodules) {
   window.location.href = '/compatibility.html';
 }
 
+if (window.navigator.userAgent.toLocaleLowerCase().includes('edge')) {
+  // eslint-disable-next-line
+  console.error(`Compatibility issue with: Microsoft Edge Version`);
+  // Goto compatibility page provided by default with WebUi/Framework/Frontend
+  window.location.href = '/compatibility.html';
+}
