@@ -1,7 +1,5 @@
 import {h} from '/js/src/index.js';
-import {
-  iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog
-} from '/js/src/icons.js';
+import {iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward} from '/js/src/icons.js';
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
@@ -13,7 +11,7 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
     model.sideBarMenu ? 'Environments' : 'ENVS'),
   menuItem(model, 'Create', 'newEnvironment', iconPlus()),
   menuItem(model, 'Active', 'environments', iconGridTwoUp()),
-  menuItem(model, 'Configuration', 'configuration', iconCog()),
+  // menuItem(model, 'Configuration', 'configuration', iconCog()),
   h('', {style: 'flex-grow:1'}), // empty item to fill in space
   menuItem(model, 'About', 'about', iconExcerpt()),
   collapseSidebarMenuItem(model),

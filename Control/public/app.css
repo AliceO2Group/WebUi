@@ -17,9 +17,10 @@
 }
 
 .disabled-content {
-	pointer-events: none;
-	opacity: 0.5;
+  pointer-events: none;
+  opacity: 0.5;
 }
+
 .grafana-font {
   font-family: Roboto, Helvetica Neue, Arial, sans-serif;
   font-size: 12px;
@@ -37,6 +38,18 @@ tr:hover td {
   cursor: pointer;
 }
 
+.actionable-icon {
+  cursor: pointer;
+}
+
+.actionable-icon:hover {
+  transform: scale(1.2);
+}
+
+.actionable-icon:active {
+  transform: scale(1.5);
+}
+
 .menu-title-large {
   text-transform: uppercase;
   height: 2em;
@@ -51,9 +64,13 @@ tr:hover td {
 
 .panel-title {
   border: 1px solid #ddd;
-  background:var(--color-gray-light);
+  background: var(--color-gray-light);
 }
 
 .panel {
   border: 1px solid var(--color-gray-light);
+}
+
+.border-bot {
+  border-bottom: 1px solid var(--color-gray-light);
 }

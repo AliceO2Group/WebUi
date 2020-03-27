@@ -148,6 +148,10 @@ const showEnvDetailsTable = (item) =>
         h('tr', [
           h('th', 'Root Role'),
           h('td', item.rootRole)
+        ]),
+        h('tr', [
+          h('th', 'User Vars'),
+          h('td', JSON.stringify(item.userVars))
         ])
       ])
     ]

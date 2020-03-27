@@ -24,7 +24,8 @@ export default class Workflow extends Observable {
     this.form = {
       repository: '',
       revision: 'master',
-      template: ''
+      template: '',
+      variables: {}
     };
   }
 
@@ -174,7 +175,7 @@ export default class Workflow extends Observable {
           } else {
             path = repository + 'workflows/' + template + '@' + revision;
           }
-          this.model.environment.newEnvironment({workflowTemplate: path});
+          this.model.environment.newEnvironment({workflowTemplate: path, vars: this.form.variables});
         } else {
           this.model.environment.itemNew =
             RemoteData.failure('Selected template does not exist for this repository & revision');
@@ -195,6 +196,59 @@ export default class Workflow extends Observable {
       allTags: false
     };
     this.getAllTemplatesAsMap(options);
+  }
+
+  /**
+   * Method to check inputs of key and value
+   * and add them to form of creating new environment
+   * @param {string} key
+   * @param {string} value
+   * @return {boolean}
+   */
+  addVariable(key, value) {
+    const isKeyCorrect = key && key.trim() !== '';
+    const isValueCorrect = value && value.trim() !== '';
+    if (isKeyCorrect && isValueCorrect) {
+      if (!this.form.variables[key]) {
+        this.form.variables[key] = value;
+        this.notify();
+        return true;
+      } else {
+        this.model.notification.show(`Key '${key}' already exists.`, 'danger', 2000);
+      }
+    } else {
+      this.model.notification.show('Key and Value cannot be empty', 'danger', 2000);
+    }
+    return false;
+  }
+
+  /**
+   * Method to update the value of a (K;V) pair
+   * @param {string} key
+   * @param {string} value
+   */
+  updateVariableValueByKey(key, value) {
+    if (value && value.trim() !== '') {
+      this.form.variables[key] = value;
+      this.notify();
+    } else {
+      this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
+    }
+  }
+
+  /**
+   * Method to remove one of the variables by key
+   * @param {string} key
+   * @return {boolean}
+   */
+  removeVariableByKey(key) {
+    if (this.form.variables[key]) {
+      delete this.form.variables[key];
+      this.notify();
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
