@@ -11,11 +11,10 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
       - [HTTP](#http)
       - [CCDB](#ccdb)
       - [Listing Connector](#listing-connector)
-      - [Service Discovery](#service-discovery)
   - [Run QCG locally](#run-qcg-locally)
   - [Public API](#public-api)
   - [Enable HTTPS](#enable-https)
-  - [QCG - Online Mode](#qcg---online-mode)
+  - [Online Mode](#online-mode)
 
 ## Installation
 1. NodeJS >12.13.0 is required
@@ -45,21 +44,13 @@ Edit the `ccdb` section to define a custom:
 #### Listing Connector
 Specify the connector that should be used for retrieving QC objects. Default value for `listingConnector` is `ccdb`.
 
-#### Service Discovery
-For the QC - online mode, service discovery from Consul is used. 
-Edit the `consul` section to define a custom:
-- `hostname`
-- `port`
-  
-More on how Consul is being used under section [QCG - Online Mode](#qcg---online-mode)
-
 ## Run QCG locally
 1. Load QCG modules
 ```
 alienv enter qcg/latest-o2-dataflow
 ```
 
-2. (Optional) Run `Service Discovery` if you need Online Mode. For more details use [QualityControl - Service Discovery Doc](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h)
+2. (Optional) Online Mode - If you need Online Mode read [this](#online-mode) section
 
 3. Run QCG server
 ```
@@ -84,10 +75,17 @@ QCG exposes two public REST API which can be read by any other application.
 - Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
-## QCG - Online Mode
-QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will only see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class
+## Online Mode
+QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class.
 
-For this, as a separate technology, QCG is using [Consul](https://www.consul.io/) for the Service Discovery capabilities. In order to use it, a user will have to modify the `config.js` file, field [consul](#consul---service-discovery), to specify an up and running Consul instance. 
+For this, QCG is using Service Discovery capabilities of [Consul](https://www.consul.io/).
+Once `Consul` is [installed](https://learn.hashicorp.com/consul/getting-started/install) and running, update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running:
+```javascript
+consul: {
+  hostname: 'localhost',
+  port: 8500
+}
+```
 
 As this functionality is optional, there will be no impact on QCG if a configuration for `Consul` is not provided. A simple warning message as below will be shown to the user that the configuration is missing
 ```

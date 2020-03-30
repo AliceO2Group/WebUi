@@ -21,9 +21,9 @@ export default (workflow, templatesMap, repository) =>
  * @param {string} repository
  * @return {vnode}
  */
-const revisionInputDropdown = (workflow, templatesMap, repository) => h('.m2.text-left', [
+const revisionInputDropdown = (workflow, templatesMap, repository) => h('.m2.text-left.w-100', [
   h('h5', 'Revision:'),
-  h('.w-50', {style: 'display:flex; flex-direction: row;'}, [
+  h('', {style: 'display:flex; flex-direction: row;'}, [
     h('.dropdown', {
       style: 'flex-grow: 1;',
       onclick: () => workflow.setRevisionInputDropdownVisibility(false),

@@ -1,4 +1,4 @@
-import {h, iconReload} from '/js/src/index.js';
+import {h, iconReload, iconTrash, iconPlus} from '/js/src/index.js';
 import revisionPanel from './revisionPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
@@ -21,7 +21,7 @@ Check that a lits of repositories was retrieved successfully
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
   model.workflow.repoList.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
@@ -53,15 +53,22 @@ const showTemplatesValidation = (model, repoList) =>
 * @param {RemoteData<Map<String, JSON>>} templatesMap
 * @return {vnode}
 */
-const showNewEnvironmentForm = (model, repoList, templatesMap) => h('.form-group.p3.absolute-fill', {
-  style: 'display: flex; flex-direction: column; ',
-  onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
-}, [
-  repositoryDropdownList(model.workflow, repoList),
-  revisionPanel(model.workflow, templatesMap, model.workflow.form.repository),
-  templatesPanel(model.workflow, templatesMap),
+const showNewEnvironmentForm = (model, repoList, templatesMap) => [
+  h('.flex-row', [
+    h('.w-50.ph2.flex-column', [
+      h('h5.bg-gray-light.p2.panel-title.w-100', 'Select Template'),
+      h('.form-group.p3.panel.w-100.flex-column', {
+        onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
+      }, [
+        repositoryDropdownList(model.workflow, repoList),
+        revisionPanel(model.workflow, templatesMap, model.workflow.form.repository),
+        templatesPanel(model.workflow, templatesMap),
+      ])
+    ]),
+    extraVariablePanel(model.workflow)
+  ]),
   actionableCreateEnvironment(model),
-]);
+];
 
 /**
  * Method which creates a dropdown of repositories
@@ -70,7 +77,7 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => h('.form-group
  * @return {vnode}
  */
 const repositoryDropdownList = (workflow, repoList) =>
-  h('.m2.text-left.w-50', [ // Dropdown Repositories
+  h('.m2.text-left.w-100', [ // Dropdown Repositories
     h('h5', 'Repository:'),
     h('', {style: 'display: flex; flex-direction: row'}, [
       h('select.form-control', {
@@ -113,7 +120,7 @@ const templatesPanel = (workflow, templatesMap) =>
  * @return {vnode}
  */
 const templateAreaList = (workflow, templatesMap, repository, revision) =>
-  h('.m2.text-left.w-50', [ // Dropdown Template
+  h('.m2.text-left.w-100', [ // Dropdown Template
     h('h5', {style: '', for: ''}, 'Template:'),
     h('.shadow-level1.pv1',
       Object.values(templatesMap[repository][revision]).map((template) =>
@@ -133,14 +140,84 @@ const templateAreaList = (workflow, templatesMap, repository, revision) =>
  */
 const actionableCreateEnvironment = (model) =>
   h('.mv2', [
-    btnCreateEnvironment(model),
     model.environment.itemNew.match({
       NotAsked: () => null,
       Loading: () => null,
       Success: () => null,
       Failure: (error) => errorComponent(error),
-    })
+    }),
+    btnCreateEnvironment(model),
   ]);
+
+/**
+ * Create a panel to allow user to pass in extra variables
+ * for creating a new environment
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const extraVariablePanel = (workflow) =>
+  h('.w-50.ph2', {
+    style: 'display: flex; flex-direction: column'
+  }, [
+    h('h5.bg-gray-light.p2.panel-title.w-100', 'Environment variables'),
+    addKVInputList(workflow),
+    addKVInputPair(workflow),
+  ]);
+
+/**
+ * Method to add a list of KV pairs added by the user
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const addKVInputList = (workflow) =>
+  h('.w-100.p2.panel', Object.keys(workflow.form.variables).map((key) =>
+    h('.w-100.flex-row.pv2.border-bot', {
+    }, [
+      h('.w-33.ph1.text-left', key),
+      h('.ph1', {
+        style: 'width: 60%',
+      }, h('input.form-control', {
+        type: 'text',
+        value: workflow.form.variables[key],
+        onkeyup: (e) => workflow.updateVariableValueByKey(key, e.target.value)
+      })),
+      h('.ph2.danger.actionable-icon', {
+        onclick: () => workflow.removeVariableByKey(key)
+      }, iconTrash())
+    ])
+  ));
+/**
+ * Add 2 input fields and a button for adding a new KV Pair
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const addKVInputPair = (workflow) => {
+  let keyString = '';
+  let valueString = '';
+  return h('.form-group.p2.panel.w-100.flex-column', [
+    h('.pv2.flex-row', [
+      h('.w-33.ph1', {
+      }, h('input.form-control', {
+        type: 'text',
+        placeholder: 'key',
+        value: keyString,
+        onkeyup: (e) => keyString = e.target.value
+      })),
+      h('.ph1', {
+        style: 'width:60%;',
+      }, h('input.form-control', {
+        type: 'text',
+        placeholder: 'value',
+        value: valueString,
+        onkeyup: (e) => valueString = e.target.value
+      })),
+      h('.ph2.actionable-icon', {
+        title: 'Add (key,value) variable',
+        onclick: () => workflow.addVariable(keyString, valueString)
+      }, iconPlus())
+    ]),
+  ]);
+};
 
 /**
  * Method to add a button for creation of environment
