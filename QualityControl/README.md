@@ -85,10 +85,17 @@ QCG exposes two public REST API which can be read by any other application.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
 ## QCG - Online Mode
-QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will only see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class
+QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class
 
-For this, as a separate technology, QCG is using [Consul](https://www.consul.io/) for the Service Discovery capabilities. In order to use it, a user will have to modify the `config.js` file, field [consul](#consul---service-discovery), to specify an up and running Consul instance. 
+For this, as a separate technology, QCG is using [Consul](https://www.consul.io/) for the Service Discovery capabilities. In order to use it, a user will have to modify the `config.js` file, field [consul](#consul---service-discovery), to specify an up and running Consul instance.
 
+In order to use `Consul` installed locally, no extra configuration is needed. Once `Consul` is installed and [running](https://learn.hashicorp.com/consul/getting-started/agent), update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running:
+```:JSON
+consul: {
+  hostname: 'localhost',
+  port: 8500 # default
+}
+```
 As this functionality is optional, there will be no impact on QCG if a configuration for `Consul` is not provided. A simple warning message as below will be shown to the user that the configuration is missing
 ```
 2020-02-28T10:19:26.110Z warn: [QualityControlModel] Consul Service: No Configuration Found
