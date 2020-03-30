@@ -11,8 +11,6 @@ on:
     branches:
       - 'master'
       - 'dev'
-    paths:
-      - '*'
 jobs:
   test:
     name: Tests on ubuntu-latest
