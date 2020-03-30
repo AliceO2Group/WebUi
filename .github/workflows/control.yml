@@ -39,3 +39,4 @@ jobs:
         uses: codecov/codecov-action@v1.0.6
         with:
           flags: control
+          fail_ci_if_error: true
