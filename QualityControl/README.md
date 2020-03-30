@@ -78,7 +78,7 @@ QCG exposes two public REST API which can be read by any other application.
 ## Online Mode
 QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class.
 
-For this QCG, is using Service Discovery capabilities of [Consul](https://www.consul.io/).
+For this, QCG is using Service Discovery capabilities of [Consul](https://www.consul.io/).
 Once `Consul` is [installed](https://learn.hashicorp.com/consul/getting-started/install) and running, update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running:
 ```javascript
 consul: {
