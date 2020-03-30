@@ -1,5 +1,4 @@
 name: Control
-
 on:
   pull_request:
     paths:
@@ -11,8 +10,6 @@ on:
     branches:
       - 'master'
       - 'dev'
-    paths:
-      - '*'
 
 jobs:
   test:
@@ -30,7 +27,7 @@ jobs:
     name: Tests & coverage on ubuntu-18.04
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v1
         with:
@@ -38,4 +35,8 @@ jobs:
       - run: (cd Control; npm ci )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd Control; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F control)
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.6
+        with:
+          flags: control
+          fail_ci_if_error: true

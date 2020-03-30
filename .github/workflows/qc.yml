@@ -1,5 +1,4 @@
 name: QualityControl
-
 on:
   pull_request:
     paths:
@@ -11,8 +10,6 @@ on:
     branches:
       - 'master'
       - 'dev'
-    paths:
-      - '*'
 
 jobs:
   test:
@@ -41,4 +38,8 @@ jobs:
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd QualityControl; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F qualitycontrol)
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.6
+        with:
+          flags: qualitycontrol
+          fail_ci_if_error: true
