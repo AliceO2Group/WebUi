@@ -37,4 +37,5 @@ jobs:
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Codecov
         uses: codecov/codecov-action@v1.0.6
-        flags: control
+        with:
+          flags: control
