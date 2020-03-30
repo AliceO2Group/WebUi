@@ -1,5 +1,7 @@
+codecov:
+  notify:
+    after_n_builds: 2
 name: Control
-
 on:
   pull_request:
     paths:
