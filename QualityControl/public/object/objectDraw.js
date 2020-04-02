@@ -61,7 +61,7 @@ export function draw(model, tabObject, options, location = '') {
     oncreate(vnode) {
       // ask model to load data to be shown
       model.object.addObjectByName(tabObject.name);
-      
+
       // setup resize function
       vnode.dom.onresize = timerDebouncer(() => {
         if (JSROOT.resize) {
