@@ -34,7 +34,7 @@ describe('QCG', function() {
 
     this.ok = true;
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
 
     // Listen to browser
@@ -161,7 +161,7 @@ describe('QCG', function() {
       assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
       assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), 'Object full path is not the same');
       assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
-      assert.ok(result.lastModified.includes(new Date(100).toLocaleString('EN')), 'Last Modified date is different');
+      assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified date is different');
     });
 
     it('should have an info button with full path and last modified when clicked on a second plot(plot success)', async () => {
@@ -181,7 +181,7 @@ describe('QCG', function() {
       assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
       assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), 'Object full path is not the same');
       assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
-      assert.ok(result.lastModified.includes(new Date(1020).toLocaleString('EN')), 'Last Modified date is different');
+      assert.strictEqual(result.lastModified.includes(new Date(1020).toLocaleString('EN')), true, 'Last Modified date is different');
     });
 
     it('should have second tab to be empty (according to demo data)', async () => {
@@ -230,7 +230,7 @@ describe('QCG', function() {
     it('should have a tree sidebar in edit mode', async () => {
       await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
       const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
-      assert.strictEqual(rowsCount, 4); // 4 agents
+      assert.strictEqual(rowsCount, 5); // 5 agents
     });
 
     it('should have filtered results on input search filled', async () => {
@@ -259,7 +259,7 @@ describe('QCG', function() {
     it('should have a tree as a table', async () => {
       await page.waitForSelector('section table tbody tr', {timeout: 5000});
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert.strictEqual(rowsCount, 4); // 4 agents
+      assert.strictEqual(rowsCount, 5); // 5 agents
     });
 
     it('should have a button to sort by (default "Name" ASC)', async () => {
@@ -417,99 +417,16 @@ describe('QCG', function() {
           };
         });
         assert.strictEqual(result.title, 'View details about histogram');
-        assert.ok(result.fullPath.includes('PATH'), true);
+        assert.ok(result.fullPath.includes('PATH'));
         assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
         assert.ok(result.lastModified.includes('LAST MODIFIED'));
         assert.ok(result.lastModified.includes(new Date(100).toLocaleString('EN')));
       });
-    });
 
-    describe('objectView called from layoutShow', () => {
-      it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
-        await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
-        const result = await page.evaluate(() => {
-          const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
-          const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
-          const backButtonTitle = document.querySelector('div div div a').title;
+      it('should load page=objectView and display a Checker Object when a parameter objectName is passed', async () => {
+        const objectName = 'qc/checker/AB';
+        await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
 
-          return {
-            location: window.location,
-            message: errorMessage,
-            iconClassList: iconClassList,
-            backButtonTitle: backButtonTitle
-          };
-        });
-        assert.strictEqual(result.location.search, '?page=objectView');
-        assert.strictEqual(result.message, 'No object name or object ID were provided');
-        assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
-      });
-
-      it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
-        await page.goto(url + '?page=objectView&objectId=123456', {waitUntil: 'networkidle0'});
-        const result = await page.evaluate(() => {
-          const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
-          const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
-          const backButtonTitle = document.querySelector('div div div a').title;
-
-          return {
-            location: window.location,
-            message: errorMessage,
-            iconClassList: iconClassList,
-            backButtonTitle: backButtonTitle
-          };
-        });
-        assert.strictEqual(result.location.search, '?page=objectView&objectId=123456');
-        assert.strictEqual(result.message, 'No layout ID was provided');
-        assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
-      });
-
-      it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
-        await page.evaluate(() => document.querySelector('div div div a').click());
-
-        const result = await page.evaluate(() => {
-          return {
-            location: window.location.search,
-            objectSelected: window.model.object.selected
-          };
-        });
-        assert.strictEqual(result.location, '?page=objectTree');
-        assert.strictEqual(result.objectSelected, null);
-      });
-
-      it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
-        const objectId = '5aba4a059b755d517e76ef54';
-        const layoutId = '5aba4a059b755d517e76ea10';
-        await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
-
-        const result = await page.evaluate(() => {
-          const backButtonTitle = document.querySelector('div div div a').title;
-          return {
-            location: window.location.search,
-            backButtonTitle: backButtonTitle
-          };
-        });
-        assert.strictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
-        assert.strictEqual(result.backButtonTitle, 'Go back to layout');
-      });
-
-      it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
-        const layoutId = '5aba4a059b755d517e76ea10';
-        await page.evaluate(() => document.querySelector('div div div a').click());
-
-        const result = await page.evaluate(() => {
-          return {
-            location: window.location.search,
-          };
-        });
-        assert.strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
-      });
-
-      it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
-        const objectId = '5aba4a059b755d517e76ef54';
-        const layoutId = '5aba4a059b755d517e76ea10';
-        await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
         const result = await page.evaluate(() => {
           const title = document.querySelector('div div b').textContent;
           const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
@@ -520,223 +437,325 @@ describe('QCG', function() {
             objectSelected: objectSelected
           };
         });
-        await page.waitFor(7000);
-        assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
-        // assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-        // assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
+        assert.strictEqual(result.title, objectName);
+        assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'p2', 2: 'flex-column', 3: 'scroll-y'});
+        assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 2, lastModified: 100});
       });
+    });
 
-      // it('should have an info button with full path and last modified when clicked (plot success)', async () => {
-      //   await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
-      //   const result = await page.evaluate(() => {
-      //     const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
-      //     const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
-      //     const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
-      //     return {
-      //       title: infoButtonTitle,
-      //       fullPath: fullPath,
-      //       lastModified: lastModified,
-      //     };
-      //   });
-      //   await page.waitFor(200);
-      //   assert.strictEqual(result.title, 'View details about histogram');
-      //   assert.ok(result.fullPath.includes('PATH'));
-      //   assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
-      //   assert.ok(result.lastModified.includes('LAST MODIFIED'));
-      //   assert.ok(result.lastModified.includes(new Date(100).toLocaleString('EN')));
-      // });
+    // describe('objectView called from layoutShow', () => {
+    //   it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
+    //     await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
+    //     const result = await page.evaluate(() => {
+    //       const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+    //       const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+    //       const backButtonTitle = document.querySelector('div div div a').title;
+
+    //       return {
+    //         location: window.location,
+    //         message: errorMessage,
+    //         iconClassList: iconClassList,
+    //         backButtonTitle: backButtonTitle
+    //       };
+    //     });
+    //     assert.strictEqual(result.location.search, '?page=objectView');
+    //     assert.strictEqual(result.message, 'No object name or object ID were provided');
+    //     assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+    //     assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
+    //   });
+
+    //   it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
+    //     await page.goto(url + '?page=objectView&objectId=123456', {waitUntil: 'networkidle0'});
+    //     const result = await page.evaluate(() => {
+    //       const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+    //       const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+    //       const backButtonTitle = document.querySelector('div div div a').title;
+
+    //       return {
+    //         location: window.location,
+    //         message: errorMessage,
+    //         iconClassList: iconClassList,
+    //         backButtonTitle: backButtonTitle
+    //       };
+    //     });
+    //     assert.strictEqual(result.location.search, '?page=objectView&objectId=123456');
+    //     assert.strictEqual(result.message, 'No layout ID was provided');
+    //     assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+    //     assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
+    //   });
+
+    //   it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
+    //     await page.evaluate(() => document.querySelector('div div div a').click());
+
+    //     const result = await page.evaluate(() => {
+    //       return {
+    //         location: window.location.search,
+    //         objectSelected: window.model.object.selected
+    //       };
+    //     });
+    //     assert.strictEqual(result.location, '?page=objectTree');
+    //     assert.strictEqual(result.objectSelected, null);
+    //   });
+
+    //   it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
+    //     const objectId = '5aba4a059b755d517e76ef54';
+    //     const layoutId = '5aba4a059b755d517e76ea10';
+    //     await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+
+    //     const result = await page.evaluate(() => {
+    //       const backButtonTitle = document.querySelector('div div div a').title;
+    //       return {
+    //         location: window.location.search,
+    //         backButtonTitle: backButtonTitle
+    //       };
+    //     });
+    //     assert.strictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
+    //     assert.strictEqual(result.backButtonTitle, 'Go back to layout');
+    //   });
+
+    //   it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
+    //     const layoutId = '5aba4a059b755d517e76ea10';
+    //     await page.evaluate(() => document.querySelector('div div div a').click());
+
+    //     const result = await page.evaluate(() => {
+    //       return {
+    //         location: window.location.search,
+    //       };
+    //     });
+    //     assert.strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
+    //   });
+
+    //   it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
+    //     const objectId = '5aba4a059b755d517e76ef54';
+    //     const layoutId = '5aba4a059b755d517e76ea10';
+    //     await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+    //     const result = await page.evaluate(() => {
+    //       const title = document.querySelector('div div b').textContent;
+    //       const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
+    //       const objectSelected = window.model.object.selected;
+    //       return {
+    //         title: title,
+    //         rootPlotClassList: rootPlotClassList,
+    //         objectSelected: objectSelected
+    //       };
+    //     });
+    //     await page.waitFor(7000);
+    //     assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
+    //     // assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
+    //     // assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
+    //   });
+
+    //   // it('should have an info button with full path and last modified when clicked (plot success)', async () => {
+    //   //   await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
+    //   //   const result = await page.evaluate(() => {
+    //   //     const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
+    //   //     const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
+    //   //     const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
+    //   //     return {
+    //   //       title: infoButtonTitle,
+    //   //       fullPath: fullPath,
+    //   //       lastModified: lastModified,
+    //   //     };
+    //   //   });
+    //   //   await page.waitFor(200);
+    //   //   assert.strictEqual(result.title, 'View details about histogram');
+    //   //   assert.ok(result.fullPath.includes('PATH'));
+    //   //   assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
+    //   //   assert.ok(result.lastModified.includes('LAST MODIFIED'));
+    //   //   assert.ok(result.lastModified.includes(new Date(100).toLocaleString('EN')));
+    //   // });
+    // });
+  });
+
+  describe('page frameworkInfo', () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
+
+    it('should load', async () => {
+      await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
+      const location = await page.evaluate(() => window.location);
+      assert.strictEqual(location.search, '?page=about');
+    });
+
+    it('should have a frameworkInfo item with config fields', async () => {
+      const expConfig = {
+        qcg: {port: 8181, hostname: 'localhost'},
+        consul: {hostname: 'localhost', port: 8500},
+        ccdb: {hostname: 'ccdb', port: 8500},
+        quality_control: {version: '0.19.5-1'}
+      };
+      const config = await page.evaluate(() => window.model.frameworkInfo.item);
+      delete config.payload.qcg.version;
+      assert.deepStrictEqual(config.payload, expConfig);
     });
   });
 
-  // describe('page frameworkInfo', () => {
-  //   before('reset browser to google', async () => {
-  //     // weird bug, if we don't go to external website just here, all next goto will wait forever
-  //     await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-  //   });
+  describe('QCObject - drawing options', async () => {
+    before('reset browser to google', async () => {
+      // weird bug, if we don't go to external website just here, all next goto will wait forever
+      await page.goto('http://google.com', {waitUntil: 'networkidle0'});
+    });
 
-  //   it('should load', async () => {
-  //     await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
-  //     const location = await page.evaluate(() => window.location);
-  //     assert.strictEqual(location.search, '?page=about');
-  //   });
+    it('should load', async () => {
+      // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
+      await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
+      const location = await page.evaluate(() => window.location);
+      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+    });
 
-  //   it('should have a frameworkInfo item with config fields', async () => {
-  //     const expConfig = {
-  //       qcg: {port: 8181, hostname: 'localhost'},
-  //       consul: {hostname: 'localhost', port: 8500},
-  //       ccdb: {hostname: 'ccdb', port: 8500},
-  //       quality_control: {version: '0.19.5-1'}
-  //     };
-  //     const config = await page.evaluate(() => window.model.frameworkInfo.item);
-  //     delete config.payload.qcg.version;
-  //     assert.deepStrictEqual(config.payload, expConfig);
-  //   });
-  // });
+    it('should merge options on layoutShow and no ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
 
-  // describe('QCObject - drawing options', async () => {
-  //   before('reset browser to google', async () => {
-  //     // weird bug, if we don't go to external website just here, all next goto will wait forever
-  //     await page.goto('http://google.com', {waitUntil: 'networkidle0'});
-  //   });
+      const expDrawingOpts = ['lego', 'colz', 'args', 'coly'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //   it('should load', async () => {
-  //     // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
-  //     await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
-  //     const location = await page.evaluate(() => window.location);
-  //     assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
-  //   });
+    it('should merge options on layoutShow and false ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        const tabObject = {ignoreDefaults: false, options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
 
-  //   it('should merge options on layoutShow and no ignoreDefaults field', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       const tabObject = {options: ['args', 'coly']};
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
-  //     });
+      const expDrawingOpts = ['lego', 'colz', 'args', 'coly'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //     const expDrawingOpts = ['lego', 'colz', 'args', 'coly'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+    it('should ignore default options on layoutShow and true ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        const tabObject = {ignoreDefaults: true, options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
 
-  //   it('should merge options on layoutShow and false ignoreDefaults field', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       const tabObject = {ignoreDefaults: false, options: ['args', 'coly']};
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
-  //     });
+      const expDrawingOpts = ['args', 'coly'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //     const expDrawingOpts = ['lego', 'colz', 'args', 'coly'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+    it('should use only default options on objectTree', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectTree';
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
 
-  //   it('should ignore default options on layoutShow and true ignoreDefaults field', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       const tabObject = {ignoreDefaults: true, options: ['args', 'coly']};
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
-  //     });
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //     const expDrawingOpts = ['args', 'coly'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+    it('should use only default options on objectView when no layoutId or objectId is set', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = undefined;
+        window.model.router.params.layoutId = undefined;
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
 
-  //   it('should use only default options on objectTree', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       window.model.page = 'objectTree';
-  //       const tabObject = {options: ['args', 'coly']};
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
-  //     });
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //     const expDrawingOpts = ['lego', 'colz'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+    it('should use only default options on objectView when no layoutId is set', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.layoutId = undefined;
+        window.model.router.params.objectId = '123';
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
 
-  //   it('should use only default options on objectView when no layoutId or objectId is set', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       window.model.page = 'objectView';
-  //       window.model.router.params.objectId = undefined;
-  //       window.model.router.params.layoutId = undefined;
-  //       const tabObject = {options: ['args', 'coly']};
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
-  //     });
-
-  //     const expDrawingOpts = ['lego', 'colz'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
-
-  //   it('should use only default options on objectView when no layoutId is set', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       window.model.page = 'objectView';
-  //       window.model.router.params.layoutId = undefined;
-  //       window.model.router.params.objectId = '123';
-  //       const tabObject = {options: ['args', 'coly']};
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
-  //     });
-
-  //     const expDrawingOpts = ['lego', 'colz'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
 
-  //   it('should use only default options on objectView when no objectId is set', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       window.model.page = 'objectView';
-  //       window.model.router.params.objectId = undefined;
-  //       window.model.router.params.layoutId = '123';
-  //       const tabObject = {options: ['args', 'coly']};
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
-  //     });
+    it('should use only default options on objectView when no objectId is set', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = undefined;
+        window.model.router.params.layoutId = '123';
+        const tabObject = {options: ['args', 'coly']};
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      });
 
-  //     const expDrawingOpts = ['lego', 'colz'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+      const expDrawingOpts = ['lego', 'colz'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //   it('should merge options on objectView and no ignoreDefaults field', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       window.model.page = 'objectView';
-  //       window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
-  //       window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
-  //       window.model.layout.requestedLayout.kind = 'Success';
-  //       window.model.layout.requestedLayout.payload = {};
-  //       window.model.layout.requestedLayout.payload.tabs = [{
-  //         id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
-  //           id: '5aba4a059b755d517e76ef54',
-  //           options: ['gridx'], name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
-  //         }]
-  //       }];
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(null, objectRemoteData);
-  //     });
+    it('should merge options on objectView and no ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
+        window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
+        window.model.layout.requestedLayout.kind = 'Success';
+        window.model.layout.requestedLayout.payload = {};
+        window.model.layout.requestedLayout.payload.tabs = [{
+          id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
+            id: '5aba4a059b755d517e76ef54',
+            options: ['gridx'], name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
+          }]
+        }];
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(null, objectRemoteData);
+      });
 
-  //     const expDrawingOpts = ['lego', 'colz', 'gridx'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+      const expDrawingOpts = ['lego', 'colz', 'gridx'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //   it('should merge options on objectView and false ignoreDefaults field', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       window.model.page = 'objectView';
-  //       window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
-  //       window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
-  //       window.model.layout.requestedLayout.kind = 'Success';
-  //       window.model.layout.requestedLayout.payload = {};
-  //       window.model.layout.requestedLayout.payload.tabs = [{
-  //         id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
-  //           id: '5aba4a059b755d517e76ef54',
-  //           options: ['gridx'], ignoreDefaults: false, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
-  //         }]
-  //       }];
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(null, objectRemoteData);
-  //     });
+    it('should merge options on objectView and false ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
+        window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
+        window.model.layout.requestedLayout.kind = 'Success';
+        window.model.layout.requestedLayout.payload = {};
+        window.model.layout.requestedLayout.payload.tabs = [{
+          id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
+            id: '5aba4a059b755d517e76ef54',
+            options: ['gridx'], ignoreDefaults: false, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
+          }]
+        }];
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(null, objectRemoteData);
+      });
 
-  //     const expDrawingOpts = ['lego', 'colz', 'gridx'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
+      const expDrawingOpts = ['lego', 'colz', 'gridx'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
 
-  //   it('should ignore default options on objectView and true ignoreDefaults field', async () => {
-  //     const drawingOptions = await page.evaluate(() => {
-  //       window.model.page = 'objectView';
-  //       window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
-  //       window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
-  //       window.model.layout.requestedLayout.kind = 'Success';
-  //       window.model.layout.requestedLayout.payload = {};
-  //       window.model.layout.requestedLayout.payload.tabs = [{
-  //         id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
-  //           id: '5aba4a059b755d517e76ef54',
-  //           options: ['gridx'], ignoreDefaults: true, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
-  //         }]
-  //       }];
-  //       const objectRemoteData = {payload: {fOption: 'lego colz'}};
-  //       return window.model.object.generateDrawingOptions(null, objectRemoteData);
-  //     });
+    it('should ignore default options on objectView and true ignoreDefaults field', async () => {
+      const drawingOptions = await page.evaluate(() => {
+        window.model.page = 'objectView';
+        window.model.router.params.objectId = '5aba4a059b755d517e76ef54';
+        window.model.router.params.layoutId = '5aba4a059b755d517e76ea10';
+        window.model.layout.requestedLayout.kind = 'Success';
+        window.model.layout.requestedLayout.payload = {};
+        window.model.layout.requestedLayout.payload.tabs = [{
+          id: '5aba4a059b755d517e76eb61', name: 'SDD', objects: [{
+            id: '5aba4a059b755d517e76ef54',
+            options: ['gridx'], ignoreDefaults: true, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
+          }]
+        }];
+        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        return window.model.object.generateDrawingOptions(null, objectRemoteData);
+      });
 
-  //     const expDrawingOpts = ['gridx'];
-  //     assert.deepStrictEqual(drawingOptions, expDrawingOpts);
-  //   });
-  // });
+      const expDrawingOpts = ['gridx'];
+      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+    });
+  });
 
   beforeEach(() => {
     this.ok = true;
