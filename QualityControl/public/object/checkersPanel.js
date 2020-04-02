@@ -26,22 +26,10 @@ export default (checker, location) => h('.relative.p2.flex-column.scroll-y', {
  */
 const checkerValue = (label, value, location) => {
   let padding = '';
-  switch (location) {
-    case 'layoutShow':
-      padding = '';
-      break;
-    case 'treeSidebar':
-      padding = '';
-      break;
-    case 'treePage':
-      padding = 'p3';
-      break;
-    case 'objectView':
-      padding = 'p3';
-      break;
-    default:
-      padding = '';
+  if (location === 'objectView' || location === 'treePage') {
+    padding = 'p3';
   }
+
   switch (typeof value) {
     case 'string':
       value = value && value.trim() !== '' ? value : '-';
@@ -65,6 +53,7 @@ const checkerValue = (label, value, location) => {
     default:
       value = value && JSON.stringify(value).trim() !== '' ? JSON.stringify(value) : '-';
   }
+
   return h(`.flex-row.${padding}`, [
     h('label.ph2.w-50.w-wrapped.text-right.checker-label', label),
     h('.w-wrapped.w-50.text-left', value)

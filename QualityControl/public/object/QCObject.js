@@ -297,7 +297,7 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to check if passed object is a checker
+   * Method to check if passed object type is a checker
    * @param {JSON} object
    * @return {boolean}
    */
