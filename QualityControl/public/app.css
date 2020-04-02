@@ -37,3 +37,5 @@
 /* Removing borders and arrows from select-dropdown */
 select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';}
 .select-tab {border: 0;border-bottom: 2px solid var(--color-blue);border-radius: 0;margin-bottom: -2px;color: var(--color-blue);}
+
+.checker-label{font-weight: bold; margin-bottom: 0; color: var(--color-gray-dark) }

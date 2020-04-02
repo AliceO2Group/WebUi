@@ -17,9 +17,10 @@ import {timerDebouncer, pointerId} from '../common/utils.js';
  * @param {object} model - root model object
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
  * @param {object} options - optional options of presentation
+ * @param {string} location - location from where `draw` method is called; Used for different style
  * @return {vdom} output virtual-dom, a single div with JSROOT attached to it
  */
-export function draw(model, tabObject, options) {
+export function draw(model, tabObject, options, location = '') {
   const defaultOptions = {
     width: '100%', // CSS size
     height: '100%', // CSS size
@@ -46,7 +47,7 @@ export function draw(model, tabObject, options) {
 
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
-    key: fingerprintReplacement(tabObject), // completly re-create this div if the chart is not the same at all
+    key: fingerprintReplacement(tabObject), // completely re-create this div if the chart is not the same at all
     class: options.className,
     style: {
       height: options.height,
@@ -60,7 +61,7 @@ export function draw(model, tabObject, options) {
     oncreate(vnode) {
       // ask model to load data to be shown
       model.object.addObjectByName(tabObject.name);
-
+      
       // setup resize function
       vnode.dom.onresize = timerDebouncer(() => {
         if (JSROOT.resize) {
@@ -118,10 +119,15 @@ export function draw(model, tabObject, options) {
       h('.p4.f6', objectRemoteData.payload),
     ]);
   } else {
-    // on success, JSROOT will erase all DOM inside div and put its own
-  }
+    const objectType = objectRemoteData.payload['_typename'];
 
-  return h('div.relative.jsroot-container', attributes, content);
+    if (objectType && objectType.toLowerCase().includes('qualityobject')) {
+      return checkerPanel(objectRemoteData.payload, location);
+    } else {
+      // on success, JSROOT will erase all DOM inside div and put its own
+      return h('.relative.jsroot-container', attributes, content);
+    }
+  }
 }
 
 /**
@@ -244,3 +250,49 @@ function fingerprintCleanRedraw(model, tabObject) {
   const ignoreDefaults = tabObject.ignoreDefaults ? true : false;
   return `${drawOptions},${ignoreDefaults}`;
 }
+
+/**
+ * Build a panel for displaying a checker quality object
+ * @param {JSON} checker - Object returned by CCDB
+ * @param {string} location - location from where the `draw` method is called; Used for styling
+ * @return {vnode}
+ */
+const checkerPanel = (checker, location) => h('.p2.relative.flex-column.scroll-y.scroll-auto', {
+
+}, [
+  checkerValue('Checker:', checker.mCheckName, location),
+  checkerValue('Detector:', checker.mDetectorName, location),
+  checkerValue('Quality Name:', checker.mQuality.mName, location),
+  checkerValue('Quality Lv.:', checker.mQuality.mLevel, location),
+]);
+
+/**
+ * One row with a label and the value of the checker[label]
+ * @param {string} label
+ * @param {string} value
+ * @param {string} location
+ * @return {vnode}
+ */
+const checkerValue = (label, value, location) => {
+  let padding = '';
+  switch (location) {
+    case 'layoutShow':
+      padding = '';
+      break;
+    case 'treeSidebar':
+      padding = '';
+      break;
+    case 'treePage':
+      padding = 'p3';
+      break;
+    case 'objectView':
+      padding = 'p3';
+      break;
+    default:
+      padding = '';
+  }
+  return h(`.flex-row.${padding}`, [
+    h('label.ph2.w-50.w-wrapped.text-right.checker-label', label),
+    h('.w-wrapped.w-50.text-left', value && value.toString().trim() !== '' ? value : '-')
+  ]);
+};
