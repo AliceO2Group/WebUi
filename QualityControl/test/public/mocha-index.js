@@ -443,128 +443,128 @@ describe('QCG', function() {
       });
     });
 
-    // describe('objectView called from layoutShow', () => {
-    //   it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
-    //     await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
-    //     const result = await page.evaluate(() => {
-    //       const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
-    //       const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
-    //       const backButtonTitle = document.querySelector('div div div a').title;
+    describe('objectView called from layoutShow', () => {
+      it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
+        await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+          const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+          const backButtonTitle = document.querySelector('div div div a').title;
 
-    //       return {
-    //         location: window.location,
-    //         message: errorMessage,
-    //         iconClassList: iconClassList,
-    //         backButtonTitle: backButtonTitle
-    //       };
-    //     });
-    //     assert.strictEqual(result.location.search, '?page=objectView');
-    //     assert.strictEqual(result.message, 'No object name or object ID were provided');
-    //     assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-    //     assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
-    //   });
+          return {
+            location: window.location,
+            message: errorMessage,
+            iconClassList: iconClassList,
+            backButtonTitle: backButtonTitle
+          };
+        });
+        assert.strictEqual(result.location.search, '?page=objectView');
+        assert.strictEqual(result.message, 'No object name or object ID were provided');
+        assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
+      });
 
-    //   it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
-    //     await page.goto(url + '?page=objectView&objectId=123456', {waitUntil: 'networkidle0'});
-    //     const result = await page.evaluate(() => {
-    //       const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
-    //       const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
-    //       const backButtonTitle = document.querySelector('div div div a').title;
+      it('should load page=objectView and display error message & icon due to missing layoutId parameter', async () => {
+        await page.goto(url + '?page=objectView&objectId=123456', {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
+          const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
+          const backButtonTitle = document.querySelector('div div div a').title;
 
-    //       return {
-    //         location: window.location,
-    //         message: errorMessage,
-    //         iconClassList: iconClassList,
-    //         backButtonTitle: backButtonTitle
-    //       };
-    //     });
-    //     assert.strictEqual(result.location.search, '?page=objectView&objectId=123456');
-    //     assert.strictEqual(result.message, 'No layout ID was provided');
-    //     assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-    //     assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
-    //   });
+          return {
+            location: window.location,
+            message: errorMessage,
+            iconClassList: iconClassList,
+            backButtonTitle: backButtonTitle
+          };
+        });
+        assert.strictEqual(result.location.search, '?page=objectView&objectId=123456');
+        assert.strictEqual(result.message, 'No layout ID was provided');
+        assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
+        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
+      });
 
-    //   it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
-    //     await page.evaluate(() => document.querySelector('div div div a').click());
+      it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
+        await page.evaluate(() => document.querySelector('div div div a').click());
 
-    //     const result = await page.evaluate(() => {
-    //       return {
-    //         location: window.location.search,
-    //         objectSelected: window.model.object.selected
-    //       };
-    //     });
-    //     assert.strictEqual(result.location, '?page=objectTree');
-    //     assert.strictEqual(result.objectSelected, null);
-    //   });
+        const result = await page.evaluate(() => {
+          return {
+            location: window.location.search,
+            objectSelected: window.model.object.selected
+          };
+        });
+        assert.strictEqual(result.location, '?page=objectTree');
+        assert.strictEqual(result.objectSelected, null);
+      });
 
-    //   it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
-    //     const objectId = '5aba4a059b755d517e76ef54';
-    //     const layoutId = '5aba4a059b755d517e76ea10';
-    //     await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+      it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
+        const objectId = '5aba4a059b755d517e76ef54';
+        const layoutId = '5aba4a059b755d517e76ea10';
+        await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
 
-    //     const result = await page.evaluate(() => {
-    //       const backButtonTitle = document.querySelector('div div div a').title;
-    //       return {
-    //         location: window.location.search,
-    //         backButtonTitle: backButtonTitle
-    //       };
-    //     });
-    //     assert.strictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
-    //     assert.strictEqual(result.backButtonTitle, 'Go back to layout');
-    //   });
+        const result = await page.evaluate(() => {
+          const backButtonTitle = document.querySelector('div div div a').title;
+          return {
+            location: window.location.search,
+            backButtonTitle: backButtonTitle
+          };
+        });
+        assert.strictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
+        assert.strictEqual(result.backButtonTitle, 'Go back to layout');
+      });
 
-    //   it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
-    //     const layoutId = '5aba4a059b755d517e76ea10';
-    //     await page.evaluate(() => document.querySelector('div div div a').click());
+      it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
+        const layoutId = '5aba4a059b755d517e76ea10';
+        await page.evaluate(() => document.querySelector('div div div a').click());
 
-    //     const result = await page.evaluate(() => {
-    //       return {
-    //         location: window.location.search,
-    //       };
-    //     });
-    //     assert.strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
-    //   });
+        const result = await page.evaluate(() => {
+          return {
+            location: window.location.search,
+          };
+        });
+        assert.strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
+      });
 
-    //   it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
-    //     const objectId = '5aba4a059b755d517e76ef54';
-    //     const layoutId = '5aba4a059b755d517e76ea10';
-    //     await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
-    //     const result = await page.evaluate(() => {
-    //       const title = document.querySelector('div div b').textContent;
-    //       const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
-    //       const objectSelected = window.model.object.selected;
-    //       return {
-    //         title: title,
-    //         rootPlotClassList: rootPlotClassList,
-    //         objectSelected: objectSelected
-    //       };
-    //     });
-    //     await page.waitFor(7000);
-    //     assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
-    //     // assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-    //     // assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
-    //   });
+      it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
+        const objectId = '5aba4a059b755d517e76ef54';
+        const layoutId = '5aba4a059b755d517e76ea10';
+        await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+        const result = await page.evaluate(() => {
+          const title = document.querySelector('div div b').textContent;
+          const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
+          const objectSelected = window.model.object.selected;
+          return {
+            title: title,
+            rootPlotClassList: rootPlotClassList,
+            objectSelected: objectSelected
+          };
+        });
+        await page.waitFor(7000);
+        assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
+        assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
+        assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
+      });
 
-    //   // it('should have an info button with full path and last modified when clicked (plot success)', async () => {
-    //   //   await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
-    //   //   const result = await page.evaluate(() => {
-    //   //     const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
-    //   //     const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
-    //   //     const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
-    //   //     return {
-    //   //       title: infoButtonTitle,
-    //   //       fullPath: fullPath,
-    //   //       lastModified: lastModified,
-    //   //     };
-    //   //   });
-    //   //   await page.waitFor(200);
-    //   //   assert.strictEqual(result.title, 'View details about histogram');
-    //   //   assert.ok(result.fullPath.includes('PATH'));
-    //   //   assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
-    //   //   assert.ok(result.lastModified.includes('LAST MODIFIED'));
-    //   //   assert.ok(result.lastModified.includes(new Date(100).toLocaleString('EN')));
-    //   // });
-    // });
+      it('should have an info button with full path and last modified when clicked (plot success)', async () => {
+        await page.evaluate(() => document.querySelector('body > div > div > div:nth-child(3) > div > div > button').click());
+        const result = await page.evaluate(() => {
+          const infoButtonTitle = document.querySelector('body > div > div > div:nth-child(3) > div > div > button').title;
+          const fullPath = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div').innerText;
+          const lastModified = document.querySelector('body > div > div > div:nth-child(3) > div > div > div > div:nth-child(2)').innerText;
+          return {
+            title: infoButtonTitle,
+            fullPath: fullPath,
+            lastModified: lastModified,
+          };
+        });
+        await page.waitFor(200);
+        assert.strictEqual(result.title, 'View details about histogram');
+        assert.ok(result.fullPath.includes('PATH'));
+        assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
+        assert.ok(result.lastModified.includes('LAST MODIFIED'));
+        assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified Date is not correct');
+      });
+    });
   });
 
   describe('page frameworkInfo', () => {
