@@ -2,6 +2,7 @@
 
 import {h} from '/js/src/index.js';
 import {timerDebouncer, pointerId} from '../common/utils.js';
+import checkersPanel from './checkersPanel.js';
 
 /**
  * Draw an object using JSROOT.
@@ -120,7 +121,7 @@ export function draw(model, tabObject, options, location = '') {
     ]);
   } else {
     if (model.object.isObjectChecker(objectRemoteData.payload)) {
-      return checkerPanel(objectRemoteData.payload, location);
+      return checkersPanel(objectRemoteData.payload, location);
     }
   }
   // on success, JSROOT will erase all DOM inside div and put its own
@@ -251,49 +252,3 @@ function fingerprintCleanRedraw(model, tabObject) {
   const ignoreDefaults = tabObject.ignoreDefaults ? true : false;
   return `${drawOptions},${ignoreDefaults}`;
 }
-
-/**
- * Build a panel for displaying a checker quality object
- * @param {JSON} checker - Object returned by CCDB
- * @param {string} location - location from where the `draw` method is called; Used for styling
- * @return {vnode}
- */
-const checkerPanel = (checker, location) => h('.relative.p2.flex-column.scroll-y', {
-
-}, [
-  checkerValue('Checker:', checker.mCheckName, location),
-  checkerValue('Detector:', checker.mDetectorName, location),
-  checkerValue('Quality Name:', checker.mQuality.mName, location),
-  checkerValue('Quality Lv.:', checker.mQuality.mLevel, location),
-]);
-
-/**
- * One row with a label and the value of the checker[label]
- * @param {string} label
- * @param {string} value
- * @param {string} location
- * @return {vnode}
- */
-const checkerValue = (label, value, location) => {
-  let padding = '';
-  switch (location) {
-    case 'layoutShow':
-      padding = '';
-      break;
-    case 'treeSidebar':
-      padding = '';
-      break;
-    case 'treePage':
-      padding = 'p3';
-      break;
-    case 'objectView':
-      padding = 'p3';
-      break;
-    default:
-      padding = '';
-  }
-  return h(`.flex-row.${padding}`, [
-    h('label.ph2.w-50.w-wrapped.text-right.checker-label', label),
-    h('.w-wrapped.w-50.text-left', value && value.toString().trim() !== '' ? value : '-')
-  ]);
-};
