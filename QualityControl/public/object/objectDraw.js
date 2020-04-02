@@ -44,6 +44,7 @@ export function draw(model, tabObject, options, location = '') {
       w: 0,
     };
   }
+  model.object.addObjectByName(tabObject.name);
 
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
@@ -60,7 +61,6 @@ export function draw(model, tabObject, options, location = '') {
      */
     oncreate(vnode) {
       // ask model to load data to be shown
-      model.object.addObjectByName(tabObject.name);
 
       // setup resize function
       vnode.dom.onresize = timerDebouncer(() => {
@@ -119,15 +119,12 @@ export function draw(model, tabObject, options, location = '') {
       h('.p4.f6', objectRemoteData.payload),
     ]);
   } else {
-    const objectType = objectRemoteData.payload['_typename'];
-
-    if (objectType && objectType.toLowerCase().includes('qualityobject')) {
+    if (model.object.isObjectChecker(objectRemoteData.payload)) {
       return checkerPanel(objectRemoteData.payload, location);
-    } else {
-      // on success, JSROOT will erase all DOM inside div and put its own
-      return h('.relative.jsroot-container', attributes, content);
     }
   }
+  // on success, JSROOT will erase all DOM inside div and put its own
+  return h('.relative.jsroot-container', attributes, content);
 }
 
 /**
@@ -164,8 +161,12 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   const shouldRedraw = dom.dataset.fingerprintRedraw !== redrawHash;
   const shouldCleanRedraw = dom.dataset.fingerprintCleanRedraw !== cleanRedrawHash;
 
-  if (objectRemoteData && objectRemoteData.isSuccess() &&
-    (shouldRedraw || shouldCleanRedraw)) {
+  if (
+    objectRemoteData &&
+    objectRemoteData.isSuccess() &&
+    !model.object.isObjectChecker(objectRemoteData.payload) &&
+    (shouldRedraw || shouldCleanRedraw)
+  ) {
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
@@ -257,7 +258,7 @@ function fingerprintCleanRedraw(model, tabObject) {
  * @param {string} location - location from where the `draw` method is called; Used for styling
  * @return {vnode}
  */
-const checkerPanel = (checker, location) => h('.p2.relative.flex-column.scroll-y.scroll-auto', {
+const checkerPanel = (checker, location) => h('.relative.p2.flex-column.scroll-y', {
 
 }, [
   checkerValue('Checker:', checker.mCheckName, location),

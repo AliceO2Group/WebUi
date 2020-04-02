@@ -283,13 +283,31 @@ export default class QCObject extends Observable {
 
     const result = await this.qcObjectService.getObjectByName(objectName);
     if (result.isSuccess()) {
-      // link JSROOT methods to object
-      // eslint-disable-next-line
-      this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result.payload));
+      if (this.isObjectChecker(result.payload)) {
+        this.objects[objectName] = RemoteData.success(result.payload);
+      } else {
+        // link JSROOT methods to object
+        // eslint-disable-next-line
+        this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result.payload));
+      }
     } else {
       this.objects[objectName] = result;
     }
     this.notify();
+  }
+
+  /**
+   * Method to check if passed object is a checker
+   * @param {JSON} object
+   * @return {boolean}
+   */
+  isObjectChecker(object) {
+    const objectType = object['_typename'];
+    if (objectType && objectType.toLowerCase().includes('qualityobject')) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
