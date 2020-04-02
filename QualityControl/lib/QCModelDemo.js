@@ -134,6 +134,7 @@ const graphs = {
   root0: require('./demoData/root0.json'),
   alice: require('./demoData/alice.json'),
   string: require('./demoData/string.json'),
+  checker: require('./demoData/checker.json')
 };
 
 setInterval(() => {
@@ -183,7 +184,9 @@ const objects = [
   {name: 'TST01/Default/hTOFrefMap', createTime: 21, data: graphs.hpx, lastModified: 100},
   ...Array.from({length: 2500}, (x, i) => (
     {name: `BIGTREE/120KB/${i}`, createTime: i, data: graphs.hpx, lastModified: 100}
-  ))
+  )),
+  // Checker
+  {name: 'qc/checker/AB', createTime: 2, data: graphs.checker, lastModified: 100},
 ];
 
 const tabObject = [
