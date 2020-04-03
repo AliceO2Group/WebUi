@@ -23,6 +23,7 @@ export default class Layout extends Observable {
     this.tab = null; // pointer to a tab from `item`
 
     this.myList = RemoteData.notAsked(); // array of layouts
+
     this.requestedLayout = RemoteData.notAsked();
 
     this.searchInput = '';
