@@ -9,26 +9,26 @@ coverage:
     project:
       default: false
       Control:
+        flags:
+          - control
         target: 70%
         threshold: 0%
         if_not_found: success
         if_ci_failed: error
-        paths: 
-          - "Control"
       QualityControl:
+        flags:
+          - qualitycontrol
         target: 60%
         threshold: 0%
         if_not_found: success
         if_ci_failed: error
-        paths: 
-          - "QualityControl"
       InfoLogger:
+        flags:
+            - infologger
         target: 70%
         threshold: 1%
         if_not_found: success
         if_ci_failed: error
-        paths: 
-          - "InfoLogger"
       Framework:
         flags:
           - framework
@@ -39,6 +39,15 @@ coverage:
        
     patch: false
 flags:
+  control:
+    paths: 
+      - "Control" 
+  qualitycontrol:
+    paths: 
+      - "QualityControl" 
+  infologger:
+    paths: 
+      - "InfoLogger" 
   framework:
     paths: 
       - "Framework" 
