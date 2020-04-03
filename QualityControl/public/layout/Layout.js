@@ -26,6 +26,7 @@ export default class Layout extends Observable {
 
     this.requestedLayout = RemoteData.notAsked();
 
+
     this.searchInput = '';
     this.searchResult = null; // null means no search, sub-array of `list`
 
