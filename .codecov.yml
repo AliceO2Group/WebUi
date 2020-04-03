@@ -12,25 +12,25 @@ coverage:
         flags:
           - framework 
         target: 50%
-        threshold: null
+        threshold: 0
         if_not_found: success
       QualityControl:
         flags:
           - qualitycontrol
         target: 60%
-        threshold: null
+        threshold: 0
         if_not_found: success
       InfoLogger:
         flags:
           - infologger
         target: 70%
-        threshold: null
+        threshold: 0
         if_not_found: success
       Control:
         flags:
           - control
         target: 69%
-        threshold: null
+        threshold: 0
         if_not_found: success
     patch: false
     changes: false
