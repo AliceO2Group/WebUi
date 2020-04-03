@@ -7,34 +7,35 @@ coverage:
   range: 60...90
   status:
     project:
-      default: false
+      default: off
       Framework:
-        target: 50%
         flags:
           - framework 
-        threshold: 0
+        target: 50%
+        threshold: null
         if_not_found: success
       QualityControl:
-        target: 60%
         flags:
           - qualitycontrol
-        threshold: 0
+        target: 60%
+        threshold: null
         if_not_found: success
       InfoLogger:
-        target: 70%
         flags:
           - infologger
-        threshold: 0
+        target: 70%
+        threshold: null
         if_not_found: success
       Control:
-        target: 69%
         flags:
           - control
-        threshold: 0
+        target: 69%
+        threshold: null
         if_not_found: success
     patch: false
     changes: false
     threshold: 0
+
 flags:
   control:
     paths:
@@ -51,4 +52,5 @@ flags:
 ignore:
   - docs/*
   - node_modules/*
+
 comment: false
