@@ -7,7 +7,11 @@ coverage:
   round: nearest
   status:
     project:
-      default: false
+      default: 
+        target: 80%
+        threshold: 0%
+        if_not_found: success
+        if_ci_failed: error
       Control:
         target: 90%
         threshold: 0%
@@ -15,6 +19,27 @@ coverage:
         if_ci_failed: error
         paths: 
           - "Control"
+      QualityControl:
+        target: 91%
+        threshold: 0%
+        if_not_found: success
+        if_ci_failed: error
+        paths: 
+          - "QualityControl"
+      InfoLogger:
+        target: 92%
+        threshold: 0%
+        if_not_found: success
+        if_ci_failed: error
+        paths: 
+          - "InfoLogger"
+      Framework:
+        target: 93%
+        threshold: 0%
+        if_not_found: success
+        if_ci_failed: error
+        paths: 
+          - "Framework"
     patch: false
 ignore:
   - docs/*
