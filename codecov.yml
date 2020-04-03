@@ -7,8 +7,7 @@ coverage:
   range: 60...90
   status:
     project:
-      Control:
-        paths: 'Control'
+      default:
         target: 90%
         threshold: 1%
         if_not_found: success
