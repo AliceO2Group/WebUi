@@ -4,14 +4,6 @@ codecov:
 coverage:
   precision: 2
   round: nearest
-  range: 70...90
-  status:
-    project:
-      default:
-        target: 90%
-        threshold: 1%
-        if_not_found: success
-        if_ci_error: error
 ignore:
   - docs/*
   - node_modules/*
