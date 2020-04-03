@@ -36,14 +36,12 @@ const checkerValue = (label, value, location) => {
       break;
     case 'object':
       if (value instanceof Array) {
-        const format = [h('', '[')];
+        const format = [];
         value.forEach((element) => format.push(h('.w-wrapped', element)));
-        format.push(h('', ']'));
         value = format;
       } else {
-        const format = [h('', '{')];
+        const format = [];
         Object.keys(value).forEach((element) => format.push(h('.w-wrapped', [element, ': ', value[element]])));
-        format.push(h('', '}'));
         value = format;
       }
       break;
