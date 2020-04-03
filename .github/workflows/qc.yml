@@ -38,8 +38,9 @@ jobs:
       - run: (cd QualityControl; npm install )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - name: Codecov
+      - name: Send codecov report for QualityControl
         uses: codecov/codecov-action@v1.0.6
         with:
+          token: ${{ secrets. NEW_CODECOV_TOKEN }}
           flags: qualitycontrol
           fail_ci_if_error: true
