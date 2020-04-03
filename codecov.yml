@@ -1,7 +1,8 @@
 codecov:
   notify:
-    after_n_builds: 2
+    after_n_builds: 1
 coverage:
+  range: 70...90
   precision: 2
   round: nearest
   status:
