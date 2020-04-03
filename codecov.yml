@@ -12,12 +12,7 @@ coverage:
         threshold: 0%
         if_not_found: success
         if_ci_failed: error
-    patch:
-      default:
-        target: 90%
-        threshold: 0%
-        if_not_found: success
-        if_ci_failed: error
+    patch: false
 ignore:
   - docs/*
   - node_modules/*
