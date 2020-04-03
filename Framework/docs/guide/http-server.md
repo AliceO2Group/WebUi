@@ -2,7 +2,7 @@
 
  - Protects server by defining: Content Security Policy, DNS Prefetch Control, `X-Frame-Options`, `Strict-Transport-Security`, `Referrer-Policy`, `X-XSS-Protection`
  - Serves custom static paths
- - Defines new routes (GET, POST, DELETE)
+ - Defines new routes (GET, POST, PUT, PATCH, DELETE)
  - Provides CERN SSO authentication and e-groups authorization using [OpenID Connect module](openid.md)
  - Secures routes with [JWT token](json-tokens.md)
 
@@ -32,6 +32,12 @@ get
 ```
 ```js
 post
+```
+```js
+put
+```
+```js
+patch
 ```
 ```js
 delete
