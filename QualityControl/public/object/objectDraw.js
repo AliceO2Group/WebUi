@@ -2,6 +2,7 @@
 
 import {h} from '/js/src/index.js';
 import {timerDebouncer, pointerId} from '../common/utils.js';
+import checkersPanel from './checkersPanel.js';
 
 /**
  * Draw an object using JSROOT.
@@ -17,9 +18,10 @@ import {timerDebouncer, pointerId} from '../common/utils.js';
  * @param {object} model - root model object
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
  * @param {object} options - optional options of presentation
+ * @param {string} location - location from where `draw` method is called; Used for different style
  * @return {vdom} output virtual-dom, a single div with JSROOT attached to it
  */
-export function draw(model, tabObject, options) {
+export function draw(model, tabObject, options, location = '') {
   const defaultOptions = {
     width: '100%', // CSS size
     height: '100%', // CSS size
@@ -43,10 +45,11 @@ export function draw(model, tabObject, options) {
       w: 0,
     };
   }
+  model.object.addObjectByName(tabObject.name);
 
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
-    key: fingerprintReplacement(tabObject), // completly re-create this div if the chart is not the same at all
+    key: fingerprintReplacement(tabObject), // completely re-create this div if the chart is not the same at all
     class: options.className,
     style: {
       height: options.height,
@@ -59,7 +62,6 @@ export function draw(model, tabObject, options) {
      */
     oncreate(vnode) {
       // ask model to load data to be shown
-      model.object.addObjectByName(tabObject.name);
 
       // setup resize function
       vnode.dom.onresize = timerDebouncer(() => {
@@ -118,10 +120,12 @@ export function draw(model, tabObject, options) {
       h('.p4.f6', objectRemoteData.payload),
     ]);
   } else {
-    // on success, JSROOT will erase all DOM inside div and put its own
+    if (model.object.isObjectChecker(objectRemoteData.payload)) {
+      return checkersPanel(objectRemoteData.payload, location);
+    }
   }
-
-  return h('div.relative.jsroot-container', attributes, content);
+  // on success, JSROOT will erase all DOM inside div and put its own
+  return h('.relative.jsroot-container', attributes, content);
 }
 
 /**
@@ -158,8 +162,12 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   const shouldRedraw = dom.dataset.fingerprintRedraw !== redrawHash;
   const shouldCleanRedraw = dom.dataset.fingerprintCleanRedraw !== cleanRedrawHash;
 
-  if (objectRemoteData && objectRemoteData.isSuccess() &&
-    (shouldRedraw || shouldCleanRedraw)) {
+  if (
+    objectRemoteData &&
+    objectRemoteData.isSuccess() &&
+    !model.object.isObjectChecker(objectRemoteData.payload) &&
+    (shouldRedraw || shouldCleanRedraw)
+  ) {
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
