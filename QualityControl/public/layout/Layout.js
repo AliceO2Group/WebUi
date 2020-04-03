@@ -30,6 +30,7 @@ export default class Layout extends Observable {
 
     this.editEnabled = false; // activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // pointer to a tabObject being modified
+
     this.editOriginalClone = null; // contains a deep clone of item before editing
 
 
