@@ -33,8 +33,9 @@ jobs:
       - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm run coverage )
       - run: (cd InfoLogger; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - name: Codecov
+      - name: Send codecov report for InfoLogger
         uses: codecov/codecov-action@v1.0.6
         with:
+          token: ${{ secrets. NEW_CODECOV_TOKEN }}
           flags: infologger
           fail_ci_if_error: true
