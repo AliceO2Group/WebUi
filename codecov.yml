@@ -1,13 +1,1 @@
-codecov:
-  notify:
-    after_n_builds: 2
-coverage:
-  precision: 2
-  round: nearest
-  range: 60...90
-
-ignore:
-  - docs/*
-  - node_modules/*
-
 comment: false
