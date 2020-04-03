@@ -9,27 +9,27 @@ coverage:
     project:
       default: off
       Framework:
+        target: 50%
         flags:
           - framework 
-        target: 50%
         threshold: null
         if_not_found: success
       QualityControl:
+        target: 60
         flags:
           - qualitycontrol
-        target: 60%
         threshold: null
         if_not_found: success
       InfoLogger:
+        target: 70%
         flags:
           - infologger
-        target: 70%
         threshold: null
         if_not_found: success
       Control:
+        target: "69%"
         flags:
           - control
-        target: "69%"
         threshold: null
         if_not_found: success
     patch: false
