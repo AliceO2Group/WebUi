@@ -37,7 +37,7 @@ jobs:
       - run: (cd Framework; npm ci )
       - run: (cd Framework; npm run coverage )
       - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd Framework; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -F framework)
+      - run: (cd Framework; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.NEW_CODECOV_TOKEN }} -F framework)
   windows:
     name: Test on windows-latest
     runs-on: windows-latest
