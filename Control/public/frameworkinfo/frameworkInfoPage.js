@@ -23,9 +23,9 @@ export const header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
+export const content = (model) => h('.scroll-y.absolute-fill.flex-column ', [
   createTableForControlGUIInfo(model.frameworkInfo),
-  // createTableForAliECSInfo(model.frameworkInfo),
+  createTableForAliECSInfo(model.frameworkInfo),
 ]);
 
 /**
@@ -35,12 +35,12 @@ export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
  */
 const createTableForControlGUIInfo = (frameworkInfo) =>
   h('.p2', [
-    // frameworkInfo.control.match({
-    //   NotAsked: () => null,
-    //   Loading: () => pageLoading(),
-    //   Success: (data) => showContent(data),
-    //   Failure: (error) => errorPage(error),
-    // }),
+    frameworkInfo.control.match({
+      NotAsked: () => null,
+      Loading: () => pageLoading(),
+      Success: (data) => showContent(data),
+      Failure: (error) => errorPage(error),
+    }),
   ]);
 
 /**
