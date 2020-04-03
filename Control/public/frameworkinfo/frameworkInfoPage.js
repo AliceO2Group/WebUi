@@ -23,7 +23,7 @@ export const header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
+export const content = (model) => h('.scroll-y.absolute-fill.flex-column ', [
   createTableForControlGUIInfo(model.frameworkInfo),
   createTableForAliECSInfo(model.frameworkInfo),
 ]);
