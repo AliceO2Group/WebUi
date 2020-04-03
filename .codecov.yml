@@ -29,7 +29,7 @@ coverage:
       Control:
         flags:
           - control
-        target: 69%
+        target: "69%"
         threshold: null
         if_not_found: success
     patch: false
