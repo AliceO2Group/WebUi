@@ -35,7 +35,6 @@ coverage:
     patch: false
     changes: false
     threshold: 0
-
 flags:
   control:
     paths:
@@ -52,5 +51,4 @@ flags:
 ignore:
   - docs/*
   - node_modules/*
-
 comment: false
