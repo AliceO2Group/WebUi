@@ -5,6 +5,9 @@ coverage:
   precision: 2
   round: nearest
   range: 60...90
+  status:
+    project:
+      target: 90%
 ignore:
   - docs/*
   - node_modules/*
