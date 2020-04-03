@@ -2,7 +2,7 @@ codecov:
   notify:
     after_n_builds: 1
 coverage:
-  range: 70...90
+  range: 50...80
   precision: 2
   round: nearest
   status:
@@ -13,29 +13,29 @@ coverage:
         if_not_found: success
         if_ci_failed: error
       Control:
-        target: 90%
+        target: 69%
         threshold: 0%
         if_not_found: success
         if_ci_failed: error
         paths: 
           - "Control"
       QualityControl:
-        target: 91%
+        target: 60%
         threshold: 0%
         if_not_found: success
         if_ci_failed: error
         paths: 
           - "QualityControl"
       InfoLogger:
-        target: 92%
-        threshold: 0%
+        target: 70%
+        threshold: 1%
         if_not_found: success
         if_ci_failed: error
         paths: 
           - "InfoLogger"
       Framework:
-        target: 95%
-        threshold: 0%
+        target: 50%
+        threshold: 1%
         if_not_found: success
         if_ci_failed: error
         paths: 
