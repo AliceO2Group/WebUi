@@ -32,7 +32,7 @@ coverage:
       Framework:
         flags:
           - framework
-        target: 50%
+        target: 70%
         threshold: 1%
         if_not_found: success
         if_ci_failed: error
