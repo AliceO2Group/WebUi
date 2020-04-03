@@ -7,7 +7,12 @@ coverage:
   range: 60...90
   status:
     project:
-      target: 90%
+      Control:
+        paths: 'Control'
+        target: 90%
+        threshold: 1%
+        if_not_found: success
+        if_ci_error: error
 ignore:
   - docs/*
   - node_modules/*
