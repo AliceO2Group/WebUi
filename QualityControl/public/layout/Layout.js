@@ -35,6 +35,7 @@ export default class Layout extends Observable {
     // https://github.com/hootsuite/grid
     this.gridListSize = 3;
 
+
     this.gridList = new GridList([], {
       direction: 'vertical',
       lanes: this.gridListSize
