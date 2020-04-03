@@ -23,6 +23,7 @@ export default class Layout extends Observable {
     this.tab = null; // pointer to a tab from `item`
 
     this.myList = RemoteData.notAsked(); // array of layouts
+
     this.requestedLayout = RemoteData.notAsked();
 
     this.searchInput = '';
@@ -30,7 +31,9 @@ export default class Layout extends Observable {
 
     this.editEnabled = false; // activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // pointer to a tabObject being modified
+
     this.editOriginalClone = null; // contains a deep clone of item before editing
+
 
     // https://github.com/hootsuite/grid
     this.gridListSize = 3;
