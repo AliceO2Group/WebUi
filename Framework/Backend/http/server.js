@@ -81,6 +81,7 @@ class HttpServer {
     this.app.use(helmet.hsts({
       maxAge: 5184000
     }));
+
     // Sets "Referrer-Policy: same-origin"
     this.app.use(helmet.referrerPolicy({policy: 'same-origin'}));
     // Sets "X-XSS-Protection: 1; mode=block"

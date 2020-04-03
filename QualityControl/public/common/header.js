@@ -51,6 +51,7 @@ const commonHeader = (model) => h('.flex-grow', [
   // TODO To be redesigned. It is not visible in case of error and UI is hanging
 ]);
 
+
 /**
  * Shows profile button to logout or check who is the current owner of session
  * @param {Object} model

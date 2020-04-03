@@ -12,6 +12,7 @@ export default (model) => h('.flex-grow text-left',
   },
   [
     loginButton(model),
+
     ' ',
     lockButton(model),
     ' ',
