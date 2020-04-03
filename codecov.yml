@@ -5,6 +5,26 @@ coverage:
   precision: 2
   round: nearest
   range: 60...90
+  status:
+    project:
+      target: 90%
+      threshold: 1%
+    control:
+      flags: 
+        - control
+      target: 90%
+    qualitycontrol:
+      target: 1%
+      flags: 
+        - qualitycontrol
+flags:
+  control:  
+    paths:
+      - Control/
+  qualitycontrol:
+    paths:
+      - QualityControl/
+
 ignore:
   - docs/*
   - node_modules/*
