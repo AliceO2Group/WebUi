@@ -4,6 +4,13 @@ codecov:
 coverage:
   precision: 2
   round: nearest
+  status:
+    project:
+      default:
+        target: 90%
+    patch:
+      default:
+        target: 90%
 ignore:
   - docs/*
   - node_modules/*
