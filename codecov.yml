@@ -4,11 +4,10 @@ codecov:
 coverage:
   precision: 2
   round: nearest
-  range: 60...90
+  range: 70...90
   status:
     project:
       target: 90%
-      threshold: 1%
 ignore:
   - docs/*
   - node_modules/*
