@@ -35,4 +35,8 @@ jobs:
       - run: (cd Control; npm ci )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd Control; bash <(curl -s https://codecov.io/bash) -F control)
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.6
+        with:
+          flags: control
+          fail_ci_if_error: true
