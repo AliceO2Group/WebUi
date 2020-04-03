@@ -36,21 +36,24 @@ coverage:
         threshold: 1%
         if_not_found: success
         if_ci_failed: error
-       
     patch: false
 flags:
   control:
-    paths: 
-      - "Control" 
+    paths:
+      - "Control"
+    carryforward: true
   qualitycontrol:
     paths: 
-      - "QualityControl" 
+      - "QualityControl"
+    carryforward: true
   infologger:
     paths: 
-      - "InfoLogger" 
+      - "InfoLogger"
+    carryforward: true
   framework:
     paths: 
-      - "Framework" 
+      - "Framework"
+    carryforward: true
 ignore:
   - docs/*
   - node_modules/*
