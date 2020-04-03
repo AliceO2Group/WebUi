@@ -32,6 +32,7 @@ export default class Layout extends Observable {
     this.editingTabObject = null; // pointer to a tabObject being modified
     this.editOriginalClone = null; // contains a deep clone of item before editing
 
+
     // https://github.com/hootsuite/grid
     this.gridListSize = 3;
 
