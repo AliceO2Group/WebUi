@@ -94,6 +94,24 @@ class HttpServer {
   }
 
   /**
+   * Stops the server from accepting new connections and keeps existing connections.
+   * This function is asynchronous, the server is finally closed when all connections
+   * are ended and the server emits a 'close' event.
+   * @return {Promise}
+   */
+  close() {
+    return new Promise((resolve, reject) => {
+      this.server.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
    * Configures Helmet rules to increase web app secuirty
    * @param {string} hostname whitelisted hostname for websocket connection
    * @param {number} port secure port number

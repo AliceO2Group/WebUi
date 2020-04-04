@@ -163,8 +163,8 @@ describe('websocket', () => {
     });
   });
 
-  after(() => {
+  after(async () => {
     ws.shutdown();
-    http.getServer.close();
+    await http.close();
   });
 });

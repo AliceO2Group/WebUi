@@ -29,6 +29,9 @@ Where:
 listen
 ```
 ```js
+close
+```
+```js
 addStaticPath
 ```
 ```js

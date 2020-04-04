@@ -244,8 +244,8 @@ describe('REST API', () => {
 });
 
 describe('HTTP server', () => {
-  after(() => {
-    httpServer.getServer.close();
+  after(async () => {
+    await httpServer.close();
   });
 
   it('Add and verify custom static path', (done) => {
