@@ -94,6 +94,18 @@ class HttpServer {
   }
 
   /**
+   * Returns the bound `address`, the address `family` name, and `port` of the
+   * server as reported by the operating system if listening on an IP socket
+   * (useful to find which port was assigned when getting an OS-assigned address):
+   * { port: 12346, family: 'IPv4', address: '127.0.0.1' }. For a server listening
+   * on a pipe or Unix domain socket, the name is returned as a string.
+   * @return {(object|string)} The address of the server
+   */
+  address() {
+    return this.server.address();
+  }
+
+  /**
    * Stops the server from accepting new connections and keeps existing connections.
    * This function is asynchronous, the server is finally closed when all connections
    * are ended and the server emits a 'close' event.
