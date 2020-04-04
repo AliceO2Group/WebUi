@@ -134,6 +134,14 @@ class HttpServer {
     this.app.use('/api', this.router);
 
     // Catch-all if no controller handled request
+    this.app.use('/api', (req, res, next) => {
+      log.debug(`Page was not found: ${req.originalUrl}`);
+      res.status(404).json({
+        error: '404 - Page not found',
+        message: 'The requested URL was not found on this server.'
+      });
+    });
+
     this.app.use((req, res, next) => {
       log.debug(`Page was not found: ${req.originalUrl}`);
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
