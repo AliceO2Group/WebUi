@@ -198,7 +198,9 @@ export default class QCObject extends Observable {
       if (result.isSuccess()) {
         offlineObjects = result.payload;
       } else {
-        this.model.notification.show(`Failed to retrieve list of objects due to ${result.message}`, 'danger', Infinity);
+        const errorMessage = result.payload.message ? result.payload.message : result.payload;
+        const failureMessage = `Failed to retrieve list of objects due to ${errorMessage}`;
+        this.model.notification.show(failureMessage, 'danger', Infinity);
       }
       this.list = offlineObjects;
 
@@ -260,7 +262,8 @@ export default class QCObject extends Observable {
         open: false
       };
     } else {
-      const failureMessage = `Failed to retrieve list of online objects due to ${result.message}`;
+      const errorMessage = result.payload.message ? result.payload.message : result.payload;
+      const failureMessage = `Failed to retrieve list of online objects due to ${errorMessage}`;
       this.model.notification.show(failureMessage, 'danger', Infinity);
     }
 
