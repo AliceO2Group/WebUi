@@ -1,4 +1,5 @@
 import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
+import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import infoButton from './../common/infoButton.js';
 
@@ -10,7 +11,15 @@ import infoButton from './../common/infoButton.js';
  */
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
   h('.flex-row.flex-grow', [
-    h('.flex-grow.scroll-y', tableShow(model)),
+    h('.flex-grow.scroll-y',
+      model.object.objectsRemote.match({
+        NotAsked: () => null,
+        Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
+          spinner(5), h('', 'Loading Objects')
+        ]),
+        Success: () => tableShow(model),
+        Failure: () => null, // notification is displayed
+      })),
     h('.animate-width.scroll-y',
       {
         style: {

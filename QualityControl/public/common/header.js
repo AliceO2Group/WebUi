@@ -48,7 +48,6 @@ const commonHeader = (model) => h('.flex-grow', [
   ' ',
   h('span.f4.gray', 'Quality Control'),
   model.loader.active && h('span.f4.mh1.gray', spinner())
-  // TODO To be redesigned. It is not visible in case of error and UI is hanging
 ]);
 
 /**

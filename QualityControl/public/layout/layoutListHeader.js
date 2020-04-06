@@ -1,5 +1,6 @@
 import {h} from '/js/src/index.js';
 
+
 /**
  * Shows header of list of layouts with one search input to filter them
  * @param {Object} model
@@ -26,6 +27,4 @@ export default (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-const howManyItems = (model) => model.layout.searchResult
-  ? `${model.layout.searchResult.length} found of ${model.layout.list.length}`
-  : `${model.layout.list && model.layout.list.length} items`;
+const howManyItems = (model) => `${model.layout.list && model.layout.list.length} items`;

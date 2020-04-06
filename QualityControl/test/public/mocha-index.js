@@ -135,7 +135,7 @@ describe('QCG', function() {
     });
 
     it('should have selected layout in the sidebar highlighted', async () => {
-      const layoutClassList = await page.evaluate(() => document.querySelector('body > div > div > nav > a:nth-child(5)').classList);
+      const layoutClassList = await page.evaluate(() => document.querySelector('body > div > div > nav > div:nth-child(5) > a:nth-child(1)').classList);
       assert.deepStrictEqual(layoutClassList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
     });
 

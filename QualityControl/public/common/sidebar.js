@@ -24,9 +24,7 @@ export default function sidebar(model) {
   // Spacial case when sidebar is used as a required form or perperty editor
   if (model.router.params.page === 'layoutShow' && model.layout.editEnabled) {
     return h('nav.sidebar.sidebar-extend', {class: ''}, [
-      h('.sidebar-content', [
-        objectTreeSidebar(model)
-      ])
+      h('.sidebar-content', [objectTreeSidebar(model)])
     ]);
   }
 
@@ -44,8 +42,7 @@ export default function sidebar(model) {
 const sidebarMenu = (model) => [
   exploreMenu(model),
   myLayoutsMenu(model),
-  h('.menu-title', ''),
-  refreshOptions(model),
+  model.object.isOnlineModeEnabled ? refreshOptions(model) : h('.menu-title', {style: 'flex-grow:1'}, ''),
   statusMenu(model),
   collapseSidebarMenuItem(model)
 ];
@@ -83,20 +80,21 @@ const exploreMenu = (model) => [
  * @return {vnode}
  */
 const myLayoutsMenu = (model) => [
-  h('.menu-title', model.sidebar ? 'My Layouts' : ''),
+  h('.menu-title.flex-row', model.sidebar ? [
+    h('', {style: 'width: 90%'}, 'My Layouts'),
+    h('.ph2.text-right.actionable-icon', {
+      title: 'Create a new layout',
+      onclick: () => model.layout.newItem(prompt('Choose a name for the new layout:'))
+    }, iconPlus())
+  ] : ''),
   model.layout.myList.match({
     NotAsked: () => null,
     Loading: () => h('.menu-item', 'Loading...'),
-    Success: (list) => list.map((layout) => myLayoutsMenuItem(model, layout)),
+    Success: (list) => h('.scroll-y', {
+      style: 'min-height: 10em;'
+    }, list.map((layout) => myLayoutsMenuItem(model, layout))),
     Failure: (error) => h('.menu-item', error),
   }),
-  h('a.menu-item', {
-    title: 'New layout...',
-    style: 'display:flex',
-    onclick: () => model.layout.newItem(prompt('Choose a name of the new layout:'))
-  }, [
-    h('span', iconPlus()), model.sidebar && itemMenuText('New layout...')
-  ])
 ];
 
 /**
@@ -140,7 +138,7 @@ const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
 const refreshOptions = (model) => [
   h('', {
     class: model.sidebar ? 'menu-title' : '',
-    style: model.object.isOnlineModeEnabled ? 'flex-grow:1' : 'visibility: hidden; flex-grow:1'
+    style: 'flex-grow:1; height:auto'
   }, [
     model.sidebar &&
     [
