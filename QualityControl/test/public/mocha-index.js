@@ -71,22 +71,22 @@ describe('QCG', function() {
 
   it('should have redirected to default page "/?page=objectTree"', async () => {
     const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=objectTree');
+    assert.strictEqual(location.search, '?page=objectTree');
   });
 
   it('should have a layout with header, sidebar and section', async () => {
     const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
     const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);
 
-    assert(headerContent.includes('Quality Control'));
-    assert(sidebarContent.includes('Explore'));
+    assert.ok(headerContent.includes('Quality Control'));
+    assert.ok(sidebarContent.includes('Explore'));
   });
 
   describe('page layoutList', () => {
     before(async () => {
       await page.goto(url + '?page=layoutList', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=layoutList');
+      assert.strictEqual(location.search, '?page=layoutList');
     });
 
     it('should have a button for online mode in the header', async () => {
@@ -98,14 +98,14 @@ describe('QCG', function() {
 
     it('should have a table with rows', async () => {
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert(rowsCount > 1);
+      assert.ok(rowsCount > 1);
     });
 
     it('should have a table with one row after filtering', async () => {
       await page.type('header input', 'AliRoot');
       await page.waitFor(200);
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert(rowsCount === 1);
+      assert.ok(rowsCount === 1);
     });
 
     it('should have a link to show a layout', async () => {
@@ -126,12 +126,12 @@ describe('QCG', function() {
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
       await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
     });
 
     it('should have tabs in the header', async () => {
       const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
-      assert(tabsCount > 1);
+      assert.ok(tabsCount > 1);
     });
 
     it('should have selected layout in the sidebar highlighted', async () => {
@@ -141,7 +141,7 @@ describe('QCG', function() {
 
     it('should have jsroot svg plots in the section', async () => {
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert(plotsCount > 1);
+      assert.ok(plotsCount > 1);
     });
 
     it('should have an info button with full path and last modified when clicked (plot success)', async () => {
@@ -158,9 +158,9 @@ describe('QCG', function() {
         };
       });
       assert.strictEqual(result.title, 'View details about histogram', 'Button title is different');
-      assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
-      assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), true, 'Object full path is not the same');
-      assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
+      assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
+      assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), 'Object full path is not the same');
+      assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
       assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified date is different');
     });
 
@@ -178,9 +178,9 @@ describe('QCG', function() {
       // click again to reset for other tests
       await page.evaluate(() => document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > button').click());
       assert.strictEqual(result.title, 'View details about histogram', 'Button title is different');
-      assert.strictEqual(result.path.includes('PATH'), true, 'Object full path label is not the same');
-      assert.strictEqual(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), true, 'Object full path is not the same');
-      assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true, 'Last Modified label is different');
+      assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
+      assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), 'Object full path is not the same');
+      assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
       assert.strictEqual(result.lastModified.includes(new Date(1020).toLocaleString('EN')), true, 'Last Modified date is different');
     });
 
@@ -188,31 +188,31 @@ describe('QCG', function() {
       await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
       await page.waitForSelector('section h1', {timeout: 5000});
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      assert.deepStrictEqual(plotsCount, 0);
+      assert.strictEqual(plotsCount, 0);
     });
 
     it('should have a button group containing three buttons in the header', async () => {
       const buttonCount = await page.evaluate(() =>
         document.querySelectorAll('header > div > div:nth-child(3) > div.btn-group > button').length);
-      assert.deepStrictEqual(buttonCount, 3);
+      assert.strictEqual(buttonCount, 3);
     });
 
     it('should have one duplicate button in the header to create a new duplicated layout', async () => {
       await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
       const duplicateButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)').title);
-      assert.deepStrictEqual(duplicateButton, 'Duplicate layout');
+      assert.strictEqual(duplicateButton, 'Duplicate layout');
     });
 
     it('should have one delete button in the header to delete layout', async () => {
       await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
       const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
-      assert.deepStrictEqual(deleteButton, 'Delete layout');
+      assert.strictEqual(deleteButton, 'Delete layout');
     });
 
     it('should have one edit button in the header to go in edit mode', async () => {
       await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
       const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
-      assert.deepStrictEqual(editButton, 'Edit layout');
+      assert.strictEqual(editButton, 'Edit layout');
     });
 
     // Begin: Edit Mode;
@@ -224,13 +224,13 @@ describe('QCG', function() {
     it('should have input field for changing layout name in edit mode', async () => {
       await page.waitForSelector('header > div > div:nth-child(3) > input', {timeout: 5000});
       const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
-      assert.deepStrictEqual(count, 1);
+      assert.strictEqual(count, 1);
     });
 
     it('should have a tree sidebar in edit mode', async () => {
       await page.waitForSelector('nav table tbody tr'); // loading., {timeout: 5000}..
       const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 4); // 4 agents
+      assert.strictEqual(rowsCount, 5); // 5 agents
     });
 
     it('should have filtered results on input search filled', async () => {
@@ -253,13 +253,13 @@ describe('QCG', function() {
     it('should load', async () => {
       await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=objectTree');
+      assert.strictEqual(location.search, '?page=objectTree');
     });
 
     it('should have a tree as a table', async () => {
       await page.waitForSelector('section table tbody tr', {timeout: 5000});
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-      assert.deepStrictEqual(rowsCount, 4); // 4 agents
+      assert.strictEqual(rowsCount, 5); // 5 agents
     });
 
     it('should have a button to sort by (default "Name" ASC)', async () => {
@@ -354,10 +354,10 @@ describe('QCG', function() {
             backButtonTitle: backButtonTitle
           };
         });
-        assert.deepStrictEqual(result.location.search, '?page=objectView');
-        assert.deepStrictEqual(result.message, 'No object name or object ID were provided');
+        assert.strictEqual(result.location.search, '?page=objectView');
+        assert.strictEqual(result.message, 'No object name or object ID were provided');
         assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-        assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
+        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
       });
 
       it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
@@ -369,8 +369,8 @@ describe('QCG', function() {
             objectSelected: window.model.object.selected
           };
         });
-        assert.deepStrictEqual(result.location, '?page=objectTree');
-        assert.deepStrictEqual(result.objectSelected, null);
+        assert.strictEqual(result.location, '?page=objectTree');
+        assert.strictEqual(result.objectSelected, null);
       });
 
       it('should load page=objectView and display an error message when a parameter objectName is passed but object not found', async () => {
@@ -382,7 +382,7 @@ describe('QCG', function() {
             title: title,
           };
         });
-        assert.deepStrictEqual(result.title, 'Object NOT_FOUND_OBJECT could not be loaded');
+        assert.strictEqual(result.title, 'Object NOT_FOUND_OBJECT could not be loaded');
       });
 
       it('should load page=objectView and display a plot when a parameter objectName is passed', async () => {
@@ -398,7 +398,7 @@ describe('QCG', function() {
             objectSelected: objectSelected
           };
         });
-        assert.deepStrictEqual(result.title, objectName);
+        assert.strictEqual(result.title, objectName);
         assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
         assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
       });
@@ -417,10 +417,29 @@ describe('QCG', function() {
           };
         });
         assert.strictEqual(result.title, 'View details about histogram');
-        assert.strictEqual(result.fullPath.includes('PATH'), true);
-        assert.strictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
-        assert.strictEqual(result.lastModified.includes('LAST MODIFIED'), true);
-        assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
+        assert.ok(result.fullPath.includes('PATH'));
+        assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
+        assert.ok(result.lastModified.includes('LAST MODIFIED'));
+        assert.ok(result.lastModified.includes(new Date(100).toLocaleString('EN')));
+      });
+
+      it('should load page=objectView and display a Checker Object when a parameter objectName is passed', async () => {
+        const objectName = 'qc/checker/AB';
+        await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
+
+        const result = await page.evaluate(() => {
+          const title = document.querySelector('div div b').textContent;
+          const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
+          const objectSelected = window.model.object.selected;
+          return {
+            title: title,
+            rootPlotClassList: rootPlotClassList,
+            objectSelected: objectSelected
+          };
+        });
+        assert.strictEqual(result.title, objectName);
+        assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'p2', 2: 'flex-column', 3: 'scroll-y'});
+        assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 2, lastModified: 100});
       });
     });
 
@@ -459,10 +478,10 @@ describe('QCG', function() {
             backButtonTitle: backButtonTitle
           };
         });
-        assert.deepStrictEqual(result.location.search, '?page=objectView&objectId=123456');
-        assert.deepStrictEqual(result.message, 'No layout ID was provided');
+        assert.strictEqual(result.location.search, '?page=objectView&objectId=123456');
+        assert.strictEqual(result.message, 'No layout ID was provided');
         assert.deepStrictEqual(result.iconClassList, {0: 'icon', 1: 'fill-primary'});
-        assert.deepStrictEqual(result.backButtonTitle, 'Go back to all objects');
+        assert.strictEqual(result.backButtonTitle, 'Go back to all objects');
       });
 
       it('should take back the user to page=objectTree when clicking "Back To QCG" (no object passed or selected)', async () => {
@@ -474,8 +493,8 @@ describe('QCG', function() {
             objectSelected: window.model.object.selected
           };
         });
-        assert.deepStrictEqual(result.location, '?page=objectTree');
-        assert.deepStrictEqual(result.objectSelected, null);
+        assert.strictEqual(result.location, '?page=objectTree');
+        assert.strictEqual(result.objectSelected, null);
       });
 
       it('should load a plot and update button text to "Go back to layout" if layoutId parameter is provided', async () => {
@@ -490,8 +509,8 @@ describe('QCG', function() {
             backButtonTitle: backButtonTitle
           };
         });
-        assert.deepStrictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
-        assert.deepStrictEqual(result.backButtonTitle, 'Go back to layout');
+        assert.strictEqual(result.location, `?page=objectView&objectId=5aba4a059b755d517e76ef54&layoutId=5aba4a059b755d517e76ea10`);
+        assert.strictEqual(result.backButtonTitle, 'Go back to layout');
       });
 
       it('should take back the user to page=layoutShow when clicking "Go back to layout"', async () => {
@@ -503,7 +522,7 @@ describe('QCG', function() {
             location: window.location.search,
           };
         });
-        assert.deepStrictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
+        assert.strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
       });
 
       it('should load page=objectView and display a plot when objectId and layoutId are passed', async () => {
@@ -520,7 +539,8 @@ describe('QCG', function() {
             objectSelected: objectSelected
           };
         });
-        assert.deepStrictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
+        await page.waitFor(7000);
+        assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
         assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
         assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
       });
@@ -538,11 +558,11 @@ describe('QCG', function() {
           };
         });
         await page.waitFor(200);
-        assert.deepStrictEqual(result.title, 'View details about histogram');
-        assert.deepStrictEqual(result.fullPath.includes('PATH'), true);
-        assert.deepStrictEqual(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'), true);
-        assert.deepStrictEqual(result.lastModified.includes('LAST MODIFIED'), true);
-        assert.deepStrictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true);
+        assert.strictEqual(result.title, 'View details about histogram');
+        assert.ok(result.fullPath.includes('PATH'));
+        assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
+        assert.ok(result.lastModified.includes('LAST MODIFIED'));
+        assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified Date is not correct');
       });
     });
   });
@@ -556,7 +576,7 @@ describe('QCG', function() {
     it('should load', async () => {
       await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=about');
+      assert.strictEqual(location.search, '?page=about');
     });
 
     it('should have a frameworkInfo item with config fields', async () => {
@@ -582,7 +602,7 @@ describe('QCG', function() {
       // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
       await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
       const location = await page.evaluate(() => window.location);
-      assert.deepStrictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+      assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
     });
 
     it('should merge options on layoutShow and no ignoreDefaults field', async () => {

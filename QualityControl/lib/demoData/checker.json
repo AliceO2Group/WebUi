@@ -1,0 +1,9 @@
+{
+  "_typename": "o2::quality_control::core::QualityObject",
+  "mDetectorName": "ALICE",
+  "mQuality": {
+    "mLevel": 10,
+    "mName": "QName"
+  },
+  "mCheckName": "CheckerA"
+}

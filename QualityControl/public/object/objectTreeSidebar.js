@@ -72,7 +72,7 @@ function drawComponent(model, tabObject) {
             onclick: (e) => model.router.handleLinkEvent(e)
           }, h('span.f7', iconResizeBoth()))),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, tabObject))]);
+        draw(model, tabObject, {}, 'treeSidebar'))]);
 }
 
 /**

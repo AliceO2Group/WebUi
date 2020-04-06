@@ -111,7 +111,7 @@ function getRootObject(model) {
           oncreate: () => model.object.select({name: model.router.params.objectName}),
           style: 'width: 100%; height: 100%',
         }, model.object.selected ?
-          draw(model, model.object.selected.name, {stat: true})
+          draw(model, model.object.selected.name, {stat: true}, 'objectView')
           : errorLoadingObject(`Object ${model.router.params.objectName} could not be loaded`)
         )
       ) :
@@ -126,7 +126,7 @@ function getRootObject(model) {
                 h('', {
                   style: 'width: 100%; height: 100%'
                 }, draw(model, model.object.selected.name,
-                  {stat: true})
+                  {stat: true}, 'objectView')
                 )
                 :
                 errorLoadingObject('Object could not be found'),

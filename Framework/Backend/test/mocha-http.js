@@ -34,6 +34,9 @@ describe('REST API', () => {
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-with-body', (req, res) => res.json({body: req.body}));
+    httpServer.put('/put-request', (req, res) => res.json({ok: 1}));
+    httpServer.patch('/patch-request', (req, res) => res.json({ok: 1}));
+    httpServer.delete('/delete-request', (req, res) => res.json({ok: 1}));
   });
 
   it('GET the "/" and return user details', (done) => {
@@ -150,6 +153,69 @@ describe('REST API', () => {
     }, (res) => {
       assert.strictEqual(res.statusCode, 403);
       done();
+    });
+    req.end();
+  });
+
+  it('PUT with a token should respond 200/JSON', (done) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: config.http.port,
+      path: '/api/put-request?token=' + token,
+      method: 'PUT'
+    }, (res) => {
+      assert.strictEqual(res.statusCode, 200);
+      let rawData = '';
+      res.on('data', (chunk) => {
+        rawData += chunk;
+      });
+      res.on('end', () => {
+        const parsedData = JSON.parse(rawData);
+        assert.strictEqual(parsedData.ok, 1);
+        done();
+      });
+    });
+    req.end();
+  });
+
+  it('PATCH with a token should respond 200/JSON', (done) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: config.http.port,
+      path: '/api/patch-request?token=' + token,
+      method: 'PATCH'
+    }, (res) => {
+      assert.strictEqual(res.statusCode, 200);
+      let rawData = '';
+      res.on('data', (chunk) => {
+        rawData += chunk;
+      });
+      res.on('end', () => {
+        const parsedData = JSON.parse(rawData);
+        assert.strictEqual(parsedData.ok, 1);
+        done();
+      });
+    });
+    req.end();
+  });
+
+  it('DELETE with a token should respond 200/JSON', (done) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: config.http.port,
+      path: '/api/delete-request?token=' + token,
+      method: 'DELETE'
+    }, (res) => {
+      assert.strictEqual(res.statusCode, 200);
+      let rawData = '';
+      res.on('data', (chunk) => {
+        rawData += chunk;
+      });
+      res.on('end', () => {
+        const parsedData = JSON.parse(rawData);
+        assert.strictEqual(parsedData.ok, 1);
+        done();
+      });
     });
     req.end();
   });

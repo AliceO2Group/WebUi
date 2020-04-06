@@ -1,0 +1,60 @@
+codecov:
+  notify:
+    after_n_builds: 1
+coverage:
+  range: 50...80
+  precision: 2
+  round: nearest
+  status:
+    project:
+      default: false
+      Control:
+        flags:
+          - control
+        target: 70%
+        threshold: 0%
+        if_not_found: success
+        if_ci_failed: error
+      QualityControl:
+        flags:
+          - qualitycontrol
+        target: 60%
+        threshold: 0%
+        if_not_found: success
+        if_ci_failed: error
+      InfoLogger:
+        flags:
+            - infologger
+        target: 70%
+        threshold: 1%
+        if_not_found: success
+        if_ci_failed: error
+      Framework:
+        flags:
+          - framework
+        target: 70%
+        threshold: 1%
+        if_not_found: success
+        if_ci_failed: error
+    patch: false
+flags:
+  control:
+    paths:
+      - "Control"
+    carryforward: true
+  qualitycontrol:
+    paths: 
+      - "QualityControl"
+    carryforward: true
+  infologger:
+    paths: 
+      - "InfoLogger"
+    carryforward: true
+  framework:
+    paths: 
+      - "Framework"
+    carryforward: true
+ignore:
+  - docs/*
+  - node_modules/*
+comment: false

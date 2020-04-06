@@ -174,11 +174,11 @@ function chartView(model, tabObject) {
  * @param {String} tabObject
  * @return {vnode}
  */
-function drawComponent(model, tabObject) {
-  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
+const drawComponent = (model, tabObject) =>
+  h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
       h('.jsrootdiv', {style: 'z-index: 90; height:100%; display: flex; flex-direction: column'},
-        draw(model, tabObject)),
+        draw(model, tabObject, {}, 'layoutShow')),
       h('.text-right.resize-element.resize-button.flex-row', {
         style: 'display: none; padding: .25rem .25rem 0rem .25rem;'
       }, [
@@ -211,7 +211,6 @@ function drawComponent(model, tabObject) {
         }, iconResizeBoth())
       ]),
     ]);
-}
 
 /**
  * Predicate to sort objects by id

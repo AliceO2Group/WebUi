@@ -224,6 +224,46 @@ class HttpServer {
   }
 
   /**
+   * Adds PUT route using express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
+   */
+  put(path, callback, options = {}) {
+    if (options.public) {
+      this.routerPublic.put(path, callback);
+      return;
+    }
+
+    this.router.put(path, callback);
+  }
+
+  /**
+   * Adds PATCH route using express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
+   */
+  patch(path, callback, options = {}) {
+    if (options.public) {
+      this.routerPublic.patch(path, callback);
+      return;
+    }
+
+    this.router.patch(path, callback);
+  }
+
+  /**
    * Adds DELETE route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
