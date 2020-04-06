@@ -80,7 +80,13 @@ const exploreMenu = (model) => [
  * @return {vnode}
  */
 const myLayoutsMenu = (model) => [
-  h('.menu-title', model.sidebar ? 'My Layouts' : ''),
+  h('.menu-title.flex-row', model.sidebar ? [
+    h('', {style: 'width: 90%'}, 'My Layouts'),
+    h('.ph2.text-right.actionable-icon', {
+      title: 'Create a new layout',
+      onclick: () => model.layout.newItem(prompt('Choose a name for the new layout:'))
+    }, iconPlus())
+  ] : ''),
   model.layout.myList.match({
     NotAsked: () => null,
     Loading: () => h('.menu-item', 'Loading...'),
@@ -89,13 +95,6 @@ const myLayoutsMenu = (model) => [
     }, list.map((layout) => myLayoutsMenuItem(model, layout))),
     Failure: (error) => h('.menu-item', error),
   }),
-  h('a.menu-item', {
-    title: 'New layout...',
-    style: 'display:flex',
-    onclick: () => model.layout.newItem(prompt('Choose a name of the new layout:'))
-  }, [
-    h('span', iconPlus()), model.sidebar && itemMenuText('New layout...')
-  ])
 ];
 
 /**
