@@ -20,6 +20,7 @@ export default class QCObject extends Observable {
     this.currentList = [];
     this.list = null;
 
+    this.objectsRemote = RemoteData.notAsked();
     this.selected = null; // object - id of object
     this.selectedOpen = false;
     this.objects = {}; // objectName -> RemoteData
@@ -189,6 +190,8 @@ export default class QCObject extends Observable {
    */
   async loadList() {
     if (!this.isOnlineModeEnabled) {
+      this.objectsRemote = RemoteData.loading();
+      this.notify();
       this.queryingObjects = true;
       let offlineObjects = [];
       const result = await this.qcObjectService.getObjects();
@@ -219,6 +222,7 @@ export default class QCObject extends Observable {
         this.selected = this.list.find((object) => object.name === this.selected.name);
       }
       this.queryingObjects = false;
+      this.objectsRemote = RemoteData.success();
       this.notify();
     } else {
       this.loadOnlineList();
@@ -241,6 +245,8 @@ export default class QCObject extends Observable {
    * Ask server for online objects and fills tree with them
    */
   async loadOnlineList() {
+    this.objectsRemote = RemoteData.loading();
+    this.notify();
     let onlineObjects = [];
     const result = await this.qcObjectService.getOnlineObjects();
     if (result.isSuccess()) {
@@ -264,6 +270,8 @@ export default class QCObject extends Observable {
     this.listOnline = onlineObjects;
     this.currentList = onlineObjects;
     this.search('');
+    this.objectsRemote = RemoteData.success();
+    this.notify();
   }
 
   /**
@@ -344,19 +352,22 @@ export default class QCObject extends Observable {
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
   async loadObjects(objectsName) {
+    this.objectsRemote = RemoteData.loading();
+    this.notify();
     if (!objectsName || !objectsName.length) {
       return;
     }
 
-    const result = await this.qcObjectService.getObjectsByName(objectsName);
-    if (!result.isSuccess()) {
+    this.objectsRemote = await this.qcObjectService.getObjectsByName(objectsName);
+    this.notify();
+    if (!this.objectsRemote.isSuccess()) {
       // it should be always status=200 for this request
       this.model.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
       return;
     }
 
     // eslint-disable-next-line
-    const objects = JSROOT.JSONR_unref(result.payload);
+    const objects = JSROOT.JSONR_unref(this.objectsRemote.payload);
     for (const name in objects) {
       if (objects[name].error) {
         this.objects[name] = RemoteData.failure(objects[name].error);

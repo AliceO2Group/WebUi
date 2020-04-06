@@ -21,7 +21,7 @@ export default function objectTreeHeader(model) {
     h('.w-33.text-center', [
       h('b.f4', 'Objects'),
       ' ',
-      h('span', `(${howMany})`),
+      model.object.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
     h('.flex-grow.text-right', [
       h('.dropdown', {

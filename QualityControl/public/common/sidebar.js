@@ -84,7 +84,9 @@ const myLayoutsMenu = (model) => [
   model.layout.myList.match({
     NotAsked: () => null,
     Loading: () => h('.menu-item', 'Loading...'),
-    Success: (list) => h('.scroll-y', list.map((layout) => myLayoutsMenuItem(model, layout))),
+    Success: (list) => h('.scroll-y', {
+      style: 'min-height: 10em;'
+    }, list.map((layout) => myLayoutsMenuItem(model, layout))),
     Failure: (error) => h('.menu-item', error),
   }),
   h('a.menu-item', {
