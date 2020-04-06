@@ -24,9 +24,7 @@ export default function sidebar(model) {
   // Spacial case when sidebar is used as a required form or perperty editor
   if (model.router.params.page === 'layoutShow' && model.layout.editEnabled) {
     return h('nav.sidebar.sidebar-extend', {class: ''}, [
-      h('.sidebar-content', [
-        objectTreeSidebar(model)
-      ])
+      h('.sidebar-content', [objectTreeSidebar(model)])
     ]);
   }
 
@@ -86,10 +84,7 @@ const myLayoutsMenu = (model) => [
   model.layout.myList.match({
     NotAsked: () => null,
     Loading: () => h('.menu-item', 'Loading...'),
-    Success: (list) =>
-      h('.scroll-y',
-        list.map((layout) => myLayoutsMenuItem(model, layout))
-      ),
+    Success: (list) => h('.scroll-y', list.map((layout) => myLayoutsMenuItem(model, layout))),
     Failure: (error) => h('.menu-item', error),
   }),
   h('a.menu-item', {
@@ -123,15 +118,14 @@ const statusMenu = (model) =>
  * @param {Object} layout
  * @return {vnode}
  */
-const myLayoutsMenuItem = (model, layout) =>
-  h('a.menu-item.w-wrapped', {
-    title: layout.name,
-    href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
-    onclick: (e) => model.router.handleLinkEvent(e),
-    class: model.router.params.layoutId === layout.id ? 'selected' : ''
-  }, [
-    h('span', iconLayers()), model.sidebar && itemMenuText(layout.name)
-  ]);
+const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
+  title: layout.name,
+  href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
+  onclick: (e) => model.router.handleLinkEvent(e),
+  class: model.router.params.layoutId === layout.id ? 'selected' : ''
+}, [
+  h('span', iconLayers()), model.sidebar && itemMenuText(layout.name)
+]);
 
 /**
  * Shows a little form to set interval of refresh of objects,

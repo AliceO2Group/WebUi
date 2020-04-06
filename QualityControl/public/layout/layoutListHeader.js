@@ -1,5 +1,4 @@
 import {h} from '/js/src/index.js';
-import spinner from '../loader/spinner.js';
 
 
 /**
@@ -12,7 +11,6 @@ export default (model) => [
     h('b.f4', 'Layouts'),
     ' ',
     h('span', `(${howManyItems(model)})`),
-    model.loader.active && h('span.f4.mh1', spinner()),
   ]),
   h('.flex-grow.text-right', [
     h('input.form-control.form-inline.mh1.w-33', {
