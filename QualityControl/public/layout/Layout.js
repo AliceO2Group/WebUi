@@ -310,6 +310,8 @@ export default class Layout extends Observable {
     this.editEnabled = true;
     this.editOriginalClone = JSON.parse(JSON.stringify(this.item)); // deep clone
     this.editingTabObject = null;
+    window.dispatchEvent(new Event('resize'));
+
     this.notify();
   }
 
