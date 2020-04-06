@@ -18,7 +18,7 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
           spinner(5), h('', 'Loading Objects')
         ]),
         Success: () => tableShow(model),
-        Failure: (error) => h('.menu-item', error),
+        Failure: () => null, // notification is displayed
       })),
     h('.animate-width.scroll-y',
       {
