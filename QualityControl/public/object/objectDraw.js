@@ -116,9 +116,9 @@ export function draw(model, tabObject, options, location = '') {
       h('.animate-slow-appearance', 'Loading')
     ]);
   } else if (objectRemoteData.isFailure()) {
-    content = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('.p4.f6', objectRemoteData.payload),
-    ]);
+    content = h('.scroll-y.absolute-fill.p1.f6', {
+      style: 'word-break: break-all;'
+    }, objectRemoteData.payload + objectRemoteData.payload);
   } else {
     if (model.object.isObjectChecker(objectRemoteData.payload)) {
       return checkersPanel(objectRemoteData.payload, location);
