@@ -118,7 +118,7 @@ export function draw(model, tabObject, options, location = '') {
   } else if (objectRemoteData.isFailure()) {
     content = h('.scroll-y.absolute-fill.p1.f6', {
       style: 'word-break: break-all;'
-    }, objectRemoteData.payload + objectRemoteData.payload);
+    }, objectRemoteData.payload);
   } else {
     if (model.object.isObjectChecker(objectRemoteData.payload)) {
       return checkersPanel(objectRemoteData.payload, location);
