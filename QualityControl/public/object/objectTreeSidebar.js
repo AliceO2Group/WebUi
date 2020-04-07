@@ -1,4 +1,5 @@
 import {h} from '/js/src/index.js';
+import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import {iconCaretBottom, iconCaretRight, iconBarChart, iconResizeBoth} from '/js/src/icons.js';
 
@@ -12,7 +13,16 @@ import {iconCaretBottom, iconCaretRight, iconBarChart, iconResizeBoth} from '/js
  */
 export default (model) => h('.flex-column.h-100', [
   h('.m2.mv3', searchForm(model)),
-  h('.h-100.scroll-y', treeTable(model)),
+  h('.h-100.scroll-y',
+    model.object.objectsRemote.match({
+      NotAsked: () => null,
+      Loading: () => h('.flex-column.items-center.justify-center.f5', [
+        spinner(3), h('', 'Loading Objects')
+      ]),
+      Success: () => treeTable(model),
+      Failure: () => null, // notification is displayed
+    }),
+  ),
   objectPreview(model)
 ]);
 
@@ -113,7 +123,7 @@ const treeRows = (model) => !model.object.sideTree
  * @return {vnode}
  */
 function searchRows(model) {
-  return !model.object.searchResult ? null : model.object.searchResult.map((item)=> {
+  return !model.object.searchResult ? null : model.object.searchResult.map((item) => {
     const path = item.name;
     const className = item && item === model.object.selected ? 'table-primary' : '';
 

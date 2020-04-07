@@ -106,15 +106,12 @@ export default class Model extends Observable {
   handleLocationChange() {
     switch (this.router.params.page) {
       case 'layoutList':
-        this.layout.loadList()
-          .then(() => {
-            this.page = 'layoutList';
-            this.notify();
-          }).catch(() => true); // error is handled inside loadList
+        this.page = 'layoutList';
+        this.layout.loadList();
         break;
       case 'layoutShow':
         if (!this.router.params.layoutId) {
-          // TODO: notification(`Argument layoutId is URL is missing`);
+          this.notification.show(`Argument layoutId in URL is missing`, 'warning', 2000);
           this.router.go('?', true);
           return;
         }
