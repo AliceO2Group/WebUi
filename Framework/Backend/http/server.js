@@ -93,10 +93,10 @@ class HttpServer {
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
         /* eslint-disable */
-        defaultSrc: ["'self'", "data:", hostname + ":*"],
+        defaultSrc: ["'self'", "data:", hostname + ':*'],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*']
+        connectSrc: ["'self'", 'http://' + hostname + ':*', 'https://' + hostname + ':*', 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*']
         /* eslint-enable */
       }
     }));
