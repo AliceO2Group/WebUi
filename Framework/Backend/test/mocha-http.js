@@ -96,6 +96,28 @@ describe('REST API', () => {
     );
   });
 
+  describe('404 handler', () => {
+    it('GET with an incorrect path should respond 404, response should be JSON for API', (done) => {
+      http.get('http://localhost:' + config.http.port + '/api/get-wrong?token=' + token,
+        (res) => {
+          assert.ok(/^application\/json;.+/.test(res.headers['content-type']));
+          assert.strictEqual(res.statusCode, 404);
+          done();
+        }
+      );
+    });
+
+    it('GET with an incorrect path should respond 404, response should be HTML for UI', (done) => {
+      http.get('http://localhost:' + config.http.port + '/get-wrong?token=' + token,
+        (res) => {
+          assert.ok(/^text\/html;.+/.test(res.headers['content-type']));
+          assert.strictEqual(res.statusCode, 404);
+          done();
+        }
+      );
+    });
+  });
+
   it('POST with a token should respond 200/JSON', (done) => {
     const req = http.request({
       hostname: 'localhost',
