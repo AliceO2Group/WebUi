@@ -16,7 +16,7 @@ jobs:
         os: [macOS-latest, ubuntu-18.04]
     steps:
       - name: Run Control tests by using `@aliceo2/web-ui` from local `../Framework`
-        run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework;) 
+        run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework";) 
       - uses: actions/checkout@v1
       - name: Setup node
         uses: actions/setup-node@v1
