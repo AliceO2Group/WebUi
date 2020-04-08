@@ -3,7 +3,7 @@ on:
   release:
     types: [created]
 jobs:
-  build:
+  deploy-npm-module:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -11,6 +11,8 @@ jobs:
       with:
         node-version: '12.x'
         registry-url: 'https://registry.npmjs.org'
-    - name: Identify project that is being released
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+    - name: Set variable TAG as name of project that is being released
+      run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\/aliceo2\//}
+    - name: Set variable TAG as name of project that is being released
+      run: echo ${GITHUB_REF/refs\/tags\/aliceo2\//}
 
