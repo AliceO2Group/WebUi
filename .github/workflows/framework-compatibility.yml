@@ -25,5 +25,7 @@ jobs:
       - run: (cd Control; npm i)
       - run: (cd Control; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally
-        run: (cd Control; ([[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]] && (echo "Not linked Successfully")))
+        run: |
+          cd Control;
+          ([[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]] && (echo "Not linked Successfully"))
       - run: (cd Control; npm test )
