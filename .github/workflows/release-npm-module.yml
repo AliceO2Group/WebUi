@@ -1,7 +1,7 @@
-name: Node.js Package
+name: NPM Module Deployment
 on:
   release:
-    types: [created]
+    types: [created, edited]
 jobs:
   deploy-npm-module:
     runs-on: ubuntu-latest
