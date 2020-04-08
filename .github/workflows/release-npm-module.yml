@@ -30,5 +30,8 @@ jobs:
         fi
         echo "Identified project is $PROJECT"
         echo "::set-env name=PROJECT::$(echo "$PROJECT")"
-    - run: (echo "Variable PROJECT set to $PROJECT")
+    - run: (cd $PROJECT; npm ci)
+    - run: (cd $PROJECT; npm publish)
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
     
