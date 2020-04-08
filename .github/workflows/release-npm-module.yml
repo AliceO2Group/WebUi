@@ -12,7 +12,14 @@ jobs:
         node-version: '12.x'
         registry-url: 'https://registry.npmjs.org'
     - name: Set variable TAG as name of project that is being released
-      run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\/aliceo2\//}
-    - name: Set variable TAG as name of project that is being released
-      run: echo ${GITHUB_REF/refs\/tags\/aliceo2\//}
-
+      run: |
+        TAG=$( echo "${GITHUB_REF/refs\/tags\/@aliceo2\/}" | cut -f1 -d"@")
+        if [ "$TAG" = "qc" ]; then PROJECT="QualityControl"
+        elif [ "$TAG" = "control" ]; then PROJECT="Control"
+        elif [ "$TAG" = "infologger" ]; then PROJECT="InfoLogger"
+        elif [ "$TAG" = "web-ui" ]; then PROJECT="Framework"
+        else PROJECT="UNKNOWN"; exit 1;
+        fi
+        echo ::set-output name=TAG::$PROJECT
+        echo "Identified project is $PROJECT"
+    
