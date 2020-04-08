@@ -14,42 +14,24 @@ on:
     paths:
       - '*'
 jobs:
-  test:
-    name: Tests on macos-latest    
-    runs-on: macOS-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-      - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
-      - run: (cd Framework; npm ci )
-      - run: (cd Framework; npm test )
-  coverage:
-    name: Tests & coverage on ubuntu-18.04
+  compatibility:
+    name: Test all GUIs with Framework changes
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - name: Checkout this PR
+        uses: actions/checkout@v2
+        with:
+          path: WebUI-current
+      - name: Checkout WebUI dev
+        uses: actions/checkout@v2
+        with:
+          ref: dev
+          path: WebUI-dev
+    - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd Framework; npm ci )
-      - run: (cd Framework; npm run coverage )
-      - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - name: Send codecov report for Framework
-        uses: codecov/codecov-action@v1.0.6
-        with:
-          token: ${{ secrets. NEW_CODECOV_TOKEN }}
-          flags: framework
-          fail_ci_if_error: true
-  windows:
-    name: Test on windows-latest
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-      - run: cd Framework; npm ci
-      - run: cd Framework; npm test
+    - run: (cd $GITHUB_WORKSPACE/WebUI-current/Framework/; npm i)
+    - run: (cd $GITHUB_WORKSPACE/WebUI-dev/InfoLogger; npm i)
+    - run: rm -rf $GITHUB_WORKSPACE/WebUI-dev/InfoLogger/node_modules/@aliceo2/web-ui
+    - run: ln -s $GITHUB_WORKSPACE/WebUI-current/Framework $GITHUB_WORKSPACE/WebUI-dev/InfoLogger/node_modules/@aliceo2/web-ui
+    - run: (cd $GITHUB_WORKSPACE/WebUI-dev/InfoLogger; npm test)
