@@ -1,7 +1,7 @@
 name: NPM Module Deployment
 on:
   release:
-    types: [created, edited]
+    types: [created]
 jobs:
   deploy-npm-module:
     runs-on: ubuntu-latest
@@ -20,8 +20,8 @@ jobs:
         elif [ "$TAG" = "web-ui" ]; then PROJECT="Framework"
         else PROJECT="UNKNOWN"; exit 1;
         fi
-        echo ::set-output name=TAG::$PROJECT
+        echo "::set-env name=TAG::$PROJECT"
+
         echo "Identified project is $PROJECT"
-      id: deployment
-    - run: echo "${{steps.deployment.outputs.PROJECT}}"
+    - run: (echo "Variable PROJECT set to $PROJECT")
     
