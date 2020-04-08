@@ -18,6 +18,7 @@ jobs:
           exit 1;
         else
           echo "TAG is correct"
+        fi
     - name: Set variable TAG as name of project that is being released
       run: |
         TAG=$( echo "${GITHUB_REF/refs\/tags\/@aliceo2\/}" | cut -f1 -d"@")
