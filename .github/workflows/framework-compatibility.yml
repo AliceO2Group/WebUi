@@ -15,8 +15,8 @@ jobs:
       matrix:
         os: [macOS-latest, ubuntu-18.04]
     steps:
-      - name: Run Control tests by using local Framework project
-        run : (echo "Run Control tests by using local Framework project";) 
+      - name: Run Control tests by using `@aliceo2/web-ui` from local `../Framework`
+        run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework;) 
       - uses: actions/checkout@v1
       - name: Setup node
         uses: actions/setup-node@v1
@@ -25,7 +25,5 @@ jobs:
       - run: (cd Control; npm i)
       - run: (cd Control; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally
-        run: |
-          cd Control;
-          if [[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]]; then exit 1; else echo "@aliceo2/web-ui successfully linked"; fi;
+        run: (cd Control; if [[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]]; then exit 1; else echo "@aliceo2/web-ui successfully linked"; fi;)
       - run: (cd Control; npm test )
