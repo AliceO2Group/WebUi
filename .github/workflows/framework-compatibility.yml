@@ -1,5 +1,4 @@
 name: Framework-Compatibility
-
 on:
   pull_request:
     paths:
@@ -9,7 +8,7 @@ on:
       - '.github/workflows/framework.yml'
 
 jobs:
-  control:
+  control-compatibility:
     name: Control compatibility test 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -25,4 +24,6 @@ jobs:
           node-version: '12.x'
       - run: (cd Control; npm i)
       - run: (cd Control; npm i --save ../Framework)
+      - name: Check @aliceo2/web-ui was successfully linked locally
+        run: ([[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]] && exit 1;)
       - run: (cd Control; npm test )
