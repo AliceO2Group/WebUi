@@ -26,7 +26,7 @@ jobs:
         elif [ "$TAG" = "control" ]; then PROJECT="Control"
         elif [ "$TAG" = "infologger" ]; then PROJECT="InfoLogger"
         elif [ "$TAG" = "web-ui" ]; then PROJECT="Framework"
-        else PROJECT="UNKNOWN"; exit 1;
+        else echo "Project identified is UNKNOWN"; exit 1;
         fi
         echo "Identified project is $PROJECT"
         echo "::set-env name=PROJECT::$(echo "$PROJECT")"
