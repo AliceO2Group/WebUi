@@ -20,8 +20,7 @@ jobs:
         elif [ "$TAG" = "web-ui" ]; then PROJECT="Framework"
         else PROJECT="UNKNOWN"; exit 1;
         fi
-        echo "::set-env name=TAG::$(echo "$PROJECT")"
-
         echo "Identified project is $PROJECT"
+        echo "::set-env name=TAG::$(echo "$PROJECT")"
     - run: (echo "Variable PROJECT set to $PROJECT")
     
