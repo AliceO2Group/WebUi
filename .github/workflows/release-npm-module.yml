@@ -22,5 +22,6 @@ jobs:
         fi
         echo ::set-output name=TAG::$PROJECT
         echo "Identified project is $PROJECT"
-    - run: echo "${{steps.outputs.PROJECT}}"
+      id: deployment
+    - run: echo "${{steps.deployment.outputs.PROJECT}}"
     
