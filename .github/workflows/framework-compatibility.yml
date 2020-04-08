@@ -27,5 +27,5 @@ jobs:
       - name: Check @aliceo2/web-ui was successfully linked locally
         run: |
           cd Control;
-          if [[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]]; then exit 1; else echo "@aliceo2/web-ui successfully linked";
+          if [[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]]; then exit 1; else echo "@aliceo2/web-ui successfully linked"; fi;
       - run: (cd Control; npm test )
