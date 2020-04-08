@@ -1,0 +1,27 @@
+name: Framework-Compatibility
+
+on:
+  pull_request:
+    paths:
+      - 'Framework/*'
+      - 'Framework/*/*'
+      - 'Framework/*/*/*'
+      - '.github/workflows/framework.yml'
+
+jobs:
+  control:
+    name: Control compatibility test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-18.04]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Run Control Tests by using local Framework project
+      - run: (cd Control; npm i)
+      - run: (cd Control; npm i --save ../Framework)
+      - run: (cd Control; npm test )
