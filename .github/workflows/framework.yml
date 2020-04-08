@@ -27,11 +27,11 @@ jobs:
         with:
           ref: dev
           path: WebUI-dev
-    - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-    - run: (cd $GITHUB_WORKSPACE/WebUI-current/Framework/; npm i)
-    - run: (cd $GITHUB_WORKSPACE/WebUI-dev/InfoLogger; npm i)
-    - run: rm -rf $GITHUB_WORKSPACE/WebUI-dev/InfoLogger/node_modules/@aliceo2/web-ui
-    - run: ln -s $GITHUB_WORKSPACE/WebUI-current/Framework $GITHUB_WORKSPACE/WebUI-dev/InfoLogger/node_modules/@aliceo2/web-ui
-    - run: (cd $GITHUB_WORKSPACE/WebUI-dev/InfoLogger; npm test)
+      - run: (cd $GITHUB_WORKSPACE/WebUI-current/Framework/; npm i)
+      - run: (cd $GITHUB_WORKSPACE/WebUI-dev/InfoLogger; npm i)
+      - run: rm -rf $GITHUB_WORKSPACE/WebUI-dev/InfoLogger/node_modules/@aliceo2/web-ui
+      - run: ln -s $GITHUB_WORKSPACE/WebUI-current/Framework $GITHUB_WORKSPACE/WebUI-dev/InfoLogger/node_modules/@aliceo2/web-ui
+      - run: (cd $GITHUB_WORKSPACE/WebUI-dev/InfoLogger; npm test)
