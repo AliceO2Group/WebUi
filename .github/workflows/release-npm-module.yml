@@ -1,0 +1,37 @@
+name: NPM Module Deployment
+on:
+  release:
+    types: [created]
+jobs:
+  deploy-npm-module:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Check released tag matches ALICE O2 naming pattern
+      run: |
+        if ! [[ $GITHUB_REF =~ @aliceo2\/[a-z]+-*[a-z]*@*.* ]]; then
+          echo "TAG: ${GITHUB_REF} does not match expected pattern";
+          exit 1;
+        else
+          echo "TAG is correct"
+        fi
+    - name: Set variable TAG as name of project that is being released
+      run: |
+        TAG=$( echo "${GITHUB_REF/refs\/tags\/@aliceo2\/}" | cut -f1 -d"@")
+        if [ "$TAG" = "qc" ]; then PROJECT="QualityControl"
+        elif [ "$TAG" = "control" ]; then PROJECT="Control"
+        elif [ "$TAG" = "infologger" ]; then PROJECT="InfoLogger"
+        elif [ "$TAG" = "web-ui" ]; then PROJECT="Framework"
+        else echo "Project identified is UNKNOWN"; exit 1;
+        fi
+        echo "Identified project is $PROJECT"
+        echo "::set-env name=PROJECT::$(echo "$PROJECT")"
+    - run: (cd $PROJECT; npm ci)
+    - run: (cd $PROJECT; npm publish)
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
+    
