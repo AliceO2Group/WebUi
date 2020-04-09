@@ -22,11 +22,14 @@ class CCDBConnector {
 
     this.hostname = config.hostname;
     this.port = config.port;
+  }
 
-    const connectionTest = this.httpGetJson('/latest');
-    connectionTest.catch((err) => {
-      throw new Error('Unable to connect CCDB: ' + err);
-    });
+  /**
+   * Returns a promise with regards to the status of CCDB
+   * @return {Promise}
+   */
+  async testConnection() {
+    return this.httpGetJson('/latest');
   }
 
   /**
@@ -66,6 +69,16 @@ class CCDBConnector {
      */
     const listTransform = (result) => result.objects.map(itemTransform).filter(itemFilter);
     return this.httpGetJson('/latest/.*').then(listTransform);
+  }
+
+  /**
+   * Request a list of timestamps by objectName
+   * @param {string} objectName
+   * @return {Promise.<Array.<string>, Error>}
+   */
+  async getObjectTimestampList(objectName) {
+    return this.httpGetJson(`/browse/${objectName}`)
+      .then((data) => data.objects.map((object) => object.createTime));
   }
 
   /**

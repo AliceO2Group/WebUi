@@ -20,7 +20,7 @@ module.exports = {
     port: 8500
   },
   ccdb: {
-    hostname: 'ccdb',
+    hostname: 'localhost',
     port: 8500
   },
   quality_control: {

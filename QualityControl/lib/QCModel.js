@@ -32,7 +32,11 @@ if (config.listingConnector === 'ccdb') {
     throw new Error('CCDB config is mandatory');
   }
   const ccdb = new CCDBConnector(config.ccdb);
+  ccdb.testConnection()
+    .then(() => log.info('CCDB Connection was successfully tested'))
+    .catch((error) => log.error(`CCDB connection could not be established due to ${error}`));
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
+  module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
 
   const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
   module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
