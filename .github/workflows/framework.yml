@@ -11,8 +11,6 @@ on:
     branches:
       - 'master'
       - 'dev'
-    paths:
-      - '*'
 jobs:
   test:
     name: Tests on macos-latest    
@@ -53,3 +51,62 @@ jobs:
           node-version: '12.x'
       - run: cd Framework; npm ci
       - run: cd Framework; npm test
+  control-compatibility:
+    name: Control compatibility test 
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-18.04]
+    steps:
+      - name: Run Control tests by using `@aliceo2/web-ui` from local `../Framework`
+        run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework";) 
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: (cd Control; npm ci)
+      - run: (cd Control; npm i --save ../Framework)
+      - name: Check @aliceo2/web-ui was successfully linked locally
+        run: (cd Control; if [[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]]; then exit 1; else echo "@aliceo2/web-ui successfully linked"; fi;)
+      - run: (cd Control; npm test )
+  qualitycontrol-compatibility:
+    name: QualityControl compatibility test 
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-18.04]
+    steps:
+      - name: Run QualityControl tests by using `@aliceo2/web-ui` from local `../Framework`
+        run : (echo "Run QualityControl tests by using @aliceo2/web-ui from local ../Framework";) 
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
+      - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
+      - run: (cd QualityControl; npm ci)
+      - run: (cd QualityControl; npm i --save ../Framework)
+      - name: Check @aliceo2/web-ui was successfully linked locally
+        run: (cd QualityControl; if [[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]]; then exit 1; else echo "@aliceo2/web-ui successfully linked"; fi;)
+      - run: (cd QualityControl; npm test )
+  infologger-compatibility:
+    name: InfoLogger compatibility test 
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-18.04]
+    steps:
+      - name: Run InfoLogger tests by using `@aliceo2/web-ui` from local `../Framework`
+        run : (echo "Run InfoLogger tests by using @aliceo2/web-ui from local ../Framework";) 
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: (cd InfoLogger; npm ci)
+      - run: (cd InfoLogger; npm i --save ../Framework)
+      - name: Check @aliceo2/web-ui was successfully linked locally
+        run: (cd InfoLogger; if [[ -z $(npm list @aliceo2/web-ui --link | grep @aliceo2/web-ui) ]]; then exit 1; else echo "@aliceo2/web-ui successfully linked"; fi;)
+      - run: (cd InfoLogger; npm test )
