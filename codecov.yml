@@ -38,7 +38,9 @@ coverage:
         if_ci_failed: error
     patch:
       Control:
-        target: auto
+        flags:
+          - control
+        target: 70%
         threshold: 0%
 flags:
   control:
