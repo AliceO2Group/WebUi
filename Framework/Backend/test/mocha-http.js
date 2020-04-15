@@ -30,6 +30,7 @@ const token = jwt.generateToken(0, 'test', 1);
 describe('REST API', () => {
   before(() => {
     httpServer = new HttpServer(config.http, config.jwt);
+    httpServer.get('/get-insecure', (req, res) => res.json({ok: 1}), {public: true});
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-with-body', (req, res) => res.json({body: req.body}));
@@ -59,6 +60,14 @@ describe('REST API', () => {
         parsedUrl.searchParams.has('token');
         done();
       });
+  });
+
+  it('GET without token should respond 200/JSON', (done) => {
+    request(httpServer)
+      .get('/api/get-insecure')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .expect({ok: 1}, done);
   });
 
   it('GET with token should respond 200/JSON', (done) => {
