@@ -37,11 +37,8 @@ coverage:
         if_not_found: success
         if_ci_failed: error
     patch:
-      Control:
-        flags:
-          - control
-        target: 70%
-        threshold: 0%
+      default:
+        target: 75%
 flags:
   control:
     paths:
