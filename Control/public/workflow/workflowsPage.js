@@ -1,5 +1,6 @@
 import {h, iconReload, iconTrash, iconPlus} from '/js/src/index.js';
 import revisionPanel from './revisionPanel.js';
+import flpSelectionPanel from './flpSelectionPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -162,6 +163,9 @@ const extraVariablePanel = (workflow) =>
     h('h5.bg-gray-light.p2.panel-title.w-100', 'Environment variables'),
     addKVInputList(workflow),
     addKVInputPair(workflow),
+
+    h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
+    flpSelectionPanel(workflow),
   ]);
 
 /**
