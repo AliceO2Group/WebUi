@@ -26,17 +26,20 @@ coverage:
         flags:
             - infologger
         target: 70%
-        threshold: 1%
+        threshold: 0%
         if_not_found: success
         if_ci_failed: error
       Framework:
         flags:
           - framework
         target: 70%
-        threshold: 1%
+        threshold: 0%
         if_not_found: success
         if_ci_failed: error
-    patch: false
+    patch:
+      default:
+        target: auto
+        threshold: 0%
 flags:
   control:
     paths:
