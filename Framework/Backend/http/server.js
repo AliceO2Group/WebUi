@@ -255,12 +255,7 @@ class HttpServer {
    * @param {boolean} [options.public] - true to remove token verification
    */
   get(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.get(path, callback);
-      return;
-    }
-
-    this.router.get(path, callback);
+    this._all('get', path, callback, options);
   }
 
   /**
@@ -275,12 +270,7 @@ class HttpServer {
    * @param {boolean} [options.public] - true to remove token verification
    */
   post(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.post(path, callback);
-      return;
-    }
-
-    this.router.post(path, callback);
+    this._all('post', path, callback, options);
   }
 
   /**
@@ -295,12 +285,7 @@ class HttpServer {
    * @param {boolean} [options.public] - true to remove token verification
    */
   put(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.put(path, callback);
-      return;
-    }
-
-    this.router.put(path, callback);
+    this._all('put', path, callback, options);
   }
 
   /**
@@ -315,12 +300,7 @@ class HttpServer {
    * @param {boolean} [options.public] - true to remove token verification
    */
   patch(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.patch(path, callback);
-      return;
-    }
-
-    this.router.patch(path, callback);
+    this._all('patch', path, callback, options);
   }
 
   /**
@@ -335,12 +315,28 @@ class HttpServer {
    * @param {boolean} [options.public] - true to remove token verification
    */
   delete(path, callback, options = {}) {
+    this._all('delete', path, callback, options);
+  }
+
+  /**
+   * Adds an route to the express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} method       - http method to use
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function} callback   - method that handles request and response: function(req, res);
+   *                                token should be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
+   */
+  _all(method, path, callback, options = {}) {
     if (options.public) {
-      this.routerPublic.delete(path, callback);
+      this.routerPublic[method](path, callback);
       return;
     }
 
-    this.router.delete(path, callback);
+    this.router[method](path, callback);
   }
 
   /**
