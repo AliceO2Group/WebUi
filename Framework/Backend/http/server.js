@@ -60,13 +60,65 @@ class HttpServer {
         key: fs.readFileSync(httpConfig.key),
         cert: fs.readFileSync(httpConfig.cert)
       };
-      this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
+      this.server = https.createServer(credentials, this.app);
       this.enableHttpRedirect();
-      log.info(`Secure server listening on port ${httpConfig.portSecure}`);
+      this.port = httpConfig.portSecure;
     } else {
-      this.server = http.createServer(this.app).listen(httpConfig.port);
-      log.info(`Server listening on port ${httpConfig.port}`);
+      this.server = http.createServer(this.app);
+      this.port = httpConfig.port;
     }
+
+    const autoListenFlag = 'autoListen';
+    if (!httpConfig.hasOwnProperty(autoListenFlag) || httpConfig[autoListenFlag]) {
+      this.listen();
+    }
+  }
+
+  /**
+   * Starts the server listening for connections.
+   * @return {Promise}
+   */
+  listen() {
+    return new Promise((resolve, reject) => {
+      this.server.listen(this.port, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          log.info(`Server listening on port ${this.port}`);
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Returns the bound `address`, the address `family` name, and `port` of the
+   * server as reported by the operating system if listening on an IP socket
+   * (useful to find which port was assigned when getting an OS-assigned address):
+   * { port: 12346, family: 'IPv4', address: '127.0.0.1' }. For a server listening
+   * on a pipe or Unix domain socket, the name is returned as a string.
+   * @return {(object|string)} The address of the server
+   */
+  address() {
+    return this.server.address();
+  }
+
+  /**
+   * Stops the server from accepting new connections and keeps existing connections.
+   * This function is asynchronous, the server is finally closed when all connections
+   * are ended and the server emits a 'close' event.
+   * @return {Promise}
+   */
+  close() {
+    return new Promise((resolve, reject) => {
+      this.server.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 
   /**
