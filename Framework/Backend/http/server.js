@@ -254,8 +254,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  get(path, callback, options = {}) {
-    this._all('get', path, callback, options);
+  get(path, ...callbacks) {
+    this._all('get', path, ...callbacks);
   }
 
   /**
@@ -269,8 +269,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  post(path, callback, options = {}) {
-    this._all('post', path, callback, options);
+  post(path, ...callbacks) {
+    this._all('post', path, ...callbacks);
   }
 
   /**
@@ -284,8 +284,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  put(path, callback, options = {}) {
-    this._all('put', path, callback, options);
+  put(path, ...callbacks) {
+    this._all('put', path, ...callbacks);
   }
 
   /**
@@ -299,8 +299,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  patch(path, callback, options = {}) {
-    this._all('patch', path, callback, options);
+  patch(path, ...callbacks) {
+    this._all('patch', path, ...callbacks);
   }
 
   /**
@@ -314,8 +314,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  delete(path, callback, options = {}) {
-    this._all('delete', path, callback, options);
+  delete(path, ...callbacks) {
+    this._all('delete', path, ...callbacks);
   }
 
   /**
@@ -323,20 +323,26 @@ class HttpServer {
    * By default verifies JWT token unless public options is provided
    * @param {string} method       - http method to use
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callback   - method that handles request and response: function(req, res);
-   *                                token should be passed as req.query.token;
+   * @param {function[]} callback - method or array of methods that handles request
+   *                                and response: function(req, res); token should
+   *                                be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  _all(method, path, callback, options = {}) {
+  _all(method, path, ...callbacks) {
+    let options = {};
+    if (typeof callbacks.slice(-1).pop() !== 'function') {
+      options = callbacks.pop();
+    }
+
     if (options.public) {
-      this.routerPublic[method](path, callback);
+      this.routerPublic[method](path, ...callbacks);
       return;
     }
 
-    this.router[method](path, callback);
+    this.router[method](path, ...callbacks);
   }
 
   /**
