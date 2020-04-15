@@ -167,7 +167,7 @@ const toolbarEditModeTab = (model, tab, i) => {
  * @return {vnode}
  */
 const resizeGridTabDropDown = (model, tab) =>
-  h('select.form-control.select-tab', {
+  h('select.form-control.select-tab.select-no-arrow', {
     style: 'cursor: pointer',
     title: 'Resize grid of the tab',
     onchange: (e) => model.layout.resizeGridByXY(e.target.value),

@@ -23,10 +23,10 @@ export default (model) => h('.flex-column.absolute-fill', {key: model.router.par
     h('.animate-width.scroll-y',
       {
         style: {
-          width: model.object.selected ? '50%' : 0
+          width: model.object.selectedObject.object? '50%' : 0
         }
       },
-      model.object.selected ? drawComponent(model) : null)
+      model.object.selectedObject.object? drawComponent(model) : null)
   ]),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),
@@ -48,13 +48,13 @@ function drawComponent(model) {
           h('a.btn',
             {
               title: 'Open object plot in full screen',
-              href: `?page=objectView&objectName=${model.object.selected.name}`,
+              href: `?page=objectView&objectName=${model.object.selectedObject.object.name}`,
               onclick: (e) => model.router.handleLinkEvent(e)
             }, iconResizeBoth()
           )
         )]),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, model.object.selected.name, {stat: true}, 'treePage')
+        draw(model, model.object.selectedObject.object.name, {stat: true}, 'treePage')
       )
     ]
   );
@@ -83,8 +83,8 @@ function statusBarLeft(model) {
  * @param {Object} model
  * @return {vnode}
  */
-const statusBarRight = (model) => model.object.selected
-  ? h('span.right', model.object.selected.name)
+const statusBarRight = (model) => model.object.selectedObject.object
+  ? h('span.right', model.object.selectedObject.object.name)
   : null;
 
 /**
@@ -132,7 +132,7 @@ function searchRows(model) {
      */
     const selectItem = () => model.object.select(item);
     const color = item.quality === 'good' ? 'success' : 'danger';
-    const className = item && item === model.object.selected ? 'table-primary' : '';
+    const className = item && item === model.object.selectedObject.object? 'table-primary' : '';
 
     return h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
       h('td.highlight', [
@@ -164,7 +164,7 @@ function treeRow(model, tree, level) {
   const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
   const path = tree.path.join('/');
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
-  const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
+  const className = tree.object && tree.object === model.object.selectedObject.object? 'table-primary' : '';
 
   return model.object.searchInput ? [] : [
     h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [

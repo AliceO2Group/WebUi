@@ -51,11 +51,33 @@ function getActionsHeader(model) {
       getBackToQCGButton(model),
       h('b.text-center.flex-column', {style: 'flex-grow:1'}, getObjectTitle(model)),
       h('.flex-row', [
+        timestampDropdown(model.object),
         infoButton(model.object),
         model.isContextSecure() && getCopyURLToClipboardButton(model)
       ])
     ]);
 }
+
+/**
+ * Create a droplist for user to select timestamp for object to view
+ * @param {Object} model
+ * @return {vnode}
+ */
+const timestampDropdown = (model) =>
+  h('.p1',
+    h('select.form-control', {
+      style: 'cursor: pointer',
+      // onchange: (e) => workflow.setRepository(e.target.value)
+    }, [
+      h('option', 'latest'),
+      h('option', '2'),
+      // repoList.map((repository) => repository.name)
+      //   .map((repository) => h('option', {
+      //     selected: repository === workflow.form.repository ? true : false,
+      //     value: repository
+      //   }, repository))
+    ]),
+  );
 
 /**
  * Button for redirecting the user back to QCG object tree page
@@ -110,7 +132,7 @@ function getRootObject(model) {
         h('', {
           oncreate: () => model.object.select({name: model.router.params.objectName}),
           style: 'width: 100%; height: 100%',
-        }, model.object.selected ?
+        }, model.object.selectedObject.object?
           draw(model, model.object.selected.name, {stat: true}, 'objectView')
           : errorLoadingObject(`Object ${model.router.params.objectName} could not be loaded`)
         )
@@ -122,7 +144,7 @@ function getRootObject(model) {
             NotAsked: () => null,
             Loading: () => h('.f1', spinner()),
             Success: () =>
-              model.object.selected ?
+              model.object.selectedObject.object?
                 h('', {
                   style: 'width: 100%; height: 100%'
                 }, draw(model, model.object.selected.name,

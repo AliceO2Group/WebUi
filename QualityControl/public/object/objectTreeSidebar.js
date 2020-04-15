@@ -125,7 +125,7 @@ const treeRows = (model) => !model.object.sideTree
 function searchRows(model) {
   return !model.object.searchResult ? null : model.object.searchResult.map((item) => {
     const path = item.name;
-    const className = item && item === model.object.selected ? 'table-primary' : '';
+    const className = item && item === model.object.selectedObject.object? 'table-primary' : '';
 
     /**
      * Handler when line is clicked by user
@@ -176,7 +176,7 @@ function treeRow(model, sideTree, level) {
   const icon = sideTree.object ? iconBarChart() : (sideTree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
   const iconWrapper = h('span', {style: {paddingLeft: `${level}em`}}, icon);
   const path = sideTree.path.join('/');
-  const className = sideTree.object && sideTree.object === model.object.selected ? 'table-primary' : '';
+  const className = sideTree.object && sideTree.object === model.object.selectedObject.object? 'table-primary' : '';
   const draggable = !!sideTree.object;
 
   // UI events

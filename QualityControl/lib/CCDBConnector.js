@@ -68,7 +68,7 @@ class CCDBConnector {
      * @return {Array.<Object>}
      */
     const listTransform = (result) => result.objects.map(itemTransform).filter(itemFilter);
-    return this.httpGetJson('/latest/.*').then(listTransform);
+    return this.httpGetJson('/latest/qc/TST/QcTask/exampleOption').then(listTransform);
   }
 
   /**
@@ -78,7 +78,7 @@ class CCDBConnector {
    */
   async getObjectTimestampList(objectName) {
     return this.httpGetJson(`/browse/${objectName}`)
-      .then((data) => data.objects.map((object) => object.createTime));
+      .then((data) => data.objects.map((object) => object.lastModified));
   }
 
   /**

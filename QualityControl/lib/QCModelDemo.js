@@ -32,6 +32,7 @@ function promiseResolveWithLatency(data) {
  */
 function readObjectData(name) {
   const object = objects.find((object) => object.name === `${name}`);
+  // TODO Add timestamp for testing
   return promiseResolveWithLatency(object ? object.data : 'Object not found');
 }
 

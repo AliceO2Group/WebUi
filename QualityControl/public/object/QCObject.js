@@ -21,12 +21,18 @@ export default class QCObject extends Observable {
     this.list = null;
 
     this.objectsRemote = RemoteData.notAsked();
+    
+    this.selectedObject = {
+      object: null,
+      isOpen: false,
+      timestampList: RemoteData.notAsked()
+    };
     this.selected = null; // object - id of object
-    this.selectedOpen = false;
+
     this.objects = {}; // objectName -> RemoteData
     this.objectsReferences = {}; // object name -> number of each object being
     this.qcObjectService = new QCObjectService(this.model);
-
+    
     this.listOnline = []; // list of online objects name
     this.isOnlineModeConnectionAlive = false;
     this.isOnlineModeEnabled = false; // show only online objects or all (offline)
@@ -74,12 +80,12 @@ export default class QCObject extends Observable {
    * @param {string} objectName
    */
   toggleInfoArea(objectName) {
-    this.selectedOpen = !this.selectedOpen;
+    this.selectedObject.isOpen = !this.selectedObject.isOpen;
     this.notify();
     if (objectName) {
       if (!this.list) {
         this.selected = {name: objectName};
-      } else if (this.selectedOpen && this.list
+      } else if (this.selectedObject.isOpen && this.list
         && ((this.selected && !this.selected.lastModified)
           || !this.selected)
       ) {
@@ -289,6 +295,7 @@ export default class QCObject extends Observable {
       this.objectsReferences[objectName]++;
       return;
     }
+    await this.qcObjectService.getObjectTimestampList('qc/checks/ABCCheck');
 
     // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
 

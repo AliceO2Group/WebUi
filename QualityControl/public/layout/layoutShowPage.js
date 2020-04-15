@@ -184,7 +184,7 @@ const drawComponent = (model, tabObject) =>
       }, [
         !model.object.isOnlineModeEnabled &&
         h('.text-right', {style: 'padding-bottom: 0;'},
-          h('.dropdown.mh1', {class: model.object.selectedOpen ? 'dropdown-open' : ''}, [
+          h('.dropdown.mh1', {class: model.object.selectedObject.isOpen ? 'dropdown-open' : ''}, [
             h('button.btn',
               {
                 title: 'View details about histogram',

@@ -23,21 +23,15 @@ class TObject2JsonClient {
   /**
    * Get JSON-encoded ROOT object using QualityControl/TObject2Json C++ module
    * @param {string} path - object's path (agentName/objectName)
-   * @return {Promise.<Object|null, string>} The root data, null is not found
-   */
-  retrieve(path) {
-    return this.retrieveByPathTimestamp(path, 0);
-  }
-
-  /**
-   * Get JSON-encoded ROOT object using QualityControl/TObject2Json C++ module
-   * @param {string} path - object's path (agentName/objectName)
    * @param {number} timestamp - object's timestamp
    * @return {Promise.<Object|null, string>} The root data, null is not found
    */
-  retrieveByPathTimestamp(path, timestamp) {
+  retrieve(path, timestamp = 0) {
     if (!path || path.indexOf('/') === -1) {
       return Promise.reject(new Error('Path should contain a slash at least'));
+    }
+    if (typeof timestamp !== 'number') {
+      return Promise.reject(new Error('Timestamp should be a number'));
     }
 
     return new Promise((resolve, fail) => {
