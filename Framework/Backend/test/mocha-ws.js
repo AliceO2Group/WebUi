@@ -165,6 +165,6 @@ describe('websocket', () => {
 
   after(() => {
     ws.shutdown();
-    http.getServer.close();
+    http.close();
   });
 });
