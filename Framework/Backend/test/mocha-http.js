@@ -153,8 +153,8 @@ describe('REST API', () => {
 });
 
 describe('HTTP server', () => {
-  after(async () => {
-    await httpServer.close();
+  after(() => {
+    httpServer.close();
   });
 
   it('Add and verify custom static path', (done) => {
