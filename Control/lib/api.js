@@ -37,6 +37,7 @@ module.exports.setup = (http, ws) => {
   http.get('/getPlotsList', getPlotsList);
   http.get('/getFrameworkInfo', getFrameworkInfo);
   http.get('/getCRUs', getCRUs);
+  http.get('/getFLPs', getFLPs);
 
   const kafka = new KafkaConnector(config.kafka, ws);
   if (kafka.isKafkaConfigured()) {
@@ -153,9 +154,9 @@ function getFrameworkInfo(req, res) {
  */
 function getCRUs(req, res) {
   if (consulService) {
-    const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
+    const flpPath = config.consul.flpHardwarePath ? config.consul.flpHardwarePath : 'o2/hardware/flps';
     const regex = new RegExp(`.*/.*/cards`);
-    consulService.getOnlyRawValuesByKeyPrefix(cruPath).then((data) => {
+    consulService.getOnlyRawValuesByKeyPrefix(flpPath).then((data) => {
       const crusByHost = {};
       Object.keys(data)
         .filter((key) => key.match(regex))
@@ -168,15 +169,43 @@ function getCRUs(req, res) {
     }).catch((error) => {
       if (error.message.includes('404')) {
         log.trace(error);
-        log.error(`Could not find any Readout Cards by key ${cruPath}`);
-        errorHandler(`Could not find any Readout Cards by key ${cruPath}`, res, 404);
+        log.error(`Could not find any Readout Cards by key ${flpPath}`);
+        errorHandler(`Could not find any Readout Cards by key ${flpPath}`, res, 404);
       } else {
-        log.trace(error);
         errorHandler(error, res, 502);
       }
     });
   } else {
-    log.error(`Unable to retrieve configuration of consul service`);
+    errorHandler('Unable to retrieve configuration of consul service', res, 502);
+  }
+}
+
+/**
+ * Method to query consul for keys by a prefix and parse results into a list of FLP names
+ * @param {Request} req
+ * @param {Response} res - list of strings representing flp names
+ */
+function getFLPs(req, res) {
+  if (consulService) {
+    const flpPath = config.consul.flpHardwarePath ? config.consul.flpHardwarePath : 'o2/hardware/flps';
+    consulService.getKeysByPrefix(flpPath)
+      .then((data) => {
+        const regex = new RegExp('.*o2/hardware/flps/.*/.*');
+        const flpList = data.filter((key) => key.match(regex))
+          .map((key) => key.split('/')[3]);
+        res.status(200);
+        res.json(flpList);
+      })
+      .catch((error) => {
+        if (error.message.includes('404')) {
+          log.trace(error);
+          log.error(`Could not find any FLPs by key ${flpPath}`);
+          errorHandler(`Could not find any FLPs by key ${flpPath}`, res, 404);
+        } else {
+          errorHandler(error, res, 502);
+        }
+      });
+  } else {
     errorHandler('Unable to retrieve configuration of consul service', res, 502);
   }
 }
