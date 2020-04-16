@@ -19,7 +19,7 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
 }
 
 // Start servers
-const http = new HttpServer(config.http, config.jwt, config.oAuth);
+const http = new HttpServer(config.http, config.jwt, config.openId);
 http.addStaticPath(path.join(__dirname, 'public'));
 http.addStaticPath(path.join(require.resolve('jsroot'), '../..'), 'jsroot');
 api.setup(http);
