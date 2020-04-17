@@ -60,13 +60,65 @@ class HttpServer {
         key: fs.readFileSync(httpConfig.key),
         cert: fs.readFileSync(httpConfig.cert)
       };
-      this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
+      this.server = https.createServer(credentials, this.app);
       this.enableHttpRedirect();
-      log.info(`Secure server listening on port ${httpConfig.portSecure}`);
+      this.port = httpConfig.portSecure;
     } else {
-      this.server = http.createServer(this.app).listen(httpConfig.port);
-      log.info(`Server listening on port ${httpConfig.port}`);
+      this.server = http.createServer(this.app);
+      this.port = httpConfig.port;
     }
+
+    const autoListenFlag = 'autoListen';
+    if (!httpConfig.hasOwnProperty(autoListenFlag) || httpConfig[autoListenFlag]) {
+      this.listen();
+    }
+  }
+
+  /**
+   * Starts the server listening for connections.
+   * @return {Promise}
+   */
+  listen() {
+    return new Promise((resolve, reject) => {
+      this.server.listen(this.port, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          log.info(`Server listening on port ${this.port}`);
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Returns the bound `address`, the address `family` name, and `port` of the
+   * server as reported by the operating system if listening on an IP socket
+   * (useful to find which port was assigned when getting an OS-assigned address):
+   * { port: 12346, family: 'IPv4', address: '127.0.0.1' }. For a server listening
+   * on a pipe or Unix domain socket, the name is returned as a string.
+   * @return {(object|string)} The address of the server
+   */
+  address() {
+    return this.server.address();
+  }
+
+  /**
+   * Stops the server from accepting new connections and keeps existing connections.
+   * This function is asynchronous, the server is finally closed when all connections
+   * are ended and the server emits a 'close' event.
+   * @return {Promise}
+   */
+  close() {
+    return new Promise((resolve, reject) => {
+      this.server.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 
   /**
@@ -202,13 +254,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  get(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.get(path, callback);
-      return;
-    }
-
-    this.router.get(path, callback);
+  get(path, ...callbacks) {
+    this._all('get', path, ...callbacks);
   }
 
   /**
@@ -222,13 +269,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  post(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.post(path, callback);
-      return;
-    }
-
-    this.router.post(path, callback);
+  post(path, ...callbacks) {
+    this._all('post', path, ...callbacks);
   }
 
   /**
@@ -242,13 +284,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  put(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.put(path, callback);
-      return;
-    }
-
-    this.router.put(path, callback);
+  put(path, ...callbacks) {
+    this._all('put', path, ...callbacks);
   }
 
   /**
@@ -262,13 +299,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  patch(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.patch(path, callback);
-      return;
-    }
-
-    this.router.patch(path, callback);
+  patch(path, ...callbacks) {
+    this._all('patch', path, ...callbacks);
   }
 
   /**
@@ -282,13 +314,35 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  delete(path, callback, options = {}) {
+  delete(path, ...callbacks) {
+    this._all('delete', path, ...callbacks);
+  }
+
+  /**
+   * Adds an route to the express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} method       - http method to use
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function[]} callback - method or array of methods that handles request
+   *                                and response: function(req, res); token should
+   *                                be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
+   */
+  _all(method, path, ...callbacks) {
+    let options = {};
+    if (typeof callbacks.slice(-1).pop() !== 'function') {
+      options = callbacks.pop();
+    }
+
     if (options.public) {
-      this.routerPublic.delete(path, callback);
+      this.routerPublic[method](path, ...callbacks);
       return;
     }
 
-    this.router.delete(path, callback);
+    this.router[method](path, ...callbacks);
   }
 
   /**
