@@ -88,6 +88,7 @@ module.exports.setup = (http, ws) => {
   }
 };
 
+module.exports ={getFLPs};
 /**
  * Method to build a list of plots source
  * @param {Request} req
