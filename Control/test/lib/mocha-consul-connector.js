@@ -4,19 +4,10 @@ const ConsulConnector = require('../../lib/ConsulConnector.js');
 
 describe('ConsulConnector test suite', () => {
   let connector;
-
   const consulService = {};
   let res;
-  beforeEach(() => {
-    res = {
-      status: sinon.stub(),
-      json: sinon.stub(),
-      send: sinon.stub()
-    };
-    connector = new ConsulConnector(consulService, 'some/path');
-  });
-
   describe('Request CRUs tests', async () => {
+    connector = new ConsulConnector(consulService, 'some/path');
     it('should successfully query host of ConsulLeader', async () => {
       consulService.getConsulLeaderStatus = sinon.stub().resolves('localhost:8500');
       await connector.testConsulStatus();
@@ -28,6 +19,14 @@ describe('ConsulConnector test suite', () => {
   });
 
   describe('Request CRUs tests', async () => {
+    beforeEach(() => {
+      res = {
+        status: sinon.stub(),
+        json: sinon.stub(),
+        send: sinon.stub()
+      };
+      connector = new ConsulConnector(consulService, 'some/path');
+    });
     it('should successfully query, filter, match and return a list of CRU names', async () => {
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().resolves({
         'o2/hardware/flps/flpOne/cards': `{"0": {"type": "CRORC", "pciAddress": "d8:00.0"}}`,
@@ -66,6 +65,14 @@ describe('ConsulConnector test suite', () => {
   });
 
   describe('Request FLPs tests', async () => {
+    beforeEach(() => {
+      res = {
+        status: sinon.stub(),
+        json: sinon.stub(),
+        send: sinon.stub()
+      };
+      connector = new ConsulConnector(consulService, 'some/path');
+    });
     it('should successfully query, filter, match and return a list of FLP names', async () => {
       consulService.getKeysByPrefix = sinon.stub().resolves([
         'o2/hardware/flps/flpOne/cards',
