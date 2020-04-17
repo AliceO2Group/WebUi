@@ -46,10 +46,15 @@ describe('ConsulConnector test suite', () => {
     it('should successfully return 404 if consul did not send back any data for specified key', async () => {
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects({message: '404 - Key not found'});
       const connector = new ConsulConnector(consulService, 'some/path');
-      await connector.getCRUs(null, res);
+      const res2 = {
+        status: sinon.stub(),
+        json: sinon.stub(),
+        send: sinon.stub()
+      };
+      await connector.getCRUs(null, res2);
 
-      assert.ok(res.status.calledWith(404));
-      assert.ok(res.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
+      assert.ok(res2.status.calledWith(404));
+      assert.ok(res2.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
     });
 
     it('should successfully return 502 if consul did not respond', async () => {
