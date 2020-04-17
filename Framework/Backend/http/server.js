@@ -254,13 +254,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  get(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.get(path, callback);
-      return;
-    }
-
-    this.router.get(path, callback);
+  get(path, ...callbacks) {
+    this._all('get', path, ...callbacks);
   }
 
   /**
@@ -274,13 +269,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  post(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.post(path, callback);
-      return;
-    }
-
-    this.router.post(path, callback);
+  post(path, ...callbacks) {
+    this._all('post', path, ...callbacks);
   }
 
   /**
@@ -294,13 +284,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  put(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.put(path, callback);
-      return;
-    }
-
-    this.router.put(path, callback);
+  put(path, ...callbacks) {
+    this._all('put', path, ...callbacks);
   }
 
   /**
@@ -314,13 +299,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  patch(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.patch(path, callback);
-      return;
-    }
-
-    this.router.patch(path, callback);
+  patch(path, ...callbacks) {
+    this._all('patch', path, ...callbacks);
   }
 
   /**
@@ -334,13 +314,35 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  delete(path, callback, options = {}) {
+  delete(path, ...callbacks) {
+    this._all('delete', path, ...callbacks);
+  }
+
+  /**
+   * Adds an route to the express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} method       - http method to use
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function[]} callback - method or array of methods that handles request
+   *                                and response: function(req, res); token should
+   *                                be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
+   */
+  _all(method, path, ...callbacks) {
+    let options = {};
+    if (typeof callbacks.slice(-1).pop() !== 'function') {
+      options = callbacks.pop();
+    }
+
     if (options.public) {
-      this.routerPublic.delete(path, callback);
+      this.routerPublic[method](path, ...callbacks);
       return;
     }
 
-    this.router.delete(path, callback);
+    this.router[method](path, ...callbacks);
   }
 
   /**
