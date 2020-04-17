@@ -30,12 +30,18 @@ const token = jwt.generateToken(0, 'test', 1);
 describe('REST API', () => {
   before(() => {
     httpServer = new HttpServer(config.http, config.jwt);
+    httpServer.get('/get-insecure', (req, res) => res.json({ok: 1}), {public: true});
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-with-body', (req, res) => res.json({body: req.body}));
     httpServer.put('/put-request', (req, res) => res.json({ok: 1}));
     httpServer.patch('/patch-request', (req, res) => res.json({ok: 1}));
     httpServer.delete('/delete-request', (req, res) => res.json({ok: 1}));
+
+    httpServer.get('/get-middleware',
+      (req, res, next) => isNaN(req.query.id) ? next(new Error('Not Allowed')) : next(),
+      (req, res) => res.json({ok: 1})
+    );
   });
 
   it('GET the "/" and return user details', (done) => {
@@ -54,6 +60,14 @@ describe('REST API', () => {
         parsedUrl.searchParams.has('token');
         done();
       });
+  });
+
+  it('GET without token should respond 200/JSON', (done) => {
+    request(httpServer)
+      .get('/api/get-insecure')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .expect({ok: 1}, done);
   });
 
   it('GET with token should respond 200/JSON', (done) => {
@@ -82,6 +96,23 @@ describe('REST API', () => {
     request(httpServer)
       .get('/api/get-wrong?token=' + token)
       .expect(404, done);
+  });
+
+  describe('Middleware handler', () => {
+    it('should return ok if the middleware satisfied the query condition', (done) => {
+      request(httpServer)
+        .get('/api/get-middleware?id=1&token=' + token)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .expect({ok: 1}, done);
+    });
+
+    it('should return error 500 if the middleware dissatisfied the query condition', (done) => {
+      request(httpServer)
+        .get('/api/get-middleware?id=false&token=' + token)
+        .expect('Content-Type', /html/)
+        .expect(500, done);
+    });
   });
 
   describe('404 handler', () => {
