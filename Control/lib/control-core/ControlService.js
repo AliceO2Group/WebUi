@@ -1,4 +1,4 @@
-const log = new (require('@aliceo2/web-ui').Log)('ControlService');
+const errorHandler = require('./../utils.js').errorHandler;
 const assert = require('assert');
 
 /**
@@ -26,7 +26,7 @@ class ControlService {
     if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
       this.ctrlProx[method](req.body)
         .then((response) => res.json(response))
-        .catch((error) => this.errorHandler(error, res, 504));
+        .catch((error) => errorHandler(error, res, 504));
     }
   }
 
@@ -47,7 +47,7 @@ class ControlService {
    */
   isConnectionReady(res) {
     if (!this.ctrlProx.connectionReady) {
-      this.errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
+      errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
       return false;
     }
     return true;
@@ -64,32 +64,15 @@ class ControlService {
     // disallow 'not-Get' methods if not owning the lock
     if (!method.startsWith('Get') && method !== 'ListRepos') {
       if (this.padLock.lockedBy == null) {
-        this.errorHandler(`Control is not locked`, res, 403);
+        errorHandler(`Control is not locked`, res, 403);
         return false;
       }
       if (req.session.personid != this.padLock.lockedBy) {
-        this.errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
+        errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
         return false;
       }
     }
     return true;
-  }
-
-  /**
-  * Global HTTP error handler, sends status 500
-  * @param {string} err - Message error
-  * @param {Response} res - Response object to send to
-  * @param {number} status - status code 4xx 5xx, 500 will print to debug
-  */
-  errorHandler(err, res, status = 500) {
-    if (status > 500) {
-      if (err.stack) {
-        log.trace(err);
-      }
-      log.error(err.message || err);
-    }
-    res.status(status);
-    res.send({message: err.message || err});
   }
 
   /**
