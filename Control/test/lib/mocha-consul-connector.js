@@ -25,13 +25,13 @@ describe('ConsulConnector test suite', () => {
         json: sinon.stub(),
         send: sinon.stub()
       };
-      connector = new ConsulConnector(consulService, 'some/path');
     });
     it('should successfully query, filter, match and return a list of CRU names', async () => {
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().resolves({
         'o2/hardware/flps/flpOne/cards': `{"0": {"type": "CRORC", "pciAddress": "d8:00.0"}}`,
         'o2/hardware/flps/flp1/info"': `{0: {"type": "should not be included"}}`
       });
+      connector = new ConsulConnector(consulService, 'some/path');
       await connector.getCRUs(null, res);
       const expectedCRUs = {flpOne: {0: {type: 'CRORC', pciAddress: 'd8:00.0'}}};
 
@@ -41,6 +41,7 @@ describe('ConsulConnector test suite', () => {
 
     it('should successfully return 404 if consul did not send back any data for specified key', async () => {
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects({message: '404 - Key not found'});
+      connector = new ConsulConnector(consulService, 'some/path');
       await connector.getCRUs(null, res);
 
       assert.ok(res.status.calledWith(404));
@@ -49,6 +50,7 @@ describe('ConsulConnector test suite', () => {
 
     it('should successfully return 502 if consul did not respond', async () => {
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects({message: '502 - Consul unresponsive'});
+      connector = new ConsulConnector(consulService, 'some/path');
       await connector.getCRUs(null, res);
 
       assert.ok(res.status.calledWith(502));
@@ -71,7 +73,6 @@ describe('ConsulConnector test suite', () => {
         json: sinon.stub(),
         send: sinon.stub()
       };
-      connector = new ConsulConnector(consulService, 'some/path');
     });
     it('should successfully query, filter, match and return a list of FLP names', async () => {
       consulService.getKeysByPrefix = sinon.stub().resolves([
@@ -79,6 +80,7 @@ describe('ConsulConnector test suite', () => {
         'o2/hardware/flps/flpTwo/info',
         'o2/hardware/notanflp/flp2/test',
       ]);
+      connector = new ConsulConnector(consulService, 'some/path');
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(200));
@@ -87,6 +89,7 @@ describe('ConsulConnector test suite', () => {
 
     it('should successfully return 404 if consul did not send back any data for specified key', async () => {
       consulService.getKeysByPrefix = sinon.stub().rejects({message: '404 - Key not found'});
+      connector = new ConsulConnector(consulService, 'some/path');
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(404));
@@ -95,6 +98,7 @@ describe('ConsulConnector test suite', () => {
 
     it('should successfully return 502 if consul did not respond', async () => {
       consulService.getKeysByPrefix = sinon.stub().rejects({message: '502 - Consul unresponsive'});
+      connector = new ConsulConnector(consulService, 'some/path');
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(502));
