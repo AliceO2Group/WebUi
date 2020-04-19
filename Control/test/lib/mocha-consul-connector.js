@@ -53,8 +53,10 @@ describe('ConsulConnector test suite', () => {
       };
       await connector.getCRUs(null, res2);
 
-      assert.ok(res2.status.calledWith(404));
-      assert.ok(res2.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
+      sinon.assert.calledWith(res2.status, 404);
+      sinon.assert.calledWith(res2.send, {message: 'Could not find any Readout Cards by key some/path'});
+      // assert.ok(res2.status.calledWith(404));
+      // assert.ok(res2.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
     });
 
     it('should successfully return 502 if consul did not respond', async () => {
@@ -62,13 +64,18 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, 'some/path');
       await connector.getCRUs(null, res);
 
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: '502 - Consul unresponsive'}));
+      sinon.assert.calledWith(res.status, 502);
+      sinon.assert.calledWith(res.send, {message: '502 - Consul unresponsive'});
+      // assert.ok(res.status.calledWith(502));
+      // assert.ok(res.send.calledWith({message: '502 - Consul unresponsive'}));
     });
 
     it('should successfully return error for when ConsulService was not initialized', async () => {
       const connector = new ConsulConnector(undefined, 'some/path');
       await connector.getCRUs(null, res);
+
+      sinon.assert.calledWith(res.status, 502);
+      sinon.assert.calledWith(res.send, {message: ''});
 
       assert.ok(res.status.calledWith(502));
       assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
@@ -103,8 +110,11 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, 'some/path');
       await connector.getFLPs(null, res);
 
-      assert.ok(res.status.calledWith(404));
-      assert.ok(res.send.calledWith({message: 'Could not find any FLPs by key some/path'}));
+      sinon.assert.calledWith(res.status, 502);
+      sinon.assert.calledWith(res.send, {message: 'Could not find any FLPs by key some/path'});
+
+      // assert.ok(res.status.calledWith(404));
+      // assert.ok(res.send.calledWith({message: 'Could not find any FLPs by key some/path'}));
     });
 
     it('should successfully return 502 if consul did not respond', async () => {
@@ -112,16 +122,22 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, 'some/path');
       await connector.getFLPs(null, res);
 
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: '502 - Consul unresponsive'}));
+      sinon.assert.calledWith(res.status, 502);
+      sinon.assert.calledWith(res.send, {message: '502 - Consul unresponsive'});
+
+      // assert.ok(res.status.calledWith(502));
+      // assert.ok(res.send.calledWith({message: '502 - Consul unresponsive'}));
     });
 
     it('should successfully return error for when ConsulService was not initialized', async () => {
       const connector = new ConsulConnector(undefined, 'some/path');
       await connector.getFLPs(null, res);
 
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
+      sinon.assert.calledWith(res.status, 502);
+      sinon.assert.calledWith(res.send, {message: 'Unable to retrieve configuration of consul service'});
+
+      // assert.ok(res.status.calledWith(502));
+      // assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
     });
   });
 });
