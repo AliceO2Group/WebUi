@@ -23,7 +23,7 @@ describe('ConsulConnector test suite', () => {
     let consulService;
     beforeEach(() => {
       res = {
-        status: sinon.stub(),
+        status: sinon.stub().returns(),
         json: sinon.stub(),
         send: sinon.stub()
       };
@@ -47,7 +47,7 @@ describe('ConsulConnector test suite', () => {
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects({message: '404 - Key not found'});
       const connector = new ConsulConnector(consulService, 'some/path');
       const res2 = {
-        status: sinon.stub(),
+        status: sinon.stub().returns(),
         json: sinon.stub(),
         send: sinon.stub()
       };
@@ -87,7 +87,7 @@ describe('ConsulConnector test suite', () => {
     let consulService;
     beforeEach(() => {
       res = {
-        status: sinon.stub(),
+        status: sinon.stub().returns(),
         json: sinon.stub(),
         send: sinon.stub()
       };
