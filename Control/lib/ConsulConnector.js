@@ -51,12 +51,9 @@ class ConsulConnector {
           res.json(crusByHost);
         }).catch((error) => {
           if (error.message.includes('404')) {
-            log.info('Messages includes 404');
             log.trace(error);
             log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
-            res.status(404);
-            res.send({message: 'Could not find any Readout Cards by key some/path'});
-            // this.errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
+            this.errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
           } else {
             this.errorHandler(error, res, 502);
           }
