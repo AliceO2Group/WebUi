@@ -24,8 +24,8 @@ describe('ConsulConnector test suite', () => {
     beforeEach(() => {
       res = {
         status: sinon.stub().returns(),
-        json: sinon.stub(),
-        send: sinon.stub()
+        json: sinon.stub().returns(),
+        send: sinon.stub().returns()
       };
       consulService = {};
     });
@@ -48,8 +48,8 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, 'some/path');
       const res2 = {
         status: sinon.stub().returns(),
-        json: sinon.stub(),
-        send: sinon.stub()
+        json: sinon.stub().returns(),
+        send: sinon.stub().returns()
       };
       res2.status = sinon.stub().returns(res2);
       await connector.getCRUs(null, res2);
@@ -88,8 +88,8 @@ describe('ConsulConnector test suite', () => {
     beforeEach(() => {
       res = {
         status: sinon.stub().returns(),
-        json: sinon.stub(),
-        send: sinon.stub()
+        json: sinon.stub().returns(),
+        send: sinon.stub().returns()
       };
       consulService = {};
     });
