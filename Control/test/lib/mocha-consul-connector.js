@@ -47,7 +47,7 @@ describe('ConsulConnector test suite', () => {
       };
       const connector = new ConsulConnector(consulService, 'some/path');
       const res2 = {
-        status: sinon.stub().returns(),
+        status: sinon.stub(),
         send: sinon.stub(),
       };
       await connector.getCRUs(null, res2);
