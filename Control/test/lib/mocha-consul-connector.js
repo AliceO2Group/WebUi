@@ -42,7 +42,9 @@ describe('ConsulConnector test suite', () => {
     // });
 
     it('should successfully return 404 if consul did not send back any data for specified key', async () => {
-      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects({message: '404 - Key not found'});
+      const consulService = {
+        getOnlyRawValuesByKeyPrefix: sinon.stub().rejects({message: '404 - Key not found'})
+      };
       const connector = new ConsulConnector(consulService, 'some/path');
       const res2 = {
         status: sinon.stub().returns(),
