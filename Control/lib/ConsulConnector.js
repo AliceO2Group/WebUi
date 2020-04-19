@@ -51,14 +51,16 @@ class ConsulConnector {
           res.json(crusByHost);
         }).catch((error) => {
           log.error(`Message from source: ${error}`);
-          if (error.message.includes('404')) {
-            log.info('Messages includes 404');
-            log.trace(error);
-            log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
-            this.errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
-          } else {
-            this.errorHandler(error, res, 502);
-          }
+          res.status(404);
+          res.send({message: 'Could not find any Readout Cards by key some/path'});
+          // if (error.message.includes('404')) {
+          //   log.info('Messages includes 404');
+          //   log.trace(error);
+          //   log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
+          //   this.errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
+          // } else {
+          //   this.errorHandler(error, res, 502);
+          // }
         });
     } else {
       this.errorHandler('Unable to retrieve configuration of consul service', res, 502);
