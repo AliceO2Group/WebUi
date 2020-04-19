@@ -3,7 +3,6 @@ const sinon = require('sinon');
 const ConsulConnector = require('../../lib/ConsulConnector.js');
 
 describe('ConsulConnector test suite', () => {
-  let res;
   describe('Request CRUs tests', async () => {
     let consulService;
     beforeEach(() => consulService = {});
@@ -21,6 +20,7 @@ describe('ConsulConnector test suite', () => {
 
   describe('Request CRUs tests', async () => {
     let consulService;
+    let res;
     beforeEach(() => {
       res = {
         status: sinon.stub().returns(),
