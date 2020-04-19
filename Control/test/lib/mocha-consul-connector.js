@@ -20,15 +20,14 @@ describe('ConsulConnector test suite', () => {
 
   describe('Request CRUs tests', async () => {
     let consulService;
-    let res;
     beforeEach(() => {
-      res = {
-        status: sinon.stub().returns(),
-        json: sinon.stub(),
-      };
       consulService = {};
     });
     it('should successfully query, filter, match and return a list of CRU names', async () => {
+      const res = {
+        status: sinon.stub().returns(),
+        json: sinon.stub(),
+      };
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().resolves({
         'o2/hardware/flps/flpOne/cards': `{"0": {"type": "CRORC", "pciAddress": "d8:00.0"}}`,
         'o2/hardware/flps/flp1/info"': `{0: {"type": "should not be included"}}`
@@ -47,7 +46,7 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, 'some/path');
       const res2 = {
         status: sinon.stub().returns(),
-        json: sinon.stub(),
+        json: sinon.fake.returns(true),
       };
       res2.status = sinon.stub().returns(res2);
       await connector.getCRUs(null, res2);
