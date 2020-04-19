@@ -13,7 +13,7 @@ function errorHandler(err, res, status = 500) {
     log.error(err.message || err);
   }
   res.status(status);
-  res.send({message: err.message || err});
+  res.json({message: err.message || err});
 }
 
 module.exports = {
