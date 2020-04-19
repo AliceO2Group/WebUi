@@ -40,16 +40,14 @@ describe('ConsulConnector test suite', () => {
     //   assert.ok(res.status.calledWith(200));
     //   assert.ok(res.json.calledWith(expectedCRUs));
     // });
-    const res2 = {
-      status: sinon.stub().returns(),
-      send: sinon.stub()
-    };
 
     it('should successfully return 404 if consul did not send back any data for specified key', async () => {
       const consulService = {};
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects(new Error({message: '404 - Key not found'}));
       const connector = new ConsulConnector(consulService, 'some/path');
-
+      const res2 = {};
+      res2.status = sinon.stub().returns(res2);
+      res2.send = sinon.stub();
       await connector.getCRUs(null, res2);
 
       sinon.assert.calledWith(res2.status, 404);
