@@ -51,7 +51,7 @@ describe('ConsulConnector test suite', () => {
       await connector.getCRUs(null, res2);
 
       // sinon.assert.calledWith(res2.status, 404);
-      sinon.assert.calledWith(res2.json, {message: 'Could not find any Readout Cards by key some/path'});
+      sinon.assert.calledWith(res2.send, {message: 'Could not find any Readout Cards by key some/path'});
       // assert.ok(res2.status.calledWith(404));
       // assert.ok(res2.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
     });
