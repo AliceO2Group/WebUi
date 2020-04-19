@@ -34,6 +34,8 @@ class ConsulConnector {
   * @param {Response} res
   */
   async getCRUs(req, res) {
+    res.status(404);
+    res.send({message: 'Could not find any Readout Cards by key some/path'});
     if (this.consulService) {
       const regex = new RegExp(`.*/.*/cards`);
       this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath)
