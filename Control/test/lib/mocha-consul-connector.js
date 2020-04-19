@@ -18,7 +18,7 @@ describe('ConsulConnector test suite', () => {
   //   });
   // });
 
-  describe('Request CRUs tests', async () => {
+  describe('Request CRUs tests', () => {
     // let consulService;
     // beforeEach(() => {
     //   consulService = {};
