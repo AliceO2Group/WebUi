@@ -3,26 +3,26 @@ const sinon = require('sinon');
 const ConsulConnector = require('../../lib/ConsulConnector.js');
 
 describe('ConsulConnector test suite', () => {
-  describe('Request CRUs tests', async () => {
-    let consulService;
-    beforeEach(() => consulService = {});
-    it('should successfully query host of ConsulLeader', async () => {
-      consulService.getConsulLeaderStatus = sinon.stub().resolves('localhost:8500');
-      const connector = new ConsulConnector(consulService, 'some/path');
-      await connector.testConsulStatus();
-    });
-    it('should successfully query host of ConsulLeader and fail gracefully', async () => {
-      consulService.getConsulLeaderStatus = sinon.stub().rejects('Unable to query Consul');
-      const connector = new ConsulConnector(consulService, 'some/path');
-      await connector.testConsulStatus();
-    });
-  });
+  // describe('Request CRUs tests', async () => {
+  //   let consulService;
+  //   beforeEach(() => consulService = {});
+  //   it('should successfully query host of ConsulLeader', async () => {
+  //     consulService.getConsulLeaderStatus = sinon.stub().resolves('localhost:8500');
+  //     const connector = new ConsulConnector(consulService, 'some/path');
+  //     await connector.testConsulStatus();
+  //   });
+  //   it('should successfully query host of ConsulLeader and fail gracefully', async () => {
+  //     consulService.getConsulLeaderStatus = sinon.stub().rejects('Unable to query Consul');
+  //     const connector = new ConsulConnector(consulService, 'some/path');
+  //     await connector.testConsulStatus();
+  //   });
+  // });
 
   describe('Request CRUs tests', async () => {
-    let consulService;
-    beforeEach(() => {
-      consulService = {};
-    });
+    // let consulService;
+    // beforeEach(() => {
+    //   consulService = {};
+    // });
     // it('should successfully query, filter, match and return a list of CRU names', async () => {
     //   const res = {
     //     status: sinon.stub().returns(),
