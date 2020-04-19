@@ -34,8 +34,6 @@ class ConsulConnector {
   * @param {Response} res
   */
   async getCRUs(req, res) {
-    res.status(404);
-    res.send({message: 'Could not find any Readout Cards by key some/path'});
     if (this.consulService) {
       const regex = new RegExp(`.*/.*/cards`);
       this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath)
@@ -52,17 +50,16 @@ class ConsulConnector {
           res.status(200);
           res.json(crusByHost);
         }).catch((error) => {
-          log.error(`Message from source: ${error}`);
-          res.status(404);
-          res.send({message: 'Could not find any Readout Cards by key some/path'});
-          // if (error.message.includes('404')) {
-          //   log.info('Messages includes 404');
-          //   log.trace(error);
-          //   log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
-          //   this.errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
-          // } else {
-          //   this.errorHandler(error, res, 502);
-          // }
+          if (error.message.includes('404')) {
+            log.info('Messages includes 404');
+            log.trace(error);
+            log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
+            res.status(404);
+            res.send({message: 'Could not find any Readout Cards by key some/path'});
+            // this.errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
+          } else {
+            this.errorHandler(error, res, 502);
+          }
         });
     } else {
       this.errorHandler('Unable to retrieve configuration of consul service', res, 502);
@@ -83,10 +80,7 @@ class ConsulConnector {
       log.error(err.message || err);
     }
     res.status(status);
-    const t = {message: err.message || err};
-    log.info('T IS');
-    log.info(t);
-    res.send(t);
+    res.send({message: err.message || err});
   }
 
 

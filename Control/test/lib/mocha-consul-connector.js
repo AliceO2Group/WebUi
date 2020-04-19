@@ -43,19 +43,19 @@ describe('ConsulConnector test suite', () => {
 
     it('should successfully return 404 if consul did not send back any data for specified key', async () => {
       const consulService = {};
-      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects(new Error({message: '404 - Key not found'}));
+      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects({message: '404 - Key not found'});
       const connector = new ConsulConnector(consulService, 'some/path');
       const res2 = {};
       res2.status = sinon.stub().returns(res2);
       res2.send = sinon.stub();
       await connector.getCRUs(null, res2);
-
+      
       sinon.assert.calledWith(res2.status, 404);
+      assert.deepStrictEqual(res2.send.getCalls()[0].args[0], {message: 'Could not find any Readout Cards by key some/path'});
       // sinon.assert.calledWith(res2.send, {message: 'Could not find any Readout Cards by key some/path'});
       // assert.ok(res2.status.calledWith(404));
       // console.log('res2.send.getCalls()[0].args[0]')
       // console.log(res2.send.getCalls()[0].args[0])
-      assert.deepStrictEqual(res2.send.getCalls()[0].args[0], {message: 'Could not find any Readout Cards by key some/path'})
       // assert.ok(res2.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
     });
 
