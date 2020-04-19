@@ -77,7 +77,10 @@ class ConsulConnector {
       log.error(err.message || err);
     }
     res.status(status);
-    res.send({message: err.message || err});
+    const t = {message: err.message || err};
+    log.info('T IS');
+    log.info(t);
+    res.send(t);
   }
 
 
