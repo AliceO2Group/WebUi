@@ -1,5 +1,4 @@
 const log = new (require('@aliceo2/web-ui').Log)('ConsulConnector');
-const errorHandler = require('./utils.js').errorHandler;
 
 /**
  * Gateway for all Consul Consumer calls
@@ -37,31 +36,50 @@ class ConsulConnector {
   async getCRUs(req, res) {
     if (this.consulService) {
       const regex = new RegExp(`.*/.*/cards`);
-      this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath).then((data) => {
-        const crusByHost = {};
-        Object.keys(data)
-          .filter((key) => key.match(regex))
-          .forEach((key) => {
-            const splitKey = key.split('/');
-            const hostKey = splitKey[splitKey.length - 2];
-            crusByHost[hostKey] = JSON.parse(data[key]);
-          });
+      this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath)
+        .then((data) => {
+          const crusByHost = {};
+          Object.keys(data)
+            .filter((key) => key.match(regex))
+            .forEach((key) => {
+              const splitKey = key.split('/');
+              const hostKey = splitKey[splitKey.length - 2];
+              crusByHost[hostKey] = JSON.parse(data[key]);
+            });
 
-        res.status(200);
-        res.json(crusByHost);
-      }).catch((error) => {
-        if (error.message.includes('404')) {
-          log.trace(error);
-          log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
-          errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
-        } else {
-          errorHandler(error, res, 502);
-        }
-      });
+          res.status(200);
+          res.json(crusByHost);
+        }).catch((error) => {
+          if (error.message.includes('404')) {
+            log.trace(error);
+            log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
+            this.errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
+          } else {
+            this.errorHandler(error, res, 502);
+          }
+        });
     } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
+      this.errorHandler('Unable to retrieve configuration of consul service', res, 502);
     }
   }
+
+  /**
+   * Handle error cases
+   * @param {string|JSON} err
+   * @param {Response} res
+   * @param {number} status
+   */
+  errorHandler(err, res, status = 500) {
+    if (status > 500) {
+      if (err.stack) {
+        log.trace(err);
+      }
+      log.error(err.message || err);
+    }
+    res.status(status);
+    res.send({message: err.message || err});
+  }
+
 
   /**
    * Method to query consul for keys by a prefix and parse results into a list of FLP names
@@ -82,13 +100,13 @@ class ConsulConnector {
           if (error.message.includes('404')) {
             log.trace(error);
             log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
-            errorHandler(`Could not find any FLPs by key ${this.flpHardwarePath}`, res, 404);
+            this.errorHandler(`Could not find any FLPs by key ${this.flpHardwarePath}`, res, 404);
           } else {
-            errorHandler(error, res, 502);
+            this.errorHandler(error, res, 502);
           }
         });
     } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
+      this.errorHandler('Unable to retrieve configuration of consul service', res, 502);
     }
   }
 }
