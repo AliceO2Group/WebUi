@@ -51,6 +51,7 @@ describe('ConsulConnector test suite', () => {
         json: sinon.stub(),
         send: sinon.stub()
       };
+      res2.status = sinon.stub().returns(res2);
       await connector.getCRUs(null, res2);
 
       // sinon.assert.calledWith(res2.status, 404);
@@ -110,7 +111,7 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, 'some/path');
       await connector.getFLPs(null, res);
 
-      // sinon.assert.calledWith(res.status, 502);
+      sinon.assert.calledWith(res.status, 404);
       sinon.assert.calledWith(res.send, {message: 'Could not find any FLPs by key some/path'});
 
       // assert.ok(res.status.calledWith(404));
