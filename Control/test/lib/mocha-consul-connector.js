@@ -53,7 +53,10 @@ describe('ConsulConnector test suite', () => {
       // sinon.assert.calledWith(res2.status, 404);
       // sinon.assert.calledWith(res2.send, {message: 'Could not find any Readout Cards by key some/path'});
       // assert.ok(res2.status.calledWith(404));
-      assert.ok(res2.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
+      console.log('res2.send.getCalls()[0].args[0]')
+      console.log(res2.send.getCalls()[0].args[0])
+      assert.deepStrictEqual(res2.send.getCalls()[0].args[0], {message: 'Could not find any Readout Cards by key some/path'})
+      // assert.ok(res2.send.calledWith({message: 'Could not find any Readout Cards by key some/path'}));
     });
 
     // it('should successfully return 502 if consul did not respond', async () => {
