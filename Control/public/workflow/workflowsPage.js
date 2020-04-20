@@ -160,12 +160,12 @@ const extraVariablePanel = (workflow) =>
   h('.w-50.ph2', {
     style: 'display: flex; flex-direction: column'
   }, [
+    h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
+    flpSelectionPanel(workflow),
+
     h('h5.bg-gray-light.p2.panel-title.w-100', 'Environment variables'),
     addKVInputList(workflow),
     addKVInputPair(workflow),
-
-    h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
-    flpSelectionPanel(workflow),
   ]);
 
 /**
