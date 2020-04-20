@@ -166,11 +166,11 @@ export default class Workflow extends Observable {
     const repository = this.form.repository;
     const variables = JSON.parse(JSON.stringify(this.form.variables));
     // Check FLP Selection is not duplicated in vars host
-    if (this.form.variables.hosts && this.form.variables.hosts.length > 0) {
+    if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
       this.model.environment.itemNew =
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
     } else {
-      variables['hosts'] = this.form.hosts;
+      variables['hosts'] = this.form.hosts.length > 0 ? this.form.hosts: this.form.variables.hosts;
       if (!templates[repository]) {
         this.model.environment.itemNew = RemoteData.failure('Selected repository does not exist');
       } else {
