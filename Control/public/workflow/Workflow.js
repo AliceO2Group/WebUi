@@ -25,8 +25,11 @@ export default class Workflow extends Observable {
       repository: '',
       revision: 'master',
       template: '',
-      variables: {}
+      variables: {},
+      hosts: []
     };
+
+    this.flpList = RemoteData.notAsked();
   }
 
   /**
@@ -35,6 +38,7 @@ export default class Workflow extends Observable {
   initWorkflowPage() {
     this.getRepositoriesList();
     this.getAllTemplatesAsMap();
+    this.getFLPList();
     this.resetErrorMessage();
   }
 
@@ -160,28 +164,37 @@ export default class Workflow extends Observable {
   async createNewEnvironment() {
     const templates = this.templatesMap.payload;
     const repository = this.form.repository;
-    if (!templates[repository]) {
-      this.model.environment.itemNew = RemoteData.failure('Selected repository does not exist');
+    const variables = JSON.parse(JSON.stringify(this.form.variables));
+    // Check FLP Selection is not duplicated in vars host
+    if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
+      this.model.environment.itemNew =
+        RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
     } else {
-      const revision = this.form.revision;
-      if (!templates[repository][revision]) {
-        this.model.environment.itemNew = RemoteData.failure('Selected revision does not exist for this repository');
+      variables['hosts'] = this.form.hosts.length > 0 ? this.form.hosts: this.form.variables.hosts;
+      if (!templates[repository]) {
+        this.model.environment.itemNew = RemoteData.failure('Selected repository does not exist');
       } else {
-        const template = this.form.template;
-        if (template !== '') {
-          let path = '';
-          if (revision === '(no-revision-by-default)') {
-            path = repository + 'workflows/' + template;
-          } else {
-            path = repository + 'workflows/' + template + '@' + revision;
-          }
-          this.model.environment.newEnvironment({workflowTemplate: path, vars: this.form.variables});
+        const revision = this.form.revision;
+        if (!templates[repository][revision]) {
+          this.model.environment.itemNew = RemoteData.failure('Selected revision does not exist for this repository');
         } else {
-          this.model.environment.itemNew =
-            RemoteData.failure('Selected template does not exist for this repository & revision');
+          const template = this.form.template;
+          if (template !== '') {
+            let path = '';
+            if (revision === '(no-revision-by-default)') {
+              path = repository + 'workflows/' + template;
+            } else {
+              path = repository + 'workflows/' + template + '@' + revision;
+            }
+            this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
+          } else {
+            this.model.environment.itemNew =
+              RemoteData.failure('Selected template does not exist for this repository & revision');
+          }
         }
       }
     }
+
     this.notify();
   }
 
@@ -249,6 +262,20 @@ export default class Workflow extends Observable {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Toggle the selection of an FLP from the form host
+   * @param {string} name
+   */
+  toggleFLPSelection(name) {
+    const index = this.form.hosts.indexOf(name);
+    if (index < 0) {
+      this.form.hosts.push(name);
+    } else {
+      this.form.hosts.splice(index, 1);
+    }
+    this.notify();
   }
 
   /**
@@ -342,6 +369,22 @@ export default class Workflow extends Observable {
     }
   }
 
+  /**
+   * Method to retrieve a list of FLPs
+   */
+  async getFLPList() {
+    this.flpList = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.get(`/api/getFLPs`);
+    if (!ok) {
+      this.flpList = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.flpList = RemoteData.success(result);
+    this.notify();
+  }
   /**
    * Helpers
    */

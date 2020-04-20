@@ -34,6 +34,7 @@ describe('`pageConfiguration` test-suite', async () => {
     });
 
     after(async () => {
+      await page.setRequestInterception(false);
       await page.removeListener('request', keyNotFound);
     });
 
@@ -61,6 +62,7 @@ describe('`pageConfiguration` test-suite', async () => {
     });
 
     after(async () => {
+      await page.setRequestInterception(false);
       await page.removeListener('request', readoutCardsEmpty);
     });
 
@@ -88,6 +90,7 @@ describe('`pageConfiguration` test-suite', async () => {
     });
 
     after(async () => {
+      await page.setRequestInterception(false);
       await page.removeListener('request', readoutCardList);
     });
 

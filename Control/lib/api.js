@@ -1,13 +1,16 @@
 const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
-const log = new (require('@aliceo2/web-ui').Log)('Control');
-
 const http = require('http');
+
+const log = new (require('@aliceo2/web-ui').Log)('Control');
+const errorHandler = require('./utils.js').errorHandler;
 
 const Padlock = require('./Padlock.js');
 const KafkaConnector = require('./KafkaConnector.js');
 
 const ControlProxy = require('./control-core/ControlProxy.js');
 const ControlService = require('./control-core/ControlService.js');
+
+const ConsulConnector = require('./ConsulConnector.js');
 
 const config = require('./configProvider.js');
 const projPackage = require('./../package.json');
@@ -20,7 +23,11 @@ if (!config.grafana) {
 }
 
 let consulService;
-initializeConsulService();
+if (config.consul) {
+  consulService = new ConsulService(config.consul);
+}
+const consulConnector = new ConsulConnector(consulService);
+consulConnector.testConsulStatus();
 
 const padLock = new Padlock();
 const ctrlProxy = new ControlProxy(config.grpc);
@@ -36,7 +43,8 @@ module.exports.setup = (http, ws) => {
   http.post('/unlock', unlock);
   http.get('/getPlotsList', getPlotsList);
   http.get('/getFrameworkInfo', getFrameworkInfo);
-  http.get('/getCRUs', getCRUs);
+  http.get('/getCRUs', (req, res) => consulConnector.getCRUs(req, res));
+  http.get('/getFLPs', (req, res) => consulConnector.getFLPs(req, res));
 
   const kafka = new KafkaConnector(config.kafka, ws);
   if (kafka.isKafkaConfigured()) {
@@ -147,57 +155,6 @@ function getFrameworkInfo(req, res) {
 }
 
 /**
- * Method to request all CRUs available in consul KV store
- * @param {Request} req
- * @param {Response} res
- */
-function getCRUs(req, res) {
-  if (consulService) {
-    const cruPath = config.consul.cruPath ? config.consul.cruPath : 'o2/hardware/flps';
-    const regex = new RegExp(`.*/.*/cards`);
-    consulService.getOnlyRawValuesByKeyPrefix(cruPath).then((data) => {
-      const crusByHost = {};
-      Object.keys(data)
-        .filter((key) => key.match(regex))
-        .forEach((key) => {
-          const splitKey = key.split('/');
-          const hostKey = splitKey[splitKey.length - 2];
-          crusByHost[hostKey] = JSON.parse(data[key]);
-        });
-      res.status(200).json(crusByHost);
-    }).catch((error) => {
-      if (error.message.includes('404')) {
-        log.trace(error);
-        log.error(`Could not find any Readout Cards by key ${cruPath}`);
-        errorHandler(`Could not find any Readout Cards by key ${cruPath}`, res, 404);
-      } else {
-        log.trace(error);
-        errorHandler(error, res, 502);
-      }
-    });
-  } else {
-    log.error(`Unable to retrieve configuration of consul service`);
-    errorHandler('Unable to retrieve configuration of consul service', res, 502);
-  }
-}
-
-/**
- * Global HTTP error handler, sends status 500
- * @param {string} err - Message error
- * @param {Response} res - Response object to send to
- * @param {number} status - status code 4xx 5xx, 500 will print to debug
- */
-function errorHandler(err, res, status = 500) {
-  if (status > 500) {
-    if (err.stack) {
-      log.trace(err);
-    }
-    log.error(err.message || err);
-  }
-  res.status(status).send({message: err.message || err});
-}
-
-/**
   * Util to get JSON data (parsed) from server
   * @param {string} host - hostname of the server
   * @param {number} port - port of the server
@@ -242,18 +199,4 @@ function httpGetJson(host, port, path) {
     request.on('error', (err) => reject(err));
     request.end();
   });
-}
-
-/**
- * Method to check if consul service can be used
- */
-function initializeConsulService() {
-  if (!config.consul) {
-    log.error('Consul configuration is missing');
-  } else {
-    consulService = new ConsulService(config.consul);
-    consulService.getConsulLeaderStatus()
-      .then((data) => log.info(`Consul service is up and running on: ${data}`))
-      .catch((error) => log.error(`Could not contact Consul Service due to ${error}`));
-  }
 }

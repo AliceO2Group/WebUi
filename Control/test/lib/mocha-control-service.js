@@ -43,54 +43,6 @@ describe('Control Service test suite', () => {
     });
   });
 
-  describe('Check errors are handled and sent successfully', () => {
-    let ctrlService;
-    let res;
-    before(() => {
-      ctrlService = new ControlService({}, {});
-    });
-
-    beforeEach(() => {
-      res = {
-        status: sinon.fake.returns(),
-        send: sinon.fake.returns(true)
-      };
-    });
-
-    it('should successfully respond with built error message when there is a message and no status', () => {
-      ctrlService.errorHandler('Error', res);
-      assert.ok(res.status.calledOnce);
-    });
-
-    it('should successfully respond with built error message and status > 500', () => {
-      ctrlService.errorHandler('Error', res, 502);
-      assert.ok(res.status.calledWith(502));
-    });
-
-    it('should successfully respond with built error message and status < 500', () => {
-      ctrlService.errorHandler('Error', res, 404);
-      assert.ok(res.status.calledWith(404));
-    });
-
-
-    it('should successfully respond with built error.message and status', () => {
-      const err = {
-        message: 'Test Error',
-        stack: 'Some Stack'
-      };
-      ctrlService.errorHandler(err, res, 502);
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: 'Test Error'}));
-    });
-
-    it('should successfully respond with built error.message, no stack and status', () => {
-      const err = 'Test Error';
-      ctrlService.errorHandler(err, res, 404);
-      assert.ok(res.status.calledWith(404));
-      assert.ok(res.send.calledWith({message: 'Test Error'}));
-    });
-  });
-
   describe('Check Connection availability through `ControlProxy`', () => {
     it('should successfully return true when controlProxy states connection is ready', () => {
       const ctrl = new ControlService({}, {connectionReady: true});

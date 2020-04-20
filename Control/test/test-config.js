@@ -22,6 +22,6 @@ module.exports = {
   consul: {
     hostname: 'localhost',
     port: 8550,
-    cruPath: 'test/o2/hardware/flps'
+    flpHardwarePath: 'test/o2/hardware/flps'
   }
 };
