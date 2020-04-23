@@ -199,6 +199,23 @@ class HttpServer {
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
     });
 
+    // Error handler when an API controller crashes
+    this.app.use('/api', (err, req, res, next) => {
+      log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
+      log.trace(err);
+
+      if (process.env.NODE_ENV === 'development') {
+        res.status(500).json({
+          error: err,
+        });
+      } else {
+        res.status(500).json({
+          error: '500 - Server error',
+          message: 'Something went wrong, please try again or contact an administrator.'
+        });
+      }
+    });
+
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
       log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
