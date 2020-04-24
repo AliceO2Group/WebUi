@@ -31,8 +31,13 @@ module.exports.setup = (http) => {
  * @param {Response} res
  */
 function listObjects(req, res) {
+  console.log("A CEURT OBJE")
+  console.log(new Date());
   model.listObjects()
-    .then((data) => res.status(200).json(data))
+    .then((data) => {
+      console.log(new Date());
+      res.status(200).json(data);
+    })
     .catch((err) => errorHandler(err, res));
 }
 

@@ -65,7 +65,7 @@ class CCDBConnector {
      * @return {Array.<Object>}
      */
     const listTransform = (result) => result.objects.map(itemTransform).filter(itemFilter);
-    return this.httpGetJson('/latest/.*').then(listTransform);
+    return this.httpGetJson('/latest/qc/TST.*').then(listTransform);
   }
 
   /**

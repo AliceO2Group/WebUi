@@ -33,6 +33,7 @@ export default class QCObject extends Observable {
     this.onlineModeAvailable = false; // true if data are coming from server
 
     this.searchInput = ''; // string - content of input search
+
     this.searchResult = []; // array<object> - result list of search
     this.sortBy = {
       field: 'name',
@@ -51,6 +52,21 @@ export default class QCObject extends Observable {
     this.sideTree = new ObjectTree('online');
     this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
+    this.search('qc/TST');
+    this.scrollTop = 0;
+    this.scrollHeight = 0;
+  }
+
+
+  /**
+   * Set log's table UI sizes to allow log scrolling
+   * @param {number} scrollTop - position of the user's scroll cursor
+   * @param {number} scrollHeight - height of table's viewport (not content height which is higher)
+   */
+  setScrollTop(scrollTop, scrollHeight) {
+    this.scrollTop = scrollTop;
+    this.scrollHeight = scrollHeight;
+    this.notify();
   }
 
   /**
@@ -123,9 +139,11 @@ export default class QCObject extends Observable {
   _computeFilters() {
     if (this.searchInput) {
       const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
-      const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
+      const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => {
-        return item.name.match(fuzzyRegex);
+        // console.log(this.searchInput.test(item.name));
+        return fuzzyRegex.test(item.name);
+        // return item.name.match(fuzzyRegex);
       });
     } else {
       this.searchResult = [];
@@ -439,9 +457,12 @@ export default class QCObject extends Observable {
    * @param {string} searchInput
    */
   search(searchInput) {
-    this.searchInput = searchInput;
-    this._computeFilters();
-    this.notify();
+    if (searchInput.length >= 3 || searchInput.length === 0) {
+      this.searchInput = searchInput;
+      this._computeFilters();
+    this.setScrollTop(0, 0);
+      this.notify();
+    }
   }
 
   /**

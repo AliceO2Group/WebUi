@@ -2,6 +2,7 @@ import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '
 import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import infoButton from './../common/infoButton.js';
+import searchTable from './searchTable.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -11,15 +12,17 @@ import infoButton from './../common/infoButton.js';
  */
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
   h('.flex-row.flex-grow', [
-    h('.flex-grow.scroll-y',
-      model.object.objectsRemote.match({
-        NotAsked: () => null,
-        Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
-          spinner(5), h('', 'Loading Objects')
-        ]),
-        Success: () => tableShow(model),
-        Failure: () => null, // notification is displayed
-      })),
+    h('.scroll-y.flex-grow',
+      tableShow(model),
+      // model.object.objectsRemote.match({
+      //   NotAsked: () => null,
+      //   Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
+      //     spinner(5), h('', 'Loading Objects')
+      //   ]),
+      //   Success: () => tableShow(model),
+      //   Failure: () => null, // notification is displayed
+      // })),
+    ),
     h('.animate-width.scroll-y',
       {
         style: {
@@ -93,19 +96,19 @@ const statusBarRight = (model) => model.object.selected
  * @return {vnode}
  */
 const tableShow = (model) => [
-  h('table.table.table-sm.text-no-select', [
-    h('thead', [
-      h('tr', [
-        h('th', {}, 'Name'),
-        h('th', {style: {width: '6em'}}, 'Quality'),
-      ])
-    ]),
-    h('tbody', [
-      // The main table of the view can be a tree OR the result of a search
-      treeRows(model),
-      searchRows(model),
-    ])
-  ])
+  searchTable(model),
+  // h('table.table.table-sm.text-no-select', [
+  //   h('thead', [
+  //     h('tr', [
+  //       h('th', , 'Name'),
+  //       h('th', {style: {width: '6em'}}, 'Quality'),
+  //     ])
+  //   ]),
+  //   h('tbody', [
+  //     // The main table of the view can be a tree OR the result of a search
+  //     treeRows(model),
+  //   ])
+  // ])
 ];
 
 /**
@@ -117,33 +120,6 @@ const treeRows = (model) => !model.object.tree
   ? null
   : model.object.tree.children.map((children) => treeRow(model, children, 0));
 
-/**
- * Shows a line <tr> for search mode (no indentation)
- * @param {Object} model
- * @return {vnode}
- */
-function searchRows(model) {
-  return model.object.searchResult.map((item) => {
-    const path = item.name;
-
-    /**
-     * Select `item` when clicked by user to show its preview
-     * @return {Any}
-     */
-    const selectItem = () => model.object.select(item);
-    const color = item.quality === 'good' ? 'success' : 'danger';
-    const className = item && item === model.object.selected ? 'table-primary' : '';
-
-    return h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
-      h('td.highlight', [
-        iconBarChart(),
-        ' ',
-        item.name
-      ]),
-      h('td.highlight', {class: color}, item.quality),
-    ]);
-  });
-}
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
