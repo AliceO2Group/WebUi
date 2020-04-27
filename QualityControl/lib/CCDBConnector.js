@@ -1,5 +1,5 @@
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('QualityControlCCDB');
+const log = new (require('@aliceo2/web-ui').Log)('QCG-CCDBConnector');
 
 /**
  * Gateway for all CCDB calls
@@ -22,11 +22,21 @@ class CCDBConnector {
 
     this.hostname = config.hostname;
     this.port = config.port;
+    this.prefix = this.getPrefix(config);
+  }
 
-    const connectionTest = this.httpGetJson('/latest');
-    connectionTest.catch((err) => {
-      throw new Error('Unable to connect CCDB: ' + err);
-    });
+  /**
+   * Test connection to CCDB
+   * @return {Promise.<Array.<String>, Error>}
+   */
+  async testConnection() {
+    return this.httpGetJson(`/browse/${this.prefix}`)
+      .then(() => log.info('Successfully connected to CCDB'))
+      .catch((err) => {
+        log.error('Unable to connect to CCDB');
+        log.trace(err);
+        throw new Error(`Unable to connect to CCDB due to: ${err}`);
+      });
   }
 
   /**
@@ -34,38 +44,12 @@ class CCDBConnector {
    * @return {Promise.<Array.<Object>, Error>}
    */
   async listObjects() {
-    /**
-     * Transforms objects received from CCDB to a QCG normalized one
-     * with additional verification of content
-     * @param {Object} item - from CCDB
-     * @return {Object} to QCG use
-     */
-    const itemTransform = (item) => {
-      if (!item.path) {
-        log.warn(`CCDB returned an empty ROOT object path, ignoring`);
-        return null;
-      }
-      if (item.path.indexOf('/') === -1) {
-        log.warn(`CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
-        return null;
-      }
-      return {name: item.path, createTime: parseInt(item.createTime), lastModified: parseInt(item.lastModified)};
-    };
-
-    /**
-     * Filter predicate to allow only non-null values
-     * @param {Any} item
-     * @return {boolean}
-     */
-    const itemFilter = (item) => !!item;
-    /**
-     * Clean objects'list from CCDB and check content before giving to QCG
-     * wrong paths are checked and empty items are removed
-     * @param {Array.<Object>} result - from CCDB
-     * @return {Array.<Object>}
-     */
-    const listTransform = (result) => result.objects.map(itemTransform).filter(itemFilter);
-    return this.httpGetJson('/latest/.*').then(listTransform);
+    return this.httpGetJson(`/latest/${this.prefix}.*`)
+      .then((result) =>
+        result.objects
+          .map(this.itemTransform)
+          .filter((item) => !!item)
+      );
   }
 
   /**
@@ -112,6 +96,43 @@ class CCDBConnector {
       request.on('error', (err) => reject(err));
       request.end();
     });
+  }
+
+  /*
+   * Helpers
+   */
+
+  /**
+   * Transforms objects received from CCDB to a QCG normalized one
+   * with additional verification of content
+   * @param {Object} item - from CCDB
+   * @return {Object} to QCG use
+   */
+  itemTransform(item) {
+    if (!item.path) {
+      log.warn(`CCDB returned an empty ROOT object path, ignoring`);
+      return null;
+    }
+    if (item.path.indexOf('/') === -1) {
+      log.warn(`CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
+      return null;
+    }
+    return {name: item.path, createTime: parseInt(item.createTime), lastModified: parseInt(item.lastModified)};
+  }
+
+  /**
+   * Get prefix from configuration file and parse it
+   * or use as default empty prefix
+   * @param {JSON} config
+   * @return {string} - format `name`
+   */
+  getPrefix(config) {
+    let prefix = '';
+    if (config.prefix && config.prefix.trim() !== '') {
+      prefix = config.prefix.substr(0, 1) === '/' ? config.prefix.substr(1, config.prefix.length) : config.prefix;
+      prefix = prefix.substr(prefix.length - 1, 1) === '/' ? prefix.substr(0, prefix.length - 1) : prefix;
+    }
+    return prefix;
   }
 }
 
