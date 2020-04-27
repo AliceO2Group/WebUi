@@ -55,6 +55,9 @@ describe('CCDB Connector test suite', () => {
     });
 
     it('should return rejected promise when attempting to test connection on CCDB', async () => {
+      nock('http://ccdb:8500')
+        .get('/browse/test')
+        .replyWithError('getaddrinfo ENOTFOUND ccdb ccdb:8500');
       await assert.rejects(ccdb.testConnection(),
         new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb:8500')
       );
