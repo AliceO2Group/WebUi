@@ -26,9 +26,8 @@ describe('CCDB Connector test suite', () => {
   });
   describe('`getPrefix()` tests', () => {
     let ccdb;
-    before(() => {
-      ccdb = new CCDBConnector(config.ccdb);
-    });
+    before(() => ccdb = new CCDBConnector(config.ccdb));
+
     it('successfully return empty string when no prefix is provided in config object', () => {
       const configNoPrefix = {};
       assert.strictEqual(ccdb.getPrefix(configNoPrefix), '');
@@ -44,17 +43,18 @@ describe('CCDB Connector test suite', () => {
   });
 
   describe('`testConnection()` tests', () => {
+    let ccdb;
+    before(() => ccdb = new CCDBConnector(config.ccdb));
+
     it('should successfully test connection to CCDB', async () => {
       nock('http://ccdb:8500')
         .get('/browse/test')
         .reply(200, {objects: [], subfolders: []});
 
-      const ccdb = new CCDBConnector(config.ccdb);
       await assert.doesNotReject(ccdb.testConnection());
     });
 
     it('should return rejected promise when attempting to test connection on CCDB', async () => {
-      const ccdb = new CCDBConnector(config.ccdb);
       await assert.rejects(ccdb.testConnection(),
         new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb:8500')
       );
@@ -85,19 +85,19 @@ describe('CCDB Connector test suite', () => {
   });
 
   describe('`itemTransform()` tests', () => {
+    let ccdb;
+    before(() => ccdb = new CCDBConnector(config.ccdb));
+
     it('should successfully return null for an item with missing path', () => {
-      const ccdb = new CCDBConnector(config.ccdb);
       assert.strictEqual(ccdb.itemTransform({}), null);
       assert.strictEqual(ccdb.itemTransform({path: undefined}), null);
       assert.strictEqual(ccdb.itemTransform({path: null}), null);
       assert.strictEqual(ccdb.itemTransform({path: ''}), null);
     });
     it('should successfully return null for an item with a path missing a forward slash(/)', () => {
-      const ccdb = new CCDBConnector(config.ccdb);
       assert.strictEqual(ccdb.itemTransform({path: 'wrongPath'}), null);
     });
     it('should successfully return a JSON with 3 fields if item fits criteria', () => {
-      const ccdb = new CCDBConnector(config.ccdb);
       const item = {
         path: 'correct/path', createTime: '101', lastModified: '102', id: 'id', metadata: []
       };
@@ -107,8 +107,10 @@ describe('CCDB Connector test suite', () => {
   });
 
   describe('`httGetJson()` tests', () => {
+    let ccdb;
+    before(() => ccdb = new CCDBConnector(config.ccdb));
+
     it('should successfully return a list of the objects', async () => {
-      const ccdb = new CCDBConnector(config.ccdb);
       nock('http://ccdb:8500')
         .get('/latest/test.*')
         .reply(200, '{}');
@@ -117,7 +119,6 @@ describe('CCDB Connector test suite', () => {
     });
 
     it('should reject with error due to status code', async () => {
-      const ccdb = new CCDBConnector(config.ccdb);
       nock('http://ccdb:8500')
         .get('/latest/test.*')
         .reply(502, 'Some error');
@@ -126,7 +127,6 @@ describe('CCDB Connector test suite', () => {
     });
 
     it('should reject with error due to bad JSON body', async () => {
-      const ccdb = new CCDBConnector(config.ccdb);
       nock('http://ccdb:8500')
         .get('/latest/test.*')
         .reply(200, 'Bad formatted JSON');
