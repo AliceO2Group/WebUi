@@ -7,37 +7,38 @@ const ROW_HEIGHT = 33.6;
  * @param {Object} model
  * @return {vnode}
  */
-export default function searchTable(model) {
+export default function virtualTable(model) {
   return h('.flex-grow', [
     tableHeader(),
     h('.absolute-fill.scroll-y.animate-width', tableContainerHooks(model),
       h('', maximumTableSizeStyling(model),
         h('table.table-logs-content.text-no-select.table.table-sm', scrollStyling(model), [
           h('tbody', [
-            listLogsInViewportOnly(model).map((item) => {
-              const path = item.name;
-              const color = item.quality === 'good' ? 'success' : 'danger';
-              const className = item && item === model.object.selected ? 'table-primary' : '';
-
-              return h('tr.object-selectable', {
-                key: path,
-                title: path,
-                onclick: () => model.object.select(item),
-                class: className
-              }, [
-                h('td.highlight', [
-                  iconBarChart(),
-                  ' ',
-                  item.name
-                ]),
-                h('td.highlight', {class: color}, item.quality),
-              ]);
-            })
+            listLogsInViewportOnly(model, model.object.searchResult).map((item) => objectFullRow(model, item))
           ])
         ])
       ))
   ]);
 }
+
+/**
+ * Build a <tr> element based on the item given
+ * @param {Object} model
+ * @param {JSON} item - contains fields: name, creatTime, lastModified
+ * @return {vnode}
+ */
+const objectFullRow = (model, item) => h('tr.object-selectable', {
+  key: item.name,
+  title: item.name,
+  onclick: () => model.object.select(item),
+  class: item && item === model.object.selected ? 'table-primary' : ''
+}, [
+  h('td.highlight', [
+    iconBarChart(),
+    ' ',
+    item.name
+  ]),
+]);
 
 /**
  * Create a table header separetly so that it does not get included
@@ -47,9 +48,12 @@ export default function searchTable(model) {
 const tableHeader = () =>
   h('table.table.table-sm.text-no-select',
     h('thead', [
-      h('tr', [h('th', 'Name')])
+      h('tr', [
+        h('th', 'Name'),
+      ])
     ])
   );
+
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder
  * @param {Object} model
@@ -65,7 +69,8 @@ const scrollStyling = (model) => ({
 /**
  * Style attributes for panel representing the maximum table size
  * Needed for scrollbar to be proportional with the number of elements
- * @param {Object} model 
+ * @param {Object} model
+ * @return {JSON}
  */
 const maximumTableSizeStyling = (model) => ({
   style: {
@@ -75,13 +80,14 @@ const maximumTableSizeStyling = (model) => ({
 });
 
 /**
- * Returns an array of logs that are indeed visible to user, hidden top and hidden bottom logs
+ * Returns an array of items that are visible to user, hidden top and hidden bottom logs
  * are not present in this array output
  * ceil() and + 1 ensure we see top and bottom logs coming
  * @param {Object} model
- * @return {Array.<Log>}
+ * @param {Array<JSON>} list
+ * @return {Array.<JSON>}
  */
-const listLogsInViewportOnly = (model) => model.object.searchResult.slice(
+const listLogsInViewportOnly = (model, list) => list.slice(
   Math.floor(model.object.scrollTop / ROW_HEIGHT),
   Math.floor(model.object.scrollTop / ROW_HEIGHT) + Math.ceil(model.object.scrollHeight / ROW_HEIGHT) + 1
 );

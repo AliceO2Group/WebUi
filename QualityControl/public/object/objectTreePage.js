@@ -2,7 +2,7 @@ import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '
 import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import infoButton from './../common/infoButton.js';
-import searchTable from './searchTable.js';
+import virtualTable from './virtualTable.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -13,15 +13,17 @@ import searchTable from './searchTable.js';
 export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
   h('.flex-row.flex-grow', [
     h('.scroll-y.flex-grow',
-      tableShow(model),
-      // model.object.objectsRemote.match({
-      //   NotAsked: () => null,
-      //   Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
-      //     spinner(5), h('', 'Loading Objects')
-      //   ]),
-      //   Success: () => tableShow(model),
-      //   Failure: () => null, // notification is displayed
-      // })),
+      model.object.searchInput.trim() !== '' ?
+        virtualTable(model)
+        :
+        model.object.objectsRemote.match({
+          NotAsked: () => null,
+          Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
+            spinner(5), h('', 'Loading Objects')
+          ]),
+          Success: () => tableShow(model),
+          Failure: () => null, // notification is displayed
+        })
     ),
     h('.animate-width.scroll-y',
       {
@@ -95,21 +97,18 @@ const statusBarRight = (model) => model.object.selected
  * @param {Object} model
  * @return {vnode}
  */
-const tableShow = (model) => [
-  searchTable(model),
-  // h('table.table.table-sm.text-no-select', [
-  //   h('thead', [
-  //     h('tr', [
-  //       h('th', , 'Name'),
-  //       h('th', {style: {width: '6em'}}, 'Quality'),
-  //     ])
-  //   ]),
-  //   h('tbody', [
-  //     // The main table of the view can be a tree OR the result of a search
-  //     treeRows(model),
-  //   ])
-  // ])
-];
+const tableShow = (model) =>
+  h('table.table.table-sm.text-no-select', [
+    h('thead', [
+      h('tr', [
+        h('th', 'Name'),
+        h('th', {style: {width: '6em'}}, 'Quality'),
+      ])
+    ]),
+    h('tbody', [
+      treeRows(model),
+    ])
+  ]);
 
 /**
  * Shows a list of lines <tr> of objects
