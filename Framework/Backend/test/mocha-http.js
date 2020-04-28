@@ -32,6 +32,10 @@ describe('REST API', () => {
     httpServer = new HttpServer(config.http, config.jwt);
     httpServer.get('/get-insecure', (req, res) => res.json({ok: 1}), {public: true});
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
+    httpServer.get('/get-error', (req, res, next) => next(new Error('Some unexpected error')));
+    httpServer.get('/get-crash', () => {
+      throw new Error('Some unexpected error');
+    });
     httpServer.post('/post-request', (req, res) => res.json({ok: 1}));
     httpServer.post('/post-with-body', (req, res) => res.json({body: req.body}));
     httpServer.put('/put-request', (req, res) => res.json({ok: 1}));
@@ -68,6 +72,28 @@ describe('REST API', () => {
       .expect('Content-Type', /json/)
       .expect(200)
       .expect({ok: 1}, done);
+  });
+
+  it('Crashing route should respond 500/JSON', (done) => {
+    request(httpServer)
+      .get('/api/get-crash?token=' + token)
+      .expect('Content-Type', /json/)
+      .expect(500)
+      .expect({
+        error: '500 - Server error',
+        message: 'Something went wrong, please try again or contact an administrator.'
+      }, done);
+  });
+
+  it('Error route should respond 500/JSON', (done) => {
+    request(httpServer)
+      .get('/api/get-error?token=' + token)
+      .expect('Content-Type', /json/)
+      .expect(500)
+      .expect({
+        error: '500 - Server error',
+        message: 'Something went wrong, please try again or contact an administrator.'
+      }, done);
   });
 
   it('GET with token should respond 200/JSON', (done) => {
@@ -110,7 +136,7 @@ describe('REST API', () => {
     it('should return error 500 if the middleware dissatisfied the query condition', (done) => {
       request(httpServer)
         .get('/api/get-middleware?id=false&token=' + token)
-        .expect('Content-Type', /html/)
+        .expect('Content-Type', /json/)
         .expect(500, done);
     });
   });

@@ -170,7 +170,7 @@ export default class Workflow extends Observable {
       this.model.environment.itemNew =
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
     } else {
-      variables['hosts'] = this.form.hosts.length > 0 ? this.form.hosts: this.form.variables.hosts;
+      variables['hosts'] = this.form.hosts.length > 0 ? JSON.stringify(this.form.hosts) : this.form.variables.hosts;
       if (!templates[repository]) {
         this.model.environment.itemNew = RemoteData.failure('Selected repository does not exist');
       } else {
