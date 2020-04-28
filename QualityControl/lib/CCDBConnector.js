@@ -23,6 +23,10 @@ class CCDBConnector {
     this.hostname = config.hostname;
     this.port = config.port;
     this.prefix = this.getPrefix(config);
+    this.headers = {
+      Accept: 'application/json',
+      'X-Filter-Fields': 'path,createTime,lastModified',
+    };
   }
 
   /**
@@ -64,9 +68,7 @@ class CCDBConnector {
         port: this.port,
         path: path,
         method: 'GET',
-        headers: {
-          Accept: 'application/json'
-        }
+        headers: this.headers
       };
 
       /**
