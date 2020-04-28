@@ -21,7 +21,8 @@ module.exports = {
 
   ccdb: {
     hostname: 'localhost',
-    port: 8080
+    port: 8080,
+    prefix: 'qc'
   },
 
   // consul: {

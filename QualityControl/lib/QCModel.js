@@ -32,6 +32,7 @@ if (config.listingConnector === 'ccdb') {
     throw new Error('CCDB config is mandatory');
   }
   const ccdb = new CCDBConnector(config.ccdb);
+  ccdb.testConnection();
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
 
   const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);

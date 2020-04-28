@@ -424,7 +424,7 @@ describe('QCG', function() {
       });
 
       it('should load page=objectView and display a Checker Object when a parameter objectName is passed', async () => {
-        const objectName = 'qc/checker/AB';
+        const objectName = 'qcg/checker/AB';
         await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
 
         const result = await page.evaluate(() => {
@@ -583,7 +583,7 @@ describe('QCG', function() {
       const expConfig = {
         qcg: {port: 8181, hostname: 'localhost'},
         consul: {hostname: 'localhost', port: 8500},
-        ccdb: {hostname: 'ccdb', port: 8500},
+        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test'},
         quality_control: {version: '0.19.5-1'}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);

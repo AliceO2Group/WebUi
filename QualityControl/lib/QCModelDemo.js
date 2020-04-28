@@ -186,7 +186,7 @@ const objects = [
     {name: `BIGTREE/120KB/${i}`, createTime: i, data: graphs.hpx, lastModified: 100}
   )),
   // Checker
-  {name: 'qc/checker/AB', createTime: 2, data: graphs.checker, lastModified: 100},
+  {name: 'qcg/checker/AB', createTime: 2, data: graphs.checker, lastModified: 100},
 ];
 
 const tabObject = [
