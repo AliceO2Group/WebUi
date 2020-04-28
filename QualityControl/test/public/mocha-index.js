@@ -424,7 +424,7 @@ describe('QCG', function() {
       });
 
       it('should load page=objectView and display a Checker Object when a parameter objectName is passed', async () => {
-        const objectName = 'qc/checker/AB';
+        const objectName = 'qcg/checker/AB';
         await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
 
         const result = await page.evaluate(() => {
