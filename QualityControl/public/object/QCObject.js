@@ -52,7 +52,6 @@ export default class QCObject extends Observable {
     this.sideTree = new ObjectTree('online');
     this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
-    this.search('qc/TST');
     this.scrollTop = 0;
     this.scrollHeight = 0;
   }
@@ -457,12 +456,10 @@ export default class QCObject extends Observable {
    * @param {string} searchInput
    */
   search(searchInput) {
-    if (searchInput.length >= 3 || searchInput.length === 0) {
-      this.searchInput = searchInput;
-      this._computeFilters();
+    this.searchInput = searchInput;
+    this._computeFilters();
     this.setScrollTop(0, 0);
-      this.notify();
-    }
+    this.notify();
   }
 
   /**
