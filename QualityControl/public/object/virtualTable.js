@@ -3,7 +3,7 @@ import {h, iconBarChart} from '/js/src/index.js';
 const ROW_HEIGHT = 33.6;
 
 /**
- * Shows a line <tr> for search mode (no indentation)
+ * A table which only displays the rows visible to the user
  * @param {Object} model
  * @return {vnode}
  */
@@ -12,7 +12,7 @@ export default function virtualTable(model) {
   }, [
     tableHeader(),
     h('.absolute-fill.scroll-y.animate-width', tableContainerHooks(model),
-      h('', maximumTableSizeStyling(model),
+      h('', maximumTableSizeStyling(model.object.searchResult.length),
         h('table.table-logs-content.text-no-select.table.table-sm', scrollStyling(model), [
           h('tbody', [
             listLogsInViewportOnly(model, model.object.searchResult).map((item) => objectFullRow(model, item))
@@ -25,7 +25,7 @@ export default function virtualTable(model) {
 /**
  * Build a <tr> element based on the item given
  * @param {Object} model
- * @param {JSON} item - contains fields: name, creatTime, lastModified
+ * @param {JSON} item - contains fields: <name>, [creatTime], [lastModified]
  * @return {vnode}
  */
 const objectFullRow = (model, item) =>
@@ -44,7 +44,7 @@ const objectFullRow = (model, item) =>
 
 /**
  * Create a table header separately so that it does not get included
- * in the virtual list
+ * in the virtual list scrolling events
  * @return {vnode}
  */
 const tableHeader = () =>
@@ -71,18 +71,18 @@ const scrollStyling = (model) => ({
 /**
  * Style attributes for panel representing the maximum table size
  * Needed for scrollbar to be proportional with the number of elements
- * @param {Object} model
+ * @param {Object} length
  * @return {JSON}
  */
-const maximumTableSizeStyling = (model) => ({
+const maximumTableSizeStyling = (length) => ({
   style: {
-    height: model.object.searchResult.length * ROW_HEIGHT + 'px',
+    height: length * ROW_HEIGHT + 'px',
     position: 'relative'
   }
 });
 
 /**
- * Returns an array of items that are visible to user, hidden top and hidden bottom logs
+ * Returns an array of items that are visible to user, hidden top and hidden bottom items
  * are not present in this array output
  * ceil() and + 1 ensure we see top and bottom logs coming
  * @param {Object} model
@@ -97,7 +97,8 @@ const listLogsInViewportOnly = (model, list) => list.slice(
 
 /**
  * Hooks of .tableLogsContent for "smart scrolling"
- * This notifies model of its size and scrolling position to compute logs to draw
+ * This notifies model of its size and scrolling position to compute item to draw
+ * It is also changing the size of the table in case a plot needs to be drawn
  * @param {Object} model
  * @return {Object} object containing hooks
  */
