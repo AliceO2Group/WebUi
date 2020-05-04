@@ -8,7 +8,8 @@ const ROW_HEIGHT = 33.6;
  * @return {vnode}
  */
 export default function virtualTable(model) {
-  return h('.flex-grow', [
+  return h('.flex-grow', {
+  }, [
     tableHeader(),
     h('.absolute-fill.scroll-y.animate-width', tableContainerHooks(model),
       h('', maximumTableSizeStyling(model),
@@ -27,21 +28,22 @@ export default function virtualTable(model) {
  * @param {JSON} item - contains fields: name, creatTime, lastModified
  * @return {vnode}
  */
-const objectFullRow = (model, item) => h('tr.object-selectable', {
-  key: item.name,
-  title: item.name,
-  onclick: () => model.object.select(item),
-  class: item && item === model.object.selected ? 'table-primary' : ''
-}, [
-  h('td.highlight', [
-    iconBarChart(),
-    ' ',
-    item.name
-  ]),
-]);
+const objectFullRow = (model, item) =>
+  h('tr.object-selectable', {
+    key: item.name,
+    title: item.name,
+    onclick: () => model.object.select(item),
+    class: item && item === model.object.selected ? 'table-primary' : ''
+  }, [
+    h('td.highlight', [
+      iconBarChart(),
+      ' ',
+      item.name
+    ]),
+  ]);
 
 /**
- * Create a table header separetly so that it does not get included
+ * Create a table header separately so that it does not get included
  * in the virtual list
  * @return {vnode}
  */
@@ -120,7 +122,6 @@ const tableContainerHooks = (model) => ({
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
       model.object.setScrollTop(scrollTop, height);
     };
-
     // call the function when scrolling is updated
     vnode.dom.addEventListener('scroll', onTableScroll);
 
