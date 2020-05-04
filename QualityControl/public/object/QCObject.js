@@ -33,7 +33,6 @@ export default class QCObject extends Observable {
     this.onlineModeAvailable = false; // true if data are coming from server
 
     this.searchInput = ''; // string - content of input search
-
     this.searchResult = []; // array<object> - result list of search
     this.sortBy = {
       field: 'name',
@@ -58,7 +57,7 @@ export default class QCObject extends Observable {
 
 
   /**
-   * Set log's table UI sizes to allow log scrolling
+   * Set searched items table UI sizes to allow virtual scrolling
    * @param {number} scrollTop - position of the user's scroll cursor
    * @param {number} scrollHeight - height of table's viewport (not content height which is higher)
    */
@@ -140,9 +139,7 @@ export default class QCObject extends Observable {
       const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => {
-        // console.log(this.searchInput.test(item.name));
         return fuzzyRegex.test(item.name);
-        // return item.name.match(fuzzyRegex);
       });
     } else {
       this.searchResult = [];
@@ -459,7 +456,6 @@ export default class QCObject extends Observable {
     this.searchInput = searchInput;
     this._computeFilters();
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
-    // this.setScrollTop(0, 0);
     this.notify();
   }
 
