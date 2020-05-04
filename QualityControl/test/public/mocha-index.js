@@ -332,10 +332,15 @@ describe('QCG', function() {
       assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
     });
 
-    it('should have filtered results on input search filled and display only the ones visible to the user (15 out of 2500)', async () => {
+    it('should have filtered results on input search filled and display only the ones visible to the user (less than 2500)', async () => {
       await page.type('header input', 'BIGTREE');
-      const rowsDisplayed = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length, {timeout: 5000});
-      assert.strictEqual(rowsDisplayed, 15);
+      const rowsDisplayed = await page.evaluate(() => {
+        const rows = [];
+        document.querySelectorAll('section table tbody tr').forEach((item) => rows.push(item.innerText));
+        return rows;
+      }, {timeout: 5000});
+      const allRowsContainBIGTREE = rowsDisplayed.filter((name) => name.includes('BIGTREE')).length === rowsDisplayed.length;
+      assert.ok(allRowsContainBIGTREE, 'Not all rows contain the searched term');
     });
   });
 
