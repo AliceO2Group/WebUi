@@ -116,7 +116,6 @@ const listLogsInViewportOnly = (model, list) => list.slice(
   Math.floor(model.object.scrollTop / ROW_HEIGHT) + Math.ceil(model.object.scrollHeight / ROW_HEIGHT) + 1
 );
 
-
 /**
  * Hooks of .tableLogsContent for "smart scrolling"
  * This notifies model of its size and scrolling position to compute item to draw

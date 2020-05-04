@@ -55,7 +55,6 @@ export default class QCObject extends Observable {
     this.scrollHeight = 0;
   }
 
-
   /**
    * Set searched items table UI sizes to allow virtual scrolling
    * @param {number} scrollTop - position of the user's scroll cursor

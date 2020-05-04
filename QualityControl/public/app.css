@@ -45,4 +45,3 @@ select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-ove
 .actionable-icon:active {transform: scale(1.5);}
 
 .table-logs-content { width: 100%; border-collapse: collapse; }
-.table-logs-content td {}
