@@ -10,20 +10,23 @@ import virtualTable from './virtualTable.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
+export default (model) => h('.h-100.flex-column', {key: model.router.params.page}, [
   h('.flex-row.flex-grow', [
-    h('.scroll-y.flex-grow',
-      model.object.searchInput.trim() !== '' ?
-        virtualTable(model)
-        :
-        model.object.objectsRemote.match({
-          NotAsked: () => null,
-          Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
-            spinner(5), h('', 'Loading Objects')
-          ]),
-          Success: () => tableShow(model),
-          Failure: () => null, // notification is displayed
-        })
+    h('.scroll-y.flex-column', {
+      style: {
+        width: model.object.selected ? '50%' : '100%'
+      },
+    }, model.object.searchInput.trim() !== '' ?
+      virtualTable(model, 'main')
+      :
+      model.object.objectsRemote.match({
+        NotAsked: () => null,
+        Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
+          spinner(5), h('', 'Loading Objects')
+        ]),
+        Success: () => tableShow(model),
+        Failure: () => null, // notification is displayed
+      })
     ),
     h('.animate-width.scroll-y',
       {

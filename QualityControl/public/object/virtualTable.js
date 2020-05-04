@@ -1,21 +1,24 @@
 import {h, iconBarChart} from '/js/src/index.js';
 
-const ROW_HEIGHT = 33.6;
-
+let ROW_HEIGHT = 33.6;
+let FONT = '';
 /**
  * A table which only displays the rows visible to the user
  * @param {Object} model
+ * @param {String} location - location of where the virtual table is used: main(default) / side
  * @return {vnode}
  */
-export default function virtualTable(model) {
-  return h('.flex-grow', {
+export default function virtualTable(model, location = 'main') {
+  ROW_HEIGHT = (location === 'side') ? 29.4 : 33.6;
+  FONT = (location === 'side') ? '.f6' : '';
+  return h('.flex-grow.flex-column', {
   }, [
-    tableHeader(),
-    h('.absolute-fill.scroll-y.animate-width', tableContainerHooks(model),
+    location !== 'side' && tableHeader(),
+    h('.scroll-y.animate-width', tableContainerHooks(model),
       h('', maximumTableSizeStyling(model.object.searchResult.length),
-        h('table.table-logs-content.text-no-select.table.table-sm', scrollStyling(model), [
+        h(`table.table-logs-content.text-no-select.table.table-sm${FONT}`, scrollStyling(model), [
           h('tbody', [
-            listLogsInViewportOnly(model, model.object.searchResult).map((item) => objectFullRow(model, item))
+            listLogsInViewportOnly(model, model.object.searchResult).map((item) => objectFullRow(model, item, location))
           ])
         ])
       ))
@@ -26,16 +29,34 @@ export default function virtualTable(model) {
  * Build a <tr> element based on the item given
  * @param {Object} model
  * @param {JSON} item - contains fields: <name>, [creatTime], [lastModified]
+ * @param {String} location
  * @return {vnode}
  */
-const objectFullRow = (model, item) =>
+const objectFullRow = (model, item, location) =>
   h('tr.object-selectable', {
     key: item.name,
     title: item.name,
     onclick: () => model.object.select(item),
-    class: item && item === model.object.selected ? 'table-primary' : ''
+    ondblclick: () => {
+      if (location === 'side') {
+        model.layout.addItem(item.name);
+      }
+    },
+    ondragstart: () => {
+      if (location === 'side') {
+        const newItem = model.layout.addItem(item.name);
+        model.layout.moveTabObjectStart(newItem);
+      }
+    },
+    ondragend: () => {
+      if (location === 'side') {
+        model.layout.moveTabObjectStop();
+      }
+    },
+    class: item && item === model.object.selected ? 'table-primary' : '',
+    draggable: location === 'side'
   }, [
-    h('td.highlight', [
+    h('td.highlight.text-ellipsis', [
       iconBarChart(),
       ' ',
       item.name
@@ -48,12 +69,13 @@ const objectFullRow = (model, item) =>
  * @return {vnode}
  */
 const tableHeader = () =>
-  h('table.table.table-sm.text-no-select',
-    h('thead', [
-      h('tr', [
-        h('th', 'Name'),
-      ])
+  h('table.table.table-sm.text-no-select', {
+    style: 'margin-bottom:0'
+  }, h('thead', [
+    h('tr', [
+      h('th', 'Name'),
     ])
+  ])
   );
 
 /**
@@ -100,11 +122,11 @@ const listLogsInViewportOnly = (model, list) => list.slice(
  * This notifies model of its size and scrolling position to compute item to draw
  * It is also changing the size of the table in case a plot needs to be drawn
  * @param {Object} model
+ * @param {Object} location
  * @return {Object} object containing hooks
  */
 const tableContainerHooks = (model) => ({
   style: {
-    width: model.object.selected ? '50%' : '100%',
     top: '2em',
     bottom: '1.4em'
   },
@@ -115,7 +137,7 @@ const tableContainerHooks = (model) => ({
    */
   oncreate(vnode) {
     /**
-     * THis handler allow to notify model of element scrolling change (.tableLogsContent)
+     * This handler allow to notify model of element scrolling change (.tableLogsContent)
      */
     const onTableScroll = () => {
       const container = vnode.dom;
