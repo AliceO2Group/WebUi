@@ -119,46 +119,6 @@ const treeRows = (model) => !model.object.sideTree
   : model.object.sideTree.children.map((children) => treeRow(model, children, 0));
 
 /**
- * Shows a line <tr> for search mode (no indentation)
- * @param {Object} model
- * @return {vnode}
- */
-function searchRows(model) {
-  return !model.object.searchResult ? null : model.object.searchResult.map((item) => {
-    const path = item.name;
-    const className = item && item === model.object.selected ? 'table-primary' : '';
-
-    /**
-     * Handler when line is clicked by user
-     * @return {Any}
-     */
-    const onclick = () => model.object.select(item);
-
-    /**
-     * On double click object is added to tab
-     * @return {Any}
-     */
-    const ondblclick = () => model.layout.addItem(item.name);
-
-    /**
-     * On drag start, inform model of the object moving
-     */
-    const ondragstart = () => {
-      const newItem = model.layout.addItem(item.name);
-      model.layout.moveTabObjectStart(newItem);
-    };
-
-    return h('tr', {key: path, title: path, onclick, ondblclick, ondragstart, class: className, draggable: true}, [
-      h('td.highlight.text-ellipsis', [
-        iconBarChart(),
-        ' ',
-        item.name
-      ])
-    ]);
-  });
-}
-
-/**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
  * sub-nodes of `tree` as additionnals lines if they are open in the tree.
  * Indentation is added according to tree level during recurcive call of treeRow
