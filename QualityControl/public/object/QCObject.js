@@ -458,7 +458,8 @@ export default class QCObject extends Observable {
   search(searchInput) {
     this.searchInput = searchInput;
     this._computeFilters();
-    this.setScrollTop(0, 0);
+    this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
+    // this.setScrollTop(0, 0);
     this.notify();
   }
 
