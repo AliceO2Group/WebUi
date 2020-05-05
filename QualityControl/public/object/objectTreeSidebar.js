@@ -2,6 +2,7 @@ import {h} from '/js/src/index.js';
 import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import {iconCaretBottom, iconCaretRight, iconBarChart, iconResizeBoth} from '/js/src/icons.js';
+import virtualTable from './virtualTable.js';
 
 /**
  * Tree of object, searchable, inside the sidebar.
@@ -13,15 +14,18 @@ import {iconCaretBottom, iconCaretRight, iconBarChart, iconResizeBoth} from '/js
  */
 export default (model) => h('.flex-column.h-100', [
   h('.m2.mv3', searchForm(model)),
-  h('.h-100.scroll-y',
-    model.object.objectsRemote.match({
-      NotAsked: () => null,
-      Loading: () => h('.flex-column.items-center.justify-center.f5', [
-        spinner(3), h('', 'Loading Objects')
-      ]),
-      Success: () => treeTable(model),
-      Failure: () => null, // notification is displayed
-    }),
+  h('.h-100.scroll-y.flex-column',
+    model.object.searchInput.trim() !== '' ?
+      virtualTable(model, 'side')
+      :
+      model.object.objectsRemote.match({
+        NotAsked: () => null,
+        Loading: () => h('.flex-column.items-center.justify-center.f5', [
+          spinner(3), h('', 'Loading Objects')
+        ]),
+        Success: () => treeTable(model),
+        Failure: () => null, // notification is displayed
+      }),
   ),
   objectPreview(model)
 ]);
@@ -101,10 +105,7 @@ function treeTable(model) {
   };
 
   return h('table.table.table-sm.text-no-select.flex-grow.f6', attrs, [
-    h('tbody', [
-      // The main table of the view can be a tree OR the result of a search
-      model.object.searchInput ? searchRows(model) : treeRows(model),
-    ])
+    h('tbody', [treeRows(model)])
   ]);
 }
 
@@ -116,46 +117,6 @@ function treeTable(model) {
 const treeRows = (model) => !model.object.sideTree
   ? null
   : model.object.sideTree.children.map((children) => treeRow(model, children, 0));
-
-/**
- * Shows a line <tr> for search mode (no indentation)
- * @param {Object} model
- * @return {vnode}
- */
-function searchRows(model) {
-  return !model.object.searchResult ? null : model.object.searchResult.map((item) => {
-    const path = item.name;
-    const className = item && item === model.object.selected ? 'table-primary' : '';
-
-    /**
-     * Handler when line is clicked by user
-     * @return {Any}
-     */
-    const onclick = () => model.object.select(item);
-
-    /**
-     * On double click object is added to tab
-     * @return {Any}
-     */
-    const ondblclick = () => model.layout.addItem(item.name);
-
-    /**
-     * On drag start, inform model of the object moving
-     */
-    const ondragstart = () => {
-      const newItem = model.layout.addItem(item.name);
-      model.layout.moveTabObjectStart(newItem);
-    };
-
-    return h('tr', {key: path, title: path, onclick, ondblclick, ondragstart, class: className, draggable: true}, [
-      h('td.highlight.text-ellipsis', [
-        iconBarChart(),
-        ' ',
-        item.name
-      ])
-    ]);
-  });
-}
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
