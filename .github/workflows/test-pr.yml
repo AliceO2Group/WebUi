@@ -10,7 +10,11 @@ jobs:
       RECIPE_MODULE: ${{ secrets.ALIDIST_MODULE }}
       PROJECT_VERSION: '1.8.2'
     steps:
-    - run: echo ${RECIPE_MODULE}
+    - run: |
+        echo "TEST"
+        echo ${RECIPE_MODULE}
+        echo $RECIPE_MODULE
+        echo "$RECIPE_MODULE"
     - uses: actions/checkout@v2
       with: 
         repository: ${{ secrets.ALIDIST_ORG }}/alidist
