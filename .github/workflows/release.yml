@@ -55,7 +55,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with: 
-        repository: '${RECIPE_ORG}/alidist'
+        repository: '$RECIPE_ORG/alidist'
         ref: 'master'
         token: $USER_TOKEN
     - name: Set user credentials
