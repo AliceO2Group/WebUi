@@ -24,8 +24,8 @@ jobs:
         CURRENT_VERSION=`cat $RECIPE_MODULE.sh | grep "version: v" | awk '{print $2}' | cut -f2 -d "v"`
         ls
         echo "Replacing version: $CURRENT_VERSION with $PROJECT_VERSION in file: $RECIPE_MODULE.sh" 
-        sed -i "" "2s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
-        sed -i "" "3s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
+        sed -i 2s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
+        sed -i 3s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
     - name: Add changes, commit and create new branch and raise PR
       run: |
         git add $RECIPE_MODULE.sh
