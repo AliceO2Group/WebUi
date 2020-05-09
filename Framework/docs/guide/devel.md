@@ -31,7 +31,17 @@ Exceptions can be added to lines and files:
 * `npm run test` runs both: `npm run mocha` and `npm run eslint`
 
 ## Continuous integration
-[GitHub Actions](https://github.com/AliceO2Group/WebUi/actions?query=workflow%3AFramework) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.github/framework.yml` file.
+#### [framework.yml](./../../../.github/workflows/framework.yml)
+* Checks that tests of the project are running successfully on two virtual machines:
+  * `ubuntu`
+  * `macOS`
+* Make sure that the proposed changes are not reducing the current code-coverage percent
+* Sends a code coverage report to [CodeCov](https://codecov.io/gh/AliceO2Group/WebUi)
+* Runs a compatibility set of tests on each project (Control, QualityControl, InfoLogger) to ensure changes to the framework are not breaking existing projects. 
+
+#### [release.yml](../.github/workflows/release.yml)
+* Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/web-ui](https://www.npmjs.com/package/@aliceo2/web-ui)
+
 
 ## Dependencies status
 The status of the dependencies can be shown by running `ncu` command of [npm-check-updates](https://www.npmjs.com/package/npm-check-updates) package.
