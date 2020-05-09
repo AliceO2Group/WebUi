@@ -26,6 +26,8 @@ jobs:
         sed -i "2s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
         sed -i "3s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
     - name: Add changes, commit and create new branch and raise PR
+      env:
+        GITHUB_TOKEN: ${{ secrets. ALIDIST_USER_TOKEN }}
       run: |
         git add $RECIPE_MODULE.sh
         git commit -m "Bumping $RECIPE_MODULE version: $CURRENT_VERSION to: $PROJECT_VERSION" 
@@ -34,3 +36,4 @@ jobs:
         git push origin $BRANCH
         curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1
         bin/hub pull-request -m "Bumping $RECIPE_MODULE version $PROJECT_VERSION" -a ${{ secrets.ALIDIST_USER_MAIL }}
+
