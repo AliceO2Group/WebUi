@@ -1,0 +1,79 @@
+name: release
+on:
+  release:
+    types: [created]
+jobs:
+  deploy-npm-module:
+    runs-on: ubuntu-latest
+    outputs:
+      PROJECT: ${{ steps.set-project.outputs.project }}
+      VERSION: ${{ steps.set-project.outputs.version }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Check released tag matches ALICE O2 naming pattern
+      run: |
+        if ! [[ $GITHUB_REF =~ @aliceo2\/[a-z]+-*[a-z]*@*.* ]]; then
+          echo "TAG: ${GITHUB_REF} does not match expected pattern";
+          exit 1;
+        else
+          echo "TAG is correct"
+        fi
+    - name: Set variable TAG as name of project that is being released
+      id: set-project
+      run: |
+        TAG=$( echo "${GITHUB_REF/refs\/tags\/@aliceo2\/}" | cut -f1 -d"@")
+        VERSION=$( echo "${GITHUB_REF/refs\/tags\/@aliceo2\/$TAG}" | cut -f1 -d"@")
+        echo "VERSION IS: $VERSION"
+        if [ "$TAG" = "qc" ]; then PROJECT="QualityControl"
+        elif [ "$TAG" = "control" ]; then PROJECT="Control"
+        elif [ "$TAG" = "infologger" ]; then PROJECT="InfoLogger"
+        elif [ "$TAG" = "web-ui" ]; then PROJECT="Framework"
+        else echo "Project identified is UNKNOWN"; exit 1;
+        fi
+        echo "Identified project is $PROJECT"
+        echo "::set-env name=PROJECT::$(echo "$PROJECT")"
+        echo "::set-output name=project::$(echo "$PROJECT")"
+        echo "::set-output name=version::$(echo "$VERSION")"
+    - run: (cd $PROJECT; npm ci)
+    - run: (cd $PROJECT; npm publish)
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
+    - run: 
+  bump-alidist-recipe:
+    needs: [deploy-npm-module]
+    runs-on: ubuntu-latest
+    if: ${{ needs.deploy-npm-module.outputs.project }} == "QualityControl"
+    env:
+      RECIPE_TOKEN: ${{ secrets.ALIDIST_TOKEN }}
+      RECIPE_ORG: ${{ secrets.ALIDIST_ORG }}
+      RECIPE_MODULE: ${{ secrets.ALIDIST_MODULE }}
+      PROJECT_VERSION: ${{ needs.deploy-npm-module.outputs.version}}
+    steps:
+    - uses: actions/checkout@v2
+      repository: '${RECIPE_ORG}/alidist'
+      ref: 'master'
+      token: $RECIPE_TOKEN
+    - name: Set user credentials
+      run: |
+        git config --global user.email ${{ secrets.ALIDIST_USER_MAIL  }}
+        git config --global user.name ${{ secrets.ALIDIST_USER_NAME  }}
+    - name: Update recipe VERSION and TAG of the module
+      run: |
+        CURRENT_VERSION=`cat $RECIPE_MODULE.sh | grep "version: v" | awk '{print $2}' | cut -f2 -d "v"`
+        echo "Replacing version: $CURRENT_VERSION with $PROJECT_VERSION" 
+        sed -i "" "2s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
+        sed -i "" "3s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
+    - name: Add changes, commit and create new branch
+      run: |
+        git add $RECIPE_MODULE.sh
+        git commit -m "Bumping $RECIPE_MODULE version: $CURRENT_VERSION to: $PROJECT_VERSION" 
+        BRANCH="bump/$RECIPE_MODULE/$PROJECT_VERSION"
+        git checkout -b $BRANCH
+        git push origin $BRANCH
+        git pull-request
+
+        
