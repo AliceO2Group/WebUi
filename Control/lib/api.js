@@ -150,6 +150,9 @@ function getFrameworkInfo(req, res) {
     if (config.kafka) {
       result.kafka = config.kafka;
     }
+    if (config.consul) {
+      result.consul = config.consul;
+    }
     res.status(200).json(result);
   }
 }
