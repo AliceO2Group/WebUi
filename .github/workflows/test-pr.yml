@@ -35,5 +35,5 @@ jobs:
         git checkout -b $BRANCH
         git push origin $BRANCH
         curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1
-        bin/hub pull-request -m "Bumping $RECIPE_MODULE version $PROJECT_VERSION" -a ${{ secrets.ALIDIST_USER_NAME }}
+        bin/hub pull-request -m "Bumping $RECIPE_MODULE version $PROJECT_VERSION" -a ${{ secrets.ALIDIST_USER }}
 
