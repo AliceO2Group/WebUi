@@ -42,13 +42,13 @@ jobs:
     - run: (cd $PROJECT; npm publish)
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
-    - run: 
   bump-alidist-recipe:
     needs: [deploy-npm-module]
     runs-on: ubuntu-latest
     if: ${{ needs.deploy-npm-module.outputs.project }} == "QualityControl"
     env:
-      RECIPE_TOKEN: ${{ secrets.ALIDIST_TOKEN }}
+      USER_TOKEN: ${{ secrets.ALIDIST_USER_TOKEN }}
+      USER_MAIL: ${{ secrets.ALIDIST_USER_MAIL }}
       RECIPE_ORG: ${{ secrets.ALIDIST_ORG }}
       RECIPE_MODULE: ${{ secrets.ALIDIST_MODULE }}
       PROJECT_VERSION: ${{ needs.deploy-npm-module.outputs.version}}
@@ -56,10 +56,10 @@ jobs:
     - uses: actions/checkout@v2
       repository: '${RECIPE_ORG}/alidist'
       ref: 'master'
-      token: $RECIPE_TOKEN
+      token: $USER_TOKEN
     - name: Set user credentials
       run: |
-        git config --global user.email ${{ secrets.ALIDIST_USER_MAIL  }}
+        git config --global user.email $USER_MAIL
         git config --global user.name ${{ secrets.ALIDIST_USER_NAME  }}
     - name: Update recipe VERSION and TAG of the module
       run: |
@@ -67,13 +67,12 @@ jobs:
         echo "Replacing version: $CURRENT_VERSION with $PROJECT_VERSION" 
         sed -i "" "2s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
         sed -i "" "3s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
-    - name: Add changes, commit and create new branch
+    - name: Add changes, commit and create new branch and raise PR
       run: |
         git add $RECIPE_MODULE.sh
         git commit -m "Bumping $RECIPE_MODULE version: $CURRENT_VERSION to: $PROJECT_VERSION" 
         BRANCH="bump/$RECIPE_MODULE/$PROJECT_VERSION"
         git checkout -b $BRANCH
         git push origin $BRANCH
-        git pull-request
-
-        
+        curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1
+        bin/hub pull-request -m "Bumping $RECIPE_MODULE version $PROJECT_VERSION" -a $USER_MAIL
