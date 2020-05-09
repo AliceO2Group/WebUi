@@ -7,7 +7,7 @@ jobs:
   bump-alidist-recipe:
     runs-on: ubuntu-latest
     env:
-      RECIPE_MODULE: ${{ secrets.ALIDIST_MODULE }}
+      RECIPE_MODULE: qcg
       PROJECT_VERSION: '1.8.2'
     steps:
     - run: |
