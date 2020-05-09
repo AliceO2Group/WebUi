@@ -54,9 +54,10 @@ jobs:
       PROJECT_VERSION: ${{ needs.deploy-npm-module.outputs.version}}
     steps:
     - uses: actions/checkout@v2
-      repository: '${RECIPE_ORG}/alidist'
-      ref: 'master'
-      token: $USER_TOKEN
+      with: 
+        repository: '${RECIPE_ORG}/alidist'
+        ref: 'master'
+        token: $USER_TOKEN
     - name: Set user credentials
       run: |
         git config --global user.email $USER_MAIL
