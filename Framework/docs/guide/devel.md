@@ -62,10 +62,8 @@ Set "Fix version" of each JIRA issue that is being released, as we host multiple
 
 If all the issues for the given release are in the "Ready for release" status start the process:
 1. Bump npm (`package.json`) version, either manually or using `npm version` script, create "release" PR against `dev`, merge
-2. Create a PR to merge `dev` with `master` (in order to run checks and upload coverage report), merge the PR (it can be simply done by doing `git pull origin dev`, `git push origin master`)
-3. Create and push GH tag: as we host multiple packages in the repo use `npm` naming conventions: `<org>/<package>@<version>`
-4. `npm publish`
-5. Mark version as released in JIRA
-6. Create GH release, generate "Release Notes" from JIRA and add them to release description
-7. Update status of JIRA issues (You can use Bulk Change feature to edit multiple issues at once)
-8. Bump version in [alidist](https://github.com/alisw/alidist) or/and in [system-configuration](https://gitlab.cern.ch/AliceO2Group/system-configuration)
+3. Create a release from GitHub interface: as we host multiple packages in the repo use `npm` naming conventions: `<org>/<package>@<version>`.
+4. Mark version as released in JIRA
+5. Create GH release(with title `<org>/<package>@<version>`), generate "Release Notes" from JIRA and add them to release description.  Our release workflow will automatically release it to NPM and if the project is QualityControl it will also raise a PR in [alisw/alidist](https://github.com/alisw/alidist) bumping the `qcg.sh` recipe with the new version and tag. 
+6. Update status of JIRA issues (You can use Bulk Change feature to edit multiple issues at once)
+7. Bump version in [system-configuration](https://gitlab.cern.ch/AliceO2Group/system-configuration)
