@@ -41,7 +41,7 @@ jobs:
   bump-alidist-recipe:
     needs: [deploy-npm-module]
     runs-on: ubuntu-latest
-    if: (${{ needs.deploy-npm-module.outputs.project }} == "QualityControl" && ${{ needs.deploy-npm-module.outputs.version }} != "")
+    if: ( needs.deploy-npm-module.outputs.project == 'QualityControl' && needs.deploy-npm-module.outputs.version != '')
     env:
       PROJECT_VERSION: ${{ needs.deploy-npm-module.outputs.version }}
       RECIPE_MODULE: 'qcg'
