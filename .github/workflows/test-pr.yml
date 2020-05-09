@@ -22,9 +22,8 @@ jobs:
     - name: Update recipe VERSION and TAG of the module
       run: |
         CURRENT_VERSION=`cat $RECIPE_MODULE.sh | grep "version: v" | awk '{print $2}' | cut -f2 -d "v"`
-        echo "Current version is $CURRENT_VERSION"
-        echo "File is $RECIPE_MODULE.sh"
-        echo "Replacing version: $CURRENT_VERSION with $PROJECT_VERSION" 
+        ls
+        echo "Replacing version: $CURRENT_VERSION with $PROJECT_VERSION in file: $RECIPE_MODULE.sh" 
         sed -i "" "2s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
         sed -i "" "3s/$CURRENT_VERSION/$PROJECT_VERSION/g" $RECIPE_MODULE.sh
     - name: Add changes, commit and create new branch and raise PR
