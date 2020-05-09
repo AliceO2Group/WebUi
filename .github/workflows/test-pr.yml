@@ -17,7 +17,7 @@ jobs:
       with: 
         repository: ${{ secrets.ALIDIST_ORG }}/alidist
         ref: 'master'
-        token: $USER_TOKEN
+        token: ${{ secrets.ALIDIST_USER_TOKEN }}
     - name: Set user credentials
       run: |
         git config --global user.email $USER_MAIL
