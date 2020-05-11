@@ -37,7 +37,15 @@ jobs:
         echo "::set-env name=PROJECT::$(echo "$PROJECT")"
         echo "::set-output name=project::$(echo "$PROJECT")"
         echo "::set-output name=version::$(echo "$VERSION")"
-    - run: (cd $PROJECT; npm ci)
+    - name: Install & Configure project dependencies 
+      run: |
+        cd $PROJECT
+        if [ "$PROJECT" = "QualityControl" ]
+        then
+          (cd lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
+          (cd ..; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
+        fi
+        npm ci
     - run: (cd $PROJECT; npm publish)
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
