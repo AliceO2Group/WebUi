@@ -22,7 +22,7 @@
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "simul": "node test/live-simulator/infoLoggerServer.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js') --retries 4",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
@@ -32,7 +32,7 @@
   "devDependencies": {
     "eslint": "^5.15.0",
     "eslint-config-google": "^0.12.0",
-    "mocha": "7.0.1",
+    "mocha": "^7.1.2",
     "nyc": "^14.1.1",
     "puppeteer": "2.0.0",
     "sinon": "^7.3.2"
