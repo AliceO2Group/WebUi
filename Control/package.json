@@ -21,7 +21,7 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-*.js') --retries 4",
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js') --retries 2",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
