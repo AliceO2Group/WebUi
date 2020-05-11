@@ -43,7 +43,7 @@ jobs:
         if [ "$PROJECT" = "QualityControl" ]
         then
           (cd lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
-          (cd ..; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
+          (rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
         fi
         npm ci
     - run: (cd $PROJECT; npm publish)
