@@ -55,7 +55,7 @@ const showContent = (model, list) => (list && Object.keys(list).length > 0)
  * @return {vnode}
  */
 const environmentsTable = (model, list) => {
-  const tableHeaders = ['Tasks', 'ID', 'Created', 'Role', 'State', 'Actions'];
+  const tableHeaders = ['Tasks', 'Run', 'Created', 'Role', 'State', 'Actions'];
   return h('table.table', [
     h('thead', [
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
@@ -63,7 +63,7 @@ const environmentsTable = (model, list) => {
     h('tbody', [
       list.map((item) => h('tr', [
         h('td', {style: 'text-align: center;'}, parseObject(item.tasks, 'tasks')),
-        h('td', {style: 'text-align: center;'}, item.id),
+        h('td', {style: 'text-align: center;'}, item.run ? item.run : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
         h('td', {style: 'text-align: center;'}, item.rootRole),
         h('td', {
