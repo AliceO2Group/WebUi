@@ -243,7 +243,7 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
     ),
     h('tbody', [
       tasks.map((task) => [h('tr', [
-        h('td', {style: 'text-align:left'}, task.name),
+        h('td', {style: 'text-align:center'}, task.name),
         h('td', {style: 'text-align:center'}, task.locked),
         h('td', {style: 'text-align:center'}, task.status),
         h('td', {
@@ -255,7 +255,7 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
         environment.task.list[task.taskId] && environment.task.list[task.taskId].match({
           NotAsked: () => null,
           Loading: () => h('td', {style: 'font-size: 0.25em;text-align:center'}, pageLoading()),
-          Success: (data) => h('td', {style: 'text-align:left'}, data.arguments),
+          Success: (data) => h('td', {style: 'text-align:center'}, data.arguments),
           Failure: (_error) => h('td', {style: 'text-align:center', title: 'Could not load arguments'}, iconCircleX()),
         }),
         h('td', {style: 'text-align:center'},
