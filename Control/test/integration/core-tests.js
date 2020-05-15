@@ -8,7 +8,7 @@ const assert = require('assert');
 let page;
 describe('Control', function() {
   let browser;
-  this.timeout(160000);
+  this.timeout(180000);
   this.slow(1000);
   const url = 'http://localhost:8080/';
 
@@ -43,7 +43,7 @@ describe('Control', function() {
     for (let i = 0; i < 10; i++) {
       try {
         await page.goto(url, {waitUntil: 'networkidle0'});
-        break; // conneciton ok, this test passed
+        break; // connection ok, this test passed
       } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
@@ -59,7 +59,7 @@ describe('Control', function() {
     assert.strictEqual(location.search, '?page=environments', 'Could not load home page of AliECS GUI');
   });
 
-  describe('Check if lock is aquired', () => {
+  describe('Check if lock is acquired', () => {
     it('should successfully request LOCK if it is not already taken', async () => {
       let lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       if (lockButton !== 'Lock is taken by Anonymous (id 0)') {
@@ -68,7 +68,7 @@ describe('Control', function() {
         await page.waitFor(1000);
       }
       lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
+      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)', 'Lock might be taken by another user');
     });
   });
 

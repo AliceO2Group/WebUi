@@ -22,7 +22,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
 
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
-    assert.strictEqual(startButton, 'START', 'Could not found button for starting environment probably due to bad state of environment');
+    assert.strictEqual(startButton, 'START', 'Could not find button for starting environment probably due to bad state of environment');
   });
 
   it('should successfully transition CONFIGURED -> RUNNING by clicking START button', async () => {

@@ -4,7 +4,7 @@ const test = require('./core-tests');
 
 let url;
 let page;
-// const workflowToTest = 'read2out-stfb';
+// const workflowToTest = 'readout-stfb';
 const workflowToTest = 'sleep36s-2';
 
 describe('`pageNewEnvironment` test-suite', async () => {
@@ -13,7 +13,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     page = test.page;
   });
 
-  it('should successfully load newEnvironment page and needed resources', async () => {
+  it('should successfully load newEnvironment page', async () => {
     await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=newEnvironment');
@@ -61,7 +61,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully create a new environment', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
-    // await page.waitFor(10000);
     await waitForCoreResponse(page);
 
     const location = await page.evaluate(() => window.location);
