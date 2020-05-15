@@ -85,13 +85,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully shutdown environment and redirect to environments page', async () => {
-    // await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    // const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').title);
-    // assert.strictEqual(shutdownButton, 'Shutdown environment');
-    await page.waitFor(requestTimeout);
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
+    await waitForCoreResponse(page, requestTimeout);
+
     const location = await page.evaluate(() => window.location);
     assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
-    // envID = location.search.split('&id=')[1];
   });
 });
 
