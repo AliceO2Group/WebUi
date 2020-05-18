@@ -47,7 +47,7 @@ const revisionInputField = (workflow) => h('input.form-control', {
   type: 'text',
   style: 'z-index:100',
   value: workflow.getRevision(),
-  onkeyup: (e) => workflow.updateInputSearch('revision', e.target.value),
+  oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
   onclick: (e) => {
     workflow.setRevisionInputDropdownVisibility(true);
     e.stopPropagation();
