@@ -63,7 +63,7 @@ const environmentsTable = (model, list) => {
     h('tbody', [
       list.map((item) => h('tr', [
         h('td', {style: 'text-align: center;'}, parseObject(item.tasks, 'tasks')),
-        h('td', {style: 'text-align: center;'}, item.run ? item.run : '-'),
+        h('td', {style: 'text-align: center;'}, item.currentRunNumber ? item.currentRunNumber : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
         h('td', {style: 'text-align: center;'}, item.rootRole),
         h('td', {
