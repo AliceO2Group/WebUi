@@ -183,7 +183,7 @@ const addKVInputList = (workflow) =>
       }, h('input.form-control', {
         type: 'text',
         value: workflow.form.variables[key],
-        onkeyup: (e) => workflow.updateVariableValueByKey(key, e.target.value)
+        oninput: (e) => workflow.updateVariableValueByKey(key, e.target.value)
       })),
       h('.ph2.danger.actionable-icon', {
         onclick: () => workflow.removeVariableByKey(key)
@@ -205,7 +205,7 @@ const addKVInputPair = (workflow) => {
         type: 'text',
         placeholder: 'key',
         value: keyString,
-        onkeyup: (e) => keyString = e.target.value
+        oninput: (e) => keyString = e.target.value
       })),
       h('.ph1', {
         style: 'width:60%;',
@@ -213,7 +213,7 @@ const addKVInputPair = (workflow) => {
         type: 'text',
         placeholder: 'value',
         value: valueString,
-        onkeyup: (e) => valueString = e.target.value
+        oninput: (e) => valueString = e.target.value
       })),
       h('.ph2.actionable-icon', {
         title: 'Add (key,value) variable',
