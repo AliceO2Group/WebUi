@@ -4,8 +4,7 @@ const test = require('./core-tests');
 
 let url;
 let page;
-// const workflowToTest = 'readout-stfb';
-const workflowToTest = 'sleep36s-2';
+const workflowToTest = 'readout-stfb';
 
 describe('`pageNewEnvironment` test-suite', async () => {
   before(async () => {
