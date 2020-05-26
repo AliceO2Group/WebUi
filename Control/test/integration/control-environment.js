@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
 const assert = require('assert');
-const test = require('./core-tests');
+const coreTests = require('./core-tests');
 
 let page;
-let requestTimeout;
+let timeout;
 
 describe('`pageNewEnvironment` test-suite', async () => {
   before(async () => {
-    page = test.page;
-    requestTimeout = test.requestTimeout ? test.requestTimeout : 90;
+    page = coreTests.page;
+    timeout = coreTests.timeout;
   });
 
   it('should be on page of new environment just created', async () => {
@@ -28,12 +28,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully transition CONFIGURED -> RUNNING by clicking START button', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
-    await waitForCoreResponse(page, requestTimeout);
+    await waitForCoreResponse(page, timeout);
 
+    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
     const state = environment.payload.environment.state;
 
-    assert.strictEqual(environment.kind, 'Success', `Transition was not successful due to: ${environment.payload}`);
+    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'RUNNING', 'Environment was expected to be running');
   });
 
@@ -49,12 +50,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully transition RUNNING -> CONFIGURED by clicking STOP button', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)').click());
-    await waitForCoreResponse(page, requestTimeout);
+    await waitForCoreResponse(page, timeout);
 
+    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
     const state = environment.payload.environment.state;
 
-    assert.strictEqual(environment.kind, 'Success', `Transition was not successful due to: ${environment.payload}`);
+    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
   });
 
@@ -68,13 +70,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully transition CONFIGURED -> STANDBY by clicking RESET button', async () => {
+    await page.waitFor(5000); // Standby for 5s
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
-    await waitForCoreResponse(page, requestTimeout);
+    await waitForCoreResponse(page, timeout);
 
+    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
     const state = environment.payload.environment.state;
 
-    assert.strictEqual(environment.kind, 'Success', `Transition was not successful due to: ${environment.payload}`);
+    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'STANDBY');
   });
 
@@ -85,29 +89,35 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully shutdown environment and redirect to environments page', async () => {
+    await page.waitFor(5000); // Standby for 5s
     page.on('dialog', async (dialog) => {
       await dialog.accept();
     });
 
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
-    await waitForCoreResponse(page, requestTimeout);
+    await waitForCoreResponse(page, timeout);
 
+    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const location = await page.evaluate(() => window.location);
+
+    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
     assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
   });
 });
 
 /**
  * Wait for response from AliECS Core
- * Method will check if loader is still active (requests still pending) every second for 90 seconds
+ * Method will check if loader is still active (requests still pending) every second
+ * for a specified amount of seconds (default 90)
  * @param {Object} page
+ * @param {number} timeout
  * @return {Promise}
  */
-const waitForCoreResponse = async (page) => {
+const waitForCoreResponse = async (page, timeout = 90) => {
   return new Promise(async (resolve) => {
     let i = 0;
-    while (i++ < 90) {
+    while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
         resolve();
