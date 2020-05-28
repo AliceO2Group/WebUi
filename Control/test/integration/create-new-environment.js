@@ -1,20 +1,22 @@
 /* eslint-disable max-len */
 const assert = require('assert');
-const test = require('./core-tests');
+const coreTests = require('./core-tests');
 
 let url;
 let page;
-const workflowToTest = 'readout-stfb';
+let workflowToTest;
 
 describe('`pageNewEnvironment` test-suite', async () => {
   before(async () => {
-    url = test.url;
-    page = test.page;
+    url = coreTests.url;
+    page = coreTests.page;
+    workflowToTest = coreTests.workflow;
   });
 
   it('should successfully load newEnvironment page', async () => {
     await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
+    await page.waitFor(2000);
     assert.strictEqual(location.search, '?page=newEnvironment');
   });
 
@@ -74,12 +76,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
  * Wait for response from AliECS Core
  * Method will check if loader is still active (requests still pending) every second for 90 seconds
  * @param {Object} page
+ * @param {number} timeout
  * @return {Promise}
  */
-const waitForCoreResponse = async (page) => {
+const waitForCoreResponse = async (page, timeout = 90) => {
   return new Promise(async (resolve) => {
     let i = 0;
-    while (i++ < 90) {
+    while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
         resolve();

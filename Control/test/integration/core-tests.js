@@ -33,6 +33,14 @@ describe('Control', function() {
         console.log(`        ${msg.args()[i]}`);
       }
     });
+    let testConfig;
+    try {
+      testConfig = require('./test-config');
+    } catch (error) {
+      console.warn('`test-config.js` file could not be found. Will use default values.');
+    }
+    exports.workflow = (testConfig && testConfig.workflow) ? testConfig.workflow : 'readout-stfb';
+    exports.timeout = (testConfig && testConfig.timeout) ? testConfig.timeout : 90;
     exports.page = page;
     exports.url = url;
     exports.requestTimeout = 90; // seconds
