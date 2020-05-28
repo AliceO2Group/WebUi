@@ -1,4 +1,4 @@
-import {h, iconReload, iconTrash, iconPlus} from '/js/src/index.js';
+import {h, iconReload, iconTrash, iconPlus, info} from '/js/src/index.js';
 import revisionPanel from './revisionPanel.js';
 import flpSelectionPanel from './flpSelectionPanel.js';
 import errorComponent from './../common/errorComponent.js';
@@ -157,13 +157,17 @@ const actionableCreateEnvironment = (model) =>
  * @return {vnode}
  */
 const extraVariablePanel = (workflow) =>
-  h('.w-50.ph2', {
-    style: 'display: flex; flex-direction: column'
-  }, [
+  h('.w-50.ph2.flex-column', [
     h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
     flpSelectionPanel(workflow),
-
-    h('h5.bg-gray-light.p2.panel-title.w-100', 'Environment variables'),
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', [
+      h('.w-100', 'Environment variables'),
+      h('a.ph1.actionable-icon', {
+        href: 'https://github.com/AliceO2Group/ControlWorkflows',
+        target: '_blank',
+        title: 'Open Environment Variables Documentation'
+      }, info())
+    ]),
     addKVInputList(workflow),
     addKVInputPair(workflow),
   ]);
