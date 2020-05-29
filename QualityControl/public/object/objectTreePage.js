@@ -118,9 +118,15 @@ const tableShow = (model) =>
  * @param {Object} model
  * @return {vnode}
  */
-const treeRows = (model) => !model.object.tree
-  ? null
-  : model.object.tree.children.map((children) => treeRow(model, children, 0));
+const treeRows = (model) => !model.object.tree ?
+  null
+  :
+  (
+    (model.object.tree.children.length === 0) ?
+      h('.w-100.text-center', 'No objects found')
+      :
+      model.object.tree.children.map((children) => treeRow(model, children, 0))
+  );
 
 
 /**
