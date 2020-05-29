@@ -215,6 +215,7 @@ export default class QCObject extends Observable {
         const failureMessage = `Failed to retrieve list of objects due to ${errorMessage}`;
         this.model.notification.show(failureMessage, 'danger', Infinity);
       }
+      this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
       this.list = offlineObjects;
 
       this.tree.initTree('database');

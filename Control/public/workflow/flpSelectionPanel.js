@@ -12,9 +12,14 @@ export default (workflow) =>
       NotAsked: () => null,
       Loading: () => pageLoading(2),
       Success: (list) => flpSelectionArea(list, workflow),
-      Failure: () => h('.f7.flex-column', [
-        h('', 'FLP Selection is currently disabled due to connection refused to Consul.'),
-        h('', ' Please use `environment variables` panel to select your FLP Hosts')
+      Failure: (error) => h('.f7.flex-column', [
+        error.includes(404) ?
+          h('', error)
+          :
+          h('', [
+            h('', 'FLP Selection is currently disabled due to connection refused to Consul.'),
+            h('', ' Please use `environment variables` panel to select your FLP Hosts')
+          ])
       ]),
     })
   );

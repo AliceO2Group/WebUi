@@ -20,8 +20,8 @@
     "test": "npm run eslint && npm run mocha",
     "coverage": "npm run eslint && nyc mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
-    "mocha-frontend": "mocha --exit ./Frontend/test/",
-    "mocha-backend": "mocha --exit ./Backend/test/*.js",
+    "mocha-frontend": "mocha --exit ./Frontend/test/  --retries 2",
+    "mocha-backend": "mocha --exit ./Backend/test/*.js  --retries 2",
     "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
     "coverage-local": "nyc --reporter=lcov npm run mocha-backend"
   },
@@ -43,7 +43,7 @@
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.13.0",
-    "mocha": "^6.1.4",
+    "mocha": "^7.1.2",
     "nock": "11.7.0",
     "nyc": "^14.1.1",
     "puppeteer": "2.0.0",

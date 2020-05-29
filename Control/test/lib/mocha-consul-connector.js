@@ -4,7 +4,26 @@ const ConsulConnector = require('../../lib/ConsulConnector.js');
 
 describe('ConsulConnector test suite', () => {
   let res;
-  describe('Request CRUs tests', async () => {
+  describe('Test ConsulConnector initialization', () => {
+    it('should successfully initialize consul with "undefined" path', () => {
+      const consul = new ConsulConnector({}, undefined);
+      assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
+    });
+    it('should successfully initialize consul with "null" path', () => {
+      const consul = new ConsulConnector({}, null);
+      assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
+    });
+    it('should successfully initialize consul with "missing" path', () => {
+      const consul = new ConsulConnector({});
+      assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
+    });
+    it('should successfully initialize consul with "passed" path', () => {
+      const consul = new ConsulConnector({}, 'some/path');
+      assert.strictEqual(consul.flpHardwarePath, 'some/path');
+    });
+  });
+
+  describe('Test Consul Connection', async () => {
     let consulService;
     beforeEach(() => consulService = {});
     it('should successfully query host of ConsulLeader', async () => {

@@ -37,7 +37,6 @@ jobs:
         echo "::set-env name=PROJECT::$(echo "$PROJECT")"
         echo "::set-output name=project::$(echo "$PROJECT")"
         echo "::set-output name=version::$(echo "$VERSION")"
-    - run: (cd $PROJECT; npm ci)
     - run: (cd $PROJECT; npm publish)
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
