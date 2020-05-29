@@ -39,7 +39,8 @@ Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
 
 Edit the `ccdb` section to define a custom:
 - `hostname`
-- `port` 
+- `port`
+- `prefix` - (optional) prefix to use for filtering on pathName
 
 #### Listing Connector
 Specify the connector that should be used for retrieving QC objects. Default value for `listingConnector` is `ccdb`.
@@ -76,7 +77,7 @@ QCG exposes two public REST API which can be read by any other application.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
 ## Online Mode
-QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class.
+QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class. 
 
 For this, QCG is using Service Discovery capabilities of [Consul](https://www.consul.io/).
 Once `Consul` is [installed](https://learn.hashicorp.com/consul/getting-started/install) and running, update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running:
@@ -86,6 +87,7 @@ consul: {
   port: 8500
 }
 ```
+Online mode will use an optional prefix for its queries specified in [ccdb.prefix](#ccdb). This is to ensure the same results are provided in both Offline & Online mode.
 
 As this functionality is optional, there will be no impact on QCG if a configuration for `Consul` is not provided. A simple warning message as below will be shown to the user that the configuration is missing
 ```
