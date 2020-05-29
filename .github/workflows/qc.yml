@@ -6,7 +6,6 @@ on:
       - 'QualityControl/*/*'
       - 'QualityControl/*/*/*'
       - '.github/workflows/qc.yml'
-      - '!QualityControl/README.md'
   push:
     branches:
       - 'master'

@@ -6,7 +6,6 @@ on:
       - 'InfoLogger/*/*'
       - 'InfoLogger/*/*/*'
       - '.github/workflows/infologger.yml'
-      - '!InfoLogger/README.md'
   push:
     branches:
       - 'master'

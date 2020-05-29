@@ -6,7 +6,6 @@ on:
       - 'Control/*/*'
       - 'Control/*/*/*'
       - '.github/workflows/control.yml'
-      - '!Control/README.md'
   push:
     branches:
       - 'master'
