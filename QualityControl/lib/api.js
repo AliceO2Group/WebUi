@@ -285,16 +285,19 @@ function errorHandler(err, res, status = 500) {
  */
 
 /**
- * Method to extract the tags from a service list. This represents objects that are in online mode.
+ * Method to extract the tags (with a specified prefix) from a list of services.
+ * This represents objects that are in online mode
  * @param {JSON} services
  * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
  */
 function getTagsFromServices(services) {
+  const prefix = model.queryPrefix;
   const tags = [];
   for (const serviceName in services) {
     if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
       const tagsToBeAdded = services[serviceName].Tags;
-      tagsToBeAdded.forEach((tag) => tags.push({name: tag}));
+      tagsToBeAdded.filter((tag) => tag.startsWith(prefix))
+        .forEach((tag) => tags.push({name: tag}));
     }
   }
   return tags;
