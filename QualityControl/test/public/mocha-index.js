@@ -267,9 +267,9 @@ describe('QCG', function() {
       assert.strictEqual(sortByButtonTitle, 'Sort by');
     });
 
-    it('should have first element in tree as "DAQ01/EquipmentSize/ACORDE/ACORDE"', async () => {
+    it('should have first element in tree as "BIGTREE/120KB/0"', async () => {
       const firstElement = await page.evaluate(() => window.model.object.currentList[0]);
-      assert.strictEqual(firstElement.name, 'DAQ01/EquipmentSize/ACORDE/ACORDE');
+      assert.strictEqual(firstElement.name, 'BIGTREE/120KB/0');
     });
 
     it('should sort list of histograms by name in descending order', async () => {
