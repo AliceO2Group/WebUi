@@ -470,9 +470,22 @@ class HttpServer {
           name: data.username
         };
         next();
-      }, (error) => {
-        log.warn(`${error.name} : ${error.message}`);
-        res.status(403).json({message: error.name});
+      }, ({name, message}) => {
+        log.warn(`${name} : ${message}`);
+
+        const response = {error: '403 - Json Web Token Error'};
+
+        // Allow for a custom message for known error messages
+        switch (message) {
+          case 'jwt must be provided':
+            response.message = 'You must provide a JWT token';
+            break;
+          default:
+            response.message = 'Invalid JWT token provided';
+            break;
+        }
+
+        res.status(403).json(response);
       });
   }
 }
