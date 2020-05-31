@@ -23,7 +23,6 @@ const JwtToken = require('./../jwt/token.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
-const bodyParser = require('body-parser');
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
@@ -175,14 +174,14 @@ class HttpServer {
     // Router for public API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.routerPublic = express.Router();
-    this.routerPublic.use(bodyParser.json()); // parse json body for API calls
+    this.routerPublic.use(express.json()); // parse json body for API calls
     this.app.use('/api', this.routerPublic);
 
     // Router for secure API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
-    this.router.use(bodyParser.json()); // parse json body for API calls
+    this.router.use(express.json()); // parse json body for API calls
     this.app.use('/api', this.router);
 
     // Catch-all if no controller handled request
