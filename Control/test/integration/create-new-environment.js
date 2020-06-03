@@ -30,7 +30,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully select a specified workflow from template list', async () => {
-    const [button] = await page.$x(`//div/a[contains(., "${workflowToTest}")]`);
+    const [button] = await page.$x(`//div/a[text()="${workflowToTest}"]`);
     if (button) {
       await button.click();
     } else {
