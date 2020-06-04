@@ -108,14 +108,20 @@ describe('REST API', () => {
     request(httpServer)
       .get('/api/get-request?token=wrong')
       .expect('Content-Type', /json/)
-      .expect(403, done);
+      .expect(403, {
+        error: '403 - Json Web Token Error',
+        message: 'Invalid JWT token provided',
+      }, done);
   });
 
   it('GET without a token should respond 403', (done) => {
     request(httpServer)
       .get('/api/get-request')
       .expect('Content-Type', /json/)
-      .expect(403, done);
+      .expect(403, {
+        error: '403 - Json Web Token Error',
+        message: 'You must provide a JWT token',
+      }, done);
   });
 
   it('GET with an incorrect path should respond 404', (done) => {
