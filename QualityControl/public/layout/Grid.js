@@ -323,7 +323,7 @@ GridList.prototype = {
      */
 
     var position = this._getItemPosition(item),
-        x, y, row;
+        x, y;
 
     // No coordonate can be negative
     if (newPosition[0] < 0 || newPosition[1] < 0) {
