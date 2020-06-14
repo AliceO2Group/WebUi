@@ -57,6 +57,19 @@ export default class QCObject extends Observable {
     this.sideTree = new ObjectTree('online');
     this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
+    this.scrollTop = 0;
+    this.scrollHeight = 0;
+  }
+
+  /**
+   * Set searched items table UI sizes to allow virtual scrolling
+   * @param {number} scrollTop - position of the user's scroll cursor
+   * @param {number} scrollHeight - height of table's viewport (not content height which is higher)
+   */
+  setScrollTop(scrollTop, scrollHeight) {
+    this.scrollTop = scrollTop;
+    this.scrollHeight = scrollHeight;
+    this.notify();
   }
 
   /**
@@ -129,9 +142,9 @@ export default class QCObject extends Observable {
   _computeFilters() {
     if (this.searchInput) {
       const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
-      const fuzzyRegex = new RegExp(this.searchInput.split('').join('.*?'), 'i');
+      const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => {
-        return item.name.match(fuzzyRegex);
+        return fuzzyRegex.test(item.name);
       });
     } else {
       this.searchResult = [];
@@ -208,6 +221,7 @@ export default class QCObject extends Observable {
         const failureMessage = `Failed to retrieve list of objects due to ${errorMessage}`;
         this.model.notification.show(failureMessage, 'danger', Infinity);
       }
+      this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
       this.list = offlineObjects;
 
       this.tree.initTree('database');
@@ -448,6 +462,7 @@ export default class QCObject extends Observable {
   search(searchInput) {
     this.searchInput = searchInput;
     this._computeFilters();
+    this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
     this.notify();
   }
 

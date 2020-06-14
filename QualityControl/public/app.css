@@ -43,3 +43,5 @@
 .actionable-icon {cursor: pointer;}
 .actionable-icon:hover {transform: scale(1.2);}
 .actionable-icon:active {transform: scale(1.5);}
+
+.table-logs-content { width: 100%; border-collapse: collapse; }

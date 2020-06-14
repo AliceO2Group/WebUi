@@ -267,9 +267,9 @@ describe('QCG', function() {
       assert.strictEqual(sortByButtonTitle, 'Sort by');
     });
 
-    it('should have first element in tree as "DAQ01/EquipmentSize/ACORDE/ACORDE"', async () => {
+    it('should have first element in tree as "BIGTREE/120KB/0"', async () => {
       const firstElement = await page.evaluate(() => window.model.object.currentList[0]);
-      assert.strictEqual(firstElement.name, 'DAQ01/EquipmentSize/ACORDE/ACORDE');
+      assert.strictEqual(firstElement.name, 'BIGTREE/120KB/0');
     });
 
     it('should sort list of histograms by name in descending order', async () => {
@@ -332,9 +332,15 @@ describe('QCG', function() {
       assert.strictEqual(sorted.list[0].name, 'BIGTREE/120KB/0');
     });
 
-    it('should have filtered results on input search filled', async () => {
+    it('should have filtered results on input search filled and display only the ones visible to the user (less than 2500)', async () => {
       await page.type('header input', 'BIGTREE');
-      await page.waitForFunction(`document.querySelectorAll('section table tbody tr').length === 2500`, {timeout: 5000});
+      const rowsDisplayed = await page.evaluate(() => {
+        const rows = [];
+        document.querySelectorAll('section table tbody tr').forEach((item) => rows.push(item.innerText));
+        return rows;
+      }, {timeout: 5000});
+      const allRowsContainBIGTREE = rowsDisplayed.filter((name) => name.includes('BIGTREE')).length === rowsDisplayed.length;
+      assert.ok(allRowsContainBIGTREE, 'Not all rows contain the searched term');
     });
   });
 
@@ -424,7 +430,7 @@ describe('QCG', function() {
       });
 
       it('should load page=objectView and display a Checker Object when a parameter objectName is passed', async () => {
-        const objectName = 'qc/checker/AB';
+        const objectName = 'qcg/checker/AB';
         await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
 
         const result = await page.evaluate(() => {
@@ -583,7 +589,7 @@ describe('QCG', function() {
       const expConfig = {
         qcg: {port: 8181, hostname: 'localhost'},
         consul: {hostname: 'localhost', port: 8500},
-        ccdb: {hostname: 'ccdb', port: 8500},
+        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test'},
         quality_control: {version: '0.19.5-1'}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);

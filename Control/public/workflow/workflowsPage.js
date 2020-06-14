@@ -1,5 +1,6 @@
-import {h, iconReload, iconTrash, iconPlus} from '/js/src/index.js';
+import {h, iconReload, iconTrash, iconPlus, info} from '/js/src/index.js';
 import revisionPanel from './revisionPanel.js';
+import flpSelectionPanel from './flpSelectionPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -156,10 +157,17 @@ const actionableCreateEnvironment = (model) =>
  * @return {vnode}
  */
 const extraVariablePanel = (workflow) =>
-  h('.w-50.ph2', {
-    style: 'display: flex; flex-direction: column'
-  }, [
-    h('h5.bg-gray-light.p2.panel-title.w-100', 'Environment variables'),
+  h('.w-50.ph2.flex-column', [
+    h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
+    flpSelectionPanel(workflow),
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', [
+      h('.w-100', 'Environment variables'),
+      h('a.ph1.actionable-icon', {
+        href: 'https://github.com/AliceO2Group/ControlWorkflows',
+        target: '_blank',
+        title: 'Open Environment Variables Documentation'
+      }, info())
+    ]),
     addKVInputList(workflow),
     addKVInputPair(workflow),
   ]);
@@ -179,7 +187,7 @@ const addKVInputList = (workflow) =>
       }, h('input.form-control', {
         type: 'text',
         value: workflow.form.variables[key],
-        onkeyup: (e) => workflow.updateVariableValueByKey(key, e.target.value)
+        oninput: (e) => workflow.updateVariableValueByKey(key, e.target.value)
       })),
       h('.ph2.danger.actionable-icon', {
         onclick: () => workflow.removeVariableByKey(key)
@@ -201,7 +209,7 @@ const addKVInputPair = (workflow) => {
         type: 'text',
         placeholder: 'key',
         value: keyString,
-        onkeyup: (e) => keyString = e.target.value
+        oninput: (e) => keyString = e.target.value
       })),
       h('.ph1', {
         style: 'width:60%;',
@@ -209,7 +217,7 @@ const addKVInputPair = (workflow) => {
         type: 'text',
         placeholder: 'value',
         value: valueString,
-        onkeyup: (e) => valueString = e.target.value
+        oninput: (e) => valueString = e.target.value
       })),
       h('.ph2.actionable-icon', {
         title: 'Add (key,value) variable',

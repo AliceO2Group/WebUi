@@ -24,7 +24,7 @@ export default class ObjectTree extends Observable {
   initTree(name, parent) {
     this.name = name || ''; // like 'B'
     this.object = null;
-    this.open = false;
+    this.open = name === 'qc' ? true : false;
     this.children = []; // <Array<ObjectTree>>
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // like ['A', 'B'] for node at path 'A/B' called 'B'

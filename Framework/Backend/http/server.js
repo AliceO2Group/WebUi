@@ -23,7 +23,6 @@ const JwtToken = require('./../jwt/token.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
-const bodyParser = require('body-parser');
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
@@ -60,13 +59,65 @@ class HttpServer {
         key: fs.readFileSync(httpConfig.key),
         cert: fs.readFileSync(httpConfig.cert)
       };
-      this.server = https.createServer(credentials, this.app).listen(httpConfig.portSecure);
+      this.server = https.createServer(credentials, this.app);
       this.enableHttpRedirect();
-      log.info(`Secure server listening on port ${httpConfig.portSecure}`);
+      this.port = httpConfig.portSecure;
     } else {
-      this.server = http.createServer(this.app).listen(httpConfig.port);
-      log.info(`Server listening on port ${httpConfig.port}`);
+      this.server = http.createServer(this.app);
+      this.port = httpConfig.port;
     }
+
+    const autoListenFlag = 'autoListen';
+    if (!httpConfig.hasOwnProperty(autoListenFlag) || httpConfig[autoListenFlag]) {
+      this.listen();
+    }
+  }
+
+  /**
+   * Starts the server listening for connections.
+   * @return {Promise}
+   */
+  listen() {
+    return new Promise((resolve, reject) => {
+      this.server.listen(this.port, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          log.info(`Server listening on port ${this.port}`);
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Returns the bound `address`, the address `family` name, and `port` of the
+   * server as reported by the operating system if listening on an IP socket
+   * (useful to find which port was assigned when getting an OS-assigned address):
+   * { port: 12346, family: 'IPv4', address: '127.0.0.1' }. For a server listening
+   * on a pipe or Unix domain socket, the name is returned as a string.
+   * @return {(object|string)} The address of the server
+   */
+  address() {
+    return this.server.address();
+  }
+
+  /**
+   * Stops the server from accepting new connections and keeps existing connections.
+   * This function is asynchronous, the server is finally closed when all connections
+   * are ended and the server emits a 'close' event.
+   * @return {Promise}
+   */
+  close() {
+    return new Promise((resolve, reject) => {
+      this.server.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 
   /**
@@ -123,14 +174,14 @@ class HttpServer {
     // Router for public API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.routerPublic = express.Router();
-    this.routerPublic.use(bodyParser.json()); // parse json body for API calls
+    this.routerPublic.use(express.json()); // parse json body for API calls
     this.app.use('/api', this.routerPublic);
 
     // Router for secure API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
-    this.router.use(bodyParser.json()); // parse json body for API calls
+    this.router.use(express.json()); // parse json body for API calls
     this.app.use('/api', this.router);
 
     // Catch-all if no controller handled request
@@ -145,6 +196,23 @@ class HttpServer {
     this.app.use((req, res, next) => {
       log.debug(`Page was not found: ${req.originalUrl}`);
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
+    });
+
+    // Error handler when an API controller crashes
+    this.app.use('/api', (err, req, res, next) => {
+      log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
+      log.trace(err);
+
+      if (process.env.NODE_ENV === 'development') {
+        res.status(500).json({
+          error: err,
+        });
+      } else {
+        res.status(500).json({
+          error: '500 - Server error',
+          message: 'Something went wrong, please try again or contact an administrator.'
+        });
+      }
     });
 
     // Error handler when a controller crashes
@@ -202,13 +270,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  get(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.get(path, callback);
-      return;
-    }
-
-    this.router.get(path, callback);
+  get(path, ...callbacks) {
+    this._all('get', path, ...callbacks);
   }
 
   /**
@@ -222,13 +285,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  post(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.post(path, callback);
-      return;
-    }
-
-    this.router.post(path, callback);
+  post(path, ...callbacks) {
+    this._all('post', path, ...callbacks);
   }
 
   /**
@@ -242,13 +300,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  put(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.put(path, callback);
-      return;
-    }
-
-    this.router.put(path, callback);
+  put(path, ...callbacks) {
+    this._all('put', path, ...callbacks);
   }
 
   /**
@@ -262,13 +315,8 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  patch(path, callback, options = {}) {
-    if (options.public) {
-      this.routerPublic.patch(path, callback);
-      return;
-    }
-
-    this.router.patch(path, callback);
+  patch(path, ...callbacks) {
+    this._all('patch', path, ...callbacks);
   }
 
   /**
@@ -282,13 +330,35 @@ class HttpServer {
    * @param {object} [options={}] - additional options
    * @param {boolean} [options.public] - true to remove token verification
    */
-  delete(path, callback, options = {}) {
+  delete(path, ...callbacks) {
+    this._all('delete', path, ...callbacks);
+  }
+
+  /**
+   * Adds an route to the express router, the path will be prefix with "/api"
+   * By default verifies JWT token unless public options is provided
+   * @param {string} method       - http method to use
+   * @param {string} path         - path that the callback will be bound to
+   * @param {function[]} callback - method or array of methods that handles request
+   *                                and response: function(req, res); token should
+   *                                be passed as req.query.token;
+   *                                more on req: https://expressjs.com/en/api.html#req
+   *                                more on res: https://expressjs.com/en/api.html#res
+   * @param {object} [options={}] - additional options
+   * @param {boolean} [options.public] - true to remove token verification
+   */
+  _all(method, path, ...callbacks) {
+    let options = {};
+    if (typeof callbacks.slice(-1).pop() !== 'function') {
+      options = callbacks.pop();
+    }
+
     if (options.public) {
-      this.routerPublic.delete(path, callback);
+      this.routerPublic[method](path, ...callbacks);
       return;
     }
 
-    this.router.delete(path, callback);
+    this.router[method](path, ...callbacks);
   }
 
   /**
@@ -399,9 +469,22 @@ class HttpServer {
           name: data.username
         };
         next();
-      }, (error) => {
-        log.warn(`${error.name} : ${error.message}`);
-        res.status(403).json({message: error.name});
+      }, ({name, message}) => {
+        log.warn(`${name} : ${message}`);
+
+        const response = {error: '403 - Json Web Token Error'};
+
+        // Allow for a custom message for known error messages
+        switch (message) {
+          case 'jwt must be provided':
+            response.message = 'You must provide a JWT token';
+            break;
+          default:
+            response.message = 'Invalid JWT token provided';
+            break;
+        }
+
+        res.status(403).json(response);
       });
   }
 }

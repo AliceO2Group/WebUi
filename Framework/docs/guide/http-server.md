@@ -9,7 +9,7 @@
 #### Instance
 ```js
 const {HttpServer} = require('@aliceo2/web-ui');
-HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT}, JWT_CONF, OPENID_CONF);
+HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT, autoListen: AUTO_LISTEN}, JWT_CONF, OPENID_CONF);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
@@ -19,11 +19,21 @@ Where:
      * [`HTTPS_PORT`] - HTTPS port number, TLS must be enabled
      * [`TLS_KEY`] - private key filepath, TLS must be enabled
      * [`TLS_CERT`] - certificate filepath, TLS must be enabled
+     * [`AUTO_LISTEN`] - flag that enables/disables automatic listening (default: `true`)
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
 
 
 #### Public methods
+```js
+listen
+```
+```js
+close
+```
+```js
+address
+```
 ```js
 addStaticPath
 ```
