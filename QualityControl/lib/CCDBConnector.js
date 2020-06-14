@@ -1,5 +1,5 @@
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('QCG-CCDBConnector');
+const log = new (require('@aliceo2/web-ui').Log)('CCDBConnector');
 
 /**
  * Gateway for all CCDB calls
