@@ -31,7 +31,17 @@ Exceptions can be added to lines and files:
 * `npm run test` runs both: `npm run mocha` and `npm run eslint`
 
 ## Continuous integration
-[GitHub Actions](https://github.com/AliceO2Group/WebUi/actions?query=workflow%3AFramework) runs unit test each time the new code is pushed to the repository. The steps of build environment are specified in `.github/framework.yml` file.
+#### [framework.yml](./../../../.github/workflows/framework.yml)
+* Checks that tests of the project are running successfully on two virtual machines:
+  * `ubuntu`
+  * `macOS`
+* Make sure that the proposed changes are not reducing the current code-coverage percent
+* Sends a code coverage report to [CodeCov](https://codecov.io/gh/AliceO2Group/WebUi)
+* Runs a compatibility set of tests on each project (Control, QualityControl, InfoLogger) to ensure changes to the framework are not breaking existing projects. 
+
+#### [release.yml](../.github/workflows/release.yml)
+* Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/web-ui](https://www.npmjs.com/package/@aliceo2/web-ui)
+
 
 ## Dependencies status
 The status of the dependencies can be shown by running `ncu` command of [npm-check-updates](https://www.npmjs.com/package/npm-check-updates) package.
@@ -52,10 +62,7 @@ Set "Fix version" of each JIRA issue that is being released, as we host multiple
 
 If all the issues for the given release are in the "Ready for release" status start the process:
 1. Bump npm (`package.json`) version, either manually or using `npm version` script, create "release" PR against `dev`, merge
-2. Create a PR to merge `dev` with `master` (in order to run checks and upload coverage report), merge the PR (it can be simply done by doing `git pull origin dev`, `git push origin master`)
-3. Create and push GH tag: as we host multiple packages in the repo use `npm` naming conventions: `<org>/<package>@<version>`
-4. `npm publish`
-5. Mark version as released in JIRA
-6. Create GH release, generate "Release Notes" from JIRA and add them to release description
-7. Update status of JIRA issues (You can use Bulk Change feature to edit multiple issues at once)
-8. Bump version in [alidist](https://github.com/alisw/alidist) or/and in [system-configuration](https://gitlab.cern.ch/AliceO2Group/system-configuration)
+2. Mark version as released in JIRA
+3. Create GH release(with title `<org>/<package>@<version>`), generate "Release Notes" from JIRA and add them to release description. Our release workflow will automatically release it to NPM and if the project is `QualityControl` it will also raise a PR in [alisw/alidist](https://github.com/alisw/alidist) bumping the `qcg.sh` recipe with the new version and tag. 
+4. Update status of JIRA issues (You can use Bulk Change feature to edit multiple issues at once)
+5. Bump version in [system-configuration](https://gitlab.cern.ch/AliceO2Group/system-configuration)
