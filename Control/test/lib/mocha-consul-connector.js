@@ -104,6 +104,7 @@ describe('ConsulConnector test suite', () => {
       };
       consulService = {};
     });
+
     it('should successfully query, filter, match and return a list of FLP names', async () => {
       consulService.getKeysByPrefix = sinon.stub().resolves([
         'o2/hardware/flps/flpOne/cards',
@@ -115,6 +116,18 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(['flpOne', 'flpTwo']));
+    });
+
+    it('should successfully remove duplicates from list of FLP names', async () => {
+      consulService.getKeysByPrefix = sinon.stub().resolves([
+        'o2/hardware/flps/flpTwo/cards',
+        'o2/hardware/flps/flpTwo/info'
+      ]);
+      const connector = new ConsulConnector(consulService, 'some/path');
+      await connector.getFLPs(null, res);
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith(['flpTwo']));
     });
 
     // it('should successfully return 404 if consul did not send back any data for specified key', async () => {
