@@ -196,6 +196,7 @@ message DestroyEnvironmentRequest {
     string id = 1;
     bool keepTasks = 2;
     bool allowInRunningState = 3;
+    bool force = 4;
 }
 message DestroyEnvironmentReply {
     CleanupTasksReply cleanupTasksReply = 1;
