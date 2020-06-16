@@ -51,7 +51,7 @@ function getActionsHeader(model) {
       getBackToQCGButton(model),
       h('b.text-center.flex-column', {style: 'flex-grow:1'}, getObjectTitle(model)),
       h('.flex-row', [
-        infoButton(model.object),
+        infoButton(model.object, model.isOnlineModeEnabled),
         model.isContextSecure() && getCopyURLToClipboardButton(model)
       ])
     ]);

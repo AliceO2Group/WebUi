@@ -51,7 +51,7 @@ function drawComponent(model) {
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
       h('.resize-button.flex-row', [
-        infoButton(model.object),
+        infoButton(model.object, model.isOnlineModeEnabled),
         h('.p1.text-left', {style: 'padding-bottom: 0;'},
           h('a.btn',
             {

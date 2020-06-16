@@ -40,6 +40,9 @@ export default class Model extends Observable {
     this.frameworkInfo = new FrameworkInfo(this);
     this.frameworkInfo.bubbleTo(this);
 
+    this.isOnlineModeConnectionAlive = false;
+    this.isOnlineModeEnabled = false; // show only online objects or all (offline)
+
     this.refreshTimer = 0;
     this.refreshInterval = 0; // seconds
     this.sidebar = true;
@@ -61,8 +64,8 @@ export default class Model extends Observable {
 
     // Init data
     this.object.loadList();
-    this.object.checkOnlineStatus();
     this.layout.loadMyList();
+    this.checkOnlineModeAvailability();
   }
 
   /**
@@ -173,12 +176,40 @@ export default class Model extends Observable {
   }
 
   /**
+   * Toggle mode (Online/Offline)
+   */
+  toggleMode() {
+    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
+    if (this.isOnlineModeEnabled) {
+      this.setRefreshInterval(60);
+    } else {
+      this.object.loadList();
+      clearTimeout(this.refreshTimer);
+    }
+    this.object.selected = null;
+    this.object.searchInput = '';
+    this.notify();
+  }
+
+  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @return {boolean}
    */
   isContextSecure() {
     return window.isSecureContext;
+  }
+
+  /**
+   * Method to check if Online Mode is available
+   */
+  async checkOnlineModeAvailability() {
+    const result = await this.object.qcObjectService.isOnlineModeConnectionAlive();
+    if (result.isSuccess()) {
+      this.isOnlineModeConnectionAlive = true;
+    } else {
+      this.isOnlineModeConnectionAlive = false;
+    }
   }
 
   /**

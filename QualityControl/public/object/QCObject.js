@@ -28,9 +28,6 @@ export default class QCObject extends Observable {
     this.qcObjectService = new QCObjectService(this.model);
 
     this.listOnline = []; // list of online objects name
-    this.isOnlineModeConnectionAlive = false;
-    this.isOnlineModeEnabled = false; // show only online objects or all (offline)
-    this.onlineModeAvailable = false; // true if data are coming from server
 
     this.searchInput = ''; // string - content of input search
     this.searchResult = []; // array<object> - result list of search
@@ -60,22 +57,6 @@ export default class QCObject extends Observable {
   setScrollTop(scrollTop, scrollHeight) {
     this.scrollTop = scrollTop;
     this.scrollHeight = scrollHeight;
-    this.notify();
-  }
-
-  /**
-   * Toggle mode (Online/Offline)
-   */
-  toggleMode() {
-    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    if (this.isOnlineModeEnabled) {
-      this.model.setRefreshInterval(60);
-    } else {
-      this.loadList();
-      clearTimeout(this.model.refreshTimer);
-    }
-    this.selected = null;
-    this.searchInput = '';
     this.notify();
   }
 
@@ -132,7 +113,7 @@ export default class QCObject extends Observable {
    */
   _computeFilters() {
     if (this.searchInput) {
-      const listSource = (this.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
+      const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => {
         return fuzzyRegex.test(item.name);
@@ -175,7 +156,7 @@ export default class QCObject extends Observable {
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
-    if (!this.isOnlineModeEnabled) {
+    if (!this.model.isOnlineModeEnabled) {
       this.tree.initTree('database');
       this.tree.addChildren(this.currentList);
     } else {
@@ -199,7 +180,7 @@ export default class QCObject extends Observable {
    * Ask server for all available objects, fills `tree` of objects
    */
   async loadList() {
-    if (!this.isOnlineModeEnabled) {
+    if (!this.model.isOnlineModeEnabled) {
       this.objectsRemote = RemoteData.loading();
       this.notify();
       this.queryingObjects = true;
@@ -239,18 +220,6 @@ export default class QCObject extends Observable {
       this.notify();
     } else {
       this.loadOnlineList();
-    }
-  }
-
-  /**
-   * Method to check if OnlineService Connection is alive
-   */
-  async checkOnlineStatus() {
-    const result = await this.qcObjectService.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
     }
   }
 
@@ -441,7 +410,8 @@ export default class QCObject extends Observable {
    * @return {boolean}
    */
   isObjectInOnlineList(objectName) {
-    return this.isOnlineModeEnabled && this.listOnline && this.listOnline.map((item) => item.name).includes(objectName);
+    return this.model.isOnlineModeEnabled && this.listOnline
+      && this.listOnline.map((item) => item.name).includes(objectName);
   }
 
 
