@@ -1,5 +1,5 @@
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('QCG-CCDBConnector');
+const log = new (require('@aliceo2/web-ui').Log)('CCDBConnector');
 
 /**
  * Gateway for all CCDB calls
@@ -51,8 +51,21 @@ class CCDBConnector {
     return this.httpGetJson(`/latest/${this.prefix}.*`)
       .then((result) =>
         result.objects
+          .filter(this.isItemValid)
           .map(this.itemTransform)
-          .filter((item) => !!item)
+      );
+  }
+
+  /**
+   * Retrieve a list of available timestamps for a specified object
+   * @param {String} objectName - full path of the object
+   */
+  async getObjectTimestampList(objectName) {
+    return this.httpGetJson(`/browse/${objectName}`)
+      .then((result) =>
+        result.objects
+          .filter(this.isItemValid)
+          .map((item) => parseInt(item.lastModified))
       );
   }
 
@@ -111,15 +124,24 @@ class CCDBConnector {
    * @return {Object} to QCG use
    */
   itemTransform(item) {
+    return {name: item.path, createTime: parseInt(item.createTime), lastModified: parseInt(item.lastModified)};
+  }
+
+  /**
+   * Check if received object from CCDB is valid
+   * @param {JSON} item
+   * @return {JSON}
+   */
+  isItemValid(item) {
     if (!item.path) {
       log.warn(`CCDB returned an empty ROOT object path, ignoring`);
-      return null;
-    }
-    if (item.path.indexOf('/') === -1) {
+      return false;
+    } else if (item.path.indexOf('/') === -1) {
       log.warn(`CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
-      return null;
+      return false;
+    } else {
+      return true;
     }
-    return {name: item.path, createTime: parseInt(item.createTime), lastModified: parseInt(item.lastModified)};
   }
 
   /**
