@@ -105,7 +105,7 @@ const tableShow = (model) =>
     h('thead', [
       h('tr', [
         h('th', 'Name'),
-        h('th', {style: {width: '6em'}}, 'Quality'),
+        h('th.w-33.text-right', {}, h('.w-100.text-center', 'Last Modified')),
       ])
     ]),
     h('tbody', [
@@ -140,7 +140,6 @@ const treeRows = (model) => !model.object.tree ?
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
-  const color = tree.quality === 'good' ? 'success' : 'danger';
   const padding = `${level}em`;
   const levelDeeper = level + 1;
   const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
@@ -149,6 +148,7 @@ function treeRow(model, tree, level) {
   const path = tree.path.join('/');
   const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
+  const lastModified = tree.object ? new Date(tree.object.lastModified).toLocaleString() : '';
 
   return model.object.searchInput ? [] : [
     h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
@@ -157,7 +157,7 @@ function treeRow(model, tree, level) {
         ' ',
         tree.name
       ]),
-      h('td.highlight', {class: color}, tree.quality),
+      h('td.highlight.w-33', h('.w-100.text-center', lastModified)),
     ]),
     children
   ];
