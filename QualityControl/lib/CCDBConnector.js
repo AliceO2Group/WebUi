@@ -57,6 +57,19 @@ class CCDBConnector {
   }
 
   /**
+   * Retrieve a list of available timestamps for a specified object
+   * @param {String} objectName - full path of the object
+   */
+  async getObjectTimestampList(objectName) {
+    return this.httpGetJson(`/latest/${objectName}.*`)
+      .then((result) =>
+        result.objects
+          .map(this.itemTransform)
+          .filter((item) => !!item)
+      );
+  }
+
+  /**
    * Util to get JSON data (parsed) from CCDB server
    * @param {string} path - path en CCDB server
    * @return {Promise.<Object, Error>} JSON response

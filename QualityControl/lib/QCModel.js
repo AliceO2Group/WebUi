@@ -34,6 +34,7 @@ if (config.listingConnector === 'ccdb') {
   const ccdb = new CCDBConnector(config.ccdb);
   ccdb.testConnection();
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
+  module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
   module.exports.queryPrefix = ccdb.prefix;
 
   const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
