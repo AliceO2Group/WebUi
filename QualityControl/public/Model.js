@@ -40,6 +40,8 @@ export default class Model extends Observable {
     this.frameworkInfo = new FrameworkInfo(this);
     this.frameworkInfo.bubbleTo(this);
 
+    this.refreshTimer = 0;
+    this.refreshInterval = 0; // seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
     this.page = null;
@@ -177,5 +179,30 @@ export default class Model extends Observable {
    */
   isContextSecure() {
     return window.isSecureContext;
+  }
+
+  /**
+   * Set the interval to update objects currently loaded and shown to user.
+   * This will reload only data associated to them
+   * @param {number} intervalSeconds - in seconds
+   */
+  setRefreshInterval(intervalSeconds) {
+    // Stop any other timer
+    clearTimeout(this.refreshTimer);
+
+    // Validate user input
+    let parsedValue = parseInt(intervalSeconds, 10);
+    if (isNaN(parsedValue) || parsedValue < 1) {
+      parsedValue = 2;
+    }
+
+    // Start new timer
+    this.refreshInterval = parsedValue;
+    this.refreshTimer = setTimeout(() => {
+      this.setRefreshInterval(this.refreshInterval);
+    }, this.refreshInterval * 1000);
+    this.notify();
+
+    this.object.refreshObjects();
   }
 }

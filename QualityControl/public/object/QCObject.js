@@ -42,9 +42,6 @@ export default class QCObject extends Observable {
       open: false
     };
 
-    this.refreshTimer = 0;
-    this.refreshInterval = 0; // seconds
-
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
@@ -72,10 +69,10 @@ export default class QCObject extends Observable {
   toggleMode() {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
     if (this.isOnlineModeEnabled) {
-      this.setRefreshInterval(60);
+      this.model.setRefreshInterval(60);
     } else {
       this.loadList();
-      clearTimeout(this.refreshTimer);
+      clearTimeout(this.model.refreshTimer);
     }
     this.selected = null;
     this.searchInput = '';
@@ -397,42 +394,21 @@ export default class QCObject extends Observable {
   }
 
   /**
+   * Refreshes currently displayed objects and requests an updated list
+   * of online objects from Consul
+   */
+  refreshObjects() {
+    this.loadObjects(Object.keys(this.objects));
+    this.loadOnlineList();
+  }
+
+  /**
    * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
    * @param {string} name - name of the object
    */
   invalidObject(name) {
     this.objects[name] = RemoteData.failure('JSROOT was unable to draw this object');
     this.notify();
-  }
-
-  /**
-   * Set the interval to update objects currently loaded and shown to user,
-   * this will reload only data associated to them
-   * @param {number} intervalSeconds - in seconds
-   */
-  setRefreshInterval(intervalSeconds) {
-    // Stop any other timer
-    clearTimeout(this.refreshTimer);
-
-    // Validate user input
-    let parsedValue = parseInt(intervalSeconds, 10);
-    if (isNaN(parsedValue) || parsedValue < 1) {
-      parsedValue = 2;
-    }
-
-    // Start new timer
-    this.refreshInterval = parsedValue;
-    this.refreshTimer = setTimeout(() => {
-      this.setRefreshInterval(this.refreshInterval);
-    }, this.refreshInterval * 1000);
-    this.notify();
-
-    // Refreshed currently seen objects
-    this.loadObjects(Object.keys(this.objects));
-    this.loadOnlineList();
-
-    // refreshTimer is a timer id (number) and is also used in the view to
-    // interpret new cycle when this number changes
   }
 
   /**
