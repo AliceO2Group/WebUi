@@ -10,8 +10,8 @@ static std::unique_ptr<DatabaseInterface> BackendInstance;
 class TObjectAsyncWorker : public Napi::AsyncWorker
 {
 public:
-  TObjectAsyncWorker(const Napi::Function& callback, const std::string& arg0)
-  : Napi::AsyncWorker(callback), path(arg0), output()
+  TObjectAsyncWorker(const Napi::Function& callback, const std::string& path, const long timestamp)
+  : Napi::AsyncWorker(callback), path(path), output(), timestamp(timestamp)
   {
     ROOT::EnableThreadSafety();
   }
@@ -20,7 +20,7 @@ protected:
   void Execute() override
   {
     const auto slashIndex = path.find_first_of('/');
-    output = BackendInstance->retrieveMOJson(path.substr(0, slashIndex), path.substr(slashIndex + 1));
+    output = BackendInstance->retrieveMOJson(path.substr(0, slashIndex), path.substr(slashIndex + 1), timestamp);
   }
 
   void OnOK() override
@@ -52,6 +52,7 @@ protected:
 private:
   std::string path;
   std::string output;
+  long timestamp;
 };
 
 
@@ -77,22 +78,21 @@ void InitBackend(const Napi::CallbackInfo& info) {
 /// Get JSON-encoded TObject asynchronously
 void GetObject(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
-
-  if (info.Length() < 2) {
+  if (info.Length() < 3) {
     Napi::TypeError::New(env, "Invalid argument count").ThrowAsJavaScriptException();
     return;
   }
 
-  if (!info[1].IsFunction()) {
+  if (!info[2].IsFunction()) {
     Napi::TypeError::New(env, "Invalid argument types").ThrowAsJavaScriptException();
     return;
   }
 
-  Napi::Function cb = info[1].As<Napi::Function>();
+  Napi::Function cb = info[2].As<Napi::Function>();
+  std::string path = info[0].As<Napi::String>();
+  long timestamp = info[1].As<Napi::Number>().Int32Value();
 
-  std::string arg0 = info[0].As<Napi::String>();
-
-  (new TObjectAsyncWorker(cb, arg0))->Queue();
+  (new TObjectAsyncWorker(cb, path, timestamp))->Queue();
 
   return;
 }
