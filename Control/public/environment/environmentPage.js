@@ -176,7 +176,7 @@ const showControl = (environment, item) => h('.mv2.pv3.ph2', [
     ),
     h('.w-25', {
       style: 'display: flex; justify-content: flex-end;'
-    }, destroyEnvButton(environment, item))
+    }, [destroyEnvButton(environment, item), destroyEnvButton(environment, item, true)])
   ]),
   environment.itemControl.match({
     NotAsked: () => null,
@@ -214,16 +214,17 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
  * Create a button which will call the ShutDown&DestroyEnv GRPC Method
  * @param {Object} environment
  * @param {JSON} item
+ * @param {bool} forceDestroy
  * @return {vnode}
  */
-const destroyEnvButton = (environment, item) =>
-  h(`button.btn.btn-danger`, {
+const destroyEnvButton = (environment, item, forceDestroy = false) =>
+  h(`button.btn.btn-danger.mh1`, {
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     onclick: () => confirm(`Are you sure you want to to shutdown this ${item.state} environment?`)
-      && environment.destroyEnvironment({id: item.id, allowInRunningState: true}),
-    title: 'Shutdown environment'
-  }, 'Shutdown');
+      && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: forceDestroy}),
+    title: forceDestroy ? 'Force the shutdown of the environment' : 'Shutdown environment'
+  }, forceDestroy ? 'Force Shutdown': 'Shutdown');
 
 /**
  * Method to create and display a table with tasks details

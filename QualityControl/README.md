@@ -17,7 +17,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   - [Online Mode](#online-mode)
 
 ## Installation
-1. NodeJS >12.13.0 is required
+1. `nodeJS` >= `12.13.0` is required
 2. Install QualityControl using `aliBuild` and configure database with [following instructions](https://github.com/AliceO2Group/QualityControl/blob/master/README.md).
 3. Install QCG
 ```
@@ -33,6 +33,7 @@ Attribute to define the `http` endpoint of the application.
 Edit the `http` section to define a custom:
 - `hostname`
 - `port`
+- `prefix` - a prefix as string which will be used when querying objects from CCDB
 
 #### CCDB
 Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
@@ -93,3 +94,16 @@ As this functionality is optional, there will be no impact on QCG if a configura
 ```
 2020-02-28T10:19:26.110Z warn: [QualityControlModel] Consul Service: No Configuration Found
 ```
+
+## Continuous Integration Workflows
+QualityControl project makes use of two workflows.
+### [qc.yml](./../.github/workflows/qc.yml)
+* Checks that tests of the project are running successfully on two virtual machines:
+  * `ubuntu`
+  * `macOS`
+* Make sure that the proposed changes are not reducing the current code-coverage percent
+* Sends a code coverage report to [CodeCov](https://codecov.io/gh/AliceO2Group/WebUi)
+
+### [release.yml](../.github/workflows/release.yml)
+* Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/qc](https://www.npmjs.com/package/@aliceo2/qc)
+* Raises a new Pull-Request in [alisw/alidist](https://github.com/alisw/alidist) with changes to the recipe `qcg.sh` with the new version and new tag

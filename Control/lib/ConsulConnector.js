@@ -76,7 +76,7 @@ class ConsulConnector {
           const flpList = data.filter((key) => key.match(regex))
             .map((key) => key.split('/')[3]);
           res.status(200);
-          res.json(flpList);
+          res.json([...new Set(flpList)]);
         })
         .catch((error) => {
           if (error.message.includes('404')) {
