@@ -28,13 +28,12 @@ export default (model) => h('.h-100.flex-column', {key: model.router.params.page
         Failure: () => null, // notification is displayed
       })
     ),
-    h('.animate-width.scroll-y',
-      {
-        style: {
-          width: model.object.selected ? '50%' : 0
-        }
-      },
-      model.object.selected ? drawComponent(model) : null)
+    h('.animate-width.scroll-y', {
+      style: {
+        width: model.object.selected ? '50%' : 0
+      }
+    }, model.object.selected ? drawComponent(model) : null
+    )
   ]),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),

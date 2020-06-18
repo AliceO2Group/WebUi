@@ -2,8 +2,8 @@
 
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
 import QCObjectService from './../services/QCObject.service.js';
-
 import ObjectTree from './ObjectTree.class.js';
+
 /**
  * Model namespace for all about QC's objects (not javascript objects)
  */
@@ -21,10 +21,11 @@ export default class QCObject extends Observable {
     this.list = null;
 
     this.objectsRemote = RemoteData.notAsked();
-    this.selected = null; // object - id of object
+    this.selected = null; // object - { name; createTime; lastModified; }
     this.selectedOpen = false;
-    this.objects = {}; // objectName -> RemoteData
+    this.objects = {}; // objectName -> RemoteData.payload -> plot
     this.objectsReferences = {}; // object name -> number of each object being
+
     this.qcObjectService = new QCObjectService(this.model);
 
     this.listOnline = []; // list of online objects name
@@ -262,16 +263,8 @@ export default class QCObject extends Observable {
    * Also adds a reference to this object.
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
    */
-  async addObjectByName(objectName) {
-    if (!this.objectsReferences[objectName]) {
-      this.objectsReferences[objectName] = 1;
-    } else {
-      this.objectsReferences[objectName]++;
-      return;
-    }
-
+  async loadObjectByName(objectName) {
     // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
-
     const result = await this.qcObjectService.getObjectByName(objectName);
     if (result.isSuccess()) {
       if (this.isObjectChecker(result.payload)) {
@@ -299,35 +292,6 @@ export default class QCObject extends Observable {
     } else {
       return false;
     }
-  }
-
-  /**
-   * Removes a reference to the specified object and unload it from memory if not used anymore
-   * @param {string} objectName - The object name like /FULL/OBJ/NAME
-   */
-  removeObjectByName(objectName) {
-    this.objectsReferences[objectName]--;
-
-    // No more used
-    if (!this.objectsReferences[objectName]) {
-      delete this.objects[objectName];
-      delete this.objectsReferences[objectName];
-    }
-
-    this.notify();
-  }
-
-  /**
-   * Method to search for the object which info was requested for and return lastModified timestamp
-   * @param {string} objectName
-   * @return {string}
-   */
-  getLastModifiedByName(objectName) {
-    const object = this.currentList.find((object) => object.name === objectName);
-    if (object) {
-      return new Date(object.lastModified).toLocaleString();
-    }
-    return 'Loading...';
   }
 
   /**
@@ -390,6 +354,7 @@ export default class QCObject extends Observable {
     } else {
       this.selected = object;
     }
+    this.loadObjectByName(object.name);
     this.notify();
   }
 
@@ -496,5 +461,18 @@ export default class QCObject extends Observable {
       }
     });
     return objectName;
+  }
+
+  /**
+   * Method to search for the object which info was requested for and return lastModified timestamp
+   * @param {string} objectName
+   * @return {string}
+   */
+  getLastModifiedByName(objectName) {
+    const object = this.currentList.find((object) => object.name === objectName);
+    if (object) {
+      return new Date(object.lastModified).toLocaleString();
+    }
+    return 'Loading...';
   }
 }

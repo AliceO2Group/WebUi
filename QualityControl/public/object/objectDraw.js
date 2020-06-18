@@ -45,7 +45,7 @@ export function draw(model, tabObject, options, location = '') {
       w: 0,
     };
   }
-  model.object.addObjectByName(tabObject.name);
+  // model.object.addObjectByName(tabObject.name);
 
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
@@ -95,7 +95,7 @@ export function draw(model, tabObject, options, location = '') {
      */
     onremove(vnode) {
       // tell model we don't need those data anymore and free memory if needed
-      model.object.removeObjectByName(tabObject.name);
+      delete model.object.objects[tabObject.name];
 
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {

@@ -136,6 +136,10 @@ export default class Model extends Observable {
       case 'objectTree':
         this.page = 'objectTree';
         // data is already loaded at beginning
+        // TODO: If selected than query to load selected?
+        if (this.object.selected) {
+          this.object.loadObjectByName(this.object.selected.name);
+        }
         this.notify();
         break;
       case 'objectView': {
