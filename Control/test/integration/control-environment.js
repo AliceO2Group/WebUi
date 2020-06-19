@@ -4,11 +4,13 @@ const coreTests = require('./core-tests');
 
 let page;
 let timeout;
+let workflowToTest;
 
 describe('`pageNewEnvironment` test-suite', async () => {
   before(async () => {
     page = coreTests.page;
     timeout = coreTests.timeout;
+    workflowToTest = coreTests.workflow;
   });
 
   it('should be on page of new environment just created', async () => {
@@ -84,8 +86,14 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should have one button for `Shutdown` environment', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').title);
+    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(1)').title);
     assert.strictEqual(shutdownButton, 'Shutdown environment');
+  });
+
+  it('should have one button for `Force Shutdown` environment', async () => {
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').title);
+    assert.strictEqual(shutdownButton, 'Force the shutdown of the environment');
   });
 
   it('should successfully shutdown environment and redirect to environments page', async () => {
@@ -95,14 +103,32 @@ describe('`pageNewEnvironment` test-suite', async () => {
     });
 
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(1)').click());
     await waitForCoreResponse(page, timeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const location = await page.evaluate(() => window.location);
 
-    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
-    assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
+    if (!workflowToTest.includes('qc')) {
+      assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
+      assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
+    } else {
+      // temporary checks to attempt force-shutdown for workflow that includes `qc` in the name
+      if (controlAction.kind !== 'Failure') {
+        // workflow was successfully shutdown without the use of force
+        assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
+        assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
+      } else {
+        await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').click());
+        await waitForCoreResponse(page, timeout);
+
+        const controlAction = await page.evaluate(() => window.model.environment.itemControl);
+        const location = await page.evaluate(() => window.location);
+
+        assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
+        assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
+      }
+    }
   });
 });
 
