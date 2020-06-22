@@ -38,7 +38,7 @@ describe('InfoLogger', function() {
     require('./live-simulator/infoLoggerServer.js');
 
     // Start browser to test UI
-    browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
   });
 
@@ -231,15 +231,6 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
     });
 
-    it('successfully show indicator when user double pressed the log row', async () => {
-      await page.evaluate(() => {
-        document.querySelector('body > div:nth-child(2) > div:nth-child(2) > main:nth-child(2) > div:nth-child(2) > div>  div > table > tbody:nth-child(2) > tr').dlbclick();
-      });
-      await page.waitFor(200);
-
-      const indicatorOpen = await page.evaluate(() => window.model.indicatorEnabled);
-      assert.ok(indicatorOpen);
-    });
   });
 
   describe('Live mode', async () => {
@@ -329,6 +320,14 @@ describe('InfoLogger', function() {
       assert.ok(list.length > 0);
       assert.ok(isHostNameMatching);
       assert.ok(isUserNameMatching);
+    });
+
+    it('successfully show indicator when user double pressed the log row', async () => {
+      const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
+      await tableRow.click({clickCount: 2});
+      await page.waitFor(200);
+      const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
+      assert.ok(indicatorOpen);
     });
 
     it('should go to mode live in paused state', async () => {
