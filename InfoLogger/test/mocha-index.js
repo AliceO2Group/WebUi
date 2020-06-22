@@ -230,6 +230,16 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(criterias.severity.in, 'I W E F');
       assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
     });
+
+    it('successfully show indicator when user double pressed the log row', async () => {
+      await page.evaluate(() => {
+        document.querySelector('body > div:nth-child(2) > div:nth-child(2) > main:nth-child(2) > div:nth-child(2) > div>  div > table > tbody:nth-child(2) > tr').dlbclick();
+      });
+      await page.waitFor(200);
+
+      const indicatorOpen = await page.evaluate(() => window.model.indicatorEnabled);
+      assert.ok(indicatorOpen);
+    });
   });
 
   describe('Live mode', async () => {
