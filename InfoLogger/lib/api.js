@@ -164,9 +164,9 @@ module.exports.attachTo = (http, ws) => {
    * @param {Error} error
    * @param {number} status
    */
-  function handleError(res, error) {
+  function handleError(res, error, status=500) {
     log.trace(error);
-    res.status(500).json({message: error.message});
+    res.status(status).json({message: error.message});
   }
 
   if (liveSource) {
