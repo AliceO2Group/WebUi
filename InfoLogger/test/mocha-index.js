@@ -230,6 +230,7 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(criterias.severity.in, 'I W E F');
       assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
     });
+
   });
 
   describe('Live mode', async () => {
@@ -319,6 +320,14 @@ describe('InfoLogger', function() {
       assert.ok(list.length > 0);
       assert.ok(isHostNameMatching);
       assert.ok(isUserNameMatching);
+    });
+
+    it('successfully show indicator when user double pressed the log row', async () => {
+      const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
+      await tableRow.click({clickCount: 2});
+      await page.waitFor(200);
+      const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
+      assert.ok(indicatorOpen);
     });
 
     it('should go to mode live in paused state', async () => {
