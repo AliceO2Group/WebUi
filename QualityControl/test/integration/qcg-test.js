@@ -10,7 +10,7 @@ describe('QCG', function() {
   let browser;
   this.timeout(10000);
   this.slow(1000);
-  let url = 'http://localhost:8082/';
+  const url = 'http://localhost:8082/';
 
   before(async () => {
     this.ok = true;
@@ -67,6 +67,7 @@ describe('QCG', function() {
   });
 
   require('./offline-mode.js');
+  require('./online-mode.js');
 
   beforeEach(() => {
     this.ok = true;
