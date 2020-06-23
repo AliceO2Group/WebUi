@@ -63,7 +63,8 @@ const listLogsInViewportOnly = (model) => model.log.list.slice(
  */
 const tableLogLine = (model, row) => h('tr.row-hover', {
   className: model.log.item === row ? 'row-selected' : '',
-  onclick: () => model.log.setItem(row)
+  onclick: () => model.log.setItem(row),
+  ondblclick: () => model.toggleInspector(),
 }, tableRows(model, model.table.colsHeader, row));
 
 /**
