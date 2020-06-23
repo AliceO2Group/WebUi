@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -27,8 +27,7 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.10.4",
-    "mariadb": "^2.4.0"
+    "@aliceo2/web-ui": "1.11.3"
   },
   "devDependencies": {
     "eslint": "^5.15.0",
