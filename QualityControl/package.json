@@ -21,6 +21,7 @@
     "install": "node-gyp rebuild --jobs max",
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
+    "integration-test": "mocha --exit --bail ./test/integration/qcg-test.js -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "coverage": "npm run eslint && nyc npm run mocha",
