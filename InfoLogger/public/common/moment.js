@@ -2100,7 +2100,7 @@ function configFromRFC2822(config) {
         ' PST': ' -0800'
     };
     var military = 'YXWVUTSRQPONZABCDEFGHIKLM';
-    var timezone, timezoneIndex;
+    var timezone, timezoneIndex = 0;
 
     string = config._i
         .replace(/\([^\)]*\)|[\n\t]/g, ' ') // Remove comments and folding whitespace
@@ -3628,7 +3628,7 @@ addRegexToken('Do', function (isStrict, locale) {
 
 addParseToken(['D', 'DD'], DATE);
 addParseToken('Do', function (input, array) {
-    array[DATE] = toInt(input.match(match1to2)[0], 10);
+    array[DATE] = toInt(input.match(match1to2)[0]);
 });
 
 // MOMENTS
@@ -4418,7 +4418,7 @@ addFormatToken('x', 0, 0, 'valueOf');
 addRegexToken('x', matchSigned);
 addRegexToken('X', matchTimestamp);
 addParseToken('X', function (input, array, config) {
-    config._d = new Date(parseFloat(input, 10) * 1000);
+    config._d = new Date(parseFloat(input) * 1000);
 });
 addParseToken('x', function (input, array, config) {
     config._d = new Date(toInt(input));
