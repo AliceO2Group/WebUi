@@ -160,7 +160,7 @@ export default class Timezone extends Observable {
    */
   format(timestamp, format, tz) {
     if (typeof timestamp === 'string') {
-      timestamp = parseFloat(timestamp, 10);
+      timestamp = parseFloat(timestamp);
     }
 
     if (typeof timestamp === 'number') {

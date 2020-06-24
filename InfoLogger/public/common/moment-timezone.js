@@ -225,10 +225,14 @@
     this.offset = at.getTimezoneOffset();
   }
 
-  function ZoneScore(zone) {
+  function ZoneScore(zone,offsetsLength) {
     this.zone = zone;
     this.offsetScore = 0;
     this.abbrScore = 0;
+
+    if(offsetsLength) {
+      this.offsetScore = offsetsLength;
+    }
   }
 
   ZoneScore.prototype.scoreOffsetAt = function (offsetAt) {
