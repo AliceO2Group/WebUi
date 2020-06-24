@@ -1,12 +1,14 @@
 /* eslint-disable no-invalid-this */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
-const url = require('./config-provider').url;
+const config = require('./config-provider');
 
 let page;
+const url = config.url;
+const timeout = config.timeout;
 describe('QCG', function() {
   let browser;
-  this.timeout(20000);
+  this.timeout(timeout);
   this.slow(1000);
 
   before(async () => {
