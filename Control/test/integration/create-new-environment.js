@@ -80,7 +80,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
  * @param {number} timeout
  * @return {Promise}
  */
-const waitForCoreResponse = async (page, timeout = 90) => {
+async function waitForCoreResponse(page, timeout = 90) {
   return new Promise(async (resolve) => {
     let i = 0;
     while (i++ < timeout) {
@@ -92,4 +92,4 @@ const waitForCoreResponse = async (page, timeout = 90) => {
       }
     }
   });
-};
+}
