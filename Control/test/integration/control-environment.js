@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
 const assert = require('assert');
 const coreTests = require('./core-tests');
+const config = require('./config-provider');
+const reqTimeout = config.requestTimeout;
 
 let page;
-let timeout;
 
-describe('`pageNewEnvironment` test-suite', async () => {
+describe('`Control Environment` test-suite', async () => {
   before(async () => {
     page = coreTests.page;
-    timeout = coreTests.timeout;
   });
 
   it('should be on page of new environment just created', async () => {
@@ -28,7 +28,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully transition CONFIGURED -> RUNNING by clicking START button', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
-    await waitForCoreResponse(page, timeout);
+    await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
@@ -50,7 +50,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully transition RUNNING -> CONFIGURED by clicking STOP button', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)').click());
-    await waitForCoreResponse(page, timeout);
+    await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
@@ -72,7 +72,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully transition CONFIGURED -> STANDBY by clicking RESET button', async () => {
     await page.waitFor(5000); // Standby for 5s
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
-    await waitForCoreResponse(page, timeout);
+    await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
@@ -96,7 +96,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
-    await waitForCoreResponse(page, timeout);
+    await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const location = await page.evaluate(() => window.location);
@@ -114,7 +114,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
  * @param {number} timeout
  * @return {Promise}
  */
-const waitForCoreResponse = async (page, timeout = 90) => {
+async function waitForCoreResponse(page, timeout = 90) {
   return new Promise(async (resolve) => {
     let i = 0;
     while (i++ < timeout) {
@@ -126,4 +126,4 @@ const waitForCoreResponse = async (page, timeout = 90) => {
       }
     }
   });
-};
+}

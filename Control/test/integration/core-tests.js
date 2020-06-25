@@ -1,49 +1,22 @@
 /* eslint-disable no-invalid-this */
 /* eslint-disable no-console */
 /* eslint-disable max-len */
-/* eslint-disable require-jsdoc */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
+const config = require('./config-provider');
 
 let page;
+const url = config.url;
 describe('Control', function() {
   let browser;
-  this.timeout(180000);
-  this.slow(1000);
-  const url = 'http://localhost:8080/';
+  this.timeout(config.timeout);
+  this.slow(3000);
 
   before(async () => {
-    this.ok = true;
-
     // Start browser to test UI
     browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
-
-    // Listen to browser
-    page.on('error', (pageerror) => {
-      console.error('        ', pageerror);
-      this.ok = false;
-    });
-    page.on('pageerror', (pageerror) => {
-      console.error('        ', pageerror);
-      this.ok = false;
-    });
-    page.on('console', (msg) => {
-      for (let i = 0; i < msg.args().length; ++i) {
-        console.log(`        ${msg.args()[i]}`);
-      }
-    });
-    let testConfig;
-    try {
-      testConfig = require('./test-config');
-    } catch (error) {
-      console.warn('`test-config.js` file could not be found. Will use default values.');
-    }
-    exports.workflow = (testConfig && testConfig.workflow) ? testConfig.workflow : 'readout-stfb';
-    exports.timeout = (testConfig && testConfig.timeout) ? testConfig.timeout : 90;
     exports.page = page;
-    exports.url = url;
-    exports.requestTimeout = 90; // seconds
   });
 
   it('should load first page "/"', async () => {
@@ -93,16 +66,6 @@ describe('Control', function() {
       }
       lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
     });
-  });
-
-  beforeEach(() => {
-    this.ok = true;
-  });
-
-  afterEach(() => {
-    if (!this.ok) {
-      throw new Error('Something went wrong. Please use "systemctl status o2-cog for more information"');
-    }
   });
 
   after(async () => {

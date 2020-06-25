@@ -1,16 +1,17 @@
 /* eslint-disable max-len */
 const assert = require('assert');
 const coreTests = require('./core-tests');
+const config = require('./config-provider');
 
-let url;
+const url = config.url;
+const workflowToTest = config.workflow;
+const reqTimeout = config.requestTimeout;
+
 let page;
-let workflowToTest;
 
 describe('`pageNewEnvironment` test-suite', async () => {
   before(async () => {
-    url = coreTests.url;
     page = coreTests.page;
-    workflowToTest = coreTests.workflow;
   });
 
   it('should successfully load newEnvironment page', async () => {
@@ -62,7 +63,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully create a new environment', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
-    await waitForCoreResponse(page);
+    await waitForCoreResponse(page, reqTimeout);
 
     const location = await page.evaluate(() => window.location);
     const queryResult = await page.evaluate(() => window.model.environment.itemNew);
@@ -79,7 +80,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
  * @param {number} timeout
  * @return {Promise}
  */
-const waitForCoreResponse = async (page, timeout = 90) => {
+async function waitForCoreResponse(page, timeout = 90) {
   return new Promise(async (resolve) => {
     let i = 0;
     while (i++ < timeout) {
@@ -91,4 +92,4 @@ const waitForCoreResponse = async (page, timeout = 90) => {
       }
     }
   });
-};
+}
