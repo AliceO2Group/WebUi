@@ -32,7 +32,7 @@ export default class Model extends Observable {
     this.table.bubbleTo(this);
     this.getUserProfile();
 
-    this.timezone = new Timezone(this);
+    this.timezone = new Timezone();
     this.timezone.bubbleTo(this);
 
     this.notification = new Notification(this);
