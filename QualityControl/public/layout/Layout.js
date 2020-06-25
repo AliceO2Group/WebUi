@@ -185,7 +185,7 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Ceva
+   * Method to allow more than 3x3 grid
    * @param {string} value
    */
   resizeGridByXY(value) {
@@ -221,6 +221,7 @@ export default class Layout extends Observable {
     }
 
     this.tab = this.item.tabs[index];
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const columns = this.item.tabs[index].columns;
     if (columns > 0) {
       this.resizeGridByXY(columns);

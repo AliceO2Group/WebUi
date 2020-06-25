@@ -109,6 +109,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
+    this.object.objects = {}; // remove any in-memory loaded objects
     switch (this.router.params.page) {
       case 'layoutList':
         this.page = 'layoutList';

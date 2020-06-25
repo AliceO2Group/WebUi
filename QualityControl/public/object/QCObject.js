@@ -24,7 +24,6 @@ export default class QCObject extends Observable {
     this.selected = null; // object - { name; createTime; lastModified; }
     this.selectedOpen = false;
     this.objects = {}; // objectName -> RemoteData.payload -> plot
-    this.objectsReferences = {}; // object name -> number of each object being
 
     this.qcObjectService = new QCObjectService(this.model);
 
@@ -300,6 +299,7 @@ export default class QCObject extends Observable {
    */
   async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
+    this.objects = {}; // remove any in-memory loaded objects
     this.notify();
     if (!objectsName || !objectsName.length) {
       return;
