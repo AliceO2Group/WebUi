@@ -126,49 +126,21 @@ export default class LogFilter extends Observable {
     return criterias;
   }
 
-  // /**
-  //  * Set criterias according to object passed as argument
-  //  * @param {Criterias} criterias
-  //  */
-  // fromObject(criterias) {
-  //   this.resetCriterias();
-  //   // copy values to inner filters
-  //   // eslint-disable-next-line guard-for-in
-  //   for (const field in criterias) {
-  //     // eslint-disable-next-line guard-for-in
-  //     for (const operator in criterias[field]) {
-  //       this.setCriteria(field, operator, criterias[field][operator]);
-  //     }
-  //   }
-
-  //   this.notify();
-  // }
-
-    /**
+  /**
    * Set criterias according to object passed as argument
-   * @param {Object} query
+   * @param {Criterias} criterias
    */
-  fromObject(query) {
+  fromObject(criterias) {
     this.resetCriterias();
-  
-    if(query.profile && Object.keys(query).length > 1 ) {
-      this.model.notification.show(`URL can contain only filters or profile, not both`, 'warning');
-      return;
-    } else if (query.profile && Object.keys(query).length ===1 ) {
-      this.setProfile();
-      return;
-    } else {
-      // copy values to inner filters
+    // copy values to inner filters
+    // eslint-disable-next-line guard-for-in
+    for (const field in criterias) {
       // eslint-disable-next-line guard-for-in
-      for (const field in query) {
-        // eslint-disable-next-line guard-for-in
-        console.log("from Object - field :" + field);
-        for (const operator in query[field]) {
-          console.log("from Object - operator :" + operator);
-          this.setCriteria(field, operator, query[field][operator]);
-        }
+      for (const operator in criterias[field]) {
+        this.setCriteria(field, operator, criterias[field][operator]);
       }
     }
+
     this.notify();
   }
 

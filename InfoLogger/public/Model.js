@@ -250,10 +250,33 @@ export default class Model extends Observable {
   handleLocationChange() {
     const q = this.router.params.q;
     if (q) {
-      this.log.filter.fromObject(JSON.parse(q));
+      this.parseLocation(JSON.parse(q));
     }
   }
 
+  /**
+   * Delegates sub-model actions depending if location is filters or profile
+   * @param {Object} query
+   */
+  parseLocation(query) {
+    if(query.profile && Object.keys(query).length > 1 ) {
+      this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
+      return;
+    } else if (query.profile && Object.keys(query).length ===1 ) {
+      this.setProfile(query);
+      return;
+    } else {
+      this.log.filter.fromObject(query);
+    }
+  }
+
+  /**
+   * Parses profile parameter and delegates sub-model actions depending on the profile
+   * @param {Object} query
+   */
+  setProfile(query) {
+    this.log.filter.resetCriterias();
+  }
   /**
    * When model change (filters), update address bar with the filter
    * do it silently to avoid infinite loop
