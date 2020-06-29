@@ -81,15 +81,6 @@ export default class LogFilter extends Observable {
     }
   }
 
-   /**
-   * Set parameters depending on the profile
-   * @param {string} profile
-   */
-  setProfile(profile) {
-    console.log("set profile");
-    return;
-  }
-
   /**
    * Exports all filled filters inputs
    * @return {Object} minimal filter object

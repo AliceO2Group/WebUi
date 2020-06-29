@@ -132,6 +132,36 @@ describe('InfoLogger', function() {
   });
 
   describe('LogFilter', async () => {
+
+    it('should update filters based on profile when passed in the URI', async () => {
+      // for now check if the filters are reset once the profile is passed 
+      const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+      const searchParams = await page.evaluate(() => {
+        const params = '{"profile":{"in":"I W E F"}}';
+        query = JSON.parse(params);
+        window.model.parseLocation(query);
+        return window.location.search;
+      });
+
+      assert.deepStrictEqual(searchParams, expectedParams);
+    });
+
+    it('should reset filters and show warning message when profile and filters are passed', async () => {
+      const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+
+      const searchParams = await page.evaluate(() => {
+        const params = '{"profile":{"match":"callibration"},"severity":{"in":"I W E F"}}';
+        query = JSON.parse(params);
+        window.model.parseLocation(query);
+        return window.location.search;
+      });
+
+      await page.waitForFunction(`window.model.notification.state === 'shown'`);
+      await page.waitForFunction(`window.model.notification.type === 'warning'`);
+      await page.waitForFunction(`window.model.notification.message === "URL can contain only filters or profile, not both"`);
+      assert.deepStrictEqual(searchParams, expectedParams);
+    });
+
     it('should update URI with new encoded criteria', async () => {
       /* eslint-disable max-len */
       const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"I W E F"}}';

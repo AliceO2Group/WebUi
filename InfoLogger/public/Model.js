@@ -259,11 +259,12 @@ export default class Model extends Observable {
    * @param {Object} query
    */
   parseLocation(query) {
-    if(query.profile && Object.keys(query).length > 1 ) {
+    if (query.profile && Object.keys(query).length > 1 ) {
+      this.log.filter.resetCriterias();
       this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
       return;
     } else if (query.profile && Object.keys(query).length ===1 ) {
-      this.setProfile(query);
+      this.parseProfile();
       return;
     } else {
       this.log.filter.fromObject(query);
@@ -274,7 +275,7 @@ export default class Model extends Observable {
    * Parses profile parameter and delegates sub-model actions depending on the profile
    * @param {Object} query
    */
-  setProfile(query) {
+  parseProfile() {
     this.log.filter.resetCriterias();
   }
   /**
