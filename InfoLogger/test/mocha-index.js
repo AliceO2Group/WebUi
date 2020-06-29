@@ -148,7 +148,6 @@ describe('InfoLogger', function() {
 
     it('should reset filters and show warning message when profile and filters are passed', async () => {
       const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
-
       const searchParams = await page.evaluate(() => {
         const params = '{"profile":{"match":"callibration"},"severity":{"in":"I W E F"}}';
         query = JSON.parse(params);
