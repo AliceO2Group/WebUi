@@ -120,16 +120,8 @@ function getRootObject(model) {
         model.router.params.layoutId ?
           model.layout.requestedLayout.match({
             NotAsked: () => null,
-            Loading: () => h('.f1', spinner()),
-            Success: () =>
-              model.object.selected ?
-                h('', {
-                  style: 'width: 100%; height: 100%'
-                }, draw(model, model.object.selected.name,
-                  {stat: true}, 'objectView')
-                )
-                :
-                errorLoadingObject('Object could not be found'),
+            Loading: () => h('.f1', 'spinner()'),
+            Success: (data) => showObject(model, data),
             Failure: (error) => errorLoadingObject(error),
           })
           :
@@ -137,6 +129,19 @@ function getRootObject(model) {
         : errorLoadingObject('No object name or object ID were provided')
   );
 }
+
+/**
+ * ffdsafda
+ * @param {fdsa} model
+ * @return {vnode}
+ */
+const showObject = (model) =>
+  // model.object.selected ?
+  h('.w-100.h-100', draw(model, model.object.selected.name,
+    {stat: true}, 'objectView')
+  );
+// :
+// errorLoadingObject('Object could not be found');
 
 /**
  * Display error message & icon

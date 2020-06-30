@@ -81,11 +81,13 @@ export default class Layout extends Observable {
     this.requestedLayout = RemoteData.loading();
     this.notify();
     this.requestedLayout = await this.model.layoutService.getLayoutById(layoutId);
+    this.notify();
+
     if (!this.requestedLayout.isSuccess()) {
       this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
     } else {
       if (this.model.router.params.objectId) {
-        this.model.object.select({
+        await this.model.object.select({
           name: this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload,
             this.model.router.params.objectId)
         });

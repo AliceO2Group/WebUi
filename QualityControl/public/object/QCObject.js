@@ -348,13 +348,13 @@ export default class QCObject extends Observable {
    * Set the current selected object by user
    * @param {QCObject} object
    */
-  select(object) {
+  async select(object) {
     if (this.currentList.length > 0) {
       this.selected = this.currentList.find((obj) => obj.name === object.name);
     } else {
       this.selected = object;
     }
-    this.loadObjectByName(object.name);
+    await this.loadObjectByName(object.name);
     this.notify();
   }
 
