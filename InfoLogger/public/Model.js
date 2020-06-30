@@ -170,6 +170,28 @@ export default class Model extends Observable {
     return;
   }
 
+  /**
+   * Request data about the profile passed in the URL
+   * @param {string} profile
+   */
+  async getProfile(profile) {
+    this.userProfile = RemoteData.loading();
+    this.notify();
+    const {result, ok} = await this.loader.get(`/api/getProfile`);
+    if (!ok) {
+      this.userProfile = RemoteData.failure(result.message);
+      this.notification.show('Unable to load profile. Default profile will be used instead', 'danger', 2000);
+    } else {
+      this.userProfile = RemoteData.success(result);
+      if (this.userProfile.payload.content.colsHeader) {
+        this.table.colsHeader = this.userProfile.payload.content.colsHeader;
+        this.notification.show('The profile ' + profile + ' was loaded successfully', 'success', 2000);
+      }
+    }
+    this.notify();
+    return;
+  }
+
 
   /**
    * Delegates sub-model actions depending on incoming keyboard event
@@ -264,7 +286,7 @@ export default class Model extends Observable {
       this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
       return;
     } else if (params.profile) {
-      this.parseProfile();
+      this.parseProfile(params.profile);
       return;
     } else if (params.q) {
       this.log.filter.fromObject(JSON.parse(params.q));
@@ -273,9 +295,10 @@ export default class Model extends Observable {
 
   /**
    * Parses profile parameter and delegates sub-model actions depending on the profile
-   * @param {Object} query
+   * @param {Object} profile
    */
-  parseProfile() {
+  parseProfile(profile) {
+    this.getProfile(profile);
     this.log.filter.resetCriterias();
   }
   /**
