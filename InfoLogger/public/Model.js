@@ -248,26 +248,26 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
-    const q = this.router.params.q;
-    if (q) {
-      this.parseLocation(JSON.parse(q));
+    const params = this.router.params;
+    if (params) {
+      this.parseLocation(params);
     }
   }
 
   /**
    * Delegates sub-model actions depending if location is filters or profile
-   * @param {Object} query
+   * @param {Object} params
    */
-  parseLocation(query) {
-    if (query.profile && Object.keys(query).length > 1 ) {
+  parseLocation(params) {
+    if (params.profile && params.q ) {
       this.log.filter.resetCriterias();
       this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
       return;
-    } else if (query.profile && Object.keys(query).length ===1 ) {
+    } else if (params.profile) {
       this.parseProfile();
       return;
-    } else {
-      this.log.filter.fromObject(query);
+    } else if (params.q) {
+      this.log.filter.fromObject(JSON.parse(params.q));
     }
   }
 
