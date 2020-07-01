@@ -165,25 +165,127 @@ module.exports.attachTo = (http, ws) => {
    * @param {Response} res
    */
   function getProfile(req, res) {
-    const defaultUserConfig = {
-      date: {size: 'cell-m', visible: false},
-      time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: false},
-      rolename: {size: 'cell-m', visible: true},
-      pid: {size: 'cell-s', visible: false},
-      username: {size: 'cell-m', visible: false},
-      system: {size: 'cell-s', visible: true},
-      facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: false},
-      partition: {size: 'cell-m', visible: false},
-      run: {size: 'cell-s', visible: false},
-      errcode: {size: 'cell-s', visible: true},
-      errline: {size: 'cell-s', visible: false},
-      errsource: {size: 'cell-m', visible: false},
-      message: {size: 'cell-xl', visible: true}
-    };
-    res.status(200).json({user: 'default', content: {colsHeader: defaultUserConfig}});
-    // .catch((err) => handleError(res, err));
+    const profileName = req.query.profile;
+    jsonDb.getPredefinedProfile(profileName).then((profile) => {
+      if (profile) {
+        res.status(200).json(profile);
+      } else {
+        const defaultUserConfig = {
+          date: {size: 'cell-m', visible: false},
+          time: {size: 'cell-m', visible: true},
+          hostname: {size: 'cell-m', visible: false},
+          rolename: {size: 'cell-m', visible: true},
+          pid: {size: 'cell-s', visible: false},
+          username: {size: 'cell-m', visible: false},
+          system: {size: 'cell-s', visible: true},
+          facility: {size: 'cell-m', visible: true},
+          detector: {size: 'cell-s', visible: false},
+          partition: {size: 'cell-m', visible: false},
+          run: {size: 'cell-s', visible: false},
+          errcode: {size: 'cell-s', visible: true},
+          errline: {size: 'cell-s', visible: false},
+          errsource: {size: 'cell-m', visible: false},
+          message: {size: 'cell-xl', visible: true}
+        };
+
+        const defaultCriterias = {
+          timestamp: {
+            since: '',
+            until: '',
+            $since: null,
+            $until: null,
+          },
+          hostname: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null,
+          },
+          rolename: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          pid: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          username: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          system: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          facility: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          detector: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          partition: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          run: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          errcode: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          errline: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          errsource: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          message: {
+            match: '',
+            exclude: '',
+            $match: null,
+            $exclude: null
+          },
+          severity: {
+            in: 'I W E F',
+            $in: ['W', 'I', 'E', 'F'],
+          },
+          level: {
+            max: null, 
+            $max: null,
+          },
+        };
+        res.status(200).json({user: 'default', content: {colsHeader: defaultUserConfig, criterias: defaultCriterias}});
+      }
+    })
+      .catch((err) => handleError(res, err));
   }
 
   /**
