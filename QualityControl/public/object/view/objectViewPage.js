@@ -120,8 +120,8 @@ function getRootObject(model) {
         model.router.params.layoutId ?
           model.layout.requestedLayout.match({
             NotAsked: () => null,
-            Loading: () => h('.f1', 'spinner()'),
-            Success: (data) => showObject(model, data),
+            Loading: () => null, // TODO Investigate why RemoteData is displaying both states simultaneously
+            Success: () => showObject(model, model.object.selected.name),
             Failure: (error) => errorLoadingObject(error),
           })
           :
@@ -131,17 +131,16 @@ function getRootObject(model) {
 }
 
 /**
- * ffdsafda
- * @param {fdsa} model
+ * Draw an object based on a given objectName
+ * @param {Object} model
+ * @param {String} objectName
  * @return {vnode}
  */
-const showObject = (model) =>
-  // model.object.selected ?
-  h('.w-100.h-100', draw(model, model.object.selected.name,
-    {stat: true}, 'objectView')
-  );
-// :
-// errorLoadingObject('Object could not be found');
+const showObject = (model, objectName) =>
+  model.object.selected ?
+    h('.w-100.h-100', draw(model, objectName, {stat: true}, 'objectView'))
+    :
+    errorLoadingObject('Object could not be found');
 
 /**
  * Display error message & icon
