@@ -120,7 +120,7 @@ function getRootObject(model) {
           model.layout.requestedLayout.match({
             NotAsked: () => null,
             Loading: () => null, // TODO Investigate why RemoteData is displaying both states simultaneously
-            Success: () => showObject(model, model.object.selected.name),
+            Success: () => showObject(model),
             Failure: (error) => errorLoadingObject(error),
           })
           :
@@ -130,14 +130,13 @@ function getRootObject(model) {
 }
 
 /**
- * Draw an object based on a given objectName
+ * Draw an object based on selected object
  * @param {Object} model
- * @param {String} objectName
  * @return {vnode}
  */
-const showObject = (model, objectName) =>
+const showObject = (model) =>
   model.object.selected ?
-    h('.w-100.h-100', draw(model, objectName, {stat: true}, 'objectView'))
+    h('.w-100.h-100', draw(model, model.object.selected.name, {stat: true}, 'objectView'))
     :
     errorLoadingObject('Object could not be found');
 
