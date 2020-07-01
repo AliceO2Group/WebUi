@@ -181,6 +181,7 @@ export default class Model extends Observable {
       this.userProfile = RemoteData.failure(result.message);
       this.notification.show('Unable to load profile. Default profile will be used instead', 'danger', 2000);
     } else {
+      console.log("getProfile");
       this.userProfile = RemoteData.success(result);
       if (this.userProfile.payload.content.colsHeader) {
         this.table.colsHeader = this.userProfile.payload.content.colsHeader;
@@ -297,30 +298,6 @@ export default class Model extends Observable {
     }
   }
 
-  /**
-   * Delegates sub-model actions depending if location is filters or profile
-   * @param {Object} params
-   */
-  parseLocation(params) {
-    if (params.profile && params.q ) {
-      this.log.filter.resetCriterias();
-      this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
-      return;
-    } else if (params.profile) {
-      this.parseProfile();
-      return;
-    } else if (params.q) {
-      this.log.filter.fromObject(JSON.parse(params.q));
-    }
-  }
-
-  /**
-   * Parses profile parameter and delegates sub-model actions depending on the profile
-   * @param {Object} query
-   */
-  parseProfile() {
-    this.log.filter.resetCriterias();
-  }
   /**
    * When model change (filters), update address bar with the filter
    * do it silently to avoid infinite loop
