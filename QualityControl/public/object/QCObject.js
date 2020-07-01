@@ -294,7 +294,7 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Reload currently used objects which have a number of references greater or equal to 1
+   * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
   async loadObjects(objectsName) {
@@ -302,6 +302,8 @@ export default class QCObject extends Observable {
     this.objects = {}; // remove any in-memory loaded objects
     this.notify();
     if (!objectsName || !objectsName.length) {
+      this.objectsRemote = RemoteData.success();
+      this.notify();
       return;
     }
 
