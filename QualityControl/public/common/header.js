@@ -79,7 +79,7 @@ const onlineButton = (model) => h('button.btn',
     onclick: () => toggleOnlineButton(model),
     disabled: model.object.queryingObjects ? true : false,
     title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.object.isOnlineModeConnectionAlive ? '' : 'display: none'
+    style: model.isOnlineModeConnectionAlive ? '' : 'display: none'
   },
   'Online',
   ' ',
@@ -91,8 +91,8 @@ const onlineButton = (model) => h('button.btn',
  * @param {Object} model
  */
 function toggleOnlineButton(model) {
-  model.object.toggleMode();
-  switch (model.object.isOnlineModeEnabled) {
+  model.toggleMode();
+  switch (model.isOnlineModeEnabled) {
     case true:
       onlineButtonStyle = 'btn-success';
       onlineButtonIcon = iconMediaStop();

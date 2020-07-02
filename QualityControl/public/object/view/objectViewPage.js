@@ -1,5 +1,4 @@
 import {h, iconBook, iconCircleX, iconArrowThickLeft} from '/js/src/index.js';
-import spinner from './../../loader/spinner.js';
 import {draw} from './../objectDraw.js';
 import infoButton from './../../common/infoButton.js';
 
@@ -51,7 +50,7 @@ function getActionsHeader(model) {
       getBackToQCGButton(model),
       h('b.text-center.flex-column', {style: 'flex-grow:1'}, getObjectTitle(model)),
       h('.flex-row', [
-        infoButton(model.object),
+        infoButton(model.object, model.isOnlineModeEnabled),
         model.isContextSecure() && getCopyURLToClipboardButton(model)
       ])
     ]);
@@ -120,16 +119,8 @@ function getRootObject(model) {
         model.router.params.layoutId ?
           model.layout.requestedLayout.match({
             NotAsked: () => null,
-            Loading: () => h('.f1', spinner()),
-            Success: () =>
-              model.object.selected ?
-                h('', {
-                  style: 'width: 100%; height: 100%'
-                }, draw(model, model.object.selected.name,
-                  {stat: true}, 'objectView')
-                )
-                :
-                errorLoadingObject('Object could not be found'),
+            Loading: () => null, // TODO Investigate why RemoteData is displaying both states simultaneously
+            Success: () => showObject(model),
             Failure: (error) => errorLoadingObject(error),
           })
           :
@@ -137,6 +128,17 @@ function getRootObject(model) {
         : errorLoadingObject('No object name or object ID were provided')
   );
 }
+
+/**
+ * Draw an object based on selected object
+ * @param {Object} model
+ * @return {vnode}
+ */
+const showObject = (model) =>
+  model.object.selected ?
+    h('.w-100.h-100', draw(model, model.object.selected.name, {stat: true}, 'objectView'))
+    :
+    errorLoadingObject('Object could not be found');
 
 /**
  * Display error message & icon

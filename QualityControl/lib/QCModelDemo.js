@@ -26,11 +26,25 @@ function promiseResolveWithLatency(data) {
 }
 
 /**
+ * Fake promise latency
+ * @return {Promise} error is returned
+ */
+function promiseRejectWithLatency() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error('Object could not be displayed')), 250);
+  });
+}
+
+/**
  * Read object's data or null if it fails
  * @param {string} name - Object's path like agentName/objectName/objectNameSub
  * @return {Object|null}
  */
 function readObjectData(name) {
+  if (name === 'DAQ01/EventSize/ACORDE/ACORDE') {
+    // test to cover errors thrown by QC
+    return promiseRejectWithLatency();
+  }
   const object = objects.find((object) => object.name === `${name}`);
   return promiseResolveWithLatency(object ? object.data : 'Object not found');
 }

@@ -32,9 +32,9 @@ export default function objectTreeHeader(model) {
           onclick: () => model.object.toggleSortDropdown()
         }, [model.object.sortBy.title, ' ', model.object.sortBy.icon]),
         h('.dropdown-menu.text-left', [
-          !model.object.isOnlineModeEnabled
+          !model.isOnlineModeEnabled
           && sortMenuItem(model, 'Created Time', 'Sort by time of creation ASC', iconArrowTop(), 'createTime', 1),
-          !model.object.isOnlineModeEnabled
+          !model.isOnlineModeEnabled
           && sortMenuItem(model, 'Created Time', 'Sort by time of creation DESC', iconArrowBottom(), 'createTime', -1),
           sortMenuItem(model, 'Name', 'Sort by name ASC', iconArrowTop(), 'name', 1),
           sortMenuItem(model, 'Name', 'Sort by name DESC', iconArrowBottom(), 'name', -1),
