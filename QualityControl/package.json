@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "O2 Quality Control Web User Interface",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -21,6 +21,7 @@
     "install": "node-gyp rebuild --jobs max",
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
+    "integration-test": "mocha --exit --bail ./test/integration/qcg-test.js -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "coverage": "npm run eslint && nyc npm run mocha",
@@ -28,7 +29,7 @@
     "mocha": "mocha --exit test/**/mocha-* --retries 2"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.10.4",
+    "@aliceo2/web-ui": "1.11.3",
     "jsroot": "^5.8.0",
     "node-addon-api": "^1.6.3"
   },

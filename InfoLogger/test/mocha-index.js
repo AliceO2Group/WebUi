@@ -132,6 +132,33 @@ describe('InfoLogger', function() {
   });
 
   describe('LogFilter', async () => {
+
+    it('should update filters based on profile when passed in the URI', async () => {
+      // for now check if the filters are reset once the profile is passed 
+      const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+      const searchParams = await page.evaluate(() => {
+        const params = {profile:'physicist'};
+        window.model.parseLocation(params);
+        return window.location.search;
+      });
+
+      assert.strictEqual(searchParams, expectedParams);
+    });
+
+    it('should reset filters and show warning message when profile and filters are passed', async () => {
+      const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+      const searchParams = await page.evaluate(() => {
+        const params ={profile: "physicist", q: '"severity":{"in":"I W E F"}}'};
+        window.model.parseLocation(params);
+        return window.location.search;
+      });
+
+      await page.waitForFunction(`window.model.notification.state === 'shown'`);
+      await page.waitForFunction(`window.model.notification.type === 'warning'`);
+      await page.waitForFunction(`window.model.notification.message === "URL can contain only filters or profile, not both"`);
+      assert.strictEqual(searchParams, expectedParams);
+    });
+
     it('should update URI with new encoded criteria', async () => {
       /* eslint-disable max-len */
       const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
@@ -230,6 +257,7 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(criterias.severity.in, 'I W E F');
       assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
     });
+
   });
 
   describe('Live mode', async () => {
@@ -319,6 +347,14 @@ describe('InfoLogger', function() {
       assert.ok(list.length > 0);
       assert.ok(isHostNameMatching);
       assert.ok(isUserNameMatching);
+    });
+
+    it('successfully show indicator when user double pressed the log row', async () => {
+      const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
+      await tableRow.click({clickCount: 2});
+      await page.waitFor(200);
+      const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
+      assert.ok(indicatorOpen);
     });
 
     it('should go to mode live in paused state', async () => {
