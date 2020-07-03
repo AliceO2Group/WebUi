@@ -41,11 +41,10 @@ class Winston {
       if (log.hasOwnProperty('label')) {
         basic = '[' + log.label + '] ' + basic;
       }
-      if (config.hasOwnProperty('timestamp')) {
-        basic = log.timestamp + '  ' + basic;
-      }
       if (config.hasOwnProperty('systemd')) {
         basic = systemdPr[log.level] + basic;
+      } else {
+        basic = log.timestamp + '  ' + basic;
       }
       return basic;
     });
