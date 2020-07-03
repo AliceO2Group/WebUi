@@ -54,6 +54,7 @@ class Winston {
         level: config.consoleLvl,
         format: winston.format.combine(
           winston.format.timestamp(),
+          winston.format.colorize(),
           consoleFormatter
         )}
       )
