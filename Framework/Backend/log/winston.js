@@ -37,16 +37,16 @@ class Winston {
     config.consoleLvl = config.consoleLvl || 'debug';
 
     const consoleFormatter = winston.format.printf((log) => {
-      let basic = `${log.level}: ${log.message}`;
+      let output = `${log.level}: ${log.message}`;
       if (log.hasOwnProperty('label')) {
-        basic = '[' + log.label + '] ' + basic;
+        output = `[${log.label}] ${output}`;
       }
       if (config.hasOwnProperty('systemd')) {
-        basic = systemdPr[log.level] + basic;
+        output = systemdPr[log.level] + output;
       } else {
-        basic = log.timestamp + '  ' + basic;
+        output = `${log.timestamp}  ${output}`
       }
-      return basic;
+      return output;
     });
 
     const transports = [
