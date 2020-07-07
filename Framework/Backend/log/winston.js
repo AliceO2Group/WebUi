@@ -13,6 +13,14 @@
 
 const winston = require('winston');
 
+// Maping between winston levels and journalctl priorities
+const systemdPr = {
+  debug: '<7>',
+  info: '<6>',
+  warn: '<4>',
+  error: '<3>'
+};
+
 /**
  * Creates Winston logger
  * Uses two transports file and console (if properly configured)
@@ -29,11 +37,16 @@ class Winston {
     config.consoleLvl = config.consoleLvl || 'debug';
 
     const consoleFormatter = winston.format.printf((log) => {
+      let output = `${log.level}: ${log.message}`;
       if (log.hasOwnProperty('label')) {
-        return `${log.timestamp} ${log.level}: [${log.label}] ${log.message}`;
-      } else {
-        return `${log.timestamp} ${log.level}: ${log.message}`;
+        output = `[${log.label}] ${output}`;
       }
+      if (config.hasOwnProperty('consoleSystemd')) {
+        output = systemdPr[log.level] + output;
+      } else {
+        output = `${log.timestamp}  ${output}`;
+      }
+      return output;
     });
 
     const transports = [
