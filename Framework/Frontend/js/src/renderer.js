@@ -141,8 +141,7 @@ function mount(element, view, model, debug) {
     }
     try {
       render(element, view(model));
-    }
-    finally {
+    } finally {
       if (debug) {
         // eslint-disable-next-line no-console
         console.timeEnd('render');
