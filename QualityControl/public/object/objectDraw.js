@@ -189,7 +189,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         drawingOptions += ';f';
       }
 
-      JSROOT.redraw(dom, objectRemoteData.payload, drawingOptions, (painter) => {
+      JSROOT.draw(dom, objectRemoteData.payload,"px:py::pz>5", (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);

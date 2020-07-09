@@ -157,7 +157,9 @@ function treeRow(model, tree, level) {
         ' ',
         tree.name
       ]),
-      h('td.highlight.w-33', h('.w-100.text-center', lastModified)),
+      h('td.highlight.w-33',
+          lastModified && h('select.form-control.text-center',
+            h('option', lastModified))),
     ]),
     children
   ];
