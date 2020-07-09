@@ -3,10 +3,7 @@ name: Framework
 on:
   pull_request:
     paths:
-      - 'Framework/*'
-      - 'Framework/*/*'
-      - 'Framework/*/*/*'
-      - 'Framework/*/*/*/*'
+      - 'Framework/**/*'
       - '.github/workflows/framework.yml'
   push:
     branches:
