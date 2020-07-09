@@ -6,6 +6,7 @@ on:
       - 'Framework/*'
       - 'Framework/*/*'
       - 'Framework/*/*/*'
+      - 'Framework/*/*/*/*'
       - '.github/workflows/framework.yml'
   push:
     branches:
