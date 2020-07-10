@@ -2,9 +2,7 @@ name: InfoLogger
 on:
   pull_request:
     paths:
-      - 'InfoLogger/*'
-      - 'InfoLogger/*/*'
-      - 'InfoLogger/*/*/*'
+      - 'InfoLogger/**/*'
       - '.github/workflows/infologger.yml'
   push:
     branches:

@@ -2,9 +2,7 @@ name: Control
 on:
   pull_request:
     paths:
-      - 'Control/*'
-      - 'Control/*/*'
-      - 'Control/*/*/*'
+      - 'Control/**/*'
       - '.github/workflows/control.yml'
   push:
     branches:
