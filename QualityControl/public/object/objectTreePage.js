@@ -51,6 +51,9 @@ function drawComponent(model) {
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
       h('.resize-button.flex-row', [
+        h('.p1.text-left', {style: 'padding-bottom: 0;'},
+          h('select.form-control', h('option', '2/3/2020, 1:54:05 PM'))
+        ),
         infoButton(model.object),
         h('.p1.text-left', {style: 'padding-bottom: 0;'},
           h('a.btn',
@@ -157,9 +160,7 @@ function treeRow(model, tree, level) {
         ' ',
         tree.name
       ]),
-      h('td.highlight.w-33',
-          lastModified && h('select.form-control.text-center',
-            h('option', lastModified))),
+      h('td.highlight.w-33', h('.w-100.text-center', lastModified)),
     ]),
     children
   ];
