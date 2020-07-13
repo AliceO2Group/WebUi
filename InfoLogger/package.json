@@ -24,7 +24,9 @@
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js') --retries 2",
     "coverage": "npm run eslint && nyc npm run mocha",
-    "coverage-local": "nyc --reporter=lcov npm run mocha"
+    "coverage-local": "nyc --reporter=lcov npm run mocha",
+    "integration-live-test": "mocha --exit --bail ./test/integration/ilg-live-tests.js -R min",
+    "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.11.3"
