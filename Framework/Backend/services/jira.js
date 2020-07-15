@@ -22,8 +22,8 @@ class Jira {
    */
   constructor(config) {
     this.url = config.url;
-    this.serviceUser = config.serviceUser;
-    this.servicePass = config.servicePass;
+    this.accountUser = config.accountUser;
+    this.accountPass = config.accountPass;
     this.projectId = config.projectId;
     this.issueTypes = {
       bug: 1
@@ -37,7 +37,7 @@ class Jira {
   async createIssue(postData) {
     const requestOptions = {
       method: 'POST',
-      auth: this.serviceUser + ':' + this.servicePass,
+      auth: this.accountUser + ':' + this.accountPass,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',

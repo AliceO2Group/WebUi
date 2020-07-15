@@ -21,6 +21,7 @@ const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
 const MySQL = require('./db/mysql.js');
 const JwtToken = require('./jwt/token.js');
 const ConsulService = require('./services/consul.service.js');
+const Jira = require('./services/jira.js');
 
 exports.WebSocket = WebSocket;
 exports.HttpServer = HttpServer;
@@ -31,3 +32,4 @@ exports.JwtToken = JwtToken;
 exports.InfoLoggerSender = InfoLoggerSender;
 exports.InfoLoggerReceiver = InfoLoggerReceiver;
 exports.ConsulService = ConsulService;
+exports.Jira = Jira;
