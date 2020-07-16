@@ -43,9 +43,15 @@ describe('JIRA service test suite', function() {
       }, new Error('Service account for JIRA must be defined'));
     });
 
+    it('should throw error due to missing project ID', function() {
+      assert.throws(() => {
+        new Jira({url: 'https://localhost', serviceAccount: {user: 'test', pass: 'test'}});
+      }, new Error('JIRA project ID must be defined'));
+    });
+
     it('should successfully create a JIRA service', function() {
       const jira = new Jira({url: 'https://localhost:8443', serviceAccount: {user: 'test', pass: 'test'}, projectId: 0});
-      assert.deepStrictEqual(jira.url, 'https://localhost:8443');
+      assert.strictEqual(jira.url, 'https://localhost:8443');
       assert.deepStrictEqual(jira.projectId, 0);
     });
   });
@@ -66,7 +72,7 @@ describe('JIRA service test suite', function() {
     it('should reject with error if is unable to parse response', async () => {
       nock('https://localhost:8443')
         .post('/jira/rest/api/2/issue')
-        .reply(200, 'Not a JSON resposne');
+        .reply(200, 'Not a JSON response');
       return assert.rejects(async () => {
         await jira.createBugIssue('alice', 'bob', 'Run fails');
       }, new Error('Unable to parse JSON'));

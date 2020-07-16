@@ -31,7 +31,7 @@ class Jira {
     if (!config.serviceAccount || !config.serviceAccount.user || !config.serviceAccount.pass) {
       throw new Error('Service account for JIRA must be defined');
     }
-    if (config.projectId) {
+    if (!config.projectId) {
       throw new Error('JIRA project ID must be defined');
     }
 
@@ -94,7 +94,7 @@ class Jira {
   async createBugIssue(reporter, assignee, summary, description = '') {
     if (!reporter || !assignee || !summary) {
       log.warn('Creating bug issue failed: undefined arguments');
-      return Promise.reject(new Error('Creating JIRA issue failed'));
+      return Promise.reject(new Error('Invalid parameters passed'));
     }
     const issue = JSON.stringify(
       {
