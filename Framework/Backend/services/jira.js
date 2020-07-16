@@ -12,6 +12,7 @@
 */
 
 const https = require('https');
+const log = new (require('./../log/Log.js'))('JIRA');
 
 /**
  * Handles creating JIRA issues
@@ -21,9 +22,22 @@ class Jira {
    * @param {object} config - JIRA configuration including URL, service account and project ID
    */
   constructor(config) {
+    if (!config) {
+      throw new Error('Configuration object cannot be empty');
+    }
+    if (!config.url) {
+      throw new Error('JIRA URL must be defined');
+    }
+    if (!config.serviceAccount || !config.serviceAccount.user || !config.serviceAccount.pass) {
+      throw new Error('Service account for JIRA must be defined');
+    }
+    if (config.projectId) {
+      throw new Error('JIRA project ID must be defined');
+    }
+
     this.url = config.url;
-    this.accountUser = config.accountUser;
-    this.accountPass = config.accountPass;
+    this.accountUser = config.serviceAccount.user;
+    this.accountPass = config.serviceAccount.pass;
     this.projectId = config.projectId;
     this.issueTypes = {
       bug: 1
@@ -31,8 +45,8 @@ class Jira {
   }
 
   /**
-   * Handles HTTP req/rep in order to create JIRA issue
-   * @param {object} postData - issue details
+   * Handles HTTP req/res in order to create JIRA issue
+   * @param {string} postData - issue details
    */
   async createIssue(postData) {
     const requestOptions = {
@@ -71,13 +85,17 @@ class Jira {
 
   /**
    * Creates bug issue
-   * @param {string} reporter - reporter of issue
-   * @param {string} assignee - asignee of issue
+   * @param {string} reporter - reporter of issue as NICE login
+   * @param {string} assignee - asignee of issue as NICE login
    * @param {string} summary - title of issue
    * @param {string} description - issue description (optional)
    * @return {Promise} - resolve object contains issue ID (id) , key (key) and URL (self)
    */
   async createBugIssue(reporter, assignee, summary, description = '') {
+    if (!reporter || !assignee || !summary) {
+      log.warn('Creating bug issue failed: undefined arguments');
+      return Promise.reject(new Error('Creating JIRA issue failed'));
+    }
     const issue = JSON.stringify(
       {
         fields: {
@@ -93,7 +111,7 @@ class Jira {
             name: reporter
           },
           assignee: {
-            name: reporter
+            name: assignee
           }
         }
       });

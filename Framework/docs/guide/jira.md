@@ -8,7 +8,7 @@ require('@aliceo2/web-ui').Jira
 
 #### Create an instance
 ```js
-new Jira({url: URL, accountUser: ACCOUNT_USER, accountPass: ACCOUNT_PASS, projectId: PROJECT_ID});
+new Jira({url: URL, serviceAccount: {user: ACCOUNT_USER, pass: ACCOUNT_PASS}, projectId: PROJECT_ID});
 ```
 
 Where:
