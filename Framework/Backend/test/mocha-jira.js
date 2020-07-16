@@ -16,9 +16,8 @@ const Jira = require('./../services/jira.js');
 const assert = require('assert');
 const nock = require('nock');
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-
 describe('JIRA service test suite', function() {
+  before(nock.activate);
   describe('Check Initialization of ConsulService', function() {
     it('should throw error due to no config being passed', function() {
       assert.throws(() => {
