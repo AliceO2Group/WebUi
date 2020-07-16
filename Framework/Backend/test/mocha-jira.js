@@ -16,6 +16,7 @@ const Jira = require('./../services/jira.js');
 const assert = require('assert');
 const nock = require('nock');
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 describe('JIRA service test suite', function() {
   describe('Check Initialization of ConsulService', function() {
@@ -33,37 +34,38 @@ describe('JIRA service test suite', function() {
 
     it('should throw error due to empty service account', function() {
       assert.throws(() => {
-        new Jira({url: 'localhost', serviceAccount: {}});
+        new Jira({url: 'https://localhost', serviceAccount: {}});
       }, new Error('Service account for JIRA must be defined'));
     });
 
     it('should throw error due to missing password of service account', function() {
       assert.throws(() => {
-        new Jira({url: 'localhost', serviceAccount: {user: 'test'}});
+        new Jira({url: 'https://localhost', serviceAccount: {user: 'test'}});
       }, new Error('Service account for JIRA must be defined'));
     });
 
     it('should successfully create a JIRA service', function() {
-      const jira = new Jira({url: 'localhost', serviceAccount: {user: 'test', pass: 'test'}, projectId: 0});
-      assert.deepStrictEqual(jira.url, 'localhost');
+      const jira = new Jira({url: 'https://localhost:8443', serviceAccount: {user: 'test', pass: 'test'}, projectId: 0});
+      assert.deepStrictEqual(jira.url, 'https://localhost:8443');
       assert.deepStrictEqual(jira.projectId, 0);
     });
   });
 
   describe('Check creating bug issue', function() {
-    const jira = new Jira({url: 'http://localhost/jira/rest/api/2/issue', serviceAccount: {user: 'test', pass: 'test'}, projectId: 0});
+    const jira = new Jira({url: 'https://localhost:8443/jira/rest/api/2/issue', serviceAccount: {user: 'test', pass: 'test'}, projectId: 0});
 
     it('should successfully create a ticket', () => {
-      nock('https://localhost')
+      nock('https://localhost:8443')
         .post('/jira/rest/api/2/issue')
-        .reply(200, '{"key":"OPRO-123", "self":"https://localhost/jira/OPRO-123", "id":1234}');
+        .basicAuth({user: 'test', pass: 'test'})
+        .reply(200, '{"key":"OPRO-123", "self":"https://localhost:8443/jira/OPRO-123", "id":1234}');
       return jira.createBugIssue('alice', 'bob', 'Run fails').then((res) => {
         assert.deepStrictEqual(res.key, 'OPRO-123');
       });
     });
 
     it('should reject with error if is unable to parse response', async () => {
-      nock('https://localhost')
+      nock('https://localhost:8443')
         .post('/jira/rest/api/2/issue')
         .reply(200, 'Not a JSON resposne');
       return assert.rejects(async () => {
@@ -72,7 +74,7 @@ describe('JIRA service test suite', function() {
     });
 
     it('should reject with error if server replies with 401', async () => {
-      nock('https://localhost')
+      nock('https://localhost:8443')
         .post('/jira/rest/api/2/issue')
         .reply(401, 'Unauthorised');
       return assert.rejects(async () => {
