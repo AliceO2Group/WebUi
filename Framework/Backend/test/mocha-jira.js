@@ -13,7 +13,6 @@
 */
 
 const Jira = require('./../services/jira.js');
-const config = require('./test-config.js');
 const assert = require('assert');
 const nock = require('nock');
 
@@ -58,7 +57,9 @@ describe('JIRA service test suite', function() {
       nock('https://localhost')
         .post('/jira/rest/api/2/issue')
         .reply(200, '{"key":"OPRO-123", "self":"https://localhost/jira/OPRO-123", "id":1234}');
-      return jira.createBugIssue('alice', 'bob', 'Run fails').then((res) => {assert.deepStrictEqual(res.key, 'OPRO-123')});
+      return jira.createBugIssue('alice', 'bob', 'Run fails').then((res) => {
+        assert.deepStrictEqual(res.key, 'OPRO-123');
+      });
     });
 
     it('should reject with error if is unable to parse response', async () => {
@@ -80,9 +81,8 @@ describe('JIRA service test suite', function() {
     });
 
     it('should reject with error if missing arguments', (done) => {
-        jira.createBugIssue('alice', 'bob')
-         .then((resp) => console.log(resp))
-         .catch((err) => done());
+      jira.createBugIssue('alice', 'bob')
+        .catch(() => done());
     });
   });
 });
