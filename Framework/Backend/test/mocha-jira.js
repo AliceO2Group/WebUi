@@ -50,14 +50,14 @@ describe('JIRA service test suite', function() {
     });
 
     it('should successfully create a JIRA service', function() {
-      const jira = new Jira({url: 'https://localhost:8443', serviceAccount: {user: 'test', pass: 'test'}, projectId: 0});
+      const jira = new Jira({url: 'https://localhost:8443', serviceAccount: {user: 'test', pass: 'test'}, projectId: 1});
       assert.strictEqual(jira.url, 'https://localhost:8443');
-      assert.deepStrictEqual(jira.projectId, 0);
+      assert.deepStrictEqual(jira.projectId, 1);
     });
   });
 
   describe('Check creating bug issue', function() {
-    const jira = new Jira({url: 'https://localhost:8443/jira/rest/api/2/issue', serviceAccount: {user: 'test', pass: 'test'}, projectId: 0});
+    const jira = new Jira({url: 'https://localhost:8443/jira/rest/api/2/issue', serviceAccount: {user: 'test', pass: 'test'}, projectId: 1});
 
     it('should successfully create a ticket', () => {
       nock('https://localhost:8443')
