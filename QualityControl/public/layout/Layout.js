@@ -81,11 +81,13 @@ export default class Layout extends Observable {
     this.requestedLayout = RemoteData.loading();
     this.notify();
     this.requestedLayout = await this.model.layoutService.getLayoutById(layoutId);
+    this.notify();
+
     if (!this.requestedLayout.isSuccess()) {
       this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
     } else {
       if (this.model.router.params.objectId) {
-        this.model.object.select({
+        await this.model.object.select({
           name: this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload,
             this.model.router.params.objectId)
         });
@@ -185,7 +187,7 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Ceva
+   * Method to allow more than 3x3 grid
    * @param {string} value
    */
   resizeGridByXY(value) {
@@ -221,6 +223,7 @@ export default class Layout extends Observable {
     }
 
     this.tab = this.item.tabs[index];
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const columns = this.item.tabs[index].columns;
     if (columns > 0) {
       this.resizeGridByXY(columns);

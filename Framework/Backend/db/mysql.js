@@ -113,5 +113,4 @@ class MySQL {
     return message;
   }
 }
-
 module.exports = MySQL;

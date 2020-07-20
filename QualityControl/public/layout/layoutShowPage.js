@@ -182,7 +182,7 @@ const drawComponent = (model, tabObject) =>
       h('.text-right.resize-element.resize-button.flex-row', {
         style: 'display: none; padding: .25rem .25rem 0rem .25rem;'
       }, [
-        !model.object.isOnlineModeEnabled &&
+        !model.isOnlineModeEnabled &&
         h('.text-right', {style: 'padding-bottom: 0;'},
           h('.dropdown.mh1', {class: model.object.selectedOpen ? 'dropdown-open' : ''}, [
             h('button.btn',

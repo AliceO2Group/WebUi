@@ -139,10 +139,13 @@ function mount(element, view, model, debug) {
       // eslint-disable-next-line no-console
       console.time('render');
     }
-    render(element, view(model));
-    if (debug) {
-      // eslint-disable-next-line no-console
-      console.timeEnd('render');
+    try {
+      render(element, view(model));
+    } finally {
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.timeEnd('render');
+      }
     }
   });
 

@@ -2,9 +2,7 @@ name: QualityControl
 on:
   pull_request:
     paths:
-      - 'QualityControl/*'
-      - 'QualityControl/*/*'
-      - 'QualityControl/*/*/*'
+      - 'QualityControl/**/*'
       - '.github/workflows/qc.yml'
   push:
     branches:

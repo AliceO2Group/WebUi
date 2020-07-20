@@ -40,6 +40,11 @@ export default class Model extends Observable {
     this.frameworkInfo = new FrameworkInfo(this);
     this.frameworkInfo.bubbleTo(this);
 
+    this.isOnlineModeConnectionAlive = false;
+    this.isOnlineModeEnabled = false; // show only online objects or all (offline)
+
+    this.refreshTimer = 0;
+    this.refreshInterval = 0; // seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
     this.page = null;
@@ -59,8 +64,8 @@ export default class Model extends Observable {
 
     // Init data
     this.object.loadList();
-    this.object.checkOnlineStatus();
     this.layout.loadMyList();
+    this.checkOnlineModeAvailability();
   }
 
   /**
@@ -104,6 +109,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
+    this.object.objects = {}; // remove any in-memory loaded objects
     switch (this.router.params.page) {
       case 'layoutList':
         this.page = 'layoutList';
@@ -131,6 +137,9 @@ export default class Model extends Observable {
       case 'objectTree':
         this.page = 'objectTree';
         // data is already loaded at beginning
+        if (this.object.selected) {
+          this.object.loadObjectByName(this.object.selected.name);
+        }
         this.notify();
         break;
       case 'objectView': {
@@ -171,11 +180,64 @@ export default class Model extends Observable {
   }
 
   /**
+   * Toggle mode (Online/Offline)
+   */
+  toggleMode() {
+    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
+    if (this.isOnlineModeEnabled) {
+      this.setRefreshInterval(60);
+    } else {
+      this.object.loadList();
+      clearTimeout(this.refreshTimer);
+    }
+    this.object.selected = null;
+    this.object.searchInput = '';
+    this.notify();
+  }
+
+  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @return {boolean}
    */
   isContextSecure() {
     return window.isSecureContext;
+  }
+
+  /**
+   * Method to check if Online Mode is available
+   */
+  async checkOnlineModeAvailability() {
+    const result = await this.object.qcObjectService.isOnlineModeConnectionAlive();
+    if (result.isSuccess()) {
+      this.isOnlineModeConnectionAlive = true;
+    } else {
+      this.isOnlineModeConnectionAlive = false;
+    }
+  }
+
+  /**
+   * Set the interval to update objects currently loaded and shown to user.
+   * This will reload only data associated to them
+   * @param {number} intervalSeconds - in seconds
+   */
+  setRefreshInterval(intervalSeconds) {
+    // Stop any other timer
+    clearTimeout(this.refreshTimer);
+
+    // Validate user input
+    let parsedValue = parseInt(intervalSeconds, 10);
+    if (isNaN(parsedValue) || parsedValue < 1) {
+      parsedValue = 2;
+    }
+
+    // Start new timer
+    this.refreshInterval = parsedValue;
+    this.refreshTimer = setTimeout(() => {
+      this.setRefreshInterval(this.refreshInterval);
+    }, this.refreshInterval * 1000);
+    this.notify();
+
+    this.object.refreshObjects();
   }
 }

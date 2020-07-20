@@ -45,7 +45,6 @@ export function draw(model, tabObject, options, location = '') {
       w: 0,
     };
   }
-  model.object.addObjectByName(tabObject.name);
 
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
@@ -94,9 +93,6 @@ export function draw(model, tabObject, options, location = '') {
      * @param {vnode} vnode
      */
     onremove(vnode) {
-      // tell model we don't need those data anymore and free memory if needed
-      model.object.removeObjectByName(tabObject.name);
-
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {
         // cleanup might not be loaded yet
@@ -116,7 +112,7 @@ export function draw(model, tabObject, options, location = '') {
       h('.animate-slow-appearance', 'Loading')
     ]);
   } else if (objectRemoteData.isFailure()) {
-    content = h('.scroll-y.absolute-fill.p1.f6', {
+    content = h('.scroll-y.absolute-fill.p1.f6.text-center', {
       style: 'word-break: break-all;'
     }, objectRemoteData.payload);
   } else {

@@ -94,7 +94,7 @@ function readObjectsData(req, res) {
    */
   const safeRetriever = (name) => model.readObjectData(name)
     .then((data) => !data ? {error: 'Object not found'} : data)
-    .catch((err) => ({error: err}));
+    .catch((err) => ({error: err.toString()}));
 
   const promiseArray = objectsNames.map(safeRetriever);
   Promise.all(promiseArray)
