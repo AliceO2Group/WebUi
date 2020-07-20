@@ -181,16 +181,14 @@ export default class Model extends Observable {
       this.userProfile = RemoteData.failure(result.message);
       this.notification.show('Unable to load profile. Default profile will be used instead', 'danger', 2000);
     } else {
-      console.log("getProfile");
       this.userProfile = RemoteData.success(result);
       if (this.userProfile.payload.content.colsHeader) {
         this.table.colsHeader = this.userProfile.payload.content.colsHeader;
       }
       if (this.userProfile.payload.content.criterias) {
-        console.log(this.userProfile.payload.content.criterias);
         this.log.filter.fromObject(this.userProfile.payload.content.criterias);
       }
-      // only of colsHeader and criterias are loaded succesfully??
+      // only if colsHeader and criterias are loaded succesfully??
       this.notification.show(`The profile ${profile} was loaded successfully`, 'success', 2000);
     }
     this.notify();
@@ -295,6 +293,8 @@ export default class Model extends Observable {
     } else if (params.q) {
       this.getUserProfile();
       this.log.filter.fromObject(JSON.parse(params.q));
+    } else {
+      this.getUserProfile();
     }
   }
 

@@ -133,19 +133,40 @@ describe('InfoLogger', function() {
 
   describe('LogFilter', async () => {
 
-    it('should update filters based on profile when passed in the URI', async () => {
+    it('should update filters and column headers based on profile when passed in the URI', async () => {
       // for now check if the filters are reset once the profile is passed 
       const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
-      const searchParams = await page.evaluate(() => {
+      const expectedColumns = {
+        date: {size: 'cell-m', visible: false},
+        time: {size: 'cell-m', visible: true},
+        hostname: {size: 'cell-m', visible: false},
+        rolename: {size: 'cell-m', visible: true},
+        pid: {size: 'cell-s', visible: false},
+        username: {size: 'cell-m', visible: false},
+        system: {size: 'cell-s', visible: true},
+        facility: {size: 'cell-m', visible: true},
+        detector: {size: 'cell-s', visible: false},
+        partition: {size: 'cell-m', visible: false},
+        run: {size: 'cell-s', visible: false},
+        errcode: {size: 'cell-s', visible: true},
+        errline: {size: 'cell-s', visible: false},
+        errsource: {size: 'cell-m', visible: false},
+        message: {size: 'cell-xl', visible: true}
+      };
+
+      const [searchParams, columns] = await page.evaluate(() => {
         const params = {profile:'physicist'};
         window.model.parseLocation(params);
-        return window.location.search;
+        return [window.location.search, window.model.table.colsHeader];
       });
 
+      assert.deepStrictEqual(columns, expectedColumns);
       assert.strictEqual(searchParams, expectedParams);
     });
 
     it('should reset filters and show warning message when profile and filters are passed', async () => {
+      // wait until the previous warning is hidden
+      await page.waitForFunction(`window.model.notification.state === 'hidden'`);
       const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
       const searchParams = await page.evaluate(() => {
         const params ={profile: "physicist", q: '"severity":{"in":"I W E F"}}'};

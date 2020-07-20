@@ -140,15 +140,6 @@ class JsonFileConnector {
   }
 
   /**
-   * Retrieve a profile or undefined if it does not exist
-   * @param {string} profile
-   * @return {JSON}
-   */
-  async getPredefinedProfile(profile) {
-    return undefined;
-  }
-
-  /**
    * Update a single profile by its username with the provided content
    * Updates lastModified timestamp
    * @param {string} username

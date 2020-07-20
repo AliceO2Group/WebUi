@@ -71,7 +71,7 @@ export default class LogFilter extends Observable {
           this.criterias[field]['$in'] = value ? value.split(' ') : null;
           break;
         default:
-          throw new Error(`unknown operator ${operator}`);
+          throw new Error(`unknown operator`);
       }
 
       this.notify();
@@ -127,7 +127,6 @@ export default class LogFilter extends Observable {
     // eslint-disable-next-line guard-for-in
     for (const field in criterias) {
       // eslint-disable-next-line guard-for-in
-      console.log(field);
       for (const operator in criterias[field]) {
         this.setCriteria(field, operator, criterias[field][operator]);
       }
