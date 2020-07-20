@@ -222,6 +222,8 @@ export default class Workflow extends Observable {
     const isKeyCorrect = key && key.trim() !== '';
     const isValueCorrect = value && value.trim() !== '';
     if (isKeyCorrect && isValueCorrect) {
+      key = key.trim();
+      value = value.trim();
       if (!this.form.variables[key]) {
         this.form.variables[key] = value;
         this.notify();
@@ -242,7 +244,7 @@ export default class Workflow extends Observable {
    */
   updateVariableValueByKey(key, value) {
     if (value && value.trim() !== '') {
-      this.form.variables[key] = value;
+      this.form.variables[key] = value.trim();
       this.notify();
     } else {
       this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);

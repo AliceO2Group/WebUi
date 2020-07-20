@@ -209,7 +209,7 @@ const addKVInputPair = (workflow) => {
         type: 'text',
         placeholder: 'key',
         value: keyString,
-        oninput: (e) => keyString = e.target.value
+        oninput: (e) => keyString = e.target.value.trim()
       })),
       h('.ph1', {
         style: 'width:60%;',
@@ -217,7 +217,7 @@ const addKVInputPair = (workflow) => {
         type: 'text',
         placeholder: 'value',
         value: valueString,
-        oninput: (e) => valueString = e.target.value
+        oninput: (e) => valueString = e.target.value.trim()
       })),
       h('.ph2.actionable-icon', {
         title: 'Add (key,value) variable',
