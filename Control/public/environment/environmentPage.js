@@ -221,10 +221,11 @@ const destroyEnvButton = (environment, item, forceDestroy = false) =>
   h(`button.btn.btn-danger.mh1`, {
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
+    style: {display: !forceDestroy ? 'none' : ''},
     onclick: () => confirm(`Are you sure you want to to shutdown this ${item.state} environment?`)
       && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: forceDestroy}),
     title: forceDestroy ? 'Force the shutdown of the environment' : 'Shutdown environment'
-  }, forceDestroy ? 'Force Shutdown': 'Shutdown');
+  }, forceDestroy ? 'Force Shutdown' : 'Shutdown');
 
 /**
  * Method to create and display a table with tasks details
