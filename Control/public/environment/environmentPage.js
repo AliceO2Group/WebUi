@@ -238,28 +238,28 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
       h('tr',
         [
           ['Name', 'Locked', 'Status', 'State', 'Host Name', 'Args', 'More']
-            .map((header) => h('th', {style: 'text-align: center'}, header))
+            .map((header) => h('th', header))
         ]
       )
     ),
     h('tbody', [
       tasks.map((task) => [h('tr', [
-        h('td', {style: 'text-align:center'}, task.name),
-        h('td', {style: 'text-align:center'}, task.locked),
-        h('td', {style: 'text-align:center'}, task.status),
+        h('td', task.name),
+        h('td', task.locked),
+        h('td', task.status),
         h('td', {
           class: (task.state === 'RUNNING' ?
             'success' : (task.state === 'CONFIGURED' ? 'warning' : '')),
-          style: 'font-weight: bold; text-align:center'
+          style: 'font-weight: bold;'
         }, task.state),
-        h('td', {style: 'text-align:center'}, task.deploymentInfo.hostname),
+        h('td', task.deploymentInfo.hostname),
         environment.task.list[task.taskId] && environment.task.list[task.taskId].match({
           NotAsked: () => null,
           Loading: () => h('td', {style: 'font-size: 0.25em;text-align:center'}, pageLoading()),
-          Success: (data) => h('td', {style: 'text-align:center'}, data.arguments),
+          Success: (data) => h('td', data.arguments),
           Failure: (_error) => h('td', {style: 'text-align:center', title: 'Could not load arguments'}, iconCircleX()),
         }),
-        h('td', {style: 'text-align:center'},
+        h('td',
           h('button.btn.btn-default', {
             title: 'More Details',
             onclick: () => environment.task.toggleTaskView(task.taskId),
