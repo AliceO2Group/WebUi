@@ -255,9 +255,9 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
         h('td', task.deploymentInfo.hostname),
         environment.task.list[task.taskId] && environment.task.list[task.taskId].match({
           NotAsked: () => null,
-          Loading: () => h('td', {style: 'font-size: 0.25em;text-align:center'}, pageLoading()),
+          Loading: () => h('td', {style: 'font-size: 0.25em;'}, pageLoading()),
           Success: (data) => h('td', data.arguments),
-          Failure: (_error) => h('td', {style: 'text-align:center', title: 'Could not load arguments'}, iconCircleX()),
+          Failure: (_error) => h('td', {title: 'Could not load arguments'}, iconCircleX()),
         }),
         h('td',
           h('button.btn.btn-default', {
