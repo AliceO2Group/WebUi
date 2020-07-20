@@ -181,13 +181,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual('Environment variables', title);
   });
 
-  it('should successfully add pair (K;V) to variables', async () => {
+  it('should successfully add trimmed pair (K;V) to variables', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div > input');
-    page.keyboard.type('TestKey');
+    page.keyboard.type('TestKey   ');
     await page.waitFor(200);
 
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div:nth-child(2) > input');
-    page.keyboard.type('TestValue');
+    page.keyboard.type(' TestValue  ');
     await page.waitFor(200);
 
     const variables = await page.evaluate(() => {

@@ -244,11 +244,22 @@ export default class Workflow extends Observable {
    */
   updateVariableValueByKey(key, value) {
     if (value && value.trim() !== '') {
-      this.form.variables[key] = value.trim();
+      this.form.variables[key] = value;
       this.notify();
     } else {
       this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
     }
+  }
+
+  /**
+   * After focus is taken from the input, the value added by the user will be trimmed
+   * @param {string} key - key of the value that needs to be trimmed
+   */
+  trimVariableValue(key) {
+    if (this.form.variables[key]) {
+      this.form.variables[key] = this.form.variables[key].trim();
+    }
+    this.notify();
   }
 
   /**
