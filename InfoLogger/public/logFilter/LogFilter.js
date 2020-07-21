@@ -71,7 +71,7 @@ export default class LogFilter extends Observable {
           this.criterias[field]['$in'] = value ? value.split(' ') : null;
           break;
         default:
-          throw new Error(`unknown operator`);
+          throw new Error('unknown operator');
       }
 
       this.notify();

@@ -189,7 +189,7 @@ export default class Model extends Observable {
         this.log.filter.fromObject(this.userProfile.payload.content.criterias);
       }
       // only if colsHeader and criterias are loaded succesfully??
-      this.notification.show(`The profile ${profile} was loaded successfully`, 'success', 2000);
+      this.notification.show(`The profile ${profile.toUpperCase()} was loaded successfully`, 'success', 2000);
     }
     this.notify();
     return;
