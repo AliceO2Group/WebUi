@@ -2,6 +2,7 @@ const {Log, WebSocketMessage, InfoLoggerReceiver} = require('@aliceo2/web-ui');
 const log = new Log('InfoLogger');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
+const ProfileService = require('./ProfileService.js');
 const {MySQL} = require('@aliceo2/web-ui');
 const JsonFileConnector = require('./JSONFileConnector.js');
 const projPackage = require('./../package.json');
@@ -10,6 +11,7 @@ let querySource = null;
 let liveSource = null;
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+const profileService = new ProfileService();
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);
@@ -39,7 +41,7 @@ if (config.infoLoggerServer) {
 module.exports.attachTo = (http, ws) => {
   http.get('/getFrameworkInfo', getFrameworkInfo);
   http.get('/getUserProfile', getUserProfile);
-  http.get('/getProfile', getProfile);
+  http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
   http.post('/services', getServicesStatus);
   http.post('/query', query);
   http.post('/saveUserProfile', saveUserProfile);
@@ -157,97 +159,6 @@ module.exports.attachTo = (http, ws) => {
           .catch((err) => handleError(res, err));
       }
     }).catch((err) => handleError(res, err));
-  }
-
-  /**
-   * Method which handles the request for the a profile
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function getProfile(req, res) {
-    const defaultUserConfig = {
-      date: {size: 'cell-m', visible: false},
-      time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: false},
-      rolename: {size: 'cell-m', visible: true},
-      pid: {size: 'cell-s', visible: false},
-      username: {size: 'cell-m', visible: false},
-      system: {size: 'cell-s', visible: true},
-      facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: false},
-      partition: {size: 'cell-m', visible: false},
-      run: {size: 'cell-s', visible: false},
-      errcode: {size: 'cell-s', visible: true},
-      errline: {size: 'cell-s', visible: false},
-      errsource: {size: 'cell-m', visible: false},
-      message: {size: 'cell-xl', visible: true}
-    };
-
-    const defaultCriterias = {
-      timestamp: {
-        since: '',
-        until: '',
-      },
-      hostname: {
-        match: '',
-        exclude: ''
-      },
-      rolename: {
-        match: '',
-        exclude: ''
-      },
-      pid: {
-        match: '',
-        exclude: ''
-      },
-      username: {
-        match: '',
-        exclude: ''
-      },
-      system: {
-        match: '',
-        exclude: ''
-      },
-      facility: {
-        match: '',
-        exclude: ''
-      },
-      detector: {
-        match: '',
-        exclude: ''
-      },
-      partition: {
-        match: '',
-        exclude: ''
-      },
-      run: {
-        match: '',
-        exclude: ''
-      },
-      errcode: {
-        match: '',
-        exclude: ''
-      },
-      errline: {
-        match: '',
-        exclude: ''
-      },
-      errsource: {
-        match: '',
-        exclude: ''
-      },
-      message: {
-        match: '',
-        exclude: ''
-      },
-      severity: {
-        in: 'I W E F'
-      },
-      level: {
-        max: null
-      },
-    };
-    res.status(200).json({user: 'default', content: {colsHeader: defaultUserConfig, criterias: defaultCriterias}});
   }
 
   /**
