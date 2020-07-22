@@ -36,9 +36,12 @@ export default class Workflow extends Observable {
    * Initialize page and request data
    */
   initWorkflowPage() {
-    this.getRepositoriesList();
-    this.getAllTemplatesAsMap();
-    this.getFLPList();
+    if (!this.form.repository && !this.form.template) {
+      this.getRepositoriesList();
+      this.getAllTemplatesAsMap();
+      this.getFLPList();
+    }
+
     this.resetErrorMessage();
   }
 
