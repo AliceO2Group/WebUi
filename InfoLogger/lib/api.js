@@ -5,11 +5,13 @@ const SQLDataSource = require('./SQLDataSource.js');
 const ProfileService = require('./ProfileService.js');
 const {MySQL} = require('@aliceo2/web-ui');
 const projPackage = require('./../package.json');
+const JsonFileConnector = require('./JSONFileConnector.js');
 
 let querySource = null;
 let liveSource = null;
 
-const profileService = new ProfileService();
+const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+const profileService = new ProfileService(jsonDb);
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);

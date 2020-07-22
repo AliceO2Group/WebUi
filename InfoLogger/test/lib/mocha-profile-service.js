@@ -6,7 +6,7 @@ let profileService;
 
 describe('Profile Service', () => {
   before(() => {
-    profileService = new ProfileService();
+    profileService = new ProfileService({});
   });
 
   describe('Return requested profile', () => {

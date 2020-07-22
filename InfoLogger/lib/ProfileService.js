@@ -1,6 +1,4 @@
 const log = new (require('@aliceo2/web-ui').Log)('ProfileService');
-const config = require('./configProvider.js');
-const JsonFileConnector = require('./JSONFileConnector.js');
 
 /**
  * Gateway for all Infologger profile calls
@@ -8,10 +6,11 @@ const JsonFileConnector = require('./JSONFileConnector.js');
 class ProfileService {
   /**
    * Initialize connector
+   * @param {JsonFileConnector} jsonDb
    */
-  constructor() {
+  constructor(jsonDb) {
     // TODO: Connect SQLite connector
-    this.jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+    this.jsonDb = jsonDb;
     this.defaultUserConfig = {
       date: {size: 'cell-m', visible: false},
       time: {size: 'cell-m', visible: true},
