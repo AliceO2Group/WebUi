@@ -4,8 +4,8 @@ const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
 const ProfileService = require('./ProfileService.js');
 const {MySQL} = require('@aliceo2/web-ui');
-const projPackage = require('./../package.json');
 const JsonFileConnector = require('./JSONFileConnector.js');
+const projPackage = require('./../package.json');
 
 let querySource = null;
 let liveSource = null;
