@@ -120,6 +120,7 @@ async function waitForCoreResponse(page, timeout = 90) {
     while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
+        await page.waitFor(1000);
         resolve();
       } else {
         await page.waitFor(1000);

@@ -187,6 +187,7 @@ const addKVInputList = (workflow) =>
       }, h('input.form-control', {
         type: 'text',
         value: workflow.form.variables[key],
+        onblur: () => workflow.trimVariableValue(key),
         oninput: (e) => workflow.updateVariableValueByKey(key, e.target.value)
       })),
       h('.ph2.danger.actionable-icon', {

@@ -36,9 +36,12 @@ export default class Workflow extends Observable {
    * Initialize page and request data
    */
   initWorkflowPage() {
-    this.getRepositoriesList();
-    this.getAllTemplatesAsMap();
-    this.getFLPList();
+    if (!this.form.repository && !this.form.template) {
+      this.getRepositoriesList();
+      this.getAllTemplatesAsMap();
+      this.getFLPList();
+    }
+
     this.resetErrorMessage();
   }
 
@@ -222,6 +225,8 @@ export default class Workflow extends Observable {
     const isKeyCorrect = key && key.trim() !== '';
     const isValueCorrect = value && value.trim() !== '';
     if (isKeyCorrect && isValueCorrect) {
+      key = key.trim();
+      value = value.trim();
       if (!this.form.variables[key]) {
         this.form.variables[key] = value;
         this.notify();
@@ -247,6 +252,17 @@ export default class Workflow extends Observable {
     } else {
       this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
     }
+  }
+
+  /**
+   * After focus is taken from the input, the value added by the user will be trimmed
+   * @param {string} key - key of the value that needs to be trimmed
+   */
+  trimVariableValue(key) {
+    if (this.form.variables[key]) {
+      this.form.variables[key] = this.form.variables[key].trim();
+    }
+    this.notify();
   }
 
   /**
