@@ -2,6 +2,48 @@ const assert = require('assert');
 const sinon = require('sinon');
 const ProfileService = require('../../lib/ProfileService.js');
 
+let profileService;
+
+describe('Profile Service', () => {
+  before(() => {
+    profileService = new ProfileService();
+  });
+
+  describe('Return requested profile', () => {
+    let status,json,res;
+    beforeEach(() => {
+        status = sinon.stub();
+        json = sinon.spy();
+        res = { json, status };
+        status.returns(res);
+    });
+
+    it('should successfully return requested profile', async () => {
+        const req = {
+            query: {
+                profile: 'physicist',
+            },
+        }; 
+
+        await profileService.getProfile(req,res); 
+        assert.ok(res.status.calledWith(200));
+        assert.ok(res.json.calledWith(FULL_PROFILE));
+    });
+
+    it('should successfully return default profile', async () => {
+        const req = {
+            query: {
+                profile: '',
+            },
+        }; 
+
+        await profileService.getProfile(req,res); 
+        assert.ok(res.status.calledWith(200));
+        assert.ok(res.json.calledWith(DEFAULT_PROFILE));
+    });
+  });
+});
+
 const DEFAULT_PROFILE = {
     user: 'default',
     content: {
@@ -83,44 +125,4 @@ const FULL_PROFILE = {
         }
     }
 };
-
-describe('Profile Service', () => {
-  before(() => {
-    profileService = new ProfileService();
-  });
-
-  describe('Return requested profile', () => {
-    let status,json,res;
-    beforeEach(() => {
-        status = sinon.stub();
-        json = sinon.spy();
-        res = { json, status };
-        status.returns(res);
-    });
-
-    it('should successfully return requested profile', async () => {
-        const req = {
-            query: {
-                profile: "physicist",
-            },
-        }; 
-
-        await profileService.getProfile(req,res); 
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(FULL_PROFILE));
-    });
-
-    it('should successfully return requested profile', async () => {
-        const req = {
-            query: {
-                profile: "",
-            },
-        }; 
-
-        await profileService.getProfile(req,res); 
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(DEFAULT_PROFILE));
-    });
-  });
-});
 
