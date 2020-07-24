@@ -20,7 +20,7 @@ describe('`ONLINE` test-suite', async () => {
   it('should successfully press the button and enable ONLINE mode', async () => {
     await page.evaluate(() => document.querySelector('header > div > div > button').click());
     await page.waitFor(3000);
-    const isOnline = await page.evaluate(() => window.model.object.isOnlineModeEnabled);
+    const isOnline = await page.evaluate(() => window.model.isOnlineModeEnabled);
     assert.ok(isOnline, 'Online Mode was not Enabled');
   });
 
