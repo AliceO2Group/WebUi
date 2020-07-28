@@ -72,6 +72,7 @@ npm install --save @aliceo2/web-ui
 * [WebSocket server](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 * [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
+* [JIRA](./docs/guide/jira.md) - Create JIRA issues
 
 ### Frontend guide
 - [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript and observable model
