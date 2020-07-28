@@ -18,7 +18,7 @@ const nock = require('nock');
 
 describe('JIRA service test suite', function() {
   before(nock.activate);
-  describe('Check Initialization of ConsulService', function() {
+  describe('Check Initialization of JIRA Service', function() {
     it('should throw error due to no config being passed', function() {
       assert.throws(() => {
         new Jira();
