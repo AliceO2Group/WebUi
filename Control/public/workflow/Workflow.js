@@ -18,7 +18,8 @@ export default class Workflow extends Observable {
 
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp('^master'),
+      regex: new RegExp('master'),
+      rawValue: 'master'
     };
 
     this.form = {
@@ -87,7 +88,8 @@ export default class Workflow extends Observable {
     }
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp(`^${defaultRevision}`)
+      regex: new RegExp(`^${defaultRevision}`),
+      rawValue: defaultRevision
     };
     this.form.revision = defaultRevision;
     this.notify();
@@ -104,12 +106,13 @@ export default class Workflow extends Observable {
   /**
    * Updates the selected repository with the new user selection
    * @param {string} inputField - input that should be updated
-   * @param {string} selectedRepo - Repository that user clicked on from the dropdown list
+   * @param {string} selectedRevision - Repository that user clicked on from the dropdown list
    */
-  updateInputSelection(inputField, selectedRepo) {
+  updateInputSelection(inputField, selectedRevision) {
     this.revision.isSelectionOpen = !this.revision.isSelectionOpen;
     this.form.template = '';
-    this.updateInputSearch(inputField, selectedRepo);
+    this.form.revision = selectedRevision;
+    this.updateInputSearch(inputField, selectedRevision);
   }
 
   /**
@@ -129,7 +132,7 @@ export default class Workflow extends Observable {
    */
   updateInputSearch(inputField, input) {
     this.revision.regex = new RegExp(input);
-    this.form.revision = input;
+    this.revision.rawValue = input;
     this.notify();
   }
 

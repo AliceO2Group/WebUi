@@ -46,10 +46,11 @@ const revisionInputDropdown = (workflow, templatesMap, repository) => h('.m2.tex
 const revisionInputField = (workflow) => h('input.form-control', {
   type: 'text',
   style: 'z-index:100',
-  value: workflow.getRevision(),
+  value: workflow.revision.rawValue,
   oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
   onclick: (e) => {
     workflow.setRevisionInputDropdownVisibility(true);
+    workflow.updateInputSearch('revision', '');
     e.stopPropagation();
   }
 });
@@ -62,7 +63,8 @@ const revisionInputField = (workflow) => h('input.form-control', {
  * @param {string} repository
  * @return {vnode}
  */
-const revisionDropdownArea = (workflow, templatesMap, repository) => h('.dropdown-menu.w-100',
+const revisionDropdownArea = (workflow, templatesMap, repository) => h('.dropdown-menu.w-100.scroll-y',
+  {style: 'max-height: 25em;'},
   Object.keys(templatesMap[repository])
     .filter((name) => name.match(workflow.revision.regex))
     .map((revision) =>
