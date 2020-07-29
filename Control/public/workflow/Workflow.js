@@ -128,7 +128,7 @@ export default class Workflow extends Observable {
    * @param {string} input - input from user used for autocomplete
    */
   updateInputSearch(inputField, input) {
-    this.revision.regex = new RegExp('^' + input);
+    this.revision.regex = new RegExp(input);
     this.form.revision = input;
     this.notify();
   }
