@@ -77,24 +77,7 @@ class ProfileService {
       if (profile) {
         res.status(200).json(profile);
       } else {
-        const defaultUserConfig = {
-          date: {size: 'cell-m', visible: false},
-          time: {size: 'cell-m', visible: true},
-          hostname: {size: 'cell-m', visible: false},
-          rolename: {size: 'cell-m', visible: true},
-          pid: {size: 'cell-s', visible: false},
-          username: {size: 'cell-m', visible: false},
-          system: {size: 'cell-s', visible: true},
-          facility: {size: 'cell-m', visible: true},
-          detector: {size: 'cell-s', visible: false},
-          partition: {size: 'cell-m', visible: false},
-          run: {size: 'cell-s', visible: false},
-          errcode: {size: 'cell-s', visible: true},
-          errline: {size: 'cell-s', visible: false},
-          errsource: {size: 'cell-m', visible: false},
-          message: {size: 'cell-xl', visible: true}
-        };
-        res.status(200).json({user: 'default', content: {colsHeader: defaultUserConfig}});
+        res.status(200).json({user: 'default', content: {colsHeader: this.defaultUserConfig}});
       }
     })
       .catch((err) => this.handleError(res, err));
