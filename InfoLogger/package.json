@@ -28,7 +28,8 @@
     "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.11.3"
+    "@aliceo2/web-ui": "1.11.3",
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {
     "eslint": "^5.15.0",
