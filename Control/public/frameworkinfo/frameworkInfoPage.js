@@ -72,12 +72,26 @@ const showContent = (item) =>
       }, [
         h('tbody', [
           h('tr',
-            h('th.w-25', {style: 'text-decoration: underline'}, columnName.toUpperCase())),
-          Object.keys(item[columnName]).map((name) =>
-            h('tr', [
-              h('th.w-25', name),
-              h('td', JSON.stringify(item[columnName][name])),
+            h('th.flex-row', [
+              item[columnName].status && item[columnName].status.ok &&
+              h('.badge.bg-success.white', '✓'),
+              item[columnName].status && !item[columnName].status.ok &&
+              h('.badge.bg-danger.white', '✕'),
+              h('.mh2', {style: 'text-decoration: underline'}, columnName.toUpperCase()),
             ])
+          ),
+          Object.keys(item[columnName]).map((name) =>
+            name === 'status' ?
+              !item[columnName]['status'].ok &&
+              h('tr.danger', [
+                h('th.w-25', 'error'),
+                h('td', item[columnName]['status'].message),
+              ])
+              :
+              h('tr', [
+                h('th.w-25', name),
+                h('td', JSON.stringify(item[columnName][name])),
+              ])
           )])
       ])
     ])
