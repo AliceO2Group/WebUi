@@ -78,7 +78,7 @@ class SQLiteConnector {
     return new Promise((resolve, reject) => {
       this.db.get(query, values, (err, row) => {
         if (err) {
-          log.err(err.message);
+          log.error(err.message);
           reject(err);
         }
         if (row) {
@@ -100,7 +100,7 @@ class SQLiteConnector {
     return new Promise((resolve, reject) => {
       this.db.run(query, values, function(err) {
         if (err) {
-          log.err(err.message);
+          log.error(err.message);
           reject(err);
         }
         log.info(`Query ${query} was successful`);
@@ -115,7 +115,7 @@ class SQLiteConnector {
   async closeDatabase() {
     this.db.close((err) => {
       if (err) {
-        return log.err(err.message);
+        return log.error(err.message);
       }
     });
   }
