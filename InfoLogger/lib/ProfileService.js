@@ -49,8 +49,8 @@ class ProfileService {
     };
     this.connector = new SQLiteConnector(__dirname + '/../INFOLOGGER;');
     this.connector.query('SELECT * FROM profiles WHERE profile_name=?', ['users'], true).then((profile)=>{
-        log.info(profile.profile_id);
-    })
+      log.info(profile.profile_id);
+    });
     // this.connector = new SQLiteConnector('/Users/michaelabrezinova/WebUi/InfoLogger/INFOLOGGER;');
   }
 
