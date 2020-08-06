@@ -5,7 +5,7 @@ const SQLiteConnector = require('../../lib/SQLiteConnector.js');
 
 describe('SQLite database', () => {
   before(() => {
-    sqliteConnector = new SQLiteConnector(__dirname + '/../INFOLOGGER;');
+    sqliteConnector = new SQLiteConnector(__dirname + 'INFOLOGGER;');
   });
   
   describe('Test Connection', () => {
@@ -17,12 +17,13 @@ describe('SQLite database', () => {
   });
 
   describe('Make Query', () => {
-    it('should successfully get profile by username', () => {
+    it('should successfully get profile by username', (done) => {
         return assert.doesNotReject(async () => {
             sqliteConnector.query('SELECT * FROM profiles WHERE profile_name=?', ['users'], true).then((profile) => {
                 log.info(profile.profile_id);
                 assert.strictEqual(profile.profile_id, 1);
-            })
+                done();
+            }).catch(done);
         });
     });
     it('should successfully add a new profile', () => {

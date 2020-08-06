@@ -60,10 +60,10 @@ class SQLiteConnector {
   async query(query, values, read=false) {
     return new Promise((resolve, reject) => {
       if (read) {
-        this.read_query(query, values).then((profile) => resolve(profile))
+        this.readQuery(query, values).then((profile) => resolve(profile))
           .catch((err) => reject(err));
       } else {
-        this.general_query(query, values).then(() => resolve())
+        this.generalQuery(query, values).then(() => resolve())
           .catch((err) => reject(err));
       }
     });
