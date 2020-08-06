@@ -1,4 +1,5 @@
 const log = new (require('@aliceo2/web-ui').Log)('ProfileService');
+const SQLiteConnector = require('./SQLiteConnector.js');
 
 /**
  * Gateway for all Infologger profile calls
@@ -46,6 +47,11 @@ class ProfileService {
       severity: {in: 'I W E F'},
       level: {max: null},
     };
+    this.connector = new SQLiteConnector(__dirname + '/../INFOLOGGER;');
+    this.connector.query('SELECT * FROM profiles WHERE profile_name=?', ['users'], true).then((profile)=>{
+        log.info(profile.profile_id);
+    })
+    // this.connector = new SQLiteConnector('/Users/michaelabrezinova/WebUi/InfoLogger/INFOLOGGER;');
   }
 
   /**
