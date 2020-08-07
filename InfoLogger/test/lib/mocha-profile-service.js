@@ -1,12 +1,16 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const ProfileService = require('../../lib/ProfileService.js');
-
+const SQLiteConnector = require('../../lib/SQLiteConnector.js');
+const path = require('path');
 let profileService;
+
 
 describe('Profile Service', () => {
   before(() => {
-    profileService = new ProfileService({});
+    sqliteConnector = new SQLiteConnector(path.join(__dirname, '/../../INFOLOGGER;'));
+    sqliteConnector.init();  
+    profileService = new ProfileService({}, sqliteConnector);
   });
 
   describe('Return requested profile', () => {
@@ -85,8 +89,9 @@ const DEFAULT_PROFILE = {
     }
 };
 
+// TODO: Change once the profiles' table is populated
 const FULL_PROFILE = {
-    user: 'physicist',
+    user: 'default',
     content: {
         colsHeader: {
             date: {size: 'cell-m', visible: false},

@@ -178,8 +178,8 @@ describe('InfoLogger', function() {
       });
 
       await page.waitForFunction(`window.model.notification.state === 'shown'`);
-      await page.waitForFunction(`window.model.notification.type === 'success'`);
-      await page.waitForFunction(`window.model.notification.message === "The profile PHYSICIST was loaded successfully"`);
+      await page.waitForFunction(`window.model.notification.type === 'warning'`);
+      await page.waitForFunction(`window.model.notification.message === "Cannot find profile PHYSICIST, default profile used instead"`);
 
       assert.strictEqual(searchParams, expectedParams);
     });

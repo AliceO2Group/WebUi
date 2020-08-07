@@ -39,12 +39,12 @@ class SQLiteConnector {
      */
   async testConnection() {
     return new Promise((resolve, reject) => {
-      this.db.get(this.connectionQuery, [], function(err, row) {
+      this.db.get(this.connectionQuery, [], function(err,) {
         if (err) {
           log.error(err.message);
           reject(err);
         }
-        log.info(`Connection test was successful`); 
+        log.info(`Connection test was successful`);
         resolve();
       });
     });

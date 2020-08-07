@@ -4,6 +4,7 @@ const path = require('path');
 const SQLiteConnector = require('../../lib/SQLiteConnector.js');
 const log = new (require('@aliceo2/web-ui').Log)('SQLite Test');
 
+let sqliteConnector;
 
 describe('SQLite database', () => {
   before(() => {

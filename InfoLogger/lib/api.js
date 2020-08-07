@@ -15,12 +15,13 @@ let profileService = null;
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 const sqliteDb = new SQLiteConnector(__dirname + '/../INFOLOGGER;');
-sqliteDb.init();
-sqliteDb.testConnection().then(()=> {
+try {
+  sqliteDb.init();
+  sqliteDb.testConnection();
   profileService = new ProfileService(jsonDb, sqliteDb);
-}).catch((err) => {
-  log.error(err.message);
-});
+} catch (error) {
+  log.error(error.message);
+}
 
 
 if (config.mysql) {
