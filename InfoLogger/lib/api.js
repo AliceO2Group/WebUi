@@ -6,12 +6,22 @@ const ProfileService = require('./ProfileService.js');
 const {MySQL} = require('@aliceo2/web-ui');
 const JsonFileConnector = require('./JSONFileConnector.js');
 const projPackage = require('./../package.json');
+const SQLiteConnector = require('./SQLiteConnector.js');
 
 let querySource = null;
 let liveSource = null;
 
+let profileService = null;
+
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
-const profileService = new ProfileService(jsonDb);
+const sqliteDb = new SQLiteConnector(__dirname + '/../INFOLOGGER;');
+sqliteDb.init();
+sqliteDb.testConnection().then(()=> {
+  profileService = new ProfileService(jsonDb, sqliteDb);
+}).catch((err) => {
+  log.error(err.message);
+});
+
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);

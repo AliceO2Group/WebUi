@@ -8,9 +8,21 @@ const log = new (require('@aliceo2/web-ui').Log)('SQLite Test');
 describe('SQLite database', () => {
   before(() => {
     sqliteConnector = new SQLiteConnector(path.join(__dirname, '/../../INFOLOGGER;'));
-    log.info(path.join(__dirname, '/../../INFOLOGGER;'));
+    sqliteConnector.init();
   });
   
+  describe('Creating a new SQLite instance', () => {
+    it('should throw an error if the pathname is not provided', () => {
+      assert.throws(() => new SQLiteConnector(), new Error('No pathname provided'));
+      assert.throws(() => new SQLiteConnector(null), new Error('No pathname provided'));
+      assert.throws(() => new SQLiteConnector(undefined), new Error('No pathname provided'));
+    });
+
+    it('should successfully initialize SQLiteConnector', () => {
+      assert.doesNotThrow(() => new SQLiteConnector(path.join(__dirname, '/../../INFOLOGGER;')));
+    });
+  });
+
   describe('Test Connection', () => {
     it('should successfully return a response', () => {
         return assert.doesNotReject(async () => {
@@ -37,7 +49,7 @@ describe('SQLite database', () => {
             assert.strictEqual(newProfile.profile_name, 'anonymous');
         });
     });
-    it('should successfully delete a new profile', () => {
+    it('should successfully delete a profile', () => {
         return assert.doesNotReject(async () => {
             await sqliteConnector.query('DELETE FROM profiles WHERE profile_name=?',['anonymous'],false);
             const newProfile = await sqliteConnector.query('SELECT * FROM profiles WHERE profile_name=?', ['anonymous'], false);
@@ -47,7 +59,7 @@ describe('SQLite database', () => {
     });
   });
     after(() => {
-      sqliteConnector.closeDatabase();
+        sqliteConnector.closeDatabase();
     });
 });
 
