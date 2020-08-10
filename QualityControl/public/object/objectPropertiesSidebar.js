@@ -41,6 +41,7 @@ export default function objectPropertiesSidebar(model) {
       ]),
       h('', [
         btnOption(model, tabObject, 'stat'), ' ',
+        btnOption(model, tabObject, 'text'), ' ',
       ]),
     ]),
 
