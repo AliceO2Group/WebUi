@@ -104,7 +104,6 @@ const tableShow = (model) =>
     h('thead', [
       h('tr', [
         h('th', 'Name'),
-        h('th', {style: {width: '6em'}}, 'Quality'),
       ])
     ]),
     h('tbody', [
