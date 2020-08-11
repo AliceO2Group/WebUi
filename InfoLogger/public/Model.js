@@ -188,7 +188,12 @@ export default class Model extends Observable {
       if (this.userProfile.payload.content.criterias) {
         this.log.filter.fromObject(this.userProfile.payload.content.criterias);
       }
-      this.notification.show(`The profile ${profile.toUpperCase()} was loaded successfully`, 'success', 2000);
+      if (result.user === profile) {
+        this.notification.show(`The profile ${profile.toUpperCase()} was loaded successfully`, 'success', 2000);
+      } else {
+        this.notification.show(`Cannot find profile ${profile.toUpperCase()}, default profile used instead`,
+          'warning', 4000);
+      }
     }
     this.notify();
     return;

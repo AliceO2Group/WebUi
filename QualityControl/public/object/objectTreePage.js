@@ -104,7 +104,6 @@ const tableShow = (model) =>
     h('thead', [
       h('tr', [
         h('th', 'Name'),
-        h('th', {style: {width: '6em'}}, 'Quality'),
       ])
     ]),
     h('tbody', [
@@ -139,25 +138,60 @@ const treeRows = (model) => !model.object.tree ?
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
-  const color = tree.quality === 'good' ? 'success' : 'danger';
   const padding = `${level}em`;
   const levelDeeper = level + 1;
-  const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
-  const iconWrapper = h('span', {style: {paddingLeft: padding}}, icon);
   const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
   const path = tree.path.join('/');
-  const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
-  return model.object.searchInput ? [] : [
-    h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
-      h('td.highlight', [
-        iconWrapper,
-        ' ',
-        tree.name
-      ]),
-      h('td.highlight', {class: color}, tree.quality),
-    ]),
-    children
-  ];
+  if (model.object.searchInput) {
+    return [];
+  } else {
+    if (tree.object && tree.children.length === 0) {
+      return [leafRow(path, () => model.object.select(tree.object), className, padding, tree.name)];
+    } else if (tree.object && tree.children.length > 0) {
+      return [
+        leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
+        branchRow(path, tree, padding),
+        children
+      ];
+    }
+    return [
+      branchRow(path, tree, padding),
+      children
+    ];
+  }
 }
+
+/**
+ * Creates a row containing specific visuals for leaf object and on selection
+ * it will plot the object with JSRoot
+ * @param {String} path - full name of the object
+ * @param {Action} selectItem - action for plotting the object
+ * @param {String} className - name of the row class
+ * @param {number} padding - space needed to be displayed so that leaf is within its parent
+ * @param {String} leafName - name of the object
+ * @return {vnode}
+ */
+const leafRow = (path, selectItem, className, padding, leafName) =>
+  h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
+    h('td.highlight', [
+      h('span', {style: {paddingLeft: padding}}, iconBarChart()), ' ', leafName]),
+  ]);
+
+/**
+ * Creates a row containing specific visuals for branch object and on selection
+ * it will open its children
+ * @param {String} path - full name of the object
+ * @param {ObjectTree} tree - current selected tree
+ * @param {number} padding - space needed to be displayed so that branch is within its parent
+ * @return {vnode}
+ */
+const branchRow = (path, tree, padding) =>
+  h('tr.object-selectable', {key: path, title: path, onclick: () => tree.toggle()}, [
+    h('td.highlight', [
+      h('span', {style: {paddingLeft: padding}}, tree.open ? iconCaretBottom() : iconCaretRight()),
+      ' ',
+      tree.name
+    ]),
+  ]);
