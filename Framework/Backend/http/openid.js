@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Issuer, generators} = require('openid-client');
+const {Issuer, generators, custom} = require('openid-client');
 const assert = require('assert');
 const log = new (require('./../log/Log.js'))('OpenID');
 
@@ -31,6 +31,9 @@ class OpenId {
     assert(config.redirect_uri, 'Missing OpenID config value: redirect_uri');
     this.config = config;
     this.code_verifier = generators.codeVerifier();
+    custom.setHttpOptionsDefaults({
+      timeout: 5000,
+    });
   }
 
   /**
