@@ -40,8 +40,10 @@ describe('`OFFLINE` test-suite', async () => {
 
         await toggleGivenObjectPath(page, path);
 
+        await page.waitFor(500);
         const panelWidth = await page.evaluate(() => document.querySelector('section > div > div > div:nth-child(2)').style.width);
         assert.strictEqual(panelWidth, '50%', `Panel containing object ${objects[i]} plot was not opened successfully`);
+        await page.waitFor(500);
 
         await toggleGivenObjectPath(page, path.reverse());
       });
