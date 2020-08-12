@@ -13,7 +13,8 @@ import virtualTable from './virtualTable.js';
  * @return {vnode}
  */
 export default (model) => h('.flex-column.h-100', [
-  h('.m2.mv3', searchForm(model)),
+  layoutSettingsPanel(model),
+  h('.mh2.mv1', searchForm(model)),
   h('.h-100.scroll-y.flex-column',
     model.object.searchInput.trim() !== '' ?
       virtualTable(model, 'side')
@@ -29,6 +30,27 @@ export default (model) => h('.flex-column.h-100', [
   ),
   objectPreview(model)
 ]);
+
+/**
+ * Creates a panel used for adding settings specific to layout only
+ * @param {Object} model
+ * @return {vnode}
+ */
+const layoutSettingsPanel = (model) =>
+  h('.br1.m1.w-100.flex-row', [
+    h('.w-25.mh2', 'Layout settings:'),
+    h('.form-check.f6', [
+      h('input.form-check-input', {
+        type: 'checkbox',
+        id: 'inputShowTimestamp',
+        checked: model.layout.item.displayTimestamp,
+        onchange: (e) => model.layout.setLayoutProperty('displayTimestamp', e.target.checked)
+      }),
+      h('label.form-check-label', {for: 'inputShowTimestamp'}, [
+        'Display timestamp on each plot'
+      ])
+    ])
+  ]);
 
 /**
  * Shows an input to search though objects, shows also

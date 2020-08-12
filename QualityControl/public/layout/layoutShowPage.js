@@ -177,8 +177,15 @@ function chartView(model, tabObject) {
 const drawComponent = (model, tabObject) =>
   h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
-      h('.jsrootdiv', {style: 'z-index: 90; height:100%; display: flex; flex-direction: column'},
-        draw(model, tabObject, {}, 'layoutShow')),
+      h('.jsrootdiv', {
+        style: {
+          'z-index': 90,
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          'flex-direction': 'column'
+        }
+      }, draw(model, tabObject, {}, 'layoutShow')),
       h('.text-right.resize-element.resize-button.flex-row', {
         style: 'display: none; padding: .25rem .25rem 0rem .25rem;'
       }, [
@@ -210,6 +217,8 @@ const drawComponent = (model, tabObject) =>
           onclick: (e) => model.router.handleLinkEvent(e)
         }, iconResizeBoth())
       ]),
+      !model.isOnlineModeEnabled && model.layout.item.displayTimestamp
+      && h('.gray-darker.text-center.f6', {style: 'height:1.3em'}, model.object.getLastModifiedByName(tabObject.name))
     ]);
 
 /**
