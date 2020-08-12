@@ -480,4 +480,19 @@ export default class QCObject extends Observable {
     }
     return '-';
   }
+
+  /**
+   * Sends back the timestamp/date for the selected object based on
+   * preferred format
+   * @param {boolean} displayDate
+   * @return {string}
+   */
+  getLastModifiedForSelected(displayDate = false) {
+    if (this.selected && this.selected.lastModified) {
+      return displayDate === 'date' ?
+        new Date(this.selected.lastModified).toLocaleString() : this.selected.lastModified.toString();
+    } else {
+      return '-';
+    }
+  }
 }

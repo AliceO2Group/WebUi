@@ -62,7 +62,8 @@ function drawComponent(model) {
         )]),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
         draw(model, model.object.selected.name, {stat: true}, 'treePage')
-      )
+      ),
+      h('.gray-darker.text-center', model.object.getLastModifiedForSelected('date')),
     ]
   );
 }

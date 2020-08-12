@@ -23,16 +23,16 @@ export default (model) => h('.p2.absolute-fill', {style: 'display: flex; flex-di
 function getObjectTitle(model) {
   return model.router.params.objectName ?
     model.router.params.objectName
-    :
-    (
+    : (
       model.router.params.objectId && model.router.params.layoutId &&
       model.layout.requestedLayout.match({
         NotAsked: () => null,
         Loading: () => null,
         Success: (layout) =>
-          model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) && h('.flex-column', [
-            h('', model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId)),
-            h('.text-light.f7', `(from layout: ${layout.name})`)
+          model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) &&
+          h('.flex-row', {style: 'justify-content: center;'}, [
+            model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId),
+            h('.text-light', `(${layout.name})`)
           ]),
         Failure: () => null
       })
@@ -48,7 +48,10 @@ function getActionsHeader(model) {
   return h('', {style: 'display: flex'},
     [
       getBackToQCGButton(model),
-      h('b.text-center.flex-column', {style: 'flex-grow:1'}, getObjectTitle(model)),
+      h('.text-center.flex-column', {style: 'flex-grow:1'}, [
+        h('b', getObjectTitle(model)),
+        h('.gray-darker.text-center.f6', model.object.getLastModifiedForSelected('date')),
+      ]),
       h('.flex-row', [
         infoButton(model.object, model.isOnlineModeEnabled),
         model.isContextSecure() && getCopyURLToClipboardButton(model)
