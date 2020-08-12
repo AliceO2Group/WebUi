@@ -234,7 +234,7 @@ describe('QCG', function() {
     });
 
     it('should have filtered results on input search filled', async () => {
-      await page.type('nav input', 'HistoWithRandom');
+      await page.type('nav > div > div > div:nth-child(2) > input', 'HistoWithRandom');
       await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
     });
 
@@ -395,7 +395,7 @@ describe('QCG', function() {
         const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
         await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
         const result = await page.evaluate(() => {
-          const title = document.querySelector('div div b').textContent;
+          const title = document.querySelector('div div b').innerText;
           const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
           const objectSelected = window.model.object.selected;
           return {
@@ -546,7 +546,7 @@ describe('QCG', function() {
           };
         });
         await page.waitFor(7000);
-        assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
+        assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(AliRoot)');
         assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
         assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
       });

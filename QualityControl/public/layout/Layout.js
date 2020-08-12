@@ -19,7 +19,7 @@ export default class Layout extends Observable {
     this.model = model;
 
     this.list = null; // array of layouts
-    this.item = null; // layout containing an array of tabs
+    this.item = null; // current selected layout containing an array of tabs
     this.tab = null; // pointer to a tab from `item`
 
     this.myList = RemoteData.notAsked(); // array of layouts
@@ -120,6 +120,16 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Set layout property to given value
+   * @param {string} property
+   * @param {object} value
+   */
+  setLayoutProperty(property, value) {
+    this.item[property] = value;
+    this.notify();
+  }
+
+  /**
    * Creates a new empty layout with a name, go to its own page in edit mode afterward
    * @param {string} layoutName
    */
@@ -132,6 +142,7 @@ export default class Layout extends Observable {
         name: layoutName,
         owner_id: this.model.session.personid,
         owner_name: this.model.session.name,
+        displayTimestamp: false,
         tabs: [{
           id: objectId(),
           name: 'main',

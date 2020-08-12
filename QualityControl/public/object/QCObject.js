@@ -471,10 +471,28 @@ export default class QCObject extends Observable {
    * @return {string}
    */
   getLastModifiedByName(objectName) {
+    if (this.currentList.length === 0) {
+      return 'Loading ...';
+    }
     const object = this.currentList.find((object) => object.name === objectName);
     if (object) {
       return new Date(object.lastModified).toLocaleString();
     }
-    return 'Loading...';
+    return '-';
+  }
+
+  /**
+   * Sends back the timestamp/date for the selected object based on
+   * preferred format
+   * @param {boolean} displayDate
+   * @return {string}
+   */
+  getLastModifiedForSelected(displayDate = false) {
+    if (this.selected && this.selected.lastModified) {
+      return displayDate === 'date' ?
+        new Date(this.selected.lastModified).toLocaleString() : this.selected.lastModified.toString();
+    } else {
+      return '-';
+    }
   }
 }
