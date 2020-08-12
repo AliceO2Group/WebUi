@@ -471,10 +471,13 @@ export default class QCObject extends Observable {
    * @return {string}
    */
   getLastModifiedByName(objectName) {
+    if (this.currentList.length === 0) {
+      return 'Loading ...';
+    }
     const object = this.currentList.find((object) => object.name === objectName);
     if (object) {
       return new Date(object.lastModified).toLocaleString();
     }
-    return 'Loading...';
+    return '-';
   }
 }
