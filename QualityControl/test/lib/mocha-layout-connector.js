@@ -33,6 +33,11 @@ describe('Layout connector test suite', () => {
         listLayouts: sinon.stub().rejects(new Error('Unable to connect'))
       });
       const req = {body: {}};
+      const res = {
+        status: sinon.stub().returnsThis(),
+        send: sinon.stub(),
+        json: sinon.stub()
+      };
       const layoutConnector = new LayoutConnector(jsonStub);
       await layoutConnector.listLayouts(req, res);
       console.log('Spy was called with: ' + res.status.getCall(0));
