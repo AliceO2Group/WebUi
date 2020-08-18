@@ -1,3 +1,4 @@
+const LayoutConnector = require('./connector/LayoutConnector');
 
 // force user accounts during demo
 const ownerIdUser1 = 0;
@@ -19,9 +20,7 @@ const ownerNameUser2 = 'Samantha Smith';
  */
 function promiseResolveWithLatency(data) {
   return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(data);
-    }, 250);
+    setTimeout(() => resolve(data, 250));
   });
 }
 
@@ -66,6 +65,7 @@ function listObjects() {
 function isOnlineModeConnectionAlive() {
   return promiseResolveWithLatency({running: true});
 }
+
 /**
  * Create a layout
  * @param {Layout} layout
@@ -85,17 +85,9 @@ function createLayout(layout) {
  * @return {Array<Layout>}
  */
 function listLayouts(filter = {}) {
-  if (filter.owner_id !== undefined) {
-    filter.owner_id = ownerIdUser1;
-  }
-
-  return promiseResolveWithLatency(layouts.filter((layout) => {
-    if (filter.owner_id !== undefined && layout.owner_id !== filter.owner_id) {
-      return false;
-    }
-
-    return true;
-  }));
+  filter.owner_id = filter.owner_id !== undefined ? ownerIdUser1 : filter.owner_id;
+  return promiseResolveWithLatency(
+    layouts.filter((layout) => (filter.owner_id === undefined || layout.owner_id === filter.owner_id)));
 }
 
 /**
@@ -278,8 +270,12 @@ module.exports.listObjects = listObjects;
 module.exports.listOnlineObjects = listObjects;
 module.exports.isOnlineModeConnectionAlive = isOnlineModeConnectionAlive;
 
-module.exports.readLayout = readLayout;
-module.exports.updateLayout = updateLayout;
-module.exports.listLayouts = listLayouts;
-module.exports.createLayout = createLayout;
-module.exports.deleteLayout = deleteLayout;
+const dataConnector = {
+  readLayout,
+  updateLayout,
+  listLayouts,
+  createLayout,
+  deleteLayout
+};
+
+module.exports.layoutConnector = new LayoutConnector(dataConnector);
