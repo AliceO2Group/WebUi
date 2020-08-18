@@ -14,7 +14,7 @@ describe('Layout connector test suite', () => {
         new AssertionError({message: 'Missing JSON File Connector', expected: true, operator: '=='}));
     });
 
-    it('should successfully initialize CCDBConnector', () => {
+    it('should successfully initialize LayoutConnector', () => {
       assert.doesNotThrow(() => new LayoutConnector({}));
     });
   });
@@ -28,7 +28,7 @@ describe('Layout connector test suite', () => {
         json: sinon.stub()
       };
     });
-    it('respond with error if data connector could not find layouts', async () => {
+    it('should respond with error if data connector could not find layouts', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         listLayouts: sinon.stub().rejects(new Error('Unable to connect'))
       });
@@ -44,7 +44,7 @@ describe('Layout connector test suite', () => {
       assert.ok(res.send.calledWith({message: 'Unable to connect'}), 'Error message was incorrect');
     });
 
-    it('successfully return a list of layouts', async () => {
+    it('should successfully return a list of layouts', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         listLayouts: sinon.stub().resolves([{name: 'somelayout'}])
       });
@@ -55,7 +55,7 @@ describe('Layout connector test suite', () => {
       assert.ok(res.json.calledWith([{name: 'somelayout'}]), 'A list of layouts should have been sent back');
     });
 
-    it('successfully return a list of layouts based on owner_id', async () => {
+    it('should successfully return a list of layouts based on owner_id', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         listLayouts: sinon.stub().resolves([{name: 'somelayout'}])
       });
@@ -77,7 +77,7 @@ describe('Layout connector test suite', () => {
         json: sinon.stub()
       };
     });
-    it('respond with 400 error if request did not contain layout id when requesting to read', async () => {
+    it('should respond with 400 error if request did not contain layout id when requesting to read', async () => {
       const req = {body: {}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.readLayout(req, res);
@@ -85,7 +85,7 @@ describe('Layout connector test suite', () => {
       assert.ok(res.send.calledWith({message: 'layoutId parameter is needed'}), 'Error message was incorrect');
     });
 
-    it('successfully return a layout specified by its id', async () => {
+    it('should successfully return a layout specified by its id', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         readLayout: sinon.stub().resolves([{layout: 'somelayout'}])
       });
@@ -97,7 +97,7 @@ describe('Layout connector test suite', () => {
       assert.ok(jsonStub.readLayout.calledWith('mylayout'), 'Layout id was not used in data connector call');
     });
 
-    it('successfully return an empty object if data connector returned nothing', async () => {
+    it('should successfully return an empty object if data connector returned nothing', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         readLayout: sinon.stub().resolves()
       });
@@ -109,7 +109,7 @@ describe('Layout connector test suite', () => {
       assert.ok(jsonStub.readLayout.calledWith('mylayout'), 'Layout id was not used in data connector call');
     });
 
-    it('return error if data connector failed', async () => {
+    it('should return error if data connector failed', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         readLayout: sinon.stub().rejects(new Error('Unable to read layout'))
       });
@@ -132,7 +132,7 @@ describe('Layout connector test suite', () => {
       };
     });
 
-    it('respond with 400 error if request did not contain layout id when requesting to update', async () => {
+    it('should respond with 400 error if request did not contain layout id when requesting to update', async () => {
       const req = {query: {}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.updateLayout(req, res);
@@ -140,7 +140,7 @@ describe('Layout connector test suite', () => {
       assert.ok(res.send.calledWith({message: 'layoutId parameter is needed'}), 'Error message was incorrect');
     });
 
-    it('respond with 400 error if request did not contain body id', async () => {
+    it('should respond with 400 error if request did not contain body id', async () => {
       const req = {query: {layoutId: 'someid'}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.updateLayout(req, res);
@@ -148,7 +148,7 @@ describe('Layout connector test suite', () => {
       assert.ok(res.send.calledWith({message: 'body for the updated layout is needed'}), 'Error message was incorrect');
     });
 
-    it('successfully return the id of the updated layout', async () => {
+    it('should successfully return the id of the updated layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         updateLayout: sinon.stub().resolves([{id: 'somelayout'}])
       });
@@ -160,7 +160,7 @@ describe('Layout connector test suite', () => {
       assert.ok(jsonStub.updateLayout.calledWith('mylayout', {}), 'Layout id was not used in data connector call');
     });
 
-    it('return error if data connector failed to update', async () => {
+    it('should return error if data connector failed to update', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         updateLayout: sinon.stub().rejects(new Error('Could not update layout'))
       });
@@ -183,7 +183,7 @@ describe('Layout connector test suite', () => {
       };
     });
 
-    it('respond with 400 error if request did not contain layout id when requesting to update', async () => {
+    it('should respond with 400 error if request did not contain layout id when requesting to update', async () => {
       const req = {params: {}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.deleteLayout(req, res);
@@ -191,7 +191,7 @@ describe('Layout connector test suite', () => {
       assert.ok(res.send.calledWith({message: 'layoutId is needed'}), 'Error message was incorrect');
     });
 
-    it('successfully return the id of the deleted layout', async () => {
+    it('should successfully return the id of the deleted layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         deleteLayout: sinon.stub().resolves({id: 'somelayout'})
       });
@@ -203,7 +203,7 @@ describe('Layout connector test suite', () => {
       assert.ok(jsonStub.deleteLayout.calledWith('somelayout'), 'Layout id was not used in data connector call');
     });
 
-    it('return error if data connector failed to update', async () => {
+    it('should return error if data connector failed to update', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         deleteLayout: sinon.stub().rejects(new Error('Could not delete layout'))
       });
@@ -226,28 +226,28 @@ describe('Layout connector test suite', () => {
       };
     });
 
-    it('respond with 400 error if request did not contain owner_id when requesting to update', async () => {
+    it('should respond with 400 error if request did not contain owner_id when requesting to update', async () => {
       const req = {body: {}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
       assert.ok(res.send.calledWith({message: 'layout.name parameter is needed'}), 'Error message was incorrect');
     });
-    it('respond with 400 error if request did not contain layout name when requesting to update', async () => {
+    it('should respond with 400 error if request did not contain layout name when requesting to update', async () => {
       const req = {body: {name: 'somelayout'}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
       assert.ok(res.send.calledWith({message: 'layout.owner_id parameter is needed'}), 'Error message was incorrect');
     });
-    it('respond with 400 error if request did not contain owner name when requesting to update', async () => {
+    it('should respond with 400 error if request did not contain owner name when requesting to update', async () => {
       const req = {body: {name: 'somelayout', owner_id: 1}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
       assert.ok(res.send.calledWith({message: 'layout.owner_name parameter is needed'}), 'Error message was incorrect');
     });
-    it('respond with 400 error if request did not contain tabs when requesting to update', async () => {
+    it('should respond with 400 error if request did not contain tabs when requesting to update', async () => {
       const req = {body: {name: 'somelayout', owner_id: 1, owner_name: 'admin'}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
@@ -255,7 +255,7 @@ describe('Layout connector test suite', () => {
       assert.ok(res.send.calledWith({message: 'layout.tabs parameter is needed'}), 'Error message was incorrect');
     });
 
-    it('successfully return created layout', async () => {
+    it('should successfully return created layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         createLayout: sinon.stub().resolves({layout: 'somelayout'})
       });
@@ -267,7 +267,7 @@ describe('Layout connector test suite', () => {
       assert.ok(jsonStub.createLayout.calledWith(req.body), 'New layout body was not used in data connector call');
     });
 
-    it('return error if data connector failed to update', async () => {
+    it('should return error if data connector failed to update', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         createLayout: sinon.stub().rejects(new Error('Could not create layout'))
       });
