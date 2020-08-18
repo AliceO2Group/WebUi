@@ -77,7 +77,7 @@ describe('Layout connector test suite', () => {
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.readLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('layoutId parameter is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'layoutId parameter is needed'}), 'Error message was incorrect');
     });
 
     it('successfully return a layout specified by its id', async () => {
@@ -132,7 +132,7 @@ describe('Layout connector test suite', () => {
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.updateLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('layoutId parameter is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'layoutId parameter is needed'}), 'Error message was incorrect');
     });
 
     it('respond with 400 error if request did not contain body id', async () => {
@@ -140,7 +140,7 @@ describe('Layout connector test suite', () => {
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.updateLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('body is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'body is needed'}), 'Error message was incorrect');
     });
 
     it('successfully return the id of the updated layout', async () => {
@@ -183,7 +183,7 @@ describe('Layout connector test suite', () => {
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.deleteLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('layoutId is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'layoutId is needed'}), 'Error message was incorrect');
     });
 
     it('successfully return the id of the deleted layout', async () => {
@@ -226,28 +226,28 @@ describe('Layout connector test suite', () => {
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('layout.name parameter is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'layout.name parameter is needed'}), 'Error message was incorrect');
     });
     it('respond with 400 error if request did not contain layout name when requesting to update', async () => {
       const req = {body: {name: 'somelayout'}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('layout.owner_id parameter is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'layout.owner_id parameter is needed'}), 'Error message was incorrect');
     });
     it('respond with 400 error if request did not contain owner name when requesting to update', async () => {
       const req = {body: {name: 'somelayout', owner_id: 1}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('layout.owner_name parameter is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'layout.owner_name parameter is needed'}), 'Error message was incorrect');
     });
     it('respond with 400 error if request did not contain tabs when requesting to update', async () => {
       const req = {body: {name: 'somelayout', owner_id: 1, owner_name: 'admin'}};
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith('layout.tabs parameter is needed'), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'layout.tabs parameter is needed'}), 'Error message was incorrect');
     });
 
     it('successfully return created layout', async () => {

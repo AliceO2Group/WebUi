@@ -38,7 +38,7 @@ class LayoutConnector {
     const layoutId = req.body.layoutId;
 
     if (!layoutId) {
-      res.status(400).send('layoutId parameter is needed');
+      this.errorHandler('layoutId parameter is needed', res, 400);
       return;
     }
 
@@ -57,12 +57,12 @@ class LayoutConnector {
     const data = req.body;
 
     if (!layoutId) {
-      res.status(400).send('layoutId parameter is needed');
+      this.errorHandler('layoutId parameter is needed', res, 400);
       return;
     }
 
     if (!data) {
-      res.status(400).send('body is needed');
+      this.errorHandler('body for the updated layout is needed', res, 400);
       return;
     }
 
@@ -80,7 +80,7 @@ class LayoutConnector {
     const layoutId = req.params.layoutId;
 
     if (!layoutId) {
-      res.status(400).send('layoutId is needed');
+      this.errorHandler('layoutId is needed', res, 400);
       return;
     }
 
@@ -98,19 +98,19 @@ class LayoutConnector {
     const layout = req.body;
 
     if (!layout.name) {
-      res.status(400).send('layout.name parameter is needed');
+      this.errorHandler('layout.name parameter is needed', res, 400);
       return;
     }
     if (layout.owner_id === undefined) { // integer from 0 to Infinity
-      res.status(400).send('layout.owner_id parameter is needed');
+      this.errorHandler('layout.owner_id parameter is needed', res, 400);
       return;
     }
     if (!layout.owner_name) {
-      res.status(400).send('layout.owner_name parameter is needed');
+      this.errorHandler('layout.owner_name parameter is needed', res, 400);
       return;
     }
     if (!layout.tabs) {
-      res.status(400).send('layout.tabs parameter is needed');
+      this.errorHandler('layout.tabs parameter is needed', res, 400);
       return;
     }
 
