@@ -140,7 +140,7 @@ describe('Layout connector test suite', () => {
       const layoutConnector = new LayoutConnector({});
       await layoutConnector.updateLayout(req, res);
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith({message: 'body is needed'}), 'Error message was incorrect');
+      assert.ok(res.send.calledWith({message: 'body for the updated layout is needed'}), 'Error message was incorrect');
     });
 
     it('successfully return the id of the updated layout', async () => {
