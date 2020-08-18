@@ -16,11 +16,11 @@ module.exports.setup = (http) => {
   http.get('/listObjects', listObjects, {public: true});
   http.get('/listOnlineObjects', listOnlineObjects);
   http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
-  http.post('/readLayout', readLayout);
-  http.post('/writeLayout', updateLayout);
-  http.post('/listLayouts', listLayouts);
-  http.delete('/layout/:layoutId', deleteLayout);
-  http.post('/layout', createLayout);
+  http.post('/readLayout', model.layoutConnector.readLayout.bind(model.layoutConnector));
+  http.post('/writeLayout', model.layoutConnector.updateLayout.bind(model.layoutConnector));
+  http.post('/listLayouts', model.layoutConnector.listLayouts.bind(model.layoutConnector));
+  http.delete('/layout/:layoutId', model.layoutConnector.deleteLayout.bind(model.layoutConnector));
+  http.post('/layout', model.layoutConnector.createLayout.bind(model.layoutConnector));
   http.get('/getFrameworkInfo', getFrameworkInfo);
   new WebSocket(http);
 };
@@ -124,112 +124,6 @@ function readObjectData(req, res) {
   model.readObjectData(objectName)
     .then((data) => res.status(data ? 200 : 404).json(data))
     .catch((err) => errorHandler('Reading object data: ' + err, res));
-}
-
-/**
- * List all layouts, can be filtered by owner_id
- * @param {Request} req
- * @param {Response} res
- */
-function listLayouts(req, res) {
-  const filter = {};
-  if (req.body.owner_id !== undefined) {
-    filter.owner_id = parseInt(req.body.owner_id, 10);
-  }
-
-  model.listLayouts(filter)
-    .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Read a single layout specified by layoutId
- * @param {Request} req
- * @param {Response} res
- */
-function readLayout(req, res) {
-  const layoutId = req.body.layoutId;
-
-  if (!layoutId) {
-    res.status(400).send('layoutId parameter is needed');
-    return;
-  }
-
-  model.readLayout(layoutId)
-    .then((data) => res.status(data ? 200 : 404).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Update a single layout specified by layoutId and body
- * @param {Request} req
- * @param {Response} res
- */
-function updateLayout(req, res) {
-  const layoutId = req.query.layoutId;
-  const data = req.body;
-
-  if (!layoutId) {
-    res.status(400).send('layoutId parameter is needed');
-    return;
-  }
-
-  if (!data) {
-    res.status(400).send('body is needed');
-    return;
-  }
-
-  model.updateLayout(layoutId, data)
-    .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Delete a single layout specified by layoutId
- * @param {Request} req
- * @param {Response} res
- */
-function deleteLayout(req, res) {
-  const layoutId = req.params.layoutId;
-
-  if (!layoutId) {
-    res.status(400).send('layoutId is needed');
-    return;
-  }
-
-  model.deleteLayout(layoutId)
-    .then((data) => res.status(204).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Create a layout specified by body
- * @param {Request} req
- * @param {Response} res
- */
-function createLayout(req, res) {
-  const layout = req.body;
-
-  if (!layout.name) {
-    res.status(400).send('layout.name parameter is needed');
-    return;
-  }
-  if (layout.owner_id === undefined) { // integer from 0 to Infinity
-    res.status(400).send('layout.owner_id parameter is needed');
-    return;
-  }
-  if (!layout.owner_name) {
-    res.status(400).send('layout.owner_name parameter is needed');
-    return;
-  }
-  if (!layout.tabs) {
-    res.status(400).send('layout.tabs parameter is needed');
-    return;
-  }
-
-  model.createLayout(layout)
-    .then((data) => res.status(201).json(data))
-    .catch((err) => errorHandler(err, res, 409));
 }
 
 /**
