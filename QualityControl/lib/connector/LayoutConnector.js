@@ -24,7 +24,7 @@ class LayoutConnector {
     if (req.body.owner_id !== undefined) {
       filter.owner_id = parseInt(req.body.owner_id, 10);
     }
-    this.jsonFileConnector.listLayouts(filter)
+    return this.jsonFileConnector.listLayouts(filter)
       .then((data) => res.status(200).json(data))
       .catch((err) => this.errorHandler(err, res));
   }

@@ -20,7 +20,7 @@ const ownerNameUser2 = 'Samantha Smith';
  */
 function promiseResolveWithLatency(data) {
   return new Promise((resolve) => {
-    setTimeout(() => resolve(data, 250));
+    setTimeout(() => resolve(data), 250);
   });
 }
 
