@@ -40,7 +40,6 @@ describe('Layout connector test suite', () => {
       };
       const layoutConnector = new LayoutConnector(jsonStub);
       await layoutConnector.listLayouts(req, res);
-      console.log('Spy was called with: ' + res.status.getCall(0));
       assert.ok(res.status.calledWith(500), 'Response status was not 500');
       assert.ok(res.send.calledWith({message: 'Unable to connect'}), 'Error message was incorrect');
     });

@@ -18,6 +18,7 @@ class LayoutConnector {
    * List all layouts, can be filtered by owner_id
    * @param {Request} req
    * @param {Response} res
+   * @return {Promise}
    */
   async listLayouts(req, res) {
     const filter = {};
@@ -33,6 +34,7 @@ class LayoutConnector {
    * Read a single layout specified by layoutId
    * @param {Request} req
    * @param {Response} res
+   * @return {Promise}
    */
   async readLayout(req, res) {
     const layoutId = req.body.layoutId;
@@ -42,7 +44,7 @@ class LayoutConnector {
       return;
     }
 
-    this.jsonFileConnector.readLayout(layoutId)
+    return this.jsonFileConnector.readLayout(layoutId)
       .then((data) => res.status(data ? 200 : 404).json(data))
       .catch((err) => this.errorHandler(err, res));
   }
@@ -51,6 +53,7 @@ class LayoutConnector {
    * Update a single layout specified by layoutId and body
    * @param {Request} req
    * @param {Response} res
+   * @return {Promise}
    */
   async updateLayout(req, res) {
     const layoutId = req.query.layoutId;
@@ -66,7 +69,7 @@ class LayoutConnector {
       return;
     }
 
-    this.jsonFileConnector.updateLayout(layoutId, data)
+    return this.jsonFileConnector.updateLayout(layoutId, data)
       .then((data) => res.status(200).json(data))
       .catch((err) => this.errorHandler(err, res));
   }
@@ -75,6 +78,7 @@ class LayoutConnector {
    * Delete a single layout specified by layoutId
    * @param {Request} req
    * @param {Response} res
+   * @return {Promise}
    */
   async deleteLayout(req, res) {
     const layoutId = req.params.layoutId;
@@ -84,7 +88,7 @@ class LayoutConnector {
       return;
     }
 
-    this.jsonFileConnector.deleteLayout(layoutId)
+    return this.jsonFileConnector.deleteLayout(layoutId)
       .then((data) => res.status(204).json(data))
       .catch((err) => this.errorHandler(err, res));
   }
@@ -93,6 +97,7 @@ class LayoutConnector {
    * Create a layout specified by body
    * @param {Request} req
    * @param {Response} res
+   * @return {Promise}
    */
   async createLayout(req, res) {
     const layout = req.body;
@@ -114,7 +119,7 @@ class LayoutConnector {
       return;
     }
 
-    this.jsonFileConnector.createLayout(layout)
+    return this.jsonFileConnector.createLayout(layout)
       .then((data) => res.status(201).json(data))
       .catch((err) => this.errorHandler(err, res, 409));
   }
@@ -126,7 +131,6 @@ class LayoutConnector {
    * @param {number} status - status code 4xx 5xx, 500 will print to debug
    */
   errorHandler(err, res, status = 500) {
-    log.error('RECEIVED STATUS IS: ' + status);
     if (status === 500) {
       if (err.stack) {
         log.trace(err);
