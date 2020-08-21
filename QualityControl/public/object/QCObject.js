@@ -362,12 +362,18 @@ export default class QCObject extends Observable {
 
   /**
    * Set the current selected object by user
+   * Search within `currentList`;
+   * If user is in online mode, `list` will be used instead
    * @param {QCObject} object
    */
   async select(object) {
     if (this.currentList.length > 0) {
       this.selected = this.currentList.find((obj) => obj.name === object.name);
-    } else {
+    }
+    if (!this.selected && this.list && this.list.length > 0) {
+      this.selected = this.list.find((obj) => obj.name === object.name);
+    }
+    if (!this.selected) {
       this.selected = object;
     }
     await this.loadObjectByName(object.name);
