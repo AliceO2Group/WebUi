@@ -95,7 +95,7 @@ describe('`Control Environment` test-suite', async () => {
     const environment = await page.evaluate(() => window.model.environment.item);
     const state = environment.payload.environment.state;
 
-    assert.ok(controlAction.kind == 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
+    assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'STANDBY');
   });
 
