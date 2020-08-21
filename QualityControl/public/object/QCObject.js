@@ -369,9 +369,11 @@ export default class QCObject extends Observable {
   async select(object) {
     if (this.currentList.length > 0) {
       this.selected = this.currentList.find((obj) => obj.name === object.name);
-    } else if (this.list && this.list.length > 0) {
-      this.selected = this.currentList.find((obj) => obj.name === object.name);
-    } else {
+    }
+    if (!this.selected && this.list && this.list.length > 0) {
+      this.selected = this.list.find((obj) => obj.name === object.name);
+    }
+    if (!this.selected) {
       this.selected = object;
     }
     await this.loadObjectByName(object.name);
