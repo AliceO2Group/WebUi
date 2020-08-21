@@ -405,8 +405,16 @@ export default class QCObject extends Observable {
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
     let drawingOptions = [];
-    if (objectRemoteData.payload.fOption && objectRemoteData.payload.fOption !== '') {
+    if (objectRemoteData.payload.fOption) {
       objectOptionList = objectRemoteData.payload.fOption.split(' ');
+    }
+    if (objectRemoteData.payload.metadata && objectRemoteData.payload.metadata.drawOptions) {
+      const metaOpt = objectRemoteData.payload.metadata.drawOptions.split(' ');
+      objectOptionList = objectOptionList.concat(metaOpt);
+    }
+    if (objectRemoteData.payload.metadata && objectRemoteData.payload.metadata.displayHints) {
+      const metaHints = objectRemoteData.payload.metadata.displayHints.split(' ');
+      objectOptionList = objectOptionList.concat(metaHints);
     }
     switch (this.model.page) {
       case 'objectTree':
@@ -431,8 +439,10 @@ export default class QCObject extends Observable {
         const objectId = this.model.router.params.objectId;
 
         if (!layoutId || !objectId) {
+          // object opened from tree view -> use only its own options
           drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
         } else {
+          // object opened from layout view -> use the layout/tab configuration
           if (this.model.layout.requestedLayout.isSuccess()) {
             let objectData = {};
             this.model.layout.requestedLayout.payload.tabs.forEach((tab) => {

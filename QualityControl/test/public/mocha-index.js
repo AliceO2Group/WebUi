@@ -670,18 +670,18 @@ describe('QCG', function() {
       assert.deepStrictEqual(drawingOptions, expDrawingOpts);
     });
 
-    it('should use only default options on objectView when no layoutId or objectId is set', async () => {
+    it('should use only default options(foption and metadata) on objectView when no layoutId or objectId is set', async () => {
       const drawingOptions = await page.evaluate(() => {
         window.model.page = 'objectView';
         window.model.router.params.objectId = undefined;
         window.model.router.params.layoutId = undefined;
         const tabObject = {options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {fOption: 'lego colz', metadata: {displayHints: 'hint hint2', drawOptions: 'option option2'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
-      const expDrawingOpts = ['lego', 'colz'];
-      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+      const expDrawingOpts = ['lego', 'colz', 'option', 'option2', 'hint', 'hint2'];
+      assert.deepStrictEqual(expDrawingOpts, drawingOptions);
     });
 
     it('should use only default options on objectView when no layoutId is set', async () => {
