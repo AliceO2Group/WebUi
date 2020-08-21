@@ -22,12 +22,14 @@ let page;
 const workflowToTest = config.workflow;
 
 describe('`Control Environment` test-suite', async () => {
+  let revision = '';
   before(async () => {
     page = coreTests.page;
   });
 
   it(`should be on page of new environment (workflow '${workflowToTest}') just created`, async () => {
     const location = await page.evaluate(() => window.location);
+    revision = await page.evaluate(() => window.model.workflow.form.revision);
     assert.ok(location.search.includes('?page=environment&id='));
   });
 
@@ -49,7 +51,7 @@ describe('`Control Environment` test-suite', async () => {
     const environment = await page.evaluate(() => window.model.environment.item);
     const state = environment.payload.environment.state;
 
-    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
+    assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'RUNNING', 'Environment was expected to be running');
   });
 
@@ -58,7 +60,7 @@ describe('`Control Environment` test-suite', async () => {
     const stopButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(2)').title);
     const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
 
-    assert.strictEqual(state, 'RUNNING', 'WRONG state of environment');
+    assert.strictEqual(state, 'RUNNING', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
     assert.strictEqual(stopButton, 'STOP', 'Could not found button for stopping environment probably due to bad state of environment');
   });
 
@@ -71,7 +73,7 @@ describe('`Control Environment` test-suite', async () => {
     const environment = await page.evaluate(() => window.model.environment.item);
     const state = environment.payload.environment.state;
 
-    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
+    assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
   });
 
@@ -80,7 +82,7 @@ describe('`Control Environment` test-suite', async () => {
     const resetButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
     const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
 
-    assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
+    assert.strictEqual(state, 'CONFIGURED', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
     assert.strictEqual(resetButton, 'RESET', 'Could not found button for resetting (stand-by) environment probably due to bad state of environment');
   });
 
@@ -93,7 +95,7 @@ describe('`Control Environment` test-suite', async () => {
     const environment = await page.evaluate(() => window.model.environment.item);
     const state = environment.payload.environment.state;
 
-    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
+    assert.ok(controlAction.kind == 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'STANDBY');
   });
 
@@ -116,7 +118,7 @@ describe('`Control Environment` test-suite', async () => {
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const location = await page.evaluate(() => window.location);
 
-    assert.ok(controlAction.kind !== 'Failure', `Transition was not successful due to: ${controlAction.payload}`);
+    assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
   });
 });
