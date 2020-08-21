@@ -22,10 +22,27 @@ export default function objectPropertiesSidebar(model) {
     h('hr'),
 
     h('.flex-row', [
-      h('span', 'Options'),
+      h('span', 'Object Configuration:'),
       btnIgnoreOptions(model, tabObject)
     ]),
-    h('.p3', [
+    h('.ph3', [
+      h('.flex-row',
+        h('.tooltip.mv2', [
+          h('label.m0', 'Drawing Options:'),
+          h('.tooltiptext', ' ROOT draw options')
+        ])
+      ),
+      h('.flex-row', [
+        btnOption(model, tabObject, 'lego'), ' ',
+        btnOption(model, tabObject, 'colz'), ' ',
+        btnOption(model, tabObject, 'text'), ' ',
+      ]),
+      h('.flex-row',
+        h('.tooltip.mv2', [
+          h('label.m0', 'Display Hints:'),
+          h('.tooltiptext', 'Canvas options')
+        ])
+      ),
       h('.flex-row', [
         btnOption(model, tabObject, 'logx'), ' ',
         btnOption(model, tabObject, 'logy'), ' ',
@@ -34,14 +51,10 @@ export default function objectPropertiesSidebar(model) {
       h('.flex-row', [
         btnOption(model, tabObject, 'gridx'), ' ',
         btnOption(model, tabObject, 'gridy'), ' ',
+        btnOption(model, tabObject, 'gridz'), ' ',
       ]),
       h('.flex-row', [
-        btnOption(model, tabObject, 'lego'), ' ',
-        btnOption(model, tabObject, 'colz'), ' ',
-      ]),
-      h('', [
         btnOption(model, tabObject, 'stat'), ' ',
-        btnOption(model, tabObject, 'text'), ' ',
       ]),
     ]),
 
@@ -109,7 +122,7 @@ const btnIgnoreOptions = (model, tabObject) =>
         onchange: () => model.layout.toggleDefaultOptions(tabObject)
       }),
       h('label.m0', {for: tabObject.id + 'defaults'}, 'Ignore defaults'),
-      h('span.tooltiptext', 'Set on the histogram in C++')
+      h('span.tooltiptext', 'Set on the histogram in ROOT - fOption and QC Metadata')
     ]
     )
   );
