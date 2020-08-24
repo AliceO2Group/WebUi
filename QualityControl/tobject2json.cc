@@ -19,9 +19,7 @@ public:
 protected:
   void Execute() override
   {
-    const auto slashIndex = path.find_first_of('/');
-    // output = BackendInstance->retrieveMOJson(path.substr(0, slashIndex), path.substr(slashIndex + 1), timestamp);
-    output = BackendInstance->retrieveJson(path);
+    output = BackendInstance->retrieveJson(path, timestamp);
   }
 
   void OnOK() override
