@@ -44,7 +44,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.ok(templatesMap.payload[repository]);
   });
 
-  it('should successfully select a specified workflow from template list', async () => {
+  it(`should successfully select workflow '${workflowToTest}' from template list`, async () => {
     const [button] = await page.$x(`//div/a[text()="${workflowToTest}"]`);
     if (button) {
       await button.click();
@@ -74,15 +74,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLP was not successfully selected from the panel');
   });
 
-  it('should successfully create a new environment', async () => {
+  it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const location = await page.evaluate(() => window.location);
     const queryResult = await page.evaluate(() => window.model.environment.itemNew);
+    const revision = await page.evaluate(() => window.model.workflow.form.revision);
 
-    assert.strictEqual(queryResult.kind, 'NotAsked', `Environment was not created due to: ${queryResult.payload}`);
+    assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
     assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
   });
 });
