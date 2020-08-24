@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h, iconActionRedo} from '/js/src/index.js';
 import errorComponent from './../common/errorComponent.js';
 
@@ -46,10 +60,11 @@ const revisionInputDropdown = (workflow, templatesMap, repository) => h('.m2.tex
 const revisionInputField = (workflow) => h('input.form-control', {
   type: 'text',
   style: 'z-index:100',
-  value: workflow.getRevision(),
+  value: workflow.revision.rawValue,
   oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
   onclick: (e) => {
     workflow.setRevisionInputDropdownVisibility(true);
+    workflow.updateInputSearch('revision', '');
     e.stopPropagation();
   }
 });
@@ -62,7 +77,8 @@ const revisionInputField = (workflow) => h('input.form-control', {
  * @param {string} repository
  * @return {vnode}
  */
-const revisionDropdownArea = (workflow, templatesMap, repository) => h('.dropdown-menu.w-100',
+const revisionDropdownArea = (workflow, templatesMap, repository) => h('.dropdown-menu.w-100.scroll-y',
+  {style: 'max-height: 25em;'},
   Object.keys(templatesMap[repository])
     .filter((name) => name.match(workflow.revision.regex))
     .map((revision) =>

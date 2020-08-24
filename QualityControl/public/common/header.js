@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 
 import spinner from '../loader/spinner.js';
@@ -79,7 +93,7 @@ const onlineButton = (model) => h('button.btn',
     onclick: () => toggleOnlineButton(model),
     disabled: model.object.queryingObjects ? true : false,
     title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.object.isOnlineModeConnectionAlive ? '' : 'display: none'
+    style: model.isOnlineModeConnectionAlive ? '' : 'display: none'
   },
   'Online',
   ' ',
@@ -91,8 +105,8 @@ const onlineButton = (model) => h('button.btn',
  * @param {Object} model
  */
 function toggleOnlineButton(model) {
-  model.object.toggleMode();
-  switch (model.object.isOnlineModeEnabled) {
+  model.toggleMode();
+  switch (model.isOnlineModeEnabled) {
     case true:
       onlineButtonStyle = 'btn-success';
       onlineButtonIcon = iconMediaStop();

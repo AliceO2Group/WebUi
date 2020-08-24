@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h, iconChevronBottom, iconChevronTop, iconCircleX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -221,10 +235,11 @@ const destroyEnvButton = (environment, item, forceDestroy = false) =>
   h(`button.btn.btn-danger.mh1`, {
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
+    style: {display: !forceDestroy ? 'none' : ''},
     onclick: () => confirm(`Are you sure you want to to shutdown this ${item.state} environment?`)
       && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: forceDestroy}),
     title: forceDestroy ? 'Force the shutdown of the environment' : 'Shutdown environment'
-  }, forceDestroy ? 'Force Shutdown': 'Shutdown');
+  }, forceDestroy ? 'Force Shutdown' : 'Shutdown');
 
 /**
  * Method to create and display a table with tasks details
@@ -238,28 +253,28 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
       h('tr',
         [
           ['Name', 'Locked', 'Status', 'State', 'Host Name', 'Args', 'More']
-            .map((header) => h('th', {style: 'text-align: center'}, header))
+            .map((header) => h('th', header))
         ]
       )
     ),
     h('tbody', [
       tasks.map((task) => [h('tr', [
-        h('td', {style: 'text-align:center'}, task.name),
-        h('td', {style: 'text-align:center'}, task.locked),
-        h('td', {style: 'text-align:center'}, task.status),
+        h('td', task.name),
+        h('td', task.locked),
+        h('td', task.status),
         h('td', {
           class: (task.state === 'RUNNING' ?
             'success' : (task.state === 'CONFIGURED' ? 'warning' : '')),
-          style: 'font-weight: bold; text-align:center'
+          style: 'font-weight: bold;'
         }, task.state),
-        h('td', {style: 'text-align:center'}, task.deploymentInfo.hostname),
+        h('td', task.deploymentInfo.hostname),
         environment.task.list[task.taskId] && environment.task.list[task.taskId].match({
           NotAsked: () => null,
-          Loading: () => h('td', {style: 'font-size: 0.25em;text-align:center'}, pageLoading()),
-          Success: (data) => h('td', {style: 'text-align:center'}, data.arguments),
-          Failure: (_error) => h('td', {style: 'text-align:center', title: 'Could not load arguments'}, iconCircleX()),
+          Loading: () => h('td', {style: 'font-size: 0.25em;'}, pageLoading()),
+          Success: (data) => h('td', data.arguments),
+          Failure: (_error) => h('td', {title: 'Could not load arguments'}, iconCircleX()),
         }),
-        h('td', {style: 'text-align:center'},
+        h('td',
           h('button.btn.btn-default', {
             title: 'More Details',
             onclick: () => environment.task.toggleTaskView(task.taskId),

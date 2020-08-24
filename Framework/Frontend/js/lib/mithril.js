@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 /*
 MithrilJS V1.1.6 compiled version
 from: https://raw.githubusercontent.com/MithrilJS/mithril.js/v1.1.6/mithril.js
@@ -30,6 +28,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+/* eslint-disable */
 
 ;(function() {
 "use strict"

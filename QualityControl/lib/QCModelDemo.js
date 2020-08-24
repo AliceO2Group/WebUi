@@ -1,3 +1,18 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
+const LayoutConnector = require('./connector/LayoutConnector');
 
 // force user accounts during demo
 const ownerIdUser1 = 0;
@@ -19,9 +34,17 @@ const ownerNameUser2 = 'Samantha Smith';
  */
 function promiseResolveWithLatency(data) {
   return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(data);
-    }, 250);
+    setTimeout(() => resolve(data), 250);
+  });
+}
+
+/**
+ * Fake promise latency
+ * @return {Promise} error is returned
+ */
+function promiseRejectWithLatency() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error('Object could not be displayed')), 250);
   });
 }
 
@@ -31,6 +54,10 @@ function promiseResolveWithLatency(data) {
  * @return {Object|null}
  */
 function readObjectData(name) {
+  if (name === 'DAQ01/EventSize/ACORDE/ACORDE') {
+    // test to cover errors thrown by QC
+    return promiseRejectWithLatency();
+  }
   const object = objects.find((object) => object.name === `${name}`);
   // TODO Add timestamp for testing
   return promiseResolveWithLatency(object ? object.data : 'Object not found');
@@ -53,6 +80,7 @@ function listObjects() {
 function isOnlineModeConnectionAlive() {
   return promiseResolveWithLatency({running: true});
 }
+
 /**
  * Create a layout
  * @param {Layout} layout
@@ -72,17 +100,9 @@ function createLayout(layout) {
  * @return {Array<Layout>}
  */
 function listLayouts(filter = {}) {
-  if (filter.owner_id !== undefined) {
-    filter.owner_id = ownerIdUser1;
-  }
-
-  return promiseResolveWithLatency(layouts.filter((layout) => {
-    if (filter.owner_id !== undefined && layout.owner_id !== filter.owner_id) {
-      return false;
-    }
-
-    return true;
-  }));
+  filter.owner_id = filter.owner_id !== undefined ? ownerIdUser1 : filter.owner_id;
+  return promiseResolveWithLatency(
+    layouts.filter((layout) => (filter.owner_id === undefined || layout.owner_id === filter.owner_id)));
 }
 
 /**
@@ -319,8 +339,12 @@ module.exports.listObjects = listObjects;
 module.exports.listOnlineObjects = listObjects;
 module.exports.isOnlineModeConnectionAlive = isOnlineModeConnectionAlive;
 
-module.exports.readLayout = readLayout;
-module.exports.updateLayout = updateLayout;
-module.exports.listLayouts = listLayouts;
-module.exports.createLayout = createLayout;
-module.exports.deleteLayout = deleteLayout;
+const dataConnector = {
+  readLayout,
+  updateLayout,
+  listLayouts,
+  createLayout,
+  deleteLayout
+};
+
+module.exports.layoutConnector = new LayoutConnector(dataConnector);

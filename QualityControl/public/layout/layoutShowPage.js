@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h} from '/js/src/index.js';
 import {draw} from '../object/objectDraw.js';
 import {iconArrowLeft, iconArrowTop, iconResizeBoth, info} from '/js/src/icons.js';
@@ -177,12 +191,19 @@ function chartView(model, tabObject) {
 const drawComponent = (model, tabObject) =>
   h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
-      h('.jsrootdiv', {style: 'z-index: 90; height:100%; display: flex; flex-direction: column'},
-        draw(model, tabObject, {}, 'layoutShow')),
+      h('.jsrootdiv', {
+        style: {
+          'z-index': 90,
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          'flex-direction': 'column'
+        }
+      }, draw(model, tabObject, {}, 'layoutShow')),
       h('.text-right.resize-element.resize-button.flex-row', {
         style: 'display: none; padding: .25rem .25rem 0rem .25rem;'
       }, [
-        !model.object.isOnlineModeEnabled &&
+        !model.isOnlineModeEnabled &&
         h('.text-right', {style: 'padding-bottom: 0;'},
           h('.dropdown.mh1', {class: model.object.selectedOpen ? 'dropdown-open' : ''}, [
             h('button.btn',
@@ -210,6 +231,8 @@ const drawComponent = (model, tabObject) =>
           onclick: (e) => model.router.handleLinkEvent(e)
         }, iconResizeBoth())
       ]),
+      !model.isOnlineModeEnabled && model.layout.item.displayTimestamp
+      && h('.gray-darker.text-center.f6', {style: 'height:1.3em'}, model.object.getLastModifiedByName(tabObject.name))
     ]);
 
 /**

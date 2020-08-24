@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* global JSROOT */
 
 import {h} from '/js/src/index.js';
@@ -45,7 +59,6 @@ export function draw(model, tabObject, options, location = '') {
       w: 0,
     };
   }
-  model.object.addObjectByName(tabObject.name);
 
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
@@ -94,9 +107,6 @@ export function draw(model, tabObject, options, location = '') {
      * @param {vnode} vnode
      */
     onremove(vnode) {
-      // tell model we don't need those data anymore and free memory if needed
-      model.object.removeObjectByName(tabObject.name);
-
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {
         // cleanup might not be loaded yet
@@ -116,7 +126,7 @@ export function draw(model, tabObject, options, location = '') {
       h('.animate-slow-appearance', 'Loading')
     ]);
   } else if (objectRemoteData.isFailure()) {
-    content = h('.scroll-y.absolute-fill.p1.f6', {
+    content = h('.scroll-y.absolute-fill.p1.f6.text-center', {
       style: 'word-break: break-all;'
     }, objectRemoteData.payload);
   } else {

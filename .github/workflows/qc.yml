@@ -2,9 +2,7 @@ name: QualityControl
 on:
   pull_request:
     paths:
-      - 'QualityControl/*'
-      - 'QualityControl/*/*'
-      - 'QualityControl/*/*/*'
+      - 'QualityControl/**/*'
       - '.github/workflows/qc.yml'
   push:
     branches:
@@ -39,7 +37,7 @@ jobs:
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for QualityControl
-        uses: codecov/codecov-action@v1.0.6
+        uses: codecov/codecov-action@v1.0.13
         with:
           token: ${{ secrets. NEW_CODECOV_TOKEN }}
           flags: qualitycontrol

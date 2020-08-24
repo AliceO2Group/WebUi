@@ -2,9 +2,7 @@ name: InfoLogger
 on:
   pull_request:
     paths:
-      - 'InfoLogger/*'
-      - 'InfoLogger/*/*'
-      - 'InfoLogger/*/*/*'
+      - 'InfoLogger/**/*'
       - '.github/workflows/infologger.yml'
   push:
     branches:
@@ -34,7 +32,7 @@ jobs:
       - run: (cd InfoLogger; npm run coverage )
       - run: (cd InfoLogger; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for InfoLogger
-        uses: codecov/codecov-action@v1.0.6
+        uses: codecov/codecov-action@v1.0.13
         with:
           token: ${{ secrets. NEW_CODECOV_TOKEN }}
           flags: infologger

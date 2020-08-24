@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h} from '/js/src/index.js';
 import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
@@ -13,7 +27,8 @@ import virtualTable from './virtualTable.js';
  * @return {vnode}
  */
 export default (model) => h('.flex-column.h-100', [
-  h('.m2.mv3', searchForm(model)),
+  layoutSettingsPanel(model),
+  h('.mh2.mv1', searchForm(model)),
   h('.h-100.scroll-y.flex-column',
     model.object.searchInput.trim() !== '' ?
       virtualTable(model, 'side')
@@ -31,6 +46,27 @@ export default (model) => h('.flex-column.h-100', [
 ]);
 
 /**
+ * Creates a panel used for adding settings specific to layout only
+ * @param {Object} model
+ * @return {vnode}
+ */
+const layoutSettingsPanel = (model) =>
+  h('.br1.m1.w-100.flex-row', [
+    h('.w-25.mh2', 'Layout settings:'),
+    h('.form-check.f6', [
+      h('input.form-check-input', {
+        type: 'checkbox',
+        id: 'inputShowTimestamp',
+        checked: model.layout.item.displayTimestamp,
+        onchange: (e) => model.layout.setLayoutProperty('displayTimestamp', e.target.checked)
+      }),
+      h('label.form-check-label', {for: 'inputShowTimestamp'}, [
+        'Display timestamp on each plot'
+      ])
+    ])
+  ]);
+
+/**
  * Shows an input to search though objects, shows also
  * a checkbox to filter only objects available though 'information service'
  * @param {Object} model
@@ -43,7 +79,7 @@ const searchForm = (model) => [
     value: model.object.searchInput,
     oninput: (e) => model.object.search(e.target.value)
   }),
-  model.object.isOnlineModeEnabled && h('.form-check.f6', [
+  model.isOnlineModeEnabled && h('.form-check.f6', [
     h('input.form-check-input', {
       type: 'checkbox',
       id: 'inputOnlineOnlyTreeSidebar',
@@ -120,42 +156,49 @@ const treeRows = (model) => !model.object.sideTree
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
- * sub-nodes of `tree` as additionnals lines if they are open in the tree.
- * Indentation is added according to tree level during recurcive call of treeRow
+ * sub-nodes of `tree` as additional lines if they are open in the tree.
+ * Indentation is added according to tree level during recursive call of treeRow
  * Tree is traversed in depth-first with pre-order (root then subtrees)
  * @param {Object} model
- * @param {ObjectTree} sideTree - data-structure containaing an object per node
- * @param {number} level - used for indentation within recurcive call of treeRow
+ * @param {ObjectTree} sideTree - data-structure containing an object per node
+ * @param {number} level - used for indentation within recursive call of treeRow
  * @return {vnode}
  */
 function treeRow(model, sideTree, level) {
-  // sideTree construction
+  if (sideTree.object && sideTree.children.length === 0) {
+    return [leafRow(model, sideTree, level)];
+  } else if (sideTree.object && sideTree.children.length > 0) {
+    return [
+      leafRow(model, sideTree, level),
+      branchRow(model, sideTree, level)
+    ];
+  } else {
+    return [branchRow(model, sideTree, level)];
+  }
+}
+
+/**
+ * Shows a line <tr> of object represented by parent node `tree`, also shows
+ * sub-nodes of `tree` as additional lines if they are open in the tree.
+ * Indentation is added according to tree level during recursive call of treeRow
+ * Tree is traversed in depth-first with pre-order (root then subtrees)
+ * @param {Object} model
+ * @param {ObjectTree} sideTree - data-structure containing an object per node
+ * @param {number} level - used for indentation within recursive call of treeRow
+ * @return {vnode}
+ */
+const branchRow = (model, sideTree, level) => {
   const levelDeeper = level + 1;
   const subtree = sideTree.open ? sideTree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
 
-  // UI construction
-  const icon = sideTree.object ? iconBarChart() : (sideTree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
+  const icon = sideTree.open ? iconCaretBottom() : iconCaretRight();
   const iconWrapper = h('span', {style: {paddingLeft: `${level}em`}}, icon);
   const path = sideTree.path.join('/');
-  const className = sideTree.object && sideTree.object === model.object.selected ? 'table-primary' : '';
-  const draggable = !!sideTree.object;
-
-  // UI events
-  const onclick = sideTree.object ? () => model.object.select(sideTree.object) : () => sideTree.toggle();
-  const ondblclick = sideTree.object ? () => model.layout.addItem(sideTree.object.name) : null;
-  const ondragstart = sideTree.object ? () => {
-    const newItem = model.layout.addItem(sideTree.object.name);
-    model.layout.moveTabObjectStart(newItem);
-  } : null;
 
   const attr = {
     key: `key-sidebar-tree-${path}`,
     title: path,
-    onclick,
-    class: className,
-    draggable,
-    ondragstart,
-    ondblclick
+    onclick: () => sideTree.toggle(),
   };
 
   return [
@@ -164,4 +207,42 @@ function treeRow(model, sideTree, level) {
     ]),
     ...subtree
   ];
-}
+};
+
+
+/**
+ * Shows a line <tr> of object represented by parent node `tree`, also shows
+ * sub-nodes of `tree` as additional lines if they are open in the tree.
+ * Indentation is added according to tree level during recursive call of treeRow
+ * Tree is traversed in depth-first with pre-order (root then subtrees)
+ * @param {Object} model
+ * @param {ObjectTree} sideTree - data-structure containing an object per node
+ * @param {number} level - used for indentation within recursive call of treeRow
+ * @return {vnode}
+ */
+const leafRow = (model, sideTree, level) => {
+  // UI construction
+  const iconWrapper = h('span', {style: {paddingLeft: `${level}em`}}, iconBarChart());
+  const path = sideTree.path.join('/');
+  const className = sideTree.object && sideTree.object === model.object.selected ? 'table-primary' : '';
+  const draggable = !!sideTree.object;
+
+  const attr = {
+    key: `key-sidebar-tree-${path}`,
+    title: path,
+    onclick: () => model.object.select(sideTree.object),
+    class: className,
+    draggable,
+    ondragstart: () => {
+      const newItem = model.layout.addItem(sideTree.object.name);
+      model.layout.moveTabObjectStart(newItem);
+    },
+    ondblclick: () => model.layout.addItem(sideTree.object.name)
+  };
+
+  return [
+    h('tr.object-selectable', attr, [
+      h('td.text-ellipsis', [iconWrapper, ' ', sideTree.name])
+    ]),
+  ];
+};

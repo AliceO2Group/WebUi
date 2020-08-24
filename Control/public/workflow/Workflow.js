@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
@@ -18,7 +32,8 @@ export default class Workflow extends Observable {
 
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp('^master'),
+      regex: new RegExp('master'),
+      rawValue: 'master'
     };
 
     this.form = {
@@ -36,9 +51,12 @@ export default class Workflow extends Observable {
    * Initialize page and request data
    */
   initWorkflowPage() {
-    this.getRepositoriesList();
-    this.getAllTemplatesAsMap();
-    this.getFLPList();
+    if (!this.form.repository && !this.form.template) {
+      this.getRepositoriesList();
+      this.getAllTemplatesAsMap();
+      this.getFLPList();
+    }
+
     this.resetErrorMessage();
   }
 
@@ -84,7 +102,8 @@ export default class Workflow extends Observable {
     }
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp(`^${defaultRevision}`)
+      regex: new RegExp(`^${defaultRevision}`),
+      rawValue: defaultRevision
     };
     this.form.revision = defaultRevision;
     this.notify();
@@ -101,12 +120,13 @@ export default class Workflow extends Observable {
   /**
    * Updates the selected repository with the new user selection
    * @param {string} inputField - input that should be updated
-   * @param {string} selectedRepo - Repository that user clicked on from the dropdown list
+   * @param {string} selectedRevision - Repository that user clicked on from the dropdown list
    */
-  updateInputSelection(inputField, selectedRepo) {
+  updateInputSelection(inputField, selectedRevision) {
     this.revision.isSelectionOpen = !this.revision.isSelectionOpen;
     this.form.template = '';
-    this.updateInputSearch(inputField, selectedRepo);
+    this.form.revision = selectedRevision;
+    this.updateInputSearch(inputField, selectedRevision);
   }
 
   /**
@@ -125,8 +145,8 @@ export default class Workflow extends Observable {
    * @param {string} input - input from user used for autocomplete
    */
   updateInputSearch(inputField, input) {
-    this.revision.regex = new RegExp('^' + input);
-    this.form.revision = input;
+    this.revision.regex = new RegExp(input);
+    this.revision.rawValue = input;
     this.notify();
   }
 
@@ -222,6 +242,8 @@ export default class Workflow extends Observable {
     const isKeyCorrect = key && key.trim() !== '';
     const isValueCorrect = value && value.trim() !== '';
     if (isKeyCorrect && isValueCorrect) {
+      key = key.trim();
+      value = value.trim();
       if (!this.form.variables[key]) {
         this.form.variables[key] = value;
         this.notify();
@@ -247,6 +269,17 @@ export default class Workflow extends Observable {
     } else {
       this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
     }
+  }
+
+  /**
+   * After focus is taken from the input, the value added by the user will be trimmed
+   * @param {string} key - key of the value that needs to be trimmed
+   */
+  trimVariableValue(key) {
+    if (this.form.variables[key]) {
+      this.form.variables[key] = this.form.variables[key].trim();
+    }
+    this.notify();
   }
 
   /**

@@ -1,5 +1,18 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h, iconBook, iconCircleX, iconArrowThickLeft} from '/js/src/index.js';
-import spinner from './../../loader/spinner.js';
 import {draw} from './../objectDraw.js';
 import infoButton from './../../common/infoButton.js';
 
@@ -24,16 +37,16 @@ export default (model) => h('.p2.absolute-fill', {style: 'display: flex; flex-di
 function getObjectTitle(model) {
   return model.router.params.objectName ?
     model.router.params.objectName
-    :
-    (
+    : (
       model.router.params.objectId && model.router.params.layoutId &&
       model.layout.requestedLayout.match({
         NotAsked: () => null,
         Loading: () => null,
         Success: (layout) =>
-          model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) && h('.flex-column', [
-            h('', model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId)),
-            h('.text-light.f7', `(from layout: ${layout.name})`)
+          model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) &&
+          h('.flex-row', {style: 'justify-content: center;'}, [
+            model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId),
+            h('.text-light', `(${layout.name})`)
           ]),
         Failure: () => null
       })
@@ -49,9 +62,12 @@ function getActionsHeader(model) {
   return h('', {style: 'display: flex'},
     [
       getBackToQCGButton(model),
-      h('b.text-center.flex-column', {style: 'flex-grow:1'}, getObjectTitle(model)),
+      h('.text-center.flex-column', {style: 'flex-grow:1'}, [
+        h('b', getObjectTitle(model)),
+        h('.gray-darker.text-center.f6', model.object.getLastModifiedForSelected('date')),
+      ]),
       h('.flex-row', [
-        infoButton(model.object),
+        infoButton(model.object, model.isOnlineModeEnabled),
         model.isContextSecure() && getCopyURLToClipboardButton(model)
       ])
     ]);
@@ -120,16 +136,8 @@ function getRootObject(model) {
         model.router.params.layoutId ?
           model.layout.requestedLayout.match({
             NotAsked: () => null,
-            Loading: () => h('.f1', spinner()),
-            Success: () =>
-              model.object.selected ?
-                h('', {
-                  style: 'width: 100%; height: 100%'
-                }, draw(model, model.object.selected.name,
-                  {stat: true}, 'objectView')
-                )
-                :
-                errorLoadingObject('Object could not be found'),
+            Loading: () => null, // TODO Investigate why RemoteData is displaying both states simultaneously
+            Success: () => showObject(model),
             Failure: (error) => errorLoadingObject(error),
           })
           :
@@ -137,6 +145,17 @@ function getRootObject(model) {
         : errorLoadingObject('No object name or object ID were provided')
   );
 }
+
+/**
+ * Draw an object based on selected object
+ * @param {Object} model
+ * @return {vnode}
+ */
+const showObject = (model) =>
+  model.object.selected ?
+    h('.w-100.h-100', draw(model, model.object.selected.name, {stat: true}, 'objectView'))
+    :
+    errorLoadingObject('Object could not be found');
 
 /**
  * Display error message & icon

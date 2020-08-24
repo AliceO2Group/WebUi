@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 // Import frontend framework
 import {
   Observable, WebSocketClient, QueryRouter,
@@ -30,7 +44,6 @@ export default class Model extends Observable {
 
     this.table = new Table(this);
     this.table.bubbleTo(this);
-    this.getUserProfile();
 
     this.timezone = new Timezone();
     this.timezone.bubbleTo(this);
@@ -170,6 +183,35 @@ export default class Model extends Observable {
     return;
   }
 
+  /**
+   * Request data about the profile passed in the URL and set column headers and criterias
+   * @param {string} profile
+   */
+  async getProfile(profile) {
+    this.userProfile = RemoteData.loading();
+    this.notify();
+    const {result, ok} = await this.loader.get(`/api/getProfile?profile=${profile}`);
+    if (!ok) {
+      this.userProfile = RemoteData.failure(result.message);
+      this.notification.show('Unable to load profile. Default profile will be used instead', 'danger', 2000);
+    } else {
+      this.userProfile = RemoteData.success(result);
+      if (this.userProfile.payload.content.colsHeader) {
+        this.table.colsHeader = this.userProfile.payload.content.colsHeader;
+      }
+      if (this.userProfile.payload.content.criterias) {
+        this.log.filter.fromObject(this.userProfile.payload.content.criterias);
+      }
+      if (result.user === profile) {
+        this.notification.show(`The profile ${profile.toUpperCase()} was loaded successfully`, 'success', 2000);
+      } else {
+        this.notification.show(`Cannot find profile ${profile.toUpperCase()}, default profile used instead`,
+          'warning', 4000);
+      }
+    }
+    this.notify();
+    return;
+  }
 
   /**
    * Delegates sub-model actions depending on incoming keyboard event
@@ -264,20 +306,16 @@ export default class Model extends Observable {
       this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
       return;
     } else if (params.profile) {
-      this.parseProfile();
+      this.getProfile(params.profile);
       return;
     } else if (params.q) {
+      this.getUserProfile();
       this.log.filter.fromObject(JSON.parse(params.q));
+    } else {
+      this.getUserProfile();
     }
   }
 
-  /**
-   * Parses profile parameter and delegates sub-model actions depending on the profile
-   * @param {Object} query
-   */
-  parseProfile() {
-    this.log.filter.resetCriterias();
-  }
   /**
    * When model change (filters), update address bar with the filter
    * do it silently to avoid infinite loop

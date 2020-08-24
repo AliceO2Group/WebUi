@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h} from '/js/src/index.js';
 import objectTreeSidebar from '../object/objectTreeSidebar.js';
 import objectPropertiesSidebar from '../object/objectPropertiesSidebar.js';
@@ -42,7 +56,7 @@ export default function sidebar(model) {
 const sidebarMenu = (model) => [
   exploreMenu(model),
   myLayoutsMenu(model),
-  model.object.isOnlineModeEnabled ? refreshOptions(model) : h('.menu-title', {style: 'flex-grow:1'}, ''),
+  model.isOnlineModeEnabled ? refreshOptions(model) : h('.menu-title', {style: 'flex-grow:1'}, ''),
   statusMenu(model),
   collapseSidebarMenuItem(model)
 ];
@@ -143,16 +157,16 @@ const refreshOptions = (model) => [
     model.sidebar &&
     [
       h('span.highlight', {
-        key: 'timer' + model.object.refreshTimer,
-        title: 'timer' + model.object.refreshTimer
-      }, `Refresh period (${model.object.refreshInterval} seconds)`),
+        key: 'timer' + model.refreshTimer,
+        title: 'timer' + model.refreshTimer
+      }, `Refresh period (${model.refreshInterval} seconds)`),
       h('input.form-control.text-center', {
         type: 'range',
         step: 1,
         min: 2,
         max: 120,
-        value: model.object.refreshInterval,
-        oninput: (e) => model.object.setRefreshInterval(e.target.value)
+        value: model.refreshInterval,
+        oninput: (e) => model.setRefreshInterval(e.target.value)
       })
     ],
     h('button.btn.btn-success', {
@@ -160,7 +174,7 @@ const refreshOptions = (model) => [
       class: model.sidebar ? 'w-100' : '',
       style: !model.sidebar ? 'margin: 0.25em' : '',
       title: 'Refresh objects now',
-      onclick: () => model.object.setRefreshInterval(model.object.refreshInterval)
+      onclick: () => model.setRefreshInterval(model.refreshInterval)
     }, model.sidebar ? 'Refresh objects now' : h('span', iconReload())),
   ]),
 ];

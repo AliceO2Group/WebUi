@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
@@ -181,13 +195,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual('Environment variables', title);
   });
 
-  it('should successfully add pair (K;V) to variables', async () => {
+  it('should successfully add trimmed pair (K;V) to variables', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div > input');
-    page.keyboard.type('TestKey');
+    page.keyboard.type('TestKey   ');
     await page.waitFor(200);
 
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div:nth-child(2) > input');
-    page.keyboard.type('TestValue');
+    page.keyboard.type(' TestValue  ');
     await page.waitFor(200);
 
     const variables = await page.evaluate(() => {

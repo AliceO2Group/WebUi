@@ -1,10 +1,11 @@
 /**
  * @license
- * Copyright CERN and copyright holders of ALICE O2. This software is
- * distributed under the terms of the GNU General Public License v3 (GPL
- * Version 3), copied verbatim in the file "COPYING".
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
  *
- * See http://alice-o2.web.cern.ch/license for full licensing information.
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
  *
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
@@ -12,6 +13,14 @@
 */
 
 const winston = require('winston');
+
+// Maping between winston levels and journalctl priorities
+const systemdPr = {
+  debug: '<7>',
+  info: '<6>',
+  warn: '<4>',
+  error: '<3>'
+};
 
 /**
  * Creates Winston logger
@@ -29,11 +38,16 @@ class Winston {
     config.consoleLvl = config.consoleLvl || 'debug';
 
     const consoleFormatter = winston.format.printf((log) => {
+      let output = `${log.level}: ${log.message}`;
       if (log.hasOwnProperty('label')) {
-        return `${log.timestamp} ${log.level}: [${log.label}] ${log.message}`;
-      } else {
-        return `${log.timestamp} ${log.level}: ${log.message}`;
+        output = `[${log.label}] ${output}`;
       }
+      if (config.hasOwnProperty('consoleSystemd')) {
+        output = systemdPr[log.level] + output;
+      } else {
+        output = `${log.timestamp}  ${output}`;
+      }
+      return output;
     });
 
     const transports = [
