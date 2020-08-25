@@ -158,7 +158,7 @@ async function readObjectData(req, res) {
   try {
     const qcObject = await model.readObjectData(objectName, timestamp);
     const timestamps = await model.getObjectTimestampList(objectName);
-    res.status(qcObject ? 200 : 404).json({qcObject: qcObject, timestamps: timestamps.slice(0, 20)});
+    res.status(qcObject ? 200 : 404).json({qcObject: qcObject, timestamps: timestamps.slice(0, 50)});
   } catch (err) {
     errorHandler('Reading object data: ' + err, res);
   }
