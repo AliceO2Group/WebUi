@@ -287,10 +287,9 @@ export default class QCObject extends Observable {
         // eslint-disable-next-line
         this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result.payload));
       }
-      if (timestamp === -1) {
-        this.selected.version = parseInt(this.objects[objectName].payload.timestamps[0]);
-      } else {
-        this.selected.version = parseInt(timestamp);
+      if (this.selected) {
+        this.selected.version = timestamp === -1 ?
+          parseInt(this.objects[objectName].payload.timestamps[0]) : parseInt(timestamp);
       }
     } else {
       this.objects[objectName] = result;
@@ -416,15 +415,16 @@ export default class QCObject extends Observable {
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
     let drawingOptions = [];
-    if (objectRemoteData.payload.qcObject.fOption) {
-      objectOptionList = objectRemoteData.payload.qcObject.fOption.split(' ');
+    const qcObject = objectRemoteData.payload.qcObject;
+    if (qcObject.fOption) {
+      objectOptionList = qcObject.fOption.split(' ');
     }
-    if (objectRemoteData.payload.qcObject.metadata && objectRemoteData.payload.qcObject.metadata.drawOptions) {
-      const metaOpt = objectRemoteData.payload.qcObject.metadata.drawOptions.split(' ');
+    if (qcObject.metadata && qcObject.metadata.drawOptions) {
+      const metaOpt = qcObject.metadata.drawOptions.split(' ');
       objectOptionList = objectOptionList.concat(metaOpt);
     }
-    if (objectRemoteData.payload.qcObject.metadata && objectRemoteData.payload.qcObject.metadata.displayHints) {
-      const metaHints = objectRemoteData.payload.qcObject.metadata.displayHints.split(' ');
+    if (qcObject.metadata && qcObject.metadata.displayHints) {
+      const metaHints = qcObject.metadata.displayHints.split(' ');
       objectOptionList = objectOptionList.concat(metaHints);
     }
     switch (this.model.page) {

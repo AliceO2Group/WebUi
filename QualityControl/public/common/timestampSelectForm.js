@@ -25,7 +25,7 @@ export default (model) => h('.w-100.flex-row',
   h('select.form-control.gray-darker.text-center.w-25', {
     onchange: (e) => {
       const value = e.target.value;
-      if (value !== 'Invalid Timestamp') {
+      if (model.object.selected && value !== 'Invalid Timestamp') {
         model.object.loadObjectByName(model.object.selected.name, value);
       }
     }
