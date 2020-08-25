@@ -33,10 +33,6 @@ export default (object, isOnlineModeEnabled) => object.selected && !isOnlineMode
       h('.dropdown-menu', {style: 'right:0.1em; left: auto; white-space: nowrap;'}, [
         h('.m2.gray-darker.text-center', [
           h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'PATH'),
-          h('select.form-control', h('option', '2/3/2020, 1:54:05 PM'))
-        ]),
-        h('.m2.gray-darker.text-center', [
-          h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'PATH'),
           object.selected.name
         ]),
         h('.m2.gray-darker.text-center', [

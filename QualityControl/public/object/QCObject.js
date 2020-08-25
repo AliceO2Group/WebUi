@@ -272,20 +272,25 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Load full content of an object in-memory, do nothing if already in.
-   * Also adds a reference to this object.
+   * Load full content of an object in-memory
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
+   * @param {number} timestamp
    */
-  async loadObjectByName(objectName) {
+  async loadObjectByName(objectName, timestamp = -1) {
     // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
-    const result = await this.qcObjectService.getObjectByName(objectName);
+    const result = await this.qcObjectService.getObjectByName(objectName, timestamp);
     if (result.isSuccess()) {
-      if (this.isObjectChecker(result.payload)) {
+      if (this.isObjectChecker(result.payload.qcObject)) {
         this.objects[objectName] = RemoteData.success(result.payload);
       } else {
         // link JSROOT methods to object
         // eslint-disable-next-line
         this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result.payload));
+      }
+      if (timestamp === -1) {
+        this.selected.version = parseInt(this.objects[objectName].payload.timestamps[0]);
+      } else {
+        this.selected.version = parseInt(timestamp);
       }
     } else {
       this.objects[objectName] = result;
@@ -411,15 +416,15 @@ export default class QCObject extends Observable {
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
     let drawingOptions = [];
-    if (objectRemoteData.payload.fOption) {
-      objectOptionList = objectRemoteData.payload.fOption.split(' ');
+    if (objectRemoteData.payload.qcObject.fOption) {
+      objectOptionList = objectRemoteData.payload.qcObject.fOption.split(' ');
     }
-    if (objectRemoteData.payload.metadata && objectRemoteData.payload.metadata.drawOptions) {
-      const metaOpt = objectRemoteData.payload.metadata.drawOptions.split(' ');
+    if (objectRemoteData.payload.qcObject.metadata && objectRemoteData.payload.qcObject.metadata.drawOptions) {
+      const metaOpt = objectRemoteData.payload.qcObject.metadata.drawOptions.split(' ');
       objectOptionList = objectOptionList.concat(metaOpt);
     }
-    if (objectRemoteData.payload.metadata && objectRemoteData.payload.metadata.displayHints) {
-      const metaHints = objectRemoteData.payload.metadata.displayHints.split(' ');
+    if (objectRemoteData.payload.qcObject.metadata && objectRemoteData.payload.qcObject.metadata.displayHints) {
+      const metaHints = objectRemoteData.payload.qcObject.metadata.displayHints.split(' ');
       objectOptionList = objectOptionList.concat(metaHints);
     }
     switch (this.model.page) {
@@ -523,6 +528,32 @@ export default class QCObject extends Observable {
         new Date(this.selected.lastModified).toLocaleString() : this.selected.lastModified.toString();
     } else {
       return '-';
+    }
+  }
+
+  /**
+   * Return the list of object timestamps
+   * @param {string} name
+   * @return {array<numbers>}
+   */
+  getObjectTimestamps(name) {
+    if (this.objects[name] && this.objects[name].kind === 'Success') {
+      return this.objects[name].payload.timestamps;
+    } else {
+      return [];
+    }
+  }
+
+  /**
+   * Convert a timestamp to a date string in browser format
+   * @param {number} timestamp
+   * @return {string}
+   */
+  getDateFromTimestamp(timestamp) {
+    try {
+      return new Date(timestamp).toLocaleString();
+    } catch (_err) {
+      return 'Invalid Timestamp';
     }
   }
 }

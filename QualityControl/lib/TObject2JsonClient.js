@@ -40,7 +40,7 @@ class TObject2JsonClient {
    * @param {number} timestamp - object's timestamp
    * @return {Promise.<Object|null, string>} The root data, null is not found
    */
-  retrieve(path, timestamp = 0) {
+  retrieve(path, timestamp = -1) {
     if (!path || path.indexOf('/') === -1) {
       return Promise.reject(new Error('Path should contain a slash at least'));
     }

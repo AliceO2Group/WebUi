@@ -19,7 +19,8 @@ public:
 protected:
   void Execute() override
   {
-    output = BackendInstance->retrieveJson(path, timestamp);
+    std::map<std::string, std::string> metadata;
+    output = BackendInstance->retrieveJson(path, timestamp, metadata);
   }
 
   void OnOK() override
@@ -89,8 +90,7 @@ void GetObject(const Napi::CallbackInfo& info) {
 
   Napi::Function cb = info[2].As<Napi::Function>();
   std::string path = info[0].As<Napi::String>();
-  long timestamp = info[1].As<Napi::Number>().Int32Value();
-
+  uint64_t timestamp = info[1].As<Napi::Number>().Int64Value();
   (new TObjectAsyncWorker(cb, path, timestamp))->Queue();
 
   return;

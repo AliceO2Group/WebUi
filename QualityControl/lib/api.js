@@ -122,7 +122,7 @@ function readObjectsData(req, res) {
    * @return {Promise.<Object>}
    */
   const safeRetriever = (name) => model.readObjectData(name)
-    .then((data) => !data ? {error: 'Object not found'} : data)
+    .then((data) => !data ? {error: 'Object not found'} : {qcObject: data})
     .catch((err) => ({error: err.toString()}));
 
   const promiseArray = objectsNames.map(safeRetriever);
@@ -142,9 +142,9 @@ function readObjectsData(req, res) {
  * @param {Request} req
  * @param {Response} res
  */
-function readObjectData(req, res) {
+async function readObjectData(req, res) {
   const objectName = req.query.objectName;
-  let timestamp = 0;
+  let timestamp = -1;
   if (req.query.timestamp) {
     const ts = req.query.timestamp;
     timestamp = typeof ts === 'string' ? parseInt(ts) : ts;
@@ -154,9 +154,14 @@ function readObjectData(req, res) {
     return;
   }
 
-  model.readObjectData(objectName, timestamp)
-    .then((data) => res.status(data ? 200 : 404).json(data))
-    .catch((err) => errorHandler('Reading object data: ' + err, res));
+  // Read from QC
+  try {
+    const qcObject = await model.readObjectData(objectName, timestamp);
+    const timestamps = await model.getObjectTimestampList(objectName);
+    res.status(qcObject ? 200 : 404).json({qcObject: qcObject, timestamps: timestamps.slice(0, 20)});
+  } catch (err) {
+    errorHandler('Reading object data: ' + err, res);
+  }
 }
 
 /**

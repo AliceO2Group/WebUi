@@ -16,6 +16,7 @@ import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '
 import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import infoButton from './../common/infoButton.js';
+import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 
 /**
@@ -77,7 +78,7 @@ function drawComponent(model) {
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
         draw(model, model.object.selected.name, {stat: true}, 'treePage')
       ),
-      h('.gray-darker.text-center', model.object.getLastModifiedForSelected('date')),
+      h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model)))
     ]
   );
 }
@@ -158,7 +159,6 @@ function treeRow(model, tree, level) {
   const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
   const path = tree.path.join('/');
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
-  const lastModified = tree.object ? new Date(tree.object.lastModified).toLocaleString() : '';
 
   if (model.object.searchInput) {
     return [];
