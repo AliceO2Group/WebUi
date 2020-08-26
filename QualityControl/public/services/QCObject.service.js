@@ -65,12 +65,15 @@ export default class QCObjectService {
   }
 
   /**
-  * Ask server for an object by name
-  * @param {string} objectName
-  * @return {JSON} {result, ok, status}
-  */
-  async getObjectByName(objectName) {
-    const {result, ok, status} = await this.model.loader.get(`/api/readObjectData?objectName=${objectName}`);
+   * Ask server for an object by name and optionally timestamp
+   * If timestamp is not provided, -1 will be used to request latest version of the object
+   * @param {string} objectName
+   * @param {number} timestamp
+   * @return {JSON} {result, ok, status}
+   */
+  async getObjectByName(objectName, timestamp = -1) {
+    const {result, ok, status} =
+      await this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`);
     if (ok) {
       return RemoteData.success(result);
     } else if (status === 404) {

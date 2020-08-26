@@ -15,6 +15,7 @@
 import {h, iconBook, iconCircleX, iconArrowThickLeft} from '/js/src/index.js';
 import {draw} from './../objectDraw.js';
 import infoButton from './../../common/infoButton.js';
+import timestampSelectForm from '../../common/timestampSelectForm.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -64,7 +65,9 @@ function getActionsHeader(model) {
       getBackToQCGButton(model),
       h('.text-center.flex-column', {style: 'flex-grow:1'}, [
         h('b', getObjectTitle(model)),
-        h('.gray-darker.text-center.f6', model.object.getLastModifiedForSelected('date')),
+        h('.w-100.flex-row', {style: 'justify-content: center'},
+          h('.w-25.p2.f6', timestampSelectForm(model))
+        )
       ]),
       h('.flex-row', [
         infoButton(model.object, model.isOnlineModeEnabled),

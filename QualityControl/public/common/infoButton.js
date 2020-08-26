@@ -38,7 +38,7 @@ export default (object, isOnlineModeEnabled) => object.selected && !isOnlineMode
         h('.m2.gray-darker.text-center', [
           h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'LAST MODIFIED'),
           object.selected.lastModified ?
-            `${new Date(object.selected.lastModified).toLocaleString()}`
+            `${new Date(object.selected.lastModified).toLocaleString('en-UK')}`
             :
             'Loading...'
         ]),

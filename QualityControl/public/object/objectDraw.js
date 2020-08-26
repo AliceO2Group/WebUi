@@ -130,8 +130,8 @@ export function draw(model, tabObject, options, location = '') {
       style: 'word-break: break-all;'
     }, objectRemoteData.payload);
   } else {
-    if (model.object.isObjectChecker(objectRemoteData.payload)) {
-      return checkersPanel(objectRemoteData.payload, location);
+    if (model.object.isObjectChecker(objectRemoteData.payload.qcObject)) {
+      return checkersPanel(objectRemoteData.payload.qcObject, location);
     }
   }
   // on success, JSROOT will erase all DOM inside div and put its own
@@ -175,9 +175,10 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   if (
     objectRemoteData &&
     objectRemoteData.isSuccess() &&
-    !model.object.isObjectChecker(objectRemoteData.payload) &&
+    !model.object.isObjectChecker(objectRemoteData.payload.qcObject) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
+    const qcObject = objectRemoteData.payload.qcObject;
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
@@ -186,20 +187,19 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      if (objectRemoteData.payload._typename === 'TGraph' &&
-        (objectRemoteData.payload.fOption === '' || objectRemoteData.payload.fOption === undefined)) {
-        objectRemoteData.payload.fOption = 'alp';
+      if (qcObject._typename === 'TGraph' && (qcObject.fOption === '' || qcObject.fOption === undefined)) {
+        qcObject.fOption = 'alp';
       }
 
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
       drawingOptions = drawingOptions.join(';');
       drawingOptions += ';stat';
-      if (objectRemoteData.payload._typename !== 'TGraph') {
+      if (qcObject._typename !== 'TGraph') {
         // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
         drawingOptions += ';f';
       }
 
-      JSROOT.redraw(dom, objectRemoteData.payload, drawingOptions, (painter) => {
+      JSROOT.draw(dom, qcObject, drawingOptions, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
