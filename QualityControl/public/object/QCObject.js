@@ -511,7 +511,7 @@ export default class QCObject extends Observable {
     }
     const object = this.currentList.find((object) => object.name === objectName);
     if (object) {
-      return new Date(object.lastModified).toLocaleString();
+      return new Date(object.lastModified).toLocaleString('en-UK');
     }
     return '-';
   }
@@ -525,7 +525,7 @@ export default class QCObject extends Observable {
   getLastModifiedForSelected(displayDate = false) {
     if (this.selected && this.selected.lastModified) {
       return displayDate === 'date' ?
-        new Date(this.selected.lastModified).toLocaleString() : this.selected.lastModified.toString();
+        new Date(this.selected.lastModified).toLocaleString('en-UK') : this.selected.lastModified.toString();
     } else {
       return '-';
     }
@@ -551,7 +551,7 @@ export default class QCObject extends Observable {
    */
   getDateFromTimestamp(timestamp) {
     try {
-      return new Date(timestamp).toLocaleString();
+      return new Date(timestamp).toLocaleString('en-UK');
     } catch (_err) {
       return 'Invalid Timestamp';
     }
