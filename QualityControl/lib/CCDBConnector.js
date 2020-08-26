@@ -13,7 +13,7 @@
 */
 
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('CCDBConnector');
+const log = new (require('@aliceo2/web-ui').Log)('QCG-CCDBConnector');
 
 /**
  * Gateway for all CCDB calls
@@ -142,7 +142,7 @@ class CCDBConnector {
   }
 
   /**
-   * Check if received object from CCDB is valid
+   * Check if received object's path from CCDB is valid
    * @param {JSON} item
    * @return {JSON}
    */

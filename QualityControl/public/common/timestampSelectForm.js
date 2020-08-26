@@ -37,9 +37,7 @@ export default (model) => h('.w-100.flex-row',
           selected: timestamp === model.object.selected.version ? true : false
         }, [
           model.object.getDateFromTimestamp(timestamp),
-          ' (',
-          timestamp,
-          ')'
+          ' (', timestamp, ')'
         ]);
       })
   ])

@@ -138,7 +138,8 @@ function readObjectsData(req, res) {
 }
 
 /**
- * Read only data of an object specified by objectName
+ * Request data of an object based on name and optionally timestamp
+ * Returned data will contained the QC Object and a list of its corresponding timestamps
  * @param {Request} req
  * @param {Response} res
  */

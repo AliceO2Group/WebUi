@@ -59,7 +59,6 @@ function readObjectData(name) {
     return promiseRejectWithLatency();
   }
   const object = objects.find((object) => object.name === `${name}`);
-  // TODO Add timestamp for testing
   return promiseResolveWithLatency(object ? object.data : 'Object not found');
 }
 
@@ -80,8 +79,9 @@ function listObjects() {
 function getObjectTimestampList() {
   return promiseResolveWithLatency([]);
 }
+
 /**
- * WC
+ * Return true for checking online mode connection
  * @return {Array<Layout>}
  */
 function isOnlineModeConnectionAlive() {

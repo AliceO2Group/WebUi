@@ -178,6 +178,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     !model.object.isObjectChecker(objectRemoteData.payload.qcObject) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
+    const qcObject = objectRemoteData.payload.qcObject;
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
@@ -186,20 +187,19 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      if (objectRemoteData.payload.qcObject._typename === 'TGraph' &&
-        (objectRemoteData.payload.qcObject.fOption === '' || objectRemoteData.payload.qcObject.fOption === undefined)) {
-        objectRemoteData.payload.qcObject.fOption = 'alp';
+      if (qcObject._typename === 'TGraph' && (qcObject.fOption === '' || qcObject.fOption === undefined)) {
+        qcObject.fOption = 'alp';
       }
 
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
       drawingOptions = drawingOptions.join(';');
       drawingOptions += ';stat';
-      if (objectRemoteData.payload.qcObject._typename !== 'TGraph') {
+      if (qcObject._typename !== 'TGraph') {
         // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
         drawingOptions += ';f';
       }
 
-      JSROOT.draw(dom, objectRemoteData.payload.qcObject, drawingOptions, (painter) => {
+      JSROOT.draw(dom, qcObject, drawingOptions, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);

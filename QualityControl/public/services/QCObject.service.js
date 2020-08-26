@@ -65,7 +65,8 @@ export default class QCObjectService {
   }
 
   /**
-   * Ask server for an object by name
+   * Ask server for an object by name and optionally timestamp
+   * If timestamp is not provided, -1 will be used to request latest version of the object
    * @param {string} objectName
    * @param {number} timestamp
    * @return {JSON} {result, ok, status}
