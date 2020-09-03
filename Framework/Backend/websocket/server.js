@@ -1,10 +1,11 @@
 /**
  * @license
- * Copyright CERN and copyright holders of ALICE O2. This software is
- * distributed under the terms of the GNU General Public License v3 (GPL
- * Version 3), copied verbatim in the file "COPYING".
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
  *
- * See http://alice-o2.web.cern.ch/license for full licensing information.
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
  *
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
@@ -24,9 +25,7 @@ const WebSocketMessage = require('./message.js');
 class WebSocket {
   /**
    * Starts up the server and binds event handler.
-   * @param {object} httpsServer - HTTPS server
-   * @param {object} jwtConfig - configuration of jwt
-   * @param {string} hostname - hostname that clients will be conneting to
+   * @param {object} httpsServer - HTTPS server instance
    * @constructor
    */
   constructor(httpsServer) {
@@ -50,10 +49,11 @@ class WebSocket {
   }
 
   /**
-   * Binds callback to websocket message (depending on message name)
-   * Message as an Object is passed to the callback
-   * @param {string} name - websocket message name
-   * @param {function} callback - callback function, that receives message object
+   * Binds callback to websocket message command
+   * Name "filter" is reserved for internal use
+   * @param {string} name       - command name
+   * @param {function} callback - function that receives message as WebSocketMessage object;
+   *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
     if (this.callbackArray.hasOwnProperty(name)) {
@@ -182,9 +182,9 @@ class WebSocket {
   }
 
   /**
-   * Broadcasts the message to all connected clients.
-   * Send messages that match the filter.
-   * @param {string} message
+   * Broadcasts the message to all connected clients
+   * The message must match client's filter (if filter is set)
+   * @param {WebSocketMessage} message
    */
   broadcast(message) {
     this.server.clients.forEach((client) => {
@@ -206,7 +206,7 @@ class WebSocket {
 
   /**
    * Broadcasts messges to all connected clients.
-   * @param {string} message
+   * @param {WebSocketMessage} message
    */
   unfilteredBroadcast(message) {
     this.server.clients.forEach((client) => {

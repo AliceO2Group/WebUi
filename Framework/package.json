@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "1.9.4",
+  "version": "1.12.0",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "contributors": [
@@ -20,8 +20,8 @@
     "test": "npm run eslint && npm run mocha",
     "coverage": "npm run eslint && nyc mocha Backend/test/ --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
-    "mocha-frontend": "mocha --exit ./Frontend/test/",
-    "mocha-backend": "mocha --exit ./Backend/test/*.js",
+    "mocha-frontend": "mocha --exit ./Frontend/test/  --retries 2",
+    "mocha-backend": "mocha --exit ./Backend/test/*.js  --retries 2",
     "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
     "coverage-local": "nyc --reporter=lcov npm run mocha-backend"
   },
@@ -31,23 +31,23 @@
     ]
   },
   "dependencies": {
-    "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.17.1",
-    "simple-oauth2": "^2.2.1",
-    "winston": "^3.2.1",
+    "openid-client": "^3.12.2",
+    "winston": "3.2.1",
     "ws": "^7.0.0"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.13.0",
-    "mocha": "^6.1.4",
+    "mocha": "^7.1.2",
     "nock": "11.7.0",
-    "sinon": "8.1.1",
     "nyc": "^14.1.1",
-    "puppeteer": "2.0.0"
+    "puppeteer": "2.0.0",
+    "sinon": "8.1.1",
+    "supertest": "^4.0.2"
   },
   "main": "Backend/index.js"
 }

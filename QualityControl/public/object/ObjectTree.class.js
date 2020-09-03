@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {Observable} from '/js/src/index.js';
 
 /**
@@ -24,12 +38,11 @@ export default class ObjectTree extends Observable {
   initTree(name, parent) {
     this.name = name || ''; // like 'B'
     this.object = null;
-    this.open = false;
+    this.open = name === 'qc' ? true : false;
     this.children = []; // <Array<ObjectTree>>
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
-    this.quality = null; // most negative quality from this subtree
   }
   /**
    * Toggle this node (open/close)
@@ -86,12 +99,6 @@ export default class ObjectTree extends Observable {
       this.addChild(object, path, []);
       this.notify();
       return;
-    }
-
-    // Keep quality of wrost quality of all leaf
-    // so the root has the wrost quality, easy to monitor
-    if (!this.quality || object.quality === 'bad') {
-      this.quality = object.quality;
     }
 
     // Case end of path, associate the object to 'this' node

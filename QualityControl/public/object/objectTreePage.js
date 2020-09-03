@@ -1,6 +1,23 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
+import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import infoButton from './../common/infoButton.js';
+import timestampSelectForm from './../common/timestampSelectForm.js';
+import virtualTable from './virtualTable.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -8,16 +25,30 @@ import infoButton from './../common/infoButton.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('.flex-column.absolute-fill', {key: model.router.params.page}, [
+export default (model) => h('.h-100.flex-column', {key: model.router.params.page}, [
   h('.flex-row.flex-grow', [
-    h('.flex-grow.scroll-y', tableShow(model)),
-    h('.animate-width.scroll-y',
-      {
-        style: {
-          width: model.object.selected ? '50%' : 0
-        }
+    h('.scroll-y.flex-column', {
+      style: {
+        width: model.object.selected ? '50%' : '100%'
       },
-      model.object.selected ? drawComponent(model) : null)
+    }, model.object.searchInput.trim() !== '' ?
+      virtualTable(model, 'main')
+      :
+      model.object.objectsRemote.match({
+        NotAsked: () => null,
+        Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
+          spinner(5), h('', 'Loading Objects')
+        ]),
+        Success: () => tableShow(model),
+        Failure: () => null, // notification is displayed
+      })
+    ),
+    h('.animate-width.scroll-y', {
+      style: {
+        width: model.object.selected ? '50%' : 0
+      }
+    }, model.object.selected ? drawComponent(model) : null
+    )
   ]),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),
@@ -34,7 +65,7 @@ function drawComponent(model) {
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
       h('.resize-button.flex-row', [
-        infoButton(model.object),
+        infoButton(model.object, model.isOnlineModeEnabled),
         h('.p1.text-left', {style: 'padding-bottom: 0;'},
           h('a.btn',
             {
@@ -45,8 +76,9 @@ function drawComponent(model) {
           )
         )]),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, model.object.selected.name, {stat: true})
-      )
+        draw(model, model.object.selected.name, {stat: true}, 'treePage')
+      ),
+      h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model)))
     ]
   );
 }
@@ -83,58 +115,33 @@ const statusBarRight = (model) => model.object.selected
  * @param {Object} model
  * @return {vnode}
  */
-const tableShow = (model) => [
+const tableShow = (model) =>
   h('table.table.table-sm.text-no-select', [
     h('thead', [
       h('tr', [
-        h('th', {}, 'Name'),
-        h('th', {style: {width: '6em'}}, 'Quality'),
+        h('th', 'Name'),
       ])
     ]),
     h('tbody', [
-      // The main table of the view can be a tree OR the result of a search
       treeRows(model),
-      searchRows(model),
     ])
-  ])
-];
+  ]);
 
 /**
  * Shows a list of lines <tr> of objects
  * @param {Object} model
  * @return {vnode}
  */
-const treeRows = (model) => !model.object.tree
-  ? null
-  : model.object.tree.children.map((children) => treeRow(model, children, 0));
+const treeRows = (model) => !model.object.tree ?
+  null
+  :
+  (
+    (model.object.tree.children.length === 0) ?
+      h('.w-100.text-center', 'No objects found')
+      :
+      model.object.tree.children.map((children) => treeRow(model, children, 0))
+  );
 
-/**
- * Shows a line <tr> for search mode (no indentation)
- * @param {Object} model
- * @return {vnode}
- */
-function searchRows(model) {
-  return model.object.searchResult.map((item) => {
-    const path = item.name;
-
-    /**
-     * Select `item` when clicked by user to show its preview
-     * @return {Any}
-     */
-    const selectItem = () => model.object.select(item);
-    const color = item.quality === 'good' ? 'success' : 'danger';
-    const className = item && item === model.object.selected ? 'table-primary' : '';
-
-    return h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
-      h('td.highlight', [
-        iconBarChart(),
-        ' ',
-        item.name
-      ]),
-      h('td.highlight', {class: color}, item.quality),
-    ]);
-  });
-}
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -147,25 +154,60 @@ function searchRows(model) {
  * @return {vnode}
  */
 function treeRow(model, tree, level) {
-  const color = tree.quality === 'good' ? 'success' : 'danger';
   const padding = `${level}em`;
   const levelDeeper = level + 1;
-  const icon = tree.object ? iconBarChart() : (tree.open ? iconCaretBottom() : iconCaretRight()); // 1 of 3 icons
-  const iconWrapper = h('span', {style: {paddingLeft: padding}}, icon);
   const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
   const path = tree.path.join('/');
-  const selectItem = tree.object ? () => model.object.select(tree.object) : () => tree.toggle();
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
-  return model.object.searchInput ? [] : [
-    h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
-      h('td.highlight', [
-        iconWrapper,
-        ' ',
-        tree.name
-      ]),
-      h('td.highlight', {class: color}, tree.quality),
-    ]),
-    children
-  ];
+  if (model.object.searchInput) {
+    return [];
+  } else {
+    if (tree.object && tree.children.length === 0) {
+      return [leafRow(path, () => model.object.select(tree.object), className, padding, tree.name)];
+    } else if (tree.object && tree.children.length > 0) {
+      return [
+        leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
+        branchRow(path, tree, padding),
+        children
+      ];
+    }
+    return [
+      branchRow(path, tree, padding),
+      children
+    ];
+  }
 }
+
+/**
+ * Creates a row containing specific visuals for leaf object and on selection
+ * it will plot the object with JSRoot
+ * @param {String} path - full name of the object
+ * @param {Action} selectItem - action for plotting the object
+ * @param {String} className - name of the row class
+ * @param {number} padding - space needed to be displayed so that leaf is within its parent
+ * @param {String} leafName - name of the object
+ * @return {vnode}
+ */
+const leafRow = (path, selectItem, className, padding, leafName) =>
+  h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
+    h('td.highlight', [
+      h('span', {style: {paddingLeft: padding}}, iconBarChart()), ' ', leafName]),
+  ]);
+
+/**
+ * Creates a row containing specific visuals for branch object and on selection
+ * it will open its children
+ * @param {String} path - full name of the object
+ * @param {ObjectTree} tree - current selected tree
+ * @param {number} padding - space needed to be displayed so that branch is within its parent
+ * @return {vnode}
+ */
+const branchRow = (path, tree, padding) =>
+  h('tr.object-selectable', {key: path, title: path, onclick: () => tree.toggle()}, [
+    h('td.highlight', [
+      h('span', {style: {paddingLeft: padding}}, tree.open ? iconCaretBottom() : iconCaretRight()),
+      ' ',
+      tree.name
+    ]),
+  ]);

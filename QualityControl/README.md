@@ -1,18 +1,50 @@
 # Quality Control GUI (QCG)
 
 [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/QualityControl/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)
+[![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=qualitycontrol)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
 QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https://github.com/AliceO2Group/QualityControl).
 
+  - [Installation](#installation)
+  - [Local configuration](#local-configuration)
+      - [HTTP](#http)
+      - [CCDB](#ccdb)
+      - [Listing Connector](#listing-connector)
+  - [Run QCG locally](#run-qcg-locally)
+  - [Public API](#public-api)
+  - [Enable HTTPS](#enable-https)
+  - [Online Mode](#online-mode)
 
 ## Installation
-1. NodeJS >12.13.0 is required
+1. `nodeJS` >= `12.13.0` is required
 2. Install QualityControl using `aliBuild` and configure database with [following instructions](https://github.com/AliceO2Group/QualityControl/blob/master/README.md).
 3. Install QCG
 ```
 aliBuild build qcg --default o2-dataflow
 ```
+
+## Local Configuration
+In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/node_modules/@aliceo2/qc/config.js`
+
+#### HTTP
+Attribute to define the `http` endpoint of the application.
+
+Edit the `http` section to define a custom:
+- `hostname`
+- `port`
+- `prefix` - a prefix as string which will be used when querying objects from CCDB
+
+#### CCDB
+Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
+
+Edit the `ccdb` section to define a custom:
+- `hostname`
+- `port`
+- `prefix` - (optional) prefix to use for filtering on pathName
+
+#### Listing Connector
+Specify the connector that should be used for retrieving QC objects. Default value for `listingConnector` is `ccdb`.
 
 ## Run QCG locally
 1. Load QCG modules
@@ -20,7 +52,7 @@ aliBuild build qcg --default o2-dataflow
 alienv enter qcg/latest-o2-dataflow
 ```
 
-2. (Run `Information Service` if you need Online mode. For more details use [QualityControl instructions](https://github.com/AliceO2Group/QualityControl#information-service)).
+2. (Optional) Online Mode - If you need Online Mode read [this](#online-mode) section
 
 3. Run QCG server
 ```
@@ -30,51 +62,7 @@ qcg
 5. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
 
-## Custom configuration
-These steps are necessary only when you don't run the QCG or the CCDB on `localhost`.
-
-In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/node_modules/@aliceo2/qc/config.js`
-
-#### HTTP
-Edit the `http` section to define a custom:
-- `port` number and
-- `hostname`.
-
-#### Information Service
-Edit the `informationService` section to define a custom:
-- `host`name and
-- `port`
-
-of Information Service publish and response socket.
-
-#### CCDB database
-Edit the `ccdb` section to define a custom:
-- `host`name and
-- `port`. 
-
-#### MySQL database
-Edit the `mysql` section to define a custom:
-- MySQL database `host`name,
-- `user`name,
-- `password` and
-- `database` name.
-Edit the `listingConnector` to switch it to `mysql`. 
-
-#### CERN OAuth
-- Register your application in the [CERN OAuth service](https://sso-management.web.cern.ch/OAuth/RegisterOAuthClient.aspx)
-- Provide any `client_id`, eg `qc_gui`
-- Set `redirect_uri` to `https://<YOUR_HOSTNAME>/callback`
-- Fill these values and generated secret into `oAuth` section of `config.js` file.
-
-Note: Enabling or disabling OAuth may impacts layout ownership model. When OAuth is disabled all users share the same `id` (`0`), otherwise `id` equals to CERN Person ID. The layout ownership `id` can be changed directly in the database -  `layout.owner_id`.
-
-#### Enable HTTPS
-- Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
-- Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
-- Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
-
 ## Public API
-
 QCG exposes two public REST API which can be read by any other application.
 
 - Get all objects metadata\
@@ -83,3 +71,39 @@ QCG exposes two public REST API which can be read by any other application.
 - Get ROOT object data in JSON format to be used with JSROOT\
   Request: `curl 'http://localhost:8080/api/readObjectData?objectName=AGENT/OBJECT' -X GET`\
   Result: `{"_typename":"TCanvas", ...}`
+
+## Enable HTTPS
+- Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
+- Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
+- Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
+
+## Online Mode
+QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class. 
+
+For this, QCG is using Service Discovery capabilities of [Consul](https://www.consul.io/).
+Once `Consul` is [installed](https://learn.hashicorp.com/consul/getting-started/install) and running, update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running:
+```javascript
+consul: {
+  hostname: 'localhost',
+  port: 8500
+}
+```
+Online mode will use an optional prefix for its queries specified in [ccdb.prefix](#ccdb). This is to ensure the same results are provided in both Offline & Online mode.
+
+As this functionality is optional, there will be no impact on QCG if a configuration for `Consul` is not provided. A simple warning message as below will be shown to the user that the configuration is missing
+```
+2020-02-28T10:19:26.110Z warn: [QualityControlModel] Consul Service: No Configuration Found
+```
+
+## Continuous Integration Workflows
+QualityControl project makes use of two workflows.
+### [qc.yml](./../.github/workflows/qc.yml)
+* Checks that tests of the project are running successfully on two virtual machines:
+  * `ubuntu`
+  * `macOS`
+* Make sure that the proposed changes are not reducing the current code-coverage percent
+* Sends a code coverage report to [CodeCov](https://codecov.io/gh/AliceO2Group/WebUi)
+
+### [release.yml](../.github/workflows/release.yml)
+* Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/qc](https://www.npmjs.com/package/@aliceo2/qc)
+* Raises a new Pull-Request in [alisw/alidist](https://github.com/alisw/alidist) with changes to the recipe `qcg.sh` with the new version and new tag

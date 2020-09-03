@@ -1,8 +1,0 @@
-digraph g{
-rankdir=LR
-"/" -> "OAuth" [label = "1. code is missing\nsave query into state" fontsize = 10]
-"OAuth" -> "/callback" [label = "3. user is authentified" fontsize = 10]
-"/callback" -> "/" [label = "4. redirect to app\nwith code and saved query" fontsize = 10]
-OAuth -> OAuth [label = "2. check username and password" fontsize = 10]
-}
-

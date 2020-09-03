@@ -1,21 +1,13 @@
 name: QualityControl
-
 on:
   pull_request:
     paths:
-      - 'QualityControl/*'
-      - 'QualityControl/*/*'
-      - 'QualityControl/*/*/*'
+      - 'QualityControl/**/*'
       - '.github/workflows/qc.yml'
   push:
     branches:
       - 'master'
       - 'dev'
-    paths:
-      - 'QualityControl/*'
-      - 'QualityControl/*/*'
-      - 'QualityControl/*/*/*'
-      - '.github/workflows/qc.yml'
 
 jobs:
   test:
@@ -29,10 +21,10 @@ jobs:
           node-version: '12.x'
       - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
       - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
-      - run: (cd QualityControl; npm install )
+      - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm test )
   coverage:
-    name: Tests && coverage on macOS-latest
+    name: Tests & coverage on macOS-latest
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
@@ -41,7 +33,12 @@ jobs:
           node-version: '12.x'
       - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
       - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
-      - run: (cd QualityControl; npm install )
+      - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd QualityControl; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
+      - name: Send codecov report for QualityControl
+        uses: codecov/codecov-action@v1.0.13
+        with:
+          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          flags: qualitycontrol
+          fail_ci_if_error: true

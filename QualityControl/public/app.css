@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ * 
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ * 
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 .animate-width { transition: width 0.3s; }
 .animate-height { transition: height 0.3s; }
 .animate-dimensions { transition: height 0.3s, width 0.3s; }
@@ -35,5 +49,13 @@
 .resize-button { position: absolute; right: 0%; z-index: 100 }
 
 /* Removing borders and arrows from select-dropdown */
-select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';}
-.select-tab {border: 0;border-bottom: 2px solid var(--color-blue);border-radius: 0;margin-bottom: -2px;color: var(--color-blue);}
+/* select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';} */
+.select-tab {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';border: 0;border-bottom: 2px solid var(--color-blue);border-radius: 0;margin-bottom: -2px;color: var(--color-blue);}
+
+.checker-label{font-weight: bold; margin-bottom: 0; color: var(--color-gray-dark) }
+
+.actionable-icon {cursor: pointer;}
+.actionable-icon:hover {transform: scale(1.2);}
+.actionable-icon:active {transform: scale(1.5);}
+
+.table-logs-content { width: 100%; border-collapse: collapse; }

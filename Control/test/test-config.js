@@ -1,3 +1,16 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
 
 module.exports = {
   http: {
@@ -21,7 +34,7 @@ module.exports = {
   },
   consul: {
     hostname: 'localhost',
-    port: 8500,
-    cruPath: 'test/o2/hardware/flps'
+    port: 8550,
+    flpHardwarePath: 'test/o2/hardware/flps'
   }
 };

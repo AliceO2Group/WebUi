@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 // Import frontend framework
 import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
 import {Notification as O2Notification} from '/js/src/index.js';
@@ -49,9 +63,6 @@ export default class Model extends Observable {
     this.router.bubbleTo(this);
     this.handleLocationChange(); // Init first page
 
-    // Setup keyboard dispatcher
-    window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
-
     // Setup WS connexion
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
@@ -62,23 +73,6 @@ export default class Model extends Observable {
 
     this.accountMenuEnabled = false;
     this.sideBarMenu = true;
-  }
-
-  /**
-   * Delegates sub-model actions depending on incoming keyboard event
-   * @param {Event} e
-   */
-  handleKeyboardDown(e) {
-    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
-    const code = e.keyCode;
-
-    // Delete key + layout page + object select => delete this object
-    if (code === 8 &&
-      this.router.params.page === 'layoutShow' &&
-      this.layout.editEnabled &&
-      this.layout.editingTabObject) {
-      this.layout.deleteTabObject(this.layout.editingTabObject);
-    }
   }
 
   /**
@@ -119,9 +113,7 @@ export default class Model extends Observable {
         this.environment.getEnvironment({id: this.router.params.id});
         break;
       case 'newEnvironment':
-        this.workflow.getRepositoriesList();
-        this.workflow.getAllTemplatesAsMap();
-        this.workflow.resetErrorMessage();
+        this.workflow.initWorkflowPage();
         break;
       case 'about':
         this.frameworkInfo.getFrameworkInfo();
@@ -153,6 +145,7 @@ export default class Model extends Observable {
     this.sideBarMenu = !this.sideBarMenu;
     this.notify();
   }
+
   /**
    * Display a browser notification(Notification - Web API)
    * @param {String} message

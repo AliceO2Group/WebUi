@@ -2,22 +2,23 @@
 
 
 [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/Framework/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)
-[![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/master/graph/badge.svg)](https://codecov.io/gh/AliceO2Group/WebUi)
+[![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=framework)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
-  - [Overview](#overview)
-    - [Server-side features](#server-side-features)
-    - [Client-side features](#client-side-features)
-  - [System requirements](#system-requirements)
-    - [CentOS 7](#centos-7)
-    - [macOS](#macos)
-  - [Minimum browser version support](#minimum-browser-version-support)
-  - [Installation](#installation)
-  - [Getting started](#getting-started)
-  - [Backend guide](#backend-guide)
-  - [Frontend guide](#frontend-guide)
-  - [References](#references)
-  - [Documentation for developers](#documentation-for-developers)
+- [ALICE O<sup>2</sup> Web UI Framework](#alice-osup2sup-web-ui-framework)
+    - [Overview](#overview)
+      - [Server-side features](#server-side-features)
+      - [Client-side features](#client-side-features)
+    - [Backend requirements](#backend-requirements)
+      - [CentOS 7](#centos-7)
+      - [macOS](#macos)
+    - [Minimum browser version support](#minimum-browser-version-support)
+    - [Installation](#installation)
+    - [Getting started](#getting-started)
+    - [Backend guide](#backend-guide)
+    - [Frontend guide](#frontend-guide)
+    - [References](#references)
+    - [Documentation for developers](#documentation-for-developers)
 
 ### Overview
 
@@ -25,7 +26,7 @@ The goal of this UI framework is to identify library and framework sets, provide
 
 #### Server-side features
 - REST and WebSocket API
-- Authentication via CERN OAuth 2.0 and authorisation via CERN e-groups
+- Authentication via CERN SSO (OpenID Connect), authorisation using CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
 - External resource access: MySQL, gRPC, Consul
 
@@ -34,8 +35,8 @@ The goal of this UI framework is to identify library and framework sets, provide
 - Asynchronous data fetching (Ajax) and bi-directional socket (WebSockets)
 - MVC engine with a "diffing" algorithm
 
-### System requirements
-* `nodejs` >= 8.9.4
+### Backend requirements
+* `nodejs` >= v10.13.0
 
 #### CentOS 7
 ```
@@ -50,7 +51,7 @@ brew install node
 ### Minimum browser version support
 - Chrome 61
 - Firefox 60
-- Edge 16
+- Edge 80
 - Safari 10.1
 - Opera 47
 
@@ -64,13 +65,14 @@ npm install --save @aliceo2/web-ui
 * [Advanced frontend demo](https://aliceo2group.github.io/WebUi/Framework/docs/demo/frontend.html)
 
 ### Backend guide
-* [HTTPS server](./docs/guide/http-server.md) - Serves custom REST API, supports TLS
+* [REST API](./docs/guide/http-server.md) - Serves custom REST API, supports TLS
 * [JSON Web Tokens](./docs/guide/json-tokens.md) - Secures HTTP requests and WebSocket messages with a JWT token
 * [Logging](./docs/guide/logging.md) - Stores log messages in a file or pushes them to InfoLogger service
-* [OAuth](./docs/guide/oauth.md) - Provides authentication via CERN oAuth and authorisation via e-groups
-* [WebSockets](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
+* [SSO - OpenID Connect](./docs/guide/openid.md) - Provides authentication using CERN SSO via OpenID Connect
+* [WebSocket server](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 * [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
+* [JIRA](./docs/guide/jira.md) - Create JIRA issues
 
 ### Frontend guide
 - [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript and observable model
@@ -88,4 +90,3 @@ npm install --save @aliceo2/web-ui
 
 ### Documentation for developers
 * [Development environment](./docs/guide/devel.md)
-* [Authentication and authorization](./docs/guide/auth.md)

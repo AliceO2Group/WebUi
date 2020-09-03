@@ -1,7 +1,20 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
 
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
+import errorPage from '../common/errorPage.js';
 
 /**
  * @file Page to FrameworkInfo(About) (content and header)
@@ -39,7 +52,7 @@ const createTableForControlGUIInfo = (frameworkInfo) =>
       NotAsked: () => null,
       Loading: () => pageLoading(),
       Success: (data) => showContent(data),
-      Failure: (error) => pageError(error),
+      Failure: (error) => errorPage(error),
     }),
   ]);
 
@@ -54,7 +67,7 @@ const createTableForAliECSInfo = (frameworkInfo) =>
       NotAsked: () => null,
       Loading: () => pageLoading(),
       Success: (data) => showContent({'AliECS Core Info': data}),
-      Failure: (error) => pageError(error),
+      Failure: (error) => errorPage(error),
     })
   ]);
 

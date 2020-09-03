@@ -1,21 +1,13 @@
 name: Control
-
 on:
   pull_request:
     paths:
-      - 'Control/*'
-      - 'Control/*/*'
-      - 'Control/*/*/*'
+      - 'Control/**/*'
       - '.github/workflows/control.yml'
   push:
     branches:
       - 'master'
       - 'dev'
-    paths:
-      - 'Control/*'
-      - 'Control/*/*'
-      - 'Control/*/*/*'
-      - '.github/workflows/control.yml'
 
 jobs:
   test:
@@ -27,18 +19,23 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd Control; npm install )
+      - run: (cd Control; npm ci )
       - run: (cd Control; npm test )
   coverage:
     name: Tests & coverage on ubuntu-18.04
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd Control; npm install )
+      - run: (cd Control; npm ci )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd Control; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
+      - name: Send codecov report for Control
+        uses: codecov/codecov-action@v1.0.13
+        with:
+          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          flags: control
+          fail_ci_if_error: true

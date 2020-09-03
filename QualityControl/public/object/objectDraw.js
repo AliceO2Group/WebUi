@@ -1,7 +1,22 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* global JSROOT */
 
 import {h} from '/js/src/index.js';
 import {timerDebouncer, pointerId} from '../common/utils.js';
+import checkersPanel from './checkersPanel.js';
 
 /**
  * Draw an object using JSROOT.
@@ -17,9 +32,10 @@ import {timerDebouncer, pointerId} from '../common/utils.js';
  * @param {object} model - root model object
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
  * @param {object} options - optional options of presentation
+ * @param {string} location - location from where `draw` method is called; Used for different style
  * @return {vdom} output virtual-dom, a single div with JSROOT attached to it
  */
-export function draw(model, tabObject, options) {
+export function draw(model, tabObject, options, location = '') {
   const defaultOptions = {
     width: '100%', // CSS size
     height: '100%', // CSS size
@@ -46,7 +62,7 @@ export function draw(model, tabObject, options) {
 
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
-    key: fingerprintReplacement(tabObject), // completly re-create this div if the chart is not the same at all
+    key: fingerprintReplacement(tabObject), // completely re-create this div if the chart is not the same at all
     class: options.className,
     style: {
       height: options.height,
@@ -59,7 +75,6 @@ export function draw(model, tabObject, options) {
      */
     oncreate(vnode) {
       // ask model to load data to be shown
-      model.object.addObjectByName(tabObject.name);
 
       // setup resize function
       vnode.dom.onresize = timerDebouncer(() => {
@@ -92,9 +107,6 @@ export function draw(model, tabObject, options) {
      * @param {vnode} vnode
      */
     onremove(vnode) {
-      // tell model we don't need those data anymore and free memory if needed
-      model.object.removeObjectByName(tabObject.name);
-
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {
         // cleanup might not be loaded yet
@@ -114,14 +126,16 @@ export function draw(model, tabObject, options) {
       h('.animate-slow-appearance', 'Loading')
     ]);
   } else if (objectRemoteData.isFailure()) {
-    content = h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('.p4.f6', objectRemoteData.payload),
-    ]);
+    content = h('.scroll-y.absolute-fill.p1.f6.text-center', {
+      style: 'word-break: break-all;'
+    }, objectRemoteData.payload);
   } else {
-    // on success, JSROOT will erase all DOM inside div and put its own
+    if (model.object.isObjectChecker(objectRemoteData.payload.qcObject)) {
+      return checkersPanel(objectRemoteData.payload.qcObject, location);
+    }
   }
-
-  return h('div.relative.jsroot-container', attributes, content);
+  // on success, JSROOT will erase all DOM inside div and put its own
+  return h('.relative.jsroot-container', attributes, content);
 }
 
 /**
@@ -158,8 +172,13 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   const shouldRedraw = dom.dataset.fingerprintRedraw !== redrawHash;
   const shouldCleanRedraw = dom.dataset.fingerprintCleanRedraw !== cleanRedrawHash;
 
-  if (objectRemoteData && objectRemoteData.isSuccess() &&
-    (shouldRedraw || shouldCleanRedraw)) {
+  if (
+    objectRemoteData &&
+    objectRemoteData.isSuccess() &&
+    !model.object.isObjectChecker(objectRemoteData.payload.qcObject) &&
+    (shouldRedraw || shouldCleanRedraw)
+  ) {
+    const qcObject = objectRemoteData.payload.qcObject;
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
@@ -168,20 +187,19 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      if (objectRemoteData.payload._typename === 'TGraph' &&
-        (objectRemoteData.payload.fOption === '' || objectRemoteData.payload.fOption === undefined)) {
-        objectRemoteData.payload.fOption = 'alp';
+      if (qcObject._typename === 'TGraph' && (qcObject.fOption === '' || qcObject.fOption === undefined)) {
+        qcObject.fOption = 'alp';
       }
 
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
       drawingOptions = drawingOptions.join(';');
       drawingOptions += ';stat';
-      if (objectRemoteData.payload._typename !== 'TGraph') {
+      if (qcObject._typename !== 'TGraph') {
         // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
         drawingOptions += ';f';
       }
 
-      JSROOT.redraw(dom, objectRemoteData.payload, drawingOptions, (painter) => {
+      JSROOT.draw(dom, qcObject, drawingOptions, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);

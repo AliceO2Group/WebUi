@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* eslint-disable no-invalid-this */
 /* eslint-disable no-console */
 /* eslint-disable max-len */
@@ -71,7 +85,7 @@ describe('Control', function() {
         calls['getEnvironments'] = true;
         const responseData = {
           frameworkId: '74917838-27cb-414d-bfcd-7e74f85d4926-0000',
-          environments: [envTest]
+          environments: [envTest.environment]
         };
         callback(null, responseData);
       },
@@ -117,6 +131,10 @@ describe('Control', function() {
           callback(null, {});
         }
       },
+      destroyEnvironment(call, callback) {
+        calls['destroyEnvironment'] = true;
+        callback(null, {});
+      }
     });
     server.bind(address, credentials);
     server.start();
@@ -183,6 +201,7 @@ describe('Control', function() {
   require('./public/page-environment-mocha');
   require('./public/page-environments-mocha');
   require('./public/page-new-environment-mocha');
+  require('./public/page-configuration-mocha');
 
   beforeEach(() => {
     this.ok = true;

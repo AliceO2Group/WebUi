@@ -1,6 +1,20 @@
-import {h, iconChevronBottom, iconChevronRight} from '/js/src/index.js';
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
+import {h, iconChevronBottom, iconChevronRight, iconCircleX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import pageError from '../common/pageError.js';
+import errorPage from '../common/errorPage.js';
 /**
  * @file Page to show configuration components (content and header)
  */
@@ -12,12 +26,8 @@ import pageError from '../common/pageError.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', [
-    h('h4', 'Configuration')
-  ]),
-  h('.flex-grow text-right', [
-
-  ])
+  h('.w-50 text-center', h('h4', 'Configuration')),
+  h('.flex-grow text-right')
 ];
 
 /**
@@ -26,75 +36,213 @@ export const header = (model) => [
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill', [
-  model.configuration.cruList.match({
+  model.configuration.readoutCardList.match({
     NotAsked: () => null,
     Loading: () => h('.w-100.text-center', pageLoading()),
-    Success: (cruMap) => buildPage(model, cruMap),
-    Failure: (error) => h('.w-100.text-center', pageError(error)),
+    Success: (readoutCardsMap) => buildPage(model, readoutCardsMap),
+    Failure: (error) => h('.w-100.text-center', errorPage(error)),
   })
 ]);
 
 /**
  * vnode with the configuration
  * @param {Object} model
- * @param {JSON} cruMap
+ * @param {JSON} readoutCardsMap
  * @return {vnode}
  */
-const buildPage = (model, cruMap) =>
-  h('.p2', [
-    actionForm(model),
-    h('h4.mh2.mv2', 'Readout Cards Table'),
-    cruTable(model, cruMap)
-  ]);
+const buildPage = (model, readoutCardsMap) => h('.p2', [
+  actionForm(model),
+  h('h4.mh2.mv2', 'Readout Cards Table'),
+  readoutCardsTable(model, readoutCardsMap)
+]);
 
 /**
  * vnode with the action panel (roc-config/status)
  * @param {Object} model
  * @return {vnode}
  */
-const actionForm = (model) =>
-  h('.p2.mh2.mv3.shadow-level1',
-    [
-      actionDropdown(model)
-    ]
-  );
+const actionForm = (model) => h('.p2.mv3.w-100', [
+  actionPanel(model),
+  expertPanel(model, model.configuration.actionPanel.expertOptions),
+]);
 
 /**
  * vnode with the possible roc actions
  * @param {Object} model
  * @return {vnode}
  */
-const actionDropdown = (model) =>
-  h('.m2.w-50', [
-    h('h5', 'ROC Action:'),
-    h('', {style: 'display: flex; flex-direction: row;'}, [
-      h('select.form-control', {
-        style: 'cursor: pointer',
-        onchange: (e) => model.configuration.setCommand(e.target.value)
-      }, [
-        h('option', {
-          selected: 'CONFIG' === model.configuration.actionPanel.command ? true : false, value: 'CONFIG'
-        }, 'roc-config'),
-        h('option', {
-          selected: 'STATUS' === model.configuration.actionPanel.command ? true : false, value: 'STATUS'
-        }, 'roc-status')
-      ]),
-      h('button.btn.btn-primary.mh2', {title: 'Run command for the selected CRUs', disabled: true}, 'Run')
-    ])
-  ]);
+const actionPanel = (model) => h('.flex-row.w-100.pv2', [
+  h('h4', 'Action:'),
+  h('.w-25.mh2', {style: 'display: flex; flex-direction: row;'}, [
+    h('select.form-control', {
+      style: 'cursor: pointer',
+      onchange: (e) => model.configuration.setRocCommand(e.target.value)
+    }, [
+      h('option', {
+        selected: 'CONFIG' === model.configuration.actionPanel.command ? true : false, value: 'CONFIG'
+      }, 'roc-config')
+    ]),
+  ]),
+  runPanel(model),
+  rocStatusPanel(model)
+]);
+
 /**
- * vnode with the CRU table
+ * vnode returning a panel containing operational buttons
  * @param {Object} model
- * @param {Map<string, JSON>} cruMap
  * @return {vnode}
  */
-const cruTable = (model, cruMap) =>
-  h('.mh2.shadow-level1', [
+const runPanel = (model) =>
+  h('.btn-group.mh2', {
+    style: 'justify-content:right; display: flex',
+  }, [
+    h('button.btn.btn-primary', {
+      title: 'Run command for the selected CRUs',
+      disabled: model.configuration.actionPanel.runButtonDisabled,
+      onclick: () => model.configuration.confirmSelectionAndRunCommand()
+    }, 'Run'),
+  ]);
+
+/**
+ * vnode with the status of the execution of roc-command
+ * @param {Object} model
+ * @return {vnode}
+ */
+const rocStatusPanel = (model) => h('.w-100',
+  model.configuration.rocStatus.match({
+    NotAsked: () => null,
+    Loading: () => h('.w-100.text-center', pageLoading(2)),
+    // Success: (status) => showStatus(panel),
+    Success: () => null,
+    Failure: (error) => h('.w-100.text-center.danger', h('', [iconCircleX(), ' ', error])),
+  })
+);
+
+
+/**
+ * vnode with expert panel allowing the user to change defaults for the command
+ * @param {Object} model
+ * @param {options} options
+ * @return {vnode}
+ */
+const expertPanel = (model, options) => h('.pv3', {
+  class: model.configuration.actionPanel.runButtonDisabled ? 'disabled-content' : '',
+  style: {
+    transition: 'max-height 0.5s',
+    overflow: 'hidden',
+    // 'max-height': model.configuration.actionPanel.expertMode ? '50em' : 0,
+    height: 'auto'
+  }
+}, [
+  h('h4.pv2', 'Flags:'),
+  h('.flex-column', [
+    h('h5.bg-gray-light.p2.panel-title', 'Clock Settings'),
+    h('.flex-row.w-100.p2.panel', [
+      inputNumberBox(model, 'ONU Address', 0, Math.pow(2, 31 - 1), 'onu-address', 'ONU address for PON upstream'),
+      dropDown(model, 'PON Upstream', ['TRUE', 'FALSE'], 'pon-upstream', 'Enables PON upstream'),
+      dropDown(model, 'Clock', ['LOCAL', 'TTC'], 'clock', 'LOCAL => CRU internal CLOCK ; TTC => CLOCK from LTU'),
+    ])
+  ]),
+  h('.flex-column.mv3', [
+    h('h5.panel-title.p2', 'Dataflow Settings'),
+    h('.panel.p2', [
+      h('.flex-row.w-100', [
+        inputNumberBox(model, 'CRU-ID', 0, Math.pow(2, 31 - 1), 'cru-id', '12-bit CRU ID'),
+        inputNumberBox(model, 'Trigger Window Size', 0, Math.pow(2, 31 - 1), 'trigger-window-size',
+          'Size of the trigger window in GBT words'),
+        dropDown(model, 'Allow rejection', ['TRUE', 'FALSE'], 'allow-rejection',
+          'Allows HBF (HeartBeat Frame) rejection'),
+      ]),
+      h('.flex-row.w-100.pv2', [
+        dropDown(model, 'Downstream Data', ['CTP', 'PATTERN', 'MIDTRG'], 'downstreamdata'),
+        dropDown(model, 'Loopback', ['TRUE', 'FALSE'], 'loopback', 'Enables link loopback'),
+        dropDown(model, 'Datapath Mode', ['PACKET', 'CONTINUOUS'], 'datapathmode'),
+      ]),
+      h('.flex-row.w-100.pv2', [
+        dropDown(model, 'DYN Offset', ['TRUE', 'FALSE'], 'dyn-offset', 'Enables the dynamic offset'),
+        h('.w-33'), h('.w-33'),
+      ]),
+    ])
+  ]),
+  h('.flex-column', [
+    h('h5.panel-title.p2', 'Link Settings'),
+    h('.panel.p2', [
+      h('.flex-row.w-100.p2', [
+        dropDown(model, 'GBT Mode', ['GBT', 'WB'], 'gbtmode'),
+        dropDown(model, 'GBT MUX', ['TTC', 'DDG', 'SWT'], 'gbtmux'),
+        h('.w-33')]
+      ),
+      h('.flex-row.w-100.p1', [
+        h('.tooltip', {
+          style: 'width: 12.5%;border: 0'
+        }, [
+          h('label', {
+            style: 'cursor: help'
+          }, 'Links'),
+          h('span.tooltiptext', 'Enables checked links')
+        ]),
+        h('.w-100.mh2', {style: 'display: flex; justify-content: space-between; flex-wrap: wrap;'}, [
+          h('label.d-inline.f6.ph1', {style: 'white-space: nowrap', title: `Toggle selection of all links`},
+            h('input', {
+              type: 'checkbox',
+              checked: model.configuration.areAllLinksSelected(),
+              onchange: () => model.configuration.toggleAllLinksSelection()
+            }), 'Toggle all'),
+          options.links.map((link, index) => index !== 12 && checkBox(model, `#${index}`, index)),
+        ])
+      ])
+    ])
+  ]),
+  h('.flex-column.mv3', [
+    h('h5.panel-title.p2', 'Miscellaneous'),
+    h('.flex-row.w-100.p2.panel', [
+      dropDown(model, 'Force config', ['TRUE', 'FALSE'], 'force-config',
+        'Flag to force configuration (needed to force the clock configuration)'),
+    ]),
+    h('.flex-row.w-50'),
+    h('.flex-row.w-50'),
+  ]),
+  displayCommandPanel(model.configuration),
+]);
+
+/**
+ * vnode with the roc command as a string
+ * @param {Object} configuration
+ * @return {vnode}
+ */
+const displayCommandPanel = (configuration) => h('.w-100', [
+  h('h5.panel-title.p2', 'Command:'),
+  h('.panel.p2', ['roc-config',
+    configuration.getSelectedLinks().length > 0 &&
+    `  --links ${configuration.getSelectedLinks()}`,
+    configuration.getModifiedOptionsAsString()
+  ])
+]);
+
+/**
+ * vnode with the Readout Cards table
+ * @param {Object} model
+ * @param {Map<string, JSON>} readoutCardsMap
+ * @return {vnode}
+ */
+const readoutCardsTable = (model, readoutCardsMap) =>
+  h('.p2', [
     h('table.table.table-sm', [
-      h('thead', [
+      h('thead.panel-title', [
         h('tr', [
-          h('th', {style: 'width:0'}, ''),
-          h('th', {style: 'width:0'}, ''),
+          h('th.actionable-row', {
+            style: 'width:0',
+            title: 'Open / Close all rows by HostName',
+            onclick: () => model.configuration.toggleAllHostRows()
+          }, model.configuration.areAllHostRowsOpened() ? iconChevronBottom() : iconChevronRight()),
+          h('th', {style: 'width:0'},
+            h('input.actionable-row', {
+              type: 'checkbox',
+              title: 'Toggle selection of all hosts',
+              onclick: () => model.configuration.toggleSelectionOfAllReadoutCards(),
+              checked: model.configuration.areAllReadoutCardsSelected()
+            })
+          ),
           h('th', 'Hostname'),
           h('th', {style: 'width:0;'}, ''),
           h('th', 'Type'),
@@ -104,25 +252,25 @@ const cruTable = (model, cruMap) =>
           h('th', 'Serial')
         ])
       ]),
-      h('tbody.actionable-row', [
-        Object.keys(cruMap).length === 0 ?
+      h('tbody.actionable-row.panel', [
+        Object.keys(readoutCardsMap).length === 0 ?
           h('tr', h('td', {colspan: 9, style: 'text-align: center;'}, 'No data found'))
-          : Object.keys(cruMap).map((hostName) =>
+          : Object.keys(readoutCardsMap).map((hostName) =>
             [h('tr', [
               h('td.text-center', {
                 title: 'Show/Hide CRUs for this host',
                 onclick: () => model.configuration.toggleHostRow(hostName)
-              }, cruMap[hostName].open ? iconChevronBottom() : iconChevronRight()),
-              h('td', {onclick: () => model.configuration.toggleAllCRUsForHost(hostName)},
+              }, readoutCardsMap[hostName].open ? iconChevronBottom() : iconChevronRight()),
+              h('td', {onclick: () => model.configuration.toggleAllReadoutCardsByHost(hostName)},
                 h('label.d-inline.actionable-row', {title: 'Select / Unselect all CRUs for this host'},
                   h('input.actionable-row', {
                     type: 'checkbox',
-                    title: 'Select / Unselect all CRUs for this host',
-                    checked: model.configuration.areAllCRUsForHostSelected(hostName), // add from somewhere in JSON
+                    title: 'Toggle selection of all CRUs for this host',
+                    checked: model.configuration.areAllReadoutCardsForHostSelected(hostName),
                   })
                 )
               ),
-              h('td', {onclick: () => model.configuration.toggleAllCRUsForHost(hostName)}, hostName),
+              h('td', {onclick: () => model.configuration.toggleAllReadoutCardsByHost(hostName)}, hostName),
               h('td', ''),
               h('td', ''),
               h('td', ''),
@@ -130,8 +278,8 @@ const cruTable = (model, cruMap) =>
               h('td', ''),
               h('td', ''),
             ]),
-            cruMap[hostName].open && Object.keys(cruMap[hostName].objects).map((card) =>
-              h('tr', {onclick: () => model.configuration.toggleCRUSelection(hostName, card)}, [
+            readoutCardsMap[hostName].open && Object.keys(readoutCardsMap[hostName].objects).map((card) =>
+              h('tr', {onclick: () => model.configuration.toggleReadoutCardSelection(hostName, card)}, [
                 h('td', ''),
                 h('td', ''),
                 h('td', ''),
@@ -139,16 +287,97 @@ const cruTable = (model, cruMap) =>
                   h('input.actionable-row', {
                     type: 'checkbox',
                     title: 'Select / Unselect this CRU',
-                    checked: cruMap[hostName].objects[card].checked,
+                    checked: readoutCardsMap[hostName].objects[card].checked,
                   }))),
-                h('td', cruMap[hostName].objects[card].type),
-                h('td', cruMap[hostName].objects[card].endpoint),
-                h('td', cruMap[hostName].objects[card].pciAddress),
-                h('td', cruMap[hostName].objects[card].firmware),
-                h('td', cruMap[hostName].objects[card].serial),
+                h('td', readoutCardsMap[hostName].objects[card].type),
+                h('td', readoutCardsMap[hostName].objects[card].endpoint),
+                h('td', readoutCardsMap[hostName].objects[card].pciAddress),
+                h('td', readoutCardsMap[hostName].objects[card].firmware),
+                h('td', readoutCardsMap[hostName].objects[card].serial),
               ]),
             )
             ]
           )])
     ])]
   );
+
+/*
+Helpers
+*/
+
+/**
+ * Generate a dropdown list
+ * @param {Object} model
+ * @param {string} title
+ * @param {Array<string>} options
+ * @param {string} field
+ * @param {string} help
+ * @return {vnode}
+ */
+const dropDown = (model, title, options, field, help = undefined) =>
+  h('.flex-row.w-33', [
+    h('.w-33', {
+      style: 'border: 0',
+      class: help ? 'tooltip' : ''
+    }, [
+      h('label', {
+        style: help ? 'cursor: help' : ''
+      }, title),
+      help && h('span.tooltiptext', help)
+    ]),
+    h('.w-50.mh2',
+      h('select.form-control', {
+        style: 'cursor: pointer',
+        onchange: (e) => model.configuration.setExpertOptionByField(field, e.target.value)
+      }, [
+        h('option', {selected: '-' === field ? true : false, value: '-'}, '-'),
+        options.map((option) =>
+          h('option', {
+            selected: option === field ? true : false, value: option
+          }, option)
+        )
+      ])
+    )
+  ]);
+
+/**
+* Generate a component with an input string box of type number
+* @param {Object} model
+* @param {string} title
+* @param {number} min
+* @param {number} max
+* @param {string} field
+* @param {string} help
+* @return {vnode}
+*/
+const inputNumberBox = (model, title, min, max, field, help) =>
+  h('.flex-row.w-33', [
+    h('.w-33.tooltip', {style: 'border: 0'}, [
+      h('label', {style: 'cursor: help'}, title),
+      h('span.tooltiptext', help)
+    ]),
+    h('.w-50.mh2',
+      h('input.form-control', {
+        type: 'number',
+        min: min,
+        max: max,
+        onkeyup: (e) => model.configuration.setExpertOptionByField(field, e.target.value),
+      }, field)
+    )
+  ]);
+
+/**
+ * Generate a checkbox based on title and field to change
+ * @param {Object} model
+ * @param {string} title
+ * @param {number} index
+ * @return {vnode}
+ */
+const checkBox = (model, title, index) => h('label.d-inline.f6.ph1', {
+  style: 'white-space: nowrap',
+  title: `Toggle selection of Link #${index}`
+}, h('input', {
+  type: 'checkbox',
+  checked: model.configuration.actionPanel.expertOptions.links[index],
+  onchange: () => model.configuration.toggleLinkSelection(index)
+}), title);

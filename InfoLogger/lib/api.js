@@ -1,7 +1,22 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 const {Log, WebSocketMessage, InfoLoggerReceiver} = require('@aliceo2/web-ui');
 const log = new Log('InfoLogger');
 const config = require('./configProvider.js');
 const SQLDataSource = require('./SQLDataSource.js');
+const ProfileService = require('./ProfileService.js');
 const {MySQL} = require('@aliceo2/web-ui');
 const JsonFileConnector = require('./JSONFileConnector.js');
 const projPackage = require('./../package.json');
@@ -10,6 +25,7 @@ let querySource = null;
 let liveSource = null;
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+const profileService = new ProfileService(jsonDb);
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);
@@ -38,10 +54,11 @@ if (config.infoLoggerServer) {
 
 module.exports.attachTo = (http, ws) => {
   http.get('/getFrameworkInfo', getFrameworkInfo);
-  http.get('/getUserProfile', getUserProfile);
+  http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
+  http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
   http.post('/services', getServicesStatus);
   http.post('/query', query);
-  http.post('/saveUserProfile', saveUserProfile);
+  http.post('/saveUserProfile', (req, res) => profileService.saveUserProfile(req, res));
 
   /**
    * Method to send back the status of the current services (e.g query/live)
@@ -98,75 +115,14 @@ module.exports.attachTo = (http, ws) => {
   }
 
   /**
-   * Method which handles the request for the user profile
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function getUserProfile(req, res) {
-    const user = parseInt(req.query.user);
-    jsonDb.getProfileByUsername(user).then((profile) => {
-      if (profile) {
-        res.status(200).json(profile);
-      } else {
-        const defaultUserConfig = {
-          date: {size: 'cell-m', visible: false},
-          time: {size: 'cell-m', visible: true},
-          hostname: {size: 'cell-m', visible: false},
-          rolename: {size: 'cell-m', visible: true},
-          pid: {size: 'cell-s', visible: false},
-          username: {size: 'cell-m', visible: false},
-          system: {size: 'cell-s', visible: true},
-          facility: {size: 'cell-m', visible: true},
-          detector: {size: 'cell-s', visible: false},
-          partition: {size: 'cell-m', visible: false},
-          run: {size: 'cell-s', visible: false},
-          errcode: {size: 'cell-s', visible: true},
-          errline: {size: 'cell-s', visible: false},
-          errsource: {size: 'cell-m', visible: false},
-          message: {size: 'cell-xl', visible: true}
-        };
-        res.status(200).json({user: 'default', content: {colsHeader: defaultUserConfig}});
-      }
-    })
-      .catch((err) => handleError(res, err));
-  }
-
-  /**
-  * Method which handles the request for saving the user profile
-  * @param {Request} req
-  * @param {Response} res
-  */
-  function saveUserProfile(req, res) {
-    const user = parseInt(req.body.user);
-    const content = req.body.content;
-    jsonDb.getProfileByUsername(user).then((profile) => {
-      if (!profile) {
-        jsonDb.createNewProfile(user, content)
-          .then((newProfile) => {
-            if (newProfile) {
-              res.status(200).json({message: 'New profile was successfully created and saved'});
-            } else {
-              res.status(500).json({message: 'Profile was not found and a new profile could not be created'});
-            }
-          })
-          .catch((err) => handleError(res, err));
-      } else {
-        jsonDb.updateProfile(user, content)
-          .then(() => res.status(200).json({message: 'Profile updates were saved successfully'}))
-          .catch((err) => handleError(res, err));
-      }
-    }).catch((err) => handleError(res, err));
-  }
-
-  /**
    * Catch all HTTP errors
    * @param {Object} res
    * @param {Error} error
    * @param {number} status
    */
-  function handleError(res, error) {
+  function handleError(res, error, status=500) {
     log.trace(error);
-    res.status(500).json({message: error.message});
+    res.status(status).json({message: error.message});
   }
 
   if (liveSource) {

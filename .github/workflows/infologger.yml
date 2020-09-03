@@ -1,33 +1,24 @@
 name: InfoLogger
-
 on:
   pull_request:
     paths:
-      - 'InfoLogger/*'
-      - 'InfoLogger/*/*'
-      - 'InfoLogger/*/*/*'
+      - 'InfoLogger/**/*'
       - '.github/workflows/infologger.yml'
   push:
     branches:
       - 'master'
       - 'dev'
-    paths:
-      - 'InfoLogger/*'
-      - 'InfoLogger/*/*'
-      - 'InfoLogger/*/*/*'
-      - '.github/workflows/infologger.yml'
 jobs:
   test:
-    name: Tests on ubuntu-18.04
-    runs-on: ubuntu-18.04
+    name: Tests on ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
-      - run: mysql -uroot -proot -e "CREATE DATABASE INFOLOGGER;"
       - uses: actions/checkout@v1
       - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd InfoLogger; npm install )
+      - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm test )
   coverage:
     name: Tests & coverage on ubuntu-18.04
@@ -37,7 +28,12 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd InfoLogger; npm install )
+      - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm run coverage )
       - run: (cd InfoLogger; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
-      - run: (cd InfoLogger; bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }})
+      - name: Send codecov report for InfoLogger
+        uses: codecov/codecov-action@v1.0.13
+        with:
+          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          flags: infologger
+          fail_ci_if_error: true

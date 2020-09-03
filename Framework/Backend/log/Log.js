@@ -1,10 +1,11 @@
 /**
  * @license
- * Copyright CERN and copyright holders of ALICE O2. This software is
- * distributed under the terms of the GNU General Public License v3 (GPL
- * Version 3), copied verbatim in the file "COPYING".
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
  *
- * See http://alice-o2.web.cern.ch/license for full licensing information.
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
  *
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
@@ -50,7 +51,7 @@ class Log {
 
   /**
    * Debug severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   debug(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -64,7 +65,7 @@ class Log {
 
   /**
    * Information severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   info(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -78,7 +79,7 @@ class Log {
 
   /**
    * Warning severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   warn(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -92,7 +93,7 @@ class Log {
 
   /**
    * Error severity log
-   * @param {string} log
+   * @param {string} log - log message
    */
   error(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
@@ -105,8 +106,8 @@ class Log {
   }
 
   /**
-   * Prints more details, for debugging purposes
-   * @param {object} err
+   * Outputs a stack trace on an object
+   * @param {object} err - any object
    */
   trace(err) {
     // eslint-disable-next-line

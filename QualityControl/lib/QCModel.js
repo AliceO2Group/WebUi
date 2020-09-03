@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 const config = require('./configProvider.js');
 const TObject2JsonClient = require('./TObject2JsonClient.js');
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
@@ -5,6 +19,7 @@ const CCDBConnector = require('./CCDBConnector.js');
 const MySQLConnector = require('./MySQLConnector.js');
 const AMOREConnector = require('./AMOREConnector.js');
 const JsonFileConnector = require('./JsonFileConnector.js');
+const LayoutConnector = require('./connector/LayoutConnector.js');
 
 const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 
@@ -12,6 +27,8 @@ const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 // Initialization of model according to config file
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+const layoutConnector = new LayoutConnector(jsonDb);
+module.exports.layoutConnector = layoutConnector;
 
 if (config.consul) {
   const consulService = new ConsulService(config.consul);
@@ -22,7 +39,7 @@ if (config.consul) {
     );
   module.exports.consulService = consulService;
 } else {
-  log.error('Consul Service: No Configuration Found');
+  log.warn('Consul Service: No Configuration Found');
   module.exports.consulService = undefined;
 }
 
@@ -32,7 +49,10 @@ if (config.listingConnector === 'ccdb') {
     throw new Error('CCDB config is mandatory');
   }
   const ccdb = new CCDBConnector(config.ccdb);
+  ccdb.testConnection();
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
+  module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
+  module.exports.queryPrefix = ccdb.prefix;
 
   const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
   module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
@@ -53,9 +73,3 @@ if (config.listingConnector === 'ccdb') {
 }
 
 // --------------------------------------------------------
-
-module.exports.readLayout = jsonDb.readLayout.bind(jsonDb);
-module.exports.updateLayout = jsonDb.updateLayout.bind(jsonDb);
-module.exports.listLayouts = jsonDb.listLayouts.bind(jsonDb);
-module.exports.createLayout = jsonDb.createLayout.bind(jsonDb);
-module.exports.deleteLayout = jsonDb.deleteLayout.bind(jsonDb);

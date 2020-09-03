@@ -1,7 +1,19 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h} from '/js/src/index.js';
-import {
-  iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog
-} from '/js/src/icons.js';
+import {iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward} from '/js/src/icons.js';
 
 /**
  * Sidebar is the main navigation menu to choose pages though QueryRouter instance
@@ -13,7 +25,7 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
     model.sideBarMenu ? 'Environments' : 'ENVS'),
   menuItem(model, 'Create', 'newEnvironment', iconPlus()),
   menuItem(model, 'Active', 'environments', iconGridTwoUp()),
-  menuItem(model, 'Configuration', 'configuration', iconCog()),
+  // menuItem(model, 'Configuration', 'configuration', iconCog()),
   h('', {style: 'flex-grow:1'}), // empty item to fill in space
   menuItem(model, 'About', 'about', iconExcerpt()),
   collapseSidebarMenuItem(model),

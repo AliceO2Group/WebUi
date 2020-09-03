@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /*
  * App specific CSS styles
  */
@@ -9,11 +23,16 @@
   line-height: 1;
 }
 
-.pageError {
+.errorPage {
   font-size: 10em;
   color: var(--color-dark);
   margin: var(--space-l);
   line-height: 1;
+}
+
+.disabled-content {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .grafana-font {
@@ -33,6 +52,18 @@ tr:hover td {
   cursor: pointer;
 }
 
+.actionable-icon {
+  cursor: pointer;
+}
+
+.actionable-icon:hover {
+  transform: scale(1.2);
+}
+
+.actionable-icon:active {
+  transform: scale(1.5);
+}
+
 .menu-title-large {
   text-transform: uppercase;
   height: 2em;
@@ -43,4 +74,17 @@ tr:hover td {
   font-weight: 100;
   margin: 0.5em;
   user-select: none;
+}
+
+.panel-title {
+  border: 1px solid #ddd;
+  background: var(--color-gray-light);
+}
+
+.panel {
+  border: 1px solid var(--color-gray-light);
+}
+
+.border-bot {
+  border-bottom: 1px solid var(--color-gray-light);
 }
