@@ -53,8 +53,8 @@ const triggerPanel = (workflow) =>
         type: 'radio',
         name: 'trigger',
         id: 'triggerOff',
-        checked: workflow.form.variables['roc_ctp_emulator_enabled'] === 'false',
-        onchange: () => workflow.updateVariableValueByKey('roc_ctp_emulator_enabled', 'false')
+        checked: workflow.form.basicVariables['roc_ctp_emulator_enabled'] === 'false',
+        onchange: () => workflow.form.basicVariables['roc_ctp_emulator_enabled'] = 'false'
       }),
       h('label', {for: 'triggerOff'}, 'OFF')
     ]),
@@ -63,8 +63,8 @@ const triggerPanel = (workflow) =>
         type: 'radio',
         name: 'trigger',
         id: 'triggerEmu',
-        checked: workflow.form.variables['roc_ctp_emulator_enabled'] === 'true',
-        onchange: () => workflow.updateVariableValueByKey('roc_ctp_emulator_enabled', 'true')
+        checked: workflow.form.basicVariables['roc_ctp_emulator_enabled'] === 'true',
+        onchange: () => workflow.form.basicVariables['roc_ctp_emulator_enabled'] = 'true'
       }),
       h('label', {for: 'triggerEmu'}, 'EMU')
     ]),

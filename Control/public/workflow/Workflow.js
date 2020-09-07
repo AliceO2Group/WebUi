@@ -41,6 +41,7 @@ export default class Workflow extends Observable {
       revision: 'master',
       template: '',
       variables: {},
+      basicVariables: {},
       hosts: []
     };
 
@@ -185,8 +186,13 @@ export default class Workflow extends Observable {
     const templates = this.templatesMap.payload;
     const repository = this.form.repository;
     const variables = JSON.parse(JSON.stringify(this.form.variables));
-    // Check FLP Selection is not duplicated in vars host
-    if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
+    const sameKeys = Object.keys(this.form.basicVariables).filter((key) => this.form.variables[key]);
+    // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+    if (sameKeys.length !== 0) {
+      this.model.environment.itemNew =
+        RemoteData.failure(`Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`);
+    } else if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
+      // Check FLP Selection is not duplicated in vars host
       this.model.environment.itemNew =
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
     } else {
@@ -206,7 +212,8 @@ export default class Workflow extends Observable {
             } else {
               path = repository + 'workflows/' + template + '@' + revision;
             }
-            this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
+            const finalVariables = Object.assign({}, this.form.basicVariables, variables);
+            this.model.environment.newEnvironment({workflowTemplate: path, vars: finalVariables});
           } else {
             this.model.environment.itemNew =
               RemoteData.failure('Selected template does not exist for this repository & revision');
@@ -214,7 +221,6 @@ export default class Workflow extends Observable {
         }
       }
     }
-
     this.notify();
   }
 
