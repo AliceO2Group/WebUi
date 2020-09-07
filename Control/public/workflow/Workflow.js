@@ -264,7 +264,7 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Method to update the value of a (K;V) pair
+   * Method to update the value of a (K;V) pair in variables
    * @param {string} key
    * @param {string} value
    */
@@ -275,6 +275,17 @@ export default class Workflow extends Observable {
     } else {
       this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
     }
+  }
+
+
+  /**
+   * Method to update the value of a (K;V) pair in basicVariables
+   * @param {string} key
+   * @param {string} value
+   */
+  updateBasicVariableByKey(key, value) {
+    this.form.basicVariables[key] = value;
+    this.notify();
   }
 
   /**

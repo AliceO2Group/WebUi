@@ -189,6 +189,39 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'selected'});
   });
 
+  it('should successfully select trigger on from BasicConfiguration', async () => {
+    const [label] = await page.$x(`//div/label[text()="EMU"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `EMU label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true'}, 'roc_ctp_emulator_enabled key could not be found in basic variables selection');
+  });
+
+  it('should successfully select EPN ON from BasicConfiguration and automatically set DD to ON', async () => {
+    const [label] = await page.$x(`//div/input[@id="epnOn"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `EPN ON label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'true', dd_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to true');
+  });
+
+  it('should successfully select DD OFF from BasicConfiguration and automatically set EPN to OFF', async () => {
+    const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `Data Distribution OFF label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'false', dd_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
+  });
+
   it('should display variables (K;V) panel', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5', {timeout: 2000});
     const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5').innerText);
