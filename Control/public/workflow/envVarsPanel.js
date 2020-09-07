@@ -37,6 +37,7 @@ const togglesPanel = (workflow) =>
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Configuration of environment')),
     h('.p2.panel', [
       triggerPanel(workflow),
+      dataDistributionPanel(workflow),
     ])
   ]);
 
@@ -47,7 +48,7 @@ const togglesPanel = (workflow) =>
  */
 const triggerPanel = (workflow) =>
   h('.flex-row.text-left.w-50', [
-    h('.w-25', 'Trigger:'),
+    h('.w-50', 'Trigger:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
@@ -67,6 +68,36 @@ const triggerPanel = (workflow) =>
         onchange: () => workflow.updateVariableValueByKey('roc_ctp_emulator_enabled', 'true')
       }),
       h('label', {for: 'triggerEmu'}, 'EMU')
+    ]),
+  ]);
+
+/**
+ * Add a radio button group to select if data distribution should be set as on or off
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const dataDistributionPanel = (workflow) =>
+  h('.flex-row.text-left.w-50', [
+    h('.w-50', 'Data Distribution:'),
+    h('.w-25.form-check', [
+      h('input.form-check-input', {
+        type: 'radio',
+        name: 'dataDistribution',
+        id: 'dataDistributionOff',
+        checked: workflow.form.variables['dd_enabled'] === 'false',
+        onchange: () => workflow.updateVariableValueByKey('dd_enabled', 'false')
+      }),
+      h('label', {for: 'dataDistributionOff'}, 'OFF')
+    ]),
+    h('.w-25.form-check', [
+      h('input.form-check-input disabled', {
+        type: 'radio',
+        name: 'dataDistribution',
+        id: 'dataDistributionOn',
+        checked: workflow.form.variables['dd_enabled'] === 'true',
+        onchange: () => workflow.updateVariableValueByKey('dd_enabled', 'true')
+      }),
+      h('label', {for: 'dataDistributionOn'}, 'ON')
     ]),
   ]);
 
