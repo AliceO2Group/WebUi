@@ -341,8 +341,7 @@ export default class Workflow extends Observable {
       } else if (this.repoList.payload.repos.length > 0) {
         this.form.repository = this.repoList.payload.repos[0].name;
       }
-      const initRepo = this.repoList.payload.repos[0].name;
-      this.resetRevision(initRepo);
+      this.resetRevision(repository.name);
     }
   }
 
