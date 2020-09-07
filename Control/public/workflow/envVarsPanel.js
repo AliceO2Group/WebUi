@@ -34,7 +34,7 @@ export default (workflow) =>
  */
 const togglesPanel = (workflow) =>
   h('', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Configuration of environment')),
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
     h('.p2.panel', [
       triggerPanel(workflow),
     ])
@@ -79,7 +79,7 @@ const triggerPanel = (workflow) =>
 const envVarsPanel = (workflow) =>
   h('', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', [
-      h('.w-100', 'Environment variables'),
+      h('.w-100', 'Advanced Configuration'),
       h('a.ph1.actionable-icon', {
         href: 'https://github.com/AliceO2Group/ControlWorkflows',
         target: '_blank',
