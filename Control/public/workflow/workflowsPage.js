@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconReload, iconTrash, iconPlus, info} from '/js/src/index.js';
+import {h, iconReload} from '/js/src/index.js';
 import revisionPanel from './revisionPanel.js';
+import envVarsPanel from './envVarsPanel.js';
 import flpSelectionPanel from './flpSelectionPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
@@ -80,10 +81,25 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => [
         templatesPanel(model.workflow, templatesMap),
       ])
     ]),
-    extraVariablePanel(model.workflow)
+    workflowSettingsPanels(model.workflow)
   ]),
   actionableCreateEnvironment(model),
 ];
+
+
+/**
+ * Creates multiple panels with the purpose of configuring
+ * the to be created environment
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const workflowSettingsPanels = (workflow) =>
+  h('.w-50.ph2.flex-column', [
+    h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
+    flpSelectionPanel(workflow),
+    envVarsPanel(workflow),
+  ]);
+
 
 /**
  * Method which creates a dropdown of repositories
@@ -164,83 +180,6 @@ const actionableCreateEnvironment = (model) =>
     btnCreateEnvironment(model),
   ]);
 
-/**
- * Create a panel to allow user to pass in extra variables
- * for creating a new environment
- * @param {Object} workflow
- * @return {vnode}
- */
-const extraVariablePanel = (workflow) =>
-  h('.w-50.ph2.flex-column', [
-    h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
-    flpSelectionPanel(workflow),
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', [
-      h('.w-100', 'Environment variables'),
-      h('a.ph1.actionable-icon', {
-        href: 'https://github.com/AliceO2Group/ControlWorkflows',
-        target: '_blank',
-        title: 'Open Environment Variables Documentation'
-      }, info())
-    ]),
-    addKVInputList(workflow),
-    addKVInputPair(workflow),
-  ]);
-
-/**
- * Method to add a list of KV pairs added by the user
- * @param {Object} workflow
- * @return {vnode}
- */
-const addKVInputList = (workflow) =>
-  h('.w-100.p2.panel', Object.keys(workflow.form.variables).map((key) =>
-    h('.w-100.flex-row.pv2.border-bot', {
-    }, [
-      h('.w-33.ph1.text-left', key),
-      h('.ph1', {
-        style: 'width: 60%',
-      }, h('input.form-control', {
-        type: 'text',
-        value: workflow.form.variables[key],
-        onblur: () => workflow.trimVariableValue(key),
-        oninput: (e) => workflow.updateVariableValueByKey(key, e.target.value)
-      })),
-      h('.ph2.danger.actionable-icon', {
-        onclick: () => workflow.removeVariableByKey(key)
-      }, iconTrash())
-    ])
-  ));
-/**
- * Add 2 input fields and a button for adding a new KV Pair
- * @param {Object} workflow
- * @return {vnode}
- */
-const addKVInputPair = (workflow) => {
-  let keyString = '';
-  let valueString = '';
-  return h('.form-group.p2.panel.w-100.flex-column', [
-    h('.pv2.flex-row', [
-      h('.w-33.ph1', {
-      }, h('input.form-control', {
-        type: 'text',
-        placeholder: 'key',
-        value: keyString,
-        oninput: (e) => keyString = e.target.value
-      })),
-      h('.ph1', {
-        style: 'width:60%;',
-      }, h('input.form-control', {
-        type: 'text',
-        placeholder: 'value',
-        value: valueString,
-        oninput: (e) => valueString = e.target.value
-      })),
-      h('.ph2.actionable-icon', {
-        title: 'Add (key,value) variable',
-        onclick: () => workflow.addVariable(keyString, valueString)
-      }, iconPlus())
-    ]),
-  ]);
-};
 
 /**
  * Method to add a button for creation of environment
