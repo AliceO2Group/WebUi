@@ -1,6 +1,6 @@
 name: Control
 on:
-  workflow-dispatch:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'Control/**/*'
