@@ -34,7 +34,7 @@ export default (workflow) =>
  */
 const togglesPanel = (workflow) =>
   h('', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Configuration of environment')),
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
     h('.p2.panel', [
       triggerPanel(workflow),
       dataDistributionPanel(workflow),
@@ -54,8 +54,8 @@ const triggerPanel = (workflow) =>
         type: 'radio',
         name: 'trigger',
         id: 'triggerOff',
-        checked: workflow.form.variables['roc_ctp_emulator_enabled'] === 'false',
-        onchange: () => workflow.updateVariableValueByKey('roc_ctp_emulator_enabled', 'false')
+        checked: workflow.form.basicVariables['roc_ctp_emulator_enabled'] === 'false',
+        onchange: () => workflow.form.basicVariables['roc_ctp_emulator_enabled'] = 'false'
       }),
       h('label', {for: 'triggerOff'}, 'OFF')
     ]),
@@ -64,8 +64,8 @@ const triggerPanel = (workflow) =>
         type: 'radio',
         name: 'trigger',
         id: 'triggerEmu',
-        checked: workflow.form.variables['roc_ctp_emulator_enabled'] === 'true',
-        onchange: () => workflow.updateVariableValueByKey('roc_ctp_emulator_enabled', 'true')
+        checked: workflow.form.basicVariables['roc_ctp_emulator_enabled'] === 'true',
+        onchange: () => workflow.form.basicVariables['roc_ctp_emulator_enabled'] = 'true'
       }),
       h('label', {for: 'triggerEmu'}, 'EMU')
     ]),
@@ -110,7 +110,7 @@ const dataDistributionPanel = (workflow) =>
 const envVarsPanel = (workflow) =>
   h('', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', [
-      h('.w-100', 'Environment variables'),
+      h('.w-100', 'Advanced Configuration'),
       h('a.ph1.actionable-icon', {
         href: 'https://github.com/AliceO2Group/ControlWorkflows',
         target: '_blank',
