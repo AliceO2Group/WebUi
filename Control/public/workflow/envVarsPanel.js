@@ -84,8 +84,8 @@ const dataDistributionPanel = (workflow) =>
         type: 'radio',
         name: 'dataDistribution',
         id: 'dataDistributionOff',
-        checked: workflow.form.variables['dd_enabled'] === 'false',
-        onchange: () => workflow.updateVariableValueByKey('dd_enabled', 'false')
+        checked: workflow.form.basicVariables['dd_enabled'] === 'false',
+        onchange: () => workflow.form.basicVariables['dd_enabled'] = 'false'
       }),
       h('label', {for: 'dataDistributionOff'}, 'OFF')
     ]),
@@ -94,8 +94,8 @@ const dataDistributionPanel = (workflow) =>
         type: 'radio',
         name: 'dataDistribution',
         id: 'dataDistributionOn',
-        checked: workflow.form.variables['dd_enabled'] === 'true',
-        onchange: () => workflow.updateVariableValueByKey('dd_enabled', 'true')
+        checked: workflow.form.basicVariables['dd_enabled'] === 'true',
+        onchange: () => workflow.form.basicVariables['dd_enabled'] = 'true'
       }),
       h('label', {for: 'dataDistributionOn'}, 'ON')
     ]),
