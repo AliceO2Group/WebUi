@@ -68,7 +68,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it(`should successfully pre-select all FLPS by default`, async () => {
-    const flps = await page.waitFor(() => window.model.workflow.form.hosts);
+    const flps = await page.evaluate(() => window.model.workflow.form.hosts);
     assert.ok(flps.length > 0, 'No hosts were selected');
   });
 
@@ -96,26 +96,52 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(basicVars['roc_ctp_emulator_enabled'], 'false', 'dd_enabled was not set to true');
   });
 
-  it('should successfully set the user as flp', async () => {
+  it('should successfully add trimmed pair (K;V) (user;flp)', async () => {
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
+    page.keyboard.type('user');
+    await page.waitFor(200);
 
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
+    page.keyboard.type('flp');
+    await page.waitFor(200);
+
+    const variables = await page.evaluate(() => {
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
+      return window.model.workflow.form.variables;
+    });
+    const expectedVars = {user: 'flp'};
+    assert.deepStrictEqual(expectedVars, variables);
   });
 
-  it('should successfully add new variable (stfb_standalone;true)', async () => {
+  it('should successfully add trimmed pair (K;V) (user;flp)', async () => {
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
+    page.keyboard.type('stfb_standalone');
+    await page.waitFor(200);
 
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
+    page.keyboard.type('true');
+    await page.waitFor(200);
+
+    const variables = await page.evaluate(() => {
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
+      return window.model.workflow.form.variables;
+    });
+    const expectedVars = {user: 'flp', stfb_standalone: 'true'};
+    assert.deepStrictEqual(expectedVars, variables);
   });
 
-  // it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
-  //   await page.evaluate(() => document.querySelector(
-  //     'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
-  //   await waitForCoreResponse(page, reqTimeout);
+  it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
+    await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
+    await waitForCoreResponse(page, reqTimeout);
 
-  //   const location = await page.evaluate(() => window.location);
-  //   const queryResult = await page.evaluate(() => window.model.environment.itemNew);
-  //   const revision = await page.evaluate(() => window.model.workflow.form.revision);
+    const location = await page.evaluate(() => window.location);
+    const queryResult = await page.evaluate(() => window.model.environment.itemNew);
+    const revision = await page.evaluate(() => window.model.workflow.form.revision);
 
-  //   assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
-  //   assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
-  // });
+    assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
+    assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
+  });
 });
 
 /**
