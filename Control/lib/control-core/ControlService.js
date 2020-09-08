@@ -60,7 +60,11 @@ class ControlService {
           })
           .catch((error) => reject(new Error(error)));
       } else {
-        reject(new Error('Connection is not ready'));
+        let error = 'Could not establish connection to AliECS Core';
+        if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+          error = this.ctrlProx.connectionError.message;
+        }
+        reject(new Error(error));
       }
     });
   }
@@ -82,7 +86,11 @@ class ControlService {
    */
   isConnectionReady(res) {
     if (!this.ctrlProx.connectionReady) {
-      errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
+      let error = 'Could not establish connection to AliECS Core';
+      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+        error = this.ctrlProx.connectionError.message;
+      }
+      errorHandler(error, res, 503);
       return false;
     }
     return true;

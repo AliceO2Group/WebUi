@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {WebSocketMessage, ConsulService, InfoLoggerReceiver} = require('@aliceo2/web-ui');
+const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
 const http = require('http');
 
 const log = new (require('@aliceo2/web-ui').Log)('Control');
@@ -161,14 +161,15 @@ async function getFrameworkInfo(req, res) {
       result['AliECS GUI'].status = {ok: true};
     }
     if (config.grpc) {
+      result['AliECS Core'] = config.grpc;
       try {
         const coreInfo = await ctrlService.getAliECSInfo();
-        result['AliECS Core'] = Object.assign({}, config.grpc, coreInfo);
+        result['AliECS Core'] = Object.assign({}, result['AliECS Core'], coreInfo);
         result['AliECS Core'].status = {ok: true};
       } catch (err) {
         log.error(err);
         result['AliECS Core'].status = {ok: false};
-        result['AliECS Core'].message = err.toString();
+        result['AliECS Core'].status.message = err.toString();
       }
     }
     if (config.grafana) {
