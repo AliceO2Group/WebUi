@@ -57,7 +57,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should display variables (K;V) panel', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5', {timeout: 2000});
     const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5').innerText);
-    assert.strictEqual('Environment variables', title, 'Could not find the Environments Panel');
+    assert.strictEqual('Advanced Configuration', title, 'Could not find the Advanced Configuration Panel');
   });
 
   it('should successfully request a list of FLP names', async () => {
@@ -67,11 +67,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.ok(flpList.payload.length > 0, 'No FLPs were found in Consul');
   });
 
-  it('should successfully select 1st element from the FLP selection area list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').click());
-    await page.waitFor(200);
+  it('should have successfully select first FLP by default from area list by', async () => {
     const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').classList);
-    assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLP was not successfully selected from the panel');
+    assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLPs were not successfully selected by default in the panel');
+    const hosts = await page.evaluate(() => window.model.workflow.form.hosts);
+    assert.ok(hosts.length > 0, 'No hosts were selected before creating an environment')
   });
 
   it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
