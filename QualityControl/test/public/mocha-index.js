@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* eslint-disable arrow-parens */
 /* eslint-disable max-len */
 const puppeteer = require('puppeteer');
@@ -234,7 +248,7 @@ describe('QCG', function() {
     });
 
     it('should have filtered results on input search filled', async () => {
-      await page.type('nav input', 'HistoWithRandom');
+      await page.type('nav > div > div > div:nth-child(2) > input', 'HistoWithRandom');
       await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
     });
 
@@ -395,7 +409,7 @@ describe('QCG', function() {
         const objectName = 'DAQ01/EquipmentSize/CPV/CPV';
         await page.goto(url + `?page=objectView&objectName=${objectName}`, {waitUntil: 'networkidle0'});
         const result = await page.evaluate(() => {
-          const title = document.querySelector('div div b').textContent;
+          const title = document.querySelector('div div b').innerText;
           const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
           const objectSelected = window.model.object.selected;
           return {
@@ -406,7 +420,7 @@ describe('QCG', function() {
         });
         assert.strictEqual(result.title, objectName);
         assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-        assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100});
+        assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 3, lastModified: 100, version: null});
       });
 
       it('should have an info button with full path and last modified when clicked (plot success)', async () => {
@@ -445,7 +459,7 @@ describe('QCG', function() {
         });
         assert.strictEqual(result.title, objectName);
         assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'p2', 2: 'flex-column', 3: 'scroll-y'});
-        assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 2, lastModified: 100});
+        assert.deepStrictEqual(result.objectSelected, {name: objectName, createTime: 2, lastModified: 100, version: null});
       });
     });
 
@@ -546,9 +560,9 @@ describe('QCG', function() {
           };
         });
         await page.waitFor(7000);
-        assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(from layout: AliRoot)');
+        assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(AliRoot)');
         assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-        assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
+        assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100, version: null});
       });
 
       it('should have an info button with full path and last modified when clicked (plot success)', async () => {
@@ -614,7 +628,7 @@ describe('QCG', function() {
     it('should merge options on layoutShow and no ignoreDefaults field', async () => {
       const drawingOptions = await page.evaluate(() => {
         const tabObject = {options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
@@ -625,7 +639,7 @@ describe('QCG', function() {
     it('should merge options on layoutShow and false ignoreDefaults field', async () => {
       const drawingOptions = await page.evaluate(() => {
         const tabObject = {ignoreDefaults: false, options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
@@ -636,7 +650,7 @@ describe('QCG', function() {
     it('should ignore default options on layoutShow and true ignoreDefaults field', async () => {
       const drawingOptions = await page.evaluate(() => {
         const tabObject = {ignoreDefaults: true, options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
@@ -648,7 +662,7 @@ describe('QCG', function() {
       const drawingOptions = await page.evaluate(() => {
         window.model.page = 'objectTree';
         const tabObject = {options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
@@ -656,18 +670,18 @@ describe('QCG', function() {
       assert.deepStrictEqual(drawingOptions, expDrawingOpts);
     });
 
-    it('should use only default options on objectView when no layoutId or objectId is set', async () => {
+    it('should use only default options(foption and metadata) on objectView when no layoutId or objectId is set', async () => {
       const drawingOptions = await page.evaluate(() => {
         window.model.page = 'objectView';
         window.model.router.params.objectId = undefined;
         window.model.router.params.layoutId = undefined;
         const tabObject = {options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz', metadata: {displayHints: 'hint hint2', drawOptions: 'option option2'}}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
-      const expDrawingOpts = ['lego', 'colz'];
-      assert.deepStrictEqual(drawingOptions, expDrawingOpts);
+      const expDrawingOpts = ['lego', 'colz', 'option', 'option2', 'hint', 'hint2'];
+      assert.deepStrictEqual(expDrawingOpts, drawingOptions);
     });
 
     it('should use only default options on objectView when no layoutId is set', async () => {
@@ -676,7 +690,7 @@ describe('QCG', function() {
         window.model.router.params.layoutId = undefined;
         window.model.router.params.objectId = '123';
         const tabObject = {options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
@@ -691,7 +705,7 @@ describe('QCG', function() {
         window.model.router.params.objectId = undefined;
         window.model.router.params.layoutId = '123';
         const tabObject = {options: ['args', 'coly']};
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
@@ -712,7 +726,7 @@ describe('QCG', function() {
             options: ['gridx'], name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
           }]
         }];
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(null, objectRemoteData);
       });
 
@@ -733,7 +747,7 @@ describe('QCG', function() {
             options: ['gridx'], ignoreDefaults: false, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
           }]
         }];
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(null, objectRemoteData);
       });
 
@@ -754,7 +768,7 @@ describe('QCG', function() {
             options: ['gridx'], ignoreDefaults: true, name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
           }]
         }];
-        const objectRemoteData = {payload: {fOption: 'lego colz'}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz'}}};
         return window.model.object.generateDrawingOptions(null, objectRemoteData);
       });
 

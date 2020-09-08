@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* global JSROOT */
 
 import {h} from '/js/src/index.js';
@@ -116,8 +130,8 @@ export function draw(model, tabObject, options, location = '') {
       style: 'word-break: break-all;'
     }, objectRemoteData.payload);
   } else {
-    if (model.object.isObjectChecker(objectRemoteData.payload)) {
-      return checkersPanel(objectRemoteData.payload, location);
+    if (model.object.isObjectChecker(objectRemoteData.payload.qcObject)) {
+      return checkersPanel(objectRemoteData.payload.qcObject, location);
     }
   }
   // on success, JSROOT will erase all DOM inside div and put its own
@@ -161,9 +175,10 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   if (
     objectRemoteData &&
     objectRemoteData.isSuccess() &&
-    !model.object.isObjectChecker(objectRemoteData.payload) &&
+    !model.object.isObjectChecker(objectRemoteData.payload.qcObject) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
+    const qcObject = objectRemoteData.payload.qcObject;
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
@@ -172,20 +187,19 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
 
-      if (objectRemoteData.payload._typename === 'TGraph' &&
-        (objectRemoteData.payload.fOption === '' || objectRemoteData.payload.fOption === undefined)) {
-        objectRemoteData.payload.fOption = 'alp';
+      if (qcObject._typename === 'TGraph' && (qcObject.fOption === '' || qcObject.fOption === undefined)) {
+        qcObject.fOption = 'alp';
       }
 
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
       drawingOptions = drawingOptions.join(';');
       drawingOptions += ';stat';
-      if (objectRemoteData.payload._typename !== 'TGraph') {
+      if (qcObject._typename !== 'TGraph') {
         // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
         drawingOptions += ';f';
       }
 
-      JSROOT.redraw(dom, objectRemoteData.payload, drawingOptions, (painter) => {
+      JSROOT.draw(dom, qcObject, drawingOptions, (painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);

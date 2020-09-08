@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 const assert = require('assert');
 const nock = require('nock');
 
@@ -87,19 +101,58 @@ describe('CCDB Connector test suite', () => {
     });
   });
 
-  describe('`itemTransform()` tests', () => {
+  describe('`getObjectTimestampList()` tests', () => {
+    it('should successfully return a list of timestamps for a specific object', async () => {
+      const ccdb = new CCDBConnector(config.ccdb);
+      const objects = [
+        {path: 'object/one', createTime: '101', lastModified: '102', id: 'id', metadata: []},
+        {path: 'object/one', createTime: '101', lastModified: '103', id: 'id', metadata: []},
+        {path: 'object/one', createTime: '101', lastModified: '104', id: 'id', metadata: []},
+      ];
+      const expectedTimestamps = [102, 103, 104];
+      nock('http://ccdb:8500')
+        .get('/browse/object/one')
+        .reply(200, {objects: objects, subfolders: []});
+
+      await ccdb.getObjectTimestampList('object/one').then((result) => {
+        assert.deepStrictEqual(result, expectedTimestamps);
+      });
+    });
+
+    it('should successfully return an empty list due to empty reply from CCDB', async () => {
+      const ccdb = new CCDBConnector(config.ccdb);
+      nock('http://ccdb:8500')
+        .get('/browse/object/one')
+        .reply(200, {objects: [], subfolders: []});
+
+      await ccdb.getObjectTimestampList('object/one').then((result) => {
+        assert.deepStrictEqual(result, []);
+      });
+    });
+  });
+
+  describe('`itemTransform()` & `isItemValid() tests', () => {
     let ccdb;
     before(() => ccdb = new CCDBConnector(config.ccdb));
 
-    it('should successfully return null for an item with missing path', () => {
-      assert.strictEqual(ccdb.itemTransform({}), null);
-      assert.strictEqual(ccdb.itemTransform({path: undefined}), null);
-      assert.strictEqual(ccdb.itemTransform({path: null}), null);
-      assert.strictEqual(ccdb.itemTransform({path: ''}), null);
+    it('should successfully return false for an item with missing path', () => {
+      assert.strictEqual(ccdb.isItemValid({}), false);
+      assert.strictEqual(ccdb.isItemValid({path: undefined}), false);
+      assert.strictEqual(ccdb.isItemValid({path: false}), false);
+      assert.strictEqual(ccdb.isItemValid({path: ''}), false);
     });
-    it('should successfully return null for an item with a path missing a forward slash(/)', () => {
-      assert.strictEqual(ccdb.itemTransform({path: 'wrongPath'}), null);
+
+    it('should successfully return false for an item with a path missing a forward slash(/)', () => {
+      assert.strictEqual(ccdb.isItemValid({path: 'wrongPath'}), false);
     });
+
+    it('should successfully return true for an item that fits criteria', () => {
+      const item = {
+        path: 'correct/path', createTime: '101', lastModified: '102', id: 'id', metadata: []
+      };
+      assert.deepStrictEqual(ccdb.isItemValid(item), true);
+    });
+
     it('should successfully return a JSON with 3 fields if item fits criteria', () => {
       const item = {
         path: 'correct/path', createTime: '101', lastModified: '102', id: 'id', metadata: []

@@ -34,7 +34,7 @@ jobs:
       - run: (cd Framework; npm run coverage )
       - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for Framework
-        uses: codecov/codecov-action@v1.0.6
+        uses: codecov/codecov-action@v1.0.13
         with:
           token: ${{ secrets. NEW_CODECOV_TOKEN }}
           flags: framework

@@ -1,6 +1,21 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {h, iconBook, iconCircleX, iconArrowThickLeft} from '/js/src/index.js';
 import {draw} from './../objectDraw.js';
 import infoButton from './../../common/infoButton.js';
+import timestampSelectForm from '../../common/timestampSelectForm.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -23,16 +38,16 @@ export default (model) => h('.p2.absolute-fill', {style: 'display: flex; flex-di
 function getObjectTitle(model) {
   return model.router.params.objectName ?
     model.router.params.objectName
-    :
-    (
+    : (
       model.router.params.objectId && model.router.params.layoutId &&
       model.layout.requestedLayout.match({
         NotAsked: () => null,
         Loading: () => null,
         Success: (layout) =>
-          model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) && h('.flex-column', [
-            h('', model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId)),
-            h('.text-light.f7', `(from layout: ${layout.name})`)
+          model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId) &&
+          h('.flex-row', {style: 'justify-content: center;'}, [
+            model.object.getObjectNameByIdFromLayout(layout, model.router.params.objectId),
+            h('.text-light', `(${layout.name})`)
           ]),
         Failure: () => null
       })
@@ -48,7 +63,12 @@ function getActionsHeader(model) {
   return h('', {style: 'display: flex'},
     [
       getBackToQCGButton(model),
-      h('b.text-center.flex-column', {style: 'flex-grow:1'}, getObjectTitle(model)),
+      h('.text-center.flex-column', {style: 'flex-grow:1'}, [
+        h('b', getObjectTitle(model)),
+        h('.w-100.flex-row', {style: 'justify-content: center'},
+          h('.w-25.p2.f6', timestampSelectForm(model))
+        )
+      ]),
       h('.flex-row', [
         infoButton(model.object, model.isOnlineModeEnabled),
         model.isContextSecure() && getCopyURLToClipboardButton(model)

@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
@@ -18,7 +32,8 @@ export default class Workflow extends Observable {
 
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp('^master'),
+      regex: new RegExp('master'),
+      rawValue: 'master'
     };
 
     this.form = {
@@ -26,6 +41,7 @@ export default class Workflow extends Observable {
       revision: 'master',
       template: '',
       variables: {},
+      basicVariables: {},
       hosts: []
     };
 
@@ -87,7 +103,8 @@ export default class Workflow extends Observable {
     }
     this.revision = {
       isSelectionOpen: false,
-      regex: new RegExp(`^${defaultRevision}`)
+      regex: new RegExp(`^${defaultRevision}`),
+      rawValue: defaultRevision
     };
     this.form.revision = defaultRevision;
     this.notify();
@@ -104,12 +121,13 @@ export default class Workflow extends Observable {
   /**
    * Updates the selected repository with the new user selection
    * @param {string} inputField - input that should be updated
-   * @param {string} selectedRepo - Repository that user clicked on from the dropdown list
+   * @param {string} selectedRevision - Repository that user clicked on from the dropdown list
    */
-  updateInputSelection(inputField, selectedRepo) {
+  updateInputSelection(inputField, selectedRevision) {
     this.revision.isSelectionOpen = !this.revision.isSelectionOpen;
     this.form.template = '';
-    this.updateInputSearch(inputField, selectedRepo);
+    this.form.revision = selectedRevision;
+    this.updateInputSearch(inputField, selectedRevision);
   }
 
   /**
@@ -128,8 +146,8 @@ export default class Workflow extends Observable {
    * @param {string} input - input from user used for autocomplete
    */
   updateInputSearch(inputField, input) {
-    this.revision.regex = new RegExp('^' + input);
-    this.form.revision = input;
+    this.revision.regex = new RegExp(input);
+    this.revision.rawValue = input;
     this.notify();
   }
 
@@ -168,8 +186,13 @@ export default class Workflow extends Observable {
     const templates = this.templatesMap.payload;
     const repository = this.form.repository;
     const variables = JSON.parse(JSON.stringify(this.form.variables));
-    // Check FLP Selection is not duplicated in vars host
-    if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
+    const sameKeys = Object.keys(this.form.basicVariables).filter((key) => this.form.variables[key]);
+    // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+    if (sameKeys.length !== 0) {
+      this.model.environment.itemNew =
+        RemoteData.failure(`Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`);
+    } else if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
+      // Check FLP Selection is not duplicated in vars host
       this.model.environment.itemNew =
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
     } else {
@@ -189,7 +212,8 @@ export default class Workflow extends Observable {
             } else {
               path = repository + 'workflows/' + template + '@' + revision;
             }
-            this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
+            const finalVariables = Object.assign({}, this.form.basicVariables, variables);
+            this.model.environment.newEnvironment({workflowTemplate: path, vars: finalVariables});
           } else {
             this.model.environment.itemNew =
               RemoteData.failure('Selected template does not exist for this repository & revision');
@@ -197,7 +221,6 @@ export default class Workflow extends Observable {
         }
       }
     }
-
     this.notify();
   }
 
@@ -241,7 +264,7 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Method to update the value of a (K;V) pair
+   * Method to update the value of a (K;V) pair in variables
    * @param {string} key
    * @param {string} value
    */
@@ -252,6 +275,17 @@ export default class Workflow extends Observable {
     } else {
       this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
     }
+  }
+
+
+  /**
+   * Method to update the value of a (K;V) pair in basicVariables
+   * @param {string} key
+   * @param {string} value
+   */
+  updateBasicVariableByKey(key, value) {
+    this.form.basicVariables[key] = value;
+    this.notify();
   }
 
   /**
