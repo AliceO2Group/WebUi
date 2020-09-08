@@ -28,7 +28,7 @@ describe('Control', function() {
 
   before(async () => {
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
     page = await browser.newPage();
     exports.page = page;
   });
@@ -68,7 +68,7 @@ describe('Control', function() {
   });
 
   require('./create-new-environment');
-  require('./control-environment.js');
+  // require('./control-environment.js');
 
   describe('Release lock', () => {
     it('should successfully release LOCK if it is not already released', async () => {

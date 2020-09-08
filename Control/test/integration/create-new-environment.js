@@ -57,7 +57,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should display variables (K;V) panel', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5', {timeout: 2000});
     const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5').innerText);
-    assert.strictEqual('Environment variables', title, 'Could not find the Environments Panel');
+    assert.strictEqual('Advanced Configuration', title, 'Could not find the Environments Panel');
   });
 
   it('should successfully request a list of FLP names', async () => {
@@ -67,25 +67,55 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.ok(flpList.payload.length > 0, 'No FLPs were found in Consul');
   });
 
-  it('should successfully select 1st element from the FLP selection area list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').click());
+  it(`should successfully pre-select all FLPS by default`, async () => {
+    const flps = await page.waitFor(() => window.model.workflow.form.hosts);
+    assert.ok(flps.length > 0, 'No hosts were selected');
+  });
+
+  it('should successfully enable Data Distribution', async () => {
+    const [ddOnButton] = await page.$x(`//div/input[@id="dataDistributionOn"]`);
+    if (ddOnButton) {
+      await ddOnButton.click();
+    } else {
+      assert.ok(false, `Data Distribution radio button ON could not be found`);
+    }
     await page.waitFor(200);
-    const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').classList);
-    assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLP was not successfully selected from the panel');
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.strictEqual(basicVars['dd_enabled'], 'true', 'dd_enabled was not set to true');
   });
 
-  it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
-    await waitForCoreResponse(page, reqTimeout);
-
-    const location = await page.evaluate(() => window.location);
-    const queryResult = await page.evaluate(() => window.model.environment.itemNew);
-    const revision = await page.evaluate(() => window.model.workflow.form.revision);
-
-    assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
-    assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
+  it('should successfully disable trigger', async () => {
+    const [triggerOffButton] = await page.$x(`//div/input[@id="triggerOff"]`);
+    if (triggerOffButton) {
+      await triggerOffButton.click();
+    } else {
+      assert.ok(false, `Trigger radio button OFF could not be found`);
+    }
+    await page.waitFor(200);
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.strictEqual(basicVars['roc_ctp_emulator_enabled'], 'false', 'dd_enabled was not set to true');
   });
+
+  it('should successfully set the user as flp', async () => {
+
+  });
+
+  it('should successfully add new variable (stfb_standalone;true)', async () => {
+
+  });
+
+  // it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
+  //   await page.evaluate(() => document.querySelector(
+  //     'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
+  //   await waitForCoreResponse(page, reqTimeout);
+
+  //   const location = await page.evaluate(() => window.location);
+  //   const queryResult = await page.evaluate(() => window.model.environment.itemNew);
+  //   const revision = await page.evaluate(() => window.model.workflow.form.revision);
+
+  //   assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
+  //   assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
+  // });
 });
 
 /**
