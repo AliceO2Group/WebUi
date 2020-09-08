@@ -241,8 +241,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
-    const expectedVars = {TestKey: 'TestValue'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
@@ -259,8 +258,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return window.model.workflow.form.variables;
     });
 
-    const expectedVars = {TestKey: 'TestValue', TestKey2: 'TestValue2'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
   });
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
@@ -270,7 +268,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     });
 
     const expectedVars = {TestKey2: 'TestValue2'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables, expectedVars);
 
     const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);

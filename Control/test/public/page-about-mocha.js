@@ -41,6 +41,6 @@ describe('`pageAbout` test-suite', async () => {
   it('should request info about Control GUI and store in frameworkInfo RemoteData', async () => {
     const frameworkInfo = await page.evaluate(() => window.model.frameworkInfo.control.payload);
     assert.ok(frameworkInfo !== undefined);
-    assert.ok(frameworkInfo['control-gui'] !== undefined);
+    assert.ok(frameworkInfo['AliECS GUI'] !== undefined);
   });
 });

@@ -73,7 +73,7 @@ describe('Control Service test suite', () => {
 
       assert.strictEqual(ctrl.isConnectionReady(res), false);
       assert.ok(res.status.calledWith(503));
-      assert.ok(res.send.calledWith({message: 'Could not establish gRPC connection to Control-Core'}));
+      assert.ok(res.send.calledWith({message: 'Could not establish connection to AliECS Core'}));
     });
   });
 
