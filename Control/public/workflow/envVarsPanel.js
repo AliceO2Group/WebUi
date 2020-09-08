@@ -38,6 +38,7 @@ const togglesPanel = (workflow) =>
     h('.p2.panel', [
       triggerPanel(workflow),
       dataDistributionPanel(workflow),
+      epnPanel(workflow)
     ])
   ]);
 
@@ -73,6 +74,7 @@ const triggerPanel = (workflow) =>
 
 /**
  * Add a radio button group to select if data distribution should be set as on or off
+ * If dd_enabled is set to false than odc_enabled should be set to false
  * @param {Object} workflow
  * @return {vnode}
  */
@@ -85,7 +87,10 @@ const dataDistributionPanel = (workflow) =>
         name: 'dataDistribution',
         id: 'dataDistributionOff',
         checked: workflow.form.basicVariables['dd_enabled'] === 'false',
-        onchange: () => workflow.form.basicVariables['dd_enabled'] = 'false'
+        onchange: () => {
+          workflow.updateBasicVariableByKey('odc_enabled', 'false');
+          workflow.updateBasicVariableByKey('dd_enabled', 'false');
+        }
       }),
       h('label', {for: 'dataDistributionOff'}, 'OFF')
     ]),
@@ -98,6 +103,40 @@ const dataDistributionPanel = (workflow) =>
         onchange: () => workflow.form.basicVariables['dd_enabled'] = 'true'
       }),
       h('label', {for: 'dataDistributionOn'}, 'ON')
+    ]),
+  ]);
+
+/**
+ * Add a radio button group to select if EPN cluster should be set as on or off
+ * If odc_enabled is set as true than dd_enabled should be set to true
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const epnPanel = (workflow) =>
+  h('.flex-row.text-left.w-50', [
+    h('.w-50', 'EPN:'),
+    h('.w-25.form-check', [
+      h('input.form-check-input', {
+        type: 'radio',
+        name: 'epn',
+        id: 'epnOff',
+        checked: workflow.form.basicVariables['odc_enabled'] === 'false',
+        onchange: () => workflow.form.basicVariables['odc_enabled'] = 'false'
+      }),
+      h('label', {for: 'epnOff'}, 'OFF')
+    ]),
+    h('.w-25.form-check', [
+      h('input.form-check-input disabled', {
+        type: 'radio',
+        name: 'epn',
+        id: 'epnOn',
+        checked: workflow.form.basicVariables['odc_enabled'] === 'true',
+        onchange: () => {
+          workflow.updateBasicVariableByKey('odc_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+        }
+      }),
+      h('label', {for: 'epnOn'}, 'ON')
     ]),
   ]);
 
