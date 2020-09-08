@@ -45,6 +45,27 @@ class ControlService {
   }
 
   /**
+   * Method to execute specified command return results
+   * @param {String} path
+   * @return {Promise}
+   */
+  getAliECSInfo() {
+    return new Promise((resolve, reject) => {
+      const method = this.parseMethodNameString('GetFrameworkInfo');
+      if (this.ctrlProx.connectionReady) {
+        this.ctrlProx[method]()
+          .then((response) => {
+            response.version = this.parseAliEcsVersion(response.version);
+            resolve(response);
+          })
+          .catch((error) => reject(new Error(error)));
+      } else {
+        reject(new Error('Connection is not ready'));
+      }
+    });
+  }
+
+  /**
   * Method to check provided options for command and execute it through AliECS-Core
   * @param {Request} req
   * @param {Response} res
@@ -90,6 +111,10 @@ class ControlService {
   }
 
   /**
+   * Helpers
+   */
+
+  /**
    * Method to remove `/` if exists from method name
    * @param {string} method
    * @return {string}
@@ -100,6 +125,25 @@ class ControlService {
     } else {
       return method;
     }
+  }
+
+  /**
+   * Parse the JSON of the version and return it as a string
+   * @param {JSON} versionJSON
+   * @return {string}
+   */
+  parseAliEcsVersion(versionJSON) {
+    let version = '';
+    if (versionJSON.productName) {
+      version += versionJSON.productName;
+    }
+    if (versionJSON.versionStr) {
+      version += ' ' + versionJSON.versionStr;
+    }
+    if (versionJSON.build) {
+      version += ' (revision ' + versionJSON.build + ')';
+    }
+    return version;
   }
 }
 

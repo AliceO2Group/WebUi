@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
+const {WebSocketMessage, ConsulService, InfoLoggerReceiver} = require('@aliceo2/web-ui');
 const http = require('http');
 
 const log = new (require('@aliceo2/web-ui').Log)('Control');
@@ -151,19 +151,25 @@ async function getFrameworkInfo(req, res) {
     errorHandler('Unable to retrieve configuration of the framework', res, 502);
   } else {
     const result = {};
-    result['control-gui'] = {};
+    result['AliECS GUI'] = {};
     if (projPackage && projPackage.version) {
-      result['control-gui'].version = projPackage.version;
+      result['AliECS GUI'].version = projPackage.version;
     }
     if (config.http) {
       const con = {hostname: config.http.hostname, port: config.http.port};
-      result['control-gui'] = Object.assign(result['control-gui'], con);
-      result['control-gui'].status = {ok: true};
+      result['AliECS GUI'] = Object.assign(result['AliECS GUI'], con);
+      result['AliECS GUI'].status = {ok: true};
     }
     if (config.grpc) {
-      result.grpc = config.grpc;
-      result.grpc.status = {ok: true};
-      // TODO make request to core
+      try {
+        const coreInfo = await ctrlService.getAliECSInfo();
+        result['AliECS Core'] = Object.assign({}, config.grpc, coreInfo);
+        result['AliECS Core'].status = {ok: true};
+      } catch (err) {
+        log.error(err);
+        result['AliECS Core'].status = {ok: false};
+        result['AliECS Core'].message = err.toString();
+      }
     }
     if (config.grafana) {
       result.grafana = config.grafana;
