@@ -20,7 +20,9 @@ import pageLoading from '../common/pageLoading.js';
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) =>
+export default (workflow) => [
+  h('h5.bg-gray-light.p2.panel-title.w-100',
+    `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
   h('.w-100.p2.panel',
     workflow.flpList.match({
       NotAsked: () => null,
@@ -32,11 +34,11 @@ export default (workflow) =>
           :
           h('', [
             h('', 'FLP Selection is currently disabled due to connection refused to Consul.'),
-            h('', ' Please use `environment variables` panel to select your FLP Hosts')
+            h('', ' Please use `Advanced Configuration` panel to select your FLP Hosts')
           ])
       ]),
     })
-  );
+  )];
 
 /**
  * Display an area with selectable elements

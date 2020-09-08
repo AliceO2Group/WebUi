@@ -422,6 +422,8 @@ export default class Workflow extends Observable {
       return;
     }
     this.flpList = RemoteData.success(result);
+    // preselect all hosts once they are loaded
+    this.form.hosts = Object.values(result);
     this.notify();
   }
   /**
