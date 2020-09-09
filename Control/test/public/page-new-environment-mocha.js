@@ -222,6 +222,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'false', dd_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
+  it('should successfully fill in readout uri from typed text', async () => {
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > div:nth-child(4) > div:nth-child(2) > input');
+    page.keyboard.type('file-readout');
+    await page.waitFor(200);
+    const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
+
+    assert.strictEqual(variables.readout_cfg_uri, 'file-readout');
+  });
+
   it('should display variables (K;V) panel', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5', {timeout: 2000});
     const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5').innerText);
