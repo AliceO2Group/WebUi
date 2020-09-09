@@ -38,7 +38,8 @@ const togglesPanel = (workflow) =>
     h('.p2.panel', [
       triggerPanel(workflow),
       dataDistributionPanel(workflow),
-      epnPanel(workflow)
+      epnPanel(workflow),
+      readoutPanel(workflow),
     ])
   ]);
 
@@ -138,6 +139,20 @@ const epnPanel = (workflow) =>
       }),
       h('label', {for: 'epnOn'}, 'ON')
     ]),
+  ]);
+
+/**
+ * Add a text input field so that the user can fill in the readout_uri
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const readoutPanel = (workflow) =>
+  h('.flex-row.text-left', [
+    h('.w-25', {style: 'width:'}, 'Readout URI:'),
+    h('.w-75', h('input.form-control', {
+      type: 'text',
+      oninput: (e) => workflow.form.basicVariables['readout_cfg_uri'] = e.target.value,
+    }))
   ]);
 
 /**
