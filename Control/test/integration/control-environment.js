@@ -86,18 +86,18 @@ describe('`Control Environment` test-suite', async () => {
     assert.strictEqual(resetButton, 'RESET', 'Could not found button for resetting (stand-by) environment probably due to bad state of environment');
   });
 
-  it(`should successfully transition CONFIGURED -> STANDBY by clicking RESET button(workflow '${workflowToTest}')`, async () => {
-    await page.waitFor(5000); // Standby for 5s
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
-    await waitForCoreResponse(page, reqTimeout);
+  // it(`should successfully transition CONFIGURED -> STANDBY by clicking RESET button(workflow '${workflowToTest}')`, async () => {
+  //   await page.waitFor(5000); // Standby for 5s
+  //   await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
+  //   await waitForCoreResponse(page, reqTimeout);
 
-    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
-    const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.environment.state;
+  //   const controlAction = await page.evaluate(() => window.model.environment.itemControl);
+  //   const environment = await page.evaluate(() => window.model.environment.item);
+  //   const state = environment.payload.environment.state;
 
-    assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
-    assert.strictEqual(state, 'STANDBY');
-  });
+  //   assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
+  //   assert.strictEqual(state, 'STANDBY');
+  // });
 
   it(`should have one button for 'Shutdown' environment (workflow '${workflowToTest}')`, async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
