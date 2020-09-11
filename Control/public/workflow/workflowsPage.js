@@ -95,7 +95,6 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => [
  */
 const workflowSettingsPanels = (workflow) =>
   h('.w-50.ph2.flex-column', [
-    h('h5.bg-gray-light.p2.panel-title.w-100', 'FLP Selection'),
     flpSelectionPanel(workflow),
     envVarsPanel(workflow),
   ]);
