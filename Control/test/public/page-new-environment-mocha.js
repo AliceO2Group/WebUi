@@ -55,7 +55,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const templatesMap = await page.evaluate(() => window.model.workflow.templatesMap);
     const expectedMap = {
       kind: 'Success', payload:
-      {'git.cern.ch/some-user/some-repo/': {dev: ['prettyreadout-1'], master: ['prettyreadout-1']},}
+        {'git.cern.ch/some-user/some-repo/': {dev: ['prettyreadout-1'], master: ['prettyreadout-1']}, }
     };
     assert.deepStrictEqual(templatesMap, expectedMap);
   });
@@ -81,7 +81,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
       revision: 'dev',
       template: '',
       variables: {},
-      hosts: []
+      basicVariables: {},
+      hosts: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']
     };
     assert.deepStrictEqual(initialForm, expectedForm, 'Initial form was not filled correctly');
   });
@@ -257,8 +258,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
-    const expectedVars = {TestKey: 'TestValue'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
@@ -275,18 +275,18 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return window.model.workflow.form.variables;
     });
 
-    const expectedVars = {TestKey: 'TestValue', TestKey2: 'TestValue2'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
   });
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
-    const variables = await page.evaluate(() => {
+    await page.evaluate(() => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').click();
-      return window.model.workflow.form.variables;
     });
+    await page.waitFor(500);
+    const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables, expectedVars);
 
     const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);

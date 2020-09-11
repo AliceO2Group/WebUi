@@ -45,6 +45,31 @@ class ControlService {
   }
 
   /**
+   * Method to execute specified command return results
+   * @param {String} path
+   * @return {Promise}
+   */
+  getAliECSInfo() {
+    return new Promise((resolve, reject) => {
+      const method = this.parseMethodNameString('GetFrameworkInfo');
+      if (this.ctrlProx.connectionReady) {
+        this.ctrlProx[method]()
+          .then((response) => {
+            response.version = this.parseAliEcsVersion(response.version);
+            resolve(response);
+          })
+          .catch((error) => reject(new Error(error)));
+      } else {
+        let error = 'Could not establish connection to AliECS Core';
+        if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+          error = this.ctrlProx.connectionError.message;
+        }
+        reject(new Error(error));
+      }
+    });
+  }
+
+  /**
   * Method to check provided options for command and execute it through AliECS-Core
   * @param {Request} req
   * @param {Response} res
@@ -61,7 +86,11 @@ class ControlService {
    */
   isConnectionReady(res) {
     if (!this.ctrlProx.connectionReady) {
-      errorHandler(`Could not establish gRPC connection to Control-Core`, res, 503);
+      let error = 'Could not establish connection to AliECS Core';
+      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+        error = this.ctrlProx.connectionError.message;
+      }
+      errorHandler(error, res, 503);
       return false;
     }
     return true;
@@ -90,6 +119,10 @@ class ControlService {
   }
 
   /**
+   * Helpers
+   */
+
+  /**
    * Method to remove `/` if exists from method name
    * @param {string} method
    * @return {string}
@@ -100,6 +133,25 @@ class ControlService {
     } else {
       return method;
     }
+  }
+
+  /**
+   * Parse the JSON of the version and return it as a string
+   * @param {JSON} versionJSON
+   * @return {string}
+   */
+  parseAliEcsVersion(versionJSON) {
+    let version = '';
+    if (versionJSON.productName) {
+      version += versionJSON.productName;
+    }
+    if (versionJSON.versionStr) {
+      version += ' ' + versionJSON.versionStr;
+    }
+    if (versionJSON.build) {
+      version += ' (revision ' + versionJSON.build + ')';
+    }
+    return version;
   }
 }
 

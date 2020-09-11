@@ -62,6 +62,7 @@ class ControlProxy {
     this.client.waitForReady(Date.now() + TIMEOUT_READY, (error) => {
       if (error) {
         log.error(`Connection to gRPC server (${address}) timedout`);
+        log.error(error.message);
         this.connectionError = error;
       } else {
         log.info(`gRPC connected to ${address}`);

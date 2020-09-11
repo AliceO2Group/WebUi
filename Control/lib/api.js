@@ -146,31 +146,60 @@ function getPlotsList(req, res) {
  * @param {Request} req
  * @param {Response} res
  */
-function getFrameworkInfo(req, res) {
+async function getFrameworkInfo(req, res) {
   if (!config) {
     errorHandler('Unable to retrieve configuration of the framework', res, 502);
   } else {
     const result = {};
-    result['control-gui'] = {};
+    result['AliECS GUI'] = {};
     if (projPackage && projPackage.version) {
-      result['control-gui'].version = projPackage.version;
+      result['AliECS GUI'].version = projPackage.version;
     }
     if (config.http) {
       const con = {hostname: config.http.hostname, port: config.http.port};
-      result['control-gui'] = Object.assign(result['control-gui'], con);
+      result['AliECS GUI'] = Object.assign(result['AliECS GUI'], con);
+      result['AliECS GUI'].status = {ok: true};
     }
     if (config.grpc) {
-      result.grpc = config.grpc;
+      result['AliECS Core'] = config.grpc;
+      try {
+        const coreInfo = await ctrlService.getAliECSInfo();
+        result['AliECS Core'] = Object.assign({}, result['AliECS Core'], coreInfo);
+        result['AliECS Core'].status = {ok: true};
+      } catch (err) {
+        log.error(err);
+        result['AliECS Core'].status = {ok: false};
+        result['AliECS Core'].status.message = err.toString();
+      }
     }
     if (config.grafana) {
       result.grafana = config.grafana;
+      result.grafana.status = {};
+      await httpGetJson(config.http.hostname, config.grafana.port, '/api/health')
+        .then((_result) => result.grafana.status.ok = true)
+        .catch((error) => {
+          result.grafana.status.ok = false; result.grafana.status.message = error.toString();
+        });
     }
     if (config.kafka) {
       result.kafka = config.kafka;
+      result.kafka.status = {};
+      await httpGetJson(config.kafka.hostname, config.kafka.port, '/api/health')
+        .then((_result) => result.kafka.status.ok = true)
+        .catch((error) => {
+          result.kafka.status.ok = false; result.kafka.status.message = error.toString();
+        });
     }
     if (config.consul) {
       result.consul = config.consul;
+      result.consul.status = {};
+      await consulService.getConsulLeaderStatus()
+        .then((_data) => result.consul.status.ok = true)
+        .catch((error) => {
+          result.consul.status.ok = false; result.consul.status.message = error.toString();
+        });
     }
+
     res.status(200).json(result);
   }
 }
