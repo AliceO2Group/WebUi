@@ -52,30 +52,38 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request and parse a list of template objects', async () => {
-    const templatesMap = await page.evaluate(() => {
-      return window.model.workflow.templatesMap;
-    });
+    const templatesMap = await page.evaluate(() => window.model.workflow.templatesMap);
     const expectedMap = {
       kind: 'Success', payload:
-        {'git.cern.ch/some-user/some-repo/': {master: ['prettyreadout-1']}}
+      {'git.cern.ch/some-user/some-repo/': {dev: ['prettyreadout-1'], master: ['prettyreadout-1']},}
     };
     assert.deepStrictEqual(templatesMap, expectedMap);
   });
 
   it('should successfully request and parse a list of repositories objects', async () => {
-    const repositories = await page.evaluate(() => {
-      return window.model.workflow.repoList;
-    });
+    const repositories = await page.evaluate(() => window.model.workflow.repoList);
     const expectedRepositories = {
       kind: 'Success',
       payload: {
         repos: [
-          {name: 'git.cern.ch/some-user/some-repo/', default: true},
+          {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev'},
           {name: 'git.com/alice-user/alice-repo/'}
         ]
       }
     };
     assert.deepStrictEqual(repositories, expectedRepositories);
+  });
+
+  it('should successfully fill form with default revision and repo passed from core', async () => {
+    const initialForm = await page.evaluate(() => window.model.workflow.form);
+    const expectedForm = {
+      repository: 'git.cern.ch/some-user/some-repo/',
+      revision: 'dev',
+      template: '',
+      variables: {},
+      hosts: []
+    };
+    assert.deepStrictEqual(initialForm, expectedForm, 'Initial form was not filled correctly');
   });
 
   it('should have `Create` button disabled due to no selected workflow', async () => {
@@ -147,7 +155,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
         'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > p');
       return {classList: errorElement.classList, text: errorElement.innerText};
     });
-
     assert.strictEqual(errorMessage.text.trim(), 'No revisions found for this repository. Please contact an administrator');
     assert.deepStrictEqual(errorMessage.classList, {0: 'text-center', 1: 'danger'});
   });

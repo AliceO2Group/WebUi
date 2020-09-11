@@ -58,11 +58,12 @@ describe('Control', function() {
     workflowTemplates: {
       workflowTemplates: [
         {repo: 'git.cern.ch/some-user/some-repo/', template: 'prettyreadout-1', revision: 'master'},
+        {repo: 'git.cern.ch/some-user/some-repo/', template: 'prettyreadout-1', revision: 'dev'},
       ]
     },
     listRepos: {
       repos: [
-        {name: 'git.cern.ch/some-user/some-repo/', default: true},
+        {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev'},
         {name: 'git.com/alice-user/alice-repo/'}]
     }
   };
