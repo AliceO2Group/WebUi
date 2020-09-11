@@ -55,7 +55,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const templatesMap = await page.evaluate(() => window.model.workflow.templatesMap);
     const expectedMap = {
       kind: 'Success', payload:
-      {'git.cern.ch/some-user/some-repo/': {dev: ['prettyreadout-1'], master: ['prettyreadout-1']},}
+        {'git.cern.ch/some-user/some-repo/': {dev: ['prettyreadout-1'], master: ['prettyreadout-1']}, }
     };
     assert.deepStrictEqual(templatesMap, expectedMap);
   });
@@ -270,10 +270,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
-    const variables = await page.evaluate(() => {
+    await page.evaluate(() => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').click();
-      return window.model.workflow.form.variables;
     });
+    await page.waitFor(500);
+    const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
     assert.deepStrictEqual(variables, expectedVars);
