@@ -151,7 +151,7 @@ const templatesPanel = (workflow, templatesMap) =>
  */
 const templateAreaList = (workflow, templatesMap, repository, revision) =>
   h('.m2.text-left.w-100', [ // Dropdown Template
-    h('h5', {style: '', for: ''}, 'Template:'),
+    h('h5', {style: '', for: ''}, 'Workflow:'),
     h('.shadow-level1.pv1',
       Object.values(templatesMap[repository][revision]).map((template) =>
         h('a.menu-item', {

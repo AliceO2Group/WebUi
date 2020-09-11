@@ -20,6 +20,7 @@ const config = require('./config-provider');
 const url = config.url;
 const workflowToTest = config.workflow;
 const reqTimeout = config.requestTimeout;
+const confVariables = config.vars;
 
 let page;
 
@@ -72,45 +73,29 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.ok(flps.length > 0, 'No hosts were selected');
   });
 
-  it('should successfully enable Data Distribution', async () => {
-    const [ddOnButton] = await page.$x(`//div/input[@id="dataDistributionOn"]`);
-    if (ddOnButton) {
-      await ddOnButton.click();
-    } else {
-      assert.ok(false, `Data Distribution radio button ON could not be found`);
+  it('should successfully add provided K:V pairs', async () => {
+    let filledVars = {};
+    for (const key in Object.keys(confVariables)) {
+      if (key && confVariables[key]) {
+
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
+        page.keyboard.type(key);
+        await page.waitFor(200);
+
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
+        page.keyboard.type(confVariables[key]);
+        await page.waitFor(200);
+
+        filledVars = await page.evaluate(() => {
+          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
+          return window.model.workflow.form.variables;
+        });
+      }
     }
-    await page.waitFor(200);
-    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
-    assert.strictEqual(basicVars['dd_enabled'], 'true', 'dd_enabled was not set to true');
-  });
 
-  it('should successfully disable trigger', async () => {
-    const [triggerOffButton] = await page.$x(`//div/input[@id="triggerOff"]`);
-    if (triggerOffButton) {
-      await triggerOffButton.click();
-    } else {
-      assert.ok(false, `Trigger radio button OFF could not be found`);
-    }
-    await page.waitFor(200);
-    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
-    assert.strictEqual(basicVars['roc_ctp_emulator_enabled'], 'false', 'dd_enabled was not set to true');
-  });
-
-  it('should successfully add trimmed pair (K;V) (user;flp)', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
-    page.keyboard.type('user');
-    await page.waitFor(200);
-
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
-    page.keyboard.type('flp');
-    await page.waitFor(200);
-
-    const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
-      return window.model.workflow.form.variables;
-    });
-    const expectedVars = {user: 'flp'};
-    assert.deepStrictEqual(expectedVars, variables);
+    const expectedVars = confVariables;
+    await page.waitFor(20000);
+    assert.deepStrictEqual(filledVars, expectedVars);
   });
 
   it('should successfully add trimmed pair (K;V) (user;flp)', async () => {
@@ -130,18 +115,25 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(expectedVars, variables);
   });
 
-  it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
-    await waitForCoreResponse(page, reqTimeout);
-
-    const location = await page.evaluate(() => window.location);
-    const queryResult = await page.evaluate(() => window.model.environment.itemNew);
-    const revision = await page.evaluate(() => window.model.workflow.form.revision);
-
-    assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
-    assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
+  it('should have successfully select first FLP by default from area list by', async () => {
+    const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').classList);
+    assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLPs were not successfully selected by default in the panel');
+    const hosts = await page.evaluate(() => window.model.workflow.form.hosts);
+    assert.ok(hosts.length > 0, 'No hosts were selected before creating an environment')
   });
+
+  // it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
+  //   await page.evaluate(() => document.querySelector(
+  //     'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
+  //   await waitForCoreResponse(page, reqTimeout);
+
+  //   const location = await page.evaluate(() => window.location);
+  //   const queryResult = await page.evaluate(() => window.model.environment.itemNew);
+  //   const revision = await page.evaluate(() => window.model.workflow.form.revision);
+
+  //   assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
+  //   assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
+  // });
 });
 
 /**
