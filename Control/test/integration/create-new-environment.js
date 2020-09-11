@@ -20,6 +20,7 @@ const config = require('./config-provider');
 const url = config.url;
 const workflowToTest = config.workflow;
 const reqTimeout = config.requestTimeout;
+const confVariables = config.vars;
 
 let page;
 
@@ -65,6 +66,32 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
     assert.strictEqual(flpList.kind, 'Success', 'Could not retrieve list of FLPs from Consul');
     assert.ok(flpList.payload.length > 0, 'No FLPs were found in Consul');
+  });
+
+  it(`should successfully pre-select all FLPS by default`, async () => {
+    const flps = await page.evaluate(() => window.model.workflow.form.hosts);
+    assert.ok(flps.length > 0, 'No hosts were selected');
+  });
+
+  it('should successfully add provided K:V pairs', async () => {
+    for (const key in confVariables) {
+      if (key && confVariables[key]) {
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
+        page.keyboard.type(key);
+        await page.waitFor(200);
+
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
+        page.keyboard.type(confVariables[key]);
+        await page.waitFor(200);
+
+        await page.evaluate(() => {
+          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
+        });
+        await page.waitFor(200);
+      }
+    }
+    const filledVars = await page.evaluate(() => window.model.workflow.form.variables);
+    assert.deepStrictEqual(filledVars, confVariables);
   });
 
   it('should have successfully select first FLP by default from area list by', async () => {
