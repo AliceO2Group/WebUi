@@ -38,7 +38,8 @@ const togglesPanel = (workflow) =>
     h('.p2.panel', [
       triggerPanel(workflow),
       dataDistributionPanel(workflow),
-      epnPanel(workflow)
+      epnPanel(workflow),
+      readoutPanel(workflow),
     ])
   ]);
 
@@ -138,6 +139,38 @@ const epnPanel = (workflow) =>
       }),
       h('label', {for: 'epnOn'}, 'ON')
     ]),
+  ]);
+
+/**
+ * Add a text input field so that the user can fill in the readout_uri
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const readoutPanel = (workflow) =>
+  h('.flex-row.text-left', [
+    h('.w-25', {style: 'display: flex; align-items: center;'}, 'Readout URI:'),
+    h('.w-75.flex-row', [
+      h('', {style: 'width:30%'},
+        h('select.form-control', {
+          style: 'cursor: pointer',
+          onchange: (e) => {
+            workflow.form.basicVariables['readout_cfg_uri_pre'] = e.target.value;
+          }
+        }, [
+          h('option', {id: 'fileOption', value: 'file://'}, 'file://'),
+          h('option', {id: 'consulOption', value: 'consul://'}, 'consul://')
+        ])
+      ),
+      h('input.form-control.mh1', {
+        type: 'text',
+        oninput: (e) => {
+          if (!workflow.form.basicVariables['readout_cfg_uri_pre']) {
+            workflow.form.basicVariables['readout_cfg_uri_pre'] = 'file://';
+          }
+          workflow.form.basicVariables['readout_cfg_uri'] = e.target.value;
+        }
+      })
+    ])
   ]);
 
 /**
