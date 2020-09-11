@@ -117,7 +117,6 @@ export default class Model extends Observable {
         break;
       case 'about':
         this.frameworkInfo.getFrameworkInfo();
-        this.frameworkInfo.getAliECSInfo();
         break;
       case 'configuration':
         this.configuration.getCRUList();

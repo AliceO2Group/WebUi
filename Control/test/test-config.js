@@ -36,5 +36,9 @@ module.exports = {
     hostname: 'localhost',
     port: 8550,
     flpHardwarePath: 'test/o2/hardware/flps'
+  },
+  grafana: {
+    hostname: 'localhost',
+    port: 2020
   }
 };
