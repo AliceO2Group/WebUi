@@ -212,7 +212,9 @@ export default class Workflow extends Observable {
             } else {
               path = repository + 'workflows/' + template + '@' + revision;
             }
-            const finalVariables = Object.assign({}, this.form.basicVariables, variables);
+            let finalVariables = Object.assign({}, this.form.basicVariables, variables);
+            // Combine Readout URI if it was used
+            finalVariables = this.checkReadoutKey(finalVariables);
             this.model.environment.newEnvironment({workflowTemplate: path, vars: finalVariables});
           } else {
             this.model.environment.itemNew =
@@ -438,6 +440,26 @@ export default class Workflow extends Observable {
   /**
    * Helpers
    */
+
+  /**
+   * If the user provides `readout_cfg_uri` than combine it with the prefix
+   * and remove prefix from list of variable keys
+   * @param {JSON} vars
+   * @return {JSON}
+   */
+  checkReadoutKey(vars) {
+    if (vars['readout_cfg_uri_pre'] && vars['readout_cfg_uri'] &&
+      vars['readout_cfg_uri_pre'] !== '' && vars['readout_cfg_uri'] !== '') {
+      vars['readout_cfg_uri'] =
+        vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
+    } else {
+      delete vars['readout_cfg_uri'];
+    }
+    if (vars['readout_cfg_uri_pre']) {
+      delete vars['readout_cfg_uri_pre'];
+    }
+    return vars;
+  }
 
   /**
    * Group list of repository in a JSON object by
