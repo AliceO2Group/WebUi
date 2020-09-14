@@ -20,7 +20,8 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export default (model) => h('.w-100.flex-row',
-  model.object.selected && model.object.objects && model.object.objects[model.object.selected.name]
+  !model.isOnlineModeEnabled && model.object.selected && model.object.objects
+  && model.object.objects[model.object.selected.name]
   && model.object.objects[model.object.selected.name].kind === 'Success' &&
   h('select.form-control.gray-darker.text-center.w-25', {
     onchange: (e) => {

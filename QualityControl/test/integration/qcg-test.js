@@ -34,7 +34,7 @@ describe('QCG', function() {
 
   it('should load first page "/"', async () => {
     // try many times until backend server is ready
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 40; i++) {
       try {
         await page.goto(url, {waitUntil: 'networkidle0'});
         break; // connection ok, this test passed
