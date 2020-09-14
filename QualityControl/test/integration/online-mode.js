@@ -16,6 +16,7 @@
 const assert = require('assert');
 const qcg = require('./qcg-test');
 const config = require('./config-provider');
+const waitForQCResponse = require('./utils').waitForQCResponse;
 
 let page;
 const objects = config.onlineObjects;
@@ -59,7 +60,7 @@ describe('`ONLINE` test-suite', async () => {
         path.shift();
 
         await toggleGivenObjectPath(page, path);
-
+        await waitForQCResponse(page, 20);
         await page.waitFor(500);
         const panelWidth = await page.evaluate(() => document.querySelector('section > div > div > div:nth-child(2)').style.width);
         await page.waitFor(500);

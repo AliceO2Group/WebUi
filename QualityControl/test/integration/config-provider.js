@@ -23,8 +23,8 @@ try {
 }
 
 const timeout = (testConfig && testConfig.timeout) ? testConfig.timeout : 20000;
+const timeoutReq = (testConfig && testConfig.timeoutReq) ? testConfig.timeoutReq : 20;
 const url = (testConfig && testConfig.hostname && testConfig.port) ? `http://${testConfig.hostname}:${testConfig.port}/` : 'http://localhost:8082/';
 const offlineObjects = (testConfig && testConfig.offlineObjects) ? testConfig.offlineObjects : ['qc/checks/TST/QcCheck', 'qc/DAQ/dataDistribution/payloadSize'];
 const onlineObjects = (testConfig && testConfig.onlineObjects) ? testConfig.onlineObjects : ['qc/checks/TST/QcCheck', 'qc/DAQ/dataDistribution/payloadSize'];
-
-module.exports = {timeout, url, offlineObjects, onlineObjects};
+module.exports = {timeout, url, offlineObjects, onlineObjects, timeoutReq};

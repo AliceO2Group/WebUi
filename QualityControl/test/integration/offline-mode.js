@@ -16,7 +16,7 @@
 const assert = require('assert');
 const qcg = require('./qcg-test');
 const config = require('./config-provider');
-
+const waitForQCResponse = require('./utils').waitForQCResponse;
 
 let page;
 const objects = config.offlineObjects;
@@ -28,8 +28,8 @@ describe('`OFFLINE` test-suite', async () => {
 
   it('should successfully load objectTree page', async () => {
     await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
-    const location = await page.evaluate(() => window.location);
     await page.waitFor(2000);
+    const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=objectTree', 'Could not load page objectTree');
   });
 
@@ -53,6 +53,7 @@ describe('`OFFLINE` test-suite', async () => {
         path.shift();
 
         await toggleGivenObjectPath(page, path);
+        await waitForQCResponse(page, 20);
 
         await page.waitFor(500);
         const panelWidth = await page.evaluate(() => document.querySelector('section > div > div > div:nth-child(2)').style.width);
