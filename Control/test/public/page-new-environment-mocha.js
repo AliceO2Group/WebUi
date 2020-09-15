@@ -233,7 +233,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully fill in readout uri from typed text', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > div:nth-child(4) > div:nth-child(2) > input');
     page.keyboard.type('file-readout');
-    await page.waitFor(200);
+    await page.waitFor(500);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
 
     assert.strictEqual(variables.readout_cfg_uri, 'file-readout');

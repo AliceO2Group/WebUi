@@ -146,8 +146,10 @@ const epnPanel = (workflow) =>
  * @param {Object} workflow
  * @return {vnode}
  */
-const readoutPanel = (workflow) =>
-  h('.flex-row.text-left', [
+const readoutPanel = (workflow) => {
+  const filePre = 'file://';
+  const consulPre = 'consul://';
+  return h('.flex-row.text-left', [
     h('.w-25', {style: 'display: flex; align-items: center;'}, 'Readout URI:'),
     h('.w-75.flex-row', [
       h('', {style: 'width:30%'},
@@ -157,21 +159,32 @@ const readoutPanel = (workflow) =>
             workflow.form.basicVariables['readout_cfg_uri_pre'] = e.target.value;
           }
         }, [
-          h('option', {id: 'fileOption', value: 'file://'}, 'file://'),
-          h('option', {id: 'consulOption', value: 'consul://'}, 'consul://')
+          h('option', {
+            id: 'fileOption',
+            value: filePre,
+            selected: !workflow.form.basicVariables['readout_cfg_uri_pre']
+              || workflow.form.basicVariables['readout_cfg_uri_pre'] === filePre
+          }, filePre),
+          h('option', {
+            id: 'consulOption',
+            value: consulPre,
+            selected: workflow.form.basicVariables['readout_cfg_uri_pre'] === consulPre
+          }, consulPre)
         ])
       ),
       h('input.form-control.mh1', {
         type: 'text',
+        value: workflow.form.basicVariables['readout_cfg_uri'],
         oninput: (e) => {
           if (!workflow.form.basicVariables['readout_cfg_uri_pre']) {
-            workflow.form.basicVariables['readout_cfg_uri_pre'] = 'file://';
+            workflow.form.basicVariables['readout_cfg_uri_pre'] = filePre;
           }
           workflow.form.basicVariables['readout_cfg_uri'] = e.target.value;
         }
       })
     ])
   ]);
+};
 
 /**
  * Panel for adding (K;V) configurations for the environment
