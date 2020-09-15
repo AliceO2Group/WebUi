@@ -449,13 +449,24 @@ export default class Workflow extends Observable {
    * @return {JSON}
    */
   checkReadoutKey(vars) {
-    if (vars['readout_cfg_uri_pre'] && vars['readout_cfg_uri'] &&
+    const filePre = 'file:';
+    const consulPre = 'consul:';
+    // User used Advanced Config Panel
+    if (vars['readout_cfg_uri'] &&
+      (vars['readout_cfg_uri'].includes(filePre) || vars['readout_cfg_uri'].includes(consulPre))
+    ) {
+      delete vars['readout_cfg_uri_pre'];
+      return vars;
+    } else if (vars['readout_cfg_uri_pre'] && vars['readout_cfg_uri'] &&
       vars['readout_cfg_uri_pre'] !== '' && vars['readout_cfg_uri'] !== '') {
+      // User used Basic Config panel
       vars['readout_cfg_uri'] =
         vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
     } else {
       delete vars['readout_cfg_uri'];
+      delete vars['readout_cfg_uri_pre'];
     }
+    // Remove prefix variable from JSON that will be sent to Core
     if (vars['readout_cfg_uri_pre']) {
       delete vars['readout_cfg_uri_pre'];
     }
