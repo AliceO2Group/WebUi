@@ -179,7 +179,12 @@ const readoutPanel = (workflow) => {
           if (!workflow.form.basicVariables['readout_cfg_uri_pre']) {
             workflow.form.basicVariables['readout_cfg_uri_pre'] = filePre;
           }
-          workflow.form.basicVariables['readout_cfg_uri'] = e.target.value;
+          if (e.target.value === '') {
+            delete workflow.form.basicVariables['readout_cfg_uri'];
+            delete workflow.form.basicVariables['readout_cfg_pre'];
+          } else {
+            workflow.form.basicVariables['readout_cfg_uri'] = e.target.value;
+          }
         }
       })
     ])
