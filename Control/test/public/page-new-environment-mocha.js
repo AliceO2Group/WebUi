@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
@@ -38,30 +52,39 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request and parse a list of template objects', async () => {
-    const templatesMap = await page.evaluate(() => {
-      return window.model.workflow.templatesMap;
-    });
+    const templatesMap = await page.evaluate(() => window.model.workflow.templatesMap);
     const expectedMap = {
       kind: 'Success', payload:
-        {'git.cern.ch/some-user/some-repo/': {master: ['prettyreadout-1']}}
+        {'git.cern.ch/some-user/some-repo/': {dev: ['prettyreadout-1'], master: ['prettyreadout-1']}, }
     };
     assert.deepStrictEqual(templatesMap, expectedMap);
   });
 
   it('should successfully request and parse a list of repositories objects', async () => {
-    const repositories = await page.evaluate(() => {
-      return window.model.workflow.repoList;
-    });
+    const repositories = await page.evaluate(() => window.model.workflow.repoList);
     const expectedRepositories = {
       kind: 'Success',
       payload: {
         repos: [
-          {name: 'git.cern.ch/some-user/some-repo/', default: true},
+          {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev'},
           {name: 'git.com/alice-user/alice-repo/'}
         ]
       }
     };
     assert.deepStrictEqual(repositories, expectedRepositories);
+  });
+
+  it('should successfully fill form with default revision and repo passed from core', async () => {
+    const initialForm = await page.evaluate(() => window.model.workflow.form);
+    const expectedForm = {
+      repository: 'git.cern.ch/some-user/some-repo/',
+      revision: 'dev',
+      template: '',
+      variables: {},
+      basicVariables: {},
+      hosts: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']
+    };
+    assert.deepStrictEqual(initialForm, expectedForm, 'Initial form was not filled correctly');
   });
 
   it('should have `Create` button disabled due to no selected workflow', async () => {
@@ -133,7 +156,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
         'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > p');
       return {classList: errorElement.classList, text: errorElement.innerText};
     });
-
     assert.strictEqual(errorMessage.text.trim(), 'No revisions found for this repository. Please contact an administrator');
     assert.deepStrictEqual(errorMessage.classList, {0: 'text-center', 1: 'danger'});
   });
@@ -175,57 +197,98 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'selected'});
   });
 
+  it('should successfully select trigger on from BasicConfiguration', async () => {
+    const [label] = await page.$x(`//div/label[text()="EMU"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `EMU label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true'}, 'roc_ctp_emulator_enabled key could not be found in basic variables selection');
+  });
+
+  it('should successfully select EPN ON from BasicConfiguration and automatically set DD to ON', async () => {
+    const [label] = await page.$x(`//div/input[@id="epnOn"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `EPN ON label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'true', dd_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to true');
+  });
+
+  it('should successfully select DD OFF from BasicConfiguration and automatically set EPN to OFF', async () => {
+    const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `Data Distribution OFF label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'false', dd_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
+  });
+
+  it('should successfully fill in readout uri from typed text', async () => {
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > div:nth-child(4) > div:nth-child(2) > input');
+    page.keyboard.type('file-readout');
+    await page.waitFor(500);
+    const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
+
+    assert.strictEqual(variables.readout_cfg_uri, 'file-readout');
+  });
+
   it('should display variables (K;V) panel', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > h5:nth-child(3)', {timeout: 2000});
-    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > h5:nth-child(3)').innerText);
-    assert.strictEqual('Environment variables', title);
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5', {timeout: 2000});
+    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5').innerText);
+    assert.strictEqual('Advanced Configuration', title);
   });
 
   it('should successfully add trimmed pair (K;V) to variables', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
     page.keyboard.type('TestKey   ');
     await page.waitFor(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
     page.keyboard.type(' TestValue  ');
     await page.waitFor(200);
 
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div  > div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
-    const expectedVars = {TestKey: 'TestValue'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
     page.keyboard.type('TestKey2');
     await page.waitFor(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
     page.keyboard.type('TestValue2');
     await page.waitFor(200);
 
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(5) > div  > div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
 
-    const expectedVars = {TestKey: 'TestValue', TestKey2: 'TestValue2'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
   });
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
-    const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(4) > div  > div:nth-child(3)').click();
-      return window.model.workflow.form.variables;
+    await page.evaluate(() => {
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').click();
     });
+    await page.waitFor(500);
+    const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
-    assert.deepStrictEqual(expectedVars, variables);
+    assert.deepStrictEqual(variables, expectedVars);
 
-    const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(4) > div  > div:nth-child(3)').classList);
+    const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);
   });
 
@@ -238,9 +301,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flpList, expectedList);
   });
 
-  it('should successfully select 1 element from the FLP selection area list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').click());
-    await page.waitFor(200);
+  it('should have successfully select all FLPS from area list by', async () => {
     const selectedFLP = await page.evaluate(() => {
       const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a');
       return {
@@ -249,7 +310,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       };
     });
     assert.deepStrictEqual(selectedFLP.classList, {0: 'menu-item', 1: 'selected'});
-    assert.deepStrictEqual(selectedFLP.hosts, ['alio2-cr1-flp134']);
+    assert.deepStrictEqual(selectedFLP.hosts, ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']);
   });
 
   it('should successfully create a new environment', async () => {

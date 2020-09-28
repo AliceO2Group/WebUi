@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 /* global JSROOT */
 
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
@@ -258,20 +272,24 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Load full content of an object in-memory, do nothing if already in.
-   * Also adds a reference to this object.
+   * Load full content of an object in-memory
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
+   * @param {number} timestamp
    */
-  async loadObjectByName(objectName) {
+  async loadObjectByName(objectName, timestamp = -1) {
     // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
-    const result = await this.qcObjectService.getObjectByName(objectName);
+    const result = await this.qcObjectService.getObjectByName(objectName, timestamp);
     if (result.isSuccess()) {
-      if (this.isObjectChecker(result.payload)) {
+      if (this.isObjectChecker(result.payload.qcObject)) {
         this.objects[objectName] = RemoteData.success(result.payload);
       } else {
         // link JSROOT methods to object
         // eslint-disable-next-line
         this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result.payload));
+      }
+      if (this.selected) {
+        this.selected.version = timestamp === -1 ?
+          parseInt(this.objects[objectName].payload.timestamps[0]) : parseInt(timestamp);
       }
     } else {
       this.objects[objectName] = result;
@@ -348,12 +366,18 @@ export default class QCObject extends Observable {
 
   /**
    * Set the current selected object by user
+   * Search within `currentList`;
+   * If user is in online mode, `list` will be used instead
    * @param {QCObject} object
    */
   async select(object) {
     if (this.currentList.length > 0) {
       this.selected = this.currentList.find((obj) => obj.name === object.name);
-    } else {
+    }
+    if (!this.selected && this.list && this.list.length > 0) {
+      this.selected = this.list.find((obj) => obj.name === object.name);
+    }
+    if (!this.selected) {
       this.selected = object;
     }
     await this.loadObjectByName(object.name);
@@ -391,8 +415,17 @@ export default class QCObject extends Observable {
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
     let drawingOptions = [];
-    if (objectRemoteData.payload.fOption && objectRemoteData.payload.fOption !== '') {
-      objectOptionList = objectRemoteData.payload.fOption.split(' ');
+    const qcObject = objectRemoteData.payload.qcObject;
+    if (qcObject.fOption) {
+      objectOptionList = qcObject.fOption.split(' ');
+    }
+    if (qcObject.metadata && qcObject.metadata.drawOptions) {
+      const metaOpt = qcObject.metadata.drawOptions.split(' ');
+      objectOptionList = objectOptionList.concat(metaOpt);
+    }
+    if (qcObject.metadata && qcObject.metadata.displayHints) {
+      const metaHints = qcObject.metadata.displayHints.split(' ');
+      objectOptionList = objectOptionList.concat(metaHints);
     }
     switch (this.model.page) {
       case 'objectTree':
@@ -417,8 +450,10 @@ export default class QCObject extends Observable {
         const objectId = this.model.router.params.objectId;
 
         if (!layoutId || !objectId) {
+          // object opened from tree view -> use only its own options
           drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
         } else {
+          // object opened from layout view -> use the layout/tab configuration
           if (this.model.layout.requestedLayout.isSuccess()) {
             let objectData = {};
             this.model.layout.requestedLayout.payload.tabs.forEach((tab) => {
@@ -471,10 +506,54 @@ export default class QCObject extends Observable {
    * @return {string}
    */
   getLastModifiedByName(objectName) {
+    if (this.currentList.length === 0) {
+      return 'Loading ...';
+    }
     const object = this.currentList.find((object) => object.name === objectName);
     if (object) {
-      return new Date(object.lastModified).toLocaleString();
+      return new Date(object.lastModified).toLocaleString('en-UK');
     }
-    return 'Loading...';
+    return '-';
+  }
+
+  /**
+   * Sends back the timestamp/date for the selected object based on
+   * preferred format
+   * @param {boolean} displayDate
+   * @return {string}
+   */
+  getLastModifiedForSelected(displayDate = false) {
+    if (this.selected && this.selected.lastModified) {
+      return displayDate === 'date' ?
+        new Date(this.selected.lastModified).toLocaleString('en-UK') : this.selected.lastModified.toString();
+    } else {
+      return '-';
+    }
+  }
+
+  /**
+   * Return the list of object timestamps
+   * @param {string} name
+   * @return {array<numbers>}
+   */
+  getObjectTimestamps(name) {
+    if (this.objects[name] && this.objects[name].kind === 'Success') {
+      return this.objects[name].payload.timestamps;
+    } else {
+      return [];
+    }
+  }
+
+  /**
+   * Convert a timestamp to a date string in browser format
+   * @param {number} timestamp
+   * @return {string}
+   */
+  getDateFromTimestamp(timestamp) {
+    try {
+      return new Date(timestamp).toLocaleString('en-UK');
+    } catch (_err) {
+      return 'Invalid Timestamp';
+    }
   }
 }

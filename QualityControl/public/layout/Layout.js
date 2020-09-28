@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 import {Observable, RemoteData} from '/js/src/index.js';
 
 import GridList from './Grid.js';
@@ -19,7 +33,7 @@ export default class Layout extends Observable {
     this.model = model;
 
     this.list = null; // array of layouts
-    this.item = null; // layout containing an array of tabs
+    this.item = null; // current selected layout containing an array of tabs
     this.tab = null; // pointer to a tab from `item`
 
     this.myList = RemoteData.notAsked(); // array of layouts
@@ -120,6 +134,16 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Set layout property to given value
+   * @param {string} property
+   * @param {object} value
+   */
+  setLayoutProperty(property, value) {
+    this.item[property] = value;
+    this.notify();
+  }
+
+  /**
    * Creates a new empty layout with a name, go to its own page in edit mode afterward
    * @param {string} layoutName
    */
@@ -132,6 +156,7 @@ export default class Layout extends Observable {
         name: layoutName,
         owner_id: this.model.session.personid,
         owner_name: this.model.session.name,
+        displayTimestamp: false,
         tabs: [{
           id: objectId(),
           name: 'main',

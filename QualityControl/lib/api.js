@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+
 const {Log, WebSocket} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
 const projPackage = require('./../package.json');
@@ -14,13 +28,14 @@ module.exports.setup = (http) => {
   http.get('/readObjectData', readObjectData, {public: true});
   http.post('/readObjectsData', readObjectsData);
   http.get('/listObjects', listObjects, {public: true});
+  http.get('/objectTimestampList', getObjectTimestampList, {public: true});
   http.get('/listOnlineObjects', listOnlineObjects);
   http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
-  http.post('/readLayout', readLayout);
-  http.post('/writeLayout', updateLayout);
-  http.post('/listLayouts', listLayouts);
-  http.delete('/layout/:layoutId', deleteLayout);
-  http.post('/layout', createLayout);
+  http.post('/readLayout', model.layoutConnector.readLayout.bind(model.layoutConnector));
+  http.post('/writeLayout', model.layoutConnector.updateLayout.bind(model.layoutConnector));
+  http.post('/listLayouts', model.layoutConnector.listLayouts.bind(model.layoutConnector));
+  http.delete('/layout/:layoutId', model.layoutConnector.deleteLayout.bind(model.layoutConnector));
+  http.post('/layout', model.layoutConnector.createLayout.bind(model.layoutConnector));
   http.get('/getFrameworkInfo', getFrameworkInfo);
   new WebSocket(http);
 };
@@ -33,6 +48,20 @@ module.exports.setup = (http) => {
 function listObjects(req, res) {
   model.listObjects()
     .then((data) => res.status(200).json(data))
+    .catch((err) => errorHandler(err, res));
+}
+
+/**
+ * Method to retrieve a list of timestamps for the requested objectName
+ * @param {Request} req
+ * @param {Response} res
+ */
+function getObjectTimestampList(req, res) {
+  model.getObjectTimestampList(req.query.objectName)
+    .then((data) => {
+      res.status(200);
+      res.json(data);
+    })
     .catch((err) => errorHandler(err, res));
 }
 
@@ -93,7 +122,7 @@ function readObjectsData(req, res) {
    * @return {Promise.<Object>}
    */
   const safeRetriever = (name) => model.readObjectData(name)
-    .then((data) => !data ? {error: 'Object not found'} : data)
+    .then((data) => !data ? {error: 'Object not found'} : {qcObject: data})
     .catch((err) => ({error: err.toString()}));
 
   const promiseArray = objectsNames.map(safeRetriever);
@@ -109,127 +138,31 @@ function readObjectsData(req, res) {
 }
 
 /**
- * Read only data of an object specified by objectName
+ * Request data of an object based on name and optionally timestamp
+ * Returned data will contained the QC Object and a list of its corresponding timestamps
  * @param {Request} req
  * @param {Response} res
  */
-function readObjectData(req, res) {
+async function readObjectData(req, res) {
   const objectName = req.query.objectName;
-
+  let timestamp = -1;
+  if (req.query.timestamp) {
+    const ts = req.query.timestamp;
+    timestamp = typeof ts === 'string' ? parseInt(ts) : ts;
+  }
   if (!objectName) {
     res.status(400).send('parameter objectName is needed');
     return;
   }
 
-  model.readObjectData(objectName)
-    .then((data) => res.status(data ? 200 : 404).json(data))
-    .catch((err) => errorHandler('Reading object data: ' + err, res));
-}
-
-/**
- * List all layouts, can be filtered by owner_id
- * @param {Request} req
- * @param {Response} res
- */
-function listLayouts(req, res) {
-  const filter = {};
-  if (req.body.owner_id !== undefined) {
-    filter.owner_id = parseInt(req.body.owner_id, 10);
+  // Read from QC
+  try {
+    const qcObject = await model.readObjectData(objectName, timestamp);
+    const timestamps = await model.getObjectTimestampList(objectName);
+    res.status(qcObject ? 200 : 404).json({qcObject: qcObject, timestamps: timestamps.slice(0, 50)});
+  } catch (err) {
+    errorHandler('Reading object data: ' + err, res);
   }
-
-  model.listLayouts(filter)
-    .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Read a single layout specified by layoutId
- * @param {Request} req
- * @param {Response} res
- */
-function readLayout(req, res) {
-  const layoutId = req.body.layoutId;
-
-  if (!layoutId) {
-    res.status(400).send('layoutId parameter is needed');
-    return;
-  }
-
-  model.readLayout(layoutId)
-    .then((data) => res.status(data ? 200 : 404).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Update a single layout specified by layoutId and body
- * @param {Request} req
- * @param {Response} res
- */
-function updateLayout(req, res) {
-  const layoutId = req.query.layoutId;
-  const data = req.body;
-
-  if (!layoutId) {
-    res.status(400).send('layoutId parameter is needed');
-    return;
-  }
-
-  if (!data) {
-    res.status(400).send('body is needed');
-    return;
-  }
-
-  model.updateLayout(layoutId, data)
-    .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Delete a single layout specified by layoutId
- * @param {Request} req
- * @param {Response} res
- */
-function deleteLayout(req, res) {
-  const layoutId = req.params.layoutId;
-
-  if (!layoutId) {
-    res.status(400).send('layoutId is needed');
-    return;
-  }
-
-  model.deleteLayout(layoutId)
-    .then((data) => res.status(204).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Create a layout specified by body
- * @param {Request} req
- * @param {Response} res
- */
-function createLayout(req, res) {
-  const layout = req.body;
-
-  if (!layout.name) {
-    res.status(400).send('layout.name parameter is needed');
-    return;
-  }
-  if (layout.owner_id === undefined) { // integer from 0 to Infinity
-    res.status(400).send('layout.owner_id parameter is needed');
-    return;
-  }
-  if (!layout.owner_name) {
-    res.status(400).send('layout.owner_name parameter is needed');
-    return;
-  }
-  if (!layout.tabs) {
-    res.status(400).send('layout.tabs parameter is needed');
-    return;
-  }
-
-  model.createLayout(layout)
-    .then((data) => res.status(201).json(data))
-    .catch((err) => errorHandler(err, res, 409));
 }
 
 /**
