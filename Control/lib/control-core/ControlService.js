@@ -14,6 +14,7 @@
 
 const errorHandler = require('./../utils.js').errorHandler;
 const assert = require('assert');
+const log = new (require('@aliceo2/web-ui').Log)('Control-Proxy');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -38,6 +39,9 @@ class ControlService {
   executeCommand(req, res) {
     const method = this.parseMethodNameString(req.path);
     if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
+      if (!method.startsWith('Get')) {
+        log.debug(`User ${req.session.personid} ${method} ` + (req.body.type ? req.body.type : ''));
+      }
       this.ctrlProx[method](req.body)
         .then((response) => res.json(response))
         .catch((error) => errorHandler(error, res, 504));
