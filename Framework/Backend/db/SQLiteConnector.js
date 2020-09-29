@@ -1,87 +1,82 @@
-const log = new (require('@aliceo2/web-ui').Log)('SQLiteConnector');
+const log = new (require('./../log/Log.js'))('SQLiteConnector');
 const sqlite3 = require('sqlite3').verbose();
 
 /**
- * SQLite database wrapper
+ * SQLite database connector
+ * @example
+ * const sqlite = new SQLiteConnector(<path>);
+ * sqlite.init();
+ * sqlite.query('SELECT * FROM mytable, []);
+ * sqlite.query('INSERT INTO mytable (name) VALUES (?), ['user'], false);
  */
 class SQLiteConnector {
   /**
-     * Initialize connector and test the connection
-     * @param {string} pathname - path to SQLite DB file
-     */
+   * Initialize connector
+   * @param {string} pathname - path to SQLite DB file
+   */
   constructor(pathname) {
     if (!pathname) {
       throw new Error('No pathname provided');
     }
     this.pathname = pathname;
     this.db;
-
-    this.connectionQuery = 'SELECT * FROM profiles LIMIT 1';
   }
 
   /**
-     * Initialize the database connection
-     * @return {Promise}
-     */
+   * Initialize the database connection
+   * @return {Promise}
+   */
   async init() {
-    this.db = new sqlite3.Database(this.pathname, sqlite3.OPEN_READWRITE, (err) => {
-      if (err) {
-        log.error(err.message);
-        throw new Error('Cannot initiate the database');
-      }
-      log.info('Successfully connected to the database.');
-    });
-  }
-
-  /**
-     * Method to test connection of sqlite connector once initialized
-     * @return {Promise}
-     */
-  async testConnection() {
     return new Promise((resolve, reject) => {
-      this.db.get(this.connectionQuery, [], function(err, row) {
+      this.db = new sqlite3.Database(this.pathname, sqlite3.OPEN_READWRITE, (err) => {
         if (err) {
           log.error(err.message);
-          reject(err);
+          reject(new Error(`Cannot initiate the database with provided path: ${this.pathname}`));
+        } else {
+          log.info(`Successfully connected to the database on path: ${this.pathname}`);
+          resolve();
         }
-        log.info(`Connection test was successful`); 
-        resolve();
       });
     });
   }
 
   /**
-     * Runs the passed query on the database,
-     * @param {string} query - SQLite query
-     * @param {array} values - values to be bound to the query
-     * @param {boolean} read - if true use #get otherwise #run
-     */
-  async query(query, values, read=true) {
+   * Runs the passed query on the database,
+   * @param {string} query - SQLite query
+   * @param {array} values - values to be bound to the query
+   * @param {boolean} read - if true use #all otherwise #run
+   * @return {Promise.<Array<JSON>, Error>}
+   */
+  async query(query, values, read = true) {
     return new Promise((resolve, reject) => {
       if (read) {
-        this.readQuery(query, values).then((profile) => resolve(profile))
+        this.readQuery(query, values)
+          .then((profile) => resolve(profile))
           .catch((err) => reject(err));
       } else {
-        this.generalQuery(query, values).then(() => resolve())
+        this.generalQuery(query, values)
+          .then(() => resolve([]))
           .catch((err) => reject(err));
       }
     });
   }
 
   /**
-     * Query that reads data from the database
-     * @param {string} query - SQLite query
-     * @param {array} values - values to be bound to the query
-     */
+   * Query that reads data from the database
+   * It will return all rows matching the query
+   * @param {string} query - SQLite query
+   * @param {array} values - values to be bound to the query
+   * @return {Promise.<Array<JSON>, Error>}
+   */
   async readQuery(query, values) {
     return new Promise((resolve, reject) => {
-      this.db.get(query, values, (err, row) => {
+      this.db.all(query, values, (err, row) => {
         if (err) {
           log.error(err.message);
           reject(err);
         }
         if (row) {
-          log.info('Successfully fetched the required data');
+          log.info(`Query ${query} was successful`);
         } else {
           log.warn('No result for this query');
         }
@@ -91,13 +86,15 @@ class SQLiteConnector {
   }
 
   /**
-     * Query that writes and deletes data from the database
-     * @param {string} query - SQLite query
-     * @param {array} values - values to be bound to the query
-     */
+   * Query that writes and deletes data from the database;
+   * It does not return any data from the query
+   * @param {string} query - SQLite query
+   * @param {array} values - values to be bound to the query
+   * @return {Promise.<_, Error>}
+   */
   async generalQuery(query, values) {
     return new Promise((resolve, reject) => {
-      this.db.run(query, values, function(err) {
+      this.db.run(query, values, (err) => {
         if (err) {
           log.error(err.message);
           reject(err);
@@ -109,14 +106,21 @@ class SQLiteConnector {
   }
 
   /**
-     * Close database
-     */
+   * Close database connection
+   * @return {Promise.<_, Error>}
+   */
   async closeDatabase() {
-    this.db.close((err) => {
-      if (err) {
-        return log.error(err.message);
-      }
+    return new Promise((resolve, reject) => {
+      this.db.close((err) => {
+        if (err) {
+          log.error(err.message);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
     });
   }
 }
+
 module.exports = SQLiteConnector;
