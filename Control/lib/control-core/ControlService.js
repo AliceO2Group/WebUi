@@ -40,7 +40,7 @@ class ControlService {
     const method = this.parseMethodNameString(req.path);
     if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
       if (!method.startsWith('Get')) {
-        log.debug(`${req.session.personid} => ${method}` + (req.body.type ? ` (${req.body.type})` : ''));
+        log.info(`${req.session.personid} => ${method}` + (req.body.type ? ` (${req.body.type})` : ''));
       }
       this.ctrlProx[method](req.body)
         .then((response) => res.json(response))
