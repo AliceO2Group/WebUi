@@ -21,8 +21,19 @@ import pageLoading from '../common/pageLoading.js';
  * @return {vnode}
  */
 export default (workflow) => [
-  h('h5.bg-gray-light.p2.panel-title.w-100',
-    `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
+  h('.w-100.flex-row.panel-title', [
+    h('.form-check', {style: 'width: 2%'},
+      h('input.form-check-input', {
+        type: 'checkbox',
+        title: 'Toggle selection of ALL FLPs',
+        style: 'margin-top: 1em; margin-left: 0em;',
+        checked: workflow.areAllFLPsSelected(),
+        onchange: () => workflow.toggleAllFLPSelection(name)
+      }),
+    ),
+    h('h5.bg-gray-light.p2', {style: 'width: 98%'},
+      `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
+  ]),
   h('.w-100.p2.panel',
     workflow.flpList.match({
       NotAsked: () => null,
@@ -47,13 +58,22 @@ export default (workflow) => [
  * @return {vnode}
  */
 const flpSelectionArea = (list, workflow) =>
-  h('.w-100.m1.text-left.shadow-level1.scroll-y', {
+  h('.w-100.m1.text-left.shadow-level1.scroll-y.flex-column', {
     style: 'max-height: 25em;'
   }, [
     list.map((name) =>
-      h('a.menu-item', {
-        className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
-        onclick: () => workflow.toggleFLPSelection(name)
-      }, name)
+      h('.form-check.flex-row.check-item', [
+        h('input.form-check-input', {
+          type: 'checkbox',
+          style: 'margin-top: .7em; margin-left: -.7em;',
+          id: name,
+          checked: workflow.form.hosts.indexOf(name) >= 0 ? true : false,
+          onchange: () => workflow.toggleFLPSelection(name)
+        }),
+        h('label.form-check-label.ph2', {
+          for: name,
+          style: 'cursor: pointer;'
+        }, name)
+      ])
     ),
   ]);

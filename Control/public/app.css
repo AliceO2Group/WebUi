@@ -15,76 +15,28 @@
 /*
  * App specific CSS styles
  */
+.pageLoading { font-size: 10em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
+.errorPage { font-size: 10em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
 
-.pageLoading {
-  font-size: 10em;
-  color: var(--color-dark);
-  margin: var(--space-l);
-  line-height: 1;
-}
+.disabled-content { pointer-events: none; opacity: 0.5; }
 
-.errorPage {
-  font-size: 10em;
-  color: var(--color-dark);
-  margin: var(--space-l);
-  line-height: 1;
-}
+.grafana-font { font-family: Roboto, Helvetica Neue, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #52545c; font-weight: 515; text-align: center; }
 
-.disabled-content {
-  pointer-events: none;
-  opacity: 0.5;
-}
+tr:hover td { background-color: var(--color-gray-light)}
 
-.grafana-font {
-  font-family: Roboto, Helvetica Neue, Arial, sans-serif;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #52545c;
-  font-weight: 515;
-  text-align: center;
-}
+.actionable-row:hover { cursor: pointer;}
+.actionable-icon { cursor: pointer; }
+.actionable-icon:hover { transform: scale(1.2); }
+.actionable-icon:active { transform: scale(1.5); }
 
-tr:hover td {
-  background-color: var(--color-gray-light)
-}
+.menu-title-large { text-transform: uppercase; height: 2em; line-height: 2em; color: var(--color-gray-darker); padding-left: 0.2em; font-size: 0.9em; font-weight: 100; margin: 0.5em; user-select: none; }
 
-.actionable-row:hover {
-  cursor: pointer;
-}
+.panel-title { border: 1px solid #ddd; background: var(--color-gray-light); }
+.panel { border: 1px solid var(--color-gray-light); }
 
-.actionable-icon {
-  cursor: pointer;
-}
+.border-bot { border-bottom: 1px solid var(--color-gray-light); }
 
-.actionable-icon:hover {
-  transform: scale(1.2);
-}
-
-.actionable-icon:active {
-  transform: scale(1.5);
-}
-
-.menu-title-large {
-  text-transform: uppercase;
-  height: 2em;
-  line-height: 2em;
-  color: var(--color-gray-darker);
-  padding-left: 0.2em;
-  font-size: 0.9em;
-  font-weight: 100;
-  margin: 0.5em;
-  user-select: none;
-}
-
-.panel-title {
-  border: 1px solid #ddd;
-  background: var(--color-gray-light);
-}
-
-.panel {
-  border: 1px solid var(--color-gray-light);
-}
-
-.border-bot {
-  border-bottom: 1px solid var(--color-gray-light);
-}
+.check-item { cursor: pointer; text-decoration: none; height: 2em; line-height: 2em; padding-left: 1em; padding-right: 1em; color: var(--color-gray-darker); font-weight: 100; margin: 0.25em; border-radius: 0.25em; display: block; user-select: none; }
+.check-item:hover { text-decoration: none; background-color: var(--color-gray-dark); color: var(--color-gray-lighter); }
+.check-item:active { background-color: var(--color-gray-dark); color: var(--color-white);  }
+.check-item.selected { background-color: var(--color-primary); color: var(--color-white); }

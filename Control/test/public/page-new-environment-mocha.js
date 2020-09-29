@@ -302,15 +302,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have successfully select all FLPS from area list by', async () => {
-    const selectedFLP = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a');
-      return {
-        classList: element.classList,
-        hosts: window.model.workflow.form.hosts
-      };
-    });
-    assert.deepStrictEqual(selectedFLP.classList, {0: 'menu-item', 1: 'selected'});
-    assert.deepStrictEqual(selectedFLP.hosts, ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']);
+    const selectedFLP = await page.evaluate(() => window.model.workflow.form.hosts);
+    assert.deepStrictEqual(selectedFLP, ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']);
   });
 
   it('should successfully create a new environment', async () => {
