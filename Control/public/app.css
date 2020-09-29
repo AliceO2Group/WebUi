@@ -36,7 +36,6 @@ tr:hover td { background-color: var(--color-gray-light)}
 
 .border-bot { border-bottom: 1px solid var(--color-gray-light); }
 
-.check-item { cursor: pointer; text-decoration: none; height: 2em; line-height: 2em; padding-left: 1em; padding-right: 1em; color: var(--color-gray-darker); font-weight: 100; margin: 0.25em; border-radius: 0.25em; display: block; user-select: none; }
-.check-item:hover { text-decoration: none; background-color: var(--color-gray-dark); color: var(--color-gray-lighter); }
-.check-item:active { background-color: var(--color-gray-dark); color: var(--color-white);  }
-.check-item.selected { background-color: var(--color-primary); color: var(--color-white); }
+.none-selected-btn { margin-left: .7em; background-color: var(--color-gray-darker); color: var(--color-white); padding: .4em .5em;}
+.none-selected-btn:hover  { background-color: var(--color-gray);}
+.selected-btn { margin-left: .7em; background-color: var(--color-primary); color: var(--color-white); padding: .4em .5em;}
