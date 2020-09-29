@@ -149,6 +149,9 @@ describe('Control Service test suite', () => {
   describe('Check executing commands through `ControlProxy`', () => {
     let ctrlService = null;
     const req = {
+      session: {
+        personid: 0
+      },
       path: 'ListRepos',
       body: 'Test'
     };
