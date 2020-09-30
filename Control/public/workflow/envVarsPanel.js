@@ -39,6 +39,7 @@ const togglesPanel = (workflow) =>
       triggerPanel(workflow),
       dataDistributionPanel(workflow),
       epnPanel(workflow),
+      qcddPanel(workflow),
       readoutPanel(workflow),
     ])
   ]);
@@ -75,7 +76,7 @@ const triggerPanel = (workflow) =>
 
 /**
  * Add a radio button group to select if data distribution should be set as on or off
- * If dd_enabled is set to false than odc_enabled should be set to false
+ * If dd_enabled is set to false than odc_enabled and qcdd_enabled should be set to false
  * @param {Object} workflow
  * @return {vnode}
  */
@@ -90,6 +91,7 @@ const dataDistributionPanel = (workflow) =>
         checked: workflow.form.basicVariables['dd_enabled'] === 'false',
         onchange: () => {
           workflow.updateBasicVariableByKey('odc_enabled', 'false');
+          workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
           workflow.updateBasicVariableByKey('dd_enabled', 'false');
         }
       }),
@@ -138,6 +140,40 @@ const epnPanel = (workflow) =>
         }
       }),
       h('label', {for: 'epnOn'}, 'ON')
+    ]),
+  ]);
+
+/**
+ * Add a radio button group to select if QC should be set as on or off
+ * If qcdd_enabled is set as true than dd_enabled should be set to true
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const qcddPanel = (workflow) =>
+  h('.flex-row.text-left.w-50', [
+    h('.w-50', 'QC:'),
+    h('.w-25.form-check', [
+      h('input.form-check-input', {
+        type: 'radio',
+        name: 'qcdd',
+        id: 'qcddOff',
+        checked: workflow.form.basicVariables['qcdd_enabled'] === 'false',
+        onchange: () => workflow.form.basicVariables['qcdd_enabled'] = 'false'
+      }),
+      h('label', {for: 'qcddOff'}, 'OFF')
+    ]),
+    h('.w-25.form-check', [
+      h('input.form-check-input disabled', {
+        type: 'radio',
+        name: 'qcdd',
+        id: 'qcddOn',
+        checked: workflow.form.basicVariables['qcdd_enabled'] === 'true',
+        onchange: () => {
+          workflow.updateBasicVariableByKey('qcdd_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+        }
+      }),
+      h('label', {for: 'qcddOn'}, 'ON')
     ]),
   ]);
 

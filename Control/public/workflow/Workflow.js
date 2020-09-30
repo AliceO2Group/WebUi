@@ -331,6 +331,23 @@ export default class Workflow extends Observable {
   }
 
   /**
+   * If all FLPs are selected than deselect them
+   * Else select all FLPs
+   */
+  toggleAllFLPSelection() {
+    this.form.hosts = this.areAllFLPsSelected() ? [] : JSON.parse(JSON.stringify(this.flpList.payload));
+    this.notify();
+  }
+
+  /**
+   * Check if all FLPs are selected
+   * @return {boolean}
+   */
+  areAllFLPsSelected() {
+    return this.form.hosts.length === this.flpList.payload.length;
+  }
+
+  /**
    * HTTP Requests
    */
 
