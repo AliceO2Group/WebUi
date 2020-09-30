@@ -21,8 +21,16 @@ import pageLoading from '../common/pageLoading.js';
  * @return {vnode}
  */
 export default (workflow) => [
-  h('h5.bg-gray-light.p2.panel-title.w-100',
-    `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
+  h('.w-100.flex-row.panel-title', [
+    h('.flex-column.justify-center.f6',
+      h('button.btn.f6', {
+        class: workflow.areAllFLPsSelected() ? 'selected-btn' : 'none-selected-btn',
+        onclick: () => workflow.toggleAllFLPSelection()
+      }, 'Toggle')
+    ),
+    h('h5.bg-gray-light.p2', {style: 'width: 98%'},
+      `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
+  ]),
   h('.w-100.p2.panel',
     workflow.flpList.match({
       NotAsked: () => null,
