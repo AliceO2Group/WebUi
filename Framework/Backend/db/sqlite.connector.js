@@ -19,7 +19,6 @@ class SQLiteConnector {
       throw new Error('No pathname provided');
     }
     this.pathname = pathname;
-    this.db;
   }
 
   /**
