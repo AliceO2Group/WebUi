@@ -252,7 +252,7 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
     h('thead',
       h('tr',
         [
-          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'Args', 'More']
+          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
             .map((header) => h('th', header))
         ]
       )
@@ -268,12 +268,6 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
           style: 'font-weight: bold;'
         }, task.state),
         h('td', task.deploymentInfo.hostname),
-        environment.task.list[task.taskId] && environment.task.list[task.taskId].match({
-          NotAsked: () => null,
-          Loading: () => h('td', {style: 'font-size: 0.25em;'}, pageLoading()),
-          Success: (data) => h('td', data.arguments),
-          Failure: (_error) => h('td', {title: 'Could not load arguments'}, iconCircleX()),
-        }),
         h('td',
           h('button.btn.btn-default', {
             title: 'More Details',
