@@ -414,6 +414,7 @@ class HttpServer {
       const query = {
         personid: details.cern_person_id,
         name: details.name,
+        access: this.authorise(details),
         token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, this.authorise(details)),
       };
 
@@ -467,7 +468,8 @@ class HttpServer {
         req.decoded = data.decoded;
         req.session = {
           personid: data.id,
-          name: data.username
+          name: data.username,
+          access: data.access
         };
         next();
       }, ({name, message}) => {

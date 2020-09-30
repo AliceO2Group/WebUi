@@ -19,7 +19,7 @@ const history = window.history;
 
 // This are the parameters coming from the server only and represent
 // the current session
-const parametersNames = ['personid', 'name', 'token'];
+const parametersNames = ['personid', 'name', 'token', 'access'];
 
 /**
  * Singleton to retrieve and hide the parameters passed as query string.
