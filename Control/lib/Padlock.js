@@ -39,13 +39,29 @@ class Padlock {
   }
 
   /**
+   * Tries to force unlock
+   * Requires admin auth level (2)
+   * @param {number} auth - auth level
+   */
+  forceUnlock(auth) {
+    if (this.lockedBy === null) {
+      throw new Error(`Lock is already released`);
+    }
+    if (auth != 2) {
+      throw new Error(`Insufficient permission`);
+    }
+    this.lockedBy = null;
+    this.lockedByName = null;
+  }
+
+  /**
    * Release lock by someone who must be the actual owner.
    * Fails if the lock is not taken or taken by someone else.
    * @param {number} personid - someone's id
    */
   unlockBy(personid) {
     if (this.lockedBy === null) {
-      throw new Error('Lock is already unlocked');
+      throw new Error('Lock is already released');
     }
 
     if (this.lockedBy !== personid) {

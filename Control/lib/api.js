@@ -59,6 +59,7 @@ module.exports.setup = (http, ws) => {
   http.post('/lockState', (req, res) => res.json(padLock));
   http.post('/lock', lock);
   http.post('/unlock', unlock);
+  http.post('/forceUnlock', forceUnlock);
   http.get('/getPlotsList', getPlotsList);
   http.get('/getFrameworkInfo', getFrameworkInfo);
   http.get('/getCRUs', (req, res) => consulConnector.getCRUs(req, res));
@@ -91,6 +92,23 @@ module.exports.setup = (http, ws) => {
       res.status(403).json({message: error.toString()});
       return;
     }
+    broadcastPadState();
+  }
+
+  /** 
+   * Method to try to release lock
+   * @param {Request} req
+   * @param {Response} res
+  */
+  function forceUnlock(req, res) {
+    try {
+      padLock.forceUnlock(req.session.access);
+      log.info(`Lock forced by ${req.session.name}`);
+      res.json({ok: true});
+    } catch (error) {
+      log.warn(`Unable to force lock by ${req.session.name}: ${error}`);
+      res.status(403).json({message: error.message});
+    }   
     broadcastPadState();
   }
 
