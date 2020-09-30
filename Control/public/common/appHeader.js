@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconPerson, iconStar} from '/js/src/index.js';
+import {h, iconPerson} from '/js/src/index.js';
 import lockButton from '../lock/lockButton.js';
 
 /**
