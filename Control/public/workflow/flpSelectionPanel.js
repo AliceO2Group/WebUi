@@ -22,11 +22,11 @@ import pageLoading from '../common/pageLoading.js';
  */
 export default (workflow) => [
   h('.w-100.flex-row.panel-title', [
-    h('.flex-column.justify-center',
+    h('.flex-column.justify-center.f6',
       h('button.btn.f6', {
         class: workflow.areAllFLPsSelected() ? 'selected-btn' : 'none-selected-btn',
         onclick: () => workflow.toggleAllFLPSelection()
-      }, workflow.areAllFLPsSelected() ? 'All' : 'None')
+      }, 'Toggle')
     ),
     h('h5.bg-gray-light.p2', {style: 'width: 98%'},
       `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
