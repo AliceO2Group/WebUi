@@ -19,4 +19,9 @@ describe('SQLite database', () => {
     it('should successfully run a read statement', () => {
     });
   });
+
+  describe('Close Connection', () => {
+    it('should successfully run a read statement', () => {
+    });
+  });
 });

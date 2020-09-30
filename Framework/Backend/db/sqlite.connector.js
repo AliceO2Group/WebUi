@@ -1,4 +1,4 @@
-const log = new (require('./../log/Log.js'))('SQLiteConnector');
+const log = new (require('../log/Log.js'))('SQLiteConnector');
 const sqlite3 = require('sqlite3').verbose();
 
 /**
@@ -47,7 +47,7 @@ class SQLiteConnector {
    * @param {boolean} read - if true use #all otherwise #run
    * @return {Promise.<Array<JSON>, Error>}
    */
-  async query(query, values, read = true) {
+  async query(query, values = [], read = true) {
     return new Promise((resolve, reject) => {
       if (read) {
         this.readQuery(query, values)
@@ -109,7 +109,7 @@ class SQLiteConnector {
    * Close database connection
    * @return {Promise.<_, Error>}
    */
-  async closeDatabase() {
+  async close() {
     return new Promise((resolve, reject) => {
       this.db.close((err) => {
         if (err) {
