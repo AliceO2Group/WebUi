@@ -296,7 +296,7 @@ describe('Framework Frontend', function() {
   describe('Loader class (and fetchClient, sessionService)', function() {
     it('loads session token', async () => {
       await page.evaluate(async () => {
-        window.router.go('?personid=PERSONID&name=NAME&token=TOKEN', true, true);
+        window.router.go('?personid=PERSONID&name=NAME&token=TOKEN&access=0', true, true);
         sessionService.loadAndHideParameters();
         window.result = sessionService.get().token;
       });
