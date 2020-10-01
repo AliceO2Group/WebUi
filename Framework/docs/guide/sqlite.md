@@ -1,6 +1,6 @@
 
 
-# MySQL client
+# SQLite client
 Manages SQLite standard operations
 
 - [MySQL client](#mysql-client)
