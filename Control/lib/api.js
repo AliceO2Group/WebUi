@@ -95,7 +95,7 @@ module.exports.setup = (http, ws) => {
     broadcastPadState();
   }
 
-  /** 
+  /**
    * Method to try to release lock
    * @param {Request} req
    * @param {Response} res
@@ -108,7 +108,7 @@ module.exports.setup = (http, ws) => {
     } catch (error) {
       log.warn(`Unable to force lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
-    }   
+    }
     broadcastPadState();
   }
 

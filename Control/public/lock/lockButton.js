@@ -26,7 +26,7 @@ export default (model) => [
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
     Success: (data) => button(model, data),
-    Failure: (_error) => console.log(_error),
+    Failure: (_error) => null,
   })
 ];
 

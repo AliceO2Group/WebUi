@@ -76,7 +76,7 @@ export default class Lock extends Observable {
   /**
    * Force Control lock (eg. if someone left the lock in locked state)
    * Other peers will be notified by WS
-   */ 
+   */
   async forceUnlock() {
     this.padlockState = RemoteData.loading();
     this.notify();
@@ -85,7 +85,7 @@ export default class Lock extends Observable {
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
       return;
-    }   
+    }
     this.model.notification.show(`Lock forced`, 'success');
   }
 
