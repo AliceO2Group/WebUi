@@ -237,6 +237,7 @@ class HttpServer {
       query.personid = 0;
       query.name = 'Anonymous';
       query.token = this.jwt.generateToken(query.personid, query.name);
+      query.access = 0;
 
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);
@@ -414,6 +415,7 @@ class HttpServer {
       const query = {
         personid: details.cern_person_id,
         name: details.name,
+        access: this.authorise(details),
         token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, this.authorise(details)),
       };
 
@@ -467,7 +469,8 @@ class HttpServer {
         req.decoded = data.decoded;
         req.session = {
           personid: data.id,
-          name: data.username
+          name: data.username,
+          access: data.access
         };
         next();
       }, ({name, message}) => {
