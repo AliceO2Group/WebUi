@@ -293,7 +293,12 @@ const addKVInputPair = (workflow) => {
         type: 'text',
         placeholder: 'value',
         value: valueString,
-        oninput: (e) => valueString = e.target.value
+        oninput: (e) => valueString = e.target.value,
+        onkeyup: (e) => {
+          if (e.keyCode === 13) {
+            workflow.addVariable(keyString, valueString);
+          }
+        }
       })),
       h('.ph2.actionable-icon', {
         title: 'Add (key,value) variable',
