@@ -40,7 +40,6 @@ const revisionInputDropdown = (workflow, templatesMap, repository) => h('.m2.tex
   h('', {style: 'display:flex; flex-direction: row;'}, [
     h('.dropdown', {
       style: 'flex-grow: 1;',
-      onclick: () => workflow.setRevisionInputDropdownVisibility(false),
       class: workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
     }, [
       revisionInputField(workflow),
@@ -62,6 +61,14 @@ const revisionInputField = (workflow) => h('input.form-control', {
   style: 'z-index:100',
   value: workflow.revision.rawValue,
   oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
+  onblur: () => {
+    workflow.closeRevisionInputDropdown();
+  },
+  onkeyup: (e) => {
+    if (e.keyCode === 27) { // code for escape
+      workflow.closeRevisionInputDropdown();
+    }
+  },
   onclick: (e) => {
     workflow.setRevisionInputDropdownVisibility(true);
     workflow.updateInputSearch('revision', '');
@@ -84,7 +91,7 @@ const revisionDropdownArea = (workflow, templatesMap, repository) => h('.dropdow
     .map((revision) =>
       h('a.menu-item', {
         class: revision === workflow.form.revision ? 'selected' : '',
-        onclick: () => workflow.updateInputSelection('revision', revision),
+        onmousedown: () => workflow.updateInputSelection('revision', revision),
       }, revision)
     )
 );
