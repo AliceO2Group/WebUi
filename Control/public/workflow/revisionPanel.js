@@ -61,9 +61,7 @@ const revisionInputField = (workflow) => h('input.form-control', {
   style: 'z-index:100',
   value: workflow.revision.rawValue,
   oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
-  onblur: () => {
-    workflow.closeRevisionInputDropdown();
-  },
+  onblur: () => workflow.closeRevisionInputDropdown(),
   onkeyup: (e) => {
     if (e.keyCode === 27) { // code for escape
       workflow.closeRevisionInputDropdown();
