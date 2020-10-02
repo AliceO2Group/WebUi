@@ -161,6 +161,16 @@ export default class Workflow extends Observable {
   }
 
   /**
+   * Method to set to false the visibility of the dropdown and
+   * if the user did not select a new revision from the dropdown area
+   * to reset the value to the current selected revision
+   */
+  closeRevisionInputDropdown() {
+    this.setRevisionInputDropdownVisibility(false);
+    this.updateInputSearch('revision', this.form.revision);
+  }
+
+  /**
    * Match regex to see if revision is in a commit format
    * @return {boolean}
    */

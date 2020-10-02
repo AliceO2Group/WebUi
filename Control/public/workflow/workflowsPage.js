@@ -73,9 +73,7 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => [
   h('.flex-row', [
     h('.w-50.ph2.flex-column', [
       h('h5.bg-gray-light.p2.panel-title.w-100', 'Select Template'),
-      h('.form-group.p3.panel.w-100.flex-column', {
-        onclick: () => model.workflow.setRevisionInputDropdownVisibility(false),
-      }, [
+      h('.form-group.p3.panel.w-100.flex-column', [
         repositoryDropdownList(model.workflow, repoList),
         revisionPanel(model.workflow, templatesMap, model.workflow.form.repository),
         templatesPanel(model.workflow, templatesMap),
