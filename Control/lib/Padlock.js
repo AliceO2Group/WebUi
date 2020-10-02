@@ -47,7 +47,7 @@ class Padlock {
     if (this.lockedBy === null) {
       throw new Error(`Lock is already released`);
     }
-    if (auth != 2) {
+    if (auth !== 2) {
       throw new Error(`Insufficient permission`);
     }
     this.lockedBy = null;

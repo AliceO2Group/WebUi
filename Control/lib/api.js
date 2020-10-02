@@ -86,7 +86,7 @@ module.exports.setup = (http, ws) => {
     try {
       padLock.lockBy(req.session.personid, req.session.name);
       log.info(`Lock taken by ${req.session.name}`);
-      res.json({ok: true});
+      res.status(200).json({ok: true});
     } catch (error) {
       log.warn(`Unable to lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.toString()});
@@ -104,7 +104,7 @@ module.exports.setup = (http, ws) => {
     try {
       padLock.forceUnlock(req.session.access);
       log.info(`Lock forced by ${req.session.name}`);
-      res.json({ok: true});
+      res.status(200).json({ok: true});
     } catch (error) {
       log.warn(`Unable to force lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
@@ -121,7 +121,7 @@ module.exports.setup = (http, ws) => {
     try {
       padLock.unlockBy(req.session.personid);
       log.info(`Lock released by ${req.session.name}`);
-      res.json({ok: true});
+      res.status(200).json({ok: true});
     } catch (error) {
       log.warn(`Unable to give away lock by ${req.session.name}: ${error}`);
       res.status(403).json(error);
