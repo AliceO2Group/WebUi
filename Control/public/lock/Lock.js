@@ -74,6 +74,22 @@ export default class Lock extends Observable {
   }
 
   /**
+   * Force Control lock (eg. if someone left the lock in locked state)
+   * Other peers will be notified by WS
+   */
+  async forceUnlock() {
+    this.padlockState = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(`/api/forceUnlock`);
+    if (!ok) {
+      this.model.notification.show(result.message, 'danger');
+      return;
+    }
+    this.model.notification.show(`Lock forced`, 'success');
+  }
+
+  /**
    * Ask server to release the lock of Control
    * Result of this action will be an update by WS
    */

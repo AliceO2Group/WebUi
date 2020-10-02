@@ -59,6 +59,7 @@ module.exports.setup = (http, ws) => {
   http.post('/lockState', (req, res) => res.json(padLock));
   http.post('/lock', lock);
   http.post('/unlock', unlock);
+  http.post('/forceUnlock', forceUnlock);
   http.get('/getPlotsList', getPlotsList);
   http.get('/getFrameworkInfo', getFrameworkInfo);
   http.get('/getCRUs', (req, res) => consulConnector.getCRUs(req, res));
@@ -85,11 +86,28 @@ module.exports.setup = (http, ws) => {
     try {
       padLock.lockBy(req.session.personid, req.session.name);
       log.info(`Lock taken by ${req.session.name}`);
-      res.json({ok: true});
+      res.status(200).json({ok: true});
     } catch (error) {
       log.warn(`Unable to lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.toString()});
       return;
+    }
+    broadcastPadState();
+  }
+
+  /**
+   * Method to try to release lock
+   * @param {Request} req
+   * @param {Response} res
+  */
+  function forceUnlock(req, res) {
+    try {
+      padLock.forceUnlock(req.session.access);
+      log.info(`Lock forced by ${req.session.name}`);
+      res.status(200).json({ok: true});
+    } catch (error) {
+      log.warn(`Unable to force lock by ${req.session.name}: ${error}`);
+      res.status(403).json({message: error.message});
     }
     broadcastPadState();
   }
@@ -103,7 +121,7 @@ module.exports.setup = (http, ws) => {
     try {
       padLock.unlockBy(req.session.personid);
       log.info(`Lock released by ${req.session.name}`);
-      res.json({ok: true});
+      res.status(200).json({ok: true});
     } catch (error) {
       log.warn(`Unable to give away lock by ${req.session.name}: ${error}`);
       res.status(403).json(error);
