@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom} from '/js/src/index.js';
+import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX} from '/js/src/index.js';
 import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
 import infoButton from './../common/infoButton.js';
@@ -47,7 +47,7 @@ export default (model) => h('.h-100.flex-column', {key: model.router.params.page
       style: {
         width: model.object.selected ? '50%' : 0
       }
-    }, model.object.selected ? drawComponent(model) : null
+    }, model.object.selected ? objectPanel(model) : null
     )
   ]),
   h('.f6.status-bar.ph1.flex-row', [
@@ -57,12 +57,29 @@ export default (model) => h('.h-100.flex-column', {key: model.router.params.page
 ]);
 
 /**
- * Method to generate a component containing a header with actions and a jsroot plot
+ * Method to tackle various states for the selected objects
  * @param {Object} model
  * @return {vnode}
  */
-function drawComponent(model) {
-  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
+function objectPanel(model) {
+  const selectedObjectName = model.object.selected.name;
+  return model.object.objects[selectedObjectName].match({
+    NotAsked: () => null,
+    Loading: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
+      spinner(3), h('', 'Loading Object')]),
+    Success: () => drawPlot(model),
+    Failure: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
+      h('.f1', iconCircleX()), 'Unable to get data for the selected object']),
+  });
+}
+
+/**
+ * Draw the object including the info button and history dropdown
+ * @param {Object} model
+ * @return {vnode}
+ */
+const drawPlot = (model) =>
+  h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
       h('.resize-button.flex-row', [
         infoButton(model.object, model.isOnlineModeEnabled),
@@ -81,7 +98,6 @@ function drawComponent(model) {
       h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model)))
     ]
   );
-}
 
 /**
  * Shows status of current tree with its options (online, loaded, how many)
