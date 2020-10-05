@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import {iconProject, iconArrowBottom, iconArrowTop} from '/js/src/icons.js';
+import {iconCollapseUp, iconArrowBottom, iconArrowTop} from '/js/src/icons.js';
 
 /**
  * Shows header for the objects tree page, buttons allow to open/close the entire tree,
@@ -57,10 +57,10 @@ export default function objectTreeHeader(model) {
       ]),
       ' ',
       h('button.btn', {
-        title: 'Open or close whole tree',
-        onclick: () => model.object.tree.toggleAll(),
+        title: 'Close whole tree',
+        onclick: () => model.object.tree.closeAll(),
         disabled: !!model.object.searchInput
-      }, iconProject()),
+      }, iconCollapseUp()),
       ' ',
       h('input.form-control.form-inline.mh1.w-33', {
         placeholder: 'Search',
