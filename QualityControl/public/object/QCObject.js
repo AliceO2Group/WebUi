@@ -277,6 +277,8 @@ export default class QCObject extends Observable {
    * @param {number} timestamp
    */
   async loadObjectByName(objectName, timestamp = -1) {
+    this.objects[objectName] = RemoteData.loading();
+    this.notify();
     // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
     const result = await this.qcObjectService.getObjectByName(objectName, timestamp);
     if (result.isSuccess()) {
