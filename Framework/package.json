@@ -23,7 +23,8 @@
     "mocha-frontend": "mocha --exit ./Frontend/test/  --retries 2",
     "mocha-backend": "mocha --exit ./Backend/test/*.js  --retries 2",
     "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
-    "coverage-local": "nyc --reporter=lcov npm run mocha-backend"
+    "coverage-local": "nyc --reporter=lcov npm run mocha-backend",
+    "postinstall": "mv node_modules/mithril/mithril.js Frontend/js"
   },
   "nyc": {
     "exclude": [
@@ -34,6 +35,7 @@
     "express": "^4.17.1",
     "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.1",
+    "mithril": "^1.1.7",
     "mysql": "^2.17.1",
     "openid-client": "^3.12.2",
     "sqlite3": "^5.0.0",
@@ -50,5 +52,6 @@
     "sinon": "8.1.1",
     "supertest": "^4.0.2"
   },
-  "main": "Backend/index.js"
+  "main": "Backend/index.js",
+  "eslintIgnore": ["Frontend/js/mithril.js"]
 }
