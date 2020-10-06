@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "1.13.0",
+  "version": "1.13.1",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "contributors": [
@@ -53,5 +53,7 @@
     "supertest": "^4.0.2"
   },
   "main": "Backend/index.js",
-  "eslintIgnore": ["Frontend/js/mithril.js"]
+  "eslintIgnore": [
+    "Frontend/js/mithril.js"
+  ]
 }
