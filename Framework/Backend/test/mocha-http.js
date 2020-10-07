@@ -51,7 +51,7 @@ describe('REST API', () => {
 
   it('Verify that mithril is present', (done) => {
     request(httpServer)
-      .get('/mithril.js')
+      .get('/mithril/mithril.min.js')
       .expect(200)
       .end((err) => {
         done(err);

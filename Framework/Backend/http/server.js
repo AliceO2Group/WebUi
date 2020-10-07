@@ -165,13 +165,12 @@ class HttpServer {
     } else {
       this.app.get('/', (req, res, next) => this.addDefaultUserData(req, res, next));
     }
-    this.app.get('/mithril.js', (req, res) => {
-      res.sendFile(path.join(__dirname, '..', '..', 'node_modules/mithril/mithril.min.js'));
-    });
+
     // Router for static files (can grow with addStaticPath)
     // eslint-disable-next-line
     this.routerStatics = express.Router();
     this.addStaticPath(path.join(__dirname, '../../Frontend'));
+    this.addStaticPath(path.join(require.resolve('mithril'), '..'), 'mithril');
     this.app.use(this.routerStatics);
 
     // Router for public API (can grow with get, post and delete)
