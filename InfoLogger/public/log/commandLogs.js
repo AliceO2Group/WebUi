@@ -146,7 +146,7 @@ function toggleButtonStates(model, wasLivePressed) {
     switch (model.log.activeMode) {
       case MODE.QUERY:
       case MODE.LIVE.PAUSED:
-        setButtonsType(BUTTON.DEFAULT, BUTTON.DANGER_ACTIVE, iconMediaStop());
+        setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
         model.log.updateLogMode(MODE.LIVE.RUNNING);
         break;
       default: // MODE.LIVE.RUNNING
