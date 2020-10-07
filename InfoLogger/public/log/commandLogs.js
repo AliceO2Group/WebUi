@@ -150,7 +150,7 @@ function toggleButtonStates(model, wasLivePressed) {
         model.log.updateLogMode(MODE.LIVE.RUNNING);
         break;
       default: // MODE.LIVE.RUNNING
-        setButtonsType(BUTTON.DEFAULT, BUTTON.DANGER, iconMediaPlay());
+        setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
         model.log.updateLogMode(MODE.LIVE.PAUSED);
     }
   } else {
