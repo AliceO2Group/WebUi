@@ -39,7 +39,7 @@ class CCDBConnector {
     this.prefix = this.getPrefix(config);
     this.headers = {
       Accept: 'application/json',
-      'X-Filter-Fields': 'path,createTime,lastModified',
+      'X-Filter-Fields': 'path,createTime,lastModified'
     };
   }
 
@@ -48,7 +48,8 @@ class CCDBConnector {
    * @return {Promise.<Array.<String>, Error>}
    */
   async testConnection() {
-    return this.httpGetJson(`/browse/${this.prefix}`)
+    const connectionHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'path', 'Browse-Limit': 1};
+    return this.httpGetJson(`/browse/${this.prefix}`, connectionHeaders)
       .then(() => log.info('Successfully connected to CCDB'))
       .catch((err) => {
         log.error('Unable to connect to CCDB');
@@ -75,7 +76,8 @@ class CCDBConnector {
    * @param {String} objectName - full path of the object
    */
   async getObjectTimestampList(objectName) {
-    return this.httpGetJson(`/browse/${objectName}`)
+    const timestampHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'path,lastModified', 'Browse-Limit': 50};
+    return this.httpGetJson(`/browse/${objectName}`, timestampHeaders)
       .then((result) =>
         result.objects
           .filter(this.isItemValid)
@@ -86,16 +88,17 @@ class CCDBConnector {
   /**
    * Util to get JSON data (parsed) from CCDB server
    * @param {string} path - path en CCDB server
+   * @param {JSON} headers - use default initialized in constructor if not provided
    * @return {Promise.<Object, Error>} JSON response
    */
-  httpGetJson(path) {
+  httpGetJson(path, headers = this.headers) {
     return new Promise((resolve, reject) => {
       const requestOptions = {
         hostname: this.hostname,
         port: this.port,
         path: path,
         method: 'GET',
-        headers: this.headers
+        headers: headers
       };
 
       /**
