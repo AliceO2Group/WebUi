@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global window */
-
 /**
  * Template engine functions using vnode and DOM diff algo
  * @module renderer

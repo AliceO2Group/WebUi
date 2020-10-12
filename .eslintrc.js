@@ -1,6 +1,6 @@
 module.exports = {
   "root": true,
-  "extends": ["eslint:recommended", "google"],
+  "extends": ["eslint:recommended"],
   "env": {
     "es6": true,
     "node": true,
@@ -31,6 +31,7 @@ module.exports = {
             "FunctionExpression": true
         }
     }],
+    "no-prototype-builtins": "off",
     "linebreak-style": "warn"
   }
 }
