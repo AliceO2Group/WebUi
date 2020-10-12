@@ -32,6 +32,7 @@ module.exports = {
         }
     }],
     "no-prototype-builtins": "off",
+    "no-cond-assign": "off",
     "linebreak-style": "warn"
   }
 }
