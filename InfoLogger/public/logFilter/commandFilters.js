@@ -34,10 +34,10 @@ export default (model) => [
     ]),
     h('span.mh3'),
     h('.btn-group', [
-      buttonFilterLevel(model, 'Shift', 1),
-      buttonFilterLevel(model, 'Oncall', 6),
+      buttonFilterLevel(model, 'Ops', 1),
+      buttonFilterLevel(model, 'Support', 6),
       buttonFilterLevel(model, 'Devel', 11),
-      buttonFilterLevel(model, 'Debug', null),
+      buttonFilterLevel(model, 'Trace', null), // 21
     ]),
     h('span.mh3'),
     h('.btn-group', [

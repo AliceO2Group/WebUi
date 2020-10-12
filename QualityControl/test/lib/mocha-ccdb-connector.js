@@ -174,6 +174,28 @@ describe('CCDB Connector test suite', () => {
       await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*'));
     });
 
+    it('should successfully add default headers to request if none were provided', async () => {
+      nock('http://ccdb:8500', {
+        reqheaders: {
+          Accept: 'application/json',
+          'X-Filter-Fields': 'path,createTime,lastModified'
+        }
+      }).get('/latest/test.*')
+        .reply(200, '{}');
+
+      await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*'), 'Provided headers are not matching the default ones');
+    });
+
+    it('should successfully use provided headers to request', async () => {
+      const timestampHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'lastModified', 'Browse-Limit': 50};
+
+      nock('http://ccdb:8500', {
+        reqheaders: timestampHeaders
+      }).get('/latest/test.*')
+        .reply(200, '{}');
+      await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*', timestampHeaders), 'Expected headers are not matching');
+    });
+
     it('should reject with error due to status code', async () => {
       nock('http://ccdb:8500')
         .get('/latest/test.*')
