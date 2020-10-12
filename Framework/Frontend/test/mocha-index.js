@@ -16,12 +16,12 @@
 
 const puppeteer = require('puppeteer');
 const assert = require('assert');
+const {spawn} = require('child_process');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const port = 8085;
 
-let server;
 let browser;
 let page;
 
@@ -34,47 +34,23 @@ let page;
 // if they are tested just after their initialization.
 
 describe('Framework Frontend', function() {
+  let subprocess; // web-server runs into a subprocess
+  let subprocessOutput = '';
   this.timeout(10000);
   this.slow(1000);
 
-  // Start a web server to serve frontend
-  // We don't use backend to avoid side effects from it
-  before(function(done) {
-    server = http.createServer((request, response) => {
-      // console.log(request.url);
-      if (request.url === '/index.html') {
-        return response.end(`<script type="module">
-          import * as framework from '/js/src/index.js';
-          Object.assign(window, framework);
-          window.frameworkLoaded = true;
-        </script>`);
-      } else if (request.url === '/api/ok.json?token=TOKEN') {
-        response.setHeader('Content-type', 'application/json');
-        return response.end(`{"ok": "${request.method}"}`);
-      } else {
-        fs.readFile(path.join(__dirname, '..', request.url), (error, content) => {
-          if (error) {
-            response.statusCode = 404;
-            response.end(`File ${request.url} not found!`);
-            return;
-          }
-          response.setHeader('Content-type', 'text/javascript');
-          response.end(content);
-        });
-      }
-    });
-
-    server.listen(port, (err) => {
-      if (err) {
-        throw err;
-      }
-      done();
-    })
-  });
-
   // Start browser to test UI
   before(async function() {
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    // Start web-server in background
+    subprocess = spawn('node', ['index-test.js'], {stdio: 'pipe'});
+    subprocess.stdout.on('data', (chunk) => {
+      subprocessOutput += chunk.toString();
+    });
+    subprocess.stderr.on('data', (chunk) => {
+      subprocessOutput += chunk.toString();
+    });
+
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
     page.on('requestfailed', (request) => {
       console.error(`Navigator failed to load ${request.url()}`);
@@ -90,7 +66,7 @@ describe('Framework Frontend', function() {
 
   it('should be loaded by browser as a module', async function() {
     // frameworkLoaded is affected in index.html sent by server
-    await page.goto(`http://localhost:${port}/index.html`, {waitUntil: 'networkidle0'});
+    await page.goto(`http://localhost:${port}`, {waitUntil: 'networkidle0'});
     const framework = await page.evaluate(() => window.frameworkLoaded);
     if (!framework) {
       throw new Error(`Navigator failed to load framework`);
@@ -295,12 +271,11 @@ describe('Framework Frontend', function() {
 
   describe('Loader class (and fetchClient, sessionService)', function() {
     it('loads session token', async () => {
-      await page.evaluate(async () => {
-        window.router.go('?personid=PERSONID&name=NAME&token=TOKEN&access=0', true, true);
-        sessionService.loadAndHideParameters();
-        window.result = sessionService.get().token;
+      const res = await page.evaluate(async () => {
+        window.router.go('/');
+        return window.sessionService.session;
       });
-      await page.waitForFunction(`window.result === 'TOKEN'`);
+      assert.ok(res !== undefined);
     });
 
     it('sends POST to web server', async () => {
@@ -425,7 +400,11 @@ describe('Framework Frontend', function() {
     });
   });
 
-  after(function() {
-    server.close();
+  after(async () => {
+    await browser.close();
+    console.log('---------------------------------------------');
+    console.log('Output of server logs for the previous tests:');
+    console.log(subprocessOutput);
+    subprocess.kill();
   });
 });
