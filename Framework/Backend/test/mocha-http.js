@@ -49,6 +49,15 @@ describe('REST API', () => {
     );
   });
 
+  it('Verify that mithril is present', (done) => {
+    request(httpServer)
+      .get('/mithril/mithril.min.js')
+      .expect(200)
+      .end((err) => {
+        done(err);
+      });
+  });
+
   it('GET the "/" and return user details', (done) => {
     request(httpServer)
       .get('/')

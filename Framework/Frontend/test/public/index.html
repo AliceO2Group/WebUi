@@ -1,0 +1,14 @@
+<!doctype html>
+<title>Framework test</title>
+<meta name="description" content="Framework interface for ROOT object of Alice O2">
+
+<!-- Main application controller -->
+<script type="module">
+  import * as framework from '/js/src/index.js';
+  Object.assign(window, framework);
+  import sessionService from '/js/src/sessionService.js';
+  sessionService.loadAndHideParameters();
+  // Expose sessionService to interract with it the browser's console
+  window.sessionService = sessionService;
+  window.frameworkLoaded = true;
+</script>

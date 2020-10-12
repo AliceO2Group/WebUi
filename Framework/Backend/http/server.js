@@ -170,6 +170,7 @@ class HttpServer {
     // eslint-disable-next-line
     this.routerStatics = express.Router();
     this.addStaticPath(path.join(__dirname, '../../Frontend'));
+    this.addStaticPath(path.join(require.resolve('mithril'), '..'), 'mithril');
     this.app.use(this.routerStatics);
 
     // Router for public API (can grow with get, post and delete)
