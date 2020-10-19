@@ -81,11 +81,11 @@ class StatusService {
     }
     if (this.config.ccdb) {
       result.ccdb = this.config.ccdb;
-      result.ccdb.status = await this.connectorChecker();
+      result.ccdb.status = await this.getDataConnectorStatus();
     }
     if (this.config.consul) {
       result.consul = this.config.consul;
-      result.consul.status = await this.liveConnectorChecker();
+      result.consul.status = await this.getLiveModeConnectorStatus();
     }
     if (this.config.quality_control) {
       result.quality_control = this.config.quality_control;
@@ -97,7 +97,7 @@ class StatusService {
    * Retrieve Data Connector status
    * @return {Promise<Resolve, Reject>}
    */
-  async connectorChecker() {
+  async getDataConnectorStatus() {
     if (!this.connector) {
       return {ok: false, message: 'Data connector was not configured'}
     } 
@@ -114,7 +114,7 @@ class StatusService {
    * Retrieve Live Connector status
    * @return {Promise<Resolve, Reject>}
    */
-  async liveConnectorChecker() {
+  async getLiveModeConnectorStatus() {
     if (!this.liveConnector) {
       return {ok: false, message: 'Live Mode was not configured'}
     }
