@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -13,6 +14,9 @@
 */
 
 const LayoutConnector = require('./connector/LayoutConnector');
+const StatusService = require('./StatusService.js');
+const config = require('./../test/test-config.js');
+const projPackage = require('./../package.json');
 
 // force user accounts during demo
 const ownerIdUser1 = 0;
@@ -218,50 +222,17 @@ const objects = [
 ];
 
 const tabObject = [
-  {
-    id: '5aba4a059b755d517e76ef51',
-    options: ['logx'], name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', x: 0, y: 0, w: 2, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef52',
-    options: ['logy'], name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef53',
-    options: ['gridx'], name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef54',
-    options: ['gridx'], name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef55',
-    options: ['gridx'], name: 'DAQ01/EquipmentSize/HMPID/HMPID', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef56',
-    options: [], name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef57',
-    options: [], name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef58',
-    options: [], name: 'DAQ01/EquipmentSize/TOF/TOF', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef59',
-    options: [], name: 'DAQ01/EquipmentSize/TPC/TPC', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef50',
-    options: [], name: 'DAQ01/EventSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1
-  },
-  {
-    id: '5aba4a059b755d517e76ef60',
-    options: [], name: 'DAQ01/EventSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1
-  },
+  {id: '5aba4a059b755d517e76ef51', options: ['logx'], name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', x: 0, y: 0, w: 2, h: 1},
+  {id: '5aba4a059b755d517e76ef52', options: ['logy'], name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef53', options: ['gridx'], name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef54', options: ['gridx'], name: 'DAQ01/EquipmentSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef55', options: ['gridx'], name: 'DAQ01/EquipmentSize/HMPID/HMPID', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef56', options: [], name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef57', options: [], name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef58', options: [], name: 'DAQ01/EquipmentSize/TOF/TOF', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef59', options: [], name: 'DAQ01/EquipmentSize/TPC/TPC', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef50', options: [], name: 'DAQ01/EventSize/ACORDE/ACORDE', x: 0, y: 0, w: 1, h: 1},
+  {id: '5aba4a059b755d517e76ef60', options: [], name: 'DAQ01/EventSize/CPV/CPV', x: 0, y: 0, w: 1, h: 1},
 ];
 
 const tabs = [
@@ -273,70 +244,22 @@ const tabs = [
 ];
 
 const layouts = [
-  {
-    id: '5aba4a059b755d517e76ea10',
-    owner_id: ownerIdUser1, name: 'AliRoot', owner_name: ownerNameUser1, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea11',
-    owner_id: ownerIdUser1, name: 'PWG-GA', owner_name: ownerNameUser1, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea12',
-    owner_id: ownerIdUser1, name: 'PWG-HF', owner_name: ownerNameUser1, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea13',
-    owner_id: ownerIdUser1, name: 'PWG-CF', owner_name: ownerNameUser1, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea14',
-    owner_id: ownerIdUser1, name: 'PWG-PP', owner_name: ownerNameUser1, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea15',
-    owner_id: ownerIdUser2, name: 'Run Coordination', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea16',
-    owner_id: ownerIdUser2, name: 'PWG-LF', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea17',
-    owner_id: ownerIdUser2, name: 'PWG-DQ', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea18',
-    owner_id: ownerIdUser2, name: 'PWG-JE', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea19',
-    owner_id: ownerIdUser2, name: 'MC productions', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea21',
-    owner_id: ownerIdUser2, name: 'Run Coordination 2017', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea22',
-    owner_id: ownerIdUser2, name: 'O2 Milestones', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea23',
-    owner_id: ownerIdUser2, name: 'O2 TDR', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea24',
-    owner_id: ownerIdUser2, name: 'MC prod dashboard', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea25',
-    owner_id: ownerIdUser2, name: 'DAQ System Dashboard', owner_name: ownerNameUser2, tabs: tabs
-  },
-  {
-    id: '5aba4a059b755d517e76ea26',
-    owner_id: ownerIdUser2, name: 'PWG-LF (2)', owner_name: ownerNameUser2, tabs: tabs
-  },
+  {id: '5aba4a059b755d517e76ea10', owner_id: ownerIdUser1, name: 'AliRoot', owner_name: ownerNameUser1, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea11', owner_id: ownerIdUser1, name: 'PWG-GA', owner_name: ownerNameUser1, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea12', owner_id: ownerIdUser1, name: 'PWG-HF', owner_name: ownerNameUser1, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea13', owner_id: ownerIdUser1, name: 'PWG-CF', owner_name: ownerNameUser1, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea14', owner_id: ownerIdUser1, name: 'PWG-PP', owner_name: ownerNameUser1, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea15', owner_id: ownerIdUser2, name: 'Run Coordination', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea16', owner_id: ownerIdUser2, name: 'PWG-LF', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea17', owner_id: ownerIdUser2, name: 'PWG-DQ', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea18', owner_id: ownerIdUser2, name: 'PWG-JE', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea19', owner_id: ownerIdUser2, name: 'MC productions', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea21', owner_id: ownerIdUser2, name: 'Run Coordination 2017', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea22', owner_id: ownerIdUser2, name: 'O2 Milestones', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea23', owner_id: ownerIdUser2, name: 'O2 TDR', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea24', owner_id: ownerIdUser2, name: 'MC prod dashboard', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea25', owner_id: ownerIdUser2, name: 'DAQ System Dashboard', owner_name: ownerNameUser2, tabs: tabs},
+  {id: '5aba4a059b755d517e76ea26', owner_id: ownerIdUser2, name: 'PWG-LF (2)', owner_name: ownerNameUser2, tabs: tabs},
 ];
 
 // --------------------------------------------------------
@@ -356,3 +279,5 @@ const dataConnector = {
 
 module.exports.layoutConnector = new LayoutConnector(dataConnector);
 module.exports.getObjectTimestampList = getObjectTimestampList;
+
+module.exports.statusService = new StatusService(config, projPackage);
