@@ -20,6 +20,11 @@ const config = require('../test-config.js');
 const StatusService = require('../../lib/StatusService.js');
 
 describe('Status Service test suite', () => {
+  config.mysql = {
+    host: 'localhost',
+    port: 6103,
+    database: 'INFOLOGGER'
+  };
   describe('Creating a new StatusService instance', () => {
     it('should throw an error if configuration object is not provided', () => {
       assert.throws(() => new StatusService(), new Error('Empty Framework configuration'));
