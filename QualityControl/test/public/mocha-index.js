@@ -601,9 +601,9 @@ describe('QCG', function() {
 
     it('should have a frameworkInfo item with config fields', async () => {
       const expConfig = {
-        qcg: {port: 8181, hostname: 'localhost'},
-        consul: {hostname: 'localhost', port: 8500},
-        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test'},
+        qcg: {port: 8181, hostname: 'localhost', status: {ok: true}},
+        consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live Mode was not configured'}},
+        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: false, message: 'Data connector was not configured'}},
         quality_control: {version: '0.19.5-1'}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);
