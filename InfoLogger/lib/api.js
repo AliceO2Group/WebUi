@@ -19,13 +19,15 @@ const SQLDataSource = require('./SQLDataSource.js');
 const ProfileService = require('./ProfileService.js');
 const {MySQL} = require('@aliceo2/web-ui');
 const JsonFileConnector = require('./JSONFileConnector.js');
-const projPackage = require('./../package.json');
+const projPackage = require('../package.json');
+const StatusService = require('./StatusService.js');
 
 let querySource = null;
 let liveSource = null;
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 const profileService = new ProfileService(jsonDb);
+const statusService = new StatusService(config, projPackage);
 
 if (config.mysql) {
   log.info(`Detected InfoLogger database configration`);
@@ -36,6 +38,7 @@ if (config.mysql) {
       log.error(`Unable to instantiate data source due to ${error}`);
       querySource = null;
     });
+    statusService.setQuerySource(querySource);
   }).catch((error) => {
     log.error(`Unable to connect to mysql due to ${error}`);
     querySource = null;
@@ -48,12 +51,13 @@ if (config.infoLoggerServer) {
   log.info(`InfoLogger server config found`);
   liveSource = new InfoLoggerReceiver();
   liveSource.connect(config.infoLoggerServer);
+  statusService.setLiveSource(liveSource);
 } else {
   log.warn(`InfoLogger server config not found, Live mode not available`);
 }
 
 module.exports.attachTo = (http, ws) => {
-  http.get('/getFrameworkInfo', getFrameworkInfo);
+  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService));
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
   http.post('/services', getServicesStatus);
@@ -85,32 +89,6 @@ module.exports.attachTo = (http, ws) => {
         .catch((error) => handleError(res, error));
     } else {
       handleError(res, 'MySQL Data Source is not available');
-    }
-  }
-
-  /**
-   * Method which handles the request for framework information
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function getFrameworkInfo(req, res) {
-    if (!config) {
-      handleError(res, 'Unable to retrieve configuration of the framework', 502);
-    } else {
-      const result = {};
-      result['infoLogger-gui'] = {};
-      if (projPackage && projPackage.version) {
-        result['infoLogger-gui'].version = projPackage.version;
-      }
-      if (config.http) {
-        const il = {hostname: config.http.hostname, port: config.http.port};
-        result['infoLogger-gui'] = Object.assign(result['infoLogger-gui'], il);
-      }
-      if (config.infoLoggerServer) {
-        const ils = {host: config.infoLoggerServer.host, port: config.infoLoggerServer.port};
-        result.infoLoggerServer = ils;
-      }
-      res.status(200).json(result);
     }
   }
 

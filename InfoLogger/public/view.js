@@ -22,8 +22,7 @@ import inspector from './log/inspector.js';
 import tableLogsHeader from './log/tableLogsHeader.js';
 import tableLogsContent from './log/tableLogsContent.js';
 import tableLogsScrollMap from './log/tableLogsScrollMap.js';
-import loadingAnimation from './common/loadingAnimation.js';
-import errorComponent from './common/errorComponent.js';
+import aboutComponent from './about/about.component.js';
 
 // The view
 export default (model) => [
@@ -40,7 +39,7 @@ export default (model) => [
       h('header.f7', tableFilters(model)),
     ]),
     h('div.flex-grow.flex-row.shadow-level0.logs-container', [
-      frameworkInfoSide(model),
+      aboutComponent(model),
       logsTable(model),
       inspectorSide(model)
     ]),
@@ -49,46 +48,6 @@ export default (model) => [
     ]),
   ]),
 ];
-
-/**
- * Component which will display information about the framework of InfoLogger
- * @param {Object} model
- * @return {vnode}
- */
-const frameworkInfoSide = (model) =>
-  h('aside.sidebar', {style: {width: model.frameworkInfoEnabled ? '' : '0rem'}}, [
-    h('.sidebar-content.scroll-y.p1.text-center', [
-      model.frameworkInfo.match({
-        NotAsked: () => null,
-        Loading: () => h('.f1', loadingAnimation()),
-        Success: (data) => showContent(data),
-        Failure: (error) => errorComponent(error),
-      })
-    ])
-  ]);
-
-/**
-* Display a table with information about infologger framework
-* @param {Object} item
-* @return {vnode}
-*/
-const showContent = (item) =>
-  Object.keys(item).map((columnName) => [
-    h('table.table.f7.shadow-level1',
-      h('tbody', [
-        h('tr',
-          h('th.w-50', {style: 'text-decoration: underline'}, columnName.charAt(0).toUpperCase() + columnName.slice(1)),
-          h('th', '')
-        ),
-        Object.keys(item[columnName]).map((name) =>
-          h('tr', [
-            h('th.w-25', name),
-            h('td', JSON.stringify(item[columnName][name])),
-          ]))
-      ])
-    )
-  ]);
-
 
 /**
  * Component which will display a virtual table containing the logs filtered by the user
