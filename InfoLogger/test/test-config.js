@@ -25,6 +25,11 @@ module.exports = {
     host: 'localhost',
     port: 6102
   },
+  mysql: {
+    host: 'localhost',
+    port: 6103,
+    database: 'INFOLOGGER'
+  },
   jwt: {
     secret: '<secret>',
     issuer: 'alice-o2-gui',

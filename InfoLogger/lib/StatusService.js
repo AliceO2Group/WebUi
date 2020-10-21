@@ -15,11 +15,14 @@
 const log = new (require('@aliceo2/web-ui').Log)('ILG-StatusService');
 
 /**
- * 
+ * Gateway for all calls with regards to the status
+ * of the framework and its dependencies
  */
 class StatusService {
   /**
-   * 
+   * Setup StatusService
+   * @param {JSON} config - of the framework
+   * @param {JSON} projPackage - package json file
    */
   constructor(config, projPackage) {
     if (!config) {
@@ -65,7 +68,7 @@ class StatusService {
   }
 
   /**
-   * Build a JSON containing GUI's information
+   * Build a JSON containing InfoLogger GUI's information
    * @return {JSON}
    */
   getProjectInfo() {
@@ -111,8 +114,7 @@ class StatusService {
         if (error.stack) {
           log.trace(error);
         }
-        mysql.status.ok = false;
-        mysql.status.message = error.message || error;
+        mysql.status = {ok: false, message: error.message || error};
       }
     } else {
       log.error('There was no data source set up')
