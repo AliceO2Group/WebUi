@@ -33,14 +33,10 @@ class InfoLoggerSender {
     });
   }
 
-  static setSystem(globalName) {
-    system = globalName;
-  }
-
   /**
    * InfoLogger system value which should equal to name of the GUI
    */
-  static system = "GUI";
+  static system = 'GUI';
 
   /**
    * @param {string} log - log message
