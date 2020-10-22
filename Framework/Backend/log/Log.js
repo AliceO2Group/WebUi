@@ -58,8 +58,7 @@ class Log {
     winston.instance.debug(message);
 
     if (infologger) {
-      const logObj = {severity: 'D', message: log, rolename: this.label};
-      infologger.send(logObj);
+      infologger.send(log. 'Debug', this.label);
     }
   }
 
@@ -72,8 +71,7 @@ class Log {
     winston.instance.info(message);
 
     if (infologger) {
-      const logObj = {severity: 'D', message: log, rolename: this.label};
-      infologger.send(logObj);
+      infologger.send(log. 'Info', this.label);
     }
   }
 
@@ -86,8 +84,7 @@ class Log {
     winston.instance.warn(message);
 
     if (infologger) {
-      const logObj = {severity: 'W', message: log, rolename: this.label};
-      infologger.send(logObj);
+      infologger.send(log, 'Warning', this.label);
     }
   }
 
@@ -100,8 +97,7 @@ class Log {
     winston.instance.error(message);
 
     if (infologger) {
-      const logObj = {severity: 'E', message: log, rolename: this.label};
-      infologger.send(logObj);
+      infologger.send(log, 'Error', this.label);
     }
   }
 
