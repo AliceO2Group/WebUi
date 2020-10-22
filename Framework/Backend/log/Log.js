@@ -58,7 +58,7 @@ class Log {
     winston.instance.debug(message);
 
     if (infologger) {
-      infologger.send(log. 'Debug', this.label);
+      infologger.send(log, 'Debug', this.label);
     }
   }
 
@@ -71,7 +71,7 @@ class Log {
     winston.instance.info(message);
 
     if (infologger) {
-      infologger.send(log. 'Info', this.label);
+      infologger.send(log, 'Info', this.label);
     }
   }
 

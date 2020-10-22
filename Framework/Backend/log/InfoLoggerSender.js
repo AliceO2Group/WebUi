@@ -13,7 +13,7 @@
 */
 
 const fs = require('fs');
-const exec = require("child_process");
+const {exec} = require("child_process");
 
 /**
  * Sends InfoLogger logs to InfoLoggerD over UNIX named socket
@@ -33,8 +33,22 @@ class InfoLoggerSender {
     });
   }
 
+  static setSystem(globalName) {
+    system = globalName;
+  }
+
+  /**
+   * InfoLogger system value which should equal to name of the GUI
+   */
+  static system = "GUI";
+
+  /**
+   * @param {string} log - log message
+   * @param {string} severity - one of InfoLogger supported severities
+   * @param {stsrimg} facility name - name of the module sending the log
+   */
   send(log, severity, rolename) {
-    const command = `${this.path} -s ${severity} -oRole=${rolename} -oSystem=GUI`;
+    const command = `${this.path} -s ${severity} -oFacility=${rolename} -oSystem=${InfoLoggerSender.system} "${log}"`;
     exec(command, (error) => {
       if (error) {
         this.winston.debug('[InfoLoggerSender] Impossible to write a log');
