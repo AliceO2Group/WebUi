@@ -2,7 +2,7 @@
 Logging module features:
  * Prints colored log messages
  * Saves logs in a file in JSON format
- * Sends logs to `InfoLogger` daemon over named socket
+ * Sends logs to `InfoLogger` system
  * Receives logs from `InfoLogger` server endpoint
 
 #### Import module and create default instance
@@ -27,7 +27,7 @@ Where:
   * [`FILE_LVL`] - log severity of logs written to file
   * [`CONSOLE_LVL`] - log severity of logs written to console
   * [`CONSOLE_SYSTEMD`] - flags, console logs will be converted to a format more conviniet for `journalctl` (where logs are stored from `systemd` services).
-  * [`IL_SENDER` - UNIX name socket of InfoLoggerD
+  * [`IL_SENDER` - Path to InfoLogger "log" executable
   * [`IL_RCV_HOST`] - InfoLogger server host
   * [`IL_RCV_PORT`] - InfoLogger server port
   * `LOG_NAME` - log instance name
