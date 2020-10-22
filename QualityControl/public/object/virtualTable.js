@@ -32,7 +32,10 @@ export default function virtualTable(model, location = 'main') {
       h('', maximumTableSizeStyling(model.object.searchResult.length),
         h(`table.table-logs-content.text-no-select.table.table-sm${FONT}`, scrollStyling(model), [
           h('tbody', [
-            listLogsInViewportOnly(model, model.object.searchResult).map((item) => objectFullRow(model, item, location))
+            listLogsInViewportOnly(model, model.object.searchResult).map((item) => {
+              console.log("MAI ADAUGAM " + JSON.stringify(item))
+              return objectFullRow(model, item, location)
+            })
           ])
         ])
       ))
@@ -125,10 +128,18 @@ const maximumTableSizeStyling = (length) => ({
  * @param {Array<JSON>} list
  * @return {Array.<JSON>}
  */
-const listLogsInViewportOnly = (model, list) => list.slice(
-  Math.floor(model.object.scrollTop / ROW_HEIGHT),
-  Math.floor(model.object.scrollTop / ROW_HEIGHT) + Math.ceil(model.object.scrollHeight / ROW_HEIGHT) + 1
-);
+const listLogsInViewportOnly = (model, list) => {
+  console.log("mi-a dat " + list.length)
+  console.log(model.object.scrollHeight)
+  console.log(Math.floor(model.object.scrollTop / ROW_HEIGHT) + Math.ceil(model.object.scrollHeight / ROW_HEIGHT) + 1)
+  console.log(list.slice(
+    Math.floor(model.object.scrollTop / ROW_HEIGHT),
+    Math.floor(model.object.scrollTop / ROW_HEIGHT) + Math.ceil(model.object.scrollHeight / ROW_HEIGHT) + 1))
+  return list.slice(
+    Math.floor(model.object.scrollTop / ROW_HEIGHT),
+    Math.floor(model.object.scrollTop / ROW_HEIGHT) + Math.ceil(model.object.scrollHeight / ROW_HEIGHT) + 1
+  )
+};
 
 /**
  * Hooks of .tableLogsContent for "smart scrolling"
@@ -155,6 +166,9 @@ const tableContainerHooks = (model) => ({
     const onTableScroll = () => {
       const container = vnode.dom;
       const height = container.getBoundingClientRect().height;
+      console.log("container");
+      console.log(container);
+      console.log(container.getBoundingClientRect().height);
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
       model.object.setScrollTop(scrollTop, height);
     };

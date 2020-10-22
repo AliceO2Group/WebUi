@@ -66,7 +66,7 @@ export default function objectTreeHeader(model) {
         placeholder: 'Search',
         type: 'text',
         value: model.object.searchInput,
-        disabled: model.object.queryingObjects ? true : false,
+        // disabled: model.object.queryingObjects ? true : false,
         oninput: (e) => model.object.search(e.target.value)
       })
     ]),

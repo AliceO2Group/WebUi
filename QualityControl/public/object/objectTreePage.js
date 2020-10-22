@@ -31,17 +31,17 @@ export default (model) => h('.h-100.flex-column', {key: model.router.params.page
       style: {
         width: model.object.selected ? '50%' : '100%'
       },
-    }, model.object.searchInput.trim() !== '' ?
-      virtualTable(model, 'main')
-      :
-      model.object.objectsRemote.match({
-        NotAsked: () => null,
-        Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
-          spinner(5), h('', 'Loading Objects')
-        ]),
-        Success: () => tableShow(model),
-        Failure: () => null, // notification is displayed
-      })
+    }, 
+    model.object.objectsRemote.match({
+      NotAsked: () => null,
+      Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
+        spinner(5), h('', 'Loading Objects')
+      ]),
+      Success: () => model.object.searchInput.trim() !== '' ?
+        virtualTable(model, 'main')
+        : tableShow(model),
+      Failure: () => null, // notification is displayed
+    })
     ),
     h('.animate-width.scroll-y', {
       style: {

@@ -69,6 +69,7 @@ export default class QCObject extends Observable {
    * @param {number} scrollHeight - height of table's viewport (not content height which is higher)
    */
   setScrollTop(scrollTop, scrollHeight) {
+    console.log("HEIGH CHANGED from: " + this.scrollHeight + " to " + scrollHeight)
     this.scrollTop = scrollTop;
     this.scrollHeight = scrollHeight;
     this.notify();
@@ -207,7 +208,8 @@ export default class QCObject extends Observable {
         const failureMessage = `Failed to retrieve list of objects due to ${errorMessage}`;
         this.model.notification.show(failureMessage, 'danger', Infinity);
       }
-      this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
+
+      // this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
       this.list = offlineObjects;
 
       this.tree.initTree('database');
@@ -224,12 +226,17 @@ export default class QCObject extends Observable {
         icon: iconArrowTop(),
         open: false
       };
-      this._computeFilters();
+      // this._computeFilters();
 
       if (this.selected && !this.selected.lastModified) {
         this.selected = this.list.find((object) => object.name === this.selected.name);
       }
       this.queryingObjects = false;
+      this.notify();
+      this.search('P');
+      this.search('Pi');
+      this.search('Pio');
+      this.search('Piot');
       this.objectsRemote = RemoteData.success();
       this.notify();
     } else {
@@ -391,10 +398,15 @@ export default class QCObject extends Observable {
    * @param {string} searchInput
    */
   search(searchInput) {
-    this.searchInput = searchInput;
-    this._computeFilters();
-    this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
-    this.notify();
+    if (!this.queryingObjects) {
+      console.log("CAUTAM")
+      console.log(searchInput);
+      this.searchInput = searchInput;
+      this._computeFilters();
+      this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
+      this.notify();
+    }
+
   }
 
   /**
