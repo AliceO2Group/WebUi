@@ -21,12 +21,12 @@ const {exec} = require("child_process");
 class InfoLoggerSender {
   /**
    * @param {object} winston local loging object
-   * @param {string} path path to InfoLogger client (log executable)
    */
-  constructor(winston, path) {
+  constructor(winston) {
     this.winston = winston;
-    this.path = path;
-    fs.access(path, fs.constants.X_OK, (err) => {
+    // for security reasons this path is hardcoded
+    this.path = "/opt/o2-InfoLogger/bin/log";
+    fs.access(this.path, fs.constants.X_OK, (err) => {
       if (err) {
         winston.instance.error('[InfoLoggerSender] Wrong InfoLogger log executable provided');
       }
