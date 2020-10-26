@@ -90,7 +90,7 @@ class StatusService {
    */
   getLiveSourceStatus(config) {
     const ils = {host: config.host, port: config.port};
-    ils.status = this.liveSource ? {ok: true} : {ok: false, message: 'There was no live source set up'}
+    ils.status = this.liveSource && this.liveSource.isConnected ? {ok: true} : {ok: false, message: 'There was no live source set up'}
     return ils;
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -76,6 +77,9 @@ function connectionListener(client) {
     }
 
     currentLogIndex++;
+    if (currentLogIndex > 10) {
+      throw new Error("Bad")
+    }
     timer = setTimeout(sendNextLog, nextLogTimeout);
   }
 
