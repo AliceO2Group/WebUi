@@ -33,8 +33,7 @@
     },
     "infologger": {
       "host": "127.0.0.1",
-      "port": 6102,
-      "enableSender": false
+      "port": 6102
     }
   },
   "consul": {
