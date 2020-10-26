@@ -33,8 +33,7 @@
     },
     "infologger": {
       "host": "127.0.0.1",
-      "port": 6102,
-      "sender": "/tmp/infoLoggerD.socket"
+      "port": 6102
     }
   },
   "consul": {

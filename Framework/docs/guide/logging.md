@@ -2,7 +2,7 @@
 Logging module features:
  * Prints colored log messages
  * Saves logs in a file in JSON format
- * Sends logs to `InfoLogger` daemon over named socket
+ * Sends logs to `InfoLogger` server (if InfoLogger package is installed under `/opt/o2-InfoLogger/`)
  * Receives logs from `InfoLogger` server endpoint
 
 #### Import module and create default instance
@@ -18,7 +18,7 @@ Configuring logger is optional and required only when non default behavior of lo
 
 ```js
 const {Log} = require('@aliceo2/web-ui');
-Log.configure({winston: {file: FILE_NAME, fileLvl: FILE_LVL, consoleLvl: CONSOLE_LVL, consoleSystemd: CONSOLE_SYSTEMD}, infologger: {sender: IL_SENDER, host: IL_RCV_HOST, port: IL_RCV_PORT}});
+Log.configure({winston: {file: FILE_NAME, fileLvl: FILE_LVL, consoleLvl: CONSOLE_LVL, consoleSystemd: CONSOLE_SYSTEMD}, infologger: {host: IL_RCV_HOST, port: IL_RCV_PORT}});
 new Log(LOG_NAME);
 ```
 
@@ -27,7 +27,6 @@ Where:
   * [`FILE_LVL`] - log severity of logs written to file
   * [`CONSOLE_LVL`] - log severity of logs written to console
   * [`CONSOLE_SYSTEMD`] - flags, console logs will be converted to a format more conviniet for `journalctl` (where logs are stored from `systemd` services).
-  * [`IL_SENDER` - UNIX name socket of InfoLoggerD
   * [`IL_RCV_HOST`] - InfoLogger server host
   * [`IL_RCV_PORT`] - InfoLogger server port
   * `LOG_NAME` - log instance name

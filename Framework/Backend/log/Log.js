@@ -32,20 +32,20 @@ class Log {
     this.label = label;
     if (!winston) {
       winston = new Winston();
-      winston.instance.warn('Created default instance of logger');
+      winston.instance.debug('Created default instance of console logger');
+    }
+    if (!infologger) {
+      infologger = new InfoLoggerSender(winston);
     }
   }
 
   /**
-   * Configures Winston and InfoLogger instances
+   * Configures Winston instance
    * @param {object} config
    */
   static configure(config) {
     if (config && config.winston) {
       winston = new Winston(config.winston);
-    }
-    if (!infologger && config && config.infologger) {
-      infologger = new InfoLoggerSender(winston, config.infologger.sender);
     }
   }
 
@@ -57,9 +57,8 @@ class Log {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.debug(message);
 
-    if (infologger) {
-      const logObj = {severity: 'D', message: log, rolename: this.label};
-      infologger.send(logObj);
+    if (infologger.configured) {
+      infologger.send(log, 'Debug', this.label);
     }
   }
 
@@ -71,9 +70,8 @@ class Log {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.info(message);
 
-    if (infologger) {
-      const logObj = {severity: 'D', message: log, rolename: this.label};
-      infologger.send(logObj);
+    if (infologger.configured) {
+      infologger.send(log, 'Info', this.label);
     }
   }
 
@@ -85,9 +83,8 @@ class Log {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.warn(message);
 
-    if (infologger) {
-      const logObj = {severity: 'W', message: log, rolename: this.label};
-      infologger.send(logObj);
+    if (infologger.configured) {
+      infologger.send(log, 'Warning', this.label);
     }
   }
 
@@ -99,9 +96,8 @@ class Log {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.error(message);
 
-    if (infologger) {
-      const logObj = {severity: 'E', message: log, rolename: this.label};
-      infologger.send(logObj);
+    if (infologger.configured) {
+      infologger.send(log, 'Error', this.label);
     }
   }
 
