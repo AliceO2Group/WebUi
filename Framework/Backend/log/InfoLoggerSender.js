@@ -23,12 +23,16 @@ class InfoLoggerSender {
    * @param {object} winston local loging object
    */
   constructor(winston) {
+    this.configured = false;
     this.winston = winston;
     // for security reasons this path is hardcoded
-    this.path = "/opt/o2-InfoLogger/bin/log";
+    this.path = '/opt/o2-InfoLogger/bin/log';
     fs.access(this.path, fs.constants.X_OK, (err) => {
       if (err) {
-        winston.instance.error('[InfoLoggerSender] Wrong InfoLogger log executable provided');
+        winston.instance.debug('InfoLogger executable not found');
+      } else {
+        winston.instance.debug('Created instance of InfoLogger sender');
+        this.configured = true;
       }
     });
   }
@@ -42,7 +46,7 @@ class InfoLoggerSender {
     const command = `${this.path} -s ${severity} -oFacility=${rolename} -oSystem=GUI "${log}"`;
     exec(command, (error) => {
       if (error) {
-        this.winston.debug('[InfoLoggerSender] Impossible to write a log');
+        this.winston.debug('Impossible to write a log to InfoLogger');
       }
     });
   }
