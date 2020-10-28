@@ -41,10 +41,12 @@ class HttpServer {
     assert(httpConfig, 'Missing HTTP config');
     assert(httpConfig.port, 'Missing HTTP config value: port');
     httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
-    httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
+    httpConfig.cors = (!httpConfig.cors) ? [] : httpConfig.cors;
+    httpConfig.cors = Array.isArray(httpConfig.cors) ? httpConfig.cors : [httpConfig.cors];
+    httpConfig.hostname ? httpConfig.cors.push(httpConfig.hostname) : httpConfig.cors.push('localhost');
 
     this.app = express();
-    this.configureHelmet(httpConfig.hostname);
+    this.configureHelmet(httpConfig.cors);
 
     this.jwt = new JwtToken(jwtConfig);
     if (connectIdConfig) {
@@ -126,7 +128,15 @@ class HttpServer {
    * @param {string} hostname whitelisted hostname for websocket connection
    * @param {number} port secure port number
    */
-  configureHelmet(hostname) {
+  configureHelmet(cors) {
+    const connectSrc = [];
+    for (let hostname of cors) {
+      connectSrc.push('http://' + hostname + ':*');
+      connectSrc.push('https://' + hostname + ':*');
+      connectSrc.push('wss://' + hostname + ':*');
+      connectSrc.push('ws://' + hostname + ':*');
+    }
+
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -148,7 +158,7 @@ class HttpServer {
         defaultSrc: ["'self'", "data:", hostname + ':*'],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'http://' + hostname + ':*', 'https://' + hostname + ':*', 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*']
+        connectSrc: connectSrc
         /* eslint-enable */
       }
     }));
