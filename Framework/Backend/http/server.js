@@ -41,12 +41,13 @@ class HttpServer {
     assert(httpConfig, 'Missing HTTP config');
     assert(httpConfig.port, 'Missing HTTP config value: port');
     httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
+    httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
     httpConfig.cors = (!httpConfig.cors) ? [] : httpConfig.cors;
     httpConfig.cors = Array.isArray(httpConfig.cors) ? httpConfig.cors : [httpConfig.cors];
-    httpConfig.hostname ? httpConfig.cors.push(httpConfig.hostname) : httpConfig.cors.push('localhost');
+    httpConfig.cors.push(httpConfig.hostname);
 
     this.app = express();
-    this.configureHelmet(httpConfig.cors);
+    this.configureHelmet(httpConfig.hostname, httpConfig.cors);
 
     this.jwt = new JwtToken(jwtConfig);
     if (connectIdConfig) {
@@ -128,7 +129,7 @@ class HttpServer {
    * @param {string} hostname whitelisted hostname for websocket connection
    * @param {number} port secure port number
    */
-  configureHelmet(cors) {
+  configureHelmet(dataSrc, cors) {
     const connectSrc = [];
     for (let hostname of cors) {
       connectSrc.push('http://' + hostname + ':*');
@@ -155,7 +156,7 @@ class HttpServer {
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
         /* eslint-disable */
-        defaultSrc: ["'self'", "data:", hostname + ':*'],
+        defaultSrc: ["'self'", "data:", dataSrc + ':*'],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: connectSrc

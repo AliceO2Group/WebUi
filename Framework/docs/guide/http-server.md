@@ -14,7 +14,7 @@ HttpServer({port: PORT, hostname: HOSTNAME, cors: CORS, tls: TLS_ENABLED, portSe
 Where:
  * `HTTP_CONF` consists of following fields:
      * `PORT` - HTTP port number
-     * [`HOSTNAME`] - (DEPRICATED, use `CORS` instead) server's hostname which is required by Content Security Policy
+     * [`HOSTNAME`] - server's hostname which is required by Content Security Policy
      * [`CORS`] - array of hostnames to be set as CORS by Content Security Policy (default: `localhost`)
      * [`TLS_ENABLED`] - flag that enables/disables TLS (default: `false`)
      * [`HTTPS_PORT`] - HTTPS port number, TLS must be enabled
