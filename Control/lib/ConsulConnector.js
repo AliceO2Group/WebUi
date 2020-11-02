@@ -22,11 +22,13 @@ class ConsulConnector {
   /**
    * Setup ConsulConnector
    * @param {ConsulService} consulService
-   * @param {string} flpHardwarePath
+   * @param {JSON} config
    */
-  constructor(consulService, flpHardwarePath) {
+  constructor(consulService, config) {
     this.consulService = consulService;
-    this.flpHardwarePath = flpHardwarePath ? flpHardwarePath : 'o2/hardware/flps';
+
+    this.flpHardwarePath = config.flpHardwarePath ? config.flpHardwarePath : 'o2/hardware/flps';
+    this.cruConfigPath = config.cruConfigPath ? config.cruConfigPath : 'o2/components/readoutcard';
   }
 
 
@@ -44,7 +46,8 @@ class ConsulConnector {
   }
 
   /**
-  * Method to request all CRUs available in consul KV store
+  * Method to request all CRUs available in consul KV store under the 
+  * hardware key
   * @param {Request} req
   * @param {Response} res
   */
@@ -104,6 +107,24 @@ class ConsulConnector {
     } else {
       errorHandler('Unable to retrieve configuration of consul service', res, 502);
     }
+  }
+
+  /**
+   * 
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getCRUsWithConfiguration(req, res) {
+    if (this.consulService) {
+      const cruList = await this._getCRUsConsulKey();
+      
+    } else {
+      errorHandler('Unable to retrieve configuration of the CRUs', res, 502);
+    }
+  }
+
+  async _getCRUsConsulKey() {
+    const cardList = this.getCRU
   }
 }
 
