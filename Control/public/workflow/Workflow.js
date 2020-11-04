@@ -195,13 +195,12 @@ export default class Workflow extends Observable {
   async createNewEnvironment() {
     const templates = this.templatesMap.payload;
     const repository = this.form.repository;
-    const variables = JSON.parse(JSON.stringify(this.form.variables));
-    const sameKeys = Object.keys(this.form.basicVariables).filter((key) => this.form.variables[key]);
-    // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
-    if (sameKeys.length !== 0) {
-      this.model.environment.itemNew =
-        RemoteData.failure(`Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`);
-    } else if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
+
+    const {ok, message, variables} = this.checkAndMergeVariables(this.form.variables, this.form.basicVariables);
+    if (!ok) {
+      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      this.model.environment.itemNew = RemoteData.failure(message);
+    } else if (variables.hosts && variables.hosts.length > 0 && this.form.hosts.length > 0) {
       // Check FLP Selection is not duplicated in vars host
       this.model.environment.itemNew =
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
@@ -222,10 +221,9 @@ export default class Workflow extends Observable {
             } else {
               path = repository + 'workflows/' + template + '@' + revision;
             }
-            let finalVariables = Object.assign({}, this.form.basicVariables, variables);
+
             // Combine Readout URI if it was used
-            finalVariables = this.checkReadoutKey(finalVariables);
-            this.model.environment.newEnvironment({workflowTemplate: path, vars: finalVariables});
+            this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
           } else {
             this.model.environment.itemNew =
               RemoteData.failure('Selected template does not exist for this repository & revision');
@@ -288,7 +286,6 @@ export default class Workflow extends Observable {
       this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
     }
   }
-
 
   /**
    * Method to update the value of a (K;V) pair in basicVariables
@@ -465,39 +462,46 @@ export default class Workflow extends Observable {
     this.form.hosts = Object.values(result);
     this.notify();
   }
+
   /**
    * Helpers
    */
 
   /**
-   * If the user provides `readout_cfg_uri` than combine it with the prefix
-   * and remove prefix from list of variable keys
+   * Check that variables are not duplicated in basic and advanced 
+   * configuration panel and merge them together
    * @param {JSON} vars
-   * @return {JSON}
+   * @param {JSON} basicVars
+   * @return {boolean, string, JSON}
    */
-  checkReadoutKey(vars) {
-    const filePre = 'file:';
-    const consulPre = 'consul:';
-    // User used Advanced Config Panel
-    if (vars['readout_cfg_uri'] &&
-      (vars['readout_cfg_uri'].includes(filePre) || vars['readout_cfg_uri'].includes(consulPre))
-    ) {
-      delete vars['readout_cfg_uri_pre'];
-      return vars;
-    } else if (vars['readout_cfg_uri_pre'] && vars['readout_cfg_uri'] &&
-      vars['readout_cfg_uri_pre'] !== '' && vars['readout_cfg_uri'] !== '') {
-      // User used Basic Config panel
-      vars['readout_cfg_uri'] =
-        vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
+  checkAndMergeVariables(vars, basicVars) {
+    const variables = JSON.parse(JSON.stringify(vars));
+    const basicVariables = JSON.parse(JSON.stringify(basicVars));
+    const sameKeys = Object.keys(basicVariables).filter((key) => variables[key]);
+
+    if (sameKeys.length > 0) {
+      return {
+        variables: {}, ok: false,
+        message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
+      };
     } else {
-      delete vars['readout_cfg_uri'];
-      delete vars['readout_cfg_uri_pre'];
+      if (basicVariables['readout_cfg_uri'] && !basicVariables['readout_cfg_uri_pre']) {
+        return {
+          variables: {}, ok: false,
+          message: `Missing 'Readout URI' type selection`
+        };
+      } else if (!basicVariables['readout_cfg_uri'] && basicVariables['readout_cfg_uri_pre']) {
+        return {
+          variables: {}, ok: false,
+          message: `Missing 'Readout URI' path. Either remove the type of the file or enter configuration path.`
+        };
+      } else if (basicVariables['readout_cfg_uri'] && basicVariables['readout_cfg_uri_pre']) {
+        basicVariables['readout_cfg_uri'] = basicVariables['readout_cfg_uri_pre'] + basicVariables['readout_cfg_uri'];
+        delete basicVariables['readout_cfg_uri_pre'];
+      }
+      const allVariables = Object.assign({}, basicVariables, variables);
+      return {ok: true, message: '', variables: allVariables};
     }
-    // Remove prefix variable from JSON that will be sent to Core
-    if (vars['readout_cfg_uri_pre']) {
-      delete vars['readout_cfg_uri_pre'];
-    }
-    return vars;
   }
 
   /**

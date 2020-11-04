@@ -183,8 +183,9 @@ const qcddPanel = (workflow) =>
  * @return {vnode}
  */
 const readoutPanel = (workflow) => {
+  const noPre = '-';
   const filePre = 'file://';
-  const consulPre = 'consul://';
+  const consulPre = 'consul-ini://';
   return h('.flex-row.text-left', [
     h('.w-25', {style: 'display: flex; align-items: center;'}, 'Readout URI:'),
     h('.w-75.flex-row', [
@@ -192,14 +193,23 @@ const readoutPanel = (workflow) => {
         h('select.form-control', {
           style: 'cursor: pointer',
           onchange: (e) => {
-            workflow.form.basicVariables['readout_cfg_uri_pre'] = e.target.value;
+            if (e.target.value !== noPre) {
+              workflow.form.basicVariables['readout_cfg_uri_pre'] = e.target.value;
+            } else {
+              delete workflow.form.basicVariables['readout_cfg_uri_pre'];
+            }
           }
         }, [
           h('option', {
+            id: 'noOption',
+            value: noPre,
+            selected: !workflow.form.basicVariables['readout_cfg_uri_pre']
+              || workflow.form.basicVariables['readout_cfg_uri_pre'] === noPre
+          }, noPre),
+          h('option', {
             id: 'fileOption',
             value: filePre,
-            selected: !workflow.form.basicVariables['readout_cfg_uri_pre']
-              || workflow.form.basicVariables['readout_cfg_uri_pre'] === filePre
+            selected: workflow.form.basicVariables['readout_cfg_uri_pre'] === filePre
           }, filePre),
           h('option', {
             id: 'consulOption',
@@ -212,15 +222,16 @@ const readoutPanel = (workflow) => {
         type: 'text',
         value: workflow.form.basicVariables['readout_cfg_uri'],
         oninput: (e) => {
-          if (!workflow.form.basicVariables['readout_cfg_uri_pre']) {
+          if (e.target.value !== '' && !workflow.form.basicVariables['readout_cfg_uri_pre']) {
             workflow.form.basicVariables['readout_cfg_uri_pre'] = filePre;
           }
           if (e.target.value === '') {
             delete workflow.form.basicVariables['readout_cfg_uri'];
-            delete workflow.form.basicVariables['readout_cfg_pre'];
+            delete workflow.form.basicVariables['readout_cfg_uri_pre'];
           } else {
             workflow.form.basicVariables['readout_cfg_uri'] = e.target.value;
           }
+          workflow.notify();
         }
       })
     ])
