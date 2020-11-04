@@ -29,7 +29,10 @@ export default (workflow) => [
       }, 'Toggle')
     ),
     h('h5.bg-gray-light.p2', {style: 'width: 98%'},
-      `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
+      workflow.flpList.kind === 'Success'
+        ? `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`
+        : 'FLP Selection'
+    )
   ]),
   h('.w-100.p2.panel',
     workflow.flpList.match({
@@ -41,7 +44,7 @@ export default (workflow) => [
           h('', error)
           :
           h('', [
-            h('', 'FLP Selection is currently disabled due to connection refused to Consul.'),
+            h('', 'Currently disabled due to connection refused to Consul.'),
             h('', ' Please use `Advanced Configuration` panel to select your FLP Hosts')
           ])
       ]),
