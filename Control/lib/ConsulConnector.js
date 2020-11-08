@@ -116,15 +116,55 @@ class ConsulConnector {
    */
   async getCRUsWithConfiguration(req, res) {
     if (this.consulService) {
-      const cruList = await this._getCRUsConsulKey();
-      
+      // const cruList = await this._getCRUsConsulKey();
+      // const regex = new RegExp(`.*/.*/cards`);
+      const key = 'o2/components/readoutcard/flp-kostas/cru_1041_0/';
+      this.consulService.getOnlyRawValuesByKeyPrefix(key).then((data) => {
+        const crusByHost = {};
+        console.log(data);
+        // Object.keys(data)
+        //   .filter((key) => key.match(regex))
+        //   .forEach((key) => {
+        //     const splitKey = key.split('/');
+        //     const hostKey = splitKey[splitKey.length - 2];
+        //     crusByHost[hostKey] = JSON.parse(data[key]);
+        //   });
+
+        res.status(200);
+        res.json(crusByHost);
+      }).catch((error) => {
+        if (error.message.includes('404')) {
+          log.trace(error);
+          log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
+          errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
+        } else {
+          errorHandler(error, res, 502);
+        }
+      });
     } else {
       errorHandler('Unable to retrieve configuration of the CRUs', res, 502);
     }
   }
 
-  async _getCRUsConsulKey() {
-    const cardList = this.getCRU
+  /**
+   * 
+   */
+  async _getCruEndpointSerialList() {
+    const regex = new RegExp(`.*/.*/cards`);
+    const crus = await this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath);
+    console.log(crus);
+    // .then((data) => {
+    //   const crusByHost = {};
+    //   Object.keys(data)
+    //     .filter((key) => key.match(regex))
+    //     .forEach((key) => {
+    //       const splitKey = key.split('/');
+    //       const hostKey = splitKey[splitKey.length - 2];
+    //       crusByHost[hostKey] = JSON.parse(data[key]);
+    //     });
+    // }).catch((error) => {
+
+    // });
   }
 }
 
