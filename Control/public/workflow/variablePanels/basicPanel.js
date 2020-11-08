@@ -12,27 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconTrash, iconPlus, info} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 
 /**
- * Create a panel to allow users to pass in extra variables
- * for creating a new environment
+ * Panel which allows the user to select various options
+ * to configure the workflow
  * @param {Object} workflow
  * @return {vnode}
  */
 export default (workflow) =>
-  h('.w-100.flex-column', [
-    togglesPanel(workflow),
-    envVarsPanel(workflow),
-  ]);
-
-/**
- * Panel which allows the user to select various options
- * that will automatically fill in (K;V) panel
- * @param {Object} workflow
- * @return {vnode}
- */
-const togglesPanel = (workflow) =>
   h('', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
     h('.p2.panel', [
@@ -183,138 +171,70 @@ const qcddPanel = (workflow) =>
  * @return {vnode}
  */
 const readoutPanel = (workflow) => {
-  const noPre = '-';
-  const filePre = 'file://';
-  const consulPre = 'consul-ini://';
-  return h('.flex-row.text-left', [
-    h('.w-25', {style: 'display: flex; align-items: center;'}, 'Readout URI:'),
-    h('.w-75.flex-row', [
-      h('', {style: 'width:30%'},
-        h('select.form-control', {
-          style: 'cursor: pointer',
-          onchange: (e) => {
-            if (e.target.value !== noPre) {
-              workflow.form.basicVariables['readout_cfg_uri_pre'] = e.target.value;
-            } else {
-              delete workflow.form.basicVariables['readout_cfg_uri_pre'];
+  const noPre = workflow.READOUT_PREFIX.NONE;
+  const filePre = workflow.READOUT_PREFIX.FILE;
+  const consulPre = workflow.READOUT_PREFIX.CONSUL;
+  const variables = workflow.form.basicVariables;
+  return h('.flex-column.text-left', [
+    h('.w-100.flex-row', [
+      h('.w-25', {style: 'display: flex; align-items: center;'}, 'Readout URI:'),
+      h('.w-75.flex-row', [
+        h('', {style: 'width:30%'},
+          h('select.form-control', {
+            style: 'cursor: pointer',
+            onchange: (e) => {
+              if (e.target.value !== noPre) {
+                variables['readout_cfg_uri_pre'] = e.target.value;
+              } else {
+                delete variables['readout_cfg_uri_pre'];
+              }
+              workflow.notify();
             }
+          }, [
+            h('option', {
+              id: 'noOption',
+              value: noPre,
+              selected: !variables['readout_cfg_uri_pre'] || variables['readout_cfg_uri_pre'] === noPre
+            }, noPre),
+            h('option', {
+              id: 'fileOption',
+              value: filePre,
+              selected: variables['readout_cfg_uri_pre'] === filePre
+            }, filePre),
+            h('option', {
+              id: 'consulOption',
+              value: consulPre,
+              selected: variables['readout_cfg_uri_pre'] === consulPre
+            }, consulPre)
+          ])
+        ),
+        h('input.form-control', {
+          type: 'text',
+          value: variables['readout_cfg_uri'],
+          oninput: (e) => {
+            if (e.target.value !== '' && !variables['readout_cfg_uri_pre']) {
+              variables['readout_cfg_uri_pre'] = filePre;
+            }
+            if (e.target.value === '') {
+              delete variables['readout_cfg_uri'];
+              delete variables['readout_cfg_uri_pre'];
+            } else {
+              variables['readout_cfg_uri'] = e.target.value;
+            }
+            workflow.notify();
           }
-        }, [
-          h('option', {
-            id: 'noOption',
-            value: noPre,
-            selected: !workflow.form.basicVariables['readout_cfg_uri_pre']
-              || workflow.form.basicVariables['readout_cfg_uri_pre'] === noPre
-          }, noPre),
-          h('option', {
-            id: 'fileOption',
-            value: filePre,
-            selected: workflow.form.basicVariables['readout_cfg_uri_pre'] === filePre
-          }, filePre),
-          h('option', {
-            id: 'consulOption',
-            value: consulPre,
-            selected: workflow.form.basicVariables['readout_cfg_uri_pre'] === consulPre
-          }, consulPre)
-        ])
-      ),
-      h('input.form-control.mh1', {
-        type: 'text',
-        value: workflow.form.basicVariables['readout_cfg_uri'],
-        oninput: (e) => {
-          if (e.target.value !== '' && !workflow.form.basicVariables['readout_cfg_uri_pre']) {
-            workflow.form.basicVariables['readout_cfg_uri_pre'] = filePre;
-          }
-          if (e.target.value === '') {
-            delete workflow.form.basicVariables['readout_cfg_uri'];
-            delete workflow.form.basicVariables['readout_cfg_uri_pre'];
-          } else {
-            workflow.form.basicVariables['readout_cfg_uri'] = e.target.value;
-          }
-          workflow.notify();
-        }
-      })
-    ])
-  ]);
-};
-
-/**
- * Panel for adding (K;V) configurations for the environment
- * to be created
- * @param {Object} workflow
- * @return {vnode}
- */
-const envVarsPanel = (workflow) =>
-  h('', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', [
-      h('.w-100', 'Advanced Configuration'),
-      h('a.ph1.actionable-icon', {
-        href: 'https://github.com/AliceO2Group/ControlWorkflows',
-        target: '_blank',
-        title: 'Open Environment Variables Documentation'
-      }, info())
+        })
+      ])
     ]),
-    addKVInputList(workflow),
-    addKVInputPair(workflow)
-  ]);
-
-/**
-* Method to add a list of KV pairs added by the user
-* @param {Object} workflow
-* @return {vnode}
-*/
-const addKVInputList = (workflow) =>
-  h('.w-100.p2.panel', Object.keys(workflow.form.variables).map((key) =>
-    h('.w-100.flex-row.pv2.border-bot', {
-    }, [
-      h('.w-33.ph1.text-left', key),
-      h('.ph1', {
-        style: 'width: 60%',
-      }, h('input.form-control', {
-        type: 'text',
-        value: workflow.form.variables[key],
-        onblur: () => workflow.trimVariableValue(key),
-        oninput: (e) => workflow.updateVariableValueByKey(key, e.target.value)
-      })),
-      h('.ph2.danger.actionable-icon', {
-        onclick: () => workflow.removeVariableByKey(key)
-      }, iconTrash())
+    variables['readout_cfg_uri_pre'] === consulPre &&
+    h('.w-100.flex-row', [
+      h('.w-25'),
+      h('label.w-75.f5', {
+        style: 'font-style: italic'
+      }, workflow.consulReadoutPrefix + (
+        variables['readout_cfg_uri'] ?
+          variables['readout_cfg_uri'] : '')
+      )
     ])
-  ));
-/**
-* Add 2 input fields and a button for adding a new KV Pair
-* @param {Object} workflow
-* @return {vnode}
-*/
-const addKVInputPair = (workflow) => {
-  let keyString = '';
-  let valueString = '';
-  return h('.form-group.p2.panel.w-100.flex-column', [
-    h('.pv2.flex-row', [
-      h('.w-33.ph1', {
-      }, h('input.form-control', {
-        type: 'text',
-        placeholder: 'key',
-        value: keyString,
-        oninput: (e) => keyString = e.target.value
-      })),
-      h('.ph1', {
-        style: 'width:60%;',
-      }, h('input.form-control', {
-        type: 'text',
-        placeholder: 'value',
-        value: valueString,
-        oninput: (e) => valueString = e.target.value,
-        onkeyup: (e) => {
-          if (e.keyCode === 13) {
-            workflow.addVariable(keyString, valueString);
-          }
-        }
-      })),
-      h('.ph2.actionable-icon', {
-        title: 'Add (key,value) variable',
-        onclick: () => workflow.addVariable(keyString, valueString)
-      }, iconPlus())
-    ]),
   ]);
 };
