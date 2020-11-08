@@ -119,7 +119,7 @@ class ConsulConnector {
     if (!this.config.hostname || !this.config.port) {
       return '';
     } 
-    return `${this.config.hostname}:${this.config.port}/${this.readoutPath}`
+    return `${this.config.hostname}:${this.config.port}/${this.readoutPath}/`
   }
 }
 
