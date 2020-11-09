@@ -27,10 +27,10 @@ module.exports.waitForQCResponse = (page, timeout = 90) => {
     while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
         resolve();
       } else {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
       }
     }
   });
