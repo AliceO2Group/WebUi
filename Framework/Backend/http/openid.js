@@ -30,10 +30,11 @@ class OpenId {
     assert(config.secret, 'Missing OpenID config value: secret');
     assert(config.well_known, 'Missing OpenID config value: well_known');
     assert(config.redirect_uri, 'Missing OpenID config value: redirect_uri');
+    config.timeout = (!config.timeout) ? 5000 : config.timeout;
     this.config = config;
     this.code_verifier = generators.codeVerifier();
     custom.setHttpOptionsDefaults({
-      timeout: 5000,
+      timeout: config.timeout
     });
   }
 
