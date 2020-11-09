@@ -204,6 +204,7 @@ const readoutPanel = (workflow) => {
             h('option', {
               id: 'consulOption',
               value: consulPre,
+              disabled: workflow.consulReadoutPrefix ? false : true,
               selected: variables['readout_cfg_uri_pre'] === consulPre
             }, consulPre)
           ])
