@@ -13,10 +13,10 @@
 */
 
 import {h, iconReload} from '/js/src/index.js';
-import revisionPanel from './revisionPanel.js';
-import basicVarsPanel from './variablePanels/basicPanel.js';
-import advancedVarsPanel from './variablePanels/advancedPanel.js';
-import flpSelectionPanel from './flpSelectionPanel.js';
+import revisionPanel from './panels/revision/revisionPanel.js';
+import basicVarsPanel from './panels/variables/basicPanel.js';
+import advancedVarsPanel from './panels/variables/advancedPanel.js';
+import flpSelectionPanel from './panels/flps/flpSelectionPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
