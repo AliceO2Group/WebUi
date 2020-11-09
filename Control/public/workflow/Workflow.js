@@ -46,6 +46,12 @@ export default class Workflow extends Observable {
     };
 
     this.flpList = RemoteData.notAsked();
+    this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.READOUT_PREFIX = {
+      NONE: '-',
+      FILE: 'file://',
+      CONSUL: 'consul-ini://'
+    }
   }
 
   /**
@@ -454,12 +460,14 @@ export default class Workflow extends Observable {
     const {result, ok} = await this.model.loader.get(`/api/getFLPs`);
     if (!ok) {
       this.flpList = RemoteData.failure(result.message);
+      this.consulReadoutPrefix = '';
       this.notify();
       return;
     }
-    this.flpList = RemoteData.success(result);
+    this.consulReadoutPrefix = result['consulReadoutPrefix'];
+    this.flpList = RemoteData.success(result.flps);
     // preselect all hosts once they are loaded
-    this.form.hosts = Object.values(result);
+    this.form.hosts = Object.values(result.flps);
     this.notify();
   }
 
@@ -496,6 +504,9 @@ export default class Workflow extends Observable {
           message: `Missing 'Readout URI' path. Either remove the type of the file or enter configuration path.`
         };
       } else if (basicVariables['readout_cfg_uri'] && basicVariables['readout_cfg_uri_pre']) {
+        if (basicVars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
+          basicVariables['readout_cfg_uri'] = this.consulReadoutPrefix + basicVariables['readout_cfg_uri'];
+        }
         basicVariables['readout_cfg_uri'] = basicVariables['readout_cfg_uri_pre'] + basicVariables['readout_cfg_uri'];
         delete basicVariables['readout_cfg_uri_pre'];
       }

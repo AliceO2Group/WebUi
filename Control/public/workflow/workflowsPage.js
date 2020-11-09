@@ -14,7 +14,8 @@
 
 import {h, iconReload} from '/js/src/index.js';
 import revisionPanel from './revisionPanel.js';
-import envVarsPanel from './envVarsPanel.js';
+import basicVarsPanel from './variablePanels/basicPanel.js';
+import advancedVarsPanel from './variablePanels/advancedPanel.js';
 import flpSelectionPanel from './flpSelectionPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
@@ -94,7 +95,8 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => [
 const workflowSettingsPanels = (workflow) =>
   h('.w-50.ph2.flex-column', [
     flpSelectionPanel(workflow),
-    envVarsPanel(workflow),
+    basicVarsPanel(workflow),
+    advancedVarsPanel(workflow)
   ]);
 
 

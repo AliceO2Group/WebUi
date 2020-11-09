@@ -25,7 +25,8 @@ module.exports = {
   consul: {
     hostname: 'localhost',
     port: 8500,
-    flpHardwarePath: 'key/prefix'
+    flpHardwarePath: 'key/prefix',
+    readoutPathL: 'some/path'
   },
   // JWT manages user's session duration
   // https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/json-tokens.md
