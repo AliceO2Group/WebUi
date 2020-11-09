@@ -13,7 +13,7 @@
 */
 
 import {h, iconActionRedo} from '/js/src/index.js';
-import errorComponent from './../common/errorComponent.js';
+import errorComponent from './../../../common/errorComponent.js';
 
 /**
 * Method to create the revision input-dropdown panel
