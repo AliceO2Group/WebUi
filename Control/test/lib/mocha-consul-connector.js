@@ -139,11 +139,12 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: ['flpOne', 'flpTwo'],
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/'
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/'
       }));
     });
 
-    it('should successfully return a readout configuration prefix', async () => {
+    it('should successfully return a readout and qc configuration prefix', async () => {
       consulService.getKeysByPrefix = sinon.stub().resolves([]);
       const connector = new ConsulConnector(consulService, config);
       await connector.getFLPs(null, res);
@@ -151,11 +152,12 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: [],
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/'
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/',
       }));
     });
 
-    it('should successfully return an empty readout configuration prefix if configuration host is missing', async () => {
+    it('should successfully return an empty readout and qc configuration prefix if configuration host is missing', async () => {
       consulService.getKeysByPrefix = sinon.stub().resolves([]);
       const connector = new ConsulConnector(consulService, {port: 8550});
       await connector.getFLPs(null, res);
@@ -163,7 +165,8 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: [],
-        consulReadoutPrefix: ''
+        consulReadoutPrefix: '',
+        consulQcPrefix: ''
       }));
     });
 
@@ -175,7 +178,8 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: [],
-        consulReadoutPrefix: ''
+        consulReadoutPrefix: '',
+        consulQcPrefix: ''
       }));
     });
 
@@ -189,7 +193,8 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: ['flpTwo'],
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/'
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/',
       }));
     });
 
