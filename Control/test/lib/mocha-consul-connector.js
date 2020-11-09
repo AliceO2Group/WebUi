@@ -139,7 +139,7 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: ['flpOne', 'flpTwo'],
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components'
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/'
       }));
     });
 
@@ -151,7 +151,7 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: [],
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components'
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/'
       }));
     });
 
@@ -189,7 +189,7 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         flps: ['flpTwo'],
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components'
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/'
       }));
     });
 
