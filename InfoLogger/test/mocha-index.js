@@ -115,7 +115,7 @@ describe('InfoLogger', function() {
           document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();
           document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
         });
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
 
         const actionDropdownClosed = await page.evaluate(() => window.model.accountMenuEnabled);
         assert.ok(!actionDropdownClosed);
@@ -139,7 +139,7 @@ describe('InfoLogger', function() {
           document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
           return window.model.userProfile;
         });
-        page.waitFor(200);
+        page.waitForTimeout(200);
         assert.ok(!userProfile.payload.content.colsHeader.date.visible);
       });
     });
@@ -350,7 +350,7 @@ describe('InfoLogger', function() {
       assert.deepStrictEqual(criterias.level.$max, 21);
 
       // Wait for logs and count them (2-3 maybe, it's random)
-      await page.waitFor(1500); // simulator is set to ~100ms per log
+      await page.waitForTimeout(1500); // simulator is set to ~100ms per log
       const list = await page.evaluate(() => {
         return window.model.log.list;
       });
@@ -364,9 +364,9 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitFor(7000);
+      await page.waitForTimeout(7000);
       const list = await page.evaluate(() => window.model.log.list);
-      await page.waitFor(1000);
+      await page.waitForTimeout(1000);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');
       assert.ok(list.length > 0);
       assert.ok(isHostNameMatching);
@@ -379,7 +379,7 @@ describe('InfoLogger', function() {
         window.model.log.filter.setCriteria('hostname', 'exclude', 'aldaqdip01');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitFor(3000);
+      await page.waitForTimeout(3000);
       const list = await page.evaluate(() => window.model.log.list);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname !== 'aldaqdip01');
 
@@ -394,7 +394,7 @@ describe('InfoLogger', function() {
         window.model.log.setCriteria('username', 'match', 'a_iceda_');
         window.model.log.empty();
       });
-      await page.waitFor(3000);
+      await page.waitForTimeout(3000);
       const list = await page.evaluate(() => window.model.log.list);
       const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
       const isUserNameMatching = list.map((element) => element.username).every((username) => new RegExp('a.iceda.').test(username));
@@ -407,7 +407,7 @@ describe('InfoLogger', function() {
     it('successfully show indicator when user double pressed the log row', async () => {
       const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
       await tableRow.click({clickCount: 2});
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
       const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
       assert.ok(indicatorOpen);
     });
@@ -479,7 +479,7 @@ describe('InfoLogger', function() {
       });
       assert.deepStrictEqual(counter, 1);
 
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
       counter = await page.evaluate(() => {
         return window.testCounter;
       });
