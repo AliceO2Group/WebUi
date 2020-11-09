@@ -13,6 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {PREFIX} from './constants.js';
 
 /**
  * Model representing Workflow
@@ -47,11 +48,10 @@ export default class Workflow extends Observable {
 
     this.flpList = RemoteData.notAsked();
     this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.READOUT_PREFIX = {
-      NONE: '-',
-      FILE: 'file://',
-      CONSUL: 'consul-ini://'
-    }
+    this.READOUT_PREFIX = PREFIX.READOUT;
+
+    this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.QC_PREFIX = PREFIX.QC;
   }
 
   /**
