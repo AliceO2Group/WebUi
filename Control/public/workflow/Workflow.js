@@ -13,6 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {PREFIX} from './constants.js';
 
 /**
  * Model representing Workflow
@@ -47,11 +48,10 @@ export default class Workflow extends Observable {
 
     this.flpList = RemoteData.notAsked();
     this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.READOUT_PREFIX = {
-      NONE: '-',
-      FILE: 'file://',
-      CONSUL: 'consul-ini://'
-    }
+    this.READOUT_PREFIX = PREFIX.READOUT;
+
+    this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.QC_PREFIX = PREFIX.QC;
   }
 
   /**
@@ -461,10 +461,12 @@ export default class Workflow extends Observable {
     if (!ok) {
       this.flpList = RemoteData.failure(result.message);
       this.consulReadoutPrefix = '';
+      this.consulQcPrefix = '';
       this.notify();
       return;
     }
     this.consulReadoutPrefix = result['consulReadoutPrefix'];
+    this.consulQcPrefix = result['consulQcPrefix'];
     this.flpList = RemoteData.success(result.flps);
     // preselect all hosts once they are loaded
     this.form.hosts = Object.values(result.flps);
@@ -484,7 +486,7 @@ export default class Workflow extends Observable {
    */
   checkAndMergeVariables(vars, basicVars) {
     const variables = JSON.parse(JSON.stringify(vars));
-    const basicVariables = JSON.parse(JSON.stringify(basicVars));
+    let basicVariables = JSON.parse(JSON.stringify(basicVars));
     const sameKeys = Object.keys(basicVariables).filter((key) => variables[key]);
 
     if (sameKeys.length > 0) {
@@ -493,26 +495,64 @@ export default class Workflow extends Observable {
         message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
       };
     } else {
-      if (basicVariables['readout_cfg_uri'] && !basicVariables['readout_cfg_uri_pre']) {
-        return {
-          variables: {}, ok: false,
-          message: `Missing 'Readout URI' type selection`
-        };
-      } else if (!basicVariables['readout_cfg_uri'] && basicVariables['readout_cfg_uri_pre']) {
-        return {
-          variables: {}, ok: false,
-          message: `Missing 'Readout URI' path. Either remove the type of the file or enter configuration path.`
-        };
-      } else if (basicVariables['readout_cfg_uri'] && basicVariables['readout_cfg_uri_pre']) {
-        if (basicVars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
-          basicVariables['readout_cfg_uri'] = this.consulReadoutPrefix + basicVariables['readout_cfg_uri'];
-        }
-        basicVariables['readout_cfg_uri'] = basicVariables['readout_cfg_uri_pre'] + basicVariables['readout_cfg_uri'];
-        delete basicVariables['readout_cfg_uri_pre'];
-      }
+      basicVariables = this.parseReadoutURI(basicVariables);
+      basicVariables = this.parseQcURI(basicVariables);
+
       const allVariables = Object.assign({}, basicVariables, variables);
       return {ok: true, message: '', variables: allVariables};
     }
+  }
+
+  /**
+   * Build the string for readout configuration URI
+   * @param {JSON} vars
+   * @return {JSON}
+   */
+  parseReadoutURI(vars) {
+    if (vars['readout_cfg_uri'] && !vars['readout_cfg_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'Readout URI' type selection`
+      };
+    } else if (!vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'Readout URI' path. Either remove the type of the file or enter configuration path.`
+      };
+    } else if (vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
+      if (vars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
+        vars['readout_cfg_uri'] = this.consulReadoutPrefix + vars['readout_cfg_uri'];
+      }
+      vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
+      delete vars['readout_cfg_uri_pre'];
+    }
+    return vars;
+  }
+
+  /**
+   * Build the string for quality control configuration URI
+   * @param {JSON} vars
+   * @return {JSON}
+   */
+  parseQcURI(vars) {
+    if (vars['qc_config_uri'] && !vars['qc_config_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'QC URI' type selection`
+      };
+    } else if (!vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'QC URI' path. Either remove the type of the file or enter configuration path.`
+      };
+    } else if (vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
+      if (vars['qc_config_uri_pre'] === this.QC_PREFIX.CONSUL) {
+        vars['qc_config_uri'] = this.consulQcPrefix + vars['qc_config_uri'];
+      }
+      vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
+      delete vars['qc_config_uri_pre'];
+    }
+    return vars;
   }
 
   /**

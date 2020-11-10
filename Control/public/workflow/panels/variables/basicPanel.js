@@ -29,6 +29,7 @@ export default (workflow) =>
       epnPanel(workflow),
       qcddPanel(workflow),
       readoutPanel(workflow),
+      qcUriPanel(workflow)
     ])
   ]);
 
@@ -235,6 +236,81 @@ const readoutPanel = (workflow) => {
       }, workflow.consulReadoutPrefix + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
+      )
+    ])
+  ]);
+};
+
+/**
+ * Add a text input field so that the user can fill in the qc_uri
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const qcUriPanel = (workflow) => {
+  const noPre = workflow.QC_PREFIX.NONE;
+  const filePre = workflow.QC_PREFIX.JSON;
+  const consulPre = workflow.QC_PREFIX.CONSUL;
+  const variables = workflow.form.basicVariables;
+  return h('.flex-column.text-left.mv2', [
+    h('.w-100.flex-row', [
+      h('.w-25', {style: 'display: flex; align-items: center;'}, 'QC URI:'),
+      h('.w-75.flex-row', [
+        h('', {style: 'width:30%'},
+          h('select.form-control', {
+            style: 'cursor: pointer',
+            onchange: (e) => {
+              if (e.target.value !== noPre) {
+                variables['qc_config_uri_pre'] = e.target.value;
+              } else {
+                delete variables['qc_config_uri_pre'];
+              }
+              workflow.notify();
+            }
+          }, [
+            h('option', {
+              id: 'noOption',
+              value: noPre,
+              selected: !variables['qc_config_uri_pre'] || variables['qc_config_uri_pre'] === noPre
+            }, noPre),
+            h('option', {
+              id: 'fileOption',
+              value: filePre,
+              selected: variables['qc_config_uri_pre'] === filePre
+            }, filePre),
+            h('option', {
+              id: 'consulOption',
+              value: consulPre,
+              disabled: workflow.consulQcPrefix ? false : true,
+              selected: variables['qc_config_uri_pre'] === consulPre
+            }, consulPre)
+          ])
+        ),
+        h('input.form-control', {
+          type: 'text',
+          value: variables['qc_config_uri'],
+          oninput: (e) => {
+            if (e.target.value !== '' && !variables['qc_config_uri_pre']) {
+              variables['qc_config_uri_pre'] = filePre;
+            }
+            if (e.target.value === '') {
+              delete variables['qc_config_uri'];
+              delete variables['qc_config_uri_pre'];
+            } else {
+              variables['qc_config_uri'] = e.target.value;
+            }
+            workflow.notify();
+          }
+        })
+      ])
+    ]),
+    variables['qc_config_uri_pre'] === consulPre &&
+    h('.w-100.flex-row', [
+      h('.w-25'),
+      h('label.w-75.f5', {
+        style: 'font-style: italic'
+      }, workflow.consulQcPrefix + (
+        variables['qc_config_uri'] ?
+          variables['qc_config_uri'] : '')
       )
     ])
   ]);
