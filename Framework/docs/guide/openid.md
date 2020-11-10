@@ -4,13 +4,14 @@ It protects the static content (REST API calls and WebSocket messages are protec
 
 ### Instance
 ```js
-new OpenId({secret: SECRET, id: ID, redirect_uri: REDIRECT_URI, well_known: WELL_KNOWN});
+new OpenId({secret: SECRET, id: ID, redirect_uri: REDIRECT_URI, well_known: WELL_KNOWN[, timeout: TIMEOUT});
 ```
 Where:
    * `SECRET` - Application secret
    * `ID` - Application ID
    * `REDIRECT_URI` - Authentication callback
    * `WELL_KNOWN` - So-called "well-known" endpoint defining OpenID configuration
+   * [`TIMEOUT`] - OpenID timeout in milliseconds
 
 ### Config example
 ```
