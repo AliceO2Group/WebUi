@@ -87,7 +87,7 @@ describe('`Control Environment` test-suite', async () => {
   });
 
   // it(`should successfully transition CONFIGURED -> STANDBY by clicking RESET button(workflow '${workflowToTest}')`, async () => {
-  //   await page.waitFor(5000); // Standby for 5s
+  //   await page.waitForTimeout(5000); // Standby for 5s
   //   await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
   //   await waitForCoreResponse(page, reqTimeout);
 
@@ -106,7 +106,7 @@ describe('`Control Environment` test-suite', async () => {
   });
 
   it(`should successfully shutdown environment (workflow '${workflowToTest}') and redirect to environments page`, async () => {
-    await page.waitFor(5000); // Standby for 5s
+    await page.waitForTimeout(5000); // Standby for 5s
     page.on('dialog', async (dialog) => {
       await dialog.accept();
     });
@@ -137,10 +137,10 @@ async function waitForCoreResponse(page, timeout = 90) {
     while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
         resolve();
       } else {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
       }
     }
   });

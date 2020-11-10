@@ -32,7 +32,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully load newEnvironment page', async () => {
     await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    await page.waitFor(2000);
+    await page.waitForTimeout(2000);
     assert.strictEqual(location.search, '?page=newEnvironment');
   });
 
@@ -52,7 +52,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     } else {
       assert.ok(false, `${workflowToTest} could not be found in list of workflows`);
     }
-    await page.waitFor(200);
+    await page.waitForTimeout(200);
   });
 
   it('should display variables (K;V) panel', async () => {
@@ -78,16 +78,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
       if (key && confVariables[key]) {
         await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
         page.keyboard.type(key);
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
 
         await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
         page.keyboard.type(confVariables[key]);
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
 
         await page.evaluate(() => {
           document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
         });
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
       }
     }
     const filledVars = await page.evaluate(() => window.model.workflow.form.variables);
@@ -128,10 +128,10 @@ async function waitForCoreResponse(page, timeout = 90) {
     while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
         resolve();
       } else {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
       }
     }
   });

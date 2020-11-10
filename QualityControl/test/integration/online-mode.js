@@ -34,7 +34,7 @@ describe('`ONLINE` test-suite', async () => {
 
   it('should successfully press the button and enable ONLINE mode', async () => {
     await page.evaluate(() => document.querySelector('header > div > div > button').click());
-    await page.waitFor(3000);
+    await page.waitForTimeout(3000);
     const isOnline = await page.evaluate(() => window.model.isOnlineModeEnabled);
     assert.ok(isOnline, 'Online Mode was not Enabled');
   });
@@ -61,9 +61,9 @@ describe('`ONLINE` test-suite', async () => {
 
         await toggleGivenObjectPath(page, path);
         await waitForQCResponse(page, 20);
-        await page.waitFor(500);
+        await page.waitForTimeout(500);
         const panelWidth = await page.evaluate(() => document.querySelector('section > div > div > div:nth-child(2)').style.width);
-        await page.waitFor(500);
+        await page.waitForTimeout(500);
         assert.strictEqual(panelWidth, '50%', `Panel containing object ${objects[i]} plot was not opened successfully`);
 
         await toggleGivenObjectPath(page, path.reverse());
@@ -82,7 +82,7 @@ async function toggleGivenObjectPath(page, path) {
     const [row] = await page.$x(`//tr[td[text()="${path[i]}"]]`);
     if (row) {
       await row.click();
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
     } else {
       assert.ok(false, `${path[i]} could not be found in object tree`);
     }

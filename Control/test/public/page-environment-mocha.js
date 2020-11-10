@@ -57,7 +57,7 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should click START button and do nothing due to `Control is not locked`', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
-      await page.waitFor(2000);
+      await page.waitForTimeout(2000);
       const state = await page.evaluate(() => {
         return window.model.environment.itemControl.payload;
       });
@@ -67,7 +67,7 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should click LOCK button', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitFor(500);
+      await page.waitForTimeout(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
     });
@@ -107,7 +107,7 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
       const state = await page.evaluate(() => {
         return window.model.environment.item.payload.environment.state;
       });
@@ -151,14 +151,14 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)').click());
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
       const configuredState = await page.evaluate(() => {
         return window.model.environment.item.payload.environment.state;
       });
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
       const standbyState = await page.evaluate(() => {
         return window.model.environment.item.payload.environment.state;
       });
@@ -203,7 +203,7 @@ describe('`pageEnvironment` test-suite', async () => {
       });
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
-      await page.waitFor(500);
+      await page.waitForTimeout(500);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
       assert.ok(calls['destroyEnvironment']);
@@ -212,7 +212,7 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should click LOCK button to remove control', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitFor(500);
+      await page.waitForTimeout(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       assert.strictEqual(lockButton, 'Lock is free');
     });
