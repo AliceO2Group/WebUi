@@ -35,7 +35,7 @@ export default (workflow, templatesMap, repository) =>
  * @param {string} repository
  * @return {vnode}
  */
-const revisionInputDropdown = (workflow, templatesMap, repository) => h('.m2.text-left.w-100', [
+const revisionInputDropdown = (workflow, templatesMap, repository) => h('.mv2.text-left.w-100', [
   h('h5', 'Revision:'),
   h('', {style: 'display:flex; flex-direction: row;'}, [
     h('.dropdown', {
@@ -87,7 +87,7 @@ const revisionDropdownArea = (workflow, templatesMap, repository) => h('.dropdow
   Object.keys(templatesMap[repository])
     .filter((name) => name.match(workflow.revision.regex))
     .map((revision) =>
-      h('a.menu-item', {
+      h('a.menu-item.w-wrapped', {
         class: revision === workflow.form.revision ? 'selected' : '',
         onmousedown: () => workflow.updateInputSelection('revision', revision),
       }, revision)

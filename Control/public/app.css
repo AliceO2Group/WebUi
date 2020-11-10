@@ -42,3 +42,5 @@ tr:hover td { background-color: var(--color-gray-light)}
 
 .overflow { height: 1.5rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all; }
 .w-15 { width: 15%; }
+.w-40 { width: 40%; }
+.w-60 { width: 60%; }

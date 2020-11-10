@@ -180,7 +180,7 @@ const readoutPanel = (workflow) => {
     h('.w-100.flex-row', [
       h('.w-25', {style: 'display: flex; align-items: center;'}, 'Readout URI:'),
       h('.w-75.flex-row', [
-        h('', {style: 'width:30%'},
+        h('', {style: 'width:15%'},
           h('select.form-control', {
             style: 'cursor: pointer',
             onchange: (e) => {
@@ -210,22 +210,31 @@ const readoutPanel = (workflow) => {
             }, consulPre)
           ])
         ),
-        h('input.form-control', {
-          type: 'text',
-          value: variables['readout_cfg_uri'],
-          oninput: (e) => {
-            if (e.target.value !== '' && !variables['readout_cfg_uri_pre']) {
-              variables['readout_cfg_uri_pre'] = filePre;
+        h('.flex-row', {style: 'width:85%;'}, [
+          // h('input.form-control', {
+          //   style: 'width: 70%',
+          //   value: workflow.consulReadoutPrefix,
+          //   disabled: true
+          // }),
+          h('input.form-control', {
+            type: 'text',
+            // style: 'width: 30%',
+            value: variables['readout_cfg_uri'],
+            oninput: (e) => {
+              if (e.target.value !== '' && !variables['readout_cfg_uri_pre']) {
+                variables['readout_cfg_uri_pre'] = filePre;
+              }
+              if (e.target.value === '') {
+                delete variables['readout_cfg_uri'];
+                delete variables['readout_cfg_uri_pre'];
+              } else {
+                variables['readout_cfg_uri'] = e.target.value;
+              }
+              workflow.notify();
             }
-            if (e.target.value === '') {
-              delete variables['readout_cfg_uri'];
-              delete variables['readout_cfg_uri_pre'];
-            } else {
-              variables['readout_cfg_uri'] = e.target.value;
-            }
-            workflow.notify();
-          }
-        })
+          })
+        ])
+
       ])
     ]),
     variables['readout_cfg_uri_pre'] === consulPre &&
@@ -233,7 +242,7 @@ const readoutPanel = (workflow) => {
       h('.w-25'),
       h('label.w-75.f5', {
         style: 'font-style: italic'
-      }, workflow.consulReadoutPrefix + (
+      }, consulPre + workflow.consulReadoutPrefix + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
       )
@@ -308,7 +317,7 @@ const qcUriPanel = (workflow) => {
       h('.w-25'),
       h('label.w-75.f5', {
         style: 'font-style: italic'
-      }, workflow.consulQcPrefix + (
+      }, consulPre + workflow.consulQcPrefix + (
         variables['qc_config_uri'] ?
           variables['qc_config_uri'] : '')
       )
