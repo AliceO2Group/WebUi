@@ -180,14 +180,7 @@ const showEnvDetailsTable = (item, environment) =>
             )
           ),
           h('td.flex-row', !environment.expandUserVars ?
-            h('.mh2.overflow', [
-              JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),
-              JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),
-              JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),
-              JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),
-              JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),JSON.stringify(item.userVars),
-
-            ])
+            h('.mh2.overflow', JSON.stringify(item.userVars))
             :
             h('.flex-column', [
               Object.keys(item.userVars).map((key) =>
