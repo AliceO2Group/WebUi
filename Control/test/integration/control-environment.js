@@ -101,8 +101,8 @@ describe('`Control Environment` test-suite', async () => {
 
   it(`should have one button for 'Shutdown' environment (workflow '${workflowToTest}')`, async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').title);
-    assert.strictEqual(shutdownButton, 'Shutdown environment');
+    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').title);
+    assert.strictEqual(shutdownButton, 'Force the shutdown of the environment');
   });
 
   it(`should successfully shutdown environment (workflow '${workflowToTest}') and redirect to environments page`, async () => {
@@ -112,7 +112,7 @@ describe('`Control Environment` test-suite', async () => {
     });
 
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
