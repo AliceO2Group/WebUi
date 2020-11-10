@@ -36,6 +36,8 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.notAsked();
     this.plots = RemoteData.notAsked();
 
+    this.expandUserVars = false;
+
     this.getPlotsList();
   }
 
