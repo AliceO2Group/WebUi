@@ -14,26 +14,34 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const config = require('../test-config.js').consul;
 const ConsulConnector = require('../../lib/ConsulConnector.js');
 
 describe('ConsulConnector test suite', () => {
   let res;
   describe('Test ConsulConnector initialization', () => {
-    it('should successfully initialize consul with "undefined" path', () => {
+    it('should successfully initialize consul with "undefined" configuration', () => {
       const consul = new ConsulConnector({}, undefined);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
     });
-    it('should successfully initialize consul with "null" path', () => {
+    it('should successfully initialize consul with "null" configuration', () => {
       const consul = new ConsulConnector({}, null);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
     });
-    it('should successfully initialize consul with "missing" path', () => {
+    it('should successfully initialize consul with "missing" configuration', () => {
       const consul = new ConsulConnector({});
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
     });
-    it('should successfully initialize consul with "passed" path', () => {
-      const consul = new ConsulConnector({}, 'some/path');
-      assert.strictEqual(consul.flpHardwarePath, 'some/path');
+    it('should successfully initialize consul with "passed" configuration', () => {
+      const consul = new ConsulConnector({}, {
+        flpHardwarePath: 'some/hardware/path',
+        readoutPath: 'some/readout/path'
+      });
+      assert.strictEqual(consul.flpHardwarePath, 'some/hardware/path');
+      assert.strictEqual(consul.readoutPath, 'some/readout/path');
     });
   });
 
@@ -42,12 +50,12 @@ describe('ConsulConnector test suite', () => {
     beforeEach(() => consulService = {});
     it('should successfully query host of ConsulLeader', async () => {
       consulService.getConsulLeaderStatus = sinon.stub().resolves('localhost:8500');
-      const connector = new ConsulConnector(consulService, 'some/path');
+      const connector = new ConsulConnector(consulService, config);
       await connector.testConsulStatus();
     });
     it('should successfully query host of ConsulLeader and fail gracefully', async () => {
       consulService.getConsulLeaderStatus = sinon.stub().rejects('Unable to query Consul');
-      const connector = new ConsulConnector(consulService, 'some/path');
+      const connector = new ConsulConnector(consulService, config);
       await connector.testConsulStatus();
     });
   });
@@ -67,7 +75,7 @@ describe('ConsulConnector test suite', () => {
         'o2/hardware/flps/flpOne/cards': `{"0": {"type": "CRORC", "pciAddress": "d8:00.0"}}`,
         'o2/hardware/flps/flp1/info"': `{0: {"type": "should not be included"}}`
       });
-      const connector = new ConsulConnector(consulService, 'some/path');
+      const connector = new ConsulConnector(consulService, config);
 
       await connector.getCRUs(null, res);
       const expectedCRUs = {flpOne: {0: {type: 'CRORC', pciAddress: 'd8:00.0'}}};
@@ -100,7 +108,7 @@ describe('ConsulConnector test suite', () => {
     // });
 
     it('should successfully return error for when ConsulService was not initialized', async () => {
-      const connector = new ConsulConnector(undefined, 'some/path');
+      const connector = new ConsulConnector(undefined, config);
       await connector.getCRUs(null, res);
 
       assert.ok(res.status.calledWith(502));
@@ -125,11 +133,54 @@ describe('ConsulConnector test suite', () => {
         'o2/hardware/flps/flpTwo/info',
         'o2/hardware/notanflp/flp2/test',
       ]);
-      const connector = new ConsulConnector(consulService, 'some/path');
+      const connector = new ConsulConnector(consulService, config);
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith(['flpOne', 'flpTwo']));
+      assert.ok(res.json.calledWith({
+        flps: ['flpOne', 'flpTwo'],
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/'
+      }));
+    });
+
+    it('should successfully return a readout and qc configuration prefix', async () => {
+      consulService.getKeysByPrefix = sinon.stub().resolves([]);
+      const connector = new ConsulConnector(consulService, config);
+      await connector.getFLPs(null, res);
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({
+        flps: [],
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/',
+      }));
+    });
+
+    it('should successfully return an empty readout and qc configuration prefix if configuration host is missing', async () => {
+      consulService.getKeysByPrefix = sinon.stub().resolves([]);
+      const connector = new ConsulConnector(consulService, {port: 8550});
+      await connector.getFLPs(null, res);
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({
+        flps: [],
+        consulReadoutPrefix: '',
+        consulQcPrefix: ''
+      }));
+    });
+
+    it('should successfully return an empty readout configuration prefix if configuration port is missing', async () => {
+      consulService.getKeysByPrefix = sinon.stub().resolves([]);
+      const connector = new ConsulConnector(consulService, {hostname: 'localhost'});
+      await connector.getFLPs(null, res);
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({
+        flps: [],
+        consulReadoutPrefix: '',
+        consulQcPrefix: ''
+      }));
     });
 
     it('should successfully remove duplicates from list of FLP names', async () => {
@@ -137,11 +188,14 @@ describe('ConsulConnector test suite', () => {
         'o2/hardware/flps/flpTwo/cards',
         'o2/hardware/flps/flpTwo/info'
       ]);
-      const connector = new ConsulConnector(consulService, 'some/path');
+      const connector = new ConsulConnector(consulService, config);
       await connector.getFLPs(null, res);
-
       assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith(['flpTwo']));
+      assert.ok(res.json.calledWith({
+        flps: ['flpTwo'],
+        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/',
+      }));
     });
 
     // it('should successfully return 404 if consul did not send back any data for specified key', async () => {
@@ -163,7 +217,7 @@ describe('ConsulConnector test suite', () => {
     // });
 
     it('should successfully return error for when ConsulService was not initialized', async () => {
-      const connector = new ConsulConnector(undefined, 'some/path');
+      const connector = new ConsulConnector(undefined, config);
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(502));

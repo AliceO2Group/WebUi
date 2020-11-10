@@ -105,6 +105,6 @@ tr:hover td {
   color: var(--color-white);
   padding: .4em .5em;
 }
-
+.overflow { height: 1.5rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all; }
 .w-15 {width: 15%;}
 .w-85 {width: 85%;}

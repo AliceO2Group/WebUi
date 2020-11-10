@@ -28,7 +28,7 @@ describe('`OFFLINE` test-suite', async () => {
 
   it('should successfully load objectTree page', async () => {
     await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
-    await page.waitFor(2000);
+    await page.waitForTimeout(2000);
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=objectTree', 'Could not load page objectTree');
   });
@@ -55,10 +55,10 @@ describe('`OFFLINE` test-suite', async () => {
         await toggleGivenObjectPath(page, path);
         await waitForQCResponse(page, 20);
 
-        await page.waitFor(500);
+        await page.waitForTimeout(500);
         const panelWidth = await page.evaluate(() => document.querySelector('section > div > div > div:nth-child(2)').style.width);
         assert.strictEqual(panelWidth, '50%', `Panel containing object ${objects[i]} plot was not opened successfully`);
-        await page.waitFor(500);
+        await page.waitForTimeout(500);
 
         await toggleGivenObjectPath(page, path.reverse());
       });
@@ -77,7 +77,7 @@ async function toggleGivenObjectPath(page, path) {
     const [row] = await page.$x(`//tr[td[text()="${path[i]}"]]`);
     if (row) {
       await row.click();
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
     } else {
       assert.ok(false, `${path[i]} could not be found in object tree`);
     }

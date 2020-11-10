@@ -26,11 +26,11 @@ class ConsulConnector {
    */
   constructor(consulService, config) {
     this.consulService = consulService;
-
-    this.flpHardwarePath = config.flpHardwarePath ? config.flpHardwarePath : 'o2/hardware/flps';
-    this.cruConfigPath = config.cruConfigPath ? config.cruConfigPath : 'o2/components/readoutcard';
+    this.config = config;
+    this.flpHardwarePath = (config && config.flpHardwarePath) ? config.flpHardwarePath : 'o2/hardware/flps';
+    this.readoutPath = (config && config.readoutPath) ? config.readoutPath : 'o2/components/readout';
+    this.qcPath = (config && config.qcPath) ? config.qcPath : 'o2/components/qc';
   }
-
 
   /**
    * Method to check if consul service can be used
@@ -93,7 +93,11 @@ class ConsulConnector {
           const flpList = data.filter((key) => key.match(regex))
             .map((key) => key.split('/')[3]);
           res.status(200);
-          res.json([...new Set(flpList)]);
+          res.json({
+            consulQcPrefix: this.consulQcPrefix,
+            consulReadoutPrefix: this.consulReadoutPrefix,
+            flps: [...new Set(flpList)]
+          });
         })
         .catch((error) => {
           if (error.message.includes('404')) {
@@ -163,8 +167,31 @@ class ConsulConnector {
     //       crusByHost[hostKey] = JSON.parse(data[key]);
     //     });
     // }).catch((error) => {
-
     // });
+  }
+
+  /**
+   * Build and return the URL prefix for
+   * Readout Configuration Consul Path  
+   * @return {string}
+   */
+  get consulReadoutPrefix() {
+    if (!this.config.hostname || !this.config.port) {
+      return '';
+    }
+    return `${this.config.hostname}:${this.config.port}/${this.readoutPath}/`
+  }
+
+  /**
+   * Build and return the URL prefix for
+   * QC Configuration Consul Path
+   * @return {string}
+   */
+  get consulQcPrefix() {
+    if (!this.config.hostname || !this.config.port) {
+      return '';
+    }
+    return `${this.config.hostname}:${this.config.port}/${this.qcPath}/`
   }
 }
 

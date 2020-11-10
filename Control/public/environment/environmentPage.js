@@ -86,7 +86,7 @@ const showContent = (environment, item) => [
       })
     ]
   ),
-  showEnvDetailsTable(item),
+  showEnvDetailsTable(item, environment),
   h('.m2', [
     h('h4', 'Tasks'),
     h('.flex-row.flex-grow',
@@ -132,44 +132,70 @@ const showEmbeddedGraphs = (data) =>
 /**
  * Table to display Environment details
  * @param {Object} item - object to be shown
+ * @param {Environment} environment
  * @return {vnode} table view
  */
-const showEnvDetailsTable = (item) =>
+const showEnvDetailsTable = (item, environment) =>
   h('.m2.mv4.shadow-level1',
     h('table.table', [
       h('tbody', [
         h('tr', [
-          h('th', 'Number of Tasks'),
+          h('th.w-15', 'Number of Tasks'),
           h('td', item.tasks.length)
         ]),
         h('tr', [
-          h('th', 'ID'),
+          h('th.w-15', 'ID'),
           h('td', item.id)
         ]),
         h('tr', [
-          h('th', 'Created'),
+          h('th.w-15', 'Created'),
           h('td', new Date(item.createdWhen).toLocaleString())
         ]),
         h('tr', [
-          h('th', 'State'),
+          h('th.w-15', 'State'),
           h('td',
             {
-              class: item.state === 'RUNNING' ? 'success' : (item.state === 'CONFIGURED' ? 'warning' : ''),
+              class: item.state === 'RUNNING' ?
+                'success' :
+                (item.state === 'CONFIGURED' ? 'warning' : (item.state === 'ERROR' ? 'danger' : '')),
               style: 'font-weight: bold;'
             },
             item.state)
         ]),
         h('tr', [
-          h('th', 'Root Role'),
+          h('th.w-15', 'Root Role'),
           h('td', item.rootRole)
         ]),
         h('tr', [
-          h('th', 'User Vars'),
-          h('td', JSON.stringify(item.userVars))
+          h('th.w-15',
+            h('.flex-row', [
+              h('.w-75', 'User Vars'),
+              h('.w-25.text-right.mh2.actionable-icon', {
+                onclick: () => {
+                  environment.expandUserVars = !environment.expandUserVars;
+                  environment.notify();
+                }
+              }, environment.expandUserVars ? iconChevronTop() : iconChevronBottom()
+              )]
+            )
+          ),
+          h('td.flex-row', !environment.expandUserVars ?
+            h('.mh2.overflow', JSON.stringify(item.userVars))
+            :
+            h('.flex-column', [
+              Object.keys(item.userVars).map((key) =>
+                h('.mh2.flex-row', [
+                  h('', {style: 'font-weight: bold'}, key + ':'),
+                  h('', {
+                    style: 'word-break: break-word'
+                  }, JSON.stringify(item.userVars[key]))
+                ])
+              ),
+            ]),
+          )
         ])
       ])
-    ]
-    )
+    ])
   );
 
 /**
@@ -264,7 +290,7 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
         h('td', task.status),
         h('td', {
           class: (task.state === 'RUNNING' ?
-            'success' : (task.state === 'CONFIGURED' ? 'warning' : '')),
+            'success' : (task.state === 'CONFIGURED' ? 'warning' : (task.state === 'ERROR' ? 'danger' : ''))),
           style: 'font-weight: bold;'
         }, task.state),
         h('td', task.deploymentInfo.hostname),
