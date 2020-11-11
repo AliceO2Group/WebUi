@@ -61,6 +61,8 @@ module.exports.setup = (http, ws) => {
   http.get('/getCRUs', (req, res) => consulConnector.getCRUs(req, res));
   http.get('/getFLPs', (req, res) => consulConnector.getFLPs(req, res));
   http.get('/getCRUsConfig', (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
+  http.post('/saveCRUsConfig', (req, res) => consulConnector.saveCRUsConfiguration(req, res));
+  
   
   const kafka = new KafkaConnector(config.kafka, ws);
   if (kafka.isKafkaConfigured()) {
