@@ -38,6 +38,7 @@ class ConsulService {
     this.servicesPath = '/v1/agent/services';
     this.kvPath = '/v1/kv/';
     this.leaderPath = '/v1/status/leader';
+    this.txnPath = '/v1/txn';
   }
 
   /**
@@ -140,47 +141,50 @@ class ConsulService {
   }
 
   /**
+   * Given a list of KV Pairs, split it in batches of
+   * maximum 64 pairs and use transactions to update or set
+   * new keys in Consul KV Store
+   * @param {Array<KV>} list
+   * @return {Promise.<JSON, Error>}
+   */
+  async putListOfKeyValues(list) {
+    const consulBuiltList = this._mapToConsulKVObjectsLists(list);
+    let allPut = true;
+    consulBuiltList.forEach(async (list) => {
+      try {
+        const requestOptions = this._getRequestOptionsPUT(this.txnPath, list);
+        await this.httpJson(this.txnPath, requestOptions, list);
+      } catch (error) {
+        allPut = false
+        throw error;
+      }
+    });
+    return Promise.resolve({allPut: allPut});
+  }
+
+  /**
    * Util to get JSON data (parsed) from Consul server
    * @param {string} path - path to Consul server
+   * @param {JSON} requestOptions
+   * @param {JSON} data
    * @return {Promise.<Object, Error>} JSON response
    */
-  async httpGetJson(path) {
+  async httpJson(path, requestOptions, data) {
     return new Promise((resolve, reject) => {
-      const requestOptions = {
+      const reqOptions = requestOptions ? requestOptions : {
         hostname: this.hostname,
         port: this.port,
         path: path,
         qs: {keys: true},
         method: 'GET',
-        headers: {
-          Accept: 'application/json'
-        }
+        headers: {Accept: 'application/json'}
       };
 
-      /**
-       * Generic handler for client http requests,
-       * buffers response, checks status code and parses JSON
-       * @param {Response} response
-       */
-      const requestHandler = (response) => {
-        if (response.statusCode < 200 || response.statusCode > 299) {
-          reject(new Error('Non-2xx status code: ' + response.statusCode));
-          return;
-        }
-        const bodyChunks = [];
-        response.on('data', (chunk) => bodyChunks.push(chunk));
-        response.on('end', () => {
-          try {
-            const body = JSON.parse(bodyChunks.join(''));
-            resolve(body);
-          } catch (e) {
-            reject(new Error('Unable to parse JSON'));
-          }
-        });
-      };
-
-      const request = http.request(requestOptions, requestHandler);
+      const request = http.request(reqOptions, this._requestHandler);
       request.on('error', (err) => reject(err));
+      if (reqOptions.method === 'PUT' && data) {
+        request.write(JSON.stringify(data));
+      }
       request.end();
     });
   }
@@ -188,6 +192,49 @@ class ConsulService {
   /**
    * Helpers
    */
+
+  /**
+   * Build a JSON with request options needed for PUT request
+   * @param {JSON} data 
+   * @return {JSON}
+   */
+  _getRequestOptionsPUT(path, data) {
+    if (typeof data !== 'string') {
+      data = JSON.stringify(data);
+    }
+    return {
+      hostname: this.hostname,
+      port: this.port,
+      path: path,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    };
+  }
+
+  /**
+   * Generic handler for client http requests,
+   * buffers response, checks status code and parses JSON
+   * @param {Response} response
+   * @return {Promise.<JSON, Error>}
+   */
+  _requestHandler(response) {
+    if (response.statusCode < 200 || response.statusCode > 299) {
+      return Promise.reject(new Error('Non-2xx status code: ' + response.statusCode));
+    }
+    const bodyChunks = [];
+    response.on('data', (chunk) => bodyChunks.push(chunk));
+    response.on('end', () => {
+      try {
+        const body = JSON.parse(bodyChunks.join(''));
+        return Promise.resolve(body);
+      } catch (e) {
+        return Promise.reject(new Error('Unable to parse JSON'));
+      }
+    });
+  }
 
   /**
    * Method to check for and remove any `/` from the start and end of a key/keyPrefix
@@ -202,6 +249,39 @@ class ConsulService {
       key = key.substring(0, key.length - 1);
     }
     return key;
+  }
+
+  /**
+   * Given a list of KV pairs, build for each pair
+   * a consul transaction object. These pairs will than be placed
+   * in an Array<Array<ConsulTransactions>> due to the fact that a transaction
+   * accepts maximum 64 elements
+   * https://www.consul.io/api/txn
+   * @param {Array<<String,String>>} list 
+   * @return {Array<Array<ConsulTransaction>>}
+   */
+  _mapToConsulKVObjectsLists(list) {
+    const consulList = [];
+    let transactionList = [];
+    list.forEach((kvpair) => {
+      const key = Object.keys(kvpair)[0];
+      const consulObj = {
+        KV: {
+          Verb: 'set',
+          Key: key,
+          Value: Buffer.from(kvpair[key]).toString('base64')
+        }
+      };
+      transactionList.push(consulObj);
+      if (transactionList.length >= 64) {
+        consulList.push(transactionList);
+        transactionList = [];
+      }
+    });
+    if (transactionList.length !== 0) {
+      consulList.push(transactionList);
+    }
+    return consulList;
   }
 }
 
