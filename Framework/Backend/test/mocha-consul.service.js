@@ -17,8 +17,6 @@ const ConsulService = require('./../services/consul.service.js');
 const config = require('./test-config.js');
 const assert = require('assert');
 const nock = require('nock');
-const {consul} = require('./test-config.js');
-
 
 describe('Consul Service test suite', function() {
   describe('Check Initialization of ConsulService', function() {
