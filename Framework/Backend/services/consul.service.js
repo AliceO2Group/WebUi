@@ -141,29 +141,29 @@ class ConsulService {
   }
 
   /**
-   * Given a list of KV Pairs, split it in batches of
-   * maximum 64 pairs and use transactions to update or set
-   * new keys in Consul KV Store
+   * Given a list of KV Pairs, split it in batches of maximum 64 pairs
+   * and use transactions to update or set new keys in Consul KV Store
+   * Will return Promise.Resolve() with ok if all transaction was done
+   * or false if at least one failed
    * @param {Array<KV>} list
    * @return {Promise.<JSON, Error>}
    */
   async putListOfKeyValues(list) {
     const consulBuiltList = this._mapToConsulKVObjectsLists(list);
     let allPut = true;
-    consulBuiltList.forEach(async (list) => {
+    await Promise.all(consulBuiltList.map(async (list) => {
       try {
         const requestOptions = this._getRequestOptionsPUT(this.txnPath, list);
         await this.httpJson(this.txnPath, requestOptions, list);
       } catch (error) {
-        allPut = false
-        throw error;
+        allPut = false;
       }
-    });
-    return Promise.resolve({allPut: allPut});
+    }));
+    return {allPut: allPut};
   }
 
   /**
-   * Util to get JSON data (parsed) from Consul server
+   * Util to get/put JSON data (parsed) from Consul server
    * @param {string} path - path to Consul server
    * @param {JSON} requestOptions
    * @param {JSON} data
@@ -180,7 +180,29 @@ class ConsulService {
         headers: {Accept: 'application/json'}
       };
 
-      const request = http.request(reqOptions, this._requestHandler);
+      /**
+       * Generic handler for client http requests,
+       * buffers response, checks status code and parses JSON
+       * @param {Response} response
+       * @return {Promise.<JSON, Error>}
+       */
+      const requestHandler = (response) => {
+        if (response.statusCode < 200 || response.statusCode > 299) {
+          reject(new Error('Non-2xx status code: ' + response.statusCode));
+        }
+        const bodyChunks = [];
+        response.on('data', (chunk) => bodyChunks.push(chunk));
+        response.on('end', () => {
+          try {
+            const body = JSON.parse(bodyChunks.join(''));
+            resolve(body);
+          } catch (e) {
+            reject(new Error('Unable to parse JSON'));
+          }
+        });
+      }
+
+      const request = http.request(reqOptions, requestHandler);
       request.on('error', (err) => reject(err));
       if (reqOptions.method === 'PUT' && data) {
         request.write(JSON.stringify(data));
@@ -215,28 +237,6 @@ class ConsulService {
   }
 
   /**
-   * Generic handler for client http requests,
-   * buffers response, checks status code and parses JSON
-   * @param {Response} response
-   * @return {Promise.<JSON, Error>}
-   */
-  _requestHandler(response) {
-    if (response.statusCode < 200 || response.statusCode > 299) {
-      return Promise.reject(new Error('Non-2xx status code: ' + response.statusCode));
-    }
-    const bodyChunks = [];
-    response.on('data', (chunk) => bodyChunks.push(chunk));
-    response.on('end', () => {
-      try {
-        const body = JSON.parse(bodyChunks.join(''));
-        return Promise.resolve(body);
-      } catch (e) {
-        return Promise.reject(new Error('Unable to parse JSON'));
-      }
-    });
-  }
-
-  /**
    * Method to check for and remove any `/` from the start and end of a key/keyPrefix
    * @param {string} key - key or keyPrefix to check
    * @return {string}
@@ -252,9 +252,8 @@ class ConsulService {
   }
 
   /**
-   * Given a list of KV pairs, build for each pair
-   * a consul transaction object. These pairs will than be placed
-   * in an Array<Array<ConsulTransactions>> due to the fact that a transaction
+   * Given a list of KV pairs, for each pair build  a consul transaction object.
+   * These pairs will than be placed in batches due to the fact that a transaction
    * accepts maximum 64 elements
    * https://www.consul.io/api/txn
    * @param {Array<<String,String>>} list 
@@ -263,13 +262,13 @@ class ConsulService {
   _mapToConsulKVObjectsLists(list) {
     const consulList = [];
     let transactionList = [];
-    list.forEach((kvpair) => {
-      const key = Object.keys(kvpair)[0];
+    list.forEach((kvPair) => {
+      const key = Object.keys(kvPair)[0];
       const consulObj = {
         KV: {
           Verb: 'set',
           Key: key,
-          Value: Buffer.from(kvpair[key]).toString('base64')
+          Value: Buffer.from(kvPair[key]).toString('base64')
         }
       };
       transactionList.push(consulObj);

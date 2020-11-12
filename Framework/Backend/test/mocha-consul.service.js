@@ -17,6 +17,7 @@ const ConsulService = require('./../services/consul.service.js');
 const config = require('./test-config.js');
 const assert = require('assert');
 const nock = require('nock');
+const {consul} = require('./test-config.js');
 
 
 describe('Consul Service test suite', function() {
@@ -43,6 +44,14 @@ describe('Consul Service test suite', function() {
       const consul = new ConsulService(config.consul);
       assert.deepStrictEqual(consul.hostname, 'localhost');
       assert.deepStrictEqual(consul.port, 8080);
+    });
+
+    it('should successfully set default values for API paths', function() {
+      const consul = new ConsulService(config.consul);
+      assert.deepStrictEqual(consul.servicesPath, '/v1/agent/services');
+      assert.deepStrictEqual(consul.kvPath, '/v1/kv/');
+      assert.deepStrictEqual(consul.leaderPath, '/v1/status/leader');
+      assert.deepStrictEqual(consul.txnPath, '/v1/txn');
     });
   });
 
@@ -171,7 +180,7 @@ describe('Consul Service test suite', function() {
     });
   });
 
-  describe('Check various ways of retrieving services', function() {
+  describe('Check various ways of retrieving services', () => {
     const services = {
       Main_QC_TASK:
       {
@@ -195,6 +204,103 @@ describe('Consul Service test suite', function() {
         .get('/v1/agent/services')
         .reply(200, services);
       return consul.getServices().then((res) => assert.deepStrictEqual(res, services));
+    });
+  });
+
+  describe('Check PUT transaction calls', () => {
+    it('should successfully send to consul a batch of transactions and all should succeed', async () => {
+      const expectedBatches = [
+        [...Array.from({length: 64}, (x, i) => (
+          {KV: {Verb: 'set', Key: 'key', Value: Buffer.from(`value/${i}`).toString('base64')}}
+        ))],
+        [...Array.from({length: 6}, (x, i) => (
+          {KV: {Verb: 'set', Key: 'key', Value: Buffer.from(`value/${i + 64}`).toString('base64')}}
+        ))]
+      ];
+      nock('http://localhost:8080')
+        .put('/v1/txn', expectedBatches[0])
+        .reply(200, {});
+      nock('http://localhost:8080')
+        .put('/v1/txn', expectedBatches[1])
+        .reply(200, {});
+      const list = [...Array.from({length: 70}, (x, i) => ({key: `value/${i}`}))];
+      const consul = new ConsulService(config.consul);
+      const response = await consul.putListOfKeyValues(list);
+      assert.deepStrictEqual(response, {allPut: true});
+    });
+
+    it('should successfully send to consul a batch of transactions and not all should succeed', async () => {
+      const expectedBatches = [
+        [...Array.from({length: 64}, (x, i) => (
+          {KV: {Verb: 'set', Key: 'key', Value: Buffer.from(`value/${i}`).toString('base64')}}
+        ))],
+        [...Array.from({length: 6}, (x, i) => (
+          {KV: {Verb: 'set', Key: 'key', Value: Buffer.from(`value/${i + 64}`).toString('base64')}}
+        ))]
+      ];
+      nock('http://localhost:8080')
+        .put('/v1/txn', expectedBatches[0])
+        .reply(200, {});
+      nock('http://localhost:8080')
+        .put('/v1/txn', expectedBatches[1])
+        .replyWithError('Service unavailable');
+      const list = [...Array.from({length: 70}, (x, i) => ({key: `value/${i}`}))];
+      const consul = new ConsulService(config.consul);
+      const response = await consul.putListOfKeyValues(list);
+      assert.deepStrictEqual(response, {allPut: false});
+    });
+    afterEach(nock.cleanAll);
+  });
+
+  describe('Check helper methods', () => {
+    const consul = new ConsulService(config.consul);
+    it('should successfully parse a given key', () => {
+      assert.strictEqual(consul.parseKey('/some/key'), 'some/key');
+      assert.strictEqual(consul.parseKey('some/key/'), 'some/key');
+      assert.strictEqual(consul.parseKey('/some/key/'), 'some/key');
+    });
+
+    it('should successfully build request options for PUT call when data is string', () => {
+      const data = 'some-string';
+      const path = 'some-path';
+      const options = consul._getRequestOptionsPUT(path, data);
+      const expectedOptions = {
+        hostname: config.consul.hostname,
+        port: config.consul.port,
+        path: path,
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json', 'Content-Length': data.length}
+      };
+      assert.deepStrictEqual(options, expectedOptions);
+    });
+
+    it('should successfully build request options for PUT call when data is not string', () => {
+      const data = {key: 'some-value'};
+      const path = 'some-path';
+      const options = consul._getRequestOptionsPUT(path, data);
+      const expectedOptions = {
+        hostname: config.consul.hostname,
+        port: config.consul.port,
+        path: path,
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json', 'Content-Length': JSON.stringify(data).length}
+      };
+      assert.deepStrictEqual(options, expectedOptions);
+    });
+
+    it('should successfully build batches of max 64 with Consul Transaction Objects given a list of KV pairs', () => {
+      const list = [...Array.from({length: 70}, (x, i) => ({key: `value/${i}`}))];
+      const expectedBatches = [
+        [...Array.from({length: 64}, (x, i) => (
+          {KV: {Verb: 'set', Key: 'key', Value: Buffer.from(`value/${i}`).toString('base64')}}
+        ))],
+        [...Array.from({length: 6}, (x, i) => (
+          {KV: {Verb: 'set', Key: 'key', Value: Buffer.from(`value/${i + 64}`).toString('base64')}}
+        ))]
+      ];
+
+      const batches = consul._mapToConsulKVObjectsLists(list);
+      assert.deepStrictEqual(batches, expectedBatches);
     });
   });
 
