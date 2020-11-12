@@ -46,7 +46,7 @@ class ConsulService {
    * @return {Promise}
    */
   async getConsulLeaderStatus() {
-    return this.httpGetJson(this.leaderPath);
+    return this.httpJson(this.leaderPath);
   }
 
   /**
@@ -56,7 +56,7 @@ class ConsulService {
    * @return {Promise}
    */
   async getServices() {
-    return this.httpGetJson(this.servicesPath);
+    return this.httpJson(this.servicesPath);
   }
 
   /**
@@ -65,7 +65,7 @@ class ConsulService {
    * @return {Promise.<Array<string>, Error>}
    */
   async getKeys() {
-    return this.httpGetJson(this.kvPath + '?keys=true');
+    return this.httpJson(this.kvPath + '?keys=true');
   }
 
   /**
@@ -77,7 +77,7 @@ class ConsulService {
   async getKeysByPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '/?keys=true';
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -89,7 +89,7 @@ class ConsulService {
   async getValueObjectByKey(key) {
     key = this.parseKey(key);
     const getPath = this.kvPath + key;
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -101,7 +101,7 @@ class ConsulService {
   async getOnlyRawValueByKey(key) {
     key = this.parseKey(key);
     const getPath = this.kvPath + key + '?raw=true';
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -113,7 +113,7 @@ class ConsulService {
   async getValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '?recurse=true';
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -126,7 +126,7 @@ class ConsulService {
   async getOnlyRawValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '?recurse=true';
-    return this.httpGetJson(getPath).then((data) => {
+    return this.httpJson(getPath).then((data) => {
       const response = {};
       data.forEach((object) => {
         const key = object.Key;
