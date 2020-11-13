@@ -53,7 +53,7 @@ describe('`pageEnvironments` test-suite', () => {
 
     it('should successfully navigate to environment page on click Details', async () => {
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button').click());
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
@@ -81,7 +81,7 @@ describe('`pageEnvironments` test-suite', () => {
     it('should click LOCK button', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitFor(500);
+      await page.waitForTimeout(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
     });
@@ -92,14 +92,14 @@ describe('`pageEnvironments` test-suite', () => {
       });
 
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button:nth-child(2)').click());
-      await page.waitFor(500);
+      await page.waitForTimeout(500);
       assert.ok(calls['destroyEnvironment']);
     });
 
     it('should click LOCK button to remove control', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitFor(500);
+      await page.waitForTimeout(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       assert.strictEqual(lockButton, 'Lock is free');
     });

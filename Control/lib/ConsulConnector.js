@@ -22,13 +22,15 @@ class ConsulConnector {
   /**
    * Setup ConsulConnector
    * @param {ConsulService} consulService
-   * @param {string} flpHardwarePath
+   * @param {JSON} config
    */
-  constructor(consulService, flpHardwarePath) {
+  constructor(consulService, config) {
     this.consulService = consulService;
-    this.flpHardwarePath = flpHardwarePath ? flpHardwarePath : 'o2/hardware/flps';
+    this.config = config;
+    this.flpHardwarePath = (config && config.flpHardwarePath) ? config.flpHardwarePath : 'o2/hardware/flps';
+    this.readoutPath = (config && config.readoutPath) ? config.readoutPath : 'o2/components/readout';
+    this.qcPath = (config && config.qcPath) ? config.qcPath : 'o2/components/qc';
   }
-
 
   /**
    * Method to check if consul service can be used
@@ -90,7 +92,11 @@ class ConsulConnector {
           const flpList = data.filter((key) => key.match(regex))
             .map((key) => key.split('/')[3]);
           res.status(200);
-          res.json([...new Set(flpList)]);
+          res.json({
+            consulQcPrefix: this.consulQcPrefix,
+            consulReadoutPrefix: this.consulReadoutPrefix,
+            flps: [...new Set(flpList)]
+          });
         })
         .catch((error) => {
           if (error.message.includes('404')) {
@@ -104,6 +110,29 @@ class ConsulConnector {
     } else {
       errorHandler('Unable to retrieve configuration of consul service', res, 502);
     }
+  }
+
+  /**
+   * Build and return the URL prefix for
+   * Readout Configuration Consul Path
+   * @return {string}
+   */
+  get consulReadoutPrefix() {
+    if (!this.config.hostname || !this.config.port) {
+      return '';
+    }
+    return `${this.config.hostname}:${this.config.port}/${this.readoutPath}/`
+  }
+
+  /**
+   * Build and return the URL prefix for
+   * QC Configuration Consul Path
+   */
+  get consulQcPrefix() {
+    if (!this.config.hostname || !this.config.port) {
+      return '';
+    }
+    return `${this.config.hostname}:${this.config.port}/${this.qcPath}/`
   }
 }
 

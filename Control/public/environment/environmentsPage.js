@@ -83,7 +83,7 @@ const environmentsTable = (model, list) => {
         h('td', {
           class: (item.state === 'RUNNING' ?
             'success'
-            : (item.state === 'CONFIGURED' ? 'warning' : '')),
+            : (item.state === 'CONFIGURED' ? 'warning' : (item.state === 'ERROR' ? 'danger' : ''))),
           style: 'font-weight: bold; text-align: center;'
         }, item.state
         ),

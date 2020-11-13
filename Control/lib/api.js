@@ -37,14 +37,10 @@ if (!config.grafana) {
 }
 
 let consulService;
-let flpHardwarePath = undefined;
 if (config.consul) {
   consulService = new ConsulService(config.consul);
-  if (config.consul.flpHardwarePath) {
-    flpHardwarePath = config.consul.flpHardwarePath;
-  }
 }
-const consulConnector = new ConsulConnector(consulService, flpHardwarePath);
+const consulConnector = new ConsulConnector(consulService, config.consul);
 consulConnector.testConsulStatus();
 
 const padLock = new Padlock();

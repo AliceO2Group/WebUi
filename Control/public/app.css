@@ -39,3 +39,6 @@ tr:hover td { background-color: var(--color-gray-light)}
 .none-selected-btn { margin-left: .7em; background-color: var(--color-gray-darker); color: var(--color-white); padding: .4em .5em;}
 .none-selected-btn:hover  { background-color: var(--color-gray);}
 .selected-btn { margin-left: .7em; background-color: var(--color-primary); color: var(--color-white); padding: .4em .5em;}
+
+.overflow { height: 1.5rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all; }
+.w-15 { width: 15%; }

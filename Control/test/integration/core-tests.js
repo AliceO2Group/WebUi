@@ -60,7 +60,7 @@ describe('Control', function() {
       if (lockButton !== 'Lock is taken by Anonymous (id 0)') {
         await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
         await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
       }
       lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)', 'Lock might be taken by another user');
@@ -76,7 +76,7 @@ describe('Control', function() {
       if (lockButton !== 'Lock is free') {
         await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
         await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
       }
       lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
     });

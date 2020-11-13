@@ -13,40 +13,45 @@
 */
 
 import {h} from '/js/src/index.js';
-import pageLoading from '../common/pageLoading.js';
+import pageLoading from './../../../common/pageLoading.js';
 
 /**
  * Create a selection area for all FLPs from consul
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) => [
-  h('.w-100.flex-row.panel-title', [
-    h('.flex-column.justify-center.f6',
-      h('button.btn.f6', {
-        class: workflow.areAllFLPsSelected() ? 'selected-btn' : 'none-selected-btn',
-        onclick: () => workflow.toggleAllFLPSelection()
-      }, 'Toggle')
-    ),
-    h('h5.bg-gray-light.p2', {style: 'width: 98%'},
-      `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`),
-  ]),
-  h('.w-100.p2.panel',
-    workflow.flpList.match({
-      NotAsked: () => null,
-      Loading: () => pageLoading(2),
-      Success: (list) => flpSelectionArea(list, workflow),
-      Failure: (error) => h('.f7.flex-column', [
-        error.includes(404) ?
-          h('', error)
-          :
-          h('', [
-            h('', 'FLP Selection is currently disabled due to connection refused to Consul.'),
-            h('', ' Please use `Advanced Configuration` panel to select your FLP Hosts')
-          ])
-      ]),
-    })
-  )];
+export default (workflow) =>
+  h('', [
+    h('.w-100.flex-row.panel-title', [
+      h('.flex-column.justify-center.f6',
+        h('button.btn.f6', {
+          class: workflow.areAllFLPsSelected() ? 'selected-btn' : 'none-selected-btn',
+          onclick: () => workflow.toggleAllFLPSelection()
+        }, 'Toggle')
+      ),
+      h('h5.bg-gray-light.p2', {style: 'width: 98%'},
+        workflow.flpList.kind === 'Success'
+          ? `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`
+          : 'FLP Selection'
+      )
+    ]),
+    h('.w-100.p2.panel',
+      workflow.flpList.match({
+        NotAsked: () => null,
+        Loading: () => pageLoading(2),
+        Success: (list) => flpSelectionArea(list, workflow),
+        Failure: (error) => h('.f7.flex-column', [
+          error.includes(404) ?
+            h('', error)
+            :
+            h('', [
+              h('', 'Currently disabled due to connection refused to Consul.'),
+              h('', ' Please use `Advanced Configuration` panel to select your FLP Hosts')
+            ])
+        ]),
+      })
+    )
+  ]);
 
 /**
  * Display an area with selectable elements
