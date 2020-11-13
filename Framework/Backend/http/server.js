@@ -42,9 +42,11 @@ class HttpServer {
     assert(httpConfig.port, 'Missing HTTP config value: port');
     httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
     httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
+    httpConfig.cors = (!httpConfig.cors) ? [] : httpConfig.cors;
+    httpConfig.cors = Array.isArray(httpConfig.cors) ? httpConfig.cors : [httpConfig.cors];
 
     this.app = express();
-    this.configureHelmet(httpConfig.hostname);
+    this.configureHelmet(httpConfig.hostname, httpConfig.cors);
 
     this.jwt = new JwtToken(jwtConfig);
     if (connectIdConfig) {
@@ -126,7 +128,20 @@ class HttpServer {
    * @param {string} hostname whitelisted hostname for websocket connection
    * @param {number} port secure port number
    */
-  configureHelmet(hostname) {
+  configureHelmet(serverHostname, cors) {
+    // As server usually is accessible via proxy under different hostname it is
+    // necessary to add it to CORS
+    // Also localhost is whitelisted for websocket test purposes
+    cors.push(
+      'http://' + serverHostname + ':*',
+      'https://' + serverHostname + ':*',
+      'wss://' + serverHostname + ':*',
+      'ws://' + serverHostname + ':*',
+      "'self'",
+      'wss://localhost:*',
+      'ws://localhost:*'
+    );
+
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -145,10 +160,10 @@ class HttpServer {
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
         /* eslint-disable */
-        defaultSrc: ["'self'", "data:", hostname + ':*'],
+        defaultSrc: ["'self'", "data:", serverHostname + ':*'],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'http://' + hostname + ':*', 'https://' + hostname + ':*', 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*']
+        connectSrc: cors
         /* eslint-enable */
       }
     }));
