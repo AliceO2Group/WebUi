@@ -61,8 +61,8 @@ export default class Workflow extends Observable {
     if (!this.form.repository && !this.form.template) {
       this.getRepositoriesList();
       this.getAllTemplatesAsMap();
-      this.getFLPList();
     }
+    this.getFLPList();
 
     this.resetErrorMessage();
   }
@@ -357,7 +357,7 @@ export default class Workflow extends Observable {
    * @return {boolean}
    */
   areAllFLPsSelected() {
-    return this.form.hosts.length === this.flpList.payload.length;
+    return this.flpList.isSuccess() && this.form.hosts.length === this.flpList.payload.length;
   }
 
   /**
@@ -468,8 +468,16 @@ export default class Workflow extends Observable {
     this.consulReadoutPrefix = result['consulReadoutPrefix'];
     this.consulQcPrefix = result['consulQcPrefix'];
     this.flpList = RemoteData.success(result.flps);
-    // preselect all hosts once they are loaded
-    this.form.hosts = Object.values(result.flps);
+    if (this.form.hosts.length === 0) {
+      // preselect all hosts if hosts were not selected already previously
+      this.form.hosts = Object.values(result.flps);
+    } else {
+      // FLP machines can be removed by the user since the last creation of an environment
+      // ensure the list of selected items is still up to date
+      const tempFormHosts = [];
+      this.form.hosts.filter((host) => this.flpList.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
+      this.form.hosts = tempFormHosts.slice();
+    }
     this.notify();
   }
 
