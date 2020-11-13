@@ -301,7 +301,20 @@ describe('Framework Frontend', function() {
       });
       await page.waitForFunction(`window.result === 'GET'`);
     });
+
+    it('sends GET to CORS resource', async () => {
+      await page.evaluate(async () => {
+        const loader = new Loader();
+        const {result, ok, status} = await loader.get('https://github.com/AliceO2Group/WebUi/');
+        if (!ok) {
+          throw new Error(`unable to send request to server, got status ${status}`);
+        }
+        window.result = result.ok;
+      });
+      await page.waitForFunction(`window.result === 'GET'`);
+    });
   });
+
 
   describe('BrowserStorage class', function() {
     it('should successfully create a BrowserStorage instance', async () => {

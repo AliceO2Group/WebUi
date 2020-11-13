@@ -141,7 +141,6 @@ class HttpServer {
       'wss://localhost:*',
       'ws://localhost:*'
     );
-
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
