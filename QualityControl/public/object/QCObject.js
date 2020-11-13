@@ -230,7 +230,6 @@ export default class QCObject extends Observable {
         this.selected = this.list.find((object) => object.name === this.selected.name);
       }
       this.queryingObjects = false;
-      this.notify();
       this.objectsRemote = RemoteData.success();
       this.notify();
     } else {
