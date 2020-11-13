@@ -242,6 +242,7 @@ export default class QCObject extends Observable {
    */
   async loadOnlineList() {
     this.objectsRemote = RemoteData.loading();
+    this.queryingObjects = true;
     this.notify();
     let onlineObjects = [];
     const result = await this.qcObjectService.getOnlineObjects();
@@ -268,6 +269,8 @@ export default class QCObject extends Observable {
     this.currentList = onlineObjects;
     this.search('');
     this.objectsRemote = RemoteData.success();
+    this.queryingObjects = false;
+
     this.notify();
   }
 
