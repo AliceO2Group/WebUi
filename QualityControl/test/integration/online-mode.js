@@ -59,32 +59,56 @@ describe('`ONLINE` test-suite', async () => {
         const path = objects[i].split('/');
         path.shift();
 
-        await toggleGivenObjectPath(page, path);
+        await openGivenObjectPath(page, path);
         await waitForQCResponse(page, 20);
         await page.waitForTimeout(500);
         const panelWidth = await page.evaluate(() => document.querySelector('section > div > div > div:nth-child(2)').style.width);
         await page.waitForTimeout(500);
         assert.strictEqual(panelWidth, '50%', `Panel containing object ${objects[i]} plot was not opened successfully`);
 
-        await toggleGivenObjectPath(page, path.reverse());
+        await closeGivenObjectPath(page, path);
       });
     }
   });
 });
 
 /**
- * Method to open/close the tree for a given path
+ * Method to open the tree for a given path
  * @param {Page} page
  * @param {Array<String>} path
  */
-async function toggleGivenObjectPath(page, path) {
+async function openGivenObjectPath(page, path) {
+  let tempPath = `qc`;
   for (let i = 0; i < path.length; ++i) {
-    const [row] = await page.$x(`//tr[td[text()="${path[i]}"]]`);
+    tempPath += `/${path[i]}`
+    const [row] = await page.$x(`//tr[@title="${tempPath}"]`);
     if (row) {
       await row.click();
       await page.waitForTimeout(200);
     } else {
       assert.ok(false, `${path[i]} could not be found in object tree`);
     }
+
+  }
+}
+
+/**
+ * Method to close the tree for a given path
+ * @param {Page} page
+ * @param {Array<String>} path
+ */
+async function closeGivenObjectPath(page, path) {
+  const tempPath = path.slice();
+  for (let i = 0; i < path.length; ++i) {
+    const objectPath = `qc/${tempPath.join('/')}`;
+
+    const [row] = await page.$x(`//tr[@title="${objectPath}"]`);
+    if (row) {
+      await row.click();
+      await page.waitForTimeout(200);
+    } else {
+      assert.ok(false, `${objectPath} could not be found in object tree`);
+    }
+    tempPath.pop();
   }
 }
