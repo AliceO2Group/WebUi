@@ -72,7 +72,7 @@ const showTemplatesValidation = (model, repoList) =>
 */
 const showNewEnvironmentForm = (model, repoList, templatesMap) => [
   h('.flex-row', [
-    h('.w-40.ph2.flex-column', [
+    h('.w-30.ph2.flex-column', [
       h('h5.bg-gray-light.p2.panel-title.w-100', 'Select Template'),
       h('.form-group.p3.panel.w-100.flex-column', [
         repositoryDropdownList(model.workflow, repoList),
@@ -93,7 +93,7 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => [
  * @return {vnode}
  */
 const workflowSettingsPanels = (workflow) =>
-  h('.w-60.ph2.flex-column', [
+  h('.w-70.ph2.flex-column', [
     flpSelectionPanel(workflow),
     basicVarsPanel(workflow),
     advancedVarsPanel(workflow)

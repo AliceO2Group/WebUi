@@ -495,9 +495,16 @@ export default class Workflow extends Observable {
         message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
       };
     } else {
-      basicVariables = this.parseReadoutURI(basicVariables);
-      basicVariables = this.parseQcURI(basicVariables);
-
+      const readoutResult = this.parseReadoutURI(basicVariables);
+      if (!readoutResult.ok) {
+        return {ok: false, message: readoutResult.message, variables: {}};
+      }
+      basicVariables = readoutResult.variables;
+      const qcResult = this.parseQcURI(basicVariables);
+      if (!qcResult.ok) {
+        return {ok: false, message: qcResult.message, variables: {}};
+      }
+      basicVariables = qcResult.variables;
       const allVariables = Object.assign({}, basicVariables, variables);
       return {ok: true, message: '', variables: allVariables};
     }
@@ -526,7 +533,7 @@ export default class Workflow extends Observable {
       vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
       delete vars['readout_cfg_uri_pre'];
     }
-    return vars;
+    return {variables: vars, ok: true, message: ''};
   }
 
   /**
@@ -552,7 +559,7 @@ export default class Workflow extends Observable {
       vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
       delete vars['qc_config_uri_pre'];
     }
-    return vars;
+    return {variables: vars, ok: true, message: ''};
   }
 
   /**
