@@ -203,8 +203,7 @@ export default class QCObject extends Observable {
       if (result.isSuccess()) {
         offlineObjects = result.payload;
       } else {
-        const errorMessage = result.payload.message ? result.payload.message : result.payload;
-        const failureMessage = `Failed to retrieve list of objects due to ${errorMessage}`;
+        const failureMessage = `Failed to retrieve list of objects. Please contact an administrator`;
         this.model.notification.show(failureMessage, 'danger', Infinity);
       }
       this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
@@ -242,6 +241,7 @@ export default class QCObject extends Observable {
    */
   async loadOnlineList() {
     this.objectsRemote = RemoteData.loading();
+    this.queryingObjects = true;
     this.notify();
     let onlineObjects = [];
     const result = await this.qcObjectService.getOnlineObjects();
@@ -256,8 +256,7 @@ export default class QCObject extends Observable {
         open: false
       };
     } else {
-      const errorMessage = result.payload.message ? result.payload.message : result.payload;
-      const failureMessage = `Failed to retrieve list of online objects due to ${errorMessage}`;
+      const failureMessage = `Failed to retrieve list of online objects. Please contact an administrator`;
       this.model.notification.show(failureMessage, 'danger', Infinity);
     }
 
@@ -268,6 +267,8 @@ export default class QCObject extends Observable {
     this.currentList = onlineObjects;
     this.search('');
     this.objectsRemote = RemoteData.success();
+    this.queryingObjects = false;
+
     this.notify();
   }
 

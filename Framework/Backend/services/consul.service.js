@@ -38,6 +38,7 @@ class ConsulService {
     this.servicesPath = '/v1/agent/services';
     this.kvPath = '/v1/kv/';
     this.leaderPath = '/v1/status/leader';
+    this.txnPath = '/v1/txn';
   }
 
   /**
@@ -45,7 +46,7 @@ class ConsulService {
    * @return {Promise}
    */
   async getConsulLeaderStatus() {
-    return this.httpGetJson(this.leaderPath);
+    return this.httpJson(this.leaderPath);
   }
 
   /**
@@ -55,7 +56,7 @@ class ConsulService {
    * @return {Promise}
    */
   async getServices() {
-    return this.httpGetJson(this.servicesPath);
+    return this.httpJson(this.servicesPath);
   }
 
   /**
@@ -64,7 +65,7 @@ class ConsulService {
    * @return {Promise.<Array<string>, Error>}
    */
   async getKeys() {
-    return this.httpGetJson(this.kvPath + '?keys=true');
+    return this.httpJson(this.kvPath + '?keys=true');
   }
 
   /**
@@ -76,7 +77,7 @@ class ConsulService {
   async getKeysByPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '/?keys=true';
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -88,7 +89,7 @@ class ConsulService {
   async getValueObjectByKey(key) {
     key = this.parseKey(key);
     const getPath = this.kvPath + key;
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -100,7 +101,7 @@ class ConsulService {
   async getOnlyRawValueByKey(key) {
     key = this.parseKey(key);
     const getPath = this.kvPath + key + '?raw=true';
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -112,7 +113,7 @@ class ConsulService {
   async getValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '?recurse=true';
-    return this.httpGetJson(getPath);
+    return this.httpJson(getPath);
   }
 
   /**
@@ -125,7 +126,7 @@ class ConsulService {
   async getOnlyRawValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
     const getPath = this.kvPath + keyPrefix + '?recurse=true';
-    return this.httpGetJson(getPath).then((data) => {
+    return this.httpJson(getPath).then((data) => {
       const response = {};
       data.forEach((object) => {
         const key = object.Key;
@@ -140,32 +141,54 @@ class ConsulService {
   }
 
   /**
-   * Util to get JSON data (parsed) from Consul server
+   * Given a list of KV Pairs, split it in batches of maximum 64 pairs
+   * and use transactions to update or set new keys in Consul KV Store
+   * Will return Promise.Resolve() with ok if all transaction was done
+   * or false if at least one failed
+   * @param {Array<KV>} list
+   * @return {Promise.<JSON, Error>}
+   */
+  async putListOfKeyValues(list) {
+    const consulBuiltList = this._mapToConsulKVObjectsLists(list);
+    let allPut = true;
+    await Promise.all(consulBuiltList.map(async (list) => {
+      try {
+        const requestOptions = this._getRequestOptionsPUT(this.txnPath, list);
+        await this.httpJson(this.txnPath, requestOptions, list);
+      } catch (error) {
+        allPut = false;
+      }
+    }));
+    return {allPut: allPut};
+  }
+
+  /**
+   * Util to get/put JSON data (parsed) from Consul server
    * @param {string} path - path to Consul server
+   * @param {JSON} requestOptions
+   * @param {JSON} data
    * @return {Promise.<Object, Error>} JSON response
    */
-  async httpGetJson(path) {
+  async httpJson(path, requestOptions, data) {
     return new Promise((resolve, reject) => {
-      const requestOptions = {
+      const reqOptions = requestOptions ? requestOptions : {
         hostname: this.hostname,
         port: this.port,
         path: path,
         qs: {keys: true},
         method: 'GET',
-        headers: {
-          Accept: 'application/json'
-        }
+        headers: {Accept: 'application/json'}
       };
 
       /**
        * Generic handler for client http requests,
        * buffers response, checks status code and parses JSON
        * @param {Response} response
+       * @return {Promise.<JSON, Error>}
        */
       const requestHandler = (response) => {
         if (response.statusCode < 200 || response.statusCode > 299) {
           reject(new Error('Non-2xx status code: ' + response.statusCode));
-          return;
         }
         const bodyChunks = [];
         response.on('data', (chunk) => bodyChunks.push(chunk));
@@ -177,10 +200,13 @@ class ConsulService {
             reject(new Error('Unable to parse JSON'));
           }
         });
-      };
+      }
 
-      const request = http.request(requestOptions, requestHandler);
+      const request = http.request(reqOptions, requestHandler);
       request.on('error', (err) => reject(err));
+      if (reqOptions.method === 'PUT' && data) {
+        request.write(JSON.stringify(data));
+      }
       request.end();
     });
   }
@@ -188,6 +214,27 @@ class ConsulService {
   /**
    * Helpers
    */
+
+  /**
+   * Build a JSON with request options needed for PUT request
+   * @param {JSON} data 
+   * @return {JSON}
+   */
+  _getRequestOptionsPUT(path, data) {
+    if (typeof data !== 'string') {
+      data = JSON.stringify(data);
+    }
+    return {
+      hostname: this.hostname,
+      port: this.port,
+      path: path,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    };
+  }
 
   /**
    * Method to check for and remove any `/` from the start and end of a key/keyPrefix
@@ -202,6 +249,38 @@ class ConsulService {
       key = key.substring(0, key.length - 1);
     }
     return key;
+  }
+
+  /**
+   * Given a list of KV pairs, for each pair build  a consul transaction object.
+   * These pairs will than be placed in batches due to the fact that a transaction
+   * accepts maximum 64 elements
+   * https://www.consul.io/api/txn
+   * @param {Array<<String,String>>} list 
+   * @return {Array<Array<ConsulTransaction>>}
+   */
+  _mapToConsulKVObjectsLists(list) {
+    const consulList = [];
+    let transactionList = [];
+    list.forEach((kvPair) => {
+      const key = Object.keys(kvPair)[0];
+      const consulObj = {
+        KV: {
+          Verb: 'set',
+          Key: key,
+          Value: Buffer.from(kvPair[key]).toString('base64')
+        }
+      };
+      transactionList.push(consulObj);
+      if (transactionList.length >= 64) {
+        consulList.push(transactionList);
+        transactionList = [];
+      }
+    });
+    if (transactionList.length !== 0) {
+      consulList.push(transactionList);
+    }
+    return consulList;
   }
 }
 
