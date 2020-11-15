@@ -121,8 +121,8 @@ class ConsulConnector {
   async getCRUsWithConfiguration(req, res) {
     if (this.consulService) {
       try {
-        let crusByHost = await this._getCardsByHost();
-        crusByHost = this._mapCrusWithId(crusByHost);
+        let cardsByHost = await this._getCardsByHost();
+        const crusByHost = this._mapCrusWithId(cardsByHost);
         const crusWithConfigByHost = await this._getCrusConfigById(crusByHost);
         res.status(200).json(crusWithConfigByHost);
       } catch (error) {
@@ -142,9 +142,7 @@ class ConsulConnector {
     const crusByHost = req.body;
     const keyValues = this._mapToKVPairs(crusByHost);
     try {
-      const configurationFields = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutPath);
-      const differentKVPairs = this._getDifferentKVPairs(keyValues, configurationFields);
-      await this.consulService.putListOfKeyValues(differentKVPairs);
+      await this.consulService.putListOfKeyValues(keyValues);
       log.info('Successfully saved configuration links');
       res.status(200).json({message: 'CRUs Configuration saved'});
     } catch (error) {
@@ -153,45 +151,27 @@ class ConsulConnector {
   }
 
   /**
-   * Retrieve the keys and values which are different to the current
-   * stored configuration in Consul
-   * @param {Array<KV>} kvs
-   * @param {JSON<KV>} configFields
-   * @return {Array<KV>}
-   */
-  _getDifferentKVPairs(kvs, configFields) {
-    const differentKVPairs = [];
-    kvs.forEach((config) => {
-      const key = Object.keys(config)[0];
-      const value = config[key];
-      if (configFields[key] !== value) {
-        const pair = {};
-        pair[key] = value;
-        differentKVPairs.push(pair);
-      }
-    });
-    return differentKVPairs;
-  }
-
-  /**
    * Query Consul for configuration of the CRUs based
-   * on the readoutPath prefix
+   * on the readoutPath prefix and group them in a JSON
+   * by host and cruid (cru_<serial>_<endpoint>)
    * @param {JSON} crus
    * @return {Promise.<JSON, Error>}
    */
   async _getCrusConfigById(crus) {
-    const linksRegex = new RegExp(`${this.readoutPath}/.*/.*/link[0-9]{1,}/enabled`);
     try {
-      const configurationFields = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutPath);
-
-      Object.keys(configurationFields)
-        .filter((fieldKey) => fieldKey.match(linksRegex))
+      const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutPath);
+      Object.keys(crusByEndpoint)
+        .filter((fieldKey) => fieldKey.split('/').length >= 7) // filter out incomplete keys
         .forEach((fieldKey) => {
+          // o2/components/readoutcard/<hostname>/cru/<serial>/<endpoint>
           const splitKey = fieldKey.split('/');
           const host = splitKey[3];
-          const cruId = splitKey[4];
-          const linkIndex = splitKey[5];
-          crus[host][cruId].config[linkIndex] = configurationFields[fieldKey] === 'true';
+          const cardType = splitKey[4];
+          const serial = splitKey[5];
+          const endpoint = splitKey[6];
+          const cruId = `${cardType}_${serial}_${endpoint}`;
+
+          crus[host][cruId].config = JSON.parse(crusByEndpoint[fieldKey]);
         });
       return crus;
     } catch (error) {
@@ -242,11 +222,11 @@ class ConsulConnector {
     Object.keys(crusByHost).forEach((host) => {
       Object.keys(crusByHost[host]).forEach((cruId) => {
         const cruConfig = crusByHost[host][cruId].config;
-        Object.keys(cruConfig).forEach((link) => {
-          const pair = {};
-          pair[`${this.readoutPath}/${host}/${cruId}/${link}/enabled`] = cruConfig[link] + '';
-          kvPairs.push(pair)
-        });
+        const serial = cruId.split('_')[1];
+        const endpoint = cruId.split('_')[2];
+        const pair = {}
+        pair[`${this.readoutPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(cruConfig);
+        kvPairs.push(pair);
       })
     });
     return kvPairs;
