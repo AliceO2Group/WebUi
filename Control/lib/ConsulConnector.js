@@ -114,7 +114,8 @@ class ConsulConnector {
   }
 
   /**
-   * 
+   * Get CRUs stored under the hardware path with their information
+   * and configuration
    * @param {Request} req
    * @param {Response} res
    */
@@ -195,7 +196,7 @@ class ConsulConnector {
    * @return {Promise.<JSON, Error>}
    */
   async _getCardsByHost() {
-    const regex = new RegExp(`.*/.*/cards`);
+    const regex = new RegExp(`.*cards`);
     try {
       const data = await this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath);
       const cardsByHost = {};
@@ -243,7 +244,7 @@ class ConsulConnector {
     Object.keys(cards).forEach((hostName) => {
       const hostCru = {};
       Object.keys(cards[hostName])
-        .filter((cardIndex) => cards[hostName][cardIndex].type === 'CRU')
+        .filter((cardIndex) => cards[hostName][cardIndex].type.toUpperCase() === 'CRU')
         .sort((a, b) => this._sortCRUsBySerialEndpoint(cards[hostName][a], cards[hostName][b]))
         .forEach((cruIndex) => {
           const cruInfo = cards[hostName][cruIndex];
