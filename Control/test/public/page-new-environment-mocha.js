@@ -106,7 +106,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return {classList: element.classList};
     });
 
-    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'selected'});
+    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
   });
 
   it('should throw error when `Create` button is clicked due to `Control is not locked`', async () => {
@@ -129,15 +129,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully display `Refresh repositories` button', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button', {timeout: 5000});
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button', {timeout: 5000});
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').title);
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
     assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
   });
 
   it('should click to refresh repositories but throw error due to `Control is not locked`', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
     await page.waitForTimeout(500);
     const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
     assert.deepStrictEqual(calls['refreshRepos'], undefined);
@@ -170,7 +170,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
     await page.waitForTimeout(500);
     const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
     assert.ok(calls['refreshRepos']);
@@ -180,7 +180,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
     await page.waitForTimeout(1000);
     assert.ok(calls['refreshRepos']);
     assert.ok(calls['getWorkflowTemplates']);
@@ -194,7 +194,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > a');
       return {classList: element.classList};
     });
-    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'selected'});
+    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'w-wrapped', 2: 'selected'});
   });
 
   it('should successfully select trigger on from BasicConfiguration', async () => {
@@ -230,8 +230,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'false', dd_enabled: 'false', qcdd_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
+  it('should successfully select option file:// from dropdown and input box should appear', async () => {
+    await page.select('select#readoutURISelection', 'file://');
+    await page.waitForTimeout(500);
+    const readoutUriPrefix = await page.evaluate(() => window.model.workflow.form.basicVariables.readout_cfg_uri_pre);
+    assert.strictEqual(readoutUriPrefix, 'file://');
+  });
+
   it('should successfully fill in readout uri from typed text', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div > div:nth-child(5) > div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div > div:nth-child(5) > div > div:nth-child(2) > div > input');
     page.keyboard.type('file-readout');
     await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
@@ -331,10 +338,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
    */
   function getFLPList(request) {
     if (request.url().includes('/api/getFLPs')) {
-      request.respond({status: 200, contentType: 'application/json', body: JSON.stringify({
-        flps:['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137'],
-        readoutPath: 'localhost:8500/some/readout/path'
-      })});
+      request.respond({
+        status: 200, contentType: 'application/json', body: JSON.stringify({
+          flps: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137'],
+          readoutPath: 'localhost:8500/some/readout/path'
+        })
+      });
     } else {
       request.continue();
     }

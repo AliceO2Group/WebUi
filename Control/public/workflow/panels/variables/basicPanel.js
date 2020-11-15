@@ -183,6 +183,7 @@ const readoutPanel = (workflow) => {
         h('', {style: 'width:15%'},
           h('select.form-control', {
             style: 'cursor: pointer',
+            id: 'readoutURISelection',
             onchange: (e) => {
               if (e.target.value !== noPre) {
                 variables['readout_cfg_uri_pre'] = e.target.value;
@@ -265,6 +266,7 @@ const qcUriPanel = (workflow) => {
         h('', {style: 'width:15%'},
           h('select.form-control', {
             style: 'cursor: pointer',
+            id: 'qcURISelection',
             onchange: (e) => {
               if (e.target.value !== noPre) {
                 variables['qc_config_uri_pre'] = e.target.value;
