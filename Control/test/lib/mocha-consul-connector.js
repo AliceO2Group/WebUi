@@ -23,17 +23,17 @@ describe('ConsulConnector test suite', () => {
     it('should successfully initialize consul with "undefined" configuration', () => {
       const consul = new ConsulConnector({}, undefined);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
     });
     it('should successfully initialize consul with "null" configuration', () => {
       const consul = new ConsulConnector({}, null);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
     });
     it('should successfully initialize consul with "missing" configuration', () => {
       const consul = new ConsulConnector({});
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
     });
     it('should successfully initialize consul with "passed" configuration', () => {
       const consul = new ConsulConnector({}, {

@@ -19,7 +19,7 @@ import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import FrameworkInfo from './frameworkinfo/FrameworkInfo.js';
 import Workflow from './workflow/Workflow.js';
-import Config from './configuration/Config.js';
+import Config from './configuration/ConfigByCru.js';
 
 /**
  * Root of model tree
