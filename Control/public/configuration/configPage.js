@@ -79,19 +79,22 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
  * @param {options} options
  * @return {vnode}
  */
-const cruPanel = (model, cruId, cru) => h('', {
-}, [
-  h('.flex-column', [
-    h('h5.flex-row.p1.panel.bg-gray-lighter', [
-      h('.w-5'),
-      // h('.w-5.actionable-icon.text-center', {title: 'Open/Close CRUs configuration'}, iconChevronBottom()),
-      h('.w-85.flex-row', [
-        h('.w-25', cruId),
-        linksPanel(model, cru),
-      ])
+const cruPanel = (model, cruId, cru) => {
+  const cruLabel = `${cru.info.serial}:${cru.info.endpoint}`;
+  return h('', {
+  }, [
+    h('.flex-column', [
+      h('h5.flex-row.p1.panel.bg-gray-lighter', [
+        h('.w-5'),
+        // h('.w-5.actionable-icon.text-center', {title: 'Open/Close CRUs configuration'}, iconChevronBottom()),
+        h('.w-85.flex-row', [
+          h('.w-25', cruLabel),
+          linksPanel(model, cru),
+        ])
+      ]),
     ]),
-  ]),
-]);
+  ])
+};
 
 /**
  * A panel which iterate through all links in the configuration
@@ -101,8 +104,8 @@ const cruPanel = (model, cruId, cru) => h('', {
  * @return {vnode}
  */
 const linksPanel = (model, cru) =>
-  h('.flex-row', [
-    toggleAllCheckBox(model, cru),
+  h('.flex-row.w-100', [
+    h('.w-25', toggleAllCheckBox(model, cru)),
     Object.keys(cru.config)
       .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
       .map((link, index) => checkBox(model, `link${index}`, `#${index}`, cru.config)),
@@ -134,7 +137,7 @@ const toggleAllCheckBox = (model, cru) =>
         .forEach((key) => cru.config[key].enabled = !areAllChecked ? 'true' : 'false');
       model.configuration.notify();
     }
-  }), ' Toggle All Links');
+  }), ' All Links');
 
 /**
  * Generate a checkbox based on title and field to change
