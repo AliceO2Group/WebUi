@@ -72,7 +72,7 @@ const showTemplatesValidation = (model, repoList) =>
 */
 const showNewEnvironmentForm = (model, repoList, templatesMap) => [
   h('.flex-row', [
-    h('.w-50.ph2.flex-column', [
+    h('.w-30.ph2.flex-column', [
       h('h5.bg-gray-light.p2.panel-title.w-100', 'Select Template'),
       h('.form-group.p3.panel.w-100.flex-column', [
         repositoryDropdownList(model.workflow, repoList),
@@ -93,7 +93,7 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => [
  * @return {vnode}
  */
 const workflowSettingsPanels = (workflow) =>
-  h('.w-50.ph2.flex-column', [
+  h('.w-70.ph2.flex-column', [
     flpSelectionPanel(workflow),
     basicVarsPanel(workflow),
     advancedVarsPanel(workflow)
@@ -107,11 +107,11 @@ const workflowSettingsPanels = (workflow) =>
  * @return {vnode}
  */
 const repositoryDropdownList = (workflow, repoList) =>
-  h('.m2.text-left.w-100', [ // Dropdown Repositories
+  h('.text-left.w-100', [ // Dropdown Repositories
     h('h5', 'Repository:'),
-    h('', {style: 'display: flex; flex-direction: row'}, [
+    h('.flex-row', [
       h('select.form-control', {
-        style: 'cursor: pointer',
+        style: 'cursor: pointer; width: 85%;',
         onchange: (e) => workflow.setRepository(e.target.value)
       }, [
         repoList.map((repository) => repository.name)
@@ -120,12 +120,14 @@ const repositoryDropdownList = (workflow, repoList) =>
             value: repository
           }, repository))
       ]),
-      h('button.btn', {
-        title: 'Refresh repositories',
-        class: workflow.refreshedRepositories.isLoading() ? 'loading' : '',
-        disabled: workflow.refreshedRepositories.isLoading(),
-        onclick: () => workflow.refreshRepositories()
-      }, iconReload())
+      h('.text-right', {style: 'width:15%'},
+        h('button.btn', {
+          title: 'Refresh repositories',
+          class: workflow.refreshedRepositories.isLoading() ? 'loading' : '',
+          disabled: workflow.refreshedRepositories.isLoading(),
+          onclick: () => workflow.refreshRepositories()
+        }, iconReload())
+      )
     ])
   ]);
 
@@ -150,11 +152,11 @@ const templatesPanel = (workflow, templatesMap) =>
  * @return {vnode}
  */
 const templateAreaList = (workflow, templatesMap, repository, revision) =>
-  h('.m2.text-left.w-100', [ // Dropdown Template
+  h('.text-left.w-100', [ // Dropdown Template
     h('h5', {style: '', for: ''}, 'Workflow:'),
     h('.shadow-level1.pv1',
       Object.values(templatesMap[repository][revision]).map((template) =>
-        h('a.menu-item', {
+        h('a.menu-item.w-wrapped', {
           className: workflow.form.template === template ? 'selected' : null,
           onclick: () => workflow.setTemplate(template)
         }, template))
