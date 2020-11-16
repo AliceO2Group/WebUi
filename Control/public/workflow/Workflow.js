@@ -61,8 +61,8 @@ export default class Workflow extends Observable {
     if (!this.form.repository && !this.form.template) {
       this.getRepositoriesList();
       this.getAllTemplatesAsMap();
-      this.getFLPList();
     }
+    this.getFLPList();
 
     this.resetErrorMessage();
   }
@@ -357,7 +357,7 @@ export default class Workflow extends Observable {
    * @return {boolean}
    */
   areAllFLPsSelected() {
-    return this.form.hosts.length === this.flpList.payload.length;
+    return this.flpList.isSuccess() && this.form.hosts.length === this.flpList.payload.length;
   }
 
   /**
@@ -468,8 +468,16 @@ export default class Workflow extends Observable {
     this.consulReadoutPrefix = result['consulReadoutPrefix'];
     this.consulQcPrefix = result['consulQcPrefix'];
     this.flpList = RemoteData.success(result.flps);
-    // preselect all hosts once they are loaded
-    this.form.hosts = Object.values(result.flps);
+    if (this.form.hosts.length === 0) {
+      // preselect all hosts if hosts were not selected already previously
+      this.form.hosts = Object.values(result.flps);
+    } else {
+      // FLP machines can be removed by the user since the last creation of an environment
+      // ensure the list of selected items is still up to date
+      const tempFormHosts = [];
+      this.form.hosts.filter((host) => this.flpList.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
+      this.form.hosts = tempFormHosts.slice();
+    }
     this.notify();
   }
 
@@ -495,9 +503,16 @@ export default class Workflow extends Observable {
         message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
       };
     } else {
-      basicVariables = this.parseReadoutURI(basicVariables);
-      basicVariables = this.parseQcURI(basicVariables);
-
+      const readoutResult = this.parseReadoutURI(basicVariables);
+      if (!readoutResult.ok) {
+        return {ok: false, message: readoutResult.message, variables: {}};
+      }
+      basicVariables = readoutResult.variables;
+      const qcResult = this.parseQcURI(basicVariables);
+      if (!qcResult.ok) {
+        return {ok: false, message: qcResult.message, variables: {}};
+      }
+      basicVariables = qcResult.variables;
       const allVariables = Object.assign({}, basicVariables, variables);
       return {ok: true, message: '', variables: allVariables};
     }
@@ -526,7 +541,7 @@ export default class Workflow extends Observable {
       vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
       delete vars['readout_cfg_uri_pre'];
     }
-    return vars;
+    return {variables: vars, ok: true, message: ''};
   }
 
   /**
@@ -552,7 +567,7 @@ export default class Workflow extends Observable {
       vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
       delete vars['qc_config_uri_pre'];
     }
-    return vars;
+    return {variables: vars, ok: true, message: ''};
   }
 
   /**

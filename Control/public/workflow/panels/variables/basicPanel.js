@@ -180,14 +180,16 @@ const readoutPanel = (workflow) => {
     h('.w-100.flex-row', [
       h('.w-25', {style: 'display: flex; align-items: center;'}, 'Readout URI:'),
       h('.w-75.flex-row', [
-        h('', {style: 'width:30%'},
+        h('', {style: 'width:15%'},
           h('select.form-control', {
             style: 'cursor: pointer',
+            id: 'readoutURISelection',
             onchange: (e) => {
               if (e.target.value !== noPre) {
                 variables['readout_cfg_uri_pre'] = e.target.value;
               } else {
                 delete variables['readout_cfg_uri_pre'];
+                delete variables['readout_cfg_uri'];
               }
               workflow.notify();
             }
@@ -210,22 +212,28 @@ const readoutPanel = (workflow) => {
             }, consulPre)
           ])
         ),
-        h('input.form-control', {
-          type: 'text',
-          value: variables['readout_cfg_uri'],
-          oninput: (e) => {
-            if (e.target.value !== '' && !variables['readout_cfg_uri_pre']) {
-              variables['readout_cfg_uri_pre'] = filePre;
+        h('.flex-row', {style: 'width:85%;'}, [
+          variables['readout_cfg_uri_pre'] === consulPre && h('input.form-control.w-60', {
+            value: workflow.consulReadoutPrefix,
+            disabled: true
+          }),
+          variables['readout_cfg_uri_pre'] && h('input.form-control', {
+            type: 'text',
+            class:  variables['readout_cfg_uri_pre'] === consulPre ? 'w-40' : 'w-100',
+            value: variables['readout_cfg_uri'],
+            oninput: (e) => {
+              if (e.target.value !== '' && !variables['readout_cfg_uri_pre']) {
+                variables['readout_cfg_uri_pre'] = filePre;
+              }
+              if (e.target.value === '') {
+                delete variables['readout_cfg_uri'];
+              } else {
+                variables['readout_cfg_uri'] = e.target.value;
+              }
+              workflow.notify();
             }
-            if (e.target.value === '') {
-              delete variables['readout_cfg_uri'];
-              delete variables['readout_cfg_uri_pre'];
-            } else {
-              variables['readout_cfg_uri'] = e.target.value;
-            }
-            workflow.notify();
-          }
-        })
+          })
+        ])
       ])
     ]),
     variables['readout_cfg_uri_pre'] === consulPre &&
@@ -233,7 +241,7 @@ const readoutPanel = (workflow) => {
       h('.w-25'),
       h('label.w-75.f5', {
         style: 'font-style: italic'
-      }, workflow.consulReadoutPrefix + (
+      }, consulPre + workflow.consulReadoutPrefix + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
       )
@@ -242,7 +250,7 @@ const readoutPanel = (workflow) => {
 };
 
 /**
- * Add a text input field so that the user can fill in the qc_uri
+ * Add a text input field so that the user can fill in the readout_uri
  * @param {Object} workflow
  * @return {vnode}
  */
@@ -251,18 +259,20 @@ const qcUriPanel = (workflow) => {
   const filePre = workflow.QC_PREFIX.JSON;
   const consulPre = workflow.QC_PREFIX.CONSUL;
   const variables = workflow.form.basicVariables;
-  return h('.flex-column.text-left.mv2', [
+  return h('.flex-column.text-left', [
     h('.w-100.flex-row', [
       h('.w-25', {style: 'display: flex; align-items: center;'}, 'QC URI:'),
       h('.w-75.flex-row', [
-        h('', {style: 'width:30%'},
+        h('', {style: 'width:15%'},
           h('select.form-control', {
             style: 'cursor: pointer',
+            id: 'qcURISelection',
             onchange: (e) => {
               if (e.target.value !== noPre) {
                 variables['qc_config_uri_pre'] = e.target.value;
               } else {
                 delete variables['qc_config_uri_pre'];
+                delete variables['qc_config_uri'];
               }
               workflow.notify();
             }
@@ -285,22 +295,28 @@ const qcUriPanel = (workflow) => {
             }, consulPre)
           ])
         ),
-        h('input.form-control', {
-          type: 'text',
-          value: variables['qc_config_uri'],
-          oninput: (e) => {
-            if (e.target.value !== '' && !variables['qc_config_uri_pre']) {
-              variables['qc_config_uri_pre'] = filePre;
+        h('.flex-row', {style: 'width:85%;'}, [
+          variables['qc_config_uri_pre'] === consulPre && h('input.form-control.w-60', {
+            value: workflow.consulQcPrefix,
+            disabled: true
+          }),
+          variables['qc_config_uri_pre'] && h('input.form-control', {
+            type: 'text',
+            class:  variables['qc_config_uri_pre'] === consulPre ? 'w-40' : 'w-100',
+            value: variables['qc_config_uri'],
+            oninput: (e) => {
+              if (e.target.value !== '' && !variables['qc_config_uri_pre']) {
+                variables['qc_config_uri_pre'] = filePre;
+              }
+              if (e.target.value === '') {
+                delete variables['qc_config_uri'];
+              } else {
+                variables['qc_config_uri'] = e.target.value;
+              }
+              workflow.notify();
             }
-            if (e.target.value === '') {
-              delete variables['qc_config_uri'];
-              delete variables['qc_config_uri_pre'];
-            } else {
-              variables['qc_config_uri'] = e.target.value;
-            }
-            workflow.notify();
-          }
-        })
+          })
+        ])
       ])
     ]),
     variables['qc_config_uri_pre'] === consulPre &&
@@ -308,7 +324,7 @@ const qcUriPanel = (workflow) => {
       h('.w-25'),
       h('label.w-75.f5', {
         style: 'font-style: italic'
-      }, workflow.consulQcPrefix + (
+      }, consulPre + workflow.consulQcPrefix + (
         variables['qc_config_uri'] ?
           variables['qc_config_uri'] : '')
       )
