@@ -39,7 +39,7 @@ import {
 import {
   content as configurationContent,
   header as configurationHeader
-} from './configuration/configurationPage.js';
+} from './configuration/configPage.js';
 
 /**
  * Main view layout

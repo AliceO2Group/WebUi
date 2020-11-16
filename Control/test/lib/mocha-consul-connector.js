@@ -23,17 +23,17 @@ describe('ConsulConnector test suite', () => {
     it('should successfully initialize consul with "undefined" configuration', () => {
       const consul = new ConsulConnector({}, undefined);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
     });
     it('should successfully initialize consul with "null" configuration', () => {
       const consul = new ConsulConnector({}, null);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
     });
     it('should successfully initialize consul with "missing" configuration', () => {
       const consul = new ConsulConnector({});
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
     });
     it('should successfully initialize consul with "passed" configuration', () => {
       const consul = new ConsulConnector({}, {
@@ -224,4 +224,113 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
     });
   });
+
+  describe('Test private helper methods', () => {
+    const connector = new ConsulConnector({}, {});
+    it('should successfully compare to structures similar to expected crus', () => {
+      const cruA = {serial: '12', endpoint: 3};
+      const cruB = {serial: '23', endpoint: 3};
+      const cruC = {serial: '34', endpoint: 3};
+      const cruD = {serial: '12', endpoint: 1};
+      assert.strictEqual(connector._sortCRUsBySerialEndpoint(cruA, cruD), 1);
+      assert.strictEqual(connector._sortCRUsBySerialEndpoint(cruA, cruB), -1);
+      assert.strictEqual(connector._sortCRUsBySerialEndpoint(cruC, cruB), 1);
+    });
+
+    it('should successfully filter out CRORCs, sort CRUs by id and replace index with cruId', () => {
+      const cruByHost = {
+        hostA: {
+          0: {type: 'CRU', serial: '123', endpoint: 1},
+          1: {type: 'cru', serial: '323', endpoint: 1},
+          2: {type: 'cru', serial: '123', endpoint: 0},
+          3: {type: 'CRORC', serial: '123', endpoint: 0}
+        }
+      };
+      const expectedCruByHost = {
+        hostA: {
+          cru_123_0: {info: {type: 'cru', serial: '123', endpoint: 0}, config: {}},
+          cru_123_1: {info: {type: 'CRU', serial: '123', endpoint: 1}, config: {}},
+          cru_323_1: {info: {type: 'cru', serial: '323', endpoint: 1}, config: {}}
+        }
+      };
+      assert.deepStrictEqual(connector._mapCrusWithId(cruByHost), expectedCruByHost);
+    });
+
+    it('should successfully create a JSON with keys and values as string for Consul store', () => {
+      const cruByHost = {
+        hostA: {
+          cru_123_0: {info: {type: 'cru', serial: '123', endpoint: 0}, config: {link: 'true'}},
+          cru_123_1: {info: {type: 'CRU', serial: '123', endpoint: 1}, config: {link: 'false'}},
+          cru_323_1: {info: {type: 'cru', serial: '323', endpoint: 1}, config: {link: 'true'}}
+        }
+      };
+      const expectedKvList = [
+        {'o2/components/readoutcard/hostA/cru/123/0': JSON.stringify({link: 'true'})},
+        {'o2/components/readoutcard/hostA/cru/123/1': JSON.stringify({link: 'false'})},
+        {'o2/components/readoutcard/hostA/cru/323/1': JSON.stringify({link: 'true'})},
+      ];
+
+      assert.deepStrictEqual(connector._mapToKVPairs(cruByHost), expectedKvList);
+    });
+
+    it('should successfully request hardware list and group crus by host', async () => {
+      let consulService = {};
+      const hardwareList = {
+        'o2/hardware/flps/hostA/cards': '{"0":{"type":"CRU"}}',
+        'o2/hardware/flps/hostB/cards': '{"0":{"type":"CRU"}}',
+        'o2/hardware/flps/hostB/something-else': '0: {type: "CRU"}',
+      };
+      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().resolves(hardwareList);
+      const cruByHost = {
+        hostA: {0: {type: 'CRU'}},
+        hostB: {0: {type: 'CRU'}},
+      };
+      const connector = new ConsulConnector(consulService, {});
+      const expected = await connector._getCardsByHost()
+      assert.deepStrictEqual(expected, cruByHost);
+    });
+
+    it('should throw error if consul replied with error', async () => {
+      let consulService = {};
+      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects(new Error('Something bad happened'));
+      const connector = new ConsulConnector(consulService, {});
+      await assert.rejects(() => connector._getCardsByHost(), new Error('Something bad happened'));
+    });
+
+    it('should successfully query crus configuration from readoutcard path', async () => {
+      let consulService = {};
+      const list = {
+        'o2/components/readoutcard/hostA/cru/123/0': '{"cru":{"type":"CRU"},"link":{"enabled":true}}',
+        'o2/components/readoutcard/hostA/cru/123/1': '{"cru":{"type":"CRU"},"link":{"enabled":false}}',
+        'o2/components/readoutcard/hostB/cru/323/0': '{"cru":{"type":"CRU"},"link":{"enabled":true}}',
+      };
+      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().resolves(list);
+      const connector = new ConsulConnector(consulService, {});
+
+      const cruByHost = {
+        hostA: {cru_123_0: {info: {type: 'CRU'}, config: {}}, cru_123_1: {info: {type: 'CRU'}, config: {}}},
+        hostB: {cru_323_0: {info: {type: 'CRU'}, config: {}}},
+      };
+
+      const expectedCrusInfo = {
+        hostA: {
+          cru_123_0: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: true}}},
+          cru_123_1: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: false}}},
+        },
+        hostB: {
+          cru_323_0: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: true}}},
+        }
+      };
+      const crusInfo = await connector._getCrusConfigById(cruByHost);
+      assert.deepStrictEqual(crusInfo, expectedCrusInfo);
+    });
+
+    it('should throw error if consul replied with error', async () => {
+      let consulService = {};
+      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects(new Error('Something bad happened'));
+      const connector = new ConsulConnector(consulService, {});
+      await assert.rejects(() => connector._getCrusConfigById({}), new Error('Something bad happened'));
+    });
+
+  })
 });

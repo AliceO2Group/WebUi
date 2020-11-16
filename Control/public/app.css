@@ -22,9 +22,10 @@
 
 .grafana-font { font-family: Roboto, Helvetica Neue, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #52545c; font-weight: 515; text-align: center; }
 
-tr:hover td { background-color: var(--color-gray-light)}
+tr:hover td { background-color: var(--color-gray-light) }
 
-.actionable-row:hover { cursor: pointer;}
+.actionable-row:hover { cursor: pointer; }
+
 .actionable-icon { cursor: pointer; }
 .actionable-icon:hover { transform: scale(1.2); }
 .actionable-icon:active { transform: scale(1.5); }
@@ -36,14 +37,17 @@ tr:hover td { background-color: var(--color-gray-light)}
 
 .border-bot { border-bottom: 1px solid var(--color-gray-light); }
 
-.none-selected-btn { margin-left: .7em; background-color: var(--color-gray-darker); color: var(--color-white); padding: .4em .5em;}
-.none-selected-btn:hover  { background-color: var(--color-gray);}
-.selected-btn { margin-left: .7em; background-color: var(--color-primary); color: var(--color-white); padding: .4em .5em;}
+.none-selected-btn { margin-left: .7em; background-color: var(--color-gray-darker); color: var(--color-white); padding: .4em .5em; }
+.none-selected-btn:hover { background-color: var(--color-gray); }
+
+.selected-btn { margin-left: .7em; background-color: var(--color-primary); color: var(--color-white); padding: .4em .5em; }
 
 .overflow { height: 1.5rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all; }
+
+.w-5 {width: 5%;}
 .w-15 { width: 15%; }
 .w-30 { width: 30%; }
 .w-40 { width: 40%; }
 .w-60 { width: 60%; }
 .w-70 { width: 70%; }
-
+.w-85 {width: 85%;}
