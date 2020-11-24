@@ -5,7 +5,11 @@
 
 using namespace o2::quality_control::core;
 using namespace o2::quality_control::repository;
-static std::unique_ptr<DatabaseInterface> BackendInstance;
+static std::string type;
+static std::string host;
+static std::string database;
+static std::string username;
+static std::string password;
 
 class TObjectAsyncWorker : public Napi::AsyncWorker
 {
@@ -14,6 +18,8 @@ public:
   : Napi::AsyncWorker(callback), path(path), output(), timestamp(timestamp)
   {
     ROOT::EnableThreadSafety();
+    BackendInstance = DatabaseFactory::create(type);
+    BackendInstance->connect(host, database, username, password);
   }
 
 protected:
@@ -50,6 +56,7 @@ protected:
   }
 
 private:
+  std::unique_ptr<DatabaseInterface> BackendInstance;
   std::string path;
   std::string output;
   long timestamp;
@@ -64,15 +71,11 @@ void InitBackend(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "Invalid argument").ThrowAsJavaScriptException();
   }
 
-  if (!BackendInstance) {
-    std::string type = info[0].As<Napi::String>();
-    std::string host = info[1].As<Napi::String>();
-    std::string database = info[2].As<Napi::String>();
-    std::string username = info[3].As<Napi::String>();
-    std::string password = info[4].As<Napi::String>();
-    BackendInstance = DatabaseFactory::create(type);
-    BackendInstance->connect(host, database, username, password);
-  }
+  type = info[0].As<Napi::String>();
+  host = info[1].As<Napi::String>();
+  database = info[2].As<Napi::String>();
+  username = info[3].As<Napi::String>();
+  password = info[4].As<Napi::String>();
 }
 
 /// Get JSON-encoded TObject asynchronously
