@@ -41,7 +41,7 @@ class ControlProxy {
       log.error('Missing configuration: port');
     }
     if (!config.timeout) {
-      config.timeout = 2000;
+      config.timeout = 30000;
     }
 
     this.config = config;
