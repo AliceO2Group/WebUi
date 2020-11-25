@@ -20,7 +20,6 @@ const path = require('path');
 const log = new (require('@aliceo2/web-ui').Log)('gRPC');
 
 const PROTO_PATH = path.join(__dirname, './../../protobuf/o2control.proto');
-const TIMEOUT_READY = 2000; // ms, time to stop waiting for a connection between client and server
 
 /**
  * Encapsulate gRPC calls to O2 Control
