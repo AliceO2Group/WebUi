@@ -24,7 +24,7 @@ const path = require('path');
 
 // Doc: https://grpc.io/grpc/node/grpc.html
 const protoLoader = require('@grpc/proto-loader');
-const grpcLibrary = require('grpc');
+const grpcLibrary = require('@grpc/grpc-js');
 
 const PROTO_PATH = path.join(__dirname, '../protobuf/o2control.proto');
 
@@ -137,8 +137,19 @@ describe('Control', function() {
         callback(null, {});
       }
     });
-    server.bind(address, credentials);
-    server.start();
+
+    const bindCallback = (error, _) => {
+      if (error) {
+        this.ok = false;
+        console.error(error);
+        throw error;
+      } else {
+        server.start();
+      }
+
+    };
+    server.bindAsync(address, credentials, bindCallback);
+
 
     // Start web-server in background
     subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
