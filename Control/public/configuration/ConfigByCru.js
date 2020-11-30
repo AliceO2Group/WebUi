@@ -28,6 +28,8 @@ export default class Config extends Observable {
     this.model = model;
 
     this.cruMapByHost = RemoteData.notAsked();
+    this.cruToggleByHost = {};
+    this.cruToggleByCruEndpoint = {};
     this.isSavingConfiguration = RemoteData.notAsked();
   }
 
@@ -49,6 +51,7 @@ export default class Config extends Observable {
       this.notify();
       return;
     }
+    this.addToggleOptions(result);
     this.cruMapByHost = RemoteData.success(result);
     this.notify();
   }
@@ -68,6 +71,25 @@ export default class Config extends Observable {
       return;
     }
     this.isSavingConfiguration = RemoteData.success(result.message);
+    this.notify();
+  }
+
+  /**
+   * Helpers
+   */
+
+  /**
+   * Build a map in which is saved:
+   * * the state of a host panel with key: <host>
+   * * the state of a cru-endpoint panel with key: <host>_<serial>_<endpoint>
+   * true - opened; false - closed
+   * @param {JSON} cruByHost
+   */
+  addToggleOptions(cruByHost) {
+    Object.keys(cruByHost).forEach((host) => {
+      this.cruToggleByHost[host] = true;
+      Object.keys(cruByHost[host]).forEach((cruId) => this.cruToggleByCruEndpoint[`${host}_${cruId}`] = false);
+    });
     this.notify();
   }
 }
