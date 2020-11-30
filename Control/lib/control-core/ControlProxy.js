@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-// Doc: https://grpc.io/grpc/node/grpc.html
+// Doc: https://grpc.io/docs/languages/node/
 const protoLoader = require('@grpc/proto-loader');
-const grpcLibrary = require('grpc');
+const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
 
 const log = new (require('@aliceo2/web-ui').Log)('gRPC');
@@ -29,8 +29,8 @@ class ControlProxy {
    * Create gRPC client
    * https://grpc.io/grpc/node/grpc.Client.html
    * @param {Object} config - Contains `hostname` and `port`
-   * @param {Object} config.hostname -
-   * @param {Object} config.port -
+   * @param {Object} config.hostname
+   * @param {Object} config.port
    * @param {Object} config.timeout - used for gRPC deadline, in ms
    */
   constructor(config) {
