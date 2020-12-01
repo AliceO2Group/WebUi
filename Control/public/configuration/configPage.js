@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronRight} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import loading from '../common/loading.js';
 import errorPage from '../common/errorPage.js';
@@ -61,12 +61,20 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
     h('', [
       h('h5.panel-title.p2.flex-row', [
         h('.w-15.flex-row', [
-          h('.actionable-icon', {title: 'Open/Close CRUs configuration'}, iconChevronBottom()),
+          h('.actionable-icon', {
+            title: 'Open/Close CRUs configuration',
+            onclick: () => {
+              model.configuration.cruToggleByHost[host] = !model.configuration.cruToggleByHost[host];
+              model.configuration.notify();
+            }
+          }, model.configuration.cruToggleByHost[host] ? iconChevronBottom() : iconChevronRight()
+          ),
           h('.w-100.ph2', host)
         ]),
       ]),
-      h('.panel', [
-        Object.keys(cruMapByHost[host]).map((cruId) => cruPanel(model, cruId, cruMapByHost[host][cruId]))
+      model.configuration.cruToggleByHost[host] && h('.panel', [
+        Object.keys(cruMapByHost[host])
+          .map((cruId) => cruPanelByEndpoint(model, cruId, cruMapByHost[host][cruId], host))
       ])
     ])
   ),
@@ -76,20 +84,39 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
  * Panel for each CRU endpoint to allow the user to 
  * enable/disable endpoints
  * @param {Object} model
- * @param {options} options
+ * @param {string} cruId
+ * @param {JSON} cru
+ * @param {string} host
  * @return {vnode}
  */
-const cruPanel = (model, cruId, cru) => {
+const cruPanelByEndpoint = (model, cruId, cru, host) => {
   const cruLabel = `${cru.info.serial}:${cru.info.endpoint}`;
+  let isCruInfoVisible = model.configuration.cruToggleByCruEndpoint[`${host}_${cruId}`];
   return h('', {
   }, [
     h('.flex-column', [
-      h('h5.flex-row.p1.panel.bg-gray-lighter', [
-        h('.w-5'),
-        // h('.w-5.actionable-icon.text-center', {title: 'Open/Close CRUs configuration'}, iconChevronBottom()),
-        h('.w-85.flex-row', [
+      h('.flex-row.p1.panel.bg-gray-lighter', {style: 'font-weight: bold'}, [
+        h('.w-5.actionable-icon.text-center', {
+          title: 'Open/Close CRUs configuration',
+          onclick: () => {
+            model.configuration.cruToggleByCruEndpoint[`${host}_${cruId}`] = !isCruInfoVisible;
+            model.configuration.notify();
+          }
+        }, isCruInfoVisible ? iconChevronBottom() : iconChevronRight()),
+        h('.w-95.flex-row', [
           h('.w-25', cruLabel),
           linksPanel(model, cru),
+        ])
+      ]),
+      isCruInfoVisible && h('.flex-row.p1.panel.bg-white', [
+        h('.w-5', []),
+        h('.w-95.flex-row.flex-wrap', [
+          Object.keys(cru.info).map((key) =>
+            h('.w-25.flex-row', [
+              h('.w-60.w-wrapped', {style: 'font-weight: bold'}, key),
+              h('.w-40.w-wrapped', cru.info[key]),
+            ])
+          )
         ])
       ]),
     ]),
@@ -104,11 +131,13 @@ const cruPanel = (model, cruId, cru) => {
  * @return {vnode}
  */
 const linksPanel = (model, cru) =>
-  h('.flex-row.w-100', [
-    h('.w-25', toggleAllCheckBox(model, cru)),
-    Object.keys(cru.config)
-      .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
-      .map((link, index) => checkBox(model, `link${index}`, `#${index}`, cru.config)),
+  h('.flex-row.w-75', [
+    h('.w-20', toggleAllCheckBox(model, cru)),
+    h('.w-80.flex-row.flex-wrap', [
+      Object.keys(cru.config)
+        .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
+        .map((link, index) => checkBox(model, `link${index}`, `#${index}`, cru.config)),
+    ])
   ]);
 
 /**
