@@ -22,8 +22,8 @@ import {h, iconTrash, iconPlus, info} from '/js/src/index.js';
  */
 export default (workflow) =>
   h('', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', [
-      h('.w-100', 'Advanced Configuration'),
+    h('.bg-gray-light.p2.panel-title.w-100.flex-row', [
+      h('h5.w-100', 'Advanced Configuration'),
       h('a.ph1.actionable-icon', {
         href: 'https://github.com/AliceO2Group/ControlWorkflows',
         target: '_blank',

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+import {h, info} from '/js/src/index.js';
 import pageLoading from './../../../common/pageLoading.js';
 
 /**
@@ -22,24 +22,29 @@ import pageLoading from './../../../common/pageLoading.js';
  */
 export default (workflow) =>
   h('', [
-    h('.w-100.flex-row.panel-title', [
+    h('.w-100.flex-row.panel-title.p2', [
       h('.flex-column.justify-center.f6',
-        h('button.btn.f6', {
+        h('button.btn', {
           class: workflow.areAllFLPsSelected() ? 'selected-btn' : 'none-selected-btn',
           onclick: () => workflow.toggleAllFLPSelection()
         }, 'Toggle')
       ),
-      h('h5.bg-gray-light.p2', {style: 'width: 98%'},
+      h('h5.bg-gray-light', {style: 'width: 90%'},
         workflow.flpList.kind === 'Success'
           ? `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`
           : 'FLP Selection'
-      )
+      ),
+      h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
+        h('.ph1.actionable-icon.justify-center.flex-column', info()),
+        h('.p2.dropdown-menu-right#flp_selection_info', {style: 'width: 350px'},
+          `Keep SHIFT / ⇧ key pressed when selecting two machines to select all in-between machines.`)
+      ])
     ]),
     h('.w-100.p2.panel',
       workflow.flpList.match({
         NotAsked: () => null,
         Loading: () => pageLoading(2),
-        Success: (list) => flpSelectMultiple(list, workflow),
+        Success: (list) => flpSelectionArea(list, workflow),
         Failure: (error) => h('.f7.flex-column', [
           error.includes(404) ?
             h('', error)
@@ -66,28 +71,7 @@ const flpSelectionArea = (list, workflow) =>
     list.map((name) =>
       h('a.menu-item', {
         className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
-        onclick: () => workflow.toggleFLPSelection(name)
+        onclick: (e) => workflow.toggleFLPSelection(name, e)
       }, name)
     ),
   ]);
-
-/**
- * 
- * @param {} list 
- * @param {}} workflow 
- * @return 
- */
-const flpSelectMultiple = (list, workflow) =>
-  h('.w-100.m1', {
-  }, h('select.form-control', {
-    style: 'color: white',
-    multiple: true,
-    size: list.length > 10 ? 10 : list.length,
-  }, [
-    list.map(name =>
-      h('option.items-center.menu-item',{
-        style: 'display:flex;',
-        selected: 'selected'
-      }, h('', name)))
-  ])
-  );
