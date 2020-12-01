@@ -39,7 +39,7 @@ export default (workflow) =>
       workflow.flpList.match({
         NotAsked: () => null,
         Loading: () => pageLoading(2),
-        Success: (list) => flpSelectionArea(list, workflow),
+        Success: (list) => flpSelectMultiple(list, workflow),
         Failure: (error) => h('.f7.flex-column', [
           error.includes(404) ?
             h('', error)
@@ -70,3 +70,24 @@ const flpSelectionArea = (list, workflow) =>
       }, name)
     ),
   ]);
+
+/**
+ * 
+ * @param {} list 
+ * @param {}} workflow 
+ * @return 
+ */
+const flpSelectMultiple = (list, workflow) =>
+  h('.w-100.m1', {
+  }, h('select.form-control', {
+    style: 'color: white',
+    multiple: true,
+    size: list.length > 10 ? 10 : list.length,
+  }, [
+    list.map(name =>
+      h('option.items-center.menu-item',{
+        style: 'display:flex;',
+        selected: 'selected'
+      }, h('', name)))
+  ])
+  );
