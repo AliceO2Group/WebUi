@@ -406,6 +406,8 @@ export default class Workflow extends Observable {
    * Load repositories into `repoList` as RemoteData
    */
   async getRepositoriesList() {
+    this.repoList = RemoteData.loading();
+    this.notify();
     this.repoList = await this.remoteDataPostRequest(this.repoList, `/api/ListRepos`, {});
     if (this.repoList.isSuccess()) {
       // Set first repository the default one or first from the list if default does not exist
