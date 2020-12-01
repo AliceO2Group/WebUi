@@ -256,7 +256,7 @@ describe('ConsulConnector test suite', () => {
       assert.deepStrictEqual(connector._mapCrusWithId(cruByHost), expectedCruByHost);
     });
 
-    it('should successfully create a JSON with keys and values as string for Consul store', () => {
+    it('should successfully create a JSON (spacing of 2) with keys and values as string for Consul store', () => {
       const cruByHost = {
         hostA: {
           cru_123_0: {info: {type: 'cru', serial: '123', endpoint: 0}, config: {link: 'true'}},
@@ -265,9 +265,9 @@ describe('ConsulConnector test suite', () => {
         }
       };
       const expectedKvList = [
-        {'o2/components/readoutcard/hostA/cru/123/0': JSON.stringify({link: 'true'})},
-        {'o2/components/readoutcard/hostA/cru/123/1': JSON.stringify({link: 'false'})},
-        {'o2/components/readoutcard/hostA/cru/323/1': JSON.stringify({link: 'true'})},
+        {'o2/components/readoutcard/hostA/cru/123/0': JSON.stringify({link: 'true'}, null, 2)},
+        {'o2/components/readoutcard/hostA/cru/123/1': JSON.stringify({link: 'false'}, null, 2)},
+        {'o2/components/readoutcard/hostA/cru/323/1': JSON.stringify({link: 'true'}, null, 2)},
       ];
 
       assert.deepStrictEqual(connector._mapToKVPairs(cruByHost), expectedKvList);
