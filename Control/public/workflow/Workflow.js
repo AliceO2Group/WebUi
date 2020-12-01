@@ -52,6 +52,8 @@ export default class Workflow extends Observable {
 
     this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
     this.QC_PREFIX = PREFIX.QC;
+
+    this.firstFlpSelection = -1;
   }
 
   /**
@@ -331,14 +333,37 @@ export default class Workflow extends Observable {
 
   /**
    * Toggle the selection of an FLP from the form host
+   * The user can also use SHIFT key to select between 2 FLP machines, thus
+   * selecting all machines between the 2 selected
    * @param {string} name
+   * @param {Event} e
    */
-  toggleFLPSelection(name) {
-    const index = this.form.hosts.indexOf(name);
-    if (index < 0) {
-      this.form.hosts.push(name);
+  toggleFLPSelection(name, e) {
+    if (e.shiftKey && this.flpList.isSuccess()) {
+      if (this.firstFlpSelection === -1) {
+        this.firstFlpSelection = this.flpList.payload.indexOf(name);
+      } else {
+        let secondFlpSelection = this.flpList.payload.indexOf(name);
+        if (this.firstFlpSelection > secondFlpSelection) {
+          [this.firstFlpSelection, secondFlpSelection] = [secondFlpSelection, this.firstFlpSelection];
+        }
+        for (let flpIndex = this.firstFlpSelection; flpIndex <= secondFlpSelection; ++flpIndex) {
+          const flpName = this.flpList.payload[flpIndex];
+          const hostFormIndex = this.form.hosts.indexOf(flpName);
+          if (hostFormIndex < 0) {
+            this.form.hosts.push(flpName);
+          }
+        }
+        this.firstFlpSelection = -1;
+      }
     } else {
-      this.form.hosts.splice(index, 1);
+      this.firstFlpSelection = -1;
+      const index = this.form.hosts.indexOf(name);
+      if (index < 0) {
+        this.form.hosts.push(name);
+      } else {
+        this.form.hosts.splice(index, 1);
+      }
     }
     this.notify();
   }
