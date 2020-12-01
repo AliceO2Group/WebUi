@@ -226,7 +226,7 @@ class ConsulConnector {
         const serial = cruId.split('_')[1];
         const endpoint = cruId.split('_')[2];
         const pair = {}
-        pair[`${this.readoutPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(cruConfig);
+        pair[`${this.readoutPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(cruConfig, null, 2);
         kvPairs.push(pair);
       })
     });
