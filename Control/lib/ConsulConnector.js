@@ -302,8 +302,7 @@ class ConsulConnector {
   }
 
   /**
-   * Build and return the URL prefix for
-   * Consul KV Store  
+   * Build and return the URL prefix for Readout Consul KV Store  
    * @return {string}
    */
   get consulKvStoreReadout() {
@@ -314,8 +313,7 @@ class ConsulConnector {
   }
 
   /**
-   * Build and return the URL prefix for
-   * Consul KV Store  
+   * Build and return the URL prefix for QC Consul KV Store  
    * @return {string}
    */
   get consulKvStoreQC() {
