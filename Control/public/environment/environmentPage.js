@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom, iconChevronTop, iconCircleX} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronTop, iconCircleX, iconList} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
@@ -216,7 +216,11 @@ const showControl = (environment, item) => h('.mv2.pv3.ph2', [
     ),
     h('.w-25', {
       style: 'display: flex; justify-content: flex-end;'
-    }, [destroyEnvButton(environment, item), destroyEnvButton(environment, item, true)])
+    }, [
+      infoLoggerButton(environment, item),
+      destroyEnvButton(environment, item),
+      destroyEnvButton(environment, item, true)
+    ])
   ]),
   environment.itemControl.match({
     NotAsked: () => null,
@@ -266,6 +270,20 @@ const destroyEnvButton = (environment, item, forceDestroy = false) =>
       && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: forceDestroy}),
     title: forceDestroy ? 'Force the shutdown of the environment' : 'Shutdown environment'
   }, forceDestroy ? 'Force Shutdown' : 'Shutdown');
+
+/**
+ * Open InfoLogger in a new browser tab with run number set if available
+ * @param {Object} environment
+ * @return {vnode}
+ */
+const infoLoggerButton = (environment, item) =>
+  environment.infoLoggerUrl && h('a', {
+    title: 'Open InfoLogger',
+    href: item.currentRunNumber ?
+      `//${environment.infoLoggerUrl}?q={"run":{"match":"${item.currentRunNumber}"}}`
+      : `//${environment.infoLoggerUrl}`,
+    target: '_blank'
+  }, h('button.btn.primary', iconList()));
 
 /**
  * Method to create and display a table with tasks details

@@ -161,7 +161,7 @@ const templateAreaList = (workflow, templatesMap, repository, revision) =>
             className: workflow.form.template === template ? 'selected' : null,
             onclick: () => workflow.setTemplate(template)
           }, template),
-          h('a.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker', {
+          h('a.w-10.flex-row.items-center.justify-center.actionable-icon', {
             href: `//${repository}/blob/${revision}/workflows/${template}.yaml`,
             target: '_blank',
             title: `Open workflow '${template}' definition`
