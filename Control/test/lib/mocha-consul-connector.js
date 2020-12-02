@@ -23,25 +23,40 @@ describe('ConsulConnector test suite', () => {
     it('should successfully initialize consul with "undefined" configuration', () => {
       const consul = new ConsulConnector({}, undefined);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutCardPath, 'o2/components/readoutcard');
+      assert.strictEqual(consul.qcPath, 'o2/components/qc');
+      assert.strictEqual(consul.consulKVPrefix, 'ui/alice-o2-cluster/kv');
     });
     it('should successfully initialize consul with "null" configuration', () => {
       const consul = new ConsulConnector({}, null);
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutCardPath, 'o2/components/readoutcard');
+      assert.strictEqual(consul.qcPath, 'o2/components/qc');
+      assert.strictEqual(consul.consulKVPrefix, 'ui/alice-o2-cluster/kv');
     });
     it('should successfully initialize consul with "missing" configuration', () => {
       const consul = new ConsulConnector({});
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
-      assert.strictEqual(consul.readoutPath, 'o2/components/readoutcard');
+      assert.strictEqual(consul.readoutPath, 'o2/components/readout');
+      assert.strictEqual(consul.readoutCardPath, 'o2/components/readoutcard');
+      assert.strictEqual(consul.qcPath, 'o2/components/qc');
+      assert.strictEqual(consul.consulKVPrefix, 'ui/alice-o2-cluster/kv');
     });
     it('should successfully initialize consul with "passed" configuration', () => {
       const consul = new ConsulConnector({}, {
         flpHardwarePath: 'some/hardware/path',
-        readoutPath: 'some/readout/path'
+        readoutPath: 'some/readout/path',
+        readoutCardPath: 'some/readoutcard/path',
+        qcPath: 'some/qc/path',
+        consulKVPrefix: 'ui/some-cluster/kv',
       });
       assert.strictEqual(consul.flpHardwarePath, 'some/hardware/path');
       assert.strictEqual(consul.readoutPath, 'some/readout/path');
+      assert.strictEqual(consul.readoutCardPath, 'some/readoutcard/path');
+      assert.strictEqual(consul.qcPath, 'some/qc/path');
+      assert.strictEqual(consul.consulKVPrefix, 'ui/some-cluster/kv');
     });
   });
 
@@ -49,7 +64,7 @@ describe('ConsulConnector test suite', () => {
     let consulService;
     beforeEach(() => consulService = {});
     it('should successfully query host of ConsulLeader', async () => {
-      consulService.getConsulLeaderStatus = sinon.stub().resolves('localhost:8500');
+      consulService.getConsulLeaderStatus = sinon.stub().resolves('localhost:8550');
       const connector = new ConsulConnector(consulService, config);
       await connector.testConsulStatus();
     });
@@ -138,9 +153,11 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
-        flps: ['flpOne', 'flpTwo'],
+        consulKvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
+        consulKvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/components/',
         consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
-        consulQcPrefix: 'localhost:8550/test/o2/qc/'
+        flps: ['flpOne', 'flpTwo']
       }));
     });
 
@@ -151,9 +168,11 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
-        flps: [],
+        consulKvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
+        consulKvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/components/',
         consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
-        consulQcPrefix: 'localhost:8550/test/o2/qc/',
+        flps: []
       }));
     });
 
@@ -164,9 +183,11 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
-        flps: [],
+        consulKvStoreQC: '',
+        consulKvStoreReadout: '',
+        consulQcPrefix: '',
         consulReadoutPrefix: '',
-        consulQcPrefix: ''
+        flps: []
       }));
     });
 
@@ -177,9 +198,11 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
-        flps: [],
+        consulKvStoreQC: '',
+        consulKvStoreReadout: '',
+        consulQcPrefix: '',
         consulReadoutPrefix: '',
-        consulQcPrefix: ''
+        flps: []
       }));
     });
 
@@ -192,9 +215,11 @@ describe('ConsulConnector test suite', () => {
       await connector.getFLPs(null, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
-        flps: ['flpTwo'],
+        consulKvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
+        consulKvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
+        consulQcPrefix: 'localhost:8550/test/o2/qc/components/',
         consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
-        consulQcPrefix: 'localhost:8550/test/o2/qc/',
+        flps: [ 'flpTwo' ]
       }));
     });
 

@@ -277,7 +277,8 @@ const destroyEnvButton = (environment, item, forceDestroy = false) =>
  * @return {vnode}
  */
 const infoLoggerButton = (environment, item) =>
-  environment.infoLoggerUrl && h('a', {
+  h('a', {
+    style: {display: !environment.infoLoggerUrl  ? 'none' : ''},
     title: 'Open InfoLogger',
     href: item.currentRunNumber ?
       `//${environment.infoLoggerUrl}?q={"run":{"match":"${item.currentRunNumber}"}}`

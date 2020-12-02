@@ -96,7 +96,6 @@ class ConsulConnector {
             .map((key) => key.split('/')[3]);
           res.status(200);
           res.json({
-            consulKvStore: this.consulKvStore,
             consulKvStoreQC: this.consulKvStoreQC,
             consulKvStoreReadout: this.consulKvStoreReadout,
             consulQcPrefix: this.consulQcPrefix,
