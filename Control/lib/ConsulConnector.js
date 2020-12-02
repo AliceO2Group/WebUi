@@ -28,8 +28,10 @@ class ConsulConnector {
     this.consulService = consulService;
     this.config = config;
     this.flpHardwarePath = (config && config.flpHardwarePath) ? config.flpHardwarePath : 'o2/hardware/flps';
-    this.readoutPath = (config && config.readoutPath) ? config.readoutPath : 'o2/components/readoutcard';
+    this.readoutCardPath = (config && config.readoutCardPath) ? config.readoutCardPath : 'o2/components/readoutcard';
     this.qcPath = (config && config.qcPath) ? config.qcPath : 'o2/components/qc';
+    this.readoutPath = (config && config.readoutPath) ? config.readoutPath : 'o2/components/readout';
+    this.consulKVPrefix = (config && config.consulKVPrefix) ? config.consulKVPrefix : 'ui/alice-o2-cluster/kv';
   }
 
   /**
@@ -94,6 +96,9 @@ class ConsulConnector {
             .map((key) => key.split('/')[3]);
           res.status(200);
           res.json({
+            consulKvStore: this.consulKvStore,
+            consulKvStoreQC: this.consulKvStoreQC,
+            consulKvStoreReadout: this.consulKvStoreReadout,
             consulQcPrefix: this.consulQcPrefix,
             consulReadoutPrefix: this.consulReadoutPrefix,
             flps: [...new Set(flpList)]
@@ -160,7 +165,7 @@ class ConsulConnector {
    */
   async _getCrusConfigById(crus) {
     try {
-      const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutPath);
+      const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutCardPath);
       Object.keys(crusByEndpoint)
         .filter((fieldKey) => fieldKey.split('/').length >= 7) // filter out incomplete keys
         .forEach((fieldKey) => {
@@ -226,7 +231,7 @@ class ConsulConnector {
         const serial = cruId.split('_')[1];
         const endpoint = cruId.split('_')[2];
         const pair = {}
-        pair[`${this.readoutPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(cruConfig, null, 2);
+        pair[`${this.readoutCardPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(cruConfig, null, 2);
         kvPairs.push(pair);
       })
     });
@@ -295,6 +300,30 @@ class ConsulConnector {
       return '';
     }
     return `${this.config.hostname}:${this.config.port}/${this.qcPath}/`
+  }
+
+  /**
+   * Build and return the URL prefix for
+   * Consul KV Store  
+   * @return {string}
+   */
+  get consulKvStoreReadout() {
+    if (!this.config.hostname || !this.config.port) {
+      return '';
+    }
+    return `${this.config.hostname}:${this.config.port}/${this.consulKVPrefix}/${this.readoutPath}`
+  }
+
+  /**
+   * Build and return the URL prefix for
+   * Consul KV Store  
+   * @return {string}
+   */
+  get consulKvStoreQC() {
+    if (!this.config.hostname || !this.config.port) {
+      return '';
+    }
+    return `${this.config.hostname}:${this.config.port}/${this.consulKVPrefix}/${this.qcPath}`
   }
 }
 
