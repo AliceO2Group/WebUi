@@ -48,9 +48,11 @@ export default class Workflow extends Observable {
 
     this.flpList = RemoteData.notAsked();
     this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.consulKvStoreReadout = '';
     this.READOUT_PREFIX = PREFIX.READOUT;
 
     this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.consulKvStoreQC = '';
     this.QC_PREFIX = PREFIX.QC;
 
     this.firstFlpSelection = -1;
@@ -489,11 +491,15 @@ export default class Workflow extends Observable {
       this.flpList = RemoteData.failure(result.message);
       this.consulReadoutPrefix = '';
       this.consulQcPrefix = '';
+      this.consulKvStoreQC = '';
+      this.consulKvStoreReadout = '';
       this.notify();
       return;
     }
     this.consulReadoutPrefix = result['consulReadoutPrefix'];
     this.consulQcPrefix = result['consulQcPrefix'];
+    this.consulKvStoreReadout = result['consulKvStoreReadout'];
+    this.consulKvStoreQC = result['consulKvStoreQC'];
     this.flpList = RemoteData.success(result.flps);
     if (this.form.hosts.length === 0) {
       // preselect all hosts if hosts were not selected already previously

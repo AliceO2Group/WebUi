@@ -219,7 +219,7 @@ const readoutPanel = (workflow) => {
           }),
           variables['readout_cfg_uri_pre'] && h('input.form-control', {
             type: 'text',
-            class:  variables['readout_cfg_uri_pre'] === consulPre ? 'w-40' : 'w-100',
+            class: variables['readout_cfg_uri_pre'] === consulPre ? 'w-40' : 'w-100',
             value: variables['readout_cfg_uri'],
             oninput: (e) => {
               if (e.target.value !== '' && !variables['readout_cfg_uri_pre']) {
@@ -239,8 +239,12 @@ const readoutPanel = (workflow) => {
     variables['readout_cfg_uri_pre'] === consulPre &&
     h('.w-100.flex-row', [
       h('.w-25'),
-      h('label.w-75.f5', {
-        style: 'font-style: italic'
+      h('a.w-75.f5.action', {
+        style: 'font-style: italic; cursor: pointer',
+        href: `//${workflow.consulKvStoreReadout}/${(
+          variables['readout_cfg_uri'] ?
+            variables['readout_cfg_uri'] + '/edit' : '')}`,
+        target: '_blank',
       }, consulPre + workflow.consulReadoutPrefix + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
@@ -302,7 +306,7 @@ const qcUriPanel = (workflow) => {
           }),
           variables['qc_config_uri_pre'] && h('input.form-control', {
             type: 'text',
-            class:  variables['qc_config_uri_pre'] === consulPre ? 'w-40' : 'w-100',
+            class: variables['qc_config_uri_pre'] === consulPre ? 'w-40' : 'w-100',
             value: variables['qc_config_uri'],
             oninput: (e) => {
               if (e.target.value !== '' && !variables['qc_config_uri_pre']) {
@@ -322,8 +326,12 @@ const qcUriPanel = (workflow) => {
     variables['qc_config_uri_pre'] === consulPre &&
     h('.w-100.flex-row', [
       h('.w-25'),
-      h('label.w-75.f5', {
-        style: 'font-style: italic'
+      h('a.w-75.f5.action', {
+        style: 'font-style: italic; cursor: pointer',
+        href: `//${workflow.consulKvStoreQC}/${(
+          variables['qc_config_uri'] ?
+            variables['qc_config_uri'] + '/edit' : '')}`,
+        target: '_blank',
       }, consulPre + workflow.consulQcPrefix + (
         variables['qc_config_uri'] ?
           variables['qc_config_uri'] : '')

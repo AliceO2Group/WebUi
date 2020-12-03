@@ -99,9 +99,9 @@ describe('`Control Environment` test-suite', async () => {
   //   assert.strictEqual(state, 'STANDBY');
   // });
 
-  it(`should have one button for 'Shutdown' environment (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').title);
+  it(`should have one button for 'Force Shutdown' environment (workflow '${workflowToTest}')`, async () => {
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(3)', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(3)').title);
     assert.strictEqual(shutdownButton, 'Force the shutdown of the environment');
   });
 

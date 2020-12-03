@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconReload} from '/js/src/index.js';
+import {h, iconReload, info} from '/js/src/index.js';
 import revisionPanel from './panels/revision/revisionPanel.js';
 import basicVarsPanel from './panels/variables/basicPanel.js';
 import advancedVarsPanel from './panels/variables/advancedPanel.js';
@@ -156,10 +156,18 @@ const templateAreaList = (workflow, templatesMap, repository, revision) =>
     h('h5', {style: '', for: ''}, 'Workflow:'),
     h('.shadow-level1.pv1',
       Object.values(templatesMap[repository][revision]).map((template) =>
-        h('a.menu-item.w-wrapped', {
-          className: workflow.form.template === template ? 'selected' : null,
-          onclick: () => workflow.setTemplate(template)
-        }, template))
+        h('.flex-row', [
+          h('a.w-90.menu-item.w-wrapped', {
+            className: workflow.form.template === template ? 'selected' : null,
+            onclick: () => workflow.setTemplate(template)
+          }, template),
+          h('a.w-10.flex-row.items-center.justify-center.actionable-icon', {
+            href: `//${repository}/blob/${revision}/workflows/${template}.yaml`,
+            target: '_blank',
+            title: `Open workflow '${template}' definition`
+          }, info())
+        ])
+      )
     )
   ]);
 
