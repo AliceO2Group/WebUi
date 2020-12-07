@@ -145,12 +145,10 @@ class LayoutConnector {
    * @param {number} status - status code 4xx 5xx, 500 will print to debug
    */
   errorHandler(err, res, status = 500) {
-    if (status === 500) {
-      if (err.stack) {
-        log.trace(err);
-      }
-      log.error(err.message || err);
+    if (err.stack) {
+      log.trace(err);
     }
+    log.error(err.message || err);
     res.status(status).send({message: err.message || err});
   }
 }
