@@ -15,8 +15,8 @@
 /*
  * App specific CSS styles
  */
-.pageLoading { font-size: 10em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
-.errorPage { font-size: 10em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
+.pageLoading { font-size: 5em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
+.errorPage { font-size: 3em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
 
 .disabled-content { pointer-events: none; opacity: 0.5; }
 

@@ -21,5 +21,5 @@ import {h, iconCircleX} from '/js/src/index.js';
  */
 export default (error) => h('.flex-column items-center justify-center', [
   h('span.errorPage', iconCircleX()),
-  h('p.text-center.danger.measure-narrow', error)
+  h('span.text-center.danger.measure-narrow', {style: 'white-space: pre-line'},error)
 ]);

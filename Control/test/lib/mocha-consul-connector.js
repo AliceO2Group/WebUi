@@ -219,7 +219,7 @@ describe('ConsulConnector test suite', () => {
         consulKvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
         consulQcPrefix: 'localhost:8550/test/o2/qc/components/',
         consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
-        flps: [ 'flpTwo' ]
+        flps: ['flpTwo']
       }));
     });
 
@@ -247,6 +247,28 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(502));
       assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
+    });
+  });
+
+  describe('Request CRUs with Configuration', async () => {
+    let consulService;
+    beforeEach(() => {
+      res = {
+        status: sinon.stub(),
+        json: sinon.stub(),
+        send: sinon.stub()
+      };
+      consulService = {};
+    });
+    it('should successfully respond with 404 when key is not found', async () => {
+      consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().rejects(new Error('404-key not found'))
+
+      const connector = new ConsulConnector(consulService, config);
+      await connector.getCRUsWithConfiguration(null, res);
+
+      assert.ok(res.status.calledWith(404));
+      assert.ok(res.send.calledWith({
+        message: `No value found for one of the keys:\ntest/o2/hardware/flps\nor\ntest/o2/readoutcard/components`}));
     });
   });
 
