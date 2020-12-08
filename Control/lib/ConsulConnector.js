@@ -132,8 +132,8 @@ class ConsulConnector {
         res.status(200).json(crusWithConfigByHost);
       } catch (error) {
         if (error.toString().includes('404')) {
-          const missingKVErrorMessage = `No value found for one of the keys:
-          ${this.flpHardwarePath}\nor\n${this.readoutCardPath}`;
+          const missingKVErrorMessage = 'No value found for one of the keys:\n' +
+            `${this.flpHardwarePath}\nor\n${this.readoutCardPath}`;
           errorHandler(missingKVErrorMessage, res, 404);
         } else {
           errorHandler(error, res, 502);
