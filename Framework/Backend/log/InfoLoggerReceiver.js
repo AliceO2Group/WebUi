@@ -35,6 +35,8 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     // Declare properties
     this.client = null;
     this.buffer = '';
+
+    this.isConnected = false;
   }
 
   /**
@@ -54,25 +56,29 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     this.client.on('data', (messages) => this.onData(messages));
 
     this.client.on('connect', () => {
+      this.isConnected = true;
+      this.emit('connected');
       log.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
     });
 
     this.client.on('end', () => {
       log.error('Connection to infoLoggerServer ended (FIN)');
+      this.isConnected = false;
       this.emit('close');
-      this.client.setTimeout(1000, () => {
+      setTimeout(() => {
         log.info('Quickly reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
-      });
+      }, 5000);
     });
 
     this.client.on('error', (error) => {
+      this.isConnected = false;
       log.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
-      this.client.setTimeout(5000, () => {
+      setTimeout(() => {
         this.emit('connection-issue', 'Unable to connect to InfoLogger Server. Retrying in 5 seconds...');
         log.info('Reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
-      });
+      }, 5000);
     });
   }
 
@@ -83,7 +89,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     if (!this.client) {
       return;
     }
-
+    this.isConnected = false;
     this.client.end();
     this.client = null; // gc
   }
