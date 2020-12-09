@@ -92,7 +92,7 @@ class StatusService {
     const ils = {host: config.host, port: config.port};
     ils.status = this.liveSource && this.liveSource.isConnected ?
       {ok: true}
-      : {ok: false, message: 'There was no live source set up'}
+      : {ok: false, message: 'Unable to connect to InfoLogger Server'}
     return ils;
   }
 

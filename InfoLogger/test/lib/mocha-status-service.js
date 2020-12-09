@@ -57,12 +57,12 @@ describe('Status Service test suite', () => {
   describe('`getLiveSourceStatus()` tests', () => {
     it('should successfully return InfoLogger Server info with status ok false if live source is missing', () => {
       const statusService = new StatusService(config, undefined);
-      const info = {host: 'localhost', port: 6102, status: {ok: false, message: 'There was no live source set up'}};
+      const info = {host: 'localhost', port: 6102, status: {ok: false, message: 'Unable to connect to InfoLogger Server'}};
       assert.deepStrictEqual(statusService.getLiveSourceStatus(config.infoLoggerServer), info);
     });
     it('should successfully return InfoLogger Server info with status ok when live source is present', () => {
       const statusService = new StatusService(config, undefined);
-      statusService.setLiveSource({onconnect: () => true});
+      statusService.setLiveSource({isConnected: true, onconnect: () => true});
 
       const info = {host: 'localhost', port: 6102, status: {ok: true}};
       assert.deepStrictEqual(statusService.getLiveSourceStatus(config.infoLoggerServer), info);
@@ -112,7 +112,7 @@ describe('Status Service test suite', () => {
       const info = {
         'infoLogger-gui': {hostname: 'localhost', port: 8080, status: {ok: true}},
         mysql: {host: 'localhost', port: 6103, database: 'INFOLOGGER', status: {ok: false, message: 'There was no data source set up'}},
-        infoLoggerServer: {host: 'localhost', port: 6102, status: {ok: false, message: 'There was no live source set up'}}
+        infoLoggerServer: {host: 'localhost', port: 6102, status: {ok: false, message: 'Unable to connect to InfoLogger Server'}}
       };
 
       assert.ok(res.status.calledWith(200));
