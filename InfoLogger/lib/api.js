@@ -98,7 +98,7 @@ module.exports.attachTo = (http, ws) => {
    * @param {Error} error
    * @param {number} status
    */
-  function handleError(res, error, status=500) {
+  function handleError(res, error, status = 500) {
     log.trace(error);
     res.status(status).json({message: error.message});
   }
@@ -109,6 +109,10 @@ module.exports.attachTo = (http, ws) => {
       msg.command = 'live-log';
       msg.payload = message;
       ws.broadcast(msg);
+    });
+
+    liveSource.on('connected', () => {
+      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-connected'));
     });
 
     liveSource.on('connection-issue', () => {

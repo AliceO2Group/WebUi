@@ -277,12 +277,20 @@ export default class Model extends Observable {
   async handleWSCommand(message) {
     if (message.command === 'live-log') {
       this.log.addLog(message.payload);
-    } else if (message.command === 'il-server-connection-issue'
-      && this.log.activeMode !== MODE.QUERY) {
+    } else {
       await this.getFrameworkInfo();
-      this.notification.show(`Connection to InfoLogger server is unavailable. Retrying in 5 seconds`, 'warning', 2000);
-    } else if (message.command === 'il-server-close') {
-      this.notification.show(`Connection between backend and InfoLogger server has been lost`, 'warning', 2000);
+      await this.detectServices();
+      if (message.command === 'il-server-connection-issue'
+        && this.log.activeMode !== MODE.QUERY) {
+        this.notification.show(
+          `Connection to InfoLogger server is unavailable. Retrying in 5 seconds`, 'warning', 2000);
+      } else if (message.command === 'il-server-close') {
+        this.notification.show(
+          `Connection between backend and InfoLogger server has been lost`, 'warning', 2000);
+      } else if (message.command === 'il-server-connected') {
+        this.notification.show(
+          `Connection between backend and InfoLogger server has been established`, 'success', 2000);
+      }
     }
     return;
   }

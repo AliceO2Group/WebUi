@@ -56,6 +56,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     this.client.on('connect', () => {
       this.isConnected = true;
+      this.emit('connected');
       log.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
     });
 
