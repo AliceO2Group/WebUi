@@ -72,7 +72,7 @@ module.exports.attachTo = (http, ws) => {
   function getServicesStatus(req, res) {
     res.json({
       query: !!querySource,
-      live: !!liveSource,
+      live: !!liveSource.isConnected,
       streamHostname: config.infoLoggerServer && config.infoLoggerServer.host
     });
   }

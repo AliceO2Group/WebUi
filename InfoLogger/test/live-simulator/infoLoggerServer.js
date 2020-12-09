@@ -78,7 +78,7 @@ function connectionListener(client) {
 
     currentLogIndex++;
     if (currentLogIndex > 10) {
-      throw new Error("Bad")
+      // throw new Error("Bad")
     }
     timer = setTimeout(sendNextLog, nextLogTimeout);
   }

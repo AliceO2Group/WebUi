@@ -128,7 +128,7 @@ export default class Model extends Observable {
    * Request data about the framework
    */
   async getFrameworkInfo() {
-    this.servicesResult = RemoteData.loading();
+    this.frameworkInfo = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.loader.get(`/api/getFrameworkInfo`);
@@ -274,11 +274,12 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending on incoming command from server
    * @param {WebSocketMessage} message - {command, payload}
    */
-  handleWSCommand(message) {
+  async handleWSCommand(message) {
     if (message.command === 'live-log') {
       this.log.addLog(message.payload);
     } else if (message.command === 'il-server-connection-issue'
       && this.log.activeMode !== MODE.QUERY) {
+      await this.getFrameworkInfo();
       this.notification.show(`Connection to InfoLogger server is unavailable. Retrying in 5 seconds`, 'warning', 2000);
     } else if (message.command === 'il-server-close') {
       this.notification.show(`Connection between backend and InfoLogger server has been lost`, 'warning', 2000);
@@ -301,7 +302,7 @@ export default class Model extends Observable {
    * @param {Object} params
    */
   parseLocation(params) {
-    if (params.profile && params.q ) {
+    if (params.profile && params.q) {
       this.log.filter.resetCriterias();
       this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
       return;
@@ -335,7 +336,10 @@ export default class Model extends Observable {
   /**
    * Toggle framework info on the left
    */
-  toggleFrameworkInfo() {
+  async toggleFrameworkInfo() {
+    if (!this.frameworkInfoEnabled) {
+      await this.getFrameworkInfo();
+    }
     this.frameworkInfoEnabled = !this.frameworkInfoEnabled;
     this.accountMenuEnabled = false;
     this.notify();
