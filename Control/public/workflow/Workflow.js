@@ -13,6 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {PREFIX} from './constants.js';
 
 /**
  * Model representing Workflow
@@ -46,6 +47,15 @@ export default class Workflow extends Observable {
     };
 
     this.flpList = RemoteData.notAsked();
+    this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.consulKvStoreReadout = '';
+    this.READOUT_PREFIX = PREFIX.READOUT;
+
+    this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.consulKvStoreQC = '';
+    this.QC_PREFIX = PREFIX.QC;
+
+    this.firstFlpSelection = -1;
   }
 
   /**
@@ -55,8 +65,8 @@ export default class Workflow extends Observable {
     if (!this.form.repository && !this.form.template) {
       this.getRepositoriesList();
       this.getAllTemplatesAsMap();
-      this.getFLPList();
     }
+    this.getFLPList();
 
     this.resetErrorMessage();
   }
@@ -195,13 +205,12 @@ export default class Workflow extends Observable {
   async createNewEnvironment() {
     const templates = this.templatesMap.payload;
     const repository = this.form.repository;
-    const variables = JSON.parse(JSON.stringify(this.form.variables));
-    const sameKeys = Object.keys(this.form.basicVariables).filter((key) => this.form.variables[key]);
-    // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
-    if (sameKeys.length !== 0) {
-      this.model.environment.itemNew =
-        RemoteData.failure(`Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`);
-    } else if (this.form.variables.hosts && this.form.variables.hosts.length > 0 && this.form.hosts.length > 0) {
+
+    const {ok, message, variables} = this.checkAndMergeVariables(this.form.variables, this.form.basicVariables);
+    if (!ok) {
+      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      this.model.environment.itemNew = RemoteData.failure(message);
+    } else if (variables.hosts && variables.hosts.length > 0 && this.form.hosts.length > 0) {
       // Check FLP Selection is not duplicated in vars host
       this.model.environment.itemNew =
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
@@ -222,10 +231,9 @@ export default class Workflow extends Observable {
             } else {
               path = repository + 'workflows/' + template + '@' + revision;
             }
-            let finalVariables = Object.assign({}, this.form.basicVariables, variables);
+
             // Combine Readout URI if it was used
-            finalVariables = this.checkReadoutKey(finalVariables);
-            this.model.environment.newEnvironment({workflowTemplate: path, vars: finalVariables});
+            this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
           } else {
             this.model.environment.itemNew =
               RemoteData.failure('Selected template does not exist for this repository & revision');
@@ -289,7 +297,6 @@ export default class Workflow extends Observable {
     }
   }
 
-
   /**
    * Method to update the value of a (K;V) pair in basicVariables
    * @param {string} key
@@ -328,14 +335,37 @@ export default class Workflow extends Observable {
 
   /**
    * Toggle the selection of an FLP from the form host
+   * The user can also use SHIFT key to select between 2 FLP machines, thus
+   * selecting all machines between the 2 selected
    * @param {string} name
+   * @param {Event} e
    */
-  toggleFLPSelection(name) {
-    const index = this.form.hosts.indexOf(name);
-    if (index < 0) {
-      this.form.hosts.push(name);
+  toggleFLPSelection(name, e) {
+    if (e.shiftKey && this.flpList.isSuccess()) {
+      if (this.firstFlpSelection === -1) {
+        this.firstFlpSelection = this.flpList.payload.indexOf(name);
+      } else {
+        let secondFlpSelection = this.flpList.payload.indexOf(name);
+        if (this.firstFlpSelection > secondFlpSelection) {
+          [this.firstFlpSelection, secondFlpSelection] = [secondFlpSelection, this.firstFlpSelection];
+        }
+        for (let flpIndex = this.firstFlpSelection; flpIndex <= secondFlpSelection; ++flpIndex) {
+          const flpName = this.flpList.payload[flpIndex];
+          const hostFormIndex = this.form.hosts.indexOf(flpName);
+          if (hostFormIndex < 0) {
+            this.form.hosts.push(flpName);
+          }
+        }
+        this.firstFlpSelection = -1;
+      }
     } else {
-      this.form.hosts.splice(index, 1);
+      this.firstFlpSelection = -1;
+      const index = this.form.hosts.indexOf(name);
+      if (index < 0) {
+        this.form.hosts.push(name);
+      } else {
+        this.form.hosts.splice(index, 1);
+      }
     }
     this.notify();
   }
@@ -354,7 +384,7 @@ export default class Workflow extends Observable {
    * @return {boolean}
    */
   areAllFLPsSelected() {
-    return this.form.hosts.length === this.flpList.payload.length;
+    return this.flpList.isSuccess() && this.form.hosts.length === this.flpList.payload.length;
   }
 
   /**
@@ -378,6 +408,8 @@ export default class Workflow extends Observable {
    * Load repositories into `repoList` as RemoteData
    */
   async getRepositoriesList() {
+    this.repoList = RemoteData.loading();
+    this.notify();
     this.repoList = await this.remoteDataPostRequest(this.repoList, `/api/ListRepos`, {});
     if (this.repoList.isSuccess()) {
       // Set first repository the default one or first from the list if default does not exist
@@ -457,47 +489,118 @@ export default class Workflow extends Observable {
     const {result, ok} = await this.model.loader.get(`/api/getFLPs`);
     if (!ok) {
       this.flpList = RemoteData.failure(result.message);
+      this.consulReadoutPrefix = '';
+      this.consulQcPrefix = '';
+      this.consulKvStoreQC = '';
+      this.consulKvStoreReadout = '';
       this.notify();
       return;
     }
-    this.flpList = RemoteData.success(result);
-    // preselect all hosts once they are loaded
-    this.form.hosts = Object.values(result);
+    this.consulReadoutPrefix = result['consulReadoutPrefix'];
+    this.consulQcPrefix = result['consulQcPrefix'];
+    this.consulKvStoreReadout = result['consulKvStoreReadout'];
+    this.consulKvStoreQC = result['consulKvStoreQC'];
+    this.flpList = RemoteData.success(result.flps);
+    if (this.form.hosts.length === 0) {
+      // preselect all hosts if hosts were not selected already previously
+      this.form.hosts = Object.values(result.flps);
+    } else {
+      // FLP machines can be removed by the user since the last creation of an environment
+      // ensure the list of selected items is still up to date
+      const tempFormHosts = [];
+      this.form.hosts.filter((host) => this.flpList.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
+      this.form.hosts = tempFormHosts.slice();
+    }
     this.notify();
   }
+
   /**
    * Helpers
    */
 
   /**
-   * If the user provides `readout_cfg_uri` than combine it with the prefix
-   * and remove prefix from list of variable keys
+   * Check that variables are not duplicated in basic and advanced 
+   * configuration panel and merge them together
+   * @param {JSON} vars
+   * @param {JSON} basicVars
+   * @return {boolean, string, JSON}
+   */
+  checkAndMergeVariables(vars, basicVars) {
+    const variables = JSON.parse(JSON.stringify(vars));
+    let basicVariables = JSON.parse(JSON.stringify(basicVars));
+    const sameKeys = Object.keys(basicVariables).filter((key) => variables[key]);
+
+    if (sameKeys.length > 0) {
+      return {
+        variables: {}, ok: false,
+        message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
+      };
+    } else {
+      const readoutResult = this.parseReadoutURI(basicVariables);
+      if (!readoutResult.ok) {
+        return {ok: false, message: readoutResult.message, variables: {}};
+      }
+      basicVariables = readoutResult.variables;
+      const qcResult = this.parseQcURI(basicVariables);
+      if (!qcResult.ok) {
+        return {ok: false, message: qcResult.message, variables: {}};
+      }
+      basicVariables = qcResult.variables;
+      const allVariables = Object.assign({}, basicVariables, variables);
+      return {ok: true, message: '', variables: allVariables};
+    }
+  }
+
+  /**
+   * Build the string for readout configuration URI
    * @param {JSON} vars
    * @return {JSON}
    */
-  checkReadoutKey(vars) {
-    const filePre = 'file:';
-    const consulPre = 'consul:';
-    // User used Advanced Config Panel
-    if (vars['readout_cfg_uri'] &&
-      (vars['readout_cfg_uri'].includes(filePre) || vars['readout_cfg_uri'].includes(consulPre))
-    ) {
-      delete vars['readout_cfg_uri_pre'];
-      return vars;
-    } else if (vars['readout_cfg_uri_pre'] && vars['readout_cfg_uri'] &&
-      vars['readout_cfg_uri_pre'] !== '' && vars['readout_cfg_uri'] !== '') {
-      // User used Basic Config panel
-      vars['readout_cfg_uri'] =
-        vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
-    } else {
-      delete vars['readout_cfg_uri'];
-      delete vars['readout_cfg_uri_pre'];
-    }
-    // Remove prefix variable from JSON that will be sent to Core
-    if (vars['readout_cfg_uri_pre']) {
+  parseReadoutURI(vars) {
+    if (vars['readout_cfg_uri'] && !vars['readout_cfg_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'Readout URI' type selection`
+      };
+    } else if (!vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'Readout URI' path. Either remove the type of the file or enter configuration path.`
+      };
+    } else if (vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
+      if (vars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
+        vars['readout_cfg_uri'] = this.consulReadoutPrefix + vars['readout_cfg_uri'];
+      }
+      vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
       delete vars['readout_cfg_uri_pre'];
     }
-    return vars;
+    return {variables: vars, ok: true, message: ''};
+  }
+
+  /**
+   * Build the string for quality control configuration URI
+   * @param {JSON} vars
+   * @return {JSON}
+   */
+  parseQcURI(vars) {
+    if (vars['qc_config_uri'] && !vars['qc_config_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'QC URI' type selection`
+      };
+    } else if (!vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
+      return {
+        variables: {}, ok: false,
+        message: `Missing 'QC URI' path. Either remove the type of the file or enter configuration path.`
+      };
+    } else if (vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
+      if (vars['qc_config_uri_pre'] === this.QC_PREFIX.CONSUL) {
+        vars['qc_config_uri'] = this.consulQcPrefix + vars['qc_config_uri'];
+      }
+      vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
+      delete vars['qc_config_uri_pre'];
+    }
+    return {variables: vars, ok: true, message: ''};
   }
 
   /**

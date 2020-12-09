@@ -13,6 +13,8 @@
 */
 
 const config = require('./configProvider.js');
+const projPackage = require('./../package.json');
+
 const TObject2JsonClient = require('./TObject2JsonClient.js');
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
 const CCDBConnector = require('./CCDBConnector.js');
@@ -20,6 +22,7 @@ const MySQLConnector = require('./MySQLConnector.js');
 const AMOREConnector = require('./AMOREConnector.js');
 const JsonFileConnector = require('./JsonFileConnector.js');
 const LayoutConnector = require('./connector/LayoutConnector.js');
+const StatusService = require('./StatusService.js');
 
 const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 
@@ -29,6 +32,8 @@ const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 const layoutConnector = new LayoutConnector(jsonDb);
 module.exports.layoutConnector = layoutConnector;
+const statusService = new StatusService(config, projPackage);
+module.exports.statusService = statusService;
 
 if (config.consul) {
   const consulService = new ConsulService(config.consul);
@@ -38,6 +43,7 @@ if (config.consul) {
       `Consul Service connection could not be established. Please try restarting the service due to: ${error}`)
     );
   module.exports.consulService = consulService;
+  statusService.setLiveModeConnector(consulService);
 } else {
   log.warn('Consul Service: No Configuration Found');
   module.exports.consulService = undefined;
@@ -53,6 +59,7 @@ if (config.listingConnector === 'ccdb') {
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
   module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
   module.exports.queryPrefix = ccdb.prefix;
+  statusService.setDataConnector(ccdb);
 
   const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
   module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);

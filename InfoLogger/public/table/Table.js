@@ -79,6 +79,18 @@ export default class Table extends Observable {
       this.notify();
     }
   }
+
+  /**
+   * Set column visibility based on `isVisible`.
+   * Hide the column if no value is passed
+   * @param {string} fieldName - column of which the visibility will be set
+   * @param {boolean} isVisible - hide/show the column
+   */
+  setColumnVisibility(fieldName, isVisible = false) {
+    this.colsHeader[fieldName].visible = isVisible;
+    this.notify();
+  }
+
   /**
    * Method to reset what columns are displayed and their sizes
    * @return {JSON}

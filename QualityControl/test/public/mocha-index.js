@@ -117,7 +117,7 @@ describe('QCG', function() {
 
     it('should have a table with one row after filtering', async () => {
       await page.type('header input', 'AliRoot');
-      await page.waitFor(200);
+      await page.waitForTimeout(200);
       const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
       assert.ok(rowsCount === 1);
     });
@@ -559,7 +559,7 @@ describe('QCG', function() {
             objectSelected: objectSelected
           };
         });
-        await page.waitFor(7000);
+        await page.waitForTimeout(7000);
         assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(AliRoot)');
         assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
         assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100, version: null});
@@ -577,7 +577,7 @@ describe('QCG', function() {
             lastModified: lastModified,
           };
         });
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
         assert.strictEqual(result.title, 'View details about histogram');
         assert.ok(result.fullPath.includes('PATH'));
         assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
@@ -601,9 +601,9 @@ describe('QCG', function() {
 
     it('should have a frameworkInfo item with config fields', async () => {
       const expConfig = {
-        qcg: {port: 8181, hostname: 'localhost'},
-        consul: {hostname: 'localhost', port: 8500},
-        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test'},
+        qcg: {port: 8181, hostname: 'localhost', status: {ok: true}},
+        consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live Mode was not configured'}},
+        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: false, message: 'Data connector was not configured'}},
         quality_control: {version: '0.19.5-1'}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);

@@ -32,7 +32,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully load newEnvironment page', async () => {
     await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    await page.waitFor(2000);
+    await page.waitForTimeout(2000);
     assert.strictEqual(location.search, '?page=newEnvironment');
   });
 
@@ -52,12 +52,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
     } else {
       assert.ok(false, `${workflowToTest} could not be found in list of workflows`);
     }
-    await page.waitFor(200);
+    await page.waitForTimeout(200);
   });
 
   it('should display variables (K;V) panel', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5', {timeout: 2000});
-    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5').innerText);
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div', {timeout: 2000});
+    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div').innerText);
     assert.strictEqual('Advanced Configuration', title, 'Could not find the Advanced Configuration Panel');
   });
 
@@ -76,18 +76,18 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully add provided K:V pairs', async () => {
     for (const key in confVariables) {
       if (key && confVariables[key]) {
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
         page.keyboard.type(key);
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
 
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
         page.keyboard.type(confVariables[key]);
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
 
         await page.evaluate(() => {
-          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
+          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
         });
-        await page.waitFor(200);
+        await page.waitForTimeout(200);
       }
     }
     const filledVars = await page.evaluate(() => window.model.workflow.form.variables);
@@ -95,7 +95,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have successfully select first FLP by default from area list by', async () => {
-    const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div > a').classList);
+    const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div> div:nth-child(2) > div > a').classList);
     assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLPs were not successfully selected by default in the panel');
     const hosts = await page.evaluate(() => window.model.workflow.form.hosts);
     assert.ok(hosts.length > 0, 'No hosts were selected before creating an environment')
@@ -128,10 +128,10 @@ async function waitForCoreResponse(page, timeout = 90) {
     while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
         resolve();
       } else {
-        await page.waitFor(1000);
+        await page.waitForTimeout(1000);
       }
     }
   });

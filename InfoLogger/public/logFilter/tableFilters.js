@@ -40,14 +40,14 @@ export default (model) => h('table.table-filters', [
                 className: model.log.timeFormat === TIME_S ? 'selected' : '',
                 onclick: () => {
                   model.log.timeFormat = TIME_S;
-                  model.log.setColumnVisibility('time', true);
+                  model.table.setColumnVisibility('time', true);
                 }
               }, `HH:mm:ss`),
               h('a.menu-item.text-ellipsis', {
                 className: model.log.timeFormat === TIME_MS ? 'selected' : '',
                 onclick: () => {
                   model.log.timeFormat = TIME_MS;
-                  model.log.setColumnVisibility('time', true);
+                  model.table.setColumnVisibility('time', true);
                 }
               }, `HH:mm:ss.SSS`),
             ])

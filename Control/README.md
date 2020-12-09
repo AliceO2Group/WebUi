@@ -12,6 +12,7 @@
     - [Grafana](#grafana)
     - [Consul](#consul)
     - [Kafka](#kafka)
+    - [InfoLogger GUI](#infologger-gui)
   - [Features](#features)
     - [Integration with Notification Service](#integration-with-notification-service)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
@@ -50,12 +51,21 @@ Use of a Consul instance is optional
 * `hostname` - Consul head node hostname
 * `port` - Consul head node port
 * `flpHardwarePath` - Prefix for KV Store for the content about the FLPs machines
-
+* `readoutPath` - Prefix for KV Store for readout's configuration
+* `readoutCardPath` - Prefix for KV Store for readout-card's configuration
+* `qcPath` - Prefix for KV Store for quality-control's configuration
+* `consulKVPrefix` - Name of the Consul cluster used by AliceO2
+  
 ### Kafka
 Use of a Kafka instance is optional. It is being used for prompting [Browser Notifications](#integration-with-notification-service) 
 * `hostnames` - list of hostnames separated by comma
 * `port` - port of the Grafana instance
 * `topic` - A string to follow for messages
+
+### InfoLogger GUI
+Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
+* `hostname` - InfoLogger GUI hostname
+* `port` - InfoLogger GUI port
 
 ## Features
 1. Lock interface - single user is allowed to execute commands, others act as spectators

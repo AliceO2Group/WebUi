@@ -99,20 +99,20 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully select a workflow from template list initially', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > a').click());
-    await page.waitFor(200);
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a').click());
+    await page.waitForTimeout(200);
     const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > a');
+      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a');
       return {classList: element.classList};
     });
 
-    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'selected'});
+    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
   it('should throw error when `Create` button is clicked due to `Control is not locked`', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > button').click());
-    await page.waitFor(500);
+    await page.waitForTimeout(500);
     const errorOnCreation = await page.evaluate(() => window.model.environment.itemNew);
     assert.strictEqual(errorOnCreation.kind, 'Failure');
     assert.strictEqual(errorOnCreation.payload, 'Request to server failed (403 Forbidden): Control is not locked');
@@ -129,16 +129,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully display `Refresh repositories` button', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button', {timeout: 5000});
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button', {timeout: 5000});
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').title);
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
     assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
   });
 
   it('should click to refresh repositories but throw error due to `Control is not locked`', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').click());
-    await page.waitFor(500);
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
+    await page.waitForTimeout(500);
     const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
     assert.deepStrictEqual(calls['refreshRepos'], undefined);
     assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (403 Forbidden): Control is not locked'});
@@ -146,7 +146,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully select second repository from dropdown', async () => {
     const selectedRepository = await page.select('select', 'git.com/alice-user/alice-repo/');
-    await page.waitFor(500);
+    await page.waitForTimeout(500);
     assert.deepStrictEqual(selectedRepository, ['git.com/alice-user/alice-repo/']);
   });
 
@@ -163,15 +163,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully request LOCK', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitFor(500);
+    await page.waitForTimeout(500);
     const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
     assert.deepStrictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
   });
 
   it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').click());
-    await page.waitFor(500);
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
+    await page.waitForTimeout(500);
     const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
     assert.ok(calls['refreshRepos']);
     assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (504 Gateway Timeout): 2 UNKNOWN: 504: Unable to refresh repositories'});
@@ -180,21 +180,21 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > button').click());
-    await page.waitFor(1000);
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
+    await page.waitForTimeout(1000);
     assert.ok(calls['refreshRepos']);
     assert.ok(calls['getWorkflowTemplates']);
     assert.ok(calls['listRepos']);
   });
 
   it('should successfully select a workflow from template list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > a').click());
-    await page.waitFor(200);
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a').click());
+    await page.waitForTimeout(200);
     const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > a');
+      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a');
       return {classList: element.classList};
     });
-    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'menu-item', 1: 'selected'});
+    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
   it('should successfully select trigger on from BasicConfiguration', async () => {
@@ -230,65 +230,72 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'false', dd_enabled: 'false', qcdd_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
+  it('should successfully select option file:// from dropdown and input box should appear', async () => {
+    await page.select('select#readoutURISelection', 'file://');
+    await page.waitForTimeout(500);
+    const readoutUriPrefix = await page.evaluate(() => window.model.workflow.form.basicVariables.readout_cfg_uri_pre);
+    assert.strictEqual(readoutUriPrefix, 'file://');
+  });
+
   it('should successfully fill in readout uri from typed text', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > div:nth-child(5) > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div > div:nth-child(5) > div > div:nth-child(2) > div > input');
     page.keyboard.type('file-readout');
-    await page.waitFor(500);
+    await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
 
     assert.strictEqual(variables.readout_cfg_uri, 'file-readout');
   });
 
   it('should display variables (K;V) panel', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5', {timeout: 2000});
-    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > h5').innerText);
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div', {timeout: 2000});
+    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div').innerText);
     assert.strictEqual('Advanced Configuration', title);
   });
 
   it('should successfully add trimmed pair (K;V) to variables', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
     page.keyboard.type('TestKey   ');
-    await page.waitFor(200);
+    await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
     page.keyboard.type(' TestValue  ');
-    await page.waitFor(200);
+    await page.waitForTimeout(200);
 
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div >  div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
     assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
     page.keyboard.type('TestKey2');
-    await page.waitFor(200);
+    await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
     page.keyboard.type('TestValue2');
-    await page.waitFor(200);
+    await page.waitForTimeout(200);
 
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2)> div:nth-child(3) > div > div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
 
     assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
+    await page.waitForTimeout(2000);
   });
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
     await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div > div:nth-child(3)').click();
     });
-    await page.waitFor(500);
+    await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
     assert.deepStrictEqual(variables, expectedVars);
-
-    const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
+    const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div > div:nth-child(3)').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);
   });
 
@@ -309,7 +316,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully create a new environment', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
-    await page.waitFor(1000);
+    await page.waitForTimeout(1000);
     const location = await page.evaluate(() => window.location);
 
     assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
@@ -320,7 +327,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully release LOCK', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitFor(500);
+    await page.waitForTimeout(500);
     const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
     assert.deepStrictEqual(lockButton, 'Lock is free');
   });
@@ -331,7 +338,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
    */
   function getFLPList(request) {
     if (request.url().includes('/api/getFLPs')) {
-      request.respond({status: 200, contentType: 'application/json', body: JSON.stringify(['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137'])});
+      request.respond({
+        status: 200, contentType: 'application/json', body: JSON.stringify({
+          flps: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137'],
+          readoutPath: 'localhost:8500/some/readout/path'
+        })
+      });
     } else {
       request.continue();
     }

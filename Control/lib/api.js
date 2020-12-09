@@ -37,14 +37,10 @@ if (!config.grafana) {
 }
 
 let consulService;
-let flpHardwarePath = undefined;
 if (config.consul) {
   consulService = new ConsulService(config.consul);
-  if (config.consul.flpHardwarePath) {
-    flpHardwarePath = config.consul.flpHardwarePath;
-  }
 }
-const consulConnector = new ConsulConnector(consulService, flpHardwarePath);
+const consulConnector = new ConsulConnector(consulService, config.consul);
 consulConnector.testConsulStatus();
 
 const padLock = new Padlock();
@@ -62,8 +58,11 @@ module.exports.setup = (http, ws) => {
   http.post('/forceUnlock', forceUnlock);
   http.get('/getPlotsList', getPlotsList);
   http.get('/getFrameworkInfo', getFrameworkInfo);
+  http.get('/getInfoLoggerUrl', getInfoLoggerUrl);
   http.get('/getCRUs', (req, res) => consulConnector.getCRUs(req, res));
   http.get('/getFLPs', (req, res) => consulConnector.getFLPs(req, res));
+  http.get('/getCRUsConfig', (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
+  http.post('/saveCRUsConfig', (req, res) => consulConnector.saveCRUsConfiguration(req, res));
 
   const kafka = new KafkaConnector(config.kafka, ws);
   if (kafka.isKafkaConfigured()) {
@@ -219,6 +218,20 @@ async function getFrameworkInfo(req, res) {
     }
 
     res.status(200).json(result);
+  }
+}
+
+/**
+ * Build the URL of infologger gui from the configuration file
+ * @param {Request} _
+ * @param {Response} res
+ */
+function getInfoLoggerUrl(_, res) {
+  const ilg = config.infoLoggerGui;
+  if (ilg && ilg.hostname && ilg.port) {
+    res.status(200).json({ilg: `${ilg.hostname}:${ilg.port}`});
+  } else {
+    res.status(502).json({ilg: ''});
   }
 }
 

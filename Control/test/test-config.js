@@ -35,7 +35,15 @@ module.exports = {
   consul: {
     hostname: 'localhost',
     port: 8550,
-    flpHardwarePath: 'test/o2/hardware/flps'
+    flpHardwarePath: 'test/o2/hardware/flps',
+    readoutPath: 'test/o2/readout/components',
+    readoutCardPath: 'test/o2/readoutcard/components',
+    qcPath: 'test/o2/qc/components',
+    consulKVPrefix: 'test/ui/some-cluster/kv',
+  },
+  infoLoggerGui: {
+    hostname: 'localhost',
+    port:8081
   },
   grafana: {
     hostname: 'localhost',

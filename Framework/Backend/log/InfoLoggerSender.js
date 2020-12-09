@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
-const protocols = require('./infologger-protocols.js');
-const net = require('net');
+const fs = require('fs');
+const {exec} = require("child_process");
 
 /**
  * Sends InfoLogger logs to InfoLoggerD over UNIX named socket
@@ -21,52 +21,34 @@ const net = require('net');
 class InfoLoggerSender {
   /**
    * @param {object} winston local loging object
-   * @param {string} path path to InfoLogger client (log executable)
    */
-  constructor(winston, path) {
+  constructor(winston) {
+    this.configured = false;
     this.winston = winston;
-    this.stream = net.connect(path);
-    this.stream.on('close', () => {
-      winston.instance.error('[InfoLoggerSender] Connection to daemon closed');
-    });
-    this.stream.on('connect', () => {
-      winston.instance.info('[InfoLoggerSender] Connected to daemon: ' + path);
-    });
-  }
-
-  /**
-   * Formats an log object into InfoLogger log frame
-   * @param {object} fields log object
-   * @param {string} version protocol version
-   * @return {string} InfoLogger protocol frame
-   */
-  format(fields, version = '1.4') {
-    let stringLog = '*' + version;
-    fields.system = fields.system || 'Web';
-    fields.facility = fields.facility || `Node ${process.version}`;
-    const currentProtocol = protocols.find((protocol) => protocol.version === version);
-    currentProtocol.fields.forEach((field) => {
-      stringLog += '#';
-      if (typeof fields[field.name] !== 'undefined') {
-        stringLog += fields[field.name];
+    // for security reasons this path is hardcoded
+    this.path = '/opt/o2-InfoLogger/bin/log';
+    fs.access(this.path, fs.constants.X_OK, (err) => {
+      if (err) {
+        winston.instance.debug('InfoLogger executable not found');
+      } else {
+        winston.instance.debug('Created instance of InfoLogger sender');
+        this.configured = true;
       }
     });
-    return stringLog + '\n';
   }
 
   /**
-   * Sends log message
-   * @param {object} log message as Object
+   * @param {string} log - log message
+   * @param {string} severity - one of InfoLogger supported severities
+   * @param {stsrimg} facility name - name of the module sending the log
    */
-  send(log) {
-    this.stream.write(this.format(log));
-  }
-
-  /**
-   * Smoothly closes the connection
-   */
-  close() {
-    this.stream.end();
+  send(log, severity, rolename) {
+    const command = `${this.path} -s ${severity} -oFacility=${rolename} -oSystem=GUI "${log}"`;
+    exec(command, (error) => {
+      if (error) {
+        this.winston.debug('Impossible to write a log to InfoLogger');
+      }
+    });
   }
 }
 module.exports = InfoLoggerSender;

@@ -12,14 +12,26 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconCircleX} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 
 /**
- * Generic page error with label, used on page load failed or access denied
- * @param {string} error
+ * Generic page loading placeholder
+ * @param {number} size
  * @return {vnode}
  */
-export default (error) => h('.flex-column items-center justify-center', [
-  h('span.errorPage', iconCircleX()),
-  h('span.text-center.danger.measure-narrow', {style: 'white-space: pre-line'},error)
-]);
+export default (size) => h('span',
+  {
+    style: size ? `font-size: ${size}em` : 'font-size: 10em'
+  },
+  h('.atom-spinner',
+    h('.spinner-inner',
+      [
+        h('.spinner-line'),
+        h('.spinner-line'),
+        h('.spinner-line'),
+        h('.spinner-circle',
+          h('div', '●')
+        )
+      ]
+    )
+  ));

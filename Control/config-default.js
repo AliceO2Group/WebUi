@@ -25,8 +25,16 @@ module.exports = {
   consul: {
     hostname: 'localhost',
     port: 8500,
-    flpHardwarePath: 'key/prefix'
+    flpHardwarePath: 'o2/hardware/key/prefix',
+    readoutPath: 'o2/components/readout/key/prefix',
+    readoutCardPath: 'o2/components/readoutcard/key/prefix',
+    qcPath: 'o2/components/qc/key/prefix',
+    consulKVPrefix: 'o2/cluster/key/prefix',
   },
+  // infoLoggerGui: {
+  //   hostname: 'localhost',
+  //   port: 8081
+  // }
   // JWT manages user's session duration
   // https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/json-tokens.md
   // jwt: {

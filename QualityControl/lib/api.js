@@ -14,7 +14,6 @@
 
 const {Log, WebSocket} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
-const projPackage = require('./../package.json');
 const log = new Log('QualityControl');
 
 // Load data source (demo or DB)
@@ -36,7 +35,7 @@ module.exports.setup = (http) => {
   http.post('/listLayouts', model.layoutConnector.listLayouts.bind(model.layoutConnector));
   http.delete('/layout/:layoutId', model.layoutConnector.deleteLayout.bind(model.layoutConnector));
   http.post('/layout', model.layoutConnector.createLayout.bind(model.layoutConnector));
-  http.get('/getFrameworkInfo', getFrameworkInfo);
+  http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService));
   new WebSocket(http);
 };
 
@@ -166,50 +165,16 @@ async function readObjectData(req, res) {
 }
 
 /**
- * Send back info about the framework
- * @param {Request} req
- * @param {Response} res
- */
-function getFrameworkInfo(req, res) {
-  if (!config) {
-    errorHandler('Unable to retrieve configuration of the framework', res, 502);
-  } else {
-    const result = {};
-    result.qcg = {};
-
-    if (projPackage && projPackage.version) {
-      result.qcg.version = projPackage.version;
-    }
-    if (config.http) {
-      const qc = {hostname: config.http.hostname, port: config.http.port};
-      result.qcg = Object.assign(result.qcg, qc);
-    }
-    if (config.ccdb) {
-      result.ccdb = config.ccdb;
-    }
-    if (config.consul) {
-      result.consul = config.consul;
-    }
-    if (config.quality_control) {
-      result.quality_control = config.quality_control;
-    }
-    res.status(200).json(result);
-  }
-}
-
-/**
  * Global HTTP error handler, sends status 500
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
 function errorHandler(err, res, status = 500) {
-  if (status === 500) {
-    if (err.stack) {
-      log.trace(err);
-    }
-    log.error(err.message || err);
+  if (err.stack) {
+    log.trace(err);
   }
+  log.error(err.message || err);
   res.status(status).send({message: err.message || err});
 }
 

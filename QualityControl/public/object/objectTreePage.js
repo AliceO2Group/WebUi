@@ -63,14 +63,17 @@ export default (model) => h('.h-100.flex-column', {key: model.router.params.page
  */
 function objectPanel(model) {
   const selectedObjectName = model.object.selected.name;
-  return model.object.objects[selectedObjectName].match({
-    NotAsked: () => null,
-    Loading: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
-      spinner(3), h('', 'Loading Object')]),
-    Success: () => drawPlot(model),
-    Failure: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
-      h('.f1', iconCircleX()), 'Unable to get data for the selected object']),
-  });
+  if (model.object.objects && model.object.objects[selectedObjectName]) {
+    return model.object.objects[selectedObjectName].match({
+      NotAsked: () => null,
+      Loading: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
+        spinner(3), h('', 'Loading Object')]),
+      Success: () => drawPlot(model),
+      Failure: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
+        h('.f1', iconCircleX()), 'Unable to get data for the selected object']),
+    });
+  }
+  return null;
 }
 
 /**

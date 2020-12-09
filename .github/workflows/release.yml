@@ -34,7 +34,7 @@ jobs:
         else echo "Project identified is UNKNOWN"; exit 1;
         fi
         echo "Identified project is $PROJECT with version $VERSION"
-        echo "::set-env name=PROJECT::$(echo "$PROJECT")"
+        echo "PROJECT=$PROJECT" >> $GITHUB_ENV
         echo "::set-output name=project::$(echo "$PROJECT")"
         echo "::set-output name=version::$(echo "$VERSION")"
     - run: (cd $PROJECT; npm publish)
