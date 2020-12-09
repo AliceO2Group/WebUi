@@ -123,11 +123,27 @@ h6, .f6 { font-size: .875rem; }
 .h-100 { height: 100%; }
 
 /* width scale */
-.w-25 {  width:  25%; }
-.w-33 {  width:  33%; }
-.w-50 {  width:  50%; }
-.w-75 {  width:  75%; }
+.w-5 { width: 5%; }
+.w-10 { width: 10%; }
+.w-15 { width: 15%; }
+.w-20 { width: 20%; }
+.w-25 { width: 25%; }
+.w-30 { width: 30%; }
+.w-33 { width: 33%; }
+.w-40 { width: 40%; }
+.w-45 { width: 45%; }
+.w-50 { width: 50%; }
+.w-55 { width: 55%; }
+.w-60 { width: 60%; }
+.w-65 { width: 65%; }
+.w-70 { width: 70%; }
+.w-75 { width: 75%; }
+.w-80 { width: 80%; }
+.w-85 { width: 85%; }
+.w-90 { width: 90%; }
+.w-95 { width: 95%; }
 .w-100 { width: 100%; }
+
 .w-wrapped { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 /* padding */
@@ -198,6 +214,10 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 .fill-green { fill: var(--color-success); }
 .fill-orange { fill: var(--color-orange); }
 
+.actionable-icon { cursor: pointer; }
+.actionable-icon:hover { transform: scale(1.2); }
+.actionable-icon:active { transform: scale(1.5); }
+
 /* button */
 
 .btn {
@@ -223,23 +243,23 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 .btn.btn-primary { background-color: var(--color-primary); color: var(--color-white); }
 .btn.btn-primary:hover { background-color: var(--color-primary-dark); color: var(--color-white);}
 .btn.btn-primary:active, .btn.btn-primary.active { background-color: var(--color-dark-blue); color: var(--color-white); }
-.btn.btn-primary[disabled] { background-image: linear-gradient(var(--color-primary), var(--color-dark-blue)); color: var(--color-white); border: 1px solid var(--color-dark-blue); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
+.btn.btn-primary[disabled] { background-image: linear-gradient(var(--color-primary), var(--color-dark-blue)); color: var(--color-white); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
 
 .btn.btn-danger { color: var(--color-danger); }
 .btn.btn-danger:hover { background-color: var(--color-danger); color: var(--color-white); }
 .btn.btn-danger:active, .btn.btn-danger.active { background-color: var(--color-danger-dark); color: var(--color-white); }
-.btn.btn-danger[disabled] { background-image: linear-gradient(var(--color-danger), var(--color-danger-dark)); color: var(--color-white); border: 1px solid var(--color-danger-dark); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
+.btn.btn-danger[disabled] { background-image: linear-gradient(var(--color-danger), var(--color-danger-dark)); color: var(--color-white); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
 
 .btn.btn-success { color: var(--color-success); }
 .btn.btn-success:hover { background-color: var(--color-success); color: var(--color-white); }
 .btn.btn-success:active, .btn.btn-success.active { background-color: var(--color-success-dark); color: var(--color-white); }
-.btn.btn-success[disabled] { background-image: linear-gradient(var(--color-success), var(--color-success-dark)); color: var(--color-white); border: 1px solid var(--color-success-dark); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
+.btn.btn-success[disabled] { background-image: linear-gradient(var(--color-success), var(--color-success-dark)); color: var(--color-white); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
 
 .btn.btn-warning { color: var(--color-warning); }
 .btn.btn-warning:hover { background-color: var(--color-warning); color: var(--color-white); }
 .btn.btn-warning:active,
 .btn.btn-warning.active { background-color: var(--color-warning-darker); color: var(--color-white); }
-.btn.btn-warning[disabled] { background-image: linear-gradient(var(--color-warning), var(--color-warning-darker)); color: var(--color-white); border: 1px solid var(--color-warning-dark); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
+.btn.btn-warning[disabled] { background-image: linear-gradient(var(--color-warning), var(--color-warning-darker)); color: var(--color-white); opacity: 0.4; box-shadow: none; cursor: not-allowed; }
 
 .btn.loading, .btn.loading:focus, .btn.loading:hover { color: transparent !important; }
 .btn.loading::after { left: calc(50% - (1em / 2)); top: calc(50% - (1em / 2)); position: absolute!important; animation: spinAround .5s infinite linear; border: 2px solid #0000003d; border-radius: 100%; border-right-color: transparent; border-top-color: transparent; content: ""; display: block; height: 1em; width: 1em; }
