@@ -37,7 +37,6 @@
     "mithril": "1.1.7",
     "mysql": "^2.18.1",
     "openid-client": "^4.2.0",
-    "sqlite3": "^5.0.0",
     "winston": "3.3.3",
     "ws": "^7.3.1"
   },
