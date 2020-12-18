@@ -28,7 +28,7 @@ The goal of this UI framework is to identify library and framework sets, provide
 - REST and WebSocket API
 - Authentication via CERN SSO (OpenID Connect), authorisation using CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
-- External resource access: MySQL, SQLite, gRPC, Consul
+- External resource access: MySQL, gRPC, Consul
 
 #### Client-side features
 - User interface CSS building blocks in accordance with ALICE standards
@@ -71,7 +71,6 @@ npm install --save @aliceo2/web-ui
 * [SSO - OpenID Connect](./docs/guide/openid.md) - Provides authentication using CERN SSO via OpenID Connect
 * [WebSocket server](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
-* [SQLite](./docs/guide/sqlite.md) - SQLite client with simple CRUD queries
 * [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
 * [JIRA](./docs/guide/jira.md) - Create JIRA issues
 
