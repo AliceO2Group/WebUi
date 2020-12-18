@@ -56,10 +56,6 @@ class Log {
   debug(log) {
     const message = (this.label == null) ? log : {message: log, label: this.label};
     winston.instance.debug(message);
-
-    if (infologger.configured) {
-      infologger.send(log, 'Debug', this.label);
-    }
   }
 
   /**
