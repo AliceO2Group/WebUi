@@ -2,9 +2,9 @@
   "name": "@aliceo2/qc",
   "version": "1.10.2",
   "description": "O2 Quality Control Web User Interface",
-  "author": "Vladimir Kosmala",
+  "author": "George Raduta",
   "contributors": [
-    "George Raduta",
+    "Vladimir Kosmala",
     "Adam Wegrzynek"
   ],
   "license": "GPL-3.0",
