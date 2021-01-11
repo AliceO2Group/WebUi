@@ -17,11 +17,11 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 
 /**
- * @file Page to FrameworkInfo(About) (content and header)
+ * @file Page that displays list of tasks
  */
 
 /**
- * Header of the about page
+ * Header
  * @param {Object} model
  * @return {vnode}
  */
@@ -31,35 +31,42 @@ export const header = (model) => [
 ];
 
 /**
- * Content of the status page (or frameworkinfo)
+ * Content
  * Show loading or error on other cases
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
-  createTableForControlGUIInfo(model.task),
+export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+  getListOfTasks(model.task)
 ]);
 
 /**
- * Show COG and its dependencies info based on request status
+ * Call GetTasks on server side
  * @param {Object} tasks
  * @return {vnode}
  */
-const createTableForControlGUIInfo = (task) =>
+const getListOfTasks = (task) =>
   h('.p2', [
     task.getTaskList.match({
       NotAsked: () => null,
       Loading: () => pageLoading(),
       Success: (data) => showContent(data),
       Failure: (error) => errorPage(error),
-    }),
+    })
   ]);
 
 /**
- * Display all running task
+ * Render table of display message
+ */
+const showContent = (items) => (items && Object.keys(items).length > 0)
+  ? h('.scroll-auto', taskTable(items))
+  : h('h3.m4', ['No tasks found.']);
+
+/**
+ * Display all running task as table
  * param {object} items - formatted list of tasks
  */
-const showContent = (items) =>
+const taskTable = (items) =>
   Object.keys(items).map((hostname) => [
     h('.shadow-level1', [
       h('table.table', {
