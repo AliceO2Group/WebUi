@@ -45,16 +45,20 @@ export default class Task extends Observable {
     this.notify();
   }
 
+  /**
+   * Prepare data for taks table
+   * @param {object} data - raw data
+   */
   prepareData(data) {
-    var taskTable = {}; 
+    var taskTable = {};
     for (let item of data.tasks) {
       if (!taskTable.hasOwnProperty(item.deploymentInfo.hostname)) {
-        taskTable[item.deploymentInfo.hostname] = []; 
-       }   
-       taskTable[item.deploymentInfo.hostname].push({
-         name: item.className,
-         pid: item.pid 
-        })  
+        taskTable[item.deploymentInfo.hostname] = [];
+      }
+      taskTable[item.deploymentInfo.hostname].push({
+        name: item.className,
+        pid: item.pid
+      })
     }
     return taskTable;
   }
