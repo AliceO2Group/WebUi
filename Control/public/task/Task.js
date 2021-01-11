@@ -32,7 +32,7 @@ export default class Task extends Observable {
    * Loads list of running tasks from AliECS Core
    */
   async initTasks() {
-    this.getTaskListt = RemoteData.loading();
+    this.getTaskList = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post('/api/GetTasks');
@@ -66,7 +66,7 @@ export default class Task extends Observable {
   /**
    * Initialize page and request data
    */
-  initTasksPage() {
+  getTasks() {
     this.initTasks();
   }
 }

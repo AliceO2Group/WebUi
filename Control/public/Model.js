@@ -121,7 +121,7 @@ export default class Model extends Observable {
         this.workflow.initWorkflowPage();
         break;
       case 'taskList':
-        this.task.initTasksPage();
+        this.task.getTasks();
         break;
       case 'about':
         this.frameworkInfo.getFrameworkInfo();
