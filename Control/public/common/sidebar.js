@@ -14,7 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {
-  iconGridTwoUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog
+  iconGridTwoUp, iconGridThreeUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog
 } from '/js/src/icons.js';
 
 /**
@@ -27,7 +27,10 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
     model.sideBarMenu ? 'Environments' : 'ENVS'),
   menuItem(model, 'Create', 'newEnvironment', iconPlus()),
   menuItem(model, 'Active', 'environments', iconGridTwoUp()),
-  menuItem(model, 'Links Configuration', 'configuration', iconCog()),
+  menuItem(model, 'Task list', 'taskList', iconGridThreeUp()),
+  h('h5.menu-title-large.mh1',
+    model.sideBarMenu ? 'Configuration' : 'CONF'),
+  menuItem(model, 'Links', 'configuration', iconCog()),
   h('', {style: 'flex-grow:1'}), // empty item to fill in space
   menuItem(model, 'About', 'about', iconExcerpt()),
   collapseSidebarMenuItem(model),

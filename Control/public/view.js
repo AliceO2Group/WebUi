@@ -40,6 +40,10 @@ import {
   content as configurationContent,
   header as configurationHeader
 } from './configuration/configPage.js';
+import {
+  content as taskContent,
+  header as taskHeader
+} from './task/taskPage.js';
 
 /**
  * Main view layout
@@ -74,7 +78,8 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     environments: environmentsHeader,
     environment: environmentHeader,
     about: statusHeader,
-    configuration: configurationHeader
+    configuration: configurationHeader,
+    taskList: taskHeader
   })(model)
 ]);
 
@@ -89,6 +94,7 @@ const content = (model) => [
     environments: environmentsContent,
     environment: environmentContent,
     about: statusContent,
-    configuration: configurationContent
+    configuration: configurationContent,
+    taskList: taskContent
   })(model)
 ];

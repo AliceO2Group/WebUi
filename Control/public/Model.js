@@ -19,6 +19,7 @@ import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import FrameworkInfo from './frameworkinfo/FrameworkInfo.js';
 import Workflow from './workflow/Workflow.js';
+import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
 
 /**
@@ -50,6 +51,9 @@ export default class Model extends Observable {
 
     this.workflow = new Workflow(this);
     this.workflow.bubbleTo(this);
+
+    this.task = new Task(this);
+    this.task.bubbleTo(this);
 
     this.frameworkInfo = new FrameworkInfo(this);
     this.frameworkInfo.bubbleTo(this);
@@ -115,6 +119,9 @@ export default class Model extends Observable {
         break;
       case 'newEnvironment':
         this.workflow.initWorkflowPage();
+        break;
+      case 'taskList':
+        this.task.initTasksPage();
         break;
       case 'about':
         this.frameworkInfo.getFrameworkInfo();
