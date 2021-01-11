@@ -135,6 +135,10 @@ describe('Control', function() {
       destroyEnvironment(call, callback) {
         calls['destroyEnvironment'] = true;
         callback(null, {});
+      },
+      getTasks(call, callback) {
+        calls['getTasks'] = true;
+        callback(null, {});
       }
     });
 
@@ -214,6 +218,7 @@ describe('Control', function() {
   require('./public/page-environments-mocha');
   require('./public/page-new-environment-mocha');
   // require('./public/page-configuration-mocha');
+  require('./public/page-tasks-mocha');
 
   beforeEach(() => {
     this.ok = true;
