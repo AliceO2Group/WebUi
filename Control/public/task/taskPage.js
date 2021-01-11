@@ -74,13 +74,17 @@ const taskTable = (items) =>
       }, [
         h('thead',
           h('tr.table-primary',
-            h('th', {colspan: 2}, hostname)
+            h('th', {colspan: 3}, hostname)
           ),
-          h('tr', ['Name', 'PID'].map((header) => h('th', header)))
+          h('tr', ['Name', 'PID', 'State'].map((header) => h('th', header)))
         ),
         h('tbody', items[hostname].map((task) => [h('tr', [
-          h('td', task.name.substr(task.name.lastIndexOf("/") + 1)),
-          h('td', task.pid)
+          h('td', task.name.substring(task.name.lastIndexOf("/") + 1, task.name.lastIndexOf("@"))),
+          h('td', task.pid),
+          h('td', {class: (task.state === 'RUNNING' ?  'success'
+                        : (task.state === 'CONFIGURED' ? 'warning'
+                        : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
+            style: 'font-weight: bold;'}, task.state)
         ])]))
       ])
     ])

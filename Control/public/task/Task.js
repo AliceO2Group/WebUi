@@ -57,6 +57,7 @@ export default class Task extends Observable {
       }
       taskTable[item.deploymentInfo.hostname].push({
         name: item.className,
+        state: item.state,
         pid: item.pid
       })
     }
