@@ -82,9 +82,9 @@ const taskTable = (items) =>
           h('td', task.name.substring(task.name.lastIndexOf("/") + 1, task.name.lastIndexOf("@"))),
           h('td', task.pid),
           h('td', {class: (task.state === 'RUNNING' ?  'success'
-                        : (task.state === 'CONFIGURED' ? 'warning'
-                        : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
-            style: 'font-weight: bold;'}, task.state)
+            : (task.state === 'CONFIGURED' ? 'warning'
+              : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
+          style: 'font-weight: bold;'}, task.state)
         ])]))
       ])
     ])
