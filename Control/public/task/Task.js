@@ -56,9 +56,10 @@ export default class Task extends Observable {
         taskTable[item.deploymentInfo.hostname] = [];
       }
       taskTable[item.deploymentInfo.hostname].push({
-        name: item.className,
+        name: item.className.substring(item.className.lastIndexOf("/") + 1, item.className.lastIndexOf("@")),
         state: item.state,
-        pid: item.pid
+        pid: item.pid,
+        locked: item.locked
       })
     }
     return taskTable;
