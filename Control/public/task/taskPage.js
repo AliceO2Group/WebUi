@@ -15,6 +15,7 @@
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
+import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
 
 /**
  * @file Page that displays list of tasks
@@ -74,17 +75,18 @@ const taskTable = (items) =>
       }, [
         h('thead',
           h('tr.table-primary',
-            h('th', {colspan: 3}, hostname)
+            h('th', {colspan: 4}, hostname)
           ),
-          h('tr', ['Name', 'PID', 'State'].map((header) => h('th', header)))
+          h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
         ),
         h('tbody', items[hostname].map((task) => [h('tr', [
-          h('td', task.name.substring(task.name.lastIndexOf("/") + 1, task.name.lastIndexOf("@"))),
+          h('td', task.name),
           h('td', task.pid),
           h('td', {class: (task.state === 'RUNNING' ?  'success'
             : (task.state === 'CONFIGURED' ? 'warning'
               : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
-          style: 'font-weight: bold;'}, task.state)
+          style: 'font-weight: bold;'}, task.state),
+          h('td', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
         ])]))
       ])
     ])
