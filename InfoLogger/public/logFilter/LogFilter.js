@@ -191,6 +191,9 @@ export default class LogFilter extends Observable {
        * @return {string}
        */
       function removeNewLinesFrom(logValue) {
+        if (typeof logValue !== 'string') {
+          return logValue;
+        }
         return logValue.replace(/\r?\n|\r/g, '');
       }
 
