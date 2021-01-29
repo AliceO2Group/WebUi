@@ -27,9 +27,25 @@ import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', h('h4', 'Task list')),
-  h('.flex-grow text-right', [])
+  h('.w-50 text-center', [
+    h('h4', 'Task list')
+  ]),
+  h('.flex-grow text-right', [
+    cleanUpButton(model.task)
+  ])
 ];
+
+/**
+ * Prepares cleanup button in top right corner
+ */
+const cleanUpButton = (task) =>
+  h(`button.btn.btn-danger.mh1`, {
+    class: task.cleanUpRequest.isLoading() ? 'loading' : '',
+    disabled: task.cleanUpRequest.isLoading(),
+    onclick: () => confirm(`Are you sure you know what you are doing?`)
+      && task.cleanUpTasks(),
+    title: 'Clean tasks'
+  },'Clean tasks');
 
 /**
  * Content
