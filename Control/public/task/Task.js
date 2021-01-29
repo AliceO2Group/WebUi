@@ -26,6 +26,7 @@ export default class Task extends Observable {
     super();
     this.model = model;
     this.getTaskList = RemoteData.notAsked();
+    this.cleanUpRequest = RemoteData.notAsked();
   }
 
   /** 
@@ -42,6 +43,25 @@ export default class Task extends Observable {
     } else {
       this.getTaskList = RemoteData.success(this.prepareData(result));
     }   
+    this.notify();
+  }
+
+  /**
+   * Clean up tasks
+   */
+  async cleanUpTasks() {
+    this.cleanUpRequest = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post('/api/CleanupTasks');
+    if (!ok) {
+      this.cleanUpRequest = RemoteData.failure(result.message);
+      this.model.notification.show(`Unable to clean up tasks: ${result.message}`, 'danger', 2000);
+    } else {
+      this.cleanUpRequest = RemoteData.success();
+      this.model.notification.show(`Tasks have been cleaned`, 'success');
+      this.model.router.go('?page=taskList');
+    }
     this.notify();
   }
 
