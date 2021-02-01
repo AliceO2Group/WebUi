@@ -12,7 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom, iconChevronTop, iconCircleX, iconList} from '/js/src/index.js';
+import {
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, info
+} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
@@ -278,7 +280,7 @@ const destroyEnvButton = (environment, item, forceDestroy = false) =>
  */
 const infoLoggerButton = (environment, item) =>
   h('a', {
-    style: {display: !environment.infoLoggerUrl  ? 'none' : ''},
+    style: {display: !environment.infoLoggerUrl ? 'none' : ''},
     title: 'Open InfoLogger',
     href: item.currentRunNumber ?
       `//${environment.infoLoggerUrl}?q={"run":{"match":"${item.currentRunNumber}"}}`
@@ -297,7 +299,7 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
     h('thead',
       h('tr',
         [
-          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
+          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'Logs', 'More']
             .map((header) => h('th', header))
         ]
       )
@@ -305,7 +307,7 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
     h('tbody', [
       tasks.map((task) => [h('tr', [
         h('td', task.name),
-        h('td', task.locked),
+        h('td', h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())),
         h('td', task.status),
         h('td', {
           class: (task.state === 'RUNNING' ?
@@ -313,6 +315,14 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
           style: 'font-weight: bold;'
         }, task.state),
         h('td', task.deploymentInfo.hostname),
+        h('td',
+          environment.task.list[task.taskId].isSuccess()
+          && h('a', {
+            title: 'Open Mesos Task Logs',
+            href: environment.task.list[task.taskId].payload.messosLog,
+            target: '_blank'
+          }, h('.flex-row.items-center.justify-center.actionable-icon.w-33', info()))
+        ),
         h('td',
           h('button.btn.btn-default', {
             title: 'More Details',
