@@ -13,6 +13,8 @@
 */
 
 const jwt = require('jsonwebtoken');
+const {randomBytes} = require('crypto');
+
 /**
  * Provides JSON Web Token functionality such as token generation and verification.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
@@ -25,11 +27,11 @@ class JwtToken {
    */
   constructor(config) {
     config = (typeof config == 'undefined') ? {} : config;
-    config.secret = (!config.secret) ? (Math.random()+1).toString(36).substring(7) : config.secret;
     config.expiration = (!config.expiration) ? '1d' : config.expiration;
     config.issuer = (!config.issuer) ? 'o2-ui' : config.issuer;
     config.maxAge = (!config.maxAge) ? '7d' : config.maxAge;
-
+    config.secret = (!config.secret) ? randomBytes(4).toString('hex') : config.secret;
+    
     this._expiration = config.expiration;
     this._maxAge = config.maxAge;
     this._secret = config.secret;
