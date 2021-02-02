@@ -401,8 +401,8 @@ export default class Log extends Observable {
    * @param {MODE} mode to switch to
    */
   liveStop(mode = MODE.QUERY) {
-    if (!this.isLiveModeRunning()) {
-      throw new Error(`Live not enabled. Current mode is: ${mode}`);
+    if (this.isLiveModeRunning()) {
+      throw new Error(`Live not enabled. Current mode is: ${this.activeMode}`);
     }
     this.activeMode = mode;
     clearInterval(this.liveInterval);
