@@ -374,7 +374,7 @@ export default class Log extends Observable {
       throw new Error('WS is not yet ready');
     }
     if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.live) {
-      throw new Error('Live service is not available');
+      throw new Error(`Live service is not available due to: ${this.model.servicesResult.payload}`);
     }
     if (this.isLiveModeRunning()) {
       throw new Error('Live already enabled');
