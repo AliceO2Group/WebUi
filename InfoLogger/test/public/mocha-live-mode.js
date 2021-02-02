@@ -83,6 +83,7 @@ describe('Live Mode test-suite', async () => {
 
   it('should filter messages based on `hostname` matching `aldaqecs01-v1` from live -> paused -> live', async () => {
     await page.evaluate(() => window.model.log.liveStop('Paused'));
+    await page.waitForTimeout(2000);
     await page.evaluate(() => {
       window.model.log.filter.resetCriterias();
       window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
