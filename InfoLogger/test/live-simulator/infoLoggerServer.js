@@ -21,9 +21,8 @@
 const net = require('net');
 const fakeData = require('./fakeData.json');
 
-let server;
 const createServer = () => {
-  server = net.createServer(connectionListener);
+  const server = net.createServer(connectionListener);
   const port = 6102; // infoLoggerServer default port
 
   function connectionListener(client) {
@@ -98,11 +97,12 @@ const createServer = () => {
   server.listen(port, () => {
     console.log(`InfoLoggerServer is running on port ${port}`);
   });
+  return server
 }
 
-const closeServer = () => {
+const closeServer = (server) => {
   try {
-    this.server.close();
+    server.close();
   } catch (err) {
     console.error(err);
   }

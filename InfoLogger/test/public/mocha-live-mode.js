@@ -21,16 +21,16 @@ const {createServer, closeServer} = require('./../live-simulator/infoLoggerServe
 describe('Live Mode test-suite', async () => {
   let baseUrl;
   let page;
-
+  let ilgServer;
   before(async () => {
     baseUrl = test.helpers.baseUrl;
     page = test.page;
     // Start infologgerserver simulator
-    createServer();
+    ilgServer = createServer();
     await page.waitForTimeout(2000);
   });
 
-  after(() => closeServer());
+  after(() => closeServer(ilgServer));
 
   it('should go to homepage', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
