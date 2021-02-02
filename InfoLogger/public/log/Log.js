@@ -397,12 +397,12 @@ export default class Log extends Observable {
   }
 
   /**
-   * Stops live mode if it was enabled by stopping streaming from server
-   * @param {MODE} mode to switch to
+   * Stops live mode and moves to specified mode ('Paused' or 'Query')
+   * @param {MODE} mode to switch to (default 'Query')
    */
   liveStop(mode = MODE.QUERY) {
-    if (!this.isLiveModeRunning()) {
-      throw new Error(`Live not enabled. Current mode is: ${this.activeMode}`);
+    if (mode !== MODE.QUERY || mode !== MODE.LIVE.PAUSED) {
+      mode = MODE.QUERY;
     }
     this.activeMode = mode;
     clearInterval(this.liveInterval);
