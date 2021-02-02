@@ -20,78 +20,92 @@
 
 const net = require('net');
 const fakeData = require('./fakeData.json');
-const server = net.createServer(connectionListener);
-const port = 6102; // infoLoggerServer default port
 
-function connectionListener(client) {
-  console.log('Client connected');
-  let timer;
-  let currentLogIndex = 0;
+let server;
+const createServer = () => {
+  server = net.createServer(connectionListener);
+  const port = 6102; // infoLoggerServer default port
 
-  client.on('close', onClientDisconnect);
-  client.on('end', onClientDisconnect);
-  sendNextLog();
+  function connectionListener(client) {
+    console.log('Client connected');
+    let timer;
+    let currentLogIndex = 0;
 
-  function sendNextLog() {
-    const log = fakeData[currentLogIndex % fakeData.length];
-    const timestamp = (new Date()).getTime() / 1000; // seconds
-    const nextLogTimeout = 500 + (Math.random() * -500); // [0 ; 500]ms
+    client.on('close', onClientDisconnect);
+    client.on('end', onClientDisconnect);
+    sendNextLog();
 
-    // switch protocol after each log sent to try both protocols
-    if (currentLogIndex % 2 === 1) {
-      client.write(`*1.4#` +
-        `${log.severity || ''}#` +
-        `${log.level || ''}#` +
-        `${timestamp || ''}#` +
-        `${log.hostname || ''}#` +
-        `${log.rolename || ''}#` +
-        `${log.pid || ''}#` +
-        `${log.username || ''}#` +
-        `${log.system || ''}#` +
-        `${log.facility || ''}#` +
-        `${log.detector || ''}#` +
-        `${log.partition || ''}#` +
-        `${log.run || ''}#` +
-        `${log.errcode || ''}#` +
-        `${log.errline || ''}#` +
-        `${log.errsource || ''}#` +
-        `${log.message || ''}\r\n`);
-    } else {
-      client.write(`*1.3#` +
-        `${log.severity || ''}#` +
-        `${log.level || ''}#` +
-        `${timestamp || ''}#` +
-        `${log.hostname || ''}#` +
-        `${log.rolename || ''}#` +
-        `${log.pid || ''}#` +
-        `${log.username || ''}#` +
-        `${log.system || ''}#` +
-        `${log.facility || ''}#` +
-        `${log.detector || ''}#` +
-        `${log.partition || ''}#` +
-        `#` + // dest field
-        `${log.run || ''}#` +
-        `${log.errcode || ''}#` +
-        `${log.errline || ''}#` +
-        `${log.errsource || ''}#` +
-        `${log.message || ''}\r\n`);
+    function sendNextLog() {
+      const log = fakeData[currentLogIndex % fakeData.length];
+      const timestamp = (new Date()).getTime() / 1000; // seconds
+      const nextLogTimeout = 500 + (Math.random() * -500); // [0 ; 500]ms
+
+      // switch protocol after each log sent to try both protocols
+      if (currentLogIndex % 2 === 1) {
+        client.write(`*1.4#` +
+          `${log.severity || ''}#` +
+          `${log.level || ''}#` +
+          `${timestamp || ''}#` +
+          `${log.hostname || ''}#` +
+          `${log.rolename || ''}#` +
+          `${log.pid || ''}#` +
+          `${log.username || ''}#` +
+          `${log.system || ''}#` +
+          `${log.facility || ''}#` +
+          `${log.detector || ''}#` +
+          `${log.partition || ''}#` +
+          `${log.run || ''}#` +
+          `${log.errcode || ''}#` +
+          `${log.errline || ''}#` +
+          `${log.errsource || ''}#` +
+          `${log.message || ''}\r\n`);
+      } else {
+        client.write(`*1.3#` +
+          `${log.severity || ''}#` +
+          `${log.level || ''}#` +
+          `${timestamp || ''}#` +
+          `${log.hostname || ''}#` +
+          `${log.rolename || ''}#` +
+          `${log.pid || ''}#` +
+          `${log.username || ''}#` +
+          `${log.system || ''}#` +
+          `${log.facility || ''}#` +
+          `${log.detector || ''}#` +
+          `${log.partition || ''}#` +
+          `#` + // dest field
+          `${log.run || ''}#` +
+          `${log.errcode || ''}#` +
+          `${log.errline || ''}#` +
+          `${log.errsource || ''}#` +
+          `${log.message || ''}\r\n`);
+      }
+
+      currentLogIndex++;
+      timer = setTimeout(sendNextLog, nextLogTimeout);
     }
 
-    currentLogIndex++;
-    timer = setTimeout(sendNextLog, nextLogTimeout);
+    function onClientDisconnect() {
+      console.log('Client disconnected');
+      clearTimeout(timer);
+    }
   }
 
-  function onClientDisconnect() {
-    console.log('Client disconnected');
-    clearTimeout(timer);
+  server.on('error', (error) => {
+    console.error('InfoLogger Server crashed due to:');
+    console.trace(error);
+  });
+
+  server.listen(port, () => {
+    console.log(`InfoLoggerServer is running on port ${port}`);
+  });
+}
+
+const closeServer = () => {
+  try {
+    this.server.close();
+  } catch (err) {
+    console.error(err);
   }
 }
 
-server.on('error', (error) => {
-  console.error('InfoLogger Server crashed due to:');
-  console.trace(error);
-});
-
-server.listen(port, () => {
-  console.log(`InfoLoggerServer is running on port ${port}`);
-});
+module.exports = {createServer, closeServer};

@@ -401,7 +401,7 @@ export default class Log extends Observable {
    * @param {MODE} mode to switch to (default 'Query')
    */
   liveStop(mode = MODE.QUERY) {
-    if (mode !== MODE.QUERY || mode !== MODE.LIVE.PAUSED) {
+    if (mode !== MODE.QUERY && mode !== MODE.LIVE.PAUSED) {
       mode = MODE.QUERY;
     }
     this.activeMode = mode;

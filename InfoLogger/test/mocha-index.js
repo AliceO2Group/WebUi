@@ -45,9 +45,6 @@ describe('InfoLogger', function() {
     subprocess.stderr.on('data', (chunk) => subprocessOutput += chunk.toString());
     subprocess.on('error', (error) => console.error(`Server failed due to: ${error}`))
 
-    // Start infologgerserver simulator
-    require('./live-simulator/infoLoggerServer.js');
-
     // Start browser to test UI
     browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
