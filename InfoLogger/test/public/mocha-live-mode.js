@@ -27,7 +27,15 @@ describe('Live Mode test-suite', async () => {
     // TODO reload page
   });
 
-  it('can be activated because it is configured and simulator is started', async () => {
+  it('should go to homepage', async function() {
+    await page.goto(baseUrl, {waitUntil: 'networkidle0'});
+    const location = await page.evaluate(() => window.location);
+    const search = decodeURIComponent(location.search);
+
+    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+  });
+
+  it('should successfully enable LIVE mode', async () => {
     const activeMode = await page.evaluate(() => {
       window.model.log.liveStart();
       return window.model.log.activeMode;
@@ -36,7 +44,7 @@ describe('Live Mode test-suite', async () => {
     assert.strictEqual(activeMode, 'Running');
   });
 
-  it('cannot be activated twice', async () => {
+  it('should throw error due to LIVE mode already beeing active', async () => {
     const thrown = await page.evaluate(() => {
       try {
         window.model.log.liveStart();
@@ -75,7 +83,7 @@ describe('Live Mode test-suite', async () => {
       window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
     });
     await page.evaluate(() => window.model.log.liveStart());
-    await page.waitForTimeout(20000);
+    await page.waitForTimeout(7000);
     const list = await page.evaluate(() => window.model.log.list);
     await page.waitForTimeout(1000);
     const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');

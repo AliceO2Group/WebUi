@@ -423,6 +423,8 @@ export default class Log extends Observable {
    * @return {boolean} is live mode running
    */
   isLiveModeRunning() {
+    // eslint-disable-next-line no-console
+    console.log('CURRENT RUNNING MODE', this.activeMode);
     return this.activeMode === MODE.LIVE.RUNNING;
   }
 
