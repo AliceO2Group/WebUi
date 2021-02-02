@@ -43,6 +43,7 @@ describe('InfoLogger', function() {
     subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => subprocessOutput += chunk.toString());
     subprocess.stderr.on('data', (chunk) => subprocessOutput += chunk.toString());
+    subprocess.on('error', (error) => console.error(`Server failed due to: ${error}`))
 
     // Start infologgerserver simulator
     require('./live-simulator/infoLoggerServer.js');
