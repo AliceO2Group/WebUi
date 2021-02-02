@@ -402,7 +402,7 @@ export default class Log extends Observable {
    */
   liveStop(mode = MODE.QUERY) {
     if (!this.isLiveModeRunning()) {
-      throw new Error('Live not enabled');
+      throw new Error(`Live not enabled. Current mode is: ${mode}`);
     }
     this.activeMode = mode;
     clearInterval(this.liveInterval);
@@ -423,8 +423,6 @@ export default class Log extends Observable {
    * @return {boolean} is live mode running
    */
   isLiveModeRunning() {
-    // eslint-disable-next-line no-console
-    console.log('CURRENT RUNNING MODE', this.activeMode);
     return this.activeMode === MODE.LIVE.RUNNING;
   }
 
