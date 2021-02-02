@@ -15,29 +15,23 @@
 /* eslint-disable max-len */
 
 const assert = require('assert');
-
 const test = require('../mocha-index');
 
 describe('Query Mode test-suite', async () => {
-  let baseUrl;
   let page;
 
   before(async () => {
-    baseUrl = test.helpers.baseUrl;
     page = test.page;
-    // TODO go back to new page
-  });
-  describe('Query mode', () => {
-    it('should fail because it is not configured', async () => {
-      try {
-        await page.evaluate(async () => {
-          return await window.model.log.query();
-        });
-        assert.fail();
-      } catch (e) {
-        // code failed, so it is a successful test
-      }
-    });
   });
 
+  it('should fail because it is not configured', async () => {
+    try {
+      await page.evaluate(async () => {
+        return await window.model.log.query();
+      });
+      assert.fail();
+    } catch (e) {
+      // code failed, so it is a successful test
+    }
+  });
 });

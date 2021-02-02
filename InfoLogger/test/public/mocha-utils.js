@@ -19,43 +19,39 @@ const assert = require('assert');
 const test = require('../mocha-index');
 
 describe('Utils test-suite', async () => {
-  let baseUrl;
   let page;
 
   before(async () => {
-    baseUrl = test.helpers.baseUrl;
     page = test.page;
-    // TODO go back to new page
   });
-  describe('utils.js', async () => {
-    it('can be injected', async () => {
-      const watchDogInjection = page.waitForFunction('window.utils');
-      await page.evaluate(() => {
-        const script = document.createElement('script');
-        script.type = 'module';
-        const content = document.createTextNode('import * as utils from "/common/utils.js"; window.utils = utils;');
-        script.appendChild(content);
-        document.getElementsByTagName('head')[0].appendChild(script);
-      });
-      await watchDogInjection;
-    });
 
-    it('has a callRateLimiter to limit function calls per window', async () => {
-      let counter = await page.evaluate(() => {
-        window.testCounter = 0;
-        window.testFunction = window.utils.callRateLimiter(() => window.testCounter++, 100);
-        window.testFunction();
-        window.testFunction();
-        window.testFunction(); // 3 calls but counter will increase by 2 only at the end
-        return window.testCounter;
-      });
-      assert.deepStrictEqual(counter, 1);
-
-      await page.waitForTimeout(200);
-      counter = await page.evaluate(() => {
-        return window.testCounter;
-      });
-      assert.deepStrictEqual(counter, 2);
+  it('can be injected', async () => {
+    const watchDogInjection = page.waitForFunction('window.utils');
+    await page.evaluate(() => {
+      const script = document.createElement('script');
+      script.type = 'module';
+      const content = document.createTextNode('import * as utils from "/common/utils.js"; window.utils = utils;');
+      script.appendChild(content);
+      document.getElementsByTagName('head')[0].appendChild(script);
     });
+    await watchDogInjection;
+  });
+
+  it('has a callRateLimiter to limit function calls per window', async () => {
+    let counter = await page.evaluate(() => {
+      window.testCounter = 0;
+      window.testFunction = window.utils.callRateLimiter(() => window.testCounter++, 100);
+      window.testFunction();
+      window.testFunction();
+      window.testFunction(); // 3 calls but counter will increase by 2 only at the end
+      return window.testCounter;
+    });
+    assert.strictEqual(counter, 1);
+
+    await page.waitForTimeout(200);
+    counter = await page.evaluate(() => {
+      return window.testCounter;
+    });
+    assert.strictEqual(counter, 2);
   });
 });
