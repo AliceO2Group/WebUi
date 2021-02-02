@@ -46,7 +46,7 @@ describe('Live Mode test-suite', async () => {
         }
       });
   
-      assert.deepStrictEqual(thrown, true);
+      assert.ok(thrown);
     });
   
     it('should have filled some logs via WS with the level "debug"', async () => {
@@ -57,15 +57,15 @@ describe('Live Mode test-suite', async () => {
         return window.model.log.filter.criterias;
       });
   
-      assert.deepStrictEqual(criterias.level.max, 21);
-      assert.deepStrictEqual(criterias.level.$max, 21);
+      assert.strictEqual(criterias.level.max, 21);
+      assert.strictEqual(criterias.level.$max, 21);
   
       // Wait for logs and count them (2-3 maybe, it's random)
       await page.waitForTimeout(1500); // simulator is set to ~100ms per log
       const list = await page.evaluate(() => {
         return window.model.log.list;
       });
-      assert.deepStrictEqual(!!list.length, true);
+      assert.ok(!!list.length);
     });
   
     it('should filter messages based on `hostname` matching `aldaqecs01-v1` from live -> paused -> live', async () => {
