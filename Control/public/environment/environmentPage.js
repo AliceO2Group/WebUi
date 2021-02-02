@@ -13,7 +13,7 @@
 */
 
 import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, info
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, iconCloudDownload
 } from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -219,6 +219,7 @@ const showControl = (environment, item) => h('.mv2.pv3.ph2', [
     h('.w-25', {
       style: 'display: flex; justify-content: flex-end;'
     }, [
+      messosLogButton(environment),
       infoLoggerButton(environment, item),
       destroyEnvButton(environment, item),
       destroyEnvButton(environment, item, true)
@@ -264,7 +265,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
  * @return {vnode}
  */
 const destroyEnvButton = (environment, item, forceDestroy = false) =>
-  h(`button.btn.btn-danger.mh1`, {
+  h(`button.btn.btn-danger`, {
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     style: {display: !forceDestroy ? 'none' : ''},
@@ -279,7 +280,7 @@ const destroyEnvButton = (environment, item, forceDestroy = false) =>
  * @return {vnode}
  */
 const infoLoggerButton = (environment, item) =>
-  h('a', {
+  h('a.ph2', {
     style: {display: !environment.infoLoggerUrl ? 'none' : ''},
     title: 'Open InfoLogger',
     href: item.currentRunNumber ?
@@ -287,6 +288,21 @@ const infoLoggerButton = (environment, item) =>
       : `//${environment.infoLoggerUrl}`,
     target: '_blank'
   }, h('button.btn.primary', iconList()));
+
+
+/**
+ * Download a file with logs from Messos
+ * @param {JSON} environment 
+ * @return {vnode}
+ */
+const messosLogButton = (environment) =>
+  h('a', {
+    style: {display: !environment.item.payload.mesosStdout ? 'none' : ''},
+    title: 'Download Mesos Environment Logs',
+    href: environment.item.payload.mesosStdout,
+    target: '_blank'
+  }, h('button.btn.primary', iconCloudDownload())
+  );
 
 /**
  * Method to create and display a table with tasks details
@@ -299,7 +315,7 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
     h('thead',
       h('tr',
         [
-          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'Logs', 'More']
+          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
             .map((header) => h('th', header))
         ]
       )
@@ -315,14 +331,6 @@ const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1'
           style: 'font-weight: bold;'
         }, task.state),
         h('td', task.deploymentInfo.hostname),
-        h('td',
-          environment.task.list[task.taskId].isSuccess()
-          && h('a', {
-            title: 'Open Mesos Task Logs',
-            href: environment.task.list[task.taskId].payload.messosLog,
-            target: '_blank'
-          }, h('.flex-row.items-center.justify-center.actionable-icon.w-33', info()))
-        ),
         h('td',
           h('button.btn.btn-default', {
             title: 'More Details',
