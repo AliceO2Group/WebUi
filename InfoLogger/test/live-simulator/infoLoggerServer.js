@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -13,6 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
+/* eslint-disable no-console */
+/* eslint-disable require-jsdoc */
+
 // Documentation:
 // https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener
 
@@ -20,8 +22,6 @@ const net = require('net');
 const fakeData = require('./fakeData.json');
 const server = net.createServer(connectionListener);
 const port = 6102; // infoLoggerServer default port
-server.listen(port);
-console.log(`InfoLoggerServer is running on port ${port}`);
 
 function connectionListener(client) {
   console.log('Client connected');
@@ -29,6 +29,7 @@ function connectionListener(client) {
   let currentLogIndex = 0;
 
   client.on('close', onClientDisconnect);
+  client.on('end', onClientDisconnect);
   sendNextLog();
 
   function sendNextLog() {
@@ -77,9 +78,6 @@ function connectionListener(client) {
     }
 
     currentLogIndex++;
-    if (currentLogIndex > 10) {
-      // throw new Error("Bad")
-    }
     timer = setTimeout(sendNextLog, nextLogTimeout);
   }
 
@@ -88,3 +86,12 @@ function connectionListener(client) {
     clearTimeout(timer);
   }
 }
+
+server.on('error', (error) => {
+  console.error('InfoLogger Server crashed due to:');
+  console.trace(error);
+});
+
+server.listen(port, () => {
+  console.log(`InfoLoggerServer is running on port ${port}`);
+});
