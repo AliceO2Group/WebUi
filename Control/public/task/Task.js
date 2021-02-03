@@ -25,7 +25,7 @@ export default class Task extends Observable {
   constructor(model) {
     super();
     this.model = model;
-    this.getTaskList = RemoteData.notAsked();
+    this.tasksByFlp = RemoteData.notAsked();
     this.cleanUpRequest = RemoteData.notAsked();
   }
 
@@ -33,15 +33,15 @@ export default class Task extends Observable {
    * Loads list of running tasks from AliECS Core
    */
   async initTasks() {
-    this.getTaskList = RemoteData.loading();
+    this.tasksByFlp = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post('/api/GetTasks');
     if (!ok) {
-      this.getTaskList = RemoteData.failure(result.message);
+      this.tasksByFlp = RemoteData.failure(result.message);
       this.model.notification.show(`Unable to retrieve list of tasks`, 'danger', 2000);
     } else {
-      this.getTaskList = RemoteData.success(this.prepareData(result));
+      this.tasksByFlp = RemoteData.success(this.prepareData(result));
     }   
     this.notify();
   }
@@ -73,14 +73,18 @@ export default class Task extends Observable {
     var taskTable = {};
     for (let item of data.tasks) {
       if (!taskTable.hasOwnProperty(item.deploymentInfo.hostname)) {
-        taskTable[item.deploymentInfo.hostname] = [];
+        taskTable[item.deploymentInfo.hostname] = {
+          list: [],
+          stdout: ''
+        };
       }
-      taskTable[item.deploymentInfo.hostname].push({
+      taskTable[item.deploymentInfo.hostname].list.push({
         name: item.className.substring(item.className.lastIndexOf("/") + 1, item.className.lastIndexOf("@")),
         state: item.state,
         pid: item.pid,
         locked: item.locked
       })
+      taskTable[item.deploymentInfo.hostname].stdout = item.sandboxStdout;
     }
     return taskTable;
   }
