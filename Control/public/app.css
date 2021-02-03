@@ -22,7 +22,7 @@
 
 .grafana-font { font-family: Roboto, Helvetica Neue, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #52545c; font-weight: 515; text-align: center; }
 
-tr:hover td { background-color: var(--color-gray-light) }
+/* tr:hover td { background-color: var(--color-gray-light) } */
 
 .actionable-row:hover { cursor: pointer; }
 
