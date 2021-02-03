@@ -18,6 +18,8 @@ import {
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
+import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
+import {getTasksByFlp} from './../common/utils.js';
 /**
  * @file Page to show 1 environment (content and header)
  */
@@ -58,7 +60,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode}
  */
 const showContent = (environment, item) => [
-  showControl(environment, item),
+  controlEnvironmentPanel(environment, item),
   item.state === 'RUNNING' &&
   h('.m2.flex-row',
     {
@@ -90,14 +92,35 @@ const showContent = (environment, item) => [
   ),
   showEnvDetailsTable(item, environment),
   h('.m2', [
-    h('h4', 'Tasks'),
+    h('h4', 'Tasks by FLP'),
     h('.flex-row.flex-grow',
       h('.flex-grow',
-        showEnvTasksTable(environment, item.tasks)
+        tasksPerFlpTables(environment, item),
       )
     ),
   ]),
 ];
+
+/**
+ * Build multiple tables of the tasks frouped by FLP
+ * @param {Environment} environmentModel
+ * @param {JSON} environment - GetEnvironment response.environment
+ * @return {vnode}
+ */
+const tasksPerFlpTables = (environmentModel, environment) => {
+  const tasksByFlp = getTasksByFlp(environment.tasks);
+  return [Object.keys(tasksByFlp).map((host) =>
+    h('', [
+      h('.p2.flex-row.bg-primary.white', [
+        h('h5.w-100', host),
+        h('.flex-row', [
+          messosLogButton(tasksByFlp[host].stdout)
+        ]),
+      ]),
+      showEnvTasksTable(environmentModel, tasksByFlp[host].list)
+    ])
+  )];
+};
 
 /**
  * Method to display plots from Grafana
@@ -195,84 +218,14 @@ const showEnvDetailsTable = (item, environment) =>
               ),
             ]),
           )
-        ])
+        ]),
+        h('tr', [
+          h('th.w-15', 'InfoLogger'),
+          h('td', infoLoggerButton(environment, item))
+        ]),
       ])
     ])
   );
-
-/**
- * List of buttons, each one is an action to do on the current environment `item`
- * @param {Object} environment
- * @param {Environment} item - environment to show on this page
- * @return {vnode}
- */
-const showControl = (environment, item) => h('.mv2.pv3.ph2', [
-  h('.flex-row', [
-    h('.w-75',
-      [
-        controlButton('.btn-success', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
-        controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
-        controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'STANDBY'), ' ',
-        controlButton('', environment, item, 'RESET', 'RESET', 'CONFIGURED'), ' '
-      ]
-    ),
-    h('.w-25', {
-      style: 'display: flex; justify-content: flex-end;'
-    }, [
-      messosLogButton(environment),
-      infoLoggerButton(environment, item),
-      destroyEnvButton(environment, item),
-      destroyEnvButton(environment, item, true)
-    ])
-  ]),
-  environment.itemControl.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Success: (_data) => null,
-    Failure: (error) => h('p.danger', error),
-  })
-]);
-
-/**
- * Makes a button to toggle severity
- * @param {string} buttonType
- * @param {Object} environment
- * @param {Object} item
- * @param {string} label - button's label
- * @param {string} type - action
- * @param {string} stateToHide - state in which button should not be displayed
- * @return {vnode}
- */
-const controlButton = (buttonType, environment, item, label, type, stateToHide) =>
-  h(`button.btn${buttonType}`,
-    {
-      class: environment.itemControl.isLoading() ? 'loading' : '',
-      disabled: environment.itemControl.isLoading(),
-      style: item.state !== stateToHide ? 'display: none;' : '',
-      onclick: () => {
-        environment.controlEnvironment({id: item.id, type: type});
-      },
-      title: item.state !== stateToHide ? `'${label}' cannot be used in state '${item.state}'` : label
-    },
-    label
-  );
-
-/**
- * Create a button which will call the ShutDown&DestroyEnv GRPC Method
- * @param {Object} environment
- * @param {JSON} item
- * @param {bool} forceDestroy
- * @return {vnode}
- */
-const destroyEnvButton = (environment, item, forceDestroy = false) =>
-  h(`button.btn.btn-danger`, {
-    class: environment.itemControl.isLoading() ? 'loading' : '',
-    disabled: environment.itemControl.isLoading(),
-    style: {display: !forceDestroy ? 'none' : ''},
-    onclick: () => confirm(`Are you sure you want to to shutdown this ${item.state} environment?`)
-      && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: forceDestroy}),
-    title: forceDestroy ? 'Force the shutdown of the environment' : 'Shutdown environment'
-  }, forceDestroy ? 'Force Shutdown' : 'Shutdown');
 
 /**
  * Open InfoLogger in a new browser tab with run number set if available
@@ -289,17 +242,16 @@ const infoLoggerButton = (environment, item) =>
     target: '_blank'
   }, h('button.btn.primary', iconList()));
 
-
 /**
- * Download a file with logs from Messos
- * @param {JSON} environment 
+ * Button to allow the user to download a file with logs from Messos
+ * @param {string} href - location of the mesos log
  * @return {vnode}
  */
-const messosLogButton = (environment) =>
+const messosLogButton = (href) =>
   h('a', {
-    style: {display: !environment.item.payload.mesosStdout ? 'none' : ''},
+    style: {display: !href ? 'none' : ''},
     title: 'Download Mesos Environment Logs',
-    href: environment.item.payload.mesosStdout,
+    href: href,
     target: '_blank'
   }, h('button.btn.primary', iconCloudDownload())
   );
@@ -310,40 +262,42 @@ const messosLogButton = (environment) =>
  * @param {Array<Object>} tasks
  * @return {vnode}
  */
-const showEnvTasksTable = (environment, tasks) => h('.scroll-auto.shadow-level1', [
-  h('table.table.table-sm', {style: 'margin:0'}, [
-    h('thead',
-      h('tr',
-        [
-          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
-            .map((header) => h('th', header))
-        ]
-      )
-    ),
-    h('tbody', [
-      tasks.map((task) => [h('tr', [
-        h('td', task.name),
-        h('td', h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())),
-        h('td', task.status),
-        h('td', {
-          class: (task.state === 'RUNNING' ?
-            'success' : (task.state === 'CONFIGURED' ? 'warning' : (task.state === 'ERROR' ? 'danger' : ''))),
-          style: 'font-weight: bold;'
-        }, task.state),
-        h('td', task.deploymentInfo.hostname),
-        h('td',
-          h('button.btn.btn-default', {
-            title: 'More Details',
-            onclick: () => environment.task.toggleTaskView(task.taskId),
-          }, environment.task.openedTasks[task.taskId] ? iconChevronTop() : iconChevronBottom())
-        ),
-      ]),
-      environment.task.openedTasks[task.taskId] && environment.task.list[task.taskId] &&
-      addTaskDetailsTable(environment, task),
-      ]),
+const showEnvTasksTable = (environment, tasks) => {
+  return h('.scroll-auto.panel', [
+    h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
+      h('thead',
+        h('tr',
+          [
+            ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
+              .map((header) => h('th', header))
+          ]
+        )
+      ),
+      h('tbody', [
+        tasks.map((task) => [h('tr', [
+          h('td', task.name),
+          h('td', h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())),
+          h('td', task.status),
+          h('td', {
+            class: (task.state === 'RUNNING' ?
+              'success' : (task.state === 'CONFIGURED' ? 'warning' : (task.state === 'ERROR' ? 'danger' : ''))),
+            style: 'font-weight: bold;'
+          }, task.state),
+          h('td', task.deploymentInfo.hostname),
+          h('td',
+            h('button.btn.btn-default', {
+              title: 'More Details',
+              onclick: () => environment.task.toggleTaskView(task.taskId),
+            }, environment.task.openedTasks[task.taskId] ? iconChevronTop() : iconChevronBottom())
+          ),
+        ]),
+        environment.task.openedTasks[task.taskId] && environment.task.list[task.taskId] &&
+        addTaskDetailsTable(environment, task),
+        ]),
+      ])
     ])
-  ])
-]);
+  ]);
+};
 
 /**
  *  Method to display an expandable table with details about a selected task if request was successful
