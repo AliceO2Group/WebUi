@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import parseObject from './utils.js';
+import {parseObject} from './utils.js';
 
 /**
  * Generic table to show properties of an object
