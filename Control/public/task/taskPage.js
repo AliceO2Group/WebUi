@@ -92,12 +92,12 @@ const taskTable = (items) =>
         h('thead',
           h('tr.table-primary',
             h('th', {colspan: 3}, hostname),
-            h('th.flex-row', {style: {'justify-content': 'end'}, colspan: 1},
+            h('th.flex-row', {style: {'justify-content': 'flex-end'}, colspan: 1},
               h('a', {
                 title: 'Download Mesos Environment Logs',
                 href: items[hostname].stdout,
                 target: '_blank'
-              }, h('button.btn.primary', iconCloudDownload())
+              }, h('button.btn-sm.primary', iconCloudDownload())
               )
             )
           ),

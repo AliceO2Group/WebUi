@@ -62,42 +62,28 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 const showContent = (environment, item) => [
   controlEnvironmentPanel(environment, item),
   item.state === 'RUNNING' &&
-  h('.m2.flex-row',
-    {
-      style: 'height: 10em;'
-    },
-    [
-      h('.grafana-font.m1.flex-column',
-        {
-          style: 'width: 15%;'
-        },
-        [
-          h('', {style: 'height:40%'}, 'Run Number'),
-          h('',
-            h('.badge.bg-success.white',
-              {style: 'font-size:45px'},
-              item.currentRunNumber)
-          )
-        ]
+  h('.m2.flex-row', {style: 'height: 10em;'}, [
+    h('.grafana-font.m1.flex-column', {style: 'width: 15%;'}, [
+      h('', {style: 'height:40%'}, 'Run Number'),
+      h('',
+        h('.badge.bg-success.white',
+          {style: 'font-size:45px'},
+          item.currentRunNumber)
+      )
+    ]),
+    environment.plots.match({
+      NotAsked: () => h('.w-100.text-center.grafana-font', 'Grafana plots were not loaded, please refresh the page'),
+      Loading: () => null,
+      Success: (data) => showEmbeddedGraphs(data),
+      Failure: () => h('.w-100.text-center.grafana-font',
+        'Grafana plots were not loaded, please contact an administrator'
       ),
-      environment.plots.match({
-        NotAsked: () => h('.w-100.text-center.grafana-font', 'Grafana plots were not loaded, please refresh the page'),
-        Loading: () => null,
-        Success: (data) => showEmbeddedGraphs(data),
-        Failure: () => h('.w-100.text-center.grafana-font',
-          'Grafana plots were not loaded, please contact an administrator'
-        ),
-      })
-    ]
-  ),
+    })
+  ]),
   showEnvDetailsTable(item, environment),
   h('.m2', [
     h('h4', 'Tasks by FLP'),
-    h('.flex-row.flex-grow',
-      h('.flex-grow',
-        tasksPerFlpTables(environment, item),
-      )
-    ),
+    h('.w-100', tasksPerFlpTables(environment, item))
   ]),
 ];
 
@@ -127,32 +113,23 @@ const tasksPerFlpTables = (environmentModel, environment) => {
  * @param {Array<String>} data
  * @return {vnode}
  */
-const showEmbeddedGraphs = (data) =>
-  [
-    h('.flex-row',
-      {style: 'width:30%;'},
-      [
-        h('iframe.w-50',
-          {
-            src: data[0],
-            style: 'height: 100%; border: 0;'
-          }
-        ),
-        h('iframe.w-50',
-          {
-            src: data[1],
-            style: 'height: 100%; border: 0;'
-          }
-        )
-      ]),
-    // Large Plot
-    h('iframe.flex-grow',
-      {
-        src: data[2],
-        style: 'height: 100%; border: 0'
-      }
-    )
-  ];
+const showEmbeddedGraphs = (data) => [
+  h('.flex-row', {style: 'width:30%;'}, [
+    h('iframe.w-50', {
+      src: data[0],
+      style: 'height: 100%; border: 0;'
+    }),
+    h('iframe.w-50', {
+      src: data[1],
+      style: 'height: 100%; border: 0;'
+    })
+  ]),
+  // Large Plot
+  h('iframe.flex-grow', {
+    src: data[2],
+    style: 'height: 100%; border: 0'
+  })
+];
 
 /**
  * Table to display Environment details
@@ -161,7 +138,7 @@ const showEmbeddedGraphs = (data) =>
  * @return {vnode} table view
  */
 const showEnvDetailsTable = (item, environment) =>
-  h('.m2.mv4.shadow-level1',
+  h('.mh2.mv4.shadow-level1',
     h('table.table', [
       h('tbody', [
         h('tr', [
@@ -253,7 +230,7 @@ const messosLogButton = (href) =>
     title: 'Download Mesos Environment Logs',
     href: href,
     target: '_blank'
-  }, h('button.btn.primary', iconCloudDownload())
+  }, h('button.btn-sm.primary', iconCloudDownload())
   );
 
 /**
@@ -266,12 +243,10 @@ const showEnvTasksTable = (environment, tasks) => {
   return h('.scroll-auto.panel', [
     h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
       h('thead',
-        h('tr',
-          [
-            ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
-              .map((header) => h('th', header))
-          ]
-        )
+        h('tr', [
+          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
+            .map((header) => h('th', header))
+        ])
       ),
       h('tbody', [
         tasks.map((task) => [h('tr', [
@@ -279,13 +254,14 @@ const showEnvTasksTable = (environment, tasks) => {
           h('td', h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())),
           h('td', task.status),
           h('td', {
-            class: (task.state === 'RUNNING' ?
-              'success' : (task.state === 'CONFIGURED' ? 'warning' : (task.state === 'ERROR' ? 'danger' : ''))),
+            class: (task.state === 'RUNNING' ? 'success' :
+              (task.state === 'CONFIGURED' ? 'warning' :
+                ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
             style: 'font-weight: bold;'
           }, task.state),
           h('td', task.deploymentInfo.hostname),
           h('td',
-            h('button.btn.btn-default', {
+            h('button.btn-sm.btn-default', {
               title: 'More Details',
               onclick: () => environment.task.toggleTaskView(task.taskId),
             }, environment.task.openedTasks[task.taskId] ? iconChevronTop() : iconChevronBottom())
