@@ -28,6 +28,15 @@ function errorHandler(err, res, status = 500) {
   res.send({message: err.message || err});
 }
 
-module.exports = {
-  errorHandler
-};
+/**
+ * Global Error Logger for AliECS GUI
+ * @param {Error} err 
+ */
+function errorLogger(err) {
+  if (err.stack) {
+    log.trace(err);
+  }
+  log.error(err.message || err);
+}
+
+module.exports = {errorHandler, errorLogger};
