@@ -44,13 +44,14 @@ const consulConnector = new ConsulConnector(consulService, config.consul);
 consulConnector.testConsulStatus();
 
 const padLock = new Padlock();
-const ctrlProxy = new ControlProxy(config.grpc);
-const ctrlService = new ControlService(padLock, ctrlProxy);
 
 module.exports.setup = (http, ws) => {
+  const ctrlProxy = new ControlProxy(config.grpc);
+  const ctrlService = new ControlService(padLock, ctrlProxy, ws, consulConnector);
   ctrlProxy.methods.forEach((method) =>
     http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res))
   );
+  http.post('/clean/resources', (req, res) => ctrlService.cleanResources(req, res));
   http.post('/executeRocCommand', (req, res) => ctrlService.executeRocCommand(req, res));
   http.post('/lockState', (req, res) => res.json(padLock));
   http.post('/lock', lock);
