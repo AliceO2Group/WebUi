@@ -22,7 +22,7 @@
 
 .grafana-font { font-family: Roboto, Helvetica Neue, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #52545c; font-weight: 515; text-align: center; }
 
-tr:hover td { background-color: var(--color-gray-light) }
+/* tr:hover td { background-color: var(--color-gray-light) } */
 
 .actionable-row:hover { cursor: pointer; }
 
@@ -59,3 +59,18 @@ tr:hover td { background-color: var(--color-gray-light) }
 
 #flp_selection_info_icon:hover > #flp_selection_info{ display: block; }
 .dropdown-menu-right { z-index: 300; box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); display: none; position: absolute; top: calc(100% + 0.1rem); right: 0.1rem; z-index: 1000; font-size: 1rem; background-color: #fff; border: 1px solid rgba(0,0,0,.15); border-radius: .25rem; }
+
+.btn-sm {
+  display: inline-block;
+  font-family: inherit;
+  padding: .3em .7em;
+  border: 0;
+  border-radius: .25rem;
+  font-size: 1em;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+  position: relative;
+}

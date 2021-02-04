@@ -14,6 +14,7 @@
 
 import {Observable, RemoteData} from '/js/src/index.js';
 import Task from './Task.js';
+import {getTaskShortName} from '../common/utils.js';
 
 /**
  * Model representing Environment CRUD
@@ -73,9 +74,12 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
+    let mesosStdout = '';
     await result.environment.tasks.forEach((task) => {
       this.task.getTaskById({taskId: task.taskId});
+      mesosStdout = task.sandboxStdout;
     });
+    result.mesosStdout = mesosStdout;
     this.item = RemoteData.success(this.parseEnvResult(result));
     this.itemControl = RemoteData.notAsked(); // because item has changed
     this.notify();
@@ -87,13 +91,7 @@ export default class Environment extends Observable {
    * @return {JSON}
    */
   parseEnvResult(result) {
-    result.environment.tasks.forEach((task) => {
-      const regex = new RegExp(`tasks/.*@`);
-      const tasksAndName = task.name.match(regex);
-      if (tasksAndName) {
-        task.name = tasksAndName[0].replace('tasks/', '').replace('@', '');
-      }
-    });
+    result.environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
 
     return result;
   }

@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
-import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
+import {iconLockLocked, iconLockUnlocked, iconCloudDownload} from '/js/src/icons.js';
 
 /**
  * @file Page that displays list of tasks
@@ -45,7 +45,7 @@ const cleanUpButton = (task) =>
     onclick: () => confirm(`Are you sure you know what you are doing?`)
       && task.cleanUpTasks(),
     title: 'Clean tasks'
-  },'Clean tasks');
+  }, 'Clean tasks');
 
 /**
  * Content
@@ -64,7 +64,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
  */
 const getListOfTasks = (task) =>
   h('.p2', [
-    task.getTaskList.match({
+    task.tasksByFlp.match({
       NotAsked: () => null,
       Loading: () => pageLoading(),
       Success: (data) => showContent(data),
@@ -91,17 +91,27 @@ const taskTable = (items) =>
       }, [
         h('thead',
           h('tr.table-primary',
-            h('th', {colspan: 4}, hostname)
+            h('th', {colspan: 3}, hostname),
+            h('th.flex-row', {style: {'justify-content': 'flex-end'}, colspan: 1},
+              h('a', {
+                title: 'Download Mesos Environment Logs',
+                href: items[hostname].stdout,
+                target: '_blank'
+              }, h('button.btn-sm.primary', iconCloudDownload())
+              )
+            )
           ),
           h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
         ),
-        h('tbody', items[hostname].map((task) => [h('tr', [
+        h('tbody', items[hostname].list.map((task) => [h('tr', [
           h('td', task.name),
           h('td', task.pid),
-          h('td', {class: (task.state === 'RUNNING' ?  'success'
-            : (task.state === 'CONFIGURED' ? 'warning'
-              : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
-          style: 'font-weight: bold;'}, task.state),
+          h('td', {
+            class: (task.state === 'RUNNING' ? 'success'
+              : (task.state === 'CONFIGURED' ? 'warning'
+                : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
+            style: 'font-weight: bold;'
+          }, task.state),
           h('td', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
         ])]))
       ])

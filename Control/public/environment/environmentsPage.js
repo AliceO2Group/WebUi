@@ -15,7 +15,7 @@
 import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
-import parseObject from './../common/utils.js';
+import {parseObject} from './../common/utils.js';
 
 /**
  * @file Page to show a list of environments (content and header)

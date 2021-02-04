@@ -18,7 +18,7 @@
  * @param {string} key
  * @return {string}
  */
-export default function parseObject(item, key) {
+const parseObject = (item, key) => {
   switch (key) {
     case 'tasks':
       return item.length;
@@ -30,3 +30,39 @@ export default function parseObject(item, key) {
       return JSON.stringify(item);
   }
 }
+
+/**
+  * Create a map of tasks grouped by their FLP name
+  * @param {object} tasks - raw data
+  * @return {JSON} {<string>:{list: <array>, stdout: <string>}}
+  */
+const getTasksByFlp = (tasks) => {
+  var taskMap = {};
+  tasks.forEach((task) => {
+    const hostname = task.deploymentInfo.hostname;
+    if (!taskMap.hasOwnProperty(hostname)) {
+      taskMap[hostname] = {list: [], stdout: ''};
+    }
+    task.name = getTaskShortName(task.name);
+    taskMap[hostname].list.push(task);
+    taskMap[hostname].stdout = task.sandboxStdout;
+  });
+  return taskMap;
+}
+
+/**
+ * Method to check if a task name is the long version.
+ * If yes, return the short version
+ * @param {string} taskName
+ * @return {string}
+ */
+const getTaskShortName = (taskName) => {
+  const regex = new RegExp(`tasks/.*@`);
+  const matchedTaskName = taskName.match(regex);
+  if (matchedTaskName) {
+    taskName = matchedTaskName[0].replace('tasks/', '').replace('@', '');
+  }
+  return taskName;
+}
+
+export {getTasksByFlp, parseObject, getTaskShortName};
