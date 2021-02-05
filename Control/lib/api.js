@@ -44,10 +44,12 @@ const consulConnector = new ConsulConnector(consulService, config.consul);
 consulConnector.testConsulStatus();
 
 const padLock = new Padlock();
+const ctrlProxy = new ControlProxy(config.grpc);
+const ctrlService = new ControlService(padLock, ctrlProxy, consulConnector);
 
-module.exports.setup = (http, ws) => {
-  const ctrlProxy = new ControlProxy(config.grpc);
-  const ctrlService = new ControlService(padLock, ctrlProxy, ws, consulConnector);
+module.exports.setup = (http, ws) => { 
+  ctrlService.setWS(ws);
+  
   ctrlProxy.methods.forEach((method) =>
     http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res))
   );

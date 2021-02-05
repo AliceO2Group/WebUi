@@ -28,13 +28,20 @@ class ControlService {
    * @param {WebSocket} webSocket
    * @param {ConsulConnector} consulConnector
    */
-  constructor(padLock, ctrlProx, webSocket, consulConnector) {
+  constructor(padLock, ctrlProx, consulConnector) {
     assert(padLock, 'Missing PadLock dependency');
     assert(ctrlProx, 'Missing ControlProxy dependency');
     this.padLock = padLock;
     this.ctrlProx = ctrlProx;
-    this.webSocket = webSocket;
     this.consulConnector = consulConnector;
+  }
+
+  /**
+   * Set websocket after server initialization
+   * @param {WebSocket} webSocket 
+   */
+  setWS(webSocket) {
+    this.webSocket = webSocket;
   }
 
   /**
@@ -47,6 +54,7 @@ class ControlService {
    * @param {Response} res 
    */
   async cleanResources(req, res) {
+    // TODO Check if core version above 0.20
     const channelId = req.body.channelId;
     const method = 'NewAutoEnvironment';
     if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
