@@ -27,13 +27,15 @@ class ControlService {
    * @param {ControlProxy} ctrlProx
    * @param {WebSocket} webSocket
    * @param {ConsulConnector} consulConnector
+   * * @param {JSON} coreConfig
    */
-  constructor(padLock, ctrlProx, consulConnector) {
+  constructor(padLock, ctrlProx, consulConnector, coreConfig) {
     assert(padLock, 'Missing PadLock dependency');
     assert(ctrlProx, 'Missing ControlProxy dependency');
     this.padLock = padLock;
     this.ctrlProx = ctrlProx;
     this.consulConnector = consulConnector;
+    this.coreConfig = coreConfig;
   }
 
   /**
@@ -54,41 +56,44 @@ class ControlService {
    * @param {Response} res 
    */
   async cleanResources(req, res) {
-    // TODO Check if core version above 0.20
-    const channelId = req.body.channelId;
-    const method = 'NewAutoEnvironment';
-    if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
-      log.info(`${req.session.personid} => ${method}` + (req.body.type ? ` (${req.body.type})` : ''));
+    if (this.coreConfig.version.toString() < `0.20.0`) {
+      res.status(502).json({message: `AliECS version has to be >= 0.20.0; Currently is ${this.coreConfig.version}`});
+    } else {
+      const channelId = req.body.channelId;
+      const method = 'NewAutoEnvironment';
+      if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
+        log.info(`${req.session.personid} => ${method}` + (req.body.type ? ` (${req.body.type})` : ''));
 
-      try {
-        const hosts = await this.consulConnector.getFLPsList();
-        const {repos: repositories} = await this.ctrlProx['ListRepos']();
-        const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
-        const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
-        cleanChanel.on('data', (data) => this.onData(channelId, data));
-        cleanChanel.on('error', (err) => this.onError(channelId, err));
-        // onEnd gets called no matter what
-        // cleanChanel.on('end', () => this.onEnd(channelId));
+        try {
+          const hosts = await this.consulConnector.getFLPsList();
+          const {repos: repositories} = await this.ctrlProx['ListRepos']();
+          const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+          const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
+          cleanChanel.on('data', (data) => this.onData(channelId, data));
+          cleanChanel.on('error', (err) => this.onError(channelId, err));
+          // onEnd gets called no matter what
+          // cleanChanel.on('end', () => this.onEnd(channelId));
 
-        // Make request to clear resources
-        const coreConf = {
-          id: channelId,
-          vars: {hosts: JSON.stringify(hosts), modulepath: '/opt/alisw/el7/modulefiles/'},
-          workflowTemplate: `${repositoryName}resources-cleanup@${defaultRevision}`
-        };
+          // Make request to clear resources
+          const coreConf = {
+            id: channelId,
+            vars: {hosts: JSON.stringify(hosts), modulepath: '/opt/alisw/el7/modulefiles/'},
+            workflowTemplate: `${repositoryName}resources-cleanup@${defaultRevision}`
+          };
 
-        await this.ctrlProx[method](coreConf);
-        res.status(200).json({
-          ended: false, success: true, id: channelId,
-          message: 'Request for "Cleaning Resources" was successfully sent and in progress'
-        })
-      } catch (error) {
-        // Failed to getFLPs, ListRepos or NewAutoEnvironment
-        errorLogger(error);
-        res.status(502).json({
-          ended: true, success: false, id: channelId,
-          message: error.message || error || 'Error while attempting to clean resources ...'
-        });
+          await this.ctrlProx[method](coreConf);
+          res.status(200).json({
+            ended: false, success: true, id: channelId,
+            message: 'Request for "Cleaning Resources" was successfully sent and in progress'
+          })
+        } catch (error) {
+          // Failed to getFLPs, ListRepos or NewAutoEnvironment
+          errorLogger(error);
+          res.status(502).json({
+            ended: true, success: false, id: channelId,
+            message: error.message || error || 'Error while attempting to clean resources ...'
+          });
+        }
       }
     }
   }
