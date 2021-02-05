@@ -77,8 +77,8 @@ class ControlService {
           // Make request to clear resources
           const coreConf = {
             id: channelId,
-            vars: {hosts: JSON.stringify(hosts), modulepath: '/opt/alisw/el7/modulefiles/'},
-            workflowTemplate: `${repositoryName}resources-cleanup@${defaultRevision}`
+            vars: {hosts: JSON.stringify(hosts)},
+            workflowTemplate: `${repositoryName}workflows/resources-cleanup@${defaultRevision}`
           };
           await this.ctrlProx[method](coreConf);
           res.status(200).json({
@@ -236,7 +236,8 @@ class ControlService {
       msg.command = 'clean-resources-action';
       if (!data.environmentEvent.error) {
         msg.payload = {
-          ended: false, success: true, id: channelId,
+          ended: data.environmentEvent.state === 'DONE' ? true : false,
+          success: true, id: channelId,
           message: data.environmentEvent.message || 'Cleaning Resources ...'
         };
       } else {
@@ -246,7 +247,6 @@ class ControlService {
         };
       }
       this.webSocket.broadcast(msg);
-
     }
   }
 
