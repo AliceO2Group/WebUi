@@ -80,7 +80,6 @@ class ControlService {
             vars: {hosts: JSON.stringify(hosts), modulepath: '/opt/alisw/el7/modulefiles/'},
             workflowTemplate: `${repositoryName}resources-cleanup@${defaultRevision}`
           };
-
           await this.ctrlProx[method](coreConf);
           res.status(200).json({
             ended: false, success: true, id: channelId,
