@@ -100,8 +100,8 @@ describe('`Control Environment` test-suite', async () => {
   // });
 
   it(`should have one button for 'Force Shutdown' environment (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(3)', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(3)').title);
+    await page.waitForSelector('#buttonForceShutdown', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonForceShutdown').title);
     assert.strictEqual(shutdownButton, 'Force the shutdown of the environment');
   });
 
@@ -111,8 +111,8 @@ describe('`Control Environment` test-suite', async () => {
       await dialog.accept();
     });
 
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').click());
+    await page.waitForSelector('#buttonForceShutdown', {timeout: 5000});
+    await page.evaluate(() => document.querySelector('#buttonForceShutdown').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
