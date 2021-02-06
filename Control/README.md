@@ -6,6 +6,7 @@
 - [Control GUI](#control-gui)
   - [Description](#description)
   - [Requirements](#requirements)
+  - [Compatibility with AliECS Core](#compatibility-with-aliecs-core)
   - [Installation](#installation)
   - [Configuration](#configuration)
     - [gRPC](#grpc)
@@ -26,6 +27,12 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 
 ## Requirements
 - `nodejs` >= `10.13.0`
+
+## Compatibility with AliECS Core
+Below you can find details about the minimum version of [AliECS Core](https://github.com/AliceO2Group/Control) needed to run AliECS GUI full package of features.
+| GUI v.   | AliECS Core v. |
+|----------|----------------|
+| `1.13.0` | `>= v0.20.0`  |
 
 ## Installation
 1. `git clone https://github.com/AliceO2Group/WebUi.git;`

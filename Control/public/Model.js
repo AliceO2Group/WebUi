@@ -91,6 +91,8 @@ export default class Model extends Observable {
     } else if (message.command === 'notification') {
       this.show(message.payload);
       return;
+    } else if (message.command === 'clean-resources-action') {
+      this.task.setResourcesRequest(message.payload);
     }
   }
 

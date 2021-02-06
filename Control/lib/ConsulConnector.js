@@ -118,6 +118,30 @@ class ConsulConnector {
   }
 
   /**
+   * Get a list of FLPs loaded from Consul
+   * @return {Array<String>}
+   */
+  async getFLPsList() {
+    if (this.consulService) {
+      try {
+        const data = await this.consulService.getKeysByPrefix(this.flpHardwarePath);
+        const regex = new RegExp('.*o2/hardware/flps/.*/.*');
+        const flpList = data.filter((key) => key.match(regex))
+          .map((key) => key.split('/')[3]);
+        return [...new Set(flpList)];
+      } catch (error) {
+        if (error.message.includes('404')) {
+          log.trace(error);
+          log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+          throw new Error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+        }
+      }
+    } else {
+      throw new Error('There was no ConsulService provided');
+    }
+  }
+
+  /**
    * Get CRUs stored under the hardware path with their information
    * and configuration
    * @param {Request} req

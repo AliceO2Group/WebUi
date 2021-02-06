@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
-import {iconLockLocked, iconLockUnlocked, iconCloudDownload} from '/js/src/icons.js';
+import {iconLockLocked, iconLockUnlocked, iconCloudDownload, iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 
 /**
  * @file Page that displays list of tasks
@@ -30,22 +30,35 @@ export const header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'Task list')
   ]),
-  h('.flex-grow text-right', [
-    cleanUpButton(model.task)
+  h('.flex-row.text-right', [
+    cleanResourcesButton(model.task),
+    cleanTasksButton(model.task)
   ])
 ];
 
 /**
- * Prepares cleanup button in top right corner
+ * Prepares cleanup tasks button in top right corner
  */
-const cleanUpButton = (task) =>
+const cleanTasksButton = (task) =>
   h(`button.btn.btn-danger.mh1`, {
-    class: task.cleanUpRequest.isLoading() ? 'loading' : '',
-    disabled: task.cleanUpRequest.isLoading(),
+    class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
+    disabled: task.cleanUpTasksRequest.isLoading(),
     onclick: () => confirm(`Are you sure you know what you are doing?`)
       && task.cleanUpTasks(),
     title: 'Clean tasks'
   }, 'Clean tasks');
+
+/**
+ * Prepares cleanup resources button in top right corner
+ */
+const cleanResourcesButton = (task) =>
+  h(`button.btn.btn-warning.mh1`, {
+    class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
+    disabled: task.cleanUpTasksRequest.isLoading(),
+    onclick: () => task.cleanUpResources(),
+    title: 'Clean Resources'
+  }, 'Clean resources');
+
 
 /**
  * Content
@@ -54,8 +67,35 @@ const cleanUpButton = (task) =>
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+  infoPanel(model),
   getListOfTasks(model.task)
 ]);
+
+/**
+ * Panel in which response messages from stream will be displayed
+ * @param {Object} model
+ * @return {vnode}
+ */
+const infoPanel = (model) =>
+  model.task.cleanUpResourcesRequest.match({
+    NotAsked: () => null,
+    Loading: () => h('.m2.f6.p2.shadow-level1.text-left.flex-row', [
+      h('.p2.text-center', pageLoading(1.5)),
+      h('.p2', 'Request to clean resources has been sent'),
+    ]),
+    Success: (data) => h('.m2.f6.p2.shadow-level1.text-left.flex-row', {
+      class: data.ended ? (data.success ? 'success' : 'danger') : '',
+    }, [
+      !data.ended ?
+        h('.pv1', pageLoading(1.5))
+        : (data.success ? h('.pv2.ph4.text-center', iconCircleCheck()) : h('.pv2.ph4.text-center', iconCircleX())),
+      h('.w-100.p2', data.message),
+    ]),
+    Failure: (error) => h('.m2.f6.p2.shadow-level1.text-left.flex-row.danger', [
+      h('.pv2.ph4', iconCircleX()),
+      h('.p2', error),
+    ]),
+  })
 
 /**
  * Call GetTasks on server side

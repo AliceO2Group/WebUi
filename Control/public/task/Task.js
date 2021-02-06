@@ -27,7 +27,9 @@ export default class Task extends Observable {
     super();
     this.model = model;
     this.tasksByFlp = RemoteData.notAsked();
-    this.cleanUpRequest = RemoteData.notAsked();
+    this.cleanUpTasksRequest = RemoteData.notAsked();
+    this.cleanUpResourcesRequest = RemoteData.notAsked();
+    this.cleanUpResourcesID = 0;
   }
 
   /** 
@@ -42,8 +44,9 @@ export default class Task extends Observable {
       this.tasksByFlp = RemoteData.failure(result.message);
       this.model.notification.show(`Unable to retrieve list of tasks`, 'danger', 2000);
     } else {
-      this.tasksByFlp = RemoteData.success(getTasksByFlp(result.tasks));
-    }   
+      const tasksByFlpMap = getTasksByFlp(result.tasks);
+      this.tasksByFlp = RemoteData.success(tasksByFlpMap);
+    }
     this.notify();
   }
 
@@ -51,17 +54,35 @@ export default class Task extends Observable {
    * Clean up tasks
    */
   async cleanUpTasks() {
-    this.cleanUpRequest = RemoteData.loading();
+    this.cleanUpTasksRequest = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post('/api/CleanupTasks');
     if (!ok) {
-      this.cleanUpRequest = RemoteData.failure(result.message);
+      this.cleanUpTasksRequest = RemoteData.failure(result.message);
       this.model.notification.show(`Unable to clean up tasks: ${result.message}`, 'danger', 2000);
     } else {
-      this.cleanUpRequest = RemoteData.success();
+      this.cleanUpTasksRequest = RemoteData.success();
       this.model.notification.show(`Tasks have been cleaned`, 'success');
       this.model.router.go('?page=taskList');
+    }
+    this.notify();
+  }
+
+  /**
+   * Clean up resources request
+   */
+  async cleanUpResources() {
+    this.cleanUpResourcesRequest = RemoteData.loading();
+    this.notify();
+
+    this.cleanUpResourcesID = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
+    const {result, ok} = await this.model.loader
+      .post(`/api/clean/resources`, {channelId: this.cleanUpResourcesID});
+    if (!ok) {
+      this.cleanUpResourcesRequest = RemoteData.failure(result.message);
+    } else {
+      this.cleanUpResourcesRequest = RemoteData.success(result);
     }
     this.notify();
   }
@@ -71,5 +92,22 @@ export default class Task extends Observable {
    */
   getTasks() {
     this.initTasks();
+  }
+
+  /**
+   * Method to update the message with regards to the `CleanResources` command
+   * If message id will match the user's it will be displayed
+   * @param {WebSocketMessagePayload} req 
+   */
+  setResourcesRequest(message) {
+    const messageId = message.id || '';
+    if (this.cleanUpResourcesID.toString() === messageId.toString()) {
+      if (message.success) {
+        this.cleanUpResourcesRequest = RemoteData.success(message);
+      } else {
+        this.cleanUpResourcesRequest = RemoteData.success(message);
+      }
+      this.notify();
+    }
   }
 }
