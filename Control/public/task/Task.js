@@ -30,7 +30,6 @@ export default class Task extends Observable {
     this.cleanUpTasksRequest = RemoteData.notAsked();
     this.cleanUpResourcesRequest = RemoteData.notAsked();
     this.cleanUpResourcesID = 0;
-    this.hosts = [];
   }
 
   /** 
@@ -47,7 +46,6 @@ export default class Task extends Observable {
     } else {
       const tasksByFlpMap = getTasksByFlp(result.tasks);
       this.tasksByFlp = RemoteData.success(tasksByFlpMap);
-      this.hosts = Object.keys(tasksByFlpMap);
     }
     this.notify();
   }
