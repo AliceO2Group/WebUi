@@ -78,6 +78,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
  */
 const destroyEnvButton = (environment, item, forceDestroy = false) =>
   h(`button.btn.btn-danger`, {
+    id: forceDestroy ? 'buttonForceShutdown' : 'buttonShutdown', 
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     style: {display: !forceDestroy ? 'none' : ''},
