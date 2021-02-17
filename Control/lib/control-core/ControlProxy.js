@@ -57,7 +57,8 @@ class ControlProxy {
 
     const address = `${config.hostname}:${config.port}`;
     const credentials = grpcLibrary.credentials.createInsecure();
-    this.client = new octlProto.o2control.Control(address, credentials);
+    const options = {'grpc.max_receive_message_length': 1024*1024*10}; // 10 MB
+    this.client = new octlProto.o2control.Control(address, credentials, options);
     this.client.waitForReady(Date.now() + config.timeout, (error) => {
       if (error) {
         log.error(`Connection to gRPC server (${address}) timedout`);
