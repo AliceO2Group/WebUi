@@ -31,7 +31,7 @@ export const controlEnvironmentPanel = (environment, item) => h('.mv2.pv3.ph2', 
       ]
     ),
     h('.w-25', {
-      style: 'display: flex; justify-content: end;'
+      style: 'display: flex; justify-content: flex-end;'
     }, [
       shutdownEnvButton(environment, item),
       killEnvButton(environment, item)
@@ -82,7 +82,7 @@ const shutdownEnvButton = (environment, item) =>
     style: {display: (item.state === 'CONFIGURED' || item.state == 'STANDBY') ? '' : 'none'},
     onclick: () => environment.destroyEnvironment({id: item.id}),
     title: 'Shutdown environment'
-  }, 'Shutdown');
+  }, 'SHUTDOWN');
 
 /**
  * Create a button to kill env
@@ -97,4 +97,4 @@ const killEnvButton = (environment, item) =>
     onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
       && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: true}),
     title: 'Kill environment'
-  }, 'Kill');
+  }, 'KILL');
