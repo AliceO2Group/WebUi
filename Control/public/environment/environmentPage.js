@@ -169,6 +169,10 @@ const showEnvDetailsTable = (item, environment) =>
           h('td', item.rootRole)
         ]),
         h('tr', [
+          h('th.w-15', 'FLP count'),
+          h('td', JSON.parse(item.defaults.inventory_flps).length)
+        ]),
+        h('tr', [
           h('th.w-15',
             h('.flex-row', [
               h('.w-75', 'User Vars'),
