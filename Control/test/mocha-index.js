@@ -52,7 +52,10 @@ describe('Control', function() {
       createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
       state: 'CONFIGURED',
       tasks: [],
-      rootRole: 'copy-push'
+      rootRole: 'copy-push',
+      defaults: {
+        inventory_flps: "[\"an-flp.cern.ch\"]"
+      }
     },
     workflow: {},
     workflowTemplates: {
