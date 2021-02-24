@@ -232,7 +232,6 @@ const infoLoggerButton = (environment, item) =>
 const messosLogButton = (href) =>
   h('a', {
     style: {display: !href ? 'none' : ''},
-    style: 'margin-left: 5px',
     title: 'Download Mesos Environment Logs',
     href: href,
     target: '_blank'

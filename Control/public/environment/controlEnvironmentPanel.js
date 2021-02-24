@@ -95,7 +95,7 @@ const killEnvButton = (environment, item) =>
   h(`button.btn.btn-danger active`, {
     id: 'buttonForceShutdown',
     class: environment.itemControl.isLoading() ? 'loading' : '',
-    style: 'margin-left: 5px',
+    style: 'margin-left: .3em',
     disabled: environment.itemControl.isLoading(),
     onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
       && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: true}),
