@@ -26,7 +26,7 @@ syntax = "proto3";
 
 package o2control;
 option java_package = "ch.cern.alice.o2.control.rpcserver";
-option go_package = "pb";
+option go_package = "protos;pb";
 
 //////////////// Common event messages ///////////////
 
@@ -357,6 +357,7 @@ message RoleInfo {
     map<string, string> defaults = 7;
     map<string, string> vars = 8;
     map<string, string> userVars = 9;
+    map<string, string> consolidatedStack = 10;
 }
 
 message GetRolesReply {
