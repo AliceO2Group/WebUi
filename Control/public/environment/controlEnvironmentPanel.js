@@ -33,8 +33,8 @@ export const controlEnvironmentPanel = (environment, item) => h('.mv2.pv3.ph2', 
     h('.w-25', {
       style: 'display: flex; justify-content: flex-end;'
     }, [
-      destroyEnvButton(environment, item),
-      destroyEnvButton(environment, item, true)
+      shutdownEnvButton(environment, item),
+      killEnvButton(environment, item)
     ])
   ]),
   environment.itemControl.match({
@@ -70,19 +70,33 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
   );
 
 /**
- * Create a button which will call the ShutDown&DestroyEnv GRPC Method
+ * Create a button to shutdown env
  * @param {Object} environment
  * @param {JSON} item
- * @param {bool} forceDestroy
  * @return {vnode}
  */
-const destroyEnvButton = (environment, item, forceDestroy = false) =>
+const shutdownEnvButton = (environment, item) =>
   h(`button.btn.btn-danger`, {
-    id: forceDestroy ? 'buttonForceShutdown' : 'buttonShutdown', 
+    id: 'buttonShutdown',
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
-    style: {display: !forceDestroy ? 'none' : ''},
-    onclick: () => confirm(`Are you sure you want to to shutdown this ${item.state} environment?`)
-      && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: forceDestroy}),
-    title: forceDestroy ? 'Force the shutdown of the environment' : 'Shutdown environment'
-  }, forceDestroy ? 'Force Shutdown' : 'Shutdown');
+    style: {display: (item.state === 'CONFIGURED' || item.state == 'STANDBY') ? '' : 'none'},
+    onclick: () => environment.destroyEnvironment({id: item.id}),
+    title: 'Shutdown environment'
+  }, 'SHUTDOWN');
+
+/**
+ * Create a button to kill env
+ * @param {Object} environment
+ * @param {JSON} item
+ * @return {vnode}
+ */
+const killEnvButton = (environment, item) =>
+  h(`button.btn.btn-danger active`, {
+    id: 'buttonForceShutdown',
+    class: environment.itemControl.isLoading() ? 'loading' : '',
+    disabled: environment.itemControl.isLoading(),
+    onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
+      && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: true}),
+    title: 'Kill environment'
+  }, 'KILL');
