@@ -100,6 +100,7 @@ const tasksPerFlpTables = (environmentModel, environment) => {
       h('.p2.flex-row.bg-primary.white', [
         h('h5.w-100', host),
         h('.flex-row', [
+          infoLoggerPerFlpButton(environment, environmentModel, host),
           messosLogButton(tasksByFlp[host].stdout)
         ]),
       ]),
@@ -235,6 +236,22 @@ const messosLogButton = (href) =>
     href: href,
     target: '_blank'
   }, h('button.btn-sm.primary', iconCloudDownload())
+  );
+
+/**
+ * Button to open InfoLogger with run and hostname pre-set
+ * @param {string} href - location of the mesos log
+ * @return {vnode}
+ */
+const infoLoggerPerFlpButton = (environment, model, host) =>
+  h('a', {
+    style: {display: !model.infoLoggerUrl ? 'none' : ''},
+    title: 'Open InfoLogger for this hostname',
+    href: environment.currentRunNumber ?
+      `//${model.infoLoggerUrl}?q={"run":{"match":"${environment.currentRunNumber}"},"hostname":{"match":"${host}"}}`
+      : `//${model.infoLoggerUrl}?q={"hostname":{"match":"flptest1"}}`,
+    target: '_blank'
+  }, h('button.btn-sm.primary', iconList())
   );
 
 /**
