@@ -77,6 +77,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
  */
 const shutdownEnvButton = (environment, item) =>
   h(`button.btn.btn-danger`, {
+    id: 'buttonShutdown',
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     style: {display: (item.state === 'CONFIGURED' || item.state == 'STANDBY') ? '' : 'none'},
@@ -92,6 +93,7 @@ const shutdownEnvButton = (environment, item) =>
  */
 const killEnvButton = (environment, item) =>
   h(`button.btn.btn-danger active`, {
+    id: 'buttonForceShutdown',
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
