@@ -471,18 +471,18 @@ export default class Log extends Observable {
   /**
    * Enables auto-scroll, this is used when entering Live mode
    */
-   enableAutoScroll() {
-     this.autoScrollLive = true;
-     this.notify();
-   }
+  enableAutoScroll() {
+    this.autoScrollLive = true;
+    this.notify();
+  }
 
   /**
-    * Disable auto-scroll, this is used when leaving Live mode
-    */
-   disableAutoScroll() {
-     this.autoScrollLive = false;
-     this.notify();
-   }
+   * Disable auto-scroll, this is used when leaving Live mode
+   */
+  disableAutoScroll() {
+    this.autoScrollLive = false;
+    this.notify();
+  }
 
   /**
    * Method to update the state of the selected mode
