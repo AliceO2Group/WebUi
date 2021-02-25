@@ -28,6 +28,7 @@ export default (workflow) =>
       dataDistributionPanel(workflow),
       epnPanel(workflow),
       qcddPanel(workflow),
+      dplMwPanel(workflow),
       readoutPanel(workflow),
       qcUriPanel(workflow)
     ])
@@ -82,6 +83,7 @@ const dataDistributionPanel = (workflow) =>
           workflow.updateBasicVariableByKey('odc_enabled', 'false');
           workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
           workflow.updateBasicVariableByKey('dd_enabled', 'false');
+          workflow.updateBasicVariableByKey('dplmw_enabled', 'false');
         }
       }),
       h('label', {for: 'dataDistributionOff'}, 'OFF')
@@ -160,11 +162,49 @@ const qcddPanel = (workflow) =>
         onchange: () => {
           workflow.updateBasicVariableByKey('qcdd_enabled', 'true');
           workflow.updateBasicVariableByKey('dd_enabled', 'true');
+          workflow.updateBasicVariableByKey('dplmw_enabled', 'false');
         }
       }),
       h('label', {for: 'qcddOn'}, 'ON')
     ]),
   ]);
+
+
+/**
+ * Add a radio button group to enable or disable DPL Minimal workflow
+ * DPL Minimal workflow required DD, but when on QC needs to be off
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const dplMwPanel = (workflow) =>
+  h('.flex-row.text-left.w-50', [
+    h('.w-50', 'Minimal DPL workflow:'),
+    h('.w-25.form-check', [
+      h('input.form-check-input', {
+        type: 'radio',
+        name: 'dplmw',
+        id: 'dplMwOff',
+        checked: workflow.form.basicVariables['dplmw_enabled'] === 'false',
+        onchange: () => workflow.form.basicVariables['dplmw_enabled'] = 'false'
+      }),
+      h('label', {for: 'dplMwOff'}, 'OFF')
+    ]),
+    h('.w-25.form-check', [
+      h('input.form-check-input disabled', {
+        type: 'radio',
+        name: 'dplmw',
+        id: 'dplMwOn',
+        checked: workflow.form.basicVariables['dplmw_enabled'] === 'true',
+        onchange: () => {
+          workflow.updateBasicVariableByKey('dplmw_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+          workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
+        }
+      }),
+      h('label', {for: 'dplMwOn'}, 'ON')
+    ]),
+  ]);
+
 
 /**
  * Add a text input field so that the user can fill in the readout_uri
