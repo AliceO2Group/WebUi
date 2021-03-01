@@ -147,10 +147,12 @@ function toggleButtonStates(model, wasLivePressed) {
       case MODE.QUERY:
       case MODE.LIVE.PAUSED:
         setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
+        model.log.enableAutoScroll();
         model.log.updateLogMode(MODE.LIVE.RUNNING);
         break;
       default: // MODE.LIVE.RUNNING
         setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
+        model.log.disableAutoScroll();
         model.log.updateLogMode(MODE.LIVE.PAUSED);
     }
   } else {

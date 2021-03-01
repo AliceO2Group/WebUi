@@ -22,8 +22,8 @@ import {h} from '/js/src/index.js';
  */
 export default (model) => [
   h('.flex-row', [
-    h('', {style: 'width:40%'}, statusLogs(model)),
-    h('.w-50', {style: 'text-align: center;'}, sqlQuery(model)),
+    h('', {style: 'width:50%'}, statusLogs(model)),
+    h('', {style: 'text-align: center; width:30%'}, sqlQuery(model)),
     h('.flex-grow.text-right', applicationMessage(model), applicationOptions(model)),
   ]),
 ];
