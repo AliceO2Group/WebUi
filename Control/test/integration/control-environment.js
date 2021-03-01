@@ -102,7 +102,7 @@ describe('`Control Environment` test-suite', async () => {
   it(`should have one button for 'Force Shutdown' environment (workflow '${workflowToTest}')`, async () => {
     await page.waitForSelector('#buttonForceShutdown', {timeout: 5000});
     const shutdownButton = await page.evaluate(() => document.querySelector('#buttonForceShutdown').title);
-    assert.strictEqual(shutdownButton, 'Force the shutdown of the environment');
+    assert.strictEqual(shutdownButton, 'Kill environment');
   });
 
   it(`should successfully shutdown environment (workflow '${workflowToTest}') and redirect to environments page`, async () => {
