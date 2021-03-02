@@ -24,7 +24,6 @@ export default (workflow) =>
   h('', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
     h('.p2.panel', [
-      triggerPanel(workflow),
       dataDistributionPanel(workflow),
       epnPanel(workflow),
       qcddPanel(workflow),
@@ -32,36 +31,6 @@ export default (workflow) =>
       readoutPanel(workflow),
       qcUriPanel(workflow)
     ])
-  ]);
-
-/**
- * Panel for displaying options for the trigger
- * @param {Object} workflow
- * @return {vnode}
- */
-const triggerPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
-    h('.w-50', 'Trigger:'),
-    h('.w-25.form-check', [
-      h('input.form-check-input', {
-        type: 'radio',
-        name: 'trigger',
-        id: 'triggerOff',
-        checked: workflow.form.basicVariables['roc_ctp_emulator_enabled'] === 'false',
-        onchange: () => workflow.form.basicVariables['roc_ctp_emulator_enabled'] = 'false'
-      }),
-      h('label', {for: 'triggerOff'}, 'OFF')
-    ]),
-    h('.w-25.form-check', [
-      h('input.form-check-input disabled', {
-        type: 'radio',
-        name: 'trigger',
-        id: 'triggerEmu',
-        checked: workflow.form.basicVariables['roc_ctp_emulator_enabled'] === 'true',
-        onchange: () => workflow.form.basicVariables['roc_ctp_emulator_enabled'] = 'true'
-      }),
-      h('label', {for: 'triggerEmu'}, 'EMU')
-    ]),
   ]);
 
 /**
