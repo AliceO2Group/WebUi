@@ -53,10 +53,10 @@ class InfoLoggerSender {
         `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
       ], function(error, stdout, stderr) {
         if (error) {
-          this.winston.debug('Impossible to write a log to InfoLogger');
+          this.winston.debug(`Impossible to write a log to InfoLogger due to: ${error}`);
         }
         if (stderr) {
-          this.winston.debug('Impossible to write a log to InfoLogger')
+          this.winston.debug(`Impossible to write a log to InfoLogger due to: ${stderr}`);
         }
       });
     }
