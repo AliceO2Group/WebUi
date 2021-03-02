@@ -15,7 +15,6 @@
 const config = require('./configProvider.js');
 const projPackage = require('./../package.json');
 
-const TObject2JsonClient = require('./TObject2JsonClient.js');
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
 const CCDBConnector = require('./CCDBConnector.js');
 const MySQLConnector = require('./MySQLConnector.js');
@@ -61,8 +60,6 @@ if (config.listingConnector === 'ccdb') {
   module.exports.queryPrefix = ccdb.prefix;
   statusService.setDataConnector(ccdb);
 
-  const tObject2JsonClient = new TObject2JsonClient('ccdb', config.ccdb);
-  module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
 } else if (config.listingConnector === 'amore') {
   log.info('Object listing: AMORE');
   if (!config.amore) {
@@ -74,9 +71,6 @@ if (config.listingConnector === 'ccdb') {
   const mysql = new MySQLConnector(config.mysql);
   log.info('Object listing: MySQL');
   module.exports.listObjects = mysql.listObjects.bind(mysql);
-
-  const tObject2JsonClient = new TObject2JsonClient('mysql', config.mysql);
-  module.exports.readObjectData = tObject2JsonClient.retrieve.bind(tObject2JsonClient);
 }
 
 // --------------------------------------------------------

@@ -17,8 +17,6 @@
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
-    "postinstall": "mv build/Release/tobject2json.node .",
-    "install": "node-gyp rebuild --jobs max",
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "integration-test": "mocha --exit --bail ./test/integration/qcg-test.js -R min",
@@ -30,8 +28,7 @@
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.15.1",
-    "jsroot": "^5.9.0",
-    "node-addon-api": "^1.6.3"
+    "jsroot": "^6.0.1"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
