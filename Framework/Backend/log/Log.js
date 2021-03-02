@@ -24,18 +24,20 @@ let infologger = null;
  */
 class Log {
   /**
-   * Sets the label and constructs default winston instance
+   * Sets the facility and constructs default winston instance
    * @constructor
-   * @param {string} label
+   * @param {string} facility - the name of the module/library injecting the message
+   * @param {string} system - the name of the system running the process
    */
-  constructor(label = null) {
-    this.label = label;
+  constructor(facility = '', system = 'GUI') {
+    this.facility = facility;
+    this.system = system;
     if (!winston) {
       winston = new Winston();
       winston.instance.debug('Created default instance of console logger');
     }
     if (!infologger) {
-      infologger = new InfoLoggerSender(winston);
+      infologger = new InfoLoggerSender(winston, this.system);
     }
   }
 
@@ -54,7 +56,7 @@ class Log {
    * @param {string} log - log message
    */
   debug(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+    const message = (!this.facility) ? log : {message: log, facility: this.facility};
     winston.instance.debug(message);
   }
 
@@ -63,12 +65,10 @@ class Log {
    * @param {string} log - log message
    */
   info(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+    const message = (!this.facility) ? log : {message: log, facility: this.facility};
     winston.instance.info(message);
 
-    if (infologger.configured) {
-      infologger.send(log, 'Info', this.label);
-    }
+    infologger.send(log, 'Info', this.facility);
   }
 
   /**
@@ -76,12 +76,10 @@ class Log {
    * @param {string} log - log message
    */
   warn(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+    const message = (!this.facility) ? log : {message: log, facility: this.facility};
     winston.instance.warn(message);
 
-    if (infologger.configured) {
-      infologger.send(log, 'Warning', this.label);
-    }
+    infologger.send(log, 'Warning', this.facility);
   }
 
   /**
@@ -89,12 +87,10 @@ class Log {
    * @param {string} log - log message
    */
   error(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+    const message = (!this.facility) ? log : {message: log, facility: this.facility};
     winston.instance.error(message);
 
-    if (infologger.configured) {
-      infologger.send(log, 'Error', this.label);
-    }
+    infologger.send(log, 'Error', this.facility);
   }
 
   /**

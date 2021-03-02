@@ -17,14 +17,17 @@ const {exec} = require("child_process");
 
 /**
  * Sends InfoLogger logs to InfoLoggerD over UNIX named socket
+ * @docs https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md
  */
 class InfoLoggerSender {
   /**
-   * @param {object} winston local loging object
+   * @param {object} winston - local loging object
+   * @param {string} system - the name of the system running the process
    */
   constructor(winston) {
     this.configured = false;
     this.winston = winston;
+
     // for security reasons this path is hardcoded
     this.path = '/opt/o2-InfoLogger/bin/log';
     fs.access(this.path, fs.constants.X_OK, (err) => {
@@ -38,17 +41,37 @@ class InfoLoggerSender {
   }
 
   /**
+   * Send a message to InfoLogger with certain fields filled.
    * @param {string} log - log message
-   * @param {string} severity - one of InfoLogger supported severities
-   * @param {stsrimg} facility name - name of the module sending the log
+   * @param {string} severity - one of InfoLogger supported severities: 'Info'(default), 'Error', 'Fatal', 'Warning', 'Debug'
+   * @param {string} facility - the name of the module/library injecting the message
+   * @param {number} level - visibility of the message
    */
-  send(log, severity, rolename) {
-    const command = `${this.path} -s ${severity} -oFacility=${rolename} -oSystem=GUI "${log}"`;
-    exec(command, (error) => {
-      if (error) {
-        this.winston.debug('Impossible to write a log to InfoLogger');
-      }
-    });
+  send(log, severity = 'Info', facility = '', level = 99) {
+    if (this.configured) {
+      log = this._removeNewLinesAndTabs(log);
+      const command =
+        `${this.path} -s ${severity} -oFacility=${facility} -oSystem=GUI -oLevel=${level} "${log}"`;
+      exec(command, function(error) {
+        if (error) {
+          console.error(error);
+          this.winston.debug('Impossible to write a log to InfoLogger');
+        }
+      });
+    }
+  }
+
+  /**
+   * Replace all occurences of new lines, tabs or groups of 4 spaces with an empty space
+   * @param {String} log
+   * @return {String}
+   */
+  _removeNewLinesAndTabs(log) {
+    if (log) {
+      return log.replace(/ {4}|[\t\n\r]/gm, ' ');
+    }
+    return '';
   }
 }
+
 module.exports = InfoLoggerSender;
