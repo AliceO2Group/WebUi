@@ -22,7 +22,6 @@ const {execFile} = require("child_process");
 class InfoLoggerSender {
   /**
    * @param {object} winston - local loging object
-   * @param {string} system - the name of the system running the process
    */
   constructor(winston) {
     this.configured = false;

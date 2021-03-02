@@ -27,17 +27,15 @@ class Log {
    * Sets the facility and constructs default winston instance
    * @constructor
    * @param {string} facility - the name of the module/library injecting the message
-   * @param {string} system - the name of the system running the process
    */
-  constructor(facility = '', system = 'GUI') {
+  constructor(facility = '') {
     this.facility = facility;
-    this.system = system;
     if (!winston) {
       winston = new Winston();
       winston.instance.debug('Created default instance of console logger');
     }
     if (!infologger) {
-      infologger = new InfoLoggerSender(winston, this.system);
+      infologger = new InfoLoggerSender(winston);
     }
   }
 
