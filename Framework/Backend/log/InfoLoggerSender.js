@@ -43,7 +43,7 @@ class InfoLoggerSender {
    * @param {stsrimg} facility name - name of the module sending the log
    */
   send(log, severity, rolename) {
-    execFile(this.path, [`-s ${severity}`, `-oFacility=${rolename}`, `-oSystem=GUI "${log}"`], (error) => {
+    execFile(this.path, [`-s`, `${severity}`, `-oFacility=${rolename}`, `-oSystem=GUI "${log}"`], (error) => {
       if (error) {
         this.winston.debug('Impossible to write a log to InfoLogger');
       }
