@@ -63,34 +63,37 @@ class Log {
   /**
    * Information severity log
    * @param {string} log - log message
+   * @param {number} level - defaults to 11 for "developer"
    */
-  info(log) {
+  info(log, level = 11) {
     const message = (!this.facility) ? log : {message: log, facility: this.facility};
     winston.instance.info(message);
 
-    infologger.send(log, 'Info', this.facility);
+    infologger.send(log, 'Info', this.facility, level);
   }
 
   /**
    * Warning severity log
    * @param {string} log - log message
+   * @param {number} level - defaults to 11 for "developer"
    */
-  warn(log) {
+  warn(log, level = 11) {
     const message = (!this.facility) ? log : {message: log, facility: this.facility};
     winston.instance.warn(message);
 
-    infologger.send(log, 'Warning', this.facility);
+    infologger.send(log, 'Warning', this.facility, level);
   }
 
   /**
    * Error severity log
    * @param {string} log - log message
+   * @param {number} level - defaults to 11 for "developer"
    */
-  error(log) {
+  error(log, level = 11) {
     const message = (!this.facility) ? log : {message: log, facility: this.facility};
     winston.instance.error(message);
 
-    infologger.send(log, 'Error', this.facility);
+    infologger.send(log, 'Error', this.facility, level);
   }
 
   /**
