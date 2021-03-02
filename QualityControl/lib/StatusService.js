@@ -77,7 +77,7 @@ class StatusService {
     if (this.config.http) {
       const qc = {hostname: this.config.http.hostname, port: this.config.http.port};
       result.qcg = Object.assign(result.qcg, qc);
-      result.qcg.status = {ok: true}
+      result.qcg.status = {ok: true};
     }
     if (this.config.ccdb) {
       result.ccdb = this.config.ccdb;
@@ -100,7 +100,7 @@ class StatusService {
   async getDataConnectorStatus() {
     if (!this.connector) {
       return {ok: false, message: 'Data connector was not configured'}
-    } 
+    }
     try {
       await this.connector.testConnection();
       return {ok: true};

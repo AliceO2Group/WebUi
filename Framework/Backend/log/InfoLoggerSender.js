@@ -13,7 +13,7 @@
 */
 
 const fs = require('fs');
-const {exec} = require("child_process");
+const {execFile} = require("child_process");
 
 /**
  * Sends InfoLogger logs to InfoLoggerD over UNIX named socket
@@ -50,12 +50,14 @@ class InfoLoggerSender {
   send(log, severity = 'Info', facility = '', level = 99) {
     if (this.configured) {
       log = this._removeNewLinesAndTabs(log);
-      const command =
-        `${this.path} -s ${severity} -oFacility=${facility} -oSystem=GUI -oLevel=${level} "${log}"`;
-      exec(command, function(error) {
+      execFile(this.path, [
+        `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
+      ], function(error, stdout, stderr) {
         if (error) {
-          console.error(error);
           this.winston.debug('Impossible to write a log to InfoLogger');
+        }
+        if (stderr) {
+          this.winston.debug('Impossible to write a log to InfoLogger')
         }
       });
     }
