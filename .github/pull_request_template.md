@@ -10,6 +10,7 @@ Remove checklist and/or items that do not apply.
 - [ ] if it is new feature explain how plan to use it
 - [ ] test are added
 - [ ] documentation is changed or added
+- [ ] FLP integration tests were ran successful
 
 
 #### I have JIRA issue created
@@ -17,3 +18,4 @@ Remove checklist and/or items that do not apply.
 - [ ] issue has "Fix version" assigned
 - [ ] issue "Status" is set to "In review"
 - [ ] PR labels are selected
+- [ ] FLP integration tests were ran successful
