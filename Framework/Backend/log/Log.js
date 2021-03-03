@@ -54,7 +54,7 @@ class Log {
    * @param {string} log - log message
    */
   debug(log) {
-    const message = (!this.facility) ? log : {message: log, facility: this.facility};
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.debug(message);
   }
 
@@ -64,7 +64,9 @@ class Log {
    * @param {number} level - defaults to 11 for "developer"
    */
   info(log, level = 11) {
-    const message = (!this.facility) ? log : {message: log, facility: this.facility};
+    console.log("FACILITY IS:", this.facility)
+
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.info(message);
 
     infologger.send(log, 'Info', this.facility, level);
@@ -76,7 +78,7 @@ class Log {
    * @param {number} level - defaults to 11 for "developer"
    */
   warn(log, level = 11) {
-    const message = (!this.facility) ? log : {message: log, facility: this.facility};
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.warn(message);
 
     infologger.send(log, 'Warning', this.facility, level);
@@ -88,7 +90,7 @@ class Log {
    * @param {number} level - defaults to 11 for "developer"
    */
   error(log, level = 11) {
-    const message = (!this.facility) ? log : {message: log, facility: this.facility};
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.error(message);
 
     infologger.send(log, 'Error', this.facility, level);
