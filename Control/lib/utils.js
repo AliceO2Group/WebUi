@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('COG');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 /**
  * Global HTTP error handler, sends status 500
  * @param {string} err - Message error

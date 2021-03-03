@@ -15,7 +15,7 @@
 const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
 const http = require('http');
 
-const log = new (require('@aliceo2/web-ui').Log)('COG');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 const errorHandler = require('./utils.js').errorHandler;
 
 const Padlock = require('./Padlock.js');

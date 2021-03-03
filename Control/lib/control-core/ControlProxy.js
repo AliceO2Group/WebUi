@@ -17,7 +17,7 @@ const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
 
-const log = new (require('@aliceo2/web-ui').Log)('COG');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 const PROTO_PATH = path.join(__dirname, './../../protobuf/o2control.proto');
 

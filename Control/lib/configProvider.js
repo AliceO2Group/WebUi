@@ -13,7 +13,7 @@
 */
 
 const {Log} = require('@aliceo2/web-ui');
-const log = new Log('COG');
+const log = new Log('Control');
 
 const fs = require('fs');
 const path = require('path');

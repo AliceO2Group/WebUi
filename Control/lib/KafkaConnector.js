@@ -14,7 +14,7 @@
 
 const kafka = require('kafka-node');
 const {WebSocketMessage} = require('@aliceo2/web-ui');
-const log = new (require('@aliceo2/web-ui').Log)('COG');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 /**
  * Gateway for all Kafka Consumer calls
  */
