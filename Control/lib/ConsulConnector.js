@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('ConsulConnector');
+const log = new (require('@aliceo2/web-ui').Log)('COG');
 const errorHandler = require('./utils.js').errorHandler;
 
 /**
@@ -40,10 +40,10 @@ class ConsulConnector {
   async testConsulStatus() {
     if (this.consulService) {
       this.consulService.getConsulLeaderStatus()
-        .then((data) => log.info(`Consul service is up and running on: ${data}`))
-        .catch((error) => log.error(`Could not contact Consul Service due to ${error}`));
+        .then((data) => log.info(`[Consul] Service is up and running on: ${data}`))
+        .catch((error) => log.error(`[Consul] Connection failed due to ${error}`));
     } else {
-      log.error('Unable to retrieve configuration of consul service');
+      log.error('[Consul] Unable to retrieve configuration');
     }
   }
 
@@ -71,14 +71,14 @@ class ConsulConnector {
       }).catch((error) => {
         if (error.message.includes('404')) {
           log.trace(error);
-          log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
-          errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
+          log.error(`[Consul] Could not find any Readout Cards by key ${this.flpHardwarePath}`);
+          errorHandler(`[Consul] Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
         } else {
           errorHandler(error, res, 502);
         }
       });
     } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
+      errorHandler('[Consul] Unable to retrieve configuration of consul service', res, 502);
     }
   }
 
@@ -106,14 +106,14 @@ class ConsulConnector {
         .catch((error) => {
           if (error.message.includes('404')) {
             log.trace(error);
-            log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
-            errorHandler(`Could not find any FLPs by key ${this.flpHardwarePath}`, res, 404);
+            log.error(`[Consul] Could not find any FLPs by key ${this.flpHardwarePath}`);
+            errorHandler(`[Consul] Could not find any FLPs by key ${this.flpHardwarePath}`, res, 404);
           } else {
             errorHandler(error, res, 502);
           }
         });
     } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
+      errorHandler('[Consul] Unable to retrieve configuration of consul service', res, 502);
     }
   }
 
@@ -132,7 +132,7 @@ class ConsulConnector {
       } catch (error) {
         if (error.message.includes('404')) {
           log.trace(error);
-          log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+          log.error(`[Consul] Could not find any FLPs by key ${this.flpHardwarePath}`);
           throw new Error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
         }
       }
@@ -178,7 +178,7 @@ class ConsulConnector {
     const keyValues = this._mapToKVPairs(crusByHost);
     try {
       await this.consulService.putListOfKeyValues(keyValues);
-      log.info('Successfully saved configuration links');
+      log.info('[Consul] Successfully saved configuration links');
       res.status(200).json({message: 'CRUs Configuration saved'});
     } catch (error) {
       errorHandler(error, res, 502);

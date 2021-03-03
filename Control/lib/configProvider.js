@@ -13,7 +13,7 @@
 */
 
 const {Log} = require('@aliceo2/web-ui');
-const log = new Log('ControlConfig');
+const log = new Log('COG');
 
 const fs = require('fs');
 const path = require('path');
@@ -34,12 +34,12 @@ if (process.argv.length >= 3 && /\.js$/.test(process.argv[2])) {
 try {
   configFile = fs.realpathSync(configFile);
 } catch (err) {
-  log.error(`Unable to read config file: ${err.message}`);
+  log.error(`[Config] Unable to read config file: ${err.message}`);
   process.exit(1);
 }
 
 const config = require(configFile);
 Log.configure(config);
-log.info(`Read config file "${configFile}"`);
+log.info(`[Config] Read config file "${configFile}"`);
 
 module.exports = config;
