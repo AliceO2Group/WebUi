@@ -16,7 +16,7 @@
 
 const assert = require('assert');
 const test = require('../mocha-index');
-const {createServer, closeServer} = require('./../live-simulator/infoLoggerServer.js');
+const {createServer, closeServer} = require('../live-simulator/infoLoggerServer.js');
 
 describe('Live Mode test-suite', async () => {
   let baseUrl;
