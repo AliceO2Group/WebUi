@@ -14,7 +14,7 @@
 
 const {Issuer, generators, custom} = require('openid-client');
 const assert = require('assert');
-const log = new (require('./../log/Log.js'))('OpenID');
+const log = new (require('./../log/Log.js'))('Framework');
 
 /**
  * Authenticates and authorises users via OpenID Connect (new CERN SSO).
@@ -26,10 +26,10 @@ class OpenId {
   * @param {object} config - id, secret, well_known, redirect_uri
   */
   constructor(config) {
-    assert(config.id, 'Missing OpenID config value: id');
-    assert(config.secret, 'Missing OpenID config value: secret');
-    assert(config.well_known, 'Missing OpenID config value: well_known');
-    assert(config.redirect_uri, 'Missing OpenID config value: redirect_uri');
+    assert(config.id, '[OpenID] Missing config value: id');
+    assert(config.secret, '[OpenID] Missing config value: secret');
+    assert(config.well_known, '[OpenID] Missing config value: well_known');
+    assert(config.redirect_uri, '[OpenID] Missing config value: redirect_uri');
     config.timeout = (!config.timeout) ? 5000 : config.timeout;
     this.config = config;
     this.code_verifier = generators.codeVerifier();
@@ -54,10 +54,10 @@ class OpenId {
             id_token_signed_response_alg: 'RS256',
             token_endpoint_auth_method: 'client_secret_basic'
           });
-          log.info('OpenID client initialised');
+          log.info('[OpenID] Client initialised');
           resolve();
         }).catch((error) => {
-          log.error('Initialising OpenID failed: ' + error);
+          log.error('[OpenID] Initialisation failed: ' + error);
           reject(error);
         });
     });

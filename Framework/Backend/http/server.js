@@ -19,7 +19,7 @@ const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
 const Log = require('./../log/Log.js');
-const log = new Log('HTTP');
+const log = new Log('Framework');
 const JwtToken = require('./../jwt/token.js');
 const OpenId = require('./openid.js');
 const path = require('path');
@@ -38,8 +38,8 @@ class HttpServer {
    * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
-    assert(httpConfig, 'Missing HTTP config');
-    assert(httpConfig.port, 'Missing HTTP config value: port');
+    assert(httpConfig, '[HTTP] Missing config');
+    assert(httpConfig.port, '[HTTP] Missing config value: port');
     httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
     httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
 
@@ -84,7 +84,7 @@ class HttpServer {
         if (err) {
           reject(err);
         } else {
-          log.info(`Server listening on port ${this.port}`);
+          log.info(`[HTTP] Server listening on port ${this.port}`);
           resolve();
         }
       });
@@ -188,7 +188,7 @@ class HttpServer {
 
     // Catch-all if no controller handled request
     this.app.use('/api', (req, res, next) => {
-      log.debug(`Page was not found: ${req.originalUrl}`);
+      log.debug(`[HTTP] Page was not found: ${req.originalUrl}`);
       res.status(404).json({
         error: '404 - Page not found',
         message: 'The requested URL was not found on this server.'
@@ -196,13 +196,13 @@ class HttpServer {
     });
 
     this.app.use((req, res, next) => {
-      log.debug(`Page was not found: ${req.originalUrl}`);
+      log.debug(`[HTTP] Page was not found: ${req.originalUrl}`);
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
     });
 
     // Error handler when an API controller crashes
     this.app.use('/api', (err, req, res, next) => {
-      log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
+      log.error(`[HTTP] Request ${req.originalUrl} failed: ${err.message || err}`);
       log.trace(err);
 
       if (process.env.NODE_ENV === 'development') {
@@ -219,7 +219,7 @@ class HttpServer {
 
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
-      log.error(`Request ${req.originalUrl} failed: ${err.message || err}`);
+      log.error(`[HTTP] Request ${req.originalUrl} failed: ${err.message || err}`);
       log.trace(err);
       res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
     });
@@ -391,7 +391,7 @@ class HttpServer {
 
     if (token) {
       this.jwt.verify(req.query.token).then(() => next(), (error) => {
-        log.warn(`${error.name} : ${error.message}`);
+        log.warn(`[HTTP] ${error.name} : ${error.message}`);
         res.status(403).json({message: error.name});
       });
     } else {
@@ -428,7 +428,7 @@ class HttpServer {
 
       res.redirect(url.format({pathname: '/', query: query}));
     }).catch((reason) => {
-      log.info('OpenId failed: ' + reason);
+      log.info('[HTTP] OpenId failed: ' + reason);
       res.status(401).send('OpenId failed');
     });
   }
@@ -475,7 +475,7 @@ class HttpServer {
         };
         next();
       }, ({name, message}) => {
-        log.warn(`${name} : ${message}`);
+        log.warn(`[HTTP] ${name} : ${message}`);
 
         const response = {error: '403 - Json Web Token Error'};
 

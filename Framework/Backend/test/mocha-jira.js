@@ -24,31 +24,31 @@ describe('JIRA service test suite', function() {
     it('should throw error due to no config being passed', function() {
       assert.throws(() => {
         new Jira();
-      }, new Error('Configuration object cannot be empty'));
+      }, new Error('[JIRA] Configuration object cannot be empty'));
     });
 
     it('should throw error due to empty JIRA URL', function() {
       assert.throws(() => {
         new Jira({});
-      }, new Error('JIRA URL must be defined'));
+      }, new Error('[JIRA] URL must be defined'));
     });
 
     it('should throw error due to empty service account', function() {
       assert.throws(() => {
         new Jira({url: 'https://localhost', serviceAccount: {}});
-      }, new Error('Service account for JIRA must be defined'));
+      }, new Error('[JIRA] Service account must be defined'));
     });
 
     it('should throw error due to missing password of service account', function() {
       assert.throws(() => {
         new Jira({url: 'https://localhost', serviceAccount: {user: 'test'}});
-      }, new Error('Service account for JIRA must be defined'));
+      }, new Error('[JIRA] Service account must be defined'));
     });
 
     it('should throw error due to missing project ID', function() {
       assert.throws(() => {
         new Jira({url: 'https://localhost', serviceAccount: {user: 'test', pass: 'test'}});
-      }, new Error('JIRA project ID must be defined'));
+      }, new Error('[JIRA] Project ID must be defined'));
     });
 
     it('should successfully create a JIRA service', function() {
