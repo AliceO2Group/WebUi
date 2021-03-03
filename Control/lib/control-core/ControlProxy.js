@@ -17,7 +17,7 @@ const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
 
-const log = new (require('@aliceo2/web-ui').Log)('gRPC');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 const PROTO_PATH = path.join(__dirname, './../../protobuf/o2control.proto');
 
@@ -35,10 +35,10 @@ class ControlProxy {
    */
   constructor(config) {
     if (!config.hostname) {
-      log.error('Missing configuration: hostname');
+      log.error('[ControlProxy] Missing configuration: hostname');
     }
     if (!config.port) {
-      log.error('Missing configuration: port');
+      log.error('[ControlProxy] Missing configuration: port');
     }
     if (!config.timeout) {
       config.timeout = 30000;
@@ -61,11 +61,11 @@ class ControlProxy {
     this.client = new octlProto.o2control.Control(address, credentials, options);
     this.client.waitForReady(Date.now() + config.timeout, (error) => {
       if (error) {
-        log.error(`Connection to gRPC server (${address}) timedout`);
+        log.error(`[ControlProxy] Connection to gRPC server (${address}) timedout`);
         log.error(error.message);
         this.connectionError = error;
       } else {
-        log.info(`gRPC connected to ${address}`);
+        log.info(`[ControlProxy] gRPC connected to ${address}`);
         this.connectionReady = true;
       }
     });
