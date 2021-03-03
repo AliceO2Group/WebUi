@@ -30,30 +30,30 @@ const profileService = new ProfileService(jsonDb);
 const statusService = new StatusService(config, projPackage);
 
 if (config.mysql) {
-  log.info(`Detected InfoLogger database configration`);
+  log.info(`[API] Detected InfoLogger database configration`);
   const connector = new MySQL(config.mysql);
   connector.testConnection().then(() => {
     querySource = new SQLDataSource(connector, config.mysql);
     querySource.isConnectionUpAndRunning().catch((error) => {
-      log.error(`Unable to instantiate data source due to ${error}`);
+      log.error(`[API] Unable to instantiate data source due to ${error}`);
       querySource = null;
     });
     statusService.setQuerySource(querySource);
   }).catch((error) => {
-    log.error(`Unable to connect to mysql due to ${error}`);
+    log.error(`[API] Unable to connect to mysql due to ${error}`);
     querySource = null;
   });
 } else {
-  log.warn(`InfoLogger database config not found, Query mode not available`);
+  log.warn(`[API] InfoLogger database config not found, Query mode not available`);
 }
 
 if (config.infoLoggerServer) {
-  log.info(`InfoLogger server config found`);
+  log.info(`[API] InfoLogger server config found`);
   liveSource = new InfoLoggerReceiver();
   liveSource.connect(config.infoLoggerServer);
   statusService.setLiveSource(liveSource);
 } else {
-  log.warn(`InfoLogger server config not found, Live mode not available`);
+  log.warn(`[API] InfoLogger server config not found, Live mode not available`);
 }
 
 module.exports.attachTo = (http, ws) => {
@@ -88,7 +88,7 @@ module.exports.attachTo = (http, ws) => {
         .then((result) => res.json(result))
         .catch((error) => handleError(res, error));
     } else {
-      handleError(res, 'MySQL Data Source is not available');
+      handleError(res, '[API] MySQL Data Source is not available');
     }
   }
 
