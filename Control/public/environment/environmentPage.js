@@ -171,7 +171,7 @@ const showEnvDetailsTable = (item, environment) =>
         ]),
         h('tr', [
           h('th.w-15', 'FLP count'),
-          h('td', JSON.parse(item.defaults.inventory_flps).length)
+          h('td', item.numberOfFlps)
         ]),
         h('tr', [
           h('th.w-15',

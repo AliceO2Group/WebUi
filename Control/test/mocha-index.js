@@ -53,6 +53,7 @@ describe('Control', function() {
       state: 'CONFIGURED',
       tasks: [],
       rootRole: 'copy-push',
+      numberOfFlps: 2,
       defaults: {
         inventory_flps: "[\"an-flp.cern.ch\"]"
       }
