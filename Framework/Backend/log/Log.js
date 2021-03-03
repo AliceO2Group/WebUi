@@ -64,8 +64,6 @@ class Log {
    * @param {number} level - defaults to 11 for "developer"
    */
   info(log, level = 11) {
-    console.log("FACILITY IS:", this.facility)
-
     const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.info(message);
 
