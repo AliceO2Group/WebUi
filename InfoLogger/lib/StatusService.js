@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('ILG-StatusService');
+const log = new (require('@aliceo2/web-ui').Log)('InfoLogger');
 
 /**
  * Gateway for all calls with regards to the status
@@ -119,7 +119,7 @@ class StatusService {
         mysql.status = {ok: false, message: error.message || error};
       }
     } else {
-      log.error('There was no data source set up')
+      log.error('[StatusService] There was no data source set up')
       mysql.status = {ok: false, message: 'There was no data source set up'}
     }
     return mysql;
