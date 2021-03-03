@@ -14,7 +14,7 @@
 
 const WebSocketServer = require('ws').Server;
 const url = require('url');
-const log = new (require('./../log/Log.js'))('WebSocket');
+const log = new (require('./../log/Log.js'))('Framework');
 const WebSocketMessage = require('./message.js');
 
 /**
@@ -32,7 +32,7 @@ class WebSocket {
     this.http = httpsServer;
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
-    log.info('Server started');
+    log.info('[WebSocket] Server started');
     this.callbackArray = [];
     this.bind('filter', (message) => {
       return new WebSocketMessage(200).setCommand(message.getCommand());
@@ -74,7 +74,7 @@ class WebSocket {
         .then((data) => {
           // 2. Transfer decoded JWT data to request
           Object.assign(req, data);
-          log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
+          log.debug(`[WebSocket] ID ${data.id} Processing "${req.getCommand()}"`);
           // 3. Check whether callback exists
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
             const res = this.callbackArray[req.getCommand()](req);
@@ -113,9 +113,9 @@ class WebSocket {
         client.on('message', (message) => this.onmessage(message, client));
         client.on('close', () => this.onclose(client));
         client.on('pong', () => client.isAlive = true);
-        client.on('error', (err) => log.error(`Connection ${err.code}`));
+        client.on('error', (err) => log.error(`[WebSocket] Connection ${err.code}`));
       }, (error) => {
-        log.warn(`${error.name} : ${error.message}`);
+        log.warn(`[WebSocket] ${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -141,19 +141,19 @@ class WebSocket {
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              log.debug(`ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
+              log.debug(`[WebSocket] ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
               // 5. Send back to a client
               client.send(JSON.stringify(response.json));
             }
           }, (response) => {
             // 6. If generating response fails
-            throw new Error(`ID ${client.id} Processing request failed: ${response.message}`);
+            throw new Error(`[WebSocket] ID ${client.id} Processing request failed: ${response.message}`);
           });
       }, (failed) => {
         // 7. If parsing message fails
         client.send(JSON.stringify(failed.json));
       }).catch((error) => {
-        log.warn(`ID ${client.id} ${error.name} : ${error.message}`);
+        log.warn(`[WebSocket] ID ${client.id} ${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -178,7 +178,7 @@ class WebSocket {
    * @param {object} client - disconnected client
    */
   onclose(client) {
-    log.info(`ID ${client.id} Client disconnected`);
+    log.info(`[WebSocket] ID ${client.id} Client disconnected`);
   }
 
   /**
@@ -195,12 +195,12 @@ class WebSocket {
             return; // don't send
           }
         } catch (error) {
-          log.error(`Client's filter corrupted, skipping broadcast: ${error}`);
+          log.error(`[WebSocket] Client's filter corrupted, skipping broadcast: ${error}`);
           return; // don't send
         }
       }
       client.send(JSON.stringify(message.json));
-      log.debug(`ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
+      log.debug(`[WebSocket] ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
     });
   }
 
@@ -212,7 +212,7 @@ class WebSocket {
     this.server.clients.forEach((client) => {
       client.send(JSON.stringify(message.json));
     });
-    log.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
+    log.debug(`[WebSocket] Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
 module.exports = WebSocket;
