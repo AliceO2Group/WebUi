@@ -15,6 +15,7 @@
 import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX} from '/js/src/index.js';
 import spinner from '../loader/spinner.js';
 import {draw} from './objectDraw.js';
+import panel from './jsrootobjdraw.js';
 import infoButton from './../common/infoButton.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
@@ -44,10 +45,11 @@ export default (model) => h('.h-100.flex-column', {key: model.router.params.page
       })
     ),
     h('.animate-width.scroll-y', {
+      id: 'drawing',
       style: {
         width: model.object.selected ? '50%' : 0
       }
-    }, model.object.selected ? objectPanel(model) : null
+    }, model.object.selected ?  panel() : null
     )
   ]),
   h('.f6.status-bar.ph1.flex-row', [
@@ -96,7 +98,9 @@ const drawPlot = (model) =>
           )
         )]),
       h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, model.object.selected.name, {stat: true}, 'treePage')
+        // draw(model, model.object.selected.name, {stat: true}, 'treePage')
+        panel()
+
       ),
       h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model)))
     ]
