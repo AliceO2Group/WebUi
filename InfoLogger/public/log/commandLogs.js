@@ -103,12 +103,12 @@ const saveUserProfileMenuItem = (model) =>
  * @param {Object} model
  * @return {vnode}
  */
-const queryButton = (model) => h('button.btn', model.servicesResult.match({
+const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
-  Success: (services) => ({
-    title: services.query ? 'Query database with filters (Enter)' : 'Query service not configured',
-    disabled: !services.query || model.log.queryResult.isLoading(),
+  Success: (frameworkInfo) => ({
+    title: frameworkInfo.mysql.status.ok ? 'Query database with filters (Enter)' : 'Query service not configured',
+    disabled: !frameworkInfo.mysql.status.ok || model.log.queryResult.isLoading(),
     className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
     onclick: () => toggleButtonStates(model, false)
   }),
@@ -124,12 +124,12 @@ const queryButton = (model) => h('button.btn', model.servicesResult.match({
  * @param {Object} model
  * @return {vnode}
  */
-const liveButton = (model) => h('button.btn', model.servicesResult.match({
+const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
-  Success: (services) => ({
-    title: services.live ? 'Stream logs with filtering' : 'Live service not configured',
-    disabled: !services.live || model.log.queryResult.isLoading(),
+  Success: (frameworkInfo) => ({
+    title: frameworkInfo.infoLoggerServer.status.ok ? 'Stream logs with filtering' : 'Live service not configured',
+    disabled: !frameworkInfo.infoLoggerServer.status.ok || model.log.queryResult.isLoading(),
     className: !model.ws.authed ? 'loading' : liveButtonType,
     onclick: () => toggleButtonStates(model, true)
   }),

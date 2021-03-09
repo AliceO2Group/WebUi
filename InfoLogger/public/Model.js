@@ -73,10 +73,6 @@ export default class Model extends Observable {
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
-    this.servicesResult = RemoteData.notAsked(); // Success({query, live})
-
-    this.detectServices();
-
     // update router on model change
     // Model can change very often we protect router with callRateLimiter
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
@@ -96,32 +92,6 @@ export default class Model extends Observable {
    */
   handleWSClose() {
     this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
-  }
-
-  /**
-   * Ask server for services configured and ready to be used
-   * Currently: query and live data sources.
-   */
-  async detectServices() {
-    this.servicesResult = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.loader.post(`/api/services`);
-    if (!ok) {
-      this.notification.show(`Unable to load services and start application`, 'danger', Infinity);
-      return;
-    }
-
-    if (!result.query && !result.live) {
-      this.notification.show(`QUERY and LIVE services are currently unavailable`, 'danger', 3000);
-    } else if (!result.query) {
-      this.notification.show(`QUERY service is currently unavailable`, 'danger', 3000);
-    } else if (!result.live) {
-      this.notification.show(`Live Mode is currently unavailable`, 'danger', 3000);
-    }
-
-    this.servicesResult = RemoteData.success(result);
-    this.notify();
   }
 
   /**
@@ -278,18 +248,39 @@ export default class Model extends Observable {
     if (message.command === 'live-log') {
       this.log.addLog(message.payload);
     } else {
-      await this.getFrameworkInfo();
-      await this.detectServices();
       if (message.command === 'il-server-connection-issue'
         && this.log.activeMode !== MODE.QUERY) {
+        if (this.frameworkInfo.isSuccess()) {
+          this.frameworkInfo.payload.infoLoggerServer.status =
+            {ok: false, message: 'Live Mode is currently unavailable. Retrying...'};
+        }
         this.notification.show(
           `Connection to InfoLogger server is unavailable. Retrying in 5 seconds`, 'warning', 2000);
       } else if (message.command === 'il-server-close') {
+        if (this.frameworkInfo.isSuccess()) {
+          this.frameworkInfo.payload.infoLoggerServer.status =
+            {ok: false, message: 'Live Mode is currently unavailable. Retrying...'};
+        }
         this.notification.show(
           `Connection between backend and InfoLogger server has been lost`, 'warning', 2000);
       } else if (message.command === 'il-server-connected') {
+        if (this.frameworkInfo.isSuccess()) {
+          this.frameworkInfo.payload.infoLoggerServer.status = {ok: true};
+        }
         this.notification.show(
           `Connection between backend and InfoLogger server has been established`, 'success', 2000);
+      } else if (message.command === 'il-sql-server-status') {
+        if (this.frameworkInfo.isSuccess()) {
+          this.frameworkInfo.payload.mysql.status = message.payload;
+        }
+        this.notify();
+        if (!message.payload.ok) {
+          this.notification.show(
+            `SQL QUERY System is unavailable. Retrying in 5 seconds`, 'warning', 2000);
+        } else {
+          this.notification.show(
+            `Connection to SQL QUERY System has been restored`, 'success', 2000);
+        }
       }
     }
     return;
