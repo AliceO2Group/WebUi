@@ -299,7 +299,7 @@ export default class Log extends Observable {
    * `list` is then reset and filled with result.
    */
   async query() {
-    if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.query) {
+    if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
       throw new Error('Query service is not available');
     }
     this.queryResult = RemoteData.loading();
@@ -373,8 +373,8 @@ export default class Log extends Observable {
     if (!this.model.ws.authed) {
       throw new Error('WS is not yet ready');
     }
-    if (!this.model.servicesResult.isSuccess() || !this.model.servicesResult.payload.live) {
-      throw new Error(`Live service is not available due to: ${JSON.stringify(this.model.servicesResult)}`);
+    if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.infoLoggerServer.status.ok) {
+      throw new Error(`Live service is not available`);
     }
     if (this.isLiveModeRunning()) {
       throw new Error('Live already enabled');

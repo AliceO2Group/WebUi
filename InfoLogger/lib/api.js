@@ -29,78 +29,32 @@ const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json')
 const profileService = new ProfileService(jsonDb);
 const statusService = new StatusService(config, projPackage);
 
-if (config.mysql) {
-  log.info(`[API] Detected InfoLogger database configration`);
-  const connector = new MySQL(config.mysql);
-  connector.testConnection().then(() => {
-    querySource = new SQLDataSource(connector, config.mysql);
-    querySource.isConnectionUpAndRunning().catch((error) => {
-      log.error(`[API] Unable to instantiate data source due to ${error}`);
-      querySource = null;
-    });
-    statusService.setQuerySource(querySource);
-  }).catch((error) => {
-    log.error(`[API] Unable to connect to mysql due to ${error}`);
-    querySource = null;
-  });
-} else {
-  log.warn(`[API] InfoLogger database config not found, Query mode not available`);
-}
-
-if (config.infoLoggerServer) {
-  log.info(`[API] InfoLogger server config found`);
-  liveSource = new InfoLoggerReceiver();
-  liveSource.connect(config.infoLoggerServer);
-  statusService.setLiveSource(liveSource);
-} else {
-  log.warn(`[API] InfoLogger server config not found, Live mode not available`);
-}
-
 module.exports.attachTo = (http, ws) => {
   http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService));
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
-  http.post('/services', getServicesStatus);
-  http.post('/query', query);
   http.post('/saveUserProfile', (req, res) => profileService.saveUserProfile(req, res));
+  http.post('/query', query);
 
-  /**
-   * Method to send back the status of the current services (e.g query/live)
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function getServicesStatus(req, res) {
-    res.json({
-      query: !!querySource,
-      live: !!liveSource.isConnected,
-      streamHostname: config.infoLoggerServer && config.infoLoggerServer.host
-    });
+  if (config.mysql) {
+    log.info(`[API] Detected InfoLogger database configration`);
+    setupMySQLConnectors();
+    setInterval(() => {
+      if (!querySource) {
+        setupMySQLConnectors();
+      }
+    }, config.mysql.retryMs || 5000);
+  } else {
+    log.warn(`[API] InfoLogger database config not found, Query mode not available`);
   }
 
-  /**
-   * Method to perform a query on the SQL Data Source
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function query(req, res) {
-    if (querySource) {
-      querySource.queryFromFilters(req.body.criterias, req.body.options)
-        .then((result) => res.json(result))
-        .catch((error) => handleError(res, error));
-    } else {
-      handleError(res, '[API] MySQL Data Source is not available');
-    }
-  }
-
-  /**
-   * Catch all HTTP errors
-   * @param {Object} res
-   * @param {Error} error
-   * @param {number} status
-   */
-  function handleError(res, error, status = 500) {
-    log.trace(error);
-    res.status(status).json({message: error.message});
+  if (config.infoLoggerServer) {
+    log.info(`[API] InfoLogger server config found`);
+    liveSource = new InfoLoggerReceiver();
+    liveSource.connect(config.infoLoggerServer);
+    statusService.setLiveSource(liveSource);
+  } else {
+    log.warn(`[API] InfoLogger server config not found, Live mode not available`);
   }
 
   if (liveSource) {
@@ -122,5 +76,61 @@ module.exports.attachTo = (http, ws) => {
     liveSource.on('close', () => {
       ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-close'));
     });
+  }
+
+  /**
+   * Method to atttempt creating a connection to the InfoLogger SQL DB
+   */
+  function setupMySQLConnectors() {
+    const connector = new MySQL(config.mysql);
+    connector.testConnection().then(() => {
+      querySource = new SQLDataSource(connector, config.mysql);
+      querySource.isConnectionUpAndRunning()
+        .then(() => {
+          ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status').setPayload({ok: true}));
+          statusService.setQuerySource(querySource);
+        }).catch((error) => {
+          log.error(`[API] Unable to instantiate data source due to ${error}`);
+          ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status')
+            .setPayload({ok: false, message: 'Query service is unavailable'}));
+          querySource = null;
+          statusService.setQuerySource(querySource);
+        });
+    }).catch((error) => {
+      log.error(`[API] Unable to connect to mysql due to ${error}`);
+      querySource = null;
+      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status')
+        .setPayload({ok: false, message: 'Query service is unavailable'}));
+      statusService.setQuerySource(querySource);
+    });
+  }
+
+  /**
+   * Method to perform a query on the SQL Data Source
+   * @param {Request} req
+   * @param {Response} res
+   */
+  function query(req, res) {
+    if (querySource) {
+      querySource.queryFromFilters(req.body.criterias, req.body.options)
+        .then((result) => res.json(result))
+        .catch((error) => {
+          setupMySQLConnectors();
+          handleError(res, error);
+        });
+    } else {
+      handleError(res, '[API] MySQL Data Source is currently not available');
+    }
+  }
+
+  /**
+   * Catch all HTTP errors
+   * @param {Object} res
+   * @param {Error} error
+   * @param {number} status
+   */
+  function handleError(res, error, status = 500) {
+    log.trace(error);
+    res.status(status).json({message: error.message});
   }
 };
