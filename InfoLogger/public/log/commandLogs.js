@@ -107,8 +107,9 @@ const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
   NotAsked: () => ({disabled: true}),
   Loading: () => ({disabled: true, className: 'loading'}),
   Success: (frameworkInfo) => ({
-    title: frameworkInfo.mysql.status.ok ? 'Query database with filters (Enter)' : 'Query service not configured',
-    disabled: !frameworkInfo.mysql.status.ok || model.log.queryResult.isLoading(),
+    title: (frameworkInfo.mysql && frameworkInfo.mysql.status.ok)
+      ? 'Query database with filters (Enter)' : 'Query service not configured',
+    disabled: !frameworkInfo.mysql || !frameworkInfo.mysql.status.ok || model.log.queryResult.isLoading(),
     className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
     onclick: () => toggleButtonStates(model, false)
   }),
