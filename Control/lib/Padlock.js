@@ -32,7 +32,7 @@ class Padlock {
    */
   lockBy(personid, name) {
     if (this.lockedBy !== null) {
-      throw new Error(`Lock is already hold by ${this.lockedByName} (id ${this.lockedBy})`);
+      throw new Error(`[Padlock] Lock is already hold by ${this.lockedByName} (id ${this.lockedBy})`);
     }
     this.lockedBy = personid;
     this.lockedByName = name;
@@ -45,10 +45,10 @@ class Padlock {
    */
   forceUnlock(auth) {
     if (this.lockedBy === null) {
-      throw new Error(`Lock is already released`);
+      throw new Error(`[Padlock] Lock is already released`);
     }
     if (auth !== 2) {
-      throw new Error(`Insufficient permission`);
+      throw new Error(`[Padlock] Insufficient permission`);
     }
     this.lockedBy = null;
     this.lockedByName = null;
@@ -61,11 +61,11 @@ class Padlock {
    */
   unlockBy(personid) {
     if (this.lockedBy === null) {
-      throw new Error('Lock is already released');
+      throw new Error('[Padlock] Lock is already released');
     }
 
     if (this.lockedBy !== personid) {
-      throw new Error(`You cannot unlock, owner is ${this.lockedByName} (id ${this.lockedBy})`);
+      throw new Error(`[Padlock] You cannot unlock, owner is ${this.lockedByName} (id ${this.lockedBy})`);
     }
 
     this.lockedBy = null;

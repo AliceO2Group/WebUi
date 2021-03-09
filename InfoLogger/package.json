@@ -28,7 +28,7 @@
     "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.15.1"
+    "@aliceo2/web-ui": "1.16.2"
   },
   "devDependencies": {
     "eslint": "^5.15.0",

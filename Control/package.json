@@ -27,7 +27,7 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.15.1",
+    "@aliceo2/web-ui": "1.16.2",
     "@grpc/grpc-js": "^1.2.1",
     "@grpc/proto-loader": "^0.5.3",
     "kafka-node": "^4.1.3"

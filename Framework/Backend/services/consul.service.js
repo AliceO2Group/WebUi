@@ -24,13 +24,13 @@ class ConsulService {
    */
   constructor(config) {
     if (!config) {
-      throw new Error('Configuration field cannot be empty');
+      throw new Error('[Consul] Configuration field cannot be empty');
     }
     if (!config.hostname) {
-      throw new Error('Hostname field cannot be empty');
+      throw new Error('[Consul] Hostname field cannot be empty');
     }
     if (!config.port) {
-      throw new Error('Port field cannot be empty');
+      throw new Error('[Consul] Port field cannot be empty');
     }
     this.hostname = config.hostname;
     this.port = config.port;
