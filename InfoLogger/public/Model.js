@@ -274,7 +274,7 @@ export default class Model extends Observable {
           this.frameworkInfo.payload.mysql.status = message.payload;
         }
         this.notify();
-        if (!message.payload.ok) {
+        if (!message.payload.ok && this.log.activeMode === MODE.QUERY) {
           this.notification.show(
             `SQL QUERY System is unavailable. Retrying in 5 seconds`, 'warning', 2000);
         } else {
