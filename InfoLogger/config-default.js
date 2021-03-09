@@ -31,7 +31,8 @@ module.exports = {
     password: 'root',
     database: 'INFOLOGGER',
     port: 3306,
-    timeout: 60000
+    timeout: 60000,
+    retryMs: 5000
   },
 
   // optional data source, comment object if not used
