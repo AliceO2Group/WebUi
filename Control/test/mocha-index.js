@@ -53,9 +53,7 @@ describe('Control', function() {
       state: 'CONFIGURED',
       tasks: [],
       rootRole: 'copy-push',
-      defaults: {
-        inventory_flps: "[\"an-flp.cern.ch\"]"
-      }
+      numberOfFlps: 2,
     },
     workflow: {},
     workflowTemplates: {
