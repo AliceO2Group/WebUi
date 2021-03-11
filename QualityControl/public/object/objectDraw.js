@@ -204,7 +204,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
         }
-      });
+      }).catch(() => model.object.invalidObject(tabObject.name));
     }, 0);
 
     dom.dataset.fingerprintRedraw = redrawHash;

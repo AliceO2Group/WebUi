@@ -82,20 +82,7 @@ export default class Model extends Observable {
     this.object.loadList();
     this.layout.loadMyList();
     this.checkOnlineModeAvailability();
-    // Optimization of JSROOT to be as quick as possible (remove unecessary UIs)
-    // Also configure style for a better integration
-    // CSS file modifies also the styles
-
-    JSROOT.gStyle.AutoStat = true;
-    // JSROOT.gStyle.ContextMenu = true;
-    JSROOT.gStyle.CanEnlarge = false;
-    JSROOT.gStyle.DragAndDrop = false;
-    JSROOT.gStyle.MoveResize = false; // div 2
-    JSROOT.gStyle.ToolBar = false;
-    JSROOT.gStyle.ZoomWheel = false;
-    JSROOT.gStyle.ApproxTextSize = true;
-
-    JSROOT.gStyle.fFrameLineColor = 16;
+    this.configureJSRoot();
   }
 
   /**
@@ -270,5 +257,21 @@ export default class Model extends Observable {
     this.notify();
 
     this.object.refreshObjects();
+  }
+
+  /**
+   * Optimization of JSROOT to be as quick as possible (remove unecessary UIs)
+   */
+  configureJSRoot() {
+    JSROOT.settings.AutoStat = true;
+    // JSROOT.settings.ContextMenu = true;
+    JSROOT.settings.CanEnlarge = false;
+    JSROOT.settings.DragAndDrop = false;
+    JSROOT.settings.MoveResize = false; // div 2
+    JSROOT.settings.ToolBar = false;
+    JSROOT.settings.ZoomWheel = false;
+    JSROOT.settings.ApproxTextSize = true;
+
+    JSROOT.settings.fFrameLineColor = 16;
   }
 }
