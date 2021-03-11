@@ -81,15 +81,15 @@ export default class QCObjectService {
       // TODO update link to localhost + prefix
       const filename = `http://ccdb-test.cern.ch:8080/${objectName}/${timestamp}`;
       let [qcObject, timeStampsReq] = await Promise.all([
-        async () => {
+        new Promise(async (resolve, reject) => {
           try {
             const file = await JSROOT.openFile(filename);
             const obj = await file.readObject("ccdb_object");
-            return obj;
+            resolve(obj);
           } catch (error) {
-            return {error: 'Could not load object'};
+            reject({error: 'Could not load object'});
           }
-        },
+        }),
         this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
       ]);
       const {result, ok, status} = timeStampsReq;
