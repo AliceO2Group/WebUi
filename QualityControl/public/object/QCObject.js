@@ -281,7 +281,7 @@ export default class QCObject extends Observable {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
     const obj = await this.qcObjectService.getObjectByName(objectName, timestamp);
-
+    
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
       if (this.isObjectChecker(obj.payload.qcObject)) {
@@ -289,7 +289,7 @@ export default class QCObject extends Observable {
         this.notify();
       } else {
         // link JSROOT methods to object
-        this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(obj.payload));
+        this.objects[objectName] = RemoteData.success(JSROOT.parse(obj.payload));
         this.notify();
       }
     } else {
@@ -334,7 +334,7 @@ export default class QCObject extends Observable {
     this.notify();
 
     // eslint-disable-next-line
-    const objects = JSROOT.JSONR_unref(this.objectsRemote.payload);
+    const objects = JSROOT.parse(this.objectsRemote.payload);
     for (const name in objects) {
       if (objects[name].error) {
         this.objects[name] = RemoteData.failure(objects[name].error);
