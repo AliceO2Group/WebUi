@@ -280,22 +280,24 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = -1) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    // we don't put a RemoteData.Loading() state to avoid blinking between 2 loads
-    const result = await this.qcObjectService.getObjectByName(objectName, timestamp);
-    if (result.isSuccess()) {
-      if (this.isObjectChecker(result.payload.qcObject)) {
-        this.objects[objectName] = RemoteData.success(result.payload);
+    const obj = await this.qcObjectService.getObjectByName(objectName, timestamp);
+
+    // TODO Is it a TTree?
+    if (obj.isSuccess()) {
+      if (this.isObjectChecker(obj.payload.qcObject)) {
+        this.objects[objectName] = obj;
+        this.notify();
       } else {
         // link JSROOT methods to object
-        // eslint-disable-next-line
-        this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(result.payload));
-      }
-      if (this.selected) {
-        this.selected.version = timestamp === -1 ?
-          parseInt(this.objects[objectName].payload.timestamps[0]) : parseInt(timestamp);
+        this.objects[objectName] = RemoteData.success(JSROOT.JSONR_unref(obj.payload));
+        this.notify();
       }
     } else {
-      this.objects[objectName] = result;
+      this.objects[objectName] = obj;
+    }
+    if (this.selected) {
+      this.selected.version = timestamp === -1 ?
+        parseInt(this.objects[objectName].payload.timestamps[0]) : parseInt(timestamp);
     }
     this.notify();
   }
@@ -330,11 +332,6 @@ export default class QCObject extends Observable {
 
     this.objectsRemote = await this.qcObjectService.getObjectsByName(objectsName);
     this.notify();
-    if (!this.objectsRemote.isSuccess()) {
-      // it should be always status=200 for this request
-      this.model.notification.show('Failed to refresh plots when contacting server', 'danger', Infinity);
-      return;
-    }
 
     // eslint-disable-next-line
     const objects = JSROOT.JSONR_unref(this.objectsRemote.payload);

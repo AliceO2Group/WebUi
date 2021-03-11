@@ -25,7 +25,6 @@ const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel
  */
 module.exports.setup = (http) => {
   http.get('/readObjectData', readObjectData, {public: true});
-  // http.post('/readObjectsData', readObjectsData);
   http.get('/listObjects', listObjects, {public: true});
   http.get('/objectTimestampList', getObjectTimestampList, {public: true});
   http.get('/listOnlineObjects', listOnlineObjects);
@@ -98,45 +97,6 @@ function isOnlineModeConnectionAlive(req, res) {
 }
 
 /**
- * List objects with data specified by objectName[]
- * Send back array of objects or {error: ...}
- * @param {Request} req
- * @param {Response} res
- */
-function readObjectsData(req, res) {
-  let objectsNames = req.body.objectsNames;
-
-  if (!objectsNames) {
-    res.status(400).send('parameter objectsNames is needed');
-    return;
-  }
-
-  if (!Array.isArray(objectsNames)) {
-    objectsNames = [objectsNames];
-  }
-
-  /**
-   * Retrieves data or provides {error} object on failure
-   * @param {Object} name - name path of object and its agent
-   * @return {Promise.<Object>}
-   */
-  const safeRetriever = (name) => model.readObjectData(name)
-    .then((data) => !data ? {error: 'Object not found'} : {qcObject: data})
-    .catch((err) => ({error: err.toString()}));
-
-  const promiseArray = objectsNames.map(safeRetriever);
-  Promise.all(promiseArray)
-    .then((results) => {
-      const resultsByName = {};
-      objectsNames.forEach((name, i) => {
-        resultsByName[name] = results[i];
-      });
-      res.status(200).json(resultsByName);
-    })
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
  * Request data of an object based on name and optionally timestamp
  * Returned data will contained the QC Object and a list of its corresponding timestamps
  * @param {Request} req
@@ -144,21 +104,13 @@ function readObjectsData(req, res) {
  */
 async function readObjectData(req, res) {
   const objectName = req.query.objectName;
-  let timestamp = -1;
-  if (req.query.timestamp) {
-    const ts = req.query.timestamp;
-    timestamp = typeof ts === 'string' ? parseInt(ts) : ts;
-  }
   if (!objectName) {
     res.status(400).send('parameter objectName is needed');
     return;
   }
-
-  // Read from QC
   try {
-    const qcObject = await model.readObjectData(objectName, timestamp);
     const timestamps = await model.getObjectTimestampList(objectName);
-    res.status(qcObject ? 200 : 404).json({qcObject: qcObject, timestamps: timestamps.slice(0, 50)});
+    res.status(timestamps.length > 0 ? 200 : 404).json({timestamps: timestamps.slice(0, 50)});
   } catch (err) {
     errorHandler('Reading object data: ' + err, res);
   }

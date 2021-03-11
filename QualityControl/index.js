@@ -37,6 +37,5 @@ const http = new HttpServer(config.http, config.jwt, config.openId);
 http.addStaticPath(path.join(__dirname, 'public'));
 http.addStaticPath(path.join(require.resolve('jsroot'), '../..'), 'jsroot');
 http.addStaticPath(path.join(__dirname, 'zstd'));
-console.log(path.join(__dirname, 'zstd/zstd-codec.min.js'));
 
 api.setup(http);
