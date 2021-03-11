@@ -16,7 +16,7 @@
 
 const assert = require('assert');
 const test = require('../mocha-index');
-const {createServer, closeServer} = require('./../live-simulator/infoLoggerServer.js');
+const {createServer, closeServer} = require('../live-simulator/infoLoggerServer.js');
 
 describe('Live Mode test-suite', async () => {
   let baseUrl;
@@ -27,10 +27,13 @@ describe('Live Mode test-suite', async () => {
     page = test.page;
     // Start infologgerserver simulator
     ilgServer = createServer();
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
   });
 
-  after(() => closeServer(ilgServer));
+  after(async () => {
+    closeServer(ilgServer);
+    await page.waitForTimeout(5000);
+  });
 
   it('should go to homepage', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});

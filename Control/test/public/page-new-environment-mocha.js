@@ -197,17 +197,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
-  it('should successfully select trigger on from BasicConfiguration', async () => {
-    const [label] = await page.$x(`//div/label[text()="EMU"]`);
-    if (label) {
-      await label.click();
-    } else {
-      assert.ok(false, `EMU label could not be found in list of labels`);
-    }
-    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
-    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true'}, 'roc_ctp_emulator_enabled key could not be found in basic variables selection');
-  });
-
   it('should successfully select EPN ON from BasicConfiguration and automatically set DD to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="epnOn"]`);
     if (label) {
@@ -216,7 +205,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       assert.ok(false, `EPN ON label could not be found in list of labels`);
     }
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
-    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'true', dd_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to true');
+    assert.deepStrictEqual(basicVars, {odc_enabled: 'true', dd_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to true');
   });
 
   it('should successfully select DD OFF from BasicConfiguration and automatically set EPN to OFF', async () => {
@@ -227,7 +216,29 @@ describe('`pageNewEnvironment` test-suite', async () => {
       assert.ok(false, `Data Distribution OFF label could not be found in list of labels`);
     }
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
-    assert.deepStrictEqual(basicVars, {roc_ctp_emulator_enabled: 'true', odc_enabled: 'false', dd_enabled: 'false', qcdd_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
+    assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'false', qcdd_enabled: 'false', dplmw_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
+  });
+
+  it('should successfully select QC ON from BasicConfiguration and automatically set DD to ON', async () => {
+    const [label] = await page.$x(`//div/input[@id="qcddOn"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `Quality Control ON label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', qcdd_enabled: 'true', dplmw_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
+  });
+
+  it('should successfully select DPL Minimal ON from BasicConfiguration and automatically set QC to OFF and keep DD set to ON', async () => {
+    const [label] = await page.$x(`//div/input[@id="dplMwOn"]`);
+    if (label) {
+      await label.click();
+    } else {
+      assert.ok(false, `DPL Minimal ON label could not be found in list of labels`);
+    }
+    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', qcdd_enabled: 'false', dplmw_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
   it('should successfully select option file:// from dropdown and input box should appear', async () => {

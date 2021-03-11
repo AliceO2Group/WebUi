@@ -14,7 +14,7 @@
 
 const kafka = require('kafka-node');
 const {WebSocketMessage} = require('@aliceo2/web-ui');
-const log = new (require('@aliceo2/web-ui').Log)('Kafka');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 /**
  * Gateway for all Kafka Consumer calls
  */
@@ -26,7 +26,7 @@ class KafkaConnector {
    */
   constructor(kafkaConfig, webSocket) {
     if (!kafkaConfig) {
-      log.error('Missing configuration');
+      log.error('[Kafka] Missing configuration');
       return;
     }
     const missingConfigFields = [];
@@ -60,9 +60,9 @@ class KafkaConnector {
     const consumerGroup = new kafka.ConsumerGroup(options, [this.topic]);
 
     consumerGroup.on('message', (message) => this.notifyUsers(message));
-    consumerGroup.on('connect', () => log.info(`ConsumerGroup successfully connected to topic ${this.topic}`));
-    consumerGroup.on('error', (error) => log.error(`Error on ${error}`));
-    consumerGroup.on('offsetOutOfRange', (error) => log.error(`OffsetOutOfRange on ${error}`));
+    consumerGroup.on('connect', () => log.info(`[Kafka] ConsumerGroup successfully connected to topic ${this.topic}`));
+    consumerGroup.on('error', (error) => log.error(`[Kafka] Error on ${error}`));
+    consumerGroup.on('offsetOutOfRange', (error) => log.error(`[Kafka] OffsetOutOfRange on ${error}`));
   }
 
   /**

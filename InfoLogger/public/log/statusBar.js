@@ -36,12 +36,12 @@ export default (model) => [
  * @param {object} model
  * @return {vnode}
  */
-const statusLogs = (model) => model.servicesResult.match({
+const statusLogs = (model) => model.frameworkInfo.match({
   NotAsked: () => 'Loading services...',
   Loading: () => 'Loading services...',
-  Success: (services) => [
+  Success: (frameworkInfo) => [
     statusStats(model),
-    model.log.isLiveModeRunning() && statusLive(model, services),
+    model.log.isLiveModeRunning() && statusLive(model, frameworkInfo),
   ],
   Failure: () => h('span.danger', 'Unable to load services'),
 });
@@ -111,11 +111,11 @@ in ${(result.time / 1000).toFixed(2)} second(s)${(result.time / 1000) >= 2 ? 's'
 /**
  * Status of live mode with hostname of streaming source and date it started
  * @param {Object} model
- * @param {Object} services - service discovery information of what is enabled in this ILG instance
+ * @param {Object} frameworkInfo - service discovery information of what is enabled in this ILG instance
  * @return {vnode}
  */
-const statusLive = (model, services) => [
-  `(Connected to ${services.streamHostname} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`
+const statusLive = (model, frameworkInfo) => [
+  `(Connected to ${frameworkInfo.mysql.host} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`
 ];
 
 /**

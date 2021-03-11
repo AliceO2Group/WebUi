@@ -30,7 +30,7 @@ const config = require('./configProvider.js');
 const projPackage = require('./../package.json');
 
 if (!config.grpc) {
-  throw new Error('grpc field in config file is needed');
+  throw new Error('[GRPC] Configuration is missing');
 }
 if (!config.grafana) {
   log.error('[Grafana] Configuration is missing');
@@ -87,10 +87,10 @@ module.exports.setup = (http, ws) => {
   function lock(req, res) {
     try {
       padLock.lockBy(req.session.personid, req.session.name);
-      log.info(`Lock taken by ${req.session.name}`);
+      log.info(`[API] Lock taken by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.warn(`Unable to lock by ${req.session.name}: ${error}`);
+      log.warn(`[API] Unable to lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.toString()});
       return;
     }
@@ -105,10 +105,10 @@ module.exports.setup = (http, ws) => {
   function forceUnlock(req, res) {
     try {
       padLock.forceUnlock(req.session.access);
-      log.info(`Lock forced by ${req.session.name}`);
+      log.info(`[API] Lock forced by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.warn(`Unable to force lock by ${req.session.name}: ${error}`);
+      log.warn(`[API] Unable to force lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }
     broadcastPadState();
@@ -122,10 +122,10 @@ module.exports.setup = (http, ws) => {
   function unlock(req, res) {
     try {
       padLock.unlockBy(req.session.personid);
-      log.info(`Lock released by ${req.session.name}`);
+      log.info(`[API] Lock released by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.warn(`Unable to give away lock by ${req.session.name}: ${error}`);
+      log.warn(`[API] Unable to give away lock by ${req.session.name}: ${error}`);
       res.status(403).json(error);
       return;
     }
@@ -147,7 +147,7 @@ function getPlotsList(req, res) {
     const port = config.grafana.port;
     httpGetJson(host, port, '/api/health')
       .then((result) => {
-        log.info(`Grafana is up and running on version: ${result.version}`);
+        log.info(`[Grafana] Is up and running on version: ${result.version}`);
         const hostPort = `http://${host}:${port}/`;
         const valueOne = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=6 ';
         const valueTwo = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=8';
@@ -168,7 +168,7 @@ function getPlotsList(req, res) {
  */
 async function getFrameworkInfo(req, res) {
   if (!config) {
-    errorHandler('Unable to retrieve configuration of the framework', res, 502);
+    errorHandler('[API] Unable to retrieve configuration of the framework', res, 502);
   } else {
     const result = {};
     result['AliECS GUI'] = {};
@@ -187,7 +187,7 @@ async function getFrameworkInfo(req, res) {
         result['AliECS Core'] = Object.assign({}, result['AliECS Core'], coreInfo);
         result['AliECS Core'].status = {ok: true};
       } catch (err) {
-        log.error(err);
+        log.error(`[Core] ${err}`);
         result['AliECS Core'].status = {ok: false};
         result['AliECS Core'].status.message = err.toString();
       }

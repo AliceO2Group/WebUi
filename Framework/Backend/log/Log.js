@@ -24,12 +24,12 @@ let infologger = null;
  */
 class Log {
   /**
-   * Sets the label and constructs default winston instance
+   * Sets the facility and constructs default winston instance
    * @constructor
-   * @param {string} label
+   * @param {string} facility - the name of the module/library injecting the message
    */
-  constructor(label = null) {
-    this.label = label;
+  constructor(facility = '') {
+    this.facility = facility;
     if (!winston) {
       winston = new Winston();
       winston.instance.debug('Created default instance of console logger');
@@ -54,47 +54,44 @@ class Log {
    * @param {string} log - log message
    */
   debug(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.debug(message);
   }
 
   /**
    * Information severity log
    * @param {string} log - log message
+   * @param {number} level - defaults to 11 for "developer"
    */
-  info(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+  info(log, level = 11) {
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.info(message);
 
-    if (infologger.configured) {
-      infologger.send(log, 'Info', this.label);
-    }
+    infologger.send(log, 'Info', this.facility, level);
   }
 
   /**
    * Warning severity log
    * @param {string} log - log message
+   * @param {number} level - defaults to 11 for "developer"
    */
-  warn(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+  warn(log, level = 11) {
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.warn(message);
 
-    if (infologger.configured) {
-      infologger.send(log, 'Warning', this.label);
-    }
+    infologger.send(log, 'Warning', this.facility, level);
   }
 
   /**
    * Error severity log
    * @param {string} log - log message
+   * @param {number} level - defaults to 11 for "developer"
    */
-  error(log) {
-    const message = (this.label == null) ? log : {message: log, label: this.label};
+  error(log, level = 11) {
+    const message = (!this.facility) ? log : {message: log, label: this.facility};
     winston.instance.error(message);
 
-    if (infologger.configured) {
-      infologger.send(log, 'Error', this.label);
-    }
+    infologger.send(log, 'Error', this.facility, level);
   }
 
   /**

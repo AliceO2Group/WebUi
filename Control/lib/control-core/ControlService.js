@@ -15,7 +15,7 @@
 const {errorHandler, errorLogger} = require('./../utils.js');
 const assert = require('assert');
 const {WebSocketMessage} = require('@aliceo2/web-ui');
-const log = new (require('@aliceo2/web-ui').Log)('Control-Proxy');
+const log = new (require('@aliceo2/web-ui').Log)('Control');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -62,7 +62,8 @@ class ControlService {
       const channelId = req.body.channelId;
       const method = 'NewAutoEnvironment';
       if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
-        log.info(`${req.session.personid} => ${method}` + (req.body.type ? ` (${req.body.type})` : ''));
+        const type = req.body.type ? ` (${req.body.type})` : '';
+        log.info(`[ControlService] ${req.session.personid} => ${method} ${type}`);
 
         try {
           const hosts = await this.consulConnector.getFLPsList();
@@ -106,7 +107,8 @@ class ControlService {
     const method = this.parseMethodNameString(req.path);
     if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
       if (!method.startsWith('Get')) {
-        log.info(`${req.session.personid} => ${method}` + (req.body.type ? ` (${req.body.type})` : ''));
+        const type = req.body.type ? ` (${req.body.type})` : '';
+        log.info(`[ControlService] ${req.session.personid} => ${method} ${type}`, 6);
       }
       this.ctrlProx[method](req.body)
         .then((response) => res.json(response))

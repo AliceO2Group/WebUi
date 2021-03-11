@@ -101,7 +101,7 @@ const tasksPerFlpTables = (environmentModel, environment) => {
         h('h5.w-100', host),
         h('.flex-row', [
           infoLoggerPerFlpButton(environment, environmentModel, host),
-          messosLogButton(tasksByFlp[host].stdout)
+          mesosLogButton(tasksByFlp[host].stdout)
         ]),
       ]),
       showEnvTasksTable(environmentModel, tasksByFlp[host].list)
@@ -171,7 +171,7 @@ const showEnvDetailsTable = (item, environment) =>
         ]),
         h('tr', [
           h('th.w-15', 'FLP count'),
-          h('td', JSON.parse(item.defaults.inventory_flps).length)
+          h('td', item.numberOfFlps)
         ]),
         h('tr', [
           h('th.w-15',
@@ -229,7 +229,7 @@ const infoLoggerButton = (environment, item) =>
  * @param {string} href - location of the mesos log
  * @return {vnode}
  */
-const messosLogButton = (href) =>
+const mesosLogButton = (href) =>
   h('a', {
     style: {display: !href ? 'none' : ''},
     title: 'Download Mesos Environment Logs',

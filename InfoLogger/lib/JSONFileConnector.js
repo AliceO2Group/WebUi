@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('InfoLoggerJson');
+const log = new (require('@aliceo2/web-ui').Log)('InfoLogger');
 const fs = require('fs');
 const path = require('path');
 
@@ -46,7 +46,7 @@ class JsonFileConnector {
   async _syncFileAndInternalState() {
     await this._readFromFile();
     await this._writeToFile();
-    log.info(`Preferences will be saved in ${this.pathname}`);
+    log.info(`[JSONConnector] Preferences will be saved in ${this.pathname}`);
   }
 
   /**
@@ -60,7 +60,7 @@ class JsonFileConnector {
         if (err) {
           // file does not exist, it's ok, we will create it
           if (err.code === 'ENOENT') {
-            log.info('DB file does not exist, will create one');
+            log.info('[JSONConnector] DB file does not exist, will create one');
             return resolve();
           }
 
@@ -73,13 +73,13 @@ class JsonFileConnector {
 
           // check data we just read
           if (!dataFromFile || !dataFromFile.profiles || !Array.isArray(dataFromFile.profiles)) {
-            return reject(new Error(`DB file should have an array of profiles ${this.pathname}`));
+            return reject(new Error(`[JSONConnector] DB file should have an array of profiles ${this.pathname}`));
           }
 
           this.data = dataFromFile;
           resolve();
         } catch (e) {
-          return reject(new Error(`Unable to parse DB file ${this.pathname}`));
+          return reject(new Error(`[JSONConnector] Unable to parse DB file ${this.pathname}`));
         }
       });
     });
@@ -102,7 +102,7 @@ class JsonFileConnector {
           if (err) {
             return reject(err);
           }
-          log.info(`DB file updated`);
+          log.info(`[JSONConnector] DB file updated`);
           resolve();
         });
       });
@@ -120,12 +120,12 @@ class JsonFileConnector {
    */
   async createNewProfile(username, content) {
     if (username == undefined) {
-      throw new Error(`username for profile is mandatory`);
+      throw new Error(`[JSONConnector] username for profile is mandatory`);
     }
 
     const profile = this.data.profiles.find((profile) => profile.username === username);
     if (profile) {
-      throw new Error(`Profile with this username (${username}) already exists`);
+      throw new Error(`[JSONConnector] Profile with this username (${username}) already exists`);
     }
     const dateNow = Date.now();
     const profileEntry = {
@@ -168,7 +168,8 @@ class JsonFileConnector {
       this._writeToFile();
       return profile;
     } else {
-      throw new Error(`Profile with this username (${username}) cannot be updated as it does not exist`);
+      throw new Error('[JSONConnector] Profile with this username ('
+        + username + ') cannot be updated as it does not exist');
     }
   }
 }
