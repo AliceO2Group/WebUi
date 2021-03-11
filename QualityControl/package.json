@@ -24,7 +24,7 @@
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
-    "mocha": "mocha --exit test/**/mocha-* --retries 2"
+    "mocha": "mocha --exit test/**/mocha-*"
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.15.1",

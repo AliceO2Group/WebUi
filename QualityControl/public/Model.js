@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global JSROOT */
+
 import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
@@ -80,6 +82,20 @@ export default class Model extends Observable {
     this.object.loadList();
     this.layout.loadMyList();
     this.checkOnlineModeAvailability();
+    // Optimization of JSROOT to be as quick as possible (remove unecessary UIs)
+    // Also configure style for a better integration
+    // CSS file modifies also the styles
+
+    JSROOT.gStyle.AutoStat = true;
+    // JSROOT.gStyle.ContextMenu = true;
+    JSROOT.gStyle.CanEnlarge = false;
+    JSROOT.gStyle.DragAndDrop = false;
+    JSROOT.gStyle.MoveResize = false; // div 2
+    JSROOT.gStyle.ToolBar = false;
+    JSROOT.gStyle.ZoomWheel = false;
+    JSROOT.gStyle.ApproxTextSize = true;
+
+    JSROOT.gStyle.fFrameLineColor = 16;
   }
 
   /**
@@ -222,6 +238,7 @@ export default class Model extends Observable {
    * Method to check if Online Mode is available
    */
   async checkOnlineModeAvailability() {
+    // TODO add retrieve ccdb-link for objects
     const result = await this.object.qcObjectService.isOnlineModeConnectionAlive();
     if (result.isSuccess()) {
       this.isOnlineModeConnectionAlive = true;
