@@ -78,8 +78,7 @@ export default class QCObjectService {
       if (timestamp === -1) {
         timestamp = Date.now();
       }
-      // TODO update link to localhost + prefix
-      const filename = `http://ccdb-test.cern.ch:8080/${objectName}/${timestamp}`;
+      const filename = `${this.model.ccdbPlotUrl}/${objectName}/${timestamp}`;
       let [qcObject, timeStampsReq] = await Promise.all([
         new Promise(async (resolve, reject) => {
           try {
@@ -119,8 +118,7 @@ export default class QCObjectService {
     const objectsMap = {};
     await Promise.allSettled(
       objectsNames.map(async (objectName) => {
-        // TODO update link to localhost + prefix
-        const filename = `http://ccdb-test.cern.ch:8080/${objectName}/${Date.now()}`;
+        const filename = `${this.model.ccdbPlotUrl}/${objectName}/${Date.now()}`;
         try {
           const file = await JSROOT.openFile(filename);
           const obj = await file.readObject("ccdb_object");
@@ -131,5 +129,18 @@ export default class QCObjectService {
       })
     );
     return RemoteData.Success(objectsMap);
+  }
+
+  /**
+   * Ask the server for the link to access CCDB plots via nginx
+   * @returns {string}
+   */
+  async getCcdbPlotUrl() {
+    const {ok, result} = await this.model.loader.get('/api/ccdbPlotUrl');
+    if (ok) {
+      return result.url;
+    } else {
+      return 'localhost/ccdb';
+    }
   }
 }

@@ -225,7 +225,6 @@ export default class Model extends Observable {
    * Method to check if Online Mode is available
    */
   async checkOnlineModeAvailability() {
-    // TODO add retrieve ccdb-link for objects
     const result = await this.object.qcObjectService.isOnlineModeConnectionAlive();
     if (result.isSuccess()) {
       this.isOnlineModeConnectionAlive = true;
@@ -262,7 +261,7 @@ export default class Model extends Observable {
   /**
    * Optimization of JSROOT to be as quick as possible (remove unecessary UIs)
    */
-  configureJSRoot() {
+  async configureJSRoot() {
     JSROOT.settings.AutoStat = true;
     // JSROOT.settings.ContextMenu = true;
     JSROOT.settings.CanEnlarge = false;
@@ -273,5 +272,6 @@ export default class Model extends Observable {
     JSROOT.settings.ApproxTextSize = true;
 
     JSROOT.settings.fFrameLineColor = 16;
+    this.ccdbPlotUrl = await this.object.qcObjectService.getCcdbPlotUrl();
   }
 }
