@@ -32,6 +32,7 @@ export default class Model extends Observable {
   constructor() {
     super();
 
+    this.ccdbPlotUrl = 'localhost/ccdb'    
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
