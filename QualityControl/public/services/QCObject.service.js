@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global JSROOT */
+
 import {RemoteData} from '/js/src/index.js';
 
 /**
@@ -66,33 +68,68 @@ export default class QCObjectService {
 
   /**
    * Ask server for an object by name and optionally timestamp
-   * If timestamp is not provided, -1 will be used to request latest version of the object
+   * If timestamp is not provided, Date.now() will be used to request latest version of the object
    * @param {string} objectName
    * @param {number} timestamp
    * @return {JSON} {result, ok, status}
    */
   async getObjectByName(objectName, timestamp = -1) {
-    const {result, ok, status} =
-      await this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`);
-    if (ok) {
-      return RemoteData.success(result);
-    } else if (status === 404) {
-      return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
-    } else {
-      return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
+    try {
+      if (timestamp === -1) {
+        timestamp = Date.now();
+      }
+      // TODO update link to localhost + prefix
+      const filename = `http://ccdb-test.cern.ch:8080/${objectName}/${timestamp}`;
+      let [qcObject, timeStampsReq] = await Promise.all([
+        async () => {
+          try {
+            const file = await JSROOT.openFile(filename);
+            const obj = await file.readObject("ccdb_object");
+            return obj;
+          } catch (error) {
+            return {error: 'Could not load object'};
+          }
+        },
+        this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
+      ]);
+      const {result, ok, status} = timeStampsReq;
+      if (ok) {
+        const obj = {qcObject, timestamps: result.timestamps};
+        return RemoteData.success(obj);
+      } else {
+        if (status === 404) {
+          return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+        }
+        return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
+      }
+    } catch (error) {
+      return RemoteData.failure(`Object '${objectName}' could not be loaded`);
     }
   }
 
   /**
-   * Ask server for multiple objects by their name
+   * Make a set of requests to CCDB to get the object file through JSROOT
+   * It will return a map in which the value can contain:
+   * * qcObject - if request for receiving and opening the file was successfull
+   * * error - if request fails 'Unable to load object'
    * @param {[string]} objectsNames
+   * @return {Remodata.Success(Map<String, JSON>)}
    */
   async getObjectsByName(objectsNames) {
-    const {result, ok} = await this.model.loader.post(`/api/readObjectsData`, {objectsNames});
-    if (ok) {
-      return RemoteData.success(result);
-    } else {
-      return RemoteData.failure(result);
-    }
+    const objectsMap = {};
+    await Promise.allSettled(
+      objectsNames.map(async (objectName) => {
+        // TODO update link to localhost + prefix
+        const filename = `http://ccdb-test.cern.ch:8080/${objectName}/${Date.now()}`;
+        try {
+          const file = await JSROOT.openFile(filename);
+          const obj = await file.readObject("ccdb_object");
+          objectsMap[objectName] = {qcObject: obj};
+        } catch (error) {
+          objectsMap[objectName] = {error: `Unable to load object ${objectName}`};
+        }
+      })
+    );
+    return RemoteData.Success(objectsMap);
   }
 }
