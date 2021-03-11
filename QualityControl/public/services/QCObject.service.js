@@ -140,7 +140,8 @@ export default class QCObjectService {
     if (ok) {
       return result.url;
     } else {
-      return 'localhost/ccdb';
+      this.model.notification.show(`Unable to retrieve CCDB Plot URL`, 'danger', Infinity);
+      return '';
     }
   }
 }

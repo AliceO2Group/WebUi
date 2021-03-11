@@ -14,7 +14,9 @@
 
 /* global JSROOT */
 
-import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification} from '/js/src/index.js';
+import {
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, RemoteData, Notification
+} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
@@ -31,8 +33,6 @@ export default class Model extends Observable {
    */
   constructor() {
     super();
-
-    this.ccdbPlotUrl = 'localhost/ccdb'    
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
@@ -69,7 +69,6 @@ export default class Model extends Observable {
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
-    this.handleLocationChange(); // Init first page
 
     // Setup keyboard dispatcher
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
@@ -78,12 +77,25 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
+    this.initModel();
+  }
+
+  /**
+   * Initialize steps in a certain order based on 
+   * mandatory information from server
+   */
+  async initModel() {
+    this.ccdbPlotUrl = RemoteData.notAsked();
+    this.configureJSRoot();
 
     // Init data
+    this.ccdbPlotUrl = await this.object.qcObjectService.getCcdbPlotUrl();
+    this.checkOnlineModeAvailability();
     this.object.loadList();
     this.layout.loadMyList();
-    this.checkOnlineModeAvailability();
-    this.configureJSRoot();
+
+    // Init first page
+    this.handleLocationChange();
   }
 
   /**
@@ -273,6 +285,6 @@ export default class Model extends Observable {
     JSROOT.settings.ApproxTextSize = true;
 
     JSROOT.settings.fFrameLineColor = 16;
-    this.ccdbPlotUrl = await this.object.qcObjectService.getCcdbPlotUrl();
+    this.notify();
   }
 }
