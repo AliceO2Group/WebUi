@@ -23,9 +23,9 @@ describe('Layout connector test suite', () => {
   describe('Creating a new LayoutConnector instance', () => {
     it('should throw an error if it is missing JSONFileConnector ', () => {
       assert.throws(() => new LayoutConnector(undefined),
-        new AssertionError({message: 'Missing JSON File Connector', expected: true, operator: '=='}));
+        new AssertionError({message: '[LayoutConnector] Missing JSON File Connector', expected: true, operator: '=='}));
       assert.throws(() => new LayoutConnector(undefined),
-        new AssertionError({message: 'Missing JSON File Connector', expected: true, operator: '=='}));
+        new AssertionError({message: '[LayoutConnector] Missing JSON File Connector', expected: true, operator: '=='}));
     });
 
     it('should successfully initialize LayoutConnector', () => {

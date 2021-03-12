@@ -21,17 +21,17 @@ const config = require('../test-config.js');
 describe('CCDB Connector test suite', () => {
   describe('Creating a new CCDBConnector instance', () => {
     it('should throw an error if configuration object is not provided', () => {
-      assert.throws(() => new CCDBConnector(), new Error('Empty CCDB config'));
-      assert.throws(() => new CCDBConnector(null), new Error('Empty CCDB config'));
-      assert.throws(() => new CCDBConnector(undefined), new Error('Empty CCDB config'));
+      assert.throws(() => new CCDBConnector(), new Error('[CCDBConnector] Empty CCDB config'));
+      assert.throws(() => new CCDBConnector(null), new Error('[CCDBConnector] Empty CCDB config'));
+      assert.throws(() => new CCDBConnector(undefined), new Error('[CCDBConnector] Empty CCDB config'));
     });
 
     it('should throw an error if configuration object is missing hostname field', () => {
-      assert.throws(() => new CCDBConnector({}), new Error('Empty hostname in CCDB config'));
+      assert.throws(() => new CCDBConnector({}), new Error('[CCDBConnector] Empty hostname in CCDB config'));
     });
 
     it('should throw an error if configuration object is missing port field', () => {
-      assert.throws(() => new CCDBConnector({hostname: 'localhost'}), new Error('Empty port in CCDB config'));
+      assert.throws(() => new CCDBConnector({hostname: 'localhost'}), new Error('[CCDBConnector] Empty port in CCDB config'));
     });
 
     it('should successfully initialize CCDBConnector', () => {
@@ -71,9 +71,9 @@ describe('CCDB Connector test suite', () => {
     it('should return rejected promise when attempting to test connection on CCDB', async () => {
       nock('http://ccdb:8500')
         .get('/browse/test')
-        .replyWithError('getaddrinfo ENOTFOUND ccdb ccdb:8500');
+        .replyWithError('[CCDBConnector] getaddrinfo ENOTFOUND ccdb ccdb:8500');
       await assert.rejects(ccdb.testConnection(),
-        new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb:8500')
+        new Error('[CCDBConnector] Unable to connect to CCDB due to: Error: [CCDBConnector] getaddrinfo ENOTFOUND ccdb ccdb:8500')
       );
     });
   });
@@ -201,7 +201,7 @@ describe('CCDB Connector test suite', () => {
         .get('/latest/test.*')
         .reply(502, 'Some error');
 
-      await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Non-2xx status code: 502'));
+      await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('[CCDBConnector] Non-2xx status code: 502'));
     });
 
     it('should reject with error due to bad JSON body', async () => {
@@ -209,7 +209,7 @@ describe('CCDB Connector test suite', () => {
         .get('/latest/test.*')
         .reply(200, 'Bad formatted JSON');
 
-      await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Unable to parse JSON'));
+      await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('[CCDBConnector] Unable to parse JSON'));
     });
   });
 
