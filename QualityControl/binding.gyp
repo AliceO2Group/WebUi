@@ -12,14 +12,14 @@
       'conditions': [
         ['OS=="linux"', {
           "libraries": [
-            "-lQualityControl",
+            "-lO2QualityControl",
             "-L<@(qc_root)/lib"
           ], 
           'cflags_cc': [ '-std=c++1z', '-frtti' ],
         }],
         ['OS=="mac"', {
           "libraries": [
-            "-lQualityControl",
+            "-lO2QualityControl",
             "-L<@(qc_root)/lib",
             "-Wl,-rpath,<@(qc_root)/lib",
           ],
