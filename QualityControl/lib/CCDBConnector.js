@@ -13,7 +13,7 @@
 */
 
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('QCG-CCDBConnector');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl');
 
 /**
  * Gateway for all CCDB calls
@@ -25,13 +25,13 @@ class CCDBConnector {
    */
   constructor(config) {
     if (!config) {
-      throw new Error('Empty CCDB config');
+      throw new Error('[CCDBConnector] Empty CCDB config');
     }
     if (!config.hostname) {
-      throw new Error('Empty hostname in CCDB config');
+      throw new Error('[CCDBConnector] Empty hostname in CCDB config');
     }
     if (!config.port) {
-      throw new Error('Empty port in CCDB config');
+      throw new Error('[CCDBConnector] Empty port in CCDB config');
     }
 
     this.hostname = config.hostname;
@@ -50,11 +50,11 @@ class CCDBConnector {
   async testConnection() {
     const connectionHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'path', 'Browse-Limit': 1};
     return this.httpGetJson(`/browse/${this.prefix}`, connectionHeaders)
-      .then(() => log.info('Successfully connected to CCDB'))
+      .then(() => log.info('[CCDBConnector] Successfully connected to CCDB'))
       .catch((err) => {
-        log.error('Unable to connect to CCDB');
+        log.error('[CCDBConnector] Unable to connect to CCDB');
         log.trace(err);
-        throw new Error(`Unable to connect to CCDB due to: ${err}`);
+        throw new Error(`[CCDBConnector] Unable to connect to CCDB due to: ${err}`);
       });
   }
 
@@ -108,7 +108,7 @@ class CCDBConnector {
        */
       const requestHandler = (response) => {
         if (response.statusCode < 200 || response.statusCode > 299) {
-          reject(new Error('Non-2xx status code: ' + response.statusCode));
+          reject(new Error('[CCDBConnector] Non-2xx status code: ' + response.statusCode));
           return;
         }
 
@@ -119,7 +119,7 @@ class CCDBConnector {
             const body = JSON.parse(bodyChunks.join(''));
             resolve(body);
           } catch (e) {
-            reject(new Error('Unable to parse JSON'));
+            reject(new Error('[CCDBConnector] Unable to parse JSON'));
           }
         });
       };
@@ -151,10 +151,10 @@ class CCDBConnector {
    */
   isItemValid(item) {
     if (!item.path) {
-      log.warn(`CCDB returned an empty ROOT object path, ignoring`);
+      log.warn(`[CCDBConnector] CCDB returned an empty ROOT object path, ignoring`);
       return false;
     } else if (item.path.indexOf('/') === -1) {
-      log.warn(`CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
+      log.warn(`[CCDBConnector] CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
       return false;
     } else {
       return true;

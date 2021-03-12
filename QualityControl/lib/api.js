@@ -127,7 +127,7 @@ function errorHandler(err, res, status = 500) {
   if (err.stack) {
     log.trace(err);
   }
-  log.error(err.message || err);
+  log.error(`[API] ${err.message || err}`);
   res.status(status).send({message: err.message || err});
 }
 

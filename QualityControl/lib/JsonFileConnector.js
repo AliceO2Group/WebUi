@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('QualityControlJson');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl');
 const fs = require('fs');
 const path = require('path');
 
@@ -46,7 +46,7 @@ class JsonFileConnector {
   async _syncFileAndInternalState() {
     await this._readFromFile();
     await this._writeToFile();
-    log.info(`Preferences will be saved in ${this.pathname}`);
+    log.info(`[JsonFileConnector] Preferences will be saved in ${this.pathname}`);
   }
 
   /**
@@ -60,7 +60,7 @@ class JsonFileConnector {
         if (err) {
           // file does not exist, it's ok, we will create it
           if (err.code === 'ENOENT') {
-            log.info('DB file does not exist, will create one');
+            log.info('[JsonFileConnector] DB file does not exist, will create one');
             return resolve();
           }
 
@@ -73,13 +73,13 @@ class JsonFileConnector {
 
           // check data we just read
           if (!dataFromFile || !dataFromFile.layouts || !Array.isArray(dataFromFile.layouts)) {
-            return reject(new Error(`DB file should have an array of layouts ${this.pathname}`));
+            return reject(new Error(`[JsonFileConnector] DB file should have an array of layouts ${this.pathname}`));
           }
 
           this.data = dataFromFile;
           resolve();
         } catch (e) {
-          return reject(new Error(`Unable to parse DB file ${this.pathname}`));
+          return reject(new Error(`[JsonFileConnector] Unable to parse DB file ${this.pathname}`));
         }
       });
     });
@@ -102,7 +102,7 @@ class JsonFileConnector {
           if (err) {
             return reject(err);
           }
-          log.info(`DB file updated`);
+          log.info(`[JsonFileConnector] DB file updated`);
           resolve();
         });
       });
@@ -118,15 +118,15 @@ class JsonFileConnector {
    */
   async createLayout(newLayout) {
     if (!newLayout.id) {
-      throw new Error(`layout id is mandatory`);
+      throw new Error(`[JsonFileConnector] layout id is mandatory`);
     }
     if (!newLayout.name) {
-      throw new Error(`layout name is mandatory`);
+      throw new Error(`[JsonFileConnector] layout name is mandatory`);
     }
 
     const layout = this.data.layouts.find((layout) => layout.id === newLayout.id);
     if (layout) {
-      throw new Error(`layout with this id (${layout.id}) already exists`);
+      throw new Error(`[JsonFileConnector] layout with this id (${layout.id}) already exists`);
     }
     this.data.layouts.push(newLayout);
     await this._writeToFile();
@@ -141,7 +141,7 @@ class JsonFileConnector {
   async readLayout(layoutId) {
     const layout = this.data.layouts.find((layout) => layout.id === layoutId);
     if (!layout) {
-      throw new Error(`layout (${layoutId}) not found`);
+      throw new Error(`[JsonFileConnector] layout (${layoutId}) not found`);
     }
     return layout;
   }
