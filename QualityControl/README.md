@@ -18,14 +18,19 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 
 ## Installation
 1. `nodeJS` >= `12.13.0` is required
-2. Install QualityControl using `aliBuild` and configure database with [following instructions](https://github.com/AliceO2Group/QualityControl/blob/master/README.md).
+2. Clone the `WebUi` repository via HTTPS/SSH
 3. Install QCG
 ```
-aliBuild build qcg --default o2-dataflow
+cd QualityControl
+npm install
+```
+4. Copy configuration file and update as per your local setup:
+```
+cp config-default.js config.js
 ```
 
 ## Local Configuration
-In order to customise the QCG you can edit the following configuration file: `$QCG_ROOT/node_modules/@aliceo2/qc/config.js`
+In order to customise the QCG you can edit the following configuration file: `WebUi/QualityControl/config.js`
 
 #### HTTP
 Attribute to define the `http` endpoint of the application.
@@ -33,7 +38,7 @@ Attribute to define the `http` endpoint of the application.
 Edit the `http` section to define a custom:
 - `hostname`
 - `port`
-- `prefix` - a prefix as string which will be used when querying objects from CCDB
+- `prefix` - a prefix as string which will be used when querying objects from CCDB to request only objects containing the aforementioned string
 
 #### CCDB
 Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
@@ -41,36 +46,25 @@ Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
 Edit the `ccdb` section to define a custom:
 - `hostname`
 - `port`
+- `plotUrl`
+  - URL with the location from which ROOT Files should be downloaded from e.g. `http://localhost:8083`. If a different host is used (compared to `http` defined one), one should disable the CSP settings of the browser
 - `prefix` - (optional) prefix to use for filtering on pathName
 
 #### Listing Connector
 Specify the connector that should be used for retrieving QC objects. Default value for `listingConnector` is `ccdb`.
 
-## Run QCG locally
-1. Load QCG modules
-```
-alienv enter qcg/latest-o2-dataflow
-```
+## Run QCG locally 
 
-2. (Optional) Online Mode - If you need Online Mode read [this](#online-mode) section
+1. (Optional) Online Mode - If you need Online Mode read [this](#online-mode) section
 
-3. Run QCG server
+2. Run QCG server
 ```
-qcg
+npm start
 ```
 
-5. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
+3. Open a browser and navigate to [http://localhost:8080](http://lo calhost:8080). 
 
-
-## Public API
-QCG exposes two public REST API which can be read by any other application.
-
-- Get all objects metadata\
-  Request: `curl 'http://localhost:8080/api/listObjects' -X GET`\
-  Result: `[{"name": "AGENT/OBJECT"}]`
-- Get ROOT object data in JSON format to be used with JSROOT\
-  Request: `curl 'http://localhost:8080/api/readObjectData?objectName=AGENT/OBJECT' -X GET`\
-  Result: `{"_typename":"TCanvas", ...}`
+    Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
 ## Enable HTTPS
 - Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
