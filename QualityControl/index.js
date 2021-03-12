@@ -36,4 +36,6 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
 const http = new HttpServer(config.http, config.jwt, config.openId);
 http.addStaticPath(path.join(__dirname, 'public'));
 http.addStaticPath(path.join(require.resolve('jsroot'), '../..'), 'jsroot');
+http.addStaticPath(path.join(__dirname, 'zstd'));
+
 api.setup(http);

@@ -69,8 +69,8 @@ function objectPanel(model) {
       Loading: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
         spinner(3), h('', 'Loading Object')]),
       Success: () => drawPlot(model),
-      Failure: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
-        h('.f1', iconCircleX()), 'Unable to get data for the selected object']),
+      Failure: (error) => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
+        h('.f1', iconCircleX()), error]),
     });
   }
   return null;

@@ -199,12 +199,12 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         drawingOptions += ';f';
       }
 
-      JSROOT.draw(dom, qcObject, drawingOptions, (painter) => {
+      JSROOT.draw(dom, qcObject, drawingOptions).then((painter) => {
         if (painter === null) {
           // jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
         }
-      });
+      }).catch(() => model.object.invalidObject(tabObject.name));
     }, 0);
 
     dom.dataset.fingerprintRedraw = redrawHash;

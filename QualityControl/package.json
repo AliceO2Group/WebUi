@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "1.10.2",
+  "version": "2.0.1-rc.0",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -17,8 +17,6 @@
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
-    "postinstall": "mv build/Release/tobject2json.node .",
-    "install": "node-gyp rebuild --jobs max",
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "integration-test": "mocha --exit --bail ./test/integration/qcg-test.js -R min",
@@ -26,12 +24,11 @@
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
-    "mocha": "mocha --exit test/**/mocha-* --retries 2"
+    "mocha": "mocha --exit test/**/mocha-*"
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.15.1",
-    "jsroot": "^5.9.0",
-    "node-addon-api": "^1.6.3"
+    "jsroot": "^6.0.1"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",

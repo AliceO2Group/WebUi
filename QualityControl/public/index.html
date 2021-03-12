@@ -47,20 +47,3 @@ mount(document.body, view, model, debug);
 // Expose model to interract with it the browser's console
 window.model = model;
 </script>
-
-<script>
-// Optimization of JSROOT to be as quick as possible (remove unecessary UIs)
-// Also configure style for a better integration
-// CSS file modifies also the styles
-
-JSROOT.gStyle.AutoStat = true;
-// JSROOT.gStyle.ContextMenu = true;
-JSROOT.gStyle.CanEnlarge = false;
-JSROOT.gStyle.DragAndDrop = false;
-JSROOT.gStyle.MoveResize = false; // div 2
-JSROOT.gStyle.ToolBar = false;
-JSROOT.gStyle.ZoomWheel = false;
-JSROOT.gStyle.ApproxTextSize = true;
-
-JSROOT.gStyle.fFrameLineColor = 16;
-</script>

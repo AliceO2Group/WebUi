@@ -12,7 +12,11 @@
  * or submit itself to any jurisdiction.
 */
 
-import {sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification} from '/js/src/index.js';
+/* global JSROOT */
+
+import {
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, RemoteData, Notification
+} from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
@@ -29,7 +33,6 @@ export default class Model extends Observable {
    */
   constructor() {
     super();
-
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
@@ -66,7 +69,6 @@ export default class Model extends Observable {
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
-    this.handleLocationChange(); // Init first page
 
     // Setup keyboard dispatcher
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
@@ -75,11 +77,25 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
+    this.initModel();
+  }
+
+  /**
+   * Initialize steps in a certain order based on 
+   * mandatory information from server
+   */
+  async initModel() {
+    this.ccdbPlotUrl = RemoteData.notAsked();
+    this.configureJSRoot();
 
     // Init data
+    this.ccdbPlotUrl = await this.object.qcObjectService.getCcdbPlotUrl();
+    this.checkOnlineModeAvailability();
     this.object.loadList();
     this.layout.loadMyList();
-    this.checkOnlineModeAvailability();
+
+    // Init first page
+    this.handleLocationChange();
   }
 
   /**
@@ -253,5 +269,22 @@ export default class Model extends Observable {
     this.notify();
 
     this.object.refreshObjects();
+  }
+
+  /**
+   * Optimization of JSROOT to be as quick as possible (remove unecessary UIs)
+   */
+  async configureJSRoot() {
+    JSROOT.settings.AutoStat = true;
+    // JSROOT.settings.ContextMenu = true;
+    JSROOT.settings.CanEnlarge = false;
+    JSROOT.settings.DragAndDrop = false;
+    JSROOT.settings.MoveResize = false; // div 2
+    JSROOT.settings.ToolBar = false;
+    JSROOT.settings.ZoomWheel = false;
+    JSROOT.settings.ApproxTextSize = true;
+
+    JSROOT.settings.fFrameLineColor = 16;
+    this.notify();
   }
 }
