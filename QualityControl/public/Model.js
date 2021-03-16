@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global JSROOT */
-
 import {
   sessionService, Observable, WebSocketClient, QueryRouter, Loader, RemoteData, Notification
 } from '/js/src/index.js';
