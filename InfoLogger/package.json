@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -25,7 +25,7 @@
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
-    "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
+    "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js"
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.16.2"
