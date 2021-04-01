@@ -41,7 +41,7 @@ export default class Log extends Observable {
     this.isTimeDropdownEnabled = false;
     this.timeFormat = TIME_MS;
 
-    this.limit = 1000;
+    this.limit = 10000;
     this.applicationLimit = 100000; // browser can be slow is `list` array is bigger
 
     this.queryResult = RemoteData.notAsked();
