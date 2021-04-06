@@ -188,17 +188,7 @@ const showEnvDetailsTable = (item, environment) =>
           ),
           h('td.flex-row', !environment.expandUserVars ?
             h('.mh2.overflow', JSON.stringify(item.userVars))
-            :
-            h('.flex-column', [
-              Object.keys(item.userVars).map((key) =>
-                h('.mh2.flex-row', [
-                  h('', {style: 'font-weight: bold'}, key + ':'),
-                  h('', {
-                    style: 'word-break: break-word'
-                  }, JSON.stringify(item.userVars[key]))
-                ])
-              ),
-            ]),
+            : envVarsPanel(environment, item)
           )
         ]),
         h('tr', [
@@ -208,6 +198,25 @@ const showEnvDetailsTable = (item, environment) =>
       ])
     ])
   );
+
+/**
+ * 
+ * @param {Environment} environment 
+ * @param {Object} item 
+ * @return {vnode}
+ */
+const envVarsPanel = (environment, item) => {
+  return h('.flex-column.w-100', [
+    Object.keys(item.userVars).map((key) =>
+      h('.mh2.flex-row', [
+        h('.w-25', {style: 'font-weight: bold'}, environment.getVariableDescription(key) + ':'),
+        h('.w-75', {
+          style: 'word-break: break-word'
+        }, JSON.stringify(item.userVars[key]))
+      ])
+    ),
+  ]);
+};
 
 /**
  * Open InfoLogger in a new browser tab with run number set if available
