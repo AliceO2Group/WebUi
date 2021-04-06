@@ -20,6 +20,7 @@ import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
 import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
 import {getTasksByFlp} from './../common/utils.js';
+import {PREFIX} from '../workflow/constants.js';
 /**
  * @file Page to show 1 environment (content and header)
  */
@@ -206,15 +207,61 @@ const showEnvDetailsTable = (item, environment) =>
  * @return {vnode}
  */
 const envVarsPanel = (environment, item) => {
+  item.userVars['qc_config_uri'] = 'consul-json://localhost:8500/o2/components/qc/'
+  item.userVars['readout_cfg_uri'] = 'file://home/etc/test/grad/o2'
+  const knownVarGroups = Object.keys(item.userVars).filter((key) => environment.isVariableInRadioGroup(key));
+  const uriVarGroups = Object.keys(item.userVars).filter((key) => environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
+  const unknownVarGroups = Object.keys(item.userVars).filter((key) => !environment.isVariableInRadioGroup(key) && !environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
   return h('.flex-column.w-100', [
-    Object.keys(item.userVars).map((key) =>
-      h('.mh2.flex-row', [
-        h('.w-25', {style: 'font-weight: bold'}, environment.getVariableDescription(key) + ':'),
+    knownVarGroups.map((key) =>
+      key !== 'hosts' &&
+      h('.flex-row', [
+        h('.w-25', {style: 'font-weight: bold'}, `${environment.getVariableDescription(key)}:`),
+        h('.w-25.flex-row', [
+          h('.w-50.form-check', [
+            h('input.form-check-input', {
+              type: 'radio',
+              name: key,
+              id: `${key}Off`,
+              checked: item.userVars[key] === 'false',
+              disabled: true
+            }),
+            h('label', {for: `${key}On`}, 'OFF')
+          ]),
+          h('.w-50.form-check', [
+            h('input.form-check-input disabled', {
+              type: 'radio',
+              name: key,
+              id: `${key}On`,
+              checked: item.userVars[key] === 'true',
+              disabled: true,
+            }),
+            h('label', {for: `${key}On`}, 'ON')
+          ]),
+        ])
+      ])
+    ),
+    unknownVarGroups.map((key) =>
+      h('.w-100.flex-row', [
+        h('.w-25', {style: 'font-weight: bold'}, key),
         h('.w-75', {
           style: 'word-break: break-word'
         }, JSON.stringify(item.userVars[key]))
       ])
     ),
+    uriVarGroups.map((key) => {
+      const link = item.userVars[key].replace(PREFIX.QC.CONSUL, '').replace(PREFIX.READOUT.CONSUL, '');
+      return h('.w-100.flex-row', [
+        h('.w-25', {style: 'font-weight: bold'}, key),
+        h('',
+          h('a.w-75.f5.action', {
+            style: 'font-style: italic; cursor: pointer',
+            href: `${link}/edit`,
+            target: '_blank',
+          }, item.userVars[key]),
+        )
+      ])
+    }),
   ]);
 };
 
