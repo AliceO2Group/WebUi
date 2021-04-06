@@ -289,7 +289,7 @@ export default class QCObject extends Observable {
         this.notify();
       } else {
         // link JSROOT methods to object. JSROOT.parse call was removed due to bug
-        this.objects[objectName] = RemoteData.success(obj.payload.qcObject);
+        this.objects[objectName] = RemoteData.success(obj.payload);
         this.notify();
       }
       if (this.selected) {
