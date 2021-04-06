@@ -26,5 +26,6 @@ const url = (testConfig && testConfig.hostname && testConfig.port) ? `http://${t
 const timeout = (testConfig && testConfig.timeout) ? testConfig.timeout : 200000;
 const facility = (testConfig && testConfig.facility) ? testConfig.facility : 'readout';
 const timestamp = (testConfig && testConfig.timestamp) ? testConfig.timestamp : '-2h';
+const queryTime = (testConfig && testConfig.queryTime) ? testConfig.queryTime : 4000;
 
-module.exports = {url, timeout, facility, timestamp};
+module.exports = {url, timeout, facility, timestamp, queryTime};

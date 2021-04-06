@@ -82,8 +82,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: (cd QualityControl/lib; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" TObject2JsonClient.js)
-      - run: (cd QualityControl; rm -f binding.gyp; sed -i.bak -e '20,21d' package.json)
       - run: (cd QualityControl; npm ci)
       - run: (cd QualityControl; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally

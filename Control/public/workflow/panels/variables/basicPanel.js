@@ -52,7 +52,7 @@ const dataDistributionPanel = (workflow) =>
           workflow.updateBasicVariableByKey('odc_enabled', 'false');
           workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
           workflow.updateBasicVariableByKey('dd_enabled', 'false');
-          workflow.updateBasicVariableByKey('dplmw_enabled', 'false');
+          workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'false');
         }
       }),
       h('label', {for: 'dataDistributionOff'}, 'OFF')
@@ -131,7 +131,7 @@ const qcddPanel = (workflow) =>
         onchange: () => {
           workflow.updateBasicVariableByKey('qcdd_enabled', 'true');
           workflow.updateBasicVariableByKey('dd_enabled', 'true');
-          workflow.updateBasicVariableByKey('dplmw_enabled', 'false');
+          workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'false');
         }
       }),
       h('label', {for: 'qcddOn'}, 'ON')
@@ -153,8 +153,8 @@ const dplMwPanel = (workflow) =>
         type: 'radio',
         name: 'dplmw',
         id: 'dplMwOff',
-        checked: workflow.form.basicVariables['dplmw_enabled'] === 'false',
-        onchange: () => workflow.form.basicVariables['dplmw_enabled'] = 'false'
+        checked: workflow.form.basicVariables['minimal_dpl_enabled'] === 'false',
+        onchange: () => workflow.form.basicVariables['minimal_dpl_enabled'] = 'false'
       }),
       h('label', {for: 'dplMwOff'}, 'OFF')
     ]),
@@ -163,9 +163,9 @@ const dplMwPanel = (workflow) =>
         type: 'radio',
         name: 'dplmw',
         id: 'dplMwOn',
-        checked: workflow.form.basicVariables['dplmw_enabled'] === 'true',
+        checked: workflow.form.basicVariables['minimal_dpl_enabled'] === 'true',
         onchange: () => {
-          workflow.updateBasicVariableByKey('dplmw_enabled', 'true');
+          workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'true');
           workflow.updateBasicVariableByKey('dd_enabled', 'true');
           workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
         }
