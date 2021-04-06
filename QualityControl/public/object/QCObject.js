@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global JSROOT */
-
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
 import QCObjectService from './../services/QCObject.service.js';
 import ObjectTree from './ObjectTree.class.js';
