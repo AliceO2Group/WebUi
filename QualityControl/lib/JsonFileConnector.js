@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('qcg/jsonfile');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl/JsonFileConnector');
 const fs = require('fs');
 const path = require('path');
 

@@ -23,7 +23,7 @@ const JsonFileConnector = require('./JsonFileConnector.js');
 const LayoutConnector = require('./connector/LayoutConnector.js');
 const StatusService = require('./StatusService.js');
 
-const log = new (require('@aliceo2/web-ui').Log)('qcg/model');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl/QCModel');
 
 // --------------------------------------------------------
 // Initialization of model according to config file

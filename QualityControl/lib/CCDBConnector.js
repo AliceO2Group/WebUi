@@ -13,7 +13,7 @@
 */
 
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('qcg/ccdb');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl/CCDBConnector');
 
 /**
  * Gateway for all CCDB calls
