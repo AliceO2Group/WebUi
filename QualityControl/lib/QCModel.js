@@ -23,7 +23,7 @@ const JsonFileConnector = require('./JsonFileConnector.js');
 const LayoutConnector = require('./connector/LayoutConnector.js');
 const StatusService = require('./StatusService.js');
 
-const log = new (require('@aliceo2/web-ui').Log)('QualityControl');
+const log = new (require('@aliceo2/web-ui').Log)('qcg/model');
 
 // --------------------------------------------------------
 // Initialization of model according to config file
@@ -37,21 +37,21 @@ module.exports.statusService = statusService;
 if (config.consul) {
   const consulService = new ConsulService(config.consul);
   consulService.getConsulLeaderStatus()
-    .then(() => log.info('[QCModel] Consul Service connection was successfully tested.'))
-    .catch((error) => log.error('[QCModel] Consul Service connection could not be established. '
+    .then(() => log.info('Consul Service connection was successfully tested.'))
+    .catch((error) => log.error('Consul Service connection could not be established. '
       + `Please try restarting the service due to: ${error}`)
     );
   module.exports.consulService = consulService;
   statusService.setLiveModeConnector(consulService);
 } else {
-  log.warn('[QCModel] Consul Service: No Configuration Found');
+  log.warn('Consul Service: No Configuration Found');
   module.exports.consulService = undefined;
 }
 
 if (config.listingConnector === 'ccdb') {
-  log.info('[QCModel] Object listing: CCDB');
+  log.info('Object listing: CCDB');
   if (!config.ccdb) {
-    throw new Error('[QCModel] CCDB config is mandatory');
+    throw new Error('CCDB config is mandatory');
   }
   const ccdb = new CCDBConnector(config.ccdb);
   ccdb.testConnection();
@@ -61,15 +61,15 @@ if (config.listingConnector === 'ccdb') {
   statusService.setDataConnector(ccdb);
 
 } else if (config.listingConnector === 'amore') {
-  log.info('[QCModel] Object listing: AMORE');
+  log.info('Object listing: AMORE');
   if (!config.amore) {
-    throw new Error('[QCModel] AMORE config is mandatory');
+    throw new Error('AMORE config is mandatory');
   }
   const amore = new AMOREConnector(config.amore);
   module.exports.listObjects = amore.listObjects.bind(amore);
 } else {
   const mysql = new MySQLConnector(config.mysql);
-  log.info('[QCModel] Object listing: MySQL');
+  log.info('Object listing: MySQL');
   module.exports.listObjects = mysql.listObjects.bind(mysql);
 }
 

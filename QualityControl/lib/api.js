@@ -14,7 +14,7 @@
 
 const {Log, WebSocket} = require('@aliceo2/web-ui');
 const config = require('./configProvider.js');
-const log = new Log('QualityControl');
+const log = new Log('qcg/api');
 
 // Load data source (demo or DB)
 const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
@@ -127,7 +127,7 @@ function errorHandler(err, res, status = 500) {
   if (err.stack) {
     log.trace(err);
   }
-  log.error(`[API] ${err.message || err}`);
+  log.error(err.message || err);
   res.status(status).send({message: err.message || err});
 }
 

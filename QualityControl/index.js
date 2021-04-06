@@ -13,7 +13,7 @@
 */
 
 const {Log, HttpServer} = require('@aliceo2/web-ui');
-const log = new Log('QualityControl');
+const log = new Log('qcg/index');
 const path = require('path');
 const api = require('./lib/api.js');
 
@@ -23,11 +23,11 @@ const config = require('./lib/configProvider.js');
 // Quick check config at start
 
 if (config.http.tls) {
-  log.info(`[index] HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
+  log.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
 }
-log.info(`[index] HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
+log.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
 if (typeof config.demoData != 'undefined' && config.demoData) {
-  log.info(`[index] Using demo data`);
+  log.info(`Using demo data`);
 } else {
   config.demoData = false;
 }

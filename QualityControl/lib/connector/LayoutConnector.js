@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('QualityControl');
+const log = new (require('@aliceo2/web-ui').Log)('qcg/layout');
 const assert = require('assert');
 
 /**
@@ -24,7 +24,7 @@ class LayoutConnector {
    * @param {JSONFileConnector} jsonFileConnector
    */
   constructor(jsonFileConnector) {
-    assert(jsonFileConnector, '[LayoutConnector] Missing JSON File Connector');
+    assert(jsonFileConnector, 'Missing JSON File Connector');
     this.jsonFileConnector = jsonFileConnector;
   }
 
@@ -148,7 +148,7 @@ class LayoutConnector {
     if (err.stack) {
       log.trace(err);
     }
-    log.error(`[LayoutConnector] ${err.message || err}`);
+    log.error(err.message || err);
     res.status(status).send({message: err.message || err});
   }
 }

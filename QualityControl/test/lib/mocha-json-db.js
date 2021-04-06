@@ -41,13 +41,13 @@ describe('JSON file custom database', () => {
     it('should throw an error if layout id is not provided', () => {
       return assert.rejects(async () => {
         await jsonConfig.createLayout({});
-      }, new Error('[JsonFileConnector] layout id is mandatory'));
+      }, new Error('layout id is mandatory'));
     });
 
     it('should throw an error if layout id is not provided', () => {
       return assert.rejects(async () => {
         await jsonConfig.createLayout({id: 'id'});
-      }, new Error('[JsonFileConnector] layout name is mandatory'));
+      }, new Error('layout name is mandatory'));
     });
 
     it('should successfully create a new layout', () => {
@@ -62,7 +62,7 @@ describe('JSON file custom database', () => {
     it('should throw an error when creating a new layout with the same id as an existing layout', () => {
       return assert.rejects(async () => {
         await jsonConfig.createLayout(TEST_LAYOUT);
-      }, new Error('[JsonFileConnector] layout with this id (123) already exists'));
+      }, new Error('layout with this id (123) already exists'));
     });
 
     it('should successfully create a layout with the same name but different ID', () => {
@@ -88,13 +88,13 @@ describe('JSON file custom database', () => {
     it('should throw an error if no layout was found by an id', () => {
       return assert.rejects(async () => {
         await jsonConfig.readLayout(111);
-      }, new Error('[JsonFileConnector] layout (111) not found'));
+      }, new Error('layout (111) not found'));
     });
 
     it('should throw an error when trying to update an inexistent layout by id', () => {
       return assert.rejects(async () => {
         await jsonConfig.updateLayout(111, TEST_LAYOUT);
-      }, new Error('[JsonFileConnector] layout (111) not found'));
+      }, new Error('layout (111) not found'));
     });
 
     it('should successfully update an existing layout by id with a new name', () => {
@@ -110,7 +110,7 @@ describe('JSON file custom database', () => {
     it('should throw an error when trying to delete an inexistent layout by id', () => {
       return assert.rejects(async () => {
         await jsonConfig.deleteLayout(111, TEST_LAYOUT);
-      }, new Error('[JsonFileConnector] layout (111) not found'));
+      }, new Error('layout (111) not found'));
     });
 
     it('should successfully delete a layout by id', () => {
@@ -145,7 +145,7 @@ describe('JSON file custom database', () => {
         jsonConfig.data = '{}';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`[JsonFileConnector] DB file should have an array of layouts ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
     });
 
     it('should reject when there is no data with error of bad data format ', async () => {
@@ -153,7 +153,7 @@ describe('JSON file custom database', () => {
         jsonConfig.data = '';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`[JsonFileConnector] DB file should have an array of layouts ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
     });
 
     it('should reject when data.layouts is not an Array with error of bad data format ', async () => {
@@ -161,7 +161,7 @@ describe('JSON file custom database', () => {
         jsonConfig.data = {layouts: 'test'};
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`[JsonFileConnector] DB file should have an array of layouts ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
     });
 
     it('should reject when there is missing data with error of bad JSON format ', async () => {
@@ -169,7 +169,7 @@ describe('JSON file custom database', () => {
         jsonConfig.data = undefined;
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`[JsonFileConnector] Unable to parse DB file ${CONFIG_FILE}`));
+      }, new Error(`Unable to parse DB file ${CONFIG_FILE}`));
     });
 
     it('should successfully read layouts from data', async () => {
