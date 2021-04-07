@@ -41,10 +41,10 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('should have a button in Action column for More Details', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button', {timeout: 2000});
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > button', {timeout: 2000});
       const detailsButton = await page.evaluate(() => {
-        const title = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button').title;
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button').innerText;
+        const title = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > button').title;
+        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > button').innerText;
         return {title: title, label: label};
       });
       assert.strictEqual(detailsButton.title, 'Open the environment page with more details');
@@ -52,7 +52,7 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('should successfully navigate to environment page on click Details', async () => {
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button').click());
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > button').click());
       await page.waitForTimeout(200);
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
@@ -67,33 +67,12 @@ describe('`pageEnvironments` test-suite', () => {
       assert.strictEqual(location.search, '?page=environments');
     });
 
-    it('should have a button in Action column for More Details', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button', {timeout: 2000});
-      const detailsButton = await page.evaluate(() => {
-        const title = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button:nth-child(2)').title;
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button:nth-child(2)').innerText;
-        return {title: title, label: label};
-      });
-      assert.strictEqual(detailsButton.title, 'Shutdown environment');
-      assert.strictEqual(detailsButton.label, 'Shutdown');
-    });
-
     it('should click LOCK button', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
       await page.waitForTimeout(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
       assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
-    });
-
-    it('should successfully shutdown environment', async () => {
-      page.on('dialog', async (dialog) => {
-        await dialog.accept();
-      });
-
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(6) > div > button:nth-child(2)').click());
-      await page.waitForTimeout(500);
-      assert.ok(calls['destroyEnvironment']);
     });
 
     it('should click LOCK button to remove control', async () => {
