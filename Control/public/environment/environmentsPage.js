@@ -88,35 +88,15 @@ const environmentsTable = (model, list) => {
         }, item.state
         ),
         h('td', {style: 'text-align: center;'},
-          h('.btn-group',
-            actionButton('Details', 'Open the environment page with more details', 'primary', model.loader,
-              () => model.router.go(`?page=environment&id=${item.id}`)
-            ),
-            actionButton('Shutdown', 'Shutdown environment', 'danger', model.loader,
-              () => confirm(`Are you sure you want to delete this ${item.state} environment? ` + item.id)
-                && model.environment.destroyEnvironment({id: item.id, allowInRunningState: true})
-            ),
-          )
+          h('button.btn.btn-primary', {
+            class: model.loader.active ? 'loading' : '',
+            disabled: model.loader.active,
+            title: 'Open the environment page with more details',
+            onclick: () => model.router.go(`?page=environment&id=${item.id}`),
+          }, 'Details')
         )
       ]),
       ),
     ]),
   ]);
 };
-
-/**
- * Button for environments table
- * @param {String} label
- * @param {String} title
- * @param {String} type
- * @param {Object} loader
- * @param {function} action
- * @return {vnode}
- */
-const actionButton = (label, title, type, loader, action) =>
-  h(`button.btn.btn-${type}`, {
-    class: loader.active ? 'loading' : '',
-    disabled: loader.active,
-    title: title,
-    onclick: () => action(),
-  }, label);
