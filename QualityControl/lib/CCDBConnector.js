@@ -37,9 +37,14 @@ class CCDBConnector {
     this.hostname = config.hostname;
     this.port = config.port;
     this.prefix = this.getPrefix(config);
+  
+    this.LAST_MODIFIED = 'Last-Modified';
+    this.CREATED = 'Created';
+    this.PATH = 'path';
+
     this.headers = {
       Accept: 'application/json',
-      'X-Filter-Fields': 'path,createTime,lastModified'
+      'X-Filter-Fields': `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`
     };
   }
 
@@ -48,7 +53,7 @@ class CCDBConnector {
    * @return {Promise.<Array.<String>, Error>}
    */
   async testConnection() {
-    const connectionHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'path', 'Browse-Limit': 1};
+    const connectionHeaders = {Accept: 'application/json', 'X-Filter-Fields': `${this.PATH}`, 'Browse-Limit': 1};
     return this.httpGetJson(`/browse/${this.prefix}`, connectionHeaders)
       .then(() => log.info('Successfully connected to CCDB'))
       .catch((err) => {
@@ -66,8 +71,8 @@ class CCDBConnector {
     return this.httpGetJson(`/latest/${this.prefix}.*`)
       .then((result) =>
         result.objects
-          .filter(this.isItemValid)
-          .map(this.itemTransform)
+          .filter((item) => this.isItemValid(item))
+          .map((item) => this.itemTransform(item))
       );
   }
 
@@ -76,12 +81,14 @@ class CCDBConnector {
    * @param {String} objectName - full path of the object
    */
   async getObjectTimestampList(objectName) {
-    const timestampHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'path,lastModified', 'Browse-Limit': 50};
+    const timestampHeaders = {
+      Accept: 'application/json', 'X-Filter-Fields': `${this.PATH},${this.LAST_MODIFIED}`, 'Browse-Limit': 50
+    };
     return this.httpGetJson(`/browse/${objectName}`, timestampHeaders)
       .then((result) =>
         result.objects
-          .filter(this.isItemValid)
-          .map((item) => parseInt(item.lastModified))
+          .filter((item) => this.isItemValid(item))
+          .map((item) => parseInt(item[this.LAST_MODIFIED]))
       );
   }
 
@@ -141,7 +148,11 @@ class CCDBConnector {
    * @return {Object} to QCG use
    */
   itemTransform(item) {
-    return {name: item.path, createTime: parseInt(item.createTime), lastModified: parseInt(item.lastModified)};
+    return {
+      name: item[this.PATH],
+      createTime: parseInt(item[this.CREATED]),
+      lastModified: parseInt(item[this.LAST_MODIFIED])
+    };
   }
 
   /**
@@ -150,11 +161,11 @@ class CCDBConnector {
    * @return {JSON}
    */
   isItemValid(item) {
-    if (!item.path) {
+    if (!item || !item[this.PATH]) {
       log.warn(`CCDB returned an empty ROOT object path, ignoring`);
       return false;
-    } else if (item.path.indexOf('/') === -1) {
-      log.warn(`CCDB returned an invalid ROOT object path "${item.path}", ignoring`);
+    } else if (item[this.PATH].indexOf('/') === -1) {
+      log.warn(`CCDB returned an invalid ROOT object path "${item[this.PATH]}", ignoring`);
       return false;
     } else {
       return true;

@@ -82,9 +82,9 @@ describe('CCDB Connector test suite', () => {
     it('should successfully return a list of the objects', async () => {
       const ccdb = new CCDBConnector(config.ccdb);
       const objects = [
-        {path: 'object/one', createTime: '101', lastModified: '102', id: 'id', metadata: []},
-        {path: 'object/two', createTime: '101', lastModified: '102', id: 'id', metadata: []},
-        {path: 'object/three', createTime: '101', lastModified: '102', id: 'id', metadata: []},
+        {path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []},
+        {path: 'object/two', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []},
+        {path: 'object/three', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []},
       ];
       const expectedObjects = [
         {name: 'object/one', createTime: 101, lastModified: 102},
@@ -105,9 +105,9 @@ describe('CCDB Connector test suite', () => {
     it('should successfully return a list of timestamps for a specific object', async () => {
       const ccdb = new CCDBConnector(config.ccdb);
       const objects = [
-        {path: 'object/one', createTime: '101', lastModified: '102', id: 'id', metadata: []},
-        {path: 'object/one', createTime: '101', lastModified: '103', id: 'id', metadata: []},
-        {path: 'object/one', createTime: '101', lastModified: '104', id: 'id', metadata: []},
+        {path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []},
+        {path: 'object/one', Created: '101', 'Last-Modified': '103', id: 'id', metadata: []},
+        {path: 'object/one', Created: '101', 'Last-Modified': '104', id: 'id', metadata: []},
       ];
       const expectedTimestamps = [102, 103, 104];
       nock('http://ccdb:8500')
@@ -148,14 +148,14 @@ describe('CCDB Connector test suite', () => {
 
     it('should successfully return true for an item that fits criteria', () => {
       const item = {
-        path: 'correct/path', createTime: '101', lastModified: '102', id: 'id', metadata: []
+        path: 'correct/path', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []
       };
       assert.deepStrictEqual(ccdb.isItemValid(item), true);
     });
 
     it('should successfully return a JSON with 3 fields if item fits criteria', () => {
       const item = {
-        path: 'correct/path', createTime: '101', lastModified: '102', id: 'id', metadata: []
+        path: 'correct/path', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []
       };
       const expectedItem = {name: 'correct/path', createTime: 101, lastModified: 102};
       assert.deepStrictEqual(ccdb.itemTransform(item), expectedItem);
@@ -178,7 +178,7 @@ describe('CCDB Connector test suite', () => {
       nock('http://ccdb:8500', {
         reqheaders: {
           Accept: 'application/json',
-          'X-Filter-Fields': 'path,createTime,lastModified'
+          'X-Filter-Fields': 'path,Created,Last-Modified'
         }
       }).get('/latest/test.*')
         .reply(200, '{}');

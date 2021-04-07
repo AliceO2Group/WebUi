@@ -72,7 +72,7 @@ function readObjectData(name) {
  */
 function listObjects() {
   return promiseResolveWithLatency(objects.map((object) => {
-    return {name: object.name, createTime: parseInt(object.createTime), lastModified: parseInt(object.lastModified)};
+    return {name: object.name, createTime: parseInt(object['Created']), lastModified: parseInt(object['Last-Modified'])};
   }));
 }
 
@@ -179,46 +179,46 @@ setInterval(() => {
 }, 100);
 
 const objects = [
-  {name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', createTime: 2, data: graphs.histo, lastModified: 100},
-  {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'DAQ01/EquipmentSize/HMPID/HMPID', createTime: 4, data: graphs.gaussian, lastModified: 100},
-  {name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', createTime: 5, data: graphs.hpx, lastModified: 100},
-  {name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', createTime: 6, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'DAQ01/EquipmentSize/TOF/TOF', createTime: 7, data: graphs.histo, lastModified: 100},
-  {name: 'DAQ01/EquipmentSize/TPC/TPC', createTime: 8, data: graphs.gaussian, lastModified: 100},
-  {name: 'DAQ01/EquipmentSize/TPC/STRING', createTime: 9, data: graphs.string, lastModified: 100},
-  {name: 'DAQ01/EventSize/ACORDE/ACORDE', createTime: 10, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'DAQ01/EventSize/CPV/CPV', createTime: 11, data: graphs.hpx, lastModified: 100},
-  {name: 'DAQ01/EventSize/HMPID/HMPID', createTime: 12, data: graphs.gaussian, lastModified: 100},
-  {name: 'DAQ01/EventSize/ITSSDD/ITSSDD', createTime: 13, data: graphs.root0, lastModified: 100},
-  {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', createTime: 14, data: graphs.histo, lastModified: 100},
-  {name: 'DAQ01/EventSize/TOF/TOF', createTime: 15, data: graphs.gaussian, lastModified: 100},
-  {name: 'DAQ01/EventSize/TPC/TPC', createTime: 16, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', createTime: 17, data: graphs.hpx, lastModified: 1020},
-  {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', createTime: 18, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', createTime: 19, data: graphs.gaussian, lastModified: 100},
-  {name: 'DAQ01/_EquimentSizeSummmary', createTime: 11, data: graphs.gaussian, lastModified: 100},
-  {name: 'DAQ01/_EventSizeClusters', createTime: 12, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'DAQ01/HistoWithRandom', createTime: 13, data: graphs.histo, lastModified: 100},
-  {name: 'TOFQAshifter/Default/hTOFRRawHitMap', createTime: 14, data: graphs.gaussian, lastModified: 100},
-  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM035', createTime: 15, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM3671', createTime: 11, data: graphs.root0, lastModified: 100},
-  {name: 'TOFQAshifter/Default/hTOFRRaws', createTime: 12, data: graphs.histo, lastModified: 100},
-  {name: 'TOFQAshifter/Default/hTOFRRawsTime', createTime: 11, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'TOFQAshifter/Default/hTOFRRawsToT', createTime: 13, data: graphs.hpx, lastModified: 100},
-  {name: 'TOFQAshifter/Default/hTOFrefMap', createTime: 14, data: graphs.histo, lastModified: 100},
-  {name: 'TST01/Default/hTOFRRawHitMap', createTime: 15, data: graphs.histo, lastModified: 100},
-  {name: 'TST01/Default/hTOFRRawTimeVsTRM035', createTime: 14, data: graphs.root0, lastModified: 100},
-  {name: 'TST01/Default/hTOFRRawTimeVsTRM3671', createTime: 14, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'TST01/Default/hTOFRRaws', createTime: 11, data: graphs.gaussian, lastModified: 100},
-  {name: 'TST01/Default/hTOFRRawsTime', createTime: 21, data: graphs.canvas_tf1, lastModified: 100},
-  {name: 'TST01/Default/hTOFRRawsToT', createTime: 21, data: graphs.histo, lastModified: 100},
-  {name: 'TST01/Default/hTOFrefMap', createTime: 21, data: graphs.hpx, lastModified: 100},
+  {name: 'DAQ01/EquipmentSize/ACORDE/ACORDE', Created: 2, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'DAQ01/EquipmentSize/CPV/CPV', Created: 3, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'DAQ01/EquipmentSize/HMPID/HMPID', Created: 4, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'DAQ01/EquipmentSize/ITSSDD/ITSSDD', Created: 5, data: graphs.hpx, 'Last-Modified': 100},
+  {name: 'DAQ01/EquipmentSize/ITSSSD/ITSSSD', Created: 6, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'DAQ01/EquipmentSize/TOF/TOF', Created: 7, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'DAQ01/EquipmentSize/TPC/TPC', Created: 8, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'DAQ01/EquipmentSize/TPC/STRING', Created: 9, data: graphs.string, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSize/ACORDE/ACORDE', Created: 10, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSize/CPV/CPV', Created: 11, data: graphs.hpx, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSize/HMPID/HMPID', Created: 12, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSize/ITSSDD/ITSSDD', Created: 13, data: graphs.root0, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSize/ITSSSD/ITSSSD', Created: 14, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSize/TOF/TOF', Created: 15, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSize/TPC/TPC', Created: 16, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSizeClasses/class_C0AMU-ABC', Created: 17, data: graphs.hpx, 'Last-Modified': 1020},
+  {name: 'DAQ01/EventSizeClasses/class_C0ALSR-ABC', Created: 18, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'DAQ01/EventSizeClasses/class_C0OB3-ABC', Created: 19, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'DAQ01/_EquimentSizeSummmary', Created: 11, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'DAQ01/_EventSizeClusters', Created: 12, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'DAQ01/HistoWithRandom', Created: 13, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'TOFQAshifter/Default/hTOFRRawHitMap', Created: 14, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM035', Created: 15, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'TOFQAshifter/Default/hTOFRRawTimeVsTRM3671', Created: 11, data: graphs.root0, 'Last-Modified': 100},
+  {name: 'TOFQAshifter/Default/hTOFRRaws', Created: 12, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'TOFQAshifter/Default/hTOFRRawsTime', Created: 11, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'TOFQAshifter/Default/hTOFRRawsToT', Created: 13, data: graphs.hpx, 'Last-Modified': 100},
+  {name: 'TOFQAshifter/Default/hTOFrefMap', Created: 14, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'TST01/Default/hTOFRRawHitMap', Created: 15, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'TST01/Default/hTOFRRawTimeVsTRM035', Created: 14, data: graphs.root0, 'Last-Modified': 100},
+  {name: 'TST01/Default/hTOFRRawTimeVsTRM3671', Created: 14, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'TST01/Default/hTOFRRaws', Created: 11, data: graphs.gaussian, 'Last-Modified': 100},
+  {name: 'TST01/Default/hTOFRRawsTime', Created: 21, data: graphs.canvas_tf1, 'Last-Modified': 100},
+  {name: 'TST01/Default/hTOFRRawsToT', Created: 21, data: graphs.histo, 'Last-Modified': 100},
+  {name: 'TST01/Default/hTOFrefMap', Created: 21, data: graphs.hpx, 'Last-Modified': 100},
   ...Array.from({length: 2500}, (x, i) => (
-    {name: `BIGTREE/120KB/${i}`, createTime: i, data: graphs.hpx, lastModified: 100}
+    {name: `BIGTREE/120KB/${i}`, Created: i, data: graphs.hpx, 'Last-Modified': 100}
   )),
   // Checker
-  {name: 'qcg/checker/AB', createTime: 2, data: graphs.checker, lastModified: 100},
+  {name: 'qcg/checker/AB', Created: 2, data: graphs.checker, 'Last-Modified': 100},
 ];
 
 const tabObject = [
