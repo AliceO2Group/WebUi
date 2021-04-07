@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global JSROOT */
-
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
 import QCObjectService from './../services/QCObject.service.js';
 import ObjectTree from './ObjectTree.class.js';
@@ -288,8 +286,8 @@ export default class QCObject extends Observable {
         this.objects[objectName] = obj;
         this.notify();
       } else {
-        // link JSROOT methods to object
-        this.objects[objectName] = RemoteData.success(JSROOT.parse(obj.payload));
+        // link JSROOT methods to object. JSROOT.parse call was removed due to bug
+        this.objects[objectName] = RemoteData.success(obj.payload);
         this.notify();
       }
       if (this.selected) {
@@ -334,7 +332,8 @@ export default class QCObject extends Observable {
     this.notify();
 
     // eslint-disable-next-line
-    const objects = JSROOT.parse(this.objectsRemote.payload);
+    // JSROOT.parse call was removed due to bug
+    const objects = this.objectsRemote.payload;
     for (const name in objects) {
       if (objects[name].error) {
         this.objects[name] = RemoteData.failure(objects[name].error);
