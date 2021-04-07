@@ -350,13 +350,15 @@ describe('QCG', function() {
 
     it('should have filtered results on input search filled and display only the ones visible to the user (less than 2500)', async () => {
       await page.type('header input', 'BIGTREE');
+      await page.waitForTimeout(1000);
       const rowsDisplayed = await page.evaluate(() => {
         const rows = [];
         document.querySelectorAll('section table tbody tr').forEach((item) => rows.push(item.innerText));
         return rows;
       }, {timeout: 5000});
-      const allRowsContainBIGTREE = rowsDisplayed.filter((name) => name.includes('BIGTREE')).length === rowsDisplayed.length;
-      assert.ok(allRowsContainBIGTREE, 'Not all rows contain the searched term');
+      const filteredRows = rowsDisplayed.filter((name) => name.includes('BIGTREE'));
+      assert.ok(filteredRows.length === rowsDisplayed.length,
+        `Not all rows contain the searched term. Identified filtered: ${filteredRows.length} and displayed: ${rowsDisplayed.length}`);
     });
   });
 
