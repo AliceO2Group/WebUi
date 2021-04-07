@@ -20,7 +20,7 @@ import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
 import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
 import {getTasksByFlp} from './../common/utils.js';
-import {PREFIX} from '../workflow/constants.js';
+
 /**
  * @file Page to show 1 environment (content and header)
  */
@@ -187,7 +187,7 @@ const showEnvDetailsTable = (item, environment) =>
               )]
             )
           ),
-          h('td.flex-row', !environment.expandUserVars ?
+          item.userVars && h('td.flex-row', !environment.expandUserVars ?
             h('.mh2.overflow', JSON.stringify(item.userVars))
             : envVarsPanel(environment, item)
           )
@@ -207,11 +207,11 @@ const showEnvDetailsTable = (item, environment) =>
  * @return {vnode}
  */
 const envVarsPanel = (environment, item) => {
-  item.userVars['qc_config_uri'] = 'consul-json://localhost:8500/o2/components/qc/'
-  item.userVars['readout_cfg_uri'] = 'file://home/etc/test/grad/o2'
   const knownVarGroups = Object.keys(item.userVars).filter((key) => environment.isVariableInRadioGroup(key));
-  const uriVarGroups = Object.keys(item.userVars).filter((key) => environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
-  const unknownVarGroups = Object.keys(item.userVars).filter((key) => !environment.isVariableInRadioGroup(key) && !environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
+  const uriVarGroups = Object.keys(item.userVars).filter((key) =>
+    environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
+  const unknownVarGroups = Object.keys(item.userVars).filter((key) =>
+    !environment.isVariableInRadioGroup(key) && !environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
   return h('.flex-column.w-100', [
     knownVarGroups.map((key) =>
       key !== 'hosts' &&
@@ -246,20 +246,15 @@ const envVarsPanel = (environment, item) => {
         h('.w-25', {style: 'font-weight: bold'}, key),
         h('.w-75', {
           style: 'word-break: break-word'
-        }, JSON.stringify(item.userVars[key]))
+        }, item.userVars[key])
       ])
     ),
     uriVarGroups.map((key) => {
-      const link = item.userVars[key].replace(PREFIX.QC.CONSUL, '').replace(PREFIX.READOUT.CONSUL, '');
       return h('.w-100.flex-row', [
         h('.w-25', {style: 'font-weight: bold'}, key),
-        h('',
-          h('a.w-75.f5.action', {
-            style: 'font-style: italic; cursor: pointer',
-            href: `${link}/edit`,
-            target: '_blank',
-          }, item.userVars[key]),
-        )
+        h('.w-75', {
+          style: 'word-break: break-word'
+        }, item.userVars[key])
       ])
     }),
   ]);

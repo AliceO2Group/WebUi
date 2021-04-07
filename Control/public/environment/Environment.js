@@ -80,7 +80,6 @@ export default class Environment extends Observable {
    * Check if the passed variable is known to belong to radio button group
    */
   isKVPairInConsulUriGroup(key, value) {
-    console.log(['qc_config_uri', 'readout_cfg_uri'].includes(key) && value.includes('consul'))
     return ['qc_config_uri', 'readout_cfg_uri'].includes(key) && value.includes('consul');
   }
 
