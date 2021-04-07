@@ -23,7 +23,7 @@ const JsonFileConnector = require('./JsonFileConnector.js');
 const LayoutConnector = require('./connector/LayoutConnector.js');
 const StatusService = require('./StatusService.js');
 
-const log = new (require('@aliceo2/web-ui').Log)('QualityControlModel');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl/QCModel');
 
 // --------------------------------------------------------
 // Initialization of model according to config file
@@ -38,8 +38,8 @@ if (config.consul) {
   const consulService = new ConsulService(config.consul);
   consulService.getConsulLeaderStatus()
     .then(() => log.info('Consul Service connection was successfully tested.'))
-    .catch((error) => log.error(
-      `Consul Service connection could not be established. Please try restarting the service due to: ${error}`)
+    .catch((error) => log.error('Consul Service connection could not be established. '
+      + `Please try restarting the service due to: ${error}`)
     );
   module.exports.consulService = consulService;
   statusService.setLiveModeConnector(consulService);

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('QualityControl-LayoutConnector');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl/LayoutConnector');
 const assert = require('assert');
 
 /**

@@ -13,7 +13,7 @@
 */
 
 const {Log} = require('@aliceo2/web-ui');
-const log = new Log('QualityControlLog');
+const log = new Log('QualityControl/ConfigProvider');
 const fs = require('fs');
 const path = require('path');
 
