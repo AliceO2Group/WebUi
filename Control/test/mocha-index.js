@@ -54,6 +54,9 @@ describe('Control', function() {
       tasks: [],
       rootRole: 'copy-push',
       numberOfFlps: 2,
+      userVars: {
+        odc_enabled: 'true'
+      }
     },
     workflow: {},
     workflowTemplates: {

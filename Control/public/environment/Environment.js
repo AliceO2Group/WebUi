@@ -38,10 +38,49 @@ export default class Environment extends Observable {
     this.plots = RemoteData.notAsked();
     this.infoLoggerUrl = '';
 
-    this.expandUserVars = false;
+    this.expandUserVars = true;
 
     this.getPlotsList();
     this.getInfoLoggerUrl();
+  }
+
+  /**
+   * Check if variable is known and if yes return a user readable name for that variable
+   * Otherwise return the variable itself;
+   * @param {String} variable 
+   * @returns {string}
+   */
+  getVariableDescription(variable) {
+    switch (variable) {
+      case 'odc_enabled':
+        return 'EPN';
+      case 'qcdd_enabled':
+        return 'QC';
+      case 'dd_enabled':
+        return 'Data Distribution';
+      case 'minimal_dpl_enabled':
+        return 'Minimal DPL workflow';
+      case 'readout_cfg_uri':
+        return 'Readout URI';
+      case 'qc_config_uri':
+        return 'QC URI';
+      default:
+        return variable;
+    }
+  }
+
+  /**
+   * Check if the passed variable is known to belong to radio button group
+   */
+  isVariableInRadioGroup(variable) {
+    return ['odc_enabled', 'qcdd_enabled', 'dd_enabled', 'minimal_dpl_enabled'].includes(variable);
+  }
+
+  /**
+   * Check if the passed variable is known to belong to radio button group
+   */
+  isKVPairInConsulUriGroup(key, value) {
+    return ['qc_config_uri', 'readout_cfg_uri'].includes(key) && value.includes('consul');
   }
 
   /**

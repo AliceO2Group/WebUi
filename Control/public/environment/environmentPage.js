@@ -20,6 +20,7 @@ import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
 import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
 import {getTasksByFlp} from './../common/utils.js';
+
 /**
  * @file Page to show 1 environment (content and header)
  */
@@ -186,19 +187,9 @@ const showEnvDetailsTable = (item, environment) =>
               )]
             )
           ),
-          h('td.flex-row', !environment.expandUserVars ?
+          item.userVars && h('td.flex-row', !environment.expandUserVars ?
             h('.mh2.overflow', JSON.stringify(item.userVars))
-            :
-            h('.flex-column', [
-              Object.keys(item.userVars).map((key) =>
-                h('.mh2.flex-row', [
-                  h('', {style: 'font-weight: bold'}, key + ':'),
-                  h('', {
-                    style: 'word-break: break-word'
-                  }, JSON.stringify(item.userVars[key]))
-                ])
-              ),
-            ]),
+            : envVarsPanel(environment, item)
           )
         ]),
         h('tr', [
@@ -208,6 +199,47 @@ const showEnvDetailsTable = (item, environment) =>
       ])
     ])
   );
+
+/**
+ * 
+ * @param {Environment} environment 
+ * @param {Object} item 
+ * @return {vnode}
+ */
+const envVarsPanel = (environment, item) => {
+  const knownVarGroups = Object.keys(item.userVars).filter((key) => environment.isVariableInRadioGroup(key));
+  const uriVarGroups = Object.keys(item.userVars).filter((key) =>
+    environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
+  const unknownVarGroups = Object.keys(item.userVars).filter((key) =>
+    !environment.isVariableInRadioGroup(key) && !environment.isKVPairInConsulUriGroup(key, item.userVars[key]));
+  return h('.flex-column.w-100', [
+    knownVarGroups.map((key) =>
+      key !== 'hosts' &&
+      h('.flex-row', [
+        h('.w-25', `${environment.getVariableDescription(key)}:`),
+        h('.w-75.flex-row', [
+          h('label.', item.userVars[key] === 'true' ? 'ON' : 'OFF'),
+        ]),
+      ])
+    ),
+    unknownVarGroups.map((key) =>
+      h('.w-100.flex-row', [
+        h('.w-25', key),
+        h('.w-75', {
+          style: 'word-break: break-word'
+        }, item.userVars[key])
+      ])
+    ),
+    uriVarGroups.map((key) =>
+      h('.w-100.flex-row', [
+        h('.w-25', key),
+        h('.w-75', {
+          style: 'word-break: break-word'
+        }, item.userVars[key])
+      ])
+    ),
+  ]);
+};
 
 /**
  * Open InfoLogger in a new browser tab with run number set if available
