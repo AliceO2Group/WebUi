@@ -216,47 +216,28 @@ const envVarsPanel = (environment, item) => {
     knownVarGroups.map((key) =>
       key !== 'hosts' &&
       h('.flex-row', [
-        h('.w-25', {style: 'font-weight: bold'}, `${environment.getVariableDescription(key)}:`),
-        h('.w-25.flex-row', [
-          h('.w-50.form-check', [
-            h('input.form-check-input', {
-              type: 'radio',
-              name: key,
-              id: `${key}Off`,
-              checked: item.userVars[key] === 'false',
-              disabled: true
-            }),
-            h('label', {for: `${key}On`}, 'OFF')
-          ]),
-          h('.w-50.form-check', [
-            h('input.form-check-input disabled', {
-              type: 'radio',
-              name: key,
-              id: `${key}On`,
-              checked: item.userVars[key] === 'true',
-              disabled: true,
-            }),
-            h('label', {for: `${key}On`}, 'ON')
-          ]),
-        ])
+        h('.w-25', `${environment.getVariableDescription(key)}:`),
+        h('.w-75.flex-row', [
+          h('label.', item.userVars[key] === 'true' ? 'ON' : 'OFF'),
+        ]),
       ])
     ),
     unknownVarGroups.map((key) =>
       h('.w-100.flex-row', [
-        h('.w-25', {style: 'font-weight: bold'}, key),
+        h('.w-25', key),
         h('.w-75', {
           style: 'word-break: break-word'
         }, item.userVars[key])
       ])
     ),
-    uriVarGroups.map((key) => {
-      return h('.w-100.flex-row', [
-        h('.w-25', {style: 'font-weight: bold'}, key),
+    uriVarGroups.map((key) =>
+      h('.w-100.flex-row', [
+        h('.w-25', key),
         h('.w-75', {
           style: 'word-break: break-word'
         }, item.userVars[key])
       ])
-    }),
+    ),
   ]);
 };
 
