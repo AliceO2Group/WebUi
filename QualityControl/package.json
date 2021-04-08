@@ -40,5 +40,9 @@
     "puppeteer": "5.4.1",
     "sinon": "9.2.1"
   },
+  "bundledDependencies": [
+    "@aliceo2/web-ui",
+    "jsroot"
+  ],
   "main": "export.js"
 }
