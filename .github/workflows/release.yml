@@ -40,7 +40,7 @@ jobs:
     - run: (cd $PROJECT; npm publish)
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
-upload-asset:
+  upload-asset:
     runs-on: ubuntu-latest
     needs: deploy-npm-module
     outputs:
