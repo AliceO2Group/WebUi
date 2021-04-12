@@ -32,6 +32,8 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
   config.demoData = false;
 }
 
+//TODO Generate config
+
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
 http.addStaticPath(path.join(__dirname, 'public'));

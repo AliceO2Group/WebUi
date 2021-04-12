@@ -130,18 +130,4 @@ export default class QCObjectService {
     );
     return RemoteData.Success(objectsMap);
   }
-
-  /**
-   * Ask the server for the link to access CCDB plots via nginx
-   * @returns {string}
-   */
-  async getCcdbPlotUrl() {
-    const {ok, result} = await this.model.loader.get('/api/ccdbPlotUrl');
-    if (ok) {
-      return result.url;
-    } else {
-      this.model.notification.show(`Unable to retrieve CCDB Plot URL`, 'danger', Infinity);
-      return '';
-    }
-  }
 }
