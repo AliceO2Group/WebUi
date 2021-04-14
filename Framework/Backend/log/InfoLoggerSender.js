@@ -28,7 +28,7 @@ class InfoLoggerSender {
     this.winston = winston;
 
     // for security reasons this path is hardcoded
-    this.path = '/opt/o2-InfoLogger/bin/log';
+    this.path = '/opt/o2-InfoLogger/bin/o2-infologger-log';
     fs.access(this.path, fs.constants.X_OK, (err) => {
       if (err) {
         winston.instance.debug('[ILSender] InfoLogger executable not found');
