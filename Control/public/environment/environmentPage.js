@@ -75,7 +75,7 @@ const showContent = (environment, item) => [
     environment.plots.match({
       NotAsked: () => h('.w-100.text-center.grafana-font', 'Grafana plots were not loaded, please refresh the page'),
       Loading: () => null,
-      Success: (data) => showEmbeddedGraphs(data),
+      Success: (data) => showEmbeddedGraphs(data, data.environment.currentRunNumber),
       Failure: () => h('.w-100.text-center.grafana-font',
         'Grafana plots were not loaded, please contact an administrator'
       ),
@@ -115,7 +115,8 @@ const tasksPerFlpTables = (environmentModel, environment) => {
  * @param {Array<String>} data
  * @return {vnode}
  */
-const showEmbeddedGraphs = (data) => [
+const showEmbeddedGraphs = (data, runNumber) => [
+  data.map(url => url += ('&var-run=' + runNumber))
   h('.flex-row', {style: 'width:30%;'}, [
     h('iframe.w-50', {
       src: data[0],
