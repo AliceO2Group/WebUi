@@ -249,7 +249,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully fill in readout uri from typed text', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div > div:nth-child(5) > div > div:nth-child(2) > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div > div:nth-child(6) > div > div:nth-child(2) > div > input');
     page.keyboard.type('file-readout');
     await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);

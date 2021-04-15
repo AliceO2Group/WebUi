@@ -24,6 +24,7 @@ export default (workflow) =>
   h('', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
     h('.p2.panel', [
+      dcsPanel(workflow),
       dataDistributionPanel(workflow),
       epnPanel(workflow),
       qcddPanel(workflow),
@@ -31,6 +32,36 @@ export default (workflow) =>
       readoutPanel(workflow),
       qcUriPanel(workflow)
     ])
+  ]);
+
+/**
+ * Add a radio button group to select if dcs(dcs_enabled) should be set as on or off
+ * @param {Object} workflow
+ * @return {vnode}
+ */
+const dcsPanel = (workflow) =>
+  h('.flex-row.text-left.w-50', [
+    h('.w-50', 'DCS:'),
+    h('.w-25.form-check', [
+      h('input.form-check-input', {
+        type: 'radio',
+        name: 'dcs',
+        id: 'dcsOff',
+        checked: workflow.form.basicVariables['dcs_enabled'] === 'false',
+        onchange: () => workflow.updateBasicVariableByKey('dcs_enabled', 'false'),
+      }),
+      h('label', {for: 'dcsOff'}, 'OFF')
+    ]),
+    h('.w-25.form-check', [
+      h('input.form-check-input disabled', {
+        type: 'radio',
+        name: 'dcs',
+        id: 'dcsOn',
+        checked: workflow.form.basicVariables['dcs_enabled'] === 'true',
+        onchange: () => workflow.updateBasicVariableByKey('dcs_enabled', 'true'),
+      }),
+      h('label', {for: 'dcsOn'}, 'ON')
+    ]),
   ]);
 
 /**
@@ -63,7 +94,7 @@ const dataDistributionPanel = (workflow) =>
         name: 'dataDistribution',
         id: 'dataDistributionOn',
         checked: workflow.form.basicVariables['dd_enabled'] === 'true',
-        onchange: () => workflow.form.basicVariables['dd_enabled'] = 'true'
+        onchange: () => workflow.updateBasicVariableByKey('dd_enabled', 'true'),
       }),
       h('label', {for: 'dataDistributionOn'}, 'ON')
     ]),
