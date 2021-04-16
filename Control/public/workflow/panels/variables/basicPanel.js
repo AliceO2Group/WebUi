@@ -26,6 +26,7 @@ export default (workflow) =>
     h('.p2.panel', [
       dcsPanel(workflow),
       dataDistributionPanel(workflow),
+      dataDistributionSchedulerPanel(workflow),
       epnPanel(workflow),
       qcddPanel(workflow),
       dplMwPanel(workflow),
@@ -66,7 +67,7 @@ const dcsPanel = (workflow) =>
 
 /**
  * Add a radio button group to select if data distribution should be set as on or off
- * If dd_enabled is set to false than odc_enabled and qcdd_enabled should be set to false
+ * If dd_enabled is set to false than ddsched_enabled, odc_enabled and qcdd_enabled should be set to false
  * @param {Object} workflow
  * @return {vnode}
  */
@@ -80,6 +81,7 @@ const dataDistributionPanel = (workflow) =>
         id: 'dataDistributionOff',
         checked: workflow.form.basicVariables['dd_enabled'] === 'false',
         onchange: () => {
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'false');
           workflow.updateBasicVariableByKey('odc_enabled', 'false');
           workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
           workflow.updateBasicVariableByKey('dd_enabled', 'false');
@@ -97,6 +99,40 @@ const dataDistributionPanel = (workflow) =>
         onchange: () => workflow.updateBasicVariableByKey('dd_enabled', 'true'),
       }),
       h('label', {for: 'dataDistributionOn'}, 'ON')
+    ]),
+  ]);
+
+/**
+  * Add a radio button group to select if data distribution scheduler should be set as on or off
+  * If ddsched_enabled is set to true than dd_enabled should be set to true
+  * @param {Object} workflow
+  * @return {vnode}
+  */
+const dataDistributionSchedulerPanel = (workflow) =>
+  h('.flex-row.text-left.w-50', [
+    h('.w-50', 'Data Distribution Scheduler:'),
+    h('.w-25.form-check', [
+      h('input.form-check-input', {
+        type: 'radio',
+        name: 'dataDistributionScheduler',
+        id: 'dataDistributionSchedulerOff',
+        checked: workflow.form.basicVariables['ddsched_enabled'] === 'false',
+        onchange: () => workflow.updateBasicVariableByKey('ddsched_enabled', 'false')
+      }),
+      h('label', {for: 'dataDistributionSchedulerOff'}, 'OFF')
+    ]),
+    h('.w-25.form-check', [
+      h('input.form-check-input disabled', {
+        type: 'radio',
+        name: 'dataDistributionScheduler',
+        id: 'dataDistributionSchedulerOn',
+        checked: workflow.form.basicVariables['ddsched_enabled'] === 'true',
+        onchange: () => {
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+        }
+      }),
+      h('label', {for: 'dataDistributionSchedulerOn'}, 'ON')
     ]),
   ]);
 
