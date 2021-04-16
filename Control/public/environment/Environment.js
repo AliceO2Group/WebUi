@@ -60,6 +60,8 @@ export default class Environment extends Observable {
         return 'QC';
       case 'dd_enabled':
         return 'Data Distribution';
+      case 'ddsched_enabled':
+        return 'Data Distribution Scheduler'
       case 'minimal_dpl_enabled':
         return 'Minimal DPL workflow';
       case 'readout_cfg_uri':
@@ -75,7 +77,9 @@ export default class Environment extends Observable {
    * Check if the passed variable is known to belong to radio button group
    */
   isVariableInRadioGroup(variable) {
-    return ['odc_enabled', 'qcdd_enabled', 'dd_enabled', 'minimal_dpl_enabled', 'dcs_enabled'].includes(variable);
+    return [
+      'odc_enabled', 'qcdd_enabled', 'dd_enabled', 'ddsched_enabled', 'minimal_dpl_enabled', 'dcs_enabled'
+    ].includes(variable);
   }
 
   /**
