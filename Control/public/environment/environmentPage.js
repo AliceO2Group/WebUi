@@ -75,7 +75,7 @@ const showContent = (environment, item) => [
     environment.plots.match({
       NotAsked: () => h('.w-100.text-center.grafana-font', 'Grafana plots were not loaded, please refresh the page'),
       Loading: () => null,
-      Success: (data) => showEmbeddedGraphs(data),
+      Success: (data) => showEmbeddedGraphs(data, '&var-run=' + item.currentRunNumber),
       Failure: () => h('.w-100.text-center.grafana-font',
         'Grafana plots were not loaded, please contact an administrator'
       ),
@@ -115,20 +115,20 @@ const tasksPerFlpTables = (environmentModel, environment) => {
  * @param {Array<String>} data
  * @return {vnode}
  */
-const showEmbeddedGraphs = (data) => [
+const showEmbeddedGraphs = (data, runParam) => [
   h('.flex-row', {style: 'width:30%;'}, [
     h('iframe.w-50', {
-      src: data[0],
+      src: data[0] + runParam,
       style: 'height: 100%; border: 0;'
     }),
     h('iframe.w-50', {
-      src: data[1],
+      src: data[1] + runParam,
       style: 'height: 100%; border: 0;'
     })
   ]),
   // Large Plot
   h('iframe.flex-grow', {
-    src: data[2],
+    src: data[2] + runParam,
     style: 'height: 100%; border: 0'
   })
 ];
