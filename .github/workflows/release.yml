@@ -40,18 +40,23 @@ jobs:
     - run: (cd $PROJECT; npm publish)
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
-upload-asset:
+  upload-asset:
     runs-on: ubuntu-latest
     needs: deploy-npm-module
     outputs:
       ASSET_URL: ${{ steps.upload.outputs.asset_url }}
     steps:
+    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
         registry-url: 'https://registry.npmjs.org'
+    - name: Install production deps
+      run: npm install --only=production
+      working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
     - name: Create package tarball
-      run: echo ::set-output name=tgz_name::$(npm pack ${GITHUB_REF/refs\/tags\/} -s)
+      run:  echo ::set-output name=tgz_name::$(npm pack)
+      working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
       id: tgz
     - name: Upload tarball to release assets
       uses: actions/upload-release-asset@v1
@@ -61,7 +66,7 @@ upload-asset:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_content_type: application/tar+gzip
-        asset_path: ./${{ steps.tgz.outputs.tgz_name }}
+        asset_path: ./${{ needs.deploy-npm-module.outputs.PROJECT }}/${{ steps.tgz.outputs.tgz_name }}
         asset_name: ${{ steps.tgz.outputs.tgz_name }}
     - name: Set output
       run: echo ::set-output name=asset_url::${{ steps.upload.browser_download_url }}
