@@ -17,7 +17,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   - [Online Mode](#online-mode)
 
 ## Installation
-1. `nodeJS` >= `12.13.0` is required
+1. `nodeJS` >= `14.16.1` is required
 2. Clone the `WebUi` repository via HTTPS/SSH
 3. Install QCG
 ```
