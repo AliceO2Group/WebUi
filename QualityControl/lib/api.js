@@ -13,7 +13,7 @@
 */
 
 const {Log, WebSocket} = require('@aliceo2/web-ui');
-const config = require('./configProvider.js');
+const config = require('./config/configProvider.js');
 const log = new Log('QualityControl/Api');
 
 // Load data source (demo or DB)
@@ -29,7 +29,6 @@ module.exports.setup = (http) => {
   http.get('/objectTimestampList', getObjectTimestampList, {public: true});
   http.get('/listOnlineObjects', listOnlineObjects);
   http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
-  http.get('/ccdbPlotUrl', (req, res) => res.status(200).json({url: config.ccdb.plotUrl || 'localhost:8080/ccdb'}));
   http.post('/readLayout', model.layoutConnector.readLayout.bind(model.layoutConnector));
   http.post('/writeLayout', model.layoutConnector.updateLayout.bind(model.layoutConnector));
   http.post('/listLayouts', model.layoutConnector.listLayouts.bind(model.layoutConnector));

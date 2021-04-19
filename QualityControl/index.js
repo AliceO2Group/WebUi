@@ -18,7 +18,8 @@ const path = require('path');
 const api = require('./lib/api.js');
 
 // Reading config file
-const config = require('./lib/configProvider.js');
+const config = require('./lib/config/configProvider.js');
+const {setLocalConfig} = require('./lib/config/localConfig');
 
 // Quick check config at start
 
@@ -32,7 +33,7 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
   config.demoData = false;
 }
 
-//TODO Generate config
+setLocalConfig(config);
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
