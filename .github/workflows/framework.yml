@@ -18,7 +18,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
       - run: (cd Framework; npm ci )
       - run: (cd Framework; npm test )
@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: (cd Framework; npm ci )
       - run: (cd Framework; npm run coverage )
       - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: cd Framework; npm ci
       - run: cd Framework; npm test
   control-compatibility:
@@ -62,7 +62,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: (cd Control; npm ci)
       - run: (cd Control; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally
@@ -81,7 +81,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: (cd QualityControl; npm ci)
       - run: (cd QualityControl; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally
@@ -100,7 +100,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: (cd InfoLogger; npm ci)
       - run: (cd InfoLogger; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally
