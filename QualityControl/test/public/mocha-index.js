@@ -91,7 +91,9 @@ describe('QCG', function() {
   it('should have correctly load QCG configuration', async () => {
     const qcg = await page.evaluate(() => window.QCG);
     const expectedConf = {
-      CCDB_PLOT_URL: 'localhost:8080/some-instance'
+      CCDB_PLOT_URL: 'localhost:8080/some-instance',
+      REFRESH_MIN_INTERVAL: 2,
+      REFRESH_MAX_INTERVAL: 10,
     }
     assert.deepStrictEqual(qcg, expectedConf, 'Public configuration was not loaded successfully');
   });
