@@ -26,7 +26,7 @@ This is a prototype of Control GUI. It aims to replace current ECS HI and provid
 It communicates with [Control agent](https://github.com/AliceO2Group/Control) over gRPC.
 
 ## Requirements
-- `nodejs` >= `10.13.0`
+- `nodejs` >= `14.16.0`
 
 ## Compatibility with AliECS Core
 Below you can find details about the minimum version of [AliECS Core](https://github.com/AliceO2Group/Control) needed to run AliECS GUI full package of features.

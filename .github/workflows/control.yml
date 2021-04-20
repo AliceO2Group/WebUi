@@ -18,7 +18,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: (cd Control; npm ci )
       - run: (cd Control; npm test )
   coverage:
@@ -29,7 +29,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - run: (cd Control; npm ci )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
