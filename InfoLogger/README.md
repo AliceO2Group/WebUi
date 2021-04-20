@@ -20,7 +20,7 @@ Web user interface of [InfoLogger](https://github.com/AliceO2Group/InfoLogger) l
 ![Screenshot of ILG](docs/screenshot.png)
 
 ## Requirements
-- `nodejs` >= `10.13.0`
+- `nodejs` >= `14.16.0`
 - InfoLogger MySQL database for Query mode
 - InfoLoggerServer endpoint for Live mode
 
