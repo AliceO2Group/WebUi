@@ -19,7 +19,7 @@ const api = require('./lib/api.js');
 
 // Reading config file
 const config = require('./lib/config/configProvider.js');
-const {setLocalConfig} = require('./lib/config/localConfig');
+const {buildPublicConfig} = require('./lib/config/publicConfigProvider');
 
 // Quick check config at start
 
@@ -33,7 +33,7 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
   config.demoData = false;
 }
 
-setLocalConfig(config);
+buildPublicConfig(config);
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);

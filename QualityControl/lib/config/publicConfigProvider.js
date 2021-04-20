@@ -16,21 +16,22 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Remove if exists and create a config file which is to be sent to the client side for fixed configurations
+ * Removes (if exists) and creates a new config file which is to be sent to the client side for fixed configurations
+ * The configuration file is based on `config.js` file
  * @param {JSON} config 
  */
-function setLocalConfig(config) {
-  const publicConfigPath = path.join(__dirname, './../../public/config/public.js');
-  const localConfigExist = fs.existsSync(publicConfigPath);
-  if (localConfigExist) {
+function buildPublicConfig(config) {
+  const publicConfigPath = path.join(__dirname, './../../public/config.js');
+  const publicConfigExist = fs.existsSync(publicConfigPath);
+  if (publicConfigExist) {
     fs.rmSync(publicConfigPath);
   }
   const publicConfig = {
     CCDB_PLOT_URL: config.ccdb.plotUrl,
   };
-  let codeStr = `const publicConfig = ${JSON.stringify(publicConfig, null, 4)}; \nexport {publicConfig as QCG};\n`;
+  let codeStr = '/* eslint-disable quote-props */\n' + 
+   + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as QCG};\n`;
   fs.writeFileSync(publicConfigPath, codeStr);
-
 }
 
-module.exports = {setLocalConfig};
+module.exports = {buildPublicConfig};
