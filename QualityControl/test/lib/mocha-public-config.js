@@ -19,14 +19,14 @@ const config = require('../test-config.js');
 
 const {buildPublicConfig} = require('../../lib/config/publicConfigProvider');
 
-// describe('Public Configuration Test Suite', () => {
-//   const CONF_LOCATION = '../../public/config.js';
-//   it('should successfully create JS module with public configuration as export', () => {
-//     assert.doesNotThrow(() => buildPublicConfig(config));
-//   });
+describe('Public Configuration Test Suite', () => {
+  const CONF_LOCATION = '../../public/config.js';
+  it('should successfully create JS module with public configuration as export', () => {
+    assert.doesNotThrow(() => buildPublicConfig(config));
+  });
 
-//   it('should successfully import QCG public configuration', async () => {
-//     const confExists = fs.existsSync(path.join(__dirname, CONF_LOCATION));
-//     assert.ok(confExists, 'Public configuration file was not identified');
-//   });
-// });
+  it('should successfully import QCG public configuration', async () => {
+    const confExists = fs.existsSync(path.join(__dirname, CONF_LOCATION));
+    assert.ok(confExists, 'Public configuration file was not identified');
+  });
+});
