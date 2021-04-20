@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global QCG */
+
 import {h} from '/js/src/index.js';
 import objectTreeSidebar from '../object/objectTreeSidebar.js';
 import objectPropertiesSidebar from '../object/objectPropertiesSidebar.js';
@@ -163,8 +165,8 @@ const refreshOptions = (model) => [
       h('input.form-control.text-center', {
         type: 'range',
         step: 1,
-        min: 2,
-        max: 120,
+        min: QCG.REFRESH_MIN_INTERVAL,
+        max: QCG.REFRESH_MAX_INTERVAL,
         value: model.refreshInterval,
         oninput: (e) => model.setRefreshInterval(e.target.value)
       })
