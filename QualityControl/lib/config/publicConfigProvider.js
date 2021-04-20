@@ -29,8 +29,8 @@ function buildPublicConfig(config) {
   const publicConfig = {
     CCDB_PLOT_URL: config.ccdb.plotUrl,
   };
-  let codeStr = '/* eslint-disable quote-props */\n' + 
-   + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as QCG};\n`;
+  let codeStr = `/* eslint-disable quote-props */\n`
+  + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as QCG};\n`;
   fs.writeFileSync(publicConfigPath, codeStr);
 }
 
