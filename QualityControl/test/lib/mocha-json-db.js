@@ -164,20 +164,20 @@ describe('JSON file custom database', () => {
       }, new Error(`DB file should have an array of layouts ${CONFIG_FILE}`));
     });
 
-    it('should reject when there is missing data with error of bad JSON format ', async () => {
-      return assert.rejects(async () => {
-        jsonConfig.data = undefined;
-        await jsonConfig._writeToFile();
-        await jsonConfig._readFromFile();
-      }, new Error(`Unable to parse DB file ${CONFIG_FILE}`));
-    });
-
     it('should successfully read layouts from data', async () => {
       return assert.doesNotReject(async () => {
         jsonConfig.data = {layouts: []};
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
       });
+    });
+
+    it('should reject when there is missing data with error of bad JSON format ', async () => {
+      return assert.rejects(async () => {
+        jsonConfig.data = undefined;
+        await jsonConfig._writeToFile();
+        await jsonConfig._readFromFile();
+      }, new TypeError(`The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined`));
     });
 
     after(() => {
