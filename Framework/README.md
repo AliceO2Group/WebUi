@@ -36,11 +36,11 @@ The goal of this UI framework is to identify library and framework sets, provide
 - MVC engine with a "diffing" algorithm
 
 ### Backend requirements
-* `nodejs` >= v10.13.0
+* `nodejs` >= v14.16.0
 
 #### CentOS 7
 ```
-yum install https://rpm.nodesource.com/pub_12.x/el/7/x86_64/nodejs-12.15.0-1nodesource.x86_64.rpm
+yum install https://rpm.nodesource.com/pub_14.x/el/7/x86_64/nodejs-14.16.1-1nodesource.x86_64.rpm
 ```
 
 #### macOS

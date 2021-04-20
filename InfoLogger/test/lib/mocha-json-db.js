@@ -50,7 +50,7 @@ describe('JSON file custom database', () => {
     // Drop previous DB if exists
     try {
       fs.unlinkSync(CONFIG_FILE);
-    } catch (error) {}
+    } catch (error) { }
     jsonConfig = new JsonFileConnector(CONFIG_FILE);
   });
 
@@ -148,20 +148,20 @@ describe('JSON file custom database', () => {
       }, new Error(`[JSONConnector] DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
-    it('should reject when there is missing data with error of bad JSON format ', async () => {
-      return assert.rejects(async () => {
-        jsonConfig.data = undefined;
-        await jsonConfig._writeToFile();
-        await jsonConfig._readFromFile();
-      }, new Error(`[JSONConnector] Unable to parse DB file ${CONFIG_FILE}`));
-    });
-
     it('should successfully read profiles from data', async () => {
       return assert.doesNotReject(async () => {
         jsonConfig.data = {profiles: []};
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
       });
+    });
+
+    it('should reject when there is missing data with error of bad JSON format ', async () => {
+      return assert.rejects(async () => {
+        jsonConfig.data = undefined;
+        await jsonConfig._writeToFile();
+        await jsonConfig._readFromFile();
+      }, new TypeError(`The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined`));
     });
 
     after(() => {
