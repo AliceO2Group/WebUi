@@ -18,7 +18,8 @@ const path = require('path');
 const api = require('./lib/api.js');
 
 // Reading config file
-const config = require('./lib/configProvider.js');
+const config = require('./lib/config/configProvider.js');
+const {buildPublicConfig} = require('./lib/config/publicConfigProvider');
 
 // Quick check config at start
 
@@ -31,6 +32,8 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
 } else {
   config.demoData = false;
 }
+
+buildPublicConfig(config);
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);

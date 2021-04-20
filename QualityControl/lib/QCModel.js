@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const config = require('./configProvider.js');
+const config = require('./config/configProvider.js');
 const projPackage = require('./../package.json');
 
 const ConsulService = require('@aliceo2/web-ui').ConsulService;

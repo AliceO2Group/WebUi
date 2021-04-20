@@ -88,6 +88,14 @@ describe('QCG', function() {
     assert.strictEqual(location.search, '?page=objectTree');
   });
 
+  it('should have correctly load QCG configuration', async () => {
+    const qcg = await page.evaluate(() => window.QCG);
+    const expectedConf = {
+      CCDB_PLOT_URL: 'localhost:8080/some-instance'
+    }
+    assert.deepStrictEqual(qcg, expectedConf, 'Public configuration was not loaded successfully');
+  });
+
   it('should have a layout with header, sidebar and section', async () => {
     const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
     const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);
@@ -611,7 +619,7 @@ describe('QCG', function() {
       const expConfig = {
         qcg: {port: 8181, hostname: 'localhost', status: {ok: true}},
         consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live Mode was not configured'}},
-        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: false, message: 'Data connector was not configured'}},
+        ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test', plotUrl: 'localhost:8080/some-instance', status: {ok: false, message: 'Data connector was not configured'}},
         quality_control: {version: '0.19.5-1'}
       };
       const config = await page.evaluate(() => window.model.frameworkInfo.item);

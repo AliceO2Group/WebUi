@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global JSROOT */
+/* global JSROOT, QCG */
 
 import {RemoteData} from '/js/src/index.js';
 
@@ -78,7 +78,7 @@ export default class QCObjectService {
       if (timestamp === -1) {
         timestamp = Date.now();
       }
-      const filename = `${this.model.ccdbPlotUrl}/${objectName}/${timestamp}`;
+      const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
       let [qcObject, timeStampsReq] = await Promise.all([
         new Promise(async (resolve, reject) => {
           try {
@@ -118,7 +118,7 @@ export default class QCObjectService {
     const objectsMap = {};
     await Promise.allSettled(
       objectsNames.map(async (objectName) => {
-        const filename = `${this.model.ccdbPlotUrl}/${objectName}/${Date.now()}`;
+        const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
         try {
           const file = await JSROOT.openFile(filename);
           const obj = await file.readObject("ccdb_object");
@@ -129,19 +129,5 @@ export default class QCObjectService {
       })
     );
     return RemoteData.Success(objectsMap);
-  }
-
-  /**
-   * Ask the server for the link to access CCDB plots via nginx
-   * @returns {string}
-   */
-  async getCcdbPlotUrl() {
-    const {ok, result} = await this.model.loader.get('/api/ccdbPlotUrl');
-    if (ok) {
-      return result.url;
-    } else {
-      this.model.notification.show(`Unable to retrieve CCDB Plot URL`, 'danger', Infinity);
-      return '';
-    }
   }
 }

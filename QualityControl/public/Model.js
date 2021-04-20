@@ -13,7 +13,7 @@
 */
 
 import {
-  sessionService, Observable, WebSocketClient, QueryRouter, Loader, RemoteData, Notification
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification
 } from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
@@ -83,10 +83,7 @@ export default class Model extends Observable {
    * mandatory information from server
    */
   async initModel() {
-    this.ccdbPlotUrl = RemoteData.notAsked();
-
     // Init data
-    this.ccdbPlotUrl = await this.object.qcObjectService.getCcdbPlotUrl();
     this.checkOnlineModeAvailability();
     this.object.loadList();
     this.layout.loadMyList();
