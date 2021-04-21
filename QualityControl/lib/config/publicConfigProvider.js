@@ -27,10 +27,12 @@ function buildPublicConfig(config) {
     fs.rmSync(publicConfigPath);
   }
   const publicConfig = {
-    CCDB_PLOT_URL: config.ccdb.plotUrl,
+    CCDB_PLOT_URL: config?.ccdb?.plotUrl || 'localhost:8080/ccdb',
+    REFRESH_MIN_INTERVAL: config?.consul?.refreshRate?.min || 10,
+    REFRESH_MAX_INTERVAL: config?.consul?.refreshRate?.max || 120,
   };
   let codeStr = `/* eslint-disable quote-props */\n`
-  + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as QCG};\n`;
+    + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as QCG};\n`;
   fs.writeFileSync(publicConfigPath, codeStr);
 }
 

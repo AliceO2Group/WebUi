@@ -80,6 +80,7 @@ export default class QCObjectService {
       }
       const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
       let [qcObject, timeStampsReq] = await Promise.all([
+        /* eslint-disable no-async-promise-executor */
         new Promise(async (resolve, reject) => {
           try {
             const file = await JSROOT.openFile(filename);

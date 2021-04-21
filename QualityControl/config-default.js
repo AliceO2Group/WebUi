@@ -42,7 +42,11 @@ module.exports = {
 
   // consul: {
   //   hostname: 'localhost',
-  //   port: 8500
+  //   port: 8500,
+  //   refreshRate: {
+  //     min: 10,
+  //     max: 120
+  //   }
   // }
 
   // dbFile: '/var/db/qcg-db.json', // absolute path where to save layouts, default = root of this app
