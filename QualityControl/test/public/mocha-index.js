@@ -94,6 +94,7 @@ describe('QCG', function() {
       CCDB_PLOT_URL: 'localhost:8080/some-instance',
       REFRESH_MIN_INTERVAL: 10,
       REFRESH_MAX_INTERVAL: 120,
+      CONSUL_SERVICE: true
     }
     assert.deepStrictEqual(qcg, expectedConf, 'Public configuration was not loaded successfully');
   });

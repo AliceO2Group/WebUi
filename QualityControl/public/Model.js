@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global QCG */
+
 import {
   sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification
 } from '/js/src/index.js';
@@ -84,7 +86,9 @@ export default class Model extends Observable {
    */
   async initModel() {
     // Init data
-    this.checkOnlineModeAvailability();
+    if (QCG.CONSUL_SERVICE) {
+      this.checkOnlineModeAvailability();
+    }
     this.object.loadList();
     this.layout.loadMyList();
 
