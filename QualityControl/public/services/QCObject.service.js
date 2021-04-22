@@ -79,7 +79,7 @@ export default class QCObjectService {
         timestamp = Date.now();
       }
       const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
-      let [qcObject, timeStampsReq] = await Promise.allSettled([
+      let [qcObject, timeStampsReq] = await Promise.all([
         JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
         this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
       ]);
@@ -95,6 +95,22 @@ export default class QCObjectService {
       }
     } catch (error) {
       return RemoteData.failure(`Object '${objectName}' could not be loaded`);
+    }
+  }
+
+  /**
+   * Retrieve the JSON version of a ROOT Object through JSROOT
+   * @param {string} objectName - full path object name
+   * @return {RemoteData}
+   */
+  async getObjectByNameOnly(objectName) {
+    try {
+      const url = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
+      const file = await JSROOT.openFile(url);
+      const obj = await file.readObject("ccdb_object");
+      return RemoteData.success({qcObject: obj});
+    } catch (error) {
+      return RemoteData.failure(`Unable to load object ${objectName}`);
     }
   }
 }

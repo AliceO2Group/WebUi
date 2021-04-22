@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global JSROOT, QCG */
-
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
 import QCObjectService from './../services/QCObject.service.js';
 import ObjectTree from './ObjectTree.class.js';
@@ -320,7 +318,7 @@ export default class QCObject extends Observable {
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
-  loadObjects(objectsName) {
+  async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // remove any in-memory loaded objects
     this.notify();
@@ -330,18 +328,11 @@ export default class QCObject extends Observable {
       return;
     }
 
-    Promise.allSettled(
+    await Promise.allSettled(
       objectsName.map(async (objectName) => {
-        const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
         this.objects[objectName] = RemoteData.Loading()
         this.notify();
-        try {
-          const file = await JSROOT.openFile(filename);
-          const obj = await file.readObject("ccdb_object");
-          this.objects[objectName] = RemoteData.success({qcObject: obj});
-        } catch (error) {
-          this.objects[objectName] = RemoteData.failure(`Unable to load object ${objectName}`);
-        }
+        this.objects[objectName] = await this.qcObjectService.getObjectByNameOnly(objectName);
         this.notify();
       })
     );
