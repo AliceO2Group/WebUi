@@ -80,16 +80,9 @@ export default class QCObjectService {
       }
       const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
       let [qcObject, timeStampsReq] = await Promise.all([
-        /* eslint-disable no-async-promise-executor */
-        new Promise(async (resolve, reject) => {
-          try {
-            const file = await JSROOT.openFile(filename);
-            const obj = await file.readObject("ccdb_object");
-            resolve(obj);
-          } catch (error) {
-            reject({error: 'Could not load object'});
-          }
-        }),
+        JSROOT.openFile(filename)
+          .then((file) => file.readObject("ccdb_object"))
+          .then((object) => object),
         this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
       ]);
       const {result, ok, status} = timeStampsReq;
