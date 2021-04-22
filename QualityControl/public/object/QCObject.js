@@ -330,19 +330,23 @@ export default class QCObject extends Observable {
       return;
     }
 
-    Promise.all(
+    Promise.allSettled(
       objectsName.map(async (objectName) => {
         const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
+        this.objects[objectName] = RemoteData.Loading()
+        this.notify();
         try {
           const file = await JSROOT.openFile(filename);
           const obj = await file.readObject("ccdb_object");
           this.objects[objectName] = RemoteData.success({qcObject: obj});
         } catch (error) {
-          this.objects[objectName] = RemoteData.failure({error: `Unable to load object ${objectName}`});
+          this.objects[objectName] = RemoteData.failure(`Unable to load object ${objectName}`);
         }
         this.notify();
       })
     );
+    this.objectsRemote = RemoteData.success();
+    this.notify();
   }
 
   /**
@@ -352,6 +356,15 @@ export default class QCObject extends Observable {
   refreshObjects() {
     this.loadObjects(Object.keys(this.objects));
     this.loadOnlineList();
+  }
+
+  /**
+   * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
+   * @param {string} name - name of the object
+   */
+  invalidObject(name) {
+    this.objects[name] = RemoteData.failure('JSROOT was unable to draw this object');
+    this.notify();
   }
 
   /**
