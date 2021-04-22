@@ -79,7 +79,7 @@ export default class QCObjectService {
         timestamp = Date.now();
       }
       const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
-      let [qcObject, timeStampsReq] = await Promise.all([
+      let [qcObject, timeStampsReq] = await Promise.allSettled([
         JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
         this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
       ]);
@@ -96,30 +96,5 @@ export default class QCObjectService {
     } catch (error) {
       return RemoteData.failure(`Object '${objectName}' could not be loaded`);
     }
-  }
-
-  /**
-   * Make a set of requests to CCDB to get the object file through JSROOT
-   * It will return a map in which the value can contain:
-   * * qcObject - if request for receiving and opening the file was successfull
-   * * error - if request fails 'Unable to load object'
-   * @param {[string]} objectsNames
-   * @return {Remodata.Success(Map<String, JSON>)}
-   */
-  async getObjectsByName(objectsNames) {
-    const objectsMap = {};
-    await Promise.allSettled(
-      objectsNames.map(async (objectName) => {
-        const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
-        try {
-          const file = await JSROOT.openFile(filename);
-          const obj = await file.readObject("ccdb_object");
-          objectsMap[objectName] = {qcObject: obj};
-        } catch (error) {
-          objectsMap[objectName] = {error: `Unable to load object ${objectName}`};
-        }
-      })
-    );
-    return RemoteData.Success(objectsMap);
   }
 }

@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global JSROOT, QCG */
+
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
 import QCObjectService from './../services/QCObject.service.js';
 import ObjectTree from './ObjectTree.class.js';
@@ -318,7 +320,7 @@ export default class QCObject extends Observable {
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
-  async loadObjects(objectsName) {
+  loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // remove any in-memory loaded objects
     this.notify();
@@ -328,21 +330,19 @@ export default class QCObject extends Observable {
       return;
     }
 
-    this.objectsRemote = await this.qcObjectService.getObjectsByName(objectsName);
-    this.notify();
-
-    // eslint-disable-next-line
-    // JSROOT.parse call was removed due to bug
-    const objects = this.objectsRemote.payload;
-    for (const name in objects) {
-      if (objects[name].error) {
-        this.objects[name] = RemoteData.failure(objects[name].error);
-      } else {
-        this.objects[name] = RemoteData.success(objects[name]);
-      }
-    }
-
-    this.notify();
+    Promise.all(
+      objectsName.map(async (objectName) => {
+        const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
+        try {
+          const file = await JSROOT.openFile(filename);
+          const obj = await file.readObject("ccdb_object");
+          this.objects[objectName] = RemoteData.success({qcObject: obj});
+        } catch (error) {
+          this.objects[objectName] = RemoteData.failure({error: `Unable to load object ${objectName}`});
+        }
+        this.notify();
+      })
+    );
   }
 
   /**
@@ -352,15 +352,6 @@ export default class QCObject extends Observable {
   refreshObjects() {
     this.loadObjects(Object.keys(this.objects));
     this.loadOnlineList();
-  }
-
-  /**
-   * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
-   * @param {string} name - name of the object
-   */
-  invalidObject(name) {
-    this.objects[name] = RemoteData.failure('JSROOT was unable to draw this object');
-    this.notify();
   }
 
   /**
