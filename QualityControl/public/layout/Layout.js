@@ -66,11 +66,11 @@ export default class Layout extends Observable {
     if (result.isSuccess()) {
       this.list = assertLayouts(result.payload);
       this.model.folder.map.get('All Layouts').list = this.list;
-      this.notify();
     } else {
       this.model.notification.show(`Unable to load layouts.`, 'danger', Infinity);
       this.list = [];
     }
+    this.notify();
   }
 
   /**
