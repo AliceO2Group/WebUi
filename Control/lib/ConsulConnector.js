@@ -193,25 +193,21 @@ class ConsulConnector {
    * @return {Promise.<JSON, Error>}
    */
   async _getCrusConfigById(crus) {
-    try {
-      const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutCardPath);
-      Object.keys(crusByEndpoint)
-        .filter((fieldKey) => fieldKey.split('/').length >= 7) // filter out incomplete keys
-        .forEach((fieldKey) => {
-          // o2/components/readoutcard/<hostname>/cru/<serial>/<endpoint>
-          const splitKey = fieldKey.split('/');
-          const host = splitKey[3];
-          const cardType = splitKey[4];
-          const serial = splitKey[5];
-          const endpoint = splitKey[6];
-          const cruId = `${cardType}_${serial}_${endpoint}`;
+    const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutCardPath);
+    Object.keys(crusByEndpoint)
+      .filter((fieldKey) => fieldKey.split('/').length >= 7) // filter out incomplete keys
+      .forEach((fieldKey) => {
+        // o2/components/readoutcard/<hostname>/cru/<serial>/<endpoint>
+        const splitKey = fieldKey.split('/');
+        const host = splitKey[3];
+        const cardType = splitKey[4];
+        const serial = splitKey[5];
+        const endpoint = splitKey[6];
+        const cruId = `${cardType}_${serial}_${endpoint}`;
 
-          crus[host][cruId].config = JSON.parse(crusByEndpoint[fieldKey]);
-        });
-      return crus;
-    } catch (error) {
-      throw error;
-    }
+        crus[host][cruId].config = JSON.parse(crusByEndpoint[fieldKey]);
+      });
+    return crus;
   }
 
   /**
@@ -231,20 +227,16 @@ class ConsulConnector {
    */
   async _getCardsByHost() {
     const regex = new RegExp(`.*cards`);
-    try {
-      const data = await this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath);
-      const cardsByHost = {};
-      Object.keys(data)
-        .filter((flpKey) => flpKey.match(regex))
-        .forEach((flpKey) => {
-          const splitFlpKey = flpKey.split('/');
-          const hostName = splitFlpKey[splitFlpKey.length - 2];
-          cardsByHost[hostName] = JSON.parse(data[flpKey]);
-        });
-      return cardsByHost;
-    } catch (error) {
-      throw error;
-    }
+    const data = await this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath);
+    const cardsByHost = {};
+    Object.keys(data)
+      .filter((flpKey) => flpKey.match(regex))
+      .forEach((flpKey) => {
+        const splitFlpKey = flpKey.split('/');
+        const hostName = splitFlpKey[splitFlpKey.length - 2];
+        cardsByHost[hostName] = JSON.parse(data[flpKey]);
+      });
+    return cardsByHost;
   }
 
   /**

@@ -39,7 +39,7 @@
     "kafka-node"
   ],
   "devDependencies": {
-    "eslint": "^5.15.0",
+    "eslint": "^7.24.0",
     "mocha": "^8.2.1",
     "nock": "^13.0.4",
     "nyc": "^15.1.0",

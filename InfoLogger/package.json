@@ -31,7 +31,7 @@
     "@aliceo2/web-ui": "1.17.0"
   },
   "devDependencies": {
-    "eslint": "^5.15.0",
+    "eslint": "^7.24.0",
     "eslint-config-google": "^0.12.0",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0",
