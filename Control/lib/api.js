@@ -26,7 +26,7 @@ const ControlService = require('./control-core/ControlService.js');
 
 const ConsulConnector = require('./ConsulConnector.js');
 
-const config = require('./configProvider.js');
+const config = require('./config/configProvider.js');
 const projPackage = require('./../package.json');
 
 if (!config.grpc) {
@@ -59,9 +59,7 @@ module.exports.setup = (http, ws) => {
   http.post('/lock', lock);
   http.post('/unlock', unlock);
   http.post('/forceUnlock', forceUnlock);
-  http.get('/getPlotsList', getPlotsList);
   http.get('/getFrameworkInfo', getFrameworkInfo);
-  http.get('/getInfoLoggerUrl', getInfoLoggerUrl);
   http.get('/getCRUs', (req, res) => consulConnector.getCRUs(req, res));
   http.get('/getFLPs', (req, res) => consulConnector.getFLPs(req, res));
   http.get('/getCRUsConfig', (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
@@ -134,34 +132,6 @@ module.exports.setup = (http, ws) => {
 };
 
 /**
- * Method to build a list of plots source
- * @param {Request} req
- * @param {Response} res
- */
-function getPlotsList(req, res) {
-  if (!config.grafana || !config.http.hostname || !config.grafana.port) {
-    log.error('[Grafana] Configuration is missing');
-    res.status(503).json({message: 'Plots service configuration is missing'});
-  } else {
-    const host = config.http.hostname;
-    const port = config.grafana.port;
-    httpGetJson(host, port, '/api/health')
-      .then((result) => {
-        log.info(`[Grafana] Is up and running on version: ${result.version}`);
-        const hostPort = `http://${host}:${port}/`;
-        const valueOne = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6 ';
-        const valueTwo = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8';
-        const plot = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4';
-        const theme = '&refresh=5s&theme=light';
-        const response = [hostPort + valueOne + theme, hostPort + valueTwo + theme, hostPort + plot + theme];
-        res.status(200).json(response);
-      })
-      .catch((error) => errorHandler(`[Grafana] - Unable to connect due to ${error}`, res, 503));
-    return;
-  }
-}
-
-/**
  * Send back info about the framework
  * @param {Request} req
  * @param {Response} res
@@ -221,20 +191,6 @@ async function getFrameworkInfo(req, res) {
     }
 
     res.status(200).json(result);
-  }
-}
-
-/**
- * Build the URL of infologger gui from the configuration file
- * @param {Request} _
- * @param {Response} res
- */
-function getInfoLoggerUrl(_, res) {
-  const ilg = config.infoLoggerGui;
-  if (ilg && ilg.hostname && ilg.port) {
-    res.status(200).json({ilg: `${ilg.hostname}:${ilg.port}`});
-  } else {
-    res.status(502).json({ilg: ''});
   }
 }
 

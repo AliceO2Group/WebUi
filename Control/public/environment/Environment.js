@@ -35,13 +35,8 @@ export default class Environment extends Observable {
     this.item = RemoteData.notAsked();
     this.itemControl = RemoteData.notAsked();
     this.itemNew = RemoteData.notAsked();
-    this.plots = RemoteData.notAsked();
-    this.infoLoggerUrl = '';
 
     this.expandUserVars = true;
-
-    this.getPlotsList();
-    this.getInfoLoggerUrl();
   }
 
   /**
@@ -197,32 +192,5 @@ export default class Environment extends Observable {
     }
     this.itemControl = RemoteData.notAsked();
     this.model.router.go(`?page=environments`);
-  }
-
-  /**
-   * Method to retrieve plots source list
-   */
-  async getPlotsList() {
-    this.plots = RemoteData.loading();
-    this.notify();
-    const {result, ok} = await this.model.loader.get(`/api/getPlotsList`);
-    if (!ok) {
-      this.plots = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.plots = RemoteData.success(result);
-    this.notify();
-  }
-
-  /**
-   * Request the URL of where InfoLogger was deployed
-   */
-  async getInfoLoggerUrl() {
-    const {result, ok} = await this.model.loader.get(`/api/getInfoLoggerUrl`);
-    if (ok) {
-      this.infoLoggerUrl = result.ilg;
-      this.notify();
-    }
   }
 }
