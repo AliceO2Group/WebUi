@@ -24,7 +24,7 @@ const path = require('path');
  */
 
 // Default configuration file
-let configFile = path.join(__dirname, '../config.js');
+let configFile = path.join(__dirname, './../../config.js');
 
 // Replace if provided by command line
 if (process.argv.length >= 3 && /\.js$/.test(process.argv[2])) {
