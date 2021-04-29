@@ -41,9 +41,9 @@ function buildPublicConfig(config) {
  * @return {JSON}
  */
 function _getGrafanaConfig(config) {
-  if (config.grafana && config.http.hostname && config.grafana.port) {
+  if (config?.grafana && config?.http?.hostname && config?.grafana?.port) {
     const hostPort = `http://${config.http.hostname}:${config.grafana.port}`;
-    const plotOne = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6 ';
+    const plotOne = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6';
     const plotTwo = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8';
     const plotThree = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4';
     const theme = '&refresh=5s&theme=light';
@@ -67,7 +67,7 @@ function _getGrafanaConfig(config) {
  * @returns {string}
  */
 function _getInfoLoggerURL(config) {
-  const ilg = config.infoLoggerGui;
+  const ilg = config?.infoLoggerGui;
   if (ilg && ilg.hostname && ilg.port) {
     return `${ilg.hostname}:${ilg.port}`;
   } else {
@@ -75,4 +75,4 @@ function _getInfoLoggerURL(config) {
   }
 }
 
-module.exports = {buildPublicConfig};
+module.exports = {buildPublicConfig, _getGrafanaConfig, _getInfoLoggerURL};
