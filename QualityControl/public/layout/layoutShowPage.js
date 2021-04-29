@@ -231,7 +231,7 @@ const drawComponent = (model, tabObject) =>
           onclick: (e) => model.router.handleLinkEvent(e)
         }, iconResizeBoth())
       ]),
-      !model.isOnlineModeEnabled && model.layout.item.displayTimestamp
+      !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
       && h('.gray-darker.text-center.f6', {style: 'height:1.3em'}, model.object.getLastModifiedByName(tabObject.name))
     ]);
 

@@ -80,16 +80,7 @@ export default class QCObjectService {
       }
       const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
       let [qcObject, timeStampsReq] = await Promise.all([
-        /* eslint-disable no-async-promise-executor */
-        new Promise(async (resolve, reject) => {
-          try {
-            const file = await JSROOT.openFile(filename);
-            const obj = await file.readObject("ccdb_object");
-            resolve(obj);
-          } catch (error) {
-            reject({error: 'Could not load object'});
-          }
-        }),
+        JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
         this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
       ]);
       const {result, ok, status} = timeStampsReq;
@@ -108,27 +99,18 @@ export default class QCObjectService {
   }
 
   /**
-   * Make a set of requests to CCDB to get the object file through JSROOT
-   * It will return a map in which the value can contain:
-   * * qcObject - if request for receiving and opening the file was successfull
-   * * error - if request fails 'Unable to load object'
-   * @param {[string]} objectsNames
-   * @return {Remodata.Success(Map<String, JSON>)}
+   * Retrieve the JSON version of a ROOT Object through JSROOT
+   * @param {string} objectName - full path object name
+   * @return {RemoteData}
    */
-  async getObjectsByName(objectsNames) {
-    const objectsMap = {};
-    await Promise.allSettled(
-      objectsNames.map(async (objectName) => {
-        const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
-        try {
-          const file = await JSROOT.openFile(filename);
-          const obj = await file.readObject("ccdb_object");
-          objectsMap[objectName] = {qcObject: obj};
-        } catch (error) {
-          objectsMap[objectName] = {error: `Unable to load object ${objectName}`};
-        }
-      })
-    );
-    return RemoteData.Success(objectsMap);
+  async getObjectByNameOnly(objectName) {
+    try {
+      const url = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
+      const file = await JSROOT.openFile(url);
+      const obj = await file.readObject("ccdb_object");
+      return RemoteData.success({qcObject: obj});
+    } catch (error) {
+      return RemoteData.failure(`Unable to load object ${objectName}`);
+    }
   }
 }

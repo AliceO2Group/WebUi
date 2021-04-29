@@ -328,20 +328,15 @@ export default class QCObject extends Observable {
       return;
     }
 
-    this.objectsRemote = await this.qcObjectService.getObjectsByName(objectsName);
-    this.notify();
-
-    // eslint-disable-next-line
-    // JSROOT.parse call was removed due to bug
-    const objects = this.objectsRemote.payload;
-    for (const name in objects) {
-      if (objects[name].error) {
-        this.objects[name] = RemoteData.failure(objects[name].error);
-      } else {
-        this.objects[name] = RemoteData.success(objects[name]);
-      }
-    }
-
+    await Promise.allSettled(
+      objectsName.map(async (objectName) => {
+        this.objects[objectName] = RemoteData.Loading()
+        this.notify();
+        this.objects[objectName] = await this.qcObjectService.getObjectByNameOnly(objectName);
+        this.notify();
+      })
+    );
+    this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
