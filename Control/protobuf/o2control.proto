@@ -92,6 +92,8 @@ service Control {
     rpc SetGlobalDefaultRevision(SetGlobalDefaultRevisionRequest) returns (Empty) {}
     rpc SetRepoDefaultRevision(SetRepoDefaultRevisionRequest) returns (SetRepoDefaultRevisionReply) {}
     rpc Subscribe(SubscribeRequest) returns (stream Event);
+
+    rpc GetIntegratedServices(Empty) returns (ListIntegratedServicesReply) {}
 }
 
 ////////////////////////////////////////
@@ -148,6 +150,7 @@ message GetFrameworkInfoReply {
     int32 hostsCount = 5;
     string instanceName = 6;
     Version version = 7;
+    string configurationEndpoint = 8;
 }
 
 // Not implemented yet
@@ -370,12 +373,40 @@ message GetWorkflowTemplatesRequest{
     string revisionPattern = 2;
     bool allBranches = 3;
     bool allTags = 4;
+    bool allWorkflows = 5;
+    bool noVarInfo = 6;
+}
+message VarSpecMessage {
+    enum UiWidget {
+        editBox = 0;    // plain string input line, can accept types number and string
+        slider = 1;     // input widget exclusively for numbers, range allowedValues[0]-[1]
+        listBox = 2;    // displays a list of items, can accept types number, string or list; if number/string ==> single selection, otherwise multiple selection allowed
+        dropDownBox = 3;
+        comboBox = 4;
+    }
+
+    enum Type {
+        string = 0;
+        number = 1;
+        bool = 2;
+        list = 3;
+        map = 4;
+    }
+
+    string defaultValue = 1;
+    Type type = 2;
+    string label = 3;
+    string description = 4;
+    UiWidget uiWidgetHint = 5;
+    string panel = 6;   // hint for the UI on where to put or group the given variable input
+    repeated string allowedValues = 7;  // list of offered values from which to choose (only for some UiWidgets)
 }
 
 message WorkflowTemplateInfo {
     string repo = 1;
     string template = 2;
     string revision = 3;
+    map<string, VarSpecMessage> varSpecMap = 4;
 }
 
 message GetWorkflowTemplatesReply{
@@ -440,4 +471,16 @@ message SetRepoDefaultRevisionReply {
 
 message Empty {
 
+}
+
+message ListIntegratedServicesReply {
+    map<string, IntegratedServiceInfo> services = 1;
+}
+
+message IntegratedServiceInfo {
+    string name = 1;
+    bool enabled = 2;
+    string endpoint = 3;
+    string connectionState = 4;
+    string data = 5;
 }
