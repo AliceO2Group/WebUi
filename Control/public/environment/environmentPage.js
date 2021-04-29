@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 import {
   h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, iconCloudDownload
 } from '/js/src/index.js';
@@ -72,14 +74,11 @@ const showContent = (environment, item) => [
           item.currentRunNumber)
       )
     ]),
-    environment.plots.match({
-      NotAsked: () => h('.w-100.text-center.grafana-font', 'Grafana plots were not loaded, please refresh the page'),
-      Loading: () => null,
-      Success: (data) => showEmbeddedGraphs(data, '&var-run=' + item.currentRunNumber),
-      Failure: () => h('.w-100.text-center.grafana-font',
+    (COG && COG.GRAFANA && COG.GRAFANA.status) ?
+      showEmbeddedGraphs(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
+      h('.w-100.text-center.grafana-font',
         'Grafana plots were not loaded, please contact an administrator'
       ),
-    })
   ]),
   showEnvDetailsTable(item, environment),
   h('.m2', [
@@ -248,11 +247,11 @@ const envVarsPanel = (environment, item) => {
  */
 const infoLoggerButton = (environment, item) =>
   h('a.ph2', {
-    style: {display: !environment.infoLoggerUrl ? 'none' : ''},
+    style: {display: !COG.ILG_URL ? 'none' : ''},
     title: 'Open InfoLogger',
     href: item.currentRunNumber ?
-      `//${environment.infoLoggerUrl}?q={"run":{"match":"${item.currentRunNumber}"}}`
-      : `//${environment.infoLoggerUrl}`,
+      `//${COG.ILG_URL}?q={"run":{"match":"${item.currentRunNumber}"}}`
+      : `//${COG.ILG_URL}`,
     target: '_blank'
   }, h('button.btn.primary', iconList()));
 
@@ -277,11 +276,11 @@ const mesosLogButton = (href) =>
  */
 const infoLoggerPerFlpButton = (environment, model, host) =>
   h('a', {
-    style: {display: !model.infoLoggerUrl ? 'none' : ''},
+    style: {display: !(COG || COG.ILG_URL) ? 'none' : ''},
     title: 'Open InfoLogger for this hostname',
     href: environment.currentRunNumber ?
-      `//${model.infoLoggerUrl}?q={"run":{"match":"${environment.currentRunNumber}"},"hostname":{"match":"${host}"}}`
-      : `//${model.infoLoggerUrl}?q={"hostname":{"match":"flptest1"}}`,
+      `//${COG.ILG_URL}?q={"run":{"match":"${environment.currentRunNumber}"},"hostname":{"match":"${host}"}}`
+      : `//${COG.ILG_URL}?q={"hostname":{"match":"flptest1"}}`,
     target: '_blank'
   }, h('button.btn-sm.primary', iconList())
   );

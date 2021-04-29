@@ -15,10 +15,13 @@
 const path = require('path');
 const {HttpServer, WebSocket} = require('@aliceo2/web-ui');
 
-const config = require('./lib/configProvider.js');
+const config = require('./lib/config/configProvider.js');
+const {buildPublicConfig} = require('./lib/config/publicConfigProvider.js');
 const api = require('./lib/api.js');
 
 // -------------------------------------------------------
+
+buildPublicConfig(config);
 
 const http = new HttpServer(config.http, config.jwt, config.openId);
 const ws = new WebSocket(http);

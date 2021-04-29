@@ -212,6 +212,22 @@ describe('Control', function() {
     }
   });
 
+  it('should have correctly load COG configuration', async () => {
+    const cog = await page.evaluate(() => window.COG);
+    const expectedConf = {
+      ILG_URL: 'localhost:8081',
+      GRAFANA: {
+        status: true,
+        plots: [
+          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6&refresh=5s&theme=light',
+          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8&refresh=5s&theme=light',
+          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4&refresh=5s&theme=light'
+        ]
+      }
+    }
+    assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');
+  });
+
   it('should have redirected to default page "/?page=environments"', async () => {
     const location = await page.evaluate(() => window.location);
     assert(location.search === '?page=environments');

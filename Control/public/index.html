@@ -24,25 +24,31 @@
 
 <!-- Load the session service, parses variables provided by server in the query -->
 <script type="module">
-import sessionService from '/js/src/sessionService.js';
-sessionService.loadAndHideParameters();
+  import sessionService from '/js/src/sessionService.js';
+  sessionService.loadAndHideParameters();
 
-// Expose sessionService to interract with it the browser's console
-window.sessionService = sessionService;
+  // Expose sessionService to interract with it the browser's console
+  window.sessionService = sessionService;
+</script>
+
+<script type="module">
+  // Import COG Public Configuration
+  import {COG} from './config.js';
+  window.COG = COG;
 </script>
 
 <!-- Main application controller -->
 <script type="module">
-// Import MVC
-import {mount} from '/js/src/index.js';
-import view from './view.js';
-import Model from './Model.js';
+  // Import MVC
+  import {mount} from '/js/src/index.js';
+  import view from './view.js';
+  import Model from './Model.js';
 
-// Start application
-const model = new Model();
-const debug = true; // shows when redraw is done
-mount(document.body, view, model, debug);
+  // Start application
+  const model = new Model();
+  const debug = true; // shows when redraw is done
+  mount(document.body, view, model, debug);
 
-// Expose model to interract with it the browser's console
-window.model = model;
+  // Expose model to interract with it the browser's console
+  window.model = model;
 </script>
