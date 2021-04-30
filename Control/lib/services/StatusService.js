@@ -75,6 +75,37 @@ class StatusService {
   }
 
   /**
+   * Build a response containing the information and status of the integrated services
+   * If core responds successfully than each service will be added to a Map with its name as the key
+   * Otherwise, an entry with label 'Integrated Services' will be added in the response
+   * @returns {Promise<Resolve>}
+   */
+  async getIntegratedServicesInfo() {
+    let integServices = {};
+    if (this.config?.grpc) {
+      try {
+        const coreInfo = await this.ctrlService.getIntegratedServicesInfo();
+        const integServices = {};
+        Object.keys(coreInfo.services).forEach((service) => {
+          const serv = coreInfo.services[service];
+          serv.status = serv?.connectionState === 'READY' ? {ok: true} : {ok: false, message: this.NOT_CONFIGURED};
+          integServices[service] = serv;
+        });
+        return integServices;
+      } catch (error) {
+        integServices['Integrated Services'] = {
+          status: {ok: false, message: error.toString()}
+        };
+      }
+    } else {
+      integServices['Integrated Services'] = {
+        status: {ok: false, message: this.NOT_CONFIGURED}
+      };
+    }
+    return integServices;
+  }
+
+  /**
    * Build a response containing the information and status of the Grafana Service
    * @return {Promise<Resolve>}
    */

@@ -118,27 +118,38 @@ class ControlService {
 
   /**
    * Method to execute specified command return results
-   * @param {String} path
    * @return {Promise}
    */
-  getAliECSInfo() {
-    return new Promise((resolve, reject) => {
-      const method = this.parseMethodNameString('GetFrameworkInfo');
-      if (this.ctrlProx.connectionReady) {
-        this.ctrlProx[method]()
-          .then((response) => {
-            response.version = this.parseAliEcsVersion(response.version);
-            resolve(response);
-          })
-          .catch((error) => reject(new Error(error)));
-      } else {
-        let error = 'Could not establish connection to AliECS Core';
-        if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
-          error = this.ctrlProx.connectionError.message;
-        }
-        reject(new Error(error));
+  async getAliECSInfo() {
+    const method = this.parseMethodNameString('GetFrameworkInfo');
+    if (this.ctrlProx.connectionReady) {
+      const response = await this.ctrlProx[method]();
+      response.version = this.parseAliEcsVersion(response.version);
+      return response;
+    } else {
+      let error = 'Could not establish connection to AliECS Core';
+      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+        error = this.ctrlProx.connectionError.message;
       }
-    });
+      throw new Error(error);
+    }
+  }
+
+  /**
+   * Request information about the integrated services from AliECS Core
+   */
+  async getIntegratedServicesInfo() {
+    const method = this.parseMethodNameString('GetIntegratedServices');
+    if (this.ctrlProx.connectionReady) {
+      const response = await this.ctrlProx[method]();
+      return response;
+    } else {
+      let error = 'Could not establish connection to AliECS Core';
+      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+        error = this.ctrlProx.connectionError.message;
+      }
+      throw new Error(error);
+    }
   }
 
   /**
