@@ -32,6 +32,7 @@ export default class FrameworkInfo extends Observable {
       consul: RemoteData.notAsked(),
       kafka: RemoteData.notAsked(),
       'AliECS Core': RemoteData.notAsked(),
+      'Integrated-Services': RemoteData.notAsked(),
     };
   }
 
@@ -48,6 +49,7 @@ export default class FrameworkInfo extends Observable {
       this.getGrafanaInfo(),
       this.getKafkaInfo(),
       this.getConsulInfo(),
+      this.getIntegratedServicesInfo(),
     ]);
     this.notify();
   }
@@ -118,6 +120,23 @@ export default class FrameworkInfo extends Observable {
       this.statuses['AliECS Core'] = RemoteData.failure(result.message);
     } else {
       this.statuses['AliECS Core'] = RemoteData.success(result);
+    }
+    this.notify();
+  }
+
+  /**
+   * Make a request to retrieve information about the GUI
+   */
+  async getIntegratedServicesInfo() {
+    this.statuses['Integrated-Services'] = RemoteData.loading();
+    const {result, ok} = await this.model.loader.get('/api/status/core/services');
+    if (!ok) {
+      this.statuses['Integrated-Services'] = RemoteData.failure(result.message);
+    } else {
+      Object.keys(result).forEach((service) => {
+        this.statuses[service] = RemoteData.success(result[service]);
+      });
+      delete this.statuses['Integrated-Services'];
     }
     this.notify();
   }

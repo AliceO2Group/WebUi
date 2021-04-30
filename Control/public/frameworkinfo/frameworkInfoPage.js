@@ -48,7 +48,7 @@ const createTableForDependenciesInfo = (frameworkInfo) =>
   h('.p2', [
     Object.keys(frameworkInfo.statuses).map((dependency) =>
       h('.shadow-level1', [
-        h('table.table', {style: 'white-space: pre-wrap;'}, [
+        h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
           h('tbody', [
             buildStatusAndLabelRow(dependency, frameworkInfo.statuses[dependency]),
             buildContentRows(frameworkInfo.statuses[dependency]),
@@ -74,7 +74,7 @@ const buildStatusAndLabelRow = (label, content) =>
         Failure: (_) => h('.badge.bg-danger.white.f6', '✕'),
         Success: (item) => [
           item.status && item.status.ok &&
-          h('.badge.bg-success.white.f6', '✓'),
+          h('label.badge.bg-success.white.f6', '✓'),
           item.status && !item.status.ok &&
           h('.badge.bg-danger.white.f6', '✕'),
         ]
