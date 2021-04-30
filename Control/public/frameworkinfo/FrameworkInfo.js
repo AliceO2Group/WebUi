@@ -27,7 +27,11 @@ export default class FrameworkInfo extends Observable {
 
     this.model = model;
     this.statuses = {
-      gui: RemoteData.notAsked()
+      gui: RemoteData.notAsked(),
+      grafana: RemoteData.notAsked(),
+      consul: RemoteData.notAsked(),
+      kafka: RemoteData.notAsked(),
+      'AliECS Core': RemoteData.notAsked(),
     };
   }
 
