@@ -140,7 +140,7 @@ class ControlService {
    */
   async getIntegratedServicesInfo() {
     const method = this.parseMethodNameString('GetIntegratedServices');
-    if (this.ctrlProx.connectionReady) {
+    if (this.ctrlProx?.connectionReady) {
       const response = await this.ctrlProx[method]();
       return response;
     } else {

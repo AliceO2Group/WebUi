@@ -178,5 +178,49 @@ describe('StatusService test suite', () => {
     });
   });
 
+  describe('Test AliECS Integrated Services Status', async () => {
+    let ctrlService;
+    const config = {grpc: {hostname: 'local', port: 8081}};
+    beforeEach(() => ctrlService = {});
+
+    it('should successfully retrieve status and info about AliECS services and add status field', async () => {
+      const services = {
+        services: {
+          dcs: {connectionState: 'READY'},
+          otherDcs: {connectionState: 'TRANSIENT_FAILURE'}
+        }
+      }
+      ctrlService.getIntegratedServicesInfo = sinon.stub().resolves(services);
+      const status = new StatusService(config, ctrlService, {});
+      const coreStatus = await status.getIntegratedServicesInfo();
+
+      const expServices = {
+        dcs: {
+          status: {ok: true},
+          connectionState: 'READY'
+        },
+        otherDcs: {connectionState: 'TRANSIENT_FAILURE', status: {ok: false}}
+      }
+      assert.deepStrictEqual(coreStatus, expServices);
+    });
+
+    it('should successfully retrieve status and info about AliECS that it is not running', async () => {
+      ctrlService.getIntegratedServicesInfo = sinon.stub().rejects('Unable to query Core');
+      const status = new StatusService(config, ctrlService, {});
+      const coreStatus = await status.getIntegratedServicesInfo();
+
+      const expectedInfo = {'Integrated Services': {status: {ok: false, message: 'Unable to query Core'}}};
+      assert.deepStrictEqual(coreStatus, expectedInfo);
+    });
+
+    it('should successfully return that service was not configured if configuration is not provided', async () => {
+      const status = new StatusService({}, ctrlService, {});
+      const coreStatus = await status.getIntegratedServicesInfo();
+      const expected = {'Integrated Services': {status: {ok: false, message: 'This service was not configured'}}};
+      assert.deepStrictEqual(coreStatus, expected);
+    });
+  });
+
+
   after(nock.cleanAll)
 });

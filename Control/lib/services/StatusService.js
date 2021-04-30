@@ -85,10 +85,9 @@ class StatusService {
     if (this.config?.grpc) {
       try {
         const coreInfo = await this.ctrlService.getIntegratedServicesInfo();
-        const integServices = {};
         Object.keys(coreInfo.services).forEach((service) => {
           const serv = coreInfo.services[service];
-          serv.status = serv?.connectionState === 'READY' ? {ok: true} : {ok: false, message: this.NOT_CONFIGURED};
+          serv.status = serv?.connectionState === 'READY' ? {ok: true} : {ok: false};
           integServices[service] = serv;
         });
         return integServices;
