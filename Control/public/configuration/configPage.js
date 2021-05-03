@@ -211,7 +211,7 @@ const savingConfigurationMessagePanel = (model) =>
  */
 const saveConfigurationButton = (model) =>
   h('.w-15.text-right', {
-    style: 'display: flex; justify-content:end'
+    style: 'display: flex; justify-content:flex-end'
   }, h('button.btn.btn-primary', {
     onclick: () => model.configuration.saveConfiguration(),
     disabled: model.configuration.isSavingConfiguration.isLoading(),
