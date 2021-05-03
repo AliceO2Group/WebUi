@@ -582,7 +582,7 @@ export default class Workflow extends Observable {
    */
   parseRepository(url) {
     const copy = url.slice();
-    if (copy[copy.length] === '/') {
+    if (copy[copy.length - 1] === '/') {
       return copy.slice(0, -1)
     } else {
       return copy;

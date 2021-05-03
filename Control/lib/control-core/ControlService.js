@@ -12,10 +12,11 @@
  * or submit itself to any jurisdiction.
 */
 
-const {errorHandler, errorLogger} = require('./../utils.js');
 const assert = require('assert');
+const path = require('path');
 const {WebSocketMessage} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)('Control');
+const {errorHandler, errorLogger} = require('./../utils.js');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -76,7 +77,7 @@ class ControlService {
         const coreConf = {
           id: channelId,
           vars: {hosts: JSON.stringify(hosts)},
-          workflowTemplate: `${repositoryName}workflows/resources-cleanup@${defaultRevision}`
+          workflowTemplate: path.join(repositoryName, `workflows/resources-cleanup@${defaultRevision}`)
         };
         await this.ctrlProx[method](coreConf);
         res.status(200).json({
@@ -129,7 +130,7 @@ class ControlService {
             hosts: JSON.stringify(hosts),
             roc_config_uri_enabled: 'true',
           },
-          workflowTemplate: `${repositoryName}workflows/o2-roc-config@${defaultRevision}`
+          workflowTemplate: path.join(repositoryName, `workflows/o2-roc-config@${defaultRevision}`),
         };
         await this.ctrlProx[method](coreConf);
         res.status(200).json({
