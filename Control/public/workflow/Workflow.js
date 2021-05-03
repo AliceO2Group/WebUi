@@ -227,9 +227,9 @@ export default class Workflow extends Observable {
           if (template !== '') {
             let path = '';
             if (revision === '(no-revision-by-default)') {
-              path = repository + 'workflows/' + template;
+              path = this.parseRepository(repository) + `/workflows/${template}`;
             } else {
-              path = repository + 'workflows/' + template + '@' + revision;
+              path = this.parseRepository(repository) + `/workflows/${template}@${revision}`;
             }
 
             // Combine Readout URI if it was used
@@ -573,6 +573,20 @@ export default class Workflow extends Observable {
       delete vars['readout_cfg_uri_pre'];
     }
     return {variables: vars, ok: true, message: ''};
+  }
+
+  /**
+   * Ensure there is no slash at the end of the workflow URL
+   * @param {String} url
+   * @return {String}
+   */
+  parseRepository(url) {
+    const copy = url.slice();
+    if (copy[copy.length] === '/') {
+      return copy.slice(0, -1)
+    } else {
+      return copy;
+    }
   }
 
   /**
