@@ -37,6 +37,8 @@ export const header = (model) => [
  */
 export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
   createTableForDependenciesInfo(model.frameworkInfo),
+  statusAliEcs(model.frameworkInfo.aliecs),
+  statusAliEcsServices(model.frameworkInfo.integratedServices),
 ]);
 
 /**
@@ -71,15 +73,20 @@ const buildStatusAndLabelRow = (label, content) =>
       content.match({
         NotAsked: () => null,
         Loading: () => pageLoading(1, 0),
-        Failure: (_) => h('.badge.bg-danger.white.f6', '✕'),
+        Failure: (_) => [
+          h('.badge.bg-danger.white.f6', '✕'),
+          h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()),
+        ],
         Success: (item) => [
           item.status && item.status.ok &&
           h('label.badge.bg-success.white.f6', '✓'),
           item.status && !item.status.ok &&
           h('.badge.bg-danger.white.f6', '✕'),
+          h('.mh2', {style: 'text-decoration: underline'},
+            content.payload.name || label.toLocaleUpperCase()
+          ),
         ]
       }),
-      h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()),
     ])
   );
 
@@ -110,3 +117,39 @@ const buildContentRows = (content) =>
         ])
     )
   });
+
+/**
+ * Show status and info of AliECS
+ * @param {RemoteData} aliecs
+ * @return {vnode}
+ */
+const statusAliEcs = (aliecs) =>
+  h('.p2',
+    h('.shadow-level1',
+      h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
+        h('tbody', [
+          buildStatusAndLabelRow('aliecs', aliecs),
+          buildContentRows(aliecs),
+        ])
+      ])
+    )
+  );
+
+/**
+ * Show status and info of AliECS Integrated Services
+ * @param {RemoteData} services
+ * @return {vnode}
+ */
+const statusAliEcsServices = (services) =>
+  h('.p2',
+    h('.shadow-level1',
+      h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
+        h('tbody', [
+          buildStatusAndLabelRow('aliecs', aliecs),
+          buildContentRows(aliecs),
+        ])
+      ])
+    )
+  );
+
+;
