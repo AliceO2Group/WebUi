@@ -68,8 +68,8 @@ class ControlService {
         const {repos: repositories} = await this.ctrlProx['ListRepos']();
         const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
         const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
-        cleanChanel.on('data', (data) => this.onData(channelId, data));
-        cleanChanel.on('error', (err) => this.onError(channelId, err));
+        cleanChanel.on('data', (data) => this.onData(channelId, 'clean-resources-action', data));
+        cleanChanel.on('error', (err) => this.onError(channelId, 'clean-resources-action', err));
         // onEnd gets called no matter what
         // cleanChanel.on('end', () => this.onEnd(channelId));
 
@@ -106,8 +106,8 @@ class ControlService {
    */
   async createAutoEnvironment(req, res) {
     const channelId = req.body.channelId;
+    const operation = 'o2-roc-config';
 
-    //get list of FLPs from Consul
     const method = 'NewAutoEnvironment';
     if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
       const type = req.body.type ? ` (${req.body.type})` : '';
@@ -117,20 +117,22 @@ class ControlService {
         const hosts = await this.consulConnector.getFLPsList();
         const {repos: repositories} = await this.ctrlProx['ListRepos']();
         const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+        if (!defaultRevision) {
+          throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
+        }
+
+        // Setup Stream Channel
         const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
-        cleanChanel.on('data', (data) => this.onData(channelId, data));
-        cleanChanel.on('error', (err) => this.onError(channelId, err));
+        cleanChanel.on('data', (data) => this.onData(channelId, operation, data));
+        cleanChanel.on('error', (err) => this.onError(channelId, operation, err));
         // onEnd gets called no matter what
         // cleanChanel.on('end', () => this.onEnd(channelId));
 
         // Make request to clear resources
         const coreConf = {
           id: channelId,
-          vars: {
-            hosts: JSON.stringify(hosts),
-            roc_config_uri_enabled: 'true',
-          },
-          workflowTemplate: path.join(repositoryName, `workflows/o2-roc-config@${defaultRevision}`),
+          vars: {hosts: JSON.stringify(hosts)},
+          workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
         };
         await this.ctrlProx[method](coreConf);
         res.status(200).json({
@@ -280,22 +282,23 @@ class ControlService {
    * Deal with incoming message from AliECS Core Stream
    * Method will react only to messages that contain an EnvironmentEvent
    * @param {string} channelId - to distinguish to which client should this message be sent
+   * @param {string} command
    * @param {Event} data - AliECS Event (proto)
    */
-  onData(channelId, data) {
+  onData(channelId, command, data) {
     if (data.environmentEvent) {
       const msg = new WebSocketMessage();
-      msg.command = 'clean-resources-action';
+      msg.command = command;
       if (!data.environmentEvent.error) {
         msg.payload = {
           ended: data.environmentEvent.state === 'DONE' ? true : false,
           success: true, id: channelId,
-          message: data.environmentEvent.message || 'Cleaning Resources ...'
+          message: data.environmentEvent.message || 'Executing ...'
         };
       } else {
         msg.payload = {
           ended: true, success: false, id: channelId,
-          message: data.environmentEvent.error || 'Failed to clean resources ...'
+          message: data.environmentEvent.error || `Failed operation: ${command} ...`
         };
       }
       this.webSocket.broadcast(msg);
@@ -306,12 +309,12 @@ class ControlService {
    * Deal with incoming error message from AliECS Core Stream
    * @param {string} channelId - to distinguish to which client should this message be sent
    */
-  onError(channelId, error) {
+  onError(channelId, command, error) {
     const msg = new WebSocketMessage();
-    msg.command = 'clean-resources-action';
+    msg.command = command;
     msg.payload = {
       ended: true, success: false, id: channelId,
-      message: `"Clean Resources" action failed due to ${error.toString()}`,
+      message: `"${command}" action failed due to ${error.toString()}`,
     };
     errorLogger(error);
     this.webSocket.broadcast(msg);
