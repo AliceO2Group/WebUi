@@ -82,23 +82,14 @@ class StatusService {
    */
   async getIntegratedServicesInfo() {
     let integServices = {};
-    if (this.config?.grpc) {
-      try {
-        const coreInfo = await this.ctrlService.getIntegratedServicesInfo();
-        Object.keys(coreInfo.services).forEach((service) => {
-          const serv = coreInfo.services[service];
-          serv.status = serv?.connectionState === 'READY' ? {ok: true} : {ok: false};
-          integServices[service] = serv;
-        });
-        return integServices;
-      } catch (error) {
-        integServices['Integrated Services'] = {
-          status: {ok: false, message: error.toString()}
-        };
-      }
-    } else {
-      integServices['Integrated Services'] = {
-        status: {ok: false, message: this.NOT_CONFIGURED}
+    try {
+      const coreInfo = await this.ctrlService.getIntegratedServicesInfo();
+      return coreInfo.services;
+    } catch (error) {
+      integServices.all = {
+        name: 'Integrated Services',
+        connectionState: 'TRANSIENT_FAILURE',
+        data: {message: error.toString()}
       };
     }
     return integServices;

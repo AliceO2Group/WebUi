@@ -124,7 +124,7 @@ const buildContentRows = (content) =>
  * @return {vnode}
  */
 const statusAliEcs = (aliecs) =>
-  h('.p2',
+  h('.ph2',
     h('.shadow-level1',
       h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
         h('tbody', [
@@ -141,15 +141,81 @@ const statusAliEcs = (aliecs) =>
  * @return {vnode}
  */
 const statusAliEcsServices = (services) =>
-  h('.p2',
-    h('.shadow-level1',
-      h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
-        h('tbody', [
-          buildStatusAndLabelRow('aliecs', aliecs),
-          buildContentRows(aliecs),
-        ])
-      ])
-    )
-  );
+  services.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(1, 0), // TODO
+    Failure: (_) =>
+      h('.ph2',
+        h('.shadow-level1',
+          h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
+            h('tbody', [
+              h('tr',
+                h('th.flex-row', [
+                  h('.badge.bg-danger.white.f6', '✕'),
+                  h('.mh2', {style: 'text-decoration: underline'}, 'Integrated Services')
+                  // Add here error message
+                ])
+              )
+            ])
+          )
+        )
+      ),
+    Success: (data) => [
+      Object.keys(data).map((serviceKey) =>
+        h('.ph2',
+          h('.shadow-level1',
+            h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
+              h('tbody', [
+                buildStatusAndLabelRowIntService(serviceKey, data[serviceKey]),
+                // buildContentRows(data[serviceKey])
+                Object.keys(data[serviceKey]).filter((name) => name !== 'name')
+                  .map((name) =>
+                    h('tr', [
+                      h('th.w-25', name),
+                      h('td', JSON.stringify(data[serviceKey][name])),
+                    ])
+                  )
+              ])
+            )
+          )
+        )
+      )
+    ]
+  });
 
-;
+/**
+ * Create a row element which contains the status and name of the dependency
+ * Will display icons based on status (loading, successful, error)
+ * @param
+ * @returns {vnode}
+ */
+const buildStatusAndLabelRowIntService = (label, service) => {
+  const isServiceConfigured = Object.keys(service).length > 0;
+  if (isServiceConfigured) {
+    return h('tr',
+      h('th.flex-row', [
+        service.connectionState === 'CONNECTING' && h('.badge.bg-warning.white.f6', '...'),
+        service.connectionState === 'TRANSIENT_FAILURE' && h('.badge.bg-danger.white.f6', '✕'),
+        service.connectionState === 'READY' && h('.badge.bg-success.white.f6', '✓'),
+        (
+          service.connectionState === 'IDLE' ||
+          service.connectionState === 'SHUTDOWN'
+        ) && h('.badge.bg-gray.white.f6', '?'),
+        h('.mh2', {style: 'text-decoration: underline'},
+          service.name || label.toLocaleUpperCase()
+        ),
+      ])
+    );
+  } else {
+    // Empty value from AliECS Core means service was not enabled
+    return h('tr',
+      h('th.flex-row', [
+        h('.badge.bg-gray.white.f6', '?'),
+        h('.mh2', {style: 'text-decoration: underline'},
+          label.toLocaleUpperCase(),
+        ),
+        h('.mh5', '- Service was not enabled')
+      ])
+    );
+  }
+};
