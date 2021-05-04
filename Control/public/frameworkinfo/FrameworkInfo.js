@@ -126,7 +126,8 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Make a request to retrieve information about the GUI
+   * Make a request to retrieve information about the integrated services of AliECS CORE
+   * e.g. dcs, ddsched, etc.
    */
   async getIntegratedServicesInfo() {
     this.integratedServices = RemoteData.loading();

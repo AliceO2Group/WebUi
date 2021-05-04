@@ -83,8 +83,8 @@ class StatusService {
   async getIntegratedServicesInfo() {
     let integServices = {};
     try {
-      const coreInfo = await this.ctrlService.getIntegratedServicesInfo();
-      return coreInfo.services;
+      const {services} = await this.ctrlService.getIntegratedServicesInfo();
+      return services;
     } catch (error) {
       integServices.all = {
         name: 'Integrated Services',

@@ -122,7 +122,7 @@ class ControlService {
    */
   async getAliECSInfo() {
     const method = this.parseMethodNameString('GetFrameworkInfo');
-    if (this.ctrlProx.connectionReady) {
+    if (this.ctrlProx?.connectionReady) {
       const response = await this.ctrlProx[method]();
       response.version = this.parseAliEcsVersion(response.version);
       return response;
@@ -137,6 +137,7 @@ class ControlService {
 
   /**
    * Request information about the integrated services from AliECS Core
+   * @return {Promise}
    */
   async getIntegratedServicesInfo() {
     const method = this.parseMethodNameString('GetIntegratedServices');
