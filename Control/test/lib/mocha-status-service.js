@@ -51,7 +51,7 @@ describe('StatusService test suite', () => {
       assert.deepStrictEqual(consulStatus, expectedInfo);
     });
 
-    it('should successfully return that service was not configured if configuration is not provided', async () => {
+    it('should successfully return consul was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const consulStatus = await status.getConsulStatus();
       const expected = {status: {ok: false, message: 'This service was not configured'}};
@@ -84,7 +84,7 @@ describe('StatusService test suite', () => {
       assert.deepStrictEqual(coreStatus, expectedInfo);
     });
 
-    it('should successfully return that service was not configured if configuration is not provided', async () => {
+    it('should successfully return that AliECS was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, ctrlService, {});
       const coreStatus = await status.getAliEcsCoreStatus();
       const expected = {status: {ok: false, message: 'This service was not configured'}};
@@ -105,7 +105,7 @@ describe('StatusService test suite', () => {
       assert.deepStrictEqual(guiStatus, expectedInfo);
     });
 
-    it('should successfully return that service was not configured if GUI conf is not provided', async () => {
+    it('should successfully return that GUI was not configured if GUI conf is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const guiStatus = status.getGuiStatus();
       delete guiStatus.version;
@@ -138,7 +138,7 @@ describe('StatusService test suite', () => {
       assert.deepStrictEqual(grafanaStatus, expectedInfo);
     });
 
-    it('should successfully return that service was not configured if configuration is not provided', async () => {
+    it('should successfully return that grafana was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
       const expected = {status: {ok: false, message: 'This service was not configured'}};
@@ -170,7 +170,7 @@ describe('StatusService test suite', () => {
       assert.deepStrictEqual(kafkaStatus, expectedInfo);
     });
 
-    it('should successfully return that service was not configured if configuration is not provided', async () => {
+    it('should successfully return that Kafka was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const kafkaStatus = await status.getKafkaStatus();
       const expected = {status: {ok: false, message: 'This service was not configured'}};
@@ -196,10 +196,9 @@ describe('StatusService test suite', () => {
 
       const expServices = {
         dcs: {
-          status: {ok: true},
           connectionState: 'READY'
         },
-        otherDcs: {connectionState: 'TRANSIENT_FAILURE', status: {ok: false}}
+        otherDcs: {connectionState: 'TRANSIENT_FAILURE'}
       }
       assert.deepStrictEqual(coreStatus, expServices);
     });
@@ -209,18 +208,13 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, ctrlService, {});
       const coreStatus = await status.getIntegratedServicesInfo();
 
-      const expectedInfo = {'Integrated Services': {status: {ok: false, message: 'Unable to query Core'}}};
+      const expectedInfo = {
+        all:
+          {name: 'Integrated Services', connectionState: 'TRANSIENT_FAILURE', data: {message: 'Unable to query Core'}}
+      };
       assert.deepStrictEqual(coreStatus, expectedInfo);
     });
-
-    it('should successfully return that service was not configured if configuration is not provided', async () => {
-      const status = new StatusService({}, ctrlService, {});
-      const coreStatus = await status.getIntegratedServicesInfo();
-      const expected = {'Integrated Services': {status: {ok: false, message: 'This service was not configured'}}};
-      assert.deepStrictEqual(coreStatus, expected);
-    });
   });
-
 
   after(nock.cleanAll)
 });

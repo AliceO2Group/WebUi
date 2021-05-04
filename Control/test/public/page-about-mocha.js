@@ -40,8 +40,8 @@ describe('`pageAbout` test-suite', async () => {
   });
 
   it('should request info about Core and store in frameworkInfo.statuses as RemoteData', async () => {
-    const core = await page.evaluate(() => window.model.frameworkInfo.statuses['AliECS Core']);
-    assert.strictEqual(core.kind, 'Success', 'No information was passed regarding AliECS Core');
+    const core = await page.evaluate(() => window.model.frameworkInfo.statuses['kafka']);
+    assert.strictEqual(core.kind, 'Success', 'No information was passed regarding kafka');
     assert.ok(!core.payload.status.ok);
   });
 
