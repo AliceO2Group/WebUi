@@ -87,7 +87,6 @@ const buildStatusAndLabelRow = (label, content) =>
     ])
   );
 
-
 /**
  * Build the rows containing information about the direct dependency
  * @param {RemoteData} content 
@@ -174,8 +173,7 @@ const tableIntegratedServicesInfo = (services) =>
         )
       ])
     ]
-  })
-  ;
+  });
 
 /**
  * Create a row element which contains the status and name of the dependency
