@@ -31,8 +31,10 @@ export default class FrameworkInfo extends Observable {
       grafana: RemoteData.notAsked(),
       consul: RemoteData.notAsked(),
       kafka: RemoteData.notAsked(),
-      'AliECS Core': RemoteData.notAsked(),
     };
+
+    this.aliecs = RemoteData.notAsked();
+    this.integratedServices = RemoteData.notAsked();
   }
 
   /**
@@ -48,6 +50,7 @@ export default class FrameworkInfo extends Observable {
       this.getGrafanaInfo(),
       this.getKafkaInfo(),
       this.getConsulInfo(),
+      this.getIntegratedServicesInfo(),
     ]);
     this.notify();
   }
@@ -112,12 +115,27 @@ export default class FrameworkInfo extends Observable {
    * Make a request to retrieve information about the GUI
    */
   async getCoreInfo() {
-    this.statuses['AliECS Core'] = RemoteData.loading();
+    this.aliecs = RemoteData.loading();
     const {result, ok} = await this.model.loader.get('/api/status/core');
     if (!ok) {
-      this.statuses['AliECS Core'] = RemoteData.failure(result.message);
+      this.aliecs = RemoteData.failure(result.message);
     } else {
-      this.statuses['AliECS Core'] = RemoteData.success(result);
+      this.aliecs = RemoteData.success(result);
+    }
+    this.notify();
+  }
+
+  /**
+   * Make a request to retrieve information about the integrated services of AliECS CORE
+   * e.g. dcs, ddsched, etc.
+   */
+  async getIntegratedServicesInfo() {
+    this.integratedServices = RemoteData.loading();
+    const {result, ok} = await this.model.loader.get('/api/status/core/services');
+    if (!ok) {
+      this.integratedServices = RemoteData.failure(result.message);
+    } else {
+      this.integratedServices = RemoteData.success(result);
     }
     this.notify();
   }
