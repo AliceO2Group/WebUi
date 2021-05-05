@@ -122,15 +122,13 @@ const buildContentRows = (content) =>
  * @return {vnode}
  */
 const tableAliEcsInfo = (aliecs) =>
-  h('.ph2',
-    h('.shadow-level1',
-      h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
-        h('tbody', [
-          buildStatusAndLabelRow('aliecs', aliecs),
-          buildContentRows(aliecs),
-        ])
+  h('.shadow-level1',
+    h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
+      h('tbody', [
+        buildStatusAndLabelRow('aliecs', aliecs),
+        buildContentRows(aliecs),
       ])
-    )
+    ])
   );
 
 /**
@@ -139,11 +137,11 @@ const tableAliEcsInfo = (aliecs) =>
  * @return {vnode}
  */
 const tableIntegratedServicesInfo = (services) =>
-  services.match({
-    NotAsked: () => null,
-    Loading: () => loadingStateInfoTable('Integrated Services'),
-    Failure: (data) =>
-      h('.ph2',
+  h('.pv2',
+    services.match({
+      NotAsked: () => null,
+      Loading: () => loadingStateInfoTable('Integrated Services'),
+      Failure: (data) =>
         h('.shadow-level1',
           h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
             h('tbody', [
@@ -152,10 +150,11 @@ const tableIntegratedServicesInfo = (services) =>
                 h('.mh2', {style: 'text-decoration: underline'}, 'INTEGRATED SERVICES'),
                 h('.mh5', data.message)
               ]))
-            ])))),
-    Success: (data) => [
-      Object.keys(data).map((serviceKey) => [
-        h('.ph2',
+            ])
+          )
+        ),
+      Success: (data) => [
+        Object.keys(data).map((serviceKey) => [
           h('.shadow-level1',
             h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
               h('tbody', [
@@ -170,10 +169,9 @@ const tableIntegratedServicesInfo = (services) =>
               ])
             )
           )
-        )
-      ])
-    ]
-  });
+        ])
+      ]
+    }));
 
 /**
  * Create a row element which contains the status and name of the dependency
