@@ -474,13 +474,13 @@ message Empty {
 }
 
 message ListIntegratedServicesReply {
-    map<string, IntegratedServiceInfo> services = 1;
+    map<string, IntegratedServiceInfo> services = 1; // keys are IDs (e.g. "ddsched"), the service name should be displayed to users instead
 }
 
 message IntegratedServiceInfo {
-    string name = 1;
+    string name = 1; // user-visible service name, e.g. "DD scheduler"
     bool enabled = 2;
     string endpoint = 3;
-    string connectionState = 4;
-    string data = 5;
+    string connectionState = 4; // allowed values: READY, CONNECTING, TRANSIENT_FAILURE, IDLE, SHUTDOWN
+    string data = 5; // always a JSON payload with a map<string, string> inside.
 }

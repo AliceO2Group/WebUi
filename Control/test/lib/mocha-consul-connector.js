@@ -15,7 +15,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const config = require('../test-config.js').consul;
-const ConsulConnector = require('../../lib/ConsulConnector.js');
+const ConsulConnector = require('../../lib/connectors/ConsulConnector.js');
 
 describe('ConsulConnector test suite', () => {
   let res;

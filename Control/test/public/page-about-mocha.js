@@ -39,9 +39,30 @@ describe('`pageAbout` test-suite', async () => {
     assert.strictEqual(location.search, '?page=about');
   });
 
-  it('should request info about Control GUI and store in frameworkInfo RemoteData', async () => {
-    const frameworkInfo = await page.evaluate(() => window.model.frameworkInfo.control.payload);
-    assert.ok(frameworkInfo !== undefined);
-    assert.ok(frameworkInfo['AliECS GUI'] !== undefined);
+  it('should request info about Core and store in frameworkInfo.statuses as RemoteData', async () => {
+    const core = await page.evaluate(() => window.model.frameworkInfo.statuses['AliECS Core']);
+    assert.strictEqual(core.kind, 'Success', 'No information was passed regarding AliECS Core');
+    assert.ok(!core.payload.status.ok);
+  });
+
+  it('should request info about GUI and store in frameworkInfo.statuses as RemoteData', async () => {
+    const gui = await page.evaluate(() => window.model.frameworkInfo.statuses.gui);
+    assert.strictEqual(gui.kind, 'Success', 'No information was passed regarding GUI');
+    assert.ok(gui.payload.status.ok)
+  });
+
+  it('should request info about Grafana and store in frameworkInfo.statuses as RemoteData', async () => {
+    const grafana = await page.evaluate(() => window.model.frameworkInfo.statuses.grafana);
+    assert.strictEqual(grafana.kind, 'Success', 'No information was passed regarding Grafana');
+  });
+
+  it('should request info about Kafka and store in frameworkInfo.statuses as RemoteData', async () => {
+    const kafka = await page.evaluate(() => window.model.frameworkInfo.statuses.kafka);
+    assert.strictEqual(kafka.kind, 'Success', 'No information was passed regarding Kafka');
+  });
+
+  it('should request info about Consul and store in frameworkInfo.statuses as RemoteData', async () => {
+    const consul = await page.evaluate(() => window.model.frameworkInfo.statuses.consul);
+    assert.strictEqual(consul.kind, 'Success', 'No information was passed regarding Consul');
   });
 });
