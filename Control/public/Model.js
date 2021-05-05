@@ -93,6 +93,8 @@ export default class Model extends Observable {
       return;
     } else if (message.command === 'clean-resources-action') {
       this.task.setResourcesRequest(message.payload);
+    } else if (message.command === 'o2-roc-config') {
+      this.configuration.setConfigurationRequest(message.payload);
     }
   }
 

@@ -30,7 +30,9 @@ export default class Config extends Observable {
     this.cruMapByHost = RemoteData.notAsked();
     this.cruToggleByHost = {};
     this.cruToggleByCruEndpoint = {};
-    this.isSavingConfiguration = RemoteData.notAsked();
+
+    this.configurationRequest = RemoteData.notAsked();
+    this.channelId = 0;
   }
 
   /**
@@ -41,7 +43,7 @@ export default class Config extends Observable {
    * Method to retrieve a list of CRUs from Consul
    */
   async getCRUsConfig() {
-    this.isSavingConfiguration = RemoteData.notAsked();
+    this.configurationRequest = RemoteData.notAsked();
     this.cruMapByHost = RemoteData.loading();
     this.notify();
 
@@ -61,17 +63,58 @@ export default class Config extends Observable {
    * the server to save it in consul
    */
   async saveConfiguration() {
-    this.isSavingConfiguration = RemoteData.loading();
+    this.configurationRequest = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/saveCRUsConfig`, this.cruMapByHost.payload);
     if (!ok) {
-      this.isSavingConfiguration = RemoteData.failure(result.message);
+      result.ended = true;
+      result.success = false;
+      this.configurationRequest = RemoteData.failure(result.message);
       this.notify();
       return;
     }
-    this.isSavingConfiguration = RemoteData.success(result.message);
+    result.ended = true;
+    result.success = true;
+    this.configurationRequest = RemoteData.success(result);
     this.notify();
+  }
+
+  /**
+   * Makes a request to the server to run o2-roc-config workflow for all the hosts
+   * in the table
+   */
+  async runRocConfigWorkflow() {
+    this.configurationRequest = RemoteData.loading();
+    this.notify();
+
+    const hosts = Object.keys(this.cruMapByHost.payload);
+    this.channelId = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
+    const {result, ok} = await this.model.loader.post(`/api/execute/o2-roc-config`, {channelId: this.channelId, hosts});
+    if (!ok) {
+      this.configurationRequest = RemoteData.failure(result);
+      this.notify();
+      return;
+    }
+    this.configurationRequest = RemoteData.success(result);
+    this.notify();
+  }
+
+  /**
+   * Method to update the message with regards to the `o2-roc-config` command
+   * If message id will match the client's it will be displayed
+   * @param {WebSocketMessagePayload} message 
+   */
+  setConfigurationRequest(message) {
+    const messageId = message.id || '';
+    if (this.channelId.toString() === messageId.toString()) {
+      if (message.success) {
+        this.configurationRequest = RemoteData.success(message);
+      } else {
+        this.configurationRequest = RemoteData.success(message);
+      }
+      this.notify();
+    }
   }
 
   /**

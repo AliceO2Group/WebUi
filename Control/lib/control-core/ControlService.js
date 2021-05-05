@@ -106,46 +106,57 @@ class ControlService {
    */
   async createAutoEnvironment(req, res) {
     const channelId = req.body.channelId;
-    const operation = 'o2-roc-config';
+    const hosts = req.body.hosts;
+    if (!channelId) {
+      res.status(502).json({
+        ended: true, success: false, id: channelId,
+        message: 'Channel ID should be provided'
+      });
+    } else if (!hosts || hosts.length === 0) {
+      res.status(502).json({
+        ended: true, success: false, id: channelId,
+        message: 'List of Hosts should be provided'
+      });
+    } else {
+      const operation = 'o2-roc-config';
+      const method = 'NewAutoEnvironment';
+      if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
+        const type = req.body.type ? ` (${req.body.type})` : '';
+        log.info(`[ControlService] ${req.session.personid} => ${method} ${type} o2-roc-config`);
 
-    const method = 'NewAutoEnvironment';
-    if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
-      const type = req.body.type ? ` (${req.body.type})` : '';
-      log.info(`[ControlService] ${req.session.personid} => ${method} ${type}`);
+        try {
+          const {repos: repositories} = await this.ctrlProx['ListRepos']();
+          const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+          if (!defaultRevision) {
+            throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
+          }
 
-      try {
-        const hosts = await this.consulConnector.getFLPsList();
-        const {repos: repositories} = await this.ctrlProx['ListRepos']();
-        const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
-        if (!defaultRevision) {
-          throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
+          // Setup Stream Channel
+          const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
+          cleanChanel.on('data', (data) => this.onData(channelId, operation, data));
+          cleanChanel.on('error', (err) => this.onError(channelId, operation, err));
+          // onEnd gets called no matter what
+          // cleanChanel.on('end', () => this.onEnd(channelId));
+
+          // Make request to clear resources
+          const coreConf = {
+            id: channelId,
+            vars: {hosts: JSON.stringify(hosts)},
+            workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
+          };
+          await this.ctrlProx[method](coreConf);
+          res.status(200).json({
+            ended: false, success: true, id: channelId,
+            message: 'Request for "o2-roc-config" was successfully sent and is now in progress'
+          })
+        } catch (error) {
+          // Failed to getFLPs, ListRepos or NewAutoEnvironment
+          errorLogger(error);
+          res.status(502).json({
+            ended: true, success: false, id: channelId,
+            message: error.message || error || 'Error while attempting to run o2-roc-config ...'
+          });
         }
-
-        // Setup Stream Channel
-        const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
-        cleanChanel.on('data', (data) => this.onData(channelId, operation, data));
-        cleanChanel.on('error', (err) => this.onError(channelId, operation, err));
-        // onEnd gets called no matter what
-        // cleanChanel.on('end', () => this.onEnd(channelId));
-
-        // Make request to clear resources
-        const coreConf = {
-          id: channelId,
-          vars: {hosts: JSON.stringify(hosts)},
-          workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
-        };
-        await this.ctrlProx[method](coreConf);
-        res.status(200).json({
-          ended: false, success: true, id: channelId,
-          message: 'Request for "Cleaning Resources" was successfully sent and in progress'
-        })
-      } catch (error) {
-        // Failed to getFLPs, ListRepos or NewAutoEnvironment
-        errorLogger(error);
-        res.status(502).json({
-          ended: true, success: false, id: channelId,
-          message: error.message || error || 'Error while attempting to clean resources ...'
-        });
       }
     }
   }
@@ -289,6 +300,8 @@ class ControlService {
     if (data.environmentEvent) {
       const msg = new WebSocketMessage();
       msg.command = command;
+      console.log(data);
+      console.log("data");
       if (!data.environmentEvent.error) {
         msg.payload = {
           ended: data.environmentEvent.state === 'DONE' ? true : false,

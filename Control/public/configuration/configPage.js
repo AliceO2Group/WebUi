@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom, iconChevronRight} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronRight, iconCircleX, iconCircleCheck} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import loading from '../common/loading.js';
 import errorPage from '../common/errorPage.js';
@@ -55,7 +55,10 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
   h('.flex-row.pv1', [
     h('h4.pv2.w-15', 'CRUs by hostname:'),
     savingConfigurationMessagePanel(model),
-    saveConfigurationButton(model),
+    h('.btn-group.w-15', {style: 'justify-content: flex-end;'}, [
+      saveConfigurationButton(model),
+      runRocConfigButton(model)
+    ])
   ]),
   Object.keys(cruMapByHost).map((host) =>
     h('', [
@@ -196,11 +199,18 @@ const checkBox = (model, key, title, config) =>
  */
 const savingConfigurationMessagePanel = (model) =>
   h('.w-70.text-right', {style: 'display: flex; align-items: center; justify-content: end'},
-    model.configuration.isSavingConfiguration.match({
+    model.configuration.configurationRequest.match({
       NotAsked: () => null,
       Loading: () => null,
-      Success: (message) => h('.success', message),
-      Failure: (error) => h('.danger', error),
+      Success: (message) => h('.flex-row', {
+        class: message.ended ? (message.success ? 'success' : 'danger') : '',
+      }, [
+        !message.ended ?
+          h('.pv1', pageLoading(1.5))
+          : (message.success ? h('.pv2.ph2.text-center', iconCircleCheck()) : h('.pv2.ph4.text-center', iconCircleX())),
+        h('.w-100.p2', message.message),
+      ]),
+      Failure: (error) => h('.danger', [iconCircleX(), ' ', error.message]),
     })
   );
 
@@ -210,10 +220,21 @@ const savingConfigurationMessagePanel = (model) =>
  * @return {vnode}
  */
 const saveConfigurationButton = (model) =>
-  h('.w-15.text-right', {
-    style: 'display: flex; justify-content:flex-end'
-  }, h('button.btn.btn-primary', {
+  h('button.btn.btn-default', {
     onclick: () => model.configuration.saveConfiguration(),
-    disabled: model.configuration.isSavingConfiguration.isLoading(),
-  }, model.configuration.isSavingConfiguration.isLoading() ? loading(1.5) : 'Save')
-  )
+    disabled: model.configuration.configurationRequest.isLoading(),
+  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Save');
+
+/**
+ * Button to save the updated configuration
+ * @param {Object} model
+ * @return {vnode}
+ */
+const runRocConfigButton = (model) =>
+  h('button.btn.btn-primary', {
+    onclick: () => {
+      confirm(`Cards will be configured with Consul stored configuration. Are you sure?`)
+        && model.configuration.runRocConfigWorkflow()
+    },
+    disabled: model.configuration.configurationRequest.isLoading(),
+  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Configure all');
