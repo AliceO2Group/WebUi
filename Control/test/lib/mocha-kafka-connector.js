@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const KafkaConnector = require('./../../lib/KafkaConnector.js');
+const KafkaConnector = require('./../../lib/connectors/KafkaConnector.js');
 const config = require('../test-config.js').kafka;
 const assert = require('assert');
 

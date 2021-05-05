@@ -14,7 +14,6 @@
 
 import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import errorPage from '../common/errorPage.js';
 
 /**
  * @file Page to FrameworkInfo(About) (content and header)
@@ -37,7 +36,7 @@ export const header = (model) => [
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
-  createTableForControlGUIInfo(model.frameworkInfo),
+  createTableForDependenciesInfo(model.frameworkInfo),
 ]);
 
 /**
@@ -45,50 +44,69 @@ export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
  * @param {Object} frameworkInfo
  * @return {vnode}
  */
-const createTableForControlGUIInfo = (frameworkInfo) =>
+const createTableForDependenciesInfo = (frameworkInfo) =>
   h('.p2', [
-    frameworkInfo.control.match({
-      NotAsked: () => null,
-      Loading: () => pageLoading(),
-      Success: (data) => showContent(data),
-      Failure: (error) => errorPage(error),
-    }),
+    Object.keys(frameworkInfo.statuses).map((dependency) =>
+      h('.shadow-level1', [
+        h('table.table', {style: 'white-space: pre-wrap;'}, [
+          h('tbody', [
+            buildStatusAndLabelRow(dependency, frameworkInfo.statuses[dependency]),
+            buildContentRows(frameworkInfo.statuses[dependency]),
+          ])
+        ])
+      ])
+    )
   ]);
 
 /**
- * Display a table with cog and its dependencies information
- * @param {Object} item
- * @return {vnode}
+ * Create a row element which contains the status and name of the dependency
+ * Will display icons based on status (loading, successful, error)
+ * @param {String} label - name of the dependency
+ * @param {RemoteData} content
+ * @returns {vnode}
  */
-const showContent = (item) =>
-  Object.keys(item).map((columnName) => [
-    h('.shadow-level1', [
-      h('table.table', {
-        style: 'white-space: pre-wrap;'
-      }, [
-        h('tbody', [
-          h('tr',
-            h('th.flex-row', [
-              item[columnName].status && item[columnName].status.ok &&
-              h('.badge.bg-success.white.f6', '✓'),
-              item[columnName].status && !item[columnName].status.ok &&
-              h('.badge.bg-danger.white.f6', '✕'),
-              h('.mh2', {style: 'text-decoration: underline'}, columnName.toUpperCase()),
-            ])
-          ),
-          Object.keys(item[columnName]).map((name) =>
-            name === 'status' ?
-              !item[columnName]['status'].ok &&
-              h('tr.danger', [
-                h('th.w-25', 'error'),
-                h('td', item[columnName]['status'].message),
-              ])
-              :
-              h('tr', [
-                h('th.w-25', name),
-                h('td', JSON.stringify(item[columnName][name])),
-              ])
-          )])
-      ])
+const buildStatusAndLabelRow = (label, content) =>
+  h('tr',
+    h('th.flex-row', [
+      content.match({
+        NotAsked: () => null,
+        Loading: () => pageLoading(1, 0),
+        Failure: (_) => h('.badge.bg-danger.white.f6', '✕'),
+        Success: (item) => [
+          item.status && item.status.ok &&
+          h('.badge.bg-success.white.f6', '✓'),
+          item.status && !item.status.ok &&
+          h('.badge.bg-danger.white.f6', '✕'),
+        ]
+      }),
+      h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()),
     ])
-  ]);
+  );
+
+/**
+ * Build the rows containing information about the dependency
+ * @param {RemoteData} content 
+ * @returns {vnode}
+ */
+const buildContentRows = (content) =>
+  content.match({
+    NotAsked: () => null,
+    Loading: () => null,
+    Failure: (error) => h('tr.danger', [
+      h('th.w-25', 'error'),
+      h('td', error),
+    ]),
+    Success: (item) => Object.keys(item).map((name) =>
+      name === 'status' ?
+        !item['status'].ok &&
+        h('tr.danger', [
+          h('th.w-25', 'error'),
+          h('td', item['status'].message),
+        ])
+        :
+        h('tr', [
+          h('th.w-25', name),
+          h('td', JSON.stringify(item[name])),
+        ])
+    )
+  });

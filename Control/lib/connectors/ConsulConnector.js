@@ -13,7 +13,7 @@
 */
 
 const log = new (require('@aliceo2/web-ui').Log)('Control');
-const errorHandler = require('./utils.js').errorHandler;
+const errorHandler = require('./../utils.js').errorHandler;
 
 /**
  * Gateway for all Consul Consumer calls

@@ -13,6 +13,8 @@
 */
 
 const log = new (require('@aliceo2/web-ui').Log)('Control');
+const http = require('http');
+
 /**
  * Global HTTP error handler, sends status 500
  * @param {string} err - Message error
@@ -39,4 +41,52 @@ function errorLogger(err) {
   log.error(err.message || err);
 }
 
-module.exports = {errorHandler, errorLogger};
+/**
+  * Util to get JSON data (parsed) from server
+  * @param {string} host - hostname of the server
+  * @param {number} port - port of the server
+  * @param {string} path - path of the server request
+  * @return {Promise.<Object, Error>} JSON response
+  */
+function httpGetJson(host, port, path) {
+  return new Promise((resolve, reject) => {
+    const requestOptions = {
+      hostname: host,
+      port: port,
+      path: path,
+      method: 'GET',
+      headers: {
+        Accept: 'application/json'
+      }
+    };
+    /**
+     * Generic handler for client http requests,
+     * buffers response, checks status code and parses JSON
+     * @param {Response} response
+     */
+    const requestHandler = (response) => {
+      if (response.statusCode < 200 || response.statusCode > 299) {
+        reject(new Error('Non-2xx status code: ' + response.statusCode));
+        return;
+      }
+
+      const bodyChunks = [];
+      response.on('data', (chunk) => bodyChunks.push(chunk));
+      response.on('end', () => {
+        try {
+          const body = JSON.parse(bodyChunks.join(''));
+          resolve(body);
+        } catch (e) {
+          reject(new Error('Unable to parse JSON'));
+        }
+      });
+    };
+
+    const request = http.request(requestOptions, requestHandler);
+    request.on('error', (err) => reject(err));
+    request.end();
+  });
+}
+
+
+module.exports = {errorHandler, errorLogger, httpGetJson};
