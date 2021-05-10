@@ -75,6 +75,27 @@ class StatusService {
   }
 
   /**
+   * Build a response containing the information and status of the integrated services
+   * If core responds successfully than each service will be added to a Map with its name as the key
+   * Otherwise, an entry with label 'Integrated Services' will be added in the response
+   * @returns {Promise<Resolve>}
+   */
+  async getIntegratedServicesInfo() {
+    let integServices = {};
+    try {
+      const {services} = await this.ctrlService.getIntegratedServicesInfo();
+      return services;
+    } catch (error) {
+      integServices.all = {
+        name: 'Integrated Services',
+        connectionState: 'TRANSIENT_FAILURE',
+        data: {message: error.toString()}
+      };
+    }
+    return integServices;
+  }
+
+  /**
    * Build a response containing the information and status of the Grafana Service
    * @return {Promise<Resolve>}
    */

@@ -209,7 +209,7 @@ describe('Control Service test suite', () => {
       const ctrlService = new ControlService({},
         {connectionReady: true, GetFrameworkInfo: sinon.stub().rejects('Something went wrong')}
       );
-      return assert.rejects(() => ctrlService.getAliECSInfo(), new Error('Something went wrong'));
+      return assert.rejects(() => ctrlService.getAliECSInfo(), 'Something went wrong');
     });
 
     it('should successfully resolve with AliECS Version', async () => {
@@ -223,6 +223,47 @@ describe('Control Service test suite', () => {
       );
       const response = await ctrlService.getAliECSInfo();
       assert.strictEqual(response.version, 'AliECS 0.16.0 (revision 7d98d22216)');
+    });
+  });
+
+  describe('Test GetIntegratedServices call', () => {
+    it('should successfully reject due to no control proxy setup', () => {
+      const ctrlService = new ControlService({}, {});
+      return assert.rejects(() =>
+        ctrlService.getIntegratedServicesInfo(), new Error('Could not establish connection to AliECS Core')
+      );
+    });
+
+    it('should successfully reject due to no control proxy missing connection', () => {
+      const ctrlService = new ControlService({}, {connectionReady: false});
+      return assert.rejects(() =>
+        ctrlService.getIntegratedServicesInfo(), new Error('Could not establish connection to AliECS Core')
+      );
+    });
+
+    it('should reject with specific error message if proxy method is not ready', () => {
+      const ctrlService = new ControlService({},
+        {connectionReady: true, GetIntegratedServices: sinon.stub().rejects('Something went wrong')}
+      );
+      return assert.rejects(() => ctrlService.getIntegratedServicesInfo(), 'Something went wrong');
+    });
+
+    it('should successfully resolve with AliECS integrated services map', async () => {
+      const services = {
+        dcs: {},
+        someOtherDcs: {},
+      };
+      const ctrlService = new ControlService({},
+        {
+          connectionReady: true,
+          GetIntegratedServices: sinon.stub().resolves({
+            dcs: {},
+            someOtherDcs: {},
+          })
+        }
+      );
+      const response = await ctrlService.getIntegratedServicesInfo();
+      assert.deepStrictEqual(response, services);
     });
   });
 });
