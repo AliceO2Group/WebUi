@@ -196,6 +196,7 @@ class ConsulConnector {
     const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutCardPath);
     Object.keys(crusByEndpoint)
       .filter((fieldKey) => fieldKey.split('/').length >= 7) // filter out incomplete keys
+      .filter((fieldKey) => fieldKey.split('/')[4].toUpperCase() === 'CRU') // keep only CRU cards
       .forEach((fieldKey) => {
         // o2/components/readoutcard/<hostname>/cru/<serial>/<endpoint>
         const splitKey = fieldKey.split('/');
@@ -204,8 +205,9 @@ class ConsulConnector {
         const serial = splitKey[5];
         const endpoint = splitKey[6];
         const cruId = `${cardType}_${serial}_${endpoint}`;
-
-        crus[host][cruId].config = JSON.parse(crusByEndpoint[fieldKey]);
+        if (crus[host] && crus[host][cruId]) {
+          crus[host][cruId].config = JSON.parse(crusByEndpoint[fieldKey]);
+        }
       });
     return crus;
   }
