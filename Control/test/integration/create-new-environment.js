@@ -32,7 +32,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully load newEnvironment page', async () => {
     await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     assert.strictEqual(location.search, '?page=newEnvironment');
   });
 
