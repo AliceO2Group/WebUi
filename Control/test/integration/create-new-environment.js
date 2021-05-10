@@ -40,7 +40,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const templatesMap = await page.evaluate(() => {
       return window.model.workflow.templatesMap;
     });
-    const repository = 'github.com/AliceO2Group/ControlWorkflows/';
+    const repository = 'github.com/AliceO2Group/ControlWorkflows';
     assert.strictEqual(templatesMap.kind, 'Success', `Request for list of template objects failed due to: ${templatesMap.payload}`);
     assert.ok(templatesMap.payload[repository]);
   });
