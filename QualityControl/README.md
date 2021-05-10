@@ -17,17 +17,29 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   - [Online Mode](#online-mode)
 
 ## Installation
-1. `nodeJS` >= `14.16.0` is required
-2. Clone the `WebUi` repository via HTTPS/SSH
-3. Install QCG
+1. Install `nodeJS` >= `14.16.0`
+  * CC7: `yum install https://rpm.nodesource.com/pub_14.x/el/7/x86_64/nodejs-14.16.1-1nodesource.x86_64.rpm`
+  * Mac: `brew install node@14 ;  echo 'export PATH="/usr/local/opt/node@14/bin:$PATH"' >> $HOME/.bash_profile`
+  * Other: https://nodejs.org/en/download/package-manager
+3. Clone the `WebUi` repository 
 ```
-cd QualityControl
+git clone https://github.com/AliceO2Group/WebUi.git
+```
+5. Install QCG
+```
+cd WebUi/QualityControl
 npm install
 ```
-4. Copy configuration file and update as per your local setup:
+4. Copy configuration file and update according to your needs (see next section):
 ```
 cp config-default.js config.js
 ```
+
+### Troubleshooting
+
+Q: When doing `npm install` I have an error `error: no template named 'remove_cv_t' in namespace 'std'; did you mean 'remove_cv'?` or such. 
+
+A: Make sure you are using nodeJS 14 and not nodeJS 16. 
 
 ## Local Configuration
 In order to customise the QCG you can edit the following configuration file: `WebUi/QualityControl/config.js`
