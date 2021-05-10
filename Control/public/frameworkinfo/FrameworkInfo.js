@@ -35,6 +35,8 @@ export default class FrameworkInfo extends Observable {
 
     this.aliecs = RemoteData.notAsked();
     this.integratedServices = RemoteData.notAsked();
+
+    this.consulServicesLink = '';
   }
 
   /**
@@ -107,6 +109,7 @@ export default class FrameworkInfo extends Observable {
       this.statuses.consul = RemoteData.failure(result.message);
     } else {
       this.statuses.consul = RemoteData.success(result);
+      this.consulServicesLink = `${result.hostname}:${result.port}/`
     }
     this.notify();
   }

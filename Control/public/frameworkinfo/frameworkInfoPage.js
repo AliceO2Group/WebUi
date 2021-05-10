@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+import {h, iconPencil} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 
 /**
@@ -38,7 +38,7 @@ export const header = (model) => [
 export const content = (model) => h('.scroll-y.absolute-fill.flex-column.p2', [
   h('', tablesForDependenciesInfo(model.frameworkInfo)),
   tableAliEcsInfo(model.frameworkInfo.aliecs),
-  tableIntegratedServicesInfo(model.frameworkInfo.integratedServices),
+  tableIntegratedServicesInfo(model, model.frameworkInfo.integratedServices),
 ]);
 
 /**
@@ -133,10 +133,11 @@ const tableAliEcsInfo = (aliecs) =>
 
 /**
  * Show status and info of AliECS Integrated Services
+ * @param {Object} model
  * @param {RemoteData} services
  * @return {vnode}
  */
-const tableIntegratedServicesInfo = (services) =>
+const tableIntegratedServicesInfo = (model, services) =>
   h('.pv2',
     services.match({
       NotAsked: () => null,
@@ -158,7 +159,7 @@ const tableIntegratedServicesInfo = (services) =>
           h('.shadow-level1',
             h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
               h('tbody', [
-                buildStatusAndLabelRowIntService(serviceKey, data[serviceKey]),
+                buildStatusAndLabelRowIntService(model, serviceKey, data[serviceKey]),
                 Object.keys(data[serviceKey]).filter((name) => name !== 'name')
                   .map((name) =>
                     h('tr', [
@@ -179,7 +180,7 @@ const tableIntegratedServicesInfo = (services) =>
  * @param
  * @returns {vnode}
  */
-const buildStatusAndLabelRowIntService = (label, service) => {
+const buildStatusAndLabelRowIntService = (model, label, service) => {
   const isServiceConfigured = Object.keys(service).length > 0;
   if (isServiceConfigured) {
     return h('tr',
@@ -194,17 +195,27 @@ const buildStatusAndLabelRowIntService = (label, service) => {
         h('.mh2', {style: 'text-decoration: underline'},
           service.name || label.toLocaleUpperCase()
         ),
-      ])
+
+      ]),
+      h('td',
+        h('.w-100.ph2', {style: 'display: flex; justify-content: flex-end;'},
+          consulEditServiceIcon(model)
+        ))
     );
   } else {
     // Empty value from AliECS Core means service was not enabled
     return h('tr',
       h('th.flex-row', [
-        h('.badge.bg-gray.white.f6', '?'),
-        h('.mh2', {style: 'text-decoration: underline'},
-          label.toLocaleUpperCase(),
-        ),
-        h('.mh5', '- Service was not enabled')
+        h('.w-90.flex-row', [
+          h('.badge.bg-gray.white.f6', '?'),
+          h('.mh2', {style: 'text-decoration: underline'},
+            label.toLocaleUpperCase(),
+          ),
+          h('.mh5', '- Service was not enabled'),
+        ]),
+        h('.w-10.ph2', {style: 'display: flex; justify-content: flex-end;'},
+          consulEditServiceIcon(model)
+        )
       ])
     );
   }
@@ -285,3 +296,18 @@ const successfulStateInfoTable = (label, dependency) => h('.shadow-level1',
     ])
   )
 );
+
+/**
+ * Build an actionable icon to open a new tab with consul edit panel
+ * The panel shoudl be the one coresponding to integrated services declaration
+ * @param {Object} model 
+ * @returns {vnode}
+ */
+const consulEditServiceIcon = (model) =>
+  h('.w-10.ph2', {style: 'display: flex; justify-content: flex-end;'},
+    h('a.actionable-icon', {
+      href: model.frameworkInfo.consulServicesLink,
+      target: '_blank',
+      title: 'Open Consul to edit services'
+    }, iconPencil())
+  );
