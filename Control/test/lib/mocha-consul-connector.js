@@ -344,25 +344,24 @@ describe('ConsulConnector test suite', () => {
       await assert.rejects(() => connector._getCardsByHost(), new Error('Something bad happened'));
     });
 
-    it('should successfully query crus configuration from readoutcard path', async () => {
+    it('should successfully query CRUs configuration from readoutcard path and ignore CRORCs', async () => {
       let consulService = {};
       const list = {
         'o2/components/readoutcard/hostA/cru/123/0': '{"cru":{"type":"CRU"},"link":{"enabled":true}}',
-        'o2/components/readoutcard/hostA/cru/123/1': '{"cru":{"type":"CRU"},"link":{"enabled":false}}',
+        'o2/components/readoutcard/hostA/cru/123/1': '{"cru":{"type":"CRORC"},"link":{"enabled":false}}',
         'o2/components/readoutcard/hostB/cru/323/0': '{"cru":{"type":"CRU"},"link":{"enabled":true}}',
       };
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().resolves(list);
       const connector = new ConsulConnector(consulService, {});
 
       const cruByHost = {
-        hostA: {cru_123_0: {info: {type: 'CRU'}, config: {}}, cru_123_1: {info: {type: 'CRU'}, config: {}}},
+        hostA: {cru_123_0: {info: {type: 'CRU'}, config: {}}},
         hostB: {cru_323_0: {info: {type: 'CRU'}, config: {}}},
       };
 
       const expectedCrusInfo = {
         hostA: {
           cru_123_0: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: true}}},
-          cru_123_1: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: false}}},
         },
         hostB: {
           cru_323_0: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: true}}},
