@@ -82,14 +82,14 @@ class ControlService {
         await this.ctrlProx[method](coreConf);
         res.status(200).json({
           ended: false, success: true, id: channelId,
-          message: 'Request for "Cleaning Resources" was successfully sent and in progress'
+          info: {message: 'Request for "Cleaning Resources" was successfully sent and in progress'}
         })
       } catch (error) {
         // Failed to getFLPs, ListRepos or NewAutoEnvironment
         errorLogger(error);
         res.status(502).json({
           ended: true, success: false, id: channelId,
-          message: error.message || error || 'Error while attempting to clean resources ...'
+          info: {message: error.message || error || 'Error while attempting to clean resources ...'}
         });
       }
     }
@@ -315,7 +315,6 @@ class ControlService {
       msg.payload = {
         ended: false, success: false, id: channelId, type: 'TASK',
         info: {host: data.taskEvent.hostname, id: data.taskEvent.taskid},
-        message: 'One of the associated tasks failed. Fore more information check InfoLogger..'
       };
       this.webSocket.broadcast(msg);
     }
