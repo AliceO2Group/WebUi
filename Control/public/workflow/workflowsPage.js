@@ -60,7 +60,7 @@ const showTemplatesValidation = (model, repoList) =>
     Loading: () => pageLoading(),
     Failure: (error) => errorPage(error),
     Success: (templatesMap) => (Object.keys(templatesMap).length === 0)
-      ? h('h3.m4', ['No templates/revisions found.']) : showNewEnvironmentForm(model, repoList, templatesMap)
+      ? h('h3.m4', ['No public templates found.']) : showNewEnvironmentForm(model, repoList, templatesMap)
   });
 
 /**

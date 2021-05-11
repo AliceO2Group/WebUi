@@ -223,6 +223,15 @@ describe('Control', function() {
           'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8&refresh=5s&theme=light',
           'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4&refresh=5s&theme=light'
         ]
+      },
+      CONSUL: {
+        hostname: 'localhost',
+        port: 8550,
+        flpHardwarePath: 'test/o2/hardware/flps',
+        readoutPath: 'test/o2/readout/components',
+        readoutCardPath: 'test/o2/readoutcard/components',
+        qcPath: 'test/o2/qc/components',
+        consulKVPrefix: 'test/ui/some-cluster/kv',
       }
     }
     assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');

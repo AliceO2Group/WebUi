@@ -55,6 +55,7 @@ module.exports.setup = (http, ws) => {
   );
   http.post('/clean/resources', (req, res) => ctrlService.cleanResources(req, res));
   http.post('/executeRocCommand', (req, res) => ctrlService.executeRocCommand(req, res));
+  http.post('/execute/o2-roc-config', (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
   http.post('/lockState', (req, res) => res.json(padLock));

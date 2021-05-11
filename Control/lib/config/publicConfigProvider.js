@@ -28,11 +28,24 @@ function buildPublicConfig(config) {
   }
   const publicConfig = {
     ILG_URL: _getInfoLoggerURL(config),
-    GRAFANA: _getGrafanaConfig(config)
+    GRAFANA: _getGrafanaConfig(config),
+    CONSUL: _getConsulConfig(config),
   };
   let codeStr = `/* eslint-disable quote-props */\n`
     + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as COG};\n`;
   fs.writeFileSync(publicConfigPath, codeStr);
+}
+
+/**
+ * Create a JSON containing static Consul information
+ * @param {JSON} config - server configuration
+ * @returns {JSON}
+ */
+function _getConsulConfig(config) {
+  if (config?.consul) {
+    return config.consul
+  }
+  return {};
 }
 
 /**

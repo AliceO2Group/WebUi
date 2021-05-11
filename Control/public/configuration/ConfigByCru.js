@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
@@ -30,7 +32,41 @@ export default class Config extends Observable {
     this.cruMapByHost = RemoteData.notAsked();
     this.cruToggleByHost = {};
     this.cruToggleByCruEndpoint = {};
-    this.isSavingConfiguration = RemoteData.notAsked();
+    this.selectedHosts = [];
+
+    this.configurationRequest = RemoteData.notAsked();
+    this.failedTasks = [];
+    this.channelId = 0;
+  }
+
+  /**
+   * Initialize state
+   */
+  init() {
+    this.failedTasks = [];
+  }
+
+  /**
+   * Select/Deselect passed host
+   * @param {string} host
+   */
+  toggleHostSelection(host) {
+    const index = this.selectedHosts.findIndex((element) => host === element);
+    if (index > -1) {
+      this.selectedHosts.splice(index, 1);
+    } else {
+      this.selectedHosts.push(host);
+    }
+    this.notify();
+  }
+
+  /**
+   * Select/Deselect all hosts based on current state of checkbox
+   */
+  toggleAllSelection() {
+    const allSelected = this.selectedHosts.length === Object.keys(this.cruMapByHost.payload).length;
+    this.selectedHosts = allSelected ? [] : Object.keys(this.cruMapByHost.payload);
+    this.notify();
   }
 
   /**
@@ -41,7 +77,7 @@ export default class Config extends Observable {
    * Method to retrieve a list of CRUs from Consul
    */
   async getCRUsConfig() {
-    this.isSavingConfiguration = RemoteData.notAsked();
+    this.configurationRequest = RemoteData.notAsked();
     this.cruMapByHost = RemoteData.loading();
     this.notify();
 
@@ -61,16 +97,75 @@ export default class Config extends Observable {
    * the server to save it in consul
    */
   async saveConfiguration() {
-    this.isSavingConfiguration = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/saveCRUsConfig`, this.cruMapByHost.payload);
-    if (!ok) {
-      this.isSavingConfiguration = RemoteData.failure(result.message);
+    if (this.selectedHosts.length === 0) {
+      this.model.notification.show('Please select hosts for which configuration should be saved', 'danger', 2000);
+    } else {
+      this.configurationRequest = RemoteData.loading();
+      this.failedTasks = [];
       this.notify();
-      return;
+      const copy = {};
+      this.selectedHosts.forEach((host) => copy[host] = JSON.parse(JSON.stringify(this.cruMapByHost.payload[host])));
+      const {result, ok} = await this.model.loader.post(`/api/saveCRUsConfig`, copy);
+      if (!ok) {
+        result.ended = true;
+        result.success = false;
+        this.configurationRequest = RemoteData.failure(result.message);
+        this.notify();
+        return;
+      }
+      result.ended = true;
+      result.success = true;
+      this.configurationRequest = RemoteData.success(result);
     }
-    this.isSavingConfiguration = RemoteData.success(result.message);
+    this.notify();
+  }
+
+  /**
+   * Makes a request to the server to run o2-roc-config workflow for all the hosts
+   * in the table
+   */
+  async runRocConfigWorkflow() {
+    if (this.selectedHosts.length === 0) {
+      this.model.notification.show('Please select hosts for which o2-roc-config should be executed', 'danger', 2000);
+    } else {
+      this.configurationRequest = RemoteData.loading();
+      this.failedTasks = [];
+      this.notify();
+
+      const hosts = this.selectedHosts;
+      this.channelId = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
+      const {result, ok} = await this.model.loader.post(`/api/execute/o2-roc-config`,
+        {channelId: this.channelId, hosts}
+      );
+      if (!ok) {
+        this.configurationRequest = RemoteData.failure(result);
+        this.notify();
+        return;
+      }
+      this.configurationRequest = RemoteData.success(result);
+    }
+    this.notify();
+  }
+
+  /**
+   * Method to update the message with regards to the `o2-roc-config` command
+   * If message id will match the client's it will be displayed
+   * @param {WebSocketMessagePayload} message 
+   */
+  setConfigurationRequest(message) {
+    const messageId = message.id || '';
+    if (this.channelId.toString() === messageId.toString()) {
+      if (message.type === 'TASK') {
+        this.failedTasks.push(message.info);
+      } else {
+        if (message.success) {
+          this.configurationRequest = RemoteData.success(message);
+        } else {
+          this.failedTasks.push(message.info)
+          this.configurationRequest = RemoteData.success(message);
+        }
+      }
+    }
     this.notify();
   }
 
@@ -91,5 +186,14 @@ export default class Config extends Observable {
       Object.keys(cruByHost[host]).forEach((cruId) => this.cruToggleByCruEndpoint[`${host}_${cruId}`] = false);
     });
     this.notify();
+  }
+
+  /**
+   * Returns the URL of the location of stored configuration for CRUs
+   * @returns {string}
+   */
+  getConsulConfigURL() {
+    const consul = COG.CONSUL;
+    return `//${consul.hostname}:${consul.port}/${consul.consulKVPrefix}/${consul.readoutCardPath}`
   }
 }
