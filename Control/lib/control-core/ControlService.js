@@ -309,16 +309,12 @@ class ControlService {
    * @param {Event} data - AliECS Event (proto)
    */
   onData(channelId, command, data) {
-    console.log(data);
     if (data.taskEvent && data.taskEvent.status === 'TASK_FAILED') {
       const msg = new WebSocketMessage();
       msg.command = command;
       msg.payload = {
         ended: false, success: false, id: channelId, type: 'TASK',
-        info: {
-          host: data.taskEvent.hostname,
-          id: data.taskEvent.taskid
-        },
+        info: {host: data.taskEvent.hostname, id: data.taskEvent.taskid},
         message: 'One of the associated tasks failed. Fore more information check InfoLogger..'
       };
       this.webSocket.broadcast(msg);

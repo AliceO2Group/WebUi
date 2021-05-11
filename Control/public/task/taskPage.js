@@ -89,7 +89,7 @@ const infoPanel = (model) =>
       !data.ended ?
         h('.pv1', pageLoading(1.5))
         : (data.success ? h('.pv2.ph4.text-center', iconCircleCheck()) : h('.pv2.ph4.text-center', iconCircleX())),
-      h('.w-100.p2', data.message),
+      h('.w-100.p2', data.info.message),
     ]),
     Failure: (error) => h('.m2.f6.p2.shadow-level1.text-left.flex-row.danger', [
       h('.pv2.ph4', iconCircleX()),
