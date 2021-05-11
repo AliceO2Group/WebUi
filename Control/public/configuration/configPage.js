@@ -263,7 +263,7 @@ const tasksMessagePanel = (model) =>
  * @return {vnode}
  */
 const savingConfigurationMessagePanel = (model) =>
-  h('.w-70.text-right', {style: 'display: flex; align-items: center; justify-content: end'},
+  h('.w-70.text-right', {style: 'display: flex; align-items: center; justify-content: flex-end'},
     model.configuration.configurationRequest.match({
       NotAsked: () => null,
       Loading: () => null,
@@ -275,7 +275,7 @@ const savingConfigurationMessagePanel = (model) =>
           : (message.success ? h('.pv2.ph2.text-center', iconCircleCheck()) : h('.pv2.ph4.text-center', iconCircleX())),
         h('.w-100.p2', message.info.message),
       ]),
-      Failure: (error) => h('.danger', [iconCircleX(), ' ', error.message]),
+      Failure: (error) => h('.danger', [iconCircleX(), ' ', error.message || error]),
     })
   );
 
