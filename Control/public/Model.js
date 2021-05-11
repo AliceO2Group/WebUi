@@ -131,6 +131,7 @@ export default class Model extends Observable {
         this.frameworkInfo.getFrameworkInfo();
         break;
       case 'configuration':
+        this.configuration.init();
         this.configuration.getCRUsConfig();
         break;
       default:

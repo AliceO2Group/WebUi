@@ -147,14 +147,14 @@ class ControlService {
           await this.ctrlProx[method](coreConf);
           res.status(200).json({
             ended: false, success: true, id: channelId,
-            message: 'Request for "o2-roc-config" was successfully sent and is now in progress'
+            info: {message: 'Request for "o2-roc-config" was successfully sent and is now in progress'}
           })
         } catch (error) {
           // Failed to getFLPs, ListRepos or NewAutoEnvironment
           errorLogger(error);
           res.status(502).json({
             ended: true, success: false, id: channelId,
-            message: error.message || error || 'Error while attempting to run o2-roc-config ...'
+            info: {message: error.message || error || 'Error while attempting to run o2-roc-config ...'}
           });
         }
       }
@@ -309,21 +309,34 @@ class ControlService {
    * @param {Event} data - AliECS Event (proto)
    */
   onData(channelId, command, data) {
+    console.log(data);
+    if (data.taskEvent && data.taskEvent.status === 'TASK_FAILED') {
+      const msg = new WebSocketMessage();
+      msg.command = command;
+      msg.payload = {
+        ended: false, success: false, id: channelId, type: 'TASK',
+        info: {
+          host: data.taskEvent.hostname,
+          id: data.taskEvent.taskid
+        },
+        message: 'One of the associated tasks failed. Fore more information check InfoLogger..'
+      };
+      this.webSocket.broadcast(msg);
+    }
     if (data.environmentEvent) {
       const msg = new WebSocketMessage();
       msg.command = command;
-      console.log(data);
-      console.log("data");
+
       if (!data.environmentEvent.error) {
         msg.payload = {
           ended: data.environmentEvent.state === 'DONE' ? true : false,
-          success: true, id: channelId,
-          message: data.environmentEvent.message || 'Executing ...'
+          success: true, id: channelId, type: 'ENV',
+          info: {message: data.environmentEvent.message || 'Executing ...'}
         };
       } else {
         msg.payload = {
-          ended: true, success: false, id: channelId,
-          message: data.environmentEvent.error || `Failed operation: ${command} ...`
+          ended: true, success: false, id: channelId, type: 'ENV',
+          info: {message: data.environmentEvent.error || `Failed operation: ${command} ...`}
         };
       }
       this.webSocket.broadcast(msg);
@@ -339,7 +352,7 @@ class ControlService {
     msg.command = command;
     msg.payload = {
       ended: true, success: false, id: channelId,
-      message: `"${command}" action failed due to ${error.toString()}`,
+      info: {message: `"${command}" action failed due to ${error.toString()}`}
     };
     errorLogger(error);
     this.webSocket.broadcast(msg);
