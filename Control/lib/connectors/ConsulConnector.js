@@ -179,7 +179,7 @@ class ConsulConnector {
     try {
       await this.consulService.putListOfKeyValues(keyValues);
       log.info('[Consul] Successfully saved configuration links');
-      res.status(200).json({message: 'CRUs Configuration saved'});
+      res.status(200).json({info: {message: 'CRUs Configuration saved'}});
     } catch (error) {
       errorHandler(error, res, 502);
     }
