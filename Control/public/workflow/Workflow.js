@@ -395,7 +395,9 @@ export default class Workflow extends Observable {
    * Request to refresh repositories list from AliECS Core
    */
   async refreshRepositories() {
-    this.refreshedRepositories = await this.remoteDataPostRequest(this.refreshedRepositories, `/api/RefreshRepos`, {});
+    this.refreshedRepositories = await this.remoteDataPostRequest(
+      this.refreshedRepositories, `/api/RefreshRepos`, {index: -1}
+    );
     if (this.refreshedRepositories.isSuccess()) {
       this.getRepositoriesList();
       this.getAllTemplatesAsMap();
