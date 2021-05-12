@@ -6,7 +6,6 @@
 - [Control GUI](#control-gui)
   - [Description](#description)
   - [Requirements](#requirements)
-  - [Compatibility with AliECS Core](#compatibility-with-aliecs-core)
   - [Installation](#installation)
   - [Configuration](#configuration)
     - [gRPC](#grpc)
@@ -15,6 +14,7 @@
     - [Kafka](#kafka)
     - [InfoLogger GUI](#infologger-gui)
   - [Features](#features)
+    - [GUI](#gui)
     - [Integration with Notification Service](#integration-with-notification-service)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
@@ -28,14 +28,8 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 ## Requirements
 - `nodejs` >= `14.16.0`
 
-## Compatibility with AliECS Core
-Below you can find details about the minimum version of [AliECS Core](https://github.com/AliceO2Group/Control) needed to run AliECS GUI full package of features.
-| GUI v.   | AliECS Core v. |
-|----------|----------------|
-| `1.13.0` | `>= v0.20.0`  |
-
 ## Installation
-1. `git clone https://github.com/AliceO2Group/WebUi.git;`
+1. `git clone https://github.com/AliceO2Group/WebUi.git`
 2. `cd WebUi/Control`
 3. `npm ci`
 4. `cp config-default.js config.js`
@@ -55,6 +49,7 @@ Below you can find details about the minimum version of [AliECS Core](https://gi
 
 ### Consul
 Use of a Consul instance is optional
+
 * `hostname` - Consul head node hostname
 * `port` - Consul head node port
 * `flpHardwarePath` - Prefix for KV Store for the content about the FLPs machines
@@ -65,16 +60,20 @@ Use of a Consul instance is optional
   
 ### Kafka
 Use of a Kafka instance is optional. It is being used for prompting [Browser Notifications](#integration-with-notification-service) 
+
 * `hostnames` - list of hostnames separated by comma
 * `port` - port of the Grafana instance
 * `topic` - A string to follow for messages
 
 ### InfoLogger GUI
 Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
+
 * `hostname` - InfoLogger GUI hostname
 * `port` - InfoLogger GUI port
 
 ## Features
+
+### GUI
 1. Lock interface - single user is allowed to execute commands, others act as spectators
 2. List, create, control and shutdown environments
 3. External resources access:
@@ -106,3 +105,4 @@ Control project makes use of two workflows.
 
 ### [release.yml](../.github/workflows/release.yml)
 * Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/control](https://www.npmjs.com/package/@aliceo2/control)
+* Builds a `tgz` file which contains an archive of the project. This can than be used for local repositories installations
