@@ -83,9 +83,9 @@ Use of InfoLogger GUI instance is optional. Configuration details about it are b
    * [Consul](https://www.consul.io/) - used for KV Store
    * [Kafka-Node](https://www.npmjs.com/package/kafka-node) - used for prompting [Browser Notifications](#integration-with-notification-service) to the user
    * [Grafana](https://grafana.com/) - used to display control environment plots
+
 #### Enable/Disable CRU Links
-1. Navigate to the `Configuration` page by clicking on the `Links` sub-menu from the left side-bar
-   Here, CRUs will be grouped by host
+1. Navigate to the `Configuration` page by clicking on the `Links` sub-menu from the left side-bar. Here, CRUs will be grouped by host
 2. Lock the interface via the top-left lock button
 3. Select the hosts that should be updated by using the check-box in front of the host name
 4. Update the links' state of the selected hosts accordingly
