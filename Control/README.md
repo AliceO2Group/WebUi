@@ -6,7 +6,6 @@
 - [Control GUI](#control-gui)
   - [Description](#description)
   - [Requirements](#requirements)
-  - [Compatibility with AliECS Core](#compatibility-with-aliecs-core)
   - [Installation](#installation)
   - [Configuration](#configuration)
     - [gRPC](#grpc)
@@ -15,6 +14,9 @@
     - [Kafka](#kafka)
     - [InfoLogger GUI](#infologger-gui)
   - [Features](#features)
+    - [GUI](#gui)
+      - [Enable/Disable CRU Links](#enabledisable-cru-links)
+      - [Clean Resources/Tasks](#clean-resourcestasks)
     - [Integration with Notification Service](#integration-with-notification-service)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
@@ -28,14 +30,8 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 ## Requirements
 - `nodejs` >= `14.16.0`
 
-## Compatibility with AliECS Core
-Below you can find details about the minimum version of [AliECS Core](https://github.com/AliceO2Group/Control) needed to run AliECS GUI full package of features.
-| GUI v.   | AliECS Core v. |
-|----------|----------------|
-| `1.13.0` | `>= v0.20.0`  |
-
 ## Installation
-1. `git clone https://github.com/AliceO2Group/WebUi.git;`
+1. `git clone https://github.com/AliceO2Group/WebUi.git`
 2. `cd WebUi/Control`
 3. `npm ci`
 4. `cp config-default.js config.js`
@@ -55,6 +51,7 @@ Below you can find details about the minimum version of [AliECS Core](https://gi
 
 ### Consul
 Use of a Consul instance is optional
+
 * `hostname` - Consul head node hostname
 * `port` - Consul head node port
 * `flpHardwarePath` - Prefix for KV Store for the content about the FLPs machines
@@ -65,16 +62,20 @@ Use of a Consul instance is optional
   
 ### Kafka
 Use of a Kafka instance is optional. It is being used for prompting [Browser Notifications](#integration-with-notification-service) 
+
 * `hostnames` - list of hostnames separated by comma
 * `port` - port of the Grafana instance
 * `topic` - A string to follow for messages
 
 ### InfoLogger GUI
 Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
+
 * `hostname` - InfoLogger GUI hostname
 * `port` - InfoLogger GUI port
 
 ## Features
+
+### GUI
 1. Lock interface - single user is allowed to execute commands, others act as spectators
 2. List, create, control and shutdown environments
 3. External resources access:
@@ -83,6 +84,24 @@ Use of InfoLogger GUI instance is optional. Configuration details about it are b
    * [Kafka-Node](https://www.npmjs.com/package/kafka-node) - used for prompting [Browser Notifications](#integration-with-notification-service) to the user
    * [Grafana](https://grafana.com/) - used to display control environment plots
 
+#### Enable/Disable CRU Links
+1. Navigate to the `Configuration` page by clicking on the `Links` sub-menu from the left side-bar. Here, CRUs will be grouped by host
+2. Lock the interface via the top-left lock button
+3. Select the hosts that should be updated by using the check-box in front of the host name
+4. Update the links' state of the selected hosts accordingly
+5. By pressing the top-right grey `Save` button, the links state will be saved directly in Consul for the selected hosts
+6. By pressing the top-right blue `Configure` button, the CRUs of the selected hosts will be updated with the configuration previously saved in Consul.
+
+It is important to know that the `Configure` action will also apply any other `CRU` changes that were applied directly in `Consul` and NOT only the state of the links. 
+
+#### Clean Resources/Tasks
+1. Navigate to the `Tasks` page by clicking on the `Task list` sub-menu from the left side-bar
+   
+Here, tasks will be grouped by host and each host has an in-line button to provide a download button for the logs of that machine
+
+2. Lock the interface via the top-left lock button
+3. Use the top-right orange text `Clean Resources` button to request AliECS Core to run the `o2-roc-cleanup` workflow
+4. Use the top-right red text `Clean Tasks` button to request AliECS Core to remove all tasks that do not belong to an environment
 ### Integration with Notification Service
 This feature requires HTTPS as it is making use of [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/notification)
 
@@ -106,3 +125,4 @@ Control project makes use of two workflows.
 
 ### [release.yml](../.github/workflows/release.yml)
 * Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/control](https://www.npmjs.com/package/@aliceo2/control)
+* Builds a `tgz` file which contains an archive of the project. This can than be used for local repositories installations
