@@ -15,6 +15,8 @@
     - [InfoLogger GUI](#infologger-gui)
   - [Features](#features)
     - [GUI](#gui)
+      - [Enable/Disable CRU Links](#enabledisable-cru-links)
+      - [Clean Resources/Tasks](#clean-resourcestasks)
     - [Integration with Notification Service](#integration-with-notification-service)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
@@ -81,7 +83,25 @@ Use of InfoLogger GUI instance is optional. Configuration details about it are b
    * [Consul](https://www.consul.io/) - used for KV Store
    * [Kafka-Node](https://www.npmjs.com/package/kafka-node) - used for prompting [Browser Notifications](#integration-with-notification-service) to the user
    * [Grafana](https://grafana.com/) - used to display control environment plots
+#### Enable/Disable CRU Links
+1. Navigate to the `Configuration` page by clicking on the `Links` sub-menu from the left side-bar
+   Here, CRUs will be grouped by host
+2. Lock the interface via the top-left lock button
+3. Select the hosts that should be updated by using the check-box in front of the host name
+4. Update the links' state of the selected hosts accordingly
+5. By pressing the top-right grey `Save` button, the links state will be saved directly in Consul for the selected hosts
+6. By pressing the top-right blue `Configure` button, the CRUs of the selected hosts will be updated with the configuration previously saved in Consul.
 
+It is important to know that the `Configure` action will also apply any other `CRU` changes that were applied directly in `Consul` and NOT only the state of the links. 
+
+#### Clean Resources/Tasks
+1. Navigate to the `Tasks` page by clicking on the `Task list` sub-menu from the left side-bar
+   
+Here, tasks will be grouped by host and each host has an in-line button to provide a download button for the logs of that machine
+
+2. Lock the interface via the top-left lock button
+3. Use the top-right orange text `Clean Resources` button to request AliECS Core to run the `o2-roc-cleanup` workflow
+4. Use the top-right red text `Clean Tasks` button to request AliECS Core to remove all tasks that do not belong to an environment
 ### Integration with Notification Service
 This feature requires HTTPS as it is making use of [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/notification)
 
