@@ -268,7 +268,70 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(404));
       assert.ok(res.send.calledWith({
-        message: `No value found for one of the keys:\ntest/o2/hardware/flps\nor\ntest/o2/readoutcard/components`}));
+        message: `No value found for one of the keys:\ntest/o2/hardware/flps\nor\ntest/o2/readoutcard/components`
+      }));
+    });
+  });
+
+  describe('SAVE CRUs with Configuration', async () => {
+    let consulService, padLock;
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.spy(),
+        send: sinon.stub()
+      };
+      consulService = {};
+      padLock = {};
+    });
+    it('should return 403 due to lock not being taken', async () => {
+      padLock.lockedBy = null;
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(null, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is not locked`}));
+    });
+    it('should return 403 due to PadLock not being configured in ConsulConnector', async () => {
+      const connector = new ConsulConnector(consulService, config);
+      await connector.saveCRUsConfiguration(null, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is not locked`}));
+    });
+    it('should return 403 due to lock being taken by a different user', async () => {
+      padLock.lockedBy = 22;
+      padLock.lockedByName = 'ALICE';
+      const req = {session: {personId: 11}};
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(req, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is locked by ALICE`}));
+    });
+    it('should successfully save empty configuration with lock taken', async () => {
+      consulService.putListOfKeyValues = sinon.stub().resolves();
+      padLock.lockedBy = 1;
+      const req = {session: {personid: 1}, body: {}};
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(req, res);
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({info: {message: 'CRUs Configuration saved'}}));
+    });
+    it('should return error due to failed saving operation', async () => {
+      consulService.putListOfKeyValues = sinon.stub().rejects(new Error('Something went wrong'));
+      padLock.lockedBy = 1;
+      const req = {session: {personid: 1}, body: {}};
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(req, res);
+
+      assert.ok(res.status.calledWith(502));
+      assert.ok(res.send.calledWith({message: 'Something went wrong'}));
     });
   });
 
