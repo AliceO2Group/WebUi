@@ -43,7 +43,8 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 ### gRPC
 * `hostname` - gRPC hostname
 * `port` - gRPC port
-* `timeout` -  ms, gRPC deadline for service calls
+* `timeout` -  ms, gRPC deadline for service calls; Default value 30000 ms
+* `maxMessageLength` - MB, gRPC message size limit; Default value 50 MB
 
 ### Grafana
 * `hostname` - Grafana instance hostname

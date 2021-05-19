@@ -11,6 +11,7 @@ module.exports = {
     hostname: 'localhost',
     port: 9090,
     timeout: 20000, // ms, gRPC deadline for service calls
+    maxMessageLength: 50 // mb, gRPC receive message limit
   },
   grafana: {
     hostname: 'localhost',

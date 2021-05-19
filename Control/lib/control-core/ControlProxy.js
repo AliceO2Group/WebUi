@@ -43,6 +43,9 @@ class ControlProxy {
     if (!config.timeout) {
       config.timeout = 30000;
     }
+    if (!config.maxMessageLength) {
+      config.maxMessageLength = 50;
+    }
 
     this.config = config;
 
@@ -57,7 +60,7 @@ class ControlProxy {
 
     const address = `${config.hostname}:${config.port}`;
     const credentials = grpcLibrary.credentials.createInsecure();
-    const options = {'grpc.max_receive_message_length': 1024*1024*10}; // 10 MB
+    const options = {'grpc.max_receive_message_length': 1024 * 1024 * config.maxMessageLength}; // MB
     this.client = new octlProto.o2control.Control(address, credentials, options);
     this.client.waitForReady(Date.now() + config.timeout, (error) => {
       if (error) {
