@@ -102,8 +102,7 @@ module.exports.setup = (http, ws) => {
       res.status(200).json({ok: true});
     } catch (error) {
       log.warn(`[API] Unable to lock by ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.toString()});
-      return;
+      res.status(403).json({message: error.message});
     }
     broadcastPadState();
   }
@@ -136,9 +135,8 @@ module.exports.setup = (http, ws) => {
       log.info(`[API] Lock released by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.warn(`[API] Unable to give away lock by ${req.session.name}: ${error}`);
-      res.status(403).json(error);
-      return;
+      log.error(`[API] Unable to give away lock by ${req.session.name}: ${error}`);
+      res.status(403).json({message: error.message });
     }
     broadcastPadState();
   }
