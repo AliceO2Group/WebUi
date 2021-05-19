@@ -34,15 +34,15 @@ if (!config.grpc) {
 if (!config.grafana) {
   log.error('[Grafana] Configuration is missing');
 }
+const padLock = new Padlock();
 
 let consulService;
 if (config.consul) {
   consulService = new ConsulService(config.consul);
 }
-const consulConnector = new ConsulConnector(consulService, config.consul);
+const consulConnector = new ConsulConnector(consulService, config.consul, padLock);
 consulConnector.testConsulStatus();
 
-const padLock = new Padlock();
 const ctrlProxy = new ControlProxy(config.grpc);
 const ctrlService = new ControlService(padLock, ctrlProxy, consulConnector, config.grpc);
 const statusService = new StatusService(config, ctrlService, consulService);
