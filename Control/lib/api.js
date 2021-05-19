@@ -34,15 +34,15 @@ if (!config.grpc) {
 if (!config.grafana) {
   log.error('[Grafana] Configuration is missing');
 }
+const padLock = new Padlock();
 
 let consulService;
 if (config.consul) {
   consulService = new ConsulService(config.consul);
 }
-const consulConnector = new ConsulConnector(consulService, config.consul);
+const consulConnector = new ConsulConnector(consulService, config.consul, padLock);
 consulConnector.testConsulStatus();
 
-const padLock = new Padlock();
 const ctrlProxy = new ControlProxy(config.grpc);
 const ctrlService = new ControlService(padLock, ctrlProxy, consulConnector, config.grpc);
 const statusService = new StatusService(config, ctrlService, consulService);
@@ -101,7 +101,7 @@ module.exports.setup = (http, ws) => {
       log.info(`[API] Lock taken by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.warn(`[API] Unable to lock by ${req.session.name}: ${error}`);
+      log.error(`[API] Unable to lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }
     broadcastPadState();
@@ -118,7 +118,7 @@ module.exports.setup = (http, ws) => {
       log.info(`[API] Lock forced by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.warn(`[API] Unable to force lock by ${req.session.name}: ${error}`);
+      log.error(`[API] Unable to force lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }
     broadcastPadState();
@@ -136,7 +136,7 @@ module.exports.setup = (http, ws) => {
       res.status(200).json({ok: true});
     } catch (error) {
       log.error(`[API] Unable to give away lock by ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.message });
+      res.status(403).json({message: error.message});
     }
     broadcastPadState();
   }
