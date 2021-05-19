@@ -176,7 +176,7 @@ class ConsulConnector {
    * @param {Response} res
    */
   async saveCRUsConfiguration(req, res) {
-    if (!this.padLock?.lockedBy) {
+    if (this.padLock?.lockedBy === null || this.padLock?.lockedBy === undefined) {
       errorHandler('Control is not locked', res, 403);
       return false;
     } else if (req.session.personid != this.padLock.lockedBy) {

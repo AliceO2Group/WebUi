@@ -293,6 +293,15 @@ describe('ConsulConnector test suite', () => {
       assert.ok(res.status.calledWith(403));
       assert.ok(res.send.calledWith({message: `Control is not locked`}));
     });
+    it('should return 403 due to lock not being taken', async () => {
+      padLock.lockedBy = undefined;
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(null, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is not locked`}));
+    });
     it('should return 403 due to PadLock not being configured in ConsulConnector', async () => {
       const connector = new ConsulConnector(consulService, config);
       await connector.saveCRUsConfiguration(null, res);
