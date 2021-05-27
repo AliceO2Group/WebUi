@@ -163,7 +163,8 @@ const buildStatusAndLabelRowIntService = (model, label, service) => {
 
 /**
  * Build an actionable icon to open a new tab with consul edit panel
- * The panel shoudl be the one coresponding to integrated services declaration
+ * The panel should be the one coresponding to integrated services declaration
+ * and promt the user with a confirmation box
  * @param {Object} model 
  * @returns {vnode}
  */
