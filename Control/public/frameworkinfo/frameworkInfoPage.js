@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconPencil} from '/js/src/index.js';
+import {h, info} from '/js/src/index.js';
 import {loadingStateInfoTable, successfulStateInfoTable, failureStateInfoTable} from './stateTables.js';
 
 /**
@@ -168,10 +168,12 @@ const buildStatusAndLabelRowIntService = (model, label, service) => {
  * @returns {vnode}
  */
 const consulEditServiceIcon = (model) =>
+  model.frameworkInfo.consulServicesLink !== '' &&
   h('.w-10.ph2', {style: 'display: flex; justify-content: flex-end;'},
     h('a.actionable-icon', {
       href: model.frameworkInfo.consulServicesLink,
       target: '_blank',
-      title: 'Open Consul to edit services'
-    }, iconPencil())
+      title: 'Open Consul to edit services',
+      onclick: () => confirm('Please be advised that only experts should modify this section!')
+    }, info())
   );

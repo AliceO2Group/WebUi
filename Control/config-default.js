@@ -31,6 +31,7 @@ module.exports = {
     readoutCardPath: 'o2/components/readoutcard/key/prefix',
     qcPath: 'o2/components/qc/key/prefix',
     consulKVPrefix: 'o2/cluster/key/prefix',
+    coreServices: 'o2/components/aliecs/some/settings/path',
   },
   // infoLoggerGui: {
   //   hostname: 'localhost',
