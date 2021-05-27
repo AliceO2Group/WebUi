@@ -178,3 +178,4 @@ const consulEditServiceIcon = (model) =>
       onclick: () => confirm('Please be advised that only experts should modify this section!')
     }, info())
   );
+  
