@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import pageLoading from '../common/pageLoading.js';
+import {loadingStateInfoTable, successfulStateInfoTable, failureStateInfoTable} from './stateTables.js';
 
 /**
  * @file Page to FrameworkInfo(About) (content and header)
@@ -58,78 +58,17 @@ const tablesForDependenciesInfo = (frameworkInfo) => [
 ];
 
 /**
- * Create a row element which contains the status and name of the dependency
- * Will display icons based on status (loading, successful, error)
- * @param {String} label - name of the dependency
- * @param {RemoteData} content
- * @returns {vnode}
- */
-const buildStatusAndLabelRow = (label, content) =>
-  h('tr',
-    h('th.flex-row', [
-      content.match({
-        NotAsked: () => null,
-        Loading: () => pageLoading(1, 0),
-        Failure: (_) => [
-          h('.badge.bg-danger.white.f6', '✕'),
-          h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()),
-        ],
-        Success: (item) => [
-          item.status && item.status.ok &&
-          h('label.badge.bg-success.white.f6', '✓'),
-          item.status && !item.status.ok &&
-          h('.badge.bg-danger.white.f6', '✕'),
-          h('.mh2', {style: 'text-decoration: underline'},
-            content.payload.name || label.toLocaleUpperCase()
-          ),
-        ]
-      }),
-    ])
-  );
-
-/**
- * Build the rows containing information about the direct dependency
- * @param {RemoteData} content 
- * @returns {vnode}
- */
-const buildContentRows = (content) =>
-  content.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Failure: (error) => h('tr.danger', [
-      h('th.w-25', 'error'),
-      h('td', error),
-    ]),
-    Success: (item) =>
-      Object.keys(item).map((name) =>
-        name === 'status' ?
-          !item['status'].ok &&
-          h('tr.danger', [
-            h('th.w-25', 'error'),
-            h('td', item['status'].message),
-          ])
-          :
-          h('tr', [
-            h('th.w-25', name),
-            h('td', JSON.stringify(item[name])),
-          ])
-      )
-  });
-
-/**
  * Show status and info of AliECS
  * @param {RemoteData} aliecs
  * @return {vnode}
  */
 const tableAliEcsInfo = (aliecs) =>
-  h('.shadow-level1',
-    h('table.table.table-sm', {style: 'white-space: pre-wrap;'}, [
-      h('tbody', [
-        buildStatusAndLabelRow('aliecs', aliecs),
-        buildContentRows(aliecs),
-      ])
-    ])
-  );
+  aliecs.match({
+    NotAsked: () => null,
+    Loading: () => loadingStateInfoTable('AliECS Core'),
+    Failure: (error) => failureStateInfoTable('AliECS Core', error),
+    Success: (item) => successfulStateInfoTable('AliECS Core', item)
+  });
 
 /**
  * Show status and info of AliECS Integrated Services
@@ -171,7 +110,8 @@ const tableIntegratedServicesInfo = (services) =>
           )
         ])
       ]
-    }));
+    })
+  );
 
 /**
  * Create a row element which contains the status and name of the dependency
@@ -209,79 +149,3 @@ const buildStatusAndLabelRowIntService = (label, service) => {
     );
   }
 };
-
-/**
- * Creates a table with a loading icon and upper case label
- * @param {String} label 
- * @returns {vnode}
- */
-const loadingStateInfoTable = (label) =>
-  h('.shadow-level1',
-    h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
-      h('tbody', [
-        h('tr', h('th.flex-row', [
-          pageLoading(1, 0),
-          h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()),
-        ]))
-      ])
-    )
-  );
-
-/**
- * Creates a table with a x icon and details about the issue
- * @param {String} label
- * @param {String} message
- * @param {JSON} content 
- * @returns {vnode}
- */
-const failureStateInfoTable = (label, error = undefined) =>
-  h('.shadow-level1',
-    h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
-      h('tbody', [
-        h('tr', h('th.flex-row', [
-          h('.badge.bg-danger.white.f6', '✕'),
-          h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()),
-        ])),
-        error && h('tr.danger', [
-          h('th.w-25', 'error'),
-          h('td', error),
-        ]),
-      ])
-    )
-  );
-
-/**
- * Creates a table with a succesful status and details about the service
- * @param {String} label 
- * @param {JSON} item 
- * @returns {vnode}
- */
-const successfulStateInfoTable = (label, dependency) => h('.shadow-level1',
-  h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
-    h('tbody', [
-      h('tr',
-        h('th.flex-row', [
-          dependency.status && dependency.status.ok &&
-          h('label.badge.bg-success.white.f6', '✓'),
-          dependency.status && !dependency.status.ok &&
-          h('.badge.bg-danger.white.f6', '✕'),
-          h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()
-          ),
-        ])
-      ),
-      Object.keys(dependency).map((name) =>
-        name === 'status' ?
-          !dependency['status'].ok &&
-          h('tr.danger', [
-            h('th.w-25', 'error'),
-            h('td', dependency['status'].message),
-          ])
-          :
-          h('tr', [
-            h('th.w-25', name),
-            h('td', JSON.stringify(dependency[name])),
-          ])
-      )
-    ])
-  )
-);
