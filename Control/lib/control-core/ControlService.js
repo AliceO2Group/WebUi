@@ -57,22 +57,84 @@ class ControlService {
    * @param {Response} res 
    */
   async cleanResources(req, res) {
-    if (this.coreConfig.version.toString() < `0.20.0`) {
-      res.status(502).json({message: `AliECS version has to be >= 0.20.0; Currently is ${this.coreConfig.version}`});
+    const channelId = req.body.channelId;
+    const method = 'NewAutoEnvironment';
+    if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
+      const type = req.body.type ? ` (${req.body.type})` : '';
+      log.info(`[ControlService] ${req.session.personid} => ${method} ${type}`);
+
+      try {
+        const hosts = await this.consulConnector.getFLPsList();
+        const {repos: repositories} = await this.ctrlProx['ListRepos']();
+        const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+        const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
+        cleanChanel.on('data', (data) => this.onData(channelId, 'clean-resources-action', data));
+        cleanChanel.on('error', (err) => this.onError(channelId, 'clean-resources-action', err));
+        // onEnd gets called no matter what
+        // cleanChanel.on('end', () => this.onEnd(channelId));
+
+        // Make request to clear resources
+        const coreConf = {
+          id: channelId,
+          vars: {hosts: JSON.stringify(hosts)},
+          workflowTemplate: path.join(repositoryName, `workflows/resources-cleanup@${defaultRevision}`)
+        };
+        await this.ctrlProx[method](coreConf);
+        res.status(200).json({
+          ended: false, success: true, id: channelId,
+          info: {message: 'Request for "Cleaning Resources" was successfully sent and in progress'}
+        })
+      } catch (error) {
+        // Failed to getFLPs, ListRepos or NewAutoEnvironment
+        errorLogger(error);
+        res.status(502).json({
+          ended: true, success: false, id: channelId,
+          info: {message: error.message || error || 'Error while attempting to clean resources ...'}
+        });
+      }
+    }
+  }
+
+  /**
+   * Method to handle the request of creating a new Auto Environment
+   * * subscribes and listens to AliECS stream with channelId so that updates
+   * are sent via WebSocket
+   * * requests the creation of a new auto env
+   * * replies to the initial request
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async createAutoEnvironment(req, res) {
+    const channelId = req.body.channelId;
+    const hosts = req.body.hosts;
+    if (!channelId) {
+      res.status(502).json({
+        ended: true, success: false, id: channelId,
+        message: 'Channel ID should be provided'
+      });
+    } else if (!hosts || hosts.length === 0) {
+      res.status(502).json({
+        ended: true, success: false, id: channelId,
+        message: 'List of Hosts should be provided'
+      });
     } else {
-      const channelId = req.body.channelId;
+      const operation = 'o2-roc-config';
       const method = 'NewAutoEnvironment';
       if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
         const type = req.body.type ? ` (${req.body.type})` : '';
-        log.info(`[ControlService] ${req.session.personid} => ${method} ${type}`);
+        log.info(`[ControlService] ${req.session.personid} => ${method} ${type} o2-roc-config`);
 
         try {
-          const hosts = await this.consulConnector.getFLPsList();
           const {repos: repositories} = await this.ctrlProx['ListRepos']();
           const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+          if (!defaultRevision) {
+            throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
+          }
+
+          // Setup Stream Channel
           const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
-          cleanChanel.on('data', (data) => this.onData(channelId, data));
-          cleanChanel.on('error', (err) => this.onError(channelId, err));
+          cleanChanel.on('data', (data) => this.onData(channelId, operation, data));
+          cleanChanel.on('error', (err) => this.onError(channelId, operation, err));
           // onEnd gets called no matter what
           // cleanChanel.on('end', () => this.onEnd(channelId));
 
@@ -80,19 +142,19 @@ class ControlService {
           const coreConf = {
             id: channelId,
             vars: {hosts: JSON.stringify(hosts)},
-            workflowTemplate: path.join(repositoryName, `workflows/resources-cleanup@${defaultRevision}`)
+            workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
           };
           await this.ctrlProx[method](coreConf);
           res.status(200).json({
             ended: false, success: true, id: channelId,
-            message: 'Request for "Cleaning Resources" was successfully sent and in progress'
+            info: {message: 'Request for "o2-roc-config" was successfully sent and is now in progress'}
           })
         } catch (error) {
           // Failed to getFLPs, ListRepos or NewAutoEnvironment
           errorLogger(error);
           res.status(502).json({
             ended: true, success: false, id: channelId,
-            message: error.message || error || 'Error while attempting to clean resources ...'
+            info: {message: error.message || error || 'Error while attempting to run o2-roc-config ...'}
           });
         }
       }
@@ -243,22 +305,33 @@ class ControlService {
    * Deal with incoming message from AliECS Core Stream
    * Method will react only to messages that contain an EnvironmentEvent
    * @param {string} channelId - to distinguish to which client should this message be sent
+   * @param {string} command
    * @param {Event} data - AliECS Event (proto)
    */
-  onData(channelId, data) {
+  onData(channelId, command, data) {
+    if (data.taskEvent && data.taskEvent.status === 'TASK_FAILED') {
+      const msg = new WebSocketMessage();
+      msg.command = command;
+      msg.payload = {
+        ended: false, success: false, id: channelId, type: 'TASK',
+        info: {host: data.taskEvent.hostname, id: data.taskEvent.taskid},
+      };
+      this.webSocket.broadcast(msg);
+    }
     if (data.environmentEvent) {
       const msg = new WebSocketMessage();
-      msg.command = 'clean-resources-action';
+      msg.command = command;
+
       if (!data.environmentEvent.error) {
         msg.payload = {
           ended: data.environmentEvent.state === 'DONE' ? true : false,
-          success: true, id: channelId,
-          message: data.environmentEvent.message || 'Cleaning Resources ...'
+          success: true, id: channelId, type: 'ENV',
+          info: {message: data.environmentEvent.message || 'Executing ...'}
         };
       } else {
         msg.payload = {
-          ended: true, success: false, id: channelId,
-          message: data.environmentEvent.error || 'Failed to clean resources ...'
+          ended: true, success: false, id: channelId, type: 'ENV',
+          info: {message: data.environmentEvent.error || `Failed operation: ${command} ...`}
         };
       }
       this.webSocket.broadcast(msg);
@@ -269,12 +342,12 @@ class ControlService {
    * Deal with incoming error message from AliECS Core Stream
    * @param {string} channelId - to distinguish to which client should this message be sent
    */
-  onError(channelId, error) {
+  onError(channelId, command, error) {
     const msg = new WebSocketMessage();
-    msg.command = 'clean-resources-action';
+    msg.command = command;
     msg.payload = {
       ended: true, success: false, id: channelId,
-      message: `"Clean Resources" action failed due to ${error.toString()}`,
+      info: {message: `"${command}" action failed due to ${error.toString()}`}
     };
     errorLogger(error);
     this.webSocket.broadcast(msg);

@@ -268,7 +268,79 @@ describe('ConsulConnector test suite', () => {
 
       assert.ok(res.status.calledWith(404));
       assert.ok(res.send.calledWith({
-        message: `No value found for one of the keys:\ntest/o2/hardware/flps\nor\ntest/o2/readoutcard/components`}));
+        message: `No value found for one of the keys:\ntest/o2/hardware/flps\nor\ntest/o2/readoutcard/components`
+      }));
+    });
+  });
+
+  describe('SAVE CRUs with Configuration', async () => {
+    let consulService, padLock;
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.spy(),
+        send: sinon.stub()
+      };
+      consulService = {};
+      padLock = {};
+    });
+    it('should return 403 due to lock not being taken', async () => {
+      padLock.lockedBy = null;
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(null, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is not locked`}));
+    });
+    it('should return 403 due to lock not being taken', async () => {
+      padLock.lockedBy = undefined;
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(null, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is not locked`}));
+    });
+    it('should return 403 due to PadLock not being configured in ConsulConnector', async () => {
+      const connector = new ConsulConnector(consulService, config);
+      await connector.saveCRUsConfiguration(null, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is not locked`}));
+    });
+    it('should return 403 due to lock being taken by a different user', async () => {
+      padLock.lockedBy = 22;
+      padLock.lockedByName = 'ALICE';
+      const req = {session: {personId: 11}};
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(req, res);
+
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.send.calledWith({message: `Control is locked by ALICE`}));
+    });
+    it('should successfully save empty configuration with lock taken', async () => {
+      consulService.putListOfKeyValues = sinon.stub().resolves();
+      padLock.lockedBy = 1;
+      const req = {session: {personid: 1}, body: {}};
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(req, res);
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({info: {message: 'CRUs Configuration saved'}}));
+    });
+    it('should return error due to failed saving operation', async () => {
+      consulService.putListOfKeyValues = sinon.stub().rejects(new Error('Something went wrong'));
+      padLock.lockedBy = 1;
+      const req = {session: {personid: 1}, body: {}};
+
+      const connector = new ConsulConnector(consulService, config, padLock);
+      await connector.saveCRUsConfiguration(req, res);
+
+      assert.ok(res.status.calledWith(502));
+      assert.ok(res.send.calledWith({message: 'Something went wrong'}));
     });
   });
 
@@ -344,25 +416,24 @@ describe('ConsulConnector test suite', () => {
       await assert.rejects(() => connector._getCardsByHost(), new Error('Something bad happened'));
     });
 
-    it('should successfully query crus configuration from readoutcard path', async () => {
+    it('should successfully query CRUs configuration from readoutcard path and ignore CRORCs', async () => {
       let consulService = {};
       const list = {
         'o2/components/readoutcard/hostA/cru/123/0': '{"cru":{"type":"CRU"},"link":{"enabled":true}}',
-        'o2/components/readoutcard/hostA/cru/123/1': '{"cru":{"type":"CRU"},"link":{"enabled":false}}',
+        'o2/components/readoutcard/hostA/cru/123/1': '{"cru":{"type":"CRORC"},"link":{"enabled":false}}',
         'o2/components/readoutcard/hostB/cru/323/0': '{"cru":{"type":"CRU"},"link":{"enabled":true}}',
       };
       consulService.getOnlyRawValuesByKeyPrefix = sinon.stub().resolves(list);
       const connector = new ConsulConnector(consulService, {});
 
       const cruByHost = {
-        hostA: {cru_123_0: {info: {type: 'CRU'}, config: {}}, cru_123_1: {info: {type: 'CRU'}, config: {}}},
+        hostA: {cru_123_0: {info: {type: 'CRU'}, config: {}}},
         hostB: {cru_323_0: {info: {type: 'CRU'}, config: {}}},
       };
 
       const expectedCrusInfo = {
         hostA: {
           cru_123_0: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: true}}},
-          cru_123_1: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: false}}},
         },
         hostB: {
           cru_323_0: {info: {type: 'CRU'}, config: {cru: {type: "CRU"}, link: {enabled: true}}},

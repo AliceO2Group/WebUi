@@ -13,7 +13,10 @@
     - [infologger.yml](#infologgeryml)
     - [release.yml](#releaseyml)
 
-Web user interface of [InfoLogger](https://github.com/AliceO2Group/InfoLogger) logging system. It interfaces with the system using two modes:
+Web user interface of [InfoLogger](https://github.com/AliceO2Group/InfoLogger) logging system. 
+
+It interfaces with the system using two modes:
+
 - **Query**: Querying historical logs from a database
 - **Live**: Receiving Real-Time logs from a TCP endpoint over InfoLogger protocol (v1.3, v1.4)
 
@@ -57,3 +60,5 @@ InfoLogger project makes use of two workflows.
 
 ### [release.yml](../.github/workflows/release.yml)
 * Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/infologger](https://www.npmjs.com/package/@aliceo2/infologger)
+* Builds a `tgz` file which contains an archive of the project. This can be used for local repositories installations.
+

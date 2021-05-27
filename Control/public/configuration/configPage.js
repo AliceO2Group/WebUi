@@ -12,13 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom, iconChevronRight} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronRight, iconCircleX, iconCircleCheck} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import loading from '../common/loading.js';
 import errorPage from '../common/errorPage.js';
 /**
  * @file Page to show configuration components (content and header)
  */
+
+/* global COG */
 
 /**
  * Header of configuration page
@@ -52,16 +54,45 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode}
  */
 const buildPage = (model, cruMapByHost) => h('.p3', [
-  h('.flex-row.pv1', [
+  h('.w-100.flex-row.pv1', [
     h('h4.pv2.w-15', 'CRUs by hostname:'),
     savingConfigurationMessagePanel(model),
-    saveConfigurationButton(model),
+    h('.btn-group.w-15', {style: 'justify-content: flex-end;'}, [
+      saveConfigurationButton(model),
+      runRocConfigButton(model)
+    ])
+  ]),
+  tasksMessagePanel(model),
+  h('.w-100', {style: 'display: flex; '}, [
+    h('.w-50.ph2', [
+      h('input', {
+        type: 'checkbox',
+        id: 'allHostsSelector',
+        style: 'cursor: pointer',
+        checked: model.configuration.selectedHosts.length === Object.keys(cruMapByHost).length,
+        onchange: () => model.configuration.toggleAllSelection(),
+      }),
+      h('label.d-inline.f6.ph1', {
+        for: 'allHostsSelector', style: 'cursor: pointer;white-space: nowrap', title: `Toggle selection of all hosts`
+      }, 'Toggle hosts')
+    ]),
+    h('a.w-50', {
+      style: 'display:flex; justify-content: flex-end',
+      href: model.configuration.getConsulConfigURL(),
+      target: '_blank',
+      title: 'Open Consul with the stored configuration'
+    }, 'Open Stored Configuration'),
   ]),
   Object.keys(cruMapByHost).map((host) =>
     h('', [
       h('h5.panel-title.p2.flex-row', [
         h('.w-15.flex-row', [
-          h('.actionable-icon', {
+          h('input', {
+            type: 'checkbox',
+            checked: model.configuration.selectedHosts.includes(host),
+            onchange: () => model.configuration.toggleHostSelection(host),
+          }),
+          h('.ph2.actionable-icon', {
             title: 'Open/Close CRUs configuration',
             onclick: () => {
               model.configuration.cruToggleByHost[host] = !model.configuration.cruToggleByHost[host];
@@ -69,7 +100,7 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
             }
           }, model.configuration.cruToggleByHost[host] ? iconChevronBottom() : iconChevronRight()
           ),
-          h('.w-100.ph2', host)
+          h('.w-100', host)
         ]),
       ]),
       model.configuration.cruToggleByHost[host] && h('.panel', [
@@ -189,18 +220,62 @@ const checkBox = (model, key, title, config) =>
   }), ' ' + title);
 
 /**
+ * Builds a panel under the command buttons to display failed tasks information
+ * This panel only appears if there are any failed tasks
+ * @param {Object} model
+ * @returns {vnode}
+ */
+const tasksMessagePanel = (model) =>
+  model.configuration.failedTasks.length > 0 &&
+  h('.w-100.p2', {
+    style: 'border: 1px solid #ddd;'
+  }, [
+    h('.danger.w-90', 'The following errors occured during execution:'),
+    model.configuration.failedTasks.map((task) =>
+      (task.id && task.host) ? h('.danger.flex-row', [
+        '- task id:',
+        h('.ph1', {style: 'font-weight: bold'}, task.id),
+        'on host:',
+        h('.ph1', {style: 'font-weight: bold'}, task.host),
+      ]) :
+        h('.danger.flex-row', [
+          '- environment error: ',
+          h('.ph1', {style: 'font-weight: bold'}, task.message),
+        ])
+    ),
+    h('.danger.flex-row.w-100', [
+      'Please check ',
+      h('a.ph2', {
+        style: {display: !COG.ILG_URL ? 'none' : ''},
+        title: 'Open InfoLogger',
+        href: `//${COG.ILG_URL}`,
+        target: '_blank'
+      }, 'infologger'
+      ),
+      'for more information.'
+    ]),
+  ]);
+
+/**
  * A panel to which a successful or error message is shown,
  * informing the user about the state of the action Save
  * @param {Object} model
  * @return {vnode}
  */
 const savingConfigurationMessagePanel = (model) =>
-  h('.w-70.text-right', {style: 'display: flex; align-items: center; justify-content: end'},
-    model.configuration.isSavingConfiguration.match({
+  h('.w-70.text-right', {style: 'display: flex; align-items: center; justify-content: flex-end'},
+    model.configuration.configurationRequest.match({
       NotAsked: () => null,
       Loading: () => null,
-      Success: (message) => h('.success', message),
-      Failure: (error) => h('.danger', error),
+      Success: (message) => h('.flex-row', {
+        class: message.ended ? (message.success ? 'success' : 'danger') : '',
+      }, [
+        !message.ended ?
+          h('.pv1', pageLoading(1.5))
+          : (message.success ? h('.pv2.ph2.text-center', iconCircleCheck()) : h('.pv2.ph4.text-center', iconCircleX())),
+        h('.w-100.p2', message.info.message),
+      ]),
+      Failure: (error) => h('.danger', [iconCircleX(), ' ', error.message || error]),
     })
   );
 
@@ -210,10 +285,23 @@ const savingConfigurationMessagePanel = (model) =>
  * @return {vnode}
  */
 const saveConfigurationButton = (model) =>
-  h('.w-15.text-right', {
-    style: 'display: flex; justify-content:end'
-  }, h('button.btn.btn-primary', {
+  h('button.btn.btn-default', {
     onclick: () => model.configuration.saveConfiguration(),
-    disabled: model.configuration.isSavingConfiguration.isLoading(),
-  }, model.configuration.isSavingConfiguration.isLoading() ? loading(1.5) : 'Save')
-  )
+    disabled: model.configuration.configurationRequest.isLoading(),
+  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Save');
+
+/**
+ * Button to save the updated configuration
+ * @param {Object} model
+ * @return {vnode}
+ */
+const runRocConfigButton = (model) =>
+  h('button.btn.btn-primary', {
+    onclick: () => {
+      confirm(`Cards will be FULLY configured with Consul stored configuration.
+Thus, all parameters will be provided to o2-roc-config and NOT only the links.
+Are you sure you would like to continue?`)
+        && model.configuration.runRocConfigWorkflow()
+    },
+    disabled: model.configuration.configurationRequest.isLoading(),
+  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Configure');

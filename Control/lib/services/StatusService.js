@@ -43,12 +43,12 @@ class StatusService {
       consulStatus = this.config.consul;
       try {
         await this.consulService.getConsulLeaderStatus();
-        consulStatus.status = {ok: true};
+        consulStatus.status = {ok: true, configured: true};
       } catch (error) {
-        consulStatus.status = {ok: false, message: error.toString()};
+        consulStatus.status = {ok: false, configured: true, message: error.toString()};
       }
     } else {
-      consulStatus.status = {ok: false, message: this.NOT_CONFIGURED};
+      consulStatus.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
     }
     return consulStatus;
   }
@@ -64,12 +64,12 @@ class StatusService {
       try {
         const coreInfo = await this.ctrlService.getAliECSInfo();
         aliEcs = Object.assign({}, aliEcs, coreInfo);
-        aliEcs.status = {ok: true};
+        aliEcs.status = {ok: true, configured: true};
       } catch (error) {
-        aliEcs.status = {ok: false, message: error.toString()};
+        aliEcs.status = {ok: false, configured: true, message: error.toString()};
       }
     } else {
-      aliEcs.status = {ok: false, message: this.NOT_CONFIGURED};
+      aliEcs.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
     }
     return aliEcs;
   }
@@ -106,12 +106,12 @@ class StatusService {
       grafana.hostname = this.config.http.hostname;
       try {
         await httpGetJson(this.config.http.hostname, this.config.grafana.port, '/api/health');
-        grafana.status = {ok: true};
+        grafana.status = {ok: true, configured: true};
       } catch (error) {
-        grafana.status = {ok: false, message: error.toString()};
+        grafana.status = {ok: false, configured: true, message: error.toString()};
       }
     } else {
-      grafana.status = {ok: false, message: this.NOT_CONFIGURED};
+      grafana.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
     }
     return grafana;
   }
@@ -126,12 +126,12 @@ class StatusService {
       kafka = this.config.kafka;
       try {
         await httpGetJson(this.config.kafka.hostname, this.config.kafka.port, '/api/health');
-        kafka.status = {ok: true};
+        kafka.status = {ok: true, configured: true};
       } catch (error) {
-        kafka.status = {ok: false, message: error.toString()};
+        kafka.status = {ok: false, configured: true, message: error.toString()};
       }
     } else {
-      kafka.status = {ok: false, message: this.NOT_CONFIGURED};
+      kafka.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
     }
     return kafka;
   }
@@ -148,9 +148,9 @@ class StatusService {
     if (this.config?.http?.hostname && this.config?.http?.port) {
       const con = {hostname: this.config.http.hostname, port: this.config.http.port};
       gui = Object.assign(gui, con);
-      gui.status = {ok: true};
+      gui.status = {ok: true, configured: true};
     } else {
-      gui.status = {ok: false, message: this.NOT_CONFIGURED};
+      gui.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
     }
     return gui;
   }

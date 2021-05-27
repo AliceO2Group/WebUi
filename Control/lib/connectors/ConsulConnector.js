@@ -24,7 +24,7 @@ class ConsulConnector {
    * @param {ConsulService} consulService
    * @param {JSON} config
    */
-  constructor(consulService, config) {
+  constructor(consulService, config, padLock = undefined) {
     this.consulService = consulService;
     this.config = config;
     this.flpHardwarePath = (config && config.flpHardwarePath) ? config.flpHardwarePath : 'o2/hardware/flps';
@@ -32,6 +32,8 @@ class ConsulConnector {
     this.qcPath = (config && config.qcPath) ? config.qcPath : 'o2/components/qc';
     this.readoutPath = (config && config.readoutPath) ? config.readoutPath : 'o2/components/readout';
     this.consulKVPrefix = (config && config.consulKVPrefix) ? config.consulKVPrefix : 'ui/alice-o2-cluster/kv';
+
+    this.padLock = padLock;
   }
 
   /**
@@ -174,14 +176,22 @@ class ConsulConnector {
    * @param {Response} res
    */
   async saveCRUsConfiguration(req, res) {
-    const crusByHost = req.body;
-    const keyValues = this._mapToKVPairs(crusByHost);
-    try {
-      await this.consulService.putListOfKeyValues(keyValues);
-      log.info('[Consul] Successfully saved configuration links');
-      res.status(200).json({message: 'CRUs Configuration saved'});
-    } catch (error) {
-      errorHandler(error, res, 502);
+    if (this.padLock?.lockedBy === null || this.padLock?.lockedBy === undefined) {
+      errorHandler('Control is not locked', res, 403);
+      return false;
+    } else if (req.session.personid != this.padLock.lockedBy) {
+      errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
+      return false;
+    } else {
+      const crusByHost = req.body;
+      const keyValues = this._mapToKVPairs(crusByHost);
+      try {
+        await this.consulService.putListOfKeyValues(keyValues);
+        log.info('[Consul] Successfully saved configuration links');
+        res.status(200).json({info: {message: 'CRUs Configuration saved'}});
+      } catch (error) {
+        errorHandler(error, res, 502);
+      }
     }
   }
 
@@ -196,6 +206,7 @@ class ConsulConnector {
     const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutCardPath);
     Object.keys(crusByEndpoint)
       .filter((fieldKey) => fieldKey.split('/').length >= 7) // filter out incomplete keys
+      .filter((fieldKey) => fieldKey.split('/')[4].toUpperCase() === 'CRU') // keep only CRU cards
       .forEach((fieldKey) => {
         // o2/components/readoutcard/<hostname>/cru/<serial>/<endpoint>
         const splitKey = fieldKey.split('/');
@@ -204,8 +215,9 @@ class ConsulConnector {
         const serial = splitKey[5];
         const endpoint = splitKey[6];
         const cruId = `${cardType}_${serial}_${endpoint}`;
-
-        crus[host][cruId].config = JSON.parse(crusByEndpoint[fieldKey]);
+        if (crus[host] && crus[host][cruId]) {
+          crus[host][cruId].config = JSON.parse(crusByEndpoint[fieldKey]);
+        }
       });
     return crus;
   }
