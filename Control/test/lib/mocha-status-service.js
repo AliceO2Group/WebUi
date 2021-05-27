@@ -38,7 +38,7 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, {}, consulService);
       const consulStatus = await status.getConsulStatus();
 
-      expectedInfo.status = {ok: true};
+      expectedInfo.status = {ok: true, configured: true};
       assert.deepStrictEqual(consulStatus, expectedInfo);
     });
 
@@ -47,14 +47,14 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, {}, consulService);
       const consulStatus = await status.getConsulStatus();
 
-      expectedInfo.status = {ok: false, message: 'Unable to query Consul'};
+      expectedInfo.status = {ok: false, configured: true, message: 'Unable to query Consul'};
       assert.deepStrictEqual(consulStatus, expectedInfo);
     });
 
     it('should successfully return consul was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const consulStatus = await status.getConsulStatus();
-      const expected = {status: {ok: false, message: 'This service was not configured'}};
+      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
       assert.deepStrictEqual(consulStatus, expected);
     });
   });
@@ -70,7 +70,7 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, ctrlService, {});
       const coreStatus = await status.getAliEcsCoreStatus();
 
-      expectedInfo.status = {ok: true};
+      expectedInfo.status = {ok: true, configured: true};
       expectedInfo.version = '0.20';
       assert.deepStrictEqual(coreStatus, expectedInfo);
     });
@@ -80,14 +80,14 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, ctrlService, {});
       const coreStatus = await status.getAliEcsCoreStatus();
 
-      expectedInfo.status = {ok: false, message: 'Unable to query Core'};
+      expectedInfo.status = {ok: false, configured: true, message: 'Unable to query Core'};
       assert.deepStrictEqual(coreStatus, expectedInfo);
     });
 
     it('should successfully return that AliECS was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, ctrlService, {});
       const coreStatus = await status.getAliEcsCoreStatus();
-      const expected = {status: {ok: false, message: 'This service was not configured'}};
+      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
       assert.deepStrictEqual(coreStatus, expected);
     });
   });
@@ -100,7 +100,7 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, {}, {});
       const guiStatus = status.getGuiStatus();
 
-      expectedInfo.status = {ok: true};
+      expectedInfo.status = {ok: true, configured: true};
       delete guiStatus.version;
       assert.deepStrictEqual(guiStatus, expectedInfo);
     });
@@ -109,7 +109,7 @@ describe('StatusService test suite', () => {
       const status = new StatusService({}, {}, {});
       const guiStatus = status.getGuiStatus();
       delete guiStatus.version;
-      const expected = {status: {ok: false, message: 'This service was not configured'}};
+      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
       assert.deepStrictEqual(guiStatus, expected);
     });
   });
@@ -124,7 +124,7 @@ describe('StatusService test suite', () => {
       nock(`http://${config.http.hostname}:${config.grafana.port}`)
         .get('/api/health')
         .reply(200, {});
-      expectedInfo.status = {ok: true};
+      expectedInfo.status = {ok: true, configured: true};
       assert.deepStrictEqual(grafanaStatus, expectedInfo);
     });
 
@@ -134,14 +134,14 @@ describe('StatusService test suite', () => {
       nock(`http://${config.http.hostname}:${config.grafana.port}`)
         .get('/api/health')
         .replyWithError('Unable to connect');
-      expectedInfo.status = {ok: false, message: 'Error: Unable to connect'};
+      expectedInfo.status = {ok: false, configured: true, message: 'Error: Unable to connect'};
       assert.deepStrictEqual(grafanaStatus, expectedInfo);
     });
 
     it('should successfully return that grafana was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
-      const expected = {status: {ok: false, message: 'This service was not configured'}};
+      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
       assert.deepStrictEqual(grafanaStatus, expected);
     });
   });
@@ -156,7 +156,7 @@ describe('StatusService test suite', () => {
       nock(`http://${config.kafka.hostname}:${config.kafka.port}`)
         .get('/api/health')
         .reply(200, {});
-      expectedInfo.status = {ok: true};
+      expectedInfo.status = {ok: true, configured: true};
       assert.deepStrictEqual(kafkaStatus, expectedInfo);
     });
 
@@ -166,14 +166,14 @@ describe('StatusService test suite', () => {
       nock(`http://${config.kafka.hostname}:${config.kafka.port}`)
         .get('/api/health')
         .replyWithError('Unable to connect');
-      expectedInfo.status = {ok: false, message: 'Error: Unable to connect'};
+      expectedInfo.status = {ok: false, configured: true, message: 'Error: Unable to connect'};
       assert.deepStrictEqual(kafkaStatus, expectedInfo);
     });
 
     it('should successfully return that Kafka was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const kafkaStatus = await status.getKafkaStatus();
-      const expected = {status: {ok: false, message: 'This service was not configured'}};
+      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
       assert.deepStrictEqual(kafkaStatus, expected);
     });
   });

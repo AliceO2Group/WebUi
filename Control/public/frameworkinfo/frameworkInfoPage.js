@@ -36,7 +36,7 @@ export const header = (model) => [
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill.flex-column.p2', [
-  h('', tablesForDependenciesInfo(model.frameworkInfo)),
+  tablesForDependenciesInfo(model.frameworkInfo),
   tableAliEcsInfo(model.frameworkInfo.aliecs),
   tableIntegratedServicesInfo(model.frameworkInfo.integratedServices),
 ]);

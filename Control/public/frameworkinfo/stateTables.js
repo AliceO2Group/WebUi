@@ -21,7 +21,7 @@ import pageLoading from '../common/pageLoading.js';
  * @returns {vnode}
  */
 const loadingStateInfoTable = (label) =>
-  h('.shadow-level1',
+  h('.shadow-level1.mv1',
     h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
       h('tbody', [
         h('tr', h('th.flex-row', [
@@ -40,7 +40,7 @@ const loadingStateInfoTable = (label) =>
  * @returns {vnode}
 */
 const failureStateInfoTable = (label, error = undefined) =>
-  h('.shadow-level1',
+  h('.shadow-level1.mv1',
     h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
       h('tbody', [
         h('tr', h('th.flex-row', [
@@ -61,34 +61,58 @@ const failureStateInfoTable = (label, error = undefined) =>
  * @param {JSON} item 
  * @returns {vnode}
 */
-const successfulStateInfoTable = (label, dependency) => h('.shadow-level1',
-  h('table.table.table-sm', {style: 'white-space: pre-wrap;'},
+const successfulStateInfoTable = (label, dependency) =>
+  h('.shadow-level1.mv1',
+    !dependency.status.ok && !dependency.status.configured ?
+      unconfiguredStateInfoTable(label)
+      :
+      h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
+        h('tbody', [
+          h('tr',
+            h('th.flex-row', [
+              dependency.status && dependency.status.ok &&
+              h('label.badge.bg-success.white.f6', '✓'),
+              dependency.status && !dependency.status.ok &&
+              h('.badge.bg-danger.white.f6', '✕'),
+              h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()
+              ),
+            ])
+          ),
+          Object.keys(dependency).map((name) =>
+            name === 'status' ?
+              !dependency['status'].ok &&
+              h('tr.danger', [
+                h('th.w-25', 'error'),
+                h('td', dependency['status'].message),
+              ])
+              :
+              h('tr', [
+                h('th.w-25', name),
+                h('td', JSON.stringify(dependency[name])),
+              ])
+          )
+        ])
+      )
+  );
+
+/**
+ * Creates a table with a grey ? icon and the name of the service
+ * It also displays an informative message that the service was not configured
+ * @param {String} label - Name of the service
+ * @returns 
+ */
+const unconfiguredStateInfoTable = (label) =>
+  h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
     h('tbody', [
       h('tr',
         h('th.flex-row', [
-          dependency.status && dependency.status.ok &&
-          h('label.badge.bg-success.white.f6', '✓'),
-          dependency.status && !dependency.status.ok &&
-          h('.badge.bg-danger.white.f6', '✕'),
-          h('.mh2', {style: 'text-decoration: underline'}, label.toLocaleUpperCase()
+          h('.badge.bg-gray.white.f6', '?'),
+          h('.mh2', {style: 'text-decoration: underline'},
+            label.toLocaleUpperCase(),
           ),
+          h('.mh5', '- Service was not enabled')
         ])
-      ),
-      Object.keys(dependency).map((name) =>
-        name === 'status' ?
-          !dependency['status'].ok &&
-          h('tr.danger', [
-            h('th.w-25', 'error'),
-            h('td', dependency['status'].message),
-          ])
-          :
-          h('tr', [
-            h('th.w-25', name),
-            h('td', JSON.stringify(dependency[name])),
-          ])
       )
-    ])
-  )
-);
+    ]));
 
 export {loadingStateInfoTable, failureStateInfoTable, successfulStateInfoTable};
