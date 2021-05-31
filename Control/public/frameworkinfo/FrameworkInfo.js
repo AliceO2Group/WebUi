@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
@@ -35,6 +37,8 @@ export default class FrameworkInfo extends Observable {
 
     this.aliecs = RemoteData.notAsked();
     this.integratedServices = RemoteData.notAsked();
+
+    this.consulServicesLink = '';
   }
 
   /**
@@ -107,6 +111,11 @@ export default class FrameworkInfo extends Observable {
       this.statuses.consul = RemoteData.failure(result.message);
     } else {
       this.statuses.consul = RemoteData.success(result);
+      const CONSUL = COG.CONSUL;
+      this.consulServicesLink = (CONSUL.consulKVPrefix && CONSUL.coreServices && result.hostname && result.port) ?
+        `${result.hostname}:${result.port}/${CONSUL.consulKVPrefix}/${CONSUL.coreServices}/edit`
+        : '';
+
     }
     this.notify();
   }
