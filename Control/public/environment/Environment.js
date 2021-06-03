@@ -36,7 +36,11 @@ export default class Environment extends Observable {
     this.itemControl = RemoteData.notAsked();
     this.itemNew = RemoteData.notAsked();
 
-    this.expandUserVars = true;
+    this.isExpanded = {
+      userVars: true,
+      vars: false,
+      defaults: false,
+    }
   }
 
   /**
