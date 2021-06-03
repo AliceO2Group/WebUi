@@ -75,7 +75,7 @@ class JwtToken {
         if (err) {
           reject(err);
         } else {
-          decoded.newToken = this.generateToken(decoded.id, decoded.username, decoded.access);
+          decoded.newToken = this.generateToken(decoded.id, decoded.username, decoded.name, decoded.access);
           resolve(decoded);
         }
       });

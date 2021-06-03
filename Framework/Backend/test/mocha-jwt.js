@@ -19,6 +19,7 @@ const assert = require('assert');
 describe('JSON Web Token', () => {
   let verified;
   const username = 'test';
+  const name = 'Test';
   const id = 1111;
   const access = 1;
 
@@ -26,11 +27,12 @@ describe('JSON Web Token', () => {
     assert.strictEqual(verified.id, id);
     assert.strictEqual(verified.username, username);
     assert.strictEqual(verified.access, access);
+    assert.strictEqual(verified.name, name);
   });
 
   it('Generate and verify token', (done) => {
     const jwt = new JwtToken(config.jwt);
-    const token = jwt.generateToken(id, username, access);
+    const token = jwt.generateToken(id, username, name, access);
     jwt.verify(token)
       .then((decoded) => {
         verified = decoded;
@@ -42,7 +44,7 @@ describe('JSON Web Token', () => {
 
   it('Refresh token', (done) => {
     const jwt = new JwtToken(config.jwt);
-    const token = jwt.generateToken(id, username, access);
+    const token = jwt.generateToken(id, username, name, access);
     jwt.refreshToken(token)
       .then((data) => {
         jwt.verify(data.newToken)
