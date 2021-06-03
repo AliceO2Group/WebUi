@@ -20,12 +20,15 @@ import {h, iconChevronTop, iconChevronBottom} from '/js/src/index.js';
  * @param {Environment} environment
  * @returns {vnode}
  */
-const defaultsRow = (defaults = {}, environment) => {
+const defaultsRow = (defaults, environment) => {
+  if (!defaults || Object.keys(defaults).length === 0) {
+    defaults = undefined;
+  }
   return h('tr', [
     h('th.w-15',
       h('.flex-row', [
         h('.w-75', 'Defaults'),
-        h('.w-25.text-right.mh2.actionable-icon', {
+        defaults && h('.w-25.text-right.mh2.actionable-icon', {
           onclick: () => {
             environment.isExpanded.defaults = !environment.isExpanded.defaults;
             environment.notify();
@@ -34,9 +37,10 @@ const defaultsRow = (defaults = {}, environment) => {
         )]
       )
     ),
-    defaults && h('td.flex-row', !environment.isExpanded.defaults ?
-      h('.mh2.overflow', JSON.stringify(defaults))
-      : expandedKVPanel(environment, defaults)
+    h('td.flex-row',
+      (!environment.isExpanded.defaults || !defaults) ?
+        h('.mh2.overflow', JSON.stringify(defaults))
+        : expandedKVPanel(environment, defaults)
     )
   ]);
 };
@@ -47,12 +51,15 @@ const defaultsRow = (defaults = {}, environment) => {
  * @param {Environment} environment
  * @returns {vnode}
  */
-const varsRow = (vars = {}, environment) => {
+const varsRow = (vars, environment) => {
+  if (!vars || Object.keys(vars).length === 0) {
+    vars = undefined;
+  }
   return h('tr', [
     h('th.w-15',
       h('.flex-row', [
         h('.w-75', 'Vars'),
-        h('.w-25.text-right.mh2.actionable-icon', {
+        vars && h('.w-25.text-right.mh2.actionable-icon', {
           onclick: () => {
             environment.isExpanded.vars = !environment.isExpanded.vars;
             environment.notify();
@@ -61,9 +68,10 @@ const varsRow = (vars = {}, environment) => {
         )]
       )
     ),
-    vars && h('td.flex-row', !environment.isExpanded.vars ?
-      h('.mh2.overflow', JSON.stringify(vars))
-      : expandedKVPanel(environment, vars)
+    h('td.flex-row',
+      (!environment.isExpanded.vars || !vars) ?
+        h('.mh2.overflow', JSON.stringify(vars))
+        : expandedKVPanel(environment, vars)
     )
   ]);
 };
@@ -74,12 +82,15 @@ const varsRow = (vars = {}, environment) => {
  * @param {Environment} environment
  * @returns {vnode}
  */
-const userVarsRow = (userVars, environment) =>
-  h('tr', [
+const userVarsRow = (userVars, environment) => {
+  if (!userVars || Object.keys(userVars).length === 0) {
+    userVars = undefined;
+  }
+  return h('tr', [
     h('th.w-15',
       h('.flex-row', [
         h('.w-75', 'User Vars'),
-        h('.w-25.text-right.mh2.actionable-icon', {
+        userVars && h('.w-25.text-right.mh2.actionable-icon', {
           onclick: () => {
             environment.isExpanded.userVars = !environment.isExpanded.userVars;
             environment.notify();
@@ -88,11 +99,13 @@ const userVarsRow = (userVars, environment) =>
         )]
       )
     ),
-    userVars && h('td.flex-row', !environment.isExpanded.userVars ?
-      h('.mh2.overflow', JSON.stringify(userVars))
-      : expandedUserVarsPanel(environment, userVars)
+    h('td.flex-row',
+      (!environment.isExpanded.userVars || !userVars) ?
+        h('.mh2.overflow', JSON.stringify(userVars))
+        : expandedUserVarsPanel(environment, userVars)
     )
-  ]);
+  ])
+};
 
 /**
  * Display each KV pair on a new line
