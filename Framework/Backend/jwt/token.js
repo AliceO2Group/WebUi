@@ -46,8 +46,8 @@ class JwtToken {
    * @param {number} access - level of access
    * @return {object} generated token
    */
-  generateToken(personid, username, access = 0) {
-    const payload = {id: personid, username: username, access: access};
+  generateToken(personid, username, name, access = 0) {
+    const payload = {id: personid, username: username, name: name, access: access};
     const token = jwt.sign(payload, this._secret, {
       expiresIn: this._expiration,
       issuer: this._issuer

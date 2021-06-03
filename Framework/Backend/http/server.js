@@ -236,8 +236,9 @@ class HttpServer {
     const query = req.query;
     if (!query.token) {
       query.personid = 0;
+      query.username = 'anonymous';
       query.name = 'Anonymous';
-      query.token = this.jwt.generateToken(query.personid, query.name);
+      query.token = this.jwt.generateToken(query.personid, query.username, query.name);
       query.access = 0;
 
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
@@ -417,7 +418,7 @@ class HttpServer {
         personid: details.cern_person_id,
         name: details.name,
         access: this.authorise(details),
-        token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, this.authorise(details)),
+        token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, details.name, this.authorise(details)),
       };
 
       // Read back user params from state
