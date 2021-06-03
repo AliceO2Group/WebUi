@@ -10,7 +10,7 @@ The generated tokens includes following encrypted information:
  * Auth level (`0` - standard user, `1` - admin)
 
 If OpenID Connect is not used CERN ID is set to `0`, name to `Anonymous` and CERN username to `anonymous`.
-On the server-side these fields are available for every requset in the `req.query` object under following keys: `personid`, `name`, `username` and `access`.
+On the server-side those values are available for every requset from the `req.query` object under following keys: `personid`, `name`, `username` and `access`.
 On the client side use Session Service.
 
 ### Instance
