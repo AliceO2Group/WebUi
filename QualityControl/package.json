@@ -27,7 +27,7 @@
     "mocha": "mocha --exit test/**/mocha-*"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.17.0",
+    "@aliceo2/web-ui": "1.18.1",
     "jsroot": "^6.1.0"
   },
   "devDependencies": {
