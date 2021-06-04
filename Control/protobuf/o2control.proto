@@ -374,8 +374,8 @@ message GetWorkflowTemplatesRequest{
     bool allBranches = 3;
     bool allTags = 4;
     bool allWorkflows = 5;
-    bool noVarInfo = 6;
 }
+
 message VarSpecMessage {
     enum UiWidget {
         editBox = 0;    // plain string input line, can accept types number and string
@@ -417,12 +417,15 @@ message GetWorkflowTemplatesReply{
 // Repos
 ////////////////////////////////////////
 
-message ListReposRequest {}
+message ListReposRequest {
+    bool getRevisions = 1;
+}
 
 message RepoInfo {
     string name = 1;
     bool default = 2;
     string defaultRevision = 3;
+    repeated string revisions = 4;
 }
 
 message ListReposReply {
