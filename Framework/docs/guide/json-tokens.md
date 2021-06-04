@@ -6,9 +6,12 @@ JSON Web Tokens module secures requests or claims send between client and server
 The generated tokens includes following encrypted information:
  * CERN ID
  * CERN username
- * Auth level (currently always set to `0`)
+ * Full name
+ * Auth level (`0` - standard user, `1` - admin)
 
-If OpenID Connect is not used CERN ID is set to `0` and CERN username to `Anonymous`.
+If OpenID Connect is not used CERN ID is set to `0`, name to `Anonymous` and CERN username to `anonymous`.
+On the server-side those values are available for every requset from the `req.query` object under following keys: `personid`, `name`, `username` and `access`.
+On the client side use Session Service.
 
 ### Instance
 ```js
