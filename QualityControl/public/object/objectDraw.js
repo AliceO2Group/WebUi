@@ -179,6 +179,9 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     (shouldRedraw || shouldCleanRedraw)
   ) {
     const qcObject = objectRemoteData.payload.qcObject;
+    if (qcObject.mTreatMeAs !== '') {
+      qcObject._typename = qcObject.mTreatMeAs;
+    }
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.
