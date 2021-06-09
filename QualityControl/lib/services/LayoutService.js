@@ -12,13 +12,13 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('QualityControl/LayoutConnector');
+const log = new (require('@aliceo2/web-ui').Log)('QualityControl/LayoutService');
 const assert = require('assert');
 
 /**
  * Gateway for all Layout calls
  */
-class LayoutConnector {
+class LayoutService {
   /**
    * Setup Layout Connector
    * @param {JSONFileConnector} jsonFileConnector
@@ -153,4 +153,4 @@ class LayoutConnector {
   }
 }
 
-module.exports = LayoutConnector;
+module.exports = LayoutService;
