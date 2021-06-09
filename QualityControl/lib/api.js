@@ -29,12 +29,13 @@ module.exports.setup = (http) => {
   http.get('/objectTimestampList', getObjectTimestampList, {public: true});
   http.get('/listOnlineObjects', listOnlineObjects);
   http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
-  http.post('/readLayout', model.layoutConnector.readLayout.bind(model.layoutConnector));
-  http.post('/writeLayout', model.layoutConnector.updateLayout.bind(model.layoutConnector));
-  http.post('/listLayouts', model.layoutConnector.listLayouts.bind(model.layoutConnector));
-  http.delete('/layout/:layoutId', model.layoutConnector.deleteLayout.bind(model.layoutConnector));
-  http.post('/layout', model.layoutConnector.createLayout.bind(model.layoutConnector));
+  http.post('/readLayout', model.layoutService.readLayout.bind(model.layoutService));
+  http.post('/writeLayout', model.layoutService.updateLayout.bind(model.layoutService));
+  http.post('/listLayouts', model.layoutService.listLayouts.bind(model.layoutService));
+  http.delete('/layout/:layoutId', model.layoutService.deleteLayout.bind(model.layoutService));
+  http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
   http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService));
+  http.get('/checkUser', model.userService.addUser.bind(model.userService));
   new WebSocket(http);
 };
 
