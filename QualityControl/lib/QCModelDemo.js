@@ -14,7 +14,6 @@
 */
 
 const LayoutService = require('./services/LayoutService');
-const UserService = require('./services/UserService');
 const StatusService = require('./StatusService.js');
 const config = require('./../test/test-config.js');
 const projPackage = require('./../package.json');
@@ -278,8 +277,7 @@ const dataConnector = {
   deleteLayout
 };
 
-module.exports.layoutService = new LayoutService(dataConnector);
-module.exports.userService = new UserService(dataConnector);
+module.exports.layoutConnector = new LayoutService(dataConnector);
 module.exports.getObjectTimestampList = getObjectTimestampList;
 
 module.exports.statusService = new StatusService(config, projPackage);

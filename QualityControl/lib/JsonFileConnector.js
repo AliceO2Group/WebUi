@@ -32,7 +32,7 @@ class JsonFileConnector {
     this.pathnameTmp = this.pathname + '~tmp';
 
     // Mirror data from content of JSON file
-    this.data = {layouts: [], users: []};
+    this.data = {layouts: []};
 
     // Write lock access
     this.lock = new Lock();
@@ -75,10 +75,7 @@ class JsonFileConnector {
           if (!dataFromFile || !dataFromFile.layouts || !Array.isArray(dataFromFile.layouts)) {
             return reject(new Error(`DB file should have an array of layouts ${this.pathname}`));
           }
-          // check if users exists and if not declare and initialize with an empty array
-          if (!dataFromFile.users || !Array.isArray(dataFromFile.users)) {
-            dataFromFile.users = [];
-          }
+
           this.data = dataFromFile;
           resolve();
         } catch (e) {
@@ -183,45 +180,6 @@ class JsonFileConnector {
   async listLayouts(filter = {}) {
     return this.data.layouts.filter((layout) =>
       filter.owner_id === undefined || layout.owner_id === filter.owner_id);
-  }
-
-  /* User helpers */
-
-  /**
-   * Check if a user is saved and if not, add it to the in-memory list and db
-   * @param {JSON} user 
-   */
-  addUser(user) {
-    this._validateUser(user);
-    const isUserPresent = this.data.users.findIndex(
-      (userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
-
-    if (!isUserPresent) {
-      this.data.users.push(user);
-      this._writeToFile();
-    }
-  }
-
-  /**
-   * Validate that a user JSON contains all the mandatory fields
-   * @param {JSON} user
-   */
-  _validateUser(user) {
-    if (!user) {
-      throw new Error('User Object is mandatory');
-    }
-    if (!user.username) {
-      throw new Error('Field username is mandatory');
-    }
-    if (!user.name) {
-      throw new Error('Field name is mandatory');
-    }
-    if (user.id === null || user.id === undefined || user.id === '') {
-      throw new Error('Field id is mandatory');
-    }
-    if (isNaN(user.id)) {
-      throw new Error('Field id must be a number');
-    }
   }
 }
 

@@ -78,30 +78,30 @@ describe('UserService test suite', () => {
     before(() => userService = new UserService({}));
 
     it('should throw error due to missing username when calling validateUser()', () => {
-      assert.throws(() => userService._validateUser(''), new Error('username of the user is mandatory'))
-      assert.throws(() => userService._validateUser(), new Error('username of the user is mandatory'))
-      assert.throws(() => userService._validateUser(undefined), new Error('username of the user is mandatory'))
-      assert.throws(() => userService._validateUser(null), new Error('username of the user is mandatory'))
+      assert.throws(() => userService.validateUser(''), new Error('username of the user is mandatory'))
+      assert.throws(() => userService.validateUser(), new Error('username of the user is mandatory'))
+      assert.throws(() => userService.validateUser(undefined), new Error('username of the user is mandatory'))
+      assert.throws(() => userService.validateUser(null), new Error('username of the user is mandatory'))
     });
 
     it('should throw error due to missing name when calling validateUser()', () => {
-      assert.throws(() => userService._validateUser('username', ''), new Error('name of the user is mandatory'))
-      assert.throws(() => userService._validateUser('username'), new Error('name of the user is mandatory'))
-      assert.throws(() => userService._validateUser('username', undefined), new Error('name of the user is mandatory'))
-      assert.throws(() => userService._validateUser('username', null), new Error('name of the user is mandatory'))
+      assert.throws(() => userService.validateUser('username', ''), new Error('name of the user is mandatory'))
+      assert.throws(() => userService.validateUser('username'), new Error('name of the user is mandatory'))
+      assert.throws(() => userService.validateUser('username', undefined), new Error('name of the user is mandatory'))
+      assert.throws(() => userService.validateUser('username', null), new Error('name of the user is mandatory'))
     });
 
     it('should throw error due to missing id when calling validateUser()', () => {
-      assert.throws(() => userService._validateUser('username', 'name', ''), new Error('id of the user is mandatory'))
-      assert.throws(() => userService._validateUser('username', 'name'), new Error('id of the user is mandatory'))
-      assert.throws(() => userService._validateUser('username', 'name', undefined), new Error('id of the user is mandatory'));
-      assert.throws(() => userService._validateUser('username', 'name', null), new Error('id of the user is mandatory'))
-      assert.throws(() => userService._validateUser('username', 'name', 'test'), new Error('id of the user must be a number'))
+      assert.throws(() => userService.validateUser('username', 'name', ''), new Error('id of the user is mandatory'))
+      assert.throws(() => userService.validateUser('username', 'name'), new Error('id of the user is mandatory'))
+      assert.throws(() => userService.validateUser('username', 'name', undefined), new Error('id of the user is mandatory'));
+      assert.throws(() => userService.validateUser('username', 'name', null), new Error('id of the user is mandatory'))
+      assert.throws(() => userService.validateUser('username', 'name', 'test'), new Error('id of the user must be a number'))
     });
 
     it('should not throw error when all parameters are ok', () => {
-      assert.doesNotThrow(() => userService._validateUser('username', 'name', 0));
-      assert.doesNotThrow(() => userService._validateUser('username', 'name', 22));
+      assert.doesNotThrow(() => userService.validateUser('username', 'name', 0));
+      assert.doesNotThrow(() => userService.validateUser('username', 'name', 22));
     });
   });
 });

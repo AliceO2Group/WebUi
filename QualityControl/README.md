@@ -14,7 +14,6 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   - [Run QCG locally](#run-qcg-locally)
   - [Public API](#public-api)
   - [Enable HTTPS](#enable-https)
-  - [Display a non-standard ROOT object in QCG](#display-a-non-standard-root-object-in-qcg)
   - [Online Mode](#online-mode)
 
 ## Installation
@@ -84,9 +83,6 @@ npm start
 - Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
-## Display a non-standard ROOT object in QCG
-
-`QCG` is able to display non-standard ROOT objects with the help of QC. More information can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#display-a-non-standard-root-object-in-qcg) 
 ## Online Mode
 QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class. 
 
