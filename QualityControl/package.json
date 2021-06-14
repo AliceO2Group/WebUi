@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "2.4.0",
+  "version": "2.4.2",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -13,7 +13,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 8.9.4"
+    "node": ">= 14.16.0"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
@@ -27,7 +27,7 @@
     "mocha": "mocha --exit test/**/mocha-*"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.18.1",
+    "@aliceo2/web-ui": "1.18.2",
     "jsroot": "^6.1.0"
   },
   "devDependencies": {
@@ -43,6 +43,5 @@
   "bundledDependencies": [
     "@aliceo2/web-ui",
     "jsroot"
-  ],
-  "main": "export.js"
+  ]
 }
