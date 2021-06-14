@@ -36,12 +36,9 @@ class UserService {
    */
   async addUser(req, res) {
     const {personid: id, name, username} = req.session;
-    // const username = 'anon';
-    // const name = 'anon anon';
-    // const id = 0;
 
     try {
-      this.validateUser(username, name, id);
+      this._validateUser(username, name, id);
       await this.dataConnector.addUser({id, name, username});
       res.status(200).json({ok: true});
     } catch (err) {
@@ -59,7 +56,7 @@ class UserService {
    * @param {string} name
    * @param {number} id
    */
-  validateUser(username, name, id) {
+  _validateUser(username, name, id) {
     if (!username) {
       throw new Error('username of the user is mandatory');
     }

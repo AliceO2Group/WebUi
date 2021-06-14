@@ -91,7 +91,7 @@ export default class Model extends Observable {
     }
     this.object.loadList();
     this.layout.loadMyList();
-    this.checkuser();
+    this.loader.get('/api/checkUser');
 
     // Init first page
     this.handleLocationChange();
@@ -231,14 +231,6 @@ export default class Model extends Observable {
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Notify server about a user loading the application
-   * Response will not be parsed
-   */
-  checkuser() {
-    this.loader.get('/api/checkUser');
   }
 
   /**

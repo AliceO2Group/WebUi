@@ -72,10 +72,10 @@ class JsonFileConnector {
           const dataFromFile = JSON.parse(data);
 
           // check data we just read
-          if (!dataFromFile
-            || !dataFromFile.layouts || !Array.isArray(dataFromFile.layouts)) {
+          if (!dataFromFile || !dataFromFile.layouts || !Array.isArray(dataFromFile.layouts)) {
             return reject(new Error(`DB file should have an array of layouts ${this.pathname}`));
           }
+          // check if users exists and if not declare and initialize with an empty array
           if (!dataFromFile.users || !Array.isArray(dataFromFile.users)) {
             dataFromFile.users = [];
           }
