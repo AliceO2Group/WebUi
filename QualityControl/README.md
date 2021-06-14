@@ -87,18 +87,11 @@ npm start
 QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class. 
 
 For this, QCG is using Service Discovery capabilities of [Consul](https://www.consul.io/).
-Once `Consul` is [installed](https://learn.hashicorp.com/consul/getting-started/install) and running, update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running.
-
-Moreover, a refresh rate interval can be set to limit the user number of requests. If no `refreshRate` is provided, defaults as shown below will be used:
-e.g.
+Once `Consul` is [installed](https://learn.hashicorp.com/consul/getting-started/install) and running, update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running:
 ```javascript
 consul: {
   hostname: 'localhost',
-  port: 8500,
-  refreshRate: {
-      min: 10,
-      max: 120
-    }
+  port: 8500
 }
 ```
 Online mode will use an optional prefix for its queries specified in [ccdb.prefix](#ccdb). This is to ensure the same results are provided in both Offline & Online mode.
@@ -119,4 +112,4 @@ QualityControl project makes use of two workflows.
 
 ### [release.yml](../.github/workflows/release.yml)
 * Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/qc](https://www.npmjs.com/package/@aliceo2/qc)
-* Builds a `tgz` file which contains an archive of the project. This can than be used for local repositories installations
+* Raises a new Pull-Request in [alisw/alidist](https://github.com/alisw/alidist) with changes to the recipe `qcg.sh` with the new version and new tag
