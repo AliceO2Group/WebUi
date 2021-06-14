@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -28,7 +28,7 @@
     "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.18.1"
+    "@aliceo2/web-ui": "1.18.2"
   },
   "devDependencies": {
     "eslint": "^7.24.0",
