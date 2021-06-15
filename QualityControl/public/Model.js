@@ -91,6 +91,7 @@ export default class Model extends Observable {
     }
     this.object.loadList();
     this.layout.loadMyList();
+    this.loader.get('/api/checkUser');
 
     // Init first page
     this.handleLocationChange();

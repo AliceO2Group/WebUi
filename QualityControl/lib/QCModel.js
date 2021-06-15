@@ -20,19 +20,20 @@ const CCDBConnector = require('./CCDBConnector.js');
 const MySQLConnector = require('./MySQLConnector.js');
 const AMOREConnector = require('./AMOREConnector.js');
 const JsonFileConnector = require('./JsonFileConnector.js');
-const LayoutConnector = require('./connector/LayoutConnector.js');
+const LayoutService = require('./services/LayoutService.js');
 const StatusService = require('./StatusService.js');
+const UserService = require('./services/UserService.js');
 
 const log = new (require('@aliceo2/web-ui').Log)('QualityControl/QCModel');
 
 // --------------------------------------------------------
 // Initialization of model according to config file
-
-const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
-const layoutConnector = new LayoutConnector(jsonDb);
-module.exports.layoutConnector = layoutConnector;
 const statusService = new StatusService(config, projPackage);
 module.exports.statusService = statusService;
+
+const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+module.exports.userService = new UserService(jsonDb);
+module.exports.layoutService = new LayoutService(jsonDb);
 
 if (config.consul) {
   const consulService = new ConsulService(config.consul);
