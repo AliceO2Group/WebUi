@@ -69,7 +69,7 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
       await page.waitForTimeout(500);
       const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is taken by anonymous (id 0)');
+      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
     });
   });
 

@@ -165,7 +165,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
     await page.waitForTimeout(500);
     const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.deepStrictEqual(lockButton, 'Lock is taken by anonymous (id 0)');
+    assert.deepStrictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
   });
 
   it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
