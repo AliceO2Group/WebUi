@@ -66,8 +66,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
       kind: 'Success',
       payload: {
         repos: [
-          {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev'},
-          {name: 'git.com/alice-user/alice-repo/'}
+          {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: []},
+          {name: 'git.com/alice-user/alice-repo/', revisions: []}
         ]
       }
     };
