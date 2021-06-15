@@ -57,13 +57,13 @@ describe('Control', function() {
   describe('Check if lock is acquired', () => {
     it('should successfully request LOCK if it is not already taken', async () => {
       let lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      if (lockButton !== 'Lock is taken by anonymous (id 0)') {
+      if (lockButton !== 'Lock is taken by Anonymous (id 0)') {
         await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
         await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
         await page.waitForTimeout(1000);
       }
       lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is taken by anonymous (id 0)', 'Lock might be taken by another user');
+      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)', 'Lock might be taken by another user');
     });
   });
 
