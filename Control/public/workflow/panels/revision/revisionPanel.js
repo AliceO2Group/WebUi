@@ -18,36 +18,24 @@ import errorComponent from './../../../common/errorComponent.js';
 /**
 * Method to create the revision input-dropdown panel
 * @param {RemoteData} workflow
-* @param {RemoteData<Map<String, JSON>>} templatesMap
-* @param {string} repository
 * @return {vnode}
 */
-export default (workflow, templatesMap, repository) =>
-  !templatesMap[repository] ?
-    errorComponent('No revisions found for this repository. Please contact an administrator') :
-    revisionInputDropdown(workflow, templatesMap, repository);
-
-
-/**
- * Method which creates a combo box (input + dropdown) of repositories
- * @param {Object} workflow
- * @param {RemoteData<Map<String, JSON>>} templatesMap
- * @param {string} repository
- * @return {vnode}
- */
-const revisionInputDropdown = (workflow, templatesMap, repository) => h('.mv2.text-left.w-100', [
-  h('h5', 'Revision:'),
-  h('', {style: 'display:flex; flex-direction: row;'}, [
-    h('.dropdown', {
-      style: 'flex-grow: 1;',
-      class: workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
-    }, [
-      revisionInputField(workflow),
-      revisionDropdownArea(workflow, templatesMap, repository)
-    ]),
-    workflow.isInputCommitFormat() && buttonCommitFormat(workflow)
-  ]),
-]);
+export default (workflow) =>
+  h('.pv1.text-left.w-100', [
+    h('h5', 'Revision:'),
+    workflow.revisions.length === 0 ?
+      h('', errorComponent('No revisions found for the selected repository')) :
+      h('', {style: 'display:flex; flex-direction: row;'}, [
+        h('.dropdown', {
+          style: 'flex-grow: 1;',
+          class: workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
+        }, [
+          revisionInputField(workflow),
+          revisionDropdownArea(workflow)
+        ]),
+        workflow.isInputCommitFormat() && buttonCommitFormat(workflow)
+      ]),
+  ]);
 
 /**
  * Create an input field for revision input:
@@ -56,43 +44,43 @@ const revisionInputDropdown = (workflow, templatesMap, repository) => h('.mv2.te
  * @param {Object} workflow
  * @return {vnode}
  */
-const revisionInputField = (workflow) => h('input.form-control', {
-  type: 'text',
-  style: 'z-index:100',
-  value: workflow.revision.rawValue,
-  oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
-  onblur: () => workflow.closeRevisionInputDropdown(),
-  onkeyup: (e) => {
-    if (e.keyCode === 27) { // code for escape
-      workflow.closeRevisionInputDropdown();
+const revisionInputField = (workflow) =>
+  h('input.form-control', {
+    type: 'text',
+    style: 'z-index:100',
+    value: workflow.revision.rawValue,
+    oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
+    onblur: () => workflow.closeRevisionInputDropdown(),
+    onkeyup: (e) => {
+      if (e.keyCode === 27) { // code for escape
+        workflow.closeRevisionInputDropdown();
+      }
+    },
+    onclick: (e) => {
+      workflow.setRevisionInputDropdownVisibility(true);
+      workflow.updateInputSearch('revision', '');
+      e.stopPropagation();
     }
-  },
-  onclick: (e) => {
-    workflow.setRevisionInputDropdownVisibility(true);
-    workflow.updateInputSearch('revision', '');
-    e.stopPropagation();
-  }
-});
+  });
 
 
 /**
  * Create dropdown area based on user input on revision field
  * @param {Object} workflow
- * @param {RemoteData<Map<String, JSON>>} templatesMap
  * @param {string} repository
  * @return {vnode}
  */
-const revisionDropdownArea = (workflow, templatesMap, repository) => h('.dropdown-menu.w-100.scroll-y',
-  {style: 'max-height: 25em;'},
-  Object.keys(templatesMap[repository])
-    .filter((name) => name.match(workflow.revision.regex))
-    .map((revision) =>
-      h('a.menu-item.w-wrapped', {
-        class: revision === workflow.form.revision ? 'selected' : '',
-        onmousedown: () => workflow.updateInputSelection('revision', revision),
-      }, revision)
-    )
-);
+const revisionDropdownArea = (workflow) =>
+  h('.dropdown-menu.w-100.scroll-y', {style: 'max-height: 25em;'},
+    workflow.revisions
+      .filter((name) => name.match(workflow.revision.regex))
+      .map((revision) =>
+        h('a.menu-item.w-wrapped', {
+          class: revision === workflow.form.revision ? 'selected' : '',
+          onmousedown: () => workflow.updateInputSelection('revision', revision),
+        }, revision)
+      )
+  );
 
 /**
 * Button to be displayed if revision input is a commit format

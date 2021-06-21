@@ -21,7 +21,7 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export default (workflow) =>
-  h('', [
+  h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
     h('.p2.panel', [
       dcsPanel(workflow),
@@ -41,7 +41,7 @@ export default (workflow) =>
  * @return {vnode}
  */
 const dcsPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left', [
     h('.w-50', 'DCS:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {

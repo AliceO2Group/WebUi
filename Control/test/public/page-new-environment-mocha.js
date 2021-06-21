@@ -52,12 +52,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request and parse a list of template objects', async () => {
-    const templatesMap = await page.evaluate(() => window.model.workflow.templatesMap);
-    const expectedMap = {
+    const templates = await page.evaluate(() => window.model.workflow.templates);
+    const expectedTemplates = {
       kind: 'Success', payload:
-        {'git.cern.ch/some-user/some-repo/': {dev: ['prettyreadout-1'], master: ['prettyreadout-1']}, }
+        ['prettyreadout-1']
     };
-    assert.deepStrictEqual(templatesMap, expectedMap);
+    assert.deepStrictEqual(templates, expectedTemplates);
   });
 
   it('should successfully request and parse a list of repositories objects', async () => {
@@ -66,7 +66,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       kind: 'Success',
       payload: {
         repos: [
-          {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: []},
+          {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: ['master', 'dev']},
           {name: 'git.com/alice-user/alice-repo/', revisions: []}
         ]
       }
@@ -76,6 +76,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully fill form with default revision and repo passed from core', async () => {
     const initialForm = await page.evaluate(() => window.model.workflow.form);
+    delete initialForm.observers
     const expectedForm = {
       repository: 'git.cern.ch/some-user/some-repo/',
       revision: 'dev',
@@ -99,10 +100,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully select a workflow from template list initially', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a').click());
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
     await page.waitForTimeout(200);
     const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a');
+      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
       return {classList: element.classList};
     });
 
@@ -129,15 +130,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully display `Refresh repositories` button', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button', {timeout: 5000});
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > div > button', {timeout: 5000});
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > div > button').title);
     assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
   });
 
   it('should click to refresh repositories but throw error due to `Control is not locked`', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > div > button').click());
     await page.waitForTimeout(500);
     const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
     assert.deepStrictEqual(calls['refreshRepos'], undefined);
@@ -153,10 +154,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should have error of missing revisions for this repository', async () => {
     const errorMessage = await page.evaluate(() => {
       const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > p');
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div:nth-child(2) > div > p');
       return {classList: errorElement.classList, text: errorElement.innerText};
     });
-    assert.strictEqual(errorMessage.text.trim(), 'No revisions found for this repository. Please contact an administrator');
+    assert.strictEqual(errorMessage.text.trim(), 'No revisions found for the selected repository');
     assert.deepStrictEqual(errorMessage.classList, {0: 'text-center', 1: 'danger'});
   });
 
@@ -170,7 +171,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > div > button').click());
     await page.waitForTimeout(500);
     const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
     assert.ok(calls['refreshRepos']);
@@ -180,7 +181,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div > div > div > button').click());
     await page.waitForTimeout(1000);
     assert.ok(calls['refreshRepos']);
     assert.ok(calls['getWorkflowTemplates']);
@@ -188,10 +189,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully select a workflow from template list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a').click());
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
     await page.waitForTimeout(200);
     const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(3) > div > div > a');
+      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
       return {classList: element.classList};
     });
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
@@ -271,7 +272,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully fill in readout uri from typed text', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div > div:nth-child(7) > div > div:nth-child(2) > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(7) > div > div:nth-child(2) > div:nth-child(2) > input');
     page.keyboard.type('file-readout');
     await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
@@ -280,38 +281,38 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should display variables (K;V) panel', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div', {timeout: 2000});
-    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div').innerText);
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div', {timeout: 2000});
+    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div').innerText);
     assert.strictEqual('Advanced Configuration', title);
   });
 
   it('should successfully add trimmed pair (K;V) to variables', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div > div > input');
     page.keyboard.type('TestKey   ');
     await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div > div:nth-child(2) > input');
     page.keyboard.type(' TestValue  ');
     await page.waitForTimeout(200);
 
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div >  div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
     assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div >  div > input');
     page.keyboard.type('TestKey2');
     await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div >  div:nth-child(2) > input');
     page.keyboard.type('TestValue2');
     await page.waitForTimeout(200);
 
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div >  div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
 
@@ -321,20 +322,20 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
     await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div > div:nth-child(3)').click();
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').click();
     });
     await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
     assert.deepStrictEqual(variables, expectedVars);
-    const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div > div:nth-child(3)').classList);
+    const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);
   });
 
   // FLP Selection
   it('should successfully request a list of FLP names', async () => {
-    const flpList = await page.evaluate(() => window.model.workflow.flpList);
+    const flpList = await page.evaluate(() => window.model.workflow.flpSelection.list);
     const expectedList = {
       kind: 'Success', payload: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']
     };
