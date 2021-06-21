@@ -33,8 +33,8 @@ import errorPage from '../common/errorPage.js';
 export const header = (model) => h('h4.w-100 text-center', 'New Environment');
 
 /**
-* Form with inputs for creating a new environment
-Check that a lits of repositories was retrieved successfully
+ * Form with inputs for creating a new environment
+ * Check that a lits of repositories was retrieved successfully
  * @param {Object} model
  * @return {vnode}
  */
@@ -42,45 +42,33 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
   model.workflow.repoList.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (repoList) => (repoList.length === 0)
-      ? h('h3.m4', ['No repositories found.']) : showTemplatesValidation(model, repoList.repos),
+    Success: (repoList) => (repoList.repos.length === 0)
+      ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
     Failure: (error) => errorPage(error),
   })
 ]);
 
 /**
- * Check that after repositories were requested, templates were loaded successfully
- * @param {Object} model
- * @param {Array<JSON>} repoList - list of Repositories
- * @return {vnode}
- */
-const showTemplatesValidation = (model, repoList) =>
-  model.workflow.templatesMap.match({
-    NotAsked: () => null,
-    Loading: () => pageLoading(),
-    Failure: (error) => errorPage(error),
-    Success: (templatesMap) => (Object.keys(templatesMap).length === 0)
-      ? h('h3.m4', ['No public templates found.']) : showNewEnvironmentForm(model, repoList, templatesMap)
-  });
-
-/**
 * Create a form for the user to select inputs for a new environment
 * @param {Object} model
-* @param {RemoteData<Array<JSON>>} repoList
-* @param {RemoteData<Map<String, JSON>>} templatesMap
+* @param {Array<JSON>} repoList
 * @return {vnode}
 */
-const showNewEnvironmentForm = (model, repoList, templatesMap) => [
-  h('.flex-row', [
-    h('.w-30.ph2.flex-column', [
-      h('h5.bg-gray-light.p2.panel-title.w-100', 'Select Template'),
-      h('.form-group.p3.panel.w-100.flex-column', [
-        repositoryDropdownList(model.workflow, repoList),
-        revisionPanel(model.workflow, templatesMap, model.workflow.form.repository),
-        templatesPanel(model.workflow, templatesMap),
-      ])
+const showNewEnvironmentForm = (model, repoList) => [
+  h('.flex-column', [
+    h('.flex-row.w-100', [
+      h('.flex-column.w-50', [
+        h('h5.bg-gray-light.p2.panel-title.w-100', 'Select Template'),
+        h('.form-group.p2.panel.w-100.flex-column', [
+          repositoryDropdownList(model.workflow, repoList),
+          revisionPanel(model.workflow),
+          model.workflow.revisions.length !== 0 &&
+          templateAreaList(model.workflow, model.workflow.form.repository, model.workflow.form.revision)
+        ]),
+      ]),
+      flpSelectionPanel(model.workflow),
     ]),
-    workflowSettingsPanels(model.workflow)
+    model.workflow.form.template && workflowSettingsPanels(model.workflow)
   ]),
   actionableCreateEnvironment(model),
 ];
@@ -93,8 +81,7 @@ const showNewEnvironmentForm = (model, repoList, templatesMap) => [
  * @return {vnode}
  */
 const workflowSettingsPanels = (workflow) =>
-  h('.w-70.ph2.flex-column', [
-    flpSelectionPanel(workflow),
+  h('.w-100.ph2.flex-row', [
     basicVarsPanel(workflow),
     advancedVarsPanel(workflow)
   ]);
@@ -107,11 +94,11 @@ const workflowSettingsPanels = (workflow) =>
  * @return {vnode}
  */
 const repositoryDropdownList = (workflow, repoList) =>
-  h('.text-left.w-100', [ // Dropdown Repositories
+  h('.text-left.w-100', [
     h('h5', 'Repository:'),
     h('.flex-row', [
       h('select.form-control', {
-        style: 'cursor: pointer; width: 85%;',
+        style: 'cursor: pointer; width: 80%;',
         onchange: (e) => workflow.setRepository(e.target.value)
       }, [
         repoList.map((repository) => repository.name)
@@ -120,7 +107,7 @@ const repositoryDropdownList = (workflow, repoList) =>
             value: repository
           }, repository))
       ]),
-      h('.text-right', {style: 'width:15%'},
+      h('.text-left.ph2', {style: 'width:13%'},
         h('button.btn', {
           title: 'Refresh repositories',
           class: workflow.refreshedRepositories.isLoading() ? 'loading' : '',
@@ -132,49 +119,48 @@ const repositoryDropdownList = (workflow, repoList) =>
   ]);
 
 /**
- * Create the templates panel based on user's selection of revision
- * @param {RemoteData} workflow
- * @param {RemoteData<Map<String, JSON>>} templatesMap
- * @return {vnode}
- */
-const templatesPanel = (workflow, templatesMap) =>
-  (workflow.isRevisionCorrect() &&
-    Object.values(templatesMap[workflow.form.repository][workflow.form.revision]).length !== 0) ?
-    templateAreaList(workflow, templatesMap, workflow.form.repository, workflow.form.revision)
-    : errorComponent('No templates found for this revision.');
-
-/**
- * Method to create the template Area List
+ * Create the template Area List treating the edge cases:
+ * * loading
+ * * error
+ * * empty list of templates
+ * * templates as expected
  * @param {Object} workflow
- * @param {RemoteData<Map<String, JSON>>} templatesMap
- * @param {string} repository
- * @param {string} revision
+ * @param {String} repository
+ * @param {String} revision
  * @return {vnode}
  */
-const templateAreaList = (workflow, templatesMap, repository, revision) =>
-  h('.text-left.w-100', [ // Dropdown Template
-    h('h5', {style: '', for: ''}, 'Workflow:'),
-    h('.shadow-level1.pv1',
-      Object.values(templatesMap[repository][revision]).map((template) =>
-        h('.flex-row', [
-          h('a.w-90.menu-item.w-wrapped', {
-            className: workflow.form.template === template ? 'selected' : null,
-            onclick: () => workflow.setTemplate(template)
-          }, template),
-          h('a.w-10.flex-row.items-center.justify-center.actionable-icon', {
-            href: `//${repository}/blob/${revision}/workflows/${template}.yaml`,
-            target: '_blank',
-            title: `Open workflow '${template}' definition`
-          }, info())
-        ])
-      )
-    )
+const templateAreaList = (workflow, repository, revision) =>
+  h('.text-left.w-100', [
+    h('h5', 'Workflow:'),
+    workflow.templates.match({
+      NotAsked: () => null,
+      Loading: () => h('.w-100.text-center', pageLoading(2)),
+      Failure: (error) => errorComponent(error),
+      Success: (templates) =>
+        (templates.length === 0)
+          ? errorComponent('No public templates found on this revision.') :
+          h('.shadow-level1.pv1',
+            templates.map((template) =>
+              h('.flex-row', [
+                h('a.w-90.menu-item.w-wrapped', {
+                  className: workflow.form.template === template ? 'selected' : null,
+                  onclick: () => workflow.form.setTemplate(template)
+                }, template),
+                h('a.w-10.flex-row.items-center.justify-center.actionable-icon', {
+                  href: `//${repository}/blob/${revision}/workflows/${template}.yaml`,
+                  target: '_blank',
+                  title: `Open workflow '${template}' definition`
+                }, info())
+              ])
+            )
+          )
+    })
   ]);
 
 /**
  * Create a panel with:
- * * a button which creates environment
  * * a text area in case of failure
+ * * a button which requests the creation of environment
  * @param {Object} model
  * @return {vnode}
  */
@@ -197,7 +183,7 @@ const actionableCreateEnvironment = (model) =>
  */
 const btnCreateEnvironment = (model) => h('button.btn.btn-primary', {
   class: model.environment.itemNew.isLoading() ? 'loading' : '',
-  disabled: model.environment.itemNew.isLoading() || !model.workflow.isInputSelected(),
+  disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
   onclick: () => model.workflow.createNewEnvironment(),
   title: 'Create environment based on selected workflow'
 }, 'Create');
