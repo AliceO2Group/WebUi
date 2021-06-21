@@ -63,20 +63,36 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
     ])
   ]),
   tasksMessagePanel(model),
-  h('.w-100', {style: 'display: flex; '}, [
-    h('.w-50.ph2', [
-      h('input', {
-        type: 'checkbox',
-        id: 'allHostsSelector',
-        style: 'cursor: pointer',
-        checked: model.configuration.selectedHosts.length === Object.keys(cruMapByHost).length,
-        onchange: () => model.configuration.toggleAllSelection(),
-      }),
-      h('label.d-inline.f6.ph1', {
-        for: 'allHostsSelector', style: 'cursor: pointer;white-space: nowrap', title: `Toggle selection of all hosts`
-      }, 'Toggle hosts')
+  h('.w-100', {style: 'display: flex;'}, [
+    h('.w-70.ph2.flex-row', [
+      h('.w-40', [
+        h('input', {
+          type: 'checkbox',
+          id: 'allHostsSelector',
+          style: 'cursor: pointer',
+          checked: model.configuration.selectedHosts.length === Object.keys(cruMapByHost).length,
+          onchange: () => model.configuration.toggleAllSelection(),
+        }),
+        h('label.d-inline.f6.ph1', {
+          for: 'allHostsSelector', style: 'cursor: pointer;white-space: nowrap', title: `Toggle selection of all hosts`
+        }, 'Toggle All Hosts'),
+      ]),
+      h('.ph2.w-50', [
+        h('input', {
+          type: 'checkbox',
+          id: 'allHostsUserLogicSelector',
+          style: 'cursor: pointer',
+          checked: model.configuration.areAllUserLogicsEnabled(),
+          onchange: () => model.configuration.toggleAllHostsUserLogicSelection(),
+        }),
+        h('label.d-inline.f6.ph1', {
+          for: 'allHostsUserLogicSelector',
+          style: 'cursor: pointer;white-space: nowrap',
+          title: `Toggle User Logic for All Hosts`
+        }, 'Toggle User Logic for All Hosts')
+      ]),
     ]),
-    h('a.w-50', {
+    h('a.w-30', {
       style: 'display:flex; justify-content: flex-end',
       href: model.configuration.getConsulConfigURL(),
       target: '_blank',
@@ -163,13 +179,34 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
  */
 const linksPanel = (model, cru) =>
   h('.flex-row.w-75', [
-    h('.w-20', toggleAllCheckBox(model, cru)),
-    h('.w-80.flex-row.flex-wrap', [
+    h('.w-15', toggleUserLogic(model, cru)),
+    h('.w-15', toggleAllCheckBox(model, cru)),
+    h('.w-70.flex-row.flex-wrap', [
       Object.keys(cru.config)
         .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
         .map((link, index) => checkBox(model, `link${index}`, `#${index}`, cru.config)),
     ])
   ]);
+
+/**
+ * Add a checkbox for the user to enable/disable the user logic
+ * Based on this selection the links panel will be hidden
+ * @param {Object} model
+ * @param {JSON} cru
+ * @returns {vndoe}
+ */
+const toggleUserLogic = (model, cru) =>
+  h('label.d-inline.f6', {
+    style: 'white-space: nowrap',
+    title: `Toggle selection of User Logic`
+  }, h('input', {
+    type: 'checkbox',
+    checked: cru.config.cru.userLogicEnabled === 'true',
+    onchange: () => {
+      cru.config.cru.userLogicEnabled = cru.config.cru.userLogicEnabled === 'true' ? 'false' : 'true';
+      model.configuration.notify();
+    }
+  }), ' User Logic');
 
 /**
  * A checkbox which will either select or unselect
@@ -181,9 +218,11 @@ const linksPanel = (model, cru) =>
 const toggleAllCheckBox = (model, cru) =>
   h('label.d-inline.f6.ph2', {
     style: 'white-space: nowrap',
+    class: cru.config.cru.userLogicEnabled === 'true' ? 'disabled-content' : '',
     title: `Toggle selection of all links`
   }, h('input', {
     type: 'checkbox',
+    disabled: cru.config.cru.userLogicEnabled === 'true',
     checked: Object.keys(cru.config)
       .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
       .filter((key) => cru.config[key].enabled === 'true').length === 12,
@@ -209,9 +248,11 @@ const toggleAllCheckBox = (model, cru) =>
 const checkBox = (model, key, title, config) =>
   h('label.d-inline.f6.ph2', {
     style: 'white-space: nowrap',
+    class: config.cru.userLogicEnabled === 'true' ? 'disabled-content' : '',
     title: `Toggle selection of ${key}`
   }, h('input', {
     type: 'checkbox',
+    disabled: config.cru.userLogicEnabled === 'true',
     checked: config[key].enabled === 'true',
     onchange: () => {
       config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';

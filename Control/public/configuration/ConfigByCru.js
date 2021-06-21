@@ -30,7 +30,8 @@ export default class Config extends Observable {
     this.model = model;
 
     this.cruMapByHost = RemoteData.notAsked();
-    this.cruToggleByHost = {};
+
+    this.cruToggleByHost = {}; // JSON in which the state of displayed information is saved
     this.cruToggleByCruEndpoint = {};
     this.selectedHosts = [];
 
@@ -67,6 +68,52 @@ export default class Config extends Observable {
     const allSelected = this.selectedHosts.length === Object.keys(this.cruMapByHost.payload).length;
     this.selectedHosts = allSelected ? [] : Object.keys(this.cruMapByHost.payload);
     this.notify();
+  }
+
+  /**
+   * Update the current selection with all hosts
+   */
+  selectAllHosts() {
+    this.selectedHosts = Object.keys(this.cruMapByHost.payload);
+  }
+
+  /**
+   * Enable/Disable all fields for UserLogic
+   */
+  toggleAllHostsUserLogicSelection() {
+    if (this.cruMapByHost.isSuccess()) {
+      const allULEnabled = this.areAllUserLogicsEnabled();
+      Object.keys(this.cruMapByHost.payload).forEach((key) => {
+        const cruByEndPoint = this.cruMapByHost.payload[key];
+        Object.keys(cruByEndPoint).forEach((cruKey) => {
+          console.log(allULEnabled)
+          cruByEndPoint[cruKey].config.cru.userLogicEnabled = allULEnabled ? 'false' : 'true';
+        });
+      });
+      this.selectAllHosts();
+      this.notify();
+    }
+  }
+
+  /**
+   * Parse through the Map<String<Map<String,JSON>> which contains the data about CRUs by endpoint by hosts
+   * and check if user logic is enabled on all
+   * @returns {boolean}
+   */
+  areAllUserLogicsEnabled() {
+    if (this.cruMapByHost.isSuccess()) {
+      let allULEnabled = true;
+      Object.keys(this.cruMapByHost.payload).forEach((key) => {
+        const cruByEndPoint = this.cruMapByHost.payload[key];
+        Object.keys(cruByEndPoint).forEach((cruKey) => {
+          if (cruByEndPoint[cruKey].config.cru.userLogicEnabled === 'false') {
+            allULEnabled = false;
+          }
+        });
+      });
+      return allULEnabled;
+    }
+    return false;
   }
 
   /**
