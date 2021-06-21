@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-export const PREFIX = {
+const PREFIX = {
   QC: {
     NONE: '-',
     JSON: 'json://',
@@ -23,4 +23,22 @@ export const PREFIX = {
     FILE: 'file://',
     CONSUL: 'consul-ini://'
   }
+};
+
+const WIDGET_VAR = {
+  EDIT_BOX: 'EDIT_BOX',
+  SLIDER: 'SLIDER',
+  LIST_BOX: 'LIST_BOX',
+  DROPDOWN_BOX: 'DROPDOWN_BOX',
+  COMBO_BOX: 'COMBO_BOX',
+};
+
+const VAR_TYPE = {
+  STRING: 'STRING',
+  NUMBER: 'NUMBER',
+  BOOL: 'BOOL',
+  ARRAY: 'ARRAY',
+  JSON: 'JSON',
 }
+
+export {PREFIX, WIDGET_VAR, VAR_TYPE};
