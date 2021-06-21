@@ -30,6 +30,12 @@ export default class FlpSelection extends Observable {
     this.list = RemoteData.notAsked(); // list of FLPs gathered from Consul
 
     this.firstFlpSelection = -1;
+
+    this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.consulKvStoreReadout = '';
+
+    this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
+    this.consulKvStoreQC = '';
   }
 
   /**

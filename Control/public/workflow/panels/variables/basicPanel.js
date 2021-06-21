@@ -72,7 +72,7 @@ const dcsPanel = (workflow) =>
  * @return {vnode}
  */
 const dataDistributionPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left', [
     h('.w-50', 'Data Distribution:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
@@ -109,7 +109,7 @@ const dataDistributionPanel = (workflow) =>
   * @return {vnode}
   */
 const dataDistributionSchedulerPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left', [
     h('.w-50', 'Data Distribution Scheduler:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
@@ -143,7 +143,7 @@ const dataDistributionSchedulerPanel = (workflow) =>
  * @return {vnode}
  */
 const epnPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left', [
     h('.w-50', 'EPN:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
@@ -177,7 +177,7 @@ const epnPanel = (workflow) =>
  * @return {vnode}
  */
 const qcddPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left', [
     h('.w-50', 'QC:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
@@ -213,7 +213,7 @@ const qcddPanel = (workflow) =>
  * @return {vnode}
  */
 const dplMwPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left', [
     h('.w-50', 'Minimal DPL workflow:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
@@ -283,14 +283,14 @@ const readoutPanel = (workflow) => {
             h('option', {
               id: 'consulOption',
               value: consulPre,
-              disabled: workflow.consulReadoutPrefix ? false : true,
+              disabled: workflow.flpSelection.consulReadoutPrefix ? false : true,
               selected: variables['readout_cfg_uri_pre'] === consulPre
             }, consulPre)
           ])
         ),
         h('.flex-row', {style: 'width:85%;'}, [
           variables['readout_cfg_uri_pre'] === consulPre && h('input.form-control.w-60', {
-            value: workflow.consulReadoutPrefix,
+            value: workflow.flpSelection.consulReadoutPrefix,
             disabled: true
           }),
           variables['readout_cfg_uri_pre'] && h('input.form-control', {
@@ -317,11 +317,11 @@ const readoutPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${workflow.consulKvStoreReadout}/${(
+        href: `//${workflow.flpSelection.consulKvStoreReadout}/${(
           variables['readout_cfg_uri'] ?
             variables['readout_cfg_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + workflow.consulReadoutPrefix + (
+      }, consulPre + workflow.flpSelection.consulReadoutPrefix + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
       )
@@ -370,14 +370,14 @@ const qcUriPanel = (workflow) => {
             h('option', {
               id: 'consulOption',
               value: consulPre,
-              disabled: workflow.consulQcPrefix ? false : true,
+              disabled: workflow.flpSelection.consulQcPrefix ? false : true,
               selected: variables['qc_config_uri_pre'] === consulPre
             }, consulPre)
           ])
         ),
         h('.flex-row', {style: 'width:85%;'}, [
           variables['qc_config_uri_pre'] === consulPre && h('input.form-control.w-60', {
-            value: workflow.consulQcPrefix,
+            value: workflow.flpSelection.consulQcPrefix,
             disabled: true
           }),
           variables['qc_config_uri_pre'] && h('input.form-control', {
@@ -404,11 +404,11 @@ const qcUriPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${workflow.consulKvStoreQC}/${(
+        href: `//${workflow.flpSelection.consulKvStoreQC}/${(
           variables['qc_config_uri'] ?
             variables['qc_config_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + workflow.consulQcPrefix + (
+      }, consulPre + workflow.flpSelection.consulQcPrefix + (
         variables['qc_config_uri'] ?
           variables['qc_config_uri'] : '')
       )

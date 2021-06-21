@@ -46,12 +46,8 @@ export default class Workflow extends Observable {
       rawValue: 'master'
     };
 
-    this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.consulKvStoreReadout = '';
     this.READOUT_PREFIX = PREFIX.READOUT;
 
-    this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.consulKvStoreQC = '';
     this.QC_PREFIX = PREFIX.QC;
   }
 
@@ -437,7 +433,7 @@ export default class Workflow extends Observable {
       };
     } else if (vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
       if (vars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
-        vars['readout_cfg_uri'] = this.consulReadoutPrefix + vars['readout_cfg_uri'];
+        vars['readout_cfg_uri'] = this.flpSelection.consulReadoutPrefix + vars['readout_cfg_uri'];
       }
       vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
       delete vars['readout_cfg_uri_pre'];
@@ -477,7 +473,7 @@ export default class Workflow extends Observable {
       };
     } else if (vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
       if (vars['qc_config_uri_pre'] === this.QC_PREFIX.CONSUL) {
-        vars['qc_config_uri'] = this.consulQcPrefix + vars['qc_config_uri'];
+        vars['qc_config_uri'] = this.flpSelection.consulQcPrefix + vars['qc_config_uri'];
       }
       vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
       delete vars['qc_config_uri_pre'];
