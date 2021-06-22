@@ -171,7 +171,10 @@ class ConsulConnector {
   }
 
   /**
-   * Save the given CRUs configuration to Consul
+   * Request the latest configuration from consul and within the latest configuration
+   * update the following fields with the data from the client:
+   * * userLogicEnabled
+   * * link0 - link11
    * @param {Request} req
    * @param {Response} res
    */
@@ -183,8 +186,13 @@ class ConsulConnector {
       errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
       return false;
     } else {
+      // Get the latest version of the configuraiton
+      const latestCardsByHost = await this._getCardsByHost();
+      const latestCrusByHost = this._mapCrusWithId(latestCardsByHost);
+      const latestCrusWithConfigByHost = await this._getCrusConfigById(latestCrusByHost);
+
       const crusByHost = req.body;
-      const keyValues = this._mapToKVPairs(crusByHost);
+      const keyValues = this._mapToKVPairs(crusByHost, latestCrusWithConfigByHost);
       try {
         await this.consulService.putListOfKeyValues(keyValues);
         log.info('[Consul] Successfully saved configuration links');
@@ -252,19 +260,28 @@ class ConsulConnector {
   }
 
   /**
-   * Method to build the keys for Consul update
+   * Given the client side configuration and the latest saved configuration in Consul,
+   * update the latest configuration with the data from the client side on the following fields:
+   * * cru.userLogicEnabled
+   * * link0 - link11
    * @param {JSON} crusByHost
    * @return {Array<KV>}
    */
-  _mapToKVPairs(crusByHost) {
+  _mapToKVPairs(crusByHost, latestCrusByHost) {
     const kvPairs = [];
     Object.keys(crusByHost).forEach((host) => {
       Object.keys(crusByHost[host]).forEach((cruId) => {
+        const latestConfig = latestCrusByHost[host][cruId].config;
         const cruConfig = crusByHost[host][cruId].config;
+
+        latestConfig.cru.userLogicEnabled = cruConfig.cru.userLogicEnabled;
+        for (let i = 0; i < 12; ++i) {
+          latestConfig[`link${i}`].enabled = cruConfig[`link${i}`].enabled;
+        }
         const serial = cruId.split('_')[1];
         const endpoint = cruId.split('_')[2];
         const pair = {}
-        pair[`${this.readoutCardPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(cruConfig, null, 2);
+        pair[`${this.readoutCardPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(latestConfig, null, 2);
         kvPairs.push(pair);
       })
     });
