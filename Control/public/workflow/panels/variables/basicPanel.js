@@ -42,7 +42,16 @@ export default (workflow) =>
  */
 const dcsPanel = (workflow) =>
   h('.flex-row.text-left.w-50', [
-    h('.w-50', 'DCS:'),
+    h('.w-50', {
+      style: 'cursor: pointer',
+      onclick: () => {
+        if (workflow.form.basicVariables['dcs_enabled'] === 'true') {
+          workflow.updateBasicVariableByKey('dcs_enabled', 'false');
+        } else {
+          workflow.updateBasicVariableByKey('dcs_enabled', 'true');
+        }
+      },
+    }, 'DCS:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
@@ -73,7 +82,20 @@ const dcsPanel = (workflow) =>
  */
 const dataDistributionPanel = (workflow) =>
   h('.flex-row.text-left.w-50', [
-    h('.w-50', 'Data Distribution:'),
+    h('.w-50', {
+      style: 'cursor: pointer',
+      onclick: () => {
+        if (workflow.form.basicVariables['dd_enabled'] === 'true') {
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'false');
+          workflow.updateBasicVariableByKey('odc_enabled', 'false');
+          workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
+          workflow.updateBasicVariableByKey('dd_enabled', 'false');
+          workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'false');
+        } else {
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+        }
+      },
+    }, 'Data Distribution:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
@@ -110,7 +132,17 @@ const dataDistributionPanel = (workflow) =>
   */
 const dataDistributionSchedulerPanel = (workflow) =>
   h('.flex-row.text-left.w-50', [
-    h('.w-50', 'Data Distribution Scheduler:'),
+    h('.w-50', {
+      style: 'cursor: pointer',
+      onclick: () => {
+        if (workflow.form.basicVariables['ddsched_enabled'] === 'true') {
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'false');
+        } else {
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+        }
+      },
+    }, 'Data Distribution Scheduler:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
@@ -144,7 +176,17 @@ const dataDistributionSchedulerPanel = (workflow) =>
  */
 const epnPanel = (workflow) =>
   h('.flex-row.text-left.w-50', [
-    h('.w-50', 'EPN:'),
+    h('.w-50', {
+      style: 'cursor: pointer',
+      onclick: () => {
+        if (workflow.form.basicVariables['odc_enabled'] === 'true') {
+          workflow.updateBasicVariableByKey('odc_enabled', 'false');
+        } else {
+          workflow.updateBasicVariableByKey('odc_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+        }
+      },
+    }, 'EPN:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
@@ -178,7 +220,18 @@ const epnPanel = (workflow) =>
  */
 const qcddPanel = (workflow) =>
   h('.flex-row.text-left.w-50', [
-    h('.w-50', 'QC:'),
+    h('.w-50', {
+      style: 'cursor: pointer',
+      onclick: () => {
+        if (workflow.form.basicVariables['qcdd_enabled'] === 'true') {
+          workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
+        } else {
+          workflow.updateBasicVariableByKey('qcdd_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+          workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'false');
+        }
+      },
+    }, 'QC:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
@@ -214,14 +267,25 @@ const qcddPanel = (workflow) =>
  */
 const dplMwPanel = (workflow) =>
   h('.flex-row.text-left.w-50', [
-    h('.w-50', 'Minimal DPL workflow:'),
+    h('.w-50', {
+      style: 'cursor: pointer',
+      onclick: () => {
+        if (workflow.form.basicVariables['minimal_dpl_enabled'] === 'true') {
+          workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'false');
+        } else {
+          workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'true');
+          workflow.updateBasicVariableByKey('dd_enabled', 'true');
+          workflow.updateBasicVariableByKey('qcdd_enabled', 'false');
+        }
+      },
+    }, 'Minimal DPL workflow:'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
         name: 'dplmw',
         id: 'dplMwOff',
         checked: workflow.form.basicVariables['minimal_dpl_enabled'] === 'false',
-        onchange: () => workflow.form.basicVariables['minimal_dpl_enabled'] = 'false'
+        onchange: () => workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'false')
       }),
       h('label', {for: 'dplMwOff'}, 'OFF')
     ]),
