@@ -102,7 +102,7 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
   Object.keys(cruMapByHost).map((host) =>
     h('', [
       h('h5.panel-title.p2.flex-row', [
-        h('.w-15.flex-row', [
+        h('.flex-row', [
           h('input', {
             type: 'checkbox',
             checked: model.configuration.selectedHosts.includes(host),
@@ -180,7 +180,9 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 const linksPanel = (model, cru) =>
   h('.flex-row.w-75', [
     h('.w-15', toggleUserLogic(model, cru)),
-    h('.w-15', toggleAllCheckBox(model, cru)),
+    Object.keys(cru.config)
+      .filter((configField) => configField.match('link[0-9]{1,2}'))
+      .length !== 0 && h('.w-15', toggleAllCheckBox(model, cru)),
     h('.w-70.flex-row.flex-wrap', [
       Object.keys(cru.config)
         .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
