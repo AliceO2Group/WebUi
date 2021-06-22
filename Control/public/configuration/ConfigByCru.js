@@ -86,7 +86,6 @@ export default class Config extends Observable {
       Object.keys(this.cruMapByHost.payload).forEach((key) => {
         const cruByEndPoint = this.cruMapByHost.payload[key];
         Object.keys(cruByEndPoint).forEach((cruKey) => {
-          console.log(allULEnabled)
           cruByEndPoint[cruKey].config.cru.userLogicEnabled = allULEnabled ? 'false' : 'true';
         });
       });
