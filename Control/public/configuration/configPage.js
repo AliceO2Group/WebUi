@@ -55,9 +55,9 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  */
 const buildPage = (model, cruMapByHost) => h('.p3', [
   h('.w-100.flex-row.pv1', [
-    h('h4.pv2.w-15', 'CRUs by hostname:'),
+    h('h4.pv2.w-20', 'CRUs by hostname:'),
     savingConfigurationMessagePanel(model),
-    h('.btn-group.w-15', {style: 'justify-content: flex-end;'}, [
+    h('.btn-group.w-20', {style: 'justify-content: flex-end;'}, [
       saveConfigurationButton(model),
       runRocConfigButton(model)
     ])
