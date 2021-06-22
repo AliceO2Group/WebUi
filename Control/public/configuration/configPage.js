@@ -102,7 +102,7 @@ const buildPage = (model, cruMapByHost) => h('.p3', [
   Object.keys(cruMapByHost).map((host) =>
     h('', [
       h('h5.panel-title.p2.flex-row', [
-        h('.w-15.flex-row', [
+        h('.flex-row', [
           h('input', {
             type: 'checkbox',
             checked: model.configuration.selectedHosts.includes(host),
