@@ -274,10 +274,16 @@ class ConsulConnector {
         const latestConfig = latestCrusByHost[host][cruId].config;
         const cruConfig = crusByHost[host][cruId].config;
 
-        latestConfig.cru.userLogicEnabled = cruConfig.cru.userLogicEnabled;
-        for (let i = 0; i < 12; ++i) {
-          latestConfig[`link${i}`].enabled = cruConfig[`link${i}`].enabled;
+        if (cruConfig.cru && cruConfig.cru.userLogicEnabled) {
+          latestConfig.cru.userLogicEnabled = cruConfig.cru.userLogicEnabled;
         }
+        Object.keys(latestConfig)
+          .filter((key) => key.match('link[0-9]{1,2}')) // select only fields from links0 to links11
+          .forEach((key) => {
+            if (cruConfig[key] && cruConfig[key].enabled) {
+              latestConfig[key].enabled = cruConfig[key].enabled
+            }
+          });
         const serial = cruId.split('_')[1];
         const endpoint = cruId.split('_')[2];
         const pair = {}

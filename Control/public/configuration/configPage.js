@@ -180,7 +180,9 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 const linksPanel = (model, cru) =>
   h('.flex-row.w-75', [
     h('.w-15', toggleUserLogic(model, cru)),
-    h('.w-15', toggleAllCheckBox(model, cru)),
+    Object.keys(cru.config)
+      .filter((configField) => configField.match('link[0-9]{1,2}'))
+      .length !== 0 && h('.w-15', toggleAllCheckBox(model, cru)),
     h('.w-70.flex-row.flex-wrap', [
       Object.keys(cru.config)
         .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
