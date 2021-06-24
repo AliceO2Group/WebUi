@@ -89,8 +89,6 @@ const environmentsTable = (model, list) => {
         ),
         h('td', {style: 'text-align: center;'},
           h('button.btn.btn-primary', {
-            class: model.loader.active ? 'loading' : '',
-            disabled: model.loader.active,
             title: 'Open the environment page with more details',
             onclick: () => model.router.go(`?page=environment&id=${item.id}`),
           }, 'Details')
