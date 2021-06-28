@@ -38,7 +38,9 @@ export default class Task extends Observable {
   async toggleTaskView(taskId) {
     this.openedTasks[taskId] = !this.openedTasks[taskId];
     this.notify();
-    this.getTaskById({taskId: taskId});
+    if (this.openedTasks[taskId]) {
+      this.getTaskById({taskId: taskId});
+    }
   }
 
   /**
