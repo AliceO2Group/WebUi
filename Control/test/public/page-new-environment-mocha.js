@@ -285,29 +285,35 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual('Advanced Configuration', title);
   });
 
-  it('should successfully add trimmed pair (K;V) to variables', async () => {
+  it('should successfully add trimmed pair (K;V) to variables by pressing enter key', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
-    page.keyboard.type('TestKey   ');
+    await page.keyboard.type('TestKey   ');
     await page.waitForTimeout(200);
 
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
-    page.keyboard.type(' TestValue  ');
+    await page.keyboard.type(' TestValue  ');
     await page.waitForTimeout(200);
 
+    await page.keyboard.type(String.fromCharCode(13));
+    await page.waitForTimeout(200);
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
       return window.model.workflow.form.variables;
     });
     assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
+  it('should successfully move focus to key input after KV pair was added', async() => {
+    const hasFocus = await page.evaluate(() => document.activeElement.id === 'keyInputField');
+    assert.strictEqual(hasFocus, true, 'Key Input field was not focused after key insertion')
+  });
+
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
-    page.keyboard.type('TestKey2');
+    await page.keyboard.type('TestKey2');
     await page.waitForTimeout(200);
 
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
-    page.keyboard.type('TestValue2');
+    await page.keyboard.type('TestValue2');
     await page.waitForTimeout(200);
 
     const variables = await page.evaluate(() => {
@@ -316,7 +322,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
     });
 
     assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
-    await page.waitForTimeout(2000);
+  });
+
+  it('should successfully move focus to key input after KV pair was added', async() => {
+    const hasFocus = await page.evaluate(() => document.activeElement.id === 'keyInputField');
+    assert.strictEqual(hasFocus, true, 'Key Input field was not focused after key insertion')
   });
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
