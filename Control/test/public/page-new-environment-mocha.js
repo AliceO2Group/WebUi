@@ -288,11 +288,14 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully add trimmed pair (K;V) to variables by pressing enter key', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
     await page.keyboard.type('TestKey   ');
+    await page.waitForTimeout(200);
 
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
     await page.keyboard.type(' TestValue  ');
+    await page.waitForTimeout(200);
 
     await page.keyboard.type(String.fromCharCode(13));
+    await page.waitForTimeout(200);
     const variables = await page.evaluate(() => {
       return window.model.workflow.form.variables;
     });
@@ -307,9 +310,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
     await page.keyboard.type('TestKey2');
+    await page.waitForTimeout(200);
 
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
     await page.keyboard.type('TestValue2');
+    await page.waitForTimeout(200);
 
     const variables = await page.evaluate(() => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
