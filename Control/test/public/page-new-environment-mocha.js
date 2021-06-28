@@ -320,6 +320,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
   });
 
+  it('should successfully move focus to key input after KV pair was added', async() => {
+    const hasFocus = await page.evaluate(() => document.activeElement.id === 'keyInputField');
+    assert.strictEqual(hasFocus, true, 'Key Input field was not focused after key insertion')
+  });
+
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
     await page.evaluate(() => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div > div > div:nth-child(3)').click();
