@@ -119,8 +119,7 @@ export default class Environment extends Observable {
       return;
     }
     let mesosStdout = '';
-    await result.environment.tasks.forEach((task) => {
-      this.task.getTaskById({taskId: task.taskId});
+    result.environment.tasks.forEach((task) => {
       mesosStdout = task.sandboxStdout;
     });
     result.mesosStdout = mesosStdout;
@@ -136,7 +135,6 @@ export default class Environment extends Observable {
    */
   parseEnvResult(result) {
     result.environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
-
     return result;
   }
 
