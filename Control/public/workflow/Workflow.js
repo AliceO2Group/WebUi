@@ -56,6 +56,10 @@ export default class Workflow extends Observable {
     this.QC_PREFIX = PREFIX.QC;
 
     this.firstFlpSelection = -1;
+
+    this.dom = {
+      keyInput: ''
+    }
   }
 
   /**

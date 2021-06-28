@@ -70,8 +70,10 @@ const addKVInputPair = (workflow) => {
       h('.w-33.ph1', {
       }, h('input.form-control', {
         type: 'text',
+        id: 'keyInputField',
         placeholder: 'key',
         value: keyString,
+        oncreate: ({dom}) => workflow.dom.keyInput = dom,
         oninput: (e) => keyString = e.target.value
       })),
       h('.ph1', {
@@ -84,12 +86,16 @@ const addKVInputPair = (workflow) => {
         onkeyup: (e) => {
           if (e.keyCode === 13) {
             workflow.addVariable(keyString, valueString);
+            workflow.dom.keyInput.focus();
           }
         }
       })),
       h('.ph2.actionable-icon', {
         title: 'Add (key,value) variable',
-        onclick: () => workflow.addVariable(keyString, valueString)
+        onclick: () => {
+          workflow.addVariable(keyString, valueString);
+          workflow.dom.keyInput.focus();
+        }
       }, iconPlus())
     ]),
   ]);
