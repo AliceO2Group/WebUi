@@ -55,6 +55,7 @@ describe('Public Configuration Test Suite', () => {
         'http://local:2000/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6&refresh=5s&theme=light',
         'http://local:2000/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8&refresh=5s&theme=light',
         'http://local:2000/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4&refresh=5s&theme=light',
+        'http://local:2000/d-solo/HBa9akknk/aliecs-gui?orgId=1&panelId=10&refresh=5s&theme=light'
       ]
     };
     assert.deepStrictEqual(_getGrafanaConfig({http: {hostname: 'local'}, grafana: {port: 2000}}), expectedConf);

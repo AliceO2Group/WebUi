@@ -221,7 +221,8 @@ describe('Control', function() {
         plots: [
           'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6&refresh=5s&theme=light',
           'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8&refresh=5s&theme=light',
-          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4&refresh=5s&theme=light'
+          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4&refresh=5s&theme=light',
+          'http://localhost:2020/d-solo/HBa9akknk/aliecs-gui?orgId=1&panelId=10&refresh=5s&theme=light'
         ]
       },
       CONSUL: {
