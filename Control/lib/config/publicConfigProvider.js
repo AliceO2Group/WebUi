@@ -56,10 +56,10 @@ function _getConsulConfig(config) {
 function _getGrafanaConfig(config) {
   if (config?.grafana && config?.http?.hostname && config?.grafana?.port) {
     const hostPort = `http://${config.http.hostname}:${config.grafana.port}`;
-    const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6';
-    const plotReadoutRate = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8';
-    const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4';
-    const plotDDGraph = 'd-solo/HBa9akknk/aliecs-gui?orgId=1&panelId=10';
+    const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=6';
+    const plotReadoutRate = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=8';
+    const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=4';
+    const plotDDGraph = 'd-solo/HBa9akknk/dd?orgId=1&panelId=10';
     const theme = '&refresh=5s&theme=light';
     return {
       status: true,
