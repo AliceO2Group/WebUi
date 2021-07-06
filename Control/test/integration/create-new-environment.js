@@ -37,12 +37,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request a list of template objects', async () => {
-    const templatesMap = await page.evaluate(() => {
-      return window.model.workflow.templatesMap;
-    });
-    const repository = 'github.com/AliceO2Group/ControlWorkflows';
-    assert.strictEqual(templatesMap.kind, 'Success', `Request for list of template objects failed due to: ${templatesMap.payload}`);
-    assert.ok(templatesMap.payload[repository]);
+    const templates = await page.evaluate(() => window.model.workflow.templates);
+    assert.strictEqual(templates.kind, 'Success', `Request for list of template objects failed due to: ${templates.payload}`);
+    assert.ok(templates.payload.length !== 0);
   });
 
   it(`should successfully select workflow '${workflowToTest}' from template list`, async () => {
@@ -56,13 +53,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should display variables (K;V) panel', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div', {timeout: 2000});
-    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div').innerText);
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div', {timeout: 2000});
+    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div').innerText);
     assert.strictEqual('Advanced Configuration', title, 'Could not find the Advanced Configuration Panel');
   });
 
   it('should successfully request a list of FLP names', async () => {
-    const flpList = await page.evaluate(() => window.model.workflow.flpList);
+    const flpList = await page.evaluate(() => window.model.workflow.flpSelection.list);
 
     assert.strictEqual(flpList.kind, 'Success', 'Could not retrieve list of FLPs from Consul');
     assert.ok(flpList.payload.length > 0, 'No FLPs were found in Consul');
@@ -76,16 +73,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully add provided K:V pairs', async () => {
     for (const key in confVariables) {
       if (key && confVariables[key]) {
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div > div > input');
         page.keyboard.type(key);
         await page.waitForTimeout(200);
 
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(2) > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div > div:nth-child(2) > input');
         page.keyboard.type(confVariables[key]);
         await page.waitForTimeout(200);
 
         await page.evaluate(() => {
-          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(3) > div:nth-child(3)> div > div:nth-child(3)').click();
+          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div >  div:nth-child(3)').click();
         });
         await page.waitForTimeout(200);
       }
@@ -95,7 +92,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have successfully select first FLP by default from area list by', async () => {
-    const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div> div:nth-child(2) > div > a').classList);
+    const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(2) > div > a').classList);
     assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLPs were not successfully selected by default in the panel');
     const hosts = await page.evaluate(() => window.model.workflow.form.hosts);
     assert.ok(hosts.length > 0, 'No hosts were selected before creating an environment')

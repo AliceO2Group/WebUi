@@ -21,17 +21,17 @@ import pageLoading from './../../../common/pageLoading.js';
  * @return {vnode}
  */
 export default (workflow) =>
-  h('', [
+  h('.w-50.ph1', [
     h('.w-100.flex-row.panel-title.p2', [
       h('.flex-column.justify-center.f6',
         h('button.btn', {
-          class: workflow.areAllFLPsSelected() ? 'selected-btn' : 'none-selected-btn',
-          onclick: () => workflow.toggleAllFLPSelection()
+          class: workflow.flpSelection.areAllFLPsSelected() ? 'selected-btn' : 'none-selected-btn',
+          onclick: () => workflow.flpSelection.toggleAllFLPSelection()
         }, 'Toggle')
       ),
       h('h5.bg-gray-light', {style: 'width: 90%'},
-        workflow.flpList.kind === 'Success'
-          ? `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpList.payload.length} selected)`
+        workflow.flpSelection.list.kind === 'Success'
+          ? `FLP Selection (${workflow.form.hosts.length} out of ${workflow.flpSelection.list.payload.length} selected)`
           : 'FLP Selection'
       ),
       h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
@@ -41,7 +41,7 @@ export default (workflow) =>
       ])
     ]),
     h('.w-100.p2.panel',
-      workflow.flpList.match({
+      workflow.flpSelection.list.match({
         NotAsked: () => null,
         Loading: () => pageLoading(2),
         Success: (list) => flpSelectionArea(list, workflow),
@@ -71,7 +71,7 @@ const flpSelectionArea = (list, workflow) =>
     list.map((name) =>
       h('a.menu-item', {
         className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
-        onclick: (e) => workflow.toggleFLPSelection(name, e)
+        onclick: (e) => workflow.flpSelection.toggleFLPSelection(name, e)
       }, name)
     ),
   ]);

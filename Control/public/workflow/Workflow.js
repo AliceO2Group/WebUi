@@ -14,6 +14,8 @@
 
 import {Observable, RemoteData} from '/js/src/index.js';
 import {PREFIX} from './constants.js';
+import FlpSelection from './panels/flps/FlpSelection.js';
+import WorkflowForm from './WorkflowForm.js';
 
 /**
  * Model representing Workflow
@@ -26,10 +28,17 @@ export default class Workflow extends Observable {
   constructor(model) {
     super();
     this.model = model;
+    this.flpSelection = new FlpSelection(this);
+    this.flpSelection.bubbleTo(this);
+
+    this.form = new WorkflowForm();
+    this.form.bubbleTo(this);
 
     this.repoList = RemoteData.notAsked();
+    this.revisions = [];
+    this.templates = RemoteData.notAsked();
+
     this.refreshedRepositories = RemoteData.notAsked();
-    this.templatesMap = RemoteData.notAsked();
 
     this.revision = {
       isSelectionOpen: false,
@@ -37,25 +46,9 @@ export default class Workflow extends Observable {
       rawValue: 'master'
     };
 
-    this.form = {
-      repository: '',
-      revision: 'master',
-      template: '',
-      variables: {},
-      basicVariables: {},
-      hosts: []
-    };
-
-    this.flpList = RemoteData.notAsked();
-    this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.consulKvStoreReadout = '';
     this.READOUT_PREFIX = PREFIX.READOUT;
 
-    this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.consulKvStoreQC = '';
     this.QC_PREFIX = PREFIX.QC;
-
-    this.firstFlpSelection = -1;
 
     this.dom = {
       keyInput: ''
@@ -65,13 +58,11 @@ export default class Workflow extends Observable {
   /**
    * Initialize page and request data
    */
-  initWorkflowPage() {
-    if (!this.form.repository && !this.form.template) {
-      this.getRepositoriesList();
-      this.getAllTemplatesAsMap();
+  async initWorkflowPage() {
+    if (!this.form.isInputSelected()) {
+      this.reloadDataForm();
     }
-    this.getFLPList();
-
+    this.flpSelection.setFLPListByRequest();
     this.resetErrorMessage();
   }
 
@@ -81,18 +72,12 @@ export default class Workflow extends Observable {
    */
   setRepository(repository) {
     this.form.repository = repository;
-    this.resetErrorMessage();
-    this.setTemplate('');
     this.resetRevision(repository);
-    this.notify();
-  }
+    this.setTemplatesData();
+    this.form.setTemplate('');
 
-  /**
-   * Set template selected by the user from the list
-   * @param {string} template
-   */
-  setTemplate(template) {
-    this.form.template = template;
+    this.resetErrorMessage();
+
     this.notify();
   }
 
@@ -102,8 +87,10 @@ export default class Workflow extends Observable {
   resetErrorMessage() {
     this.model.environment.itemNew = RemoteData.notAsked();
   }
+
   /**
    * Reset revision to repository default or global default
+   * Update revisions list as well
    * @param {string} repository
    */
   resetRevision(repository) {
@@ -121,19 +108,13 @@ export default class Workflow extends Observable {
       rawValue: defaultRevision
     };
     this.form.revision = defaultRevision;
+    this.revisions = this.repoList.payload.repos.filter((obj) => obj.name === repository)[0].revisions;
     this.notify();
   }
 
   /**
-   * Method to return current selected revision
-   * @return {string}
-   */
-  getRevision() {
-    return this.form.revision;
-  }
-
-  /**
-   * Updates the selected repository with the new user selection
+   * Updates the selected revision with the new user selection
+   * It will also make a request to core to request the public templates available for that (repository,revision)
    * @param {string} inputField - input that should be updated
    * @param {string} selectedRevision - Repository that user clicked on from the dropdown list
    */
@@ -141,17 +122,8 @@ export default class Workflow extends Observable {
     this.revision.isSelectionOpen = !this.revision.isSelectionOpen;
     this.form.template = '';
     this.form.revision = selectedRevision;
+    this.setTemplatesData();
     this.updateInputSearch(inputField, selectedRevision);
-  }
-
-  /**
-   * Returns true/false if revision selected by the user exists
-   * @return {boolean}
-   */
-  isRevisionCorrect() {
-    return this.templatesMap.isSuccess()
-      && this.templatesMap.payload[this.form.repository]
-      && this.templatesMap.payload[this.form.repository][this.form.revision];
   }
 
   /**
@@ -194,22 +166,9 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Method to check that all mandatory fields were filled
-   * @return {boolean}
-   */
-  isInputSelected() {
-    return this.form.repository.trim() !== ''
-      && this.form.revision.trim() !== ''
-      && this.form.template.trim() !== '';
-  }
-
-  /**
    * Method to check user's input and create a new environment
    */
   async createNewEnvironment() {
-    const templates = this.templatesMap.payload;
-    const repository = this.form.repository;
-
     const {ok, message, variables} = this.checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
       // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
@@ -220,29 +179,15 @@ export default class Workflow extends Observable {
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
     } else {
       variables['hosts'] = this.form.hosts.length > 0 ? JSON.stringify(this.form.hosts) : this.form.variables.hosts;
-      if (!templates[repository]) {
-        this.model.environment.itemNew = RemoteData.failure('Selected repository does not exist');
+      if (!this.form.isInputSelected()) {
+        this.model.environment.itemNew =
+          RemoteData.failure('Please select repository, revision and workflow in order to create an environment');
       } else {
-        const revision = this.form.revision;
-        if (!templates[repository][revision]) {
-          this.model.environment.itemNew = RemoteData.failure('Selected revision does not exist for this repository');
-        } else {
-          const template = this.form.template;
-          if (template !== '') {
-            let path = '';
-            if (revision === '(no-revision-by-default)') {
-              path = this.parseRepository(repository) + `/workflows/${template}`;
-            } else {
-              path = this.parseRepository(repository) + `/workflows/${template}@${revision}`;
-            }
+        let path = '';
+        path = this.parseRepository(this.form.repository) + `/workflows/${this.form.template}@${this.form.revision}`;
 
-            // Combine Readout URI if it was used
-            this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
-          } else {
-            this.model.environment.itemNew =
-              RemoteData.failure('Selected template does not exist for this repository & revision');
-          }
-        }
+        // Combine Readout URI if it was used
+        this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
       }
     }
     this.notify();
@@ -258,7 +203,7 @@ export default class Workflow extends Observable {
       allBranches: false,
       allTags: false
     };
-    this.getAllTemplatesAsMap(options);
+    this.setTemplatesData(options);
   }
 
   /**
@@ -338,73 +283,31 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Toggle the selection of an FLP from the form host
-   * The user can also use SHIFT key to select between 2 FLP machines, thus
-   * selecting all machines between the 2 selected
-   * @param {string} name
-   * @param {Event} e
+   * Method to make the necesarry requests to reload the data on the new environment page
+   * * Make a request to retrieve a list of repositories with their corresponding revisions
+   * * If above request is ok, make a request to get the public templates for the new updated (repository,revision)
    */
-  toggleFLPSelection(name, e) {
-    if (e.shiftKey && this.flpList.isSuccess()) {
-      if (this.firstFlpSelection === -1) {
-        this.firstFlpSelection = this.flpList.payload.indexOf(name);
-      } else {
-        let secondFlpSelection = this.flpList.payload.indexOf(name);
-        if (this.firstFlpSelection > secondFlpSelection) {
-          [this.firstFlpSelection, secondFlpSelection] = [secondFlpSelection, this.firstFlpSelection];
-        }
-        for (let flpIndex = this.firstFlpSelection; flpIndex <= secondFlpSelection; ++flpIndex) {
-          const flpName = this.flpList.payload[flpIndex];
-          const hostFormIndex = this.form.hosts.indexOf(flpName);
-          if (hostFormIndex < 0) {
-            this.form.hosts.push(flpName);
-          }
-        }
-        this.firstFlpSelection = -1;
-      }
-    } else {
-      this.firstFlpSelection = -1;
-      const index = this.form.hosts.indexOf(name);
-      if (index < 0) {
-        this.form.hosts.push(name);
-      } else {
-        this.form.hosts.splice(index, 1);
-      }
+  async reloadDataForm() {
+    await this.requestRepositoryList();
+    if (this.repoList.isSuccess()) {
+      this.setTemplatesData();
     }
-    this.notify();
   }
-
-  /**
-   * If all FLPs are selected than deselect them
-   * Else select all FLPs
-   */
-  toggleAllFLPSelection() {
-    this.form.hosts = this.areAllFLPsSelected() ? [] : JSON.parse(JSON.stringify(this.flpList.payload));
-    this.notify();
-  }
-
-  /**
-   * Check if all FLPs are selected
-   * @return {boolean}
-   */
-  areAllFLPsSelected() {
-    return this.flpList.isSuccess() && this.form.hosts.length === this.flpList.payload.length;
-  }
-
   /**
    * HTTP Requests
    */
 
   /**
-   * Request to refresh repositories list from AliECS Core
+   * Make a request to refresh repositories list from AliECS Core
+   * If request is successful, make a new request with the updated repositories
+   * Afterwards, request the public templates for the new updated (repository,revision)
    */
   async refreshRepositories() {
     this.refreshedRepositories = await this.remoteDataPostRequest(
       this.refreshedRepositories, `/api/RefreshRepos`, {index: -1}
     );
     if (this.refreshedRepositories.isSuccess()) {
-      this.getRepositoriesList();
-      this.getAllTemplatesAsMap();
+      this.reloadDataForm();
     } else {
       this.model.notification.show(this.refreshedRepositories.payload, 'danger', 5000);
     }
@@ -412,9 +315,11 @@ export default class Workflow extends Observable {
 
   /**
    * Load repositories into `repoList` as RemoteData
+   * Set the selected repository the default one or the first one if default is missing
+   * Set the revisions for the selected repository
    */
-  async getRepositoriesList() {
-    this.repoList = await this.remoteDataPostRequest(this.repoList, `/api/ListRepos`, {});
+  async requestRepositoryList() {
+    this.repoList = await this.remoteDataPostRequest(this.repoList, `/api/ListRepos`, {getRevisions: true});
     if (this.repoList.isSuccess()) {
       // Set first repository the default one or first from the list if default does not exist
       const repository = this.repoList.payload.repos.find((repository) => repository.default);
@@ -423,40 +328,34 @@ export default class Workflow extends Observable {
       } else if (this.repoList.payload.repos.length > 0) {
         this.form.repository = this.repoList.payload.repos[0].name;
       }
+      this.notify();
       this.resetRevision(repository.name);
     }
   }
 
   /**
-  * Load all templates from all repositories & all revisions into `map` as RemoteData
+  * Load public templates for the selected repository and revision into RemoteData
   * @param {JSON} options
   */
-  async getAllTemplatesAsMap(options) {
+  async setTemplatesData(options) {
+    this.templates = RemoteData.loading();
+    this.notify();
+
     if (!options) {
       options = {
-        repoPattern: '*',
-        revisionPattern: '*',
+        repoPattern: this.form.repository,
+        revisionPattern: this.form.revision,
         allBranches: false,
         allTags: false
       };
     }
-    const tempMap = this.templatesMap.payload;
-    this.templatesMap = RemoteData.loading();
-    this.notify();
-
     const {result, ok} = await this.model.loader.post(`/api/GetWorkflowTemplates`, options);
     if (!ok) {
-      this.templatesMap = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-
-    let map = this.getMapFromList(result);
-    if (tempMap) {
-      map = this.mergeMaps(map, tempMap);
-      this.templatesMap = RemoteData.success(map);
+      this.templates = RemoteData.failure(result.message);
     } else {
-      this.templatesMap = RemoteData.success(map);
+      const templateList = [];
+      result.workflowTemplates.map((templateObject) => templateList.push(templateObject.template))
+      this.templates = RemoteData.success(templateList);
     }
     this.notify();
   }
@@ -481,41 +380,6 @@ export default class Workflow extends Observable {
       this.notify();
       return remoteDataItem;
     }
-  }
-
-  /**
-   * Method to retrieve a list of FLPs
-   */
-  async getFLPList() {
-    this.flpList = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.get(`/api/getFLPs`);
-    if (!ok) {
-      this.flpList = RemoteData.failure(result.message);
-      this.consulReadoutPrefix = '';
-      this.consulQcPrefix = '';
-      this.consulKvStoreQC = '';
-      this.consulKvStoreReadout = '';
-      this.notify();
-      return;
-    }
-    this.consulReadoutPrefix = result['consulReadoutPrefix'];
-    this.consulQcPrefix = result['consulQcPrefix'];
-    this.consulKvStoreReadout = result['consulKvStoreReadout'];
-    this.consulKvStoreQC = result['consulKvStoreQC'];
-    this.flpList = RemoteData.success(result.flps);
-    if (this.form.hosts.length === 0) {
-      // preselect all hosts if hosts were not selected already previously
-      this.form.hosts = Object.values(result.flps);
-    } else {
-      // FLP machines can be removed by the user since the last creation of an environment
-      // ensure the list of selected items is still up to date
-      const tempFormHosts = [];
-      this.form.hosts.filter((host) => this.flpList.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
-      this.form.hosts = tempFormHosts.slice();
-    }
-    this.notify();
   }
 
   /**
@@ -573,7 +437,7 @@ export default class Workflow extends Observable {
       };
     } else if (vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
       if (vars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
-        vars['readout_cfg_uri'] = this.consulReadoutPrefix + vars['readout_cfg_uri'];
+        vars['readout_cfg_uri'] = this.flpSelection.consulReadoutPrefix + vars['readout_cfg_uri'];
       }
       vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
       delete vars['readout_cfg_uri_pre'];
@@ -613,56 +477,11 @@ export default class Workflow extends Observable {
       };
     } else if (vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
       if (vars['qc_config_uri_pre'] === this.QC_PREFIX.CONSUL) {
-        vars['qc_config_uri'] = this.consulQcPrefix + vars['qc_config_uri'];
+        vars['qc_config_uri'] = this.flpSelection.consulQcPrefix + vars['qc_config_uri'];
       }
       vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
       delete vars['qc_config_uri_pre'];
     }
     return {variables: vars, ok: true, message: ''};
-  }
-
-  /**
-   * Group list of repository in a JSON object by
-   * repository and revision as keys
-   * @param {Array<JSON>} list
-   * @return {JSON}
-   */
-  getMapFromList(list) {
-    const map = {};
-    Object.values(list.workflowTemplates).forEach((element) => {
-      if (!element.revision) {
-        element.revision = '(no-revision-by-default)';
-      }
-      if (map[element.repo]) {
-        if (map[element.repo][element.revision]) {
-          const templates = map[element.repo][element.revision];
-          templates.push(element.template);
-          map[element.repo][element.revision] = templates;
-        } else {
-          map[element.repo][element.revision] = [element.template];
-        }
-      } else {
-        map[element.repo] = {};
-        map[element.repo][element.revision] = [element.template];
-      }
-    });
-    return map;
-  }
-
-  /**
-   * Method to merge 2 maps
-   * @param {JSON} map
-   * @param {JSON} tempMap
-   * @return {JSON}
-   */
-  mergeMaps(map, tempMap) {
-    Object.keys(tempMap).forEach((tempKey) => {
-      Object.keys(map).filter((key) => key === tempKey).forEach((key) => {
-        Object.keys(tempMap[key]).forEach((revisionKey) => {
-          map[key][revisionKey] = tempMap[key][revisionKey];
-        });
-      });
-    });
-    return map;
   }
 }
