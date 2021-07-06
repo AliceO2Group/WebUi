@@ -38,9 +38,7 @@ export const header = (model) => [
   h('.w-50 text-center', [
     h('h4', 'Environment details')
   ]),
-  h('.flex-grow text-right', [
-
-  ])
+  h('.flex-grow text-right', [])
 ];
 
 /**
@@ -67,21 +65,33 @@ const showContent = (environment, item) => [
   controlEnvironmentPanel(environment, item),
   item.state === 'RUNNING' &&
   h('.m2.flex-row', {style: 'height: 10em;'}, [
-    h('.grafana-font.m1.flex-column', {style: 'width: 15%;'}, [
-      h('', {style: 'height:40%'}, 'Run Number'),
-      h('',
-        h('.badge.bg-success.white',
-          {style: 'font-size:45px'},
-          item.currentRunNumber)
-      )
-    ]),
     (COG && COG.GRAFANA && COG.GRAFANA.status) ?
-      showEmbeddedGraphs(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
+      graphsPanel(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
       h('.w-100.text-center.grafana-font',
         'Grafana plots were not loaded, please contact an administrator'
       ),
   ]),
-  showEnvDetailsTable(item, environment),
+  h('.m2', [
+    h('.flex-row', [
+      h(`${item.state === 'RUNNING' ? '.w-50' : '.w-100'}`, showEnvDetailsTable(item, environment)),
+      item.state === 'RUNNING' && h('.w-50.text-center.flex-column',
+        (COG && COG.GRAFANA && COG.GRAFANA.status) ?
+          readoutDataPanel(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
+          h('.w-100.text-center.grafana-font',
+            'Grafana plots were not loaded, please contact an administrator'
+          ),
+      )
+    ]),
+    h('',
+      h('table.table', [
+        h('tbody', [
+          userVarsRow(item.userVars, environment),
+          defaultsRow(item.defaults, environment),
+          varsRow(item.vars, environment),
+        ])
+      ])
+    ),
+  ]),
   h('.m2', [
     h('h4', 'Tasks by FLP'),
     h('.w-100', tasksPerFlpTables(environment, item))
@@ -115,23 +125,37 @@ const tasksPerFlpTables = (environmentModel, environment) => {
  * @param {Array<String>} data
  * @return {vnode}
  */
-const showEmbeddedGraphs = (data, runParam) => [
-  h('.flex-row', {style: 'width:30%;'}, [
-    h('iframe.w-50', {
-      src: data[0] + runParam,
-      style: 'height: 100%; border: 0;'
-    }),
+const graphsPanel = (data, runParam) =>
+  h('.flex-column.w-100', [
+    h('.flex-row.w-100', [
+      h('iframe.w-50', {
+        src: data[3] + runParam,
+        style: 'height: 100%; border: 0'
+      }),
+      h('iframe.w-50', {
+        src: data[2] + runParam,
+        style: 'height: 100%; border: 0'
+      }),
+    ]),
+  ]);
+
+/**
+ * Builds a panel with 2 data plots from Grafana about Readout data rate
+ * @param {Array<String>} data
+ * @param {Strig} runParam
+ * @returns 
+ */
+const readoutDataPanel = (data, runParam) =>
+  h('.flex-row.w-100', [
     h('iframe.w-50', {
       src: data[1] + runParam,
-      style: 'height: 100%; border: 0;'
-    })
-  ]),
-  // Large Plot
-  h('iframe.flex-grow', {
-    src: data[2] + runParam,
-    style: 'height: 100%; border: 0'
-  })
-];
+      style: 'height: 10em; border: 0;'
+    }),
+    h('iframe.w-50', {
+      src: data[0] + runParam,
+      style: 'height: 10em; border: 0;'
+    }),
+  ]);
 
 /**
  * Table to display Environment details
@@ -139,51 +163,56 @@ const showEmbeddedGraphs = (data, runParam) => [
  * @param {Environment} environment
  * @return {vnode} table view
  */
-const showEnvDetailsTable = (item, environment) =>
-  h('.mh2.mv4.shadow-level1',
-    h('table.table', [
-      h('tbody', [
-        h('tr', [
-          h('th.w-15', 'Number of Tasks'),
-          h('td', item.tasks.length)
-        ]),
-        h('tr', [
-          h('th.w-15', 'ID'),
-          h('td', item.id)
-        ]),
-        h('tr', [
-          h('th.w-15', 'Created'),
-          h('td', new Date(item.createdWhen).toLocaleString())
-        ]),
-        h('tr', [
-          h('th.w-15', 'State'),
-          h('td',
-            {
-              class: item.state === 'RUNNING' ?
-                'success' :
-                (item.state === 'CONFIGURED' ? 'warning' : (item.state === 'ERROR' ? 'danger' : '')),
-              style: 'font-weight: bold;'
-            },
-            item.state)
-        ]),
-        h('tr', [
-          h('th.w-15', 'Root Role'),
-          h('td', item.rootRole)
-        ]),
-        h('tr', [
-          h('th.w-15', 'FLP count'),
-          h('td', item.numberOfFlps)
-        ]),
-        userVarsRow(item.userVars, environment),
-        defaultsRow(item.defaults, environment),
-        varsRow(item.vars, environment),
-        h('tr', [
-          h('th.w-15', 'InfoLogger'),
-          h('td', infoLoggerButton(environment, item))
-        ]),
-      ])
+const showEnvDetailsTable = (item, environment) => {
+  const width = item.state === 'RUNNING' ? '.w-30' : '.w-15';
+  return h('table.table', [
+    h('tbody', [
+      item.state === 'RUNNING' && h('tr', [
+        h(`th${width}`, 'Run Number'),
+        h('td',
+          h('.badge.bg-success.white', {
+            style: 'font-size:35px'
+          }, item.currentRunNumber)
+        )
+      ]),
+      h('tr', [
+        h(`th${width}`, 'ID'),
+        h('td', item.id)
+      ]),
+      h('tr', [
+        h(`th${width}`, 'Created'),
+        h('td', new Date(item.createdWhen).toLocaleString())
+      ]),
+      h('tr', [
+        h(`th${width}`, 'State'),
+        h('td',
+          {
+            class: item.state === 'RUNNING' ?
+              'success' :
+              (item.state === 'CONFIGURED' ? 'warning' : (item.state === 'ERROR' ? 'danger' : '')),
+            style: 'font-weight: bold;'
+          },
+          item.state)
+      ]),
+      h('tr', [
+        h(`th${width}`, 'Root Role'),
+        h('td', item.rootRole)
+      ]),
+      h('tr', [
+        h(`th${width}`, 'Number of Tasks'),
+        h('td', item.tasks.length)
+      ]),
+      h('tr', [
+        h(`th${width}`, 'FLP count'),
+        h('td', item.numberOfFlps)
+      ]),
+      h('tr', [
+        h(`th${width}`, 'InfoLogger'),
+        h('td', infoLoggerButton(environment, item))
+      ]),
     ])
-  );
+  ]);
+};
 
 /**
  * Open InfoLogger in a new browser tab with run number set if available

@@ -49,6 +49,10 @@ export default class Workflow extends Observable {
     this.READOUT_PREFIX = PREFIX.READOUT;
 
     this.QC_PREFIX = PREFIX.QC;
+
+    this.dom = {
+      keyInput: ''
+    }
   }
 
   /**
