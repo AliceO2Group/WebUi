@@ -38,6 +38,9 @@ export default class Task extends Observable {
   async toggleTaskView(taskId) {
     this.openedTasks[taskId] = !this.openedTasks[taskId];
     this.notify();
+    if (this.openedTasks[taskId]) {
+      this.getTaskById({taskId: taskId});
+    }
   }
 
   /**
@@ -46,7 +49,6 @@ export default class Task extends Observable {
    */
   async getTaskById(body) {
     this.list[body.taskId] = RemoteData.loading();
-    this.openedTasks[body.taskId] = false;
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);

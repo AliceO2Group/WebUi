@@ -56,16 +56,18 @@ function _getConsulConfig(config) {
 function _getGrafanaConfig(config) {
   if (config?.grafana && config?.http?.hostname && config?.grafana?.port) {
     const hostPort = `http://${config.http.hostname}:${config.grafana.port}`;
-    const plotOne = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=6';
-    const plotTwo = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=8';
-    const plotThree = 'd-solo/TZsAxKIWk/aliecs-gui?orgId=1&panelId=4';
+    const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=6';
+    const plotReadoutRate = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=8';
+    const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=4';
+    const plotDDGraph = 'd-solo/HBa9akknk/dd?orgId=1&panelId=10';
     const theme = '&refresh=5s&theme=light';
     return {
       status: true,
       plots: [
-        `${hostPort}/${plotOne}${theme}`,
-        `${hostPort}/${plotTwo}${theme}`,
-        `${hostPort}/${plotThree}${theme}`
+        `${hostPort}/${plotReadoutRateNumber}${theme}`,
+        `${hostPort}/${plotReadoutRate}${theme}`,
+        `${hostPort}/${plotReadoutRateGraph}${theme}`,
+        `${hostPort}/${plotDDGraph}${theme}`,
       ]
     };
   } else {
