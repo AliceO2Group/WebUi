@@ -67,7 +67,7 @@ module.exports.setup = (http, ws) => {
   http.get('/status/consul', (_, res) => statusService.getConsulStatus().then((data) => res.status(200).json(data)));
   http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
   http.get('/status/kafka', (_, res) => statusService.getKafkaStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()));
+  http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()), {public: true});
   http.get('/status/core', (_, res) => statusService.getAliEcsCoreStatus().then((data) => res.status(200).json(data)));
   http.get('/status/core/services', (_, res) => statusService.getIntegratedServicesInfo()
     .then((data) => res.status(200).json(data)));

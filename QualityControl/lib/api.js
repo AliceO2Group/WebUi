@@ -34,7 +34,7 @@ module.exports.setup = (http) => {
   http.post('/listLayouts', model.layoutService.listLayouts.bind(model.layoutService));
   http.delete('/layout/:layoutId', model.layoutService.deleteLayout.bind(model.layoutService));
   http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
-  http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService));
+  http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService), {public: true});
   http.get('/checkUser', model.userService.addUser.bind(model.userService));
   new WebSocket(http);
 };
