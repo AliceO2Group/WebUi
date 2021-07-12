@@ -163,7 +163,8 @@ const epnPanel = (workflow) =>
         type: 'radio',
         name: 'epn',
         id: 'epnOn',
-        checked: workflow.form.basicVariables['odc_enabled'] === 'true',
+        checked: (workflow.form.basicVariables['odc_enabled'] === 'true'
+        && workflow.form.basicVariables['ddsched_enabled'] === 'true'),
         onchange: () => {
           workflow.updateBasicVariableByKey('odc_enabled', 'true');
           workflow.updateBasicVariableByKey('ddsched_enabled', 'true');
