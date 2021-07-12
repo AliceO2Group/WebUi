@@ -335,7 +335,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully add a JSON with (K;V) pairs in advanced configuration panel', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
     await page.keyboard.type('{"testJson": "JsonValue"}');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(1000);
     const variables = await page.evaluate(() => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
       return window.model.workflow.form.variables;
