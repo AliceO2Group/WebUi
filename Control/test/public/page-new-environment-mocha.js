@@ -352,7 +352,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return window.model.workflow.form.variables;
     });
     const expectedVariables = { TestKey2: 'TestValue2', testJson: 'JsonValue' };
-    assert.deepStrictEqual(variables, expectedVariables);
+    assert.strictEqual(JSON.stringify(variables), JSON.stringify(expectedVariables));
   });
 
   it('should not add a JSON with (K;V) pairs if it is not JSON formatted', async () => {
