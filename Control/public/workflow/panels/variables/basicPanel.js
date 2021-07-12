@@ -26,7 +26,6 @@ export default (workflow) =>
     h('.p2.panel', [
       dcsPanel(workflow),
       dataDistributionPanel(workflow),
-      dataDistributionSchedulerPanel(workflow),
       epnPanel(workflow),
       qcddPanel(workflow),
       dplMwPanel(workflow),
@@ -41,7 +40,7 @@ export default (workflow) =>
  * @return {vnode}
  */
 const dcsPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left.w-70', [
     h('.w-50', {
       style: 'cursor: pointer',
       onclick: () => {
@@ -81,7 +80,7 @@ const dcsPanel = (workflow) =>
  * @return {vnode}
  */
 const dataDistributionPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left.w-70', [
     h('.w-50', {
       style: 'cursor: pointer',
       onclick: () => {
@@ -125,64 +124,22 @@ const dataDistributionPanel = (workflow) =>
   ]);
 
 /**
-  * Add a radio button group to select if data distribution scheduler should be set as on or off
-  * If ddsched_enabled is set to true than dd_enabled should be set to true
-  * @param {Object} workflow
-  * @return {vnode}
-  */
-const dataDistributionSchedulerPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
-    h('.w-50', {
-      style: 'cursor: pointer',
-      onclick: () => {
-        if (workflow.form.basicVariables['ddsched_enabled'] === 'true') {
-          workflow.updateBasicVariableByKey('ddsched_enabled', 'false');
-        } else {
-          workflow.updateBasicVariableByKey('ddsched_enabled', 'true');
-          workflow.updateBasicVariableByKey('dd_enabled', 'true');
-        }
-      },
-    }, 'Data Distribution Scheduler:'),
-    h('.w-25.form-check', [
-      h('input.form-check-input', {
-        type: 'radio',
-        name: 'dataDistributionScheduler',
-        id: 'dataDistributionSchedulerOff',
-        checked: workflow.form.basicVariables['ddsched_enabled'] === 'false',
-        onchange: () => workflow.updateBasicVariableByKey('ddsched_enabled', 'false')
-      }),
-      h('label', {for: 'dataDistributionSchedulerOff'}, 'OFF')
-    ]),
-    h('.w-25.form-check', [
-      h('input.form-check-input disabled', {
-        type: 'radio',
-        name: 'dataDistributionScheduler',
-        id: 'dataDistributionSchedulerOn',
-        checked: workflow.form.basicVariables['ddsched_enabled'] === 'true',
-        onchange: () => {
-          workflow.updateBasicVariableByKey('ddsched_enabled', 'true');
-          workflow.updateBasicVariableByKey('dd_enabled', 'true');
-        }
-      }),
-      h('label', {for: 'dataDistributionSchedulerOn'}, 'ON')
-    ]),
-  ]);
-
-/**
  * Add a radio button group to select if EPN cluster should be set as on or off
  * If odc_enabled is set as true than dd_enabled should be set to true
  * @param {Object} workflow
  * @return {vnode}
  */
 const epnPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left.w-70', [
     h('.w-50', {
       style: 'cursor: pointer',
       onclick: () => {
         if (workflow.form.basicVariables['odc_enabled'] === 'true') {
           workflow.updateBasicVariableByKey('odc_enabled', 'false');
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'false');
         } else {
           workflow.updateBasicVariableByKey('odc_enabled', 'true');
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'true');
           workflow.updateBasicVariableByKey('dd_enabled', 'true');
         }
       },
@@ -192,8 +149,12 @@ const epnPanel = (workflow) =>
         type: 'radio',
         name: 'epn',
         id: 'epnOff',
-        checked: workflow.form.basicVariables['odc_enabled'] === 'false',
-        onchange: () => workflow.form.basicVariables['odc_enabled'] = 'false'
+        checked: (workflow.form.basicVariables['odc_enabled'] === 'false'
+        || workflow.form.basicVariables['ddsched_enabled'] === 'false'),
+        onchange: () => {
+          workflow.updateBasicVariableByKey('odc_enabled', 'false');
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'false');
+        }
       }),
       h('label', {for: 'epnOff'}, 'OFF')
     ]),
@@ -205,6 +166,7 @@ const epnPanel = (workflow) =>
         checked: workflow.form.basicVariables['odc_enabled'] === 'true',
         onchange: () => {
           workflow.updateBasicVariableByKey('odc_enabled', 'true');
+          workflow.updateBasicVariableByKey('ddsched_enabled', 'true');
           workflow.updateBasicVariableByKey('dd_enabled', 'true');
         }
       }),
@@ -219,7 +181,7 @@ const epnPanel = (workflow) =>
  * @return {vnode}
  */
 const qcddPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left.w-70', [
     h('.w-50', {
       style: 'cursor: pointer',
       onclick: () => {
@@ -231,7 +193,7 @@ const qcddPanel = (workflow) =>
           workflow.updateBasicVariableByKey('minimal_dpl_enabled', 'false');
         }
       },
-    }, 'QC:'),
+    }, 'General QC (FLP):'),
     h('.w-25.form-check', [
       h('input.form-check-input', {
         type: 'radio',
@@ -266,7 +228,7 @@ const qcddPanel = (workflow) =>
  * @return {vnode}
  */
 const dplMwPanel = (workflow) =>
-  h('.flex-row.text-left.w-50', [
+  h('.flex-row.text-left.w-70', [
     h('.w-50', {
       style: 'cursor: pointer',
       onclick: () => {

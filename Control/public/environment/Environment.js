@@ -56,7 +56,7 @@ export default class Environment extends Observable {
       case 'odc_enabled':
         return 'EPN';
       case 'qcdd_enabled':
-        return 'QC';
+        return 'General QC (FLP)';
       case 'dd_enabled':
         return 'Data Distribution';
       case 'ddsched_enabled':
