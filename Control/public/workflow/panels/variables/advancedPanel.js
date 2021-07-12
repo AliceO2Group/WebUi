@@ -31,7 +31,12 @@ export default (workflow) =>
       }, info())
     ]),
     addKVInputList(workflow),
-    addKVInputPair(workflow)
+    h('.form-group.p2.panel.w-100.text-left', [
+      h('.w-100.ph2', 'Add single pair of (K;V):'),
+      addKVInputPair(workflow),
+      h('.w-100.ph2', 'Add a JSON with multiple pairs (K;V):'),
+      addListOfKvPairs(workflow)
+    ])
   ]);
 
 /**
@@ -65,38 +70,66 @@ const addKVInputList = (workflow) =>
 const addKVInputPair = (workflow) => {
   let keyString = '';
   let valueString = '';
-  return h('.form-group.p2.panel.w-100.flex-column', [
-    h('.pv2.flex-row', [
-      h('.w-33.ph1', {
-      }, h('input.form-control', {
-        type: 'text',
-        id: 'keyInputField',
-        placeholder: 'key',
-        value: keyString,
-        oncreate: ({dom}) => workflow.dom.keyInput = dom,
-        oninput: (e) => keyString = e.target.value
-      })),
-      h('.ph1', {
-        style: 'width:60%;',
-      }, h('input.form-control', {
-        type: 'text',
-        placeholder: 'value',
-        value: valueString,
-        oninput: (e) => valueString = e.target.value,
-        onkeyup: (e) => {
-          if (e.keyCode === 13) {
-            workflow.addVariable(keyString, valueString);
-            workflow.dom.keyInput.focus();
-          }
-        }
-      })),
-      h('.ph2.actionable-icon', {
-        title: 'Add (key,value) variable',
-        onclick: () => {
+  return h('.pv2.flex-row', [
+    h('.w-33.ph1', {
+    }, h('input.form-control', {
+      type: 'text',
+      id: 'keyInputField',
+      placeholder: 'key',
+      value: keyString,
+      oncreate: ({dom}) => workflow.dom.keyInput = dom,
+      oninput: (e) => keyString = e.target.value
+    })),
+    h('.ph1', {
+      style: 'width:60%;',
+    }, h('input.form-control', {
+      type: 'text',
+      placeholder: 'value',
+      value: valueString,
+      oninput: (e) => valueString = e.target.value,
+      onkeyup: (e) => {
+        if (e.keyCode === 13) {
           workflow.addVariable(keyString, valueString);
           workflow.dom.keyInput.focus();
         }
-      }, iconPlus())
-    ]),
+      }
+    })),
+    h('.ph2.actionable-icon', {
+      title: 'Add (key,value) variable',
+      onclick: () => {
+        workflow.addVariable(keyString, valueString);
+        workflow.dom.keyInput.focus();
+      }
+    }, iconPlus())
+  ])
+};
+
+/**
+ * Displays a textarea which allows the user to copy paste a JSON of KV pairs
+ * to be added in the advanced configuration panel
+ * @param {Object} workflow
+ * @returns {vnode}
+ */
+const addListOfKvPairs = (workflow) => {
+  let kvPairsString = '';
+  return h('.pv2.flex-row', [
+    h('.ph1', {
+      style: 'width: 93%'
+    }, h('textarea.form-control', {
+      id: 'kvTextArea',
+      rows: 7,
+      value: kvPairsString,
+      placeholder: 'e.g.\n{\n\t"key1": "value1",\n\t"key2": "value2"\n}',
+      oncreate: ({dom}) => workflow.dom.keyValueArea = dom,
+      oninput: (e) => kvPairsString = e.target.value
+    })
+    ),
+    h('.ph2.actionable-icon', {
+      title: 'Add list of (key,value) variables',
+      onclick: () => {
+        workflow.addVariableList(kvPairsString);
+        workflow.dom.keyValueArea.focus();
+      }
+    }, iconPlus())
   ]);
 };

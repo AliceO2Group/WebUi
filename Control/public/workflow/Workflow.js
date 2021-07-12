@@ -51,7 +51,8 @@ export default class Workflow extends Observable {
     this.QC_PREFIX = PREFIX.QC;
 
     this.dom = {
-      keyInput: ''
+      keyInput: '',
+      keyValueArea: ''
     }
   }
 
@@ -230,6 +231,20 @@ export default class Workflow extends Observable {
       this.model.notification.show('Key and Value cannot be empty', 'danger', 2000);
     }
     return false;
+  }
+
+  /**
+   * Given a JSON object, add each key and value to the panel of
+   * KV pairs configuraiton
+   * @param {String} kvPairs
+   */
+  addVariableList(kvPairs) {
+    try {
+      const pairs = JSON.parse(kvPairs);
+      Object.keys(pairs).forEach((key) => this.addVariable(key, pairs[key]))
+    } catch (error) {
+      this.model.notification.show('Provided string is not a valid JSON', 'danger', 3000);
+    }
   }
 
   /**
