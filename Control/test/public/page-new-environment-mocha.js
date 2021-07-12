@@ -303,7 +303,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
-  it('should successfully move focus to key input after KV pair was added', async() => {
+  it('should successfully move focus to key input after KV pair was added', async () => {
     const hasFocus = await page.evaluate(() => document.activeElement.id === 'keyInputField');
     assert.strictEqual(hasFocus, true, 'Key Input field was not focused after key insertion')
   });
@@ -325,7 +325,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
   });
 
-  it('should successfully move focus to key input after KV pair was added', async() => {
+  it('should successfully move focus to key input after KV pair was added', async () => {
     const hasFocus = await page.evaluate(() => document.activeElement.id === 'keyInputField');
     assert.strictEqual(hasFocus, true, 'Key Input field was not focused after key insertion')
   });
@@ -341,6 +341,36 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(variables, expectedVars);
     const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);
+  });
+
+  it('should successfully add a JSON with (K;V) pairs in advanced configuration panel', async () => {
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
+    await page.keyboard.type('{"testJson": "JsonValue"}');
+    await page.waitForTimeout(200);
+    const variables = await page.evaluate(() => {
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
+      return window.model.workflow.form.variables;
+    });
+    const expectedVariables = { TestKey2: 'TestValue2', testJson: 'JsonValue' };
+    assert.deepStrictEqual(variables, expectedVariables);
+  });
+
+  it('should not add a JSON with (K;V) pairs if it is not JSON formatted', async () => {
+    const currentVariables = await page.evaluate(() => window.model.workflow.form.variables);
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
+    await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
+    await page.waitForTimeout(200);
+    const variables = await page.evaluate(() => {
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
+      return window.model.workflow.form.variables;
+    });
+    
+    assert.deepStrictEqual(variables, currentVariables);
+  });
+
+  it('should successfully move focus to key input after KV pair was added', async () => {
+    const hasFocus = await page.evaluate(() => document.activeElement.id === 'kvTextArea');
+    assert.strictEqual(hasFocus, true, 'KV TextArea was not focused after JSON insertion')
   });
 
   // FLP Selection
