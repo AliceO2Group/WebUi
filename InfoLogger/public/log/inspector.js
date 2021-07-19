@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+import {h, iconX} from '/js/src/index.js';
 
 import {severityClass, severityLabel} from './severityUtils.js';
 
@@ -23,6 +23,19 @@ export default (model) => model.log.item ? h('', [
       h('col.cell-m'), // last column fills space
     ]),
     h('tbody', [
+      h('tr', [
+        h('td.cell-bordered', ''),
+        h('td.cell.text-ellipsis.cell-xl',
+          h('.f7.w-100.flex-column.items-end',
+            h('.w-10.actionable-icon', {
+              onclick: () => {
+                model.inspectorEnabled = false;
+                model.notify();
+              }
+            }, iconX())
+          )
+        )
+      ]),
       h('tr', [
         h('td', {className: severityClass(model.log.item.severity)}, 'Severity'),
         h('td', {className: severityClass(model.log.item.severity)}, severityLabel(model.log.item.severity))

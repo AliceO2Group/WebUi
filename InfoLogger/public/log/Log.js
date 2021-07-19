@@ -438,10 +438,12 @@ export default class Log extends Observable {
   }
 
   /**
-   * Empty the list of all logs, reset stats and clear query mode request if any.
+   * Empty the list of all logs, reset stats, clear query mode request if any
+   * and close the inspector panel
    */
   empty() {
     this.list = [];
+    this.model.inspectorEnabled = false;
     this.resetStats();
     this.queryResult = RemoteData.notAsked();
     this.notify();

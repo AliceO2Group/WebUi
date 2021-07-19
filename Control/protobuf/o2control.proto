@@ -213,6 +213,7 @@ message ControlEnvironmentRequest {
         CONFIGURE = 3;
         RESET = 4;
         GO_ERROR = 5;
+        DEPLOY = 6;
     }
     Optype type = 2;
 }

@@ -198,7 +198,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
-  it('should successfully select EPN ON from BasicConfiguration and automatically set DD to ON', async () => {
+  it('should successfully select EPN ON from BasicConfiguration and automatically set DD & DD Sched to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="epnOn"]`);
     if (label) {
       await label.click();
@@ -206,7 +206,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       assert.ok(false, `EPN ON label could not be found in list of labels`);
     }
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
-    assert.deepStrictEqual(basicVars, {odc_enabled: 'true', dd_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to true');
+    assert.deepStrictEqual(basicVars, {odc_enabled: 'true', dd_enabled: 'true', ddsched_enabled: 'true'}, 'odc_enabled, dd_enabled or ddsched_enabled could not be found in basic variables selection set to true');
   });
 
   it('should successfully select DD OFF from BasicConfiguration and automatically set EPN, DD, DDSCHED, QC to OFF', async () => {
@@ -253,17 +253,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'false', ddsched_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'false'});
   });
 
-  it('should successfully select DDSCHED ON from BasicConfiguration and automatically set DD to ON', async () => {
-    const [label] = await page.$x(`//div/input[@id="dataDistributionSchedulerOn"]`);
-    if (label) {
-      await label.click();
-    } else {
-      assert.ok(false, `Data Distribution Scheduler ON label could not be found in list of labels`);
-    }
-    const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
-    assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', ddsched_enabled: 'true', qcdd_enabled: 'false', minimal_dpl_enabled: 'false'});
-  });
-
   it('should successfully select option file:// from dropdown and input box should appear', async () => {
     await page.select('select#readoutURISelection', 'file://');
     await page.waitForTimeout(500);
@@ -272,7 +261,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully fill in readout uri from typed text', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(7) > div > div:nth-child(2) > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(6) > div > div:nth-child(2) > div:nth-child(2) > input');
     page.keyboard.type('file-readout');
     await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
@@ -303,7 +292,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
-  it('should successfully move focus to key input after KV pair was added', async() => {
+  it('should successfully move focus to key input after KV pair was added', async () => {
     const hasFocus = await page.evaluate(() => document.activeElement.id === 'keyInputField');
     assert.strictEqual(hasFocus, true, 'Key Input field was not focused after key insertion')
   });
@@ -325,7 +314,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(variables['TestKey2'], 'TestValue2');
   });
 
-  it('should successfully move focus to key input after KV pair was added', async() => {
+  it('should successfully move focus to key input after KV pair was added', async () => {
     const hasFocus = await page.evaluate(() => document.activeElement.id === 'keyInputField');
     assert.strictEqual(hasFocus, true, 'Key Input field was not focused after key insertion')
   });
@@ -341,6 +330,36 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(variables, expectedVars);
     const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);
+  });
+
+  it('should successfully add a JSON with (K;V) pairs in advanced configuration panel', async () => {
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
+    await page.keyboard.type('{"testJson": "JsonValue"}');
+    await page.waitForTimeout(1000);
+    const variables = await page.evaluate(() => {
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
+      return window.model.workflow.form.variables;
+    });
+    const expectedVariables = { TestKey2: 'TestValue2', testJson: 'JsonValue' };
+    assert.strictEqual(JSON.stringify(variables), JSON.stringify(expectedVariables));
+  });
+
+  it('should not add a JSON with (K;V) pairs if it is not JSON formatted', async () => {
+    const currentVariables = await page.evaluate(() => window.model.workflow.form.variables);
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
+    await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
+    await page.waitForTimeout(200);
+    const variables = await page.evaluate(() => {
+      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
+      return window.model.workflow.form.variables;
+    });
+    
+    assert.deepStrictEqual(variables, currentVariables);
+  });
+
+  it('should successfully move focus to key input after KV pair was added', async () => {
+    const hasFocus = await page.evaluate(() => document.activeElement.id === 'kvTextArea');
+    assert.strictEqual(hasFocus, true, 'KV TextArea was not focused after JSON insertion')
   });
 
   // FLP Selection

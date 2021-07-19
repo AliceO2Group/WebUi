@@ -69,7 +69,7 @@ export default class FlpSelection extends Observable {
       if (index < 0) {
         this.workflow.form.addHost(name);
       } else {  
-        this.workflow.form.removeHostByIndex(name);
+        this.workflow.form.removeHostByIndex(index);
       }
     }
     this.notify();

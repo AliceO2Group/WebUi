@@ -89,6 +89,7 @@ class ControlService {
         errorLogger(error);
         res.status(502).json({
           ended: true, success: false, id: channelId,
+          message: 'Error while attempting to clean resources ...',
           info: {message: error.message || error || 'Error while attempting to clean resources ...'}
         });
       }
@@ -154,6 +155,7 @@ class ControlService {
           errorLogger(error);
           res.status(502).json({
             ended: true, success: false, id: channelId,
+            message: error.message || error || 'Error while attempting to run o2-roc-config ...',
             info: {message: error.message || error || 'Error while attempting to run o2-roc-config ...'}
           });
         }
