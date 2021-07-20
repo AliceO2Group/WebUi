@@ -340,7 +340,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
       return window.model.workflow.form.variables;
     });
-    const expectedVariables = { TestKey2: 'TestValue2', testJson: 'JsonValue' };
+    await page.waitForTimeout(500);
+    const expectedVariables = {TestKey2: 'TestValue2', testJson: 'JsonValue'};
     assert.strictEqual(JSON.stringify(variables), JSON.stringify(expectedVariables));
   });
 
@@ -348,15 +349,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const currentVariables = await page.evaluate(() => window.model.workflow.form.variables);
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
     const toBeTyped = '{"testJson": "JsonValue", somtest: test}';
-    await page.keyboard.type(toBeTyped);
-    await page.waitForTimeout(200);
+    await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
+    await page.waitForTimeout(500);
+
+    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click())
     const {variables, areaString} = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
       return {variables: window.model.workflow.form.variables, areaString: window.model.workflow.kvPairsString};
     });
-    
-    assert.deepStrictEqual(variables, currentVariables);
-    assert.strictEqual(areaString, toBeTyped)
+    assert.deepStrictEqual(variables, currentVariables, 'diff vars');
+    assert.strictEqual(areaString, toBeTyped, 'dif area')
   });
 
   it('should successfully move focus to key input after KV pair was added', async () => {
