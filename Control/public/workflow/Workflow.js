@@ -46,6 +46,8 @@ export default class Workflow extends Observable {
       rawValue: 'master'
     };
 
+    this.templatesVarsMap = {};
+
     this.READOUT_PREFIX = PREFIX.READOUT;
 
     this.QC_PREFIX = PREFIX.QC;
@@ -369,7 +371,12 @@ export default class Workflow extends Observable {
       this.templates = RemoteData.failure(result.message);
     } else {
       const templateList = [];
-      result.workflowTemplates.map((templateObject) => templateList.push(templateObject.template))
+      result.workflowTemplates.map((templateObject) => {
+        templateList.push(templateObject.template);
+        if (templateObject.varSpecMap && Object.keys(templateObject.varSpecMap).length > 0) {
+          this.templatesVarsMap[templateObject.template] = templateObject.varSpecMap;
+        }
+      })
       this.templates = RemoteData.success(templateList);
     }
     this.notify();

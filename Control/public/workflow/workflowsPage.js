@@ -144,7 +144,10 @@ const templateAreaList = (workflow, repository, revision) =>
               h('.flex-row', [
                 h('a.w-90.menu-item.w-wrapped', {
                   className: workflow.form.template === template ? 'selected' : null,
-                  onclick: () => workflow.form.setTemplate(template)
+                  onclick: () => {
+                    workflow.form.setTemplate(template);
+                    // workflow.variable.
+                  }
                 }, template),
                 h('a.w-10.flex-row.items-center.justify-center.actionable-icon', {
                   href: `//${repository}/blob/${revision}/workflows/${template}.yaml`,
