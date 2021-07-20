@@ -344,17 +344,19 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(JSON.stringify(variables), JSON.stringify(expectedVariables));
   });
 
-  it('should not add a JSON with (K;V) pairs if it is not JSON formatted', async () => {
+  it('should not add a JSON with (K;V) pairs if it is not JSON formatted and text area should keep the wrong JSON to allow user to edit', async () => {
     const currentVariables = await page.evaluate(() => window.model.workflow.form.variables);
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
-    await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
+    const toBeTyped = '{"testJson": "JsonValue", somtest: test}';
+    await page.keyboard.type(toBeTyped);
     await page.waitForTimeout(200);
-    const variables = await page.evaluate(() => {
+    const {variables, areaString} = await page.evaluate(() => {
       document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
-      return window.model.workflow.form.variables;
+      return {variables: window.model.workflow.form.variables, areaString: window.model.workflow.kvPairsString};
     });
     
     assert.deepStrictEqual(variables, currentVariables);
+    assert.strictEqual(areaString, toBeTyped)
   });
 
   it('should successfully move focus to key input after KV pair was added', async () => {
