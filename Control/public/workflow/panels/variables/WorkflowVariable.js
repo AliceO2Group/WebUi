@@ -25,13 +25,14 @@ export default class WorkflowVariable {
    */
   constructor(variable) {
     this.setWidgetType(variable);
-    this.setVarType(variable);
+    this.setType(variable);
     this.setDefaultValue(variable);
     this.label = variable.label ? variable.label : 'Label Unknown';
     this.description = variable.description ? variable.description : 'none';
     this.panel = variable.panel ? variable.panel : 'mainPanel';
     this.allowedValues = variable.allowedValues ? variable.allowedValues : [];
     this.key = variable.key;
+    this.index = variable.index ? variable.index : 0;
   }
 
   /**
@@ -55,6 +56,12 @@ export default class WorkflowVariable {
       case 4:
         this.widget = WIDGET_VAR.COMBO_BOX;
         break;
+      case 5:
+        this.widget = WIDGET_VAR.RADIO_BUTTON_BOX;
+        break;
+      case 6:
+        this.widget = WIDGET_VAR.CHECKBOX_BOX;
+        break;
       default:
         this.widget = WIDGET_VAR.EDIT_BOX;
         break;
@@ -65,25 +72,25 @@ export default class WorkflowVariable {
    * Set the type of the variable UI Widget
    * @param {JSON} variable 
   */
-  setVarType(variable) {
+  setType(variable) {
     switch (variable.type) {
       case 0:
-        this.varType = VAR_TYPE.STRING;
+        this.type = VAR_TYPE.STRING;
         return;
       case 1:
-        this.varType = VAR_TYPE.NUMBER;
+        this.type = VAR_TYPE.NUMBER;
         break;
       case 2:
-        this.varType = VAR_TYPE.BOOL;
+        this.type = VAR_TYPE.BOOL;
         break;
       case 3:
-        this.varType = VAR_TYPE.ARRAY;
+        this.type = VAR_TYPE.ARRAY;
         break;
       case 4:
-        this.varType = VAR_TYPE.JSON;
+        this.type = VAR_TYPE.JSON;
         break;
       default:
-        this.varType = VAR_TYPE.STRING;
+        this.type = VAR_TYPE.STRING;
         break;
     }
   }

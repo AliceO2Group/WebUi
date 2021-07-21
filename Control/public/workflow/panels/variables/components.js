@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import {WIDGET_VAR} from './../../constants.js';
+import {VAR_TYPE, WIDGET_VAR} from './../../constants.js';
 
 /**
  * Build a variable component based on the information provided 
@@ -33,6 +33,10 @@ const autoBuiltBox = (variable, model) => {
       return dropdownBox(variable, model);
     case WIDGET_VAR.COMBO_BOX:
       return comboBox(variable, model);
+    case WIDGET_VAR.RADIO_BUTTON_BOX:
+      return radioButtonBox(variable, model);
+    case WIDGET_VAR.CHECKS_BOX:
+      return checkBox(variable, model);
   }
 };
 
@@ -47,13 +51,14 @@ const editBox = (variable, model) =>
     h('label.w-50', variable.label),
     h('.w-50',
       h('input.form-control', {
-        type: 'text',
+        type: variable.type === VAR_TYPE.NUMBER ? 'number' : 'text',
         value: model.workflow.form.basicVariables[variable.key] ?
           model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
         onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
       })
     ),
   ]);
+
 
 /**
  * Builds a component of type SLIDER to be used within the Variables Panel
@@ -64,30 +69,32 @@ const editBox = (variable, model) =>
  * @returns {vnode}
  */
 const sliderBox = (variable, model) => {
-  if (variable.allowedValues
-    && variable.allowedValues[0] && typeof variable.allowedValues[0] === 'number'
-    && variable.allowedValues[1] && typeof variable.allowedValues[1] === 'number'
-  ) {
+  try {
+    const min = parseInt(variable.allowedValues[0]);
+    const max = parseInt(variable.allowedValues[1]);
+
     return h('.flex-row.pv1', [
       h('label.w-50', variable.label),
       h('.w-50',
         h('input.form-control', {
-          type: 'number',
-          min: variable.allowedValues[0],
-          max: variable.allowedValues[1],
+          type: 'range',
+          min: min,
+          max: max,
           value: model.workflow.form.basicVariables[variable.key] ?
             model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
           onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
         })
       )
     ]);
-  } else {
+  } catch (error) {
     return editBox(variable, model);
   }
+
 };
 
 /**
-* Builds a component of type DROPDOWN_BOX to be used within the Variables Panel 
+* Builds a component of type DROPDOWN_BOX to be used within the Variables Panel
+* Provides a single selection list of elements for the user to choose
 * @param {WorkflowVariable} variable
 * @param {Object} model
 * @returns {vnode}
@@ -110,21 +117,57 @@ const dropdownBox = (variable, model) =>
   ]);
 
 /**
- * Builds a component of type LIST_BOX to be used within the Variables Panel 
+ * Builds a component of type LIST_BOX to be used within the Variables Panel
+ * If AliECS specifies type:
+ * * string - single selection (e.g. worfklow template panel) and returns a single value
+ * * number - single selection (e.g. worfklow template panel) and returns a single value
+ * * list - multiple selection and send to AliECS a JSON formatted list (e.g. FLP selection panel)
  * @param {WorkflowVariable} variable
  * @param {Object} model
  * @returns {vnode}
  */
-const listBox = (variable, model) =>
+const listBox = (variable, model) => {
+  // TODO if string/number create a dropdownbox
   h('', 'I am a list box');
+};
 
 /**
-* Builds a component of type COMBO_BOX to be used within the Variables Panel 
+* Builds a component of type COMBO_BOX to be used within the Variables Panel
+* Similar to Revision input search + dropdown list
+* The user will be able to input their own text and it is not mandatory to select from the list
 * @param {WorkflowVariable} variable
 * @param {Object} model
 * @returns {vnode}
 */
 const comboBox = (variable, model) =>
+  h('', 'I am a combo box');
+
+/**
+
+*/
+const radioButtonBox = (variable, model) =>
+  h('.flex-row.pv1', [
+    h('label.w-50', variable.label),
+    h('.w-50.flex-row.flex-wrap.text-left', [
+      variable.allowedValues.map((value) => {
+        return h('.w-33.form-check', [
+          h('input.form-check-input', {
+            type: 'radio',
+            name: `${value}`,
+            id: `${value}id`,
+            checked: model.workflow.form.basicVariables[variable.key] === value,
+            onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value),
+          }),
+          h('label.w-wrapped', {for: `${value}id`, title: value, style: 'cursor: pointer'}, value)
+        ]);
+      })
+    ])
+  ]);
+
+/**
+
+*/
+const checkBox = (variable, model) =>
   h('', 'I am a combo box');
 
 export {autoBuiltBox};
