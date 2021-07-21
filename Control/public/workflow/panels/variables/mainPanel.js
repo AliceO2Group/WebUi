@@ -38,16 +38,15 @@ export default (workflow) => {
 const panel = (workflow, variables, name) => {
   const label = name.replace(/([a-z](?=[A-Z]))/g, '$1 ');
   let sortedVars = variables.sort((varA, varB) => {
-    if (!varA.index && varB.index) {
-      return -1;
-    } else if (varA.index && !varB.index) {
-      return 1;
-    } else if (varA.index && varB.index) {
-      return varA.index > varB.index ? 1 : -1;
-    } else {
-      return varA.key > varB.key ? 1 : -1
+    if (varA.index && varB.index) {
+      if (varA.index > varB.index) {
+        return 1;
+      } else if (varA.index < varB.index) {
+        return -1;
+      }
     }
-  })
+    return varA.key > varB.key ? 1 : -1
+  });
   return h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', label)),
     h('.p2.panel', [
