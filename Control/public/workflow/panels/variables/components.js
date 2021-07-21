@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import {WIDGET_TYPE} from './../../constants.js';
+import {WIDGET_VAR} from './../../constants.js';
 
 /**
  * Build a variable component based on the information provided 
@@ -23,15 +23,15 @@ import {WIDGET_TYPE} from './../../constants.js';
  */
 const autoBuiltBox = (variable, model) => {
   switch (variable.widget) {
-    case WIDGET_TYPE.EDIT_BOX:
+    case WIDGET_VAR.EDIT_BOX:
       return editBox(variable, model);
-    case WIDGET_TYPE.SLIDER:
+    case WIDGET_VAR.SLIDER:
       return sliderBox(variable, model);
-    case WIDGET_TYPE.LIST_BOX:
+    case WIDGET_VAR.LIST_BOX:
       return listBox(variable, model);
-    case WIDGET_TYPE.DROPDOWN_BOX:
+    case WIDGET_VAR.DROPDOWN_BOX:
       return dropdownBox(variable, model);
-    case WIDGET_TYPE.COMBO_BOX:
+    case WIDGET_VAR.COMBO_BOX:
       return comboBox(variable, model);
   }
 };
@@ -43,31 +43,70 @@ const autoBuiltBox = (variable, model) => {
  * @returns {vnode}
  */
 const editBox = (variable, model) =>
-  h('', [
-    h('label', variable.label),
-    h('input', {
-      type: 'text',
-      // value: variable.defaultValue,
-      placeholder: variable.defaultValue,
-      onchange: (e) => console.log(e.target.value)
-    })
+  h('.flex-row.pv1', [
+    h('label.w-50', variable.label),
+    h('.w-50',
+      h('input.form-control', {
+        type: 'text',
+        value: model.workflow.form.basicVariables[variable.key] ?
+          model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
+        onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
+      })
+    ),
   ]);
 
 /**
- * Builds a component of type SLIDER to be used within the Variables Panel 
+ * Builds a component of type SLIDER to be used within the Variables Panel
+ * The range of the slider will be defined by the first 2 values within the `allowedValues` field
+ * If the 2 values are missing or they are not a number, a simple edit box will be generated instead
  * @param {WorkflowVariable} variable
  * @param {Object} model
  * @returns {vnode}
  */
-const sliderBox = (variable, model) =>
-  h('', [
-    h('label', variable.label),
-    h('input.form-control', {
-      type: 'number',
-      min: variable.allowedValues[0],
-      max: variable.allowedValues[1],
-      onchange: (e) => console.log(e.target.value),
-    }, 'field_some')
+const sliderBox = (variable, model) => {
+  if (variable.allowedValues
+    && variable.allowedValues[0] && typeof variable.allowedValues[0] === 'number'
+    && variable.allowedValues[1] && typeof variable.allowedValues[1] === 'number'
+  ) {
+    return h('.flex-row.pv1', [
+      h('label.w-50', variable.label),
+      h('.w-50',
+        h('input.form-control', {
+          type: 'number',
+          min: variable.allowedValues[0],
+          max: variable.allowedValues[1],
+          value: model.workflow.form.basicVariables[variable.key] ?
+            model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
+          onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
+        })
+      )
+    ]);
+  } else {
+    return editBox(variable, model);
+  }
+};
+
+/**
+* Builds a component of type DROPDOWN_BOX to be used within the Variables Panel 
+* @param {WorkflowVariable} variable
+* @param {Object} model
+* @returns {vnode}
+*/
+const dropdownBox = (variable, model) =>
+  h('.flex-row.pv1', [
+    h('label.w-50', variable.label),
+    h('.w-50',
+      h('select.form-control', {
+        style: 'cursor: pointer',
+        onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
+      }, [
+        variable.allowedValues.map((value) =>
+          h('option', {
+            style: 'cursor: pointer',
+            selected: model.workflow.form.basicVariables[variable.key] === value
+          }, value))
+      ])
+    ),
   ]);
 
 /**
@@ -77,16 +116,7 @@ const sliderBox = (variable, model) =>
  * @returns {vnode}
  */
 const listBox = (variable, model) =>
-  h('', 'I am an list box');
-
-/**
-* Builds a component of type DROPDOWN_BOX to be used within the Variables Panel 
-* @param {WorkflowVariable} variable
-* @param {Object} model
-* @returns {vnode}
-*/
-const dropdownBox = (variable, model) =>
-  h('', 'I am an dropdown box');
+  h('', 'I am a list box');
 
 /**
 * Builds a component of type COMBO_BOX to be used within the Variables Panel 
@@ -95,7 +125,6 @@ const dropdownBox = (variable, model) =>
 * @returns {vnode}
 */
 const comboBox = (variable, model) =>
-  h('', 'I am an combo box');
+  h('', 'I am a combo box');
 
-
-module.exports = {autoBuiltBox, editBox, sliderBox, listBox, dropdownBox, comboBox};
+export {autoBuiltBox};

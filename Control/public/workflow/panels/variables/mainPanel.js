@@ -13,17 +13,45 @@
 */
 
 import {h} from '/js/src/index.js';
+import {autoBuiltBox} from './components.js';
 
 /**
- * Custom panel build based on the user
+ * Custom set of panels build based on the user's selection of template
  * to configure the workflow
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) =>
-  h('.w-100', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
+export default (workflow) => {
+  return h('.w-100.flex-row', {
+    style: 'flex-wrap: wrap'
+  }, Object.keys(workflow.groupedPanels)
+    .map((panelName) => h('.w-50', panel(workflow, workflow.groupedPanels[panelName], panelName))));
+};
+
+/**
+ * Generate a panel based on the configuration provided in the Control Workflows
+ * @param {Workflow} workflow
+ * @param {Array<JSON>} variables
+ * @param {String} name - of the panel
+ * @returns 
+ */
+const panel = (workflow, variables, name) => {
+  const label = name.replace(/([a-z](?=[A-Z]))/g, '$1 ');
+  let sortedVars = variables.sort((varA, varB) => {
+    if (!varA.index && varB.index) {
+      return -1;
+    } else if (varA.index && !varB.index) {
+      return 1;
+    } else if (varA.index && varB.index) {
+      return varA.index > varB.index ? 1 : -1;
+    } else {
+      return varA.key > varB.key ? 1 : -1
+    }
+  })
+  return h('.w-100', [
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', label)),
     h('.p2.panel', [
-      dcsPanel(workflow),
+      sortedVars.map((variable) => autoBuiltBox(variable, workflow.model))
     ])
   ]);
+};

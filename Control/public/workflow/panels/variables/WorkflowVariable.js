@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {WIDGET_VAR, VAR_TYPE} from './constants.js';
+import {WIDGET_VAR, VAR_TYPE} from './../../constants.js';
 /**
  * Model representing a WorfklowVariable following gRPC model of VarSpecMessage
  */
@@ -26,11 +26,12 @@ export default class WorkflowVariable {
   constructor(variable) {
     this.setWidgetType(variable);
     this.setVarType(variable);
-    this.defaultValue = variable.defaultValue ? variable.defaultValue : '';
+    this.setDefaultValue(variable);
     this.label = variable.label ? variable.label : 'Label Unknown';
     this.description = variable.description ? variable.description : 'none';
-    this.panel = variable.panel ? variable.panel : 'BASIC';
+    this.panel = variable.panel ? variable.panel : 'mainPanel';
     this.allowedValues = variable.allowedValues ? variable.allowedValues : [];
+    this.key = variable.key;
   }
 
   /**
@@ -43,19 +44,19 @@ export default class WorkflowVariable {
         this.widget = WIDGET_VAR.EDIT_BOX;
         return;
       case 1:
-        this.slider = WIDGET_VAR.SLIDER;
+        this.widget = WIDGET_VAR.SLIDER;
         break;
       case 2:
-        this.slider = WIDGET_VAR.LIST_BOX;
+        this.widget = WIDGET_VAR.LIST_BOX;
         break;
       case 3:
-        this.slider = WIDGET_VAR.DROPDOWN_BOX;
+        this.widget = WIDGET_VAR.DROPDOWN_BOX;
         break;
       case 4:
-        this.slider = WIDGET_VAR.COMBO_BOX;
+        this.widget = WIDGET_VAR.COMBO_BOX;
         break;
       default:
-        this.slider = WIDGET_VAR.EDIT_BOX;
+        this.widget = WIDGET_VAR.EDIT_BOX;
         break;
     }
   }
@@ -84,6 +85,38 @@ export default class WorkflowVariable {
       default:
         this.varType = VAR_TYPE.STRING;
         break;
+    }
+  }
+
+  /**
+   * Set the default value of the variable UI Widget
+   * @param {JSON} variable 
+   * @returns 
+   */
+  setDefaultValue(variable) {
+    if (variable.defaultValue) {
+      this.defaultValue = variable.defaultValue;
+    } else {
+      switch (variable.type) {
+        case 0:
+          this.defaultValue = '';
+          return;
+        case 1:
+          this.defaultValue = 0;
+          break;
+        case 2:
+          this.defaultValue = false;
+          break;
+        case 3:
+          this.defaultValue = [];
+          break;
+        case 4:
+          this.defaultValue = {};
+          break;
+        default:
+          this.defaultValue = '';
+          break;
+      }
     }
   }
 }

@@ -15,6 +15,7 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import {PREFIX} from './constants.js';
 import FlpSelection from './panels/flps/FlpSelection.js';
+import WorkflowVariable from './panels/variables/WorkflowVariable.js';
 import WorkflowForm from './WorkflowForm.js';
 
 /**
@@ -47,6 +48,8 @@ export default class Workflow extends Observable {
     };
 
     this.templatesVarsMap = {};
+    this.selectedVarsMap = {};
+    this.groupedPanels = {}
 
     this.READOUT_PREFIX = PREFIX.READOUT;
 
@@ -297,6 +300,31 @@ export default class Workflow extends Observable {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Generate the variables from spec map object if it exists
+   * @param {String} template
+   */
+  generateVariablesSpec(template) {
+    if (this.templatesVarsMap[template]
+      && Object.keys(this.templatesVarsMap[template]).length > 0) {
+      this.selectedVarsMap = this.templatesVarsMap[template];
+    } else {
+      this.selectedVarsMap = {};
+    }
+
+    Object.keys(this.selectedVarsMap)
+      .forEach((variableName) => {
+        const variable = this.selectedVarsMap[variableName];
+        const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
+        if (!this.groupedPanels[panelBelongingTo]) {
+          this.groupedPanels[panelBelongingTo] = [];
+        }
+        variable.key = variableName;
+        this.groupedPanels[panelBelongingTo].push(new WorkflowVariable(variable));
+      });
+
   }
 
   /**

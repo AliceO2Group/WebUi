@@ -15,6 +15,7 @@
 import {h, iconReload, info} from '/js/src/index.js';
 import revisionPanel from './panels/revision/revisionPanel.js';
 import basicVarsPanel from './panels/variables/basicPanel.js';
+import mainPanel from './panels/variables/mainPanel.js';
 import advancedVarsPanel from './panels/variables/advancedPanel.js';
 import flpSelectionPanel from './panels/flps/flpSelectionPanel.js';
 import errorComponent from './../common/errorComponent.js';
@@ -81,10 +82,13 @@ const showNewEnvironmentForm = (model, repoList) => [
  * @return {vnode}
  */
 const workflowSettingsPanels = (workflow) =>
-  h('.w-100.ph2.flex-row', [
-    basicVarsPanel(workflow),
-    advancedVarsPanel(workflow)
-  ]);
+  [
+    Object.keys(workflow.selectedVarsMap).length > 0 && h('.w-100.pv2.flex-row', mainPanel(workflow)),
+    h('.w-100.ph2.flex-row', [
+      !Object.keys(workflow.selectedVarsMap).length > 0 && basicVarsPanel(workflow),
+      advancedVarsPanel(workflow)
+    ])
+  ];
 
 
 /**
@@ -146,7 +150,7 @@ const templateAreaList = (workflow, repository, revision) =>
                   className: workflow.form.template === template ? 'selected' : null,
                   onclick: () => {
                     workflow.form.setTemplate(template);
-                    // workflow.variable.
+                    workflow.generateVariablesSpec(template);
                   }
                 }, template),
                 h('a.w-10.flex-row.items-center.justify-center.actionable-icon', {
