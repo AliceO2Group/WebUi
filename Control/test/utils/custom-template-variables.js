@@ -43,7 +43,7 @@ const VARS = {
     widget: 4,
     type: 1,
     label: 'Combo Box with no restriction',
-    description: 'sets the frequency at which FairMQ logs channel transfers',
+    description: '',
     panel: 'mainPanel'
   },
   fmq_rate_logging_slide: {
@@ -68,9 +68,7 @@ const VARS = {
     visibleIf: '$$list_box_single_string === "FLP Panel"'
   },
   qc_remote_workflow: {
-    allowedValues: ['none', 'hmpid-raw-qcmn-remote', 'its-qcmn-fhr-fee-remote', 'mch-qcmn-digits-remote',
-      'mft-raw-qcmn-remote', 'phos-compressor-raw-qcmn-remote', 'phos-compressor-raw-qcmnt3-remote',
-      'qcmn-daq-remote', 'tof-qcmn-compressor-remote'
+    allowedValues: ['none', 'hmpid-raw-qcmn-remote', 'its-qcmn-fhr-fee-remote', 'option-mambo-no-5'
     ],
     defaultValue: 'none',
     label: 'Dropdown component',
@@ -101,8 +99,8 @@ const VARS = {
     defaultValue: 'none',
     type: 3,
     label: 'QualityControl remote workflow',
-    description: 'selects a remote QualityControl workflow',
-    widget: 2, // this is a combo box with single selection or user input value
+    description: '',  // this is a combo box with single selection or user input value
+    widget: 2,
     panel: 'dcsPanel',
     visibleIf: '$$list_box_multi_list.includes("DCS")'
 
@@ -113,20 +111,16 @@ const VARS = {
     type: 2,
     widget: 6,
     label: 'Assume this is TPC important',
-    description: 'enables or disables communication with the Data Distribution (DD) scheduler',
+    description: '',
     panel: 'tpcPanel',
     visibleIf: '$$list_box_multi_list.includes("TPC")'
   },
   dpl_workflow: {
     allowedValues: ['none', 'ft0-digits-qc', 'hmpid-raw-qc', 'hmpid-raw-qcmn-local',
-      'its-qc-fhr-fee', 'its-qcmn-fhr-fee-local', 'mch-qcmn-digits-local', 'mft-decoder', 'mft-digits-qc',
-      'mft-raw-qc', 'mft-raw-qcmn-local', 'mid-raw-parser', 'minimal-dpl', 'phos-compressor-raw-qc',
-      'phos-compressor-raw-qcmn-local', 'phos-compressor-raw-qcmnt3-local', 'phos-compressor-raw-qct3',
-      'phos-compressor', 'phos-compressort3', 'qc-daq', 'qcmn-daq-local', 'tof-compressor', 'tof-qcmn-compressor-local'
-    ],
+      'its-qc-fhr-fee', 'its-qcmn-fhr-fee-local'],
     defaultValue: 'none',
     label: 'DPL workflow',
-    description: 'selects a DPL subworkflow to inject between StfBuilder and StfSender',
+    description: '',
     widget: 3,
     panel: 'dplPanel',
     visibleIf: '$$combo_box_other === "DPL"'
@@ -135,7 +129,7 @@ const VARS = {
     allowedValues: ['none', 'stdout', 'all'],
     defaultValue: 'none',
     label: 'Log task output',
-    description: 'picks whether the standard output of controlled tasks should be forwarded',
+    description: '',
     widget: 5,
     panel: 'mainPanel'
   },
@@ -145,7 +139,7 @@ const VARS = {
     type: 2,
     widget: 6,
     label: 'Checkbox toggleing DCS SOR',
-    description: 'drops reclaimable slab object cache and page cache before CONFIGURE transition',
+    description: '',
     panel: 'mainPanel'
   },
   fmq_initial_shm_cleanup_enabled: {
