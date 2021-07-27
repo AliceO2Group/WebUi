@@ -268,11 +268,16 @@ export default class Workflow extends Observable {
 
   /**
    * Method to update the value of a (K;V) pair in basicVariables
+   * Checks if the type is a string; If it is not, it will be converted to a string
    * @param {string} key
-   * @param {string} value
+   * @param {object} value
    */
   updateBasicVariableByKey(key, value) {
-    this.form.basicVariables[key] = value;
+    if (typeof value !== 'string') {
+      this.form.basicVariables[key] = JSON.stringify(value);
+    } else {
+      this.form.basicVariables[key] = value;
+    }
     this.notify();
   }
 
@@ -307,24 +312,46 @@ export default class Workflow extends Observable {
    * @param {String} template
    */
   generateVariablesSpec(template) {
+    this.selectedVarsMap = {};
+    this.form.basicVariables = {};
+    this.groupedPanels = {};
     if (this.templatesVarsMap[template]
       && Object.keys(this.templatesVarsMap[template]).length > 0) {
       this.selectedVarsMap = this.templatesVarsMap[template];
-    } else {
-      this.selectedVarsMap = {};
+      Object.keys(this.selectedVarsMap)
+        .forEach((key) => {
+          if (this.selectedVarsMap[key].defaultValue) {
+            this.updateBasicVariableByKey(key, this.selectedVarsMap[key].defaultValue);
+          }
+          // Generate panels by grouping the variables by the `panel` field
+          const variable = this.selectedVarsMap[key];
+          const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
+          if (!this.groupedPanels[panelBelongingTo]) {
+            this.groupedPanels[panelBelongingTo] = [];
+          }
+          variable.key = key;
+          this.groupedPanels[panelBelongingTo].push(new WorkflowVariable(variable));
+        });
+      Object.keys(this.groupedPanels)
+        .forEach((key) => {
+          // sort variables within each panel based on index and label
+          let sortedVars = this.groupedPanels[key].sort((varA, varB) => {
+            if (varA.index && varB.index) {
+              if (varA.index < varB.index) {
+                return -1;
+              } else if (varA.index > varB.index) {
+                return 1;
+              }
+            } else if (varA.index) {
+              return -1;
+            } else if (varB.index) {
+              return 1;
+            }
+            return varA.label > varB.label ? 1 : -1
+          });
+          this.groupedPanels[key] = sortedVars;
+        });
     }
-
-    Object.keys(this.selectedVarsMap)
-      .forEach((variableName) => {
-        const variable = this.selectedVarsMap[variableName];
-        const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
-        if (!this.groupedPanels[panelBelongingTo]) {
-          this.groupedPanels[panelBelongingTo] = [];
-        }
-        variable.key = variableName;
-        this.groupedPanels[panelBelongingTo].push(new WorkflowVariable(variable));
-      });
-
   }
 
   /**

@@ -24,9 +24,10 @@ export default class WorkflowVariable {
    * @param {JSON} variable
    */
   constructor(variable) {
-    this.setWidgetType(variable);
-    this.setType(variable);
-    this.setDefaultValue(variable);
+    this.other = {};
+    this.widget = this.getWidgetTypeFromVariable(variable);
+    this.type = this.getTypeFromVariable(variable);
+    this.defaultValue = this.getDefaultValueFromVariable(variable);
     this.label = variable.label ? variable.label : 'Label Unknown';
     this.description = variable.description ? variable.description : 'none';
     this.panel = variable.panel ? variable.panel : 'mainPanel';
@@ -39,32 +40,25 @@ export default class WorkflowVariable {
    * Set the type of the variable UI Widget
    * @param {JSON} variable 
    */
-  setWidgetType(variable) {
-    switch (variable.uiWidgetHint) {
+  getWidgetTypeFromVariable(variable) {
+    switch (variable.widget) {
       case 0:
-        this.widget = WIDGET_VAR.EDIT_BOX;
-        return;
+        return WIDGET_VAR.EDIT_BOX;
       case 1:
-        this.widget = WIDGET_VAR.SLIDER;
-        break;
+        return WIDGET_VAR.SLIDER;
       case 2:
-        this.widget = WIDGET_VAR.LIST_BOX;
-        break;
+        return WIDGET_VAR.LIST_BOX;
       case 3:
-        this.widget = WIDGET_VAR.DROPDOWN_BOX;
-        break;
+        return WIDGET_VAR.DROPDOWN_BOX;
       case 4:
-        this.widget = WIDGET_VAR.COMBO_BOX;
-        break;
+        this.other.comboBox = {visible: false};
+        return WIDGET_VAR.COMBO_BOX;
       case 5:
-        this.widget = WIDGET_VAR.RADIO_BUTTON_BOX;
-        break;
+        return WIDGET_VAR.RADIO_BUTTON_BOX;
       case 6:
-        this.widget = WIDGET_VAR.CHECKBOX_BOX;
-        break;
+        return WIDGET_VAR.CHECKBOX_BOX;
       default:
-        this.widget = WIDGET_VAR.EDIT_BOX;
-        break;
+        return WIDGET_VAR.EDIT_BOX;
     }
   }
 
@@ -72,26 +66,20 @@ export default class WorkflowVariable {
    * Set the type of the variable UI Widget
    * @param {JSON} variable 
   */
-  setType(variable) {
+  getTypeFromVariable(variable) {
     switch (variable.type) {
       case 0:
-        this.type = VAR_TYPE.STRING;
-        return;
+        return VAR_TYPE.STRING;
       case 1:
-        this.type = VAR_TYPE.NUMBER;
-        break;
+        return VAR_TYPE.NUMBER;
       case 2:
-        this.type = VAR_TYPE.BOOL;
-        break;
+        return VAR_TYPE.BOOL;
       case 3:
-        this.type = VAR_TYPE.ARRAY;
-        break;
+        return VAR_TYPE.ARRAY;
       case 4:
-        this.type = VAR_TYPE.JSON;
-        break;
+        return VAR_TYPE.JSON;
       default:
-        this.type = VAR_TYPE.STRING;
-        break;
+        return VAR_TYPE.STRING;
     }
   }
 
@@ -100,29 +88,23 @@ export default class WorkflowVariable {
    * @param {JSON} variable 
    * @returns 
    */
-  setDefaultValue(variable) {
+  getDefaultValueFromVariable(variable) {
     if (variable.defaultValue) {
-      this.defaultValue = variable.defaultValue;
+      return variable.defaultValue;
     } else {
       switch (variable.type) {
         case 0:
-          this.defaultValue = '';
-          return;
+          return '';
         case 1:
-          this.defaultValue = 0;
-          break;
+          return 0;
         case 2:
-          this.defaultValue = false;
-          break;
+          return false;
         case 3:
-          this.defaultValue = [];
-          break;
+          return [];
         case 4:
-          this.defaultValue = {};
-          break;
+          return {};
         default:
-          this.defaultValue = '';
-          break;
+          return '';
       }
     }
   }

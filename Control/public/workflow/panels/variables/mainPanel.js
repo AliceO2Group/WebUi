@@ -16,41 +16,33 @@ import {h} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
 
 /**
- * Custom set of panels build based on the user's selection of template
+ * Builds a custom set of panels build based on the user's selection of template
  * to configure the workflow
+ * The panels are build based on the AliECS Core information sent via varSpecMap
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) => {
-  return h('.w-100.flex-row', {
-    style: 'flex-wrap: wrap'
-  }, Object.keys(workflow.groupedPanels)
-    .map((panelName) => h('.w-50', panel(workflow, workflow.groupedPanels[panelName], panelName))));
-};
+export default (workflow) =>
+  h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
+    Object.keys(workflow.groupedPanels)
+      .map((panelName) =>
+        h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[panelName], panelName))
+      )
+  );
 
 /**
  * Generate a panel based on the configuration provided in the Control Workflows
  * @param {Workflow} workflow
- * @param {Array<JSON>} variables
+ * @param {Array<JSON>} variables - that should be part of the panel
  * @param {String} name - of the panel
  * @returns 
  */
-const panel = (workflow, variables, name) => {
-  const label = name.replace(/([a-z](?=[A-Z]))/g, '$1 ');
-  let sortedVars = variables.sort((varA, varB) => {
-    if (varA.index && varB.index) {
-      if (varA.index > varB.index) {
-        return 1;
-      } else if (varA.index < varB.index) {
-        return -1;
-      }
-    }
-    return varA.key > varB.key ? 1 : -1
-  });
-  return h('.w-100', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', label)),
+const autoBuiltPanel = (workflow, variables, name) =>
+  h('.w-100', [
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
+      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 '))
+    ),
     h('.p2.panel', [
-      sortedVars.map((variable) => autoBuiltBox(variable, workflow.model))
+      variables.map((variable) => autoBuiltBox(variable, workflow.model))
     ])
   ]);
-};
