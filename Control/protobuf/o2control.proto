@@ -162,7 +162,9 @@ message TeardownReply {}
 ////////////////////////////////////////
 // Environment
 ////////////////////////////////////////
-message GetEnvironmentsRequest {}
+message GetEnvironmentsRequest {
+    bool showAll = 1;
+}
 message GetEnvironmentsReply {
     string frameworkId = 1;
     repeated EnvironmentInfo environments = 2;
@@ -183,9 +185,11 @@ message EnvironmentInfo {
 message NewEnvironmentRequest {
     string workflowTemplate = 1;
     map<string, string> vars = 2;
+    bool public = 3;
 }
 message NewEnvironmentReply {
     EnvironmentInfo environment = 1;
+    bool public = 2;
 }
 message NewAutoEnvironmentRequest {
     string workflowTemplate = 1;
@@ -202,6 +206,7 @@ message GetEnvironmentRequest {
 message GetEnvironmentReply {
     EnvironmentInfo environment = 1;
     RoleInfo workflow = 2;
+    bool public = 3;
 }
 
 message ControlEnvironmentRequest {
@@ -379,11 +384,13 @@ message GetWorkflowTemplatesRequest{
 
 message VarSpecMessage {
     enum UiWidget {
-        editBox = 0;    // plain string input line, can accept types number and string
+        editBox = 0;    // plain string input line, can accept types number (like a spinBox) and string
         slider = 1;     // input widget exclusively for numbers, range allowedValues[0]-[1]
         listBox = 2;    // displays a list of items, can accept types number, string or list; if number/string ==> single selection, otherwise multiple selection allowed
         dropDownBox = 3;
         comboBox = 4;
+        radioButtonBox = 5;
+        checkBox = 6;
     }
 
     enum Type {
@@ -398,9 +405,11 @@ message VarSpecMessage {
     Type type = 2;
     string label = 3;
     string description = 4;
-    UiWidget uiWidgetHint = 5;
+    UiWidget widget = 5;
     string panel = 6;   // hint for the UI on where to put or group the given variable input
     repeated string allowedValues = 7;  // list of offered values from which to choose (only for some UiWidgets)
+    int32 index = 8;
+    string visibleIf = 9;   // JS expression that evaluates to bool
 }
 
 message WorkflowTemplateInfo {
