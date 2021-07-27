@@ -59,6 +59,8 @@ export default class Workflow extends Observable {
       keyInput: '',
       keyValueArea: ''
     }
+
+    this.kvPairsString = ''; // variable stored for Adv Config Panel
   }
 
   /**
@@ -247,6 +249,7 @@ export default class Workflow extends Observable {
     try {
       const pairs = JSON.parse(kvPairs);
       Object.keys(pairs).forEach((key) => this.addVariable(key, pairs[key]))
+      this.kvPairsString = '';
     } catch (error) {
       this.model.notification.show('Provided string is not a valid JSON', 'danger', 3000);
     }

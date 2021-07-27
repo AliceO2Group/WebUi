@@ -111,23 +111,22 @@ const addKVInputPair = (workflow) => {
  * @returns {vnode}
  */
 const addListOfKvPairs = (workflow) => {
-  let kvPairsString = '';
   return h('.pv2.flex-row', [
     h('.ph1', {
       style: 'width: 93%'
     }, h('textarea.form-control', {
       id: 'kvTextArea',
       rows: 7,
-      value: kvPairsString,
+      value: workflow.kvPairsString,
       placeholder: 'e.g.\n{\n\t"key1": "value1",\n\t"key2": "value2"\n}',
       oncreate: ({dom}) => workflow.dom.keyValueArea = dom,
-      oninput: (e) => kvPairsString = e.target.value
+      oninput: (e) => workflow.kvPairsString = e.target.value
     })
     ),
     h('.ph2.actionable-icon', {
       title: 'Add list of (key,value) variables',
       onclick: () => {
-        workflow.addVariableList(kvPairsString);
+        workflow.addVariableList(workflow.kvPairsString);
         workflow.dom.keyValueArea.focus();
       }
     }, iconPlus())
