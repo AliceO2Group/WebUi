@@ -25,9 +25,16 @@ import {autoBuiltBox} from './components.js';
 export default (workflow) =>
   h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
     Object.keys(workflow.groupedPanels)
-      .map((panelName) =>
-        h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[panelName], panelName))
-      )
+      .filter((panelName) => {
+        return workflow.groupedPanels[panelName].some((variable) => {
+          try {
+            return eval(variable.isVisible);
+          } catch (error) {
+            return false;
+          }
+        });
+      })
+      .map((panelName) => h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[panelName], panelName)))
   );
 
 /**
@@ -40,28 +47,19 @@ export default (workflow) =>
  * @param {String} name - of the panel
  * @returns 
  */
-const autoBuiltPanel = (workflow, variables, name) => {
-  const isPanelVisible = variables.some((variable) => {
-    try {
-      return eval(variable.isVisible);
-    } catch (error) {
-      return false;
-    }
-  });
-  return isPanelVisible &&
-    h('.w-100', [
-      h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
-        h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 '))
-      ),
-      h('.p2.panel', [
-        variables.filter((variable) => {
-          try {
-            return eval(variable.isVisible);
-          } catch (error) {
-            console.error(error);
-            return false;
-          }
-        }).map((variable) => autoBuiltBox(variable, workflow.model))
-      ])
-    ]);
-};
+const autoBuiltPanel = (workflow, variables, name) =>
+  h('.w-100', [
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
+      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 '))
+    ),
+    h('.p2.panel', [
+      variables.filter((variable) => {
+        try {
+          return eval(variable.isVisible);
+        } catch (error) {
+          console.error(error);
+          return false;
+        }
+      }).map((variable) => autoBuiltBox(variable, workflow.model))
+    ])
+  ]);
