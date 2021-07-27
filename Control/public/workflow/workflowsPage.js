@@ -85,7 +85,7 @@ const workflowSettingsPanels = (workflow) =>
   [
     Object.keys(workflow.selectedVarsMap).length > 0 && h('.w-100.pv2.flex-row', mainPanel(workflow)),
     h('.w-100.ph2.flex-row', [
-      !Object.keys(workflow.selectedVarsMap).length > 0 && basicVarsPanel(workflow),
+      Object.keys(workflow.selectedVarsMap).length === 0 && basicVarsPanel(workflow),
       advancedVarsPanel(workflow)
     ])
   ];

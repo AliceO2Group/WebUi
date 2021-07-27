@@ -32,17 +32,36 @@ export default (workflow) =>
 
 /**
  * Generate a panel based on the configuration provided in the Control Workflows
+ * Each panel contains a set of variables which are to be displayed or not based on the
+ * `visibleIf` JS condition. 
+ * If the panel contains no visible variables, than it will not be displayed
  * @param {Workflow} workflow
  * @param {Array<JSON>} variables - that should be part of the panel
  * @param {String} name - of the panel
  * @returns 
  */
-const autoBuiltPanel = (workflow, variables, name) =>
-  h('.w-100', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
-      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 '))
-    ),
-    h('.p2.panel', [
-      variables.map((variable) => autoBuiltBox(variable, workflow.model))
-    ])
-  ]);
+const autoBuiltPanel = (workflow, variables, name) => {
+  const isPanelVisible = variables.some((variable) => {
+    try {
+      return eval(variable.isVisible);
+    } catch (error) {
+      return false;
+    }
+  });
+  return isPanelVisible &&
+    h('.w-100', [
+      h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
+        h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 '))
+      ),
+      h('.p2.panel', [
+        variables.filter((variable) => {
+          try {
+            return eval(variable.isVisible);
+          } catch (error) {
+            console.error(error);
+            return false;
+          }
+        }).map((variable) => autoBuiltBox(variable, workflow.model))
+      ])
+    ]);
+};

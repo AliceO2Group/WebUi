@@ -13,7 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
-import {PREFIX} from './constants.js';
+import {PREFIX, VAR_TYPE} from './constants.js';
 import FlpSelection from './panels/flps/FlpSelection.js';
 import WorkflowVariable from './panels/variables/WorkflowVariable.js';
 import WorkflowForm from './WorkflowForm.js';
@@ -268,12 +268,12 @@ export default class Workflow extends Observable {
 
   /**
    * Method to update the value of a (K;V) pair in basicVariables
-   * Checks if the type is a string; If it is not, it will be converted to a string
+   * Checks if the type is a number; If it is, it will be converted to a string
    * @param {string} key
    * @param {object} value
    */
   updateBasicVariableByKey(key, value) {
-    if (typeof value !== 'string') {
+    if (typeof value === 'number') {
       this.form.basicVariables[key] = JSON.stringify(value);
     } else {
       this.form.basicVariables[key] = value;
@@ -320,9 +320,6 @@ export default class Workflow extends Observable {
       this.selectedVarsMap = this.templatesVarsMap[template];
       Object.keys(this.selectedVarsMap)
         .forEach((key) => {
-          if (this.selectedVarsMap[key].defaultValue) {
-            this.updateBasicVariableByKey(key, this.selectedVarsMap[key].defaultValue);
-          }
           // Generate panels by grouping the variables by the `panel` field
           const variable = this.selectedVarsMap[key];
           const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
@@ -330,21 +327,25 @@ export default class Workflow extends Observable {
             this.groupedPanels[panelBelongingTo] = [];
           }
           variable.key = key;
-          this.groupedPanels[panelBelongingTo].push(new WorkflowVariable(variable));
+          const workVariable = new WorkflowVariable(variable);
+          this.groupedPanels[panelBelongingTo].push(workVariable);
+
+          // add default values to selected basic variables form
+          if (workVariable.defaultValue) {
+            if (workVariable.type === VAR_TYPE.ARRAY) {
+              this.updateBasicVariableByKey(key, [workVariable.defaultValue]);
+            } else {
+              this.updateBasicVariableByKey(key, workVariable.defaultValue);
+            }
+          }
         });
       Object.keys(this.groupedPanels)
         .forEach((key) => {
           // sort variables within each panel based on index and label
           let sortedVars = this.groupedPanels[key].sort((varA, varB) => {
-            if (varA.index && varB.index) {
-              if (varA.index < varB.index) {
-                return -1;
-              } else if (varA.index > varB.index) {
-                return 1;
-              }
-            } else if (varA.index) {
+            if (varA.index < varB.index) {
               return -1;
-            } else if (varB.index) {
+            } else if (varA.index > varB.index) {
               return 1;
             }
             return varA.label > varB.label ? 1 : -1

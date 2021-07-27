@@ -34,6 +34,7 @@ export default class WorkflowVariable {
     this.allowedValues = variable.allowedValues ? variable.allowedValues : [];
     this.key = variable.key;
     this.index = variable.index ? variable.index : 0;
+    this.isVisible = this.parseIsVisibleEval(variable);
   }
 
   /**
@@ -106,6 +107,23 @@ export default class WorkflowVariable {
         default:
           return '';
       }
+    }
+  }
+
+  /**
+   * Add the prefix to each variable within the `visibleIf` field
+   * to match the form within the GUI
+   * Currently prefixed with `workflow.form.basicVariables.`
+   * At run time, the function will be evaluated to decide if variable
+   * should be displayed or not
+   * @param {JSON} variable
+   * @return {String}
+   */
+  parseIsVisibleEval(variable) {
+    if (variable.visibleIf) {
+      return variable.visibleIf.split('$$').join('workflow.form.basicVariables.');
+    } else {
+      return true;
     }
   }
 }

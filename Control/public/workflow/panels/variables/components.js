@@ -78,7 +78,7 @@ const sliderBox = (variable, model) => {
     }
     return h('.flex-row.pv1', [
       h('label.w-50', variable.label),
-      h('.w-50.flex-row', [
+      h('', {class: 'w-50 flex-row'},
         h('.w-10.flex-row.items-center',
           model.workflow.form.basicVariables[variable.key] ?
             model.workflow.form.basicVariables[variable.key] : variable.defaultValue),
@@ -92,7 +92,7 @@ const sliderBox = (variable, model) => {
             oninput: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
           })
         )
-      ])
+      )
     ]);
   } catch (error) {
     return editBox(variable, model);
@@ -301,7 +301,7 @@ const checkBox = (variable, model) => {
           value: value,
           onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
         }),
-        h('label',{
+        h('label', {
           style: 'cursor: pointer',
           onclick: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
         }, value === 'true' ? 'ON' : 'OFF')]
