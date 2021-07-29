@@ -322,7 +322,7 @@ const variableLabel = (variable, action = undefined) => {
   return variable.description !== '' ?
     h('.w-50.flex-column.dropdown', [
       h('label#workflow-variable-info-label', style, variable.label),
-      h('.p2.dropdown-menu-right.gray-darker#workflow-variable-info', variable.description)
+      h('.p2.dropdown-menu-left.gray-darker#workflow-variable-info', variable.description)
     ])
     :
     h('label.w-50', style, variable.label);
