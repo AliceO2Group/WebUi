@@ -64,14 +64,20 @@ class InfoLoggerSender {
 
   /**
    * Replace all occurences of new lines, tabs or groups of 4 spaces with an empty space
-   * @param {String} log
+   * @param {Object|Error|String} log
    * @return {String}
    */
   _removeNewLinesAndTabs(log) {
-    if (log) {
+    try {
+      if (log instanceof Error) {
+        return log.toString().replace(/ {4}|[\t\n\r]/gm, ' ');
+      } else if (log instanceof Object) {
+        return JSON.stringify(log).replace(/ {4}|[\t\n\r]/gm, ' ');
+      }
       return log.replace(/ {4}|[\t\n\r]/gm, ' ');
+    } catch (error) {
+      return '';
     }
-    return '';
   }
 }
 
