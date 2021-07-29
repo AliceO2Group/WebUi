@@ -26,7 +26,7 @@ import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 export default (workflow) =>
   h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
     Object.keys(workflow.groupedPanels)
-      .sort((panelA, panelB) => panelA < panelB)
+      .sort((panelA, panelB) => panelA > panelB)
       .filter((panelName) => {
         return workflow.groupedPanels[panelName].some((variable) => {
           try {
@@ -63,7 +63,7 @@ const autoBuiltPanel = (workflow, variables, name) =>
           return false;
         }
       }).map((variable) => autoBuiltBox(variable, workflow.model)),
-      name === 'basicConfiguration' && [
+      name.toUpperCase() === 'BASICCONFIGURATION' && [
         readoutPanel(workflow),
         qcUriPanel(workflow)
       ]
