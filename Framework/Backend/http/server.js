@@ -188,7 +188,7 @@ class HttpServer {
 
     // Catch-all if no controller handled request
     this.app.use('/api', (req, res, next) => {
-      log.debug(`[HTTP] Page was not found: ${req.originalUrl}`);
+      log.debug(`[HTTP] Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).json({
         error: '404 - Page not found',
         message: 'The requested URL was not found on this server.'
@@ -196,13 +196,13 @@ class HttpServer {
     });
 
     this.app.use((req, res, next) => {
-      log.debug(`[HTTP] Page was not found: ${req.originalUrl}`);
+      log.debug(`[HTTP] Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
     });
 
     // Error handler when an API controller crashes
     this.app.use('/api', (err, req, res, next) => {
-      log.error(`[HTTP] Request ${req.originalUrl} failed: ${err.message || err}`);
+      log.error(`[HTTP] Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
       log.trace(err);
 
       if (process.env.NODE_ENV === 'development') {
@@ -219,7 +219,7 @@ class HttpServer {
 
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
-      log.error(`[HTTP] Request ${req.originalUrl} failed: ${err.message || err}`);
+      log.error(`[HTTP] Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
       log.trace(err);
       res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
     });
@@ -494,6 +494,19 @@ class HttpServer {
 
         res.status(403).json(response);
       });
+  }
+
+  /**
+   * Given a Request object, returns a new one
+   * with the query parameter, token, removed
+   * @param {Request} req
+   */
+  _parseOriginalUrl(req) {
+    try {
+      return req.originalUrl.replace(`token=${req.query.token}`, '');
+    } catch (error) {
+      return req.originalUrl
+    }
   }
 }
 module.exports = HttpServer;
