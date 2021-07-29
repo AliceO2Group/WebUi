@@ -29,8 +29,8 @@ export default class WorkflowVariable {
     this.type = this.getTypeFromVariable(variable);
     this.defaultValue = this.getDefaultValueFromVariable(variable);
     this.label = variable.label ? variable.label : 'Label Unknown';
-    this.description = variable.description ? variable.description : 'none';
-    this.panel = variable.panel ? variable.panel : 'mainPanel';
+    this.description = variable.description ? variable.description : '';
+    this.panel = variable.panel ? variable.panel : 'BasicConfiguration';
     this.allowedValues = variable.allowedValues ? variable.allowedValues : [];
     this.key = variable.key;
     this.index = variable.index ? variable.index : 0;

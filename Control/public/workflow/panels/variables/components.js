@@ -50,7 +50,7 @@ const autoBuiltBox = (variable, model) => {
  */
 const editBox = (variable, model) =>
   h('.flex-row.pv1', [
-    h('label.w-50', variable.label),
+    variableLabel(variable),
     h('.w-50',
       h('input.form-control', {
         type: variable.type === VAR_TYPE.NUMBER ? 'number' : 'text',
@@ -77,7 +77,7 @@ const sliderBox = (variable, model) => {
       throw new Error('Range values not a number')
     }
     return h('.flex-row.pv1', [
-      h('label.w-50', variable.label),
+      variableLabel(variable),
       h('', {class: 'w-50 flex-row'},
         h('.w-10.flex-row.items-center',
           model.workflow.form.basicVariables[variable.key] ?
@@ -108,7 +108,7 @@ const sliderBox = (variable, model) => {
  */
 const dropdownBox = (variable, model) =>
   h('.flex-row.pv1', [
-    h('label.w-50', variable.label),
+    variableLabel(variable),
     h('.w-50',
       h('select.form-control', {
         style: 'cursor: pointer',
@@ -141,7 +141,7 @@ const listBox = (variable, model) => {
     const type = variable.type;
     const list = variable.allowedValues;
     return h('.flex-row.pv1', [
-      h('label.w-50', variable.label),
+      variableLabel(variable),
       h('.w-50.text-left.shadow-level1.scroll-y', {style: 'max-height: 10em;'}, [
         list.map((name) =>
           h('a.menu-item', {
@@ -187,7 +187,7 @@ const comboBox = (variable, model) => {
   } else {
     const workflow = model.workflow;
     return h('.flex-row.pv1', [
-      h('label.w-50', variable.label),
+      variableLabel(variable),
       h('.w-50.dropdown', {
         style: 'flex-grow: 1;',
         class: variable.other.comboBox.visible ? 'dropdown-open' : ''
@@ -258,7 +258,7 @@ const comboBox = (variable, model) => {
  */
 const radioButtonBox = (variable, model) =>
   h('.flex-row.pv1', [
-    h('label.w-50', variable.label),
+    variableLabel(variable),
     h('.w-50.flex-row.flex-wrap.text-left', [
       variable.allowedValues.map((value) =>
         h('.w-33.form-check', [
@@ -287,10 +287,9 @@ const checkBox = (variable, model) => {
   const value = model.workflow.form.basicVariables[variable.key] ?
     model.workflow.form.basicVariables[variable.key] : variable.default;
   return h('.flex-row.pv1', [
-    h('label.w-50', {
-      style: 'cursor: pointer',
-      onclick: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
-    }, variable.label),
+    variableLabel(variable,
+      () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true')
+    ),
     h('.w-50.flex-row.flex-wrap.text-left', [
       h('.form-check', [
         h('input.form-check-input', {
@@ -309,5 +308,24 @@ const checkBox = (variable, model) => {
     ])
   ]);
 }
+
+/**
+ * Builds a label block which will display the variable description (if present) on hover
+ * @param {WorfklowVariable} variable 
+ * @returns {vnode}
+ */
+const variableLabel = (variable, action = undefined) => {
+  const style = {
+    style: `cursor: ${action ? 'pointer' : (variable.description ? 'help' : '')}`,
+    onclick: action,
+  };
+  return variable.description !== '' ?
+    h('.w-50.flex-column.dropdown', [
+      h('label#workflow-variable-info-label', style, variable.label),
+      h('.p2.dropdown-menu-right.gray-darker#workflow-variable-info', variable.description)
+    ])
+    :
+    h('label.w-50', style, variable.label);
+};
 
 export {autoBuiltBox};
