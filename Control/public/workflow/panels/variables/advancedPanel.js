@@ -21,7 +21,7 @@ import {h, iconTrash, iconPlus, info} from '/js/src/index.js';
  * @return {vnode}
  */
 export default (workflow) =>
-  h('.w-100.ph1', [
+  h('.w-100', [
     h('.bg-gray-light.p2.panel-title.w-100.flex-row', [
       h('h5.w-100', 'Advanced Configuration'),
       h('a.ph1.actionable-icon', {

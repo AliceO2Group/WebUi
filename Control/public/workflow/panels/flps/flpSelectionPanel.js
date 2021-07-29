@@ -21,7 +21,7 @@ import pageLoading from './../../../common/pageLoading.js';
  * @return {vnode}
  */
 export default (workflow) =>
-  h('.w-50.ph1', [
+  h('.w-50', [
     h('.w-100.flex-row.panel-title.p2', [
       h('.flex-column.justify-center.f6',
         h('button.btn', {

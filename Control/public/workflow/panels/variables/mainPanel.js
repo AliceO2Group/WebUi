@@ -14,6 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
+import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 
 /**
  * Builds a custom set of panels build based on the user's selection of template
@@ -25,6 +26,7 @@ import {autoBuiltBox} from './components.js';
 export default (workflow) =>
   h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
     Object.keys(workflow.groupedPanels)
+      .sort((panelA, panelB) => panelA < panelB)
       .filter((panelName) => {
         return workflow.groupedPanels[panelName].some((variable) => {
           try {
@@ -52,7 +54,7 @@ const autoBuiltPanel = (workflow, variables, name) =>
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
       h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 '))
     ),
-    h('.p2.panel', [
+    h('.p2.panel.text-left', [
       variables.filter((variable) => {
         try {
           return eval(variable.isVisible);
@@ -60,6 +62,10 @@ const autoBuiltPanel = (workflow, variables, name) =>
           console.error(error);
           return false;
         }
-      }).map((variable) => autoBuiltBox(variable, workflow.model))
-    ])
+      }).map((variable) => autoBuiltBox(variable, workflow.model)),
+      name === 'basicConfiguration' && [
+        readoutPanel(workflow),
+        qcUriPanel(workflow)
+      ]
+    ]),
   ]);

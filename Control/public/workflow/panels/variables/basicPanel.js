@@ -20,7 +20,7 @@ import {h} from '/js/src/index.js';
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) =>
+const basicPanel = (workflow) =>
   h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
     h('.p2.panel', [
@@ -442,3 +442,5 @@ const qcUriPanel = (workflow) => {
     ])
   ]);
 };
+
+export {basicPanel, readoutPanel, qcUriPanel};
