@@ -291,7 +291,7 @@ const checkBox = (variable, model) => {
       () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true')
     ),
     h('.w-50.flex-row.flex-wrap.text-left', [
-      h('.form-check', [
+      h('label.form-check.switch', [
         h('input.form-check-input', {
           type: 'checkbox',
           name: `${variable.id}`,
@@ -300,10 +300,8 @@ const checkBox = (variable, model) => {
           value: value,
           onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
         }),
-        h('label', {
-          style: 'cursor: pointer',
-          onclick: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
-        }, value === 'true' ? 'ON' : 'OFF')]
+        h('span.slider.round')
+      ]
       )
     ])
   ]);
