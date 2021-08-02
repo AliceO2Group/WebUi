@@ -220,20 +220,8 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 
 /* button */
 
-.btn {
-  display: inline-block;
-  font-family: inherit;
-  padding: 0.5em 1em;
-  border: 0;
-  border-radius: .25rem;
-  font-size: 1em;
-  line-height: 1;
-  text-align: center;
-  cursor: pointer;
-  text-decoration: none;
-  user-select: none;
-  position: relative;
-}
+.btn { display: inline-block; font-family: inherit; padding: 0.5em 1em; border: 0; border-radius: .25rem; font-size: 1em; line-height: 1; text-align: center; cursor: pointer; text-decoration: none; user-select: none; position: relative; }
+.btn-sm { display: inline-block; font-family: inherit; padding: .3em .7em; border: 0; border-radius: .25rem; font-size: 1em; line-height: 1; text-align: center; cursor: pointer; text-decoration: none; user-select: none; position: relative; margin-left: .3em; }
 
 .btn { background-color: var(--color-gray-light); color: var(--color-gray-darker); }
 .btn:hover { background-color: var(--color-gray); color: var(--color-white); }
@@ -304,6 +292,17 @@ svg.icon { height: 1em; width: 1em; margin-bottom: -0.2em; }
 .tooltip .tooltiptext {visibility: hidden; width: 118px; background-color: #555; color: #fff; text-align: center; padding: 3px; border-radius: 6px; position: absolute; z-index: 1;}
 .tooltiptext::after {content: ""; position: absolute; bottom: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: transparent transparent #555 transparent;}
 .tooltip:hover .tooltiptext {visibility: visible;}
+
+/* switches */ 
+.switch { position: relative; display: inline-block; width: 35px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-gray); -webkit-transition: .4s; transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 12px; left: 2px; bottom: 2px; background-color: white; -webkit-transition: .4s; transition: .4s; }
+input:checked + .slider { background-color: var(--color-blue); }
+input:focus + .slider { box-shadow: 0 0 1px var(--color-blue); }
+input:checked + .slider:before { -webkit-transform: translateX(19px); -ms-transform: translateX(19px); transform: translateX(19px); }
+.slider.round { border-radius: 34px; }
+.slider.round:before { border-radius: 50%; }
 
 /* form */
 
