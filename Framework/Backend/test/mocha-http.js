@@ -15,6 +15,7 @@
 process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
+const assert = require('assert');
 const path = require('path');
 const url = require('url');
 const config = require('./../config-default.json');
@@ -170,6 +171,21 @@ describe('REST API', () => {
         .get('/get-wrong?token=' + token)
         .expect('Content-Type', /html/)
         .expect(404, done);
+    });
+
+    it('should successfully remove the token from the URL', () => {
+      const req = {
+        query: {token: 'fdsaf234fsdfa.fsd'},
+        originalUrl: '/api/some?query=something&token=fdsaf234fsdfa.fsd'
+      };
+      assert.strictEqual(httpServer._parseOriginalUrl(req), '/api/some?query=something&');
+    });
+
+    it('should successfully return the original URL if replacing throwed an error', () => {
+      const req = {
+        originalUrl: '/api/some?query=something&token=fdsaf234fsdfa.fsd'
+      };
+      assert.strictEqual(httpServer._parseOriginalUrl(req), '/api/some?query=something&token=fdsaf234fsdfa.fsd');
     });
   });
 

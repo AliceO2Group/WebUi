@@ -19,7 +19,6 @@ const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
 const Log = require('./../log/Log.js');
-const log = new Log('Framework');
 const JwtToken = require('./../jwt/token.js');
 const OpenId = require('./openid.js');
 const path = require('path');
@@ -38,8 +37,8 @@ class HttpServer {
    * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
-    assert(httpConfig, '[HTTP] Missing config');
-    assert(httpConfig.port, '[HTTP] Missing config value: port');
+    assert(httpConfig, 'Missing config');
+    assert(httpConfig.port, 'Missing config value: port');
     httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
     httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
 
@@ -72,6 +71,8 @@ class HttpServer {
     if (!httpConfig.hasOwnProperty(autoListenFlag) || httpConfig[autoListenFlag]) {
       this.listen();
     }
+
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/server`);
   }
 
   /**
@@ -84,7 +85,7 @@ class HttpServer {
         if (err) {
           reject(err);
         } else {
-          log.info(`[HTTP] Server listening on port ${this.port}`);
+          this.log.info(`Server listening on port ${this.port}`);
           resolve();
         }
       });
@@ -188,7 +189,7 @@ class HttpServer {
 
     // Catch-all if no controller handled request
     this.app.use('/api', (req, res, next) => {
-      log.debug(`[HTTP] Page was not found: ${req.originalUrl}`);
+      this.log.debug(`Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).json({
         error: '404 - Page not found',
         message: 'The requested URL was not found on this server.'
@@ -196,14 +197,14 @@ class HttpServer {
     });
 
     this.app.use((req, res, next) => {
-      log.debug(`[HTTP] Page was not found: ${req.originalUrl}`);
+      this.log.debug(`Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
     });
 
     // Error handler when an API controller crashes
     this.app.use('/api', (err, req, res, next) => {
-      log.error(`[HTTP] Request ${req.originalUrl} failed: ${err.message || err}`);
-      log.trace(err);
+      this.log.error(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
+      this.log.trace(err);
 
       if (process.env.NODE_ENV === 'development') {
         res.status(500).json({
@@ -219,8 +220,8 @@ class HttpServer {
 
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
-      log.error(`[HTTP] Request ${req.originalUrl} failed: ${err.message || err}`);
-      log.trace(err);
+      this.log.error(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
+      this.log.trace(err);
       res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
     });
   }
@@ -392,7 +393,7 @@ class HttpServer {
 
     if (token) {
       this.jwt.verify(req.query.token).then(() => next(), (error) => {
-        log.warn(`[HTTP] ${error.name} : ${error.message}`);
+        this.log.warn(`${error.name} : ${error.message}`);
         res.status(403).json({message: error.name});
       });
     } else {
@@ -430,7 +431,7 @@ class HttpServer {
 
       res.redirect(url.format({pathname: '/', query: query}));
     }).catch((reason) => {
-      log.info('[HTTP] OpenId failed: ' + reason);
+      this.log.info('OpenId failed: ' + reason);
       res.status(401).send('OpenId failed');
     });
   }
@@ -478,7 +479,7 @@ class HttpServer {
         };
         next();
       }, ({name, message}) => {
-        log.warn(`[HTTP] ${name} : ${message}`);
+        this.log.warn(`${name} : ${message}`);
 
         const response = {error: '403 - Json Web Token Error'};
 
@@ -494,6 +495,19 @@ class HttpServer {
 
         res.status(403).json(response);
       });
+  }
+
+  /**
+   * Given a Request object, returns a new one
+   * with the query parameter, token, removed
+   * @param {Request} req
+   */
+  _parseOriginalUrl(req) {
+    try {
+      return req.originalUrl.replace(`token=${req.query.token}`, '');
+    } catch (error) {
+      return req.originalUrl
+    }
   }
 }
 module.exports = HttpServer;
