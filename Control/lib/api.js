@@ -13,7 +13,7 @@
 */
 
 const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
-const log = new (require('@aliceo2/web-ui').Log)('Control');
+const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
 // services
@@ -29,10 +29,10 @@ const ControlProxy = require('./control-core/ControlProxy.js');
 const ControlService = require('./control-core/ControlService.js');
 
 if (!config.grpc) {
-  throw new Error('[GRPC] Configuration is missing');
+  throw new Error('GRPC Configuration is missing');
 }
 if (!config.grafana) {
-  log.error('[Grafana] Configuration is missing');
+  log.error('Grafana Configuration is missing');
 }
 const padLock = new Padlock();
 
@@ -98,10 +98,10 @@ module.exports.setup = (http, ws) => {
   function lock(req, res) {
     try {
       padLock.lockBy(req.session.personid, req.session.name);
-      log.info(`[API] Lock taken by ${req.session.name}`);
+      log.info(`Lock taken by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`[API] Unable to lock by ${req.session.name}: ${error}`);
+      log.error(`Unable to lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }
     broadcastPadState();
@@ -115,10 +115,10 @@ module.exports.setup = (http, ws) => {
   function forceUnlock(req, res) {
     try {
       padLock.forceUnlock(req.session.access);
-      log.info(`[API] Lock forced by ${req.session.name}`);
+      log.info(`Lock forced by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`[API] Unable to force lock by ${req.session.name}: ${error}`);
+      log.error(`Unable to force lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }
     broadcastPadState();
@@ -132,10 +132,10 @@ module.exports.setup = (http, ws) => {
   function unlock(req, res) {
     try {
       padLock.unlockBy(req.session.personid);
-      log.info(`[API] Lock released by ${req.session.name}`);
+      log.info(`Lock released by ${req.session.name}`);
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`[API] Unable to give away lock by ${req.session.name}: ${error}`);
+      log.error(`Unable to give away lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }
     broadcastPadState();
