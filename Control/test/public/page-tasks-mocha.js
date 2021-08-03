@@ -31,10 +31,16 @@ describe('`pageTaskList` test-suite', async () => {
     calls['getTasks'] = undefined;
   });
 
-  it('should load task page', async () => {
+  it('should successfully load task page', async () => {
     await page.goto(url + '?page=taskList', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(calls['getTasks'], true);
     assert.strictEqual(location.search, '?page=taskList');
+  });
+
+  it('should successfully refresh load tasks content after 5000ms', async () => {
+    assert.strictEqual(calls['getTasks'], undefined);
+    await page.waitForTimeout(5500);
+    assert.strictEqual(calls['getTasks'], true);
   });
 });
