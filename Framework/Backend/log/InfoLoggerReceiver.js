@@ -14,7 +14,7 @@
 
 const net = require('net');
 const EventEmitter = require('events');
-const log = new (require('./Log.js'))('Framework');
+const Log = require('./Log.js');
 
 const protocols = require('./infologger-protocols.js');
 
@@ -37,6 +37,8 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     this.buffer = '';
 
     this.isConnected = false;
+
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/ilreceiver`);
   }
 
   /**
@@ -58,25 +60,25 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     this.client.on('connect', () => {
       this.isConnected = true;
       this.emit('connected');
-      log.info(`[ILReceiver] Connected to infoLoggerServer ${options.host}:${options.port}`);
+      this.log.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
     });
 
     this.client.on('end', () => {
-      log.error('[ILReceiver] Connection to infoLoggerServer ended (FIN)');
+      this.log.error('Connection to infoLoggerServer ended (FIN)');
       this.isConnected = false;
       this.emit('close');
       setTimeout(() => {
-        log.info('[ILReceiver] Quickly reconnecting infoLoggerServer socket...');
+        this.log.info('Quickly reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       }, 5000);
     });
 
     this.client.on('error', (error) => {
       this.isConnected = false;
-      log.error(`[ILReceiver] Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
+      this.log.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
       setTimeout(() => {
         this.emit('connection-issue', 'Unable to connect to InfoLogger Server. Retrying in 5 seconds...');
-        log.info('[ILReceiver] Reconnecting infoLoggerServer socket...');
+        this.log.info('Reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       }, 5000);
     });
@@ -137,12 +139,12 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
   parse(frame) {
     // Check frame integrity (header and footer)
     if (frame[0] !== '*') {
-      log.warn(`[ILReceiver] Parsing: discard uncomplete frame (length=${frame.length}), must begins with *`);
+      this.log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must begins with *`);
       return;
     }
 
     if (frame[frame.length - 1] !== '\n') {
-      log.warn(`[ILReceiver] Parsing: discard uncomplete frame (length=${frame.length}), must ends with \\n`);
+      this.log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must ends with \\n`);
       return;
     }
 
@@ -151,7 +153,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     const frameProtocol = protocols.find((protocol) => protocol.version === frameVersion);
     if (!frameProtocol) {
       const protocolsVersions = protocols.map((protocol) => protocol.version);
-      log.warn(`[ILReceiver] Parsing: unreconized protocol, found "${frameVersion}",
+      this.log.warn(`Parsing: unreconized protocol, found "${frameVersion}",
         support ${protocolsVersions.join(', ')}`);
       return;
     }
@@ -162,7 +164,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     // Check frame integrity (number of fields)
     if (fields.length !== frameProtocol.fields.length) {
-      log.warn(`[ILReceiver] Parsing: expected ${frameProtocol.fields.length} fields for
+      this.log.warn(`Parsing: expected ${frameProtocol.fields.length} fields for
         protocol version ${frameProtocol.version}, found ${fields.length}`);
       return;
     }

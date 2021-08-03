@@ -14,7 +14,7 @@
 
 const mysql = require('mysql');
 const assert = require('assert');
-const log = new (require('./../log/Log.js'))('Framework');
+const Log = require('./../log/Log.js');
 
 /**
  * MySQL pool wrapper
@@ -28,16 +28,18 @@ class MySQL {
    * and database name.
    */
   constructor(config) {
-    assert(config, '[MySQL] Missing config');
-    assert(config.host, '[MySQL] Missing config value: mysql.host');
-    assert(config.user, '[MySQL] Missing config value: mysql.user');
-    assert(config.database, '[MySQL] Missing config value: mysql.database');
+    assert(config, 'Missing config');
+    assert(config.host, 'Missing config value: mysql.host');
+    assert(config.user, 'Missing config value: mysql.user');
+    assert(config.database, 'Missing config value: mysql.database');
     config.port = (!config.port) ? 3306 : config.port;
     config.password = (!config.password) ? '' : config.password;
     config.timeout = (!config.timeout) ? 60000 : config.timeout;
 
     this.config = config;
     this.pool = mysql.createPool(config);
+
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
   }
 
   /**
@@ -96,19 +98,19 @@ class MySQL {
 
     if (err.code === 'ER_NO_DB_ERROR') {
       message = `${this.config.database} database not found`;
-      log.warn(`[MySQL] ${message}`);
+      this.log.warn(`${message}`);
     } else if (err.code === 'ER_NO_SUCH_TABLE') {
       message = `Table not found in ${this.config.database}`;
-      log.warn(`[MySQL] ${message}`);
+      this.log.warn(`${message}`);
     } else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
       message = `Unable to connect to mysql on ${this.config.host}:${this.config.port}`;
-      log.warn(`[MySQL] ${message}`);
+      this.log.warn(`${message}`);
     } else if (err.code === 'ER_ACCESS_DENIED_ERROR') {
       message = `Access denied for ${this.config.user}`;
-      log.warn(`[MySQL] ${message}`);
+      this.log.warn(`${message}`);
     } else {
       message = `MySQL error: ${err.code}, ${err.message}`;
-      log.error(`[MySQL] ${message}`);
+      this.log.error(`${message}`);
     }
 
     return message;
