@@ -90,6 +90,7 @@ class Loader extends Observable {
    * Do a POST request with `body` as JSON content.
    * @param {string} url - any URL part
    * @param {object} body - content
+   * @param {boolean} originalMessage - true if the client expects the raw formatted message in case of error
    * @return {AjaxResult} result, ok, status
    * @see {@link AjaxResult}
    * @example
@@ -97,7 +98,7 @@ class Loader extends Observable {
    * const loader = new Loader();
    * const {result, ok} = await loader.post('/api/foo', {bar: 123, baz: 456})
    */
-  async post(url, body) {
+  async post(url, body, originalMessage) {
     body = body || {};
 
     const options = {
@@ -109,13 +110,14 @@ class Loader extends Observable {
       body: JSON.stringify(body)
     };
 
-    return await this._request(url, options);
+    return await this._request(url, options, originalMessage);
   }
 
   /**
    * Do a GET request with `query` as query content.
    * @param {string} url - any URL part
    * @param {object} query - content
+   * @param {boolean} originalMessage - true if the client expects the raw formatted message in case of error
    * @return {AjaxResult} result, ok, status
    * @see {@link AjaxResult}
    * @example
@@ -123,7 +125,7 @@ class Loader extends Observable {
    * const loader = new Loader();
    * const {result, ok} = await loader.get('/api/foo', {bar: 123, baz: 456})
    */
-  async get(url, query) {
+  async get(url, query, originalMessage) {
     url = new URL(url, window.location);
     if (query) {
       Object.keys(query).forEach((key) => url.searchParams.append(key, query[key]));
@@ -136,7 +138,7 @@ class Loader extends Observable {
       },
     };
 
-    return await this._request(url, options);
+    return await this._request(url, options, originalMessage);
   }
 
   /**
@@ -144,9 +146,10 @@ class Loader extends Observable {
    * handle errors and parse json content
    * @param {string} url - any URL part
    * @param {object} options - options passed to native fetch API
+   * @param {boolean} originalMessage - true if the client expects the raw formatted message in case of error
    * @return {AjaxResult} result, ok, status
    */
-  async _request(url, options) {
+  async _request(url, options, originalMessage = false) {
     const request = fetchClient(url, options);
     this.watchPromise(request);
 
@@ -169,7 +172,8 @@ class Loader extends Observable {
       }
 
       // eslint-disable-next-line
-      const message = `Request to server failed (${response.status} ${response.statusText}): ${upstreamMessage.message}`;
+      const message = originalMessage ? upstreamMessage.message :
+        `Request to server failed (${response.status} ${response.statusText}): ${upstreamMessage.message}`;
       return new AjaxResult(false, response.status, {message});
     }
 
