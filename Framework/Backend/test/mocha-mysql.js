@@ -27,25 +27,25 @@ describe('MySQL Data Connector', () => {
     it('should throw error due to missing configuration', () => {
       assert.throws(() => {
         new MySQL();
-      }, new AssertionError({message: '[MySQL] Missing config', expected: true, operator: '=='}));
+      }, new AssertionError({message: 'Missing config', expected: true, operator: '=='}));
     });
 
     it('should throw error due to missing configuration parameter: host', () => {
       assert.throws(() => {
         new MySQL({});
-      }, new AssertionError({message: '[MySQL] Missing config value: mysql.host', expected: true, operator: '=='}));
+      }, new AssertionError({message: 'Missing config value: mysql.host', expected: true, operator: '=='}));
     });
 
     it('should throw error due to missing configuration parameter: user', () => {
       assert.throws(() => {
         new MySQL({host: 'test'});
-      }, new AssertionError({message: '[MySQL] Missing config value: mysql.user', expected: true, operator: '=='}));
+      }, new AssertionError({message: 'Missing config value: mysql.user', expected: true, operator: '=='}));
     });
 
     it('should throw error due to missing configuration parameter: database', () => {
       assert.throws(() => {
         new MySQL({host: 'test', user: 'test'});
-      }, new AssertionError({message: '[MySQL] Missing config value: mysql.database', expected: true, operator: '=='}));
+      }, new AssertionError({message: 'Missing config value: mysql.database', expected: true, operator: '=='}));
     });
 
     it('should successfully initialize mysql connector with all parameters', () => {
