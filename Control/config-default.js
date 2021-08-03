@@ -33,6 +33,9 @@ module.exports = {
     consulKVPrefix: 'o2/cluster/key/prefix',
     coreServices: 'o2/components/aliecs/some/settings/path',
   },
+  utils: {
+    refreshTask: 5000 // how often should task list page should refresh its content
+  }
   // infoLoggerGui: {
   //   hostname: 'localhost',
   //   port: 8081

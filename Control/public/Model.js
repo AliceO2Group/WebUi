@@ -109,6 +109,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
+    clearInterval(this.task.taskRefreshInterval);
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
