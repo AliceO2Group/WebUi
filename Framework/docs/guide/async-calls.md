@@ -154,3 +154,12 @@ The syntax is much more compact than using directly fetchClient.
 - `ok` is true on 2XX response only
 - `loader.active` is true if there is one or more requests working (used for a global spinner eventually)
 
+In case of errors, the user can select between a prebuilt error message (which includes the `status` and `statusText`) by passing a third argument to 
+the `get(url, query, originalMessage)` or `post(url, options, originalMessage)` methods
+
+e.g.
+For a `404 error Key not found` the messages will be sent as below:
+* `originalMessage === true` the error message will be `Key not found`
+* `originalMessage === false` the error message will be `Request to server failed (404 Not Found): Key not found`
+
+
