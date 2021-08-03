@@ -128,7 +128,7 @@ describe('ConsulConnector test suite', () => {
       await connector.getCRUs(null, res);
 
       assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: '[Consul] Unable to retrieve configuration of consul service'}));
+      assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
     });
   });
 
@@ -247,7 +247,7 @@ describe('ConsulConnector test suite', () => {
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: '[Consul] Unable to retrieve configuration of consul service'}));
+      assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
     });
   });
 
