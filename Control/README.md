@@ -17,6 +17,7 @@
     - [GUI](#gui)
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
       - [Clean Resources/Tasks](#clean-resourcestasks)
+    - [Integration with ControlWorkflows](#integration-with-controlworkflows)
     - [Integration with Notification Service](#integration-with-notification-service)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
@@ -103,6 +104,40 @@ Here, tasks will be grouped by host and each host has an in-line button to provi
 2. Lock the interface via the top-left lock button
 3. Use the top-right orange text `Clean Resources` button to request AliECS Core to run the `o2-roc-cleanup` workflow
 4. Use the top-right red text `Clean Tasks` button to request AliECS Core to remove all tasks that do not belong to an environment
+
+### Integration with ControlWorkflows
+From version `1.28.0` onwards, the AliECS GUI allows the user to define custom workflow templates. These are defined in `YAML` in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows) repository.
+
+Each variable belonging to a template will follow the definition present in the [protofile](https://github.com/AliceO2Group/WebUi/blob/dev/Control/protobuf/o2control.proto#L380) and will be dynamically built and displayed by the AliECS GUI based on the conditions provided. 
+e.g
+```json
+  "roc_ctp_emulator_enabled": {
+    "allowedValues": [],
+    "defaultValue": "11",
+    "type": 1,
+    "label": "ROC CTP emulator",
+    "description": "", // EDIT_BOX of type number with no priority on index'
+    "panel": "mainPanel"
+  },
+  "dcs_sor_parameters": {
+    "allowedValues": [],
+    "defaultValue": "Some Default Value",
+    "type": 0,
+    "label": "DCS SOR parameters",
+    "description": "", // EDIT_BOX with condition to be displayed only if component roc_ctp_emulator_enabled has a value higher or equal to 20 
+    "panel": "dcsPanel",
+    "visibleIf": "$$roc_ctp_emulator_enabled >= \"20\""
+  },
+```
+In the example above, the first variable is defined as an edit box of type `1 (number)` while the second variable is defined as an edit box of type `0 (string)` which will only be displayed if the value from the first field is greater than `"20"`.
+
+More examples can be seen in the test [file](./../test/../Control/test/utils/custom-template-variables.js)
+
+The `visibleIf` fields accepts the following 3 conditions that can be combined using logical operators:
+* `===`, `!==`, `>`, `<`, `>=`, `<=` (string comparison)
+* `includes(value)`
+* `key.match(value)` (TODO)
+
 ### Integration with Notification Service
 This feature requires HTTPS as it is making use of [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/notification)
 
