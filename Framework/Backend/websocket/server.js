@@ -14,7 +14,7 @@
 
 const WebSocketServer = require('ws').Server;
 const url = require('url');
-const log = new (require('./../log/Log.js'))('Framework');
+const Log = require('./../log/Log.js');
 const WebSocketMessage = require('./message.js');
 
 /**
@@ -32,7 +32,10 @@ class WebSocket {
     this.http = httpsServer;
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
-    log.info('[WebSocket] Server started');
+
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
+    this.log.info('Server started');
+    
     this.callbackArray = [];
     this.bind('filter', (message) => {
       return new WebSocketMessage(200).setCommand(message.getCommand());
@@ -74,7 +77,7 @@ class WebSocket {
         .then((data) => {
           // 2. Transfer decoded JWT data to request
           Object.assign(req, data);
-          log.debug(`[WebSocket] ID ${data.id} Processing "${req.getCommand()}"`);
+          this.log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
           // 3. Check whether callback exists
           if (this.callbackArray.hasOwnProperty(req.getCommand())) {
             const res = this.callbackArray[req.getCommand()](req);
@@ -113,9 +116,9 @@ class WebSocket {
         client.on('message', (message) => this.onmessage(message, client));
         client.on('close', () => this.onclose(client));
         client.on('pong', () => client.isAlive = true);
-        client.on('error', (err) => log.error(`[WebSocket] Connection ${err.code}`));
+        client.on('error', (err) => this.log.error(`Connection ${err.code}`));
       }, (error) => {
-        log.warn(`[WebSocket] ${error.name} : ${error.message}`);
+        this.log.warn(`${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -141,19 +144,19 @@ class WebSocket {
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              log.debug(`[WebSocket] ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
+              this.log.debug(`ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
               // 5. Send back to a client
               client.send(JSON.stringify(response.json));
             }
           }, (response) => {
             // 6. If generating response fails
-            throw new Error(`[WebSocket] ID ${client.id} Processing request failed: ${response.message}`);
+            throw new Error(`ID ${client.id} Processing request failed: ${response.message}`);
           });
       }, (failed) => {
         // 7. If parsing message fails
         client.send(JSON.stringify(failed.json));
       }).catch((error) => {
-        log.warn(`[WebSocket] ID ${client.id} ${error.name} : ${error.message}`);
+        this.log.warn(`ID ${client.id} ${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -178,7 +181,7 @@ class WebSocket {
    * @param {object} client - disconnected client
    */
   onclose(client) {
-    log.info(`[WebSocket] ID ${client.id} Client disconnected`);
+    this.log.info(`ID ${client.id} Client disconnected`);
   }
 
   /**
@@ -195,12 +198,12 @@ class WebSocket {
             return; // don't send
           }
         } catch (error) {
-          log.error(`[WebSocket] Client's filter corrupted, skipping broadcast: ${error}`);
+          this.log.error(`Client's filter corrupted, skipping broadcast: ${error}`);
           return; // don't send
         }
       }
       client.send(JSON.stringify(message.json));
-      log.debug(`[WebSocket] ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
+      this.log.debug(`ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
     });
   }
 
@@ -212,7 +215,7 @@ class WebSocket {
     this.server.clients.forEach((client) => {
       client.send(JSON.stringify(message.json));
     });
-    log.debug(`[WebSocket] Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
+    this.log.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
 module.exports = WebSocket;

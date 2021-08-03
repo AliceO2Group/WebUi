@@ -13,7 +13,7 @@
 */
 
 const https = require('https');
-const log = new (require('./../log/Log.js'))('Framework');
+const Log = require('./../log/Log.js');
 
 /**
  * Handles creating JIRA issues
@@ -24,16 +24,16 @@ class Jira {
    */
   constructor(config) {
     if (!config) {
-      throw new Error('[JIRA] Configuration object cannot be empty');
+      throw new Error('Configuration object cannot be empty');
     }
     if (!config.url) {
-      throw new Error('[JIRA] URL must be defined');
+      throw new Error('URL must be defined');
     }
     if (!config.serviceAccount || !config.serviceAccount.user || !config.serviceAccount.pass) {
-      throw new Error('[JIRA] Service account must be defined');
+      throw new Error('Service account must be defined');
     }
     if (!config.projectId) {
-      throw new Error('[JIRA] Project ID must be defined');
+      throw new Error('Project ID must be defined');
     }
 
     this.url = config.url;
@@ -43,6 +43,8 @@ class Jira {
     this.issueTypes = {
       bug: 1
     };
+
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/jira`);
   }
 
   /**
@@ -94,7 +96,7 @@ class Jira {
    */
   async createBugIssue(reporter, assignee, summary, description = '') {
     if (!reporter || !assignee || !summary) {
-      log.warn('[JIRA] Creating bug issue failed: undefined arguments');
+      this.log.warn('Creating bug issue failed: undefined arguments');
       return Promise.reject(new Error('Invalid parameters passed'));
     }
     const issue = JSON.stringify(

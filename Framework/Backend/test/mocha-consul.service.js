@@ -23,19 +23,19 @@ describe('Consul Service test suite', function() {
     it('should throw error due to no config being passed', function() {
       assert.throws(() => {
         new ConsulService();
-      }, new Error('[Consul] Configuration field cannot be empty'));
+      }, new Error('Configuration field cannot be empty'));
     });
 
     it('should throw error due to empty hostname in consul config', function() {
       assert.throws(() => {
         new ConsulService({});
-      }, new Error('[Consul] Hostname field cannot be empty'));
+      }, new Error('Hostname field cannot be empty'));
     });
 
     it('should throw error due to empty port in consul config', function() {
       assert.throws(() => {
         new ConsulService({hostname: 'localhost'});
-      }, new Error('[Consul] Port field cannot be empty'));
+      }, new Error('Port field cannot be empty'));
     });
 
     it('should successfully create a consul connector', function() {
