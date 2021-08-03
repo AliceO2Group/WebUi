@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-
+/* global COG */
 import {Observable, RemoteData} from '/js/src/index.js';
 import {getTasksByFlp} from './../common/utils.js';
 
@@ -46,6 +46,7 @@ export default class Task extends Observable {
     } else {
       const tasksByFlpMap = getTasksByFlp(result.tasks);
       this.tasksByFlp = RemoteData.success(tasksByFlpMap);
+      this.model.notification.show('Tasks updated', 'success', 1000);
     }
     this.notify();
   }
@@ -92,6 +93,7 @@ export default class Task extends Observable {
    */
   getTasks() {
     this.initTasks();
+    this.taskRefreshInterval = setInterval(() => this.initTasks(), COG.REFRESH_TASK);
   }
 
   /**
