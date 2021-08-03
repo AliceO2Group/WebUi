@@ -15,7 +15,7 @@
 const assert = require('assert');
 const path = require('path');
 const {WebSocketMessage} = require('@aliceo2/web-ui');
-const log = new (require('@aliceo2/web-ui').Log)('Control');
+const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 
 /**
@@ -61,7 +61,7 @@ class ControlService {
     const method = 'NewAutoEnvironment';
     if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
       const type = req.body.type ? ` (${req.body.type})` : '';
-      log.info(`[ControlService] ${req.session.personid} => ${method} ${type}`);
+      log.info(`${req.session.personid} => ${method} ${type}`);
 
       try {
         const hosts = await this.consulConnector.getFLPsList();
@@ -123,7 +123,7 @@ class ControlService {
       const method = 'NewAutoEnvironment';
       if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
         const type = req.body.type ? ` (${req.body.type})` : '';
-        log.info(`[ControlService] ${req.session.personid} => ${method} ${type} o2-roc-config`);
+        log.info(`${req.session.personid} => ${method} ${type} o2-roc-config`);
 
         try {
           const {repos: repositories} = await this.ctrlProx['ListRepos']();
@@ -173,7 +173,7 @@ class ControlService {
     if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
       if (!method.startsWith('Get')) {
         const type = req.body.type ? ` (${req.body.type})` : '';
-        log.info(`[ControlService] ${req.session.personid} => ${method} ${type}`, 6);
+        log.info(`${req.session.personid} => ${method} ${type}`, 6);
       }
       this.ctrlProx[method](req.body)
         .then((response) => res.json(response))
