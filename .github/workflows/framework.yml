@@ -13,12 +13,15 @@ jobs:
   test:
     name: Tests on macos-latest    
     runs-on: macOS-latest
+    strategy:
+      matrix:
+        node: [14, 16]
     steps:
       - uses: actions/checkout@v1
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '14.x'
+          node-version: ${{ matrix.node }}
       - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
       - run: (cd Framework; npm ci )
       - run: (cd Framework; npm test )
