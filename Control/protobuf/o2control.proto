@@ -410,6 +410,7 @@ message VarSpecMessage {
     repeated string allowedValues = 7;  // list of offered values from which to choose (only for some UiWidgets)
     int32 index = 8;
     string visibleIf = 9;   // JS expression that evaluates to bool
+    string enabledIf = 10;  // JS expression that evaluates to bool
 }
 
 message WorkflowTemplateInfo {
