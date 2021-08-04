@@ -13,7 +13,7 @@
 */
 
 const {Log, HttpServer} = require('@aliceo2/web-ui');
-const log = new Log('QualityControl/Index');
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 const path = require('path');
 const api = require('./lib/api.js');
 

@@ -24,7 +24,7 @@ const LayoutService = require('./services/LayoutService.js');
 const StatusService = require('./StatusService.js');
 const UserService = require('./services/UserService.js');
 
-const log = new (require('@aliceo2/web-ui').Log)('QualityControl/QCModel');
+const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
 // --------------------------------------------------------
 // Initialization of model according to config file

@@ -14,7 +14,7 @@
 
 const {Log, WebSocket} = require('@aliceo2/web-ui');
 const config = require('./config/configProvider.js');
-const log = new Log('QualityControl/Api');
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/api`);
 
 // Load data source (demo or DB)
 const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
