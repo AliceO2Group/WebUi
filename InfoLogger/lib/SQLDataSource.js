@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('InfoLogger');
+const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/sql`);
 
 module.exports = class SQLDataSource {
   /**
@@ -36,7 +36,7 @@ module.exports = class SQLDataSource {
       .query('select timestamp from messages LIMIT 1000;')
       .then(() => {
         const url = `${this.configMySql.host}:${this.configMySql.port}/${this.configMySql.database}`;
-        log.info(`[SQLSource] Connected to infoLogger database ${url}`);
+        log.info(`Connected to infoLogger database ${url}`);
       })
       .catch((error) => {
         log.error(error);
@@ -117,7 +117,7 @@ module.exports = class SQLDataSource {
             criteriaVerbose.push(` \`${field}\` IN [${filters[field][operator]}]`);
             break;
           default:
-            log.warn(`[SQLSource] unknown operator ${operator}`);
+            log.warn(`unknown operator ${operator}`);
             break;
         }
       }
@@ -165,7 +165,7 @@ module.exports = class SQLDataSource {
     }
 
     const totalTime = Date.now() - startTime; // ms
-    log.debug(`[SQLSource] Query done in ${totalTime}ms`);
+    log.debug(`Query done in ${totalTime}ms`);
     return {
       rows,
       total: total,
@@ -208,7 +208,7 @@ module.exports = class SQLDataSource {
     // The rows asked with a limit
     const requestRows = `SELECT * from (SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT ${options.limit}) as reordered ORDER BY \`TIMESTAMP\` ASC`;
     /* eslint-enable max-len */
-    log.debug(`[SQLSource] requestRows: ${requestRows} ${JSON.stringify(values)}`);
+    log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
     return this.connection.query(requestRows, values)
       .then((data) => data);
   }
@@ -221,7 +221,7 @@ module.exports = class SQLDataSource {
    */
   _countMessagesOnOptions(criteriaString, values) {
     const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
-    log.debug(`[SQLSource] requestCount: ${requestCount} ${JSON.stringify(values)}`);
+    log.debug(`requestCount: ${requestCount} ${JSON.stringify(values)}`);
     return this.connection.query(requestCount, values)
       .then((data) => data)
       .catch((error) => {
