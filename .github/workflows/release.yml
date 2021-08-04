@@ -43,6 +43,7 @@ jobs:
   upload-asset:
     runs-on: ubuntu-latest
     needs: deploy-npm-module
+    if: ${{ needs.deploy-npm-module.outputs.PROJECT != 'Framework' }}
     outputs:
       ASSET_URL: ${{ steps.upload.outputs.asset_url }}
     steps:
