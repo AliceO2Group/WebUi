@@ -13,7 +13,7 @@
 */
 
 const {Log} = require('@aliceo2/web-ui');
-const log = new Log('QualityControl/ConfigProvider');
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/config`);
 const fs = require('fs');
 const path = require('path');
 

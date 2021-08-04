@@ -13,7 +13,7 @@
 */
 
 const http = require('http');
-const log = new (require('@aliceo2/web-ui').Log)('QualityControl/CCDBConnector');
+const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
 
 /**
  * Gateway for all CCDB calls

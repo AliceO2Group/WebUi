@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)('QCG-StatusService');
+const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/status`);
 
 /**
  * Gateway for all calls with regards to the status
