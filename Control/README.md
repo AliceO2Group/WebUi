@@ -13,6 +13,7 @@
     - [Consul](#consul)
     - [Kafka](#kafka)
     - [InfoLogger GUI](#infologger-gui)
+    - [Utils](#utils)
   - [Features](#features)
     - [GUI](#gui)
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
@@ -75,6 +76,9 @@ Use of InfoLogger GUI instance is optional. Configuration details about it are b
 * `hostname` - InfoLogger GUI hostname
 * `port` - InfoLogger GUI port
 
+### Utils
+Use of utils field is optional. Here, a user can specify configuration fields for various uses of AliECS GUI:
+* `refreshTask` - specifies how often (ms) the page `taskList` should refresh its content if the user has it opened; Default value is `5000`
 ## Features
 
 ### GUI

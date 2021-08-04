@@ -232,7 +232,8 @@ describe('Control', function() {
         readoutCardPath: 'test/o2/readoutcard/components',
         qcPath: 'test/o2/qc/components',
         consulKVPrefix: 'test/ui/some-cluster/kv',
-      }
+      },
+      REFRESH_TASK: 5000,
     }
     assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');
   });
