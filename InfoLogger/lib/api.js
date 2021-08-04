@@ -12,15 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Log, WebSocketMessage, InfoLoggerReceiver} = require('@aliceo2/web-ui');
-const log = new Log('InfoLogger');
-const config = require('./configProvider.js');
+const {Log, WebSocketMessage, InfoLoggerReceiver, MySQL} = require('@aliceo2/web-ui');
 const SQLDataSource = require('./SQLDataSource.js');
 const ProfileService = require('./ProfileService.js');
-const {MySQL} = require('@aliceo2/web-ui');
 const JsonFileConnector = require('./JSONFileConnector.js');
-const projPackage = require('../package.json');
 const StatusService = require('./StatusService.js');
+
+const projPackage = require('../package.json');
+const log = new Log(`${process.env.npm_config_log_label ?? 'ilg'}/api`);
+const config = require('./configProvider.js');
 
 let querySource = null;
 let liveSource = null;

@@ -58,13 +58,13 @@ describe('JSON file custom database', () => {
     it('should throw an error if username is undefined', () => {
       return assert.rejects(async () => {
         await jsonConfig.createNewProfile(undefined, TEST_CONTENT);
-      }, new Error('[JSONConnector] username for profile is mandatory'));
+      }, new Error('username for profile is mandatory'));
     });
 
     it('should throw an error if username is null', () => {
       return assert.rejects(async () => {
         await jsonConfig.createNewProfile(null, TEST_CONTENT);
-      }, new Error('[JSONConnector] username for profile is mandatory'));
+      }, new Error('username for profile is mandatory'));
     });
 
     it('should successfully create a new profile', () => {
@@ -82,7 +82,7 @@ describe('JSON file custom database', () => {
     it('should throw an error when creating a new profile with the username as an existing profile', () => {
       return assert.rejects(async () => {
         await jsonConfig.createNewProfile('anonymous', TEST_CONTENT);
-      }, new Error('[JSONConnector] Profile with this username (anonymous) already exists'));
+      }, new Error('Profile with this username (anonymous) already exists'));
     });
   });
 
@@ -119,7 +119,7 @@ describe('JSON file custom database', () => {
     it('should throw an error when trying to update a profile which does not exist', () => {
       return assert.rejects(async () => {
         await jsonConfig.updateProfile('no-one', TEST_CONTENT);
-      }, new Error('[JSONConnector] Profile with this username (no-one) cannot be updated as it does not exist'));
+      }, new Error('Profile with this username (no-one) cannot be updated as it does not exist'));
     });
   });
 
@@ -129,7 +129,7 @@ describe('JSON file custom database', () => {
         jsonConfig.data = '{}';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`[JSONConnector] DB file should have an array of profiles ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
     it('should reject when there is no data with error of bad data format ', async () => {
@@ -137,7 +137,7 @@ describe('JSON file custom database', () => {
         jsonConfig.data = '';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`[JSONConnector] DB file should have an array of profiles ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
     it('should reject when data.profiles is not an Array with error of bad data format ', async () => {
@@ -145,7 +145,7 @@ describe('JSON file custom database', () => {
         jsonConfig.data = {profiles: 'test'};
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
-      }, new Error(`[JSONConnector] DB file should have an array of profiles ${CONFIG_FILE}`));
+      }, new Error(`DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
     it('should successfully read profiles from data', async () => {
