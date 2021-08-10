@@ -11,6 +11,8 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+/* eslint-disable max-len */
+/* eslint-disable require-jsdoc */
 
 const ControlService = require('./../../lib/control-core/ControlService.js');
 const sinon = require('sinon');
@@ -43,17 +45,17 @@ describe('Control Service test suite', () => {
     });
 
     it('should successfully remove `/` from beginning of string', () => {
-      assert.strictEqual(ctrlService.parseMethodNameString('/GetRepos'), 'GetRepos');
+      assert.strictEqual(ctrlService._parseMethodNameString('/GetRepos'), 'GetRepos');
     });
 
     it('should successfully return method without changing it', () => {
-      assert.strictEqual(ctrlService.parseMethodNameString('GetRepos'), 'GetRepos');
+      assert.strictEqual(ctrlService._parseMethodNameString('GetRepos'), 'GetRepos');
     });
 
     it('should successfully return same as provided for `null/undefined/<empty_string>`', () => {
-      assert.strictEqual(ctrlService.parseMethodNameString(null), null);
-      assert.strictEqual(ctrlService.parseMethodNameString(undefined), undefined);
-      assert.strictEqual(ctrlService.parseMethodNameString(''), '');
+      assert.strictEqual(ctrlService._parseMethodNameString(null), null);
+      assert.strictEqual(ctrlService._parseMethodNameString(undefined), undefined);
+      assert.strictEqual(ctrlService._parseMethodNameString(''), '');
     });
 
     it('should successfully build version of AliECS Core', () => {
@@ -62,21 +64,24 @@ describe('Control Service test suite', () => {
         versionStr: '0.16.0',
         build: '7d98d22216'
       };
-      const version = ctrlService.parseAliEcsVersion(versionJSON);
+      const version = ctrlService._parseAliEcsVersion(versionJSON);
       assert.strictEqual(version, 'AliECS 0.16.0 (revision 7d98d22216)');
     });
 
     it('should successfully return empty string if version is not provided', () => {
       const versionJSON = {};
-      const version = ctrlService.parseAliEcsVersion(versionJSON);
+      const version = ctrlService._parseAliEcsVersion(versionJSON);
       assert.strictEqual(version, '');
     });
   });
 
   describe('Check Connection availability through `ControlProxy`', () => {
-    it('should successfully return true when controlProxy states connection is ready', () => {
+    it('should successfully call next when controlProxy states connection is ready', () => {
       const ctrl = new ControlService({}, {connectionReady: true});
-      assert.ok(ctrl.isConnectionReady());
+      const next = sinon.fake.returns();
+
+      ctrl.isConnectionReady(null, null, next)
+      sinon.assert.calledOnce(next)
     });
 
     it('should fail due to bad connection and send built error response (503)', () => {
@@ -87,7 +92,7 @@ describe('Control Service test suite', () => {
         send: sinon.fake.returns(true)
       };
 
-      assert.strictEqual(ctrl.isConnectionReady(res), false);
+      ctrl.isConnectionReady(null, res, null);
       assert.ok(res.status.calledWith(503));
       assert.ok(res.send.calledWith({message: 'Could not establish connection to AliECS Core'}));
     });
@@ -100,7 +105,7 @@ describe('Control Service test suite', () => {
         send: sinon.fake.returns(true)
       };
 
-      assert.strictEqual(ctrl.isConnectionReady(res), false);
+      ctrl.isConnectionReady(null, res, null);
       assert.ok(res.status.calledWith(503));
       assert.ok(res.send.calledWith({message: 'Could not connect'}));
     });
@@ -172,20 +177,6 @@ describe('Control Service test suite', () => {
       await ctrlService.executeCommand(req, res);
       assert.ok(res.json.calledOnce);
       assert.ok(res.json.calledWith(['RepoA', 'RepoB']));
-    });
-  });
-
-  describe('Check ROC commands execution', () => {
-    let ctrlService = null;
-    const res = {
-      status: sinon.stub().returns(),
-      send: sinon.stub()
-    };
-    it('should send back an error as service is not supported yet', async () => {
-      ctrlService = new ControlService({}, {});
-      await ctrlService.executeRocCommand(null, res);
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: 'ROC-CONFIG - not supported yet'}));
     });
   });
 

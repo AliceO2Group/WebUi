@@ -24,6 +24,7 @@ class ConsulConnector {
    * Setup ConsulConnector
    * @param {ConsulService} consulService
    * @param {JSON} config
+   * @param {Padlock} padlock
    */
   constructor(consulService, config, padLock = undefined) {
     this.consulService = consulService;

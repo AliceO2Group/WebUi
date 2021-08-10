@@ -91,8 +91,8 @@ class StatusService {
         connectionState: 'TRANSIENT_FAILURE',
         data: {message: error.toString()}
       };
+      return integServices;
     }
-    return integServices;
   }
 
   /**
