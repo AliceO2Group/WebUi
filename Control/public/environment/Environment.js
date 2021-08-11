@@ -144,9 +144,6 @@ export default class Environment extends Observable {
     if (COG.DETECTORS) {
       try {
         const hosts = JSON.parse(environment.userVars.hosts);
-        hosts.push('alio2-cr1-flp001')
-        hosts.push('alio2-cr1-flp003')
-        hosts.push('alio2-cr1-flp002')
         Object.keys(COG.DETECTORS)
           .forEach((detectorKey) => {
             const detector = COG.DETECTORS[detectorKey];
