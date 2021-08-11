@@ -16,6 +16,8 @@ import {Observable, RemoteData} from '/js/src/index.js';
 import Task from './Task.js';
 import {getTaskShortName} from '../common/utils.js';
 
+/* global COG */
+
 /**
  * Model representing Environment CRUD
  */
@@ -101,6 +103,8 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
+    result.environments.forEach((environment) => environment.detectors = this._getDetectorsForEnv(environment));
+
     this.list = RemoteData.success(result);
     this.notify();
   }
@@ -122,10 +126,36 @@ export default class Environment extends Observable {
     result.environment.tasks.forEach((task) => {
       mesosStdout = task.sandboxStdout;
     });
+    result.environment.detectors = this._getDetectorsForEnv(result.environment);
     result.mesosStdout = mesosStdout;
+
     this.item = RemoteData.success(this.parseEnvResult(result));
     this.itemControl = RemoteData.notAsked(); // because item has changed
     this.notify();
+  }
+
+  /**
+   * Given an environment, attempt to match the hosts with the static detector list
+   * @param {JSON} environment 
+   * @return {Array<String>}
+   */
+  _getDetectorsForEnv(environment) {
+    const detectors = [];
+    if (COG.DETECTORS) {
+      try {
+        const hosts = JSON.parse(environment.userVars.hosts);
+        Object.keys(COG.DETECTORS)
+          .forEach((detectorKey) => {
+            const detector = COG.DETECTORS[detectorKey];
+            hosts.filter((host) => detector.start.toLocaleUpperCase() <= host.toLocaleUpperCase()
+              && host.toLocaleUpperCase() <= detector.end.toLocaleUpperCase())
+              .forEach((_) => detectors.push(detectorKey))
+          })
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    return [...new Set(detectors)];
   }
 
   /**
