@@ -150,6 +150,15 @@ export default class Model extends Observable {
   }
 
   /**
+   * Set the visibilty of the account menu
+   * @param {boolean} value 
+   */
+  setAccountMenu(value = false) {
+    this.accountMenuEnabled = value ? true : false;
+    this.notify();
+  }
+
+  /**
    * Toggles the sidebar size
    * * minimal - icons only
    * * normal - icons + text

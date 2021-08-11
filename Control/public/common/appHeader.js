@@ -39,7 +39,10 @@ export default (model) => h('.flex-grow text-left',
  * @return {vnode}
  */
 const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
-  h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
+  h('button.btn', {
+    onclick: () => model.toggleAccountMenu(),
+    onblur: () => model.setAccountMenu(false)
+  }, iconPerson()),
   h('.dropdown-menu', [
     h('p.m3.mv2.text-ellipsis', model.session.access === 2
       ? `Welcome ${model.session.name} *`
