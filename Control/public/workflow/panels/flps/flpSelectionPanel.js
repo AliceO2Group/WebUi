@@ -64,14 +64,17 @@ export default (workflow) =>
  * @param {Object} workflow
  * @return {vnode}
  */
-const flpSelectionArea = (list, workflow) =>
-  h('.w-100.m1.text-left.shadow-level1.scroll-y', {
+const flpSelectionArea = (list, workflow) => {
+  return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
     style: 'max-height: 25em;'
   }, [
-    list.map((name) =>
-      h('a.menu-item', {
+    list.map((name) => {
+      const detector = workflow._getDetectorForHost(name);
+      return h('a.menu-item', {
         className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
         onclick: (e) => workflow.flpSelection.toggleFLPSelection(name, e)
-      }, name)
+      }, [name, detector ? ` -- ${detector}` : ''])
+    }
     ),
   ]);
+};

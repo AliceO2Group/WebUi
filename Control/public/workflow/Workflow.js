@@ -18,6 +18,8 @@ import FlpSelection from './panels/flps/FlpSelection.js';
 import WorkflowVariable from './panels/variables/WorkflowVariable.js';
 import WorkflowForm from './WorkflowForm.js';
 
+/* global COG */
+
 /**
  * Model representing Workflow
  */
@@ -564,5 +566,28 @@ export default class Workflow extends Observable {
       delete vars['qc_config_uri_pre'];
     }
     return {variables: vars, ok: true, message: ''};
+  }
+
+
+  /**
+   * Given a host, it will return the matched detector from the static detector list
+   * @param {String} host 
+   * @returns {String}
+   */
+  _getDetectorForHost(host) {
+    let detectorMatch = ''
+    try {
+      Object.keys(COG.DETECTORS)
+        .forEach((detectorKey) => {
+          const detector = COG.DETECTORS[detectorKey];
+          if (detector.start.toLocaleUpperCase() <= host.toLocaleUpperCase()
+            && host.toLocaleUpperCase() <= detector.end.toLocaleUpperCase()) {
+            detectorMatch = detectorKey;
+          }
+        })
+    } catch (error) {
+      console.error(error);
+    }
+    return detectorMatch;
   }
 }
