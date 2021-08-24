@@ -205,6 +205,10 @@ export default class Model extends Observable {
 
     // shortcuts
     switch (e.keyCode) {
+      case 27: // escape
+        this.log.removeLogDownloadContent();
+        this.accountMenuEnabled = false;
+        break;
       case 37: // left
         if (e.altKey) {
           this.log.firstError();
