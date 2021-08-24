@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
+import {h, iconPerson, iconMediaPlay, iconMediaStop, iconDataTransferDownload} from '/js/src/index.js';
 import {BUTTON} from '../constants/button-states.const.js';
 import {MODE} from '../constants/mode.const.js';
 
@@ -26,8 +26,8 @@ export default (model) => [
     queryButton(model),
     liveButton(model)
   ], ''),
-  h('button.btn', {onclick: () => model.log.empty()}, 'Clear'),
-  h('span.mh3'),
+  downloadButtonGroup(model.log),
+  h('button.btn.mh3', {onclick: () => model.log.empty()}, 'Clear'),
   h('button.btn', {
     disabled: !model.log.list.length,
     onclick: () => model.log.firstError(),
@@ -117,6 +117,38 @@ const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
 }), 'Query');
 
 /**
+ * Group of buttons which allow the user to engage with the download functionality
+ * * Download queries logs - will create a file containing all logs from the table (visible/hidden)
+ * * Download visible logs only - will create a file containing only visible logs from the table
+ * @param {Log} log
+ * @return {vnode}
+ */
+const downloadButtonGroup = (log) =>
+  h('.dropdown', {class: log.download.isVisible ? 'dropdown-open' : ''}, [
+    h('button.btn', {
+      onclick: () => {
+        if (!log.download.isVisible) {
+          log.generateLogDownloadContent();
+        } else {
+          log.removeLogDownloadContent();
+        }
+      }
+    }, iconDataTransferDownload(), ' Dowlonad'),
+    h('.dropdown-menu', [
+      log.limit < 10001 && h('a.menu-item.m3.mv2.text-ellipsis', {
+        href: `data:application/octet;,${encodeURIComponent(log.download.fullContent)}`,
+        download: `InfoLog${new Date().toLocaleString()}.txt`,
+        onclick: () => log.removeLogDownloadContent()
+      }, 'Queried Logs'),
+      h('a.menu-item.m3.mv2.text-ellipsis', {
+        href: `data:application/octet;,${encodeURIComponent(log.download.visibleOnlyContent)}`,
+        download: `InfoLog${new Date().toLocaleString()}.txt`,
+        onclick: () => log.removeLogDownloadContent(),
+      }, 'Visible Logs Only')
+    ])
+  ]);
+
+/**
  * Live button final state depends on the following states
  * - services lookup
  * - services result
@@ -143,6 +175,7 @@ const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
  * @param {boolean} wasLivePressed
  */
 function toggleButtonStates(model, wasLivePressed) {
+  model.log.download.isVisible = false; // set visibilty of download dropdown to false
   if (wasLivePressed) {
     switch (model.log.activeMode) {
       case MODE.QUERY:
