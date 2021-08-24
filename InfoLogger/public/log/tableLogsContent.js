@@ -16,8 +16,7 @@ import {h} from '/js/src/index.js';
 
 import {severityClass} from './severityUtils.js';
 import tableColGroup from './tableColGroup.js';
-
-const ROW_HEIGHT = 18; // sync with CSS value
+import {ROW_HEIGHT} from './../constants/visual.const.js';
 
 /**
  * Main content of ILG - simulates a big table scrolling.
@@ -39,7 +38,7 @@ export default (model) => h('.tableLogsContent.scroll-y.flex-grow', tableContain
     h('table.table-logs-content', scrollStyling(model),
       tableColGroup(model),
       h('tbody', [
-        listLogsInViewportOnly(model).map((row) => tableLogLine(model, row))
+        model.log.listLogsInViewportOnly(model).map((row) => tableLogLine(model, row))
       ]),
     )
   ]),
@@ -56,18 +55,6 @@ const scrollStyling = (model) => ({
     top: model.log.scrollTop - (model.log.scrollTop % ROW_HEIGHT) + 'px'
   }
 });
-
-/**
- * Returns an array of logs that are indeed visible to user, hidden top and hidden bottom logs
- * are not present in this array output
- * ceil() and + 1 ensure we see top and bottom logs coming
- * @param {Object} model
- * @return {Array.<Log>}
- */
-const listLogsInViewportOnly = (model) => model.log.list.slice(
-  Math.floor(model.log.scrollTop / ROW_HEIGHT),
-  Math.floor(model.log.scrollTop / ROW_HEIGHT) + Math.ceil(model.log.scrollHeight / ROW_HEIGHT) + 1
-);
 
 /**
  * Creates a line of log with tag <tr> and its columns <td> if enabled.
