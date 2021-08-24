@@ -125,18 +125,26 @@ const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
  */
 const downloadButtonGroup = (log) =>
   h('.dropdown', {class: log.download.isVisible ? 'dropdown-open' : ''}, [
-    h('button.btn', {onclick: () => log.generateLogDownloadContent()}, iconDataTransferDownload()),
+    h('button.btn', {
+      onclick: () => {
+        if (!log.download.isVisible) {
+          log.generateLogDownloadContent();
+        } else {
+          log.removeLogDownloadContent();
+        }
+      }
+    }, iconDataTransferDownload(), ' Dowlonad'),
     h('.dropdown-menu', [
       log.limit < 10001 && h('a.menu-item.m3.mv2.text-ellipsis', {
         href: `data:application/octet;,${encodeURIComponent(log.download.fullContent)}`,
         download: `InfoLog${new Date().toLocaleString()}.txt`,
         onclick: () => log.removeLogDownloadContent()
-      }, 'Download Queried Logs'),
+      }, 'Queried Logs'),
       h('a.menu-item.m3.mv2.text-ellipsis', {
         href: `data:application/octet;,${encodeURIComponent(log.download.visibleOnlyContent)}`,
         download: `InfoLog${new Date().toLocaleString()}.txt`,
         onclick: () => log.removeLogDownloadContent(),
-      }, 'Download Visible Logs Only')
+      }, 'Visible Logs Only')
     ])
   ]);
 
