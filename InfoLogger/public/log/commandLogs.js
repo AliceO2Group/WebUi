@@ -127,13 +127,13 @@ const downloadButtonGroup = (log) =>
   h('.dropdown', {class: log.download.isVisible ? 'dropdown-open' : ''}, [
     h('button.btn', {onclick: () => log.generateLogDownloadContent()}, iconDataTransferDownload()),
     h('.dropdown-menu', [
-      h('a.menu-item.m3.mv2.text-ellipsis', {
-        href: `data:text/plain;charset=utf-8,${log.download.fullContent}`,
+      log.limit < 10001 && h('a.menu-item.m3.mv2.text-ellipsis', {
+        href: `data:application/octet;,${encodeURIComponent(log.download.fullContent)}`,
         download: `InfoLog${new Date().toLocaleString()}.txt`,
         onclick: () => log.removeLogDownloadContent()
       }, 'Download Queried Logs'),
       h('a.menu-item.m3.mv2.text-ellipsis', {
-        href: `data:text/plain;charset=utf-8,${log.download.visibleOnlyContent}`,
+        href: `data:application/octet;,${encodeURIComponent(log.download.visibleOnlyContent)}`,
         download: `InfoLog${new Date().toLocaleString()}.txt`,
         onclick: () => log.removeLogDownloadContent(),
       }, 'Download Visible Logs Only')
