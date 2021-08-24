@@ -126,4 +126,43 @@ export default class WorkflowVariable {
       return true;
     }
   }
+
+  /**
+   * Given a KV Pair it will check if:
+   * * key is valid after being trimmed
+   * * value is valid by chechking it's existence in the provided varSpecMap
+   * @param {String} key
+   * @param {Object} value
+   * @param {Map<String, JSON>} varSpecMap
+   * @return {key:string, value:object, ok: boolean, message: string}
+   */
+  static parseKVPair(key, value, varSpecMap = {}) {
+    const isKeyValid = key && key.trim() !== '';
+    if (!isKeyValid) {
+      return {ok: false, message: `Invalid key ${key} provided`};
+    } else {
+      key = key.trim();
+      if (Object.keys(varSpecMap).length === 0 || !varSpecMap[key]) {
+        // template does not support dynamic workflows or template does not contain provided key
+        return {ok: true, key, value};
+      } else {
+        if (varSpecMap[key].allowedValues.length === 0 || varSpecMap[key].allowedValues.includes(value)) {
+          return {ok: true, key, value};
+        } else {
+          return {ok: false, message: `Provided value for key ${key} is not allowed`};
+        }
+      }
+    }
+  }
+
+  /**
+   * Given a Map of KV Pairs it will check if each:
+   * * key is valid after being trimmed
+   * * value is valid by chechking it's existence in the provided varSpecMap
+   * @param {Map<String, Object>} kvList
+   * @param {Map<String, Object>} varSpecMap
+   * @return {key:string, value:object, ok: boolean, message: string} // TODO decide what to return 
+   */
+  static parseKVPairMap(kvMap, varSpecMap) {
+  }
 }
