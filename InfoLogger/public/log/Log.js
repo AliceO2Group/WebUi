@@ -522,15 +522,15 @@ export default class Log extends Observable {
     Object.keys(log).forEach((column) => {
       if (column === 'timestamp') {
         const timestamp = log['timestamp'];
-        logAsString += `| ${this.model.timezone.format(timestamp, this.timeFormat)} `;
-        logAsString += `| ${this.model.timezone.format(timestamp, 'date')} `;
+        logAsString += `${this.model.timezone.format(timestamp, this.timeFormat)}, `;
+        logAsString += `${this.model.timezone.format(timestamp, 'date')}, `;
       } else if (log[column]) {
-        logAsString += `| ${log[column]}`;
+        logAsString += `${log[column]}, `;
       } else {
-        logAsString += `| `;
+        logAsString += `, `;
       }
     });
-    return `${logAsString} |`;
+    return `${logAsString}`;
   }
 
   /**
@@ -549,16 +549,21 @@ export default class Log extends Observable {
    * Shows the download dropdown menu
    */
   generateLogDownloadContent() {
-    let fullContent = '';
-    if (this.limit < 10001) {
-      this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
-    }
+    if (this.list.length > 0) {
 
-    let visibleOnlyContent = '';
-    this.listLogsInViewportOnly().forEach((item) => {
-      visibleOnlyContent += `${this.getLogAsTableRowString(item)}\n`
-    });
-    this.download = {fullContent, visibleOnlyContent, isVisible: true};
+      let fullContent = '';
+      if (this.limit < 10001) {
+        this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
+      }
+
+      let visibleOnlyContent = '';
+      this.listLogsInViewportOnly().forEach((item) => {
+        visibleOnlyContent += `${this.getLogAsTableRowString(item)}\n`
+      });
+      this.download = {fullContent, visibleOnlyContent, isVisible: true};
+    } else {
+      this.model.notification.show('No logs present to be downloaded', 'warning', 3000);
+    }
     this.notify();
   }
 
