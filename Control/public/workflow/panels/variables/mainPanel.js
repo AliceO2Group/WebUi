@@ -14,6 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
+import advancedVarsPanel from './advancedPanel.js';
 import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 
 /**
@@ -25,6 +26,9 @@ import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
  */
 export default (workflow) =>
   h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
+    // TODO add basic and advanced first
+    // rest of them after and sorted
+    advancedVarsPanel(workflow),
     Object.keys(workflow.groupedPanels)
       .sort((panelA, panelB) => panelA.toLocaleUpperCase() < panelB.toLocaleUpperCase() ? -1 : 1)
       .filter((panelName) => workflow.groupedPanels[panelName].some((variable) => {

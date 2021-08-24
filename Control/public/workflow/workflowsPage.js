@@ -83,11 +83,11 @@ const showNewEnvironmentForm = (model, repoList) => [
  */
 const workflowSettingsPanels = (workflow) =>
   [
-    Object.keys(workflow.selectedVarsMap).length > 0 && h('.w-100.pv2.flex-row', mainPanel(workflow)),
-    h('.w-100.flex-row', [
-      Object.keys(workflow.selectedVarsMap).length === 0 && basicPanel(workflow),
-      advancedVarsPanel(workflow)
-    ])
+    Object.keys(workflow.selectedVarsMap).length > 0 ? h('.w-100.pv2.flex-row', mainPanel(workflow))
+      : h('.w-100.flex-row', [
+        basicPanel(workflow),
+        advancedVarsPanel(workflow) // TODO ADD IT IN MAIN AS WELL
+      ])
   ];
 
 
