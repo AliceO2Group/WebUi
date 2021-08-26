@@ -129,11 +129,11 @@ export default class Workflow extends Observable {
    * @param {string} selectedRevision - Repository that user clicked on from the dropdown list
    */
   updateInputSelection(inputField, selectedRevision) {
-    this.revision.isSelectionOpen = !this.revision.isSelectionOpen;
     this.form.template = '';
     this.form.revision = selectedRevision;
     this.setTemplatesData();
     this.updateInputSearch(inputField, selectedRevision);
+    this.setRevisionInputDropdownVisibility(false);
   }
 
   /**
@@ -159,20 +159,25 @@ export default class Workflow extends Observable {
   /**
    * Method to set to false the visibility of the dropdown and
    * if the user did not select a new revision from the dropdown area
+   * and it does not matches a commit string format,
    * to reset the value to the current selected revision
    */
-  closeRevisionInputDropdown() {
+  closeRevisionInputDropdown(value = undefined) {
+    if (value && this.isInputCommitFormat(value)) {
+      this.updateInputSearch('revision', value);
+    } else {
+      this.updateInputSearch('revision', this.form.revision);
+    }
     this.setRevisionInputDropdownVisibility(false);
-    this.updateInputSearch('revision', this.form.revision);
   }
 
   /**
    * Match regex to see if revision is in a commit format
    * @return {boolean}
    */
-  isInputCommitFormat() {
-    const reg = new RegExp('[a-f0-9]{40}');
-    return this.form.revision.match(reg);
+  isInputCommitFormat(value) {
+    const reg = new RegExp('^[a-f0-9]{40}$');
+    return value.match(reg);
   }
 
   /**

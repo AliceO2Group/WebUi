@@ -33,7 +33,7 @@ export default (workflow) =>
           revisionInputField(workflow),
           revisionDropdownArea(workflow)
         ]),
-        workflow.isInputCommitFormat() && buttonCommitFormat(workflow)
+        workflow.isInputCommitFormat(workflow.revision.rawValue) && buttonCommitFormat(workflow)
       ]),
   ]);
 
@@ -50,7 +50,7 @@ const revisionInputField = (workflow) =>
     style: 'z-index:100',
     value: workflow.revision.rawValue,
     oninput: (e) => workflow.updateInputSearch('revision', e.target.value),
-    onblur: () => workflow.closeRevisionInputDropdown(),
+    onblur: (e) => workflow.closeRevisionInputDropdown(e.target.value),
     onkeyup: (e) => {
       if (e.keyCode === 27) { // code for escape
         workflow.closeRevisionInputDropdown();
@@ -62,7 +62,6 @@ const revisionInputField = (workflow) =>
       e.stopPropagation();
     }
   });
-
 
 /**
  * Create dropdown area based on user input on revision field
@@ -87,8 +86,8 @@ const revisionDropdownArea = (workflow) =>
 * @param {Object} workflow
 * @return {vnode}
 */
-const buttonCommitFormat = (workflow) => h('button.btn.mh2', {
-  title: 'Retrieve workflow templates for this commit',
-  onclick: () => workflow.requestCommitTemplates()
-}, iconActionRedo()
-);
+const buttonCommitFormat = (workflow) =>
+  h('button.btn.mh2', {
+    title: 'Retrieve workflow templates for this commit',
+    onclick: () => workflow.updateInputSelection('revision', workflow.revision.rawValue)
+  }, iconActionRedo());
