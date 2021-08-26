@@ -54,7 +54,6 @@ export default class Workflow extends Observable {
     this.groupedPanels = {}
 
     this.READOUT_PREFIX = PREFIX.READOUT;
-
     this.QC_PREFIX = PREFIX.QC;
 
     this.dom = {
@@ -62,6 +61,7 @@ export default class Workflow extends Observable {
       keyValueArea: ''
     }
 
+    this.advErrorPanel = [];
     this.kvPairsString = ''; // variable stored for Adv Config Panel
   }
 
@@ -227,51 +227,27 @@ export default class Workflow extends Observable {
    * @param {Object} value
    */
   addVariable(keyToAdd, valueToAdd) {
-    const {key, value, ok, message} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap);
+    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap);
     if (ok) {
       this.form.variables[key] = value;
-      this.notify();
+      this.advErrorPanel = [];
     } else {
-      // TODO Instead of notification there should be a panel with errors
-      this.model.notification.show(message || 'Key and Value cannot be empty', 'danger', 2000);
+      this.advErrorPanel = [error];
     }
+    this.notify();
   }
 
   /**
-   * Given a JSON object, add each key and value to the panel of
-   * KV pairs configuraiton
+   * Given a KV Pairs as a String, attempt to add
+   * each key and value to the panel of KV pairs configuraiton
    * @param {String} kvPairs
    */
-  addVariableList(kvPairs) {
-    const {key, value, ok, message} = WorkflowVariable.parseKVPairMap(kvPairs, this.selectedVarsMap);
-    if (ok) {
-      this.form.variables[key] = value;
-      this.notify();
-    } else {
-      this.model.notification.show(message || 'Key and Value cannot be empty', 'danger', 2000);
-    }
-    try {
-      const pairs = JSON.parse(kvPairs);
-      Object.keys(pairs).forEach((key) => this.addVariable(key, pairs[key]))
-      this.kvPairsString = '';
-    } catch (error) {
-      this.model.notification.show('Provided string is not a valid JSON', 'danger', 3000);
-    }
-  }
+  addVariableJSON(kvPairs) {
+    const {parsedKVJSON, errors} = WorkflowVariable.parseKVPairMap(kvPairs, this.selectedVarsMap);
 
-  /**
-   * Method to update the value of a (K;V) pair in variables
-   * // TODO UPDATE
-   * @param {string} key
-   * @param {string} value
-   */
-  updateVariableValueByKey(key, value) {
-    if (value && value.trim() !== '') {
-      this.form.variables[key] = value;
-      this.notify();
-    } else {
-      this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
-    }
+    Object.keys(parsedKVJSON).forEach((key) => this.form.variables[key] = parsedKVJSON[key]);
+    this.advErrorPanel = errors;
+    this.notify();
   }
 
   /**
@@ -286,17 +262,6 @@ export default class Workflow extends Observable {
       this.form.basicVariables[key] = JSON.stringify(value);
     } else {
       this.form.basicVariables[key] = value;
-    }
-    this.notify();
-  }
-
-  /**
-   * After focus is taken from the input, the value added by the user will be trimmed
-   * @param {string} key - key of the value that needs to be trimmed
-   */
-  trimVariableValue(key) {
-    if (this.form.variables[key]) {
-      this.form.variables[key] = this.form.variables[key].trim();
     }
     this.notify();
   }
@@ -362,6 +327,10 @@ export default class Workflow extends Observable {
   }
 
   /**
+   * HTTP Requests
+   */
+
+  /**
    * Method to make the necesarry requests to reload the data on the new environment page
    * * Make a request to retrieve a list of repositories with their corresponding revisions
    * * If above request is ok, make a request to get the public templates for the new updated (repository,revision)
@@ -372,10 +341,6 @@ export default class Workflow extends Observable {
       this.setTemplatesData();
     }
   }
-
-  /**
-   * HTTP Requests
-   */
 
   /**
    * Make a request to refresh repositories list from AliECS Core
@@ -474,6 +439,7 @@ export default class Workflow extends Observable {
   /**
    * Check that variables are not duplicated in basic and advanced 
    * configuration panel and merge them together
+   * // TODO Update no longer use basic
    * @param {JSON} vars
    * @param {JSON} basicVars
    * @return {boolean, string, JSON}
@@ -569,7 +535,6 @@ export default class Workflow extends Observable {
     }
     return {variables: vars, ok: true, message: ''};
   }
-
 
   /**
    * Given a host, it will return the matched detector from the static detector list
