@@ -26,16 +26,14 @@ import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 export default (workflow) =>
   h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
     Object.keys(workflow.groupedPanels)
-      .sort((panelA, panelB) => panelA > panelB)
-      .filter((panelName) => {
-        return workflow.groupedPanels[panelName].some((variable) => {
-          try {
-            return eval(variable.isVisible);
-          } catch (error) {
-            return false;
-          }
-        });
-      })
+      .sort((panelA, panelB) => panelA.toLocaleUpperCase() < panelB.toLocaleUpperCase() ? -1 : 1)
+      .filter((panelName) => workflow.groupedPanels[panelName].some((variable) => {
+        try {
+          return eval(variable.isVisible);
+        } catch (error) {
+          return false;
+        }
+      }))
       .map((panelName) => h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[panelName], panelName)))
   );
 
