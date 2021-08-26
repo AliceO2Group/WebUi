@@ -80,7 +80,11 @@ const environmentsTable = (model, list) => {
         h('td', {style: 'text-align: center;'}, item.currentRunNumber ? item.currentRunNumber : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
         h('td', {style: 'text-align: center;'}, item.rootRole),
-        h('td', {style: 'text-align: center;'}, [item.detectors.map((detector) => `${detector} `)]),
+        h('td', {style: 'text-align: center;'}, [
+          item.includedDetectors && item.includedDetectors.length > 0 ?
+            item.includedDetectors.map((detector) => `${detector} `)
+            : '-'
+        ]),
         h('td', {
           class: (item.state === 'RUNNING' ?
             'success'

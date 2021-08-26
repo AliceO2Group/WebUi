@@ -206,9 +206,11 @@ const showEnvDetailsTable = (item, environment) => {
         h(`th${width}`, 'FLP count'),
         h('td', item.numberOfFlps)
       ]),
-      item.detectors && item.detectors.length > 0 && h('tr', [
+      h('tr', [
         h(`th${width}`, 'Detectors'),
-        h('td', [item.detectors.map((detector) => `${detector} `)])
+        item.includedDetectors && item.includedDetectors.length > 0 ?
+          h('td', [item.includedDetectors.map((detector) => `${detector} `)])
+          : h('td', '-')
       ]),
       h('tr', [
         h(`th${width}`, 'InfoLogger'),
