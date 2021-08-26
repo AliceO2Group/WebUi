@@ -35,8 +35,9 @@ export default (workflow) =>
       h('.w-100.ph2', 'Add single pair of (K;V):'),
       addKVInputPair(workflow),
       h('.w-100.ph2', 'Add a JSON with multiple pairs (K;V):'),
-      addListOfKvPairs(workflow)
-    ])
+      addListOfKvPairs(workflow),
+      importErrorPanel(workflow),
+    ]),
   ]);
 
 /**
@@ -45,6 +46,7 @@ export default (workflow) =>
 * @return {vnode}
 */
 const addKVInputList = (workflow) =>
+// TODO filter our the ones in varSpecMap
   h('.w-100.p2.panel', Object.keys(workflow.form.variables).map((key) =>
     h('.w-100.flex-row.pv2.border-bot', {
     }, [
@@ -54,8 +56,7 @@ const addKVInputList = (workflow) =>
       }, h('input.form-control', {
         type: 'text',
         value: workflow.form.variables[key],
-        onblur: () => workflow.trimVariableValue(key),
-        oninput: (e) => workflow.updateVariableValueByKey(key, e.target.value)
+        oninput: (e) => workflow.addVariable(key, e.target.value)
       })),
       h('.ph2.danger.actionable-icon', {
         onclick: () => workflow.removeVariableByKey(key)
@@ -126,9 +127,23 @@ const addListOfKvPairs = (workflow) => {
     h('.ph2.actionable-icon', {
       title: 'Add list of (key,value) variables',
       onclick: () => {
-        workflow.addVariableList(workflow.kvPairsString);
+        workflow.addVariableJSON(workflow.kvPairsString);
         workflow.dom.keyValueArea.focus();
       }
     }, iconPlus())
   ]);
 };
+
+/**
+ * Displays errors that may appear while importing a configuration via
+ * * text area JSON import
+ * * KV Pair input
+ * @param {Workflow} worfklow
+ * @returns {vnode}
+ */
+const importErrorPanel = (worfklow) =>
+  worfklow.advErrorPanel.length > 0 &&
+  h('.w-100.flex-column.ph2', [
+    h('.danger', 'The following KV pairs encountered an issue:'),
+    worfklow.advErrorPanel.map((error) => h('.danger', `- ${error}`))
+  ]);

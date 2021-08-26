@@ -26,7 +26,7 @@ import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
  */
 export default (workflow) =>
   h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
-    // TODO add basic and advanced first
+    // TODO add basic and advanced first 
     // rest of them after and sorted
     advancedVarsPanel(workflow),
     Object.keys(workflow.groupedPanels)
