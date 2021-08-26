@@ -85,9 +85,9 @@ export default class Config extends Observable {
       const allULEnabled = this.areAllUserLogicsEnabled();
       Object.keys(this.cruMapByHost.payload).forEach((key) => {
         const cruByEndPoint = this.cruMapByHost.payload[key];
-        Object.keys(cruByEndPoint).forEach((cruKey) => {
-          cruByEndPoint[cruKey].config.cru.userLogicEnabled = allULEnabled ? 'false' : 'true';
-        });
+        Object.keys(cruByEndPoint)
+          .filter((cruKey) => (cruByEndPoint[cruKey].config && cruByEndPoint[cruKey].config.cru))
+          .forEach((cruKey) => cruByEndPoint[cruKey].config.cru.userLogicEnabled = allULEnabled ? 'false' : 'true');
       });
       this.selectAllHosts();
       this.notify();
@@ -104,11 +104,9 @@ export default class Config extends Observable {
       let allULEnabled = true;
       Object.keys(this.cruMapByHost.payload).forEach((key) => {
         const cruByEndPoint = this.cruMapByHost.payload[key];
-        Object.keys(cruByEndPoint).forEach((cruKey) => {
-          if (cruByEndPoint[cruKey].config.cru.userLogicEnabled === 'false') {
-            allULEnabled = false;
-          }
-        });
+        allULEnabled = !Object.keys(cruByEndPoint)
+          .filter((cruKey) => (cruByEndPoint[cruKey].config && cruByEndPoint[cruKey].config.cru))
+          .some((cruKey) => cruByEndPoint[cruKey].config.cru.userLogicEnabled === 'false')
       });
       return allULEnabled;
     }
