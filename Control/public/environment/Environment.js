@@ -16,8 +16,6 @@ import {Observable, RemoteData} from '/js/src/index.js';
 import Task from './Task.js';
 import {getTaskShortName} from '../common/utils.js';
 
-/* global COG */
-
 /**
  * Model representing Environment CRUD
  */
