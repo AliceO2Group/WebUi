@@ -222,11 +222,9 @@ const toggleUserLogic = (model, cru) =>
 const toggleAllCheckBox = (model, cru) =>
   h('label.d-inline.f6.ph2', {
     style: 'white-space: nowrap',
-    class: cru.config.cru.userLogicEnabled === 'true' ? 'disabled-content' : '',
     title: `Toggle selection of all links`
   }, h('input', {
     type: 'checkbox',
-    disabled: cru.config.cru.userLogicEnabled === 'true',
     checked: Object.keys(cru.config)
       .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
       .filter((key) => cru.config[key].enabled === 'true').length === 12,
@@ -252,11 +250,9 @@ const toggleAllCheckBox = (model, cru) =>
 const checkBox = (model, key, title, config) =>
   h('label.d-inline.f6.ph2', {
     style: 'white-space: nowrap',
-    class: config.cru.userLogicEnabled === 'true' ? 'disabled-content' : '',
     title: `Toggle selection of ${key}`
   }, h('input', {
     type: 'checkbox',
-    disabled: config.cru.userLogicEnabled === 'true',
     checked: config[key].enabled === 'true',
     onchange: () => {
       config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';
