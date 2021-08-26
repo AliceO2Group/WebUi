@@ -83,7 +83,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       template: '',
       variables: {},
       basicVariables: {},
-      hosts: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']
+      hosts: []
     };
     assert.deepStrictEqual(initialForm, expectedForm, 'Initial form was not filled correctly');
   });
@@ -372,11 +372,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
       kind: 'Success', payload: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']
     };
     assert.deepStrictEqual(flpList, expectedList);
-  });
-
-  it('should have successfully select all FLPS from area list by', async () => {
-    const selectedFLP = await page.evaluate(() => window.model.workflow.form.hosts);
-    assert.deepStrictEqual(selectedFLP, ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']);
   });
 
   it('should successfully create a new environment', async () => {

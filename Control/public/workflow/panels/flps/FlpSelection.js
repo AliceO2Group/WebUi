@@ -68,7 +68,7 @@ export default class FlpSelection extends Observable {
       const index = this.workflow.form.hosts.indexOf(name);
       if (index < 0) {
         this.workflow.form.addHost(name);
-      } else {  
+      } else {
         this.workflow.form.removeHostByIndex(index);
       }
     }
@@ -118,17 +118,12 @@ export default class FlpSelection extends Observable {
     this.consulKvStoreReadout = result['consulKvStoreReadout'];
     this.consulKvStoreQC = result['consulKvStoreQC'];
     this.list = RemoteData.success(result.flps);
-    if (this.workflow.form.getHosts().length === 0) {
-      // preselect all hosts if hosts were not selected already previously
-      this.workflow.form.hosts = Object.values(result.flps);
-    } else {
-      // FLP machines can be removed by the user since the last creation of an environment
-      // ensure the list of selected items is still up to date
-      const tempFormHosts = [];
-      const hosts = this.workflow.form.getHosts();
-      hosts.filter((host) => this.list.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
-      this.workflow.form.setHosts(tempFormHosts.slice());
-    }
+    // FLP machines can be removed by the user since the last creation of an environment
+    // ensure the list of selected items is still up to date
+    const tempFormHosts = [];
+    const hosts = this.workflow.form.getHosts();
+    hosts.filter((host) => this.list.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
+    this.workflow.form.setHosts(tempFormHosts.slice());
     this.notify();
   }
 }
