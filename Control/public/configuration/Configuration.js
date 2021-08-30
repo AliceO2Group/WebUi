@@ -352,7 +352,7 @@ export default class Configuration extends Observable {
     this.readoutCardList = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/getCRUs`);
+    const {result, ok} = await this.model.loader.get(`/api/consul/crus`);
     if (!ok) {
       this.readoutCardList = RemoteData.failure(result.message);
       this.notify();

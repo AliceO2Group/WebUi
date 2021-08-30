@@ -398,7 +398,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
    * @param {Request} request
    */
   function getFLPList(request) {
-    if (request.url().includes('/api/getFLPs')) {
+    if (request.url().includes('/api/consul/flps')) {
       request.respond({
         status: 200, contentType: 'application/json', body: JSON.stringify({
           flps: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137'],

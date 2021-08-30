@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 import {h} from '/js/src/index.js';
 
 /**
@@ -310,14 +312,14 @@ const readoutPanel = (workflow) => {
             h('option', {
               id: 'consulOption',
               value: consulPre,
-              disabled: workflow.flpSelection.consulReadoutPrefix ? false : true,
+              disabled: COG.CONSUL.readoutPrefix ? false : true,
               selected: variables['readout_cfg_uri_pre'] === consulPre
             }, consulPre)
           ])
         ),
         h('.flex-row', {style: 'width:85%;'}, [
           variables['readout_cfg_uri_pre'] === consulPre && h('input.form-control.w-60', {
-            value: workflow.flpSelection.consulReadoutPrefix,
+            value: COG.CONSUL.readoutPrefix,
             disabled: true
           }),
           variables['readout_cfg_uri_pre'] && h('input.form-control', {
@@ -344,11 +346,11 @@ const readoutPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${workflow.flpSelection.consulKvStoreReadout}/${(
+        href: `//${COG.CONSUL.kvStoreReadout}/${(
           variables['readout_cfg_uri'] ?
             variables['readout_cfg_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + workflow.flpSelection.consulReadoutPrefix + (
+      }, consulPre + COG.CONSUL.readoutPrefix + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
       )
@@ -397,14 +399,14 @@ const qcUriPanel = (workflow) => {
             h('option', {
               id: 'consulOption',
               value: consulPre,
-              disabled: workflow.flpSelection.consulQcPrefix ? false : true,
+              disabled: COG.CONSUL.qcPrefix ? false : true,
               selected: variables['qc_config_uri_pre'] === consulPre
             }, consulPre)
           ])
         ),
         h('.flex-row', {style: 'width:85%;'}, [
           variables['qc_config_uri_pre'] === consulPre && h('input.form-control.w-60', {
-            value: workflow.flpSelection.consulQcPrefix,
+            value: COG.CONSUL.qcPrefix,
             disabled: true
           }),
           variables['qc_config_uri_pre'] && h('input.form-control', {
@@ -435,7 +437,7 @@ const qcUriPanel = (workflow) => {
           variables['qc_config_uri'] ?
             variables['qc_config_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + workflow.flpSelection.consulQcPrefix + (
+      }, consulPre + COG.CONSUL.qcPrefix + (
         variables['qc_config_uri'] ?
           variables['qc_config_uri'] : '')
       )

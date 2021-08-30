@@ -130,7 +130,7 @@ describe('`pageConfiguration` test-suite', async () => {
  * @param {Request} request
  */
 function keyNotFound(request) {
-  if (request.url().includes('/api/getCRUs')) {
+  if (request.url().includes('/api/consul/crus')) {
     request.respond({status: 404, contentType: 'application/json', body: JSON.stringify({message: 'Could not find any Readout Cards by key test/o2/hardware/flps'})});
   } else {
     request.continue();
@@ -142,7 +142,7 @@ function keyNotFound(request) {
  * @param {Request} request
  */
 function readoutCardsEmpty(request) {
-  if (request.url().includes('/api/getCRUs')) {
+  if (request.url().includes('/api/consul/crus')) {
     request.respond({status: 200, contentType: 'application/json', body: JSON.stringify({})});
   } else {
     request.continue();
@@ -154,7 +154,7 @@ function readoutCardsEmpty(request) {
  * @param {Request} request
  */
 function readoutCardList(request) {
-  if (request.url().includes('/api/getCRUs')) {
+  if (request.url().includes('/api/consul/crus')) {
     request.respond({status: 200, contentType: 'application/json', body: JSON.stringify(readoutCards)});
   } else {
     request.continue();

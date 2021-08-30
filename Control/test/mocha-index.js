@@ -231,7 +231,11 @@ describe('Control', function() {
         readoutPath: 'test/o2/readout/components',
         readoutCardPath: 'test/o2/readoutcard/components',
         qcPath: 'test/o2/qc/components',
-        consulKVPrefix: 'test/ui/some-cluster/kv',
+        kVPrefix: 'test/ui/some-cluster/kv',
+        kvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
+        kvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
+        qcPrefix: "localhost:8550/test/o2/qc/components/",
+        readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
       DETECTORS: {},
       REFRESH_TASK: 5000,

@@ -525,7 +525,7 @@ export default class Workflow extends Observable {
       };
     } else if (vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
       if (vars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
-        vars['readout_cfg_uri'] = this.flpSelection.consulReadoutPrefix + vars['readout_cfg_uri'];
+        vars['readout_cfg_uri'] = COG.CONSUL.readoutPrefix + vars['readout_cfg_uri'];
       }
       vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
       delete vars['readout_cfg_uri_pre'];
@@ -565,7 +565,7 @@ export default class Workflow extends Observable {
       };
     } else if (vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
       if (vars['qc_config_uri_pre'] === this.QC_PREFIX.CONSUL) {
-        vars['qc_config_uri'] = this.flpSelection.consulQcPrefix + vars['qc_config_uri'];
+        vars['qc_config_uri'] = COG.CONSUL.qcPrefix + vars['qc_config_uri'];
       }
       vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
       delete vars['qc_config_uri_pre'];
