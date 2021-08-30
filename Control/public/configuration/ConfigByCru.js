@@ -125,7 +125,7 @@ export default class Config extends Observable {
     this.cruMapByHost = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/getCRUsConfig`);
+    const {result, ok} = await this.model.loader.get(`/api/consul/crus/config`);
     if (!ok) {
       this.cruMapByHost = RemoteData.failure(result.message);
       this.notify();
@@ -149,7 +149,7 @@ export default class Config extends Observable {
       this.notify();
       const copy = {};
       this.selectedHosts.forEach((host) => copy[host] = JSON.parse(JSON.stringify(this.cruMapByHost.payload[host])));
-      const {result, ok} = await this.model.loader.post(`/api/saveCRUsConfig`, copy);
+      const {result, ok} = await this.model.loader.post(`/api/consul/crus/config/save`, copy);
       if (!ok) {
         result.ended = true;
         result.success = false;
@@ -238,6 +238,6 @@ export default class Config extends Observable {
    */
   getConsulConfigURL() {
     const consul = COG.CONSUL;
-    return `//${consul.hostname}:${consul.port}/${consul.consulKVPrefix}/${consul.readoutCardPath}`
+    return `//${consul.hostname}:${consul.port}/${consul.kVPrefix}/${consul.readoutCardPath}`
   }
 }

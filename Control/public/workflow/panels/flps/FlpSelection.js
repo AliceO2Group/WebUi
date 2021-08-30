@@ -30,12 +30,6 @@ export default class FlpSelection extends Observable {
     this.list = RemoteData.notAsked(); // list of FLPs gathered from Consul
 
     this.firstFlpSelection = -1;
-
-    this.consulReadoutPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.consulKvStoreReadout = '';
-
-    this.consulQcPrefix = ''; // Used in Readout URI field of Basic Configuration Panel
-    this.consulKvStoreQC = '';
   }
 
   /**
@@ -103,27 +97,18 @@ export default class FlpSelection extends Observable {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.loader.get(`/api/getFLPs`);
+    const {result, ok} = await this.loader.get(`/api/consul/flps`);
     if (!ok) {
       this.list = RemoteData.failure(result.message);
-      this.consulReadoutPrefix = '';
-      this.consulQcPrefix = '';
-      this.consulKvStoreQC = '';
-      this.consulKvStoreReadout = '';
-      this.notify();
-      return;
+    } else {
+      this.list = RemoteData.success(result.flps);
+      // FLP machines can be removed by the user since the last creation of an environment
+      // ensure the list of selected items is still up to date
+      const tempFormHosts = [];
+      const hosts = this.workflow.form.getHosts();
+      hosts.filter((host) => this.list.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
+      this.workflow.form.setHosts(tempFormHosts.slice());
     }
-    this.consulReadoutPrefix = result['consulReadoutPrefix'];
-    this.consulQcPrefix = result['consulQcPrefix'];
-    this.consulKvStoreReadout = result['consulKvStoreReadout'];
-    this.consulKvStoreQC = result['consulKvStoreQC'];
-    this.list = RemoteData.success(result.flps);
-    // FLP machines can be removed by the user since the last creation of an environment
-    // ensure the list of selected items is still up to date
-    const tempFormHosts = [];
-    const hosts = this.workflow.form.getHosts();
-    hosts.filter((host) => this.list.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
-    this.workflow.form.setHosts(tempFormHosts.slice());
     this.notify();
   }
 }
