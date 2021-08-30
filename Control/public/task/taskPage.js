@@ -66,7 +66,7 @@ const cleanResourcesButton = (task) =>
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+export const content = (model) => h('.text-center', [
   infoPanel(model),
   getListOfTasks(model.task)
 ]);
@@ -103,20 +103,21 @@ const infoPanel = (model) =>
  * @return {vnode}
  */
 const getListOfTasks = (task) =>
-  h('.p2', [
-    task.tasksByFlp.match({
-      NotAsked: () => null,
-      Loading: () => pageLoading(),
-      Success: (data) => showContent(data),
-      Failure: (error) => errorPage(error),
-    })
-  ]);
+  task.tasksByFlp.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (data) => showContent(data, task),
+    Failure: (error) => errorPage(error),
+  })
 
 /**
  * Render table of display message
  */
-const showContent = (items) => (items && Object.keys(items).length > 0)
-  ? h('.scroll-auto', taskTable(items))
+const showContent = (items, task) => (items && Object.keys(items).length > 0)
+  ? h('.p2.absolute-fill.scroll-y', {
+    oncreate: (vnode) => vnode.dom.scrollTop = task.scrollTop,
+    onremove: (vnode) => task.scrollTop = vnode.dom.scrollTop,
+  }, taskTable(items))
   : h('h3.m4', ['No tasks found.']);
 
 /**
