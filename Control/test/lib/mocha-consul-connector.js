@@ -75,6 +75,22 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, config);
       await connector.testConsulStatus();
     });
+    it('should successfully validate connector if consulService is present', () => {
+      const connector = new ConsulConnector(consulService, config);
+      const next = sinon.stub();
+      connector.validateService({}, {}, next);
+      assert.ok(next.calledWith());
+    });
+    it('should successfully respond with error on connector validate if consulService is missing', () => {
+      const connector = new ConsulConnector(undefined, config);
+      const res = {
+        status: sinon.stub(),
+        send: sinon.stub(),
+      };
+      connector.validateService({}, res, {});
+      assert.ok(res.status.calledWith(502));
+      assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
+    });
   });
 
   describe('Request CRUs tests', async () => {
@@ -123,14 +139,6 @@ describe('ConsulConnector test suite', () => {
     //   assert.ok(res.status.calledWith(502));
     //   assert.ok(res.send.calledWith({message: '502 - Consul unresponsive'}));
     // });
-
-    it('should successfully return error for when ConsulService was not initialized', async () => {
-      const connector = new ConsulConnector(undefined, config);
-      await connector.getCRUs(null, res);
-
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
-    });
   });
 
   describe('Request FLPs tests', async () => {
@@ -212,14 +220,6 @@ describe('ConsulConnector test suite', () => {
     //   assert.ok(res.status.calledWith(502));
     //   assert.ok(res.send.calledWith({message: '502 - Consul unresponsive'}));
     // });
-
-    it('should successfully return error for when ConsulService was not initialized', async () => {
-      const connector = new ConsulConnector(undefined, config);
-      await connector.getFLPs(null, res);
-
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
-    });
   });
 
   describe('Request CRUs with Configuration', async () => {

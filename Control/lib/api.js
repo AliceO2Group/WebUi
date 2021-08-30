@@ -73,10 +73,11 @@ module.exports.setup = (http, ws) => {
     .then((data) => res.status(200).json(data)));
 
   // Consul
-  http.get('/consul/flps', (req, res) => consulConnector.getFLPs(req, res));
-  http.get('/consul/crus', (req, res) => consulConnector.getCRUs(req, res));
-  http.get('/consul/crus/config', (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
-  http.post('/consul/crus/config/save', (req, res) => consulConnector.saveCRUsConfiguration(req, res));
+  const validateService = consulConnector.validateService.bind(consulConnector);
+  http.get('/consul/flps', validateService, (req, res) => consulConnector.getFLPs(req, res));
+  http.get('/consul/crus', validateService, (req, res) => consulConnector.getCRUs(req, res));
+  http.get('/consul/crus/config', validateService, (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
+  http.post('/consul/crus/config/save', validateService, (req, res) => consulConnector.saveCRUsConfiguration(req, res));
 
   const kafka = new KafkaConnector(config.kafka, ws);
   if (kafka.isKafkaConfigured()) {

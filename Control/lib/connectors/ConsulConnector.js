@@ -38,16 +38,28 @@ class ConsulConnector {
   }
 
   /**
+   * Check if consulService is present:
+   * * If yes, allow request to continue
+   * * If not, send response accordingly
+   * @param {Request} req
+   * @param {Response} res 
+   * @param {Next} next 
+   */
+  validateService(req, res, next) {
+    if (this.consulService) {
+      next();
+    } else {
+      errorHandler('Unable to retrieve configuration of consul service', res, 502);
+    }
+  }
+
+  /**
    * Method to check if consul service can be used
    */
   async testConsulStatus() {
-    if (this.consulService) {
-      this.consulService.getConsulLeaderStatus()
-        .then((data) => log.info(`Service is up and running on: ${data}`))
-        .catch((error) => log.error(`Connection failed due to ${error}`));
-    } else {
-      log.error('Unable to retrieve configuration');
-    }
+    this.consulService.getConsulLeaderStatus()
+      .then((data) => log.info(`Service is up and running on: ${data}`))
+      .catch((error) => log.error(`Connection failed due to ${error}`));
   }
 
   /**
@@ -57,32 +69,28 @@ class ConsulConnector {
   * @param {Response} res
   */
   async getCRUs(req, res) {
-    if (this.consulService) {
-      const regex = new RegExp(`.*/.*/cards`);
-      this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath).then((data) => {
-        const crusByHost = {};
-        Object.keys(data)
-          .filter((key) => key.match(regex))
-          .forEach((key) => {
-            const splitKey = key.split('/');
-            const hostKey = splitKey[splitKey.length - 2];
-            crusByHost[hostKey] = JSON.parse(data[key]);
-          });
+    const regex = new RegExp(`.*/.*/cards`);
+    this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath).then((data) => {
+      const crusByHost = {};
+      Object.keys(data)
+        .filter((key) => key.match(regex))
+        .forEach((key) => {
+          const splitKey = key.split('/');
+          const hostKey = splitKey[splitKey.length - 2];
+          crusByHost[hostKey] = JSON.parse(data[key]);
+        });
 
-        res.status(200);
-        res.json(crusByHost);
-      }).catch((error) => {
-        if (error.message.includes('404')) {
-          log.trace(error);
-          log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
-          errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
-        } else {
-          errorHandler(error, res, 502);
-        }
-      });
-    } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
-    }
+      res.status(200);
+      res.json(crusByHost);
+    }).catch((error) => {
+      if (error.message.includes('404')) {
+        log.trace(error);
+        log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
+        errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
+      } else {
+        errorHandler(error, res, 502);
+      }
+    });
   }
 
   /**
@@ -91,51 +99,24 @@ class ConsulConnector {
    * @param {Response} res - list of strings representing flp names
    */
   async getFLPs(req, res) {
-    if (this.consulService) {
-      this.consulService.getKeysByPrefix(this.flpHardwarePath)
-        .then((data) => {
-          const regex = new RegExp('.*o2/hardware/flps/.*/.*');
-          const flpList = data.filter((key) => key.match(regex))
-            .map((key) => key.split('/')[3]);
-          res.status(200);
-          res.json({flps: [...new Set(flpList)]});
-        })
-        .catch((error) => {
-          if (error.message.includes('404')) {
-            log.trace(error);
-            log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
-            errorHandler(`Could not find any FLPs by key ${this.flpHardwarePath}`, res, 404);
-          } else {
-            errorHandler(error, res, 502);
-          }
-        });
-    } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
-    }
-  }
-
-  /**
-   * Get a list of FLPs loaded from Consul
-   * @return {Array<String>}
-   */
-  async getFLPsList() {
-    if (this.consulService) {
-      try {
-        const data = await this.consulService.getKeysByPrefix(this.flpHardwarePath);
+    this.consulService
+      .getKeysByPrefix(this.flpHardwarePath)
+      .then((data) => {
         const regex = new RegExp('.*o2/hardware/flps/.*/.*');
         const flpList = data.filter((key) => key.match(regex))
           .map((key) => key.split('/')[3]);
-        return [...new Set(flpList)];
-      } catch (error) {
+        res.status(200);
+        res.json({flps: [...new Set(flpList)]});
+      })
+      .catch((error) => {
         if (error.message.includes('404')) {
           log.trace(error);
           log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
-          throw new Error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+          errorHandler(`Could not find any FLPs by key ${this.flpHardwarePath}`, res, 404);
+        } else {
+          errorHandler(error, res, 502);
         }
-      }
-    } else {
-      throw new Error('There was no ConsulService provided');
-    }
+      });
   }
 
   /**
@@ -145,23 +126,19 @@ class ConsulConnector {
    * @param {Response} res
    */
   async getCRUsWithConfiguration(req, res) {
-    if (this.consulService) {
-      try {
-        let cardsByHost = await this._getCardsByHost();
-        const crusByHost = this._mapCrusWithId(cardsByHost);
-        const crusWithConfigByHost = await this._getCrusConfigById(crusByHost);
-        res.status(200).json(crusWithConfigByHost);
-      } catch (error) {
-        if (error.toString().includes('404')) {
-          const missingKVErrorMessage = 'No value found for one of the keys:\n' +
-            `${this.flpHardwarePath}\nor\n${this.readoutCardPath}`;
-          errorHandler(missingKVErrorMessage, res, 404);
-        } else {
-          errorHandler(error, res, 502);
-        }
+    try {
+      let cardsByHost = await this._getCardsByHost();
+      const crusByHost = this._mapCrusWithId(cardsByHost);
+      const crusWithConfigByHost = await this._getCrusConfigById(crusByHost);
+      res.status(200).json(crusWithConfigByHost);
+    } catch (error) {
+      if (error.toString().includes('404')) {
+        const missingKVErrorMessage = 'No value found for one of the keys:\n' +
+          `${this.flpHardwarePath}\nor\n${this.readoutCardPath}`;
+        errorHandler(missingKVErrorMessage, res, 404);
+      } else {
+        errorHandler(error, res, 502);
       }
-    } else {
-      errorHandler('Unable to retrieve configuration of the CRUs', res, 502);
     }
   }
 
@@ -195,6 +172,30 @@ class ConsulConnector {
       } catch (error) {
         errorHandler(error, res, 502);
       }
+    }
+  }
+
+  /**
+   * Get a list of FLPs loaded from Consul
+   * @return {Array<String>}
+   */
+  async getFLPsList() {
+    if (this.consulService) {
+      try {
+        const data = await this.consulService.getKeysByPrefix(this.flpHardwarePath);
+        const regex = new RegExp('.*o2/hardware/flps/.*/.*');
+        const flpList = data.filter((key) => key.match(regex))
+          .map((key) => key.split('/')[3]);
+        return [...new Set(flpList)];
+      } catch (error) {
+        if (error.message.includes('404')) {
+          log.trace(error);
+          log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+          throw new Error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+        }
+      }
+    } else {
+      throw new Error('There was no ConsulService provided');
     }
   }
 
