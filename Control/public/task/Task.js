@@ -30,6 +30,8 @@ export default class Task extends Observable {
     this.cleanUpTasksRequest = RemoteData.notAsked();
     this.cleanUpResourcesRequest = RemoteData.notAsked();
     this.cleanUpResourcesID = 0;
+
+    this.scrollTop = 0;
   }
 
   /** 
