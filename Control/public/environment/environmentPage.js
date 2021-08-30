@@ -260,7 +260,7 @@ const infoLoggerPerFlpButton = (environment, model, host) =>
     title: 'Open InfoLogger for this hostname',
     href: environment.currentRunNumber ?
       `//${COG.ILG_URL}?q={"run":{"match":"${environment.currentRunNumber}"},"hostname":{"match":"${host}"}}`
-      : `//${COG.ILG_URL}?q={"hostname":{"match":"flptest1"}}`,
+      : `//${COG.ILG_URL}?q={"hostname":{"match":"${host}"}}`,
     target: '_blank'
   }, h('button.btn-sm.primary', iconList())
   );
