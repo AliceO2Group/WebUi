@@ -112,8 +112,8 @@ export default class FrameworkInfo extends Observable {
     } else {
       this.statuses.consul = RemoteData.success(result);
       const CONSUL = COG.CONSUL;
-      this.consulServicesLink = (CONSUL.consulKVPrefix && CONSUL.coreServices && result.hostname && result.port) ?
-        `${result.hostname}:${result.port}/${CONSUL.consulKVPrefix}/${CONSUL.coreServices}/edit`
+      this.consulServicesLink = (CONSUL.kVPrefix && CONSUL.coreServices && result.hostname && result.port) ?
+        `${result.hostname}:${result.port}/${CONSUL.kVPrefix}/${CONSUL.coreServices}/edit`
         : '';
 
     }

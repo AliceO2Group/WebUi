@@ -29,7 +29,7 @@ function buildPublicConfig(config) {
   const publicConfig = {
     ILG_URL: _getInfoLoggerURL(config),
     GRAFANA: _getGrafanaConfig(config),
-    CONSUL: _getConsulConfig(config),
+    CONSUL: getConsulConfig(config),
     REFRESH_TASK: config?.utils?.refreshTask || 5000,
     DETECTORS: config?.detectorMap || {}
   };
@@ -43,9 +43,21 @@ function buildPublicConfig(config) {
  * @param {JSON} config - server configuration
  * @returns {JSON}
  */
-function _getConsulConfig(config) {
+function getConsulConfig(config) {
   if (config?.consul) {
-    return config.consul
+    const conf = config.consul;
+
+    conf.flpHardwarePath = conf?.flpHardwarePath ? conf.flpHardwarePath : 'o2/hardware/flps';
+    conf.readoutCardPath = conf?.readoutCardPath ? conf.readoutCardPath : 'o2/components/readoutcard';
+    conf.qcPath = conf?.qcPath ? conf.qcPath : 'o2/components/qc';
+    conf.readoutPath = conf?.readoutPath ? conf.readoutPath : 'o2/components/readout';
+    conf.kVPrefix = conf?.kVPrefix ? conf.kVPrefix : 'ui/alice-o2-cluster/kv';
+
+    conf.kvStoreQC = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.qcPath}`;
+    conf.kvStoreReadout = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.readoutPath}`;
+    conf.qcPrefix = `${conf.hostname}:${conf.port}/${conf.qcPath}/`;
+    conf.readoutPrefix = `${conf.hostname}:${conf.port}/${conf.readoutPath}/`
+    return conf;
   }
   return {};
 }
@@ -92,4 +104,4 @@ function _getInfoLoggerURL(config) {
   }
 }
 
-module.exports = {buildPublicConfig, _getGrafanaConfig, _getInfoLoggerURL};
+module.exports = {buildPublicConfig, _getGrafanaConfig, _getInfoLoggerURL, getConsulConfig};

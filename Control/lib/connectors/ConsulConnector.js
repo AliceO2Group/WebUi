@@ -14,6 +14,7 @@
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
 const errorHandler = require('./../utils.js').errorHandler;
+const {getConsulConfig} = require('./../config/publicConfigProvider.js');
 
 /**
  * Gateway for all Consul Consumer calls
@@ -26,12 +27,12 @@ class ConsulConnector {
    */
   constructor(consulService, config, padLock = undefined) {
     this.consulService = consulService;
-    this.config = config;
-    this.flpHardwarePath = (config && config.flpHardwarePath) ? config.flpHardwarePath : 'o2/hardware/flps';
-    this.readoutCardPath = (config && config.readoutCardPath) ? config.readoutCardPath : 'o2/components/readoutcard';
-    this.qcPath = (config && config.qcPath) ? config.qcPath : 'o2/components/qc';
-    this.readoutPath = (config && config.readoutPath) ? config.readoutPath : 'o2/components/readout';
-    this.consulKVPrefix = (config && config.consulKVPrefix) ? config.consulKVPrefix : 'ui/alice-o2-cluster/kv';
+    this.config = getConsulConfig({consul: config});
+    this.flpHardwarePath = this.config.flpHardwarePath;
+    this.readoutCardPath = this.config.readoutCardPath;
+    this.qcPath = this.config.qcPath;
+    this.readoutPath = this.config.readoutPath;
+    this.kVPrefix = this.config.kVPrefix;
 
     this.padLock = padLock;
   }
@@ -97,13 +98,7 @@ class ConsulConnector {
           const flpList = data.filter((key) => key.match(regex))
             .map((key) => key.split('/')[3]);
           res.status(200);
-          res.json({
-            consulKvStoreQC: this.consulKvStoreQC,
-            consulKvStoreReadout: this.consulKvStoreReadout,
-            consulQcPrefix: this.consulQcPrefix,
-            consulReadoutPrefix: this.consulReadoutPrefix,
-            flps: [...new Set(flpList)]
-          });
+          res.json({flps: [...new Set(flpList)]});
         })
         .catch((error) => {
           if (error.message.includes('404')) {
@@ -328,56 +323,6 @@ class ConsulConnector {
     const cruIdA = `cru_${cruA.serial}_${cruA.endpoint}`;
     const cruIdB = `cru_${cruB.serial}_${cruB.endpoint}`;
     return cruIdA > cruIdB ? 1 : -1;
-  }
-
-  /**
-   * Helpers
-   */
-
-  /**
-   * Build and return the URL prefix for
-   * Readout Configuration Consul Path  
-   * @return {string}
-   */
-  get consulReadoutPrefix() {
-    if (!this.config.hostname || !this.config.port) {
-      return '';
-    }
-    return `${this.config.hostname}:${this.config.port}/${this.readoutPath}/`
-  }
-
-  /**
-   * Build and return the URL prefix for
-   * QC Configuration Consul Path
-   * @return {string}
-   */
-  get consulQcPrefix() {
-    if (!this.config.hostname || !this.config.port) {
-      return '';
-    }
-    return `${this.config.hostname}:${this.config.port}/${this.qcPath}/`
-  }
-
-  /**
-   * Build and return the URL prefix for Readout Consul KV Store  
-   * @return {string}
-   */
-  get consulKvStoreReadout() {
-    if (!this.config.hostname || !this.config.port) {
-      return '';
-    }
-    return `${this.config.hostname}:${this.config.port}/${this.consulKVPrefix}/${this.readoutPath}`
-  }
-
-  /**
-   * Build and return the URL prefix for QC Consul KV Store  
-   * @return {string}
-   */
-  get consulKvStoreQC() {
-    if (!this.config.hostname || !this.config.port) {
-      return '';
-    }
-    return `${this.config.hostname}:${this.config.port}/${this.consulKVPrefix}/${this.qcPath}`
   }
 }
 

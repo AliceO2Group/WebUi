@@ -21,29 +21,30 @@ const ConsulConnector = require('../../lib/connectors/ConsulConnector.js');
 describe('ConsulConnector test suite', () => {
   let res;
   describe('Test ConsulConnector initialization', () => {
-    it('should successfully initialize consul with "undefined" configuration', () => {
-      const consul = new ConsulConnector({}, undefined);
+    it('should successfully initialize consul with default fields if there are missing ones "undefined"', () => {
+      const consul = new ConsulConnector({}, {hostname: 'test', flpHardwarePath: undefined});
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
       assert.strictEqual(consul.readoutPath, 'o2/components/readout');
       assert.strictEqual(consul.readoutCardPath, 'o2/components/readoutcard');
       assert.strictEqual(consul.qcPath, 'o2/components/qc');
-      assert.strictEqual(consul.consulKVPrefix, 'ui/alice-o2-cluster/kv');
+      assert.strictEqual(consul.kVPrefix, 'ui/alice-o2-cluster/kv');
     });
-    it('should successfully initialize consul with "null" configuration', () => {
-      const consul = new ConsulConnector({}, null);
+    it('should successfully initialize consul with default fields if there are missing ones "null"', () => {
+      const consul = new ConsulConnector({}, {hostname: 'test', flpHardwarePath: null});
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
       assert.strictEqual(consul.readoutPath, 'o2/components/readout');
       assert.strictEqual(consul.readoutCardPath, 'o2/components/readoutcard');
       assert.strictEqual(consul.qcPath, 'o2/components/qc');
-      assert.strictEqual(consul.consulKVPrefix, 'ui/alice-o2-cluster/kv');
+      assert.strictEqual(consul.kVPrefix, 'ui/alice-o2-cluster/kv');
     });
-    it('should successfully initialize consul with "missing" configuration', () => {
-      const consul = new ConsulConnector({});
+    it('should successfully initialize consul with partial "missing" configuration', () => {
+      // TODO should throw error; To be refactored on middleware ticket
+      const consul = new ConsulConnector({}, {hostname: 'test'});
       assert.strictEqual(consul.flpHardwarePath, 'o2/hardware/flps');
       assert.strictEqual(consul.readoutPath, 'o2/components/readout');
       assert.strictEqual(consul.readoutCardPath, 'o2/components/readoutcard');
       assert.strictEqual(consul.qcPath, 'o2/components/qc');
-      assert.strictEqual(consul.consulKVPrefix, 'ui/alice-o2-cluster/kv');
+      assert.strictEqual(consul.kVPrefix, 'ui/alice-o2-cluster/kv');
     });
     it('should successfully initialize consul with "passed" configuration', () => {
       const consul = new ConsulConnector({}, {
@@ -51,13 +52,13 @@ describe('ConsulConnector test suite', () => {
         readoutPath: 'some/readout/path',
         readoutCardPath: 'some/readoutcard/path',
         qcPath: 'some/qc/path',
-        consulKVPrefix: 'ui/some-cluster/kv',
+        kVPrefix: 'ui/some-cluster/kv',
       });
       assert.strictEqual(consul.flpHardwarePath, 'some/hardware/path');
       assert.strictEqual(consul.readoutPath, 'some/readout/path');
       assert.strictEqual(consul.readoutCardPath, 'some/readoutcard/path');
       assert.strictEqual(consul.qcPath, 'some/qc/path');
-      assert.strictEqual(consul.consulKVPrefix, 'ui/some-cluster/kv');
+      assert.strictEqual(consul.kVPrefix, 'ui/some-cluster/kv');
     });
   });
 
@@ -153,13 +154,7 @@ describe('ConsulConnector test suite', () => {
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith({
-        consulKvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
-        consulKvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
-        consulQcPrefix: 'localhost:8550/test/o2/qc/components/',
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
-        flps: ['flpOne', 'flpTwo']
-      }));
+      assert.ok(res.json.calledWith({flps: ['flpOne', 'flpTwo']}));
     });
 
     it('should successfully return a readout and qc configuration prefix', async () => {
@@ -168,13 +163,7 @@ describe('ConsulConnector test suite', () => {
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith({
-        consulKvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
-        consulKvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
-        consulQcPrefix: 'localhost:8550/test/o2/qc/components/',
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
-        flps: []
-      }));
+      assert.ok(res.json.calledWith({flps: []}));
     });
 
     it('should successfully return an empty readout and qc configuration prefix if configuration host is missing', async () => {
@@ -183,13 +172,7 @@ describe('ConsulConnector test suite', () => {
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith({
-        consulKvStoreQC: '',
-        consulKvStoreReadout: '',
-        consulQcPrefix: '',
-        consulReadoutPrefix: '',
-        flps: []
-      }));
+      assert.ok(res.json.calledWith({flps: []}));
     });
 
     it('should successfully return an empty readout configuration prefix if configuration port is missing', async () => {
@@ -198,13 +181,7 @@ describe('ConsulConnector test suite', () => {
       await connector.getFLPs(null, res);
 
       assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith({
-        consulKvStoreQC: '',
-        consulKvStoreReadout: '',
-        consulQcPrefix: '',
-        consulReadoutPrefix: '',
-        flps: []
-      }));
+      assert.ok(res.json.calledWith({flps: []}));
     });
 
     it('should successfully remove duplicates from list of FLP names', async () => {
@@ -215,13 +192,7 @@ describe('ConsulConnector test suite', () => {
       const connector = new ConsulConnector(consulService, config);
       await connector.getFLPs(null, res);
       assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith({
-        consulKvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
-        consulKvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
-        consulQcPrefix: 'localhost:8550/test/o2/qc/components/',
-        consulReadoutPrefix: 'localhost:8550/test/o2/readout/components/',
-        flps: ['flpTwo']
-      }));
+      assert.ok(res.json.calledWith({flps: ['flpTwo']}));
     });
 
     // it('should successfully return 404 if consul did not send back any data for specified key', async () => {
