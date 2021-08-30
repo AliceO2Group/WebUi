@@ -145,15 +145,15 @@ const taskTable = (items) =>
           h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
         ),
         h('tbody', items[hostname].list.map((task) => [h('tr', [
-          h('td', task.name),
-          h('td', task.pid),
-          h('td', {
+          h('td.w-50', task.name),
+          h('td.w-10', task.pid),
+          h('td.w-10', {
             class: (task.state === 'RUNNING' ? 'success'
               : (task.state === 'CONFIGURED' ? 'warning'
                 : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
             style: 'font-weight: bold;'
           }, task.state),
-          h('td', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
+          h('td.w-10', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
         ])]))
       ])
     ])
