@@ -61,7 +61,7 @@ Use of a Consul instance is optional
 * `readoutPath` - Prefix for KV Store for readout's configuration
 * `readoutCardPath` - Prefix for KV Store for readout-card's configuration
 * `qcPath` - Prefix for KV Store for quality-control's configuration
-* `consulKVPrefix` - Name of the Consul cluster used by AliceO2
+* `kVPrefix` - Name of the Consul cluster used by AliceO2
   
 ### Kafka
 Use of a Kafka instance is optional. It is being used for prompting [Browser Notifications](#integration-with-notification-service) 

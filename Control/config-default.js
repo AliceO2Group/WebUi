@@ -30,8 +30,12 @@ module.exports = {
     readoutPath: 'o2/components/readout/key/prefix',
     readoutCardPath: 'o2/components/readoutcard/key/prefix',
     qcPath: 'o2/components/qc/key/prefix',
-    consulKVPrefix: 'o2/cluster/key/prefix',
+    kVPrefix: 'o2/cluster/key/prefix',
     coreServices: 'o2/components/aliecs/some/settings/path',
+  },
+  infoLoggerGui: {
+    hostname: 'localhost',
+    port: 8081
   },
   utils: {
     refreshTask: 5000 // how often should task list page should refresh its content
