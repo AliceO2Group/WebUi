@@ -146,8 +146,9 @@ export default class WorkflowVariable {
         // template does not support dynamic workflows or template does not contain provided key
         return {ok: true, key, value};
       } else {
-        if (varSpecMap[key].allowedValues.length === 0 || varSpecMap[key].allowedValues.includes(value)) {
-          // TODO what is off on
+        if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
+          return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
+        } else if (varSpecMap[key].allowedValues.length === 0 || varSpecMap[key].allowedValues.includes(value)) {
           return {ok: true, key, value};
         } else {
           return {ok: false, error: `Provided value for key '${key}' is not allowed`};

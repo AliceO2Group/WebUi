@@ -184,7 +184,7 @@ export default class Workflow extends Observable {
    * Method to check user's input and create a new environment
    */
   async createNewEnvironment() {
-    const {ok, message, variables} = this.checkAndMergeVariables(this.form.variables, this.form.basicVariables);
+    const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
       // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
@@ -229,7 +229,16 @@ export default class Workflow extends Observable {
   addVariable(keyToAdd, valueToAdd) {
     const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap);
     if (ok) {
-      this.form.variables[key] = value;
+      const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
+      if (isKnownKey) {
+        console.log("aici")
+        this.form.basicVariables[key] = value;
+        this.model.notification.show(
+          'Variable has been succesfully imported in the configuration panels', 'success', 3000
+        );
+      } else {
+        this.form.variables[key] = value;
+      }
       this.advErrorPanel = [];
     } else {
       this.advErrorPanel = [error];
@@ -244,8 +253,20 @@ export default class Workflow extends Observable {
    */
   addVariableJSON(kvPairs) {
     const {parsedKVJSON, errors} = WorkflowVariable.parseKVPairMap(kvPairs, this.selectedVarsMap);
-
-    Object.keys(parsedKVJSON).forEach((key) => this.form.variables[key] = parsedKVJSON[key]);
+    Object.keys(parsedKVJSON).forEach((key) => {
+      const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
+      if (isKnownKey) {
+        this.form.basicVariables[key] = parsedKVJSON[key];
+        this.model.notification.show(
+          'Variables have been succesfully imported in the configuration panels', 'success', 3000
+        );
+      } else {
+        this.form.variables[key] = parsedKVJSON[key];
+      }
+    });
+    if (errors.length === 0) {
+      this.kvPairsString = '';
+    }
     this.advErrorPanel = errors;
     this.notify();
   }
@@ -253,7 +274,6 @@ export default class Workflow extends Observable {
   /**
    * Method to update the value of a (K;V) pair in basicVariables
    * Checks if the type is a number; If it is, it will be converted to a string
-   * // TODO Update based on new
    * @param {string} key
    * @param {object} value
    */
@@ -267,7 +287,8 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Method to remove one of the variables by key
+   * Method to remove one of the variables by key from the
+   * advance configuration panel
    * @param {string} key
    * @return {boolean}
    */
@@ -439,12 +460,11 @@ export default class Workflow extends Observable {
   /**
    * Check that variables are not duplicated in basic and advanced 
    * configuration panel and merge them together
-   * // TODO Update no longer use basic
    * @param {JSON} vars
    * @param {JSON} basicVars
    * @return {boolean, string, JSON}
    */
-  checkAndMergeVariables(vars, basicVars) {
+  _checkAndMergeVariables(vars, basicVars) {
     const variables = JSON.parse(JSON.stringify(vars));
     let basicVariables = JSON.parse(JSON.stringify(basicVars));
     const sameKeys = Object.keys(basicVariables).filter((key) => variables[key]);

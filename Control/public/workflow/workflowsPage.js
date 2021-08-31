@@ -81,15 +81,13 @@ const showNewEnvironmentForm = (model, repoList) => [
  * @param {Object} workflow
  * @return {vnode}
  */
-const workflowSettingsPanels = (workflow) =>
-  [
-    Object.keys(workflow.selectedVarsMap).length > 0 ? h('.w-100.pv2.flex-row', mainPanel(workflow))
-      : h('.w-100.flex-row', [
-        basicPanel(workflow),
-        advancedVarsPanel(workflow) // TODO ADD IT IN MAIN AS WELL
-      ])
-  ];
-
+const workflowSettingsPanels = (workflow) => [
+  Object.keys(workflow.selectedVarsMap).length > 0 ? h('.w-100.pv2.flex-row', mainPanel(workflow))
+    : h('.w-100.flex-row', [
+      basicPanel(workflow),
+      advancedVarsPanel(workflow)
+    ])
+];
 
 /**
  * Method which creates a dropdown of repositories
@@ -181,7 +179,6 @@ const actionableCreateEnvironment = (model) =>
     }),
     btnCreateEnvironment(model),
   ]);
-
 
 /**
  * Method to add a button for creation of environment
