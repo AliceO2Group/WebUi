@@ -14,19 +14,31 @@
 
 import {h} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
+import advancedVarsPanel from './advancedPanel.js';
 import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 
+const BASIC_CONFIGURATION = 'BASICCONFIGURATION';
 /**
  * Builds a custom set of panels build based on the user's selection of template
  * to configure the workflow
+ * The first 2 panels are represented by the basic and advanced panels
  * The panels are build based on the AliECS Core information sent via varSpecMap
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) =>
-  h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
+export default (workflow) => {
+  let basicPanelKey = '';
+  Object.keys(workflow.groupedPanels).forEach((key) => {
+    if (key.toLocaleUpperCase() === BASIC_CONFIGURATION) {
+      basicPanelKey = key;
+    }
+  });
+  return h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
+    h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[basicPanelKey], basicPanelKey)),
+    h('.w-50', advancedVarsPanel(workflow)),
     Object.keys(workflow.groupedPanels)
       .sort((panelA, panelB) => panelA.toLocaleUpperCase() < panelB.toLocaleUpperCase() ? -1 : 1)
+      .filter((panelName) => panelName !== basicPanelKey)
       .filter((panelName) => workflow.groupedPanels[panelName].some((variable) => {
         try {
           return eval(variable.isVisible);
@@ -36,6 +48,7 @@ export default (workflow) =>
       }))
       .map((panelName) => h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[panelName], panelName)))
   );
+}
 
 /**
  * Generate a panel based on the configuration provided in the Control Workflows
@@ -61,7 +74,7 @@ const autoBuiltPanel = (workflow, variables, name) =>
           return false;
         }
       }).map((variable) => autoBuiltBox(variable, workflow.model)),
-      name.toUpperCase() === 'BASICCONFIGURATION' && [
+      name.toUpperCase() === BASIC_CONFIGURATION && [
         readoutPanel(workflow),
         qcUriPanel(workflow)
       ]
