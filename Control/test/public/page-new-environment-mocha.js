@@ -289,7 +289,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const variables = await page.evaluate(() => {
       return window.model.workflow.form.variables;
     });
-    assert.deepStrictEqual(variables['TestKey'], 'TestValue');
+    assert.deepStrictEqual(variables['TestKey'], ' TestValue  ');
   });
 
   it('should successfully move focus to key input after KV pair was added', async () => {
