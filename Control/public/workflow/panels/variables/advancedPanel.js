@@ -46,6 +46,7 @@ export default (workflow) =>
  * @return {vnode}
  */
 const addKVInputList = (workflow) =>
+// TODO filter our the ones in varSpecMap
   h('.w-100.p2.panel', Object.keys(workflow.form.variables).map((key) =>
     h('.w-100.flex-row.pv2.border-bot', {
     }, [

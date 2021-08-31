@@ -231,7 +231,6 @@ export default class Workflow extends Observable {
     if (ok) {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
-        console.log("aici")
         this.form.basicVariables[key] = value;
         this.model.notification.show(
           'Variable has been succesfully imported in the configuration panels', 'success', 3000
@@ -274,6 +273,7 @@ export default class Workflow extends Observable {
   /**
    * Method to update the value of a (K;V) pair in basicVariables
    * Checks if the type is a number; If it is, it will be converted to a string
+   * // TODO Update based on new
    * @param {string} key
    * @param {object} value
    */
