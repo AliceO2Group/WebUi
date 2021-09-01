@@ -282,17 +282,19 @@ const showEnvTasksTable = (environment, tasks) => {
       ),
       h('tbody', [
         tasks.map((task) => [h('tr', [
-          h('td', task.name),
-          h('td', h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())),
-          h('td', task.status),
-          h('td', {
+          h('td.w-40', task.name),
+          h('td.w-10',
+            h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())
+          ),
+          h('td.w-10', task.status),
+          h('td.w-10', {
             class: (task.state === 'RUNNING' ? 'success' :
               (task.state === 'CONFIGURED' ? 'warning' :
                 ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
             style: 'font-weight: bold;'
           }, task.state),
-          h('td', task.deploymentInfo.hostname),
-          h('td',
+          h('td.w-20', task.deploymentInfo.hostname),
+          h('td.w-10',
             h('button.btn-sm.btn-default', {
               title: 'More Details',
               onclick: () => environment.task.toggleTaskView(task.taskId),

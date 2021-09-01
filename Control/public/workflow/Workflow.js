@@ -54,7 +54,6 @@ export default class Workflow extends Observable {
     this.groupedPanels = {}
 
     this.READOUT_PREFIX = PREFIX.READOUT;
-
     this.QC_PREFIX = PREFIX.QC;
 
     this.dom = {
@@ -62,6 +61,7 @@ export default class Workflow extends Observable {
       keyValueArea: ''
     }
 
+    this.advErrorPanel = [];
     this.kvPairsString = ''; // variable stored for Adv Config Panel
   }
 
@@ -184,7 +184,7 @@ export default class Workflow extends Observable {
    * Method to check user's input and create a new environment
    */
   async createNewEnvironment() {
-    const {ok, message, variables} = this.checkAndMergeVariables(this.form.variables, this.form.basicVariables);
+    const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
       // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
@@ -222,63 +222,58 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * Method to check inputs of key and value
-   * and add them to form of creating new environment
+   * Method to add a new KV Pair to the variables form for creating a new environment
    * @param {string} key
-   * @param {string} value
-   * @return {boolean}
+   * @param {Object} value
    */
-  addVariable(key, value) {
-    const isKeyCorrect = key && key.trim() !== '';
-    const isValueCorrect = value && value.trim() !== '';
-    if (isKeyCorrect && isValueCorrect) {
-      key = key.trim();
-      value = value.trim();
-      if (!this.form.variables[key]) {
-        this.form.variables[key] = value;
-        this.notify();
-        return true;
+  addVariable(keyToAdd, valueToAdd) {
+    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap);
+    if (ok) {
+      const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
+      if (isKnownKey) {
+        this.form.basicVariables[key] = value;
+        this.model.notification.show(
+          'Variable has been succesfully imported in the configuration panels', 'success', 3000
+        );
       } else {
-        this.model.notification.show(`Key '${key}' already exists.`, 'danger', 2000);
+        this.form.variables[key] = value;
       }
+      this.advErrorPanel = [];
     } else {
-      this.model.notification.show('Key and Value cannot be empty', 'danger', 2000);
+      this.advErrorPanel = [error];
     }
-    return false;
+    this.notify();
   }
 
   /**
-   * Given a JSON object, add each key and value to the panel of
-   * KV pairs configuraiton
+   * Given a KV Pairs as a String, attempt to add
+   * each key and value to the panel of KV pairs configuraiton
    * @param {String} kvPairs
    */
-  addVariableList(kvPairs) {
-    try {
-      const pairs = JSON.parse(kvPairs);
-      Object.keys(pairs).forEach((key) => this.addVariable(key, pairs[key]))
+  addVariableJSON(kvPairs) {
+    const {parsedKVJSON, errors} = WorkflowVariable.parseKVPairMap(kvPairs, this.selectedVarsMap);
+    Object.keys(parsedKVJSON).forEach((key) => {
+      const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
+      if (isKnownKey) {
+        this.form.basicVariables[key] = parsedKVJSON[key];
+        this.model.notification.show(
+          'Variables have been succesfully imported in the configuration panels', 'success', 3000
+        );
+      } else {
+        this.form.variables[key] = parsedKVJSON[key];
+      }
+    });
+    if (errors.length === 0) {
       this.kvPairsString = '';
-    } catch (error) {
-      this.model.notification.show('Provided string is not a valid JSON', 'danger', 3000);
     }
-  }
-
-  /**
-   * Method to update the value of a (K;V) pair in variables
-   * @param {string} key
-   * @param {string} value
-   */
-  updateVariableValueByKey(key, value) {
-    if (value && value.trim() !== '') {
-      this.form.variables[key] = value;
-      this.notify();
-    } else {
-      this.model.notification.show(`Value for '${key}' cannot be empty`, 'warning', 2000);
-    }
+    this.advErrorPanel = errors;
+    this.notify();
   }
 
   /**
    * Method to update the value of a (K;V) pair in basicVariables
    * Checks if the type is a number; If it is, it will be converted to a string
+   * // TODO Update based on new
    * @param {string} key
    * @param {object} value
    */
@@ -292,18 +287,8 @@ export default class Workflow extends Observable {
   }
 
   /**
-   * After focus is taken from the input, the value added by the user will be trimmed
-   * @param {string} key - key of the value that needs to be trimmed
-   */
-  trimVariableValue(key) {
-    if (this.form.variables[key]) {
-      this.form.variables[key] = this.form.variables[key].trim();
-    }
-    this.notify();
-  }
-
-  /**
-   * Method to remove one of the variables by key
+   * Method to remove one of the variables by key from the
+   * advance configuration panel
    * @param {string} key
    * @return {boolean}
    */
@@ -325,45 +310,46 @@ export default class Workflow extends Observable {
     this.selectedVarsMap = {};
     this.form.basicVariables = {};
     this.groupedPanels = {};
-    if (this.templatesVarsMap[template]
-      && Object.keys(this.templatesVarsMap[template]).length > 0) {
-      this.selectedVarsMap = this.templatesVarsMap[template];
-      Object.keys(this.selectedVarsMap)
-        .forEach((key) => {
-          // Generate panels by grouping the variables by the `panel` field
-          const variable = this.selectedVarsMap[key];
-          const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
-          if (!this.groupedPanels[panelBelongingTo]) {
-            this.groupedPanels[panelBelongingTo] = [];
-          }
-          variable.key = key;
-          const workVariable = new WorkflowVariable(variable);
-          this.groupedPanels[panelBelongingTo].push(workVariable);
+    if (this.templatesVarsMap[template] && Object.keys(this.templatesVarsMap[template]).length > 0) {
+      Object.keys(this.templatesVarsMap[template]).forEach((key) => {
+        // Generate panels by grouping the variables by the `panel` field
+        const variable = this.templatesVarsMap[template][key];
+        const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
+        if (!this.groupedPanels[panelBelongingTo]) {
+          this.groupedPanels[panelBelongingTo] = [];
+        }
+        variable.key = key;
+        const workVariable = new WorkflowVariable(variable);
+        this.groupedPanels[panelBelongingTo].push(workVariable);
+        this.selectedVarsMap[key] = workVariable;
 
-          // add default values to selected basic variables form
-          if (workVariable.defaultValue) {
-            if (workVariable.type === VAR_TYPE.ARRAY) {
-              this.updateBasicVariableByKey(key, [workVariable.defaultValue]);
-            } else {
-              this.updateBasicVariableByKey(key, workVariable.defaultValue);
-            }
+        // add default values to selected basic variables form
+        if (workVariable.defaultValue) {
+          if (workVariable.type === VAR_TYPE.ARRAY) {
+            this.updateBasicVariableByKey(key, [workVariable.defaultValue]);
+          } else {
+            this.updateBasicVariableByKey(key, workVariable.defaultValue);
           }
+        }
+      });
+      Object.keys(this.groupedPanels).forEach((key) => {
+        // sort variables within each panel based on index and label
+        let sortedVars = this.groupedPanels[key].sort((varA, varB) => {
+          if (varA.index < varB.index) {
+            return -1;
+          } else if (varA.index > varB.index) {
+            return 1;
+          }
+          return varA.label.toLocaleUpperCase() > varB.label.toLocaleUpperCase() ? 1 : -1
         });
-      Object.keys(this.groupedPanels)
-        .forEach((key) => {
-          // sort variables within each panel based on index and label
-          let sortedVars = this.groupedPanels[key].sort((varA, varB) => {
-            if (varA.index < varB.index) {
-              return -1;
-            } else if (varA.index > varB.index) {
-              return 1;
-            }
-            return varA.label > varB.label ? 1 : -1
-          });
-          this.groupedPanels[key] = sortedVars;
-        });
+        this.groupedPanels[key] = sortedVars;
+      });
     }
   }
+
+  /**
+   * HTTP Requests
+   */
 
   /**
    * Method to make the necesarry requests to reload the data on the new environment page
@@ -376,9 +362,6 @@ export default class Workflow extends Observable {
       this.setTemplatesData();
     }
   }
-  /**
-   * HTTP Requests
-   */
 
   /**
    * Make a request to refresh repositories list from AliECS Core
@@ -481,7 +464,7 @@ export default class Workflow extends Observable {
    * @param {JSON} basicVars
    * @return {boolean, string, JSON}
    */
-  checkAndMergeVariables(vars, basicVars) {
+  _checkAndMergeVariables(vars, basicVars) {
     const variables = JSON.parse(JSON.stringify(vars));
     let basicVariables = JSON.parse(JSON.stringify(basicVars));
     const sameKeys = Object.keys(basicVariables).filter((key) => variables[key]);
@@ -572,7 +555,6 @@ export default class Workflow extends Observable {
     }
     return {variables: vars, ok: true, message: ''};
   }
-
 
   /**
    * Given a host, it will return the matched detector from the static detector list

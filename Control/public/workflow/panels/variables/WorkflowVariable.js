@@ -126,4 +126,62 @@ export default class WorkflowVariable {
       return true;
     }
   }
+
+  /**
+   * Given a KV Pair it will check if:
+   * * key is valid after being trimmed
+   * * value is valid by chechking it's existence in the provided varSpecMap
+   * @param {String} key
+   * @param {Object} value
+   * @param {Map<String, JSON>} varSpecMap
+   * @return {key:string, value:object, ok: boolean, error: string}
+   */
+  static parseKVPair(key, value, varSpecMap = {}) {
+    const isKeyValid = key && key.trim() !== '';
+    if (!isKeyValid) {
+      return {ok: false, error: `Invalid key '${key}' provided`};
+    } else {
+      key = key.trim();
+      if (Object.keys(varSpecMap).length === 0 || !varSpecMap[key]) {
+        // template does not support dynamic workflows or template does not contain provided key
+        return {ok: true, key, value};
+      } else {
+        if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
+          return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
+        } else if (varSpecMap[key].allowedValues.length === 0 || varSpecMap[key].allowedValues.includes(value)) {
+          return {ok: true, key, value};
+        } else {
+          return {ok: false, error: `Provided value for key '${key}' is not allowed`};
+        }
+      }
+    }
+  }
+
+  /**
+   * Given a String of KV Pairs it will check if each:
+   * * provided string is a valid JSON
+   * * key is valid after being trimmed
+   * * value is valid by chechking it's existence in the provided varSpecMap
+   * @param {String} kvPairsString
+   * @param {Map<String, Object>} varSpecMap
+   * @return {kvMpa: Map<string, Object>, errors: Array<String>}
+   */
+  static parseKVPairMap(kvPairsString, varSpecMap) {
+    const parsedKVJSON = {};
+    const errors = [];
+    try {
+      const kvJSON = JSON.parse(kvPairsString);
+      Object.keys(kvJSON).forEach((keyToAdd) => {
+        const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, kvJSON[keyToAdd], varSpecMap);
+        if (ok) {
+          parsedKVJSON[key] = value;
+        } else {
+          errors.push(error);
+        }
+      });
+      return {parsedKVJSON, errors}
+    } catch (error) {
+      return {parsedKVJSON, errors: ['Provided JSON is not valid']}
+    }
+  }
 }

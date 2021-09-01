@@ -66,7 +66,7 @@ const cleanResourcesButton = (task) =>
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+export const content = (model) => h('.text-center', [
   infoPanel(model),
   getListOfTasks(model.task)
 ]);
@@ -103,20 +103,21 @@ const infoPanel = (model) =>
  * @return {vnode}
  */
 const getListOfTasks = (task) =>
-  h('.p2', [
-    task.tasksByFlp.match({
-      NotAsked: () => null,
-      Loading: () => pageLoading(),
-      Success: (data) => showContent(data),
-      Failure: (error) => errorPage(error),
-    })
-  ]);
+  task.tasksByFlp.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (data) => showContent(data, task),
+    Failure: (error) => errorPage(error),
+  })
 
 /**
  * Render table of display message
  */
-const showContent = (items) => (items && Object.keys(items).length > 0)
-  ? h('.scroll-auto', taskTable(items))
+const showContent = (items, task) => (items && Object.keys(items).length > 0)
+  ? h('.p2.absolute-fill.scroll-y', {
+    oncreate: (vnode) => vnode.dom.scrollTop = task.scrollTop,
+    onremove: (vnode) => task.scrollTop = vnode.dom.scrollTop,
+  }, taskTable(items))
   : h('h3.m4', ['No tasks found.']);
 
 /**
@@ -144,15 +145,15 @@ const taskTable = (items) =>
           h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
         ),
         h('tbody', items[hostname].list.map((task) => [h('tr', [
-          h('td', task.name),
-          h('td', task.pid),
-          h('td', {
+          h('td.w-50', task.name),
+          h('td.w-10', task.pid),
+          h('td.w-10', {
             class: (task.state === 'RUNNING' ? 'success'
               : (task.state === 'CONFIGURED' ? 'warning'
                 : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
             style: 'font-weight: bold;'
           }, task.state),
-          h('td', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
+          h('td.w-10', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
         ])]))
       ])
     ])
