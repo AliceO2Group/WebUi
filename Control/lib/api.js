@@ -44,6 +44,7 @@ const consulConnector = new ConsulConnector(consulService, config.consul, padLoc
 consulConnector.testConsulStatus();
 
 const ctrlProxy = new ControlProxy(config.grpc);
+const apricotProxy = new ControlProxy(config.grpc);
 const ctrlService = new ControlService(padLock, ctrlProxy, consulConnector, config.grpc);
 const statusService = new StatusService(config, ctrlService, consulService);
 
