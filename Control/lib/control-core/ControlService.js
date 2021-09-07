@@ -17,6 +17,7 @@ const path = require('path');
 const {WebSocketMessage} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
+const CoreUtils = require('./CoreUtils.js');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -25,14 +26,14 @@ class ControlService {
   /**
    * Constructor initializing dependencies
    * @param {Padlock} padLock
-   * @param {ControlProxy} ctrlProx
+   * @param {GrpcProxy} ctrlProx
    * @param {WebSocket} webSocket
    * @param {ConsulConnector} consulConnector
    * * @param {JSON} coreConfig
    */
   constructor(padLock, ctrlProx, consulConnector, coreConfig) {
     assert(padLock, 'Missing PadLock dependency');
-    assert(ctrlProx, 'Missing ControlProxy dependency');
+    assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
     this.padLock = padLock;
     this.ctrlProx = ctrlProx;
     this.consulConnector = consulConnector;
@@ -169,7 +170,7 @@ class ControlService {
    * @param {Response} res
    */
   executeCommand(req, res) {
-    const method = this.parseMethodNameString(req.path);
+    const method = CoreUtils.parseMethodNameString(req.path);
     if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
       if (!method.startsWith('Get')) {
         const type = req.body.type ? ` (${req.body.type})` : '';
@@ -186,10 +187,10 @@ class ControlService {
    * @return {Promise}
    */
   async getAliECSInfo() {
-    const method = this.parseMethodNameString('GetFrameworkInfo');
-    if (this.ctrlProx?.connectionReady) {
+    const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
+    if (this.ctrlProx?.isConnectionReady) {
       const response = await this.ctrlProx[method]();
-      response.version = this.parseAliEcsVersion(response.version);
+      response.version = CoreUtils.parseAliEcsVersion(response.version);
       return response;
     } else {
       let error = 'Could not establish connection to AliECS Core';
@@ -205,8 +206,8 @@ class ControlService {
    * @return {Promise}
    */
   async getIntegratedServicesInfo() {
-    const method = this.parseMethodNameString('GetIntegratedServices');
-    if (this.ctrlProx?.connectionReady) {
+    const method = CoreUtils.parseMethodNameString('GetIntegratedServices');
+    if (this.ctrlProx?.isConnectionReady) {
       const response = await this.ctrlProx[method]();
       return response;
     } else {
@@ -234,7 +235,7 @@ class ControlService {
    * @return {boolean}
    */
   isConnectionReady(res) {
-    if (!this.ctrlProx.connectionReady) {
+    if (!this.ctrlProx.isConnectionReady) {
       let error = 'Could not establish connection to AliECS Core';
       if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
         error = this.ctrlProx.connectionError.message;
@@ -270,38 +271,6 @@ class ControlService {
   /**
    * Helpers
    */
-
-  /**
-   * Method to remove `/` if exists from method name
-   * @param {string} method
-   * @return {string}
-   */
-  parseMethodNameString(method) {
-    if (method && method.indexOf('/') === 0) {
-      return method.substring(1, method.length);
-    } else {
-      return method;
-    }
-  }
-
-  /**
-   * Parse the JSON of the version and return it as a string
-   * @param {JSON} versionJSON
-   * @return {string}
-   */
-  parseAliEcsVersion(versionJSON) {
-    let version = '';
-    if (versionJSON.productName) {
-      version += versionJSON.productName;
-    }
-    if (versionJSON.versionStr) {
-      version += ' ' + versionJSON.versionStr;
-    }
-    if (versionJSON.build) {
-      version += ' (revision ' + versionJSON.build + ')';
-    }
-    return version;
-  }
 
   /**
    * Deal with incoming message from AliECS Core Stream

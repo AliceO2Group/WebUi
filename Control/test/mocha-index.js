@@ -20,13 +20,9 @@ const puppeteer = require('puppeteer');
 const assert = require('assert');
 const config = require('./test-config.js');
 const {spawn} = require('child_process');
-const path = require('path');
+const {coreGRPCServer} = require('./config/core-grpc.js');
+const {apricotGRPCServer} = require('./config/apricot-grpc.js');
 
-// Doc: https://grpc.io/grpc/node/grpc.html
-const protoLoader = require('@grpc/proto-loader');
-const grpcLibrary = require('@grpc/grpc-js');
-
-const PROTO_PATH = path.join(__dirname, '../protobuf/o2control.proto');
 
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
@@ -45,119 +41,13 @@ describe('Control', function() {
   this.slow(1000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
-  let calls = {}; // Object.<string:method, bool:flag> memorize that gRPC methods have been called indeed
-  const envTest = {
-    environment: {
-      id: '6f6d6387-6577-11e8-993a-f07959157220',
-      createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
-      state: 'CONFIGURED',
-      tasks: [],
-      rootRole: 'copy-push',
-      numberOfFlps: 2,
-      userVars: {
-        odc_enabled: 'true'
-      }
-    },
-    workflow: {},
-    workflowTemplates: {
-      workflowTemplates: [
-        {repo: 'git.cern.ch/some-user/some-repo/', template: 'prettyreadout-1', revision: 'master'},
-      ]
-    },
-    listRepos: {
-      repos: [
-        {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: ['master', 'dev']},
-        {name: 'git.com/alice-user/alice-repo/'}]
-    }
-  };
-  let refreshCall = 0;
+
   before(async () => {
-    // Start gRPC server, this replaces the real Control server written in Go.
-    const server = new grpcLibrary.Server();
-    const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-      keepCase: false, // change to camel case
-    });
-    const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
-    const credentials = grpcLibrary.ServerCredentials.createInsecure();
-    const address = `${config.grpc.hostname}:${config.grpc.port}`;
-    server.addService(octlProto.o2control.Control.service, {
-      getFrameworkInfo(call, callback) {
-        calls['getFrameworkInfo'] = true;
-        callback(null, {fakeData: 1});
-      },
-      getEnvironments(call, callback) {
-        calls['getEnvironments'] = true;
-        const responseData = {
-          frameworkId: '74917838-27cb-414d-bfcd-7e74f85d4926-0000',
-          environments: [envTest.environment]
-        };
-        callback(null, responseData);
-      },
-      controlEnvironment(call, callback) {
-        calls['controlEnvironment'] = true;
-        switch (call.request.type) {
-          case 1: // START
-            envTest.environment.state = 'RUNNING';
-            break;
-          case 2: // STOP
-            envTest.environment.state = 'CONFIGURED';
-            break;
-          case 3: // CONFIGURE
-            envTest.environment.state = 'CONFIGURED';
-            break;
-          case 4: // RESET
-            envTest.environment.state = 'STANDBY';
-            break;
-        }
-        callback(null, {id: envTest.environment.id});
-      },
-      getEnvironment(call, callback) {
-        calls['getEnvironment'] = true;
-        callback(null, envTest);
-      },
-      newEnvironment(call, callback) {
-        calls['newEnvironment'] = true;
-        callback(null, {environment: envTest.environment});
-      },
-      getWorkflowTemplates(call, callback) {
-        calls['getWorkflowTemplates'] = true;
-        callback(null, envTest.workflowTemplates);
-      },
-      listRepos(call, callback) {
-        calls['listRepos'] = true;
-        callback(null, envTest.listRepos);
-      },
-      refreshRepos(call, callback) {
-        calls['refreshRepos'] = true;
-        if (refreshCall++ === 0) {
-          callback(new Error('504: Unable to refresh repositories'), {});
-        } else {
-          callback(null, {});
-        }
-      },
-      destroyEnvironment(call, callback) {
-        calls['destroyEnvironment'] = true;
-        callback(null, {});
-      },
-      getTasks(call, callback) {
-        calls['getTasks'] = true;
-        callback(null, {});
-      }
-    });
-
-    const bindCallback = (error, _) => {
-      if (error) {
-        this.ok = false;
-        console.error(error);
-        throw error;
-      } else {
-        server.start();
-      }
-
-    };
-    server.bindAsync(address, credentials, bindCallback);
-
-
+    // Start gRPC server, this replaces the real O2CORE server written in Go.
+    const {calls} = coreGRPCServer(config);
+    // Start gRPC server, this replaces the real APRICOT server written in Go.
+    const {apricotCalls} = apricotGRPCServer(config);
+    
     // Start web-server in background
     subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => {
@@ -188,10 +78,7 @@ describe('Control', function() {
       }
     });
     exports.page = page;
-    const helpers = {
-      url: url,
-      calls: calls
-    };
+    const helpers = {url, calls, apricotCalls};
     exports.helpers = helpers;
   });
 
@@ -255,9 +142,7 @@ describe('Control', function() {
   // require('./public/page-configuration-mocha');
   require('./public/page-tasks-mocha');
 
-  beforeEach(() => {
-    this.ok = true;
-  });
+  beforeEach(() => this.ok = true);
 
   afterEach(() => {
     if (!this.ok) {
