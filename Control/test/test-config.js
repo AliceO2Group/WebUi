@@ -25,6 +25,15 @@ module.exports = {
     hostname: 'localhost',
     port: 9090,
     timeout: 10000,
+    label: 'control',
+    package: 'o2control'
+  },
+  apricot: {
+    hostname: 'localhost',
+    port: 9090,
+    timeout: 10000,
+    label: 'apricot',
+    package: 'apricot'
   },
   kafka: {
     hostnames: 'localhost',

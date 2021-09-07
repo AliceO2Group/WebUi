@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* eslint-disable max-len */
+
 const ControlService = require('./../../lib/control-core/ControlService.js');
 const sinon = require('sinon');
 const assert = require('assert');
@@ -25,10 +27,10 @@ describe('Control Service test suite', () => {
       }, new AssertionError({message: 'Missing PadLock dependency', expected: true, operator: '=='}));
     });
 
-    it('should throw error due to null ControlProxy dependency', () => {
+    it('should throw error due to null GrpcProxy dependency', () => {
       assert.throws(() => {
         new ControlService({}, null);
-      }, new AssertionError({message: 'Missing ControlProxy dependency', actual: null, expected: true, operator: '=='}));
+      }, new AssertionError({message: 'Missing GrpcProxy dependency for AliECS', actual: null, expected: true, operator: '=='}));
     });
 
     it('should successfully instantiate ControlService', () => {
@@ -36,51 +38,14 @@ describe('Control Service test suite', () => {
     });
   });
 
-  describe('Check helper methods', () => {
-    let ctrlService = null;
-    before(() => {
-      ctrlService = new ControlService({}, {});
-    });
-
-    it('should successfully remove `/` from beginning of string', () => {
-      assert.strictEqual(ctrlService.parseMethodNameString('/GetRepos'), 'GetRepos');
-    });
-
-    it('should successfully return method without changing it', () => {
-      assert.strictEqual(ctrlService.parseMethodNameString('GetRepos'), 'GetRepos');
-    });
-
-    it('should successfully return same as provided for `null/undefined/<empty_string>`', () => {
-      assert.strictEqual(ctrlService.parseMethodNameString(null), null);
-      assert.strictEqual(ctrlService.parseMethodNameString(undefined), undefined);
-      assert.strictEqual(ctrlService.parseMethodNameString(''), '');
-    });
-
-    it('should successfully build version of AliECS Core', () => {
-      const versionJSON = {
-        productName: 'AliECS',
-        versionStr: '0.16.0',
-        build: '7d98d22216'
-      };
-      const version = ctrlService.parseAliEcsVersion(versionJSON);
-      assert.strictEqual(version, 'AliECS 0.16.0 (revision 7d98d22216)');
-    });
-
-    it('should successfully return empty string if version is not provided', () => {
-      const versionJSON = {};
-      const version = ctrlService.parseAliEcsVersion(versionJSON);
-      assert.strictEqual(version, '');
-    });
-  });
-
-  describe('Check Connection availability through `ControlProxy`', () => {
+  describe('Check Connection availability through `GrpcProxy`', () => {
     it('should successfully return true when controlProxy states connection is ready', () => {
-      const ctrl = new ControlService({}, {connectionReady: true});
+      const ctrl = new ControlService({}, {isConnectionReady: true});
       assert.ok(ctrl.isConnectionReady());
     });
 
     it('should fail due to bad connection and send built error response (503)', () => {
-      const ctrl = new ControlService({}, {connectionReady: false});
+      const ctrl = new ControlService({}, {isConnectionReady: false});
 
       const res = {
         status: sinon.fake.returns(),
@@ -93,7 +58,7 @@ describe('Control Service test suite', () => {
     });
 
     it('should fail due to bad connection and send proxy received error response (503)', () => {
-      const ctrl = new ControlService({}, {connectionReady: false, connectionError: {message: 'Could not connect'}});
+      const ctrl = new ControlService({}, {isConnectionReady: false, connectionError: {message: 'Could not connect'}});
 
       const res = {
         status: sinon.fake.returns(),
@@ -146,7 +111,7 @@ describe('Control Service test suite', () => {
     });
   });
 
-  describe('Check executing commands through `ControlProxy`', () => {
+  describe('Check executing commands through `GrpcProxy`', () => {
     let ctrlService = null;
     const req = {
       session: {
@@ -164,7 +129,7 @@ describe('Control Service test suite', () => {
 
     it('should successfully execute command, send response with status and message', async () => {
       const ctrlProxy = {
-        connectionReady: true,
+        isConnectionReady: true,
         ListRepos: sinon.stub().resolves(['RepoA', 'RepoB'])
       };
       ctrlService = new ControlService({}, ctrlProxy);
@@ -191,7 +156,7 @@ describe('Control Service test suite', () => {
 
   describe('Check Framework Information', () => {
     it('should reject with general error message if proxy connection is responding', () => {
-      const ctrlService = new ControlService({}, {connectionReady: false});
+      const ctrlService = new ControlService({}, {isConnectionReady: false});
       return assert.rejects(() =>
         ctrlService.getAliECSInfo(), new Error('Could not establish connection to AliECS Core')
       );
@@ -200,14 +165,14 @@ describe('Control Service test suite', () => {
     it('should reject with specific error message if proxy connection is not ready', () => {
       const ctrlService = new ControlService(
         {},
-        {connectionError: {message: 'Some issue on connection side'}, connectionReady: false}
+        {connectionError: {message: 'Some issue on connection side'}, isConnectionReady: false}
       );
       return assert.rejects(() => ctrlService.getAliECSInfo(), new Error('Some issue on connection side'));
     });
 
     it('should reject with specific error message if proxy method is not ready', () => {
       const ctrlService = new ControlService({},
-        {connectionReady: true, GetFrameworkInfo: sinon.stub().rejects('Something went wrong')}
+        {isConnectionReady: true, GetFrameworkInfo: sinon.stub().rejects('Something went wrong')}
       );
       return assert.rejects(() => ctrlService.getAliECSInfo(), 'Something went wrong');
     });
@@ -219,7 +184,7 @@ describe('Control Service test suite', () => {
         build: '7d98d22216'
       };
       const ctrlService = new ControlService({},
-        {connectionReady: true, GetFrameworkInfo: sinon.stub().resolves({version: versionJSON})}
+        {isConnectionReady: true, GetFrameworkInfo: sinon.stub().resolves({version: versionJSON})}
       );
       const response = await ctrlService.getAliECSInfo();
       assert.strictEqual(response.version, 'AliECS 0.16.0 (revision 7d98d22216)');
@@ -235,7 +200,7 @@ describe('Control Service test suite', () => {
     });
 
     it('should successfully reject due to no control proxy missing connection', () => {
-      const ctrlService = new ControlService({}, {connectionReady: false});
+      const ctrlService = new ControlService({}, {isConnectionReady: false});
       return assert.rejects(() =>
         ctrlService.getIntegratedServicesInfo(), new Error('Could not establish connection to AliECS Core')
       );
@@ -243,7 +208,7 @@ describe('Control Service test suite', () => {
 
     it('should reject with specific error message if proxy method is not ready', () => {
       const ctrlService = new ControlService({},
-        {connectionReady: true, GetIntegratedServices: sinon.stub().rejects('Something went wrong')}
+        {isConnectionReady: true, GetIntegratedServices: sinon.stub().rejects('Something went wrong')}
       );
       return assert.rejects(() => ctrlService.getIntegratedServicesInfo(), 'Something went wrong');
     });
@@ -255,7 +220,7 @@ describe('Control Service test suite', () => {
       };
       const ctrlService = new ControlService({},
         {
-          connectionReady: true,
+          isConnectionReady: true,
           GetIntegratedServices: sinon.stub().resolves({
             dcs: {},
             someOtherDcs: {},

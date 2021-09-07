@@ -187,10 +187,10 @@ class ControlService {
    * @return {Promise}
    */
   async getAliECSInfo() {
-    const method = this.parseMethodNameString('GetFrameworkInfo');
+    const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
     if (this.ctrlProx?.isConnectionReady) {
       const response = await this.ctrlProx[method]();
-      response.version = this.parseAliEcsVersion(response.version);
+      response.version = CoreUtils.parseAliEcsVersion(response.version);
       return response;
     } else {
       let error = 'Could not establish connection to AliECS Core';
@@ -206,7 +206,7 @@ class ControlService {
    * @return {Promise}
    */
   async getIntegratedServicesInfo() {
-    const method = this.parseMethodNameString('GetIntegratedServices');
+    const method = CoreUtils.parseMethodNameString('GetIntegratedServices');
     if (this.ctrlProx?.isConnectionReady) {
       const response = await this.ctrlProx[method]();
       return response;
@@ -271,25 +271,6 @@ class ControlService {
   /**
    * Helpers
    */
-
-  /**
-   * Parse the JSON of the version and return it as a string
-   * @param {JSON} versionJSON
-   * @return {string}
-   */
-  parseAliEcsVersion(versionJSON) {
-    let version = '';
-    if (versionJSON.productName) {
-      version += versionJSON.productName;
-    }
-    if (versionJSON.versionStr) {
-      version += ' ' + versionJSON.versionStr;
-    }
-    if (versionJSON.build) {
-      version += ' (revision ' + versionJSON.build + ')';
-    }
-    return version;
-  }
 
   /**
    * Deal with incoming message from AliECS Core Stream
