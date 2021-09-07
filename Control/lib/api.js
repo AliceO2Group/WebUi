@@ -61,19 +61,24 @@ const statusService = new StatusService(config, ctrlService, consulService);
 
 module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
+
+  const coreMiddleware = [
+    ctrlService.isConnectionReady.bind(ctrlService),
+    ctrlService.isLockSetUp.bind(ctrlService),
+    ctrlService.logAction.bind(ctrlService),
+  ]
   ctrlProxy.methods.forEach(
-    (method) => http.post(`/${method}`, (req, res) => ctrlService.executeCommand(req, res))
+    (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
   );
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
   );
 
   http.post('/clean/resources', (req, res) => ctrlService.cleanResources(req, res));
-  http.post('/executeRocCommand', (req, res) => ctrlService.executeRocCommand(req, res));
   http.post('/execute/o2-roc-config', (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
-  http.post('/lockState', (req, res) => res.json(padLock));
+  http.post('/lockState', (_, res) => res.json(padLock));
   http.post('/lock', lock);
   http.post('/unlock', unlock);
   http.post('/forceUnlock', forceUnlock);
@@ -83,9 +88,14 @@ module.exports.setup = (http, ws) => {
   http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
   http.get('/status/kafka', (_, res) => statusService.getKafkaStatus().then((data) => res.status(200).json(data)));
   http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()), {public: true});
-  http.get('/status/core', (_, res) => statusService.getAliEcsCoreStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/core/services', (_, res) => statusService.getIntegratedServicesInfo()
-    .then((data) => res.status(200).json(data)));
+  http.get('/status/core',
+    (req, res, next) => ctrlService.isConnectionReady(req, res, next),
+    (_, res) => statusService.getAliEcsCoreStatus().then((data) => res.status(200).json(data))
+  );
+  http.get('/status/core/services',
+    (req, res, next) => ctrlService.isConnectionReady(req, res, next),
+    (_, res) => statusService.getIntegratedServicesInfo().then((data) => res.status(200).json(data))
+  );
 
   // Consul
   const validateService = consulConnector.validateService.bind(consulConnector);

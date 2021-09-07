@@ -14,8 +14,8 @@
 
 const assert = require('assert');
 const path = require('path');
-const {WebSocketMessage} = require('@aliceo2/web-ui');
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
+const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
+const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
 
@@ -60,40 +60,35 @@ class ControlService {
   async cleanResources(req, res) {
     const channelId = req.body.channelId;
     const method = 'NewAutoEnvironment';
-    if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
-      const type = req.body.type ? ` (${req.body.type})` : '';
-      log.info(`${req.session.personid} => ${method} ${type}`);
+    try {
+      const hosts = await this.consulConnector.getFLPsList();
+      const {repos: repositories} = await this.ctrlProx['ListRepos']();
+      const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+      const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
+      cleanChanel.on('data', (data) => this.onData(channelId, 'clean-resources-action', data));
+      cleanChanel.on('error', (err) => this.onError(channelId, 'clean-resources-action', err));
+      // onEnd gets called no matter what
+      // cleanChanel.on('end', () => this.onEnd(channelId));
 
-      try {
-        const hosts = await this.consulConnector.getFLPsList();
-        const {repos: repositories} = await this.ctrlProx['ListRepos']();
-        const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
-        const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
-        cleanChanel.on('data', (data) => this.onData(channelId, 'clean-resources-action', data));
-        cleanChanel.on('error', (err) => this.onError(channelId, 'clean-resources-action', err));
-        // onEnd gets called no matter what
-        // cleanChanel.on('end', () => this.onEnd(channelId));
-
-        // Make request to clear resources
-        const coreConf = {
-          id: channelId,
-          vars: {hosts: JSON.stringify(hosts)},
-          workflowTemplate: path.join(repositoryName, `workflows/resources-cleanup@${defaultRevision}`)
-        };
-        await this.ctrlProx[method](coreConf);
-        res.status(200).json({
-          ended: false, success: true, id: channelId,
-          info: {message: 'Request for "Cleaning Resources" was successfully sent and in progress'}
-        })
-      } catch (error) {
-        // Failed to getFLPs, ListRepos or NewAutoEnvironment
-        errorLogger(error);
-        res.status(502).json({
-          ended: true, success: false, id: channelId,
-          message: 'Error while attempting to clean resources ...',
-          info: {message: error.message || error || 'Error while attempting to clean resources ...'}
-        });
-      }
+      // Make request to clear resources
+      const coreConf = {
+        id: channelId,
+        vars: {hosts: JSON.stringify(hosts)},
+        workflowTemplate: path.join(repositoryName, `workflows/resources-cleanup@${defaultRevision}`)
+      };
+      await this.ctrlProx[method](coreConf);
+      res.status(200).json({
+        ended: false, success: true, id: channelId,
+        info: {message: 'Request for "Cleaning Resources" was successfully sent and in progress'}
+      })
+    } catch (error) {
+      // Failed to getFLPs, ListRepos or NewAutoEnvironment
+      errorLogger(error);
+      res.status(502).json({
+        ended: true, success: false, id: channelId,
+        message: 'Error while attempting to clean resources ...',
+        info: {message: error.message || error || 'Error while attempting to clean resources ...'}
+      });
     }
   }
 
@@ -109,6 +104,7 @@ class ControlService {
   async createAutoEnvironment(req, res) {
     const channelId = req.body.channelId;
     const hosts = req.body.hosts;
+    const method = 'NewAutoEnvironment';
     if (!channelId) {
       res.status(502).json({
         ended: true, success: false, id: channelId,
@@ -121,45 +117,39 @@ class ControlService {
       });
     } else {
       const operation = 'o2-roc-config';
-      const method = 'NewAutoEnvironment';
-      if (this.isLockSetUp(method, req, res) && this.isConnectionReady(res)) {
-        const type = req.body.type ? ` (${req.body.type})` : '';
-        log.info(`${req.session.personid} => ${method} ${type} o2-roc-config`);
-
-        try {
-          const {repos: repositories} = await this.ctrlProx['ListRepos']();
-          const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
-          if (!defaultRevision) {
-            throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
-          }
-
-          // Setup Stream Channel
-          const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
-          cleanChanel.on('data', (data) => this.onData(channelId, operation, data));
-          cleanChanel.on('error', (err) => this.onError(channelId, operation, err));
-          // onEnd gets called no matter what
-          // cleanChanel.on('end', () => this.onEnd(channelId));
-
-          // Make request to clear resources
-          const coreConf = {
-            id: channelId,
-            vars: {hosts: JSON.stringify(hosts)},
-            workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
-          };
-          await this.ctrlProx[method](coreConf);
-          res.status(200).json({
-            ended: false, success: true, id: channelId,
-            info: {message: 'Request for "o2-roc-config" was successfully sent and is now in progress'}
-          })
-        } catch (error) {
-          // Failed to getFLPs, ListRepos or NewAutoEnvironment
-          errorLogger(error);
-          res.status(502).json({
-            ended: true, success: false, id: channelId,
-            message: error.message || error || 'Error while attempting to run o2-roc-config ...',
-            info: {message: error.message || error || 'Error while attempting to run o2-roc-config ...'}
-          });
+      try {
+        const {repos: repositories} = await this.ctrlProx['ListRepos']();
+        const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+        if (!defaultRevision) {
+          throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
         }
+
+        // Setup Stream Channel
+        const cleanChanel = this.ctrlProx.client['Subscribe']({id: channelId})
+        cleanChanel.on('data', (data) => this.onData(channelId, operation, data));
+        cleanChanel.on('error', (err) => this.onError(channelId, operation, err));
+        // onEnd gets called no matter what
+        // cleanChanel.on('end', () => this.onEnd(channelId));
+
+        // Make request to clear resources
+        const coreConf = {
+          id: channelId,
+          vars: {hosts: JSON.stringify(hosts)},
+          workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
+        };
+        await this.ctrlProx[method](coreConf);
+        res.status(200).json({
+          ended: false, success: true, id: channelId,
+          info: {message: 'Request for "o2-roc-config" was successfully sent and is now in progress'}
+        })
+      } catch (error) {
+        // Failed to getFLPs, ListRepos or NewAutoEnvironment
+        errorLogger(error);
+        res.status(502).json({
+          ended: true, success: false, id: channelId,
+          message: error.message || error || 'Error while attempting to run o2-roc-config ...',
+          info: {message: error.message || error || 'Error while attempting to run o2-roc-config ...'}
+        });
       }
     }
   }
@@ -171,15 +161,9 @@ class ControlService {
    */
   executeCommand(req, res) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    if (this.isConnectionReady(res) && this.isLockSetUp(method, req, res)) {
-      if (!method.startsWith('Get')) {
-        const type = req.body.type ? ` (${req.body.type})` : '';
-        log.info(`${req.session.personid} => ${method} ${type}`, 6);
-      }
-      this.ctrlProx[method](req.body)
-        .then((response) => res.json(response))
-        .catch((error) => errorHandler(error, res, 504));
-    }
+    this.ctrlProx[method](req.body)
+      .then((response) => res.json(response))
+      .catch((error) => errorHandler(error, res, 504));
   }
 
   /**
@@ -188,17 +172,9 @@ class ControlService {
    */
   async getAliECSInfo() {
     const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
-    if (this.ctrlProx?.isConnectionReady) {
-      const response = await this.ctrlProx[method]();
-      response.version = CoreUtils.parseAliEcsVersion(response.version);
-      return response;
-    } else {
-      let error = 'Could not establish connection to AliECS Core';
-      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
-        error = this.ctrlProx.connectionError.message;
-      }
-      throw new Error(error);
-    }
+    const response = await this.ctrlProx[method]();
+    response.version = CoreUtils.parseAliEcsVersion(response.version);
+    return response;
   }
 
   /**
@@ -207,65 +183,64 @@ class ControlService {
    */
   async getIntegratedServicesInfo() {
     const method = CoreUtils.parseMethodNameString('GetIntegratedServices');
-    if (this.ctrlProx?.isConnectionReady) {
-      const response = await this.ctrlProx[method]();
-      return response;
-    } else {
-      let error = 'Could not establish connection to AliECS Core';
-      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
-        error = this.ctrlProx.connectionError.message;
-      }
-      throw new Error(error);
-    }
+    const response = await this.ctrlProx[method]();
+    return response;
   }
 
   /**
-  * Method to check provided options for command and execute it through AliECS-Core
-  * @param {Request} req
-  * @param {Response} res
-  */
-  executeRocCommand(req, res) {
-    res.status(502);
-    res.send({message: 'ROC-CONFIG - not supported yet'});
-  }
-
-  /**
-   * Method to check if control-core connection is up and running
+   * Middleware method to check if AliECS connection is up and running
+   * @param {Request} req
    * @param {Response} res
+   * @param {Next} next
    * @return {boolean}
    */
-  isConnectionReady(res) {
-    if (!this.ctrlProx.isConnectionReady) {
+  isConnectionReady(_, res, next) {
+    if (!this.ctrlProx?.isConnectionReady) {
       let error = 'Could not establish connection to AliECS Core';
-      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+      if (this.ctrlProx.connectionError?.message) {
         error = this.ctrlProx.connectionError.message;
       }
       errorHandler(error, res, 503);
-      return false;
+    } else {
+      next();
     }
-    return true;
   }
 
   /**
-   * Method to check if lock is needed and if yes acquired
-   * @param {string} method
+   * Middleware method to check if lock is needed and if yes if it is acquired
    * @param {Request} req
    * @param {Response} res
+   * @param {Next} next
    * @return {boolean}
    */
-  isLockSetUp(method, req, res) {
+  isLockSetUp(req, res, next) {
+    const method = CoreUtils.parseMethodNameString(req.path);
     // disallow 'not-Get' methods if not owning the lock
     if (!method.startsWith('Get') && method !== 'ListRepos') {
       if (this.padLock.lockedBy == null) {
         errorHandler(`Control is not locked`, res, 403);
-        return false;
-      }
-      if (req.session.personid != this.padLock.lockedBy) {
+        return;
+      } else if (req.session.personid != this.padLock.lockedBy) {
         errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
-        return false;
+        return;
       }
     }
-    return true;
+    next();
+  }
+
+  /**
+   * Middleware method to log the action and id of the user
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Next} next
+   */
+  logAction(req, _, next) {
+    const method = CoreUtils.parseMethodNameString(req.path);
+    if (!method.startsWith('Get')) {
+      const type = req.body.type ? ` (${req.body.type})` : '';
+      log.info(`${req.session.personid} => ${method} ${type}`, 6);
+    }
+    next();
   }
 
   /**
