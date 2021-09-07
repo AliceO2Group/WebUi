@@ -72,7 +72,7 @@ export default class Workflow extends Observable {
     if (!this.form.isInputSelected()) {
       this.reloadDataForm();
     }
-    this.flpSelection.setFLPListByRequest();
+    this.flpSelection.getAndSetDetectors();
     this.resetErrorMessage();
   }
 
@@ -442,15 +442,10 @@ export default class Workflow extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.post(callString, options);
-    if (!ok) {
-      remoteDataItem = RemoteData.failure(result.message);
-      this.notify();
-      return remoteDataItem;
-    } else {
-      remoteDataItem = RemoteData.success(result);
-      this.notify();
-      return remoteDataItem;
-    }
+
+    remoteDataItem = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
+    this.notify();
+    return remoteDataItem;
   }
 
   /**
@@ -554,27 +549,5 @@ export default class Workflow extends Observable {
       delete vars['qc_config_uri_pre'];
     }
     return {variables: vars, ok: true, message: ''};
-  }
-
-  /**
-   * Given a host, it will return the matched detector from the static detector list
-   * @param {String} host 
-   * @returns {String}
-   */
-  _getDetectorForHost(host) {
-    let detectorMatch = ''
-    try {
-      Object.keys(COG.DETECTORS)
-        .forEach((detectorKey) => {
-          const detector = COG.DETECTORS[detectorKey];
-          if (detector.start.toLocaleUpperCase() <= host.toLocaleUpperCase()
-            && host.toLocaleUpperCase() <= detector.end.toLocaleUpperCase()) {
-            detectorMatch = detectorKey;
-          }
-        })
-    } catch (error) {
-      console.error(error);
-    }
-    return detectorMatch;
   }
 }

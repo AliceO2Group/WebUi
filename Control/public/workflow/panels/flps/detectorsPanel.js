@@ -24,7 +24,7 @@ export default (workflow) =>
   h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', h('h5.w-100.bg-gray-light', 'Detectors Selection')),
     h('.w-100.p2.panel',
-      workflow.detectors.match({
+      workflow.flpSelection.detectors.match({
         NotAsked: () => null,
         Loading: () => pageLoading(2),
         Success: (data) => detectorsSelectionArea(data.detectors, workflow),
@@ -51,16 +51,16 @@ const detectorsSelectionArea = (list, workflow) => {
 const detectorItem = (name, workflow) => {
   let className = '';
   let title = '';
-  if (workflow.selectedDetectors.indexOf(name) >= 0) {
+  if (workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {
     className += 'selected ';
   }
-  if (workflow.isDetectorActive(name)) {
+  if (workflow.flpSelection.isDetectorActive(name)) {
     className += 'disabled-item ';
     title = 'Detector UNAVAILABLE';
   }
   return h('a.menu-item', {
     className,
     title,
-    onclick: () => workflow.toggleDetectorSelection(name)
+    onclick: () => workflow.flpSelection.toggleDetectorSelection(name)
   }, name)
 };
