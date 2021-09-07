@@ -25,7 +25,7 @@ class GrpcProxy {
   /**
    * Create gRPC client and sets the methods identified in the provided path of protofile
    * https://grpc.io/grpc/node/grpc.Client.html
-   * @param {Object} config - Contains `hostname` and `port`
+   * @param {Object} config - Contains configuration fields for gRPC client
    */
   constructor(config, path) {
     if (this._isConfigurationValid(config, path)) {
