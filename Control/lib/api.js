@@ -63,9 +63,9 @@ module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
 
   const coreMiddleware = [
-    (req, res, next) => ctrlService.isConnectionReady(req, res, next),
-    (req, res, next) => ctrlService.isLockSetUp(req, res, next),
-    (req, res, next) => ctrlService.logAction(req, res, next),
+    ctrlService.isConnectionReady.bind(ctrlService),
+    ctrlService.isLockSetUp.bind(ctrlService),
+    ctrlService.logAction.bind(ctrlService),
   ]
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
