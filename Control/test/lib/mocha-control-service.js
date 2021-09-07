@@ -41,9 +41,11 @@ describe('Control Service test suite', () => {
   });
 
   describe('Check Connection availability through `GrpcProxy`', () => {
-    it('should successfully return true when controlProxy states connection is ready', () => {
+    it('should successfully call next true when controlProxy states connection is ready', () => {
+      const next = sinon.fake.returns();
       const ctrl = new ControlService({}, {isConnectionReady: true});
-      assert.ok(ctrl.isConnectionReady());
+      ctrl.isConnectionReady({}, {}, next);
+      assert.ok(next.calledOnce);
     });
 
     it('should fail due to bad connection and send built error response (503)', () => {
@@ -76,6 +78,7 @@ describe('Control Service test suite', () => {
   describe('Check PadLock availability', () => {
     let ctrlService;
     let res;
+    let next = sinon.fake.returns();
 
     beforeEach(() => {
       ctrlService = new ControlService({}, {});
@@ -86,28 +89,44 @@ describe('Control Service test suite', () => {
       };
     });
 
-    it('should successfully return true for methods starting with `Get`', () => {
-      assert.ok(ctrlService.isLockSetUp('GetRepos'));
+    it('should successfully call next for methods starting with `Get`', () => {
+      const req = {path: 'GetSomething'};
+      ctrlService.isLockSetUp(req, {}, next)
+      assert.ok(next.calledWith());
     });
 
-    it('should successfully return true for `ListRepos`', () => {
-      assert.ok(ctrlService.isLockSetUp('ListRepos'));
+    it('should successfully call next for `ListRepos`', () => {
+      const req = {path: 'ListRepos'};
+      ctrlService.isLockSetUp(req, {}, next)
+      assert.ok(next.calledWith());
     });
 
-    it('should successfully return true for other methods when user already owns lock', () => {
+    it('should successfully call next for other methods when user already owns lock', () => {
       ctrlService = new ControlService({lockedBy: 11}, {});
-      assert.ok(ctrlService.isLockSetUp('NewEnvironment', {session: {personid: 11}}, null));
+      const req = {path: 'NewEnvironment', session: {personid: 11}};
+      ctrlService.isLockSetUp(req, {}, next)
+      assert.ok(next.calledWith());
     });
 
-    it('should send errors in response when lock was not acquired', () => {
-      assert.strictEqual(ctrlService.isLockSetUp('NewEnvironment', {}, res), false);
+    it('should reply with error message in response when lock was not acquired', () => {
+      const req = {path: 'NewEnvironment'}
+      const res = {
+        status: sinon.fake.returns(),
+        send: sinon.fake.returns()
+      }
+      ctrlService.isLockSetUp(req, res, {})
       assert.ok(res.status.calledWith(403));
       assert.ok(res.send.calledWith({message: 'Control is not locked'}));
     });
 
-    it('should send errors in response when other user is already owning the lock', () => {
+    it('should reply with errors in response when other user is already owning the lock', () => {
       ctrlService = new ControlService({lockedBy: 11, lockedByName: 'admin'}, {});
-      assert.strictEqual(ctrlService.isLockSetUp('NewEnvironment', {session: {personid: 22}}, res), false);
+      const req = {session: {personid: 22}, path: 'NewEnvironment'};
+      const res = {
+        status: sinon.fake.returns(),
+        send: sinon.fake.returns()
+      }
+      ctrlService.isLockSetUp(req, res, {});
       assert.ok(res.status.calledWith(403));
       assert.ok(res.send.calledWith({message: 'Control is locked by admin'}));
     });
@@ -143,28 +162,6 @@ describe('Control Service test suite', () => {
   });
 
   describe('Check Framework Information', () => {
-    it('should reject with general error message if proxy connection is responding', () => {
-      const ctrlService = new ControlService({}, {isConnectionReady: false});
-      return assert.rejects(() =>
-        ctrlService.getAliECSInfo(), new Error('Could not establish connection to AliECS Core')
-      );
-    });
-
-    it('should reject with specific error message if proxy connection is not ready', () => {
-      const ctrlService = new ControlService(
-        {},
-        {connectionError: {message: 'Some issue on connection side'}, isConnectionReady: false}
-      );
-      return assert.rejects(() => ctrlService.getAliECSInfo(), new Error('Some issue on connection side'));
-    });
-
-    it('should reject with specific error message if proxy method is not ready', () => {
-      const ctrlService = new ControlService({},
-        {isConnectionReady: true, GetFrameworkInfo: sinon.stub().rejects('Something went wrong')}
-      );
-      return assert.rejects(() => ctrlService.getAliECSInfo(), 'Something went wrong');
-    });
-
     it('should successfully resolve with AliECS Version', async () => {
       const versionJSON = {
         productName: 'AliECS',
@@ -180,20 +177,6 @@ describe('Control Service test suite', () => {
   });
 
   describe('Test GetIntegratedServices call', () => {
-    it('should successfully reject due to no control proxy setup', () => {
-      const ctrlService = new ControlService({}, {});
-      return assert.rejects(() =>
-        ctrlService.getIntegratedServicesInfo(), new Error('Could not establish connection to AliECS Core')
-      );
-    });
-
-    it('should successfully reject due to no control proxy missing connection', () => {
-      const ctrlService = new ControlService({}, {isConnectionReady: false});
-      return assert.rejects(() =>
-        ctrlService.getIntegratedServicesInfo(), new Error('Could not establish connection to AliECS Core')
-      );
-    });
-
     it('should reject with specific error message if proxy method is not ready', () => {
       const ctrlService = new ControlService({},
         {isConnectionReady: true, GetIntegratedServices: sinon.stub().rejects('Something went wrong')}

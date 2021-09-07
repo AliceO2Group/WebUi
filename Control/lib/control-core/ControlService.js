@@ -195,9 +195,9 @@ class ControlService {
    * @return {boolean}
    */
   isConnectionReady(_, res, next) {
-    if (!this.ctrlProx.connectionReady) {
+    if (!this.ctrlProx?.isConnectionReady) {
       let error = 'Could not establish connection to AliECS Core';
-      if (this.ctrlProx.connectionError && this.ctrlProx.connectionError.message) {
+      if (this.ctrlProx.connectionError?.message) {
         error = this.ctrlProx.connectionError.message;
       }
       errorHandler(error, res, 503);

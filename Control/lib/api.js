@@ -83,7 +83,7 @@ module.exports.setup = (http, ws) => {
   http.post('/unlock', unlock);
   http.post('/forceUnlock', forceUnlock);
 
-  // Status Service // TODO what if error?
+  // Status Service
   http.get('/status/consul', (_, res) => statusService.getConsulStatus().then((data) => res.status(200).json(data)));
   http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
   http.get('/status/kafka', (_, res) => statusService.getKafkaStatus().then((data) => res.status(200).json(data)));
