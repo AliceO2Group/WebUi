@@ -1,0 +1,23 @@
+name: Sync proto file from Apricot core
+
+on:
+  schedule:
+    - cron: '0 7 * * 1-5'
+
+jobs:
+  check-changes:
+    name: Create a PR in WebUI repo with updated Apricot proto file
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Copy new proto file
+      run: |
+        git clone https://github.com/AliceO2Group/Control.git AliEcs && cp AliEcs/apricot/protos/apricot.proto Control/protobuf && rm -rf AliEcs
+    - name: Create a PR with updated proto file
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: proto-sync
+        commit-message: Sync Apricot proto file from Control repo
+        title: Sync Apricot file from Control repo
+        body: Sync Apricot file from Control repo
