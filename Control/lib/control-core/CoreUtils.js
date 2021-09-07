@@ -29,6 +29,26 @@ class CoreUtils {
   static parseMethodNameString(method) {
     return method?.indexOf('/') === 0 ? method.substring(1, method.length) : method;
   }
+
+
+  /**
+   * Parse the JSON of the version and return it as a string
+   * @param {JSON} versionJSON
+   * @return {string}
+   */
+  static parseAliEcsVersion(versionJSON) {
+    let version = '';
+    if (versionJSON.productName) {
+      version += versionJSON.productName;
+    }
+    if (versionJSON.versionStr) {
+      version += ' ' + versionJSON.versionStr;
+    }
+    if (versionJSON.build) {
+      version += ' (revision ' + versionJSON.build + ')';
+    }
+    return version;
+  }
 }
 
 module.exports = CoreUtils;
