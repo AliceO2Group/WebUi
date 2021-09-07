@@ -25,11 +25,19 @@ const KafkaConnector = require('./connectors/KafkaConnector.js');
 const ConsulConnector = require('./connectors/ConsulConnector.js');
 
 // AliECS Core
-const ControlProxy = require('./control-core/ControlProxy.js');
+const GrpcProxy = require('./control-core/GrpcProxy.js');
 const ControlService = require('./control-core/ControlService.js');
+const ApricotService = require('./control-core/ApricotService.js');
+
+const path = require('path');
+const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
+const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
 if (!config.grpc) {
-  throw new Error('GRPC Configuration is missing');
+  throw new Error('Control gRPC Configuration is missing');
+}
+if (!config.apricot) {
+  throw new Error('Apricot gRPC Configuration is missing');
 }
 if (!config.grafana) {
   log.error('Grafana Configuration is missing');
@@ -43,24 +51,31 @@ if (config.consul) {
 const consulConnector = new ConsulConnector(consulService, config.consul, padLock);
 consulConnector.testConsulStatus();
 
-const ctrlProxy = new ControlProxy(config.grpc);
+const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
 const ctrlService = new ControlService(padLock, ctrlProxy, consulConnector, config.grpc);
+
+const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
+const apricotService = new ApricotService(apricotProxy);
+
 const statusService = new StatusService(config, ctrlService, consulService);
 
 module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
+
   const coreMiddleware = [
     (req, res, next) => ctrlService.isConnectionReady(req, res, next),
     (req, res, next) => ctrlService.isLockSetUp(req, res, next),
     (req, res, next) => ctrlService.logAction(req, res, next),
   ]
-
-  // AliECS Core
-  ctrlProxy.methods.forEach((method) =>
-    http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
+  ctrlProxy.methods.forEach(
+    (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
   );
-  http.post('/clean/resources', coreMiddleware, (req, res) => ctrlService.cleanResources(req, res));
-  http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
+  apricotProxy.methods.forEach(
+    (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
+  );
+
+  http.post('/clean/resources', (req, res) => ctrlService.cleanResources(req, res));
+  http.post('/execute/o2-roc-config', (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
   http.post('/lockState', (_, res) => res.json(padLock));

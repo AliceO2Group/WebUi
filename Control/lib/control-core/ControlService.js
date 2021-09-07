@@ -17,6 +17,7 @@ const path = require('path');
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
+const CoreUtils = require('./CoreUtils.js');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -25,14 +26,14 @@ class ControlService {
   /**
    * Constructor initializing dependencies
    * @param {Padlock} padLock
-   * @param {ControlProxy} ctrlProx
+   * @param {GrpcProxy} ctrlProx
    * @param {WebSocket} webSocket
    * @param {ConsulConnector} consulConnector
    * * @param {JSON} coreConfig
    */
   constructor(padLock, ctrlProx, consulConnector, coreConfig) {
     assert(padLock, 'Missing PadLock dependency');
-    assert(ctrlProx, 'Missing ControlProxy dependency');
+    assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
     this.padLock = padLock;
     this.ctrlProx = ctrlProx;
     this.consulConnector = consulConnector;
@@ -159,7 +160,7 @@ class ControlService {
    * @param {Response} res
    */
   executeCommand(req, res) {
-    const method = this._parseMethodNameString(req.path);
+    const method = CoreUtils.parseMethodNameString(req.path);
     this.ctrlProx[method](req.body)
       .then((response) => res.json(response))
       .catch((error) => errorHandler(error, res, 504));
@@ -170,9 +171,9 @@ class ControlService {
    * @return {Promise}
    */
   async getAliECSInfo() {
-    const method = this._parseMethodNameString('GetFrameworkInfo');
+    const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
     const response = await this.ctrlProx[method]();
-    response.version = this._parseAliEcsVersion(response.version);
+    response.version = CoreUtils.parseAliEcsVersion(response.version);
     return response;
   }
 
@@ -181,7 +182,7 @@ class ControlService {
    * @return {Promise}
    */
   async getIntegratedServicesInfo() {
-    const method = this._parseMethodNameString('GetIntegratedServices');
+    const method = CoreUtils.parseMethodNameString('GetIntegratedServices');
     const response = await this.ctrlProx[method]();
     return response;
   }
@@ -213,7 +214,7 @@ class ControlService {
    * @return {boolean}
    */
   isLockSetUp(req, res, next) {
-    const method = this._parseMethodNameString(req.path);
+    const method = CoreUtils.parseMethodNameString(req.path);
     // disallow 'not-Get' methods if not owning the lock
     if (!method.startsWith('Get') && method !== 'ListRepos') {
       if (this.padLock.lockedBy == null) {
@@ -234,7 +235,7 @@ class ControlService {
    * @param {Next} next
    */
   logAction(req, _, next) {
-    const method = this._parseMethodNameString(req.path);
+    const method = CoreUtils.parseMethodNameString(req.path);
     if (!method.startsWith('Get')) {
       const type = req.body.type ? ` (${req.body.type})` : '';
       log.info(`${req.session.personid} => ${method} ${type}`, 6);
@@ -245,38 +246,6 @@ class ControlService {
   /**
    * Helpers
    */
-
-  /**
-   * Method to remove `/` if exists from method name
-   * @param {string} method
-   * @return {string}
-   */
-  _parseMethodNameString(method) {
-    if (method && method.indexOf('/') === 0) {
-      return method.substring(1, method.length);
-    } else {
-      return method;
-    }
-  }
-
-  /**
-   * Parse the JSON of the version and return it as a string
-   * @param {JSON} versionJSON
-   * @return {string}
-   */
-  _parseAliEcsVersion(versionJSON) {
-    let version = '';
-    if (versionJSON.productName) {
-      version += versionJSON.productName;
-    }
-    if (versionJSON.versionStr) {
-      version += ' ' + versionJSON.versionStr;
-    }
-    if (versionJSON.build) {
-      version += ' (revision ' + versionJSON.build + ')';
-    }
-    return version;
-  }
 
   /**
    * Deal with incoming message from AliECS Core Stream

@@ -1,0 +1,185 @@
+/*
+ * === This file is part of ALICE O² ===
+ *
+ * Copyright 2020-2021 CERN and copyright holders of ALICE O².
+ * Author: Teo Mrnjavac <teo.mrnjavac@cern.ch>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * In applying this license CERN does not waive the privileges and
+ * immunities granted to it by virtue of its status as an
+ * Intergovernmental Organization or submit itself to any jurisdiction.
+ */
+
+syntax = "proto3";
+
+package apricot;
+option java_package = "ch.cern.alice.o2.apricot.rpcserver";
+option go_package = "protos;apricotpb";
+
+service Apricot {
+    rpc NewRunNumber(Empty) returns (RunNumberResponse) {}
+    rpc GetDefaults(Empty) returns (StringMap) {}
+    rpc GetVars(Empty) returns (StringMap) {}
+    rpc RawGetRecursive(RawGetRecursiveRequest) returns (ComponentResponse) {}
+
+    // Detectors and host inventories
+    rpc ListDetectors(Empty) returns (DetectorsResponse) {}
+    rpc GetHostInventory(HostGetRequest) returns (HostEntriesResponse) {}
+    rpc GetDetectorForHost(HostRequest) returns (DetectorResponse) {}
+    rpc GetDetectorsForHosts(HostsRequest) returns (DetectorsResponse) {}
+    rpc GetCRUCardsForHost(HostRequest) returns (CRUCardsResponse) {}
+    rpc GetEndpointsForCRUCard(CardRequest) returns (CRUCardEndpointResponse) {}
+
+    // Runtime KV calls
+    rpc GetRuntimeEntry(GetRuntimeEntryRequest) returns (ComponentResponse) {}
+    rpc SetRuntimeEntry(SetRuntimeEntryRequest) returns (Empty) {}
+    rpc ListRuntimeEntries(ListRuntimeEntriesRequest) returns (ComponentEntriesResponse) {}
+
+    // Component configuration calls
+    rpc ListComponents(Empty) returns (ComponentEntriesResponse) {}
+    rpc ListComponentEntries(ListComponentEntriesRequest) returns (ComponentEntriesResponse) {}
+    rpc ListComponentEntryHistory(ComponentQuery) returns (ComponentEntriesResponse) {}
+    rpc GetComponentConfiguration(ComponentRequest) returns (ComponentResponse) {}
+    rpc ImportComponentConfiguration(ImportComponentConfigurationRequest) returns (ImportComponentConfigurationResponse) {}
+}
+
+enum RunType {
+    NULL = 0;
+    ANY = 1;
+    PHYSICS = 2;
+    TECHNICAL = 3;
+    COSMIC = 4;
+    PEDESTAL = 5;
+    THRESHOLD_SCAN = 6;
+    CALIBRATION = 7;
+}
+
+message Empty {}
+
+message ComponentQuery {
+    string component = 1;
+    RunType runType = 2;
+    string machineRole = 3;
+    string entry = 4;
+    string timestamp = 5;
+}
+
+message ComponentRequest {
+    oneof queryPath {
+        string path = 1;
+        ComponentQuery query = 2;
+    }
+    bool processTemplate = 3;
+    map<string, string> varStack = 4;
+}
+
+message ComponentResponse {
+    string payload = 1;
+}
+
+message HostRequest {
+    string hostname = 1;
+}
+
+message HostsRequest {
+    repeated string hosts = 1;
+}
+
+message DetectorResponse {
+    string payload = 1;
+}
+
+message RunNumberResponse {
+    uint32 runNumber = 1;
+}
+
+message StringMap {
+    map<string, string> stringMap = 1;
+}
+
+message RawGetRecursiveRequest {
+    string rawPath = 1;
+}
+
+message GetRuntimeEntryRequest {
+    string component = 1;
+    string key = 2;
+}
+
+message SetRuntimeEntryRequest {
+    string component = 1;
+    string key = 2;
+    string value = 3;
+}
+
+message ListRuntimeEntriesRequest {
+    string component = 1;
+}
+
+message ComponentEntriesQuery {
+    string component = 1;
+    RunType runType = 2;
+    string machineRole = 3;
+}
+
+message ListComponentEntriesRequest {
+    oneof queryPath {
+        string path = 1;
+        ComponentEntriesQuery query = 2;
+    }
+    bool includeTimestamps = 3;
+}
+
+message ComponentEntriesResponse {
+    repeated string payload = 1;
+}
+
+message DetectorsResponse {
+    repeated string detectors = 1;
+}
+
+message HostGetRequest {
+    string detector = 1;
+}
+
+message HostEntriesResponse {
+    repeated string hosts = 1;
+}
+
+message ImportComponentConfigurationRequest {
+    ComponentQuery query = 1;
+    string payload = 2;
+    bool newComponent = 3;
+    bool useVersioning = 4;
+}
+
+message ImportComponentConfigurationResponse {
+    bool existingComponentUpdated = 1;
+    bool existingEntryUpdated = 2;
+    int64 newTimestamp = 3;
+}
+
+message CRUCardsResponse {
+    string cards = 1;
+}
+
+message CardRequest {
+    string hostname = 1;
+    string cardSerial = 2;
+}
+
+message CRUCardEndpointResponse {
+    string endpoints = 1;
+}

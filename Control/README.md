@@ -8,7 +8,8 @@
   - [Requirements](#requirements)
   - [Installation](#installation)
   - [Configuration](#configuration)
-    - [gRPC](#grpc)
+    - [O2Control gRPC](#o2control-grpc)
+    - [Apricot gRPC](#apricot-grpc)
     - [Grafana](#grafana)
     - [Consul](#consul)
     - [Kafka](#kafka)
@@ -42,11 +43,21 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 7. Open browser and navigate to http://localhost:8080
 
 ## Configuration
-### gRPC
+### O2Control gRPC
 * `hostname` - gRPC hostname
 * `port` - gRPC port
 * `timeout` -  ms, gRPC deadline for service calls; Default value 30000 ms
 * `maxMessageLength` - MB, gRPC message size limit; Default value 50 MB
+* `label` - name of the gRPC service,
+* `package` - name of the gRPC package
+
+### Apricot gRPC
+* `hostname` - gRPC hostname
+* `port` - gRPC port
+* `timeout` -  ms, gRPC deadline for service calls; Default value 30000 ms
+* `maxMessageLength` - MB, gRPC message size limit; Default value 50 MB
+* `label` - name of the gRPC service
+* `package` - name of the gRPC package
 
 ### Grafana
 * `hostname` - Grafana instance hostname
