@@ -124,7 +124,6 @@ describe('Control', function() {
         qcPrefix: "localhost:8550/test/o2/qc/components/",
         readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
-      DETECTORS: {},
       REFRESH_TASK: 5000,
     }
     assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');
