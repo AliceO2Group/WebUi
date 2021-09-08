@@ -52,6 +52,7 @@ export default class Workflow extends Observable {
     this.templatesVarsMap = {};
     this.selectedVarsMap = {};
     this.groupedPanels = {}
+    this.panelsUtils = {};
 
     this.READOUT_PREFIX = PREFIX.READOUT;
     this.QC_PREFIX = PREFIX.QC;
@@ -317,6 +318,7 @@ export default class Workflow extends Observable {
         const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
         if (!this.groupedPanels[panelBelongingTo]) {
           this.groupedPanels[panelBelongingTo] = [];
+          this.panelsUtils[panelBelongingTo] = {isVisible: false};
         }
         variable.key = key;
         const workVariable = new WorkflowVariable(variable);
