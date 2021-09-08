@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
 import advancedVarsPanel from './advancedPanel.js';
 import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
@@ -31,10 +31,11 @@ export default (workflow) => {
   Object.keys(workflow.groupedPanels).forEach((key) => {
     if (key.toLocaleUpperCase() === BASIC_CONFIGURATION) {
       basicPanelKey = key;
+      workflow.panelsUtils[key].isVisible = true;
     }
   });
   return h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
-    h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[basicPanelKey], basicPanelKey)),
+    h('.w-50', basicPanel(workflow, workflow.groupedPanels[basicPanelKey], basicPanelKey)),
     h('.w-50', advancedVarsPanel(workflow)),
     Object.keys(workflow.groupedPanels)
       .sort((panelA, panelB) => panelA.toLocaleUpperCase() < panelB.toLocaleUpperCase() ? -1 : 1)
@@ -63,9 +64,15 @@ export default (workflow) => {
 const autoBuiltPanel = (workflow, variables, name) =>
   h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
-      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 '))
+      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 ')),
+      h('button.btn', {
+        onclick: () => {
+          workflow.panelsUtils[name].isVisible = !workflow.panelsUtils[name].isVisible;
+          workflow.notify();
+        }
+      }, !workflow.panelsUtils[name].isVisible ? iconChevronBottom() : iconChevronTop())
     ),
-    h('.p2.panel.text-left', [
+    workflow.panelsUtils[name].isVisible && h('.p2.panel.text-left', [
       variables.filter((variable) => {
         try {
           return eval(variable.isVisible);
@@ -74,9 +81,25 @@ const autoBuiltPanel = (workflow, variables, name) =>
           return false;
         }
       }).map((variable) => autoBuiltBox(variable, workflow.model)),
-      name.toUpperCase() === BASIC_CONFIGURATION && [
-        readoutPanel(workflow),
-        qcUriPanel(workflow)
-      ]
+    ]),
+  ]);
+
+/**
+ * Generate a basic panel containing variables defined in the ControlWorkflows yaml definition
+ * This panel should always be visible compared to the others
+ * @param {Workflow} workflow
+ * @param {Array<JSON>} variables - that should be part of the panel
+ * @param {String} name - of the panel
+ * @returns 
+ */
+const basicPanel = (workflow, variables, name) =>
+  h('.w-100', [
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
+      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 ')),
+    ),
+    h('.p2.panel.text-left', [
+      variables.map((variable) => autoBuiltBox(variable, workflow.model)),
+      readoutPanel(workflow),
+      qcUriPanel(workflow)
     ]),
   ]);
