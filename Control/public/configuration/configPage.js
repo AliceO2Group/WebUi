@@ -342,7 +342,7 @@ const runRocConfigButton = (model) =>
       confirm(`Cards will be FULLY configured with Consul stored configuration.
 Thus, all parameters will be provided to o2-roc-config and NOT only the links.
 Are you sure you would like to continue?`)
-        && model.configuration.runRocConfigWorkflow()
+        && model.configuration.saveAndConfigureCRUs()
     },
     disabled: model.configuration.configurationRequest.isLoading(),
-  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Configure');
+  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Save & Configure');

@@ -137,6 +137,18 @@ export default class Config extends Observable {
   }
 
   /**
+   * Bundle the execution of:
+   * * saving CRUs configuration in consul
+   * * executing o2-roc-config through AliECS
+   */
+  async saveAndConfigureCRUs() {
+    await this.saveConfiguration();
+    if (this.configurationRequest.isSuccess()) {
+      this.runRocConfigWorkflow();
+    }
+  }
+
+  /**
    * Method to send the new configuration to 
    * the server to save it in consul
    */
