@@ -42,7 +42,7 @@ export default (workflow) =>
     ]),
     h('.w-100.p2.panel',
       workflow.flpSelection.list.match({
-        NotAsked: () =>  h('.f7.flex-column', 'Please select detector(s) first'),
+        NotAsked: () => h('.f7.flex-column', 'Please select detector(s) first'),
         Loading: () => pageLoading(2),
         Success: (list) => flpSelectionArea(list, workflow),
         Failure: (error) => h('.f7.flex-column', [
@@ -64,16 +64,18 @@ export default (workflow) =>
  * @return {vnode}
  */
 const flpSelectionArea = (list, workflow) => {
-  return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
-    style: 'max-height: 25em;'
-  }, [
-    list.map((name) => {
-      const detector = workflow.flpSelection.getDetectorForHost(name);
-      return h('a.menu-item', {
-        className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
-        onclick: (e) => workflow.flpSelection.toggleFLPSelection(name, e)
-      }, [name, detector ? ` -- ${detector}` : ''])
-    }
-    ),
-  ]);
+  return list.length === 0 ? h('.f7.flex-column', 'Please select detector(s) first')
+    :
+    h('.w-100.m1.text-left.shadow-level1.scroll-y', {
+      style: 'max-height: 25em;'
+    }, [
+      list.map((name) => {
+        const detector = workflow.flpSelection.getDetectorForHost(name);
+        return h('a.menu-item', {
+          className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
+          onclick: (e) => workflow.flpSelection.toggleFLPSelection(name, e)
+        }, [name, detector ? ` -- ${detector}` : ''])
+      }
+      ),
+    ]);
 };

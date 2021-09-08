@@ -57,7 +57,6 @@ export default class FlpSelection extends Observable {
     } else if (!this.isDetectorActive(name)) {
       this.selectedDetectors.push(name);
       this.getAndSetHostsForDetector(name);
-      // request hosts for this detector
     }
     this.notify();
   }
@@ -70,7 +69,6 @@ export default class FlpSelection extends Observable {
   isDetectorActive(name) {
     return this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(name)
   }
-
 
   /**
    * Toggle the selection of an FLP from the form host
