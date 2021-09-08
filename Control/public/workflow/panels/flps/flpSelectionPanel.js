@@ -50,7 +50,6 @@ export default (workflow) =>
             h('', error)
             :
             h('', [
-              h('', 'Currently disabled due to connection refused to Consul.'),
               h('', ' Please use `Advanced Configuration` panel to select your FLP Hosts')
             ])
         ]),

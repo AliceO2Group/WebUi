@@ -95,7 +95,11 @@ const coreGRPCServer = (config) => {
     getTasks(call, callback) {
       calls['getTasks'] = true;
       callback(null, {});
-    }
+    },
+    getActiveDetectors(call, callback) {
+      calls['getActiveDetectors'] = true;
+      callback(null, {detectors: ['PROD']});
+    },
   });
 
   const bindCallback = (error, _) => {

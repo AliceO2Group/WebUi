@@ -42,7 +42,7 @@ export default class FlpSelection extends Observable {
    */
   async getAndSetDetectors() {
     this.detectors = await this.workflow.remoteDataPostRequest(this.detectors, '/api/ListDetectors', {});
-    this.activeDetectors = await this.workflow.remoteDataPostRequest(this.detectors, '/api/GetActiveDetectors', {});
+    this.activeDetectors = await this.workflow.remoteDataPostRequest(this.activeDetectors, '/api/GetActiveDetectors');
   }
 
   /**

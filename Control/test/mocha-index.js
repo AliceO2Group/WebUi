@@ -46,7 +46,7 @@ describe('Control', function() {
     // Start gRPC server, this replaces the real O2CORE server written in Go.
     const {calls} = coreGRPCServer(config);
     // Start gRPC server, this replaces the real APRICOT server written in Go.
-    const {apricotCalls} = apricotGRPCServer(config);
+    const {calls: apricotCalls} = apricotGRPCServer(config);
     
     // Start web-server in background
     subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
@@ -77,6 +77,7 @@ describe('Control', function() {
         console.log(`        ${msg.args()[i]}`);
       }
     });
+    await page.setViewport({ width: 1200, height: 770});
     exports.page = page;
     const helpers = {url, calls, apricotCalls};
     exports.helpers = helpers;
