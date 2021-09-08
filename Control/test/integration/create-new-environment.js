@@ -58,26 +58,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual('Advanced Configuration', title, 'Could not find the Advanced Configuration Panel');
   });
 
-  it('should successfully request a list of FLP names', async () => {
-    const flpList = await page.evaluate(() => window.model.workflow.flpSelection.list);
-
-    assert.strictEqual(flpList.kind, 'Success', 'Could not retrieve list of FLPs from Consul');
-    assert.ok(flpList.payload.length > 0, 'No FLPs were found in Consul');
-  });
-
-  it(`should successfully have no FLPS selected by default`, async () => {
-    const flps = await page.evaluate(() => window.model.workflow.form.hosts);
-    assert.ok(flps.length === 0, 'Hosts were selected already');
-  });
-
-  it(`should successfully select the first FLP from the list`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(2) > div > a', {timeout: 2000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(2) > div > a').click());
-    
-    const flps = await page.evaluate(() => window.model.workflow.form.hosts);
-    assert.ok(flps.length === 1, 'Hosts incorrectly selected');
-  });
-
   it('should successfully add provided K:V pairs', async () => {
     for (const key in confVariables) {
       if (key && confVariables[key] !== undefined) {
@@ -98,11 +78,24 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.evaluate(() => window.model.workflow.form.variables);
   });
 
-  it('should have successfully select first FLP by default from area list by', async () => {
-    const flps = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(2) > div > a').classList);
-    assert.deepStrictEqual(flps, {0: 'menu-item', 1: 'selected'}, 'FLPs were not successfully selected by default in the panel');
-    const hosts = await page.evaluate(() => window.model.workflow.form.hosts);
-    assert.ok(hosts.length > 0, 'No hosts were selected before creating an environment')
+  it('should have successfully select first detector by default from area list', async () => {
+    await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
+    const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
+    assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
+    await page.waitForTimeout(500);
+  });
+
+  it('should successfully have a list of FLPs after detector selection', async () => {
+    const flps = await page.evaluate(() => window.model.workflow.flpSelection.list.payload);
+    assert.deepStrictEqual(flps, ['flptest1']);
+  });
+
+  it('should successfully select a host', async () => {
+    await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(3) > div > div:nth-child(2) > div > a').click());
+    const flps = await page.evaluate(() => window.model.workflow.form.hosts);
+    assert.deepStrictEqual(flps, ['flptest1']);
   });
 
   it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
