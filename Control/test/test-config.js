@@ -30,7 +30,7 @@ module.exports = {
   },
   apricot: {
     hostname: 'localhost',
-    port: 9090,
+    port: 9091,
     timeout: 10000,
     label: 'Apricot',
     package: 'apricot'

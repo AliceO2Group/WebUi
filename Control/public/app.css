@@ -18,7 +18,8 @@
 .pageLoading { font-size: 5em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
 .errorPage { font-size: 3em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
 
-.disabled-content { pointer-events: none; opacity: 0.5; }
+.disabled-content { pointer-events: none; opacity: .5; }
+.disabled-item, .disabled-item:hover { cursor: not-allowed; background-color: var(--color-white); color: var(--color-gray-darker);  opacity: .5;}
 
 .grafana-font { font-family: Roboto, Helvetica Neue, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #52545c; font-weight: 515; text-align: center; }
 

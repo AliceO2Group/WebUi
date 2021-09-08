@@ -34,8 +34,12 @@ const apricotGRPCServer = (config) => {
   const address = `${config.apricot.hostname}:${config.apricot.port}`;
   server.addService(octlProto.apricot.Apricot.service, {
     listDetectors(call, callback) {
-      calls['ListDetectors'] = true;
-      callback(null, {fakeData: 1});
+      calls['listDetectors'] = true;
+      callback(null, {detectors: ['TST', 'PROD']});
+    },
+    getHostInventory(call, callback) {
+      calls['getHostInventory'] = true;
+      callback(null, {hosts: ['ali-flp-22', 'ali-flp-23']});
     },
   });
 

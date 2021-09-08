@@ -21,7 +21,7 @@ import pageLoading from './../../../common/pageLoading.js';
  * @return {vnode}
  */
 export default (workflow) =>
-  h('.w-50', [
+  h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', [
       h('.flex-column.justify-center.f6',
         h('button.btn', {
@@ -42,7 +42,7 @@ export default (workflow) =>
     ]),
     h('.w-100.p2.panel',
       workflow.flpSelection.list.match({
-        NotAsked: () => null,
+        NotAsked: () => h('.f7.flex-column', 'Please select detector(s) first'),
         Loading: () => pageLoading(2),
         Success: (list) => flpSelectionArea(list, workflow),
         Failure: (error) => h('.f7.flex-column', [
@@ -50,7 +50,6 @@ export default (workflow) =>
             h('', error)
             :
             h('', [
-              h('', 'Currently disabled due to connection refused to Consul.'),
               h('', ' Please use `Advanced Configuration` panel to select your FLP Hosts')
             ])
         ]),
@@ -65,16 +64,18 @@ export default (workflow) =>
  * @return {vnode}
  */
 const flpSelectionArea = (list, workflow) => {
-  return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
-    style: 'max-height: 25em;'
-  }, [
-    list.map((name) => {
-      const detector = workflow._getDetectorForHost(name);
-      return h('a.menu-item', {
-        className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
-        onclick: (e) => workflow.flpSelection.toggleFLPSelection(name, e)
-      }, [name, detector ? ` -- ${detector}` : ''])
-    }
-    ),
-  ]);
+  return list.length === 0 ? h('.f7.flex-column', 'Please select detector(s) first')
+    :
+    h('.w-100.m1.text-left.shadow-level1.scroll-y', {
+      style: 'max-height: 25em;'
+    }, [
+      list.map((name) => {
+        const detector = workflow.flpSelection.getDetectorForHost(name);
+        return h('a.menu-item', {
+          className: workflow.form.hosts.indexOf(name) >= 0 ? 'selected' : null,
+          onclick: (e) => workflow.flpSelection.toggleFLPSelection(name, e)
+        }, [name, detector ? ` -- ${detector}` : ''])
+      }
+      ),
+    ]);
 };

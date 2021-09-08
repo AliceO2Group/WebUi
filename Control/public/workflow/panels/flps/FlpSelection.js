@@ -27,9 +27,47 @@ export default class FlpSelection extends Observable {
     this.loader = workflow.model.loader;
     this.workflow = workflow;
 
-    this.list = RemoteData.notAsked(); // list of FLPs gathered from Consul
-
+    this.list = RemoteData.notAsked();
     this.firstFlpSelection = -1;
+
+    this.hostsByDetectors = {}
+
+    this.detectors = RemoteData.notAsked();
+    this.activeDetectors = RemoteData.notAsked();
+    this.selectedDetectors = [];
+  }
+
+  /**
+   * Method to request a list of detectors from AliECS
+   */
+  async getAndSetDetectors() {
+    this.detectors = await this.workflow.remoteDataPostRequest(this.detectors, '/api/ListDetectors', {});
+    this.activeDetectors = await this.workflow.remoteDataPostRequest(this.activeDetectors, '/api/GetActiveDetectors');
+  }
+
+  /**
+   * Toggle selection of a detector
+   * @param {String} name
+   */
+  toggleDetectorSelection(name) {
+    const index = this.selectedDetectors.indexOf(name);
+    if (index >= 0) {
+      this.selectedDetectors.splice(index, 1);
+      this.removeHostsByDetector(name);
+    } else if (!this.isDetectorActive(name)) {
+      this.selectedDetectors.push(name);
+      this.getAndSetHostsForDetector(name);
+    }
+    this.notify();
+  }
+
+  /**
+   * Given a name of a detector, it checks if it is part of the active list
+   * @param {String} name 
+   * @returns {boolean}
+   */
+  isDetectorActive(name) {
+    return this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(name)
   }
 
   /**
@@ -87,27 +125,63 @@ export default class FlpSelection extends Observable {
   }
 
   /**
+   * Remove a detector and its correspoding hosts
+   * @param {String} detector
+   */
+  removeHostsByDetector(detector) {
+    if (this.hostsByDetectors[detector]) {
+      this.hostsByDetectors[detector].forEach((host) => {
+        // Delete hosts of the detector from form selection
+        const index = this.workflow.form.hosts.indexOf(host);
+        if (index >= 0) {
+          this.workflow.form.hosts.splice(index, 1);
+        }
+      })
+      delete this.hostsByDetectors[detector];
+
+      let temp = []
+      // update list of displayed hosts with remaining ones
+      Object.keys(this.hostsByDetectors).forEach((detector) => temp = temp.concat(this.hostsByDetectors[detector]))
+      this.list = RemoteData.success(temp);
+      this.notify();
+    }
+  }
+
+  /**
+   * Method to return the name of the detector to which a given host name belongs to
+   * @param {String} host 
+   */
+  getDetectorForHost(host) {
+    let detectorForHost = '';
+    Object.keys(this.hostsByDetectors).forEach((detector) => {
+      const hosts = this.hostsByDetectors[detector];
+      if (hosts.includes(host)) {
+        detectorForHost = detector;
+      }
+    });
+    return detectorForHost;
+  }
+
+  /**
    * HTTP Requests
    */
 
   /**
-   * Method to request a list of FLPs
+   * Given a detector name, request a list of FLPs from Core
+   * @param {String} detector
    */
-  async setFLPListByRequest() {
+  async getAndSetHostsForDetector(detector) {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.loader.get(`/api/consul/flps`);
+    const {result, ok} = await this.loader.post(`/api/GetHostInventory`, {detector});
     if (!ok) {
       this.list = RemoteData.failure(result.message);
     } else {
-      this.list = RemoteData.success(result.flps);
-      // FLP machines can be removed by the user since the last creation of an environment
-      // ensure the list of selected items is still up to date
-      const tempFormHosts = [];
-      const hosts = this.workflow.form.getHosts();
-      hosts.filter((host) => this.list.payload.includes(host)).forEach((host) => tempFormHosts.push(host));
-      this.workflow.form.setHosts(tempFormHosts.slice());
+      this.hostsByDetectors[detector] = result.hosts
+      let temp = []
+      Object.keys(this.hostsByDetectors).forEach((detector) => temp = temp.concat(this.hostsByDetectors[detector]))
+      this.list = RemoteData.success(temp);
     }
     this.notify();
   }

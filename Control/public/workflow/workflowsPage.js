@@ -18,6 +18,7 @@ import {basicPanel} from './panels/variables/basicPanel.js';
 import mainPanel from './panels/variables/mainPanel.js';
 import advancedVarsPanel from './panels/variables/advancedPanel.js';
 import flpSelectionPanel from './panels/flps/flpSelectionPanel.js';
+import detectorsPanel from './panels/flps/detectorsPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -67,7 +68,8 @@ const showNewEnvironmentForm = (model, repoList) => [
           templateAreaList(model.workflow, model.workflow.form.repository, model.workflow.form.revision)
         ]),
       ]),
-      flpSelectionPanel(model.workflow),
+      h('.w-25', detectorsPanel(model.workflow)),
+      h('.w-25', flpSelectionPanel(model.workflow)),
     ]),
     model.workflow.form.template && workflowSettingsPanels(model.workflow)
   ]),

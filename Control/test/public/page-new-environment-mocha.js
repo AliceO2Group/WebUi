@@ -19,12 +19,14 @@ const test = require('../mocha-index');
 let url;
 let page;
 let calls;
+let apricotCalls;
 
 describe('`pageNewEnvironment` test-suite', async () => {
   before(async () => {
     url = test.helpers.url;
     page = test.page;
     calls = test.helpers.calls;
+    apricotCalls = test.helpers.apricotCalls;
     await page.setRequestInterception(true);
     page.on('request', getFLPList);
   });
@@ -41,6 +43,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
     calls['getEnvironments'] = undefined;
     calls['getEnvironment'] = undefined;
     calls['newEnvironment'] = undefined;
+    apricotCalls['listDetectors'] = undefined;
+    calls['getActiveDetectors'] = undefined;
   });
 
   it('should successfully load newEnvironment page and needed resources', async () => {
@@ -49,6 +53,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert(location.search === '?page=newEnvironment');
     assert.ok(calls['getWorkflowTemplates']);
     assert.ok(calls['listRepos']);
+    assert.ok(apricotCalls['listDetectors']);
+    assert.ok(calls['getActiveDetectors']);
   });
 
   it('should successfully request and parse a list of template objects', async () => {
@@ -366,12 +372,51 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   // FLP Selection
-  it('should successfully request a list of FLP names', async () => {
-    const flpList = await page.evaluate(() => window.model.workflow.flpSelection.list);
-    const expectedList = {
-      kind: 'Success', payload: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137']
-    };
-    assert.deepStrictEqual(flpList, expectedList);
+
+  it('should successfully request a list of detectors', async () => {
+    const detectors = await page.evaluate(() => window.model.workflow.flpSelection.detectors);
+    const expDetectors = {kind: 'Success', payload: {detectors: ['TST', 'PROD']}};
+    assert.deepStrictEqual(detectors, expDetectors, 'Missing detectors');
+  });
+
+  it('should successfully request a list of ACTIVE detectors', async () => {
+    const activeDetectors = await page.evaluate(() => window.model.workflow.flpSelection.activeDetectors);
+    const expActiveDetectors = {kind: 'Success', payload: {detectors: ['PROD']}};
+
+    assert.deepStrictEqual(activeDetectors, expActiveDetectors, 'Missing active detectors');
+  });
+
+  it('should successfully disable active detectors from the list', async () => {
+    const detectorClass = await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a:nth-child(2)').classList);
+    const expectedClasses = {0: 'menu-item', 1: 'disabled-item'};
+    assert.deepStrictEqual(detectorClass, expectedClasses)
+  });
+
+  it('should have an empty list of hosts before detector selection', async () => {
+    const flps = await page.evaluate(() => window.model.workflow.flpSelection.list);
+    assert.deepStrictEqual(flps.kind, 'NotAsked');
+  });
+
+  it('should successfully select a detector and request a list of hosts for that detector', async () => {
+    await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
+    const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
+    assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
+    await page.waitForTimeout(500);
+  });
+
+  it('should successfully have a list of FLPs after detector selection', async () => {
+    assert.ok(apricotCalls['getHostInventory']);
+    const flps = await page.evaluate(() => window.model.workflow.flpSelection.list.payload);
+    assert.deepStrictEqual(flps, ['ali-flp-22', 'ali-flp-23']);
+  });
+
+  it('should successfully select a host', async () => {
+    await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(3) > div > div:nth-child(2) > div > a').click());
+    const flps = await page.evaluate(() => window.model.workflow.form.hosts);
+    assert.deepStrictEqual(flps, ['ali-flp-22']);
   });
 
   it('should successfully create a new environment', async () => {
