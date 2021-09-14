@@ -20,6 +20,14 @@
  */
 const parseObject = (item, key) => {
   switch (key) {
+    case 'odc_topology':
+      if (item.odc_topology) {
+        const pathList = item.odc_topology.split('/');
+        if (pathList.length > 0) {
+          return pathList[pathList.length - 1];
+        }
+      }
+      return '-';
     case 'tasks':
       return item.length;
     case 'version':

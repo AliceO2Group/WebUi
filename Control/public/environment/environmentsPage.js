@@ -69,14 +69,13 @@ const showContent = (model, list) => (list && Object.keys(list).length > 0)
  * @return {vnode}
  */
 const environmentsTable = (model, list) => {
-  const tableHeaders = ['Tasks', 'Run', 'Created', 'Role', 'Detectors', 'State', 'Actions'];
+  const tableHeaders = ['Run', 'Created', 'Workflow', 'Detectors', 'FLPs', 'EPN Topology', 'State', 'Actions'];
   return h('table.table', [
     h('thead', [
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
       list.map((item) => h('tr', [
-        h('td', {style: 'text-align: center;'}, parseObject(item.tasks, 'tasks')),
         h('td', {style: 'text-align: center;'}, item.currentRunNumber ? item.currentRunNumber : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
         h('td', {style: 'text-align: center;'}, item.rootRole),
@@ -85,6 +84,8 @@ const environmentsTable = (model, list) => {
             item.includedDetectors.map((detector) => `${detector} `)
             : '-'
         ]),
+        h('td', {style: 'text-align: center;'}, item.numberOfFlps),
+        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {
           class: (item.state === 'RUNNING' ?
             'success'
