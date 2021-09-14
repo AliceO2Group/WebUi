@@ -20,9 +20,13 @@
  */
 const parseObject = (item, key) => {
   switch (key) {
+    case 'dcs_enabled':
+      return item[key] && item[key] === 'true' ? 'ON' : 'OFF'
+    case 'epn_enabled':
+      return item[key] && item[key] === 'true' ? 'ON' : 'OFF'
     case 'odc_topology':
-      if (item.odc_topology) {
-        const pathList = item.odc_topology.split('/');
+      if (item[key] && item['epn_enabled']) {
+        const pathList = item[key].split('/');
         if (pathList.length > 0) {
           return pathList[pathList.length - 1];
         }

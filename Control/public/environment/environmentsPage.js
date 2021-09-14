@@ -69,7 +69,9 @@ const showContent = (model, list) => (list && Object.keys(list).length > 0)
  * @return {vnode}
  */
 const environmentsTable = (model, list) => {
-  const tableHeaders = ['Run', 'Created', 'Workflow', 'Detectors', 'FLPs', 'EPN Topology', 'State', 'Actions'];
+  const tableHeaders = [
+    'Run', 'Created', 'Workflow', 'Detectors', 'FLPs', 'DCS', 'EPN', 'EPN Topology', 'State', 'Actions'
+  ];
   return h('table.table', [
     h('thead', [
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
@@ -85,6 +87,8 @@ const environmentsTable = (model, list) => {
             : '-'
         ]),
         h('td', {style: 'text-align: center;'}, item.numberOfFlps),
+        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
+        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {
           class: (item.state === 'RUNNING' ?
