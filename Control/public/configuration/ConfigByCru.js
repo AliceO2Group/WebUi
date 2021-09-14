@@ -161,23 +161,7 @@ export default class Config extends Observable {
       this.notify();
       const copy = {};
       this.selectedHosts.forEach((host) => {
-        const hostCopy = {};
-        Object.keys(this.cruMapByHost.payload[host]).forEach((cruEndpointKey) => {
-          const cruEndpointCopy = {
-            cru: {userLogicEnabled: this.cruMapByHost.payload[host][cruEndpointKey].config.cru.userLogicEnabled},
-          };
-          Object.keys(this.cruMapByHost.payload[host][cruEndpointKey].config)
-            .filter((key) => key.match('link[0-9]{1,2}')) // select only fields from links0 to links11
-            .forEach((key) => {
-              const cruConfig = this.cruMapByHost.payload[host][cruEndpointKey].config;
-              cruEndpointCopy[key] = {};
-              if (cruConfig[key] && cruConfig[key].enabled) {
-                cruEndpointCopy[key].enabled = cruConfig[key].enabled
-              }
-            });
-          hostCopy[cruEndpointKey] = cruEndpointCopy;
-        })
-        copy[host] = hostCopy
+        copy[host] = this._getMinifiedHostInfo(host);
       });
       const {result, ok} = await this.model.loader.post(`/api/consul/crus/config/save`, copy);
       if (!ok) {
@@ -269,5 +253,32 @@ export default class Config extends Observable {
   getConsulConfigURL() {
     const consul = COG.CONSUL;
     return `//${consul.hostname}:${consul.port}/${consul.kVPrefix}/${consul.readoutCardPath}`
+  }
+
+  /**
+   * Given a host, take it by cru by endpoint and build a json containing only
+   * data that can be modified via the GUI
+   * Currently we only set links0-12 and user logic
+   * @param {String} host
+   * @returns {JSON}
+   */
+  _getMinifiedHostInfo(host) {
+    const hostCopy = {};
+    Object.keys(this.cruMapByHost.payload[host]).forEach((cruEndpointKey) => {
+      const cruEndpointCopy = {
+        cru: {userLogicEnabled: this.cruMapByHost.payload[host][cruEndpointKey].config.cru.userLogicEnabled},
+      };
+      Object.keys(this.cruMapByHost.payload[host][cruEndpointKey].config)
+        .filter((key) => key.match('link[0-9]{1,2}')) // select only fields from links0 to links11
+        .forEach((key) => {
+          const cruConfig = this.cruMapByHost.payload[host][cruEndpointKey].config;
+          cruEndpointCopy[key] = {};
+          if (cruConfig[key] && cruConfig[key].enabled) {
+            cruEndpointCopy[key].enabled = cruConfig[key].enabled
+          }
+        });
+      hostCopy[cruEndpointKey] = {config: cruEndpointCopy};
+    })
+    return JSON.parse(JSON.stringify(hostCopy));
   }
 }
