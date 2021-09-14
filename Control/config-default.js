@@ -6,6 +6,7 @@ module.exports = {
     // key: './cert/key.pem',
     // cert: './cert/cert.pem',
     tls: false,
+    limit: '1Mb'
   },
   grpc: {
     hostname: 'localhost',
