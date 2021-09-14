@@ -20,6 +20,7 @@ Where:
      * [`TLS_KEY`] - private key filepath, TLS must be enabled
      * [`TLS_CERT`] - certificate filepath, TLS must be enabled
      * [`AUTO_LISTEN`] - flag that enables/disables automatic listening (default: `true`)
+     * [`LIMIT`] - controls the maximum request body size. Defaults to '100kb'. 
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
 
