@@ -41,6 +41,7 @@ class HttpServer {
     assert(httpConfig.port, 'Missing config value: port');
     httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
     httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
+    this.limit = (!httpConfig.limit) ? '100kb' : httpConfig.limit;
 
     this.app = express();
     this.configureHelmet(httpConfig.hostname);
@@ -177,14 +178,14 @@ class HttpServer {
     // Router for public API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.routerPublic = express.Router();
-    this.routerPublic.use(express.json()); // parse json body for API calls
+    this.routerPublic.use(express.json({limit: this.limit})); // parse json body for API calls
     this.app.use('/api', this.routerPublic);
 
     // Router for secure API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.router = express.Router();
     this.router.use((req, res, next) => this.jwtVerify(req, res, next));
-    this.router.use(express.json()); // parse json body for API calls
+    this.router.use(express.json({limit: this.limit})); // parse json body for API calls
     this.app.use('/api', this.router);
 
     // Catch-all if no controller handled request

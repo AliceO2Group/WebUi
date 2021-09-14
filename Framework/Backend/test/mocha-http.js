@@ -261,3 +261,20 @@ describe('HTTP server', () => {
     }
   });
 });
+
+describe('HTTP constructor checks', () => {
+  let httpServer;
+  afterEach(async () => {
+    await httpServer.close();
+  });
+  it('should succesfully add default limit for request body size to 100kb', async () => {
+    httpServer = new HttpServer(config.http, config.jwt);
+    assert.strictEqual(httpServer.limit, '100kb', 'Default limit was not set')
+  });
+  it('should succesfully add provided limit from configuration for request body size', async () => {
+    const conf = config.http;
+    conf.limit = '10Mb';
+    httpServer = new HttpServer(conf, config.jwt);
+    assert.strictEqual(httpServer.limit, '10Mb', 'Provided limit was not set')
+  });
+});
