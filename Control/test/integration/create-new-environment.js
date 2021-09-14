@@ -88,14 +88,14 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully have a list of FLPs after detector selection', async () => {
     const flps = await page.evaluate(() => window.model.workflow.flpSelection.list.payload);
-    assert.deepStrictEqual(flps, ['flptest1']);
+    assert.ok(flps.length > 0);
   });
 
   it('should successfully select a host', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(3) > div > div:nth-child(2) > div > a').click());
     const flps = await page.evaluate(() => window.model.workflow.form.hosts);
-    assert.deepStrictEqual(flps, ['flptest1']);
+    assert.ok(flps.length > 0);
   });
 
   it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
