@@ -106,12 +106,12 @@ class ApricotService {
       throw new Error(`Configuration cannot be saved without the following fields: ${missingFields.toString()}`)
     } else {
       const user = {
-        username: req?.session?.username ?? 'Anonymous',
+        username: req?.session?.username ?? 'anonymous',
         personid: req?.session?.personid ?? 0
       };
       const created = Date.now();
       const edited = Date.now();
-      const vars = req.body?.vars ?? {};
+      const variables = req.body?.variables ?? {};
       const detectors = req.body.detectors;
       const workflow = req.body.workflow;
       const revision = req.body.revision;
@@ -120,7 +120,7 @@ class ApricotService {
       const id = this._getNameAsId(name);
       return {
         key: id, value: {
-          user, created, edited, vars, workflow, repository, revision, detectors, name, id
+          user, created, edited, variables, workflow, repository, revision, detectors, name, id
         }
       };
     }

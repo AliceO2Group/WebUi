@@ -121,7 +121,7 @@ describe('ApricotService test suite', () => {
     it('should successfully save configuration', async () => {
       const body = {
         name: 'My TST Configuration',
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -149,7 +149,7 @@ describe('ApricotService test suite', () => {
 
     it('should reply with error due to bad configuration object', async () => {
       const body = {
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -178,7 +178,7 @@ describe('ApricotService test suite', () => {
     it('should reply with error due to Apricot ListRuntimeEnttires call failure', async () => {
       const body = {
         name: 'Something went wrong',
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -206,7 +206,7 @@ describe('ApricotService test suite', () => {
     it('should reply with error due to already existing configuration with the same name', async () => {
       const body = {
         name: 'MY_OWN',
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -233,7 +233,7 @@ describe('ApricotService test suite', () => {
     it('should reply with error due to Apricot SetRuntineEntry call failure', async () => {
       const body = {
         name: 'MY_OWN_TST',
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -281,7 +281,7 @@ describe('ApricotService test suite', () => {
     it('should succesfully build a configuration to store JSON based on request object', () => {
       const body = {
         name: 'My TST Configuration',
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -298,7 +298,7 @@ describe('ApricotService test suite', () => {
         key: 'My_TST_Configuration',
         value: {
           user: {username: 'someuser', personid: 11},
-          vars: {
+          variables: {
             some_enabled: 'true',
             some_other: 'false',
             hosts: ['flp01']
@@ -322,7 +322,7 @@ describe('ApricotService test suite', () => {
 
     it('should throw errors if mandatory fields are missing', () => {
       const body = {
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -342,7 +342,7 @@ describe('ApricotService test suite', () => {
     it('should throw errors if mandatory fields are missing', () => {
       const body = {
         name: 'Some name',
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
@@ -360,7 +360,7 @@ describe('ApricotService test suite', () => {
     it('should throw errors if mandatory fields are missing', () => {
       const body = {
         name: 'Some name',
-        vars: {
+        variables: {
           some_enabled: 'true',
           some_other: 'false',
           hosts: ['flp01']
