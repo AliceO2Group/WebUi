@@ -372,7 +372,7 @@ describe('ApricotService test suite', () => {
       const req = {body, session};
 
       assert.throws(() => service._buildConfigurationObject(req),
-        new Error(`Configuration cannot be saved without the following fields: detectors,repository`));
+        new Error(`Configuration cannot be saved without the following fields: repository`));
     });
   });
 });

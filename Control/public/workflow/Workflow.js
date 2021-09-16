@@ -43,6 +43,10 @@ export default class Workflow extends Observable {
 
     this.refreshedRepositories = RemoteData.notAsked();
 
+    this.savedConfigurations = RemoteData.notAsked();
+    this.selectedConfigurationId = '-';
+    this.loadedConfiguration = RemoteData.notAsked();
+
     this.revision = {
       isSelectionOpen: false,
       regex: new RegExp('master'),
@@ -73,6 +77,7 @@ export default class Workflow extends Observable {
     if (!this.form.isInputSelected()) {
       this.reloadDataForm();
     }
+    this.getAndSetSavedConfigurations();
     this.flpSelection.getAndSetDetectors();
     this.resetErrorMessage();
   }
@@ -195,9 +200,6 @@ export default class Workflow extends Observable {
       // Check FLP Selection is not duplicated in vars host
       this.model.environment.itemNew =
         RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
-    } else if (this.flpSelection.selectedDetectors.length === 0) {
-      this.model.environment.itemNew =
-        RemoteData.failure('Please select detector(s) before saving configuration');
     } else {
       variables['hosts'] = this.form.hosts.length > 0 ? JSON.stringify(this.form.hosts) : this.form.variables.hosts;
       if (!this.form.isInputSelected()) {
@@ -465,6 +467,34 @@ export default class Workflow extends Observable {
       this.templates = RemoteData.success(templateList);
     }
     this.notify();
+  }
+
+  /**
+   * Request a list of saved configurations for component `COG-v1`
+   * Set it in a RemoteData object
+   */
+  async getAndSetSavedConfigurations() {
+    this.savedConfigurations = await this.remoteDataPostRequest(
+      this.savedConfigurations, '/api/ListRuntimeEntries', {component: 'COG-v1'}
+    );
+  }
+
+  /**
+   * Given a configuration name, request its data from apricot and fill in new environment page
+   * @param {String} name 
+   */
+  async getAndSetNamedConfiguration(key) {
+    if (key !== '-') {
+      this.loadedConfiguration = await this.remoteDataPostRequest(
+        this.loadedConfiguration, '/api/GetRuntimeEntry', {component: 'COG-v1', key}
+      );
+      try {
+        this.addVariableJSON(JSON.stringify(JSON.parse(this.loadedConfiguration.payload.payload).variables));
+      } catch (error) {
+        console.error(error);
+        this.model.notification.show('Unable to load configuration. Please contact an administrator', 'warning', 2000);
+      }
+    }
   }
 
   /**
