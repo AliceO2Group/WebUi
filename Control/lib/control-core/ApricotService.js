@@ -68,7 +68,7 @@ class ApricotService {
         errorHandler(`A configuration with name '${value.name}' already exists`, res, 409, 'apricotservice');
       } else {
         await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key, value: JSON.stringify(value, null, 2)});
-        res.status(200).json({message: 'Configuration saved successfully'})
+        res.status(200).json({message: `Configuration saved successfully as ${value.name}`})
       }
     } catch (error) {
       errorHandler(error, res, 503, 'apricotservice');
