@@ -30,7 +30,8 @@ function buildPublicConfig(config) {
     ILG_URL: _getInfoLoggerURL(config),
     GRAFANA: _getGrafanaConfig(config),
     CONSUL: getConsulConfig(config),
-    REFRESH_TASK: config?.utils?.refreshTask || 5000,
+    REFRESH_TASK: config?.utils?.refreshTask || 10000,
+    REFRESH_ENVS: config?.utils?.refreshEnvs || 10000,
   };
   let codeStr = `/* eslint-disable quote-props */\n`
     + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as COG};\n`;
