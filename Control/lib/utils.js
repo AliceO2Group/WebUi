@@ -21,7 +21,8 @@ const http = require('http');
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
-function errorHandler(err, res, status = 500) {
+function errorHandler(err, res, status = 500, facility = 'utils') {
+  log.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
   if (err.stack) {
     log.trace(err);
   }
