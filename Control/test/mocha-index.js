@@ -125,7 +125,8 @@ describe('Control', function() {
         qcPrefix: "localhost:8550/test/o2/qc/components/",
         readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
-      REFRESH_TASK: 5000,
+      REFRESH_TASK: 10000,
+      REFRESH_ENVS: 10000,
     }
     assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');
   });

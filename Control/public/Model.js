@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 // Import frontend framework
 import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
 import {Notification as O2Notification} from '/js/src/index.js';
@@ -109,10 +111,12 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
-    clearInterval(this.task.taskRefreshInterval);
+    clearInterval(this.task.refreshInterval);
+    clearInterval(this.environment.refreshInterval);
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
+        this.environment.refreshInterval = setInterval(() => this.environment.getEnvironments(), COG.REFRESH_ENVS);
         break;
       case 'environment':
         if (!this.router.params.id) {

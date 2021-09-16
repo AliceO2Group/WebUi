@@ -95,7 +95,7 @@ export default class Task extends Observable {
    */
   getTasks() {
     this.initTasks();
-    this.taskRefreshInterval = setInterval(() => this.initTasks(), COG.REFRESH_TASK);
+    this.refreshInterval = setInterval(() => this.initTasks(), COG.REFRESH_TASK);
   }
 
   /**
