@@ -73,6 +73,7 @@ module.exports.setup = (http, ws) => {
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
   );
+  http.post('/configuration/save', (req, res) => apricotService.saveConfiguration(req, res));
 
   http.post('/clean/resources', (req, res) => ctrlService.cleanResources(req, res));
   http.post('/execute/o2-roc-config', (req, res) => ctrlService.createAutoEnvironment(req, res));

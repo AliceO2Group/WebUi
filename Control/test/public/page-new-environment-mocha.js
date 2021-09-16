@@ -44,6 +44,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
     calls['getEnvironment'] = undefined;
     calls['newEnvironment'] = undefined;
     apricotCalls['listDetectors'] = undefined;
+    apricotCalls['listRuntimeEntries'] = undefined;
+    apricotCalls['setRuntimeEntry'] = undefined;
     calls['getActiveDetectors'] = undefined;
   });
 
@@ -97,7 +99,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should have `Create` button disabled due to no selected workflow', async () => {
     const button = await page.evaluate(() => {
       const button = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > button');
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > button:nth-child(2)');
       return {title: button.title, classList: button.classList, disabled: button.disabled};
     });
     assert.strictEqual(button.title, 'Create environment based on selected workflow');
@@ -118,7 +120,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should throw error when `Create` button is clicked due to `Control is not locked`', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > button:nth-child(2)').click());
     await page.waitForTimeout(500);
     const errorOnCreation = await page.evaluate(() => window.model.environment.itemNew);
     assert.strictEqual(errorOnCreation.kind, 'Failure');
@@ -398,6 +400,18 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps.kind, 'NotAsked');
   });
 
+  it('should display error message when pressing save configuration with no detector selected', async () => {
+    page.on('dialog', async dialog => {
+      await dialog.accept('My Config');
+    });
+    await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
+    await page.waitForTimeout(200)
+
+    const message = await page.evaluate(() => window.model.environment.itemNew.payload);
+    assert.strictEqual(message, 'Please select detector(s) before saving configuration');
+  });
+
   it('should successfully select a detector and request a list of hosts for that detector', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
@@ -419,9 +433,23 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps, ['ali-flp-22']);
   });
 
-  it('should successfully create a new environment', async () => {
+  it('should successfully save configuration', async () => {
+    page.on('dialog', async dialog => {
+      await dialog.accept('My Config');
+    });
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
+    await page.waitForTimeout(200)
+
+    const message = await page.evaluate(() => window.model.environment.itemNew.payload);
+    assert.ok(apricotCalls['setRuntimeEntry']);
+    assert.ok(apricotCalls['listRuntimeEntries']);
+    assert.strictEqual(message, 'Configuration saved successfully');
+  });
+
+  it('should successfully create a new environment', async () => {
+    await page.evaluate(() => document.querySelector(
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button:nth-child(3)').click());
     await page.waitForTimeout(1000);
     const location = await page.evaluate(() => window.location);
 

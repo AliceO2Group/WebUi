@@ -182,6 +182,40 @@ export default class Workflow extends Observable {
   }
 
   /**
+   * Check and prepare data for saving currently displayed configuration
+   * Make API call to be saved
+   * @param {String} name
+   */
+  saveEnvConfiguration(name) {
+    const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
+    if (!ok) {
+      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      this.model.environment.itemNew = RemoteData.failure(message);
+    } else if (variables.hosts && variables.hosts.length > 0 && this.form.hosts.length > 0) {
+      // Check FLP Selection is not duplicated in vars host
+      this.model.environment.itemNew =
+        RemoteData.failure('Selecting FLPs and adding an environment variable with key `hosts` is not possible');
+    } else if (this.flpSelection.selectedDetectors.length === 0) {
+      this.model.environment.itemNew =
+        RemoteData.failure('Please select detector(s) before saving configuration');
+    } else {
+      variables['hosts'] = this.form.hosts.length > 0 ? JSON.stringify(this.form.hosts) : this.form.variables.hosts;
+      if (!this.form.isInputSelected()) {
+        this.model.environment.itemNew =
+          RemoteData.failure('Please select repository, revision and workflow in order to create an environment');
+      } else {
+        const detectors = this.flpSelection.selectedDetectors;
+        const repository = this.form.repository;
+        const revision = this.form.revision;
+        const workflow = this.form.template;
+        const data = {name, detectors, repository, revision, workflow, variables};
+        this.model.environment.saveEnvConfiguration(data);
+      }
+    }
+    this.notify();
+  }
+
+  /**
    * Method to check user's input and create a new environment
    */
   async createNewEnvironment() {

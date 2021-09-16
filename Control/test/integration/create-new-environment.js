@@ -100,7 +100,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button:nth-child(2)').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const location = await page.evaluate(() => window.location);

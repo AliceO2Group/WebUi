@@ -28,7 +28,7 @@ const apricotGRPCServer = (config) => {
   let calls = {};
 
   const server = new grpcLibrary.Server();
-  const packageDefinition = protoLoader.loadSync(PROTO_PATH, {keepCase: false});// change to camel case
+  const packageDefinition = protoLoader.loadSync(PROTO_PATH, {keepCase: false}); // change to camel case
   const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
   const credentials = grpcLibrary.ServerCredentials.createInsecure();
   const address = `${config.apricot.hostname}:${config.apricot.port}`;
@@ -40,6 +40,14 @@ const apricotGRPCServer = (config) => {
     getHostInventory(call, callback) {
       calls['getHostInventory'] = true;
       callback(null, {hosts: ['ali-flp-22', 'ali-flp-23']});
+    },
+    setRuntimeEntry(call, callback) {
+      calls['setRuntimeEntry'] = true;
+      callback(null, {});
+    },
+    listRuntimeEntries(call, callback) {
+      calls['listRuntimeEntries'] = true;
+      callback(null, {payload: ['config1', 'config2']});
     },
   });
 

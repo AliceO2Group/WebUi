@@ -194,4 +194,20 @@ export default class Environment extends Observable {
     this.itemControl = RemoteData.notAsked();
     this.model.router.go(`?page=environments`);
   }
+
+  /**
+   * Save configuration of the new environment page
+   * @param {JSON} data - configuration to be saved
+   */
+  async saveEnvConfiguration(data) {
+    this.itemNew = RemoteData.loading();
+    this.notify();
+    const {result, ok} = await this.model.loader.post(`/api/configuration/save`, data);
+    if (!ok) {
+      this.itemNew = RemoteData.failure(result.message);
+    } else {
+      this.itemNew = RemoteData.success(result.message);
+    }
+    this.notify();
+  }
 }
