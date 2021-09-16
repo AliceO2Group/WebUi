@@ -433,7 +433,7 @@ const qcUriPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${workflow.flpSelection.consulKvStoreQC}/${(
+        href: `//${COG.CONSUL.kvStoreQC}/${(
           variables['qc_config_uri'] ?
             variables['qc_config_uri'] + '/edit' : '')}`,
         target: '_blank',
