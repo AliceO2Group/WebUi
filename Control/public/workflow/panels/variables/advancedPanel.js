@@ -145,7 +145,7 @@ const loadExistingConfiguraitonPanel = (workflow) => [
   workflow.savedConfigurations.match({
     NotAsked: () => null,
     Loading: () => null,
-    Failure: (error) => h('.w-100.danger', error),
+    Failure: () => null,
     Success: (item) => configurationSelection(workflow, item.payload)
   })
 ];
