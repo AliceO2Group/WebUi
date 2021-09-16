@@ -400,18 +400,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps.kind, 'NotAsked');
   });
 
-  it('should display error message when pressing save configuration with no detector selected', async () => {
-    page.on('dialog', async dialog => {
-      await dialog.accept('My Config');
-    });
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button').click());
-    await page.waitForTimeout(200)
-
-    const message = await page.evaluate(() => window.model.environment.itemNew.payload);
-    assert.strictEqual(message, 'Please select detector(s) before saving configuration');
-  });
-
   it('should successfully select a detector and request a list of hosts for that detector', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
@@ -444,7 +432,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const message = await page.evaluate(() => window.model.environment.itemNew.payload);
     assert.ok(apricotCalls['setRuntimeEntry']);
     assert.ok(apricotCalls['listRuntimeEntries']);
-    assert.strictEqual(message, 'Configuration saved successfully');
+    assert.strictEqual(message, 'Configuration saved successfully as My_Config');
   });
 
   it('should successfully create a new environment', async () => {

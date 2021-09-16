@@ -144,7 +144,7 @@ describe('ApricotService test suite', () => {
       await apricotService.saveConfiguration(req, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledOnce);
-      assert.ok(res.json.calledWith({message: 'Configuration saved successfully'}));
+      assert.ok(res.json.calledWith({message: 'Configuration saved successfully as My_TST_Configuration'}));
     });
 
     it('should reply with error due to bad configuration object', async () => {
