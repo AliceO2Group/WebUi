@@ -32,10 +32,11 @@ export default (workflow) =>
     ]),
     addKVInputList(workflow),
     h('.form-group.p2.panel.w-100.text-left', [
-      h('.w-100.ph2', 'Add single pair of (K;V):'),
+      h('.w-100.ph1', 'Add single pair of (K;V):'),
       addKVInputPair(workflow),
-      h('.w-100.ph2', 'Add a JSON with multiple pairs (K;V):'),
+      h('.w-100.ph1', 'Add a JSON with multiple pairs (K;V):'),
       addListOfKvPairs(workflow),
+      loadExistingConfiguraitonPanel(workflow),
       importErrorPanel(workflow),
     ]),
   ]);
@@ -46,7 +47,7 @@ export default (workflow) =>
  * @return {vnode}
  */
 const addKVInputList = (workflow) =>
-// TODO filter our the ones in varSpecMap
+  // TODO filter our the ones in varSpecMap
   h('.w-100.p2.panel', Object.keys(workflow.form.variables).map((key) =>
     h('.w-100.flex-row.pv2.border-bot', {
     }, [
@@ -135,15 +136,58 @@ const addListOfKvPairs = (workflow) => {
 };
 
 /**
+ * Displays a panel which contains:
+ * * a dropdown list of past saved configurations
+ * * a button to allow the user to load that configuration
+ * @param {Workflow} workflow 
+ */
+const loadExistingConfiguraitonPanel = (workflow) => [
+  workflow.savedConfigurations.match({
+    NotAsked: () => null,
+    Loading: () => null,
+    Failure: () => null,
+    Success: (item) => configurationSelection(workflow, item.payload)
+  })
+];
+
+/**
+ * Create a configuration selection panel which is displayed only if
+ * the list of configurations was provided by apricot successfully
+ * @param {Workflow} workflow
+ * @returns 
+ */
+const configurationSelection = (workflow, configurations) => {
+  return h('.w-100.flex-column.ph1', [
+    h('.w-100', 'Load existing configurations:'),
+    h('.w-100.flex-row', [
+      h('select.form-control', {
+        style: 'cursor: pointer',
+        onchange: (e) => {
+          workflow.selectedConfigurationId = e.target.value;
+          workflow.notify();
+        }
+      }, [
+        h('option', {style: 'cursor: pointer'}, '-'),
+        configurations.map((value) => h('option', {style: 'cursor: pointer'}, value))
+      ]),
+      h('button.btn.btn-default.mh2', {
+        disabled: workflow.selectedConfigurationId === '-',
+        onclick: () => workflow.getAndSetNamedConfiguration(workflow.selectedConfigurationId)
+      }, 'Load')
+    ]),
+  ]);
+};
+
+/**
  * Displays errors that may appear while importing a configuration via
  * * text area JSON import
  * * KV Pair input
- * @param {Workflow} worfklow
+ * @param {Workflow} workflow
  * @returns {vnode}
  */
-const importErrorPanel = (worfklow) =>
-  worfklow.advErrorPanel.length > 0 &&
+const importErrorPanel = (workflow) =>
+  workflow.advErrorPanel.length > 0 &&
   h('.w-100.flex-column.ph2', [
     h('.danger', 'The following KV pairs encountered an issue:'),
-    worfklow.advErrorPanel.map((error) => h('.danger', `- ${error}`))
+    workflow.advErrorPanel.map((error) => h('.danger', `- ${error}`))
   ]);

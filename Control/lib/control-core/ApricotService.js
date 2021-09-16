@@ -68,7 +68,7 @@ class ApricotService {
         errorHandler(`A configuration with name '${value.name}' already exists`, res, 409, 'apricotservice');
       } else {
         await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key, value: JSON.stringify(value, null, 2)});
-        res.status(200).json({message: 'Configuration saved successfully'})
+        res.status(200).json({message: `Configuration saved successfully as ${key}`})
       }
     } catch (error) {
       errorHandler(error, res, 503, 'apricotservice');
@@ -88,9 +88,6 @@ class ApricotService {
     const missingFields = [];
     if (!req.body?.name) {
       missingFields.push('name');
-    }
-    if (!req.body?.detectors) {
-      missingFields.push('detectors');
     }
     if (!req.body?.workflow) {
       missingFields.push('workflow');
@@ -112,7 +109,7 @@ class ApricotService {
       const created = Date.now();
       const edited = Date.now();
       const variables = req.body?.variables ?? {};
-      const detectors = req.body.detectors;
+      const detectors = req.body?.detectors ?? []; 
       const workflow = req.body.workflow;
       const revision = req.body.revision;
       const repository = req.body.repository;

@@ -17,7 +17,6 @@ import {autoBuiltBox} from './components.js';
 import advancedVarsPanel from './advancedPanel.js';
 import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 
-const BASIC_CONFIGURATION = 'BASICCONFIGURATION';
 /**
  * Builds a custom set of panels build based on the user's selection of template
  * to configure the workflow
@@ -29,7 +28,7 @@ const BASIC_CONFIGURATION = 'BASICCONFIGURATION';
 export default (workflow) => {
   let basicPanelKey = '';
   Object.keys(workflow.groupedPanels).forEach((key) => {
-    if (key.toLocaleUpperCase() === BASIC_CONFIGURATION) {
+    if (key.toLocaleUpperCase() === 'BASIC_CONFIGURATION' || key.toLocaleUpperCase() === 'BASICCONFIGURATION') {
       basicPanelKey = key;
       workflow.panelsUtils[key].isVisible = true;
     }
@@ -61,10 +60,11 @@ export default (workflow) => {
  * @param {String} name - of the panel
  * @returns 
  */
-const autoBuiltPanel = (workflow, variables, name) =>
-  h('.w-100', [
+const autoBuiltPanel = (workflow, variables, name) => {
+  const nameAsString = name.replace(/([a-z](?=[A-Z]))/g, '$1 ').replace(/_/g, ' ');
+  return h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
-      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 ')),
+      h('.w-100', nameAsString),
       h('button.btn', {
         onclick: () => {
           workflow.panelsUtils[name].isVisible = !workflow.panelsUtils[name].isVisible;
@@ -83,6 +83,7 @@ const autoBuiltPanel = (workflow, variables, name) =>
       }).map((variable) => autoBuiltBox(variable, workflow.model)),
     ]),
   ]);
+};
 
 /**
  * Generate a basic panel containing variables defined in the ControlWorkflows yaml definition
@@ -92,10 +93,11 @@ const autoBuiltPanel = (workflow, variables, name) =>
  * @param {String} name - of the panel
  * @returns 
  */
-const basicPanel = (workflow, variables, name) =>
-  h('.w-100', [
+const basicPanel = (workflow, variables, name) => {
+  const nameAsString = name.replace(/([a-z](?=[A-Z]))/g, '$1 ').replace(/_/g, ' ');
+  return h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
-      h('.w-100', name.replace(/([a-z](?=[A-Z]))/g, '$1 ')),
+      h('.w-100', nameAsString),
     ),
     h('.p2.panel.text-left', [
       variables.map((variable) => autoBuiltBox(variable, workflow.model)),
@@ -103,3 +105,4 @@ const basicPanel = (workflow, variables, name) =>
       qcUriPanel(workflow)
     ]),
   ]);
+};
