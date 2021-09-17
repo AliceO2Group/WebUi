@@ -24,12 +24,12 @@ export default (workflow) =>
   h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', h('h5.w-100.bg-gray-light', 'Detectors Selection')),
     h('.w-100.p2.panel',
-      workflow.flpSelection.detectors.match({
-        NotAsked: () => null,
-        Loading: () => pageLoading(2),
-        Success: (data) => detectorsSelectionArea(data.detectors, workflow),
-        Failure: (error) => h('.f7.flex-column', error),
-      })
+      (workflow.flpSelection.activeDetectors.isLoading() || workflow.flpSelection.detectors.isLoading())
+      && pageLoading(2),
+      (workflow.flpSelection.activeDetectors.isSuccess() && workflow.flpSelection.detectors.isSuccess())
+      && detectorsSelectionArea(workflow.flpSelection.detectors.payload.detectors, workflow),
+      (workflow.flpSelection.activeDetectors.isFailure() || workflow.flpSelection.detectors.isFailure())
+      && h('.f7.flex-column', 'Unavailable to load detectors'),
     )
   ]);
 
@@ -54,7 +54,10 @@ const detectorItem = (name, workflow) => {
   if (workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {
     className += 'selected ';
   }
-  if (workflow.flpSelection.isDetectorActive(name)) {
+  if (workflow.flpSelection.unavailableDetectors.includes(name)) {
+    className += 'bg-danger white';
+    title = 'Detector from saved configuration is currently unavailale. Plese deselect it';
+  } else if (workflow.flpSelection.isDetectorActive(name)) {
     className += 'disabled-item ';
     title = 'Detector UNAVAILABLE';
   }
