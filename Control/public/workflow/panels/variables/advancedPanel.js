@@ -38,6 +38,7 @@ export default (workflow) =>
       addListOfKvPairs(workflow),
       loadExistingConfiguraitonPanel(workflow),
       importErrorPanel(workflow),
+      loadErrorPanel(workflow),
     ]),
   ]);
 
@@ -171,7 +172,8 @@ const configurationSelection = (workflow, configurations) => {
         configurations.map((value) => h('option', {style: 'cursor: pointer'}, value))
       ]),
       h('button.btn.btn-default.mh2', {
-        disabled: workflow.selectedConfigurationId === '-',
+        class: workflow.loadingConfiguration.isLoading() ? 'loading' : '',
+        disabled: workflow.loadingConfiguration.isLoading() || workflow.selectedConfigurationId === '-',
         onclick: () => workflow.getAndSetNamedConfiguration(workflow.selectedConfigurationId)
       }, 'Load')
     ]),
@@ -190,4 +192,16 @@ const importErrorPanel = (workflow) =>
   h('.w-100.flex-column.ph2', [
     h('.danger', 'The following KV pairs encountered an issue:'),
     workflow.advErrorPanel.map((error) => h('.danger', `- ${error}`))
+  ]);
+
+/**
+ * Displays any potential errors from loading existing configuraiton
+ * @param {Workflow} workflow 
+ * @returns {vnode}
+ */
+const loadErrorPanel = (workflow) =>
+  workflow.flpSelection.missingHosts.length > 0 &&
+  h('.w-100.flex-column.ph2', [
+    h('.danger', 'The following saved hosts are not available anymore:'),
+    h('.flex-row.danger', workflow.flpSelection.missingHosts.toString())
   ]);

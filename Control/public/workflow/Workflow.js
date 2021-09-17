@@ -46,6 +46,7 @@ export default class Workflow extends Observable {
     this.savedConfigurations = RemoteData.notAsked();
     this.selectedConfigurationId = '-';
     this.loadedConfiguration = RemoteData.notAsked();
+    this.loadingConfiguration = RemoteData.notAsked();
 
     this.revision = {
       isSelectionOpen: false,
@@ -79,6 +80,8 @@ export default class Workflow extends Observable {
     }
     this.getAndSetSavedConfigurations();
     this.flpSelection.getAndSetDetectors();
+    this.flpSelection.missingHosts = [];
+    this.selectedConfigurationId = '-';
     this.resetErrorMessage();
   }
 
@@ -225,6 +228,9 @@ export default class Workflow extends Observable {
     if (!ok) {
       // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
+    } else if (this.flpSelection.unavailableDetectors.length !== 0) {
+      this.model.environment.itemNew =
+        RemoteData.failure('Please remove selection of unavailable detectors');
     } else if (variables.hosts && variables.hosts.length > 0 && this.form.hosts.length > 0) {
       // Check FLP Selection is not duplicated in vars host
       this.model.environment.itemNew =
@@ -485,15 +491,30 @@ export default class Workflow extends Observable {
    */
   async getAndSetNamedConfiguration(key) {
     if (key !== '-') {
+      this.loadingConfiguration = RemoteData.loading();
+      this.notify();
       this.loadedConfiguration = await this.remoteDataPostRequest(
         this.loadedConfiguration, '/api/GetRuntimeEntry', {component: 'COG-v1', key}
       );
       try {
-        this.addVariableJSON(JSON.stringify(JSON.parse(this.loadedConfiguration.payload.payload).variables));
+        const configuration = JSON.parse(this.loadedConfiguration.payload.payload);
+        const variables = configuration.variables;
+        let hosts = [];
+        if (variables.hosts) {
+          hosts = JSON.parse(variables.hosts);
+          delete variables.hosts;
+        }
+        const detectors = configuration.detectors;
+        await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
+        this.addVariableJSON(JSON.stringify(variables));
+
+        this.loadingConfiguration = RemoteData.notAsked();
       } catch (error) {
         console.error(error);
+        this.loadingConfiguration = RemoteData.notAsked();
         this.model.notification.show('Unable to load configuration. Please contact an administrator', 'warning', 2000);
       }
+      this.notify();
     }
   }
 
