@@ -58,6 +58,6 @@ describe('Public Configuration Test Suite', () => {
         'http://local:2000/d-solo/HBa9akknk/dd?orgId=1&panelId=10&refresh=5s&theme=light'
       ]
     };
-    assert.deepStrictEqual(_getGrafanaConfig({http: {hostname: 'local'}, grafana: {port: 2000}}), expectedConf);
+    assert.deepStrictEqual(_getGrafanaConfig({grafana: {url: 'http://local:2000'}}), expectedConf);
   });
 });

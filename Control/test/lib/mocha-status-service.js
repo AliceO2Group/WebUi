@@ -115,34 +115,34 @@ describe('StatusService test suite', () => {
   });
 
   describe('Test Grafana Status', async () => {
-    const config = {grafana: {port: 8082}, http: {hostname: 'localh'}};
-    const expectedInfo = {hostname: 'localh', port: 8082};
+    const config = {grafana: {url: 'http://localhost:8084'}};
+    const expectedInfo = {protocol: 'http:', hostname: 'localhost', port: 8084};
 
     it('should successfully retrieve status and info about Grafana that it is running', async () => {
       const status = new StatusService(config, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
-      nock(`http://${config.http.hostname}:${config.grafana.port}`)
+      nock(config.grafana.url)
         .get('/api/health')
         .reply(200, {});
-      expectedInfo.status = {ok: true, configured: true};
-      assert.deepStrictEqual(grafanaStatus, expectedInfo);
+      assert.deepStrictEqual(grafanaStatus.status, {ok: true, configured: true});
+      assert.equal(grafanaStatus.protocol, expectedInfo.protocol);
+      assert.equal(grafanaStatus.hostname,  expectedInfo.hostname);
+      assert.equal(grafanaStatus.port,  expectedInfo.port);
     });
 
     it('should successfully retrieve status and info about AliECS that it is not running', async () => {
       const status = new StatusService(config, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
-      nock(`http://${config.http.hostname}:${config.grafana.port}`)
+      nock(config.grafana.url)
         .get('/api/health')
         .replyWithError('Unable to connect');
-      expectedInfo.status = {ok: false, configured: true, message: 'Error: Unable to connect'};
-      assert.deepStrictEqual(grafanaStatus, expectedInfo);
+      assert.deepStrictEqual(grafanaStatus.status, {ok: false, configured: true, message: 'Error: Unable to connect'});
     });
 
     it('should successfully return that grafana was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
-      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
-      assert.deepStrictEqual(grafanaStatus, expected);
+      assert.deepEqual(grafanaStatus.status, {ok: false, configured: false, message: 'This service was not configured'});
     });
   });
 

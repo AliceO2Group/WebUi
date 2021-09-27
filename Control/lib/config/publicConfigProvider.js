@@ -68,8 +68,8 @@ function getConsulConfig(config) {
  * @return {JSON}
  */
 function _getGrafanaConfig(config) {
-  if (config?.grafana && config?.http?.hostname && config?.grafana?.port) {
-    const hostPort = `http://${config.http.hostname}:${config.grafana.port}`;
+  if (config?.grafana && config?.grafana?.url) {
+    const hostPort = config.grafana.url;
     const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=6';
     const plotReadoutRate = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=8';
     const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/readout?orgId=1&panelId=4';

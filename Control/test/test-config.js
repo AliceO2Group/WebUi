@@ -55,7 +55,6 @@ module.exports = {
     port:8081
   },
   grafana: {
-    hostname: 'localhost',
-    port: 2020
+    url: 'http://localhost:2020'
   }
 };

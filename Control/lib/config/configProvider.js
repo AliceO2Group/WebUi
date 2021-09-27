@@ -42,4 +42,8 @@ const config = require(configFile);
 Log.configure(config);
 log.info(`Read config file "${configFile}"`);
 
+// Add Grafana URL to frame-src CSP
+config.http.iframeCsp = (config?.grafana?.url) ? [ config.grafana.url ] : [];
+log.debug("Setting frame-src CSP ", config.http.iframeCsp);
+
 module.exports = config;
