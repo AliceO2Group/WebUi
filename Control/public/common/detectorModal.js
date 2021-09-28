@@ -28,7 +28,7 @@ const detectorsModal = (model) =>
         h('h4', 'Select your detector view'),
         h('label', {style: 'font-style: italic;'}, 'Displayed data will be filtered based on your selection')
       ]),
-      h('.w-100.flex-row', {style: 'flex-wrap: wrap'}, [
+      h('.w-100.flex-row', {style: 'flex-wrap: wrap; justify-content:center'}, [
         model.detectors.listRemote.match({
           NotAsked: () => null,
           Loading: () => h('.w-100.text-center', loading(2)),
@@ -41,6 +41,7 @@ const detectorsModal = (model) =>
       h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
         h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
           h(`button.btn.btn-default.w-100`, {
+            id: `GLOBALViewButton`,
             onclick: () => model.setDetectorView('GLOBAL'),
           }, 'GLOBAL'),
           h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
@@ -59,6 +60,7 @@ const detectorsModal = (model) =>
 const detectorsList = (model, list) =>
   list.map((detector) => h('.w-25.pv3.text-center.f3',
     h('button.btn.btn-default.w-70', {
+      id: `${detector}ViewButton`,
       onclick: () => model.setDetectorView(detector)
     }, detector)
   ));

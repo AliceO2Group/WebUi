@@ -23,7 +23,6 @@ const {spawn} = require('child_process');
 const {coreGRPCServer} = require('./config/core-grpc.js');
 const {apricotGRPCServer} = require('./config/apricot-grpc.js');
 
-
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
 // https://mochajs.org/
@@ -60,7 +59,7 @@ describe('Control', function() {
     this.ok = true;
 
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
     page = await browser.newPage();
 
     // Listen to browser
@@ -99,6 +98,31 @@ describe('Control', function() {
     }
   });
 
+  it('should select detector view GLOBAL and redirect to environments page', async() => {
+    const [label] = await page.$x(`//div/button[@id="GLOBALViewButton"]`);
+    if (label) {
+      await label.click();
+      await page.waitForTimeout(200);
+      const location = await page.evaluate(() => window.location);
+      assert.strictEqual(location.search, '?page=environments','nu vreeeeea');
+    } else {
+      assert.ok(false, `Unable to click GLOBAL View`);
+    }
+  });
+
+  it('should successfully set selected detector', async() => {
+    const selected = await page.evaluate(() => window.model.detectors.selected);
+    assert.strictEqual(selected, 'GLOBAL');
+  });
+
+  it ('should successfully display detector view header', async() => {
+    const detectorViewLabel = await page.evaluate(() => {
+      return document.querySelector(
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > h4').innerText;
+    });
+    assert.strictEqual(detectorViewLabel, 'Detector View: GLOBAL')
+  });
+
   it('should have correctly load COG configuration', async () => {
     const cog = await page.evaluate(() => window.COG);
     const expectedConf = {
@@ -125,7 +149,7 @@ describe('Control', function() {
         qcPrefix: "localhost:8550/test/o2/qc/components/",
         readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
-      REFRESH_TASK: 10000,
+      REFRESH_TASK: 5000,
       REFRESH_ENVS: 10000,
     }
     assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');
@@ -133,7 +157,7 @@ describe('Control', function() {
 
   it('should have redirected to default page "/?page=environments"', async () => {
     const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=environments');
+    assert.ok(location.search === '?page=environments');
   });
 
   require('./public/page-new-environment-mocha');

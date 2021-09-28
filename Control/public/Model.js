@@ -94,6 +94,10 @@ export default class Model extends Observable {
    * * wait for use to make their selection
    */
   async init() {
+    if (!this.router.params.page) {
+      // if page is loaded as host:port only a default route has to bepassed
+      this.router.go('?page=environments');
+    }
     await this.detectors.init();
     if (this.detectors.selected) {
       this.handleLocationChange();

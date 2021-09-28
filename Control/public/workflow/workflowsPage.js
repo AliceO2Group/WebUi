@@ -41,17 +41,17 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
-  detectorHeader(model),
-  h('.p2',
-    model.workflow.repoList.match({
-      NotAsked: () => null,
-      Loading: () => pageLoading(),
-      Success: (repoList) => (repoList.repos.length === 0)
-        ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
-      Failure: (error) => errorPage(error),
-    })
-  )
+export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
+  // detectorHeader(model),
+  // h('.p2',
+  model.workflow.repoList.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (repoList) => (repoList.repos.length === 0)
+      ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
+    Failure: (error) => errorPage(error),
+  })
+  // )
 ]);
 
 /**
