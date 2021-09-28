@@ -16,6 +16,7 @@ import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject} from './../common/utils.js';
+import {detectorHeader} from '../common/detectorHeader.js';
 
 /**
  * @file Page to show a list of environments (content and header)
@@ -42,6 +43,7 @@ export const header = (model) => [
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+  detectorHeader(model),
   model.environment.list.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),

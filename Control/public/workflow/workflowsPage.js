@@ -19,6 +19,7 @@ import mainPanel from './panels/variables/mainPanel.js';
 import advancedVarsPanel from './panels/variables/advancedPanel.js';
 import flpSelectionPanel from './panels/flps/flpSelectionPanel.js';
 import detectorsPanel from './panels/flps/detectorsPanel.js';
+import {detectorHeader} from './../common/detectorHeader.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -40,14 +41,17 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
-  model.workflow.repoList.match({
-    NotAsked: () => null,
-    Loading: () => pageLoading(),
-    Success: (repoList) => (repoList.repos.length === 0)
-      ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
-    Failure: (error) => errorPage(error),
-  })
+export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+  detectorHeader(model),
+  h('.p2',
+    model.workflow.repoList.match({
+      NotAsked: () => null,
+      Loading: () => pageLoading(),
+      Success: (repoList) => (repoList.repos.length === 0)
+        ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
+      Failure: (error) => errorPage(error),
+    })
+  )
 ]);
 
 /**
