@@ -19,7 +19,6 @@ import mainPanel from './panels/variables/mainPanel.js';
 import advancedVarsPanel from './panels/variables/advancedPanel.js';
 import flpSelectionPanel from './panels/flps/flpSelectionPanel.js';
 import detectorsPanel from './panels/flps/detectorsPanel.js';
-import {detectorHeader} from './../common/detectorHeader.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';

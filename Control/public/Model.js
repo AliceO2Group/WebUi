@@ -91,11 +91,11 @@ export default class Model extends Observable {
   /**
    * If no detector view is selected:
    * * load a list of detectors
-   * * wait for use to make their selection
+   * * wait for user to make their selection
    */
   async init() {
     if (!this.router.params.page) {
-      // if page is loaded as host:port only a default route has to bepassed
+      // if page is loaded as host:port only, a default route has to be passed
       this.router.go('?page=environments');
     }
     await this.detectors.init();
