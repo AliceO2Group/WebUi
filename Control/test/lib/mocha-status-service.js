@@ -116,7 +116,7 @@ describe('StatusService test suite', () => {
 
   describe('Test Grafana Status', async () => {
     const config = {grafana: {url: 'http://localhost:8084'}};
-    const expectedInfo = {protocol: 'http:', hostname: 'localhost', port: 8084};
+    const expectedInfo = {protocol: 'http:', hostname: 'localhost', port: '8084'};
 
     it('should successfully retrieve status and info about Grafana that it is running', async () => {
       const status = new StatusService(config, {}, {});
@@ -125,9 +125,9 @@ describe('StatusService test suite', () => {
         .get('/api/health')
         .reply(200, {});
       assert.deepStrictEqual(grafanaStatus.status, {ok: true, configured: true});
-      assert.equal(grafanaStatus.protocol, expectedInfo.protocol);
-      assert.equal(grafanaStatus.hostname,  expectedInfo.hostname);
-      assert.equal(grafanaStatus.port,  expectedInfo.port);
+      assert.strictEqual(grafanaStatus.protocol, expectedInfo.protocol);
+      assert.strictEqual(grafanaStatus.hostname,  expectedInfo.hostname);
+      assert.strictEqual(grafanaStatus.port,  expectedInfo.port);
     });
 
     it('should successfully retrieve status and info about AliECS that it is not running', async () => {
@@ -142,7 +142,7 @@ describe('StatusService test suite', () => {
     it('should successfully return that grafana was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
-      assert.deepEqual(grafanaStatus.status, {ok: false, configured: false, message: 'This service was not configured'});
+      assert.deepStrictEqual(grafanaStatus.status, {ok: false, configured: false, message: 'This service was not configured'});
     });
   });
 
