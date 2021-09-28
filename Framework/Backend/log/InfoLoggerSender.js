@@ -31,9 +31,9 @@ class InfoLoggerSender {
     this.path = '/opt/o2-InfoLogger/bin/o2-infologger-log';
     fs.access(this.path, fs.constants.X_OK, (err) => {
       if (err) {
-        winston.debug('[ILSender] InfoLogger executable not found');
+        this.winston.debug('[ILSender] InfoLogger executable not found');
       } else {
-        winston.debug('[ILSender] Created instance of InfoLogger sender');
+        this.winston.debug('[ILSender] Created instance of InfoLogger sender');
         this.configured = true;
       }
     });
