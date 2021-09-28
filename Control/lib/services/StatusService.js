@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
+const url = require('url');
 const projPackage = require('../../package.json');
 const {httpGetJson} = require('./../utils.js');
 
@@ -101,11 +102,10 @@ class StatusService {
    */
   async getGrafanaStatus() {
     let grafana = {};
-    if (this.config?.http?.hostname && this.config?.grafana?.port) {
-      grafana = this.config.grafana;
-      grafana.hostname = this.config.http.hostname;
+    if (this.config?.grafana?.url) {
+      grafana = url.parse(this.config.grafana.url)
       try {
-        await httpGetJson(this.config.http.hostname, this.config.grafana.port, '/api/health');
+        await httpGetJson(grafana.hostname, grafana.port, '/api/health');
         grafana.status = {ok: true, configured: true};
       } catch (error) {
         grafana.status = {ok: false, configured: true, message: error.toString()};
