@@ -43,4 +43,8 @@ const VAR_TYPE = {
   JSON: 'JSON',
 }
 
-export {PREFIX, WIDGET_VAR, VAR_TYPE};
+const STORAGE = {
+  DETECTOR: 'DETECTOR'
+}
+
+export {PREFIX, WIDGET_VAR, VAR_TYPE, STORAGE};
