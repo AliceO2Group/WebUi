@@ -31,9 +31,9 @@ class InfoLoggerSender {
     this.path = '/opt/o2-InfoLogger/bin/o2-infologger-log';
     fs.access(this.path, fs.constants.X_OK, (err) => {
       if (err) {
-        winston.instance.debug('[ILSender] InfoLogger executable not found');
+        this.winston.debug('[ILSender] InfoLogger executable not found');
       } else {
-        winston.instance.debug('[ILSender] Created instance of InfoLogger sender');
+        this.winston.debug('[ILSender] Created instance of InfoLogger sender');
         this.configured = true;
       }
     });
@@ -51,7 +51,7 @@ class InfoLoggerSender {
       log = this._removeNewLinesAndTabs(log);
       execFile(this.path, [
         `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
-      ], function(error, stdout, stderr) {
+      ], (error, stdout, stderr) => {
         if (error) {
           this.winston.debug(`[ILSender] Impossible to write a log to InfoLogger due to: ${error}`);
         }

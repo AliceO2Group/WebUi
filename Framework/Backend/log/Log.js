@@ -35,7 +35,7 @@ class Log {
       winston.instance.debug('Created default instance of console logger');
     }
     if (!infologger) {
-      infologger = new InfoLoggerSender(winston);
+      infologger = new InfoLoggerSender(winston.instance);
     }
   }
 
