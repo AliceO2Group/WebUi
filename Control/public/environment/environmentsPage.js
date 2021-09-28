@@ -97,14 +97,28 @@ const environmentsTable = (model, list) => {
           style: 'font-weight: bold; text-align: center;'
         }, item.state
         ),
-        h('td', {style: 'text-align: center;'},
-          h('button.btn.btn-primary', {
-            title: 'Open the environment page with more details',
-            onclick: () => model.router.go(`?page=environment&id=${item.id}`),
-          }, 'Details')
-        )
+        h('td', {style: 'text-align: center;'}, actionsCell(model, item))
       ]),
       ),
     ]),
   ]);
 };
+
+/**
+ * Return a button if detector of the environment is among
+ * the ones belonging the environment
+ * @param {Object} model
+ * @param {JSON} item
+ * @return {vnode}
+ */
+const actionsCell = (model, item) => {
+  const isDetectorIncluded = item.includedDetectors.includes(model.detectors.selected);
+  if (isDetectorIncluded || model.detectors.selected === 'GLOBAL') {
+    return h('button.btn.btn-primary', {
+      title: 'Open the environment page with more details',
+      onclick: () => model.router.go(`?page=environment&id=${item.id}`),
+    }, 'Details')
+  } else {
+    return h('', '')
+  }
+}
