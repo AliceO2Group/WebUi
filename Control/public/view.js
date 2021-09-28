@@ -44,6 +44,7 @@ import {
   content as taskContent,
   header as taskHeader
 } from './task/taskPage.js';
+import {detectorsModal} from './common/detectorModal.js';
 
 /**
  * Main view layout
@@ -52,6 +53,7 @@ import {
  */
 export default (model) => [
   notification(model.notification),
+  detectorsModal(model),
   h('.flex-column absolute-fill', [
     header(model),
     h('.flex-grow flex-row', [

@@ -49,7 +49,7 @@ export const header = (model) => [
 export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
-    Loading: () => pageLoading(),
+    Loading: () => h('.w-100.text-center', pageLoading()),
     Success: (data) => showContent(model.environment, data.environment),
     Failure: (error) => errorPage(error),
   })

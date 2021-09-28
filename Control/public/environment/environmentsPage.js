@@ -16,6 +16,7 @@ import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject} from './../common/utils.js';
+import {detectorHeader} from '../common/detectorHeader.js';
 
 /**
  * @file Page to show a list of environments (content and header)
@@ -42,6 +43,7 @@ export const header = (model) => [
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
+  detectorHeader(model),
   model.environment.list.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
@@ -97,14 +99,28 @@ const environmentsTable = (model, list) => {
           style: 'font-weight: bold; text-align: center;'
         }, item.state
         ),
-        h('td', {style: 'text-align: center;'},
-          h('button.btn.btn-primary', {
-            title: 'Open the environment page with more details',
-            onclick: () => model.router.go(`?page=environment&id=${item.id}`),
-          }, 'Details')
-        )
+        h('td', {style: 'text-align: center;'}, actionsCell(model, item))
       ]),
       ),
     ]),
   ]);
 };
+
+/**
+ * Return a button if detector of the environment is among
+ * the ones belonging the environment
+ * @param {Object} model
+ * @param {JSON} item
+ * @return {vnode}
+ */
+const actionsCell = (model, item) => {
+  const isDetectorIncluded = item.includedDetectors.includes(model.detectors.selected);
+  if (isDetectorIncluded || model.detectors.selected === 'GLOBAL') {
+    return h('button.btn.btn-primary', {
+      title: 'Open the environment page with more details',
+      onclick: () => model.router.go(`?page=environment&id=${item.id}`),
+    }, 'Details')
+  } else {
+    return h('', '')
+  }
+}

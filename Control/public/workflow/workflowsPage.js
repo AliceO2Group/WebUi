@@ -41,6 +41,8 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
  * @return {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
+  // detectorHeader(model),
+  // h('.p2',
   model.workflow.repoList.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
@@ -48,6 +50,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
       ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
     Failure: (error) => errorPage(error),
   })
+  // )
 ]);
 
 /**

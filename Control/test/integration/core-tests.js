@@ -49,6 +49,23 @@ describe('Control', function() {
     }
   });
 
+  it('should select detector view GLOBAL and redirect to environments page', async() => {
+    const [label] = await page.$x(`//div/button[@id="GLOBALViewButton"]`);
+    if (label) {
+      await label.click();
+      await page.waitForTimeout(200);
+      const location = await page.evaluate(() => window.location);
+      assert.strictEqual(location.search, '?page=environments','nu vreeeeea');
+    } else {
+      assert.ok(false, `Unable to click GLOBAL View`);
+    }
+  });
+
+  it('should successfully set selected detector', async() => {
+    const selected = await page.evaluate(() => window.model.detectors.selected);
+    assert.strictEqual(selected, 'GLOBAL');
+  });
+
   it('should have redirected to default page "/?page=environments"', async () => {
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments', 'Could not load home page of AliECS GUI');
