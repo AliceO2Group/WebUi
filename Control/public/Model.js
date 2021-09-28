@@ -194,6 +194,19 @@ export default class Model extends Observable {
   }
 
   /**
+   * Reset detector view by:
+   * * removing current selection
+   * * retrieving a list of detectors
+   * * opening modal and allowing the user to make a new selection
+   */
+  async resetDetectorView() {
+    this.detectors.saveSelection('');
+    this.notify();
+    await this.detectors.init();
+    this.notify();
+  }
+
+  /**
    * Display a browser notification(Notification - Web API)
    * @param {String} message
    */

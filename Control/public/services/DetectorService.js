@@ -55,6 +55,7 @@ export default class DetectorService extends Observable {
   saveSelection(detector) {
     this._selected = detector;
     this.storage.setLocalItem(STORAGE.DETECTOR, {SELECTED: detector});
+    this.notify();
   }
 
   /**

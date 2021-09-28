@@ -21,39 +21,34 @@ import loading from './loading.js';
  * @param {Object} model
  * @return {vnode}
  */
-const detectorsModal = (model) => {
-  const selected = model.detectors.selected;
-  if (!selected) {
-    const detectors = model.detectors.listRemote;
-    return h('.o2-modal',
-      h('.o2-modal-content', [
-        h('.p2.text-center', [
-          h('h4', 'Select your detector view'),
-          h('label', {style: 'font-style: italic;'}, 'Displayed data will be filtered based on your selection')
-        ]),
-        h('.w-100.flex-row', {style: 'flex-wrap: wrap'}, [
-          detectors.match({
-            NotAsked: () => null,
-            Loading: () => h('.w-100.text-center', loading(2)),
-            Success: (data) => detectorsList(model, data),
-            Failure: (_) => h('.w-100.text-center.danger', [
-              iconCircleX(), ' Unable to load list of detectors. Use GLOBAL View'
-            ])
-          })
-        ]),
-        h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
-          h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-            h(`button.btn.btn-default.w-100`, {
-              onclick: () => model.setDetectorView('GLOBAL'),
-            }, 'GLOBAL'),
-            h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
-              'Use GLOBAL view to make use of data from all detectors')
+const detectorsModal = (model) =>
+  !model.detectors.selected && h('.o2-modal',
+    h('.o2-modal-content', [
+      h('.p2.text-center', [
+        h('h4', 'Select your detector view'),
+        h('label', {style: 'font-style: italic;'}, 'Displayed data will be filtered based on your selection')
+      ]),
+      h('.w-100.flex-row', {style: 'flex-wrap: wrap'}, [
+        model.detectors.listRemote.match({
+          NotAsked: () => null,
+          Loading: () => h('.w-100.text-center', loading(2)),
+          Success: (data) => detectorsList(model, data),
+          Failure: (_) => h('.w-100.text-center.danger', [
+            iconCircleX(), ' Unable to load list of detectors. Use GLOBAL View'
           ])
-        )
-      ])
-    );
-  }
-};
+        })
+      ]),
+      h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
+        h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
+          h(`button.btn.btn-default.w-100`, {
+            onclick: () => model.setDetectorView('GLOBAL'),
+          }, 'GLOBAL'),
+          h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
+            'Use GLOBAL view to make use of data from all detectors')
+        ])
+      )
+    ])
+  );
 
 /**
  * Build a wrapped list of detector buttons
