@@ -55,8 +55,7 @@ module.exports = {
     port:8081
   },
   grafana: {
-    hostname: 'localhost',
-    port: 2020
+    url: 'http://localhost:2020'
   },
   utils: {
     refreshTask: 5000, // how often should task list page should refresh its content

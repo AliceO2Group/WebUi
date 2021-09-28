@@ -25,8 +25,7 @@ module.exports = {
     package: 'apricot'
   },
   grafana: {
-    hostname: 'localhost',
-    port: 3000
+    url: 'http://localhost:3000'
   },
   kafka: {
     hostnames: 'localhost', // can be a string with multiple hostnames delimited by comma

@@ -42,7 +42,7 @@ describe('Logging: InfoLogger sender', () => {
   let sender;
   before(() => {
     const winston = new Winston();
-    sender = new InfoLoggerSender(winston, config.log.infologger.sender);
+    sender = new InfoLoggerSender(winston.instance, config.log.infologger.sender);
   })
   it('Send log over named socket', function() {
     if (skip) {

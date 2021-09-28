@@ -23,6 +23,7 @@ const api = require('./lib/api.js');
 
 buildPublicConfig(config);
 
+config.http.iframeCsp = (config?.grafana?.url) ? [ config.grafana.url ] : [];
 const http = new HttpServer(config.http, config.jwt, config.openId);
 const ws = new WebSocket(http);
 http.addStaticPath(path.join(__dirname, 'public'));

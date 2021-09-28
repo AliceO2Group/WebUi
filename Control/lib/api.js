@@ -95,7 +95,8 @@ module.exports.setup = (http, ws) => {
   );
   http.get('/status/core/services',
     (req, res, next) => ctrlService.isConnectionReady(req, res, next),
-    (_, res) => statusService.getIntegratedServicesInfo().then((data) => res.status(200).json(data))
+    (_, res) => statusService.getIntegratedServicesInfo().then((data) => res.status(200).json(data)),
+    { public: true }
   );
 
   // Consul

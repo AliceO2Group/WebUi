@@ -44,7 +44,8 @@ class HttpServer {
     this.limit = (!httpConfig.limit) ? '100kb' : httpConfig.limit;
 
     this.app = express();
-    this.configureHelmet(httpConfig.hostname);
+
+    this.configureHelmet(httpConfig.hostname, httpConfig.iframeCsp);
 
     this.jwt = new JwtToken(jwtConfig);
     if (connectIdConfig) {
@@ -126,9 +127,10 @@ class HttpServer {
   /**
    * Configures Helmet rules to increase web app secuirty
    * @param {string} hostname whitelisted hostname for websocket connection
+   * @param {list}   iframeCsp list of URLs for frame-src CSP
    * @param {number} port secure port number
    */
-  configureHelmet(hostname) {
+  configureHelmet(hostname, iframeCsp = []) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -150,7 +152,8 @@ class HttpServer {
         defaultSrc: ["'self'", "data:", hostname + ':*'],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'http://' + hostname + ':*', 'https://' + hostname + ':*', 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*']
+        connectSrc: ["'self'", 'http://' + hostname + ':*', 'https://' + hostname + ':*', 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*'],
+        frameSrc: iframeCsp
         /* eslint-enable */
       }
     }));
