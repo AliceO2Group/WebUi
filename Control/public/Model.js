@@ -23,6 +23,7 @@ import FrameworkInfo from './frameworkinfo/FrameworkInfo.js';
 import Workflow from './workflow/Workflow.js';
 import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
+import DetectorService from './services/DetectorService.js';
 
 /**
  * Root of model tree
@@ -60,15 +61,17 @@ export default class Model extends Observable {
     this.frameworkInfo = new FrameworkInfo(this);
     this.frameworkInfo.bubbleTo(this);
 
-    this.notification = new O2Notification(this);
-    this.notification.bubbleTo(this);
-    this.checkBrowserNotificationPermissions();
-
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
-    this.handleLocationChange(); // Init first page
+
+    // services
+    this.detectors = new DetectorService(this);
+
+    this.notification = new O2Notification(this);
+    this.notification.bubbleTo(this);
+    this.checkBrowserNotificationPermissions();
 
     // Setup WS connexion
     this.ws = new WebSocketClient();
@@ -78,8 +81,24 @@ export default class Model extends Observable {
     // Load some initial data
     this.lock.synchronizeState();
 
+    // General visuals
     this.accountMenuEnabled = false;
     this.sideBarMenu = true;
+
+    this.init();
+  }
+
+  /**
+   * If no detector view is selected:
+   * * load a list of detectors
+   * * wait for use to make their selection
+   */
+  async init() {
+    await this.detectors.init();
+    if (this.detectors.selected) {
+      this.handleLocationChange();
+    }
+    this.notify();
   }
 
   /**
@@ -160,6 +179,17 @@ export default class Model extends Observable {
    */
   toggleSideBarMenu() {
     this.sideBarMenu = !this.sideBarMenu;
+    this.notify();
+  }
+
+  /**
+   * Update detector selection view
+   * @param {String} detector
+   * @returns {vnode}
+   */
+  setDetectorView(detector) {
+    this.detectors.saveSelection(detector);
+    this.handleLocationChange();
     this.notify();
   }
 
