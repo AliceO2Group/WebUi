@@ -39,5 +39,8 @@
   "consul": {
     "hostname": "test",
     "port": 8500
+  },
+  "kafka": {
+    "brokers": ["kafka-broker:1234"]
   }
 }
