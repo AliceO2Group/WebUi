@@ -34,6 +34,7 @@ class KafkaConnector {
     });
     this.consumer = null;
     this.webSocket = null;
+    log.info('Kafka connector configured');
   }
 
   /**
@@ -44,16 +45,18 @@ class KafkaConnector {
     return Promise.resolve()
       .then(() => producer.connect())
       .then(() => producer.send({topic: topic,messages: [{value: message}]}))
-      .then(() => producer.disconnect());
+      .then(() => producer.disconnect())
+      .catch(() => log.error('Unable to produce Kafka message'));
   }
 
   /**
    * Sends notification to mattermost channel
    * @param {string} title Title of notification
    * @param {string} body  Body of notification
+   * @param {url}    url   URL referencing notification
    */
-  sendToMattermost(title, body) {
-    return this._send('mattermost', JSON.stringify({description: `**${title}**\n${body}`, client_url: 'none', details: 'no details'}))
+  sendToMattermost(title, body, url = '') {
+    return this._send('mattermost', JSON.stringify({description: `**${title}**`, client_url: url, details: body}))
   }
 
   /**
@@ -77,8 +80,14 @@ class KafkaConnector {
       .then(() => this.consumer.subscribe({topic: 'webnotification', fromBeginning: false}))
       .then(() => {
         return this.consumer.run({eachMessage: async ({topic, partition, message}) => {
-          this.webSocket.broadcast(new WebSocketMessage().setCommand('notification').setPayload(message.value.toString()));
+          log.debug(`Received message on ${topic} topic from ${partition} partition`)
+          this.webSocket.broadcast(
+            new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
+          );
         }})
-      });
+      })
+      .catch(() => log.error('Unable to consume Kafka messages'));
   }
 }
+
+module.exports = KafkaConnector;
