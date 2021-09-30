@@ -14,9 +14,7 @@
 
 import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
-import loading from '../common/loading.js';
 import errorPage from '../common/errorPage.js';
-import errorComponent from '../common/errorComponent.js';
 import {detectorHeader} from '../common/detectorHeader.js';
 import {iconLockLocked, iconLockUnlocked, iconCloudDownload, iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 
@@ -75,7 +73,7 @@ const getListOfTasks = (model, task) =>
   task.detectorPanels.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showContent(model, data, task),
+    Success: (data) => showContent(model, data),
     Failure: (error) => errorPage(error),
   })
 
@@ -87,13 +85,10 @@ const getListOfTasks = (model, task) =>
  * @param {Task} task 
  * @returns {vnode}
  */
-const showContent = (model, items, task) => (items && Object.keys(items).length > 0)
-  ? h('.scroll-y.absolute-fill.text-left.p2', {
+const showContent = (model, items) =>
+  h('.scroll-y.absolute-fill.text-left.p2', {
     style: 'top:40px',
-    oncreate: (vnode) => vnode.dom.scrollTop = task.scrollTop,
-    onremove: (vnode) => task.scrollTop = vnode.dom.scrollTop,
   }, h('.w-100', detectorPanels(model, items)))
-  : h('h3.m4', ['No tasks were found']);
 
 /**
  * Build a list of panels per detector with hosts and their respective tasks
@@ -102,15 +97,17 @@ const showContent = (model, items, task) => (items && Object.keys(items).length 
  * @returns {vnode}
  */
 const detectorPanels = (model, detectors) => [
-  Object.keys(detectors).map((detector) => h('.w-100', [
-    h('.panel-title.flex-row.p2', [
-      h('h4.w-20', detector),
-      h('.w-80.text-right', toggleDetectorPanel(model, detectors[detector])),
-    ]),
-    detectors[detector].isOpened && h('.panel', [
-      tasksByHostPanel(model, detectors[detector].list)
-    ])
-  ]))
+  Object.keys(detectors)
+    .filter((detector) => (detector === model.detectors.selected || model.detectors.selected === 'GLOBAL'))
+    .map((detector) => h('.w-100', [
+      h('.panel-title.flex-row.p2', [
+        h('h4.w-20', detector),
+        h('.w-80.text-right', toggleDetectorPanel(model, detectors[detector])),
+      ]),
+      detectors[detector].isOpened && h('.panel', [
+        tasksTables(model, detectors[detector].list.payload)
+      ])
+    ]))
 ];
 
 /**
@@ -119,44 +116,25 @@ const detectorPanels = (model, detectors) => [
  * @param {JSON} tasks 
  */
 const toggleDetectorPanel = (model, taskPanel) =>
-  taskPanel.list.match({
-    NotAsked: () => null,
-    Loading: () => h('.w-100.text-right', loading(1.2)),
-    Success: (data) => (Object.keys(data).length === 0) ? h('label', 'No tasks')
-      : h('button.btn', {
-        onclick: () => {
-          taskPanel.isOpened = !taskPanel.isOpened;
-          model.task.notify();
-        }
-      }, taskPanel.isOpened ? iconChevronTop() : iconChevronBottom()),
-    Failure: (error) => h('.w-100.text-right', errorComponent(error)),
-  });
+  !model.task.areTasksInDetector(taskPanel.list.payload) ?
+    h('label', 'No tasks')
+    : h('button.btn', {
+      onclick: () => {
+        taskPanel.isOpened = !taskPanel.isOpened;
+        model.task.notify();
+      }
+    }, taskPanel.isOpened ? iconChevronTop() : iconChevronBottom());
 
 /**
- * Display all running task as table
- * @param {Object} model 
- * @param {RemoteData} tasks 
- * @returns {vnode} 
-*/
-const tasksByHostPanel = (model, tasks) =>
-  tasks.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Success: (data) => Object.keys(data).length > 0 && tasksTables(model, data),
-    Failure: () => null,
-  });
-
-/**
- * 
+ * Display all running task grouped by hosts
  * @param {Object} model
  * @param {Map<String, JSON>} tasks
  * @returns {vnode}
  */
-const tasksTables = (model, tasks) =>
-  Object.keys(tasks).length === 0 ?
-    h('.w-100.text-center', 'No tasks found for this detector')
-    :
-    Object.keys(tasks).map((hostname) => [
+const tasksTables = (model, tasksByHost) =>
+  Object.keys(tasksByHost)
+    .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
+    .map((hostname) => [
       h('.shadow-level1', [
         h('table.table', {
           style: 'white-space: pre-wrap;'
@@ -167,7 +145,7 @@ const tasksTables = (model, tasks) =>
               h('th.flex-row', {style: {'justify-content': 'flex-end'}, colspan: 1},
                 h('a', {
                   title: 'Download Mesos Environment Logs',
-                  href: tasks[hostname].stdout,
+                  href: tasksByHost[hostname].stdout,
                   target: '_blank'
                 }, h('button.btn-sm.primary', iconCloudDownload())
                 )
@@ -175,7 +153,7 @@ const tasksTables = (model, tasks) =>
             ),
             h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
           ),
-          h('tbody', tasks[hostname].list.map((task) => [h('tr', [
+          h('tbody', tasksByHost[hostname].list.map((task) => [h('tr', [
             h('td.w-50', task.name),
             h('td.w-10', task.pid),
             h('td.w-10', {
