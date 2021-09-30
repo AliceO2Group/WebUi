@@ -27,28 +27,56 @@ export default class Task extends Observable {
     super();
     this.model = model;
     this.tasksByFlp = RemoteData.notAsked();
+
     this.cleanUpTasksRequest = RemoteData.notAsked();
     this.cleanUpResourcesRequest = RemoteData.notAsked();
     this.cleanUpResourcesID = 0;
 
     this.scrollTop = 0;
+
+    this.detectorPanels = RemoteData.notAsked(); // JSON containing information on detectors panels; isOpened, list of hosts
   }
 
   /** 
    * Loads list of running tasks from AliECS Core
+   * In global view close all detector panels while in single view open that respective panel
    */
   async initTasks() {
-    this.tasksByFlp = RemoteData.loading();
+    this.detectorPanels = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.post('/api/GetTasks');
     if (!ok) {
-      this.tasksByFlp = RemoteData.failure(result.message);
-      this.model.notification.show(`Unable to retrieve list of tasks`, 'danger', 2000);
+      this.detectorPanels = RemoteData.failure(result.message);
     } else {
       const tasksByFlpMap = getTasksByFlp(result.tasks);
-      this.tasksByFlp = RemoteData.success(tasksByFlpMap);
-      this.model.notification.show('Tasks updated', 'success', 1000);
+      if (this.model.detectors.isSingleView()) {
+        const singleDetector = {};
+        singleDetector[this.model.detectors.selected] = {
+          isOpened: false,
+          list: RemoteData.loading()
+        }
+        this.detectorPanels = RemoteData.success(singleDetector);
+        this._groupTasksByFlpAndDetector(tasksByFlpMap, [this.model.detectors.selected])
+      } else {
+        if (!this.model.detectors.listRemote.isSuccess()) { // request detectors list only if it was not initially
+          await this.model.detectors.getAndSetDetectorsAsRemoteData();
+        }
+        if (this.model.detectors.listRemote.isSuccess()) {
+          const initDetectorPanels = {};
+          this.model.detectors.listRemote.payload.forEach((detector) => {
+            initDetectorPanels[detector] = {
+              isOpened: false,
+              list: RemoteData.loading()
+            }
+          });
+          this.detectorPanels = RemoteData.success(initDetectorPanels);
+          this.notify();
+          this._groupTasksByFlpAndDetector(tasksByFlpMap, this.model.detectors.listRemote.payload);
+        } else {
+          this.detectorPanels = RemoteData.failure('Unable to load detectors from AliECS');
+        }
+      }
     }
     this.notify();
   }
@@ -92,10 +120,15 @@ export default class Task extends Observable {
 
   /**
    * Initialize page and request data
+   * Adds an automatic refresh of the content if another request is not ongoing already
    */
-  getTasks() {
+  async getTasks() {
     this.initTasks();
-    this.refreshInterval = setInterval(() => this.initTasks(), COG.REFRESH_TASK);
+    this.refreshInterval = setInterval(async () => {
+      if (!this.model.loader.active) {
+        await this.initTasks();
+      }
+    }, COG.REFRESH_TASK);
   }
 
   /**
@@ -113,5 +146,34 @@ export default class Task extends Observable {
       }
       this.notify();
     }
+  }
+
+  /**
+   * Given a list of tasks (with host information) and a list of hosts per detector,
+   * group the tasks and return a new map with tasks belonging to hosts belonging to detectors
+   * @param {Map<String, JSON>} tasks
+   * @param {Map<String, Array<String>>} detectors
+   */
+  async _groupTasksByFlpAndDetector(tasksByFlp, detectors) {
+    detectors.map(async (detector) => {
+      let hosts;
+      hosts = await this.model.detectors.getHostsForDetector(detector, hosts, this);
+      if (hosts.isSuccess()) {
+        const taskCopy = JSON.parse(JSON.stringify(tasksByFlp));
+        Object.keys(taskCopy)
+          .filter((host) => !hosts.payload.includes(host))
+          .forEach((host) => delete taskCopy[host]);
+        this.detectorPanels.payload[detector] = {
+          list: RemoteData.success(taskCopy),
+          isOpened: true
+        };
+      } else {
+        this.detectorPanels.payload[detector] = {
+          list: RemoteData.failure(`Unable to retrieve the list of hosts for detector: ${detector}`),
+          isOpened: true
+        };
+      }
+      this.notify();
+    })
   }
 }

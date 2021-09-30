@@ -127,6 +127,8 @@ export default class Model extends Observable {
    * Handle close event from WS when connection has been lost (server restart, etc.)
    */
   handleWSClose() {
+    clearInterval(this.task.refreshInterval);
+    clearInterval(this.environment.refreshInterval);
     this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
   }
 
