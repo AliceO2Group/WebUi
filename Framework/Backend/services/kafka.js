@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const { Kafka } = require('kafkajs')
+const { Kafka, logLevel } = require('kafkajs')
 const WebSocketMessage = require('../websocket/message.js');
 const log = new (require('./../log/Log.js'))(`${process.env.npm_config_log_label ?? 'web-ui'}/kafka`);
 
@@ -25,20 +25,35 @@ class KafkaConnector {
    * @param {object} config Config with list of Kafka brokers
    */
   constructor(config) {
-    if (config?.brokers?.length < 1) {
+    if (!config?.brokers || config.brokers.length < 1) {
       throw new Error(`Kafka broker list was not provided`);
     }
     this.kafka = new Kafka({
       clientId: 'webui',
-      brokers: config.brokers
+      brokers: config.brokers,
+      retry: {retries: 3},
+      logLevel: logLevel.NOTHING
     });
+
+    this.admin = this.kafka.admin();
     this.consumer = null;
     this.webSocket = null;
     log.info('Kafka connector configured');
   }
 
   /**
+   * Provides healthstatus of Kafka cluster
+   */
+  health() {
+    return Promise.resolve()
+      .then(() => this.admin.connect())
+      .then(() => this.admin.disconnect());
+  }
+
+  /**
    * Sends a message to selected topic
+   * @param {string} topic Kafka topic
+   * @param {string} message message to be sent
    */
   _send(topic, message) {
     const producer = this.kafka.producer();
@@ -74,13 +89,13 @@ class KafkaConnector {
   proxyWebNotificationToWs(webSocket) {
     this.webSocket = webSocket;
     this.consumer = this.kafka.consumer({groupId: 'webnotification-group'});
-
+    log.info('Listening for notifications');
     return Promise.resolve()
       .then(() => this.consumer.connect())
       .then(() => this.consumer.subscribe({topic: 'webnotification', fromBeginning: false}))
       .then(() => {
         return this.consumer.run({eachMessage: async ({topic, partition, message}) => {
-          log.debug(`Received message on ${topic} topic from ${partition} partition`)
+          log.debug(`Received message on ${topic} topic from ${partition} partition`);
           this.webSocket.broadcast(
             new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
           );
