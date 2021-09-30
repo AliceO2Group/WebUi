@@ -37,10 +37,10 @@
     }
   },
   "consul": {
-    "hostname": "test",
-    "port": 8500
+    "hostname": "localhost",
+    "port": 8080
   },
   "kafka": {
-    "brokers": ["kafka-broker:1234"]
+    "brokers": ["localhost:9092"]
   }
 }

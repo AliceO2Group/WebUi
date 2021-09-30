@@ -25,7 +25,11 @@ class KafkaConnector {
    * @param {object} config Config with list of Kafka brokers
    */
   constructor(config) {
-    if (!config?.brokers || config.brokers.length < 1) {
+    if (!config) {
+      log.warn('Missing configuration');
+      return;
+    }
+    if (!config.brokers || config.brokers.length < 1) {
       throw new Error(`Kafka broker list was not provided`);
     }
     this.kafka = new Kafka({
@@ -39,6 +43,14 @@ class KafkaConnector {
     this.consumer = null;
     this.webSocket = null;
     log.info('Kafka connector configured');
+  }
+
+  /**
+   * Check if Kafka was correctly configured
+   * @return {boolean}
+   */
+  isConfigured() {
+    return (this.kafka !== undefined && this.admin !== undefined);
   }
 
   /**
