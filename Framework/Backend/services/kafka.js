@@ -47,7 +47,7 @@ class KafkaConnector {
 
   /**
    * Check if Kafka was correctly configured
-   * @return {boolean}
+   * @return {boolean} States wheather service is correctly configured
    */
   isConfigured() {
     return (this.kafka !== undefined && this.admin !== undefined);
@@ -55,6 +55,7 @@ class KafkaConnector {
 
   /**
    * Provides healthstatus of Kafka cluster
+   * @returns {Promise}
    */
   health() {
     return Promise.resolve()
@@ -66,6 +67,7 @@ class KafkaConnector {
    * Sends a message to selected topic
    * @param {string} topic Kafka topic
    * @param {string} message message to be sent
+   * @returns {Promise}
    */
   _send(topic, message) {
     const producer = this.kafka.producer();
@@ -81,6 +83,7 @@ class KafkaConnector {
    * @param {string} title Title of notification
    * @param {string} body  Body of notification
    * @param {url}    url   URL referencing notification
+   * @returns {Promise}
    */
   sendToMattermost(title, body, url = '') {
     return this._send('mattermost', JSON.stringify({description: `**${title}**`, client_url: url, details: body}))
@@ -89,6 +92,7 @@ class KafkaConnector {
   /**
    * Sends message in order to be display in WebUI-based GUI
    * @param {string} message Notification message
+   * @returns {Promise}
    */
   triggerWebNotification(message) {
     return this._send('webnotification', message);
@@ -97,6 +101,7 @@ class KafkaConnector {
   /**
    * Receives notifications from given topic and broadcase them via WebSocket
    * @param {object} webSocket WebSocket server instance
+   * @returns {Promise}
    */
   proxyWebNotificationToWs(webSocket) {
     this.webSocket = webSocket;
@@ -118,6 +123,7 @@ class KafkaConnector {
 
   /**
    * Disconnect consumer from Kafka
+   * @returns {Promise}
    */
   disconnectProxy() {
     return this.consumer.disconnect();
