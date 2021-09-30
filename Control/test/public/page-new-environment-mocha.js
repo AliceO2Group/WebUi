@@ -130,11 +130,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should display error message due to `Control is not locked`', async () => {
     const errorMessage = await page.evaluate(() => {
       const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > p');
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div');
       return {text: errorElement.innerText, classList: errorElement.classList};
     });
     assert.strictEqual(errorMessage.text, ' Request to server failed (403 Forbidden): Control is not locked');
-    assert.deepStrictEqual(errorMessage.classList, {0: 'text-center', 1: 'danger'});
+    assert.deepStrictEqual(errorMessage.classList, {0: 'danger'});
   });
 
   it('should successfully display `Refresh repositories` button', async () => {
@@ -162,11 +162,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should have error of missing revisions for this repository', async () => {
     const errorMessage = await page.evaluate(() => {
       const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div:nth-child(2) > div > p');
-      return {classList: errorElement.classList, text: errorElement.innerText};
+        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > div > div:nth-child(2) > div > div');
+      return {text: errorElement.innerText};
     });
     assert.strictEqual(errorMessage.text.trim(), 'No revisions found for the selected repository');
-    assert.deepStrictEqual(errorMessage.classList, {0: 'text-center', 1: 'danger'});
   });
 
   it('should successfully request LOCK', async () => {

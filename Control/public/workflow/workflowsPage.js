@@ -142,10 +142,10 @@ const templateAreaList = (workflow, repository, revision) =>
     workflow.templates.match({
       NotAsked: () => null,
       Loading: () => h('.w-100.text-center', pageLoading(2)),
-      Failure: (error) => errorComponent(error),
+      Failure: (error) => h('.text-center', errorComponent(error)),
       Success: (templates) =>
         (templates.length === 0)
-          ? errorComponent('No public templates found on this revision.') :
+          ? h('.text-center', errorComponent('No public templates found on this revision.')) :
           h('.shadow-level1.pv1',
             templates.map((template) =>
               h('.flex-row', [
@@ -180,7 +180,7 @@ const actionsPanel = (model) =>
       NotAsked: () => null,
       Loading: () => null,
       Success: (message) => h('.success', message),
-      Failure: (error) => errorComponent(error),
+      Failure: (error) => h('.text-center', errorComponent(error)),
     }),
     btnSaveEnvConfiguration(model),
     ' ',

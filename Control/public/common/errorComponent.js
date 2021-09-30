@@ -21,4 +21,4 @@ import {iconCircleX} from '/js/src/icons.js';
  * @return {vnode}
  */
 export default (message) =>
-  h('p.text-center.danger', iconCircleX(), ' ', message);
+  h('.danger', iconCircleX(), ' ', message);
