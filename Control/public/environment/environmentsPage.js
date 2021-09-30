@@ -115,7 +115,7 @@ const environmentsTable = (model, list) => {
  */
 const actionsCell = (model, item) => {
   const isDetectorIncluded = item.includedDetectors.includes(model.detectors.selected);
-  if (isDetectorIncluded || model.detectors.selected === 'GLOBAL') {
+  if (isDetectorIncluded || !model.detectors.isSingleView()) {
     return h('button.btn.btn-primary', {
       title: 'Open the environment page with more details',
       onclick: () => model.router.go(`?page=environment&id=${item.id}`),

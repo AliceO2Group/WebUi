@@ -48,6 +48,14 @@ export default class DetectorService extends Observable {
   }
 
   /**
+   * Checks if the detector view is single and not global
+   * @returns {boolean}
+   */
+  isSingleView() {
+    return this._selected && this._selected !== 'GLOBAL';
+  }
+
+  /**
    * Update selection for detector view in LocalStorage
    * Format: {SELECTED: <string>}
    * @param {Array<String>} detector
@@ -95,6 +103,23 @@ export default class DetectorService extends Observable {
       item = RemoteData.success(result.detectors);
     }
     this.notify();
+    return item;
+  }
+
+  /**
+   * Given a detector, it will return a RemoteData objects containing the result of query 'GetHostInventory'
+   * @param {String} detector 
+   */
+  async getHostsForDetector(detector, item, that) {
+    item = RemoteData.loading();
+    that.notify();
+    const {result, ok} = await this.model.loader.post(`/api/GetHostInventory`, {detector});
+    if (!ok) {
+      item = RemoteData.failure(result.message);
+    } else {
+      item = RemoteData.success(result.hosts);
+    }
+    that.notify();
     return item;
   }
 
