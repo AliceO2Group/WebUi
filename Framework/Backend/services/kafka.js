@@ -82,7 +82,10 @@ class KafkaConnector {
    * @param {url}    url   URL referencing notification
    * @returns {Promise}
    */
-  sendToMattermost(title, body, url = '') {
+  sendToMattermost(title, body = '', url = '') {
+    if (!title || title.length < 3) {
+      throw new Error('Notification title needs to be at least 3 characters long');
+    }
     return this._send('mattermost', JSON.stringify({description: `**${title}**`, client_url: url, details: body}))
   }
 
@@ -92,6 +95,9 @@ class KafkaConnector {
    * @returns {Promise}
    */
   triggerWebNotification(message) {
+    if (!message || message.length < 3) {
+      throw new Error('Notification message needs to be at least 3 characters long');
+    }
     return this._send('webnotification', message);
   }
 

@@ -43,26 +43,29 @@ describe('Kafka Connector test suite', () => {
 
   /// Remove .skip to actually run tests
   describe.skip('Check integration with Kafka', () => {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    const WebSocket = require('./../websocket/server');
-    const HttpServer = require('./../http/server');
-    const JwtToken = require('./../jwt/token.js');
-    const wsClient = require('ws');
-    let wsServer, http, kafka;
+    let WebSocket, HttpServer, JwtToken, wsClient;
+    let wsServer, http, kafka, jwt, token
+
+    before(() => {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      WebSocket = require('./../websocket/server');
+      HttpServer = require('./../http/server');
+      JwtToken = require('./../jwt/token.js');
+      wsClient = require('ws');
+      kafka = kafka = new KafkaConnector(config.kafka);
+      jwt = new JwtToken(config.jwt);
+      http = new HttpServer(config.http, config.jwt);
+      wsServer = new WebSocket(http);
+      token = jwt.generateToken(0, 'test', 1);
+    });
 
     it('should report health status', async () => {
-      const kafka = new KafkaConnector(config.kafka);
       assert.doesNotThrow(async () => {
         await kafka.health();
       });
     });
 
     it('should send and receive a notification', async () => {
-      const jwt = new JwtToken(config.jwt);
-      kafka = new KafkaConnector(config.kafka);
-      http = new HttpServer(config.http, config.jwt);
-      wsServer = new WebSocket(http);
-      const token = jwt.generateToken(0, 'test', 1);
       const client = new wsClient('ws://localhost:' + config.http.port + '/?token=' + token);
       client.on('message', (message) => {
         const parsed = JSON.parse(message);
@@ -76,6 +79,12 @@ describe('Kafka Connector test suite', () => {
 
       await kafka.proxyWebNotificationToWs(wsServer);
       await kafka.triggerWebNotification('test notification');
+    });
+
+    it('should not send notification with less than 3 chars', async () => {
+      assert.throws(() => {
+        kafka.triggerWebNotification('te');
+      }, new Error('Notification message needs to be at least 3 characters long'));
     });
 
     after(() => {
