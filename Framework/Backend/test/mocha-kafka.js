@@ -32,12 +32,12 @@ describe('Kafka Connector test suite', () => {
 
     it('should successfully create a kafka connector', () => {
       const kafka = new KafkaConnector(config.kafka);
-      assert(kafka.kafka !== undefined);
-      assert.deepStrictEqual(kafka.isConfigured(), true);
+      assert.ok(kafka.kafka !== undefined);
+      assert.strictEqual(kafka.isConfigured(), true);
     });
     it('should return false for kafka not being properly configured', () => {
       const kafka = new KafkaConnector();
-      assert.deepStrictEqual(kafka.isConfigured(), false);
+      assert.strictEqual(kafka.isConfigured(), false);
     });
   });
 
