@@ -13,7 +13,7 @@
 */
 
 const KafkaConnector = require('./../services/kafka.js');
-const config = require('./../config-default.json').kafka;
+const config = require('./../config-default.json');
 const assert = require('assert');
 
 describe('Kafka Connector test suite', () => {
@@ -31,7 +31,7 @@ describe('Kafka Connector test suite', () => {
     });
 
     it('should successfully create a kafka connector', () => {
-      const kafka = new KafkaConnector(config);
+      const kafka = new KafkaConnector(config.kafka);
       assert(kafka.kafka !== undefined);
       assert.deepStrictEqual(kafka.isConfigured(), true);
     });
@@ -39,7 +39,47 @@ describe('Kafka Connector test suite', () => {
       const kafka = new KafkaConnector();
       assert.deepStrictEqual(kafka.isConfigured(), false);
     });
-
   });
 
+  /// Remove .skip to actually run tests
+  describe.skip('Check integration with Kafka', () => {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    const WebSocket = require('./../websocket/server');
+    const HttpServer = require('./../http/server');
+    const JwtToken = require('./../jwt/token.js');
+    const wsClient = require('ws');
+    let wsServer, http, kafka;
+
+    it('should report health status', async () => {
+      const kafka = new KafkaConnector(config.kafka);
+      await kafka.health();
+    });
+
+    it('should send and receive a notification', async () => {
+      const jwt = new JwtToken(config.jwt);
+      kafka = new KafkaConnector(config.kafka);
+      http = new HttpServer(config.http, config.jwt);
+      wsServer = new WebSocket(http);
+      const token = jwt.generateToken(0, 'test', 1);
+      const client = new wsClient('ws://localhost:' + config.http.port + '/?token=' + token);
+      client.on('message', (message) => {
+        const parsed = JSON.parse(message);
+        if (parsed.command == 'authed') {
+          return;
+        }
+        assert.strictEqual(parsed.command, 'notification');
+        assert.strictEqual(parsed.payload, 'test notification');
+        client.terminate();
+      });
+
+      await kafka.proxyWebNotificationToWs(wsServer);
+      await kafka.triggerWebNotification('test notification');
+    });
+
+    after(() => {
+      wsServer.shutdown();
+      http.close();
+      kafka.disconnectProxy();
+    });
+  });
 });

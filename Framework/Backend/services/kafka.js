@@ -115,6 +115,13 @@ class KafkaConnector {
       })
       .catch(() => log.error('Unable to consume Kafka messages'));
   }
+
+  /**
+   * Disconnect consumer from Kafka
+   */
+  disconnectProxy() {
+    return this.consumer.disconnect();
+  }
 }
 
 module.exports = KafkaConnector;
