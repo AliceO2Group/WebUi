@@ -110,7 +110,7 @@ class KafkaConnector {
       log.debug(`Received message on ${topic} topic from ${partition} partition`);
       this.webSocket.broadcast(
         new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
-       );
+      );
     }});
   }
 
