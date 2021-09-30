@@ -52,7 +52,7 @@ describe('Kafka Connector test suite', () => {
 
     it('should report health status', async () => {
       const kafka = new KafkaConnector(config.kafka);
-      assert.doesNotThrow(() => {
+      assert.doesNotThrow(async () => {
         await kafka.health();
       });
     });

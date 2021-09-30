@@ -57,10 +57,9 @@ class KafkaConnector {
    * Provides healthstatus of Kafka cluster
    * @returns {Promise}
    */
-  health() {
-    return Promise.resolve()
-      .then(() => this.admin.connect())
-      .then(() => this.admin.disconnect());
+  async health() {
+    await this.admin.connect();
+    await this.admin.disconnect();
   }
 
   /**
@@ -69,13 +68,11 @@ class KafkaConnector {
    * @param {string} message message to be sent
    * @returns {Promise}
    */
-  _send(topic, message) {
+  async _send(topic, message) {
     const producer = this.kafka.producer();
-    return Promise.resolve()
-      .then(() => producer.connect())
-      .then(() => producer.send({topic: topic,messages: [{value: message}]}))
-      .then(() => producer.disconnect())
-      .catch(() => log.error('Unable to produce Kafka message'));
+    await producer.connect();
+    await producer.send({topic: topic,messages: [{value: message}]});
+    await producer.disconnect();
   }
 
   /**
@@ -103,22 +100,18 @@ class KafkaConnector {
    * @param {object} webSocket WebSocket server instance
    * @returns {Promise}
    */
-  proxyWebNotificationToWs(webSocket) {
+  async proxyWebNotificationToWs(webSocket) {
     this.webSocket = webSocket;
     this.consumer = this.kafka.consumer({groupId: 'webnotification-group'});
     log.info('Listening for notifications');
-    return Promise.resolve()
-      .then(() => this.consumer.connect())
-      .then(() => this.consumer.subscribe({topic: 'webnotification', fromBeginning: false}))
-      .then(() => {
-        return this.consumer.run({eachMessage: async ({topic, partition, message}) => {
-          log.debug(`Received message on ${topic} topic from ${partition} partition`);
-          this.webSocket.broadcast(
-            new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
-          );
-        }})
-      })
-      .catch(() => log.error('Unable to consume Kafka messages'));
+    await this.consumer.connect();
+    await this.consumer.subscribe({topic: 'webnotification', fromBeginning: false});
+    await this.consumer.run({eachMessage: async ({topic, partition, message}) => {
+      log.debug(`Received message on ${topic} topic from ${partition} partition`);
+      this.webSocket.broadcast(
+        new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
+       );
+    }});
   }
 
   /**
