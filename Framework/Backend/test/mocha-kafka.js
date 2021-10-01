@@ -41,6 +41,60 @@ describe('Kafka Connector test suite', () => {
     });
   });
 
+  describe('Check trigger notification param parsing', () => {
+   it('Mattermost notification without mandatory fields should fail', () => {
+      const kafka = new KafkaConnector(config.kafka);
+      assert.throws(() => {
+        kafka.triggerMattermost();
+      }, new Error('Mattermost notification channel needs to be set'));
+
+      assert.throws(() => {
+        kafka.triggerMattermost('channel', 'ti');
+      }, new Error('Mattermost notification title needs to be at least 3 characters long'));
+
+      assert.throws(() => {
+        kafka.triggerMattermost('channel', 'title', '/path?query=a');
+      }, new Error('Mattermost notification URL needs to be correct'));
+    });
+    it('Email notification without mandatory fields should fail', () => {
+      const kafka = new KafkaConnector(config.kafka);
+      assert.throws(() => {
+        kafka.triggerWebNotification();
+      }, new Error('Web notification title needs to be at least 3 characters long'));
+
+      assert.throws(() => {
+        kafka.triggerWebNotification('title');
+      }, new Error('Web notification body needs to be set'));
+
+      assert.throws(() => {
+        kafka.triggerWebNotification('title', 'body', '/path?query=a');
+      }, new Error('Web notification URL needs to be correct'));
+    });
+    it('Email notification without mandatory fields should fail', () => {
+      const kafka = new KafkaConnector(config.kafka);
+      assert.throws(() => {
+        kafka.triggerEmailNotification();
+      }, new Error('Email notification recipients need to be set'));
+
+      assert.throws(() => {
+        kafka.triggerEmailNotification('wrong_email');
+      }, new Error('Notification recipient email address incorrect: wrong_email'));
+
+      assert.throws(() => {
+        kafka.triggerEmailNotification('correct@email.com,wrong_email');
+      }, new Error('Notification recipient email address incorrect: wrong_email'));
+
+      assert.throws(() => {
+        kafka.triggerEmailNotification('email@email.com');
+      }, new Error('Email notification subject needs to be at least 3 characters long'));
+
+      assert.throws(() => {
+        kafka.triggerEmailNotification('email@email.com', 'subject');
+      }, new Error('Email notification body needs to be set'));
+
+    });
+  });
+
   /// Remove .skip to actually run tests
   describe.skip('Check integration with Kafka', () => {
     let WebSocket, HttpServer, JwtToken, wsClient;

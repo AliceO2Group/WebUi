@@ -15,6 +15,7 @@
 const { Kafka, logLevel } = require('kafkajs')
 const WebSocketMessage = require('../websocket/message.js');
 const log = new (require('./../log/Log.js'))(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
+const url = require('url')
 
 /**
  * Gateway for all Kafka notification service
@@ -77,28 +78,70 @@ class KafkaConnector {
 
   /**
    * Sends notification to mattermost channel
-   * @param {string} title Title of notification
-   * @param {string} body  Body of notification
-   * @param {url}    url   URL referencing notification
+   * @param {string} channel Name of mattermost channel (as in channel URL)
+   * @param {string} title   Title of notification
+   * @param {string} link        URL referencing notification
+   * @param {string} extra   Extra message that's displayed after clicking on "i" icon
    * @returns {Promise}
    */
-  sendToMattermost(title, body = '', url = '') {
-    if (!title || title.length < 3) {
-      throw new Error('Notification title needs to be at least 3 characters long');
+  triggerMattermost(channel, title, link, extra) {
+    if (!channel) {
+      throw new Error('Mattermost notification channel needs to be set');
     }
-    return this._send('mattermost', JSON.stringify({description: `**${title}**`, client_url: url, details: body}))
+    if (!title || (title && title.length < 3)) {
+      throw new Error('Mattermost notification title needs to be at least 3 characters long');
+    }
+    if (!link || (link && url.parse(link).host === null)) {
+      throw new Error('Mattermost notification URL needs to be correct');
+    }
+    return this._send('mattermost', JSON.stringify(
+                                      {channel: channel, message: `${title}\n${link}`, extra: extra})
+                                    );
   }
 
   /**
-   * Sends message in order to be display in WebUI-based GUI
+   * Sends notification in order to be display in WebUI-based GUI
    * @param {string} message Notification message
    * @returns {Promise}
    */
-  triggerWebNotification(message) {
-    if (!message || message.length < 3) {
-      throw new Error('Notification message needs to be at least 3 characters long');
+  triggerWebNotification(title, body, link) {
+    if (!title || (title && title.length < 3)) {
+      throw new Error('Web notification title needs to be at least 3 characters long');
     }
-    return this._send('webnotification', message);
+    if (!body) {
+      throw new Error('Web notification body needs to be set');
+    }
+    if (!link || (link && url.parse(link).host === null)) {
+      throw new Error('Web notification URL needs to be correct');
+    }
+    return this._send('webnotification', JSON.stringify({title: title, body: body, url: url}));
+  }
+
+  /**
+   * Sends notification as email
+   * @param {string} recipients Comma separated list of recipients
+   * @param (string subject
+   * @param {string} body
+   *  @returns {Promise}
+   */
+  triggerEmailNotification(recipients, subject, body) {
+     if (!recipients) {
+      throw new Error('Email notification recipients need to be set');
+    }
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    console.log(recipients)
+    for(const email of recipients.split(',')) {
+      if (!re.test(String(email).toLowerCase())) {
+        throw new Error('Notification recipient email address incorrect: ' + email);
+      }
+    }
+    if (!subject || (subject && subject.length < 3)) {
+      throw new Error('Email notification subject needs to be at least 3 characters long');
+    }
+    if (!body) {
+      throw new Error('Email notification body needs to be set');
+    }
+    return this._send('email', JSON.stringify({to_addresses: recipients, body: body, subject: subject}));
   }
 
   /**
