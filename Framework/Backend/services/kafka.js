@@ -88,10 +88,10 @@ class KafkaConnector {
     if (!channel) {
       throw new Error('Mattermost notification channel needs to be set');
     }
-    if (!title || (title && title.length < 3)) {
+    if (!title || title.length < 3) {
       throw new Error('Mattermost notification title needs to be at least 3 characters long');
     }
-    if (!link || (link && url.parse(link).host === null)) {
+    if (!link || url.parse(link).host === null) {
       throw new Error('Mattermost notification URL needs to be correct');
     }
     return this._send('mattermost', JSON.stringify(
@@ -105,13 +105,13 @@ class KafkaConnector {
    * @returns {Promise}
    */
   triggerWebNotification(title, body, link) {
-    if (!title || (title && title.length < 3)) {
+    if (!title || title.length < 3) {
       throw new Error('Web notification title needs to be at least 3 characters long');
     }
     if (!body) {
       throw new Error('Web notification body needs to be set');
     }
-    if (!link || (link && url.parse(link).host === null)) {
+    if (!link || url.parse(link).host === null) {
       throw new Error('Web notification URL needs to be correct');
     }
     return this._send('webnotification', JSON.stringify({title: title, body: body, url: url}));
@@ -136,7 +136,7 @@ class KafkaConnector {
         throw new Error('Notification recipient email address incorrect: ' + email);
       }
     }
-    if (!subject || (subject && subject.length < 3)) {
+    if (!subject || subject.length < 3) {
       throw new Error('Email notification subject needs to be at least 3 characters long');
     }
     if (!body) {
