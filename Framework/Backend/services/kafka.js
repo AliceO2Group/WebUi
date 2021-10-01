@@ -95,8 +95,8 @@ class KafkaConnector {
       throw new Error('Mattermost notification URL needs to be correct');
     }
     return this._send('mattermost', JSON.stringify(
-                                      {channel: channel, message: `${title}\n${link}`, extra: extra})
-                                    );
+      {channel: channel, message: `${title}\n${link}`, extra: extra})
+    );
   }
 
   /**
@@ -125,9 +125,10 @@ class KafkaConnector {
    *  @returns {Promise}
    */
   triggerEmailNotification(recipients, subject, body) {
-     if (!recipients) {
+    if (!recipients) {
       throw new Error('Email notification recipients need to be set');
     }
+    // eslint-disable-next-line max-len
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     console.log(recipients)
     for(const email of recipients.split(',')) {

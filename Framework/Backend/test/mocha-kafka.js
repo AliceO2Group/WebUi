@@ -42,7 +42,7 @@ describe('Kafka Connector test suite', () => {
   });
 
   describe('Check trigger notification param parsing', () => {
-   it('Mattermost notification without mandatory fields should fail', () => {
+    it('Mattermost notification without mandatory fields should fail', () => {
       const kafka = new KafkaConnector(config.kafka);
       assert.throws(() => {
         kafka.triggerMattermost();
