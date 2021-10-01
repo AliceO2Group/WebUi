@@ -84,7 +84,7 @@ class KafkaConnector {
    * @param {string} extra   Extra message that's displayed after clicking on "i" icon
    * @returns {Promise}
    */
-  triggerMattermost(channel, title, link, extra) {
+  sendMattermostNotification(channel, title, link, extra) {
     if (!channel) {
       throw new Error('Mattermost notification channel needs to be set');
     }
@@ -104,7 +104,7 @@ class KafkaConnector {
    * @param {string} message Notification message
    * @returns {Promise}
    */
-  triggerWebNotification(title, body, link) {
+  sendWebNotification(title, body, link) {
     if (!title || title.length < 3) {
       throw new Error('Web notification title needs to be at least 3 characters long');
     }
@@ -124,7 +124,7 @@ class KafkaConnector {
    * @param {string} body
    *  @returns {Promise}
    */
-  triggerEmailNotification(recipients, subject, body) {
+  sendEmailNotification(recipients, subject, body) {
     if (!recipients) {
       throw new Error('Email notification recipients need to be set');
     }

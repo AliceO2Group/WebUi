@@ -45,51 +45,51 @@ describe('Kafka Connector test suite', () => {
     it('Mattermost notification without mandatory fields should fail', () => {
       const kafka = new KafkaConnector(config.kafka);
       assert.throws(() => {
-        kafka.triggerMattermost();
+        kafka.sendMattermostNotification();
       }, new Error('Mattermost notification channel needs to be set'));
 
       assert.throws(() => {
-        kafka.triggerMattermost('channel', 'ti');
+        kafka.sendMattermostNotification('channel', 'ti');
       }, new Error('Mattermost notification title needs to be at least 3 characters long'));
 
       assert.throws(() => {
-        kafka.triggerMattermost('channel', 'title', '/path?query=a');
+        kafka.sendMattermostNotification('channel', 'title', '/path?query=a');
       }, new Error('Mattermost notification URL needs to be correct'));
     });
     it('Email notification without mandatory fields should fail', () => {
       const kafka = new KafkaConnector(config.kafka);
       assert.throws(() => {
-        kafka.triggerWebNotification();
+        kafka.sendWebNotification();
       }, new Error('Web notification title needs to be at least 3 characters long'));
 
       assert.throws(() => {
-        kafka.triggerWebNotification('title');
+        kafka.sendWebNotification('title');
       }, new Error('Web notification body needs to be set'));
 
       assert.throws(() => {
-        kafka.triggerWebNotification('title', 'body', '/path?query=a');
+        kafka.sendWebNotification('title', 'body', '/path?query=a');
       }, new Error('Web notification URL needs to be correct'));
     });
     it('Email notification without mandatory fields should fail', () => {
       const kafka = new KafkaConnector(config.kafka);
       assert.throws(() => {
-        kafka.triggerEmailNotification();
+        kafka.sendEmailNotification();
       }, new Error('Email notification recipients need to be set'));
 
       assert.throws(() => {
-        kafka.triggerEmailNotification('wrong_email');
+        kafka.sendEmailNotification('wrong_email');
       }, new Error('Notification recipient email address incorrect: wrong_email'));
 
       assert.throws(() => {
-        kafka.triggerEmailNotification('correct@email.com,wrong_email');
+        kafka.sendEmailNotification('correct@email.com,wrong_email');
       }, new Error('Notification recipient email address incorrect: wrong_email'));
 
       assert.throws(() => {
-        kafka.triggerEmailNotification('email@email.com');
+        kafka.sendEmailNotification('email@email.com');
       }, new Error('Email notification subject needs to be at least 3 characters long'));
 
       assert.throws(() => {
-        kafka.triggerEmailNotification('email@email.com', 'subject');
+        kafka.sendEmailNotification('email@email.com', 'subject');
       }, new Error('Email notification body needs to be set'));
 
     });
@@ -135,7 +135,7 @@ describe('Kafka Connector test suite', () => {
       });
 
       await kafka.proxyWebNotificationToWs(wsServer);
-      await kafka.triggerWebNotification('title', 'body', 'http://test.cern');
+      await kafka.sendWebNotification('title', 'body', 'http://test.cern');
     });
 
     after(() => {
