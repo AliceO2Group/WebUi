@@ -127,18 +127,15 @@ describe('Kafka Connector test suite', () => {
           return;
         }
         assert.strictEqual(parsed.command, 'notification');
-        assert.strictEqual(parsed.payload, 'test notification');
+        const payload = JSON.parse(parsed.payload);
+        assert.strictEqual(payload.body, 'body');
+        assert.strictEqual(payload.title, 'title');
+        assert.strictEqual(payload.url, 'http://test.cern');
         client.terminate();
       });
 
       await kafka.proxyWebNotificationToWs(wsServer);
-      await kafka.triggerWebNotification('test notification');
-    });
-
-    it('should not send notification with less than 3 chars', async () => {
-      assert.throws(() => {
-        kafka.triggerWebNotification('te');
-      }, new Error('Notification message needs to be at least 3 characters long'));
+      await kafka.triggerWebNotification('title', 'body', 'http://test.cern');
     });
 
     after(() => {

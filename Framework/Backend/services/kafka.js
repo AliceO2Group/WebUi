@@ -114,7 +114,7 @@ class KafkaConnector {
     if (!link || url.parse(link).host === null) {
       throw new Error('Web notification URL needs to be correct');
     }
-    return this._send('webnotification', JSON.stringify({title: title, body: body, url: url}));
+    return this._send('webnotification', JSON.stringify({title: title, body: body, url: link}));
   }
 
   /**
