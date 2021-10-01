@@ -45,7 +45,7 @@ const detectorsModal = (model) =>
             onclick: () => model.setDetectorView('GLOBAL'),
           }, 'GLOBAL'),
           h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
-            'Use GLOBAL view to make use of data from all detectors')
+            'Use GLOBAL view to include multiple detectors')
         ])
       )
     ])
