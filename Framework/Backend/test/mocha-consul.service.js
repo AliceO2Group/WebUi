@@ -14,7 +14,7 @@
 
 /* eslint-disable max-len */
 const ConsulService = require('./../services/consul.service.js');
-const config = require('./test-config.js');
+const config = require('./../config-default.json');
 const assert = require('assert');
 const nock = require('nock');
 
