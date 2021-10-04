@@ -42,9 +42,17 @@ export default class DetectorService extends Observable {
       this._selected = stored.SELECTED;
     } else {
       this._selected = '';
-      this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote);
+      this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote, this);
     }
     this.notify();
+  }
+
+  /**
+   * Checks if the detector view is single and not global
+   * @returns {boolean}
+   */
+  isSingleView() {
+    return this._selected && this._selected !== 'GLOBAL';
   }
 
   /**
@@ -66,9 +74,9 @@ export default class DetectorService extends Observable {
    * Fetch detectors and return it as a remoteData object
    * @param {RemoteData} item
    */
-  async getDetectorsAsRemoteData(item) {
+  async getDetectorsAsRemoteData(item, that) {
     item = RemoteData.loading();
-    this.notify();
+    that.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/ListDetectors`);
     if (!ok) {
@@ -76,8 +84,25 @@ export default class DetectorService extends Observable {
     } else {
       item = RemoteData.success(result.detectors);
     }
-    this.notify();
+    that.notify();
     return item;
+  }
+
+  /**
+   * Fetch detectors and return it as a remoteData object
+   * @param {RemoteData} item
+   */
+  async getAndSetDetectorsAsRemoteData() {
+    this.listRemote = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(`/api/ListDetectors`);
+    if (!ok) {
+      this.listRemote = RemoteData.failure(result.message);
+    } else {
+      this.listRemote = RemoteData.success(result.detectors);
+    }
+    this.notify();
   }
 
   /**
@@ -95,6 +120,24 @@ export default class DetectorService extends Observable {
       item = RemoteData.success(result.detectors);
     }
     this.notify();
+    return item;
+  }
+
+  /**
+   * Given a detector, it will return a RemoteData objects containing the result of query 'GetHostInventory'
+   * @param {String} detector 
+   * @return {RemoteData}
+   */
+  async getHostsForDetector(detector, item, that) {
+    item = RemoteData.loading();
+    that.notify();
+    const {result, ok} = await this.model.loader.post(`/api/GetHostInventory`, {detector});
+    if (!ok) {
+      item = RemoteData.failure(result.message);
+    } else {
+      item = RemoteData.success(result.hosts);
+    }
+    that.notify();
     return item;
   }
 

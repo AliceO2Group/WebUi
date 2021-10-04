@@ -24,7 +24,7 @@ export default (workflow) =>
   h('.pv1.text-left.w-100', [
     h('h5', 'Revision:'),
     workflow.revisions.length === 0 ?
-      h('', errorComponent('No revisions found for the selected repository')) :
+      h('.text-center', errorComponent('No revisions found for the selected repository')) :
       h('', {style: 'display:flex; flex-direction: row;'}, [
         h('.dropdown', {
           style: 'flex-grow: 1;',

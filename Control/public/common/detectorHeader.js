@@ -23,7 +23,9 @@ import {h, iconPencil} from '/js/src/index.js';
 const detectorHeader = (model) => {
   const selected = model.detectors.selected;
   if (selected) {
-    return h('.w-100.bg-gray-light.pv2', [
+    return h('.w-100.bg-gray-light.pv2', {
+      style: 'height: 40px'
+    },[
       h('h4.f5.flex-row', {style: 'justify-content: center;'},
         h('.ph2', `Detector View: ${selected}`),
         h('a.f6.actionable-icon', {

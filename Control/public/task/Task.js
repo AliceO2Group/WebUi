@@ -27,28 +27,69 @@ export default class Task extends Observable {
     super();
     this.model = model;
     this.tasksByFlp = RemoteData.notAsked();
+
     this.cleanUpTasksRequest = RemoteData.notAsked();
     this.cleanUpResourcesRequest = RemoteData.notAsked();
     this.cleanUpResourcesID = 0;
 
-    this.scrollTop = 0;
+    this.detectorPanels = RemoteData.notAsked(); // JSON containing information on detectors panels; isOpened, list of hosts
+  }
+
+  /**
+   * Initialize task page by requesting detectors and hosts for each detector
+   */
+  async initTaskPage() {
+    this.detectorPanels = RemoteData.loading();
+    this.notify();
+
+    await this.model.detectors.getAndSetDetectorsAsRemoteData();
+    if (this.model.detectors.listRemote.isSuccess()) {
+      const detectorMap = {}
+      await Promise.all(
+        this.model.detectors.listRemote.payload.map(async (detector) => {
+          let hosts = RemoteData.notAsked();
+          hosts = await this.model.detectors.getHostsForDetector(detector, hosts, this);
+          if (hosts.isSuccess()) {
+            const hostsMap = {};
+            hosts.payload.forEach((host) => hostsMap[host] = {})
+            detectorMap[detector] = {isOpened: true, list: RemoteData.success(hostsMap)};
+          } else {
+            detectorMap[detector] = {
+              list: RemoteData.failure(`Unable to retrieve the list of hosts`),
+              isOpened: true
+            };
+          }
+        })
+      );
+      this.detectorPanels = RemoteData.success(detectorMap);
+      this.notify();
+    } else {
+      this.detectorPanels = RemoteData.failure('Unable to load detectors from AliECS');
+      this.notify();
+    }
+    this.initTasks();
   }
 
   /** 
    * Loads list of running tasks from AliECS Core
+   * In global view close all detector panels while in single view open that respective panel
    */
   async initTasks() {
-    this.tasksByFlp = RemoteData.loading();
-    this.notify();
-
     const {result, ok} = await this.model.loader.post('/api/GetTasks');
     if (!ok) {
-      this.tasksByFlp = RemoteData.failure(result.message);
-      this.model.notification.show(`Unable to retrieve list of tasks`, 'danger', 2000);
-    } else {
+      this.detectorPanels = RemoteData.failure(result.message);
+    } else if (this.detectorPanels.isSuccess()) {
+      const detectorsMap = this.detectorPanels.payload;
       const tasksByFlpMap = getTasksByFlp(result.tasks);
-      this.tasksByFlp = RemoteData.success(tasksByFlpMap);
-      this.model.notification.show('Tasks updated', 'success', 1000);
+      Object.keys(detectorsMap).forEach((detector) => {
+        const detectorJSON = detectorsMap[detector];
+        if (detectorJSON.list.isSuccess()) {
+          Object.keys(detectorJSON.list.payload).forEach((host) => {
+            detectorJSON.list.payload[host] = tasksByFlpMap[host]
+          });
+        }
+      });
+      this.detectorPanels = RemoteData.success(detectorsMap)
     }
     this.notify();
   }
@@ -92,10 +133,15 @@ export default class Task extends Observable {
 
   /**
    * Initialize page and request data
+   * Adds an automatic refresh of the content if another request is not ongoing already
    */
-  getTasks() {
-    this.initTasks();
-    this.refreshInterval = setInterval(() => this.initTasks(), COG.REFRESH_TASK);
+  async getTasks() {
+    this.initTaskPage();
+    this.refreshInterval = setInterval(async () => {
+      if (!this.model.loader.active) {
+        await this.initTasks();
+      }
+    }, COG.REFRESH_TASK);
   }
 
   /**
@@ -113,5 +159,15 @@ export default class Task extends Observable {
       }
       this.notify();
     }
+  }
+
+  /**
+   * Check that for a given map of hosts there is at least one host
+   * containing at least 1 task
+   * @param {JSON} data 
+   */
+  areTasksInDetector(data) {
+    return Object.keys(data)
+      .some((host) => data[host] && data[host].list && data[host].stdout && data[host].list.length > 0);
   }
 }

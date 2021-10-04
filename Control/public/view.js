@@ -40,10 +40,8 @@ import {
   content as configurationContent,
   header as configurationHeader
 } from './configuration/configPage.js';
-import {
-  content as taskContent,
-  header as taskHeader
-} from './task/taskPage.js';
+import {header as taskHeader} from './task/header.js';
+import {content as taskContent} from './task/content.js';
 import {detectorsModal} from './common/detectorModal.js';
 
 /**

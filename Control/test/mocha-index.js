@@ -104,7 +104,7 @@ describe('Control', function() {
       await label.click();
       await page.waitForTimeout(200);
       const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=environments','nu vreeeeea');
+      assert.strictEqual(location.search, '?page=environments');
     } else {
       assert.ok(false, `Unable to click GLOBAL View`);
     }
