@@ -114,7 +114,7 @@ export default class Model extends Observable {
       this.lock.setPadlockState(message.payload);
       return;
     } else if (message.command === 'notification') {
-      this.show(message.payload);
+      this.show(JSON.parse(message.payload));
       return;
     } else if (message.command === 'clean-resources-action') {
       this.task.setResourcesRequest(message.payload);
@@ -217,7 +217,11 @@ export default class Model extends Observable {
    * @param {String} message
    */
   show(message) {
-    new Notification('AliECS', {body: message});
+    const notification = new Notification(message.title, {body: message.body});
+    notification.onclick = function(event) {
+      event.preventDefault();
+      window.open(message.url, '_blank');
+    }
   }
 
   /**

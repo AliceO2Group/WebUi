@@ -146,38 +146,6 @@ describe('StatusService test suite', () => {
     });
   });
 
-  describe('Test Kafka Status', async () => {
-    const config = {kafka: {port: 8083, hostname: 'localhost'}};
-    const expectedInfo = {hostname: 'localhost', port: 8083};
-
-    it('should successfully retrieve status and info about Kafka that it is running', async () => {
-      const status = new StatusService(config, {}, {});
-      const kafkaStatus = await status.getKafkaStatus();
-      nock(`http://${config.kafka.hostname}:${config.kafka.port}`)
-        .get('/api/health')
-        .reply(200, {});
-      expectedInfo.status = {ok: true, configured: true};
-      assert.deepStrictEqual(kafkaStatus, expectedInfo);
-    });
-
-    it('should successfully retrieve status and info about Kafka that it is not running', async () => {
-      const status = new StatusService(config, {}, {});
-      const kafkaStatus = await status.getKafkaStatus();
-      nock(`http://${config.kafka.hostname}:${config.kafka.port}`)
-        .get('/api/health')
-        .replyWithError('Unable to connect');
-      expectedInfo.status = {ok: false, configured: true, message: 'Error: Unable to connect'};
-      assert.deepStrictEqual(kafkaStatus, expectedInfo);
-    });
-
-    it('should successfully return that Kafka was not configured if configuration is not provided', async () => {
-      const status = new StatusService({}, {}, {});
-      const kafkaStatus = await status.getKafkaStatus();
-      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
-      assert.deepStrictEqual(kafkaStatus, expected);
-    });
-  });
-
   describe('Test AliECS Integrated Services Status', async () => {
     let ctrlService;
     const config = {grpc: {hostname: 'local', port: 8081}};

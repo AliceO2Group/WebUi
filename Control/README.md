@@ -74,13 +74,6 @@ Use of a Consul instance is optional
 * `qcPath` - Prefix for KV Store for quality-control's configuration
 * `kVPrefix` - Name of the Consul cluster used by AliceO2
   
-### Kafka
-Use of a Kafka instance is optional. It is being used for prompting [Browser Notifications](#integration-with-notification-service) 
-
-* `hostnames` - list of hostnames separated by comma
-* `port` - port of the Grafana instance
-* `topic` - A string to follow for messages
-
 ### InfoLogger GUI
 Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
 

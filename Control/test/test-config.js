@@ -35,12 +35,6 @@ module.exports = {
     label: 'Apricot',
     package: 'apricot'
   },
-  kafka: {
-    hostnames: 'localhost',
-    port: 9092,
-    topic: 'notifications',
-    groupId: 'flp-kafka-notifications'
-  },
   consul: {
     hostname: 'localhost',
     port: 8550,

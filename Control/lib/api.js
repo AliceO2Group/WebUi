@@ -21,7 +21,7 @@ const Padlock = require('./services/Padlock.js');
 const StatusService = require('./services/StatusService.js');
 
 // connectors
-const KafkaConnector = require('./connectors/KafkaConnector.js');
+const KafkaConnector = require('@aliceo2/web-ui').KafkaConnector;
 const ConsulConnector = require('./connectors/ConsulConnector.js');
 
 // AliECS Core
@@ -73,6 +73,12 @@ module.exports.setup = (http, ws) => {
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
   );
+
+  const kafka = new KafkaConnector(config.kafka);
+  if (kafka.isConfigured()) {
+    kafka.proxyWebNotificationToWs(ws);
+  }
+
   http.post('/configuration/save', (req, res) => apricotService.saveConfiguration(req, res));
 
   http.post('/clean/resources', (req, res) => ctrlService.cleanResources(req, res));
@@ -87,7 +93,16 @@ module.exports.setup = (http, ws) => {
   // Status Service
   http.get('/status/consul', (_, res) => statusService.getConsulStatus().then((data) => res.status(200).json(data)));
   http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/kafka', (_, res) => statusService.getKafkaStatus().then((data) => res.status(200).json(data)));
+  http.get('/status/kafka', (_, res) => kafka.health().then(async () => {
+    let response = config.kafka;
+    if (kafka.isConfigured()) {
+      response.configured = true;
+      response.ok = await kafka.health();
+    } else {
+      response.configured = false;
+    }
+    res.status(200).json(response);
+  }));
   http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()), {public: true});
   http.get('/status/core',
     (req, res, next) => ctrlService.isConnectionReady(req, res, next),
@@ -105,11 +120,6 @@ module.exports.setup = (http, ws) => {
   http.get('/consul/crus', validateService, (req, res) => consulConnector.getCRUs(req, res));
   http.get('/consul/crus/config', validateService, (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
   http.post('/consul/crus/config/save', validateService, (req, res) => consulConnector.saveCRUsConfiguration(req, res));
-
-  const kafka = new KafkaConnector(config.kafka, ws);
-  if (kafka.isKafkaConfigured()) {
-    kafka.initializeKafkaConsumerGroup();
-  }
 
   /**
    * Send to all users state of Pad via Websocket

@@ -117,26 +117,6 @@ class StatusService {
   }
 
   /**
-   * Build a response containing the information and status of the Kafka Service
-   * @return {Promise<Resolve>}
-   */
-  async getKafkaStatus() {
-    let kafka = {};
-    if (this.config?.kafka?.port && this.config?.kafka?.hostname) {
-      kafka = this.config.kafka;
-      try {
-        await httpGetJson(this.config.kafka.hostname, this.config.kafka.port, '/api/health');
-        kafka.status = {ok: true, configured: true};
-      } catch (error) {
-        kafka.status = {ok: false, configured: true, message: error.toString()};
-      }
-    } else {
-      kafka.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
-    }
-    return kafka;
-  }
-
-  /**
    * Build a JSON response with AliECS GUI's configuration
    * @returns {JSON}
    */
