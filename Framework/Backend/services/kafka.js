@@ -78,9 +78,9 @@ class KafkaConnector {
 
   /**
    * Sends notification to mattermost channel
-   * @param {string} channel Name of mattermost channel (as in channel URL)
+   * @param {string} channel Original, lowercase mattermost channel name (as in channel URL!)
    * @param {string} title   Title of notification
-   * @param {string} link        URL referencing notification
+   * @param {string} link    URL referencing notification
    * @param {string} extra   Extra message that's displayed after clicking on "i" icon
    * @returns {Promise}
    */
@@ -95,7 +95,7 @@ class KafkaConnector {
       throw new Error('Mattermost notification URL needs to be correct');
     }
     return this._send('mattermost', JSON.stringify(
-      {channel: channel, message: `${title}\n${link}`, extra: extra})
+      {channel: channel, text: `${title}\n${link}`, props: {card: extra}})
     );
   }
 
