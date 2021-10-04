@@ -130,7 +130,6 @@ class KafkaConnector {
     }
     // eslint-disable-next-line max-len
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    console.log(recipients)
     for(const email of recipients.split(',')) {
       if (!re.test(String(email).toLowerCase())) {
         throw new Error('Notification recipient email address incorrect: ' + email);
