@@ -1,4 +1,4 @@
-# Kafka connector - Notifications
+# Kafka connector - Notification
 
 
 #### Import the module
@@ -13,3 +13,23 @@ new KafkaConnector({brokers: BROKERS}));
 
 Where:
  - `BROKERS` - list of broker hosts as an array
+
+#### Public methods
+ ```js
+isConfigured
+ ```
+ ```js
+sendMattermostNotification
+ ```
+ ```js
+sendWebNotification
+ ```
+ ```js
+sendEmailNotification
+ ```
+```js
+proxyWebNotificationToWs
+```
+```js
+disconnectProxy
+```
