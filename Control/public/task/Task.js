@@ -42,26 +42,23 @@ export default class Task extends Observable {
     this.detectorPanels = RemoteData.loading();
     this.notify();
 
-    await this.model.detectors.getAndSetDetectorsAsRemoteData();
-    if (this.model.detectors.listRemote.isSuccess()) {
-      const detectorMap = {};
-      await Promise.all(
-        this.model.detectors.listRemote.payload.map(async (detector) => {
-          let hosts = RemoteData.notAsked();
-          hosts = await this.model.detectors.getHostsForDetector(detector, hosts, this);
-          if (hosts.isSuccess()) {
-            const hostsMap = {};
-            hosts.payload.forEach((host) => hostsMap[host] = {})
-            detectorMap[detector] = {isOpened: true, list: RemoteData.success(hostsMap)};
-          } else {
-            detectorMap[detector] = {
-              list: RemoteData.failure(`Unable to retrieve the list of hosts`),
-              isOpened: true
-            };
-          }
-        })
-      );
-      this.detectorPanels = RemoteData.success(detectorMap);
+    if (this.model.detectors.hostsByDetectorRemote.isSuccess()) {
+      // Build the hostsByDetectorMap
+      const hostsByDetectorMap = {};
+      const detectors = this.model.detectors.hostsByDetectorRemote.payload;
+      Object.keys(detectors).map((detector) => {
+        const hosts = detectors[detector];
+        if (hosts.isSuccess()) {
+          const hostsMap = {};
+          hosts.payload.forEach((host) => hostsMap[host] = {}); // initialize to empty for future tasks to be added
+          hostsByDetectorMap[detector] = {isOpened: true, list: RemoteData.success(hostsMap)};
+        } else {
+          hostsByDetectorMap[detector] = {
+            isOpened: true, list: RemoteData.failure(`Unable to retrieve the list of hosts`)
+          };
+        }
+      });
+      this.detectorPanels = RemoteData.success(hostsByDetectorMap);
       this.notify();
     } else {
       this.detectorPanels = RemoteData.failure('Unable to load detectors from AliECS');

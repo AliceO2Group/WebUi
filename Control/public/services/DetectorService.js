@@ -29,6 +29,7 @@ export default class DetectorService extends Observable {
     this.storage = new BrowserStorage(`COG-${this.model.router.location.hostname}`);
 
     this.listRemote = RemoteData.notAsked();
+    this.hostsByDetectorRemote = RemoteData.notAsked();
     this._selected = '';
   }
 
@@ -38,6 +39,11 @@ export default class DetectorService extends Observable {
    */
   async init() {
     this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote, this);
+    if (this.listRemote.isSuccess()) {
+      this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(
+        this.hostsByDetectorRemote, this.listRemote.payload, this
+      );
+    }
     const stored = this.storage.getLocalItem(STORAGE.DETECTOR);
     this._selected = (stored && stored.SELECTED) ? stored.SELECTED : '';
     this.notify();
@@ -65,6 +71,31 @@ export default class DetectorService extends Observable {
   /**
    * HTTP Calls
    */
+
+  /**
+   * Given a list of detectors, make a request to get all the hosts
+   * belonging to each detector;
+   * Returns a RemoteData which if successful contains a map<String,JSON>
+   * @param {RemoteData} item
+   * @param {Object} that
+   * @returns {RemoteData}
+   */
+  async getHostsByDetectorsAsRemoteData(item, detectors, that) {
+    item = RemoteData.loading();
+    that.notify();
+    const detectorMap = {};
+    await Promise.all(
+      detectors.map(async (detector) => {
+        let hosts = RemoteData.notAsked();
+        hosts = await this.getHostsForDetector(detector, hosts, that);
+        detectorMap[detector] = hosts.isSuccess() ?
+          RemoteData.success(hosts.payload) : RemoteData.failure(`Unable to retrieve the list of hosts`);
+      })
+    );
+    
+    item = RemoteData.success(detectorMap);
+    return item;
+  }
 
   /**
    * Fetch detectors and return it as a remoteData object

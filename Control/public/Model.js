@@ -207,8 +207,10 @@ export default class Model extends Observable {
   async resetDetectorView() {
     this.detectors.saveSelection('');
     this.notify();
-    await this.detectors.init();
-    this.notify();
+    if (!this.detectors.listRemote.isSuccess() || !this.detectors.hostsByDetectorRemote.isSuccess()) {
+      await this.detectors.init();
+      this.notify();
+    }
   }
 
   /**
