@@ -115,12 +115,14 @@ const userVarsRow = (userVars, environment) => {
  */
 const expandedKVPanel = (environment, kv) =>
   h('.flex-column.w-100', [
-    Object.keys(kv).map((key) =>
-      h('.w-100.flex-row', [
-        h('.w-25', key),
-        h('.w-75', {style: 'word-break: break-word'}, kv[key])
-      ])
-    ),
+    Object.keys(kv)
+      .sort((keyA, keyB) => keyA.toLocaleUpperCase() < keyB.toLocaleUpperCase() ? -1 : 1)
+      .map((key) =>
+        h('.w-100.flex-row', [
+          h('.w-25', key),
+          h('.w-75', {style: 'word-break: break-word'}, kv[key])
+        ])
+      ),
   ]);
 
 /**
@@ -131,11 +133,13 @@ const expandedKVPanel = (environment, kv) =>
  * @return {vnode}
 */
 const expandedUserVarsPanel = (environment, userVars) => {
-  const knownVarGroups = Object.keys(userVars).filter((key) => environment.isVariableInRadioGroup(key));
+  const knownVarGroups = Object.keys(userVars).filter((key) => environment.isVariableInRadioGroup(key))
+    .sort((keyA, keyB) => keyA.toLocaleUpperCase() < keyB.toLocaleUpperCase() ? -1 : 1);
   const uriVarGroups = Object.keys(userVars).filter((key) =>
     environment.isKVPairInConsulUriGroup(key, userVars[key]));
   const unknownVarGroups = Object.keys(userVars).filter((key) =>
-    !environment.isVariableInRadioGroup(key) && !environment.isKVPairInConsulUriGroup(key, userVars[key]));
+    !environment.isVariableInRadioGroup(key) && !environment.isKVPairInConsulUriGroup(key, userVars[key]))
+    .sort((keyA, keyB) => keyA.toLocaleUpperCase() < keyB.toLocaleUpperCase() ? -1 : 1);
   return h('.flex-column.w-100', [
     knownVarGroups.map((key) =>
       key !== 'hosts' &&

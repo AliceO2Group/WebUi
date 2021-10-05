@@ -376,13 +376,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request a list of detectors', async () => {
     const detectors = await page.evaluate(() => window.model.workflow.flpSelection.detectors);
-    const expDetectors = {kind: 'Success', payload: {detectors: ['TST', 'PROD']}};
+    const expDetectors = {kind: 'Success', payload: {detectors: ['MID', 'DCS', 'ODC']}};
     assert.deepStrictEqual(detectors, expDetectors, 'Missing detectors');
   });
 
   it('should successfully request a list of ACTIVE detectors', async () => {
     const activeDetectors = await page.evaluate(() => window.model.workflow.flpSelection.activeDetectors);
-    const expActiveDetectors = {kind: 'Success', payload: {detectors: ['PROD']}};
+    const expActiveDetectors = {kind: 'Success', payload: {detectors: ['DCS']}};
 
     assert.deepStrictEqual(activeDetectors, expActiveDetectors, 'Missing active detectors');
   });
@@ -403,7 +403,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
-    assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
+    assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
     await page.waitForTimeout(500);
   });
 

@@ -37,13 +37,9 @@ export default class DetectorService extends Observable {
    * Initialize to empty string if the user did not select any
    */
   async init() {
+    this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote, this);
     const stored = this.storage.getLocalItem(STORAGE.DETECTOR);
-    if (stored && stored.SELECTED) {
-      this._selected = stored.SELECTED;
-    } else {
-      this._selected = '';
-      this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote, this);
-    }
+    this._selected = (stored && stored.SELECTED) ? stored.SELECTED : '';
     this.notify();
   }
 

@@ -118,23 +118,9 @@ export default class Environment extends Observable {
       this.notify();
       return;
     }
-    let mesosStdout = '';
-    result.environment.tasks.forEach((task) => mesosStdout = task.sandboxStdout);
-    result.mesosStdout = mesosStdout;
-
-    this.item = RemoteData.success(this.parseEnvResult(result));
-    this.itemControl = RemoteData.notAsked(); // because item has changed
+    this.item = RemoteData.success(this._parseEnvResult(result));
+    this.itemControl = RemoteData.notAsked();
     this.notify();
-  }
-
-  /**
-   * Method to remove and parse fields from environment result
-   * @param {JSON} result
-   * @return {JSON}
-   */
-  parseEnvResult(result) {
-    result.environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
-    return result;
   }
 
   /**
@@ -209,5 +195,55 @@ export default class Environment extends Observable {
       this.itemNew = RemoteData.success(result.message);
     }
     this.notify();
+  }
+
+  /**
+   * Helpers
+   */
+
+  /**
+   * Given a JSON containing environment information and a specific key:
+   * * check if that key maps to an existing values
+   * * remove any variables that are a detector variable but are not part of the included detector
+   * @param {JSON} dataToFilter
+   * @param {string} label
+   * @return {JSON}
+   */
+  _filterOutDetectorsVariables(dataToFilter, label) {
+    const data = JSON.parse(JSON.stringify(dataToFilter));
+    const detectors = this.model.detectors.listRemote;
+    const includedDetectors = data.includedDetectors;
+    if (data[label] && includedDetectors && includedDetectors.length !== 0 && detectors.isSuccess()) {
+      Object.keys(data[label])
+        .filter((variable) => {
+          const prefix = variable.split('_')[0];
+          const isVariableDetector =
+            detectors.payload.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+          const isVariableIncludedDetector =
+            includedDetectors.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
+          return isVariableDetector && !isVariableIncludedDetector;
+        })
+        .forEach((variable) => delete data[label][variable])
+    }
+    return data;
+  }
+
+  /**
+   * Method to remove and parse fields from environment result
+   * @param {JSON} result
+   * @return {JSON}
+   */
+  _parseEnvResult(result) {
+    let task = undefined;
+    if (result.environment.tasks) {
+      task = result.environment.tasks.find((task) => task.mesosStdout);
+      result.environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
+    }
+    result.mesosStdout = (task && task.mesosStdout) ? task.mesosStdout : '';
+
+    result.environment = this._filterOutDetectorsVariables(result.environment, 'vars');
+    result.environment = this._filterOutDetectorsVariables(result.environment, 'userVars');
+    result.environment = this._filterOutDetectorsVariables(result.environment, 'defaults');
+    return result;
   }
 }

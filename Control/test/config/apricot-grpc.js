@@ -35,7 +35,7 @@ const apricotGRPCServer = (config) => {
   server.addService(octlProto.apricot.Apricot.service, {
     listDetectors(call, callback) {
       calls['listDetectors'] = true;
-      callback(null, {detectors: ['TST', 'PROD']});
+      callback(null, {detectors: ['MID', 'DCS', 'ODC']});
     },
     getHostInventory(call, callback) {
       calls['getHostInventory'] = true;
