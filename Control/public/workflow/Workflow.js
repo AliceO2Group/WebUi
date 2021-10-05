@@ -355,26 +355,7 @@ export default class Workflow extends Observable {
     this.groupedPanels = {};
     if (this.templatesVarsMap[template] && Object.keys(this.templatesVarsMap[template]).length > 0) {
       Object.keys(this.templatesVarsMap[template])
-        .filter((key) => {
-          if (this.flpSelection.selectedDetectors.length > 0) {
-            // filter out variables
-            // return false;
-            const prefix = key.split('_')[0];
-            const isVariableDetector = this.flpSelection.detectors.payload.detectors
-              .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
-            const isVariableIncludedDetector = this.flpSelection.selectedDetectors
-              .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
-            if (!isVariableDetector) {
-              return true;
-            } else {
-              return isVariableIncludedDetector;
-            }
-          }
-          if (this.model.detectors.selected) {
-            // TODO when detector view will be enabled
-          }
-          return true;
-        }).forEach((key) => {
+        .forEach((key) => {
           // Generate panels by grouping the variables by the `panel` field
           const variable = this.templatesVarsMap[template][key];
           const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
@@ -409,6 +390,31 @@ export default class Workflow extends Observable {
         this.groupedPanels[key] = sortedVars;
       });
     }
+  }
+
+  /**
+   * Checks that a given variable key is visible:
+   * * based on detectors selection
+   * @param {JSON} variables 
+   * @return {JSON}
+   */
+  isVariableVisible(key) {
+    if (this.flpSelection.selectedDetectors.length > 0) {
+      const prefix = key.split('_')[0];
+      const isVariableDetector = this.flpSelection.detectors.payload.detectors
+        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+      const isVariableIncludedDetector = this.flpSelection.selectedDetectors
+        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
+      if (!isVariableDetector) {
+        return true;
+      } else {
+        return isVariableIncludedDetector;
+      }
+    } 
+    if (this.model.detectors.selected) {
+      // TODO when detector view will be enabled
+    }
+    return true;
   }
 
   /**

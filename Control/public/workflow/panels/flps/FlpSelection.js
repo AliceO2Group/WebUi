@@ -109,9 +109,6 @@ export default class FlpSelection extends Observable {
         this.getAndSetHostsForDetector(name);
       }
     }
-    if (this.workflow.form.template && this.workflow.form.template !== '') {
-      this.workflow.generateVariablesSpec(this.workflow.form.template)
-    }
     this.notify();
   }
 
