@@ -276,7 +276,7 @@ export default class Workflow extends Observable {
       if (isKnownKey) {
         this.form.basicVariables[key] = value;
         this.model.notification.show(
-          'Variable has been succesfully imported in the configuration panels', 'success', 3000
+          'Variable has been successfully imported in the configuration panels', 'success', 3000
         );
       } else {
         this.form.variables[key] = value;
@@ -290,7 +290,7 @@ export default class Workflow extends Observable {
 
   /**
    * Given a KV Pairs as a String, attempt to add
-   * each key and value to the panel of KV pairs configuraiton
+   * each key and value to the panel of KV pairs configuration
    * @param {String} kvPairs
    */
   addVariableJSON(kvPairs) {
@@ -300,7 +300,7 @@ export default class Workflow extends Observable {
       if (isKnownKey) {
         this.form.basicVariables[key] = parsedKVJSON[key];
         this.model.notification.show(
-          'Variables have been succesfully imported in the configuration panels', 'success', 3000
+          'Variables have been successfully imported in the configuration panels', 'success', 3000
         );
       } else {
         this.form.variables[key] = parsedKVJSON[key];
@@ -316,7 +316,6 @@ export default class Workflow extends Observable {
   /**
    * Method to update the value of a (K;V) pair in basicVariables
    * Checks if the type is a number; If it is, it will be converted to a string
-   * // TODO Update based on new
    * @param {string} key
    * @param {object} value
    */
@@ -347,6 +346,7 @@ export default class Workflow extends Observable {
 
   /**
    * Generate the variables from spec map object if it exists
+   * Filter our variables belonging to other detectors selection
    * @param {String} template
    */
   generateVariablesSpec(template) {
@@ -354,28 +354,48 @@ export default class Workflow extends Observable {
     this.form.basicVariables = {};
     this.groupedPanels = {};
     if (this.templatesVarsMap[template] && Object.keys(this.templatesVarsMap[template]).length > 0) {
-      Object.keys(this.templatesVarsMap[template]).forEach((key) => {
-        // Generate panels by grouping the variables by the `panel` field
-        const variable = this.templatesVarsMap[template][key];
-        const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
-        if (!this.groupedPanels[panelBelongingTo]) {
-          this.groupedPanels[panelBelongingTo] = [];
-          this.panelsUtils[panelBelongingTo] = {isVisible: false};
-        }
-        variable.key = key;
-        const workVariable = new WorkflowVariable(variable);
-        this.groupedPanels[panelBelongingTo].push(workVariable);
-        this.selectedVarsMap[key] = workVariable;
-
-        // add default values to selected basic variables form
-        if (workVariable.defaultValue) {
-          if (workVariable.type === VAR_TYPE.ARRAY) {
-            this.updateBasicVariableByKey(key, [workVariable.defaultValue]);
-          } else {
-            this.updateBasicVariableByKey(key, workVariable.defaultValue);
+      Object.keys(this.templatesVarsMap[template])
+        .filter((key) => {
+          if (this.flpSelection.selectedDetectors.length > 0) {
+            // filter out variables
+            // return false;
+            const prefix = key.split('_')[0];
+            const isVariableDetector = this.flpSelection.detectors.payload.detectors
+              .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+            const isVariableIncludedDetector = this.flpSelection.selectedDetectors
+              .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
+            if (!isVariableDetector) {
+              return true;
+            } else {
+              return isVariableIncludedDetector;
+            }
           }
-        }
-      });
+          if (this.model.detectors.selected) {
+            // TODO when detector view will be enabled
+          }
+          return true;
+        }).forEach((key) => {
+          // Generate panels by grouping the variables by the `panel` field
+          const variable = this.templatesVarsMap[template][key];
+          const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
+          if (!this.groupedPanels[panelBelongingTo]) {
+            this.groupedPanels[panelBelongingTo] = [];
+            this.panelsUtils[panelBelongingTo] = {isVisible: false};
+          }
+          variable.key = key;
+          const workVariable = new WorkflowVariable(variable);
+          this.groupedPanels[panelBelongingTo].push(workVariable);
+          this.selectedVarsMap[key] = workVariable;
+
+          // add default values to selected basic variables form
+          if (workVariable.defaultValue) {
+            if (workVariable.type === VAR_TYPE.ARRAY) {
+              this.updateBasicVariableByKey(key, [workVariable.defaultValue]);
+            } else {
+              this.updateBasicVariableByKey(key, workVariable.defaultValue);
+            }
+          }
+        });
       Object.keys(this.groupedPanels).forEach((key) => {
         // sort variables within each panel based on index and label
         let sortedVars = this.groupedPanels[key].sort((varA, varB) => {
@@ -396,7 +416,7 @@ export default class Workflow extends Observable {
    */
 
   /**
-   * Method to make the necesarry requests to reload the data on the new environment page
+   * Method to make the necessary requests to reload the data on the new environment page
    * * Make a request to retrieve a list of repositories with their corresponding revisions
    * * If above request is ok, make a request to get the public templates for the new updated (repository,revision)
    */
