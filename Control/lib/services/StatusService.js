@@ -117,6 +117,26 @@ class StatusService {
   }
 
   /**
+   * Build a response containing the information and status of the Kafka Service
+   * @return {Promise<Resolve>}
+   */
+  async getKafkaStatus(kafkaConnector) {
+    let kafka = {};
+    if (kafkaConnector.isConfigured()) {
+      kafka = this.config.kafka;
+      try {
+        await kafkaConnector.health();
+        kafka.status = { configured: true, ok:  true };
+      } catch (error) {
+        kafka.status = { configured: true, ok:  false, message: error.name };
+      }
+    } else {
+        kafka.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+    }
+    return kafka;
+  }
+
+  /**
    * Build a JSON response with AliECS GUI's configuration
    * @returns {JSON}
    */

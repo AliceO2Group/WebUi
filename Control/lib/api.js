@@ -93,16 +93,7 @@ module.exports.setup = (http, ws) => {
   // Status Service
   http.get('/status/consul', (_, res) => statusService.getConsulStatus().then((data) => res.status(200).json(data)));
   http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/kafka', (_, res) => kafka.health().then(async () => {
-    let response = config.kafka;
-    if (kafka.isConfigured()) {
-      response.configured = true;
-      response.ok = await kafka.health();
-    } else {
-      response.configured = false;
-    }
-    res.status(200).json(response);
-  }));
+  http.get('/status/kafka', (_, res) => statusService.getKafkaStatus(kafka).then((data) => res.status(200).json(data)));
   http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()), {public: true});
   http.get('/status/core',
     (req, res, next) => ctrlService.isConnectionReady(req, res, next),
