@@ -196,7 +196,7 @@ const linksPanel = (model, cru) => {
  * Based on this selection the links panel will be hidden
  * @param {Object} model
  * @param {JSON} cru
- * @returns {vndoe}
+ * @returns {vnode}
  */
 const toggleUserLogic = (model, cru) =>
   h('label.d-inline.f6', {
@@ -270,7 +270,7 @@ const tasksMessagePanel = (model) =>
   h('.w-100.p2', {
     style: 'border: 1px solid #ddd;'
   }, [
-    h('.danger.w-90', 'The following errors occured during execution:'),
+    h('.danger.w-90', 'The following errors ocurred during execution:'),
     model.configuration.failedTasks.map((task) =>
       (task.id && task.host) ? h('.danger.flex-row', [
         '- task id:',
