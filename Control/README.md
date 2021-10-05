@@ -73,7 +73,10 @@ Use of a Consul instance is optional
 * `readoutCardPath` - Prefix for KV Store for readout-card's configuration
 * `qcPath` - Prefix for KV Store for quality-control's configuration
 * `kVPrefix` - Name of the Consul cluster used by AliceO2
-  
+
+### Kafka
+Use of a Kafka instance is optional. It is being used for prompting and receiving notifications, see more in [Kafka connector - Notification](../Framework/docs/guide/kafka.md) framework guide.
+
 ### InfoLogger GUI
 Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
 
@@ -146,18 +149,6 @@ The `visibleIf` fields accepts the following 3 conditions that can be combined u
 * `===`, `!==`, `>`, `<`, `>=`, `<=` (string comparison)
 * `includes(value)`
 * `key.match(value)` (TODO)
-
-### Integration with Notification Service
-This feature requires HTTPS as it is making use of [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/notification)
-
-Kafka configuration:
-```javascript
-kafka: {
-  hostnames: 'test.cern.ch',
-  port: 9092,
-  topic: 'webui'
-}
-```
 
 ## Continuous Integration Workflows
 Control project makes use of two workflows.
