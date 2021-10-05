@@ -240,7 +240,7 @@ const toggleAllCheckBox = (model, cru, linksList) =>
  * @return {vnode}
  */
 const checkBox = (model, key, config) => {
-  let id = '-';
+  let id;
   try {
     id = '#' + key.split('link')[1];
   } catch (error) {
