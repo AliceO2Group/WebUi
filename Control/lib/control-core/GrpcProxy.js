@@ -97,7 +97,7 @@ class GrpcProxy {
       isValid = false;
     }
     if (!path) {
-      log.error('Missing path for gRPC API declaration')
+      log.error('Missing path for gRPC API declaration');
       isValid = false;
     }
     if (!config.label) {

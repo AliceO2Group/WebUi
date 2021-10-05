@@ -66,7 +66,7 @@ module.exports.setup = (http, ws) => {
     ctrlService.isConnectionReady.bind(ctrlService),
     ctrlService.isLockSetUp.bind(ctrlService),
     ctrlService.logAction.bind(ctrlService),
-  ]
+  ];
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
   );

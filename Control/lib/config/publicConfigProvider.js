@@ -56,7 +56,7 @@ function getConsulConfig(config) {
     conf.kvStoreQC = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.qcPath}`;
     conf.kvStoreReadout = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.readoutPath}`;
     conf.qcPrefix = `${conf.hostname}:${conf.port}/${conf.qcPath}/`;
-    conf.readoutPrefix = `${conf.hostname}:${conf.port}/${conf.readoutPath}/`
+    conf.readoutPrefix = `${conf.hostname}:${conf.port}/${conf.readoutPath}/`;
     return conf;
   }
   return {};

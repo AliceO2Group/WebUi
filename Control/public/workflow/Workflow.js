@@ -56,7 +56,7 @@ export default class Workflow extends Observable {
 
     this.templatesVarsMap = {};
     this.selectedVarsMap = {};
-    this.groupedPanels = {}
+    this.groupedPanels = {};
     this.panelsUtils = {};
 
     this.READOUT_PREFIX = PREFIX.READOUT;
@@ -65,7 +65,7 @@ export default class Workflow extends Observable {
     this.dom = {
       keyInput: '',
       keyValueArea: ''
-    }
+    };
 
     this.advErrorPanel = [];
     this.kvPairsString = ''; // variable stored for Adv Config Panel
