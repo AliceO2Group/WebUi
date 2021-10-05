@@ -354,29 +354,28 @@ export default class Workflow extends Observable {
     this.form.basicVariables = {};
     this.groupedPanels = {};
     if (this.templatesVarsMap[template] && Object.keys(this.templatesVarsMap[template]).length > 0) {
-      Object.keys(this.templatesVarsMap[template])
-        .forEach((key) => {
-          // Generate panels by grouping the variables by the `panel` field
-          const variable = this.templatesVarsMap[template][key];
-          const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
-          if (!this.groupedPanels[panelBelongingTo]) {
-            this.groupedPanels[panelBelongingTo] = [];
-            this.panelsUtils[panelBelongingTo] = {isVisible: false};
-          }
-          variable.key = key;
-          const workVariable = new WorkflowVariable(variable);
-          this.groupedPanels[panelBelongingTo].push(workVariable);
-          this.selectedVarsMap[key] = workVariable;
+      Object.keys(this.templatesVarsMap[template]).forEach((key) => {
+        // Generate panels by grouping the variables by the `panel` field
+        const variable = this.templatesVarsMap[template][key];
+        const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
+        if (!this.groupedPanels[panelBelongingTo]) {
+          this.groupedPanels[panelBelongingTo] = [];
+          this.panelsUtils[panelBelongingTo] = {isVisible: false};
+        }
+        variable.key = key;
+        const workVariable = new WorkflowVariable(variable);
+        this.groupedPanels[panelBelongingTo].push(workVariable);
+        this.selectedVarsMap[key] = workVariable;
 
-          // add default values to selected basic variables form
-          if (workVariable.defaultValue) {
-            if (workVariable.type === VAR_TYPE.ARRAY) {
-              this.updateBasicVariableByKey(key, [workVariable.defaultValue]);
-            } else {
-              this.updateBasicVariableByKey(key, workVariable.defaultValue);
-            }
+        // add default values to selected basic variables form
+        if (workVariable.defaultValue) {
+          if (workVariable.type === VAR_TYPE.ARRAY) {
+            this.updateBasicVariableByKey(key, [workVariable.defaultValue]);
+          } else {
+            this.updateBasicVariableByKey(key, workVariable.defaultValue);
           }
-        });
+        }
+      });
       Object.keys(this.groupedPanels).forEach((key) => {
         // sort variables within each panel based on index and label
         let sortedVars = this.groupedPanels[key].sort((varA, varB) => {
@@ -410,7 +409,7 @@ export default class Workflow extends Observable {
       } else {
         return isVariableIncludedDetector;
       }
-    } 
+    }
     if (this.model.detectors.selected) {
       // TODO when detector view will be enabled
     }
