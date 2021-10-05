@@ -404,11 +404,7 @@ export default class Workflow extends Observable {
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
       const isVariableIncludedDetector = this.flpSelection.selectedDetectors
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
-      if (!isVariableDetector) {
-        return true;
-      } else {
-        return isVariableIncludedDetector;
-      }
+      return !isVariableDetector || isVariableIncludedDetector;
     }
     if (this.model.detectors.selected) {
       // TODO when detector view will be enabled
