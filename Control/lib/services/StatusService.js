@@ -131,7 +131,7 @@ class StatusService {
         kafka.status = { configured: true, ok:  false, message: error.name };
       }
     } else {
-        kafka.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+      kafka.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
     }
     return kafka;
   }

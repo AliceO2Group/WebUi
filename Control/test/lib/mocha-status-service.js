@@ -16,7 +16,7 @@ const assert = require('assert');
 const nock = require('nock');
 const sinon = require('sinon');
 const StatusService = require('../../lib/services/StatusService.js');
-
+const KafkaConnector = require('@aliceo2/web-ui').KafkaConnector;
 
 describe('StatusService test suite', () => {
   describe('Test StatusService initialization', () => {
@@ -130,7 +130,7 @@ describe('StatusService test suite', () => {
       assert.strictEqual(grafanaStatus.port,  expectedInfo.port);
     });
 
-    it('should successfully retrieve status and info about AliECS that it is not running', async () => {
+    it('should successfully retrieve status and info about Grafana that it is not running', async () => {
       const status = new StatusService(config, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
       nock(config.grafana.url)
@@ -143,6 +143,25 @@ describe('StatusService test suite', () => {
       const status = new StatusService({}, {}, {});
       const grafanaStatus = await status.getGrafanaStatus();
       assert.deepStrictEqual(grafanaStatus.status, {ok: false, configured: false, message: 'This service was not configured'});
+    });
+  });
+
+  describe('Test Kafka Status', async () => {
+    const config = {kafka: {brokers: ['localhost:8083']}};
+    const expectedInfo = {brokers: ['localhost:8083']};
+
+    it('should successfully retrieve status and info about Kafka that it is not running', async () => {
+      const status = new StatusService(config, {}, {});
+      const kafkaStatus = await status.getKafkaStatus(new KafkaConnector(config.kafka));
+      expectedInfo.status = {ok: false, configured: true, message: 'KafkaJSNumberOfRetriesExceeded'};
+      assert.deepStrictEqual(kafkaStatus, expectedInfo);
+    }).timeout(5000);
+
+    it('should successfully return that Kafka was not configured if configuration is not provided', async () => {
+      const status = new StatusService({}, {}, {});
+      const kafkaStatus = await status.getKafkaStatus(new KafkaConnector());
+      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
+      assert.deepStrictEqual(kafkaStatus, expected);
     });
   });
 
