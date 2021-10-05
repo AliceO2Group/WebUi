@@ -12,10 +12,11 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom, iconChevronRight, iconCircleX, iconCircleCheck} from '/js/src/index.js';
-import pageLoading from '../common/pageLoading.js';
-import loading from '../common/loading.js';
-import errorPage from '../common/errorPage.js';
+import {h, iconChevronBottom, iconChevronTop, iconChevronRight, iconCircleX, iconCircleCheck} from '/js/src/index.js';
+import pageLoading from './../common/pageLoading.js';
+import loading from './../common/loading.js';
+import errorPage from './../common/errorPage.js';
+import {detectorHeader} from './../common/detectorHeader.js';
 /**
  * @file Page to show configuration components (content and header)
  */
@@ -38,13 +39,16 @@ export const header = (model) => [
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill', [
-  model.configuration.cruMapByHost.match({
-    NotAsked: () => null,
-    Loading: () => h('.w-100.text-center', pageLoading()),
-    Success: (cruMapByHost) => buildPage(model, cruMapByHost),
-    Failure: (error) => h('.w-100.text-center', errorPage(error)),
-  })
+export const content = (model) => h('', [
+  detectorHeader(model),
+  h('.scroll-y.absolute-fill.p3', {style: 'top: 40px'},
+    model.configuration.cruMapByHost.match({
+      NotAsked: () => null,
+      Loading: () => h('.w-100.text-center', pageLoading()),
+      Success: (cruMapByHost) => buildPage(model, cruMapByHost),
+      Failure: (error) => h('.w-100.text-center', errorPage(error)),
+    })
+  )
 ]);
 
 /**
@@ -53,79 +57,101 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  * @param {JSON} cruMapByHost
  * @return {vnode}
  */
-const buildPage = (model, cruMapByHost) => h('.p3', [
-  h('.w-100.flex-row.pv1', [
-    h('h4.pv2.w-20', 'CRUs by hostname:'),
-    savingConfigurationMessagePanel(model),
-    h('.btn-group.w-20', {style: 'justify-content: flex-end;'}, [
-      saveConfigurationButton(model),
-      runRocConfigButton(model)
-    ])
-  ]),
-  tasksMessagePanel(model),
-  h('.w-100', {style: 'display: flex;'}, [
-    h('.w-70.ph2.flex-row', [
-      h('.w-40', [
-        h('input', {
-          type: 'checkbox',
-          id: 'allHostsSelector',
-          style: 'cursor: pointer',
-          checked: model.configuration.selectedHosts.length === Object.keys(cruMapByHost).length,
-          onchange: () => model.configuration.toggleAllSelection(),
-        }),
-        h('label.d-inline.f6.ph1', {
-          for: 'allHostsSelector', style: 'cursor: pointer;white-space: nowrap', title: `Toggle selection of all hosts`
-        }, 'Toggle All Hosts'),
+const buildPage = (model, cruMapByHost) => {
+  const isDataReady = model.detectors.listRemote.isSuccess()
+    && model.detectors.hostsByDetectorRemote.isSuccess();
+  if (isDataReady) {
+    return h('', [
+      h('.w-100.flex-row', [
+        h('h4.pv2.w-20', 'CRUs by detector:'),
+        savingConfigurationMessagePanel(model),
+        h('.btn-group.w-20', {style: 'justify-content: flex-end;'}, [
+          saveConfigurationButton(model),
+          runRocConfigButton(model)
+        ])
       ]),
-      h('.ph2.w-50', [
+      tasksMessagePanel(model),
+      h('.w-100.flex-row', [
+        h('.w-70'),
+        h('a.w-30', {
+          style: 'display:flex; justify-content: flex-end',
+          href: model.configuration.getConsulConfigURL(),
+          target: '_blank',
+          title: 'Open Consul with the stored configuration'
+        }, 'Open Stored Configuration'),
+      ]),
+      cruByDetectorPanel(model, cruMapByHost),
+    ]);
+  } else {
+    return h('.w-100.text-center', errorPage('Unable to load detectors/hosts from AliECS'));
+  }
+};
+
+/**
+ * Build a series of panels for each detector based on the current view of the user
+ * @param {Object} model
+ * @returns {vnode}
+ */
+const cruByDetectorPanel = (model, cruMapByHost) => {
+  const detectors = model.configuration.detectorPanel;
+  const hostsByDetector = model.detectors.hostsByDetectorRemote.payload;
+  return Object.keys(detectors)
+    .filter((detector) => (detector === model.detectors.selected || model.detectors.selected === 'GLOBAL'))
+    .map((detector) => {
+      const hasCRUs = hostsByDetector[detector].isSuccess()
+        && hostsByDetector[detector].payload.filter((host) => cruMapByHost[host]).length > 0;
+      return h('.w-100.pv2', [
+        h('.panel-title.flex-row.p2', [
+          h('h4.w-20', detector),
+          hasCRUs && h('.w-80.text-right',
+            h('button.btn', {
+              title: `Close panel for detector ${detector}`,
+              onclick: () => {
+                detectors[detector].isOpen = !detectors[detector].isOpen;
+                model.configuration.notify();
+              }
+            }, detectors[detector].isOpen ? iconChevronTop() : iconChevronBottom())
+          ),
+        ]),
+        hasCRUs && detectors[detector].isOpen
+        && hostsByDetector[detector].payload
+          .filter((host) => cruMapByHost[host])
+          .map((host) => cruByHostPanel(model, host, cruMapByHost[host]))
+      ])
+    });
+};
+
+/**
+ * Build a panel
+ * @param {Object} model 
+ * @param {JSON} cruMapByHost 
+ * @returns 
+ */
+const cruByHostPanel = (model, host, cruData) =>
+  h('', [
+    h('h5.panel-title-lighter.p2.flex-row', [
+      h('.flex-row', [
         h('input', {
           type: 'checkbox',
-          id: 'allHostsUserLogicSelector',
-          style: 'cursor: pointer',
-          checked: model.configuration.areAllUserLogicsEnabled(),
-          onchange: () => model.configuration.toggleAllHostsUserLogicSelection(),
+          checked: model.configuration.selectedHosts.includes(host),
+          onchange: () => model.configuration.toggleHostSelection(host),
         }),
-        h('label.d-inline.f6.ph1', {
-          for: 'allHostsUserLogicSelector',
-          style: 'cursor: pointer;white-space: nowrap',
-          title: `Toggle User Logic for All Hosts`
-        }, 'Toggle User Logic for All Hosts')
+        h('.ph2.actionable-icon', {
+          title: `Open/Close list of CRUs belonging to ${host}`,
+          onclick: () => {
+            model.configuration.cruToggleByHost[host] = !model.configuration.cruToggleByHost[host];
+            model.configuration.notify();
+          }
+        }, model.configuration.cruToggleByHost[host] ? iconChevronBottom() : iconChevronRight()
+        ),
+        h('.w-100', host)
       ]),
     ]),
-    h('a.w-30', {
-      style: 'display:flex; justify-content: flex-end',
-      href: model.configuration.getConsulConfigURL(),
-      target: '_blank',
-      title: 'Open Consul with the stored configuration'
-    }, 'Open Stored Configuration'),
-  ]),
-  Object.keys(cruMapByHost).map((host) =>
-    h('', [
-      h('h5.panel-title.p2.flex-row', [
-        h('.flex-row', [
-          h('input', {
-            type: 'checkbox',
-            checked: model.configuration.selectedHosts.includes(host),
-            onchange: () => model.configuration.toggleHostSelection(host),
-          }),
-          h('.ph2.actionable-icon', {
-            title: 'Open/Close CRUs configuration',
-            onclick: () => {
-              model.configuration.cruToggleByHost[host] = !model.configuration.cruToggleByHost[host];
-              model.configuration.notify();
-            }
-          }, model.configuration.cruToggleByHost[host] ? iconChevronBottom() : iconChevronRight()
-          ),
-          h('.w-100', host)
-        ]),
-      ]),
-      model.configuration.cruToggleByHost[host] && h('.panel', [
-        Object.keys(cruMapByHost[host])
-          .map((cruId) => cruPanelByEndpoint(model, cruId, cruMapByHost[host][cruId], host))
-      ])
+    cruData && model.configuration.cruToggleByHost[host] && h('.panel', [
+      Object.keys(cruData)
+        .map((cruId) => cruPanelByEndpoint(model, cruId, cruData[cruId], host))
     ])
-  ),
-]);
+  ]);
 
 /**
  * Panel for each CRU endpoint to allow the user to 
@@ -142,7 +168,7 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
   return h('', {
   }, [
     h('.flex-column', [
-      h('.flex-row.p1.panel.bg-gray-lighter', {style: 'font-weight: bold'}, [
+      h('.flex-row.p1.panel', {style: 'font-weight: bold'}, [
         h('.w-5.actionable-icon.text-center', {
           title: 'Open/Close CRUs configuration',
           onclick: () => {
