@@ -38,14 +38,16 @@ export default class DetectorService extends Observable {
    * Initialize to empty string if the user did not select any
    */
   async init() {
+    const stored = this.storage.getLocalItem(STORAGE.DETECTOR);
+    this._selected = (stored && stored.SELECTED) ? stored.SELECTED : '';
+    this.notify();
     this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote, this);
+    this.notify();
     if (this.listRemote.isSuccess()) {
       this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(
         this.hostsByDetectorRemote, this.listRemote.payload, this
       );
     }
-    const stored = this.storage.getLocalItem(STORAGE.DETECTOR);
-    this._selected = (stored && stored.SELECTED) ? stored.SELECTED : '';
     this.notify();
   }
 
