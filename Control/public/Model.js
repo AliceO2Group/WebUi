@@ -71,7 +71,6 @@ export default class Model extends Observable {
 
     this.notification = new O2Notification(this);
     this.notification.bubbleTo(this);
-    this.checkBrowserNotificationPermissions();
 
     // Setup WS connexion
     this.ws = new WebSocketClient();
@@ -114,7 +113,7 @@ export default class Model extends Observable {
       this.lock.setPadlockState(message.payload);
       return;
     } else if (message.command === 'notification') {
-      this.show(message.payload);
+      this.showNativeNotification(JSON.parse(message.payload));
       return;
     } else if (message.command === 'clean-resources-action') {
       this.task.setResourcesRequest(message.payload);
@@ -216,8 +215,12 @@ export default class Model extends Observable {
    * Display a browser notification(Notification - Web API)
    * @param {String} message
    */
-  show(message) {
-    new Notification('AliECS', {body: message});
+  showNativeNotification(message) {
+    const notification = new Notification(message.title, {body: message.body, icon: '/o2_icon.png'});
+    notification.onclick = function(event) {
+      event.preventDefault();
+      window.open(message.url, '_blank');
+    }
   }
 
   /**

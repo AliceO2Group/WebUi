@@ -120,15 +120,15 @@ class StatusService {
    * Build a response containing the information and status of the Kafka Service
    * @return {Promise<Resolve>}
    */
-  async getKafkaStatus() {
+  async getKafkaStatus(kafkaConnector) {
     let kafka = {};
-    if (this.config?.kafka?.port && this.config?.kafka?.hostname) {
+    if (kafkaConnector.isConfigured()) {
       kafka = this.config.kafka;
       try {
-        await httpGetJson(this.config.kafka.hostname, this.config.kafka.port, '/api/health');
-        kafka.status = {ok: true, configured: true};
+        await kafkaConnector.health();
+        kafka.status = { configured: true, ok:  true };
       } catch (error) {
-        kafka.status = {ok: false, configured: true, message: error.toString()};
+        kafka.status = { configured: true, ok:  false, message: error.name };
       }
     } else {
       kafka.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};

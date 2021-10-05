@@ -27,12 +27,6 @@ module.exports = {
   grafana: {
     url: 'http://localhost:3000'
   },
-  kafka: {
-    hostnames: 'localhost', // can be a string with multiple hostnames delimited by comma
-    port: 9092,
-    topic: 'notifications',
-    groupId: 'flp-kafka-notifications'
-  },
   consul: {
     hostname: 'localhost',
     port: 8500,
