@@ -25,7 +25,7 @@ const parseObject = (item, key) => {
     case 'epn_enabled':
       return item[key] && item[key] === 'true' ? 'ON' : 'OFF'
     case 'odc_topology':
-      if (item[key] && item['epn_enabled']) {
+      if (item[key] && item['epn_enabled'] && item['epn_enabled'] === 'true') {
         const pathList = item[key].split('/');
         if (pathList.length > 0) {
           return pathList[pathList.length - 1];
