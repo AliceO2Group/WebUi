@@ -56,7 +56,7 @@ const detectorItem = (name, workflow) => {
   }
   if (workflow.flpSelection.unavailableDetectors.includes(name)) {
     className += 'bg-danger white';
-    title = 'Detector from saved configuration is currently unavailale. Plese deselect it';
+    title = 'Detector from saved configuration is currently unavailable. Please deselect it';
   } else if (workflow.flpSelection.isDetectorActive(name)) {
     className += 'disabled-item ';
     title = 'Detector UNAVAILABLE';

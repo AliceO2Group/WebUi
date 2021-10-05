@@ -73,14 +73,16 @@ const autoBuiltPanel = (workflow, variables, name) => {
       }, !workflow.panelsUtils[name].isVisible ? iconChevronBottom() : iconChevronTop())
     ),
     workflow.panelsUtils[name].isVisible && h('.p2.panel.text-left', [
-      variables.filter((variable) => {
-        try {
-          return eval(variable.isVisible);
-        } catch (error) {
-          console.error(error);
-          return false;
-        }
-      }).map((variable) => autoBuiltBox(variable, workflow.model)),
+      variables
+        .filter((variable) => workflow.isVariableVisible(variable.key))
+        .filter((variable) => {
+          try {
+            return eval(variable.isVisible);
+          } catch (error) {
+            console.error(error);
+            return false;
+          }
+        }).map((variable) => autoBuiltBox(variable, workflow.model)),
     ]),
   ]);
 };
@@ -100,7 +102,9 @@ const basicPanel = (workflow, variables, name) => {
       h('.w-100', nameAsString),
     ),
     h('.p2.panel.text-left', [
-      variables.map((variable) => autoBuiltBox(variable, workflow.model)),
+      variables
+        .filter((variable) => workflow.isVariableVisible(variable.key))
+        .map((variable) => autoBuiltBox(variable, workflow.model)),
       readoutPanel(workflow),
       qcUriPanel(workflow)
     ]),

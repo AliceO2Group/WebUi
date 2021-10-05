@@ -51,7 +51,7 @@ export default class FlpSelection extends Observable {
    * Given a list of detectors and hosts:
    * * update the data from AliECS with available detectors
    * * make the selection of the detectors based on passed values
-   * * make the seleciton of the hosts based on passed values
+   * * make the selection of the hosts based on passed values
    * * inform the user if some are unavailable anymore
    * @param {Array<String>} detectors 
    * @param {Array<String>} hosts 
@@ -176,7 +176,7 @@ export default class FlpSelection extends Observable {
   }
 
   /**
-   * Remove a detector and its correspoding hosts
+   * Remove a detector and its corresponding hosts
    * @param {String} detector
    */
   removeHostsByDetector(detector) {

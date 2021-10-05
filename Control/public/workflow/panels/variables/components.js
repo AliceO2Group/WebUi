@@ -126,8 +126,8 @@ const dropdownBox = (variable, model) =>
 /**
  * Builds a component of type LIST_BOX to be used within the Variables Panel
  * If AliECS specifies type:
- * * string - single selection (e.g. worfklow template panel) and returns a single value
- * * number - single selection (e.g. worfklow template panel) and returns a single value
+ * * string - single selection (e.g. workflow template panel) and returns a single value
+ * * number - single selection (e.g. workflow template panel) and returns a single value
  * * list - multiple selection and send to AliECS a JSON formatted list (e.g. FLP selection panel)
  * If `allowedValues` does not contain any elements, an EDIT_BOX will be built instead
  * @param {WorkflowVariable} variable
@@ -309,7 +309,7 @@ const checkBox = (variable, model) => {
 
 /**
  * Builds a label block which will display the variable description (if present) on hover
- * @param {WorfklowVariable} variable 
+ * @param {WorkflowVariable} variable 
  * @returns {vnode}
  */
 const variableLabel = (variable, action = undefined) => {
