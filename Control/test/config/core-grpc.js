@@ -98,7 +98,7 @@ const coreGRPCServer = (config) => {
     },
     getActiveDetectors(call, callback) {
       calls['getActiveDetectors'] = true;
-      callback(null, {detectors: ['PROD']});
+      callback(null, {detectors: ['DCS']});
     },
   });
 
@@ -125,7 +125,23 @@ const envTest = {
     rootRole: 'copy-push',
     numberOfFlps: 2,
     userVars: {
-      odc_enabled: 'true'
+      odc_enabled: 'true',
+      mid_enabled: 'false',
+      mid_something: 'test',
+      dd_enabled: 'true',
+      run_type: 'run'
+    },
+    vaars: {
+      odc_enabled: 'true',
+      mid_enabled: 'false',
+      mid_something: 'test',
+      dd_enabled: 'true',
+      run_type: 'run'
+    },
+    defaults: {
+      dcs_topology: 'test',
+      dd_enabled: 'true',
+      run_type: 'run'
     }
   },
   workflow: {},

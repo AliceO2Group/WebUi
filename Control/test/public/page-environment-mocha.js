@@ -221,31 +221,77 @@ describe('`pageEnvironment` test-suite', async () => {
   describe('Utils within Environment class', async () => {
     it('should replace task name if regex is matched', async () => {
       const tagModified = await page.evaluate(() => {
-        const result = {};
-        result['environment'] = {};
+        const result = {environment: {}};
         result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment.parseEnvResult(result).environment.tasks[0].name;
+        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
       });
       assert.strictEqual(tagModified, 'readout');
     });
     it('should not replace task name due to regex not matching the name (missing tasks/ group)', async () => {
       const tagModified = await page.evaluate(() => {
-        const result = {};
-        result['environment'] = {};
+        const result = {environment: {}};
         result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment.parseEnvResult(result).environment.tasks[0].name;
+        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
       });
       assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
     });
 
     it('should not replace task name due to regex not matching the name (missing @ character)', async () => {
       const tagModified = await page.evaluate(() => {
-        const result = {};
-        result['environment'] = {};
+        const result = {environment: {}};
         result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment.parseEnvResult(result).environment.tasks[0].name;
+        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
       });
       assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
     });
+
+    it('should successfully add mesosStdout if available in tasks', async () => {
+      const mesosStdout = await page.evaluate(() => {
+        const result = {environment: {}};
+        result.environment.tasks = [{mesosStdout: 'location/location', name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment._parseEnvResult(result).mesosStdout;
+      });
+      assert.strictEqual(mesosStdout, 'location/location');
+    });
+
+    it('should successfully add mesosStdout empty if not available in tasks', async () => {
+      const mesosStdout = await page.evaluate(() => {
+        const result = {environment: {}};
+        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment._parseEnvResult(result).mesosStdout;
+      });
+      assert.strictEqual(mesosStdout, '');
+    });
+
+    it('should filter out variables which do not belong to a detector', async() => {
+      const env = await page.evaluate(() => {
+        const result = {environment: {
+          includedDetectors: ['ODC'],
+          userVars: {
+            odc_enabled: 'true',
+            mid_enabled: 'false',
+            mid_something: 'test',
+            dd_enabled: 'true',
+            run_type: 'run'
+          },
+          vars: {
+            odc_enabled: 'true',
+            mid_enabled: 'false',
+            other_useful_var: 'very',
+            dd_enabled: 'true',
+            run_type: 'run'
+          },
+          defaults: {
+            dcs_topology: 'test',
+            dd_enabled: 'true',
+            run_type: 'run'
+          }
+        }};
+        return window.model.environment._parseEnvResult(result).environment;
+      });
+      assert.deepStrictEqual(env.vars, { odc_enabled: 'true', dd_enabled: 'true', run_type: 'run', other_useful_var: 'very' });
+      assert.deepStrictEqual(env.userVars,  { odc_enabled: 'true', dd_enabled: 'true', run_type: 'run' });
+      assert.deepStrictEqual(env.defaults, { dd_enabled: 'true', run_type: 'run' });
+    })
   });
 });
