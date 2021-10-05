@@ -30,7 +30,7 @@ export default class FlpSelection extends Observable {
     this.list = RemoteData.notAsked();
     this.firstFlpSelection = -1;
 
-    this.hostsByDetectors = {}
+    this.hostsByDetectors = {};
 
     this.detectors = RemoteData.notAsked();
     this.activeDetectors = RemoteData.notAsked();
@@ -62,7 +62,7 @@ export default class FlpSelection extends Observable {
     // Initialize selection
     this.selectedDetectors = [];
     this.list = RemoteData.notAsked();
-    this.hostsByDetectors = {}
+    this.hostsByDetectors = {};
     this.workflow.form.setHosts([]);
     this.unavailableDetectors = [];
     this.missingHosts = [];

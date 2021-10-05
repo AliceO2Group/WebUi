@@ -100,7 +100,7 @@ class ApricotService {
     }
 
     if (missingFields.length !== 0) {
-      throw new Error(`Configuration cannot be saved without the following fields: ${missingFields.toString()}`)
+      throw new Error(`Configuration cannot be saved without the following fields: ${missingFields.toString()}`);
     } else {
       const user = {
         username: req?.session?.username ?? 'anonymous',

@@ -177,27 +177,26 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
  * @param {JSON} cru
  * @return {vnode}
  */
-const linksPanel = (model, cru) =>
-  (cru.config && cru.config.cru) ?
-    h('.flex-row.w-75', [
+const linksPanel = (model, cru) => {
+  const linksKeyList = Object.keys(cru.config).filter((configField) => configField.match('link[0-9]{1,2}')); // select only fields from links0 to links11
+  if (cru.config && cru.config.cru) {
+    return h('.flex-row.w-75', [
       h('.w-15', toggleUserLogic(model, cru)),
-      Object.keys(cru.config)
-        .filter((configField) => configField.match('link[0-9]{1,2}'))
-        .length !== 0 && h('.w-15', toggleAllCheckBox(model, cru)),
+      linksKeyList.length !== 0 && h('.w-15', toggleAllCheckBox(model, cru, linksKeyList)),
       h('.w-70.flex-row.flex-wrap', [
-        Object.keys(cru.config)
-          .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
-          .map((link, index) => checkBox(model, `link${index}`, `#${index}`, cru.config)),
+        linksKeyList.map((link) => checkBox(model, link, cru.config)),
       ])
     ])
-    : h('.d-inline.f6.text-light', 'No configuration found for this serial:endpoint');
+  }
+  return h('.d-inline.f6.text-light', 'No configuration found for this serial:endpoint');
+};
 
 /**
  * Add a checkbox for the user to enable/disable the user logic
  * Based on this selection the links panel will be hidden
  * @param {Object} model
  * @param {JSON} cru
- * @returns {vndoe}
+ * @returns {vnode}
  */
 const toggleUserLogic = (model, cru) =>
   h('label.d-inline.f6', {
@@ -219,23 +218,16 @@ const toggleUserLogic = (model, cru) =>
  * @param {JSON} cru - reference to the currently displayed cru
  * @return {vnode}
  */
-const toggleAllCheckBox = (model, cru) =>
+const toggleAllCheckBox = (model, cru, linksList) =>
   h('label.d-inline.f6.ph2', {
     style: 'white-space: nowrap',
     title: `Toggle selection of all links`
   }, h('input', {
     type: 'checkbox',
-    checked: Object.keys(cru.config)
-      .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
-      .filter((key) => cru.config[key].enabled === 'true').length === 12,
+    checked: linksList.filter((key) => cru.config[key].enabled === 'true').length === linksList.length,
     onchange: () => {
-      const areAllChecked =
-        Object.keys(cru.config)
-          .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
-          .filter((key) => cru.config[key].enabled === 'true').length === 12;
-      Object.keys(cru.config)
-        .filter((configField) => configField.match('link[0-9]{1,2}')) // select only fields from links0 to links11
-        .forEach((key) => cru.config[key].enabled = !areAllChecked ? 'true' : 'false');
+      const areAllChecked = linksList.filter((key) => cru.config[key].enabled === 'true').length === linksList.length;
+      linksList.forEach((key) => cru.config[key].enabled = !areAllChecked ? 'true' : 'false');
       model.configuration.notify();
     }
   }), ' All Links');
@@ -243,12 +235,18 @@ const toggleAllCheckBox = (model, cru) =>
 /**
  * Generate a checkbox based on title and field to change
  * @param {Object} model
- * @param {string} title
+ * @param {string} key - format link0
  * @param {JSON} config - reference to the configuration in CRUsMapByHost
  * @return {vnode}
  */
-const checkBox = (model, key, title, config) =>
-  h('label.d-inline.f6.ph2', {
+const checkBox = (model, key, config) => {
+  let id;
+  try {
+    id = '#' + key.split('link')[1];
+  } catch (error) {
+    id = key;
+  }
+  return h('label.d-inline.f6.ph2', {
     style: 'white-space: nowrap',
     title: `Toggle selection of ${key}`
   }, h('input', {
@@ -258,7 +256,8 @@ const checkBox = (model, key, title, config) =>
       config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';
       model.configuration.notify();
     }
-  }), ' ' + title);
+  }), ' ' + id);
+};
 
 /**
  * Builds a panel under the command buttons to display failed tasks information
@@ -271,7 +270,7 @@ const tasksMessagePanel = (model) =>
   h('.w-100.p2', {
     style: 'border: 1px solid #ddd;'
   }, [
-    h('.danger.w-90', 'The following errors occured during execution:'),
+    h('.danger.w-90', 'The following errors ocurred during execution:'),
     model.configuration.failedTasks.map((task) =>
       (task.id && task.host) ? h('.danger.flex-row', [
         '- task id:',

@@ -44,7 +44,7 @@ export default class Task extends Observable {
 
     await this.model.detectors.getAndSetDetectorsAsRemoteData();
     if (this.model.detectors.listRemote.isSuccess()) {
-      const detectorMap = {}
+      const detectorMap = {};
       await Promise.all(
         this.model.detectors.listRemote.payload.map(async (detector) => {
           let hosts = RemoteData.notAsked();
