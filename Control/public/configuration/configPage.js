@@ -98,8 +98,8 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
   return Object.keys(detectors)
     .filter((detector) => (detector === model.detectors.selected || model.detectors.selected === 'GLOBAL'))
     .map((detector) => {
-      const hasCRUs = hostsByDetector[detector].isSuccess()
-        && hostsByDetector[detector].payload.filter((host) => cruMapByHost[host]).length > 0;
+      const hasCRUs = hostsByDetector[detector]
+        && hostsByDetector[detector].filter((host) => cruMapByHost[host]).length > 0;
       return h('.w-100.pv2', [
         h('.panel-title.flex-row.p2', [
           h('h4.w-20', detector),
@@ -114,7 +114,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
           ),
         ]),
         hasCRUs && detectors[detector].isOpen
-        && hostsByDetector[detector].payload
+        && hostsByDetector[detector]
           .filter((host) => cruMapByHost[host])
           .map((host) => cruByHostPanel(model, host, cruMapByHost[host]))
       ])

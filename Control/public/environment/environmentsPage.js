@@ -114,7 +114,8 @@ const environmentsTable = (model, list) => {
  * @return {vnode}
  */
 const actionsCell = (model, item) => {
-  const isDetectorIncluded = item.includedDetectors.includes(model.detectors.selected);
+  const isDetectorIncluded =
+    item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
   if (isDetectorIncluded || !model.detectors.isSingleView()) {
     return h('button.btn.btn-primary', {
       title: 'Open the environment page with more details',
