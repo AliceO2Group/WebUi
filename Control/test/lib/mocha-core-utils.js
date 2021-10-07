@@ -34,6 +34,18 @@ describe('CoreUtils test suite', () => {
     });
   });
 
+  describe('Check parseFrameworkInfo', () => {
+    it('should successfully remove unwanted fields from passed info', () => {
+      const info = {
+        host: 'test',
+        frameworkId: 'id',
+        detectorsInInstance: ['some-detectors'],
+        activeDetectors: ['some-detectors'],
+        availableDetectors: ['some-detectors'],
+      };
+      assert.deepStrictEqual(CoreUtils.parseFrameworkInfo(info), {host: 'test', frameworkId: 'id'});
+    });
+  });
 
   describe('Check parseAliEcsVersion', () => {
     it('should successfully build version of AliECS Core', () => {

@@ -32,6 +32,24 @@ class ApricotService {
   }
 
   /**
+   * Request a list of detectors from Apricot to confirm 
+   * connection and O2Apricot are up
+   * @return {Promise}
+   */
+  async getStatus() {
+    try {
+      if (this.apricotProxy?.isConnectionReady) {
+        await this.apricotProxy['ListDetectors']();
+      } else {
+        throw new Error('Unable to check status of Apricot')
+      }
+    } catch (error) {
+      log.error(error);
+      throw error;
+    }
+  }
+
+  /**
    * Method to execute command contained by req.path and send back results
    * @param {Request} req
    * @param {Response} res
@@ -48,7 +66,7 @@ class ApricotService {
         .catch((error) => errorHandler(error, res, 504, 'apricotservice'));
     } else {
       const error = this.apricotProxy?.connectionError?.message
-        ?? 'Could not establish connection to AliECS Core due to pontentially undefined method';
+        ?? 'Could not establish connection to O2Apricot due to potentially undefined method';
       errorHandler(error, res, 503, 'apricotservice');
     }
   }
@@ -109,7 +127,7 @@ class ApricotService {
       const created = Date.now();
       const edited = Date.now();
       const variables = req.body?.variables ?? {};
-      const detectors = req.body?.detectors ?? []; 
+      const detectors = req.body?.detectors ?? [];
       const workflow = req.body.workflow;
       const revision = req.body.revision;
       const repository = req.body.repository;

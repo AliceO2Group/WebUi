@@ -57,7 +57,7 @@ const ctrlService = new ControlService(padLock, ctrlProxy, consulConnector, conf
 const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
 const apricotService = new ApricotService(apricotProxy);
 
-const statusService = new StatusService(config, ctrlService, consulService);
+const statusService = new StatusService(config, ctrlService, consulService, apricotService);
 
 module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
@@ -95,6 +95,7 @@ module.exports.setup = (http, ws) => {
   http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
   http.get('/status/kafka', (_, res) => statusService.getKafkaStatus(kafka).then((data) => res.status(200).json(data)));
   http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()), {public: true});
+  http.get('/status/apricot', (_, res) => statusService.getApricotStatus().then((data) => res.status(200).json(data)));
   http.get('/status/core',
     (req, res, next) => ctrlService.isConnectionReady(req, res, next),
     (_, res) => statusService.getAliEcsCoreStatus().then((data) => res.status(200).json(data))

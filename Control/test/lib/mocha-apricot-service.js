@@ -14,14 +14,10 @@
 /* eslint-disable max-len */
 
 const sinon = require('sinon');
-const path = require('path');
 const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 
-const config = require('./../test-config.js');
-const GrpcProxy = require('./../../lib/control-core/GrpcProxy.js');
 const ApricotService = require('./../../lib/control-core/ApricotService.js');
-const APRICOT_PATH = path.join(__dirname, './../../protobuf/o2apricot.proto');
 
 describe('ApricotService test suite', () => {
   describe('Check Constructor', () => {
@@ -33,6 +29,32 @@ describe('ApricotService test suite', () => {
 
     it('should successfully instantiate ApricotService', () => {
       assert.doesNotThrow(() => new ApricotService({}));
+    });
+  });
+
+  describe('Check Status of Apricot', () => {
+    it('should successfully return promise resolved if list detectors returns', async () => {
+      const apricotProxy = {
+        isConnectionReady: true,
+        ListDetectors: sinon.stub().resolves({detectors: ['TST']})
+      };
+      const apricotService = new ApricotService(apricotProxy);
+      assert.doesNotReject(async () => apricotService.getStatus());
+    });
+
+    it('should return status error if apricotProxy is not ready', async () => {
+      const apricotProxy = {isConnectionReady: false};
+      const apricotService = new ApricotService(apricotProxy);
+      assert.rejects(() => apricotService.getStatus(), new Error('Unable to check status of Apricot'));
+    });
+
+    it('should return status error if apricotProxy fails to return list of detectors', async () => {
+      const apricotProxy = {
+        isConnectionReady: true,
+        ListDetectors: sinon.stub().rejects('Apricot is not working')
+      };
+      const apricotService = new ApricotService(apricotProxy);
+      assert.rejects(() => apricotService.getStatus(), new Error('Apricot is not working'));
     });
   });
 
@@ -75,7 +97,7 @@ describe('ApricotService test suite', () => {
       assert.ok(res.status.calledOnce);
       assert.ok(res.status.calledWith(503));
       assert.ok(res.send.calledOnce);
-      assert.ok(res.send.calledWith({message: 'Could not establish connection to AliECS Core due to pontentially undefined method'}));
+      assert.ok(res.send.calledWith({message: 'Could not establish connection to O2Apricot due to potentially undefined method'}));
     });
 
     it('should attempt execute command but send response with error if connection is not ready and connection error is provided', async () => {
@@ -102,7 +124,7 @@ describe('ApricotService test suite', () => {
       assert.ok(res.status.calledOnce);
       assert.ok(res.status.calledWith(503));
       assert.ok(res.send.calledOnce);
-      assert.ok(res.send.calledWith({message: 'Could not establish connection to AliECS Core due to pontentially undefined method'}));
+      assert.ok(res.send.calledWith({message: 'Could not establish connection to O2Apricot due to potentially undefined method'}));
     });
   });
 
@@ -131,7 +153,7 @@ describe('ApricotService test suite', () => {
         revision: 'master',
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       req = {body, session};
 
       const apricotProxy = {
@@ -159,7 +181,7 @@ describe('ApricotService test suite', () => {
         revision: 'master',
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       req = {body, session};
 
       const apricotProxy = {
@@ -175,7 +197,7 @@ describe('ApricotService test suite', () => {
       assert.ok(res.send.calledWith({message: 'Configuration cannot be saved without the following fields: name'}));
     });
 
-    it('should reply with error due to Apricot ListRuntimeEnttires call failure', async () => {
+    it('should reply with error due to Apricot ListRuntimeEntries call failure', async () => {
       const body = {
         name: 'Something went wrong',
         variables: {
@@ -188,7 +210,7 @@ describe('ApricotService test suite', () => {
         revision: 'master',
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       req = {body, session};
 
       const apricotProxy = {
@@ -216,7 +238,7 @@ describe('ApricotService test suite', () => {
         revision: 'master',
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       req = {body, session};
 
       const apricotProxy = {
@@ -230,7 +252,7 @@ describe('ApricotService test suite', () => {
       assert.ok(res.send.calledWith({message: `A configuration with name 'MY_OWN' already exists`}));
     });
 
-    it('should reply with error due to Apricot SetRuntineEntry call failure', async () => {
+    it('should reply with error due to Apricot SetRuntimeEntry call failure', async () => {
       const body = {
         name: 'MY_OWN_TST',
         variables: {
@@ -243,7 +265,7 @@ describe('ApricotService test suite', () => {
         revision: 'master',
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       req = {body, session};
 
       const apricotProxy = {
@@ -271,14 +293,14 @@ describe('ApricotService test suite', () => {
       assert.throws(() => service._getNameAsId(), new TypeError(`Cannot read property 'trim' of undefined`));
     });
 
-    it('should succesfully trim and replace spaces and / characters from name and return formated id', () => {
+    it('should successfully trim and replace spaces and / characters from name and return format id', () => {
       assert.strictEqual(service._getNameAsId('  test / test'), 'test___test');
       assert.strictEqual(service._getNameAsId('test/test'), 'test_test');
       assert.strictEqual(service._getNameAsId('  test  '), 'test');
       assert.strictEqual(service._getNameAsId('Detector test config '), 'Detector_test_config');
     });
 
-    it('should succesfully build a configuration to store JSON based on request object', () => {
+    it('should successfully build a configuration to store JSON based on request object', () => {
       const body = {
         name: 'My TST Configuration',
         variables: {
@@ -291,13 +313,13 @@ describe('ApricotService test suite', () => {
         revision: 'master',
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       const req = {body, session};
       const result = service._buildConfigurationObject(req);
       const expected = {
         key: 'My_TST_Configuration',
         value: {
-          user: {username: 'someuser', personid: 11},
+          user: {username: 'user', personid: 11},
           variables: {
             some_enabled: 'true',
             some_other: 'false',
@@ -332,7 +354,7 @@ describe('ApricotService test suite', () => {
         revision: 'master',
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       const req = {body, session};
 
       assert.throws(() => service._buildConfigurationObject(req),
@@ -350,7 +372,7 @@ describe('ApricotService test suite', () => {
         detectors: ['TST'],
         repository: 'git/repo.git',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       const req = {body, session};
 
       assert.throws(() => service._buildConfigurationObject(req),
@@ -368,7 +390,7 @@ describe('ApricotService test suite', () => {
         workflow: 'readout',
         revision: 'master',
       };
-      const session = {username: 'someuser', personid: 11};
+      const session = {username: 'user', personid: 11};
       const req = {body, session};
 
       assert.throws(() => service._buildConfigurationObject(req),
