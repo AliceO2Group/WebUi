@@ -24,10 +24,12 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50.text-center', [
+  h('.w-100.text-center', [
     h('h4', 'Task list')
   ]),
-  h('.flex-row.text-right', [
+  model.detectors.selected === 'GLOBAL' && h('.flex-row.text-right', {
+    style: 'position: absolute; right: 0px;'
+  }, [
     cleanResourcesButton(model.task),
     cleanTasksButton(model.task)
   ])
