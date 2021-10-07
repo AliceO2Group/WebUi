@@ -30,6 +30,7 @@ describe('Control', function() {
     // Start browser to test UI
     browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 770});
     exports.page = page;
   });
 
@@ -55,7 +56,7 @@ describe('Control', function() {
       await label.click();
       await page.waitForTimeout(200);
       const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=environments','nu vreeeeea');
+      assert.strictEqual(location.search, '?page=environments','Detector unable to select view');
     } else {
       assert.ok(false, `Unable to click GLOBAL View`);
     }
