@@ -61,8 +61,8 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
 */
 const showNewEnvironmentForm = (model, repoList) => [
   h('.flex-column', [
-    h('.flex-row.w-100', [
-      h('.flex-column.w-50', [
+    h('.flex-row.w-100', {style: 'flex-wrap: wrap'}, [
+      h('.template-selection.flex-column', [
         h('h5.bg-gray-light.p2.panel-title.w-100', 'Select Template'),
         h('.form-group.p2.panel.w-100.flex-column', [
           repositoryDropdownList(model.workflow, repoList),
@@ -71,8 +71,8 @@ const showNewEnvironmentForm = (model, repoList) => [
           templateAreaList(model.workflow, model.workflow.form.repository, model.workflow.form.revision)
         ]),
       ]),
-      h('.w-25', detectorsPanel(model.workflow)),
-      h('.w-25', flpSelectionPanel(model.workflow)),
+      h('.template-selection', detectorsPanel(model.workflow)),
+      h('.template-selection', flpSelectionPanel(model.workflow)),
     ]),
     model.workflow.form.template && workflowSettingsPanels(model.workflow)
   ]),

@@ -53,3 +53,17 @@
 
 .o2-modal{z-index:1001; display:block; padding-top:10em; position:fixed; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgb(0,0,0); background-color:rgba(0,0,0,0.4); }
 .o2-modal-content{margin:auto; background-color:#fff; position:relative; padding:0; outline:0; width:700px;  border-radius: 5px 20px 5px; }
+
+.auto-built-panel { width: 50%; }
+.auto-built-row:hover { border-radius: .25rem; background-color: var(--color-gray-light); }
+
+.template-selection { width: 33%; }
+
+@media (max-width: 1000px) {
+  .auto-built-panel { width: 100%; }
+  .template-selection { width: 100% }
+}
+
+@media (min-width: 2000px) {
+  .auto-built-panel { width: 33.3% }
+}
