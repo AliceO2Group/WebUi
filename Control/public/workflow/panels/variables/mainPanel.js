@@ -34,8 +34,10 @@ export default (workflow) => {
     }
   });
   return h('.w-100.flex-row', {style: 'flex-wrap: wrap'},
-    h('.w-50', basicPanel(workflow, workflow.groupedPanels[basicPanelKey], basicPanelKey)),
-    h('.w-50', advancedVarsPanel(workflow)),
+    h('.w-100.flex-row', {style: 'flex-wrap: wrap'}, [
+      h('.auto-built-panel', basicPanel(workflow, workflow.groupedPanels[basicPanelKey], basicPanelKey)),
+      h('.auto-built-panel', advancedVarsPanel(workflow)),
+    ]),
     Object.keys(workflow.groupedPanels)
       .sort((panelA, panelB) => panelA.toLocaleUpperCase() < panelB.toLocaleUpperCase() ? -1 : 1)
       .filter((panelName) => panelName !== basicPanelKey)
@@ -46,7 +48,9 @@ export default (workflow) => {
           return false;
         }
       }))
-      .map((panelName) => h('.w-50', autoBuiltPanel(workflow, workflow.groupedPanels[panelName], panelName)))
+      .map((panelName) =>
+        h('.auto-built-panel', autoBuiltPanel(workflow, workflow.groupedPanels[panelName], panelName))
+      )
   );
 }
 
@@ -82,7 +86,7 @@ const autoBuiltPanel = (workflow, variables, name) => {
             console.error(error);
             return false;
           }
-        }).map((variable) => autoBuiltBox(variable, workflow.model)),
+        }).map((variable) => h('.auto-built-row.p1', autoBuiltBox(variable, workflow.model))),
     ]),
   ]);
 };
@@ -104,7 +108,7 @@ const basicPanel = (workflow, variables, name) => {
     h('.p2.panel.text-left', [
       variables
         .filter((variable) => workflow.isVariableVisible(variable.key))
-        .map((variable) => autoBuiltBox(variable, workflow.model)),
+        .map((variable) => h('.auto-built-row.p1', autoBuiltBox(variable, workflow.model))),
       readoutPanel(workflow),
       qcUriPanel(workflow)
     ]),

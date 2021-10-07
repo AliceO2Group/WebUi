@@ -49,7 +49,7 @@ const autoBuiltBox = (variable, model) => {
  * @returns {vnode}
  */
 const editBox = (variable, model) =>
-  h('.flex-row.pv1', [
+  h('.flex-row', [
     variableLabel(variable),
     h('.w-50',
       h('input.form-control', {
@@ -318,8 +318,8 @@ const variableLabel = (variable, action = undefined) => {
     onclick: action,
   };
   return variable.description !== '' ?
-    h('.w-50.flex-column.dropdown', [
-      h('label#workflow-variable-info-label', style, variable.label),
+    h('.w-50.flex-column.dropdown', {style: 'padding: .35em 0 .35em'}, [
+      h('#workflow-variable-info-label', style, variable.label),
       h('.p2.dropdown-menu-left.gray-darker#workflow-variable-info', variable.description)
     ])
     :

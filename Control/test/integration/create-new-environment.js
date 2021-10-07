@@ -53,24 +53,24 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should display variables (K;V) panel', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > div', {timeout: 2000});
-    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > div').innerText);
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div', {timeout: 2000});
+    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div').innerText);
     assert.strictEqual('Advanced Configuration', title, 'Could not find the Advanced Configuration Panel');
   });
 
   it('should successfully add provided K:V pairs', async () => {
     for (const key in confVariables) {
       if (key && confVariables[key] !== undefined) {
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div > input');
         page.keyboard.type(key);
         await page.waitForTimeout(500);
 
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > input');
         page.keyboard.type(confVariables[key]);
         await page.waitForTimeout(500);
 
         await page.evaluate(() => {
-          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(3)').click();
+          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(3)').click();
         });
         await page.waitForTimeout(500);
       }
