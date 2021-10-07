@@ -58,6 +58,103 @@ describe('ApricotService test suite', () => {
     });
   });
 
+  describe('Check in-memory detectorlist', () => {
+    let req, res;
+    beforeEach(() => {
+      req = {};
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.spy(),
+        send: sinon.spy(),
+      };
+    });
+    it('should successfully request a list of detectors from AliECS core if none are present', async () => {
+      const apricotProxy = {
+        isConnectionReady: true,
+        ListDetectors: sinon.stub().resolves({detectors: ['TST']})
+      };
+      const apricotService = new ApricotService(apricotProxy);
+      await apricotService.getDetectorList(req, res);
+      assert.ok(res.status.calledOnce);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledOnce);
+      assert.ok(res.json.calledWith({detectors: ['TST']}));
+    });
+
+    it('should successfully return a list of detectors if already present', async () => {
+      const apricotService = new ApricotService({});
+      apricotService.detectors = ['TST'];
+      await apricotService.getDetectorList(req, res);
+      assert.ok(res.status.calledOnce);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledOnce);
+      assert.ok(res.json.calledWith({detectors: ['TST']}));
+    });
+
+    it('should return error response if detectors are not present and AliECS replies with error', async () => {
+      const apricotProxy = {
+        isConnectionReady: true,
+        ListDetectors: sinon.stub().rejects(new Error('Unable to retrieve list'))
+      };
+      const apricotService = new ApricotService(apricotProxy);
+      await apricotService.getDetectorList(req, res);
+      assert.ok(res.status.calledOnce);
+      assert.ok(res.status.calledWith(503));
+      assert.ok(res.send.calledOnce);
+      assert.ok(res.send.calledWith({message: 'Unable to retrieve list'}));
+    });
+  });
+
+  describe('Check detectors caching', () => {
+    let req, res;
+
+    beforeEach(() => {
+      req = {};
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.spy(),
+        send: sinon.spy(),
+      };
+    });
+
+    it('should successfully request hosts for each detector from AliECS core if none are present', async () => {
+      const apricotProxy = {
+        isConnectionReady: true,
+        ListDetectors: sinon.stub().resolves({detectors: ['TST']}),
+        GetHostInventory: sinon.stub().resolves({hosts: ['flp001']}),
+      };
+      const apricotService = new ApricotService(apricotProxy);
+      await apricotService.getHostsByDetectorList(req, res);
+      assert.ok(res.status.calledOnce);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledOnce);
+      assert.ok(res.json.calledWith({hosts: {TST: ['flp001']}}));
+    });
+
+    it('should successfully return a map of hosts grouped by detectors if already present', async () => {
+      const apricotService = new ApricotService({});
+      apricotService.hostsByDetector = new Map([['TST', ['flp001']]]);
+      await apricotService.getHostsByDetectorList(req, res);
+      assert.ok(res.status.calledOnce);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledOnce);
+      assert.ok(res.json.calledWith({hosts: {TST: ['flp001']}}));
+    });
+
+    it('should return error response if hostsByDetectors are not present and AliECS replies with error for initial detector request', async () => {
+      const apricotProxy = {
+        isConnectionReady: true,
+        ListDetectors: sinon.stub().rejects(new Error('unable to load detector list')),
+      };
+      const apricotService = new ApricotService(apricotProxy);
+      await apricotService.getHostsByDetectorList(req, res);
+      assert.ok(res.status.calledOnce);
+      assert.ok(res.status.calledWith(503));
+      assert.ok(res.send.calledOnce);
+      assert.ok(res.send.calledWith({message: 'unable to load detector list'}));
+    });
+  });
+
   describe('Check executing commands through `GrpcProxy`', () => {
     let apricotService;
     let req, res;

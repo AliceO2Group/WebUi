@@ -29,6 +29,60 @@ class ApricotService {
   constructor(apricotProxy) {
     assert(apricotProxy, 'Missing GrpcProxy dependency for Apricot');
     this.apricotProxy = apricotProxy;
+
+    this.detectors = [];
+    this.hostsByDetector = new Map();
+  }
+
+  /**
+   * Retrieve an in-memory detectors list
+   * If list does not exist, make a request to Apricot
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getDetectorList(_, res) {
+    if (this.detectors.length === 0) {
+      try {
+        log.info('AliECS GUI => ListDetectors')
+        this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+      } catch (error) {
+        errorHandler(error, res, 503, 'apricotservice');
+        return;
+      }
+    }
+    res.status(200).json({detectors: this.detectors});
+  }
+
+  /**
+   * Return an in-memory map of hosts grouped by their detector
+   * If map is empty, make a request to Apricot
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getHostsByDetectorList(_, res) {
+    if (this.hostsByDetector.size === 0) {
+      try {
+        log.info('AliECS GUI => ListDetectors');
+        this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+
+        await Promise.allSettled(
+          this.detectors.map(async (detector) => {
+            try {
+              log.info(`AliECS GUI => GetHostInventory for detector: ${detector}`);
+              const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
+              this.hostsByDetector.set(detector, hosts);
+            } catch (error) {
+              log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+              log.error(error);
+            }
+          })
+        );
+      } catch (error) {
+        errorHandler(error, res, 503, 'apricotservice');
+        return;
+      }
+    }
+    res.status(200).json({hosts: Object.fromEntries(this.hostsByDetector)});
   }
 
   /**
