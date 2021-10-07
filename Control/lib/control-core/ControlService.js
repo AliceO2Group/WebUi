@@ -172,7 +172,7 @@ class ControlService {
    */
   async getAliECSInfo() {
     const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
-    const response = await this.ctrlProx[method]();
+    const response = CoreUtils.parseFrameworkInfo(await this.ctrlProx[method]());
     response.version = CoreUtils.parseAliEcsVersion(response.version);
     return response;
   }

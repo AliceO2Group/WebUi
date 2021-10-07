@@ -33,6 +33,7 @@ export default class FrameworkInfo extends Observable {
       grafana: RemoteData.notAsked(),
       consul: RemoteData.notAsked(),
       kafka: RemoteData.notAsked(),
+      apricot: RemoteData.notAsked(),
     };
 
     this.aliecs = RemoteData.notAsked();
@@ -53,6 +54,7 @@ export default class FrameworkInfo extends Observable {
       this.getCoreInfo(),
       this.getGrafanaInfo(),
       this.getKafkaInfo(),
+      this.getApricotInfo(),
       this.getConsulInfo(),
       this.getIntegratedServicesInfo(),
     ]);
@@ -74,7 +76,7 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Make a request to retrieve information about the GUI
+   * Make a request to retrieve information about Grafana
    */
   async getGrafanaInfo() {
     this.statuses.grafana = RemoteData.loading();
@@ -88,7 +90,7 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Make a request to retrieve information about the GUI
+   * Make a request to retrieve information about Kafka
    */
   async getKafkaInfo() {
     this.statuses.kafka = RemoteData.loading();
@@ -102,7 +104,7 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Make a request to retrieve information about the GUI
+   * Make a request to retrieve information about Consul
    */
   async getConsulInfo() {
     this.statuses.consul = RemoteData.loading();
@@ -121,7 +123,21 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Make a request to retrieve information about the GUI
+   * Make a request to retrieve information about Apricot
+   */
+  async getApricotInfo() {
+    this.statuses.apricot = RemoteData.loading();
+    const {result, ok} = await this.model.loader.get('/api/status/apricot');
+    if (!ok) {
+      this.statuses.apricot = RemoteData.failure(result.message);
+    } else {
+      this.statuses.apricot = RemoteData.success(result);
+    }
+    this.notify();
+  }
+
+  /**
+   * Make a request to retrieve information about AliECS Core
    */
   async getCoreInfo() {
     this.aliecs = RemoteData.loading();

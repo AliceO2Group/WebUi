@@ -27,15 +27,16 @@ class StatusService {
    * @param {ControlService} ctrlService
    * @param {ConsulService} consulService
    */
-  constructor(config, ctrlService, consulService) {
+  constructor(config, ctrlService, consulService, apricotService) {
     this.config = config;
     this.ctrlService = ctrlService
     this.consulService = consulService;
+    this.apricotService = apricotService;
     this.NOT_CONFIGURED = 'This service was not configured';
   }
 
   /**
-   * Build a response containing the information and status of the Consul Serivce
+   * Build a response containing the information and status of the Consul Service
    * @return {Promise<Resolve>}
    */
   async getConsulStatus() {
@@ -61,7 +62,11 @@ class StatusService {
   async getAliEcsCoreStatus() {
     let aliEcs = {};
     if (this.config?.grpc) {
-      aliEcs = this.config.grpc;
+      aliEcs = {
+        url: `${this.config.grpc.hostname}:${this.config.grpc.port}`,
+        timeout: this.config.grpc.timeout,
+        maxMessageLength: this.config.grpc.maxMessageLength,
+      };
       try {
         const coreInfo = await this.ctrlService.getAliECSInfo();
         aliEcs = Object.assign({}, aliEcs, coreInfo);
@@ -97,15 +102,41 @@ class StatusService {
   }
 
   /**
+   * Build a response containing the information and status of Apricot Service
+   * @returns {Promise<Resolve>}
+   */
+  async getApricotStatus() {
+    let apricot = {};
+    if (this.config?.apricot) {
+      apricot = {
+        url: `${this.config.apricot.hostname}:${this.config.apricot.port}`,
+        timeout: this.config.apricot.timeout,
+        maxMessageLength: this.config.apricot.maxMessageLength
+      };
+      try {
+        await this.apricotService.getStatus();
+        apricot.status = {ok: true, configured: true};
+      } catch (error) {
+        apricot.status = {ok: false, configured: true, message: error.toString()}
+      }
+
+    } else {
+      apricot.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+    }
+    return apricot;
+  }
+
+  /**
    * Build a response containing the information and status of the Grafana Service
    * @return {Promise<Resolve>}
    */
   async getGrafanaStatus() {
     let grafana = {};
     if (this.config?.grafana?.url) {
-      grafana = url.parse(this.config.grafana.url)
       try {
-        await httpGetJson(grafana.hostname, grafana.port, '/api/health');
+        const urlObject = url.parse(this.config.grafana.url);
+        grafana = {url: this.config.grafana.url};
+        await httpGetJson(urlObject.hostname, urlObject.port, '/api/health');
         grafana.status = {ok: true, configured: true};
       } catch (error) {
         grafana.status = {ok: false, configured: true, message: error.toString()};
@@ -126,9 +157,9 @@ class StatusService {
       kafka = this.config.kafka;
       try {
         await kafkaConnector.health();
-        kafka.status = { configured: true, ok:  true };
+        kafka.status = {configured: true, ok: true};
       } catch (error) {
-        kafka.status = { configured: true, ok:  false, message: error.name };
+        kafka.status = {configured: true, ok: false, message: error.name};
       }
     } else {
       kafka.status = {ok: false, configured: false, message: this.NOT_CONFIGURED};

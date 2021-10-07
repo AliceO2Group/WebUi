@@ -22,6 +22,18 @@ class CoreUtils {
   constructor() { }
 
   /**
+   * Given a core response with framework info, filter out
+   * data which should not be displayed to the user
+   * @param {JSON} info 
+   */
+  static parseFrameworkInfo(info) {
+    delete info.detectorsInInstance;
+    delete info.activeDetectors;
+    delete info.availableDetectors;
+    return info;
+  }
+
+  /**
    * Method to remove `/` if exists from method name
    * @param {string} method
    * @return {string}
