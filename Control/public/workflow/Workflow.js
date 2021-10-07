@@ -400,7 +400,7 @@ export default class Workflow extends Observable {
   isVariableVisible(key) {
     if (this.flpSelection.selectedDetectors.length > 0) {
       const prefix = key.split('_')[0];
-      const isVariableDetector = this.flpSelection.detectors.payload.detectors
+      const isVariableDetector = this.flpSelection.detectors.payload
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
       const isVariableIncludedDetector = this.flpSelection.selectedDetectors
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;

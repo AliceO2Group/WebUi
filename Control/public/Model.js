@@ -72,7 +72,7 @@ export default class Model extends Observable {
     this.notification = new O2Notification(this);
     this.notification.bubbleTo(this);
 
-    // Setup WS connexion
+    // Setup WS connection
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
