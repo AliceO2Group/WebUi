@@ -53,24 +53,24 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should display variables (K;V) panel', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div', {timeout: 2000});
-    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div').innerText);
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div', {timeout: 2000});
+    const title = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div').innerText);
     assert.strictEqual('Advanced Configuration', title, 'Could not find the Advanced Configuration Panel');
   });
 
   it('should successfully add provided K:V pairs', async () => {
     for (const key in confVariables) {
       if (key && confVariables[key] !== undefined) {
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div > input');
         page.keyboard.type(key);
         await page.waitForTimeout(500);
 
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > input');
         page.keyboard.type(confVariables[key]);
         await page.waitForTimeout(500);
 
         await page.evaluate(() => {
-          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(3)').click();
+          document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(3)').click();
         });
         await page.waitForTimeout(500);
       }
@@ -80,7 +80,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should have successfully select first detector by default from area list', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
     await page.waitForTimeout(500);
@@ -93,14 +93,14 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully select a host', async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(3) > div > div:nth-child(2) > div > a').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(3) > div > div:nth-child(2) > div > a').click());
     const flps = await page.evaluate(() => window.model.workflow.form.hosts);
     assert.ok(flps.length > 0);
   });
 
   it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
     await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > button:nth-child(2)').click());
+      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > button:nth-child(2)').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const location = await page.evaluate(() => window.location);
