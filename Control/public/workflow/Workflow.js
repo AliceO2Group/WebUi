@@ -512,6 +512,7 @@ export default class Workflow extends Observable {
    */
   async getAndSetNamedConfiguration(key) {
     if (key !== '-') {
+      this.model.environment.itemNew = RemoteData.notAsked();
       this.loadingConfiguration = RemoteData.loading();
       this.notify();
       this.loadedConfiguration = await this.remoteDataPostRequest(
@@ -526,9 +527,17 @@ export default class Workflow extends Observable {
           delete variables.hosts;
         }
         const detectors = configuration.detectors;
-        await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
-        this.addVariableJSON(JSON.stringify(variables));
-
+        if (this.model.detectors.isSingleView() &&
+          (
+            (detectors.length === 1 && this.model.detectors.selected !== detectors[0])
+            || detectors.length > 1
+          )
+        ) {
+          this.flpSelection.detectorViewConfigurationError = true;
+        } else {
+          await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
+          this.addVariableJSON(JSON.stringify(variables));
+        }
         this.loadingConfiguration = RemoteData.notAsked();
       } catch (error) {
         console.error(error);

@@ -37,14 +37,30 @@ export default class FlpSelection extends Observable {
     this.selectedDetectors = [];
     this.unavailableDetectors = []; // detectors which are loaded from configuration but active in AliECS
     this.missingHosts = [];
+    this.detectorViewConfigurationError = false;
+  }
+
+  /**
+   * Initialize detectors and hosts panels with empty selection
+   */
+  init() {
+    this.selectedDetectors = [];
+    this.list = RemoteData.notAsked();
+    this.hostsByDetectors = {};
+    this.workflow.form.setHosts([]);
+    this.unavailableDetectors = [];
+    this.missingHosts = [];
+    this.detectorViewConfigurationError = false;
+    this.notify();
   }
 
   /**
    * Method to request a list of detectors from AliECS
    */
   async getAndSetDetectors() {
+    this.init();
     this.detectors = this.workflow.model.detectors.listRemote;
-    
+
     this.activeDetectors = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
@@ -62,32 +78,24 @@ export default class FlpSelection extends Observable {
    * @param {Array<String>} hosts 
    */
   async setDetectorsAndHosts(detectors, hosts) {
+    this.init();
+
     await this.getAndSetDetectors(); // get the latest information on detectors
 
-    // Initialize selection
-    this.selectedDetectors = [];
-    this.list = RemoteData.notAsked();
-    this.hostsByDetectors = {};
-    this.workflow.form.setHosts([]);
-    this.unavailableDetectors = [];
-    this.missingHosts = [];
-
-    await Promise.all(
-      detectors.map(async (detector) => {
-        if (this.activeDetectors.isSuccess() && !this.activeDetectors.payload.detectors.includes(detector)) {
-          this.selectedDetectors.push(detector);
-          await this.getAndSetHostsForDetector(detector);
-          hosts.forEach((host) => {
-            if (this.hostsByDetectors[detector].includes(host)) {
-              this.workflow.form.addHost(host);
-            }
-          });
-        }
-        if (this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(detector)) {
-          this.unavailableDetectors.push(detector);
-        }
-      })
-    );
+    detectors.map((detector) => {
+      if (this.activeDetectors.isSuccess() && !this.activeDetectors.payload.detectors.includes(detector)) {
+        this.selectedDetectors.push(detector);
+        this.setHostsForDetector(detector);
+        hosts.forEach((host) => {
+          if (this.hostsByDetectors[detector].includes(host)) {
+            this.workflow.form.addHost(host);
+          }
+        });
+      }
+      if (this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(detector)) {
+        this.unavailableDetectors.push(detector);
+      }
+    });
     hosts.filter((host) => !this.workflow.form.hosts.includes(host))
       .forEach((host) => this.missingHosts.push(host));
     this.notify();
@@ -111,7 +119,7 @@ export default class FlpSelection extends Observable {
         this.removeHostsByDetector(name);
       } else if (!this.isDetectorActive(name)) {
         this.selectedDetectors.push(name);
-        this.getAndSetHostsForDetector(name);
+        this.setHostsForDetector(name);
       }
     }
     this.notify();
@@ -223,20 +231,18 @@ export default class FlpSelection extends Observable {
    */
 
   /**
-   * Given a detector name, request a list of FLPs from Core
+   * Given a detector name, if hosts were successfully loaded on page load,
+   * update the list of hosts by adding the ones for the given detector
    * @param {String} detector
    */
-  async getAndSetHostsForDetector(detector) {
-    this.list = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.loader.post(`/api/GetHostInventory`, {detector});
-    if (!ok) {
-      this.list = RemoteData.failure(result.message);
+  async setHostsForDetector(detector) {
+    const hostsByDetectorRemote = this.workflow.model.detectors.hostsByDetectorRemote;
+    if (!hostsByDetectorRemote.isSuccess()) {
+      this.list = RemoteData.failure(hostsByDetectorRemote.message);
     } else {
-      this.hostsByDetectors[detector] = result.hosts
-      let temp = []
-      Object.keys(this.hostsByDetectors).forEach((detector) => temp = temp.concat(this.hostsByDetectors[detector]))
+      this.hostsByDetectors[detector] = hostsByDetectorRemote.payload[detector];
+      let temp = [];
+      Object.keys(this.hostsByDetectors).forEach((detector) => temp = temp.concat(this.hostsByDetectors[detector]));
       this.list = RemoteData.success(temp);
     }
     this.notify();

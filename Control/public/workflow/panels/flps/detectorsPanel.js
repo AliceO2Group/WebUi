@@ -20,18 +20,18 @@ import pageLoading from './../../../common/pageLoading.js';
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) =>
-  h('.w-100', [
+export default (workflow) => {
+  const activeDetectors = workflow.flpSelection.activeDetectors;
+  const detectors = workflow.flpSelection.detectors;
+  return h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', h('h5.w-100.bg-gray-light', 'Detectors Selection')),
     h('.w-100.p2.panel',
-      (workflow.flpSelection.activeDetectors.isLoading() || workflow.flpSelection.detectors.isLoading())
-      && pageLoading(2),
-      (workflow.flpSelection.activeDetectors.isSuccess() && workflow.flpSelection.detectors.isSuccess())
-      && detectorsSelectionArea(workflow.flpSelection.detectors.payload, workflow),
-      (workflow.flpSelection.activeDetectors.isFailure() || workflow.flpSelection.detectors.isFailure())
-      && h('.f7.flex-column', 'Unavailable to load detectors'),
+      (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
+      (activeDetectors.isSuccess() && detectors.isSuccess()) && detectorsSelectionArea(detectors.payload, workflow),
+      (activeDetectors.isFailure() || detectors.isFailure()) && h('.f7.flex-column', 'Unavailable to load detectors'),
     )
   ]);
+};
 
 /**
  * Display an area with selectable elements representing detectors
@@ -42,7 +42,10 @@ export default (workflow) =>
 const detectorsSelectionArea = (list, workflow) => {
   return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
     style: 'max-height: 25em;'
-  }, [list.map((name) => detectorItem(name, workflow))]);
+  }, [
+    list.filter((name) => (name === workflow.model.detectors.selected || !workflow.model.detectors.isSingleView()))
+      .map((name) => detectorItem(name, workflow))
+  ]);
 };
 
 /**

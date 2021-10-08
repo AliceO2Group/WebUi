@@ -36,7 +36,7 @@ export default (workflow) =>
       addKVInputPair(workflow),
       h('.w-100.ph1', 'Add a JSON with multiple pairs (K;V):'),
       addListOfKvPairs(workflow),
-      loadExistingConfiguraitonPanel(workflow),
+      loadExistingConfigurationPanel(workflow),
       importErrorPanel(workflow),
       loadErrorPanel(workflow),
     ]),
@@ -142,7 +142,7 @@ const addListOfKvPairs = (workflow) => {
  * * a button to allow the user to load that configuration
  * @param {Workflow} workflow 
  */
-const loadExistingConfiguraitonPanel = (workflow) => [
+const loadExistingConfigurationPanel = (workflow) => [
   workflow.savedConfigurations.match({
     NotAsked: () => null,
     Loading: () => null,
@@ -195,13 +195,22 @@ const importErrorPanel = (workflow) =>
   ]);
 
 /**
- * Displays any potential errors from loading existing configuraiton
+ * Displays any potential errors from loading existing configuration
  * @param {Workflow} workflow 
  * @returns {vnode}
  */
-const loadErrorPanel = (workflow) =>
-  workflow.flpSelection.missingHosts.length > 0 &&
-  h('.w-100.flex-column.ph2', [
-    h('.danger', 'The following saved hosts are not available anymore:'),
-    h('.flex-row.danger', workflow.flpSelection.missingHosts.toString())
-  ]);
+const loadErrorPanel = (workflow) => {
+  const isDetectorViewMatch = workflow.flpSelection.detectorViewConfigurationError;
+  const areAllHostsAvailable = workflow.flpSelection.missingHosts.length === 0;
+  if (isDetectorViewMatch) {
+    return h('.w-100.flex-column.ph2', [
+      h('.danger', 'Configuration cannot be loaded in this detector view'),
+    ]);
+  } else if (!areAllHostsAvailable) {
+    return h('.w-100.flex-column.ph2', [
+      h('.danger', 'The following saved hosts are not available anymore:'),
+      h('.flex-row.danger', workflow.flpSelection.missingHosts.toString())
+    ]);
+  }
+}
+
