@@ -41,7 +41,8 @@ export default class WorkflowForm extends Observable {
   isInputSelected() {
     return this.repository.trim() !== ''
       && this.revision.trim() !== ''
-      && this.template.trim() !== '';
+      && this.template.trim() !== ''
+      && this.hosts.length > 0;
   }
 
   /**

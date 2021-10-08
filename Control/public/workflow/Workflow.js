@@ -512,6 +512,7 @@ export default class Workflow extends Observable {
    */
   async getAndSetNamedConfiguration(key) {
     if (key !== '-') {
+      this.model.environment.itemNew = RemoteData.notAsked();
       this.loadingConfiguration = RemoteData.loading();
       this.notify();
       this.loadedConfiguration = await this.remoteDataPostRequest(
