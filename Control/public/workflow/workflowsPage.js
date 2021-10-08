@@ -14,6 +14,7 @@
 
 import {h, iconReload, info} from '/js/src/index.js';
 import revisionPanel from './panels/revision/revisionPanel.js';
+import {detectorHeader} from './../common/detectorHeader.js';
 import {basicPanel} from './panels/variables/basicPanel.js';
 import mainPanel from './panels/variables/mainPanel.js';
 import advancedVarsPanel from './panels/variables/advancedPanel.js';
@@ -40,17 +41,17 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('.scroll-y.absolute-fill.text-center.p2', [
-  // detectorHeader(model),
-  // h('.p2',
-  model.workflow.repoList.match({
-    NotAsked: () => null,
-    Loading: () => pageLoading(),
-    Success: (repoList) => (repoList.repos.length === 0)
-      ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
-    Failure: (error) => errorPage(error),
-  })
-  // )
+export const content = (model) => h('', [
+  detectorHeader(model),
+  h('.scroll-y.absolute-fill.text-center.p2', {style: 'top:40px;'},
+    model.workflow.repoList.match({
+      NotAsked: () => null,
+      Loading: () => pageLoading(),
+      Success: (repoList) => (repoList.repos.length === 0)
+        ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
+      Failure: (error) => errorPage(error),
+    })
+  )
 ]);
 
 /**
