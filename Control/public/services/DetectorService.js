@@ -85,17 +85,10 @@ export default class DetectorService extends Observable {
   async getHostsByDetectorsAsRemoteData(item, detectors, that) {
     item = RemoteData.loading();
     that.notify();
-    const detectorMap = {};
-    await Promise.all(
-      detectors.map(async (detector) => {
-        let hosts = RemoteData.notAsked();
-        hosts = await this.getHostsForDetector(detector, hosts, that);
-        detectorMap[detector] = hosts.isSuccess() ?
-          RemoteData.success(hosts.payload) : RemoteData.failure(`Unable to retrieve the list of hosts`);
-      })
-    );
-    
-    item = RemoteData.success(detectorMap);
+    const {ok, result} = await this.model.loader.get(`/api/core/hostsByDetectors`);
+    item = ok ?
+      RemoteData.success(result.hosts) : RemoteData.failure({message: 'Unable to load list of hosts by detectors'});
+    that.notify();
     return item;
   }
 
@@ -107,7 +100,7 @@ export default class DetectorService extends Observable {
     item = RemoteData.loading();
     that.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/ListDetectors`);
+    const {result, ok} = await this.model.loader.get(`/api/core/detectors`);
     if (!ok) {
       item = RemoteData.failure(result.message);
     } else {
@@ -125,7 +118,7 @@ export default class DetectorService extends Observable {
     this.listRemote = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/ListDetectors`);
+    const {result, ok} = await this.model.loader.get(`/api/core/detectors`);
     if (!ok) {
       this.listRemote = RemoteData.failure(result.message);
     } else {

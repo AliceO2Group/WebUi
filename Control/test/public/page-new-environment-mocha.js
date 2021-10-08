@@ -55,7 +55,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert(location.search === '?page=newEnvironment');
     assert.ok(calls['getWorkflowTemplates']);
     assert.ok(calls['listRepos']);
-    assert.ok(apricotCalls['listDetectors']);
     assert.ok(calls['getActiveDetectors']);
   });
 
@@ -376,7 +375,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request a list of detectors', async () => {
     const detectors = await page.evaluate(() => window.model.workflow.flpSelection.detectors);
-    const expDetectors = {kind: 'Success', payload: {detectors: ['MID', 'DCS', 'ODC']}};
+    const expDetectors = {kind: 'Success', payload: ['MID', 'DCS', 'ODC']};
     assert.deepStrictEqual(detectors, expDetectors, 'Missing detectors');
   });
 

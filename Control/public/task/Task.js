@@ -48,15 +48,9 @@ export default class Task extends Observable {
       const detectors = this.model.detectors.hostsByDetectorRemote.payload;
       Object.keys(detectors).map((detector) => {
         const hosts = detectors[detector];
-        if (hosts.isSuccess()) {
-          const hostsMap = {};
-          hosts.payload.forEach((host) => hostsMap[host] = {}); // initialize to empty for future tasks to be added
-          hostsByDetectorMap[detector] = {isOpened: true, list: RemoteData.success(hostsMap)};
-        } else {
-          hostsByDetectorMap[detector] = {
-            isOpened: true, list: RemoteData.failure(`Unable to retrieve the list of hosts`)
-          };
-        }
+        const hostsMap = {};
+        hosts.forEach((host) => hostsMap[host] = {}); // initialize to empty for future tasks to be added
+        hostsByDetectorMap[detector] = {isOpened: false, list: RemoteData.success(hostsMap)};
       });
       this.detectorPanels = RemoteData.success(hostsByDetectorMap);
       this.notify();

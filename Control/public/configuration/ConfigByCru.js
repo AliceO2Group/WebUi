@@ -47,7 +47,8 @@ export default class Config extends Observable {
   init() {
     this.failedTasks = [];
     if (this.model.detectors.listRemote.isSuccess()) {
-      this.model.detectors.listRemote.payload.forEach((detector) => this.detectorPanel[detector] = {isOpen: false});
+      const isOpen = this.model.detectors.selected !== 'GLOBAL';
+      this.model.detectors.listRemote.payload.forEach((detector) => this.detectorPanel[detector] = {isOpen});
     }
   }
 

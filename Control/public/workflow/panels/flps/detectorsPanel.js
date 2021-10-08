@@ -27,7 +27,7 @@ export default (workflow) =>
       (workflow.flpSelection.activeDetectors.isLoading() || workflow.flpSelection.detectors.isLoading())
       && pageLoading(2),
       (workflow.flpSelection.activeDetectors.isSuccess() && workflow.flpSelection.detectors.isSuccess())
-      && detectorsSelectionArea(workflow.flpSelection.detectors.payload.detectors, workflow),
+      && detectorsSelectionArea(workflow.flpSelection.detectors.payload, workflow),
       (workflow.flpSelection.activeDetectors.isFailure() || workflow.flpSelection.detectors.isFailure())
       && h('.f7.flex-column', 'Unavailable to load detectors'),
     )

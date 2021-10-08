@@ -43,8 +43,13 @@ export default class FlpSelection extends Observable {
    * Method to request a list of detectors from AliECS
    */
   async getAndSetDetectors() {
-    this.detectors = await this.workflow.remoteDataPostRequest(this.detectors, '/api/ListDetectors', {});
-    this.activeDetectors = await this.workflow.remoteDataPostRequest(this.activeDetectors, '/api/GetActiveDetectors');
+    this.detectors = this.workflow.model.detectors.listRemote;
+    
+    this.activeDetectors = RemoteData.loading();
+    this.notify();
+    const {result, ok} = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
+    this.activeDetectors = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
+    this.notify();
   }
 
   /**
