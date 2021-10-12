@@ -263,17 +263,7 @@ const radioButtonBox = (variable, model) =>
   h('.flex-row.pv1', [
     variableLabel(variable),
     h('', {class: 'flex-row w-50 flex-wrap text-left'}, [
-      variable.allowedValues.map((value) => [
-        h('.w-33.form-check', [
-          h('input.form-check-input', {
-            type: 'radio',
-            name: `${value}`,
-            id: `${value}id`,
-            checked: model.workflow.form.basicVariables[variable.key] === value,
-            onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value),
-          }),
-          h('label.w-wrapped', {for: `${value}id`, title: value, style: 'cursor: pointer'}, value)
-        ]),
+      variable.allowedValues.map((value) =>
         h('.w-33.form-check', [
           h('input.form-check-input', {
             type: 'radio',
@@ -284,7 +274,6 @@ const radioButtonBox = (variable, model) =>
           }),
           h('label.w-wrapped', {for: `${value}id`, title: value, style: 'cursor: pointer'}, value)
         ])
-      ]
       )
     ])
   ]);
