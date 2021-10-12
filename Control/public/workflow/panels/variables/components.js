@@ -51,7 +51,7 @@ const autoBuiltBox = (variable, model) => {
 const editBox = (variable, model) =>
   h('.flex-row', [
     variableLabel(variable),
-    h('.w-50',
+    h('', {class: 'w-50'},
       h('input.form-control', {
         type: variable.type === VAR_TYPE.NUMBER ? 'number' : 'text',
         value: model.workflow.form.basicVariables[variable.key] !== undefined ?
@@ -109,7 +109,7 @@ const sliderBox = (variable, model) => {
 const dropdownBox = (variable, model) =>
   h('.flex-row.pv1', [
     variableLabel(variable),
-    h('.w-50',
+    h('', {class: 'w-50'},
       h('select.form-control', {
         style: 'cursor: pointer',
         onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
@@ -142,7 +142,10 @@ const listBox = (variable, model) => {
     const list = variable.allowedValues;
     return h('.flex-row.pv1', [
       variableLabel(variable),
-      h('.w-50.text-left.shadow-level1.scroll-y', {style: 'max-height: 10em;'}, [
+      h('', {
+        class: 'w-50 text-left shadow-level1 scroll-y',
+        style: 'max-height: 10em;'
+      }, [
         list.map((name) =>
           h('a.menu-item', {
             className: (type === VAR_TYPE.STRING || type === VAR_TYPE.NUMBER) ?
@@ -259,8 +262,18 @@ const comboBox = (variable, model) => {
 const radioButtonBox = (variable, model) =>
   h('.flex-row.pv1', [
     variableLabel(variable),
-    h('.w-50.flex-row.flex-wrap.text-left', [
-      variable.allowedValues.map((value) =>
+    h('', {class: 'flex-row w-50 flex-wrap text-left'}, [
+      variable.allowedValues.map((value) => [
+        h('.w-33.form-check', [
+          h('input.form-check-input', {
+            type: 'radio',
+            name: `${value}`,
+            id: `${value}id`,
+            checked: model.workflow.form.basicVariables[variable.key] === value,
+            onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value),
+          }),
+          h('label.w-wrapped', {for: `${value}id`, title: value, style: 'cursor: pointer'}, value)
+        ]),
         h('.w-33.form-check', [
           h('input.form-check-input', {
             type: 'radio',
@@ -271,6 +284,7 @@ const radioButtonBox = (variable, model) =>
           }),
           h('label.w-wrapped', {for: `${value}id`, title: value, style: 'cursor: pointer'}, value)
         ])
+      ]
       )
     ])
   ]);
@@ -290,7 +304,7 @@ const checkBox = (variable, model) => {
     variableLabel(variable,
       () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true')
     ),
-    h('.w-50.flex-row.flex-wrap.text-left', [
+    h('', {class: 'w-50 flex-row flex-wrap text-left'}, [
       h('label.form-check.switch', [
         h('input.form-check-input', {
           type: 'checkbox',
