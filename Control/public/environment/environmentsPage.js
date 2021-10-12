@@ -72,7 +72,7 @@ const showContent = (model, list) => (list && Object.keys(list).length > 0)
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'Run', 'Created', 'Workflow', 'Detectors', 'FLPs', 'DCS', 'EPN', 'EPN Topology', 'State', 'Actions'
+    'ID', 'Run', 'Created', 'Detectors', 'FLPs', 'DCS', 'EPN', 'EPN Topology', 'State', 'Actions'
   ];
   return h('table.table', [
     h('thead', [
@@ -80,9 +80,9 @@ const environmentsTable = (model, list) => {
     ]),
     h('tbody', [
       list.map((item) => h('tr', [
+        h('td', {style: 'text-align: center;'}, item.id),
         h('td', {style: 'text-align: center;'}, item.currentRunNumber ? item.currentRunNumber : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
-        h('td', {style: 'text-align: center;'}, item.rootRole),
         h('td', {style: 'text-align: center;'}, [
           item.includedDetectors && item.includedDetectors.length > 0 ?
             item.includedDetectors.map((detector) => `${detector} `)
