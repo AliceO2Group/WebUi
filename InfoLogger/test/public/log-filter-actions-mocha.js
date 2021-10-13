@@ -176,7 +176,7 @@ describe('Filter actions test-suite', async () => {
 
   it('should reset filters and set them again', async () => {
     const criterias = await page.evaluate(() => {
-      window.model.log.filter.resetCriterias();
+      window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('level', 'max', 21);
       return window.model.log.filter.criterias;
     });
