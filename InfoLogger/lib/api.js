@@ -37,7 +37,7 @@ module.exports.attachTo = (http, ws) => {
   http.post('/query', query);
 
   if (config.mysql) {
-    log.info(`[API] Detected InfoLogger database configration`);
+    log.info(`[API] Detected InfoLogger database configuration`);
     setupMySQLConnectors();
     setInterval(() => {
       if (!querySource) {
@@ -79,7 +79,7 @@ module.exports.attachTo = (http, ws) => {
   }
 
   /**
-   * Method to atttempt creating a connection to the InfoLogger SQL DB
+   * Method to attempt creating a connection to the InfoLogger SQL DB
    */
   function setupMySQLConnectors() {
     const connector = new MySQL(config.mysql);

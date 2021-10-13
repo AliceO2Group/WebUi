@@ -67,7 +67,7 @@ export default class Model extends Observable {
     // Setup keyboard dispatcher
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
 
-    // Setup WS connexion
+    // Setup WS connection
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
@@ -80,7 +80,7 @@ export default class Model extends Observable {
   }
 
   /**
-   * Handle websocket authentification success
+   * Handle websocket authentication success
    */
   handleWSAuthed() {
     // Tell server not to stream by default
@@ -154,7 +154,7 @@ export default class Model extends Observable {
   }
 
   /**
-   * Request data about the profile passed in the URL and set column headers and criterias
+   * Request data about the profile passed in the URL and set column headers and criteria
    * @param {string} profile
    */
   async getProfile(profile) {
@@ -306,7 +306,7 @@ export default class Model extends Observable {
    */
   parseLocation(params) {
     if (params.profile && params.q) {
-      this.log.filter.resetCriterias();
+      this.log.filter.resetCriteria();
       this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
       return;
     } else if (params.profile) {

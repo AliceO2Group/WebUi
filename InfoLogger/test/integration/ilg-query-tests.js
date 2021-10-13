@@ -59,7 +59,7 @@ describe('InfoLogger - FLP CI Suite Tests ', function() {
 
   it(`should successfully type criteria based on "facility" matching ${facility}`, async () => {
     const facilityCriteria = await page.evaluate((facility) => {
-      window.model.log.filter.resetCriterias();
+      window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('facility', 'match', facility);
       return window.model.log.filter.criterias.facility;
     }, facility);
