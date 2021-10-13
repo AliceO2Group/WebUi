@@ -70,7 +70,7 @@ module.exports = class SQLDataSource {
    * criteria = ['timestamp >= ?', 'level <= ?', 'severity in (?,?)', ...]
    *
    * @param {Object} filters - {...}
-   * @return {Object} {values, criteria}
+   * @return {Object} {values, criteria, criteriaVerbose}
    */
   _filtersToSqlConditions(filters) {
     const values = [];
@@ -89,7 +89,14 @@ module.exports = class SQLDataSource {
           // read date, both input and output are GMT, no timezone to consider here
           values.push((new Date(filters[field][operator])).getTime() / 1000);
         } else {
-          values.push(filters[field][operator]);
+          if (field !== 'message' && (operator === '$match' || operator === '$exclude')
+            && filters[field][operator].split(' ').length > 1
+          ) {
+            const subValues = filters[field][operator].split(' ');
+            subValues.forEach((value) => values.push(value));
+          } else {
+            values.push(filters[field][operator]);
+          }
         }
 
         switch (operator) {
@@ -103,15 +110,50 @@ module.exports = class SQLDataSource {
             criteria.push(`\`${field}\`<=?`);
             criteriaVerbose.push(` \`${field}\`<='${filters[field].until}'`);
             break;
-          case '$match':
-            criteria.push(`\`${field}\` LIKE (?)`);
-            criteriaVerbose.push(` \`${field}\` LIKE '${filters[field].match}'`);
+          case '$match': {
+            const criteriaArray = filters[field].match.split(' ');
+            if (field === 'message' || criteriaArray.length <= 1) {
+              criteria.push(`\`${field}\` LIKE (?)`);
+              criteriaVerbose.push(` \`${field}\` LIKE '${filters[field].match}'`);
+            } else {
+              let criteriaString = '(';
+              let criteriaVerboseString = '(';
+              criteriaArray.forEach((crit) => {
+                criteriaString += `\`${field}\` LIKE (?) OR `;
+                criteriaVerboseString += `\`${field}\` LIKE '${crit}' OR `;
+              });
+              criteriaString = criteriaString.substr(0, criteriaString.length - 4);
+              criteriaString += ')';
+              criteriaVerboseString = criteriaVerboseString.substr(0, criteriaVerboseString.length - 4);
+              criteriaVerboseString += ')';
+              criteria.push(criteriaString);
+              criteriaVerbose.push(criteriaVerboseString);
+            }
             break;
-          case '$exclude':
-            criteria.push(`(NOT(\`${field}\` LIKE (?)) OR \`${field}\` IS NULL)`);
-            criteriaVerbose.push(` (NOT(\`${field}\` LIKE '${filters[field].exclude}' `
-              + `OR \`${field.exclude}\` IS NULL)`);
+          }
+          case '$exclude': {
+            const criteriaArray = filters[field].exclude.split(' ');
+            if (field === 'message' || criteriaArray.length <= 1) {
+              criteria.push(`(NOT(\`${field}\` LIKE (?)) OR \`${field}\` IS NULL)`);
+              criteriaVerbose.push(` (NOT(\`${field}\` LIKE '${filters[field].exclude}' `
+                + `OR \`${field.exclude}\` IS NULL)`);
+            } else {
+              let criteriaString = '(';
+              let criteriaVerboseString = '(';
+              criteriaArray.forEach((crit) => {
+                criteriaString += `(\`${field}\` NOT LIKE (?) OR \`${field}\` IS NULL) AND `;
+                criteriaVerboseString += `(\`${field}\` NOT LIKE '${crit}' OR \`${field}\` IS NULL) AND `;
+              });
+              criteriaString = criteriaString.substr(0, criteriaString.length - 5);
+              criteriaString += ')';
+              criteriaVerboseString = criteriaVerboseString.substr(0, criteriaVerboseString.length - 5);
+              criteriaVerboseString += ')';
+              criteria.push(criteriaString);
+              criteriaVerbose.push(criteriaVerboseString);
+            }
+
             break;
+          }
           case '$in':
             criteria.push(`\`${field}\` IN (?)`);
             criteriaVerbose.push(` \`${field}\` IN [${filters[field][operator]}]`);
