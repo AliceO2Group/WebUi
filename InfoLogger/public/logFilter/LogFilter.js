@@ -22,8 +22,7 @@ import {Observable} from '/js/src/index.js';
  */
 
 /**
- * @typedef Criterias
- * @type {Array.<Criteria>}
+ * @typedef Criteria * @type {Array.<Criteria>}
  */
 
 /**
@@ -35,7 +34,7 @@ import {Observable} from '/js/src/index.js';
  */
 export default class LogFilter extends Observable {
   /**
-   * Instantiate a LogFilter with criterias reset to empty or minimal value
+   * Instantiate a LogFilter with criteria reset to empty or minimal value
    * @param {Observable} model
    */
   constructor(model) {
@@ -43,7 +42,7 @@ export default class LogFilter extends Observable {
 
     this.model = model;
 
-    this.resetCriterias();
+    this.resetCriteria();
   }
 
   /**
@@ -136,7 +135,7 @@ export default class LogFilter extends Observable {
    * @param {Criterias} criterias
    */
   fromObject(criterias) {
-    this.resetCriterias();
+    this.resetCriteria();
     // copy values to inner filters
     // eslint-disable-next-line guard-for-in
     for (const field in criterias) {
@@ -203,7 +202,7 @@ export default class LogFilter extends Observable {
 
         // eslint-disable-next-line guard-for-in
         for (const operator in criterias[field]) {
-          const criteriaValue = criterias[field][operator];
+          let criteriaValue = criterias[field][operator];
           // don't apply criterias not set
           if (criteriaValue === null) {
             continue;
@@ -216,20 +215,28 @@ export default class LogFilter extends Observable {
                 return false;
               }
               break;
-            case '$match':
+            case '$match': {
+              const criteriaList = criteriaValue.split(' ');
+              if (field !== 'message' && criteriaList.length > 1) {
+                criteriaValue = criteriaValue.replace(new RegExp(' ', 'g'), '|');
+              }
               if (logValue === undefined ||
                 !generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
                 return false;
               }
               break;
-
-            case '$exclude':
+            }
+            case '$exclude': {
+              const criteriaList = criteriaValue.split(' ');
+              if (field !== 'message' && criteriaList.length > 1) {
+                criteriaValue = criteriaValue.replace(new RegExp(' ', 'g'), '|');
+              }
               if (logValue !== undefined &&
                 generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
                 return false;
               }
               break;
-
+            }
             case '$since':
               if (logValue === undefined || parseInfoLoggerDate(logValue) < parseInfoLoggerDate(criteriaValue)) {
                 return false;
@@ -272,7 +279,7 @@ export default class LogFilter extends Observable {
    * Reset all filters from the current LogFilter instance to there
    * original state: empty or exclusive for other criterias.
    */
-  resetCriterias() {
+  resetCriteria() {
     this.criterias = {
       timestamp: {
         since: '',
