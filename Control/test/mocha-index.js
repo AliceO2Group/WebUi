@@ -87,7 +87,7 @@ describe('Control', function() {
     for (let i = 0; i < 10; i++) {
       try {
         await page.goto(url, {waitUntil: 'networkidle0'});
-        break; // conneciton ok, this test passed
+        break; // connection ok, this test passed
       } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
@@ -127,6 +127,8 @@ describe('Control', function() {
     const cog = await page.evaluate(() => window.COG);
     const expectedConf = {
       ILG_URL: 'localhost:8081',
+      BKP_URL: 'http://localhost:2021',
+      QCG_URL: 'http://localhost:2022',
       GRAFANA: {
         status: true,
         plots: [

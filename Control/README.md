@@ -14,13 +14,14 @@
     - [Consul](#consul)
     - [Kafka](#kafka)
     - [InfoLogger GUI](#infologger-gui)
+    - [QualityControl GUI](#qualitycontrol-gui)
+    - [Bookkeeping GUI](#bookkeeping-gui)
     - [Utils](#utils)
   - [Features](#features)
     - [GUI](#gui)
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
       - [Clean Resources/Tasks](#clean-resourcestasks)
     - [Integration with ControlWorkflows](#integration-with-controlworkflows)
-    - [Integration with Notification Service](#integration-with-notification-service)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
     - [release.yml](#releaseyml)
@@ -82,6 +83,18 @@ Use of InfoLogger GUI instance is optional. Configuration details about it are b
 
 * `hostname` - InfoLogger GUI hostname
 * `port` - InfoLogger GUI port
+
+### QualityControl GUI
+Use of QualityControl GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the objects created within an environment.
+
+* `hostname` - QualityControl GUI hostname
+* `port` - QualityControl GUI port
+
+### Bookkeeping GUI
+Use of Bookkeeping GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate to the run details of their environments.
+
+* `hostname` - Bookkeeping GUI hostname
+* `port` - Bookkeeping GUI port
 
 ### Utils
 Use of utils field is optional. Here, a user can specify configuration fields for various uses of AliECS GUI:
