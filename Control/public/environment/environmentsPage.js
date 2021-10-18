@@ -17,6 +17,7 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
+import {infoLoggerButton} from './components/buttons.js';
 
 /**
  * @file Page to show a list of environments (content and header)
@@ -118,10 +119,15 @@ const actionsCell = (model, item) => {
   const isDetectorIncluded =
     item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
   if (isDetectorIncluded || !model.detectors.isSingleView()) {
-    return h('button.btn.btn-primary', {
-      title: 'Open the environment page with more details',
-      onclick: () => model.router.go(`?page=environment&id=${item.id}`),
-    }, 'Details')
+    return h('.btn-group', [
+      h('button.btn.btn-primary', {
+        title: 'Open the environment page with more details',
+        onclick: () => model.router.go(`?page=environment&id=${item.id}`),
+      }, 'Details'),
+      infoLoggerButton(item, 'ILG'),
+      // bookkeepingButton('BKP'),
+      // qcgButton('QCG'),
+    ]);
   } else {
     return h('', '')
   }
