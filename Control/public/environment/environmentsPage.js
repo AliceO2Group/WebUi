@@ -72,7 +72,7 @@ const showContent = (model, list) => (list && Object.keys(list).length > 0)
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'ID', 'Run', 'Created', 'Detectors', 'FLPs', 'DCS', 'EPN', 'EPN Topology', 'State', 'Actions'
+    'ID', 'Run', 'Created', 'Detectors', 'FLPs', 'DCS', 'TRG', 'EPN', 'EPN Topology', 'State', 'Actions'
   ];
   return h('table.table', [
     h('thead', [
@@ -90,6 +90,7 @@ const environmentsTable = (model, list) => {
         ]),
         h('td', {style: 'text-align: center;'}, item.numberOfFlps),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
+        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {

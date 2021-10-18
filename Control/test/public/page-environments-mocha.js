@@ -42,10 +42,10 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('should have a button in Action column for More Details', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(10) > button', {timeout: 2000});
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > button', {timeout: 2000});
       const detailsButton = await page.evaluate(() => {
-        const title = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(10) > button').title;
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(10) > button').innerText;
+        const title = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > button').title;
+        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > button').innerText;
         return {title, label};
       });
       assert.strictEqual(detailsButton.title, 'Open the environment page with more details');
@@ -53,7 +53,7 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('should successfully navigate to environment page on click Details', async () => {
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(10) > button').click());
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > button').click());
       await page.waitForTimeout(200);
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
