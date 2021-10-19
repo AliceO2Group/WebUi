@@ -68,5 +68,5 @@ const detectorItem = (name, workflow) => {
     className,
     title,
     onclick: () => workflow.flpSelection.toggleDetectorSelection(name)
-  }, name)
+  }, workflow.flpSelection.getDetectorWithIndexes(name))
 };

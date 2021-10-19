@@ -91,9 +91,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.ok(flps.length > 0);
   });
 
-  it('should successfully select a host', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(3) > div > div:nth-child(2) > div > a').click());
+  it('should successfully preselect hosts for TST detector', async () => {
     const flps = await page.evaluate(() => window.model.workflow.form.hosts);
     assert.ok(flps.length > 0);
   });

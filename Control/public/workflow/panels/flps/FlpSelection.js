@@ -43,7 +43,7 @@ export default class FlpSelection extends Observable {
   /**
    * Initialize detectors and hosts panels with empty selection
    */
-  init() {
+  async init() {
     this.selectedDetectors = [];
     this.list = RemoteData.notAsked();
     this.hostsByDetectors = {};
@@ -52,19 +52,29 @@ export default class FlpSelection extends Observable {
     this.missingHosts = [];
     this.detectorViewConfigurationError = false;
     this.notify();
+
+    await this.getAndSetDetectors();
+
+    if (this.workflow.model.detectors.isSingleView()
+      && this.activeDetectors.isSuccess()
+      && !this.activeDetectors.payload.detectors.includes(this.workflow.model.detectors.selected)
+    ) {
+      // if single view preselect detectors and hosts for users
+      this.toggleDetectorSelection(this.workflow.model.detectors.selected);
+    }
   }
 
   /**
-   * Method to request a list of detectors from AliECS
+   * Method to request a list of detectors from AliECS and initialized the user form accordingly
    */
   async getAndSetDetectors() {
-    this.init();
     this.detectors = this.workflow.model.detectors.listRemote;
 
     this.activeDetectors = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
     this.activeDetectors = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
+
     this.notify();
   }
 
@@ -119,7 +129,7 @@ export default class FlpSelection extends Observable {
         this.removeHostsByDetector(name);
       } else if (!this.isDetectorActive(name)) {
         this.selectedDetectors.push(name);
-        this.setHostsForDetector(name);
+        this.setHostsForDetector(name, true);
       }
     }
     this.notify();
@@ -227,15 +237,31 @@ export default class FlpSelection extends Observable {
   }
 
   /**
-   * HTTP Requests
+   * Given a detector name, build a string containing the name and number of selected hosts
+   * and available hosts for that detector
+   * @param {String} detector
+   * @returns {String}
    */
+  getDetectorWithIndexes(detector) {
+    const hostsByDetectorRemote = this.workflow.model.detectors.hostsByDetectorRemote;
+    if (hostsByDetectorRemote.isSuccess() && hostsByDetectorRemote.payload[detector]) {
+      const hosts = hostsByDetectorRemote.payload[detector];
+      const selectedHosts = this.workflow.form.hosts;
+      const totalSelected = selectedHosts.filter((host) => hosts.includes(host)).length;
+
+      return detector + ' (' + totalSelected + '/' + hosts.length + ')'
+    }
+    return detector;
+  }
 
   /**
    * Given a detector name, if hosts were successfully loaded on page load,
    * update the list of hosts by adding the ones for the given detector
+   * If specified via shouldSelect, it will also add the hosts to the form so that they appeared
+   * as selected for the user
    * @param {String} detector
    */
-  async setHostsForDetector(detector) {
+  setHostsForDetector(detector, shouldSelect = false) {
     const hostsByDetectorRemote = this.workflow.model.detectors.hostsByDetectorRemote;
     if (!hostsByDetectorRemote.isSuccess()) {
       this.list = RemoteData.failure(hostsByDetectorRemote.message);
@@ -244,6 +270,9 @@ export default class FlpSelection extends Observable {
       let temp = [];
       Object.keys(this.hostsByDetectors).forEach((detector) => temp = temp.concat(this.hostsByDetectors[detector]));
       this.list = RemoteData.success(temp);
+      if (shouldSelect) {
+        this.hostsByDetectors[detector].forEach((hostname) => this.workflow.form.addHost(hostname));
+      }
     }
     this.notify();
   }
