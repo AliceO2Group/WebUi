@@ -131,11 +131,14 @@ export default class Model extends Observable {
   handleWSClose() {
     clearInterval(this.task.refreshInterval);
     clearInterval(this.environment.refreshInterval);
+    
+    // Release client-side
+    this.lock.setPadlockState({lockedBy: null, lockedByName: null});
 
     this.notification.show(`Connection to server has been lost. Retrying to connect in 10 seconds...`, 'danger', 10000);
-
     this.frameworkInfo.setWsInfo({
-      status: {ok: false, configured: true, message: 'Cannot establish connection to server'}});
+      status: {ok: false, configured: true, message: 'Cannot establish connection to server'}
+    });
 
     const wsReconnectInterval = setInterval(() => {
       // Setup WS connection
