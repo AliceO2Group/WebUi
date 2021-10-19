@@ -43,7 +43,7 @@ export default class FlpSelection extends Observable {
   /**
    * Initialize detectors and hosts panels with empty selection
    */
-  init() {
+  async init() {
     this.selectedDetectors = [];
     this.list = RemoteData.notAsked();
     this.hostsByDetectors = {};
@@ -52,19 +52,30 @@ export default class FlpSelection extends Observable {
     this.missingHosts = [];
     this.detectorViewConfigurationError = false;
     this.notify();
+
+    await this.getAndSetDetectors();
+
+    if (this.workflow.model.detectors.isSingleView()
+      && this.activeDetectors.isSuccess()
+      && !this.activeDetectors.payload.detectors.includes(this.workflow.model.detectors.selected)
+    ) {
+      // if single view preselect detectors and hosts for users
+      this.toggleDetectorSelection(this.workflow.model.detectors.selected);
+      this.toggleAllFLPSelection();
+    }
   }
 
   /**
-   * Method to request a list of detectors from AliECS
+   * Method to request a list of detectors from AliECS and initialized the user form accordingly
    */
   async getAndSetDetectors() {
-    this.init();
     this.detectors = this.workflow.model.detectors.listRemote;
 
     this.activeDetectors = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
     this.activeDetectors = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
+
     this.notify();
   }
 

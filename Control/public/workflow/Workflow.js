@@ -79,8 +79,7 @@ export default class Workflow extends Observable {
       this.reloadDataForm();
     }
     this.getAndSetSavedConfigurations();
-    this.flpSelection.getAndSetDetectors();
-    this.flpSelection.missingHosts = [];
+    this.flpSelection.init();
     this.selectedConfigurationId = '-';
     this.resetErrorMessage();
   }
