@@ -410,11 +410,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps, ['ali-flp-22', 'ali-flp-23']);
   });
 
-  it('should successfully select a host', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(3) > div > div:nth-child(2) > div > a').click());
+  it('should successfully preselect hosts for selected detector', async () => {
     const flps = await page.evaluate(() => window.model.workflow.form.hosts);
-    assert.deepStrictEqual(flps, ['ali-flp-22']);
+    assert.deepStrictEqual(flps, ['ali-flp-22', 'ali-flp-23']);
   });
 
   it('should successfully save configuration', async () => {
