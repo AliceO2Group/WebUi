@@ -30,6 +30,7 @@ export default class FrameworkInfo extends Observable {
     this.model = model;
     this.statuses = {
       gui: RemoteData.notAsked(),
+      ws: RemoteData.notAsked(),
       grafana: RemoteData.notAsked(),
       consul: RemoteData.notAsked(),
       kafka: RemoteData.notAsked(),
@@ -51,6 +52,7 @@ export default class FrameworkInfo extends Observable {
 
     Promise.allSettled([
       this.getGuiInfo(),
+      this.getWSInfo(),
       this.getCoreInfo(),
       this.getGrafanaInfo(),
       this.getKafkaInfo(),
@@ -66,6 +68,7 @@ export default class FrameworkInfo extends Observable {
    */
   async getGuiInfo() {
     this.statuses.gui = RemoteData.loading();
+    this.notify();
     const {result, ok} = await this.model.loader.get('/api/status/gui');
     if (!ok) {
       this.statuses.gui = RemoteData.failure(result.message);
@@ -76,10 +79,33 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
+   * Update the status of the WSClient in the statuses objects used by the frameworkInfo component
+   */
+  getWSInfo() {
+    this.statuses.ws = RemoteData.loading();
+    this.notify();
+    if (this.model.ws.connection.readyState === WebSocket.OPEN) {
+      this.setWsInfo({status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
+    } else {
+      this.setWsInfo({status: {ok: false, configured: true, message: 'Cannot establish connection to the server'}});
+    }
+  }
+
+  /**
+   * Method to allow the update of WS connection while not being on the about page
+   * @param {JSON} info 
+   */
+  setWsInfo(info) {
+    this.statuses.ws = RemoteData.success(info);
+    this.notify();
+  }
+
+  /**
    * Make a request to retrieve information about Grafana
    */
   async getGrafanaInfo() {
     this.statuses.grafana = RemoteData.loading();
+    this.notify();
     const {result, ok} = await this.model.loader.get('/api/status/grafana');
     if (!ok) {
       this.statuses.grafana = RemoteData.failure(result.message);
@@ -94,6 +120,7 @@ export default class FrameworkInfo extends Observable {
    */
   async getKafkaInfo() {
     this.statuses.kafka = RemoteData.loading();
+    this.notify();
     const {result, ok} = await this.model.loader.get('/api/status/kafka');
     if (!ok) {
       this.statuses.kafka = RemoteData.failure(result.message);
@@ -108,6 +135,7 @@ export default class FrameworkInfo extends Observable {
    */
   async getConsulInfo() {
     this.statuses.consul = RemoteData.loading();
+    this.notify();
     const {result, ok} = await this.model.loader.get('/api/status/consul');
     if (!ok) {
       this.statuses.consul = RemoteData.failure(result.message);
@@ -127,6 +155,7 @@ export default class FrameworkInfo extends Observable {
    */
   async getApricotInfo() {
     this.statuses.apricot = RemoteData.loading();
+    this.notify();
     const {result, ok} = await this.model.loader.get('/api/status/apricot');
     if (!ok) {
       this.statuses.apricot = RemoteData.failure(result.message);
@@ -141,6 +170,7 @@ export default class FrameworkInfo extends Observable {
    */
   async getCoreInfo() {
     this.aliecs = RemoteData.loading();
+    this.notify();
     const {result, ok} = await this.model.loader.get('/api/status/core');
     if (!ok) {
       this.aliecs = RemoteData.failure(result.message);
@@ -156,6 +186,7 @@ export default class FrameworkInfo extends Observable {
    */
   async getIntegratedServicesInfo() {
     this.integratedServices = RemoteData.loading();
+    this.notify();
     const {result, ok} = await this.model.loader.get('/api/status/core/services');
     if (!ok) {
       this.integratedServices = RemoteData.failure(result.message);

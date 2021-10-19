@@ -124,11 +124,35 @@ export default class Model extends Observable {
 
   /**
    * Handle close event from WS when connection has been lost (server restart, etc.)
+   * * Releases the lock if taken
+   * * Displays informative message to the client
+   * * Retries to connect to server every 10 seconds; If successful, informs de user
    */
   handleWSClose() {
     clearInterval(this.task.refreshInterval);
     clearInterval(this.environment.refreshInterval);
-    this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
+    
+    // Release client-side
+    this.lock.setPadlockState({lockedBy: null, lockedByName: null});
+
+    this.notification.show(`Connection to server has been lost. Retrying to connect in 10 seconds...`, 'danger', 10000);
+    this.frameworkInfo.setWsInfo({
+      status: {ok: false, configured: true, message: 'Cannot establish connection to server'}
+    });
+
+    const wsReconnectInterval = setInterval(() => {
+      // Setup WS connection
+      try {
+        this.ws = new WebSocketClient();
+        this.ws.addListener('command', this.handleWSCommand.bind(this));
+        this.ws.addListener('close', this.handleWSClose.bind(this));
+        clearInterval(wsReconnectInterval);
+        this.frameworkInfo.setWsInfo({status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
+        this.notification.show(`Connection to server has been restored`, 'success', 3000);
+      } catch (error) {
+        console.error(error);
+      }
+    }, 10000);
   }
 
   /**

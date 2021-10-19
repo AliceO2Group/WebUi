@@ -56,7 +56,7 @@ const failureStateInfoTable = (label, error = undefined) =>
   );
 
 /**
- * Creates a table with a succesful status and details about the service
+ * Creates a table with a successful status and details about the service
  * @param {String} label 
  * @param {JSON} item 
  * @returns {vnode}
@@ -64,7 +64,7 @@ const failureStateInfoTable = (label, error = undefined) =>
 const successfulStateInfoTable = (label, dependency) =>
   h('.shadow-level1.mv1',
     !dependency.status.ok && !dependency.status.configured ?
-      unconfiguredStateInfoTable(label)
+      missConfiguredStateInfoTable(label)
       :
       h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
         h('tbody', [
@@ -101,7 +101,7 @@ const successfulStateInfoTable = (label, dependency) =>
  * @param {String} label - Name of the service
  * @returns 
  */
-const unconfiguredStateInfoTable = (label) =>
+const missConfiguredStateInfoTable = (label) =>
   h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
     h('tbody', [
       h('tr',
