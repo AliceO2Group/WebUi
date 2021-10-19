@@ -30,7 +30,7 @@ export const header = (model) => [
 ];
 
 /**
- * Content of the status page (or frameworkinfo)
+ * Content of the status page (or framework info)
  * Show loading or error on other cases
  * @param {Object} model
  * @return {vnode}
@@ -163,8 +163,8 @@ const buildStatusAndLabelRowIntService = (model, label, service) => {
 
 /**
  * Build an actionable icon to open a new tab with consul edit panel
- * The panel should be the one coresponding to integrated services declaration
- * and promt the user with a confirmation box
+ * The panel should be the one corresponding to integrated services declaration
+ * and prompt the user with a confirmation box
  * @param {Object} model 
  * @returns {vnode}
  */
