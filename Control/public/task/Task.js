@@ -33,6 +33,8 @@ export default class Task extends Observable {
     this.cleanUpResourcesID = 0;
 
     this.detectorPanels = RemoteData.notAsked(); // JSON containing information on detectors panels; isOpened, list of hosts
+
+    this._filterBy = new RegExp();
   }
 
   /**
@@ -160,5 +162,21 @@ export default class Task extends Observable {
   areTasksInDetector(data) {
     return Object.keys(data)
       .some((host) => data[host] && data[host].list && data[host].stdout && data[host].list.length > 0);
+  }
+
+  /**
+   * Given a string, create a regex which will be used Muto filter tasks by their name
+   * @param {String} filterBy
+   */
+  set filterBy(filterBy) {
+    this._filterBy = new RegExp(`.*${filterBy}.*`);
+    this.notify();
+  }  
+
+  /**
+   * Return a built regex for filtering tasks by their name
+   */
+  get filterBy() {
+    return this._filterBy;
   }
 }

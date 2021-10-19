@@ -86,9 +86,26 @@ const getListOfTasks = (model, task) =>
  * @returns {vnode}
  */
 const showContent = (model, items) =>
-  h('.scroll-y.absolute-fill.text-left.p2', {
+  h('.scroll-y.absolute-fill.text-left.ph2', {
     style: 'top:40px',
-  }, h('.w-100', detectorPanels(model, items)))
+  }, [
+    h('.w-100.flex-column.items-end.pv2', searchTasks(model)),
+    h('.w-100', detectorPanels(model, items))
+  ]);
+
+/**
+ * Adds a search bar for the user to filter tasks by name
+ * @param {Object} model 
+ * @returns 
+ */
+const searchTasks = (model) =>
+  h('.w-20',
+    h('input.form-control', {
+      id: 'searchTasksInput',
+      placeholder: 'Search tasks by name',
+      oninput: (e) => model.task.filterBy = e.target.value
+    })
+  );
 
 /**
  * Build a list of panels per detector with hosts and their respective tasks
@@ -153,17 +170,22 @@ const tasksTables = (model, tasksByHost) =>
             ),
             h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
           ),
-          h('tbody', tasksByHost[hostname].list.map((task) => [h('tr', [
-            h('td.w-50', task.name),
-            h('td.w-10', task.pid),
-            h('td.w-10', {
-              class: (task.state === 'RUNNING' ? 'success'
-                : (task.state === 'CONFIGURED' ? 'warning'
-                  : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
-              style: 'font-weight: bold;'
-            }, task.state),
-            h('td.w-10', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
-          ])]))
+          h('tbody', tasksByHost[hostname].list
+            .filter((task) => model.task.filterBy.test(task.name))
+            .map((task) => [
+              h('tr', [
+                h('td.w-50', task.name),
+                h('td.w-10', task.pid),
+                h('td.w-10', {
+                  class: (task.state === 'RUNNING' ? 'success'
+                    : (task.state === 'CONFIGURED' ? 'warning'
+                      : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
+                  style: 'font-weight: bold;'
+                }, task.state),
+                h('td.w-10', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
+              ])
+            ])
+          )
         ])
       ])
     ]);

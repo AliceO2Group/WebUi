@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+/* eslint-disable max-len */
 
 const assert = require('assert');
 const test = require('../mocha-index');
@@ -36,6 +37,18 @@ describe('`pageTaskList` test-suite', async () => {
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(calls['getTasks'], true);
     assert.strictEqual(location.search, '?page=taskList');
+  });
+
+  it('should successfully add an input panel for searching tasks by name', async() => {
+    const placeholder = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > input').placeholder);
+
+    assert.strictEqual(placeholder, 'Search tasks by name');
+  });
+
+  it('should successfully update filter regex based on user\'s input', async() => {
+    await page.type('input[id=searchTasksInput]', 'task-x', {delay: 20})
+    const filterBy = await page.evaluate(() => window.model.task.filterBy.toString());
+    assert.strictEqual(filterBy, '/.*task-x.*/')
   });
 
   it('should successfully refresh load tasks content after 5000ms', async () => {
