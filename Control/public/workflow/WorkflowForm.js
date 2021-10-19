@@ -71,11 +71,13 @@ export default class WorkflowForm extends Observable {
   }
 
   /**
-   * Add a host to the list of selected ones
+   * Add a host to the list of selected ones if it is not included already
    * @param {String} host
    */
   addHost(host) {
-    this.hosts.push(host);
+    if (!this.hosts.includes(host)) {
+      this.hosts.push(host);
+    }
     this.notify();
   }
 
