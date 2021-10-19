@@ -51,6 +51,12 @@ module.exports = {
   grafana: {
     url: 'http://localhost:2020'
   },
+  bookkeepingGui: {
+    url: 'http://localhost:2021'
+  },
+  qcGui: {
+    url: 'http://localhost:2022'
+  },
   utils: {
     refreshTask: 5000, // how often should task list page should refresh its content
     refreshEnvs: 10000, // how often should env list page should refresh its content

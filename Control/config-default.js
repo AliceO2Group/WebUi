@@ -41,6 +41,14 @@ module.exports = {
     hostname: 'localhost',
     port: 8081
   },
+  qcGui: {
+    hostname: 'localhost',
+    port: 8081
+  },
+  bookkeepingGui: {
+    hostname: 'localhost',
+    port: 8081
+  },
   utils: {
     refreshTask: 10000, // how often should task list page should refresh its content
     refreshEnvs: 10000, // how often should env list page should refresh its content

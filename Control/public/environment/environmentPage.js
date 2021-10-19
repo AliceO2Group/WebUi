@@ -15,7 +15,7 @@
 /* global COG */
 
 import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, iconCloudDownload
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList
 } from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -23,6 +23,7 @@ import showTableItem from '../common/showTableItem.js';
 import {controlEnvironmentPanel} from './components/controlEnvironmentPanel.js';
 import {getTasksByFlp} from './../common/utils.js';
 import {userVarsRow, defaultsRow, varsRow} from './components/expandableEnvRows.js';
+import {infoLoggerButton, bookkeepingButton, qcgButton, mesosLogButton} from './components/buttons.js';
 
 /**
  * @file Page to show 1 environment (content and header)
@@ -73,14 +74,15 @@ const showContent = (environment, item) => [
   ]),
   h('.m2', [
     h('.flex-row', [
-      h(`${item.state === 'RUNNING' ? '.w-50' : '.w-100'}`, showEnvDetailsTable(item, environment)),
-      item.state === 'RUNNING' && h('.w-50.text-center.flex-column',
-        (COG && COG.GRAFANA && COG.GRAFANA.status) ?
+      h(`.w-50`, showEnvDetailsTable(item)),
+      h('.w-50.text-center.flex-column', [
+        item.state === 'RUNNING' && ((COG && COG.GRAFANA && COG.GRAFANA.status) ?
           readoutDataPanel(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
           h('.w-100.text-center.grafana-font',
             'Grafana plots were not loaded, please contact an administrator'
-          ),
-      )
+          )),
+        redirectGUIsPanel(item),
+      ])
     ]),
     h('',
       h('table.table', [
@@ -97,6 +99,21 @@ const showContent = (environment, item) => [
     h('.w-100', tasksPerFlpTables(environment, item))
   ]),
 ];
+
+/**
+ *  Build a panel containing buttons which will redirect the user to other GUIs based on 
+ * environment information:
+ * @param {Object} item - environment information
+ */
+const redirectGUIsPanel = (item) => {
+  return h('.w-100.text.center.flex-row', {
+    style: 'padding-top: var(--space-xl);margin-left: var(--space-s);'
+  }, [
+    h('.w-33.flex-row.justify-center', h('.w-70', infoLoggerButton(item))),
+    h('.w-33.flex-row.justify-center', h('.w-70', bookkeepingButton())),
+    h('.w-33.flex-row.justify-center', h('.w-70', qcgButton())),
+  ]);
+};
 
 /**
  * Build multiple tables of the tasks frouped by FLP
@@ -160,10 +177,9 @@ const readoutDataPanel = (data, runParam) =>
 /**
  * Table to display Environment details
  * @param {Object} item - object to be shown
- * @param {Environment} environment
  * @return {vnode} table view
  */
-const showEnvDetailsTable = (item, environment) => {
+const showEnvDetailsTable = (item) => {
   const width = item.state === 'RUNNING' ? '.w-30' : '.w-15';
   return h('table.table', [
     h('tbody', [
@@ -212,42 +228,9 @@ const showEnvDetailsTable = (item, environment) => {
           h('td', [item.includedDetectors.map((detector) => `${detector} `)])
           : h('td', '-')
       ]),
-      h('tr', [
-        h(`th${width}`, 'InfoLogger'),
-        h('td', infoLoggerButton(environment, item))
-      ]),
     ])
   ]);
 };
-
-/**
- * Open InfoLogger in a new browser tab with run number set if available
- * @param {Object} environment
- * @return {vnode}
- */
-const infoLoggerButton = (environment, item) =>
-  h('a.ph2', {
-    style: {display: !COG.ILG_URL ? 'none' : ''},
-    title: 'Open InfoLogger',
-    href: item.currentRunNumber ?
-      `//${COG.ILG_URL}?q={"run":{"match":"${item.currentRunNumber}"}}`
-      : `//${COG.ILG_URL}`,
-    target: '_blank'
-  }, h('button.btn.primary', iconList()));
-
-/**
- * Button to allow the user to download a file with logs from Messos
- * @param {string} href - location of the mesos log
- * @return {vnode}
- */
-const mesosLogButton = (href) =>
-  h('a', {
-    style: {display: !href ? 'none' : ''},
-    title: 'Download Mesos Environment Logs',
-    href: href,
-    target: '_blank'
-  }, h('button.btn-sm.primary', iconCloudDownload())
-  );
 
 /**
  * Button to open InfoLogger with run and hostname pre-set

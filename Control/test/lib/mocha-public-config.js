@@ -17,7 +17,9 @@ const path = require('path');
 const assert = require('assert');
 const config = require('../test-config.js');
 
-const {buildPublicConfig, _getInfoLoggerURL, _getGrafanaConfig} = require('../../lib/config/publicConfigProvider');
+const {
+  _getBookkeepingURL, _getQcgURL, buildPublicConfig, _getInfoLoggerURL, _getGrafanaConfig
+} = require('../../lib/config/publicConfigProvider');
 
 describe('Public Configuration Test Suite', () => {
   const CONF_LOCATION = '../../public/config.js';
@@ -30,14 +32,14 @@ describe('Public Configuration Test Suite', () => {
     assert.ok(confExists, 'Public configuration file was not identified');
   });
 
-  it('should successfully return ILG URL as string if configuration is provided', () => {
+  it('should successfully return empty string if configuration is missing for ILG', () => {
     assert.strictEqual(_getInfoLoggerURL({}), '');
     assert.strictEqual(_getInfoLoggerURL(undefined), '');
     assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {hostname: 'local'}}), '');
     assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {port: 8080}}), '');
   });
 
-  it('should successfully return empty string if configuration is missing for ILG', () => {
+  it('should successfully return ILG URL as string if configuration is provided', () => {
     assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {hostname: 'local', port: 8080}}), 'local:8080');
   });
 
@@ -59,5 +61,25 @@ describe('Public Configuration Test Suite', () => {
       ]
     };
     assert.deepStrictEqual(_getGrafanaConfig({grafana: {url: 'http://local:2000'}}), expectedConf);
+  });
+
+  it('should successfully return empty string if configuration is missing for QCG', () => {
+    assert.strictEqual(_getQcgURL({}), '');
+    assert.strictEqual(_getQcgURL(undefined), '');
+    assert.strictEqual(_getQcgURL({qcGui: {urlWrong: 'local'}}), '');
+  });
+
+  it('should successfully return QCG URL as string if configuration is provided', () => {
+    assert.strictEqual(_getQcgURL({qcGui: {url: 'localhost:8080'}}), 'localhost:8080');
+  });
+
+  it('should successfully return empty string if configuration is missing for Bookkeeping', () => {
+    assert.strictEqual(_getBookkeepingURL({}), '');
+    assert.strictEqual(_getBookkeepingURL(undefined), '');
+    assert.strictEqual(_getBookkeepingURL({bookkeepingGui: {urlWrong: 'local'}}), '');
+  });
+
+  it('should successfully return QCG URL as string if configuration is provided', () => {
+    assert.strictEqual(_getBookkeepingURL({bookkeepingGui: {url: 'localhost:8080'}}), 'localhost:8080');
   });
 });

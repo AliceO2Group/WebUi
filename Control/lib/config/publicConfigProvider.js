@@ -28,6 +28,8 @@ function buildPublicConfig(config) {
   }
   const publicConfig = {
     ILG_URL: _getInfoLoggerURL(config),
+    QCG_URL: _getQcgURL(config),
+    BKP_URL: _getBookkeepingURL(config),
     GRAFANA: _getGrafanaConfig(config),
     CONSUL: getConsulConfig(config),
     REFRESH_TASK: config?.utils?.refreshTask || 10000,
@@ -104,4 +106,28 @@ function _getInfoLoggerURL(config) {
   }
 }
 
-module.exports = {buildPublicConfig, _getGrafanaConfig, _getInfoLoggerURL, getConsulConfig};
+/**
+ * Builds the URL of the QCG GUI and returns it as a string
+ * Returns empty string if no configuration is provided for QCG
+ * @param {JSON} config - server configuration
+ * @returns {string}
+ */
+function _getQcgURL(config) {
+  const qcg = config?.qcGui;
+  return (qcg?.url) ? `${qcg.url}` : '';
+}
+
+/**
+ * Builds the URL of the Bookkeeping GUI and returns it as a string
+ * Returns empty string if no configuration is provided for Bookkeeping
+ * @param {JSON} config - server configuration
+ * @returns {string}
+ */
+function _getBookkeepingURL(config) {
+  const bkp = config?.bookkeepingGui;
+  return (bkp?.url) ? `${bkp.url}` : '';
+}
+
+module.exports = {
+  buildPublicConfig, _getGrafanaConfig, _getInfoLoggerURL, _getQcgURL, _getBookkeepingURL, getConsulConfig
+};
