@@ -237,8 +237,22 @@ export default class FlpSelection extends Observable {
   }
 
   /**
-   * HTTP Requests
+   * Given a detector name, build a string containing the name and number of selected hosts
+   * and available hosts for that detector
+   * @param {String} detector
+   * @returns {String}
    */
+  getDetectorWithIndexes(detector) {
+    const hostsByDetectorRemote = this.workflow.model.detectors.hostsByDetectorRemote;
+    if (hostsByDetectorRemote.isSuccess() && hostsByDetectorRemote.payload[detector]) {
+      const hosts = hostsByDetectorRemote.payload[detector];
+      const selectedHosts = this.workflow.form.hosts;
+      const totalSelected = selectedHosts.filter((host) => hosts.includes(host)).length;
+
+      return detector + ' (' + totalSelected + '/' + hosts.length + ')'
+    }
+    return detector;
+  }
 
   /**
    * Given a detector name, if hosts were successfully loaded on page load,
@@ -247,7 +261,7 @@ export default class FlpSelection extends Observable {
    * as selected for the user
    * @param {String} detector
    */
-  async setHostsForDetector(detector, shouldSelect = false) {
+  setHostsForDetector(detector, shouldSelect = false) {
     const hostsByDetectorRemote = this.workflow.model.detectors.hostsByDetectorRemote;
     if (!hostsByDetectorRemote.isSuccess()) {
       this.list = RemoteData.failure(hostsByDetectorRemote.message);
