@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "1.21.0",
+  "version": "1.21.1",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "contributors": [
@@ -13,7 +13,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 8.9.4"
+    "node": ">= 14.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
