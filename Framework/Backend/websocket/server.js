@@ -35,7 +35,7 @@ class WebSocket {
 
     this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
     this.log.info('Server started');
-    
+
     this.callbackArray = [];
     this.bind('filter', (message) => {
       return new WebSocketMessage(200).setCommand(message.getCommand());
@@ -118,13 +118,13 @@ class WebSocket {
         client.on('pong', () => client.isAlive = true);
         client.on('error', (err) => this.log.error(`Connection ${err.code}`));
       }, (error) => {
-        this.log.warn(`${error.name} : ${error.message}`);
+        this.log.debug(`${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
 
   /**
-   * Called when a new message arrivies
+   * Called when a new message arrives
    * Handles connection with a client
    * @param {object} message received message
    * @param {object} client TCP socket of the client
@@ -171,7 +171,14 @@ class WebSocket {
           return client.terminate();
         }
         client.isAlive = false;
-        client.ping('', false, true);
+        client.ping('', false, (err) => {
+          if (err) {
+            this.log.error(err);
+            if (err.stack) {
+              this.log.trace(err);
+            }
+          }
+        });
       });
     }, 30000);
   }
@@ -208,13 +215,11 @@ class WebSocket {
   }
 
   /**
-   * Broadcasts messges to all connected clients.
+   * Broadcasts messages to all connected clients.
    * @param {WebSocketMessage} message
    */
   unfilteredBroadcast(message) {
-    this.server.clients.forEach((client) => {
-      client.send(JSON.stringify(message.json));
-    });
+    this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));
     this.log.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
