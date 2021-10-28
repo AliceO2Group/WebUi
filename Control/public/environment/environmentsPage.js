@@ -91,7 +91,7 @@ const environmentsTable = (model, list) => {
         ]),
         h('td', {style: 'text-align: center;'}, item.numberOfFlps),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
-        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_enabled')),
+        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {

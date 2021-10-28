@@ -20,7 +20,7 @@
  */
 const parseObject = (item, key) => {
   switch (key) {
-    case 'ctp_enabled':
+    case 'trg_enabled':
     case 'dcs_enabled':
     case 'epn_enabled':
       return item[key] && item[key] === 'true' ? 'ON' : 'OFF'

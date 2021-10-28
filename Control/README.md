@@ -22,6 +22,8 @@
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
       - [Clean Resources/Tasks](#clean-resourcestasks)
     - [Integration with ControlWorkflows](#integration-with-controlworkflows)
+      - [List of fixed variables used by AliECS GUI for user logic](#list-of-fixed-variables-used-by-aliecs-gui-for-user-logic)
+      - [Dynamically built Workflow Panels](#dynamically-built-workflow-panels)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
     - [release.yml](#releaseyml)
@@ -131,6 +133,23 @@ Here, tasks will be grouped by host and each host has an in-line button to provi
 4. Use the top-right red text `Clean Tasks` button to request AliECS Core to remove all tasks that do not belong to an environment
 
 ### Integration with ControlWorkflows
+
+#### List of fixed variables used by AliECS GUI for user logic
+There is a set of variables which are fixed and used by the AliECS GUI. If there is a need for changing the name of these variables in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows)  repository, then the AliECS GUI developers should be notified to update accordingly.
+```json
+dcs_enabled
+trg_enabled
+epn_enabled
+odc_topology
+odc_enabled
+qcdd_enabled
+dd_enabled
+ddsched_enabled
+minimal_dpl_enabled
+readout_cfg_uri
+qc_config_uri
+```
+#### Dynamically built Workflow Panels
 From version `1.28.0` onwards, the AliECS GUI allows the user to define custom workflow templates. These are defined in `YAML` in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows) repository.
 
 Each variable belonging to a template will follow the definition present in the [protofile](https://github.com/AliceO2Group/WebUi/blob/dev/Control/protobuf/o2control.proto#L380) and will be dynamically built and displayed by the AliECS GUI based on the conditions provided. 
