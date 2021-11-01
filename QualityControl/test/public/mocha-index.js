@@ -126,6 +126,11 @@ describe('QCG', function() {
       assert.ok(rowsCount > 1);
     });
 
+    it('should display layouts sorted alphabetically', async () => {
+      const firstLayout = await page.evaluate(() => document.querySelector('section table tbody tr a').innerText);
+      assert.strictEqual(firstLayout, 'AliRoot');
+    });
+
     it('should have a table with one row after filtering', async () => {
       await page.type('header input', 'AliRoot');
       await page.waitForTimeout(200);
