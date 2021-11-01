@@ -166,7 +166,7 @@ class WebSocket {
    */
   ping() {
     this.interval = setInterval(() => {
-      this.server.clients.forEach(function(client) {
+      this.server.clients.forEach((client) => {
         if (client.isAlive === false) {
           return client.terminate();
         }
