@@ -106,7 +106,7 @@ export default class Config extends Observable {
   }
 
   /**
-   * Given a string host, toggle the userLogic for all of its CRUs serial:endpoint
+   * Given a string detector, toggle the userLogic for all of its hosts CRUs serial:endpoint for that detector
    * @param {String} detector
    */
   toggleUserLogicByDetector(detector) {
