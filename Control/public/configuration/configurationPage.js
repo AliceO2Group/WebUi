@@ -17,6 +17,7 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 /**
  * @file Page to show configuration components (content and header)
+ * @deprecated
  */
 
 /**

@@ -16,6 +16,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
  * Model representing Configuration CRUD
+ * @deprecated
  */
 export default class Configuration extends Observable {
   /**
