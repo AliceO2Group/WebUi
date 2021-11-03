@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 
 /**
- * @file Page which contains multiple reuseable components for the configuration page
+ * @file which contains multiple reuseable components for the configuration page
  */
 
 /**
@@ -88,35 +88,6 @@ const toggleAllLinksCRUCheckBox = (model, cru, linksList, width) =>
       title: `Toggle selection of all links`
     }, 'All Links')
   ]);
-
-
-/**
- * Generate a checkbox based on title and field to change
- * @param {Object} model
- * @param {string} key - format link0
- * @param {JSON} config - reference to the configuration in CRUsMapByHost
- * @return {vnode}
- */
-const cruLinkCheckBox = (model, key, config) => {
-  let id;
-  try {
-    id = '#' + key.split('link')[1];
-  } catch (error) {
-    id = key;
-  }
-  return h('label.d-inline.f6.ph2', {
-    style: 'white-space: nowrap',
-    title: `Toggle selection of ${key}`
-  }, h('input', {
-    type: 'checkbox',
-    checked: config[key].enabled === 'true',
-    onchange: () => {
-      config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';
-      model.configuration.notify();
-    }
-  }), ' ' + id);
-};
-
 
 /**
  * Given a string detector, check if links[0-11] are all enabled for all hosts and CRUs serial:endpoint for that detector
@@ -194,4 +165,4 @@ const _toggleAllLinksByHost = (model, host, value = undefined) => {
   config.notify();
 }
 
-export {toggleAllLinksCRUCheckBox, toggleAllLinksCheckBox, cruLinkCheckBox};
+export {toggleAllLinksCRUCheckBox, toggleAllLinksCheckBox};

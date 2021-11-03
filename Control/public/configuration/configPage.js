@@ -18,7 +18,8 @@ import loading from './../common/loading.js';
 import errorPage from './../common/errorPage.js';
 import {detectorHeader} from './../common/detectorHeader.js';
 import {userLogicCheckBox, userLogicCheckBoxForEndpoint} from './components/userLogicCheckBox.js';
-import {toggleAllLinksCheckBox, toggleAllLinksCRUCheckBox, cruLinkCheckBox} from './components/linksCheckBox.js';
+import {toggleAllLinksCheckBox, toggleAllLinksCRUCheckBox} from './components/allLinksCheckBox.js';
+import {cruLinkCheckBox} from './components/linkCheckBox.js';
 
 /**
  * @file Page to show configuration components (content and header)
@@ -141,7 +142,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
 };
 
 /**
- * Build a panel
+ * Build a panel with CRU panels grouped by their respective host
  * @param {Object} model 
  * @param {JSON} cruMapByHost 
  * @returns 
@@ -180,8 +181,7 @@ const cruByHostPanel = (model, host, cruData) =>
   ]);
 
 /**
- * Panel for each CRU endpoint to allow the user to 
- * enable/disable endpoints
+ * Panel for each CRU endpoint to allow the user to enable/disable endpoints
  * @param {Object} model
  * @param {string} cruId
  * @param {JSON} cru
@@ -234,7 +234,7 @@ const linksPanel = (model, cru) => {
       h('.w-40.flex-row.flex-wrap', [
         linksKeyList.map((link) => cruLinkCheckBox(model, link, cru.config)),
       ])
-    ]
+    ];
   }
   return h('.d-inline.f6.text-light', 'No configuration found for this serial:endpoint');
 };

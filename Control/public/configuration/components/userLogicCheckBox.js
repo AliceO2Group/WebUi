@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 
 /**
- * @file Page which contains multiple reuseable components for the configuration page
+ * @file which contains multiple reuseable components for the configuration page
  */
 
 /**
