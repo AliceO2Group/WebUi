@@ -17,6 +17,7 @@ import pageLoading from './../common/pageLoading.js';
 import loading from './../common/loading.js';
 import errorPage from './../common/errorPage.js';
 import {detectorHeader} from './../common/detectorHeader.js';
+import {userLogicCheckBox, userLogicCheckboxForEndpoint} from './components.js';
 /**
  * @file Page to show configuration components (content and header)
  */
@@ -101,19 +102,22 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
       const hasCRUs = hostsByDetector[detector]
         && hostsByDetector[detector].filter((host) => cruMapByHost[host]).length > 0;
       return h('.w-100.pv2', [
-        h('.panel-title.flex-row.p2', [
-          hasCRUs && h('input', {
-            type: 'checkbox',
-            style: 'cursor: pointer',
-            id: `${detector}Checkbox`,
-            checked: model.configuration.areAllHostsForDetectorSelected(detector),
-            onchange: () => model.configuration.toggleHostsByDetectorSelection(detector),
-          }),
-          h('label.f4.ph2.w-20', {
-            for: `${detector}Checkbox`,
-            style: `font-weight: bold; margin-bottom:0;${hasCRUs ? 'cursor:pointer;' : ''}`
-          }, detector),
-          hasCRUs && h('.w-80.text-right',
+        h('.panel-title.flex-row.pv2', [
+          h('.w-30.flex-row.ph2', [
+            hasCRUs && h('input', {
+              type: 'checkbox',
+              style: 'cursor: pointer',
+              id: `${detector}Checkbox`,
+              checked: model.configuration.areAllHostsForDetectorSelected(detector),
+              onchange: () => model.configuration.toggleHostsByDetectorSelection(detector),
+            }),
+            h('label.f4.ph2.w-20', {
+              for: `${detector}Checkbox`,
+              style: `font-weight: bold; margin-bottom:0;${hasCRUs ? 'cursor:pointer;' : ''}`
+            }, detector),
+          ]),
+          hasCRUs && userLogicCheckBox(model, detector, 'detector', '.w-60'),
+          hasCRUs && h('.w-10.text-right',
             h('button.btn', {
               title: `Close panel for detector ${detector}`,
               onclick: () => {
@@ -139,8 +143,8 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
  */
 const cruByHostPanel = (model, host, cruData) =>
   h('', [
-    h('h5.panel-title-lighter.p2.flex-row', [
-      h('.flex-row', [
+    h('.panel-title-lighter.pv2.flex-row', [
+      h('.w-30.flex-row.ph2', [
         h('input', {
           type: 'checkbox',
           id: `${host}Checkbox`,
@@ -161,6 +165,7 @@ const cruByHostPanel = (model, host, cruData) =>
           style: `font-weight: bold; margin-bottom:0;cursor:pointer;`
         }, host)
       ]),
+      userLogicCheckBox(model, host, 'host', '.w-70'),
     ]),
     cruData && model.configuration.cruToggleByHost[host] && h('.panel', [
       Object.keys(cruData)
@@ -180,35 +185,30 @@ const cruByHostPanel = (model, host, cruData) =>
 const cruPanelByEndpoint = (model, cruId, cru, host) => {
   const cruLabel = `${cru.info.serial}:${cru.info.endpoint}`;
   let isCruInfoVisible = model.configuration.cruToggleByCruEndpoint[`${host}_${cruId}`];
-  return h('', {
-  }, [
-    h('.flex-column', [
-      h('.flex-row.p1.panel', {style: 'font-weight: bold'}, [
-        h('.w-5.actionable-icon.text-center', {
-          title: 'Open/Close CRUs configuration',
-          onclick: () => {
-            model.configuration.cruToggleByCruEndpoint[`${host}_${cruId}`] = !isCruInfoVisible;
-            model.configuration.notify();
-          }
-        }, isCruInfoVisible ? iconChevronBottom() : iconChevronRight()),
-        h('.w-95.flex-row', [
-          h('.w-25', cruLabel),
-          linksPanel(model, cru),
-        ])
-      ]),
-      isCruInfoVisible && h('.flex-row.p1.panel.bg-white', [
-        h('.w-5', []),
-        h('.w-95.flex-row.flex-wrap', [
-          Object.keys(cru.info).map((key) =>
-            h('.w-25.flex-row', [
-              h('.w-60.w-wrapped', {style: 'font-weight: bold'}, key),
-              h('.w-40.w-wrapped', cru.info[key]),
-            ])
-          )
-        ])
-      ]),
+  return h('.flex-column', [
+    h('.flex-row.pv1.panel', {style: 'font-weight: bold'}, [
+      h('.w-5.actionable-icon.text-center', {
+        title: 'Open/Close CRUs configuration',
+        onclick: () => {
+          model.configuration.cruToggleByCruEndpoint[`${host}_${cruId}`] = !isCruInfoVisible;
+          model.configuration.notify();
+        }
+      }, isCruInfoVisible ? iconChevronBottom() : iconChevronRight()),
+      h('.w-25', cruLabel),
+      linksPanel(model, cru),
     ]),
-  ])
+    isCruInfoVisible && h('.flex-row.p1.panel.bg-white', [
+      h('.w-5', []),
+      h('.w-95.flex-row.flex-wrap', [
+        Object.keys(cru.info).map((key) =>
+          h('.w-25.flex-row', [
+            h('.w-60.w-wrapped', {style: 'font-weight: bold'}, key),
+            h('.w-40.w-wrapped', cru.info[key]),
+          ])
+        )
+      ])
+    ]),
+  ]);
 };
 
 /**
@@ -221,8 +221,8 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 const linksPanel = (model, cru) => {
   const linksKeyList = Object.keys(cru.config).filter((configField) => configField.match('link[0-9]{1,2}')); // select only fields from links0 to links11
   if (cru.config && cru.config.cru) {
-    return h('.flex-row.w-75', [
-      h('.w-15', toggleUserLogic(model, cru)),
+    return h('.flex-row.w-70', [
+      userLogicCheckboxForEndpoint(model, cru, '.w-15'),
       linksKeyList.length !== 0 && h('.w-15', toggleAllCheckBox(model, cru, linksKeyList)),
       h('.w-70.flex-row.flex-wrap', [
         linksKeyList.map((link) => checkBox(model, link, cru.config)),
@@ -231,26 +231,6 @@ const linksPanel = (model, cru) => {
   }
   return h('.d-inline.f6.text-light', 'No configuration found for this serial:endpoint');
 };
-
-/**
- * Add a checkbox for the user to enable/disable the user logic
- * Based on this selection the links panel will be hidden
- * @param {Object} model
- * @param {JSON} cru
- * @returns {vnode}
- */
-const toggleUserLogic = (model, cru) =>
-  h('label.d-inline.f6', {
-    style: 'white-space: nowrap',
-    title: `Toggle selection of User Logic`
-  }, h('input', {
-    type: 'checkbox',
-    checked: cru.config.cru.userLogicEnabled === 'true',
-    onchange: () => {
-      cru.config.cru.userLogicEnabled = cru.config.cru.userLogicEnabled === 'true' ? 'false' : 'true';
-      model.configuration.notify();
-    }
-  }), ' User Logic');
 
 /**
  * A checkbox which will either select or unselect
