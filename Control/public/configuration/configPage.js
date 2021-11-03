@@ -102,7 +102,17 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
         && hostsByDetector[detector].filter((host) => cruMapByHost[host]).length > 0;
       return h('.w-100.pv2', [
         h('.panel-title.flex-row.p2', [
-          h('h4.w-20', detector),
+          hasCRUs && h('input', {
+            type: 'checkbox',
+            style: 'cursor: pointer',
+            id: `${detector}Checkbox`,
+            checked: model.configuration.areAllHostsForDetectorSelected(detector),
+            onchange: () => model.configuration.toggleHostsByDetectorSelection(detector),
+          }),
+          h('label.f4.ph2.w-20', {
+            for: `${detector}Checkbox`,
+            style: `font-weight: bold; margin-bottom:0;${hasCRUs ? 'cursor:pointer;' : ''}`
+          }, detector),
           hasCRUs && h('.w-80.text-right',
             h('button.btn', {
               title: `Close panel for detector ${detector}`,
@@ -133,6 +143,8 @@ const cruByHostPanel = (model, host, cruData) =>
       h('.flex-row', [
         h('input', {
           type: 'checkbox',
+          id: `${host}Checkbox`,
+          style: 'cursor: pointer',
           checked: model.configuration.selectedHosts.includes(host),
           onchange: () => model.configuration.toggleHostSelection(host),
         }),
@@ -144,7 +156,10 @@ const cruByHostPanel = (model, host, cruData) =>
           }
         }, model.configuration.cruToggleByHost[host] ? iconChevronBottom() : iconChevronRight()
         ),
-        h('.w-100', host)
+        h('label.w-100', {
+          for: `${host}Checkbox`,
+          style: `font-weight: bold; margin-bottom:0;cursor:pointer;`
+        }, host)
       ]),
     ]),
     cruData && model.configuration.cruToggleByHost[host] && h('.panel', [
