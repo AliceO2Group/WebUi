@@ -33,7 +33,7 @@ export default class Config extends Observable {
 
     this.detectorPanel = {}; // JSON in which the state of detector panels
     this.cruToggleByHost = {}; // JSON in which the state of displayed information is saved
-    this.cruToggleByCruEndpoint = {};
+    this.cruToggleByCruEndpoint = {}; // JSON in which it is saved the current state of the cru by endpoint panels
     this.selectedHosts = [];
 
     this.configurationRequest = RemoteData.notAsked();
@@ -54,7 +54,7 @@ export default class Config extends Observable {
 
   /**
    * Select/Deselect passed host
-   * @param {string} host
+   * @param {String} host
    */
   toggleHostSelection(host) {
     const index = this.selectedHosts.findIndex((element) => host === element);
@@ -67,55 +67,27 @@ export default class Config extends Observable {
   }
 
   /**
-   * Select/Deselect all hosts based on current state of checkbox
+   * Given a detector, toggle the selection of all of its hosts
+   * @param {String}
    */
-  toggleAllSelection() {
-    const allSelected = this.selectedHosts.length === Object.keys(this.cruMapByHost.payload).length;
-    this.selectedHosts = allSelected ? [] : Object.keys(this.cruMapByHost.payload);
+  toggleHostsByDetectorSelection(detector) {
+    const hostsWithCru = this._getHostsWithCRUForDetector(detector);
+    if (this.areAllHostsForDetectorSelected(detector)) {
+      this.selectedHosts = this.selectedHosts.filter((host) => !hostsWithCru.includes(host));
+    } else {
+      this.selectedHosts = this.selectedHosts.concat(hostsWithCru.filter((host) => !this.selectedHosts.includes(host)));
+    }
     this.notify();
   }
 
   /**
-   * Update the current selection with all hosts
-   */
-  selectAllHosts() {
-    this.selectedHosts = Object.keys(this.cruMapByHost.payload);
-  }
-
-  /**
-   * Enable/Disable all fields for UserLogic
-   */
-  toggleAllHostsUserLogicSelection() {
-    if (this.cruMapByHost.isSuccess()) {
-      const allULEnabled = this.areAllUserLogicsEnabled();
-      Object.keys(this.cruMapByHost.payload).forEach((key) => {
-        const cruByEndPoint = this.cruMapByHost.payload[key];
-        Object.keys(cruByEndPoint)
-          .filter((cruKey) => (cruByEndPoint[cruKey].config && cruByEndPoint[cruKey].config.cru))
-          .forEach((cruKey) => cruByEndPoint[cruKey].config.cru.userLogicEnabled = allULEnabled ? 'false' : 'true');
-      });
-      this.selectAllHosts();
-      this.notify();
-    }
-  }
-
-  /**
-   * Parse through the Map<String<Map<String,JSON>> which contains the data about CRUs by endpoint by hosts
-   * and check if user logic is enabled on all
+   * Give a detector name, use the hosts of the detector and check if all of them are present in selected hosts
+   * @param {String} detector
    * @returns {boolean}
    */
-  areAllUserLogicsEnabled() {
-    if (this.cruMapByHost.isSuccess()) {
-      let allULEnabled = true;
-      Object.keys(this.cruMapByHost.payload).forEach((key) => {
-        const cruByEndPoint = this.cruMapByHost.payload[key];
-        allULEnabled = !Object.keys(cruByEndPoint)
-          .filter((cruKey) => (cruByEndPoint[cruKey].config && cruByEndPoint[cruKey].config.cru))
-          .some((cruKey) => cruByEndPoint[cruKey].config.cru.userLogicEnabled === 'false')
-      });
-      return allULEnabled;
-    }
-    return false;
+  areAllHostsForDetectorSelected(detector) {
+    const hostsWithCru = this._getHostsWithCRUForDetector(detector);
+    return hostsWithCru.every((host) => this.selectedHosts.includes(host));
   }
 
   /**
@@ -165,20 +137,17 @@ export default class Config extends Observable {
       this.failedTasks = [];
       this.notify();
       const copy = {};
-      this.selectedHosts.forEach((host) => {
-        copy[host] = this._getMinifiedHostInfo(host);
-      });
+      this.selectedHosts.forEach((host) => copy[host] = this._getMinifiedHostInfo(host));
       const {result, ok} = await this.model.loader.post(`/api/consul/crus/config/save`, copy);
       if (!ok) {
         result.ended = true;
         result.success = false;
         this.configurationRequest = RemoteData.failure(result.message);
-        this.notify();
-        return;
+      } else {
+        result.ended = true;
+        result.success = true;
+        this.configurationRequest = RemoteData.success(result);
       }
-      result.ended = true;
-      result.success = true;
-      this.configurationRequest = RemoteData.success(result);
     }
     this.notify();
   }
@@ -285,5 +254,16 @@ export default class Config extends Observable {
       hostCopy[cruEndpointKey] = {config: cruEndpointCopy};
     })
     return JSON.parse(JSON.stringify(hostCopy));
+  }
+
+  /**
+   * Given a detector name, use the hosts per detector and the cry map by host to build a list of hosts
+   * that belong to a detector and contain a CRU
+   * @param {String} detector 
+   * @returns {Array<String>}
+   */
+  _getHostsWithCRUForDetector(detector) {
+    const hostsForDetector = this.model.detectors.hostsByDetectorRemote.payload[detector];
+    return hostsForDetector.filter((host) => Object.keys(this.cruMapByHost.payload).includes(host));
   }
 }
