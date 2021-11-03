@@ -91,68 +91,6 @@ export default class Config extends Observable {
   }
 
   /**
-   * Given a string detector, check if UserLogic is enabled for all hosts CRUs serial:endpoint for that detector
-   * @param {String} detector
-   * @returns {boolean}
-   */
-  isUserLogicEnabledForDetector(detector) {
-    try {
-      const hostsWithCru = this._getHostsWithCRUForDetector(detector);
-      return hostsWithCru.every((host) => this.isUserLogicEnabledForHost(host))
-    } catch (error) {
-      console.error(error);
-    }
-    return false;
-  }
-
-  /**
-   * Given a string detector, toggle the userLogic for all of its hosts CRUs serial:endpoint for that detector
-   * @param {String} detector
-   */
-  toggleUserLogicByDetector(detector) {
-    try {
-      const hostsWithCru = this._getHostsWithCRUForDetector(detector);
-      const value = this.isUserLogicEnabledForDetector(detector) ? 'false' : 'true';
-      hostsWithCru.forEach((host) => Object.keys(this.cruMapByHost.payload[host])
-        .forEach((cru) => this.cruMapByHost.payload[host][cru].config.cru.userLogicEnabled = value));
-    } catch (error) {
-      console.error(error);
-    }
-    this.notify();
-  }
-
-  /**
-   * Given a string host, check if UserLogic is enabled for all CRUs serial:endpoint for that host
-   * @param {String} host
-   * @returns {boolean}
-   */
-  isUserLogicEnabledForHost(host) {
-    try {
-      return Object.keys(this.cruMapByHost.payload[host]).every((cru) => {
-        return this.cruMapByHost.payload[host][cru].config.cru.userLogicEnabled === 'true';
-      });
-    } catch (error) {
-      console.error(error);
-    }
-    return false;
-  }
-
-  /**
-   * Given a string host, toggle the userLogic for all of its CRUs serial:endpoint
-   * @param {String} host
-   */
-  toggleUserLogicByHost(host) {
-    try {
-      const value = this.isUserLogicEnabledForHost(host) ? 'false' : 'true';
-      Object.keys(this.cruMapByHost.payload[host])
-        .forEach((cru) => this.cruMapByHost.payload[host][cru].config.cru.userLogicEnabled = value);
-    } catch (error) {
-      console.error(error);
-    }
-    this.notify();
-  }
-
-  /**
    *  HTTP Requests
    */
 
