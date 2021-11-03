@@ -168,6 +168,7 @@ message TeardownReply {}
 ////////////////////////////////////////
 message GetEnvironmentsRequest {
     bool showAll = 1;
+    bool showTaskInfos = 2;
 }
 message GetEnvironmentsReply {
     string frameworkId = 1;
@@ -207,6 +208,7 @@ message NewAutoEnvironmentReply {
 
 message GetEnvironmentRequest {
     string id = 1;
+    bool showWorkflowTree = 2;
 }
 message GetEnvironmentReply {
     EnvironmentInfo environment = 1;
