@@ -114,14 +114,16 @@ Use of utils field is optional. Here, a user can specify configuration fields fo
    * [Grafana](https://grafana.com/) - used to display control environment plots
 
 #### Enable/Disable CRU Links
-1. Navigate to the `Configuration` page by clicking on the `Links` sub-menu from the left side-bar. Here, CRUs will be grouped by host
-2. Lock the interface via the top-left lock button
-3. Select the hosts that should be updated by using the check-box in front of the host name
-4. Update the links' state of the selected hosts accordingly
-5. By pressing the top-right grey `Save` button, the links state will be saved directly in Consul for the selected hosts
-6. By pressing the top-right blue `Configure` button, the CRUs of the selected hosts will be updated with the configuration previously saved in Consul.
+1. Navigate to the `Configuration` page by clicking on the `Links` sub-menu from the left side-bar. Here, CRUs will be grouped by detectors and host
+2. Select the hosts that should be updated by using either the check-box in front of the host name or the checkbox in front of the detector
+3. Update the User Logic or Links[0-12] state of the selected hosts accordingly
+4. Lock the interface via the top-left lock button
+5. By pressing the top-right grey `Save` button, the updates will be saved directly in Consul for the selected hosts
+6. By pressing the top-right blue `Save & Configure` button:
+   * the updates will be saved directly in Consul for the selected hosts;
+   * the CRUs of the selected hosts will be updated with the configuration previously saved in Consul.
 
-It is important to know that the `Configure` action will also apply any other `CRU` changes that were applied directly in `Consul` and NOT only the state of the links. 
+It is important to understand that the `Save & Configure` action will also apply any other `CRU` changes that are present in `Consul` and NOT only the state of the links which are updatable via the Interface. 
 
 #### Clean Resources/Tasks
 1. Navigate to the `Tasks` page by clicking on the `Task list` sub-menu from the left side-bar
