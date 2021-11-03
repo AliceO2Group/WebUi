@@ -17,7 +17,9 @@ import pageLoading from './../common/pageLoading.js';
 import loading from './../common/loading.js';
 import errorPage from './../common/errorPage.js';
 import {detectorHeader} from './../common/detectorHeader.js';
-import {userLogicCheckBox, userLogicCheckboxForEndpoint} from './components.js';
+import {userLogicCheckBox, userLogicCheckBoxForEndpoint} from './components/userLogicCheckBox.js';
+import {toggleAllLinksCheckBox, toggleAllLinksCRUCheckBox, cruLinkCheckBox} from './components/linksCheckBox.js';
+
 /**
  * @file Page to show configuration components (content and header)
  */
@@ -116,16 +118,19 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
               style: `font-weight: bold; margin-bottom:0;${hasCRUs ? 'cursor:pointer;' : ''}`
             }, detector),
           ]),
-          hasCRUs && userLogicCheckBox(model, detector, 'detector', '.w-60'),
-          hasCRUs && h('.w-10.text-right',
-            h('button.btn', {
-              title: `Close panel for detector ${detector}`,
-              onclick: () => {
-                detectors[detector].isOpen = !detectors[detector].isOpen;
-                model.configuration.notify();
-              }
-            }, detectors[detector].isOpen ? iconChevronTop() : iconChevronBottom())
-          ),
+          hasCRUs && [
+            userLogicCheckBox(model, detector, 'detector', '.w-15'),
+            toggleAllLinksCheckBox(model, detector, 'detector', '.w-40'),
+            h('.w-15.text-right.ph2',
+              h('button.btn', {
+                title: `Close panel for detector ${detector}`,
+                onclick: () => {
+                  detectors[detector].isOpen = !detectors[detector].isOpen;
+                  model.configuration.notify();
+                }
+              }, detectors[detector].isOpen ? iconChevronTop() : iconChevronBottom())
+            ),
+          ]
         ]),
         hasCRUs && detectors[detector].isOpen
         && hostsByDetector[detector]
@@ -165,7 +170,8 @@ const cruByHostPanel = (model, host, cruData) =>
           style: `font-weight: bold; margin-bottom:0;cursor:pointer;`
         }, host)
       ]),
-      userLogicCheckBox(model, host, 'host', '.w-70'),
+      userLogicCheckBox(model, host, 'host', '.w-15'),
+      toggleAllLinksCheckBox(model, host, 'host', '.w-15')
     ]),
     cruData && model.configuration.cruToggleByHost[host] && h('.panel', [
       Object.keys(cruData)
@@ -214,6 +220,7 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 /**
  * A panel which iterate through all links in the configuration
  * and creates a checkbox for each
+ * It also adds UserLogic and All Links toggles
  * @param {Object} model
  * @param {JSON} cru
  * @return {vnode}
@@ -221,63 +228,15 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 const linksPanel = (model, cru) => {
   const linksKeyList = Object.keys(cru.config).filter((configField) => configField.match('link[0-9]{1,2}')); // select only fields from links0 to links11
   if (cru.config && cru.config.cru) {
-    return h('.flex-row.w-70', [
-      userLogicCheckboxForEndpoint(model, cru, '.w-15'),
-      linksKeyList.length !== 0 && h('.w-15', toggleAllCheckBox(model, cru, linksKeyList)),
-      h('.w-70.flex-row.flex-wrap', [
-        linksKeyList.map((link) => checkBox(model, link, cru.config)),
+    return [
+      userLogicCheckBoxForEndpoint(model, cru, '.w-15'),
+      linksKeyList.length !== 0 && toggleAllLinksCRUCheckBox(model, cru, linksKeyList, '.w-15'),
+      h('.w-40.flex-row.flex-wrap', [
+        linksKeyList.map((link) => cruLinkCheckBox(model, link, cru.config)),
       ])
-    ])
+    ]
   }
   return h('.d-inline.f6.text-light', 'No configuration found for this serial:endpoint');
-};
-
-/**
- * A checkbox which will either select or unselect
- * all checkboxes for links 0 - 11
- * @param {Object} model
- * @param {JSON} cru - reference to the currently displayed cru
- * @return {vnode}
- */
-const toggleAllCheckBox = (model, cru, linksList) =>
-  h('label.d-inline.f6.ph2', {
-    style: 'white-space: nowrap',
-    title: `Toggle selection of all links`
-  }, h('input', {
-    type: 'checkbox',
-    checked: linksList.filter((key) => cru.config[key].enabled === 'true').length === linksList.length,
-    onchange: () => {
-      const areAllChecked = linksList.filter((key) => cru.config[key].enabled === 'true').length === linksList.length;
-      linksList.forEach((key) => cru.config[key].enabled = !areAllChecked ? 'true' : 'false');
-      model.configuration.notify();
-    }
-  }), ' All Links');
-
-/**
- * Generate a checkbox based on title and field to change
- * @param {Object} model
- * @param {string} key - format link0
- * @param {JSON} config - reference to the configuration in CRUsMapByHost
- * @return {vnode}
- */
-const checkBox = (model, key, config) => {
-  let id;
-  try {
-    id = '#' + key.split('link')[1];
-  } catch (error) {
-    id = key;
-  }
-  return h('label.d-inline.f6.ph2', {
-    style: 'white-space: nowrap',
-    title: `Toggle selection of ${key}`
-  }, h('input', {
-    type: 'checkbox',
-    checked: config[key].enabled === 'true',
-    onchange: () => {
-      config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';
-      model.configuration.notify();
-    }
-  }), ' ' + id);
 };
 
 /**
