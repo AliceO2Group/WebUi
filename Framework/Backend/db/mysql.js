@@ -33,9 +33,10 @@ class MySQL {
     assert(config.user, 'Missing config value: mysql.user');
     assert(config.database, 'Missing config value: mysql.database');
     config.port = (!config.port) ? 3306 : config.port;
-    config.connectionLimit = (!config.connectionLimit) ? 10 : config.connectionLimit;
+    config.connectionLimit = (!config.connectionLimit) ? 25 : config.connectionLimit;
+    config.queueLimit = (!config.queueLimit) ? 50 : config.queueLimit;
     config.password = (!config.password) ? '' : config.password;
-    config.timeout = (!config.timeout) ? 60000 : config.timeout;
+    config.timeout = (!config.timeout) ? 30000 : config.timeout;
 
     this.config = config;
     this.pool = mysql.createPool(config);
