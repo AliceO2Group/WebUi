@@ -99,21 +99,16 @@ class MySQL {
 
     if (err.code === 'ER_NO_DB_ERROR') {
       message = `${this.config.database} database not found`;
-      log.warn(`${message}`);
     } else if (err.code === 'ER_NO_SUCH_TABLE') {
       message = `Table not found in ${this.config.database}`;
-      log.warn(`${message}`);
     } else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
       message = `Unable to connect to mysql on ${this.config.host}:${this.config.port}`;
-      log.warn(`${message}`);
     } else if (err.code === 'ER_ACCESS_DENIED_ERROR') {
       message = `Access denied for ${this.config.user}`;
-      log.warn(`${message}`);
     } else {
       message = `MySQL error: ${err.code}, ${err.message}`;
-      log.error(`${message}`);
     }
-
+    log.error(message);
     return message;
   }
 }
