@@ -235,7 +235,7 @@ module.exports = class SQLDataSource {
   _queryMessagesOnOptions(criteriaString, options, values) {
     /* eslint-disable max-len */
     // The rows asked with a limit
-    const requestRows = `SELECT * from (SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT ${options.limit}) as reordered ORDER BY \`TIMESTAMP\` ASC`;
+    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT ${options.limit}`;
     /* eslint-enable max-len */
     log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
     return this.connection.query(requestRows, values)
