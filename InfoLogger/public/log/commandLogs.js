@@ -26,8 +26,7 @@ export default (model) => [
     queryButton(model),
     liveButton(model)
   ], ''),
-  downloadButtonGroup(model.log),
-  h('button.btn.mh3', {onclick: () => model.log.empty()}, 'Clear'),
+  h('button.btn.mh3', {onclick: () => model.log.empty(), style: 'font-weight: bold'}, 'Clear'),
   h('button.btn', {
     disabled: !model.log.list.length,
     onclick: () => model.log.firstError(),
@@ -56,7 +55,8 @@ export default (model) => [
     disabled: !model.log.list.length,
     onclick: () => model.log.goToLastItem(),
     title: 'Go to last log message (ALT + down arrow)'
-  }, '↓')
+  }, '↓'),
+  downloadButtonGroup(model.log)
 ];
 
 /**
@@ -111,6 +111,7 @@ const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
       ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !frameworkInfo.mysql || !frameworkInfo.mysql.status.ok || model.log.queryResult.isLoading(),
     className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
+    style: 'font-weight: bold',
     onclick: () => toggleButtonStates(model, false)
   }),
   Failure: () => ({disabled: true, className: 'danger'}),
@@ -125,7 +126,7 @@ const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
  */
 const downloadButtonGroup = (log) =>
   h('.dropdown', {class: log.download.isVisible ? 'dropdown-open' : ''}, [
-    h('button.btn', {
+    h('button.btn.mh3', {
       onclick: () => {
         if (!log.download.isVisible) {
           log.generateLogDownloadContent();
@@ -164,6 +165,7 @@ const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
     title: frameworkInfo.infoLoggerServer.status.ok ? 'Stream logs with filtering' : 'Live service not configured',
     disabled: !frameworkInfo.infoLoggerServer.status.ok || model.log.queryResult.isLoading(),
     className: !model.ws.authed ? 'loading' : liveButtonType,
+    style: 'font-weight: bold',
     onclick: () => toggleButtonStates(model, true)
   }),
   Failure: () => ({disabled: true, className: 'danger'}),
