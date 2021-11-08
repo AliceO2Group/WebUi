@@ -195,24 +195,11 @@ module.exports = class SQLDataSource {
         throw error;
       });
 
-    const resultCount = await this._countMessagesOnOptions(criteriaString, values);
-
-    let total = parseInt(resultCount[0].total);
-    let more = false;
-
-    // "more" flag indicates more rows available
-    if (total > 100000) {
-      total = 100000;
-      more = true;
-    }
-
     const totalTime = Date.now() - startTime; // ms
     log.debug(`Query done in ${totalTime}ms`);
     return {
       rows,
-      total: total,
       count: rows.length,
-      more,
       limit: options.limit,
       time: totalTime, // ms
       queryAsString: this._getSQLQueryAsString(criteriaVerbose, options.limit)
@@ -254,22 +241,4 @@ module.exports = class SQLDataSource {
     return this.connection.query(requestRows, values)
       .then((data) => data);
   }
-
-  /**
-   * Count how many rows could be found, limit to 100k anyway
-   * @param {string} criteriaString as a string
-   * @param {Array} values of filter parameters
-   * @return {Promise}
-   */
-  _countMessagesOnOptions(criteriaString, values) {
-    const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
-    log.debug(`requestCount: ${requestCount} ${JSON.stringify(values)}`);
-    return this.connection.query(requestCount, values)
-      .then((data) => data)
-      .catch((error) => {
-        log.error(error);
-        return [{total: -1}];
-      });
-  }
-};
-
+}

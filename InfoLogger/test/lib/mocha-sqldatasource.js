@@ -147,20 +147,6 @@ describe('SQLDataSource', () => {
     });
   });
 
-  it('should successfully return number of results when querying mysql driver for counter of messages', async () => {
-    const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().resolves(10)});
-    const sqlDataSource = new SQLDataSource(stub, config.mysql);
-    const queryResult = await sqlDataSource._countMessagesOnOptions('criteriaString', []);
-    assert.deepStrictEqual(queryResult, 10);
-  });
-
-  it('should successfully return `-1` when querying mysql driver for counter of messages results in rejected promise', async () => {
-    const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().rejects()});
-    const sqlDataSource = new SQLDataSource(stub, config.mysql);
-    const queryResult = await sqlDataSource._countMessagesOnOptions('criteriaString', []);
-    assert.deepStrictEqual(queryResult, [{total: -1}]);
-  });
-
   it('should successfully return messages when querying mysql driver', async () => {
     const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().resolves([{severity: 'W'}, {severity: 'I'}])});
     const sqlDataSource = new SQLDataSource(stub, config.mysql);
@@ -207,36 +193,7 @@ describe('SQLDataSource', () => {
 
     const expectedResult = {
       rows: [],
-      total: 10,
       count: 0,
-      more: false,
-      limit: 10,
-      queryAsString: query
-    };
-    delete result.time;
-    assert.deepStrictEqual(result, expectedResult);
-  });
-
-  it('should successfully limit the total of result when result is larger than 100k', async () => {
-    const criteriaString = 'WHERE `timestamp`>=? AND `timestamp`<=? AND ' +
-      '`hostname` LIKE (?) AND (NOT(`hostname` LIKE (?)) OR `hostname` IS NULL) AND `severity` IN (?)';
-    const requestRows = `SELECT * from (SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT 10) as reordered ORDER BY \`TIMESTAMP\` ASC`;
-    const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
-    const values = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W']];
-    const query = 'SELECT * FROM `messages` WHERE  `timestamp`>=\'-5\', `timestamp`<=\'-1\', `hostname` LIKE \'test\', (NOT(`hostname` LIKE \'testEx\' OR `undefined` IS NULL), `severity` IN [D,W] ORDER BY `TIMESTAMP` DESC LIMIT 10';
-    const queryStub = sinon.stub();
-    queryStub.withArgs(requestRows, values).resolves([]);
-    queryStub.withArgs(requestCount, values).resolves([{total: 200000}]);
-    const stub = sinon.createStubInstance(MySQL, {query: queryStub});
-
-    const sqlDataSource = new SQLDataSource(stub, config.mysql);
-    const result = await sqlDataSource.queryFromFilters(realFilters, {limit: 10});
-
-    const expectedResult = {
-      rows: [],
-      total: 100000,
-      count: 0,
-      more: true,
       limit: 10,
       queryAsString: query
     };
