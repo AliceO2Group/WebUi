@@ -103,10 +103,7 @@ const applicationOptions = (model) => [
  * @param {Object} result - raw query result from server with its meta data
  * @return {vnode}
  */
-const statusQuery = (model, result) => `\
-(loaded out of ${result.total}${result.more ? '+' : ''} \
-in ${(result.time / 1000).toFixed(2)} second(s)${(result.time / 1000) >= 2 ? 's' : ''})\
-`;
+const statusQuery = (model, result) => `in ${(result.time / 1000).toFixed(2)} second(s)`;
 
 /**
  * Status of live mode with hostname of streaming source and date it started
