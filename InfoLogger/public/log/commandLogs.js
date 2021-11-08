@@ -133,7 +133,7 @@ const downloadButtonGroup = (log) =>
           log.removeLogDownloadContent();
         }
       }
-    }, iconDataTransferDownload(), ' Dowlonad'),
+    }, iconDataTransferDownload(), ' Download'),
     h('.dropdown-menu', [
       log.limit < 10001 && h('a.menu-item.m3.mv2.text-ellipsis', {
         href: `data:application/octet;,${encodeURIComponent(log.download.fullContent)}`,
