@@ -88,3 +88,7 @@ footer { border-top: 1px solid var(--color-gray); }
 .query-item:hover { text-decoration: none; background-color: var(--color-gray-dark); color: var(--color-gray-lighter); }
 .query-item:active { background-color: var(--color-gray-dark); color: var(--color-black);  }
 .query-item.selected { background-color: var(--color-primary); color: var(--color-white); }
+
+.btn { background-color: #e0e0e0; color: #404040; }
+.btn:hover { background-color: #a0a0a0; color: var(--color-white); }
+.btn:active, .btn.active, .dropdown-open > .btn { background-color: #c0c0c0; }
