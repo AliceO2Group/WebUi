@@ -115,6 +115,16 @@ describe('SQLDataSource', () => {
       assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(filters),
         {values: expectedValues, criteria: expectedCriteria});
     });
+    it('should successfully return values & criteria when translating filters from client (2)', () => {
+      let likeFilters = filters;
+      likeFilters.hostname = {match: 'test%', exclude: 'testEx', $match: 'test%', $exclude: 'testEx'};
+      const expectedValues = [1563794601.351, 1563794661.354, 'test%', 'testEx', ['D', 'W'], 21, 22, 10];
+      const expectedCriteria = ['`timestamp`>=?', '`timestamp`<=?',
+        '`hostname` LIKE (?)', 'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
+        '`severity` IN (?)', '`level`<=?', '`userId`>=?'];
+      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(likeFilters),
+        {values: expectedValues, criteria: expectedCriteria});
+    });
   });
 
   describe('Parse criteria as SQL Query', () => {
