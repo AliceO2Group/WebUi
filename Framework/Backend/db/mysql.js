@@ -14,7 +14,7 @@
 
 const mysql = require('mysql');
 const assert = require('assert');
-const Log = require('./../log/Log.js');
+const log = new (require('./../log/Log.js'))(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
 
 /**
  * MySQL pool wrapper
@@ -33,13 +33,13 @@ class MySQL {
     assert(config.user, 'Missing config value: mysql.user');
     assert(config.database, 'Missing config value: mysql.database');
     config.port = (!config.port) ? 3306 : config.port;
+    config.connectionLimit = (!config.connectionLimit) ? 25 : config.connectionLimit;
+    config.queueLimit = (!config.queueLimit) ? 50 : config.queueLimit;
     config.password = (!config.password) ? '' : config.password;
-    config.timeout = (!config.timeout) ? 60000 : config.timeout;
+    config.timeout = (!config.timeout) ? 30000 : config.timeout;
 
     this.config = config;
     this.pool = mysql.createPool(config);
-
-    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
   }
 
   /**
@@ -76,6 +76,7 @@ class MySQL {
         if (error) {
           reject(new Error(this.errorHandler(error)));
         }
+        log.debug(mysql.format(query, parameters));
         resolve(results);
       });
     });
@@ -98,21 +99,16 @@ class MySQL {
 
     if (err.code === 'ER_NO_DB_ERROR') {
       message = `${this.config.database} database not found`;
-      this.log.warn(`${message}`);
     } else if (err.code === 'ER_NO_SUCH_TABLE') {
       message = `Table not found in ${this.config.database}`;
-      this.log.warn(`${message}`);
     } else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
       message = `Unable to connect to mysql on ${this.config.host}:${this.config.port}`;
-      this.log.warn(`${message}`);
     } else if (err.code === 'ER_ACCESS_DENIED_ERROR') {
       message = `Access denied for ${this.config.user}`;
-      this.log.warn(`${message}`);
     } else {
       message = `MySQL error: ${err.code}, ${err.message}`;
-      this.log.error(`${message}`);
     }
-
+    log.error(message);
     return message;
   }
 }
