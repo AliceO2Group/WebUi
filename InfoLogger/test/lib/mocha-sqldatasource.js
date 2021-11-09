@@ -179,13 +179,11 @@ describe('SQLDataSource', () => {
   it('should successfully return result when filters are provided for querying', async () => {
     const criteriaString = 'WHERE `timestamp`>=? AND `timestamp`<=? AND ' +
       '`hostname` LIKE (?) AND (NOT(`hostname` LIKE (?)) OR `hostname` IS NULL) AND `severity` IN (?)';
-    const requestRows = `SELECT * from (SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT 10) as reordered ORDER BY \`TIMESTAMP\` ASC`;
-    const requestCount = `SELECT COUNT(*) as total FROM (SELECT 1 FROM \`messages\` ${criteriaString} LIMIT 100001) t1`;
+    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT 10`;
     const values = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W']];
     const query = 'SELECT * FROM `messages` WHERE  `timestamp`>=\'-5\', `timestamp`<=\'-1\', `hostname` LIKE \'test\', (NOT(`hostname` LIKE \'testEx\' OR `undefined` IS NULL), `severity` IN [D,W] ORDER BY `TIMESTAMP` DESC LIMIT 10';
     const queryStub = sinon.stub();
     queryStub.withArgs(requestRows, values).resolves([]);
-    queryStub.withArgs(requestCount, values).resolves([{total: 10}]);
     const stub = sinon.createStubInstance(MySQL, {query: queryStub});
 
     const sqlDataSource = new SQLDataSource(stub, config.mysql);
