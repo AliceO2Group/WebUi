@@ -70,12 +70,11 @@ module.exports = class SQLDataSource {
    * criteria = ['timestamp >= ?', 'level <= ?', 'severity in (?,?)', ...]
    *
    * @param {Object} filters - {...}
-   * @return {Object} {values, criteria, criteriaVerbose}
+   * @return {Object} {values, criteria}
    */
   _filtersToSqlConditions(filters) {
     const values = [];
     const criteria = [];
-    const criteriaVerbose = [];
     for (const field in filters) {
       if (!filters.hasOwnProperty(field)) {
         continue;
@@ -103,60 +102,60 @@ module.exports = class SQLDataSource {
           case '$min':
           case '$since':
             criteria.push(`\`${field}\`>=?`);
-            criteriaVerbose.push(` \`${field}\`>='${filters[field].since}'`);
             break;
           case '$max':
           case '$until':
             criteria.push(`\`${field}\`<=?`);
-            criteriaVerbose.push(` \`${field}\`<='${filters[field].until}'`);
             break;
           case '$match': {
             const criteriaArray = filters[field].match.split(' ');
             if (field === 'message' || criteriaArray.length <= 1) {
-              criteria.push(`\`${field}\` LIKE (?)`);
-              criteriaVerbose.push(` \`${field}\` LIKE '${filters[field].match}'`);
+              if (criteriaArray.toString().includes('%')) {
+                criteria.push(`\`${field}\` LIKE (?)`);
+              } else {
+                criteria.push(`\`${field}\` = ?`);
+              }
             } else {
               let criteriaString = '(';
-              let criteriaVerboseString = '(';
               criteriaArray.forEach((crit) => {
-                criteriaString += `\`${field}\` LIKE (?) OR `;
-                criteriaVerboseString += `\`${field}\` LIKE '${crit}' OR `;
+                if (crit.includes('%')) {
+                  criteriaString += `\`${field}\` LIKE (?) OR `;
+                } else {
+                  criteriaString += `\`${field}\` = ? OR `;
+                }
               });
               criteriaString = criteriaString.substr(0, criteriaString.length - 4);
               criteriaString += ')';
-              criteriaVerboseString = criteriaVerboseString.substr(0, criteriaVerboseString.length - 4);
-              criteriaVerboseString += ')';
               criteria.push(criteriaString);
-              criteriaVerbose.push(criteriaVerboseString);
             }
             break;
           }
           case '$exclude': {
             const criteriaArray = filters[field].exclude.split(' ');
             if (field === 'message' || criteriaArray.length <= 1) {
-              criteria.push(`(NOT(\`${field}\` LIKE (?)) OR \`${field}\` IS NULL)`);
-              criteriaVerbose.push(` (NOT(\`${field}\` LIKE '${filters[field].exclude}' `
-                + `OR \`${field.exclude}\` IS NULL)`);
+              if (criteriaArray.toString().includes('%')) {
+                criteria.push(`NOT(\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL)`);
+              } else {
+                criteria.push(`NOT(\`${field}\` = ? AND \`${field}\` IS NOT NULL)`);
+              }
             } else {
               let criteriaString = '(';
-              let criteriaVerboseString = '(';
               criteriaArray.forEach((crit) => {
-                criteriaString += `(\`${field}\` NOT LIKE (?) OR \`${field}\` IS NULL) AND `;
-                criteriaVerboseString += `(\`${field}\` NOT LIKE '${crit}' OR \`${field}\` IS NULL) AND `;
+                if (crit.includes('%')) {
+                  criteriaString += `NOT(\`${field}\` LIKE (?) AND \`${field}\` IS NULL) OR `;
+                } else {
+                  criteriaString += `NOT (\`${field}\` = ? AND \`${field}\` IS NOT NULL) OR `;
+                }
               });
               criteriaString = criteriaString.substr(0, criteriaString.length - 5);
               criteriaString += ')';
-              criteriaVerboseString = criteriaVerboseString.substr(0, criteriaVerboseString.length - 5);
-              criteriaVerboseString += ')';
               criteria.push(criteriaString);
-              criteriaVerbose.push(criteriaVerboseString);
             }
 
             break;
           }
           case '$in':
             criteria.push(`\`${field}\` IN (?)`);
-            criteriaVerbose.push(` \`${field}\` IN [${filters[field][operator]}]`);
             break;
           default:
             log.warn(`unknown operator ${operator}`);
@@ -164,7 +163,7 @@ module.exports = class SQLDataSource {
         }
       }
     }
-    return {values, criteria, criteriaVerbose};
+    return {values, criteria};
   }
 
   /**
@@ -186,7 +185,7 @@ module.exports = class SQLDataSource {
     options = Object.assign({}, {limit: 100}, options);
 
     const startTime = Date.now(); // ms
-    const {criteria, values, criteriaVerbose} = this._filtersToSqlConditions(filters);
+    const {criteria, values} = this._filtersToSqlConditions(filters);
     const criteriaString = this._getCriteriaAsString(criteria);
 
     const rows = await this._queryMessagesOnOptions(criteriaString, options, values)
@@ -202,7 +201,7 @@ module.exports = class SQLDataSource {
       count: rows.length,
       limit: options.limit,
       time: totalTime, // ms
-      queryAsString: this._getSQLQueryAsString(criteriaVerbose, options.limit)
+      queryAsString: this._getSQLQueryAsString(criteriaString, options.limit)
     };
   }
 
@@ -222,7 +221,7 @@ module.exports = class SQLDataSource {
    * @return {string}
    */
   _getSQLQueryAsString(criteriaVerbose, limit) {
-    return `SELECT * FROM \`messages\` WHERE ${criteriaVerbose} ORDER BY \`TIMESTAMP\` DESC LIMIT ${limit}`;
+    return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` DESC LIMIT ${limit}`;
   }
 
   /**
@@ -237,7 +236,6 @@ module.exports = class SQLDataSource {
     // The rows asked with a limit
     const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT ${options.limit}`;
     /* eslint-enable max-len */
-    log.debug(`requestRows: ${requestRows} ${JSON.stringify(values)}`);
     return this.connection.query(requestRows, values)
       .then((data) => data);
   }
