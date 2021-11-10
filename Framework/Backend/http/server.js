@@ -397,7 +397,7 @@ class HttpServer {
 
     if (token) {
       this.jwt.verify(req.query.token).then(() => next(), (error) => {
-        this.log.warn(`${error.name} : ${error.message}`);
+        this.log.debug(`${error.name} : ${error.message}`);
         res.status(403).json({message: error.name});
       });
     } else {
@@ -483,7 +483,7 @@ class HttpServer {
         };
         next();
       }, ({name, message}) => {
-        this.log.warn(`${name} : ${message}`);
+        this.log.debug(`${name} : ${message}`);
 
         const response = {error: '403 - Json Web Token Error'};
 
