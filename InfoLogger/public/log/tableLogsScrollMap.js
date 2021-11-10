@@ -24,8 +24,8 @@ import {callRateLimiter} from '../common/utils.js';
 export default (model) =>
   h('',
     h('canvas', {
-      width: '10px',
-      height: model.log.scrollHeight + 'px',
+      width: '10',
+      height: model.log.scrollHeight,
 
       /**
        * Hook when DOM element is created according to vnode
