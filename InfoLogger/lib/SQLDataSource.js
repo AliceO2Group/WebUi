@@ -221,7 +221,7 @@ module.exports = class SQLDataSource {
    * @return {string}
    */
   _getSQLQueryAsString(criteriaVerbose, limit) {
-    return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` DESC LIMIT ${limit}`;
+    return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` LIMIT ${limit}`;
   }
 
   /**
@@ -234,7 +234,7 @@ module.exports = class SQLDataSource {
   _queryMessagesOnOptions(criteriaString, options, values) {
     /* eslint-disable max-len */
     // The rows asked with a limit
-    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT ${options.limit}`;
+    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
     /* eslint-enable max-len */
     return this.connection.query(requestRows, values)
       .then((data) => data);

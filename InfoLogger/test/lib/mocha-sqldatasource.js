@@ -182,9 +182,9 @@ describe('SQLDataSource', () => {
   it('should successfully return result when filters are provided for querying', async () => {
     const criteriaString = 'WHERE `timestamp`>=? AND `timestamp`<=? AND ' +
       '`hostname` = ? AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?)';
-    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` DESC LIMIT 10`;
+    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT 10`;
     const values = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W']];
-    const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` DESC LIMIT 10';
+    const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
     const queryStub = sinon.stub();
     queryStub.withArgs(requestRows, values).resolves([]);
     const stub = sinon.createStubInstance(MySQL, {query: queryStub});
