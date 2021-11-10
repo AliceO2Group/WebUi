@@ -63,7 +63,7 @@ const logsTable = (model) =>
     // table scrollable content
     h('.flex-row.flex-grow.logs-content', [
       tableLogsContent(model),
-      tableLogsScrollMap(model),
+      !model.safariNav ? tableLogsScrollMap(model) : null
     ])
   ]);
 
