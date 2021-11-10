@@ -21,44 +21,47 @@ import {callRateLimiter} from '../common/utils.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('canvas', {
-  width: '10px',
-  height: model.log.scrollHeight + 'px',
+export default (model) =>
+  h('',
+    h('canvas', {
+      width: '10px',
+      height: model.log.scrollHeight + 'px',
 
-  /**
-   * Hook when DOM element is created according to vnode
-   * registers a redraw function to be called on model changes
-   * draw content
-   * @param {vnode} vnode
-   */
-  oncreate(vnode) {
-    // canvas consumes a lot of CPU
-    // we put 2 FPS because it's almost a static picture for human eyes
-    vnode.dom.redraw = frameDebouncer(callRateLimiter(() => {
-      draw(model, vnode.dom);
-    }, 500));
-    vnode.dom.redraw();
+      /**
+       * Hook when DOM element is created according to vnode
+       * registers a redraw function to be called on model changes
+       * draw content
+       * @param {vnode} vnode
+       */
+      oncreate(vnode) {
+        // canvas consumes a lot of CPU
+        // we put 2 FPS because it's almost a static picture for human eyes
+        vnode.dom.redraw = frameDebouncer(callRateLimiter(() => {
+          draw(model, vnode.dom);
+        }, 500));
+        vnode.dom.redraw();
 
-    vnode.dom.dataset.height = model.log.scrollHeight;
-  },
+        vnode.dom.dataset.height = model.log.scrollHeight;
+      },
 
-  /**
-   * Hook when model has changed
-   * check if height has changed since last time between DOM internal state
-   * draw content
-   * @param {vnode} vnode
-   */
-  onupdate(vnode) {
-    // height change blanks canvas, draw now to avoid white canvas
-    if (parseInt(vnode.dom.dataset.height, 10) !== model.log.scrollHeight) {
-      draw(model, vnode.dom);
-      vnode.dom.dataset.height = model.log.scrollHeight;
-      return;
-    }
+      /**
+       * Hook when model has changed
+       * check if height has changed since last time between DOM internal state
+       * draw content
+       * @param {vnode} vnode
+       */
+      onupdate(vnode) {
+        // height change blanks canvas, draw now to avoid white canvas
+        if (parseInt(vnode.dom.dataset.height, 10) !== model.log.scrollHeight) {
+          draw(model, vnode.dom);
+          vnode.dom.dataset.height = model.log.scrollHeight;
+          return;
+        }
 
-    vnode.dom.redraw();
-  }
-});
+        vnode.dom.redraw();
+      }
+    })
+  );
 
 /**
  * Draw the ScrollMap inside the canvas `dom` element provided in argument
