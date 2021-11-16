@@ -72,10 +72,10 @@ function getConsulConfig(config) {
 function _getGrafanaConfig(config) {
   if (config?.grafana?.url) {
     const hostPort = config.grafana.url;
-    const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/readout?panelId=6';
-    const plotReadoutRate = 'd-solo/TZsAxKIWk/readout?panelId=8';
-    const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/readout?panelId=4';
-    const plotDDGraph = 'd-solo/HBa9akknk/dd?panelId=10';
+    const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=6';
+    const plotReadoutRate = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=8';
+    const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=4';
+    const plotDDGraph = 'd-solo/HBa9akknk/aliecs-dd?panelId=10';
     const theme = '&refresh=5s&theme=light';
     return {
       status: true,
