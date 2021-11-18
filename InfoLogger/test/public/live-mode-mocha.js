@@ -52,19 +52,6 @@ describe('Live Mode test-suite', async () => {
     assert.strictEqual(activeMode, 'Running');
   });
 
-  it('should throw error due to LIVE mode already beeing active', async () => {
-    const thrown = await page.evaluate(() => {
-      try {
-        window.model.log.liveStart();
-        return false;
-      } catch (e) {
-        return true;
-      }
-    });
-
-    assert.ok(thrown);
-  });
-
   it('should have filled some logs via WS with the level "debug"', async () => {
     // check level is still 21 after LogFilter tests
     const criterias = await page.evaluate(() => {
