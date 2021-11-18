@@ -32,6 +32,7 @@ const tableBody = (model, colsHeader) =>
   h('tbody', [
     h('tr', [
       h('td.cell.text-ellipsis.cell-xs', {title: 'Severity'}, 'Severity'),
+      h('td.cell.text-ellipsis.cell-xs.cell-bordered', {title: 'Level'}, 'Level'),
       colsHeader.date.visible && generateCellHeader(model, colsHeader.date, 'Date'),
       colsHeader.time.visible && generateCellHeader(model, colsHeader.time, 'Time'),
       colsHeader.hostname.visible && generateCellHeader(model, colsHeader.hostname, 'Hostname'),

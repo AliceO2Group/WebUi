@@ -40,6 +40,7 @@ export default (model) => model.log.item ? h('', [
         h('td', {className: severityClass(model.log.item.severity)}, 'Severity'),
         h('td', {className: severityClass(model.log.item.severity)}, severityLabel(model.log.item.severity))
       ]),
+      h('tr', h('td', 'Level'), h('td', model.log.item.level)),
       h('tr', h('td', 'Date'), h('td', (model.timezone.format(model.log.item.timestamp, 'date')))),
       h('tr', h('td', 'Time'), h('td', (model.timezone.format(model.log.item.timestamp, 'time')))),
       h('tr', h('td', 'Hostname'), h('td', model.log.item.hostname)),
