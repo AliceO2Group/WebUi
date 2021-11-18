@@ -20,6 +20,7 @@ import {h} from '/js/src/index.js';
 // (both table are distinct to allow content scrolling and fixed header)
 export default (model) => h('colgroup', [
   h('col.cell-xs'),
+  h('col.cell-xs'),
   model.table.colsHeader.date.visible && h(`col.${model.table.colsHeader.date.size}`),
   model.table.colsHeader.time.visible && h(`col.${model.table.colsHeader.time.size}`),
   model.table.colsHeader.hostname.visible && h(`col.${model.table.colsHeader.hostname.size}`),
