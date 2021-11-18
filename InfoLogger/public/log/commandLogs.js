@@ -177,23 +177,27 @@ const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
  * @param {boolean} wasLivePressed
  */
 function toggleButtonStates(model, wasLivePressed) {
-  model.log.download.isVisible = false; // set visibilty of download dropdown to false
+  model.log.download.isVisible = false; // set visibility of download dropdown to false
   if (wasLivePressed) {
     switch (model.log.activeMode) {
       case MODE.QUERY:
       case MODE.LIVE.PAUSED:
-        setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
-        model.log.enableAutoScroll();
-        model.log.updateLogMode(MODE.LIVE.RUNNING);
+        try {
+          model.log.liveStart();
+          setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
+          model.log.enableAutoScroll();
+        } catch (error) {
+          model.notification.show(error.toString(), 'danger', 3000);
+        }
         break;
       default: // MODE.LIVE.RUNNING
+        model.log.liveStop(MODE.LIVE.PAUSED);
         setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
         model.log.disableAutoScroll();
-        model.log.updateLogMode(MODE.LIVE.PAUSED);
     }
   } else {
+    model.log.query();
     setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
-    model.log.updateLogMode(MODE.QUERY);
   }
 
   /**

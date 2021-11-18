@@ -384,9 +384,8 @@ export default class Log extends Observable {
       throw new Error(`Live service is not available`);
     }
     if (this.isLiveModeRunning()) {
-      throw new Error('Live already enabled');
+      return;
     }
-
     this.list = [];
     this.resetStats();
     this.queryResult = RemoteData.notAsked(); // empty all data from last query
@@ -491,23 +490,6 @@ export default class Log extends Observable {
   disableAutoScroll() {
     this.autoScrollLive = false;
     this.notify();
-  }
-
-  /**
-   * Method to update the state of the selected mode
-   * @param {MODE} mode that will be enabled
-   */
-  updateLogMode(mode) {
-    switch (mode) {
-      case MODE.LIVE.RUNNING:
-        this.liveStart();
-        break;
-      case MODE.LIVE.PAUSED:
-        this.liveStop(mode);
-        break;
-      default:
-        this.query();
-    }
   }
 
   /**
