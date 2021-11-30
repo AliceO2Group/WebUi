@@ -32,9 +32,9 @@ export default (workflow) =>
     ]),
     addKVInputList(workflow),
     h('.form-group.p2.panel.w-100.text-left', [
-      h('.w-100.ph1', 'Add single pair of (K;V):'),
+      h('.w-100.ph1', 'Add single pair:'),
       addKVInputPair(workflow),
-      h('.w-100.ph1', 'Add a JSON with multiple pairs (K;V):'),
+      h('.w-100.ph1', 'Add a JSON with multiple pairs:'),
       addListOfKvPairs(workflow),
       loadExistingConfigurationPanel(workflow),
       importErrorPanel(workflow),
