@@ -89,14 +89,10 @@ const addKVInputPair = (workflow) => {
       placeholder: 'value',
       style: 'height: 2em; resize: vertical',
       value: valueString,
-      oninput: (e) => {
-        if (e.inputType !== 'insertLineBreak') {
-          valueString = e.target.value;
-        }
-      },
+      oninput: (e) => valueString = e.target.value,
       onkeyup: (e) => {
         if (e.keyCode === 13) {
-          workflow.addVariable(keyString, valueString);
+          workflow.addVariable(keyString, valueString.slice(0, -1));
           workflow.dom.keyInput.focus();
         }
       }

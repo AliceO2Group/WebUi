@@ -65,7 +65,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
         page.keyboard.type(key);
         await page.waitForTimeout(500);
 
-        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > input');
+        await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > textarea');
         page.keyboard.type(confVariables[key]);
         await page.waitForTimeout(500);
 
