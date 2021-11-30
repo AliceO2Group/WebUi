@@ -284,16 +284,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.keyboard.type('TestKey   ');
     await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > textarea');
     await page.keyboard.type(' TestValue  ');
     await page.waitForTimeout(200);
 
-    await page.keyboard.type(String.fromCharCode(13));
+    await page.keyboard.press('Enter');
     await page.waitForTimeout(200);
     const variables = await page.evaluate(() => {
       return window.model.workflow.form.variables;
     });
-    assert.deepStrictEqual(variables['TestKey'], ' TestValue  ');
+    assert.deepStrictEqual(variables['TestKey'], ' TestValue  \n');
   });
 
   it('should successfully move focus to key input after KV pair was added', async () => {
@@ -306,7 +306,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.keyboard.type('TestKey2');
     await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > input');
+    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > textarea');
     await page.keyboard.type('TestValue2');
     await page.waitForTimeout(200);
 
