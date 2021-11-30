@@ -139,6 +139,7 @@ describe('Control', function() {
         ]
       },
       CONSUL: {
+        protocol: 'http',
         hostname: 'localhost',
         port: 8550,
         flpHardwarePath: 'test/o2/hardware/flps',

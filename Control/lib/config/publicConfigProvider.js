@@ -48,7 +48,7 @@ function buildPublicConfig(config) {
 function getConsulConfig(config) {
   if (config?.consul) {
     const conf = config.consul;
-
+    conf.protocol = conf?.protocol ? conf.protocol : 'http';
     conf.flpHardwarePath = conf?.flpHardwarePath ? conf.flpHardwarePath : 'o2/hardware/flps';
     conf.readoutCardPath = conf?.readoutCardPath ? conf.readoutCardPath : 'o2/components/readoutcard';
     conf.qcPath = conf?.qcPath ? conf.qcPath : 'o2/components/qc';
