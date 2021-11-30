@@ -92,6 +92,7 @@ const addKVInputPair = (workflow) => {
       oninput: (e) => valueString = e.target.value,
       onkeyup: (e) => {
         if (e.keyCode === 13) {
+          // last character needs removing due to new line being added by `Enter` press
           workflow.addVariable(keyString, valueString.slice(0, -1));
           workflow.dom.keyInput.focus();
         }
