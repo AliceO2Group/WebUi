@@ -40,7 +40,7 @@ describe('Public Configuration Test Suite', () => {
   });
 
   it('should successfully return ILG URL as string if configuration is provided', () => {
-    assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {hostname: 'local', port: 8080}}), 'local:8080');
+    assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {url: 'local:8080'}}), 'local:8080');
   });
 
   it('should successfully return status false JSON if configuration is missing for Grafana', () => {

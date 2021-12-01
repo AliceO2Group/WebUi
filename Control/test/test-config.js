@@ -45,8 +45,7 @@ module.exports = {
     kVPrefix: 'test/ui/some-cluster/kv',
   },
   infoLoggerGui: {
-    hostname: 'localhost',
-    port:8081
+    url: 'http://localhost:8081',
   },
   grafana: {
     url: 'http://localhost:2020'

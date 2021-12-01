@@ -99,11 +99,7 @@ function _getGrafanaConfig(config) {
  */
 function _getInfoLoggerURL(config) {
   const ilg = config?.infoLoggerGui;
-  if (ilg && ilg.hostname && ilg.port) {
-    return `${ilg.hostname}:${ilg.port}`;
-  } else {
-    return '';
-  }
+  return (ilg?.url) ? `${ilg.url}` : '';
 }
 
 /**

@@ -26,8 +26,8 @@ const infoLoggerButton = (item, label = 'InfoLogger') =>
     style: {display: !COG.ILG_URL ? 'none' : ''},
     title: `Open InfoLogger GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,
     href: item.currentRunNumber ?
-      `//${COG.ILG_URL}?q={"partition":{"match":"${item.id}"},"run":{"match":"${item.currentRunNumber}"}}`
-      : `//${COG.ILG_URL}?q={"partition":{"match":"${item.id}"}}`,
+      `${COG.ILG_URL}?q={"partition":{"match":"${item.id}"},"run":{"match":"${item.currentRunNumber}"}}`
+      : `${COG.ILG_URL}?q={"partition":{"match":"${item.id}"}}`,
     target: '_blank'
   }, label);
 
