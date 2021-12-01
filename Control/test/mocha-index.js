@@ -126,7 +126,7 @@ describe('Control', function() {
   it('should have correctly load COG configuration', async () => {
     const cog = await page.evaluate(() => window.COG);
     const expectedConf = {
-      ILG_URL: 'localhost:8081',
+      ILG_URL: 'http://localhost:8081',
       BKP_URL: 'http://localhost:2021',
       QCG_URL: 'http://localhost:2022',
       GRAFANA: {
