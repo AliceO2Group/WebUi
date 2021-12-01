@@ -32,9 +32,9 @@ export default (workflow) =>
     ]),
     addKVInputList(workflow),
     h('.form-group.p2.panel.w-100.text-left', [
-      h('.w-100.ph1', 'Add single pair of (K;V):'),
+      h('.w-100.ph1', 'Add single pair:'),
       addKVInputPair(workflow),
-      h('.w-100.ph1', 'Add a JSON with multiple pairs (K;V):'),
+      h('.w-100.ph1', 'Add a JSON with multiple pairs:'),
       addListOfKvPairs(workflow),
       loadExistingConfigurationPanel(workflow),
       importErrorPanel(workflow),
@@ -85,14 +85,15 @@ const addKVInputPair = (workflow) => {
     })),
     h('.ph1', {
       style: 'width:60%;',
-    }, h('input.form-control', {
-      type: 'text',
+    }, h('textarea.form-control', {
       placeholder: 'value',
+      style: 'height: 2em; resize: vertical',
       value: valueString,
       oninput: (e) => valueString = e.target.value,
       onkeyup: (e) => {
         if (e.keyCode === 13) {
-          workflow.addVariable(keyString, valueString);
+          // last character needs removing due to new line being added by `Enter` press
+          workflow.addVariable(keyString, valueString.slice(0, -1));
           workflow.dom.keyInput.focus();
         }
       }
@@ -120,6 +121,7 @@ const addListOfKvPairs = (workflow) => {
     }, h('textarea.form-control', {
       id: 'kvTextArea',
       rows: 7,
+      style: 'resize: vertical',
       value: workflow.kvPairsString,
       placeholder: 'e.g.\n{\n\t"key1": "value1",\n\t"key2": "value2"\n}',
       oncreate: ({dom}) => workflow.dom.keyValueArea = dom,
@@ -213,4 +215,3 @@ const loadErrorPanel = (workflow) => {
     ]);
   }
 }
-
