@@ -115,7 +115,7 @@ export default class Task extends Observable {
 
     this.cleanUpResourcesID = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
     const {result, ok} = await this.model.loader
-      .post(`/api/clean/resources`, {channelId: this.cleanUpResourcesID});
+      .post(`/api/execute/resources-cleanup`, {channelId: this.cleanUpResourcesID, operation: 'resources-cleanup'});
     if (!ok) {
       this.cleanUpResourcesRequest = RemoteData.failure(result.message);
     } else {

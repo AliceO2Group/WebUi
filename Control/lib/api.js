@@ -83,8 +83,8 @@ module.exports.setup = (http, ws) => {
 
   http.post('/configuration/save', (req, res) => apricotService.saveConfiguration(req, res));
 
-  http.post('/clean/resources', (req, res) => ctrlService.cleanResources(req, res));
-  http.post('/execute/o2-roc-config', (req, res) => ctrlService.createAutoEnvironment(req, res));
+  http.post('/execute/resources-cleanup', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
+  http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
   http.post('/lockState', (_, res) => res.json(padLock));
