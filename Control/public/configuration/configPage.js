@@ -268,7 +268,7 @@ const tasksMessagePanel = (model) =>
       h('a.ph2', {
         style: {display: !COG.ILG_URL ? 'none' : ''},
         title: 'Open InfoLogger',
-        href: `//${COG.ILG_URL}`,
+        href: `//${COG.ILG_URL}/?q={"system":{"match": "ECS FLP"}, "facility":{"match":"core%25 ReadoutCard/Config"}}`,
         target: '_blank'
       }, 'infologger'
       ),
