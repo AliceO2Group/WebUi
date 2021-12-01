@@ -76,7 +76,9 @@ const buildPage = (model, cruMapByHost) => {
       ]),
       tasksMessagePanel(model),
       h('.w-100.flex-row', [
-        h('.w-70'),
+        h('.w-70', [
+          forceFlagCheckbox(model),
+        ]),
         h('a.w-30', {
           style: 'display:flex; justify-content: flex-end',
           href: model.configuration.getConsulConfigURL(),
@@ -90,6 +92,30 @@ const buildPage = (model, cruMapByHost) => {
     return h('.w-100.text-center', errorPage('Unable to load detectors/hosts from AliECS'));
   }
 };
+
+/**
+ * Adds a checkbox and label which will send to AliECS a boolean
+ * to add the force flag when running roc-config
+ * @param {Object} model
+ * @returns {vnode}
+ */
+const forceFlagCheckbox = (model) => h(`.flex-row`, [
+  h('input', {
+    type: 'checkbox',
+    style: 'cursor: pointer',
+    id: 'forceConfigId',
+    checked: model.configuration.isForceEnabled,
+    onchange: () => {
+      model.configuration.isForceEnabled = !model.configuration.isForceEnabled;
+      model.configuration.notify();
+    },
+  }),
+  h('label.f6.ph2', {
+    for: 'forceConfigId',
+    style: `font-weight: bold; margin-bottom:0;cursor:pointer`,
+    title: `Use '--force-config' when running o2-roc-config`
+  }, `Run with '--force'`),
+]);
 
 /**
  * Build a series of panels for each detector based on the current view of the user
