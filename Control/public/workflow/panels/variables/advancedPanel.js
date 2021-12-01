@@ -13,6 +13,7 @@
 */
 
 import {h, iconTrash, iconPlus, info} from '/js/src/index.js';
+import loadConfigurationPanel from '../loadConfiguration/loadConfiguration.js';
 
 /**
  * Panel for adding (K;V) configurations for the environment
@@ -36,9 +37,8 @@ export default (workflow) =>
       addKVInputPair(workflow),
       h('.w-100.ph1', 'Add a JSON with multiple pairs:'),
       addListOfKvPairs(workflow),
-      loadExistingConfigurationPanel(workflow),
       importErrorPanel(workflow),
-      loadErrorPanel(workflow),
+      loadConfigurationPanel(workflow),
     ]),
   ]);
 
@@ -139,50 +139,6 @@ const addListOfKvPairs = (workflow) => {
 };
 
 /**
- * Displays a panel which contains:
- * * a dropdown list of past saved configurations
- * * a button to allow the user to load that configuration
- * @param {Workflow} workflow 
- */
-const loadExistingConfigurationPanel = (workflow) => [
-  workflow.savedConfigurations.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Failure: () => null,
-    Success: (item) => configurationSelection(workflow, item.payload)
-  })
-];
-
-/**
- * Create a configuration selection panel which is displayed only if
- * the list of configurations was provided by apricot successfully
- * @param {Workflow} workflow
- * @returns 
- */
-const configurationSelection = (workflow, configurations) => {
-  return h('.w-100.flex-column.ph1', [
-    h('.w-100', 'Load existing configurations:'),
-    h('.w-100.flex-row', [
-      h('select.form-control', {
-        style: 'cursor: pointer',
-        onchange: (e) => {
-          workflow.selectedConfigurationId = e.target.value;
-          workflow.notify();
-        }
-      }, [
-        h('option', {style: 'cursor: pointer'}, '-'),
-        configurations.map((value) => h('option', {style: 'cursor: pointer'}, value))
-      ]),
-      h('button.btn.btn-default.mh2', {
-        class: workflow.loadingConfiguration.isLoading() ? 'loading' : '',
-        disabled: workflow.loadingConfiguration.isLoading() || workflow.selectedConfigurationId === '-',
-        onclick: () => workflow.getAndSetNamedConfiguration(workflow.selectedConfigurationId)
-      }, 'Load')
-    ]),
-  ]);
-};
-
-/**
  * Displays errors that may appear while importing a configuration via
  * * text area JSON import
  * * KV Pair input
@@ -195,23 +151,3 @@ const importErrorPanel = (workflow) =>
     h('.danger', 'The following KV pairs encountered an issue:'),
     workflow.advErrorPanel.map((error) => h('.danger', `- ${error}`))
   ]);
-
-/**
- * Displays any potential errors from loading existing configuration
- * @param {Workflow} workflow 
- * @returns {vnode}
- */
-const loadErrorPanel = (workflow) => {
-  const isDetectorViewMatch = workflow.flpSelection.detectorViewConfigurationError;
-  const areAllHostsAvailable = workflow.flpSelection.missingHosts.length === 0;
-  if (isDetectorViewMatch) {
-    return h('.w-100.flex-column.ph2', [
-      h('.danger', 'Configuration cannot be loaded in this detector view'),
-    ]);
-  } else if (!areAllHostsAvailable) {
-    return h('.w-100.flex-column.ph2', [
-      h('.danger', 'The following saved hosts are not available anymore:'),
-      h('.flex-row.danger', workflow.flpSelection.missingHosts.toString())
-    ]);
-  }
-}
