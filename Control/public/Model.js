@@ -115,7 +115,7 @@ export default class Model extends Observable {
     } else if (message.command === 'notification') {
       this.showNativeNotification(JSON.parse(message.payload));
       return;
-    } else if (message.command === 'clean-resources-action') {
+    } else if (message.command === 'resources-cleanup') {
       this.task.setResourcesRequest(message.payload);
     } else if (message.command === 'o2-roc-config') {
       this.configuration.setConfigurationRequest(message.payload);

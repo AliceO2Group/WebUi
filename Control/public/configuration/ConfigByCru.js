@@ -167,7 +167,7 @@ export default class Config extends Observable {
       const hosts = this.selectedHosts;
       this.channelId = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
       const {result, ok} = await this.model.loader.post(`/api/execute/o2-roc-config`,
-        {channelId: this.channelId, hosts}
+        {channelId: this.channelId, hosts, operation: 'o2-roc-config'}
       );
       if (!ok) {
         this.configurationRequest = RemoteData.failure(result);

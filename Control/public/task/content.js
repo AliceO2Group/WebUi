@@ -30,7 +30,7 @@ import {iconLockLocked, iconLockUnlocked, iconCloudDownload, iconCircleX, iconCi
  */
 export const content = (model) => [
   detectorHeader(model),
-  h('.text-center', {style: 'top: 40px'}, [
+  h('.text-center.scroll-y.absolute-fill', {style: 'top: 40px'}, [
     infoPanel(model),
     getListOfTasks(model, model.task)
   ])
@@ -86,9 +86,7 @@ const getListOfTasks = (model, task) =>
  * @returns {vnode}
  */
 const showContent = (model, items) =>
-  h('.scroll-y.absolute-fill.text-left.ph2', {
-    style: 'top:40px',
-  }, [
+  h('.text-left.ph2', [
     h('.w-100.flex-column.items-end.pv2', searchTasks(model)),
     h('.w-100', detectorPanels(model, items))
   ]);
