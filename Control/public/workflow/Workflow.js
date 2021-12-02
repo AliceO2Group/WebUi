@@ -44,7 +44,9 @@ export default class Workflow extends Observable {
     this.refreshedRepositories = RemoteData.notAsked();
 
     this.savedConfigurations = RemoteData.notAsked();
-    this.selectedConfigurationId = '-';
+    this.selectedConfiguration = '';
+    this.selectedConfigurationRaw = '';
+    this.isLoadConfigurationVisible = false;
     this.loadedConfiguration = RemoteData.notAsked();
     this.loadingConfiguration = RemoteData.notAsked();
 
@@ -80,7 +82,7 @@ export default class Workflow extends Observable {
     }
     this.getAndSetSavedConfigurations();
     this.flpSelection.init();
-    this.selectedConfigurationId = '-';
+    this.selectedConfiguration = '';
     this.resetErrorMessage();
   }
 
