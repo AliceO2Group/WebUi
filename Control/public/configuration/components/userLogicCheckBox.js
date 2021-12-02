@@ -67,7 +67,7 @@ const userLogicCheckBox = (model, componentId, type, width) => {
  */
 const userLogicCheckBoxForEndpoint = (model, cru, width) =>
   h(`${width}.flex-row`, {
-    style: 'display: flex; align-items: center;'
+    style: 'align-items: center;'
   }, [
     h('input', {
       id: `${cru.info.serial}-${cru.info.endpoint}-checkbox`,

@@ -132,7 +132,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
         && hostsByDetector[detector].filter((host) => cruMapByHost[host]).length > 0;
       return h('.w-100.pv2', [
         h('.panel-title.flex-row.pv2', [
-          h('.w-30.flex-row.ph2', [
+          h('.w-20.flex-row.ph2', [
             hasCRUs && h('input', {
               type: 'checkbox',
               style: 'cursor: pointer',
@@ -147,7 +147,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
           ]),
           hasCRUs && [
             userLogicCheckBox(model, detector, 'detector', '.w-15'),
-            toggleAllLinksCheckBox(model, detector, 'detector', '.w-40'),
+            toggleAllLinksCheckBox(model, detector, 'detector', '.w-50'),
             h('.w-15.text-right.ph2',
               h('button.btn', {
                 title: `Close panel for detector ${detector}`,
@@ -176,7 +176,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
 const cruByHostPanel = (model, host, cruData) =>
   h('', [
     h('.panel-title-lighter.pv2.flex-row', [
-      h('.w-30.flex-row.ph2', [
+      h('.w-20.flex-row.ph2', [
         h('input', {
           type: 'checkbox',
           id: `${host}Checkbox`,
@@ -226,7 +226,7 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
           model.configuration.notify();
         }
       }, isCruInfoVisible ? iconChevronBottom() : iconChevronRight()),
-      h('.w-25', cruLabel),
+      h('.w-15', cruLabel),
       linksPanel(model, cru),
     ]),
     isCruInfoVisible && h('.flex-row.p1.panel.bg-white', [
@@ -257,7 +257,9 @@ const linksPanel = (model, cru) => {
     return [
       userLogicCheckBoxForEndpoint(model, cru, '.w-15'),
       linksKeyList.length !== 0 && toggleAllLinksCRUCheckBox(model, cru, linksKeyList, '.w-15'),
-      h('.w-40.flex-row.flex-wrap', [
+      h('.w-50.flex-row.flex-wrap', {
+        style: 'justify-content: flex-end'
+      }, [
         linksKeyList.map((link) => cruLinkCheckBox(model, link, cru.config)),
       ])
     ];
@@ -294,7 +296,10 @@ const tasksMessagePanel = (model) =>
       h('a.ph2', {
         style: {display: !COG.ILG_URL ? 'none' : ''},
         title: 'Open InfoLogger',
-        href: `${COG.ILG_URL}/?q={"system":{"match": "ECS FLP"}, "facility":{"match":"core%25 ReadoutCard/Config"}}`,
+        href: `${COG.ILG_URL}/?q={` +
+          '"timestamp":{"since":"-5m"},"system":{"match": "ECS FLP"},' +
+          '"facility":{"match":"core%25 ReadoutCard/Config"}' +
+          '}',
         target: '_blank'
       }, 'infologger'
       ),
