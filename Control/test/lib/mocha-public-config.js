@@ -35,8 +35,7 @@ describe('Public Configuration Test Suite', () => {
   it('should successfully return empty string if configuration is missing for ILG', () => {
     assert.strictEqual(_getInfoLoggerURL({}), '');
     assert.strictEqual(_getInfoLoggerURL(undefined), '');
-    assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {hostname: 'local'}}), '');
-    assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {port: 8080}}), '');
+    assert.strictEqual(_getInfoLoggerURL({infoLoggerGui: {}}), '');
   });
 
   it('should successfully return ILG URL as string if configuration is provided', () => {

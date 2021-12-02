@@ -38,8 +38,7 @@ module.exports = {
     coreServices: 'o2/components/aliecs/some/settings/path',
   },
   infoLoggerGui: {
-    hostname: 'localhost',
-    port: 8081
+    url: 'http://localhost:8081'
   },
   qcGui: {
     hostname: 'localhost',

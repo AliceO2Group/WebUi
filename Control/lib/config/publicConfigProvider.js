@@ -98,8 +98,7 @@ function _getGrafanaConfig(config) {
  * @returns {string}
  */
 function _getInfoLoggerURL(config) {
-  const ilg = config?.infoLoggerGui;
-  return (ilg?.url) ? `${ilg.url}` : '';
+  return (config?.infoLoggerGui?.url) ? config.infoLoggerGui.url : '';
 }
 
 /**
