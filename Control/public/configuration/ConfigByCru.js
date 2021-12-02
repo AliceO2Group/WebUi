@@ -39,6 +39,8 @@ export default class Config extends Observable {
     this.configurationRequest = RemoteData.notAsked();
     this.failedTasks = [];
     this.channelId = 0;
+
+    this.isForceEnabled = false;
   }
 
   /**
@@ -167,14 +169,13 @@ export default class Config extends Observable {
       const hosts = this.selectedHosts;
       this.channelId = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
       const {result, ok} = await this.model.loader.post(`/api/execute/o2-roc-config`,
-        {channelId: this.channelId, hosts, operation: 'o2-roc-config'}
+        {
+          channelId: this.channelId, vars: {
+            hosts, rocConfigForceConfig: this.isForceEnabled ? 'true' : 'false'
+          }, operation: 'o2-roc-config'
+        }
       );
-      if (!ok) {
-        this.configurationRequest = RemoteData.failure(result);
-        this.notify();
-        return;
-      }
-      this.configurationRequest = RemoteData.success(result);
+      this.configurationRequest = ok ? RemoteData.success(result) : RemoteData.failure(result);
     }
     this.notify();
   }

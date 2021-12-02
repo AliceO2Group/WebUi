@@ -62,14 +62,14 @@ class ControlService {
    * @param {Response} res
    */
   async createAutoEnvironment(req, res) {
-    let {channelId, hosts, operation} = req.body;
+    let {channelId, vars, operation} = req.body;
     const method = 'NewAutoEnvironment';
     if (!channelId) {
       res.status(502).json({
         ended: true, success: false, id: channelId,
         message: 'Channel ID should be provided'
       });
-    } else if (hosts && hosts.length === 0) {
+    } else if (vars?.hosts?.length === 0) {
       res.status(502).json({
         ended: true, success: false, id: channelId,
         message: 'List of Hosts should be provided'
@@ -80,10 +80,12 @@ class ControlService {
         message: 'Operation should be provided'
       });
     } else {
-      if (!hosts) {
-        hosts = await this.consulConnector.getFLPsList();
-      } 
       try {
+        vars = !vars ? {} : vars;
+        if (!vars.hosts) {
+          vars.hosts = await this.consulConnector.getFLPsList();
+        } 
+        vars.hosts = JSON.stringify(vars.hosts);
         const {repos: repositories} = await this.ctrlProx['ListRepos']();
         const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
         if (!defaultRevision) {
@@ -100,7 +102,7 @@ class ControlService {
         // Make request to clear resources
         const coreConf = {
           id: channelId,
-          vars: {hosts: JSON.stringify(hosts)},
+          vars,
           workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
         };
         await this.ctrlProx[method](coreConf);
