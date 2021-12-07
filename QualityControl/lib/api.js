@@ -27,15 +27,21 @@ module.exports.setup = (http) => {
   http.get('/readObjectData', readObjectData, {public: true});
   http.get('/listObjects', listObjects, {public: true});
   http.get('/objectTimestampList', getObjectTimestampList, {public: true});
+  
   http.get('/listOnlineObjects', listOnlineObjects);
   http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
+  
   http.post('/readLayout', model.layoutService.readLayout.bind(model.layoutService));
   http.post('/writeLayout', model.layoutService.updateLayout.bind(model.layoutService));
   http.post('/listLayouts', model.layoutService.listLayouts.bind(model.layoutService));
   http.delete('/layout/:layoutId', model.layoutService.deleteLayout.bind(model.layoutService));
   http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
+  
+  http.get('/status/gui', model.statusService.getQCGStatus.bind(model.statusService), {public: true});
   http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService), {public: true});
+  
   http.get('/checkUser', model.userService.addUser.bind(model.userService));
+  
   new WebSocket(http);
 };
 

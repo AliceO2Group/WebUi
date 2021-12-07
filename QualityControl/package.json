@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.21.2",
-    "jsroot": "^6.2.1"
+    "jsroot": "^6.3.1"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
