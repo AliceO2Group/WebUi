@@ -30,11 +30,14 @@ const profileService = new ProfileService(jsonDb);
 const statusService = new StatusService(config, projPackage);
 
 module.exports.attachTo = (http, ws) => {
+  http.post('/query', query);
+
+  http.get('/status/gui', statusService.getILGStatus.bind(statusService), {public: true});
   http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService), {public: true});
+
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
   http.post('/saveUserProfile', (req, res) => profileService.saveUserProfile(req, res));
-  http.post('/query', query);
 
   if (config.mysql) {
     log.info(`[API] Detected InfoLogger database configuration`);
