@@ -249,7 +249,7 @@ export default class Layout extends Observable {
       throw new Error(`index ${index} does not exist`);
     }
 
-    this.tab = JSON.parse(JSON.stringify(this.item.tabs[index]));
+    this.tab = this.item.tabs[index];
     this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const columns = this.item.tabs[index].columns;
     if (columns > 0) {
