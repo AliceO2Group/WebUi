@@ -119,4 +119,20 @@ describe('Status Service test suite', () => {
       assert.ok(res.json.calledWith(info));
     });
   });
+
+  describe('`getILGStatus()` tests', () => {
+    it('should successfully send response with JSON information about ILG', async () => {
+      const statusService = new StatusService(config, undefined);
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub()
+      }
+      await statusService.getILGStatus(undefined, res);
+
+      const info = {hostname: 'localhost', port: 8080, status: {ok: true}};
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith(info));
+    });
+  });
 });

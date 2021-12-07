@@ -49,6 +49,23 @@ class StatusService {
   }
 
   /**
+   * Method which handles the request for returning infologger gui information and status of it
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getILGStatus(_, res) {
+    let result = {};
+    if (this.projPackage && this.projPackage.version) {
+      result.version = this.projPackage.version;
+    }
+    if (this.config.http) {
+      const ilg = {hostname: this.config.http.hostname, port: this.config.http.port, status: {ok: true}};
+      result = Object.assign(result, ilg);
+    }
+    res.status(200).json(result);
+  }
+
+  /**
    * Method which handles the request for returning 
    * framework information and status of its components
    * @param {Request} req
