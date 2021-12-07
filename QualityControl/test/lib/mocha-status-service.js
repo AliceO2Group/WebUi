@@ -128,4 +128,19 @@ describe('Status Service test suite', () => {
       assert.ok(res.json.calledWith(result))
     });
   });
+
+  describe('`getQCGStatus()` tests', () => {
+    it('successfully send back result JSON with framework information', async () => {
+      const statusService = new StatusService(config)
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub()
+      }
+      await statusService.getQCGStatus({}, res);
+
+      const result = {hostname: 'localhost', port: 8181, status: {ok: true}};
+      assert.ok(res.status.calledWith(200))
+      assert.ok(res.json.calledWith(result))
+    });
+  });
 });

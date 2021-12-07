@@ -51,6 +51,24 @@ class StatusService {
   }
 
   /**
+   * Method to use response object to reply with status and information about QCG
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getQCGStatus(req, res) {
+    let result = {};
+    if (this.projPackage && this.projPackage.version) {
+      result.version = this.projPackage.version;
+    }
+    if (this.config.http) {
+      const qc = {hostname: this.config.http.hostname, port: this.config.http.port};
+      result = Object.assign(result, qc);
+      result.status = {ok: true};
+    }
+    res.status(200).json(result);
+  }
+
+  /**
    * Send back information and status about the framework and its dependencies
    * @param {Request} req
    * @param {Response} res
