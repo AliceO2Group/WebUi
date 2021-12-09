@@ -139,15 +139,15 @@ module.exports = class SQLDataSource {
                 criteria.push(`NOT(\`${field}\` = ? AND \`${field}\` IS NOT NULL)`);
               }
             } else {
-              let criteriaString = '(';
+              let criteriaString = 'NOT(';
               criteriaArray.forEach((crit) => {
                 if (crit.includes('%')) {
-                  criteriaString += `NOT(\`${field}\` LIKE (?) AND \`${field}\` IS NULL) OR `;
+                  criteriaString += `\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL OR `;
                 } else {
-                  criteriaString += `NOT (\`${field}\` = ? AND \`${field}\` IS NOT NULL) OR `;
+                  criteriaString += `\`${field}\` = ? AND \`${field}\` IS NOT NULL OR `;
                 }
               });
-              criteriaString = criteriaString.substr(0, criteriaString.length - 5);
+              criteriaString = criteriaString.substr(0, criteriaString.length - 4);
               criteriaString += ')';
               criteria.push(criteriaString);
             }

@@ -125,6 +125,16 @@ describe('SQLDataSource', () => {
       assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(likeFilters),
         {values: expectedValues, criteria: expectedCriteria});
     });
+    it('should successfully build query when excluding multiple hostnames', () => {
+      let likeFilters = filters;
+      likeFilters.hostname = {$exclude: 'test testEx', exclude: 'test testEx'};
+      const expectedValues = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W'], 21, 22, 10];
+      const expectedCriteria = ['`timestamp`>=?', '`timestamp`<=?',
+        'NOT(`hostname` = ? AND `hostname` IS NOT NULL OR `hostname` = ? AND `hostname` IS NOT NULL)',
+        '`severity` IN (?)', '`level`<=?', '`userId`>=?'];
+      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(likeFilters),
+        {values: expectedValues, criteria: expectedCriteria});
+    });
   });
 
   describe('Parse criteria as SQL Query', () => {
