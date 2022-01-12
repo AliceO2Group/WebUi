@@ -50,7 +50,7 @@ class StatusService {
         port: port,
         path: path,
         method: 'GET',
-         headers: {
+        headers: {
           Accept: 'application/json'
         }
       };
