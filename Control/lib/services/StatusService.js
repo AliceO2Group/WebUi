@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
+const http = require('http');
 const url = require('url');
 const projPackage = require('../../package.json');
-const {httpGetJson} = require('./../utils.js');
 
 /**
  * Gateway for all Status Consumer calls
@@ -34,6 +34,37 @@ class StatusService {
     this.apricotService = apricotService;
     this.NOT_CONFIGURED = 'This service was not configured';
   }
+
+
+  /**
+   * Verified that HTTP request returns status code with accepted range
+   * @param {string} host - hostname of the server
+   * @param {number} port - port of the server
+   * @param {string} path - path of the server request
+   * @return {Promise.<Object, Error>} Resolves if status code is correct
+   */
+  async httpCheckStatusCode(host, port, path) {
+    return new Promise((resolve, reject) => {
+      const requestOptions = {
+        hostname: host,
+        port: port,
+        path: path,
+        method: 'GET',
+        headers: {
+          Accept: 'application/json'
+        }
+      };
+      const request = http.request(requestOptions, (response) => {
+        if (response.statusCode < 200 || response.statusCode > 301) {
+          reject(new Error('Invalid status code: ' + response.statusCode));
+        }
+        resolve();
+      });
+      request.on('error', (err) => reject(err));
+      request.end();
+    });
+  }
+
 
   /**
    * Build a response containing the information and status of the Consul Service
@@ -136,7 +167,7 @@ class StatusService {
       try {
         const urlObject = url.parse(this.config.grafana.url);
         grafana = {url: this.config.grafana.url};
-        await httpGetJson(urlObject.hostname, urlObject.port, '/api/health');
+        await this.httpCheckStatusCode(urlObject.hostname, urlObject.port, '/api/health');
         grafana.status = {ok: true, configured: true};
       } catch (error) {
         grafana.status = {ok: false, configured: true, message: error.toString()};
