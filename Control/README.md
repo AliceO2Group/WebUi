@@ -140,16 +140,21 @@ Here, tasks will be grouped by host and each host has an in-line button to provi
 There is a set of variables which are fixed and used by the AliECS GUI. If there is a need for changing the name of these variables in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows)  repository, then the AliECS GUI developers should be notified to update accordingly.
 ```json
 dcs_enabled
-trg_enabled
+ddsched_enabled
+dd_enabled
 epn_enabled
+minimal_dpl_enabled
 odc_topology
 odc_enabled
-qcdd_enabled
-dd_enabled
-ddsched_enabled
-minimal_dpl_enabled
-readout_cfg_uri
+pdp_config_option
+pdp_o2_data_processing_hash
+pdp_o2_data_processing_path
+pdp_topology_description_library_file
+pdp_workflow_name
 qc_config_uri
+qcdd_enabled
+readout_cfg_uri
+trg_enabled
 ```
 #### Dynamically built Workflow Panels
 From version `1.28.0` onwards, the AliECS GUI allows the user to define custom workflow templates. These are defined in `YAML` in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows) repository.
