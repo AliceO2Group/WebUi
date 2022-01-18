@@ -385,9 +385,9 @@ describe('ApricotService test suite', () => {
     });
 
     it('should throw error if name is missing', () => {
-      assert.throws(() => service._getNameAsId(null), new TypeError(`Cannot read property 'trim' of null`));
-      assert.throws(() => service._getNameAsId(undefined), new TypeError(`Cannot read property 'trim' of undefined`));
-      assert.throws(() => service._getNameAsId(), new TypeError(`Cannot read property 'trim' of undefined`));
+      assert.throws(() => service._getNameAsId(null), new TypeError(`Cannot read properties of null (reading 'trim')`));
+      assert.throws(() => service._getNameAsId(undefined), new TypeError(`Cannot read properties of undefined (reading 'trim')`));
+      assert.throws(() => service._getNameAsId(), new TypeError(`Cannot read properties of undefined (reading 'trim')`));
     });
 
     it('should successfully trim and replace spaces and / characters from name and return format id', () => {
