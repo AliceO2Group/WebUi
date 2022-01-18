@@ -193,7 +193,7 @@ describe('QCG', function() {
       assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
       assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), 'Object full path is not the same');
       assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
-      assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified date is different');
+      assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString()), true, 'Last Modified date is different');
     });
 
     it('should have an info button with full path and last modified when clicked on a second plot(plot success)', async () => {
@@ -213,7 +213,7 @@ describe('QCG', function() {
       assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
       assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), 'Object full path is not the same');
       assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
-      assert.strictEqual(result.lastModified.includes(new Date(1020).toLocaleString('EN')), true, 'Last Modified date is different');
+      assert.strictEqual(result.lastModified.includes(new Date(1020).toLocaleString()), true, 'Last Modified date is different');
     });
 
     it('should have second tab to be empty (according to demo data)', async () => {
@@ -462,7 +462,7 @@ describe('QCG', function() {
         assert.ok(result.fullPath.includes('PATH'));
         assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
         assert.ok(result.lastModified.includes('LAST MODIFIED'));
-        assert.ok(result.lastModified.includes(new Date(100).toLocaleString('EN')));
+        assert.ok(result.lastModified.includes(new Date(100).toLocaleString()));
       });
 
       it('should load page=objectView and display a Checker Object when a parameter objectName is passed', async () => {
@@ -606,7 +606,7 @@ describe('QCG', function() {
         assert.ok(result.fullPath.includes('PATH'));
         assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
         assert.ok(result.lastModified.includes('LAST MODIFIED'));
-        assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString('EN')), true, 'Last Modified Date is not correct');
+        assert.strictEqual(result.lastModified.includes(new Date(100).toLocaleString()), true, 'Last Modified Date is not correct');
       });
     });
   });
