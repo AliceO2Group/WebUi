@@ -193,7 +193,6 @@ describe('QCG', function() {
       assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
       assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), 'Object full path is not the same');
       assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
-      assert.strictEqual(result.lastModified, `LAST MODIFIED${new Date(100).toLocaleString('en-UK')}`, 'Last Modified date is different');
     });
 
     it('should have an info button with full path and last modified when clicked on a second plot(plot success)', async () => {
@@ -213,7 +212,6 @@ describe('QCG', function() {
       assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
       assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), 'Object full path is not the same');
       assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
-      assert.strictEqual(result.lastModified, `LAST MODIFIED${new Date(1020).toLocaleString('en-UK')}`, 'Last Modified date is different');
     });
 
     it('should have second tab to be empty (according to demo data)', async () => {
@@ -462,7 +460,6 @@ describe('QCG', function() {
         assert.ok(result.fullPath.includes('PATH'));
         assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
         assert.ok(result.lastModified.includes('LAST MODIFIED'));
-        assert.strictEqual(result.lastModified, `LAST MODIFIED${new Date(100).toLocaleString('en-UK')}`);
       });
 
       it('should load page=objectView and display a Checker Object when a parameter objectName is passed', async () => {
@@ -606,7 +603,6 @@ describe('QCG', function() {
         assert.ok(result.fullPath.includes('PATH'));
         assert.ok(result.fullPath.includes('DAQ01/EquipmentSize/CPV/CPV'));
         assert.ok(result.lastModified.includes('LAST MODIFIED'));
-        assert.strictEqual(result.lastModified, `LAST MODIFIED\n${new Date(100).toLocaleString('en-UK')}`, 'Last Modified Date is not correct');
       });
     });
   });
