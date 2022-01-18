@@ -169,6 +169,7 @@ describe('Control', function() {
   require('./public/page-environments-mocha');
   // require('./public/page-configuration-mocha');
   require('./public/page-tasks-mocha');
+  require('./public/page-hardware-mocha');
 
   beforeEach(() => this.ok = true);
 

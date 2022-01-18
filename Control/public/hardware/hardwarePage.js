@@ -41,7 +41,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
   detectorHeader(model),
   h('.scroll-y.absolute-fill.p2', {style: 'top: 40px'},
     model.detectors.hostsByDetectorRemote.match({
-      NotAsked: () => null,
+      NotAsked: () => errorPage('Unable to load detectors and FLPs'),
       Loading: () => pageLoading(),
       Success: (data) => detectorPanels(model, data),
       Failure: (error) => errorPage(error),
