@@ -1,0 +1,16 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/Control"
+  schedule:
+    interval: weekly
+    day: "tuesday"
+    time: "07:00"
+    timezone: "Europe/Zurich"
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]
+  reviewers:
+      - "graduta"
