@@ -27,19 +27,19 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha",
     "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
   },
+  "main": "index.js",
   "dependencies": {
     "@aliceo2/web-ui": "1.21.3"
-  },
-  "devDependencies": {
-    "eslint": "^7.32.0",
-    "eslint-config-google": "^0.12.0",
-    "mocha": "^9.1.2",
-    "nyc": "^15.1.0",
-    "puppeteer": "5.4.1",
-    "sinon": "^9.2.1"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui"
   ],
-  "main": "index.js"
+  "devDependencies": {
+    "eslint": "^8.7.0",
+    "eslint-config-google": "^0.12.0",
+    "mocha": "^9.1.2",
+    "nyc": "^15.1.0",
+    "puppeteer": "13.1.1",
+    "sinon": "^12.0.1"
+  }
 }
