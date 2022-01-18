@@ -62,7 +62,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '14.x'
+          node-version: '16.x'
       - run: (cd Control; npm ci)
       - run: (cd Control; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally
@@ -81,7 +81,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '14.x'
+          node-version: '16.x'
       - run: (cd QualityControl; npm ci)
       - run: (cd QualityControl; npm i --save ../Framework)
       - name: Check @aliceo2/web-ui was successfully linked locally
