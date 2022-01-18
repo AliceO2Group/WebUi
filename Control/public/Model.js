@@ -131,7 +131,7 @@ export default class Model extends Observable {
   handleWSClose() {
     clearInterval(this.task.refreshInterval);
     clearInterval(this.environment.refreshInterval);
-    
+
     // Release client-side
     this.lock.setPadlockState({lockedBy: null, lockedByName: null});
 
@@ -186,6 +186,8 @@ export default class Model extends Observable {
       case 'configuration':
         this.configuration.init();
         this.configuration.getCRUsConfig();
+        break;
+      case 'hardware':
         break;
       default:
         this.router.go('?page=environments');

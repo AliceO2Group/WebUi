@@ -42,6 +42,10 @@ import {
 } from './configuration/configPage.js';
 import {header as taskHeader} from './task/header.js';
 import {content as taskContent} from './task/content.js';
+import {
+  content as hardwareContent,
+  header as hardwareHeader
+} from './hardware/hardwarePage.js';
 import {detectorsModal} from './common/detectorModal.js';
 
 /**
@@ -79,7 +83,8 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     environment: environmentHeader,
     about: statusHeader,
     configuration: configurationHeader,
-    taskList: taskHeader
+    taskList: taskHeader,
+    hardware: hardwareHeader,
   })(model)
 ]);
 
@@ -95,6 +100,7 @@ const content = (model) => [
     environment: environmentContent,
     about: statusContent,
     configuration: configurationContent,
-    taskList: taskContent
+    taskList: taskContent,
+    hardware: hardwareContent,
   })(model)
 ];
