@@ -27,20 +27,20 @@
     "mocha": "mocha --exit test/**/mocha-*"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.21.2",
-    "jsroot": "^6.3.1"
-  },
-  "devDependencies": {
-    "eslint": "^7.32.0",
-    "eslint-config-google": "^0.12.0",
-    "mocha": "^9.1.2",
-    "nock": "^13.0.4",
-    "nyc": "^15.1.0",
-    "puppeteer": "5.4.1",
-    "sinon": "9.2.1"
+    "@aliceo2/web-ui": "1.21.3",
+    "jsroot": "^6.3.2"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui",
     "jsroot"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^8.7.0",
+    "eslint-config-google": "^0.12.0",
+    "mocha": "^9.1.4",
+    "nock": "^13.2.2",
+    "nyc": "^15.1.0",
+    "puppeteer": "13.1.1",
+    "sinon": "12.0.1"
+  }
 }
