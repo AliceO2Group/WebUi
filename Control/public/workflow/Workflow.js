@@ -336,7 +336,7 @@ export default class Workflow extends Observable {
    * @return {boolean}
    */
   removeVariableByKey(key) {
-    if (this.form.variables[key]) {
+    if (this.form.variables[key] !== null && this.form.variables[key] !== undefined) {
       delete this.form.variables[key];
       this.notify();
       return true;
