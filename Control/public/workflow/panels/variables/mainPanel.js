@@ -109,8 +109,8 @@ const basicPanel = (workflow, variables, name) => {
       variables
         .filter((variable) => workflow.isVariableVisible(variable.key))
         .map((variable) => h('.auto-built-row.p1', autoBuiltBox(variable, workflow.model))),
-      readoutPanel(workflow),
-      qcUriPanel(workflow)
+      !workflow.isQcWorkflow && readoutPanel(workflow),
+      !workflow.isQcWorkflow && qcUriPanel(workflow)
     ]),
   ]);
 };
