@@ -362,6 +362,7 @@ export default class Workflow extends Observable {
         this.isQcWorkflow = false;
         keys.splice(detectorIndex, 1)
       } else {
+        this.flpSelection.init();
         this.isQcWorkflow = true;
       }
       keys.forEach((key) => {
