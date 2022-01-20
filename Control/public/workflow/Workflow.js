@@ -60,6 +60,7 @@ export default class Workflow extends Observable {
     this.selectedVarsMap = {};
     this.groupedPanels = {};
     this.panelsUtils = {};
+    this.isQcWorkflow = false; // a QC Workflow does not require any detectors | hosts selection
 
     this.READOUT_PREFIX = PREFIX.READOUT;
     this.QC_PREFIX = PREFIX.QC;
@@ -355,7 +356,15 @@ export default class Workflow extends Observable {
     this.form.basicVariables = {};
     this.groupedPanels = {};
     if (this.templatesVarsMap[template] && Object.keys(this.templatesVarsMap[template]).length > 0) {
-      Object.keys(this.templatesVarsMap[template]).forEach((key) => {
+      const keys = Object.keys(this.templatesVarsMap[template]);
+      const detectorIndex = keys.indexOf('detectors');
+      if (detectorIndex >= 0) {
+        this.isQcWorkflow = false;
+        keys.splice(detectorIndex, 1)
+      } else {
+        this.isQcWorkflow = true;
+      }
+      keys.forEach((key) => {
         // Generate panels by grouping the variables by the `panel` field
         const variable = this.templatesVarsMap[template][key];
         const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
@@ -389,6 +398,8 @@ export default class Workflow extends Observable {
         });
         this.groupedPanels[key] = sortedVars;
       });
+    } else {
+      this.isQcWorkflow = false;
     }
   }
 

@@ -72,8 +72,8 @@ const showNewEnvironmentForm = (model, repoList) => [
           templateAreaList(model.workflow, model.workflow.form.repository, model.workflow.form.revision)
         ]),
       ]),
-      h('.template-selection', detectorsPanel(model.workflow)),
-      h('.template-selection', flpSelectionPanel(model.workflow)),
+      !model.workflow.isQcWorkflow && h('.template-selection', detectorsPanel(model.workflow)),
+      !model.workflow.isQcWorkflow && h('.template-selection', flpSelectionPanel(model.workflow)),
     ]),
     model.workflow.form.template && workflowSettingsPanels(model.workflow)
   ]),
