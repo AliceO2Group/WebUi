@@ -202,6 +202,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
  */
 const cruByHostPanel = (model, host, cruData) => {
   let hostLabel = host;
+  let title = host;
   if (model.configuration.crusAliases.isSuccess() && model.configuration.areAliasesOn) {
     const aliases = model.configuration.crusAliases.payload;
     if (aliases[host] && aliases[host].alias) {
@@ -228,6 +229,7 @@ const cruByHostPanel = (model, host, cruData) => {
         ),
         h('label.w-100', {
           for: `${host}Checkbox`,
+          title,
           style: `font-weight: bold; margin-bottom:0;cursor:pointer;`
         }, hostLabel)
       ]),
@@ -251,6 +253,7 @@ const cruByHostPanel = (model, host, cruData) => {
  */
 const cruPanelByEndpoint = (model, cruId, cru, host) => {
   let cruLabel = `${cru.info.serial}:${cru.info.endpoint}`;
+  let title = cruLabel;
   let isCruInfoVisible = model.configuration.cruToggleByCruEndpoint[`${host}_${cruId}`];
 
   if (model.configuration.crusAliases.isSuccess() && model.configuration.areAliasesOn) {
@@ -268,7 +271,7 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
           model.configuration.notify();
         }
       }, isCruInfoVisible ? iconChevronBottom() : iconChevronRight()),
-      h('.w-15', cruLabel),
+      h('.w-15', {title}, cruLabel),
       linksPanel(model, cru, host),
     ]),
     isCruInfoVisible && h('.flex-row.p1.panel.bg-white', [
