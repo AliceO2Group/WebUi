@@ -113,6 +113,7 @@ module.exports.setup = (http, ws) => {
   http.get('/consul/flps', validateService, (req, res) => consulConnector.getFLPs(req, res));
   http.get('/consul/crus', validateService, (req, res) => consulConnector.getCRUs(req, res));
   http.get('/consul/crus/config', validateService, (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
+  http.get('/consul/crus/aliases', validateService, (req, res) => consulConnector.getCRUsAlias(req, res));
   http.post('/consul/crus/config/save', validateService, (req, res) => consulConnector.saveCRUsConfiguration(req, res));
 
   /**

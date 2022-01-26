@@ -76,8 +76,9 @@ const buildPage = (model, cruMapByHost) => {
       ]),
       tasksMessagePanel(model),
       h('.w-100.flex-row', [
-        h('.w-70', [
-          forceFlagCheckbox(model),
+        h('.w-70.flex-row', [
+          forceFlagCheckbox(model.configuration),
+          toggleAliases(model.configuration),
         ]),
         h('a.w-30', {
           style: 'display:flex; justify-content: flex-end',
@@ -96,18 +97,18 @@ const buildPage = (model, cruMapByHost) => {
 /**
  * Adds a checkbox and label which will send to AliECS a boolean
  * to add the force flag when running roc-config
- * @param {Object} model
+ * @param {ConfigByCru} configuration
  * @returns {vnode}
  */
-const forceFlagCheckbox = (model) => h(`.flex-row`, [
+const forceFlagCheckbox = (configuration) => h(`.flex-row.w-20.items-center`, [
   h('input', {
     type: 'checkbox',
     style: 'cursor: pointer',
     id: 'forceConfigId',
-    checked: model.configuration.isForceEnabled,
+    checked: configuration.isForceEnabled,
     onchange: () => {
-      model.configuration.isForceEnabled = !model.configuration.isForceEnabled;
-      model.configuration.notify();
+      configuration.isForceEnabled = !configuration.isForceEnabled;
+      configuration.notify();
     },
   }),
   h('label.f6.ph2', {
@@ -116,6 +117,32 @@ const forceFlagCheckbox = (model) => h(`.flex-row`, [
     title: `Use '--force-config' when running o2-roc-config`
   }, `Run with '--force'`),
 ]);
+
+/**
+ * Adds a checkbox which will allow the user to see aliases for FLPs, card:endpoint or links
+If no alias is identified, the normal label will be used
+ * @param {ConfigByCru} configuration
+ * @returns {vnode}
+ */
+const toggleAliases = (configuration) => h('.flex-row.w-20.items-center', [
+  h('input', {
+    type: 'checkbox',
+    style: 'cursor: pointer',
+    id: 'showAliasesId',
+    checked: configuration.areAliasesOn,
+    onchange: () => {
+      configuration.areAliasesOn = !configuration.areAliasesOn;
+      configuration.notify();
+    },
+  }),
+  h('label.f6.ph2', {
+    for: 'showAliasesId',
+    style: `font-weight: bold; margin-bottom:0;cursor:pointer`,
+    title: `Show aliases for FLPs, card:endpoint or links`
+  }, `Show Aliases`),
+]
+
+)
 
 /**
  * Build a series of panels for each detector based on the current view of the user
@@ -132,7 +159,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
         && hostsByDetector[detector].filter((host) => cruMapByHost[host]).length > 0;
       return h('.w-100.pv2', [
         h('.panel-title.flex-row.pv2', [
-          h('.w-20.flex-row.ph2', [
+          h('.w-20.flex-row.ph2.items-center', [
             hasCRUs && h('input', {
               type: 'checkbox',
               style: 'cursor: pointer',
@@ -173,10 +200,18 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
  * @param {JSON} cruMapByHost 
  * @returns 
  */
-const cruByHostPanel = (model, host, cruData) =>
-  h('', [
+const cruByHostPanel = (model, host, cruData) => {
+  let hostLabel = host;
+  let title = host;
+  if (model.configuration.crusAliases.isSuccess() && model.configuration.areAliasesOn) {
+    const aliases = model.configuration.crusAliases.payload;
+    if (aliases[host] && aliases[host].alias) {
+      hostLabel = aliases[host].alias;
+    }
+  }
+  return h('', [
     h('.panel-title-lighter.pv2.flex-row', [
-      h('.w-20.flex-row.ph2', [
+      h('.w-20.flex-row.ph2.items-center', [
         h('input', {
           type: 'checkbox',
           id: `${host}Checkbox`,
@@ -194,8 +229,9 @@ const cruByHostPanel = (model, host, cruData) =>
         ),
         h('label.w-100', {
           for: `${host}Checkbox`,
+          title,
           style: `font-weight: bold; margin-bottom:0;cursor:pointer;`
-        }, host)
+        }, hostLabel)
       ]),
       userLogicCheckBox(model, host, 'host', '.w-15'),
       toggleAllLinksCheckBox(model, host, 'host', '.w-15')
@@ -204,7 +240,8 @@ const cruByHostPanel = (model, host, cruData) =>
       Object.keys(cruData)
         .map((cruId) => cruPanelByEndpoint(model, cruId, cruData[cruId], host))
     ])
-  ]);
+  ])
+};
 
 /**
  * Panel for each CRU endpoint to allow the user to enable/disable endpoints
@@ -215,8 +252,16 @@ const cruByHostPanel = (model, host, cruData) =>
  * @return {vnode}
  */
 const cruPanelByEndpoint = (model, cruId, cru, host) => {
-  const cruLabel = `${cru.info.serial}:${cru.info.endpoint}`;
+  let cruLabel = `${cru.info.serial}:${cru.info.endpoint}`;
+  let title = cruLabel;
   let isCruInfoVisible = model.configuration.cruToggleByCruEndpoint[`${host}_${cruId}`];
+
+  if (model.configuration.crusAliases.isSuccess() && model.configuration.areAliasesOn) {
+    const aliases = model.configuration.crusAliases.payload;
+    if (aliases[host] && aliases[host].cards && aliases[host].cards[cruLabel] && aliases[host].cards[cruLabel].alias) {
+      cruLabel = aliases[host].cards[cruLabel].alias;
+    }
+  }
   return h('.flex-column', [
     h('.flex-row.pv1.panel', {style: 'font-weight: bold'}, [
       h('.w-5.actionable-icon.text-center', {
@@ -226,8 +271,8 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
           model.configuration.notify();
         }
       }, isCruInfoVisible ? iconChevronBottom() : iconChevronRight()),
-      h('.w-15', cruLabel),
-      linksPanel(model, cru),
+      h('.w-15', {title}, cruLabel),
+      linksPanel(model, cru, host),
     ]),
     isCruInfoVisible && h('.flex-row.p1.panel.bg-white', [
       h('.w-5', []),
@@ -244,23 +289,44 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 };
 
 /**
- * A panel which iterate through all links in the configuration
- * and creates a checkbox for each
+ * A panel which iterate through all links in the configuration and creates a checkbox for each;
  * It also adds UserLogic and All Links toggles
  * @param {Object} model
  * @param {JSON} cru
+ * @param {String} host - host to which the links belong to
  * @return {vnode}
  */
-const linksPanel = (model, cru) => {
+const linksPanel = (model, cru, host) => {
+  let cruLabel = `${cru.info.serial}:${cru.info.endpoint}`;
+  let linksAlias = {};
+  if (model.configuration.crusAliases.isSuccess()) {
+    const aliases = model.configuration.crusAliases.payload;
+    if (aliases[host] && aliases[host].cards && aliases[host].cards[cruLabel] && aliases[host].cards[cruLabel].links) {
+      linksAlias = aliases[host].cards[cruLabel].links;
+    }
+  }
   const linksKeyList = Object.keys(cru.config).filter((configField) => configField.match('link[0-9]{1,2}')); // select only fields from links0 to links11
   if (cru.config && cru.config.cru) {
     return [
       userLogicCheckBoxForEndpoint(model, cru, '.w-15'),
       linksKeyList.length !== 0 && toggleAllLinksCRUCheckBox(model, cru, linksKeyList, '.w-15'),
-      h('.w-50.flex-row.flex-wrap', {
-        style: 'justify-content: flex-end'
-      }, [
-        linksKeyList.map((link) => cruLinkCheckBox(model, link, cru.config)),
+      h('.w-50.flex-row.flex-wrap', [
+        linksKeyList.map((link) => {
+          let id;
+          let index = '';
+          try {
+            id = ' #' + link.split('link')[1];
+            index = link.split('link')[1];
+            if (linksAlias[index] && linksAlias[index].alias && model.configuration.areAliasesOn) {
+              id = ` ${linksAlias[index].alias}`;
+            }
+          } catch (error) {
+            console.log(error)
+            id = link;
+          }
+
+          return cruLinkCheckBox(model, link, cru.config, id)
+        }),
       ])
     ];
   }

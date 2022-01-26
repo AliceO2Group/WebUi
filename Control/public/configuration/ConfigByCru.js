@@ -34,6 +34,7 @@ export default class Config extends Observable {
     this.detectorPanel = {}; // JSON in which the state of detector panels
     this.cruToggleByHost = {}; // JSON in which the state of displayed information is saved
     this.cruToggleByCruEndpoint = {}; // JSON in which it is saved the current state of the cru by endpoint panels
+    this.cruAlias = RemoteData.notAsked();
     this.selectedHosts = [];
 
     this.configurationRequest = RemoteData.notAsked();
@@ -41,6 +42,7 @@ export default class Config extends Observable {
     this.channelId = 0;
 
     this.isForceEnabled = false;
+    this.areAliasesOn = false;
   }
 
   /**
@@ -112,6 +114,40 @@ export default class Config extends Observable {
     }
     this.addToggleOptions(result);
     this.cruMapByHost = RemoteData.success(result);
+    this.notify();
+  }
+
+  /**
+   * Retrieve a JSON object of aliases for FLPs, card:endpoint and links which 
+   * are to be used for labeling
+   * @example
+   * {
+   *   "flp": {
+   *      "alias": "mini-flp", 
+   *   },
+   *   "cards:" {
+   *     "1106:0": {
+   *       "alias": "card-mini",
+   *       "links": {
+   *         "0": {
+   *           "alias": "name for zero"
+   *         }
+   *       }
+   *     }
+   *   }
+   * }
+   */
+  async getCRUsAliases() {
+    this.crusAliases = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.get(`/api/consul/crus/aliases`);
+    if (!ok) {
+      this.crusAliases = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.crusAliases = RemoteData.success(result);
     this.notify();
   }
 

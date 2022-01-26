@@ -22,11 +22,7 @@ const http = require('http');
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
 function errorHandler(err, res, status = 500, facility = 'utils') {
-  log.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
-  if (err.stack) {
-    log.trace(err);
-  }
-  log.error(err.message || err);
+  errorLogger(err, facility);
   res.status(status);
   res.send({message: err.message || err});
 }
@@ -35,7 +31,8 @@ function errorHandler(err, res, status = 500, facility = 'utils') {
  * Global Error Logger for AliECS GUI
  * @param {Error} err 
  */
-function errorLogger(err) {
+function errorLogger(err, facility = 'utils') {
+  log.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
   if (err.stack) {
     log.trace(err);
   }
