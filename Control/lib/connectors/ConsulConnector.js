@@ -13,7 +13,7 @@
 */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
-const errorHandler = require('./../utils.js').errorHandler;
+const {errorHandler, errorLogger} = require('./../utils.js');
 const {getConsulConfig} = require('./../config/publicConfigProvider.js');
 
 /**
@@ -30,6 +30,7 @@ class ConsulConnector {
     this.consulService = consulService;
     this.config = getConsulConfig({consul: config});
     this.flpHardwarePath = this.config.flpHardwarePath;
+    this.detHardwarePath = this.config.detHardwarePath;
     this.readoutCardPath = this.config.readoutCardPath;
     this.qcPath = this.config.qcPath;
     this.readoutPath = this.config.readoutPath;
@@ -144,6 +145,56 @@ class ConsulConnector {
   }
 
   /**
+   * Get CRUs aliases which are stored in hardware path; Method will return a JSON object
+   * @example
+   * {
+   *  "flp1": {
+   *    "alias": "flp-1-alias",
+   *    "cards": {
+   *      "0123:0": {
+   *        "alias": "0123:0-alias",
+   *        "links": {
+   *          "0": {
+   *            "alias": "link0-alias"
+   *          }
+   *        }
+   *      }
+   *    }
+   *  }
+   * }
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getCRUsAlias(req, res) {
+    try {
+      const aliases = {};
+      let detectorsKey = await this.consulService.getKeysByPrefix(this.detHardwarePath);
+      await Promise.all(
+        detectorsKey.filter((key) => key.includes('aliases'))
+          .map(async (key) => {
+            try {
+              let alias = await this.consulService.getOnlyRawValuesByKeyPrefix(key);
+              alias = JSON.parse(alias[key]);
+
+              const host = key.split('/')[5];
+              aliases[host] = {
+                alias: alias.flp.alias,
+                cards: alias.cards,
+              };
+            } catch (error) {
+              errorLogger(`Bad format to get aliases for key: ${key}`, 'consul');
+              errorLogger(error, 'consul')
+            }
+            return;
+          })
+      );
+      res.json(aliases);
+    } catch (error) {
+      errorHandler(error, res, 502);
+    }
+  }
+
+  /**
    * Request the latest configuration from consul and within the latest configuration
    * update the following fields with the data from the client:
    * * userLogicEnabled
@@ -229,14 +280,14 @@ class ConsulConnector {
 
   /**
    * Get a JSON of cards grouped by their host by querying Consul through the flpHardwarePath
-   * e.g
+   * @example
    * { 
-   *  host_one: {
-   *    0: {
-   *      key: value
+   *  "host_one": {
+   *    "0": {
+   *      "key": "value"
    *    },
-   *    1: {
-   *      key: value
+   *    "1": {
+   *      "key": "value"
    *    }
    *  }
    * }
@@ -292,8 +343,8 @@ class ConsulConnector {
   }
 
   /**
-   * Filter out CRORC cards and replace the incremental
-   * index on each CRU by their unique ID used in CRUs configuration
+   * Filter out any cards with type != CRU and replace the incremental index on each CRU
+   * by their unique ID used in CRUs configuration
    * @param {JSON} cards
    * @return {JSON}
    */
