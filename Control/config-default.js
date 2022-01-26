@@ -31,6 +31,7 @@ module.exports = {
     hostname: 'localhost',
     port: 8500,
     flpHardwarePath: 'o2/hardware/key/prefix',
+    detHardwarePath: 'o2/hardware/detectors',
     readoutPath: 'o2/components/readout/key/prefix',
     readoutCardPath: 'o2/components/readoutcard/key/prefix',
     qcPath: 'o2/components/qc/key/prefix',
