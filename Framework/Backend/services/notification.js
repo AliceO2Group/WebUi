@@ -15,12 +15,11 @@
 const { Kafka, logLevel } = require('kafkajs')
 const WebSocketMessage = require('../websocket/message.js');
 const log = new (require('./../log/Log.js'))(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
-const url = require('url')
 
 /**
  * Gateway for all Kafka notification service
  */
-class KafkaConnector {
+class NotificationService {
   /**
    * Prepares connector
    * @param {object} config Config with list of Kafka brokers
@@ -31,7 +30,12 @@ class KafkaConnector {
       return;
     }
     if (!config.brokers || config.brokers.length < 1) {
-      throw new Error(`Kafka broker list was not provided`);
+      throw new Error('Kafka broker list was not provided');
+    }
+    if (!config.topic) {
+      this.topic = 'mattermost';
+    } else {
+      this.topic = config.topic;
     }
     this.kafka = new Kafka({
       clientId: 'webui',
@@ -69,79 +73,23 @@ class KafkaConnector {
    * @param {string} message message to be sent
    * @returns {Promise}
    */
-  async _send(topic, message) {
+  async send(tag, title, url, extra) {
+    if (!tag) {
+      throw new Error('Tag is required to send notifications');
+    }
+    if (!title) {
+      throw new Error('Title is required to send notifications');
+    }
+    const message = {
+      tag: tag,
+      title: title,
+      url: url || undefined,
+      extra: extra || undefined
+    };
     const producer = this.kafka.producer();
     await producer.connect();
-    await producer.send({topic: topic,messages: [{value: message}]});
+    await producer.send({topic: this.topic, messages: [{value: JSON.stringify(message)}]});
     await producer.disconnect();
-  }
-
-  /**
-   * Sends notification to mattermost channel
-   * @param {string} channel Original, lowercase mattermost channel name (as in channel URL!)
-   * @param {string} title   Title of notification
-   * @param {string} link    URL referencing notification
-   * @param {string} extra   Extra message that's displayed after clicking on "i" icon
-   * @returns {Promise}
-   */
-  sendMattermostNotification(channel, title, link, extra) {
-    if (!channel) {
-      throw new Error('Mattermost notification channel needs to be set');
-    }
-    if (!title || title.length < 3) {
-      throw new Error('Mattermost notification title needs to be at least 3 characters long');
-    }
-    if (!link || url.parse(link).host === null) {
-      throw new Error('Mattermost notification URL needs to be correct');
-    }
-    return this._send('mattermost', JSON.stringify(
-      {channel: channel, text: `${title}\n${link}`, props: {card: extra}})
-    );
-  }
-
-  /**
-   * Sends notification in order to be display in WebUI-based GUI
-   * @param {string} message Notification message
-   * @returns {Promise}
-   */
-  sendWebNotification(title, body, link) {
-    if (!title || title.length < 3) {
-      throw new Error('Web notification title needs to be at least 3 characters long');
-    }
-    if (!body) {
-      throw new Error('Web notification body needs to be set');
-    }
-    if (!link || url.parse(link).host === null) {
-      throw new Error('Web notification URL needs to be correct');
-    }
-    return this._send('webnotification', JSON.stringify({title: title, body: body, url: link}));
-  }
-
-  /**
-   * Sends notification as email
-   * @param {string} recipients Comma separated list of recipients
-   * @param (string subject
-   * @param {string} body
-   *  @returns {Promise}
-   */
-  sendEmailNotification(recipients, subject, body) {
-    if (!recipients) {
-      throw new Error('Email notification recipients need to be set');
-    }
-    // eslint-disable-next-line max-len
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    for(const email of recipients.split(',')) {
-      if (!re.test(String(email).toLowerCase())) {
-        throw new Error('Notification recipient email address incorrect: ' + email);
-      }
-    }
-    if (!subject || subject.length < 3) {
-      throw new Error('Email notification subject needs to be at least 3 characters long');
-    }
-    if (!body) {
-      throw new Error('Email notification body needs to be set');
-    }
-    return this._send('email', JSON.stringify({to_addresses: recipients, body: body, subject: subject}));
   }
 
   /**
@@ -172,4 +120,4 @@ class KafkaConnector {
   }
 }
 
-module.exports = KafkaConnector;
+module.exports = NotificationService;
