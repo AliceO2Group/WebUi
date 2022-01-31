@@ -73,7 +73,7 @@ npm install --save @aliceo2/web-ui
 * [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 * [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
 * [JIRA](./docs/guide/jira.md) - Create JIRA issues
-* [Kafka - Notifications](./docs/guide/kafka.md) - Trigger and receive notification using Kafka cluster
+* [Notification service](./docs/guide/notification.md) - Trigger and receive notification using Kafka cluster
 
 ### Frontend guide
 - [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript and observable model
