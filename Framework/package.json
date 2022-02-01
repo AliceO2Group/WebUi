@@ -47,7 +47,7 @@
     "nock": "13.2.2",
     "nyc": "^15.1.0",
     "puppeteer": "13.1.1",
-    "sinon": "12.0.1",
+    "sinon": "13.0.0",
     "supertest": "^6.2.1"
   },
   "main": "Backend/index.js"
