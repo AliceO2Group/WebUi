@@ -476,7 +476,7 @@ class HttpServer {
       .then((data) => {
         req.decoded = data.decoded;
         req.session = {
-          personid: data.id,
+          personid: parseInt(data.id),
           username: data.username,
           name: data.name,
           access: data.access
