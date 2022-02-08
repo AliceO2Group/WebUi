@@ -150,11 +150,9 @@ function errorHandler(err, res, status = 500) {
 function getTagsFromServices(services) {
   const prefix = model.queryPrefix;
   const tags = [];
-  for (const serviceName in services) {
-    if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
-      const tagsToBeAdded = services[serviceName].Tags;
-      tagsToBeAdded.filter((tag) => tag.startsWith(prefix))
-        .forEach((tag) => tags.push({name: tag}));
+  for (const service in services) {
+    if (Array.isArray(services[service]) && services[service].length > 0) {
+      tags.push(...services[service]);
     }
   }
   return tags;
