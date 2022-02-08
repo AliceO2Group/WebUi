@@ -152,7 +152,8 @@ function getTagsFromServices(services) {
   const tags = [];
   for (const service in services) {
     if (Array.isArray(services[service]) && services[service].length > 0) {
-      tags.push(...services[service]);
+      services[service].filter((tag) => tag.startsWith(prefix))
+        .forEach((tag) => tags.push({name: tag}));
     }
   }
   return tags;
