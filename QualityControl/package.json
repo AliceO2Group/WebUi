@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.21.3",
-    "jsroot": "^6.3.2"
+    "jsroot": "^6.3.3"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui",
