@@ -46,7 +46,7 @@ describe('Consul Service test suite', function() {
 
     it('should successfully set default values for API paths', function() {
       const consul = new ConsulService(config.consul);
-      assert.deepStrictEqual(consul.servicesPath, '/v1/agent/services');
+      assert.deepStrictEqual(consul.servicesPath, '/v1/catalog/services');
       assert.deepStrictEqual(consul.kvPath, '/v1/kv/');
       assert.deepStrictEqual(consul.leaderPath, '/v1/status/leader');
       assert.deepStrictEqual(consul.txnPath, '/v1/txn');
@@ -199,7 +199,7 @@ describe('Consul Service test suite', function() {
     const consul = new ConsulService(config.consul);
     it('should successfully receive a JSON and parse it in a list of services', () => {
       nock('http://localhost:8080')
-        .get('/v1/agent/services')
+        .get('/v1/catalog/services')
         .reply(200, services);
       return consul.getServices().then((res) => assert.deepStrictEqual(res, services));
     });
