@@ -151,7 +151,7 @@ function getTagsFromServices(services) {
   const prefix = model.queryPrefix;
   const tags = Object.entries(services)
     .filter(([key]) => key.startsWith(prefix))
-    .map(([key, value]) => value)
+    .map(([, value]) => value)
     .flat()
     .reduce((accu, tag) => accu.concat({name: tag}), []);
   return tags;
