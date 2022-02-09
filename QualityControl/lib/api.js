@@ -149,12 +149,10 @@ function errorHandler(err, res, status = 500) {
  */
 function getTagsFromServices(services) {
   const prefix = model.queryPrefix;
-  const tags = [];
-  for (const service in services) {
-    if (Array.isArray(services[service]) && services[service].length > 0) {
-      services[service].filter((tag) => tag.startsWith(prefix))
-        .forEach((tag) => tags.push({name: tag}));
-    }
-  }
+  const tags = Object.entries(services)
+    .filter(([key]) => key.startsWith(prefix))
+    .map(([key, value]) => value)
+    .flat()
+    .reduce((accu, tag) => accu.concat({name: tag}), []);
   return tags;
 }

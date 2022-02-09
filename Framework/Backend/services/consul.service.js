@@ -35,7 +35,7 @@ class ConsulService {
     this.hostname = config.hostname;
     this.port = config.port;
 
-    this.servicesPath = '/v1/catalog/services';
+    this.servicesPath = '/v1/agent/services';
     this.kvPath = '/v1/kv/';
     this.leaderPath = '/v1/status/leader';
     this.txnPath = '/v1/txn';
