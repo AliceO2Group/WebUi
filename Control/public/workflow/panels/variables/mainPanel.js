@@ -15,6 +15,8 @@
 import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
 import advancedVarsPanel from './advancedPanel.js';
+import loadConfigurationPanel from '../loadConfiguration/loadConfiguration.js';
+
 
 /**
  * Builds a custom set of panels build based on the user's selection of template
@@ -109,6 +111,7 @@ const basicPanel = (workflow, variables, name) => {
       variables
         .filter((variable) => workflow.isVariableVisible(variable.key))
         .map((variable) => h('.auto-built-row.p1', autoBuiltBox(variable, workflow.model))),
+      loadConfigurationPanel(workflow),
     ]),
   ]);
 };

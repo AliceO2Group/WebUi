@@ -80,7 +80,9 @@ const environmentsTable = (model, list) => {
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
-      list.map((item) => h('tr', [
+      list.map((item) => h('tr', {
+        class: _isGlobalRun(item.userVars) ? 'global-run' : ''
+      },[
         h('td', {style: 'text-align: center;'}, item.id),
         h('td', {style: 'text-align: center;'}, item.currentRunNumber ? item.currentRunNumber : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
@@ -131,4 +133,13 @@ const actionsCell = (model, item) => {
   } else {
     return h('', '')
   }
+}
+
+/**
+ * Checks if a run is considered global
+ * @param {JSON} vars 
+ * @returns {boolean}
+ */
+const _isGlobalRun = (vars) => {
+  return vars['trg_enabled'] === 'true' && vars['trg_global_run_enabled'] === 'true';
 }

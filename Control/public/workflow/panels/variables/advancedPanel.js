@@ -13,7 +13,6 @@
 */
 
 import {h, iconTrash, iconPlus, info} from '/js/src/index.js';
-import loadConfigurationPanel from '../loadConfiguration/loadConfiguration.js';
 import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 
 /**
@@ -40,7 +39,6 @@ export default (workflow) =>
         h('.w-100.ph1', 'Add a JSON with multiple pairs:'),
         addListOfKvPairs(workflow),
         importErrorPanel(workflow),
-        loadConfigurationPanel(workflow),
       ]),
     ])
   ]);

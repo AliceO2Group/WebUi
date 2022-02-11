@@ -21,6 +21,8 @@
 const parseObject = (item, key) => {
   switch (key) {
     case 'trg_enabled':
+      return item['trg_enabled'] === 'false' ? 'OFF'
+        : (item['trg_global_run_enabled'] === "true" ? 'CTP' : 'LTU');
     case 'dcs_enabled':
     case 'epn_enabled':
       return item[key] && item[key] === 'true' ? 'ON' : 'OFF'

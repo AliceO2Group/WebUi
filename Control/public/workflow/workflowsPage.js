@@ -183,8 +183,6 @@ const actionsPanel = (model) =>
       Success: (message) => h('.success', message),
       Failure: (error) => h('.text-center', errorComponent(error)),
     }),
-    btnSaveEnvConfiguration(model),
-    ' ',
     btnCreateEnvironment(model),
   ]);
 
@@ -199,21 +197,3 @@ const btnCreateEnvironment = (model) => h('button.btn.btn-primary', {
   onclick: () => model.workflow.createNewEnvironment(),
   title: 'Create environment based on selected workflow'
 }, 'Create');
-
-/**
- * Button which allows the user to save the configuration for a future use
- * @param {Object} model 
- * @returns {vnode}
- */
-const btnSaveEnvConfiguration = (model) =>
-  h('button.btn.btn-default', {
-    class: model.environment.itemNew.isLoading() ? 'loading' : '',
-    disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
-    onclick: () => {
-      const name = prompt('Enter a name for saving the configuration:');
-      if (name && name.trim() !== '') {
-        model.workflow.saveEnvConfiguration(name)
-      }
-    },
-    title: 'Save current configuration for future use'
-  }, 'Save Configuration');
