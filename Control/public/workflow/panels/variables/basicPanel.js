@@ -16,9 +16,6 @@
 
 import {h} from '/js/src/index.js';
 /**
- * @deprecated (used only for old workflows)
- */
-/**
  * Panel which allows the user to select various options
  * to configure the workflow
  * @param {Object} workflow

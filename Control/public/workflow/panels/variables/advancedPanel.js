@@ -14,6 +14,7 @@
 
 import {h, iconTrash, iconPlus, info} from '/js/src/index.js';
 import loadConfigurationPanel from '../loadConfiguration/loadConfiguration.js';
+import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 
 /**
  * Panel for adding (K;V) configurations for the environment
@@ -31,15 +32,17 @@ export default (workflow) =>
         title: 'Open Environment Variables Documentation'
       }, info())
     ]),
-    addKVInputList(workflow),
-    h('.form-group.p2.panel.w-100.text-left', [
-      h('.w-100.ph1', 'Add single pair:'),
-      addKVInputPair(workflow),
-      h('.w-100.ph1', 'Add a JSON with multiple pairs:'),
-      addListOfKvPairs(workflow),
-      importErrorPanel(workflow),
-      loadConfigurationPanel(workflow),
-    ]),
+    h('.panel', [
+      addKVInputList(workflow),
+      h('.form-group.p2.w-100.text-left', [
+        h('.w-100.ph1', 'Add single pair:'),
+        addKVInputPair(workflow),
+        h('.w-100.ph1', 'Add a JSON with multiple pairs:'),
+        addListOfKvPairs(workflow),
+        importErrorPanel(workflow),
+        loadConfigurationPanel(workflow),
+      ]),
+    ])
   ]);
 
 /**
@@ -49,22 +52,27 @@ export default (workflow) =>
  */
 const addKVInputList = (workflow) =>
   // TODO filter our the ones in varSpecMap
-  h('.w-100.p2.panel', Object.keys(workflow.form.variables).map((key) =>
-    h('.w-100.flex-row.pv2.border-bot', {
-    }, [
-      h('.w-33.ph1.text-left', key),
-      h('.ph1', {
-        style: 'width: 60%',
-      }, h('input.form-control', {
-        type: 'text',
-        value: workflow.form.variables[key],
-        oninput: (e) => workflow.addVariable(key, e.target.value)
-      })),
-      h('.ph2.danger.actionable-icon', {
-        onclick: () => workflow.removeVariableByKey(key)
-      }, iconTrash())
-    ])
-  ));
+  h('.w-100.p2.', [
+    h('.w-100.flex-column.p1.border-bot', [
+      !workflow.isQcWorkflow && readoutPanel(workflow),
+      !workflow.isQcWorkflow && qcUriPanel(workflow),
+    ]),
+    Object.keys(workflow.form.variables).map((key) =>
+      h('.w-100.flex-row.pv2.border-bot', {
+      }, [
+        h('.w-33.ph1.text-left', key),
+        h('.ph1', {
+          style: 'width: 60%',
+        }, h('input.form-control', {
+          type: 'text',
+          value: workflow.form.variables[key],
+          oninput: (e) => workflow.addVariable(key, e.target.value)
+        })),
+        h('.ph2.danger.actionable-icon', {
+          onclick: () => workflow.removeVariableByKey(key)
+        }, iconTrash())
+      ])
+    )]);
 /**
  * Add 2 input fields and a button for adding a new KV Pair
  * @param {Object} workflow
