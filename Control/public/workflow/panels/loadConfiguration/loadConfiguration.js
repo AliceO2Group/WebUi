@@ -24,18 +24,15 @@ import {h} from '/js/src/index.js';
 export default (workflow) =>
   h('.flex-column', [
     h('.w-100', 'Load from existing configurations:'),
-    h('.flex-row', [
-      workflow.savedConfigurations.match({
-        NotAsked: () => null,
-        Loading: () => null,
-        Failure: () => null,
-        Success: (item) => [
-          configurationSelection(workflow, item.payload),
-          loadErrorPanel(workflow),
-        ]
-      }),
-      h('.w-20.flex-end', btnSaveEnvConfiguration(workflow.model))
-    ])
+    workflow.savedConfigurations.match({
+      NotAsked: () => null,
+      Loading: () => null,
+      Failure: () => null,
+      Success: (item) => h('.flex-column', [
+        configurationSelection(workflow, item.payload),
+        loadErrorPanel(workflow),
+      ])
+    }),
   ]);
 
 /**
@@ -47,11 +44,14 @@ export default (workflow) =>
 const configurationSelection = (workflow, configurations) => {
   return h('.w-100.flex-column.ph1', [
     h('.flex-row', [
-      h(`.w-100.dropdown${workflow.isLoadConfigurationVisible && '.dropdown-open'}`, [
+      h(`.w-75.dropdown${workflow.isLoadConfigurationVisible && '.dropdown-open'}`, [
         searchConfigurationField(workflow),
         configurationDropdownArea(workflow, configurations)
       ]),
-      loadConfigurationButton(workflow)
+      h('.btn-group.mh2.w-25', [
+        loadConfigurationButton(workflow),
+        btnSaveEnvConfiguration(workflow.model),
+      ])
     ]),
   ]);
 };
@@ -121,7 +121,7 @@ const configurationDropdownArea = (workflow, configurations) =>
  * @returns {vnode}
  */
 const loadConfigurationButton = (workflow) =>
-  h('button.btn.btn-default.mh2', {
+  h('button.btn.btn-default', {
     class: workflow.loadingConfiguration.isLoading() ? 'loading' : '',
     disabled: workflow.loadingConfiguration.isLoading() || workflow.selectedConfiguration === '',
     onclick: () => workflow.getAndSetNamedConfiguration(workflow.selectedConfiguration)

@@ -110,6 +110,14 @@ const basicPanel = (workflow, variables, name) => {
     h('.p2.panel.text-left', [
       variables
         .filter((variable) => workflow.isVariableVisible(variable.key))
+        .filter((variable) => {
+          try {
+            return eval(variable.isVisible);
+          } catch (error) {
+            console.error(error);
+            return false;
+          }
+        })
         .map((variable) => h('.auto-built-row.p1', autoBuiltBox(variable, workflow.model))),
       loadConfigurationPanel(workflow),
     ]),
