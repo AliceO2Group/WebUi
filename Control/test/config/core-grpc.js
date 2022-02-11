@@ -59,7 +59,7 @@ const coreGRPCServer = (config) => {
           envTest.environment.state = 'CONFIGURED';
           break;
         case 4: // RESET
-          envTest.environment.state = 'STANDBY';
+          envTest.environment.state = 'DEPLOYED';
           break;
       }
       callback(null, {id: envTest.environment.id});
