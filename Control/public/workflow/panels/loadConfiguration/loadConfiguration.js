@@ -22,15 +22,21 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
 */
 export default (workflow) =>
-  workflow.savedConfigurations.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Failure: () => null,
-    Success: (item) => [
-      configurationSelection(workflow, item.payload),
-      loadErrorPanel(workflow),
-    ]
-  });
+  h('.flex-column', [
+    h('.w-100', 'Load from existing configurations:'),
+    h('.flex-row', [
+      workflow.savedConfigurations.match({
+        NotAsked: () => null,
+        Loading: () => null,
+        Failure: () => null,
+        Success: (item) => [
+          configurationSelection(workflow, item.payload),
+          loadErrorPanel(workflow),
+        ]
+      }),
+      h('.w-20.flex-end', btnSaveEnvConfiguration(workflow.model))
+    ])
+  ]);
 
 /**
  * Create a configuration selection panel which is displayed only if the list of configurations
@@ -40,7 +46,6 @@ export default (workflow) =>
  */
 const configurationSelection = (workflow, configurations) => {
   return h('.w-100.flex-column.ph1', [
-    h('.w-100', 'Load existing configurations:'),
     h('.flex-row', [
       h(`.w-100.dropdown${workflow.isLoadConfigurationVisible && '.dropdown-open'}`, [
         searchConfigurationField(workflow),
@@ -141,3 +146,22 @@ const loadErrorPanel = (workflow) => {
     ]);
   }
 };
+
+/**
+ * Button which allows the user to save the configuration for a future use
+ * @param {Object} model 
+ * @returns {vnode}
+ */
+const btnSaveEnvConfiguration = (model) =>
+  h('button.btn.btn-default', {
+    id: 'save-config',
+    class: model.environment.itemNew.isLoading() ? 'loading' : '',
+    disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
+    onclick: () => {
+      const name = prompt('Enter a name for saving the configuration:');
+      if (name && name.trim() !== '') {
+        model.workflow.saveEnvConfiguration(name)
+      }
+    },
+    title: 'Save current configuration for future use'
+  }, 'Save As');
