@@ -191,7 +191,7 @@ const actionsPanel = (model) =>
  * @param {Object} model
  * @return {vnode}
  */
-const btnCreateEnvironment = (model) => h('button.btn.btn-primary', {
+const btnCreateEnvironment = (model) => h('button.btn.btn-primary#create-env', {
   class: model.environment.itemNew.isLoading() ? 'loading' : '',
   disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
   onclick: () => model.workflow.createNewEnvironment(),

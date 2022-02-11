@@ -154,6 +154,7 @@ const loadErrorPanel = (workflow) => {
  */
 const btnSaveEnvConfiguration = (model) =>
   h('button.btn.btn-default', {
+    id: 'save-config',
     class: model.environment.itemNew.isLoading() ? 'loading' : '',
     disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
     onclick: () => {

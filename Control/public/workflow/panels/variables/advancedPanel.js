@@ -67,6 +67,7 @@ const addKVInputList = (workflow) =>
           oninput: (e) => workflow.addVariable(key, e.target.value)
         })),
         h('.ph2.danger.actionable-icon', {
+          id: `removeKey${key}`,
           onclick: () => workflow.removeVariableByKey(key)
         }, iconTrash())
       ])
@@ -93,6 +94,7 @@ const addKVInputPair = (workflow) => {
       style: 'width:60%;',
     }, h('textarea.form-control', {
       placeholder: 'value',
+      id: 'valueTextAreaField',
       style: 'height: 2em; resize: vertical',
       value: valueString,
       oninput: (e) => valueString = e.target.value,
@@ -106,6 +108,7 @@ const addKVInputPair = (workflow) => {
     })),
     h('.ph2.actionable-icon', {
       title: 'Add (key,value) variable',
+      id: 'addKVPairButton',
       onclick: () => {
         workflow.addVariable(keyString, valueString);
         workflow.dom.keyInput.focus();
@@ -136,6 +139,7 @@ const addListOfKvPairs = (workflow) => {
     ),
     h('.ph2.actionable-icon', {
       title: 'Add list of (key,value) variables',
+      id: 'addKVListButton',
       onclick: () => {
         workflow.addVariableJSON(workflow.kvPairsString);
         workflow.dom.keyValueArea.focus();
