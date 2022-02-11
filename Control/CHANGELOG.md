@@ -8,8 +8,9 @@ All notable changes to this project will be documented in this file.
   * Visual improvements as per users suggestions:
     * global runs are now displayed with a background color in ActiveEnvs
     * `TRG` column will now display `OFF`, `LTU` (if global trg is false), `CTP`( if global trg is true)
-    * Save/Load configuration buttons are now in General Panel
+    * Save/Load configuration buttons are now grouped in General Panel
     * URIs configurations were moved to Adv Panel
+  * Fixes a bug in which variables in `General Configuration` panel were not evaluated on `visibleif`
 
 * __Notable changes for developers: NN__
 ## [1.41.0](https://github.com/AliceO2Group/WebUi/releases/tag/%40aliceo2%2Fcontrol%401.41.0)
