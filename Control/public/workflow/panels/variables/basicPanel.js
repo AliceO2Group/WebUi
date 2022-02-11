@@ -15,7 +15,9 @@
 /* global COG */
 
 import {h} from '/js/src/index.js';
-
+/**
+ * @deprecated (used only for old workflows)
+ */
 /**
  * Panel which allows the user to select various options
  * to configure the workflow
@@ -24,7 +26,7 @@ import {h} from '/js/src/index.js';
  */
 const basicPanel = (workflow) =>
   h('.w-100', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'General Configuration')),
     h('.p2.panel', [
       dcsPanel(workflow),
       dataDistributionPanel(workflow),

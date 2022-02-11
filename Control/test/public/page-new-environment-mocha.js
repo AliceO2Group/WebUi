@@ -202,7 +202,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
-  it('should successfully select EPN ON from BasicConfiguration and automatically set DD & DD Sched to ON', async () => {
+  it('should successfully select EPN ON from GeneralConfiguration and automatically set DD & DD Sched to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="epnOn"]`);
     if (label) {
       await label.click();
@@ -213,7 +213,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'true', dd_enabled: 'true', ddsched_enabled: 'true'}, 'odc_enabled, dd_enabled or ddsched_enabled could not be found in basic variables selection set to true');
   });
 
-  it('should successfully select DD OFF from BasicConfiguration and automatically set EPN, DD, DDSCHED, QC to OFF', async () => {
+  it('should successfully select DD OFF from GeneralConfiguration and automatically set EPN, DD, DDSCHED, QC to OFF', async () => {
     const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
     if (label) {
       await label.click();
@@ -224,7 +224,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', ddsched_enabled: 'false', dd_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
-  it('should successfully select QC ON from BasicConfiguration and automatically set DD to ON', async () => {
+  it('should successfully select QC ON from GeneralConfiguration and automatically set DD to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="qcddOn"]`);
     if (label) {
       await label.click();
@@ -235,7 +235,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', ddsched_enabled: 'false', qcdd_enabled: 'true', minimal_dpl_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
-  it('should successfully select DPL Minimal ON from BasicConfiguration and automatically set QC to OFF and keep DD set to ON', async () => {
+  it('should successfully select DPL Minimal ON from GeneralConfiguration and automatically set QC to OFF and keep DD set to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="dplMwOn"]`);
     if (label) {
       await label.click();
@@ -246,7 +246,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', ddsched_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
-  it('should successfully select DD OFF from BasicConfiguration and automatically set QC, dpl, dd_sched to OFF', async () => {
+  it('should successfully select DD OFF from GeneralConfiguration and automatically set QC, dpl, dd_sched to OFF', async () => {
     const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
     if (label) {
       await label.click();

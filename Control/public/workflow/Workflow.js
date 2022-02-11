@@ -199,7 +199,7 @@ export default class Workflow extends Observable {
   saveEnvConfiguration(name) {
     const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
-      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
     } else if (variables.hosts && variables.hosts.length > 0 && this.form.hosts.length > 0) {
       // Check FLP Selection is not duplicated in vars host
@@ -228,7 +228,7 @@ export default class Workflow extends Observable {
   async createNewEnvironment() {
     const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
-      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
     } else if (this.flpSelection.unavailableDetectors.length !== 0) {
       this.model.environment.itemNew =
@@ -597,7 +597,7 @@ export default class Workflow extends Observable {
     if (sameKeys.length > 0) {
       return {
         variables: {}, ok: false,
-        message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
+        message: `Due to General Configuration selection, you cannot use the following keys: ${sameKeys}`
       };
     } else {
       const readoutResult = this.parseReadoutURI(basicVariables);

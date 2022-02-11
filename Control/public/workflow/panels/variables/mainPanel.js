@@ -28,7 +28,8 @@ import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 export default (workflow) => {
   let basicPanelKey = '';
   Object.keys(workflow.groupedPanels).forEach((key) => {
-    if (key.toLocaleUpperCase() === 'BASIC_CONFIGURATION' || key.toLocaleUpperCase() === 'BASICCONFIGURATION') {
+    if (['BASIC_CONFIGURATION', 'BASICCONFIGURATION', 'GENERAL_CONFIGURATION', 'GENERAL_CONFIGURATION']
+      .indexOf(key.toLocaleUpperCase()) > -1) {
       basicPanelKey = key;
       workflow.panelsUtils[key].isVisible = true;
     }
