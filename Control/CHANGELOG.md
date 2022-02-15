@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.43.0](https://github.com/AliceO2Group/WebUi/releases/tag/%40aliceo2%2Fcontrol%401.43.0)
+* __Notable changes for users__:
+  * Updates a bug in which combobox would limit the users input
+  * Adds ODC status per environment in the table of Environments page
+
 ## [1.42.0](https://github.com/AliceO2Group/WebUi/releases/tag/%40aliceo2%2Fcontrol%401.42.0)
 * __Notable changes for users__:
   * Users will now be able to transition an environment from state `DEPLOYED` to `CONFIGURED`:
