@@ -42,7 +42,7 @@ describe('Framework Frontend', function() {
   // Start browser to test UI
   before(async function() {
     // Start web-server in background
-    subprocess = spawn('node', ['index-test.js'], {stdio: 'pipe'});
+    subprocess = spawn('node', ['Frontend/test/index-test.js'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => {
       subprocessOutput += chunk.toString();
     });
