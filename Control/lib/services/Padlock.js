@@ -40,14 +40,14 @@ class Padlock {
 
   /**
    * Tries to force unlock
-   * Requires admin auth level (2)
-   * @param {number} auth - auth level
+   * Requires admin auth level
+   * @param {array} auth - auth roles
    */
   forceUnlock(auth) {
     if (this.lockedBy === null) {
       throw new Error(`[Padlock] Lock is already released`);
     }
-    if (auth !== 2) {
+    if (auth.includes('admin')) {
       throw new Error(`[Padlock] Insufficient permission`);
     }
     this.lockedBy = null;

@@ -38,7 +38,6 @@ export default class Model extends Observable {
 
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
-    this.session.access = parseInt(this.session.access, 10);
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
