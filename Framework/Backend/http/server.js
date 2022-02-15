@@ -244,7 +244,7 @@ class HttpServer {
       query.username = 'anonymous';
       query.name = 'Anonymous';
       query.token = this.jwt.generateToken(query.personid, query.username, query.name);
-      query.access = 0;
+      query.access = [];
 
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);
@@ -443,17 +443,14 @@ class HttpServer {
   /**
    * Provides access level number for JWT token depending on users' role
    * @param {object} details - user details
-   * @return {number} - access level based on role
+   * @return {object} - access roles
    */
   authorise(details) {
-    let accessLevel = 1;
     if (details.hasOwnProperty('resource_access')) {
-      const roles = details.resource_access[Object.keys(details.resource_access)[0]].roles;
-      if (roles.includes('admin')) {
-        accessLevel = 2;
-      }
+      return details.resource_access[Object.keys(details.resource_access)[0]].roles;
+    } else {
+      return [];
     }
-    return accessLevel;
   }
 
   /**

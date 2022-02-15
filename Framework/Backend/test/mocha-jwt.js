@@ -21,12 +21,12 @@ describe('JSON Web Token', () => {
   const username = 'test';
   const name = 'Test';
   const id = 1111;
-  const access = 1;
+  const access = ['admin'];
 
   afterEach(() => {
     assert.strictEqual(verified.id, id);
     assert.strictEqual(verified.username, username);
-    assert.strictEqual(verified.access, access);
+    assert.deepStrictEqual(verified.access, access);
     assert.strictEqual(verified.name, name);
   });
 
