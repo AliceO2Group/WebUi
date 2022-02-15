@@ -447,10 +447,10 @@ class HttpServer {
    */
   authorise(details) {
     let scope = [];
-    if (details.hasOwnProperty('resource_access')) {
-      scope = details.resource_access[Object.keys(details.resource_access)[0]].roles;
+    if (details.hasOwnProperty('cern_roles')) {
+      scope = details.cern_roles.join(',')
     }
-    return scope.join(',');
+    return scope ? scope.join(',') : '';
   }
 
   /**
