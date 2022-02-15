@@ -443,7 +443,7 @@ class HttpServer {
   /**
    * Provides access level number for JWT token depending on users' role
    * @param {object} details - user details
-   * @return {object} - access roles
+   * @return {string} - comma separated access roles
    */
   authorise(details) {
     let scope = [];
