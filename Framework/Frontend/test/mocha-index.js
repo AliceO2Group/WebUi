@@ -50,7 +50,7 @@ describe('Framework Frontend', function() {
       subprocessOutput += chunk.toString();
     });
 
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
     page = await browser.newPage();
     page.on('requestfailed', (request) => {
       console.error(`Navigator failed to load ${request.url()}`);
@@ -68,6 +68,7 @@ describe('Framework Frontend', function() {
     // frameworkLoaded is affected in index.html sent by server
     await page.goto(`http://localhost:${port}`, {waitUntil: 'networkidle0'});
     const framework = await page.evaluate(() => window.frameworkLoaded);
+    await page.waitForTimeout(20000)
     if (!framework) {
       throw new Error(`Navigator failed to load framework`);
     }
