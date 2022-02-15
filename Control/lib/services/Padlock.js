@@ -47,7 +47,7 @@ class Padlock {
     if (this.lockedBy === null) {
       throw new Error(`[Padlock] Lock is already released`);
     }
-    if (auth.includes('admin')) {
+    if (!auth.includes('admin')) {
       throw new Error(`[Padlock] Insufficient permission`);
     }
     this.lockedBy = null;
