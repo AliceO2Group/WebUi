@@ -53,7 +53,6 @@ export default {
         throw new Error(`query string should contain the parameter ${parameterName}`);
       }
     });
-    this.session.access = url.searchParams.get('access').split(',');
   },
 
   /**
