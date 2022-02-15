@@ -15,7 +15,7 @@
 import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
-import {parseObject} from './../common/utils.js';
+import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
 import {infoLoggerButton} from './components/buttons.js';
 
@@ -73,7 +73,7 @@ const showContent = (model, list) => (list && Object.keys(list).length > 0)
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'ID', 'Run', 'Created', 'Detectors', 'FLPs', 'DCS', 'TRG', 'EPN', 'EPN Topology', 'State', 'Actions'
+    'ID', 'Run', 'Created', 'Detectors', 'FLPs', 'DCS', 'TRG', 'EPN', 'ODC', 'EPN Topology', 'State', 'Actions'
   ];
   return h('table.table', [
     h('thead', [
@@ -82,7 +82,7 @@ const environmentsTable = (model, list) => {
     h('tbody', [
       list.map((item) => h('tr', {
         class: _isGlobalRun(item.userVars) ? 'global-run' : ''
-      },[
+      }, [
         h('td', {style: 'text-align: center;'}, item.id),
         h('td', {style: 'text-align: center;'}, item.currentRunNumber ? item.currentRunNumber : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
@@ -95,6 +95,7 @@ const environmentsTable = (model, list) => {
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
+        h('td', {style: 'text-align: center;'}, parseOdcStatusPerEnv(item.id, model)),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {
           class: (item.state === 'RUNNING' ?

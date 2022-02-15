@@ -74,6 +74,32 @@ const getTaskShortName = (taskName) => {
 }
 
 /**
+ * Look through the AliECS Integrated services and return the status of ODC for a given environment id
+ * @param {string} envId 
+ * @param {Model} model
+ * @returns 
+ */
+const parseOdcStatusPerEnv = (envId, model) => {
+  const status = model.frameworkInfo.integratedServices;
+  if (status.isSuccess()) {
+    if (status.payload && status.payload.odc && status.payload.odc.data) {
+      try {
+        const odcs = JSON.parse(status.payload.odc.data);
+        return odcs[envId] ? odcs[envId] : 'NOT FOUND'
+      } catch (error) {
+        console.error('Unable to parse ODC information')
+        return 'UNKNOWN'
+      }
+    }
+  }
+  return 'UNKNOWN';
+}
+
+/**
+ * Helpers
+ */
+
+/**
  * Given a JSON containing userVars, it will apply the logic described in OCTRL-574
  * to display desired value for topology
  * @param {JSON} item
@@ -101,4 +127,4 @@ const _parseTopology = (item) => {
   }
   return '-';
 }
-export {getTasksByFlp, parseObject, getTaskShortName};
+export {getTasksByFlp, parseObject, getTaskShortName, parseOdcStatusPerEnv};
