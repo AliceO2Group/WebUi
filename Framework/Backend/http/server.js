@@ -244,7 +244,7 @@ class HttpServer {
       query.username = 'anonymous';
       query.name = 'Anonymous';
       query.token = this.jwt.generateToken(query.personid, query.username, query.name);
-      query.access = [];
+      query.access = ''
 
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);
@@ -446,11 +446,11 @@ class HttpServer {
    * @return {object} - access roles
    */
   authorise(details) {
+    let scope = [];
     if (details.hasOwnProperty('resource_access')) {
-      return details.resource_access[Object.keys(details.resource_access)[0]].roles;
-    } else {
-      return [];
+      scope = details.resource_access[Object.keys(details.resource_access)[0]].roles;
     }
+    return scope.join(',');
   }
 
   /**

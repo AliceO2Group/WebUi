@@ -19,7 +19,7 @@ const history = window.history;
 
 // This are the parameters coming from the server only and represent
 // the current session
-const parametersNames = ['personid', 'name', 'token', 'access', 'username'];
+const parametersNames = ['personid', 'name', 'token', 'username', 'access'];
 
 /**
  * Singleton to retrieve and hide the parameters passed as query string.
@@ -47,11 +47,13 @@ export default {
     const url = new URL(location);
     this.session = {};
     parametersNames.forEach((parameterName) => {
-      this.session[parameterName] = url.searchParams.get(parameterName);
+      this.session[parameterName] = parameterName === 'access' ?
+        url.searchParams.get(parameterName).split(',') : url.searchParams.get(parameterName);
       if (!this.session[parameterName]) {
         throw new Error(`query string should contain the parameter ${parameterName}`);
       }
     });
+    this.session.access = url.searchParams.get('access').split(',');
   },
 
   /**
