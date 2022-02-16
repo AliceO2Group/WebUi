@@ -32,20 +32,23 @@ const detectorsModal = (model) =>
         model.detectors.listRemote.match({
           NotAsked: () => null,
           Loading: () => h('.w-100.text-center', loading(2)),
-          Success: (data) => detectorsList(model, data),
+          Success: (data) => detectorsList(model, model.session.admin ? data : data.filter((det) => model.detectors.detectorRoles.includes(det))),
           Failure: (_) => h('.w-100.text-center.danger', [
-            iconCircleX(), ' Unable to load list of detectors. Use GLOBAL View'
+            iconCircleX(), ' Unable to load list of detectors.'
           ])
         })
       ]),
       h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
         h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-          h(`button.btn.btn-default.w-100`, {
+          (model.session.admin || model.detectors.detectorRoles.includes('GLOBAL'))
+          && h(`button.btn.btn-default.w-100`, {
             id: `GLOBALViewButton`,
             onclick: () => model.setDetectorView('GLOBAL'),
-          }, 'GLOBAL'),
-          h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
-            'Use GLOBAL view to include multiple detectors')
+          }, 'GLOBAL')
+          || h(`button.btn.btn-default.w-100`, {
+            id: `GUESTViewButton`,
+            onclick: () => model.setDetectorView('GUEST')
+          }, 'GUEST'),
         ])
       )
     ])
