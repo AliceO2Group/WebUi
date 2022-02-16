@@ -32,7 +32,8 @@ const detectorsModal = (model) =>
         model.detectors.listRemote.match({
           NotAsked: () => null,
           Loading: () => h('.w-100.text-center', loading(2)),
-          Success: (data) => detectorsList(model, model.session.admin ? data : data.filter((det) => model.detectors.detectorRoles.includes(det))),
+          Success: (data) => detectorsList(model, model.session.admin ?
+            data : data.filter((det) => model.detectors.roles.includes(det))),
           Failure: (_) => h('.w-100.text-center.danger', [
             iconCircleX(), ' Unable to load list of detectors.'
           ])
@@ -40,7 +41,7 @@ const detectorsModal = (model) =>
       ]),
       h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
         h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-          (model.session.admin || model.detectors.detectorRoles.includes('GLOBAL'))
+          (model.session.admin || model.detectors.roles.includes('GLOBAL'))
           && h(`button.btn.btn-default.w-100`, {
             id: `GLOBALViewButton`,
             onclick: () => model.setDetectorView('GLOBAL'),
