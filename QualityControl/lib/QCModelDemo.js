@@ -13,7 +13,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const LayoutService = require('./services/LayoutService');
+const LayoutController = require('./controllers/LayoutController');
 const UserService = require('./services/UserService');
 const StatusService = require('./StatusService.js');
 const config = require('./../test/test-config.js');
@@ -278,7 +278,7 @@ const dataConnector = {
   deleteLayout
 };
 
-module.exports.layoutService = new LayoutService(dataConnector);
+module.exports.layoutService = new LayoutController(dataConnector);
 module.exports.userService = new UserService(dataConnector);
 module.exports.getObjectTimestampList = getObjectTimestampList;
 
