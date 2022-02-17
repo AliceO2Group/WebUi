@@ -32,8 +32,7 @@ const detectorsModal = (model) =>
         model.detectors.listRemote.match({
           NotAsked: () => null,
           Loading: () => h('.w-100.text-center', loading(2)),
-          Success: (data) => detectorsList(model, model.isAllowed('global') ?
-            data : data.filter((det) => model.detectors.authed.includes(det))),
+          Success: (data) => detectorsList(model, data),
           Failure: (_) => h('.w-100.text-center.danger', [
             iconCircleX(), ' Unable to load list of detectors.'
           ])
@@ -58,6 +57,7 @@ const detectorsModal = (model) =>
  * @returns {vnode}
  */
 const detectorsList = (model, list) =>
+  model.isAllowed('global') || list.filter(det => model.detectors.authed.includes(det));
   list.map((detector) => h('.w-25.pv3.text-center.f3',
     h('button.btn.btn-default.w-70', {
       id: `${detector}ViewButton`,
