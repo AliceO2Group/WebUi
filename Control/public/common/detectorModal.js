@@ -22,7 +22,7 @@ import loading from './loading.js';
  * @return {vnode}
  */
 const detectorsModal = (model) =>
-  !model.detectors.selected && model.session.role !== model.Roles.Guest && h('.o2-modal',
+  !model.detectors.selected && model.isAllowed(model.Roles.Detector) && h('.o2-modal',
     h('.o2-modal-content', [
       h('.p2.text-center', [
         h('h4', 'Select your detector view'),

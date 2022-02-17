@@ -151,7 +151,7 @@ export default class Model extends Observable {
       this.router.go('?page=environments');
     }
     await this.detectors.init();
-    if (this.detectors.selected) {
+    if (this.detectors.selected || this.session.role == this.Roles.Guest) {
       this.handleLocationChange();
     }
     this.notify();

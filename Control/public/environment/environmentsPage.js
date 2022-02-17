@@ -121,7 +121,7 @@ const environmentsTable = (model, list) => {
 const actionsCell = (model, item) => {
   const isDetectorIncluded =
     item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
-  if (isDetectorIncluded || !model.detectors.isSingleView()) {
+  if ((isDetectorIncluded || !model.detectors.isSingleView()) && model.isAllowed(model.Roles.Detector)) {
     return h('.btn-group', [
       h('button.btn.btn-primary', {
         title: 'Open the environment page with more details',
