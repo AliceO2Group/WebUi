@@ -35,7 +35,6 @@ export default class Model extends Observable {
    */
   constructor() {
     super();
-    this.Roles = Object.freeze({Admin: 1, Global: 2, Detector: 3, Guest: 4});
 
     this.Roles = Object.freeze({Admin: 1, Global: 2, Detector: 3, Guest: 4});
     this.session = sessionService.get();
