@@ -37,6 +37,7 @@ export default class Model extends Observable {
     super();
     this.Roles = Object.freeze({Admin: 1, Global: 2, Detector: 3, Guest: 4});
 
+    this.Roles = Object.freeze({Admin: 1, Global: 2, Detector: 3, Guest: 4});
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
     this.session.role = this.setRole();
@@ -88,6 +89,32 @@ export default class Model extends Observable {
     this.init();
   }
 
+  /** 
+   * Sets user role
+   * @returns {object} User's role 
+   */ 
+  setRole() {
+    let role = this.Roles.Guest;
+    if (this.session.access.some(role => role.startsWith('det-'))) {
+      role = this.Roles.Detector;
+    }
+    if (this.session.access.includes('global')) {
+      role = this.Roles.Global;
+    }
+    if (this.session.access.includes('admin')) {
+      role = this.Roles.Admin;
+    }
+    return role;
+  }
+
+  /** 
+   * Evaluate whether action is allowed for given role
+   * @param {Roles} target role
+   * @returns {bool} Whether current role (= model.role) is equal or superior to target role
+   */
+  isAllowed(role) {
+    return (this.session.role <= role);
+  }
   /**
    * Sets user role
    * @returns {object} User's role
