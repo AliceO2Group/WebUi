@@ -20,7 +20,7 @@ const CCDBConnector = require('./CCDBConnector.js');
 const MySQLConnector = require('./MySQLConnector.js');
 const AMOREConnector = require('./AMOREConnector.js');
 const JsonFileConnector = require('./JsonFileConnector.js');
-const LayoutService = require('./services/LayoutService.js');
+const LayoutController = require('./controllers/LayoutController.js');
 const StatusService = require('./StatusService.js');
 const UserService = require('./services/UserService.js');
 
@@ -33,7 +33,7 @@ module.exports.statusService = statusService;
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 module.exports.userService = new UserService(jsonDb);
-module.exports.layoutService = new LayoutService(jsonDb);
+module.exports.layoutService = new LayoutController(jsonDb);
 
 if (config.consul) {
   const consulService = new ConsulService(config.consul);

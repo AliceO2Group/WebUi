@@ -32,7 +32,7 @@ export default class LayoutService {
    * @return {RemoteData}
    */
   async getLayouts() {
-    const {result, ok} = await this.loader.post('/api/listLayouts');
+    const {result, ok} = await this.loader.get('/api/layouts');
     return this.parseResult(result, ok);
   }
 
@@ -42,7 +42,7 @@ export default class LayoutService {
    * @return {RemoteData}
    */
   async getLayoutsByUserId(userId) {
-    const {result, ok} = await this.loader.post('/api/listLayouts', {owner_id: userId});
+    const {result, ok} = await this.loader.get('/api/layouts', {owner_id: userId});
     if (!ok) {
       return RemoteData.failure(result.error);
     } else {
@@ -55,7 +55,7 @@ export default class LayoutService {
    * @param {string} layoutId
    */
   async getLayoutById(layoutId) {
-    const {result, ok} = await this.loader.post('/api/readLayout', {layoutId: layoutId});
+    const {result, ok} = await this.loader.get(`/api/layout/${layoutId}`);
     return this.parseResult(result, ok);
   }
 
