@@ -41,15 +41,12 @@ export default (model) => h('.flex-grow text-left',
 const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ? 'dropdown-open' : ''}, [
   h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
   h('.dropdown-menu', [
-    h('p.m3.mv2.text-ellipsis', model.session.access.includes('admin')
-      ? `Welcome ${model.session.name} *`
-      : `Welcome ${model.session.name}`),
+    h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`, h('sup', model.session.role)),
     model.session.personid === 0 // anonymous user has id 0
-      ? h('p.m3.gray-darker', 'You are connected as anonymous, no authentification needed for this application.')
-      : [
-        (model.session.access.includes('admin')) &&
-          h('a.menu-item', {onclick: () => model.lock.forceUnlock()}, 'Force unlock'),
-        h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout')
-      ],
+      && h('p.m3.gray-darker', 'You are connected as anonymous, no authentification needed for this application.'),
+    model.isAllowed(model.Roles.Admin) &&
+      h('a.menu-item', {onclick: () => model.lock.forceUnlock()}, 'Force unlock'),
+    model.session.personid !== 0 &&
+      h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout')
   ]),
 ]);

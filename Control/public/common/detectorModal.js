@@ -22,7 +22,7 @@ import loading from './loading.js';
  * @return {vnode}
  */
 const detectorsModal = (model) =>
-  !model.detectors.selected && h('.o2-modal',
+  !model.detectors.selected && model.session.role !== model.Roles.Guest && h('.o2-modal',
     h('.o2-modal-content', [
       h('.p2.text-center', [
         h('h4', 'Select your detector view'),
@@ -32,8 +32,8 @@ const detectorsModal = (model) =>
         model.detectors.listRemote.match({
           NotAsked: () => null,
           Loading: () => h('.w-100.text-center', loading(2)),
-          Success: (data) => detectorsList(model, model.session.admin ?
-            data : data.filter((det) => model.detectors.roles.includes(det))),
+          Success: (data) => detectorsList(model, model.isAllowed('global') ?
+            data : data.filter((det) => model.detectors.authed.includes(det))),
           Failure: (_) => h('.w-100.text-center.danger', [
             iconCircleX(), ' Unable to load list of detectors.'
           ])
@@ -41,15 +41,11 @@ const detectorsModal = (model) =>
       ]),
       h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
         h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-          (model.session.admin || model.detectors.roles.includes('GLOBAL'))
-          && h(`button.btn.btn-default.w-100`, {
-            id: `GLOBALViewButton`,
-            onclick: () => model.setDetectorView('GLOBAL'),
-          }, 'GLOBAL')
-          || h(`button.btn.btn-default.w-100`, {
-            id: `GUESTViewButton`,
-            onclick: () => model.setDetectorView('GUEST')
-          }, 'GUEST'),
+          model.isAllowed(model.Roles.Global) &&
+            h(`button.btn.btn-default.w-100`, {
+              id: `GLOBALViewButton`,
+              onclick: () => model.setDetectorView('GLOBAL'),
+            }, 'GLOBAL')
         ])
       )
     ])
