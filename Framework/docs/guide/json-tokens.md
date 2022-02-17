@@ -7,7 +7,7 @@ The generated tokens includes following encrypted information:
  * CERN ID
  * CERN username
  * Full name
- * List of access scopes as comma separated string)
+ * List of access scopes as comma separated string
 
 If OpenID Connect is not used CERN ID is set to `0`, name to `Anonymous`, CERN username to `anonymous` and access scope to "admin".
 On the server-side those values are available for every requset from the `req.query` object under following keys: `personid`, `name`, `username` and `access`.
