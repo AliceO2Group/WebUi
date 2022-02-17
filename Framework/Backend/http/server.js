@@ -243,8 +243,8 @@ class HttpServer {
       query.personid = 0;
       query.username = 'anonymous';
       query.name = 'Anonymous';
-      query.token = this.jwt.generateToken(query.personid, query.username, query.name);
       query.access = 'admin'
+      query.token = this.jwt.generateToken(query.personid, query.username, query.name, query.access);
 
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);

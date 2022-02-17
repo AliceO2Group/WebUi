@@ -43,10 +43,10 @@ class JwtToken {
    * Sets expiration time and sings it using secret.
    * @param {number} personid - CERN user id
    * @param {string} username - CERN username
-   * @param {number} access - level of access
+   * @param {string} access - comma separated list of access scopes
    * @return {object} generated token
    */
-  generateToken(personid, username, name, access = 0) {
+  generateToken(personid, username, name, access = '') {
     const payload = {id: personid, username: username, name: name, access: access};
     const token = jwt.sign(payload, this._secret, {
       expiresIn: this._expiration,

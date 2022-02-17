@@ -28,7 +28,7 @@ let http, ws, jwt, token; // eslint-disable-line
 describe('websocket', () => {
   before(() => {
     jwt = new JwtToken(config.jwt);
-    token = jwt.generateToken(0, 'test', 1);
+    token = jwt.generateToken(0, 'test', 'Test', 'admin');
 
     http = new HttpServer(config.http, config.jwt);
     ws = new WebSocket(http, config.jwt, 'localhost');

@@ -26,7 +26,7 @@ describe('JSON Web Token', () => {
   afterEach(() => {
     assert.strictEqual(verified.id, id);
     assert.strictEqual(verified.username, username);
-    assert.deepStrictEqual(verified.access, access);
+    assert.strictEqual(verified.access, access);
     assert.strictEqual(verified.name, name);
   });
 
