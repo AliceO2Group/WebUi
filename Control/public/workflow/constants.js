@@ -22,7 +22,8 @@ const PREFIX = {
     NONE: '-',
     FILE: 'file://',
     CONSUL: 'consul-ini://'
-  }
+  },
+  SSO_DET_ROLE: 'det-'
 };
 
 const WIDGET_VAR = {

@@ -13,7 +13,7 @@
 */
 
 import {Observable, RemoteData, BrowserStorage} from '/js/src/index.js';
-import {STORAGE} from './../workflow/constants.js';
+import {STORAGE, PREFIX} from './../workflow/constants.js';
 
 /**
  * Model representing API Calls regarding Detectors
@@ -27,13 +27,9 @@ export default class DetectorService extends Observable {
     super();
     this.model = model;
     this.authed = this.model.session.access
-      .filter((role) => role.startsWith('det-'))
-      .map((role) => role.replace('det-','').toUpperCase());
+      .filter((role) => role.startsWith(PREFIX.SSO_DET_ROLE))
+      .map((role) => role.replace(PREFIX.SSO_DET_ROLE, '').toUpperCase());
     this.storage = new BrowserStorage(`COG-${this.model.router.location.hostname}`);
-    this.authed = this.model.session.access
-      .filter((role) => role.startsWith('det-'))
-      .map((role) => role.replace('det-','').toUpperCase());
-
     this.listRemote = RemoteData.notAsked();
     this.hostsByDetectorRemote = RemoteData.notAsked();
     this._selected = '';

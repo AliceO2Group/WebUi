@@ -24,6 +24,7 @@ import Workflow from './workflow/Workflow.js';
 import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
+import {PREFIX} from './../workflow/constants.js';
 
 /**
  * Root of model tree
@@ -94,7 +95,7 @@ export default class Model extends Observable {
    */ 
   setRole() {
     let role = this.Roles.Guest;
-    if (this.session.access.some(role => role.startsWith('det-'))) {
+    if (this.session.access.some(role => role.startsWith(PREFIX.SSO_DET_ROLE))) {
       role = this.Roles.Detector;
     }
     if (this.session.access.includes('global')) {
