@@ -56,13 +56,13 @@ const detectorsModal = (model) =>
  * @param {List<String>} list
  * @returns {vnode}
  */
-const detectorsList = (model, list) =>
+const detectorsList = (model, list) => {
   model.isAllowed('global') || list.filter(det => model.detectors.authed.includes(det));
   list.map((detector) => h('.w-25.pv3.text-center.f3',
     h('button.btn.btn-default.w-70', {
       id: `${detector}ViewButton`,
       onclick: () => model.setDetectorView(detector)
     }, detector)
-  ));
+  ))};
 
 export {detectorsModal};
