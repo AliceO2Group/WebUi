@@ -115,30 +115,6 @@ export default class Model extends Observable {
   isAllowed(role) {
     return (this.session.role <= role);
   }
-  /**
-   * Sets user role
-   * @returns {object} User's role
-   */
-  setRole() {
-    let role = this.Roles.Guest;
-    if (this.session.access.some(role => role.startsWith('det-'))) {
-      role = this.Roles.Detector;
-    } else if (this.session.access.includes('global')) {
-      role = this.Roles.Global;
-    } else if (this.session.access.includes('admin')) {
-      role = this.Roles.Admin;
-    }
-    return role;
-  }
-
-  /**
-   * Evaluate whether action is allowed for given role
-   * @param {Roles} target role
-   * @returns {bool} Whether current role (= model.role) is equal or superior to target role
-   */
-  isAllowed(role) {
-    return (this.session.role <= role);
-  }
 
   /**
    * If no detector view is selected:
