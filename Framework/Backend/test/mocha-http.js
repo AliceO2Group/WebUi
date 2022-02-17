@@ -27,7 +27,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let httpServer;
 const jwt = new JwtToken(config.jwt);
-const token = jwt.generateToken(0, 'test', 1);
+const token = jwt.generateToken(0, 'test', 'Test', 'admin');
 
 describe('REST API', () => {
   before(() => {
