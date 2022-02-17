@@ -110,7 +110,7 @@ describe('Kafka Connector test suite', () => {
       jwt = new JwtToken(config.jwt);
       http = new HttpServer(config.http, config.jwt);
       wsServer = new WebSocket(http);
-      token = jwt.generateToken(0, 'test', 1);
+      token = jwt.generateToken(0, 'test', 'admin');
     });
 
     it('should report health status', async () => {
