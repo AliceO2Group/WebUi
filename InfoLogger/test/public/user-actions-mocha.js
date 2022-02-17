@@ -28,7 +28,7 @@ describe('User Profile test-suite', async () => {
     baseUrl = test.helpers.baseUrl;
     page = test.page;
     jwt = new JwtToken(test.helpers.jwt);
-    testToken = jwt.generateToken(1, 'test', 1);
+    testToken = jwt.generateToken(1, 'test', 'admin');
   });
 
   describe('User is anonymous', async () => {
