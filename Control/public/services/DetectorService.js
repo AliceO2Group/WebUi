@@ -27,6 +27,9 @@ export default class DetectorService extends Observable {
     super();
     this.model = model;
     this.storage = new BrowserStorage(`COG-${this.model.router.location.hostname}`);
+    this.authed = this.model.session.access
+      .filter((role) => role.startsWith('det-'))
+      .map((role) => role.replace('det-','').toUpperCase());
 
     this.listRemote = RemoteData.notAsked();
     this.hostsByDetectorRemote = RemoteData.notAsked();
@@ -39,7 +42,8 @@ export default class DetectorService extends Observable {
    */
   async init() {
     const stored = this.storage.getLocalItem(STORAGE.DETECTOR);
-    this._selected = (stored && stored.SELECTED) ? stored.SELECTED : '';
+    this._selected = (stored && stored.SELECTED &&
+      (this.model.isAllowed(this.model.Roles.Global) || this.authed.includes(stored.SELECTED))) ? stored.SELECTED : '';
     this.notify();
     this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote, this);
     this.notify();

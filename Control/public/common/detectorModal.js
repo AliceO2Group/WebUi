@@ -32,7 +32,8 @@ const detectorsModal = (model) =>
         model.detectors.listRemote.match({
           NotAsked: () => null,
           Loading: () => h('.w-100.text-center', loading(2)),
-          Success: (data) => detectorsList(model, data),
+          Success: (data) => detectorsList(model, model.isAllowed('global') ?
+            data : data.filter((det) => model.detectors.authed.includes(det))),
           Failure: (_) => h('.w-100.text-center.danger', [
             iconCircleX(), ' Unable to load list of detectors. Use GLOBAL View'
           ])
@@ -40,12 +41,11 @@ const detectorsModal = (model) =>
       ]),
       h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
         h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-          h(`button.btn.btn-default.w-100`, {
-            id: `GLOBALViewButton`,
-            onclick: () => model.setDetectorView('GLOBAL'),
-          }, 'GLOBAL'),
-          h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
-            'Use GLOBAL view to include multiple detectors')
+          model.isAllowed(model.Roles.Global) &&
+            h(`button.btn.btn-default.w-100`, {
+              id: `GLOBALViewButton`,
+              onclick: () => model.setDetectorView('GLOBAL'),
+            }, 'GLOBAL')
         ])
       )
     ])
