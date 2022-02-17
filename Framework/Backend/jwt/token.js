@@ -43,7 +43,7 @@ class JwtToken {
    * Sets expiration time and sings it using secret.
    * @param {number} personid - CERN user id
    * @param {string} username - CERN username
-   * @param {number} access - level of access
+   * @param {string} access - comma separated list of access scopes
    * @return {object} generated token
    */
   generateToken(personid, username, name, access = '') {
