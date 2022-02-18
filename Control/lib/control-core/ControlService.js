@@ -25,16 +25,13 @@ const CoreUtils = require('./CoreUtils.js');
 class ControlService {
   /**
    * Constructor initializing dependencies
-   * @param {Padlock} padLock
    * @param {GrpcProxy} ctrlProx
    * @param {WebSocket} webSocket
    * @param {ConsulConnector} consulConnector
    * * @param {JSON} coreConfig
    */
-  constructor(padLock, ctrlProx, consulConnector, coreConfig) {
-    assert(padLock, 'Missing PadLock dependency');
+  constructor(ctrlProx, consulConnector, coreConfig) {
     assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
-    this.padLock = padLock;
     this.ctrlProx = ctrlProx;
     this.consulConnector = consulConnector;
     this.coreConfig = coreConfig;
@@ -172,28 +169,6 @@ class ControlService {
     } else {
       next();
     }
-  }
-
-  /**
-   * Middleware method to check if lock is needed and if yes if it is acquired
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Next} next
-   * @return {boolean}
-   */
-  isLockSetUp(req, res, next) {
-    const method = CoreUtils.parseMethodNameString(req.path);
-    // disallow 'not-Get' methods if not owning the lock
-    if (!method.startsWith('Get') && method !== 'ListRepos') {
-      if (this.padLock.lockedBy == null) {
-        errorHandler(`Control is not locked`, res, 403);
-        return;
-      } else if (req.session.personid != this.padLock.lockedBy) {
-        errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
-        return;
-      }
-    }
-    next();
   }
 
   /**

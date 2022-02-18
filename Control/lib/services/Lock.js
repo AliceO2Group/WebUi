@@ -1,0 +1,134 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+*/
+const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
+const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lockservice`);
+
+/**
+ * Model representing the lock of the UI, one owner at a time
+ */
+class Lock {
+  /**
+   * Initialize lock as free / unlocked.
+   */
+  constructor() {
+    this.lockedBy = {};
+    this.lockedByName = {};
+  }
+
+  setWs(ws) {
+    this.webSocket = ws;
+  }
+  state(entity = null) {
+    return (entity && Number.isInteger(this.lockedBy[entity])) ?
+    {
+      name: entity,
+      lockedBy: this.lockedBy[entity],
+      lockedByName:  this.lockedByName[entity]
+    } :
+    {
+      lockedBy: this.lockedBy,
+      lockedByName: this.lockedByName
+    }
+  }
+
+  /** 
+   * Send to all users state of Pad via Websocket
+   */
+  broadcastLockState(entity) {
+    this.webSocket.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state(entity)));
+  } 
+
+  /** 
+   * Method to try to acquire lock
+   * @param {Request} req
+   * @param {Response} res
+   */
+  lockDetector(req, res) {
+    try {
+      const entity = req.body.name;
+      if (!entity) {
+        throw new Error('[Lock] Unspecified lock entity');
+      }
+      if (this.lockedBy[entity] === null) {
+        throw new Error(`[Padlock] Lock is already hold by ${this.lockedByName} (id ${this.lockedBy})`);
+      }   
+      this.lockedBy[entity] = req.session.personid;
+      this.lockedByName[entity] = req.session.name;
+      log.info(`Lock ${entity} taken by ${req.session.name}`);
+      this.broadcastLockState(entity);
+      res.status(200).json({ok: true});
+    } catch (error) {
+      log.error(`Unable to lock ${entity} by ${req.session.name}: ${error}`);
+      res.status(403).json({message: error.message});
+    }
+  }
+
+  /** 
+   * Method to try to release lock
+   * @param {Request} req
+   * @param {Response} res
+  */
+  forceUnlock(req, res) {
+    try {
+      const entity = req.body.name;
+      if (!entity) {
+        throw new Error('[Unlock] Unspecified lock entity');
+      } 
+      if (this.lockedBy[entity] === null) {
+        throw new Error(`[Padlock] Lock is already released`);
+      }   
+      if (!req.session.access.includes('admin')) {
+        throw new Error(`[Padlock] Insufficient permission`);
+      }   
+      delete this.lockedBy[entity];
+      delete this.lockedByName[entity];
+      log.info(`Lock ${entity} forced by ${req.session.name}`);
+      this.broadcastLockState(entity);
+      res.status(200).json({ok: true});
+    } catch (error) {
+      log.error(`Unable to force lock by ${req.session.name}: ${error}`);
+      res.status(403).json({message: error.message});
+    }   
+  }
+
+  /** 
+   * Method to try to release lock
+   * @param {Request} req
+   * @param {Response} res
+   */
+  unlockDetector(req, res) {
+    try {
+      const entity = req.body.name;
+      if (!entity) {
+        throw new Error('[Unlock] Unspecified lock entity');
+      }   
+      if (this.lockedBy[entity] === null) {
+        throw new Error('[Unlock] Lock is already released');
+      }
+      if (this.lockedBy[entity] !== req.session.personid) {
+        throw new Error(`[Padlock] You cannot unlock ${entity}, owner is ${this.lockedByName} (id ${this.lockedBy})`);
+      }
+      delete this.lockedBy[entity];
+      delete this.lockedByName[entity];
+      log.info(`Lock ${entity} released by ${req.session.name}`);
+      this.broadcastLockState(entity);
+      res.status(200).json({ok: true});
+    } catch (error) {
+      log.error(`Unable to give away ${entity} lock by ${req.session.name}: ${error}`);
+      res.status(403).json({message: error.message});
+    }   
+  }
+}
+
+module.exports = Lock;

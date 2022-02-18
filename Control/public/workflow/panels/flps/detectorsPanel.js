@@ -14,7 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import pageLoading from './../../../common/pageLoading.js';
-
+import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
 /**
  * Create a selection area for all detectors retrieved from AliECS
  * @param {Object} workflow
@@ -64,9 +64,9 @@ const detectorItem = (name, workflow) => {
     className += 'disabled-item ';
     title = 'Detector UNAVAILABLE';
   }
-  return h('a.menu-item', {
-    className,
-    title,
-    onclick: () => workflow.flpSelection.toggleDetectorSelection(name)
-  }, workflow.flpSelection.getDetectorWithIndexes(name))
+  return h('.flex-row', [
+    h('a.w-85.menu-item.w-wrapped', {className, title, onclick: () => workflow.flpSelection.toggleDetectorSelection(name)
+    }, workflow.flpSelection.getDetectorWithIndexes(name)),
+    h('a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker', {title: 'Lock is free', onclick: () => model.lock.lockDetector(name)}, iconLockUnlocked())
+  ]);
 };

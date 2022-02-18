@@ -40,11 +40,11 @@ export default (model) => [
 const button = (model, padlockState) => typeof padlockState.lockedBy !== 'number'
   ? h('button.btn', {
     title: 'Lock is free',
-    onclick: () => model.lock.lock()
+    onclick: () => model.lock.lock('global')
   }, iconLockUnlocked())
   : h('button.btn', {
     title: `Lock is taken by ${padlockState.lockedByName} (id ${padlockState.lockedBy})`,
-    onclick: () => model.lock.unlock()
+    onclick: () => model.lock.unlock('global')
   }, (model.session.personid == padlockState.lockedBy) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'));
 
 /**

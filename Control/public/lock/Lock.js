@@ -45,7 +45,7 @@ export default class Lock extends Observable {
     this.padlockState = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/lockState`);
+    const {result, ok} = await this.model.loader.post(`/api/lockState`, {name: 'global'});
     if (!ok) {
       this.padlockState = RemoteData.failure(result.message);
       this.notify();
@@ -60,11 +60,11 @@ export default class Lock extends Observable {
    * Ask server to get the lock of Control
    * Result of this action will be an update by WS
    */
-  async lock() {
+  async lock(entity) {
     this.padlockState = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/lock`);
+    const {result, ok} = await this.model.loader.post(`/api/lock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
       return;
@@ -77,11 +77,11 @@ export default class Lock extends Observable {
    * Force Control lock (eg. if someone left the lock in locked state)
    * Other peers will be notified by WS
    */
-  async forceUnlock() {
+  async forceUnlock(entity) {
     this.padlockState = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/forceUnlock`);
+    const {result, ok} = await this.model.loader.post(`/api/forceUnlock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
       return;
@@ -93,11 +93,11 @@ export default class Lock extends Observable {
    * Ask server to release the lock of Control
    * Result of this action will be an update by WS
    */
-  async unlock() {
+  async unlock(entity) {
     this.padlockState = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/unlock`);
+    const {result, ok} = await this.model.loader.post(`/api/unlock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
       return;
