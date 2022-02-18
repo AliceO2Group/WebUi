@@ -18,6 +18,7 @@ import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
 import {infoLoggerButton} from './components/buttons.js';
+import {ROLES} from './../workflow/constants.js';
 
 /**
  * @file Page to show a list of environments (content and header)
@@ -121,7 +122,7 @@ const environmentsTable = (model, list) => {
 const actionsCell = (model, item) => {
   const isDetectorIncluded =
     item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
-  if (isDetectorIncluded || !model.detectors.isSingleView()) {
+  if ((isDetectorIncluded || !model.detectors.isSingleView()) && model.isAllowed(ROLES.Detector)) {
     return h('.btn-group', [
       h('button.btn.btn-primary', {
         title: 'Open the environment page with more details',
