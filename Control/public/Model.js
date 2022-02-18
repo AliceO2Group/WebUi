@@ -89,21 +89,18 @@ export default class Model extends Observable {
   }
 
   /** 
-   * Sets user role
+   * Returns user role
    * @returns {object} User's role 
    */ 
-  setRole() {
-    let role = ROLES.Guest;
-    if (this.session.access.some(role => role.startsWith(PREFIX.SSO_DET_ROLE))) {
-      role = ROLES.Detector;
-    }
-    if (this.session.access.includes('global')) {
-      role = ROLES.Global;
-    }
+  getRole() {
     if (this.session.access.includes('admin')) {
-      role = ROLES.Admin;
+      return ROLES.Admin;
+    } else if (this.session.access.includes('global')) {
+      return ROLES.Global;
+    } else if (this.session.access.some((role) => role.toUpperCase().startsWith(PREFIX.SSO_DET_ROLE.toUpperCase()))) {
+      return ROLES.Detector;
     }
-    return role;
+    return ROLES.Guest;
   }
 
   /** 
