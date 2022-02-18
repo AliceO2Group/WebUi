@@ -48,4 +48,11 @@ const STORAGE = {
   DETECTOR: 'DETECTOR'
 }
 
-export {PREFIX, WIDGET_VAR, VAR_TYPE, STORAGE};
+const ROLES = Object.freeze({
+  Admin: 1,
+  Global: 2,
+  Detector: 3,
+  Guest: 4
+});
+
+export {PREFIX, WIDGET_VAR, VAR_TYPE, STORAGE, ROLES};

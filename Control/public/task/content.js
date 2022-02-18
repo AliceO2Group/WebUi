@@ -17,6 +17,7 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {detectorHeader} from '../common/detectorHeader.js';
 import {iconLockLocked, iconLockUnlocked, iconCloudDownload, iconCircleX, iconCircleCheck} from '/js/src/icons.js';
+import {ROLES} from './../workflow/constants.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
@@ -116,7 +117,7 @@ const detectorPanels = (model, detectors) => [
     .filter((detector) => (
       detector === model.detectors.selected ||
       model.detectors.selected === 'GLOBAL' ||
-      model.isAllowed(model.Roles.Guest, true)))
+      model.isAllowed(ROLES.Guest, true)))
     .map((detector) => h('.w-100', [
       h('.panel-title.flex-row.p2', [
         h('h4.w-20', detector),

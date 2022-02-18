@@ -23,6 +23,8 @@ import detectorsPanel from './panels/flps/detectorsPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
+import {ROLES} from './../workflow/constants.js';
+
 /**
  * @file Page to show a form for creating a new environment
  * from existing templates
@@ -42,7 +44,7 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
  * @return {vnode}
  */
 export const content = (model) =>
-  !model.isAllowed(model.Roles.Detector) ?
+  !model.isAllowed(ROLES.Detector) ?
     h('h3.m4.warning.text-center', ['You are not allowed to create environments.']) : h('', [
       detectorHeader(model),
       h('.scroll-y.absolute-fill.text-center.p2', {style: 'top:40px;'},

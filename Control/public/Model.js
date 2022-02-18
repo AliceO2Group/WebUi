@@ -24,7 +24,7 @@ import Workflow from './workflow/Workflow.js';
 import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
-import {PREFIX} from './../workflow/constants.js';
+import {PREFIX, ROLES} from './../workflow/constants.js';
 
 /**
  * Root of model tree
@@ -37,7 +37,6 @@ export default class Model extends Observable {
   constructor() {
     super();
 
-    this.Roles = Object.freeze({Admin: 1, Global: 2, Detector: 3, Guest: 4});
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
     this.session.role = this.setRole();
@@ -94,22 +93,22 @@ export default class Model extends Observable {
    * @returns {object} User's role 
    */ 
   setRole() {
-    let role = this.Roles.Guest;
+    let role = ROLES.Guest;
     if (this.session.access.some(role => role.startsWith(PREFIX.SSO_DET_ROLE))) {
-      role = this.Roles.Detector;
+      role = ROLES.Detector;
     }
     if (this.session.access.includes('global')) {
-      role = this.Roles.Global;
+      role = ROLES.Global;
     }
     if (this.session.access.includes('admin')) {
-      role = this.Roles.Admin;
+      role = ROLES.Admin;
     }
     return role;
   }
 
   /** 
    * Evaluate whether action is allowed for given role
-   * @param {Roles} target role
+   * @param {ROLES} target role
    * @param {bool} The target role must equal current role
    * @returns {bool} Whether current role (= model.role) is equal or superior to target role
    */
@@ -128,7 +127,7 @@ export default class Model extends Observable {
       this.router.go('?page=environments');
     }
     await this.detectors.init();
-    if (this.detectors.selected || this.session.role == this.Roles.Guest) {
+    if (this.detectors.selected || this.session.role == ROLES.Guest) {
       this.handleLocationChange();
     }
     this.notify();
