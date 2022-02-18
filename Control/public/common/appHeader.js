@@ -27,7 +27,7 @@ export default (model) => h('.flex-grow text-left',
   [
     loginButton(model),
     ' ',
-    lockButton(model),
+    model.isAllowed(model.Roles.Detector) && lockButton(model),
     ' ',
     h('span.f4 gray', 'Control')
   ]);

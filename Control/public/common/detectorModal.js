@@ -56,13 +56,14 @@ const detectorsModal = (model) =>
  * @param {List<String>} list
  * @returns {vnode}
  */
-const detectorsList = (model, list) => {
-  model.isAllowed('global') || list.filter(det => model.detectors.authed.includes(det));
-  list.map((detector) => h('.w-25.pv3.text-center.f3',
-    h('button.btn.btn-default.w-70', {
-      id: `${detector}ViewButton`,
-      onclick: () => model.setDetectorView(detector)
-    }, detector)
-  ))};
+const detectorsList = (model, list) =>
+  list
+    .filter(detector => model.detectors.authed.includes(detector) || model.isAllowed(model.Roles.Global))
+    .map((detector) => h('.w-25.pv3.text-center.f3',
+      h('button.btn.btn-default.w-70', {
+        id: `${detector}ViewButton`,
+        onclick: () => model.setDetectorView(detector)
+      }, detector)
+    ));
 
 export {detectorsModal};
