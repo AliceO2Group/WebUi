@@ -108,8 +108,8 @@ export default class Model extends Observable {
 
   /** 
    * Evaluate whether action is allowed for given role
-   * @param {ROLES} target role
-   * @param {bool} The target role must equal current role
+   * @param {ROLES} role - target role
+   * @param {bool} [strict=false] - The target role must equal current role
    * @returns {bool} Whether current role (= model.role) is equal or superior to target role
    */
   isAllowed(role, strict = false) {
