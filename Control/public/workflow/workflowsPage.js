@@ -41,18 +41,20 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('', [
-  detectorHeader(model),
-  h('.scroll-y.absolute-fill.text-center.p2', {style: 'top:40px;'},
-    model.workflow.repoList.match({
-      NotAsked: () => null,
-      Loading: () => pageLoading(),
-      Success: (repoList) => (repoList.repos.length === 0)
-        ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
-      Failure: (error) => errorPage(error),
-    })
-  )
-]);
+export const content = (model) =>
+  !model.isAllowed(model.Roles.Detector) ?
+    h('h3.m4.warning.text-center', ['You are not allowed to create environments.']) : h('', [
+      detectorHeader(model),
+      h('.scroll-y.absolute-fill.text-center.p2', {style: 'top:40px;'},
+        model.workflow.repoList.match({
+          NotAsked: () => null,
+          Loading: () => pageLoading(),
+          Success: (repoList) => (repoList.repos.length === 0)
+            ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
+          Failure: (error) => errorPage(error),
+        })
+      )
+    ]);
 
 /**
 * Create a form for the user to select inputs for a new environment

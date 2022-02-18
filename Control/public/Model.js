@@ -110,10 +110,11 @@ export default class Model extends Observable {
   /** 
    * Evaluate whether action is allowed for given role
    * @param {Roles} target role
+   * @param {bool} The target role must equal current role
    * @returns {bool} Whether current role (= model.role) is equal or superior to target role
    */
-  isAllowed(role) {
-    return (this.session.role <= role);
+  isAllowed(role, strict = false) {
+    return strict ? this.session.role === role : this.session.role <= role;
   }
 
   /**
