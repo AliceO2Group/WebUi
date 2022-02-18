@@ -58,6 +58,23 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.ok(calls['getActiveDetectors']);
   });
 
+  it('should verify default role', async () => {
+    const role = await page.evaluate(() => window.model.session.role);
+    assert.strictEqual(role, 1);
+  });
+  it('should react on role change to Guest', async () => {
+    const text = await page.evaluate(() => {
+      window.model.session.role = 4;
+      window.model.notify();
+      return document.querySelector('.m4').innerText;
+    });
+    assert.strictEqual(text, 'You are not allowed to create environments.');
+    await page.evaluate(() => {
+      window.model.session.role = 1;
+      window.model.notify();
+    });
+  });
+
   it('should successfully request and parse a list of template objects', async () => {
     const templates = await page.evaluate(() => window.model.workflow.templates);
     const expectedTemplates = {
