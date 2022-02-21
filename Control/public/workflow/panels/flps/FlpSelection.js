@@ -143,7 +143,15 @@ export default class FlpSelection extends Observable {
   isDetectorActive(name) {
     return this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(name)
   }
-
+  /**
+   * Unselects given detector and its FLPs
+   * @param {string} name
+   */
+  unselectDetector(name) {
+    if (this.selectedDetectors.includes(name)) {
+      this.toggleDetectorSelection(name);
+    }
+  }
   /**
    * Toggle the selection of an FLP from the form host
    * The user can also use SHIFT key to select between 2 FLP machines, thus
