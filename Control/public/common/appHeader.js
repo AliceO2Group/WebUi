@@ -28,7 +28,7 @@ export default (model) => h('.flex-grow text-left',
   [
     loginButton(model),
     ' ',
-    model.isAllowed(ROLES.Detector) && lockButton(model),
+    model.isAllowed(ROLES.Detector) && lockButton(model, 'global', true),
     ' ',
     h('span.f4 gray', 'Control')
   ]);
@@ -46,7 +46,7 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
     model.session.personid === 0 // anonymous user has id 0
       && h('p.m3.gray-darker', 'You are connected as anonymous, no authentification needed for this application.'),
     model.isAllowed(ROLES.Admin) &&
-      h('a.menu-item', {onclick: () => model.lock.forceUnlock()}, 'Force unlock'),
+      h('a.menu-item', {onclick: () => model.lock.forceUnlock('global')}, 'Force unlock'),
     model.session.personid !== 0 &&
       h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout')
   ]),

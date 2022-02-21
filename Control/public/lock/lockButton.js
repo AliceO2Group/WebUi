@@ -21,11 +21,11 @@ import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => [
+export default (model, name, isBig = false) => [
   model.lock.padlockState.match({
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
-    Success: (data) => button(model, data),
+    Success: (data) => isBig ? button(model, name, data) : detectorButton(model, name, data),
     Failure: (_error) => null,
   })
 ];
@@ -37,16 +37,27 @@ export default (model) => [
  * @param {Object} padlockState
  * @return {vnode}
  */
-const button = (model, padlockState) => typeof padlockState.lockedBy !== 'number'
+const button = (model, name, padlockState) => padlockState.lockedBy && name in padlockState.lockedBy
   ? h('button.btn', {
-    title: 'Lock is free',
-    onclick: () => model.lock.lock('global')
-  }, iconLockUnlocked())
+    title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
+    onclick: () => model.lock.unlock(name)
+  }, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
   : h('button.btn', {
-    title: `Lock is taken by ${padlockState.lockedByName} (id ${padlockState.lockedBy})`,
-    onclick: () => model.lock.unlock('global')
-  }, (model.session.personid == padlockState.lockedBy) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'));
+    title: 'Lock is free',
+    onclick: () => { model.lock.lock(name); model.workflows.FlpSelection.unselect(name); }
+  }, iconLockUnlocked());
 
+const detectorButton = (model, name, padlockState) => padlockState.lockedBy && name in padlockState.lockedBy
+  ? h('a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker', {
+    title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
+    onclick: () => {
+      model.lock.unlock(name);
+      model.workflow.flpSelection.unselectDetector(name);
+  }}, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
+  : h('a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker', {
+    title: 'Lock is free',
+    onclick: () => model.lock.lock(name)
+  }, iconLockUnlocked());
 /**
  * Simple loading button
  * @return {vnode}

@@ -29,14 +29,9 @@ class Lock {
   setWs(ws) {
     this.webSocket = ws;
   }
-  state(entity = null) {
-    return (entity && Number.isInteger(this.lockedBy[entity])) ?
-    {
-      name: entity,
-      lockedBy: this.lockedBy[entity],
-      lockedByName:  this.lockedByName[entity]
-    } :
-    {
+
+  state() {
+    return {
       lockedBy: this.lockedBy,
       lockedByName: this.lockedByName
     }
@@ -45,8 +40,8 @@ class Lock {
   /** 
    * Send to all users state of Pad via Websocket
    */
-  broadcastLockState(entity) {
-    this.webSocket.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state(entity)));
+  broadcastLockState() {
+    this.webSocket.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state()));
   } 
 
   /** 
@@ -56,20 +51,20 @@ class Lock {
    */
   lockDetector(req, res) {
     try {
-      const entity = req.body.name;
-      if (!entity) {
+      if (!('name' in req.body)) {
         throw new Error('[Lock] Unspecified lock entity');
       }
-      if (this.lockedBy[entity] === null) {
-        throw new Error(`[Padlock] Lock is already hold by ${this.lockedByName} (id ${this.lockedBy})`);
+      const entity = req.body.name;
+      if ('entity' in this.lockedBy) {
+        throw new Error(`[Padlock] Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
       }   
       this.lockedBy[entity] = req.session.personid;
       this.lockedByName[entity] = req.session.name;
       log.info(`Lock ${entity} taken by ${req.session.name}`);
-      this.broadcastLockState(entity);
+      this.broadcastLockState();
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`Unable to lock ${entity} by ${req.session.name}: ${error}`);
+      log.error(`Unable to lock by ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }
   }
@@ -81,12 +76,12 @@ class Lock {
   */
   forceUnlock(req, res) {
     try {
+      if (!('name' in req.body)) {
+        throw new Error('[Lock] Unspecified lock entity');
+      }
       const entity = req.body.name;
-      if (!entity) {
-        throw new Error('[Unlock] Unspecified lock entity');
-      } 
-      if (this.lockedBy[entity] === null) {
-        throw new Error(`[Padlock] Lock is already released`);
+      if ('entity' in this.lockedBy) {
+        throw new Error(`[Padlock] Lock ${entity} is already released`);
       }   
       if (!req.session.access.includes('admin')) {
         throw new Error(`[Padlock] Insufficient permission`);
@@ -94,7 +89,7 @@ class Lock {
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];
       log.info(`Lock ${entity} forced by ${req.session.name}`);
-      this.broadcastLockState(entity);
+      this.broadcastLockState();
       res.status(200).json({ok: true});
     } catch (error) {
       log.error(`Unable to force lock by ${req.session.name}: ${error}`);
@@ -109,23 +104,23 @@ class Lock {
    */
   unlockDetector(req, res) {
     try {
+      if (!('name' in req.body)) {
+        throw new Error('[Lock] Unspecified lock entity');
+      }
       const entity = req.body.name;
-      if (!entity) {
-        throw new Error('[Unlock] Unspecified lock entity');
-      }   
-      if (this.lockedBy[entity] === null) {
+      if ('entity' in this.lockedBy) {
         throw new Error('[Unlock] Lock is already released');
       }
       if (this.lockedBy[entity] !== req.session.personid) {
-        throw new Error(`[Padlock] You cannot unlock ${entity}, owner is ${this.lockedByName} (id ${this.lockedBy})`);
+        throw new Error(`[Padlock] ${entity} owner is ${this.lockedByName} (id ${this.lockedBy})`);
       }
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];
       log.info(`Lock ${entity} released by ${req.session.name}`);
-      this.broadcastLockState(entity);
+      this.broadcastLockState();
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`Unable to give away ${entity} lock by ${req.session.name}: ${error}`);
+      log.error(`Unable to give away lock to ${req.session.name}: ${error}`);
       res.status(403).json({message: error.message});
     }   
   }

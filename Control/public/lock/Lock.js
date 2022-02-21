@@ -20,7 +20,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class Lock extends Observable {
   /**
    * Initialize lock state to NotAsked
- * @param {Observable} model
+   * @param {Observable} model
    */
   constructor(model) {
     super();
@@ -29,6 +29,12 @@ export default class Lock extends Observable {
     this.padlockState = RemoteData.notAsked(); // {lockedBy, lockedByName}
   }
 
+  isLockedByMe(name) {
+    return this.padlockState.kind === 'Success' &&
+      this.padlockState.payload.lockedBy &&
+      name in this.padlockState.payload.lockedBy &&
+      this.model.session.personid === this.padlockState.payload.lockedBy[name];
+  }
   /**
    * Set padlock state from ajax or websocket as a RemoteData
    * @param {string} padlockState - object representing PadLock from server
@@ -45,7 +51,7 @@ export default class Lock extends Observable {
     this.padlockState = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/lockState`, {name: 'global'});
+    const {result, ok} = await this.model.loader.post(`/api/lockState`);
     if (!ok) {
       this.padlockState = RemoteData.failure(result.message);
       this.notify();
@@ -70,7 +76,7 @@ export default class Lock extends Observable {
       return;
     }
 
-    this.model.notification.show(`Lock taken`, 'success');
+    this.model.notification.show(`Lock ${entity} taken`, 'success');
   }
 
   /**
@@ -86,7 +92,7 @@ export default class Lock extends Observable {
       this.model.notification.show(result.message, 'danger');
       return;
     }
-    this.model.notification.show(`Lock forced`, 'success');
+    this.model.notification.show(`Lock ${entity} forced`, 'success');
   }
 
   /**
@@ -103,6 +109,6 @@ export default class Lock extends Observable {
       return;
     }
 
-    this.model.notification.show(`Lock released`, 'success');
+    this.model.notification.show(`Lock ${entity} released`, 'success');
   }
 }
