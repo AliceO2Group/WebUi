@@ -13,6 +13,7 @@
 */
 
 const assert = require('assert');
+const LayoutDto = require('../dtos/LayoutDto.js');
 const {errorHandler} = require('../utils.js');
 const LayoutDto = require('../dtos/LayoutDto.js');
 

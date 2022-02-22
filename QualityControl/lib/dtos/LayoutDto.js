@@ -22,7 +22,7 @@ const ObjectDto = Joi.object({
   h: Joi.number().min(0),
   w: Joi.number().min(0),
   options: Joi.array().items(Joi.string()).default([]),
-  autoSize: Joi.boolean().default(false),
+  autoSize: Joi.boolean().default(false)
 });
 
 const TabsDto = Joi.object({
