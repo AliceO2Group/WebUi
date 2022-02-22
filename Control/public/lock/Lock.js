@@ -28,11 +28,22 @@ export default class Lock extends Observable {
     this.model = model;
     this.padlockState = RemoteData.notAsked(); // {lockedBy, lockedByName}
   }
-
-  isLockedByMe(name) {
+  getOwner(name) {
+    if (this.padlockState.kind === 'Success' &&
+      this.padlockState.payload.lockedBy &&
+      name in this.padlockState.payload.lockedByName) {
+      return this.padlockState.payload.lockedByName[name];
+    } else {
+      return '-';
+    }
+  }
+  isLocked(name) {
     return this.padlockState.kind === 'Success' &&
       this.padlockState.payload.lockedBy &&
-      name in this.padlockState.payload.lockedBy &&
+      name in this.padlockState.payload.lockedBy;
+  }
+  isLockedByMe(name) {
+    return this.isLocked &&
       this.model.session.personid === this.padlockState.payload.lockedBy[name];
   }
   /**

@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 import {
   iconGridTwoUp, iconGridThreeUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog,
-  iconCalculator
+  iconCalculator, iconLockLocked
 } from '/js/src/icons.js';
 
 /**
@@ -29,6 +29,7 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
   menuItem(model, 'Create', 'newEnvironment', iconPlus()),
   menuItem(model, 'Active', 'environments', iconGridTwoUp()),
   menuItem(model, 'Task list', 'taskList', iconGridThreeUp()),
+  menuItem(model, 'Locks', 'locks', iconLockLocked()),
   h('h5.menu-title-large.mh1',
     model.sideBarMenu ? 'Hardware' : 'HDW'),
   menuItem(model, 'Links', 'configuration', iconCog()),

@@ -14,7 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import pageLoading from './../../../common/pageLoading.js';
-import lockButton from './../../../lock/lockButton.js';
+import {detectorButton as lockButton} from './../../../lock/lockButton.js';
 
 /**
  * Create a selection area for all detectors retrieved from AliECS

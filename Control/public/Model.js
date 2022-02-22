@@ -218,6 +218,8 @@ export default class Model extends Observable {
         this.configuration.getCRUsConfig();
         this.configuration.getCRUsAliases();
         break;
+      case 'locks':
+        break;
       case 'hardware':
         break;
       default:

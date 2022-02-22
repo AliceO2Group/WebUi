@@ -21,11 +21,20 @@ import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model, name, isBig = false) => [
+export const detectorButton = (model, name) => [
   model.lock.padlockState.match({
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
-    Success: (data) => isBig ? button(model, name, data) : detectorButton(model, name, data),
+    Success: (data) => button(model, name, data, 'a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker'),
+    Failure: (_error) => null,
+  })
+];
+
+export const detectorButtonLarge = (model, name, disabled = false) => [
+  model.lock.padlockState.match({
+    NotAsked: () => buttonLoading(),
+    Loading: () => buttonLoading(),
+    Success: (data) =>  button(model, name, data, 'button.btn', disabled),
     Failure: (_error) => null,
   })
 ];
@@ -37,7 +46,7 @@ export default (model, name, isBig = false) => [
  * @param {Object} padlockState
  * @return {vnode}
  */
-const button = (model, name, padlockState) => padlockState.lockedBy && name in padlockState.lockedBy
+const buttonBtn = (model, name, padlockState) => padlockState.lockedBy && name in padlockState.lockedBy
   ? h('button.btn', {
     title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
     onclick: () => model.lock.unlock(name)
@@ -47,15 +56,15 @@ const button = (model, name, padlockState) => padlockState.lockedBy && name in p
     onclick: () => { model.lock.lock(name); model.workflows.FlpSelection.unselect(name); }
   }, iconLockUnlocked());
 
-const detectorButton = (model, name, padlockState) => padlockState.lockedBy && name in padlockState.lockedBy
-  ? h('a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker', {
+const button = (model, name, padlockState, look, disabled) => padlockState.lockedBy && name in padlockState.lockedBy
+  ? h(look, {
     title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
     onclick: () => {
       model.lock.unlock(name);
       model.workflow.flpSelection.unselectDetector(name);
   }}, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
-  : h('a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker', {
-    title: 'Lock is free',
+  : h(look, {
+    title: 'Lock is free'+disabled,
     onclick: () => model.lock.lock(name)
   }, iconLockUnlocked());
 /**
