@@ -13,7 +13,8 @@
 */
 
 import {h} from '/js/src/index.js';
-import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan} from '/js/src/icons.js';
+import LayoutUtils from './LayoutUtils.js';
+import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan, iconShareBoxed} from '/js/src/icons.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
@@ -39,7 +40,7 @@ const toolbarViewMode = (model) => [
     h('b.f4', model.layout.item.name),
     ' ',
     // Show group button edit/duplicate only for owner of the layout shown
-    h('.btn-group', [
+    h('.btn-group.mh2', [
       h('button.btn.btn-default', {
         onclick: () => {
           const nameForNewLayout = prompt('Choose a name for the new layout:').trim();
@@ -47,6 +48,13 @@ const toolbarViewMode = (model) => [
         },
         title: 'Duplicate layout'
       }, iconLayers()),
+      h('a.btn.btn-default', {
+        title: 'Export Layout skeleton',
+        href: `data:application/octet;,${encodeURIComponent(LayoutUtils.getLayoutSkeleton(model.layout.item))}`,
+        download: `layout-${model.layout.item.name}-skeleton.json`,
+      }, iconShareBoxed()),
+    ]),
+    h('.btn-group', [
       model.session.personid == model.layout.item.owner_id && h('button.btn.btn-primary', {
         onclick: () => model.layout.edit(),
         title: 'Edit layout'
