@@ -24,10 +24,10 @@ const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel
  * @param {HttpServer} http
  */
 module.exports.setup = (http) => {
-  http.get('/readObjectData', readObjectData, {public: true});
-  http.get('/listObjects', listObjects, {public: true});
-  http.get('/objectTimestampList', getObjectTimestampList, {public: true});
-  
+  http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), {public: true});
+  http.get('/object/root', () => false);
+  http.get('/objects', () => false, {public: true});
+
   http.get('/listOnlineObjects', listOnlineObjects);
   http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
 
@@ -36,13 +36,20 @@ module.exports.setup = (http) => {
   http.delete('/layout/:id', model.layoutService.deleteLayout.bind(model.layoutService));
   http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
   http.post('/writeLayout', model.layoutService.updateLayout.bind(model.layoutService));
-  
+
   http.get('/status/gui', model.statusService.getQCGStatus.bind(model.statusService), {public: true});
   http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService), {public: true});
-  
+
   http.get('/checkUser', model.userService.addUser.bind(model.userService));
-  
+
   new WebSocket(http);
+
+  /**
+   *  @deprecated ; to be removed in version 2.10.0
+   */
+  http.get('/readObjectData', readObjectData, {public: true});
+  http.get('/listObjects', listObjects, {public: true});
+  http.get('/objectTimestampList', getObjectTimestampList, {public: true});
 };
 
 /**

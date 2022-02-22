@@ -18,7 +18,7 @@ const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_l
 /**
  * Gateway for all CCDB calls
  */
-class CCDBConnector {
+class CcdbService {
   /**
    * Setup and test CCDB connection
    * @param {Object} config - {hostname, port}
@@ -37,7 +37,7 @@ class CCDBConnector {
     this.hostname = config.hostname;
     this.port = config.port;
     this.prefix = this.getPrefix(config);
-  
+
     this.LAST_MODIFIED = 'Last-Modified';
     this.CREATED = 'Created';
     this.PATH = 'path';
@@ -90,6 +90,29 @@ class CCDBConnector {
           .filter((item) => this.isItemValid(item))
           .map((item) => parseInt(item[this.LAST_MODIFIED]))
       );
+  }
+
+  /**
+   * Get latest version of an object or a specified version through the timestamp;
+   * @example
+   * {info: <JSON>, timestamps: Array<numbers>}
+   * @param {String} path - Complete name of object; e.g qc/MO/CPV/merger1
+   * @param {Number} timestamp - version of object that should be queried
+   * @returns {Promise.<JSON>, Error>}
+   */
+  async getObjectLatestVersionByPath(path, timestamp = '') {
+    if (!path) {
+      throw new Error('Failed to load object due to missing path');
+    }
+    const timestampHeaders = {
+      Accept: 'application/json', 'X-Filter-Fields': this._getHeadersForOneObject(), 'Browse-Limit': 1
+    };
+    const result = await this.httpGetJson(`/latest/${path}/${timestamp}`, timestampHeaders);
+    if (this.isItemValid(result.objects[0])) {
+      return result.objects[0];
+    } else {
+      throw new Error(`Invalid object provided for: ${path} `)
+    }
   }
 
   /**
@@ -186,6 +209,15 @@ class CCDBConnector {
     }
     return prefix;
   }
+
+
+  /**
+   * Returns list of headers that are of interest when querying data about 1 object only
+   * @returns {Array<String>>}
+   */
+  _getHeadersForOneObject() {
+    return `${this.PATH},${this.LAST_MODIFIED},size,fileName,id,metadata`;
+  }
 }
 
-module.exports = CCDBConnector;
+module.exports = CcdbService;
