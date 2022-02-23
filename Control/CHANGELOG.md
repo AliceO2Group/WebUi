@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.43.1](https://github.com/AliceO2Group/WebUi/releases/tag/%40aliceo2%2Fcontrol%401.43.1)
+* __Notable changes for users__:
+  * Bug fixed in which variables per detector where not filtered properly from when creating a new workflow
+
 ## [1.43.0](https://github.com/AliceO2Group/WebUi/releases/tag/%40aliceo2%2Fcontrol%401.43.0)
 * __Notable changes for users__:
   * Updates a bug in which combobox would limit the users input
