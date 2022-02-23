@@ -106,8 +106,8 @@ const drawPlot = (model, object) => {
         h('.w-100', {style: 'justify-content: center;'}, [
           Object.keys(info)
             .filter((key) =>
-              ['ObjectType', 'qc_detector_name', 'RunNumber', 'qc_task_name', 'qc_task_class', 'qc_version']
-                .includes(key)
+              ['ObjectType', 'qc_detector_name', 'RunNumber',
+                'qc_task_name', 'qc_task_class', 'qc_version', 'Last-Modified'].includes(key)
             )
             .map((key) => h('.flex-row.f6', [
               h('.w-30', key),
