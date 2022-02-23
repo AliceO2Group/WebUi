@@ -16,7 +16,7 @@ const config = require('./config/configProvider.js');
 const projPackage = require('./../package.json');
 
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
-const CCDBConnector = require('./services/CcdbService.js');
+const CcdbService = require('./services/CcdbService.js');
 const JsonFileConnector = require('./JsonFileConnector.js');
 const LayoutController = require('./controllers/LayoutController.js');
 const StatusService = require('./StatusService.js');
@@ -53,7 +53,7 @@ if (config.listingConnector === 'ccdb') {
   if (!config.ccdb) {
     throw new Error('CCDB config is mandatory');
   }
-  const ccdb = new CCDBConnector(config.ccdb);
+  const ccdb = new CcdbService(config.ccdb);
   ccdb.testConnection();
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
   module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);

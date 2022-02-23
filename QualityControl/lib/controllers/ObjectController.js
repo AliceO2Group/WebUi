@@ -21,8 +21,8 @@ const {errorHandler} = require('../utils.js');
 class ObjectController {
   /**
    * Setup Object Controller:
-   * - CCDBConnector - retrieve data about objects
-   * @param {CCDBConnectors} db
+   * - CcdbService - retrieve data about objects
+   * @param {CcdbServices} db
    */
   constructor(db) {
     assert(db, 'Missing service for retrieving objects data');
