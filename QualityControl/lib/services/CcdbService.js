@@ -111,7 +111,7 @@ class CcdbService {
     if (this.isItemValid(result.objects[0])) {
       return result.objects[0];
     } else {
-      throw new Error(`Invalid object provided for: ${path} `)
+      throw new Error(`Invalid object provided for: ${path}`)
     }
   }
 
