@@ -16,13 +16,12 @@ const config = require('./config/configProvider.js');
 const projPackage = require('./../package.json');
 
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
-const CCDBConnector = require('./CCDBConnector.js');
-const MySQLConnector = require('./MySQLConnector.js');
-const AMOREConnector = require('./AMOREConnector.js');
+const CCDBConnector = require('./services/CcdbService.js');
 const JsonFileConnector = require('./JsonFileConnector.js');
 const LayoutController = require('./controllers/LayoutController.js');
 const StatusService = require('./StatusService.js');
 const UserService = require('./services/UserService.js');
+const ObjectController = require('./controllers/ObjectController.js');
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
@@ -59,19 +58,11 @@ if (config.listingConnector === 'ccdb') {
   module.exports.listObjects = ccdb.listObjects.bind(ccdb);
   module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
   module.exports.queryPrefix = ccdb.prefix;
+
+  module.exports.objectController = new ObjectController(ccdb);
+  module.exports.layoutService = new LayoutController(jsonDb);
   statusService.setDataConnector(ccdb);
 
-} else if (config.listingConnector === 'amore') {
-  log.info('Object listing: AMORE');
-  if (!config.amore) {
-    throw new Error('AMORE config is mandatory');
-  }
-  const amore = new AMOREConnector(config.amore);
-  module.exports.listObjects = amore.listObjects.bind(amore);
-} else {
-  const mysql = new MySQLConnector(config.mysql);
-  log.info('Object listing: MySQL');
-  module.exports.listObjects = mysql.listObjects.bind(mysql);
 }
 
 // --------------------------------------------------------
