@@ -178,7 +178,6 @@ const treeRows = (model) => !model.object.tree ?
       model.object.tree.children.map((children) => treeRow(model, children, 0))
   );
 
-
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
  * sub-nodes of `tree` as additional lines if they are open in the tree.
