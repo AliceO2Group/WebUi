@@ -423,8 +423,7 @@ export default class Workflow extends Observable {
       const prefix = key.split('_')[0];
       const isVariableDetector = this.flpSelection.detectors.payload
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
-      const isVariableIncludedDetector = this.model.detectors.selected.toLocaleUpperCase() === prefix.toLocaleUpperCase();
-      return !isVariableDetector || isVariableIncludedDetector;
+      return !isVariableDetector || this.model.detectors.selected.toLocaleUpperCase() === prefix.toLocaleUpperCase();
     }
     return true;
   }
