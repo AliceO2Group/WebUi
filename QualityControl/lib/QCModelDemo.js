@@ -18,6 +18,7 @@ const UserService = require('./services/UserService');
 const StatusService = require('./StatusService.js');
 const config = require('./../test/test-config.js');
 const projPackage = require('./../package.json');
+const ObjectController = require('./controllers/ObjectController');
 
 // force user accounts during demo
 const ownerIdUser1 = 0;
@@ -278,7 +279,11 @@ const dataConnector = {
   deleteLayout
 };
 
+const ccdb = {
+  getObjectLatestVersionByPath: readObjectData
+}
 module.exports.layoutService = new LayoutController(dataConnector);
+module.exports.objectController = new ObjectController(ccdb)
 module.exports.userService = new UserService(dataConnector);
 module.exports.getObjectTimestampList = getObjectTimestampList;
 

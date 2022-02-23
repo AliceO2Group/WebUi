@@ -79,20 +79,31 @@ export default class QCObjectService {
         timestamp = Date.now();
       }
       const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
-      let [qcObject, timeStampsReq] = await Promise.all([
+      let [qcObject, object] = await Promise.allSettled([
         JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
-        this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
+        this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`),
       ]);
-      const {result, ok, status} = timeStampsReq;
-      if (ok) {
-        const obj = {qcObject, timestamps: result.timestamps};
-        return RemoteData.success(obj);
-      } else {
-        if (status === 404) {
+
+      const obj = {
+        qcObject: {},
+        info: {},
+        timestamps: {}
+      }
+      if (qcObject.status === 'fulfilled') {
+        obj.qcObject = qcObject.value;
+      }
+      if (object.status === 'fulfilled') {
+        const {result, ok, status} = object.value;
+        if (ok) {
+          obj.info = result.info;
+          obj.timestamps = result.timestamps;
+          return RemoteData.success(obj);
+        } if (status === 404) {
           return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
         }
         return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
       }
+      return RemoteData.success(obj);
     } catch (error) {
       return RemoteData.failure(`Object '${objectName}' could not be loaded`);
     }

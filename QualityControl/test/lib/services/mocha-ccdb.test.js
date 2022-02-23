@@ -15,32 +15,33 @@
 const assert = require('assert');
 const nock = require('nock');
 
-const CCDBConnector = require('../../lib/CCDBConnector.js');
-const config = require('../test-config.js');
+const CcdbService = require('../../../lib/services/CcdbService.js');
+const config = require('../../test-config.js');
 
-describe('CCDB Connector test suite', () => {
-  describe('Creating a new CCDBConnector instance', () => {
+describe('CCDB Service test suite', () => {
+  describe('Creating a new CcdbService instance', () => {
     it('should throw an error if configuration object is not provided', () => {
-      assert.throws(() => new CCDBConnector(), new Error('Empty CCDB config'));
-      assert.throws(() => new CCDBConnector(null), new Error('Empty CCDB config'));
-      assert.throws(() => new CCDBConnector(undefined), new Error('Empty CCDB config'));
+      assert.throws(() => new CcdbService(), new Error('Empty CCDB config'));
+      assert.throws(() => new CcdbService(null), new Error('Empty CCDB config'));
+      assert.throws(() => new CcdbService(undefined), new Error('Empty CCDB config'));
     });
 
     it('should throw an error if configuration object is missing hostname field', () => {
-      assert.throws(() => new CCDBConnector({}), new Error('Empty hostname in CCDB config'));
+      assert.throws(() => new CcdbService({}), new Error('Empty hostname in CCDB config'));
     });
 
     it('should throw an error if configuration object is missing port field', () => {
-      assert.throws(() => new CCDBConnector({hostname: 'localhost'}), new Error('Empty port in CCDB config'));
+      assert.throws(() => new CcdbService({hostname: 'localhost'}), new Error('Empty port in CCDB config'));
     });
 
-    it('should successfully initialize CCDBConnector', () => {
-      assert.doesNotThrow(() => new CCDBConnector({hostname: 'localhost', port: 8080}));
+    it('should successfully initialize CcdbService', () => {
+      assert.doesNotThrow(() => new CcdbService({hostname: 'localhost', port: 8080}));
     });
   });
+
   describe('`getPrefix()` tests', () => {
     let ccdb;
-    before(() => ccdb = new CCDBConnector(config.ccdb));
+    before(() => ccdb = new CcdbService(config.ccdb));
 
     it('successfully return empty string when no prefix is provided in config object', () => {
       const configNoPrefix = {};
@@ -58,7 +59,7 @@ describe('CCDB Connector test suite', () => {
 
   describe('`testConnection()` tests', () => {
     let ccdb;
-    before(() => ccdb = new CCDBConnector(config.ccdb));
+    before(() => ccdb = new CcdbService(config.ccdb));
 
     it('should successfully test connection to CCDB', async () => {
       nock('http://ccdb:8500')
@@ -80,7 +81,7 @@ describe('CCDB Connector test suite', () => {
 
   describe('`listObjects()` tests', () => {
     it('should successfully return a list of the objects', async () => {
-      const ccdb = new CCDBConnector(config.ccdb);
+      const ccdb = new CcdbService(config.ccdb);
       const objects = [
         {path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []},
         {path: 'object/two', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []},
@@ -103,7 +104,7 @@ describe('CCDB Connector test suite', () => {
 
   describe('`getObjectTimestampList()` tests', () => {
     it('should successfully return a list of timestamps for a specific object', async () => {
-      const ccdb = new CCDBConnector(config.ccdb);
+      const ccdb = new CcdbService(config.ccdb);
       const objects = [
         {path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []},
         {path: 'object/one', Created: '101', 'Last-Modified': '103', id: 'id', metadata: []},
@@ -120,7 +121,7 @@ describe('CCDB Connector test suite', () => {
     });
 
     it('should successfully return an empty list due to empty reply from CCDB', async () => {
-      const ccdb = new CCDBConnector(config.ccdb);
+      const ccdb = new CcdbService(config.ccdb);
       nock('http://ccdb:8500')
         .get('/browse/object/one')
         .reply(200, {objects: [], subfolders: []});
@@ -131,9 +132,56 @@ describe('CCDB Connector test suite', () => {
     });
   });
 
+  describe('`getObjectLatestVersionByPath()` tests', () => {
+    it('should throw error if path for object to be queried is not provided', async () => {
+      const ccdb = new CcdbService(config.ccdb);
+      await assert.rejects(async () => await ccdb.getObjectLatestVersionByPath(),
+        new Error('Failed to load object due to missing path')
+      );
+      await assert.rejects(async () => await ccdb.getObjectLatestVersionByPath(null),
+        new Error('Failed to load object due to missing path')
+      );
+      await assert.rejects(async () => await ccdb.getObjectLatestVersionByPath(undefined),
+        new Error('Failed to load object due to missing path')
+      );
+    });
+
+    it('should throw error if data service rejected the request', async () => {
+      const ccdb = new CcdbService(config.ccdb);
+      nock('http://ccdb:8500')
+        .get('/latest/object/one/')
+        .reply(502, 'Unable to find object');
+
+      await assert.rejects(async () => await ccdb.getObjectLatestVersionByPath('object/one'),
+        new Error('Non-2xx status code: 502'));
+    });
+
+    it('should throw error if received object is not valid', async () => {
+      const ccdb = new CcdbService(config.ccdb);
+      const objects = [{Created: '101', 'Last-Modified': '102', id: 'id', metadata: []}];
+      nock('http://ccdb:8500')
+        .get('/latest/object/one/')
+        .reply(200, {objects, subfolders: []});
+
+      await assert.rejects(async () => await ccdb.getObjectLatestVersionByPath('object/one'),
+        new Error('Invalid object provided for: object/one'));
+    });
+
+    it('should successfully return a valid object', async () => {
+      const ccdb = new CcdbService(config.ccdb);
+      const objects = [{path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []}];
+      nock('http://ccdb:8500')
+        .get('/latest/object/one/')
+        .reply(200, {objects, subfolders: []});
+
+      const result = await ccdb.getObjectLatestVersionByPath('object/one');
+      assert.deepStrictEqual(result, objects[0]);
+    });
+  });
+
   describe('`itemTransform()` & `isItemValid() tests', () => {
     let ccdb;
-    before(() => ccdb = new CCDBConnector(config.ccdb));
+    before(() => ccdb = new CcdbService(config.ccdb));
 
     it('should successfully return false for an item with missing path', () => {
       assert.strictEqual(ccdb.isItemValid({}), false);
@@ -164,7 +212,7 @@ describe('CCDB Connector test suite', () => {
 
   describe('`httGetJson()` tests', () => {
     let ccdb;
-    before(() => ccdb = new CCDBConnector(config.ccdb));
+    before(() => ccdb = new CcdbService(config.ccdb));
 
     it('should successfully return a list of the objects', async () => {
       nock('http://ccdb:8500')
