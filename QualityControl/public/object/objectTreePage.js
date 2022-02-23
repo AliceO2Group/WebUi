@@ -68,7 +68,7 @@ function objectPanel(model) {
       NotAsked: () => null,
       Loading: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
         spinner(3), h('', 'Loading Object')]),
-      Success: () => drawPlot(model),
+      Success: (data) => drawPlot(model, data),
       Failure: (error) => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
         h('.f1', iconCircleX()), error]),
     });
@@ -79,10 +79,13 @@ function objectPanel(model) {
 /**
  * Draw the object including the info button and history dropdown
  * @param {Object} model
+ * @param {JSON} object - {qcObject, info, timestamps}
  * @return {vnode}
  */
-const drawPlot = (model) =>
-  h('', {style: 'height:100%; display: flex; flex-direction: column'},
+const drawPlot = (model, object) => {
+  const name = model.object.selected.name;
+  const info = object.info;
+  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
       h('.resize-button.flex-row', [
         infoButton(model.object, model.isOnlineModeEnabled),
@@ -90,17 +93,31 @@ const drawPlot = (model) =>
           h('a.btn',
             {
               title: 'Open object plot in full screen',
-              href: `?page=objectView&objectName=${model.object.selected.name}`,
+              href: `?page=objectView&objectName=${name}`,
               onclick: (e) => model.router.handleLinkEvent(e)
             }, iconResizeBoth()
           )
         )]),
-      h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, model.object.selected.name, {stat: true}, 'treePage')
+      h('', {style: 'height:77%;'},
+        draw(model, name, {stat: true}, 'treePage')
       ),
-      h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model)))
+      h('.scroll-y', {}, [
+        h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model))),
+        h('.w-100', {style: 'justify-content: center;'}, [
+          Object.keys(info)
+            .filter((key) =>
+              ['ObjectType', 'qc_detector_name', 'RunNumber', 'qc_task_name', 'qc_task_class', 'qc_version']
+                .includes(key)
+            )
+            .map((key) => h('.flex-row.f6', [
+              h('.w-30', key),
+              h('.w-70', info[key])
+            ]))
+        ]),
+      ])
     ]
   );
+};
 
 /**
  * Shows status of current tree with its options (online, loaded, how many)
