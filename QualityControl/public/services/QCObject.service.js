@@ -83,10 +83,14 @@ export default class QCObjectService {
         JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
         this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`),
       ]);
+
       const obj = {
         qcObject: {},
         info: {},
         timestamps: {}
+      }
+      if (qcObject.status === 'fulfilled') {
+        obj.qcObject = qcObject.value;
       }
       if (object.status === 'fulfilled') {
         const {result, ok, status} = object.value;
@@ -99,9 +103,6 @@ export default class QCObjectService {
         }
         return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
       }
-      if (qcObject.status === 'fulfilled') {
-        obj.qcObject = qcObject;
-      } 
       return RemoteData.success(obj);
     } catch (error) {
       return RemoteData.failure(`Object '${objectName}' could not be loaded`);
