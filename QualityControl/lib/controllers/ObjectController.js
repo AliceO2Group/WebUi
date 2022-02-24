@@ -13,7 +13,6 @@
 */
 
 const assert = require('assert');
-const jsroot = require('jsroot');
 const {errorHandler} = require('../utils.js');
 
 /**
@@ -25,9 +24,11 @@ class ObjectController {
    * - CcdbService - retrieve data about objects
    * @param {CcdbServices} db
    */
-  constructor(db) {
+  constructor(db, jsroot) {
     assert(db, 'Missing service for retrieving objects data');
     this.db = db;
+    this.jsroot = jsroot;
+    this.DB_URL = `${this.db.protocol}://${this.db.hostname}:${this.db.port}/`;
   }
 
   /**
@@ -53,18 +54,20 @@ class ObjectController {
    * @param {Request} req - must contain object path
    * @param {Response} res 
    */
-  async getJsonOfRootObject(req, res) {
+  async getJsonRootObject(req, res) {
+    const id = req.query?.id;
     const path = req.query?.path;
-    const timestamp = req.query?.timestamp || Date.now();
-    if (!path) {
-      const message = 'Missing path of the object';
+    const timestamp = req.query?.timestamp ?? Date.now();
+    if (!id & !path) {
+      const message = 'Missing id or path of the object';
       errorHandler(message, message, res, 400, 'object');
     }
+    const url = this.DB_URL + (id ? `/download/${id}` : `${path}/${timestamp}`);
     try {
-      const url = `http://${this.db.hostname}:${this.db.port}/${path}/${timestamp}`;
-      const file = await jsroot.openFile(url);
+      const file = await this.jsroot.openFile(url);
       const root = await file.readObject("ccdb_object");
-      res.json({root, path, timestamp});
+      const rootJson = await this.jsroot.toJSON(root)
+      res.status(200).json(rootJson);
     }
     catch (error) {
       errorHandler(error, 'Unable to read ROOT file', res, 502, 'object');
