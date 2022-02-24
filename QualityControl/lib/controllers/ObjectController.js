@@ -61,6 +61,7 @@ class ObjectController {
     if (!id & !path) {
       const message = 'Missing id or path of the object';
       errorHandler(message, message, res, 400, 'object');
+      return;
     }
     const url = this.DB_URL + (id ? `/download/${id}` : `${path}/${timestamp}`);
     try {

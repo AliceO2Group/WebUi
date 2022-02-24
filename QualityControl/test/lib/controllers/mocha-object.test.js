@@ -89,7 +89,7 @@ describe('ObjectController test suite', () => {
     });
     it('should respond with error if request does not contain id or path', async () => {
       const objController = new ObjectController({}, {});
-      await objController.getJsonRootObject({}, res);
+      await objController.getJsonRootObject({query: {}}, res);
 
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
       assert.ok(res.send.calledWith({message: 'Missing id or path of the object'}), 'Error message was incorrect');
@@ -103,7 +103,7 @@ describe('ObjectController test suite', () => {
       };
       const objController = new ObjectController(dbStub, rootMock);
 
-      await objController.getJsonRootObject({id: '1234'}, res);
+      await objController.getJsonRootObject({query: {id: '1234'}}, res);
       assert.ok(res.status.calledWith(502), 'Response status was not 502');
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
@@ -119,7 +119,7 @@ describe('ObjectController test suite', () => {
       };
       const objController = new ObjectController(dbStub, rootMock);
 
-      await objController.getJsonRootObject({path: 'some/qc'}, res);
+      await objController.getJsonRootObject({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(502), 'Response status was not 502');
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
@@ -136,7 +136,7 @@ describe('ObjectController test suite', () => {
       };
       const objController = new ObjectController(dbStub, rootMock);
 
-      await objController.getJsonRootObject({}, res);
+      await objController.getJsonRootObject({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(502), 'Response status was not 502');
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
@@ -153,7 +153,7 @@ describe('ObjectController test suite', () => {
       };
       const objController = new ObjectController(dbStub, rootMock);
 
-      await objController.getJsonRootObject({}, res);
+      await objController.getJsonRootObject({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(200), 'Response status was not 200');
       assert.ok(res.json.calledWith({__type: 'THistogram'}), 'Expected JSON Object is different');
     });
