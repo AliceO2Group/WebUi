@@ -93,7 +93,7 @@ describe('Status Service test suite', () => {
       const result = {
         qcg: {hostname: 'localhost', port: 8181, status: {ok: true}},
         ccdb: {
-          hostname: 'ccdb', port: 8500, prefix: 'test', plotUrl: 'localhost:8080/some-instance', status: {ok: true}
+          hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: true}
         },
         consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live mode was not configured'}},
         quality_control: {version: '0.19.5-1'}
@@ -119,7 +119,7 @@ describe('Status Service test suite', () => {
       const result = {
         qcg: {hostname: 'localhost', port: 8181, status: {ok: true}},
         ccdb: {
-          hostname: 'ccdb', port: 8500, prefix: 'test', plotUrl: 'localhost:8080/some-instance', status: {ok: true}
+          hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: true}
         },
         consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live mode was not configured'}},
         quality_control: {version: '0.19.5-1'}

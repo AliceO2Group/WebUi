@@ -36,6 +36,7 @@ class CcdbService {
 
     this.hostname = config.hostname;
     this.port = config.port;
+    this.protocol = config.protocol ?? 'http';
     this.prefix = this.getPrefix(config);
 
     this.LAST_MODIFIED = 'Last-Modified';

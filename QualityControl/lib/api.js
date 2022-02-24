@@ -25,7 +25,7 @@ const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel
  */
 module.exports.setup = (http) => {
   http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), {public: true});
-  http.get('/object/root', () => false);
+  http.get('/object/root', model.objectController.getJsonRootObject.bind(model.objectController));
   http.get('/objects', () => false, {public: true});
 
   http.get('/listOnlineObjects', listOnlineObjects);

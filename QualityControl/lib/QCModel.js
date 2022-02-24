@@ -14,6 +14,7 @@
 
 const config = require('./config/configProvider.js');
 const projPackage = require('./../package.json');
+const jsroot = require('jsroot');
 
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
 const CcdbService = require('./services/CcdbService.js');
@@ -59,7 +60,7 @@ if (config.listingConnector === 'ccdb') {
   module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
   module.exports.queryPrefix = ccdb.prefix;
 
-  module.exports.objectController = new ObjectController(ccdb);
+  module.exports.objectController = new ObjectController(ccdb, jsroot);
   module.exports.layoutService = new LayoutController(jsonDb);
   statusService.setDataConnector(ccdb);
 

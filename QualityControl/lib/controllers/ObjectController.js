@@ -24,9 +24,11 @@ class ObjectController {
    * - CcdbService - retrieve data about objects
    * @param {CcdbServices} db
    */
-  constructor(db) {
+  constructor(db, jsroot) {
     assert(db, 'Missing service for retrieving objects data');
     this.db = db;
+    this.jsroot = jsroot;
+    this.DB_URL = `${this.db.protocol}://${this.db.hostname}:${this.db.port}/`;
   }
 
   /**
@@ -43,6 +45,33 @@ class ObjectController {
       res.status(200).json({info, timestamps});
     } catch (error) {
       errorHandler(error, 'Failed to load data for object', res, 502, 'object');
+    }
+  }
+
+  /**
+   * Use JSROOT to decompress a ROOT object and convert it to JSON to be sent back to
+   * the client for interpretation with JSROOT.draw
+   * @param {Request} req - must contain object path
+   * @param {Response} res 
+   */
+  async getJsonRootObject(req, res) {
+    const id = req.query?.id;
+    const path = req.query?.path;
+    const timestamp = req.query?.timestamp ?? Date.now();
+    if (!id & !path) {
+      const message = 'Missing id or path of the object';
+      errorHandler(message, message, res, 400, 'object');
+      return;
+    }
+    const url = this.DB_URL + (id ? `/download/${id}` : `${path}/${timestamp}`);
+    try {
+      const file = await this.jsroot.openFile(url);
+      const root = await file.readObject("ccdb_object");
+      const rootJson = await this.jsroot.toJSON(root)
+      res.status(200).json(rootJson);
+    }
+    catch (error) {
+      errorHandler(error, 'Unable to read ROOT file', res, 502, 'object');
     }
   }
 }
