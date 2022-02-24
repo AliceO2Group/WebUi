@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global JSROOT, QCG */
+/* global JSROOT */
 
 import {RemoteData} from '/js/src/index.js';
 
@@ -78,35 +78,22 @@ export default class QCObjectService {
       if (timestamp === -1) {
         timestamp = Date.now();
       }
-      const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
-      const t = await this.model.loader.get(`/api/object/root?path=${objectName}&timestamp=${timestamp}`);
-      console.log(t);
-      let [qcObject, object] = await Promise.allSettled([
-        JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
-        this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`),
-      ]);
-     
-      const obj = {
-        qcObject: {},
-        info: {},
-        timestamps: {}
+      const {result, ok, status} =
+        await this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`);
+      if (ok) {
+        const root = await this.model.loader.get(`/api/object/root?id=${result.info.id}`);
+        const obj = {
+          info: result.info,
+          timestamps: result.timestamps,
+          qcObject: JSROOT.parse(root.result)
+        };
+        return RemoteData.success(obj);
+      } else if (status === 404) {
+        return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
       }
-      if (qcObject.status === 'fulfilled') {
-        obj.qcObject = qcObject.value;
-      }
-      if (object.status === 'fulfilled') {
-        const {result, ok, status} = object.value;
-        if (ok) {
-          obj.info = result.info;
-          obj.timestamps = result.timestamps;
-          return RemoteData.success(obj);
-        } if (status === 404) {
-          return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
-        }
-        return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
-      }
-      return RemoteData.success(obj);
+      return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
     } catch (error) {
+      console.error(error);
       return RemoteData.failure(`Object '${objectName}' could not be loaded`);
     }
   }
@@ -118,10 +105,12 @@ export default class QCObjectService {
    */
   async getObjectByNameOnly(objectName) {
     try {
-      const url = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
-      const file = await JSROOT.openFile(url);
-      const obj = await file.readObject("ccdb_object");
-      return RemoteData.success({qcObject: obj});
+      const {result, ok} = await this.model.loader.get(`/api/object/root?path=${objectName}`);
+      if (ok) {
+        return RemoteData.success({qcObject: JSROOT.parse(result)});
+      } else {
+        throw new Error();
+      }
     } catch (error) {
       return RemoteData.failure(`Unable to load object ${objectName}`);
     }
