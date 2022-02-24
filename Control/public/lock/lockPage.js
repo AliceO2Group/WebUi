@@ -57,7 +57,7 @@ const detectorLocks = (model, detectors) =>
   h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
     h('thead',
       h('tr',
-        ['Detector', 'Lock state', 'Running', 'Owner'].map(header => h('th', header)),
+        ['Detector', 'Lock state', 'Running', 'Owner'].map(header => h('th.w-20', header)),
         model.isAllowed(ROLES.Admin) && h('th', 'Admin actions')
       )
     ),
