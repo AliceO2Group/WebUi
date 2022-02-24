@@ -26,10 +26,18 @@ class Lock {
     this.lockedByName = {};
   }
 
+  /**
+   *  Sets WebSocket instance
+   *  @param {object} ws
+   */
   setWs(ws) {
     this.webSocket = ws;
   }
 
+  /**
+   * Provides state of all locks
+   * @returns {object}
+   */
   state() {
     return {
       lockedBy: this.lockedBy,
@@ -52,11 +60,11 @@ class Lock {
   lockDetector(req, res) {
     try {
       if (!('name' in req.body)) {
-        throw new Error('[Lock] Unspecified lock entity');
+        throw new Error('Unspecified lock entity');
       }
       const entity = req.body.name;
       if ('entity' in this.lockedBy) {
-        throw new Error(`[Padlock] Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
+        throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
       }   
       this.lockedBy[entity] = req.session.personid;
       this.lockedByName[entity] = req.session.name;
@@ -77,14 +85,14 @@ class Lock {
   forceUnlock(req, res) {
     try {
       if (!('name' in req.body)) {
-        throw new Error('[Lock] Unspecified lock entity');
+        throw new Error('Unspecified lock entity');
       }
       const entity = req.body.name;
       if ('entity' in this.lockedBy) {
-        throw new Error(`[Padlock] Lock ${entity} is already released`);
+        throw new Error(`Lock ${entity} is already released`);
       }   
       if (!req.session.access.includes('admin')) {
-        throw new Error(`[Padlock] Insufficient permission`);
+        throw new Error(`Insufficient permission`);
       }   
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];
@@ -105,14 +113,14 @@ class Lock {
   unlockDetector(req, res) {
     try {
       if (!('name' in req.body)) {
-        throw new Error('[Lock] Unspecified lock entity');
+        throw new Error('Unspecified lock entity');
       }
       const entity = req.body.name;
       if ('entity' in this.lockedBy) {
-        throw new Error('[Unlock] Lock is already released');
+        throw new Error('Lock is already released');
       }
       if (this.lockedBy[entity] !== req.session.personid) {
-        throw new Error(`[Padlock] ${entity} owner is ${this.lockedByName} (id ${this.lockedBy})`);
+        throw new Error(` ${entity} owner is ${this.lockedByName} (id ${this.lockedBy})`);
       }
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];

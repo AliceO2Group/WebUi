@@ -48,19 +48,33 @@ export const content = (model) => [
   ])
 ];
 
+/**
+ * Table with lock status detetails, buttons to lock them, and admin actions such us "Force lock"
+ * @param {Object} model
+ * @param {Array} detectors List of detectors
+ */
 const detectorLocks = (model, detectors) =>
   h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
-  h('thead',
-    h('tr', h('th', 'Detector'), h('th', 'Lock state'), h('th', 'Running'), h('th', 'Owner'), model.isAllowed(ROLES.Admin) && h('th', 'Admin actions'))
-  ),
-  h('tbody', [detectors &&  detectors.map(detector =>
-    ((model.isAllowed(ROLES.Global) && ((model.detectors.selected == 'GLOBAL') || model.detectors.selected == detector))
-    || model.detectors.authed.includes(detector)) &&
-    h('tr', {style: {background: model.lock.isLockedByMe(detector) ? 'rgba(76, 175, 80, 0.1)' : ''}}, [
-      h('td', {style: 'font-weight: bold'}, detector),
-      h('td', detectorButtonLarge(model, detector, !(model.isAllowed(ROLES.Global) || model.detectors.includes(detector)))),
-      h('td', model.workflow.flpSelection.isDetectorActive(detector) ? 'Yes' : 'No'),
-      h('td', model.lock.getOwner(detector)),
-      model.isAllowed(ROLES.Admin) && h('td', model.lock.isLocked(detector) && h('button.danger', {onclick: () => model.lock.forceUnlock(detector)}, 'Force lock'))
-    ]) 
-  )])); 
+    h('thead',
+      h('tr',
+        ['Detector', 'Lock state', 'Running', 'Owner'].map(header => h('th', header)),
+        model.isAllowed(ROLES.Admin) && h('th', 'Admin actions')
+      )
+    ),
+    h('tbody', [detectors &&  detectors.map(detector =>
+      ((model.isAllowed(ROLES.Global)
+      && ((model.detectors.selected == 'GLOBAL') || model.detectors.selected == detector))
+      || model.detectors.authed.includes(detector)) &&
+      h('tr', {style: {background: model.lock.isLockedByMe(detector) ? 'rgba(76, 175, 80, 0.1)' : ''}}, [
+        h('td', {style: 'font-weight: bold'}, detector),
+        h('td', detectorButtonLarge(
+          model, detector, !(model.isAllowed(ROLES.Global) || model.detectors.includes(detector))
+        )),
+        h('td', model.workflow.flpSelection.isDetectorActive(detector) ? 'Yes' : 'No'),
+        h('td', model.lock.getOwner(detector) || '-'),
+        model.isAllowed(ROLES.Admin)
+        && h('td', model.lock.isLocked(detector)
+        && h('button.danger', {onclick: () => model.lock.forceUnlock(detector)}, 'Force lock'))
+      ])
+    )])
+  );

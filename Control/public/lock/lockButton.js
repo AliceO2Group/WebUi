@@ -16,8 +16,8 @@ import {h} from '/js/src/index.js';
 import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
 
 /**
- * View of lock button, when taken, it shows who owns it
- * Otherwise show a loading button
+ * View of small lock button without background
+ * See "button" for more details
  * @param {Object} model
  * @return {vnode}
  */
@@ -25,16 +25,23 @@ export const detectorButton = (model, name) => [
   model.lock.padlockState.match({
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
-    Success: (data) => button(model, name, data, 'a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker'),
+    Success: (data) => button(model, name, data,
+      'a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker'),
     Failure: (_error) => null,
   })
 ];
 
-export const detectorButtonLarge = (model, name, disabled = false) => [
+/**
+ * View of large lock button
+ * See "button" for more details
+ * @param {Object} model
+ * @return {vnode}
+ */
+export const detectorButtonLarge = (model, name) => [
   model.lock.padlockState.match({
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
-    Success: (data) =>  button(model, name, data, 'button.btn', disabled),
+    Success: (data) =>  button(model, name, data, 'button.btn'),
     Failure: (_error) => null,
   })
 ];
@@ -43,28 +50,20 @@ export const detectorButtonLarge = (model, name, disabled = false) => [
  * Shows lock or unlock icon depending of padlock state (taken or not)
  * Shows also name of owner and its ID on mouse over
  * @param {Object} model
+ * @param {string} name name of the lock
  * @param {Object} padlockState
+ * @param {string} look Class for the lock button
  * @return {vnode}
  */
-const buttonBtn = (model, name, padlockState) => padlockState.lockedBy && name in padlockState.lockedBy
-  ? h('button.btn', {
-    title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
-    onclick: () => model.lock.unlock(name)
-  }, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
-  : h('button.btn', {
-    title: 'Lock is free',
-    onclick: () => { model.lock.lock(name); model.workflows.FlpSelection.unselect(name); }
-  }, iconLockUnlocked());
-
-const button = (model, name, padlockState, look, disabled) => padlockState.lockedBy && name in padlockState.lockedBy
+const button = (model, name, padlockState, look) => padlockState.lockedBy && name in padlockState.lockedBy
   ? h(look, {
     title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
     onclick: () => {
       model.lock.unlock(name);
       model.workflow.flpSelection.unselectDetector(name);
-  }}, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
+    }}, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
   : h(look, {
-    title: 'Lock is free'+disabled,
+    title: 'Lock is free',
     onclick: () => model.lock.lock(name)
   }, iconLockUnlocked());
 /**

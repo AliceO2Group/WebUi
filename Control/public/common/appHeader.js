@@ -13,7 +13,6 @@
 */
 
 import {h, iconPerson} from '/js/src/index.js';
-import {ROLES} from './../workflow/constants.js';
 
 /**
  * Application header (left part): lockpad button and application name

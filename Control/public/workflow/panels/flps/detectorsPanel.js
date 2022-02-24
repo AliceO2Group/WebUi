@@ -44,7 +44,8 @@ const detectorsSelectionArea = (model, list) => {
   return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
     style: 'max-height: 25em;'
   }, [
-    list.filter((name) => (name === model.workflow.model.detectors.selected || !model.workflow.model.detectors.isSingleView()))
+    list.filter(
+      (name) => (name === model.workflow.model.detectors.selected || !model.workflow.model.detectors.isSingleView()))
       .map((name) => detectorItem(model, name))
   ]);
 };
@@ -55,25 +56,27 @@ const detectorsSelectionArea = (model, list) => {
 const detectorItem = (model, name) => {
   let className = '';
   let title = '';
-  if (model.workflow.flpSelection.isDetectorActive(name)) {
-    return;
-  }
-  if (model.lock.isLockedByMe(name)) {
+  let style = 'font-weight: 150;';
+
+  if (model.workflow.flpSelection.isDetectorActive(name)
+    || (model.lock.isLocked(name) && !model.lock.isLockedByMe(name))) {
+    className = 'disabled-item danger';
+    title = 'Detector is running and/or locked';
+  } else if (model.lock.isLockedByMe(name)) {
     if (model.workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {
       className += 'selected ';
-    }
-    if (model.workflow.flpSelection.unavailableDetectors.includes(name)) {
-      className += 'bg-danger white';
-      title = 'Detector from saved configuration is currently unavailable. Please deselect it';
+      title = 'Detector is locked and selected';
     }
   } else {
     className += 'disabled-item ';
     title = 'Detector is not locked';
   }
+
   return h('.flex-row', [
     h('a.w-85.menu-item.w-wrapped', {
       className,
       title,
+      style,
       onclick: () => model.lock.isLockedByMe(name) && model.workflow.flpSelection.toggleDetectorSelection(name),
     }, model.workflow.flpSelection.getDetectorWithIndexes(name)),
     lockButton(model, name)
