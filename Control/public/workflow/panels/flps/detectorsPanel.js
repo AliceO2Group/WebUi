@@ -14,7 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import pageLoading from './../../../common/pageLoading.js';
-import {detectorButton as lockButton} from './../../../lock/lockButton.js';
+import {detectorLockButton} from './../../../lock/lockButton.js';
 
 /**
  * Create a selection area for all detectors retrieved from AliECS
@@ -73,12 +73,12 @@ const detectorItem = (model, name) => {
   }
 
   return h('.flex-row', [
-    h('a.w-85.menu-item.w-wrapped', {
+    h('a.w-90.menu-item.w-wrapped', {
       className,
       title,
       style,
       onclick: () => model.lock.isLockedByMe(name) && model.workflow.flpSelection.toggleDetectorSelection(name),
     }, model.workflow.flpSelection.getDetectorWithIndexes(name)),
-    lockButton(model, name)
+    detectorLockButton(model, name, 'small')
   ]);
 };

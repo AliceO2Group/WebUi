@@ -14,7 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {detectorButtonLarge} from './lockButton.js';
+import {detectorLockButton} from './lockButton.js';
 import {ROLES} from './../workflow/constants.js';
 
 /**
@@ -67,7 +67,7 @@ const detectorLocks = (model, detectors) =>
       || model.detectors.authed.includes(detector)) &&
       h('tr', {style: {background: model.lock.isLockedByMe(detector) ? 'rgba(76, 175, 80, 0.1)' : ''}}, [
         h('td', {style: 'font-weight: bold'}, detector),
-        h('td', detectorButtonLarge(
+        h('td', detectorLockButton(
           model, detector, !(model.isAllowed(ROLES.Global) || model.detectors.includes(detector))
         )),
         h('td', model.workflow.flpSelection.isDetectorActive(detector) ? 'Yes' : 'No'),

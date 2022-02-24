@@ -16,32 +16,17 @@ import {h} from '/js/src/index.js';
 import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
 
 /**
- * View of small lock button without background
+ * View of lock button
  * See "button" for more details
+ * @param {string} size Size 'small' or 'big'
  * @param {Object} model
  * @return {vnode}
  */
-export const detectorButton = (model, name) => [
+export const detectorLockButton = (model, name, size) => [
   model.lock.padlockState.match({
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
-    Success: (data) => button(model, name, data,
-      'a.button.w-10.flex-row.items-center.justify-center.actionable-icon.gray-darker'),
-    Failure: (_error) => null,
-  })
-];
-
-/**
- * View of large lock button
- * See "button" for more details
- * @param {Object} model
- * @return {vnode}
- */
-export const detectorButtonLarge = (model, name) => [
-  model.lock.padlockState.match({
-    NotAsked: () => buttonLoading(),
-    Loading: () => buttonLoading(),
-    Success: (data) =>  button(model, name, data, 'button.btn'),
+    Success: (data) => button(model, name, data, size),
     Failure: (_error) => null,
   })
 ];
@@ -56,16 +41,18 @@ export const detectorButtonLarge = (model, name) => [
  * @return {vnode}
  */
 const button = (model, name, padlockState, look) => padlockState.lockedBy && name in padlockState.lockedBy
-  ? h(look, {
+  ? h(look == 'small' ? 'a.f6.button.flex-row.items-center.justify-center.actionable-icon' : 'button.btn', {
     title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
+    style: look == 'small' && 'width: 20px',
     onclick: () => {
       model.lock.unlock(name);
       model.workflow.flpSelection.unselectDetector(name);
     }}, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
-  : h(look, {
+  : h(look == 'small' ? 'a.f6.button.flex-row.items-center.justify-center.actionable-icon' : 'button.btn', {
     title: 'Lock is free',
+    style: look == 'small' && 'width: 20px',
     onclick: () => model.lock.lock(name)
-  }, iconLockUnlocked());
+  }, iconLockUnlocked('fill-orange'));
 /**
  * Simple loading button
  * @return {vnode}
