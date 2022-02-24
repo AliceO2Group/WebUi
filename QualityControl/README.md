@@ -29,7 +29,7 @@ git clone https://github.com/AliceO2Group/WebUi.git
 5. Install QCG
 ```
 cd WebUi/QualityControl
-npm install
+npm ci
 ```
 4. Copy configuration file and update according to your needs (see next section):
 ```
@@ -38,7 +38,7 @@ cp config-default.js config.js
 
 ### Troubleshooting
 
-Q: When doing `npm install` I have an error `error: no template named 'remove_cv_t' in namespace 'std'; did you mean 'remove_cv'?` or such. 
+Q: When doing `npm ci` I have an error `error: no template named 'remove_cv_t' in namespace 'std'; did you mean 'remove_cv'?` or such. 
 
 A: Make sure you are using nodeJS 14 and not nodeJS 16. 
 
@@ -74,7 +74,7 @@ Specify the connector that should be used for retrieving QC objects. Default val
 npm start
 ```
 
-3. Open a browser and navigate to [http://localhost:8080](http://lo calhost:8080). 
+3. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). 
 
     Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
