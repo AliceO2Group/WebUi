@@ -13,6 +13,7 @@
 */
 
 const assert = require('assert');
+const jsroot = require('jsroot');
 const {errorHandler} = require('../utils.js');
 
 /**
@@ -43,6 +44,30 @@ class ObjectController {
       res.status(200).json({info, timestamps});
     } catch (error) {
       errorHandler(error, 'Failed to load data for object', res, 502, 'object');
+    }
+  }
+
+  /**
+   * Use JSROOT to decompress a ROOT object and convert it to JSON to be sent back to
+   * the client for interpretation with JSROOT.draw
+   * @param {Request} req - must contain object path
+   * @param {Response} res 
+   */
+  async getJsonOfRootObject(req, res) {
+    const path = req.query?.path;
+    const timestamp = req.query?.timestamp || Date.now();
+    if (!path) {
+      const message = 'Missing path of the object';
+      errorHandler(message, message, res, 400, 'object');
+    }
+    try {
+      const url = `http://${this.db.hostname}:${this.db.port}/${path}/${timestamp}`;
+      const file = await jsroot.openFile(url);
+      const root = await file.readObject("ccdb_object");
+      res.json({root, path, timestamp});
+    }
+    catch (error) {
+      errorHandler(error, 'Unable to read ROOT file', res, 502, 'object');
     }
   }
 }

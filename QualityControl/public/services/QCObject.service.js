@@ -79,11 +79,13 @@ export default class QCObjectService {
         timestamp = Date.now();
       }
       const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
+      const t = await this.model.loader.get(`/api/object/root?path=${objectName}&timestamp=${timestamp}`);
+      console.log(t);
       let [qcObject, object] = await Promise.allSettled([
         JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
         this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`),
       ]);
-
+     
       const obj = {
         qcObject: {},
         info: {},
