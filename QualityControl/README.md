@@ -57,10 +57,9 @@ Edit the `http` section to define a custom:
 Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
 
 Edit the `ccdb` section to define a custom:
+- `protocol` - default 'http';
 - `hostname`
 - `port`
-- `plotUrl`
-  - URL with the location from which ROOT Files should be downloaded from e.g. `http://localhost:8083`. If a different host is used (compared to `http` defined one), one should disable the CSP settings of the browser
 - `prefix` - (optional) prefix to use for filtering on pathName
 
 #### Listing Connector
