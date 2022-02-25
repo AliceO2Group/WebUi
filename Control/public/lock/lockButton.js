@@ -49,7 +49,7 @@ const button = (model, name, padlockState, look) => padlockState.lockedBy && nam
       model.lock.isLockedByMe(name) &&
       model.lock.unlock(name) &&
       model.workflow.flpSelection.unselectDetector(name)
-    }, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
+  }, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
   : h(look == 'small' ? 'a.button.flex-row.items-center.justify-center.actionable-icon.gray-darker' : 'button.btn', {
     title: 'Lock is free',
     style: look == 'small' && 'width: 20px',
