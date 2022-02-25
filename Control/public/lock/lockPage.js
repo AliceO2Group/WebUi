@@ -57,7 +57,7 @@ const detectorLocks = (model, detectors) =>
   h('table.table.table-sm', {style: 'white-space: pre-wrap; margin-bottom: 0'},
     h('thead',
       h('tr',
-        ['Detector', 'Lock state', 'Running', 'Owner'].map(header => h('th.w-20', header)),
+        ['Detector', 'Lock state', 'Owner'].map(header => h('th.w-20', header)),
         model.isAllowed(ROLES.Admin) && h('th', 'Admin actions')
       )
     ),
@@ -71,7 +71,6 @@ const detectorLocks = (model, detectors) =>
         h('td', detectorLockButton(
           model, detector, !(model.isAllowed(ROLES.Global) || model.detectors.includes(detector))
         )),
-        h('td', model.workflow.flpSelection.isDetectorActive(detector) ? 'Yes' : 'No'),
         h('td', model.lock.getOwner(detector) || '-'),
         model.isAllowed(ROLES.Admin)
         && h('td', model.lock.isLocked(detector)
