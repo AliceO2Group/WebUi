@@ -41,12 +41,6 @@ describe('`pageEnvironment` test-suite', async () => {
     assert.ok(calls['getEnvironment']);
   });
 
-  it('should have one button for locking', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.strictEqual(lockButton, 'Lock is free');
-  });
-
   it('should have one button for `Shutdown` environment', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
     const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').title);

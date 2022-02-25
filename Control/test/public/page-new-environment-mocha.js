@@ -133,38 +133,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
-  it('should throw error when `Create` button is clicked due to `Control is not locked`', async () => {
-    await page.evaluate(() => document.querySelector('#create-env').click());
-    await page.waitForTimeout(500);
-    const errorOnCreation = await page.evaluate(() => window.model.environment.itemNew);
-    assert.strictEqual(errorOnCreation.kind, 'Failure');
-    assert.strictEqual(errorOnCreation.payload, 'Request to server failed (403 Forbidden): Control is not locked');
-  });
-
-  it('should display error message due to `Control is not locked`', async () => {
-    const errorMessage = await page.evaluate(() => {
-      const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div > div');
-      return {text: errorElement.innerText, classList: errorElement.classList};
-    });
-    assert.strictEqual(errorMessage.text, ' Request to server failed (403 Forbidden): Control is not locked');
-    assert.deepStrictEqual(errorMessage.classList, {0: 'danger'});
-  });
-
   it('should successfully display `Refresh repositories` button', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button', {timeout: 5000});
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
     assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
-  });
-
-  it('should click to refresh repositories but throw error due to `Control is not locked`', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    await page.waitForTimeout(500);
-    const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
-    assert.deepStrictEqual(calls['refreshRepos'], undefined);
-    assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (403 Forbidden): Control is not locked'});
   });
 
   it('should successfully select second repository from dropdown', async () => {
@@ -180,22 +153,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return {text: errorElement.innerText};
     });
     assert.strictEqual(errorMessage.text.trim(), 'No revisions found for the selected repository');
-  });
-
-  it('should successfully request LOCK', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitForTimeout(500);
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.deepStrictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
-  });
-
-  it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
-    assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (403 Forbidden): Control is not locked'});
-    assert.deepStrictEqual(calls['listRepos'], undefined);
   });
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
@@ -451,14 +408,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
     assert.ok(calls['newEnvironment']);
     assert.ok(calls['getEnvironment']);
-  });
-
-  it('should successfully release LOCK', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitForTimeout(500);
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.deepStrictEqual(lockButton, 'Lock is free');
   });
 
   /**
