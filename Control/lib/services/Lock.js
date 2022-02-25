@@ -63,7 +63,7 @@ class Lock {
         throw new Error('Unspecified lock entity');
       }
       const entity = req.body.name;
-      if ('entity' in this.lockedBy) {
+      if (entity in this.lockedBy) {
         throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
       }   
       this.lockedBy[entity] = req.session.personid;
@@ -88,7 +88,7 @@ class Lock {
         throw new Error('Unspecified lock entity');
       }
       const entity = req.body.name;
-      if ('entity' in this.lockedBy) {
+      if (!(entity in this.lockedBy)) {
         throw new Error(`Lock ${entity} is already released`);
       }   
       if (!req.session.access.includes('admin')) {
@@ -116,11 +116,11 @@ class Lock {
         throw new Error('Unspecified lock entity');
       }
       const entity = req.body.name;
-      if ('entity' in this.lockedBy) {
+      if (!(entity in this.lockedBy)) {
         throw new Error('Lock is already released');
       }
       if (this.lockedBy[entity] !== req.session.personid) {
-        throw new Error(` ${entity} owner is ${this.lockedByName} (id ${this.lockedBy})`);
+        throw new Error(`${entity} owner is ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
       }
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];

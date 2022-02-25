@@ -65,7 +65,7 @@ const detectorLocks = (model, detectors) =>
       ((model.isAllowed(ROLES.Global)
       && ((model.detectors.selected == 'GLOBAL') || model.detectors.selected == detector))
       || model.detectors.authed.includes(detector)) &&
-      h('tr', {style: {background: model.lock.isLockedByMe(detector) ? 'rgba(76, 175, 80, 0.1)' : ''}}, [
+      h('tr', {style: {background: model.lock.isLockedByMe(detector) ? 'rgba(76, 175, 80, 0.1)' : model.lock.isLocked(detector) ? 'rgba(239, 130, 57, 0.1)' : ''}}, [
         h('td', {style: 'font-weight: bold'}, detector),
         h('td', detectorLockButton(
           model, detector, !(model.isAllowed(ROLES.Global) || model.detectors.includes(detector))

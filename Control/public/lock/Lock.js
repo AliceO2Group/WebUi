@@ -96,9 +96,6 @@ export default class Lock extends Observable {
    * Result of this action will be an update by WS
    */
   async lock(entity) {
-    this.padlockState = RemoteData.loading();
-    this.notify();
-
     const {result, ok} = await this.model.loader.post(`/api/lock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
@@ -129,9 +126,6 @@ export default class Lock extends Observable {
    * Result of this action will be an update by WS
    */
   async unlock(entity) {
-    this.padlockState = RemoteData.loading();
-    this.notify();
-
     const {result, ok} = await this.model.loader.post(`/api/unlock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');

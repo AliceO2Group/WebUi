@@ -60,7 +60,7 @@ const detectorItem = (model, name) => {
 
   if (model.workflow.flpSelection.isDetectorActive(name)
     || (model.lock.isLocked(name) && !model.lock.isLockedByMe(name))) {
-    className = 'disabled-item danger';
+    className = 'disabled-item warning';
     title = 'Detector is running and/or locked';
   } else if (model.lock.isLockedByMe(name)) {
     if (model.workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {

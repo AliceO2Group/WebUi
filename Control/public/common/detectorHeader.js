@@ -14,6 +14,7 @@
 
 import {h, iconPencil} from '/js/src/index.js';
 import {detectorLockButton} from './../lock/lockButton.js';
+import {ROLES} from './../workflow/constants.js';
 
 /**
  * Component which will display selected detectors to filter data based on
@@ -32,6 +33,7 @@ const detectorHeader = (model) => {
         h('a.f6.actionable-icon', {
           onclick: () => model.resetDetectorView('')
         }, iconPencil()),
+        h('', {style: {width: '4px'}}),
         model.workflow.model.detectors.isSingleView() && detectorLockButton(model, selected, 'small')
       )
     ])

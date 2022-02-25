@@ -27,7 +27,7 @@ export const detectorLockButton = (model, name, size) => [
     NotAsked: () => buttonLoading(),
     Loading: () => buttonLoading(),
     Success: (data) => button(model, name, data, size),
-    Failure: (_error) => null,
+    Failure: (_error) => null
   })
 ];
 
@@ -41,18 +41,20 @@ export const detectorLockButton = (model, name, size) => [
  * @return {vnode}
  */
 const button = (model, name, padlockState, look) => padlockState.lockedBy && name in padlockState.lockedBy
-  ? h(look == 'small' ? 'a.f6.button.flex-row.items-center.justify-center.actionable-icon' : 'button.btn', {
+  ? h(look == 'small' ? 'a.button.flex-row.items-center.justify-center.actionable-icon' : 'button.btn', {
     title: `Lock is taken by ${padlockState.lockedByName[name]} (id ${padlockState.lockedBy[name]})`,
     style: look == 'small' && 'width: 20px',
-    onclick: () => {
-      model.lock.unlock(name);
-      model.workflow.flpSelection.unselectDetector(name);
-    }}, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
-  : h(look == 'small' ? 'a.f6.button.flex-row.items-center.justify-center.actionable-icon' : 'button.btn', {
+    disabled: !model.lock.isLockedByMe(name),
+    onclick: () =>
+      model.lock.isLockedByMe(name) &&
+      model.lock.unlock(name) &&
+      model.workflow.flpSelection.unselectDetector(name)
+    }, model.lock.isLockedByMe(name) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'))
+  : h(look == 'small' ? 'a.button.flex-row.items-center.justify-center.actionable-icon.gray-darker' : 'button.btn', {
     title: 'Lock is free',
     style: look == 'small' && 'width: 20px',
     onclick: () => model.lock.lock(name)
-  }, iconLockUnlocked('fill-orange'));
+  }, iconLockUnlocked());
 /**
  * Simple loading button
  * @return {vnode}
