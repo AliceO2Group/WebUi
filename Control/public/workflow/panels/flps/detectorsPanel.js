@@ -36,8 +36,8 @@ export default (model) => {
 
 /**
  * Display an area with selectable elements representing detectors
- * @param {Array<string>} list
  * @param {Object} model
+ * @param {Array<string>} list
  * @return {vnode}
  */
 const detectorsSelectionArea = (model, list) => {
