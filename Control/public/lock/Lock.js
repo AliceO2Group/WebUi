@@ -30,9 +30,9 @@ export default class Lock extends Observable {
   }
 
   /**
-   * Provides name of lock holder
-   * @param {string} name Lock entity
-   * @returns {string} Name of lock holder
+   * Provides name and surname of lock holder
+   * @param {string} name Lock name/entity
+   * @returns {string} Name and surname as provided from SSO
    */
   getOwner(name) {
     if (this.padlockState.kind === 'Success' &&
@@ -46,7 +46,7 @@ export default class Lock extends Observable {
 
   /**
    * State whether given lock is in locked state
-   * @param {string} name Lock entity
+   * @param {string} name Lock name/entity
    * @returns {bool}
    */
   isLocked(name) {
@@ -57,7 +57,7 @@ export default class Lock extends Observable {
 
   /**
    * States whether given lock is locked by current user
-   * @param {string} name Lock entity
+   * @param {string} name Lock name/entity
    * @returns {bool}
    */
   isLockedByMe(name) {
