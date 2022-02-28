@@ -29,10 +29,9 @@ const detectorHeader = (model) => {
     },[
       h('h4.f5.flex-row', {style: 'justify-content: center;'},
         h('.ph2', `Detector View: ${selected}`),
-        h('a.f6.actionable-icon', {
+        h('a.f6.actionable-icon.ph2', {
           onclick: () => model.resetDetectorView('')
         }, iconPencil()),
-        h('', {style: {width: '4px'}}),
         model.workflow.model.detectors.isSingleView() && detectorLockButton(model, selected, 'small')
       )
     ])
