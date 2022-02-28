@@ -49,6 +49,7 @@ describe('`pageLock` test-suite', async () => {
   });
 
   it('force unlock detector', async () => {
+    await page.waitForSelector('.danger');
     await page.evaluate(() =>  document.querySelector('.danger').click());
     isLocked = await page.evaluate(() => window.model.lock.isLockedByMe('ODC'));
     assert.ok(!isLocked);
