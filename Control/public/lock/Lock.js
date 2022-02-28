@@ -110,9 +110,6 @@ export default class Lock extends Observable {
    * Other peers will be notified by WS
    */
   async forceUnlock(entity) {
-    this.padlockState = RemoteData.loading();
-    this.notify();
-
     const {result, ok} = await this.model.loader.post(`/api/forceUnlock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
