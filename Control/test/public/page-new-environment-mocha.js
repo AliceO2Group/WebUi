@@ -113,6 +113,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have `Create` button disabled due to no selected workflow', async () => {
+    await page.waitForSelector('#create-env');
     const button = await page.evaluate(() => {
       const button = document.querySelector('#create-env');
       return {title: button.title, classList: button.classList, disabled: button.disabled};
