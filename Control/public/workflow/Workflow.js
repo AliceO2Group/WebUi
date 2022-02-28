@@ -551,8 +551,17 @@ export default class Workflow extends Observable {
         ) {
           this.flpSelection.detectorViewConfigurationError = true;
         } else {
-          await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
-          this.addVariableJSON(JSON.stringify(variables));
+          const unavailableDetectors = detectors.filter(name =>
+            this.flpSelection.isDetectorActive(name)
+            || !(!this.model.lock.isLocked(name) || this.model.lock.isLockedByMe(name))
+          );
+          if (unavailableDetectors.length <= 0 || (unavailableDetectors.length > 0 && confirm(
+            `The following detectors are not available: ${unavailableDetectors.join(',')}\nDo you want to continue?`)
+          )) {
+            detectors.forEach(detector => this.model.lock.lock(detector));
+            await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
+            this.addVariableJSON(JSON.stringify(variables));
+          }
         }
         this.loadingConfiguration = RemoteData.notAsked();
       } catch (error) {

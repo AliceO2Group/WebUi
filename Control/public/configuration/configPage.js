@@ -420,5 +420,6 @@ Thus, all parameters will be provided to o2-roc-config and NOT only the links.
 Are you sure you would like to continue?`)
         && model.configuration.saveAndConfigureCRUs()
     },
-    disabled: model.configuration.configurationRequest.isLoading(),
+    disabled: model.configuration.configurationRequest.isLoading()
+    || (model.workflow.model.detectors.isSingleView() && !model.lock.isLockedByMe(model.detectors.selected)),
   }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Save & Configure');

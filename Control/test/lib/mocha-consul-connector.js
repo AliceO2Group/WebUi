@@ -256,42 +256,6 @@ describe('ConsulConnector test suite', () => {
       consulService = {};
       padLock = {};
     });
-    it('should return 403 due to lock not being taken', async () => {
-      padLock.lockedBy = null;
-
-      const connector = new ConsulConnector(consulService, config, padLock);
-      await connector.saveCRUsConfiguration(null, res);
-
-      assert.ok(res.status.calledWith(403));
-      assert.ok(res.send.calledWith({message: `Control is not locked`}));
-    });
-    it('should return 403 due to lock not being taken', async () => {
-      padLock.lockedBy = undefined;
-
-      const connector = new ConsulConnector(consulService, config, padLock);
-      await connector.saveCRUsConfiguration(null, res);
-
-      assert.ok(res.status.calledWith(403));
-      assert.ok(res.send.calledWith({message: `Control is not locked`}));
-    });
-    it('should return 403 due to PadLock not being configured in ConsulConnector', async () => {
-      const connector = new ConsulConnector(consulService, config);
-      await connector.saveCRUsConfiguration(null, res);
-
-      assert.ok(res.status.calledWith(403));
-      assert.ok(res.send.calledWith({message: `Control is not locked`}));
-    });
-    it('should return 403 due to lock being taken by a different user', async () => {
-      padLock.lockedBy = 22;
-      padLock.lockedByName = 'ALICE';
-      const req = {session: {personId: 11}};
-
-      const connector = new ConsulConnector(consulService, config, padLock);
-      await connector.saveCRUsConfiguration(req, res);
-
-      assert.ok(res.status.calledWith(403));
-      assert.ok(res.send.calledWith({message: `Control is locked by ALICE`}));
-    });
     // it('should successfully save empty configuration with lock taken', async () => {
     //   consulService.putListOfKeyValues = sinon.stub().resolves();
     //   consulService.

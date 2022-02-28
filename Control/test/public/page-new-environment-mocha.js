@@ -113,6 +113,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have `Create` button disabled due to no selected workflow', async () => {
+    await page.waitForSelector('#create-env');
     const button = await page.evaluate(() => {
       const button = document.querySelector('#create-env');
       return {title: button.title, classList: button.classList, disabled: button.disabled};
@@ -133,22 +134,14 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
-  it('should throw error when `Create` button is clicked due to `Control is not locked`', async () => {
-    await page.evaluate(() => document.querySelector('#create-env').click());
-    await page.waitForTimeout(500);
-    const errorOnCreation = await page.evaluate(() => window.model.environment.itemNew);
-    assert.strictEqual(errorOnCreation.kind, 'Failure');
-    assert.strictEqual(errorOnCreation.payload, 'Request to server failed (403 Forbidden): Control is not locked');
-  });
-
-  it('should display error message due to `Control is not locked`', async () => {
-    const errorMessage = await page.evaluate(() => {
-      const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div > div');
-      return {text: errorElement.innerText, classList: errorElement.classList};
+  it('should have `Create` button disabled due to no selected detectors', async () => {
+    await page.waitForSelector('#create-env');
+    const button = await page.evaluate(() => {
+      const button = document.querySelector('#create-env');
+      const selected = window.model.workflow.flpSelection.selectedDetectors.length;
+      return {disabled: button.disabled, noSelected: selected};
     });
-    assert.strictEqual(errorMessage.text, ' Request to server failed (403 Forbidden): Control is not locked');
-    assert.deepStrictEqual(errorMessage.classList, {0: 'danger'});
+    assert.ok(button.noSelected || button.disabled);
   });
 
   it('should successfully display `Refresh repositories` button', async () => {
@@ -156,15 +149,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
     assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
-  });
-
-  it('should click to refresh repositories but throw error due to `Control is not locked`', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    await page.waitForTimeout(500);
-    const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
-    assert.deepStrictEqual(calls['refreshRepos'], undefined);
-    assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (403 Forbidden): Control is not locked'});
   });
 
   it('should successfully select second repository from dropdown', async () => {
@@ -180,22 +164,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return {text: errorElement.innerText};
     });
     assert.strictEqual(errorMessage.text.trim(), 'No revisions found for the selected repository');
-  });
-
-  it('should successfully request LOCK', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitForTimeout(500);
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.deepStrictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
-  });
-
-  it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
-    assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (403 Forbidden): Control is not locked'});
-    assert.deepStrictEqual(calls['listRepos'], undefined);
   });
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
@@ -400,10 +368,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully disable active detectors from the list', async () => {
-    const detectorClass = await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a:nth-child(2)').classList);
-    const expectedClasses = {0: 'menu-item', 1: 'disabled-item'};
-    assert.deepStrictEqual(detectorClass, expectedClasses)
+    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > a:nth-child(1)').classList);
+    assert.ok(Object.values(detectorClass).includes('menu-item'));
+    assert.ok(Object.values(detectorClass).includes('disabled-item'));
   });
 
   it('should have an empty list of hosts before detector selection', async () => {
@@ -411,9 +378,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps.kind, 'NotAsked');
   });
 
-  it('should successfully select a detector and request a list of hosts for that detector', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
+  it('should not select a detector that is not locked', async () => {
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
+    assert.ok(selectedDet.length == 0, 'Detector selected without lock');
+    await page.waitForTimeout(500);
+  });
+
+  it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
     await page.waitForTimeout(500);
@@ -451,14 +425,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
     assert.ok(calls['newEnvironment']);
     assert.ok(calls['getEnvironment']);
-  });
-
-  it('should successfully release LOCK', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitForTimeout(500);
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.deepStrictEqual(lockButton, 'Lock is free');
   });
 
   /**

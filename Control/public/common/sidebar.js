@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 import {
   iconGridTwoUp, iconGridThreeUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog,
-  iconCalculator
+  iconCalculator, iconLockLocked
 } from '/js/src/icons.js';
 
 /**
@@ -33,6 +33,9 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
     model.sideBarMenu ? 'Hardware' : 'HDW'),
   menuItem(model, 'Links', 'configuration', iconCog()),
   menuItem(model, 'FLPs', 'hardware', iconCalculator()),
+  h('h5.menu-title-large.mh1',
+    model.sideBarMenu ? 'Admin' : 'ADM'),
+  menuItem(model, 'Locks', 'locks', iconLockLocked()),
   h('', {style: 'flex-grow:1'}), // empty item to fill in space
   menuItem(model, 'About', 'about', iconExcerpt()),
   collapseSidebarMenuItem(model),

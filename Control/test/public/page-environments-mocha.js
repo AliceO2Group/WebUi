@@ -76,21 +76,5 @@ describe('`pageEnvironments` test-suite', () => {
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
     });
-
-    it('should click LOCK button', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitForTimeout(500);
-      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
-    });
-
-    it('should click LOCK button to remove control', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitForTimeout(500);
-      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is free');
-    });
   });
 });

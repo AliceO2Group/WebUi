@@ -76,7 +76,7 @@ const showNewEnvironmentForm = (model, repoList) => [
           templateAreaList(model.workflow, model.workflow.form.repository, model.workflow.form.revision)
         ]),
       ]),
-      !model.workflow.isQcWorkflow && h('.template-selection', detectorsPanel(model.workflow)),
+      !model.workflow.isQcWorkflow && h('.template-selection', detectorsPanel(model)),
       !model.workflow.isQcWorkflow && h('.template-selection', flpSelectionPanel(model.workflow)),
     ]),
     model.workflow.form.template && workflowSettingsPanels(model.workflow)
@@ -197,7 +197,9 @@ const actionsPanel = (model) =>
  */
 const btnCreateEnvironment = (model) => h('button.btn.btn-primary#create-env', {
   class: model.environment.itemNew.isLoading() ? 'loading' : '',
-  disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
+  disabled: model.environment.itemNew.isLoading() ||
+    !model.workflow.form.isInputSelected() ||
+    model.workflow.flpSelection.selectedDetectors.length <= 0,
   onclick: () => model.workflow.createNewEnvironment(),
   title: 'Create environment based on selected workflow'
 }, 'Create');

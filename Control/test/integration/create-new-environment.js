@@ -78,9 +78,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.evaluate(() => window.model.workflow.form.variables);
   });
 
-  it('should have successfully select first detector by default from area list', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
+  it('should have successfully lock and select detector from area list', async () => {
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.waitForTimeout(500);
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
     await page.waitForTimeout(500);

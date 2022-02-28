@@ -13,6 +13,7 @@
 */
 
 import {h, iconPencil} from '/js/src/index.js';
+import {detectorLockButton} from './../lock/lockButton.js';
 
 /**
  * Component which will display selected detectors to filter data based on
@@ -28,9 +29,10 @@ const detectorHeader = (model) => {
     },[
       h('h4.f5.flex-row', {style: 'justify-content: center;'},
         h('.ph2', `Detector View: ${selected}`),
-        h('a.f6.actionable-icon', {
+        h('a.f6.actionable-icon.ph2', {
           onclick: () => model.resetDetectorView('')
-        }, [iconPencil()])
+        }, iconPencil()),
+        model.workflow.model.detectors.isSingleView() && detectorLockButton(model, selected, 'small')
       )
     ])
   }

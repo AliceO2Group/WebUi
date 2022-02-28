@@ -171,6 +171,7 @@ describe('Control', function() {
   // require('./public/page-configuration-mocha');
   require('./public/page-tasks-mocha');
   require('./public/page-hardware-mocha');
+  require('./public/page-lock-mocha');
 
   beforeEach(() => this.ok = true);
 

@@ -16,6 +16,7 @@ import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {detectorHeader} from '../common/detectorHeader.js';
+import {ROLES} from './../workflow/constants.js';
 
 /**
  * @file Page to Hardware (content and header)
@@ -58,7 +59,10 @@ export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
 const detectorPanels = (model, detectors) => [
   Object.keys(detectors)
     .sort()
-    .filter((detector) => (detector === model.detectors.selected || model.detectors.selected === 'GLOBAL'))
+    .filter((detector) =>
+      detector === model.detectors.selected
+      || model.detectors.selected === 'GLOBAL'
+      || model.session.role == ROLES.Guest)
     .map((detector) => {
       const flps = detectors[detector];
       return h('.w-100', [

@@ -26,7 +26,7 @@ class ConsulConnector {
    * @param {JSON} config
    * @param {Padlock} padlock
    */
-  constructor(consulService, config, padLock = undefined) {
+  constructor(consulService, config) {
     this.consulService = consulService;
     this.config = getConsulConfig({consul: config});
     this.flpHardwarePath = this.config.flpHardwarePath;
@@ -35,8 +35,6 @@ class ConsulConnector {
     this.qcPath = this.config.qcPath;
     this.readoutPath = this.config.readoutPath;
     this.kVPrefix = this.config.kVPrefix;
-
-    this.padLock = padLock;
   }
 
   /**
@@ -203,27 +201,19 @@ class ConsulConnector {
    * @param {Response} res
    */
   async saveCRUsConfiguration(req, res) {
-    if (this.padLock?.lockedBy === null || this.padLock?.lockedBy === undefined) {
-      errorHandler('Control is not locked', res, 403);
-      return false;
-    } else if (req.session.personid != this.padLock.lockedBy) {
-      errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
-      return false;
-    } else {
-      // Get the latest version of the configuraiton
-      const latestCardsByHost = await this._getCardsByHost();
-      const latestCrusByHost = this._mapCrusWithId(latestCardsByHost);
-      const latestCrusWithConfigByHost = await this._getCrusConfigById(latestCrusByHost);
+    // Get the latest version of the configuraiton
+    const latestCardsByHost = await this._getCardsByHost();
+    const latestCrusByHost = this._mapCrusWithId(latestCardsByHost);
+    const latestCrusWithConfigByHost = await this._getCrusConfigById(latestCrusByHost);
 
-      const crusByHost = req.body;
-      const keyValues = this._mapToKVPairs(crusByHost, latestCrusWithConfigByHost);
-      try {
-        await this.consulService.putListOfKeyValues(keyValues);
-        log.info('Successfully saved configuration links');
-        res.status(200).json({info: {message: 'CRUs Configuration saved'}});
-      } catch (error) {
-        errorHandler(error, res, 502);
-      }
+    const crusByHost = req.body;
+    const keyValues = this._mapToKVPairs(crusByHost, latestCrusWithConfigByHost);
+    try {
+      await this.consulService.putListOfKeyValues(keyValues);
+      log.info('Successfully saved configuration links');
+      res.status(200).json({info: {message: 'CRUs Configuration saved'}});
+    } catch (error) {
+      errorHandler(error, res, 502);
     }
   }
 
