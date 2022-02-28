@@ -18,7 +18,7 @@ import {detectorLockButton} from './lockButton.js';
 import {ROLES} from './../workflow/constants.js';
 
 /**
- * @file Header of the Task Page that displays the title and 2 clean operations
+ * @file Page that displays detector lock details
  */
 
 /**
@@ -36,8 +36,7 @@ export const header = (model) => [
 ];
 
 /**
- * Content
- * Show loading or error on other cases
+ * Content - displays table with detector locks
  * @param {Object} model
  * @return {vnode}
  */
