@@ -80,6 +80,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should have successfully lock and select detector from area list', async () => {
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.waitForTimeout(500);
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
