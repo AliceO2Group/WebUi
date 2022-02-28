@@ -34,10 +34,10 @@ module.exports = {
   listingConnector: 'ccdb', // ccdb or mysql or amore (default mysql) for listing objects
 
   ccdb: {
+    protocol: 'http',
     hostname: 'localhost',
     port: 8080,
     prefix: 'qc',
-    plotUrl: 'localhost/ccdb'
   },
 
   // consul: {

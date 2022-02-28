@@ -12,7 +12,9 @@
  */
 
 const LayoutController = require('./LayoutController');
+const ObjectController = require('./ObjectController');
 
 module.exports = {
   LayoutController,
+  ObjectController
 };

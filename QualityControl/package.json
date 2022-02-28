@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -24,11 +24,11 @@
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
-    "mocha": "mocha --exit test/**/mocha-*"
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js') "
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.21.5",
-    "jsroot": "^6.3.3"
+    "jsroot": "^6.3.4"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui",

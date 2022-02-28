@@ -419,8 +419,11 @@ export default class Workflow extends Observable {
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
       return !isVariableDetector || isVariableIncludedDetector;
     }
-    if (this.model.detectors.selected) {
-      // TODO when detector view will be enabled
+    if (this.model.detectors.selected && this.model.detectors.selected !== 'GLOBAL') {
+      const prefix = key.split('_')[0];
+      const isVariableDetector = this.flpSelection.detectors.payload
+        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+      return !isVariableDetector || this.model.detectors.selected.toLocaleUpperCase() === prefix.toLocaleUpperCase();
     }
     return true;
   }
