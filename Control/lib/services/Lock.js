@@ -54,16 +54,16 @@ class Lock {
   } 
 
   /** 
-   * Method to try to acquire lock
-   * @param {Request} req
+   * Method to try to acquire lock with given name
+   * @param {Request} req - expects lock name under req.body.name
    * @param {Response} res
    */
   lockDetector(req, res) {
     try {
-      if (!('name' in req.body)) {
+      const entity = req.body?.name;
+      if (!entity) {
         throw new Error('Unspecified lock entity');
       }
-      const entity = req.body.name;
       if (entity in this.lockedBy) {
         throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
       }   
@@ -78,16 +78,16 @@ class Lock {
   }
 
   /** 
-   * Method to try to release lock
-   * @param {Request} req
+   * Method to try to release lock with given name
+   * @param {Request} req - expects lock name under req.body.name
    * @param {Response} res
   */
   forceUnlock(req, res) {
     try {
-      if (!('name' in req.body)) {
+      const entity = req.body?.name;
+      if (!entity) {
         throw new Error('Unspecified lock entity');
       }
-      const entity = req.body.name;
       if (!(entity in this.lockedBy)) {
         throw new Error(`Lock ${entity} is already released`);
       }   
@@ -105,16 +105,16 @@ class Lock {
   }
 
   /** 
-   * Method to try to release lock
-   * @param {Request} req
+   * Method to try to release lock with given name
+   * @param {Request} req - expects lock name under req.body.name
    * @param {Response} res
    */
   unlockDetector(req, res) {
     try {
-      if (!('name' in req.body)) {
+      const entity = req.body?.name;
+      if (!entity) {
         throw new Error('Unspecified lock entity');
       }
-      const entity = req.body.name;
       if (!(entity in this.lockedBy)) {
         throw new Error('Lock is already released');
       }
