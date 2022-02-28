@@ -134,6 +134,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
+  it('should have `Create` button disabled due to no selected detectors', async () => {
+    await page.waitForSelector('#create-env');
+    const button = await page.evaluate(() => {
+      const button = document.querySelector('#create-env');
+      const selected = window.model.workflow.flpSelection.selectedDetectors.length;
+      return {disabled: button.disabled, noSelected: selected};
+    });
+    assert.ok(button.noSelected || button.disabled);
+  });
+
   it('should successfully display `Refresh repositories` button', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button', {timeout: 5000});
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
