@@ -13,6 +13,7 @@
 */
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lockservice`);
+const {errorHandler} = require('./../utils.js');
 
 /**
  * Model representing the lock of the UI, one owner at a time
@@ -72,8 +73,7 @@ class Lock {
       this.broadcastLockState();
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`Unable to lock by ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.message});
+      errorHandler(`Unable to lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }
   }
 
@@ -100,8 +100,7 @@ class Lock {
       this.broadcastLockState();
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`Unable to force lock by ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.message});
+      errorHandler(`Unable to force lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }   
   }
 
@@ -128,8 +127,7 @@ class Lock {
       this.broadcastLockState();
       res.status(200).json({ok: true});
     } catch (error) {
-      log.error(`Unable to give away lock to ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.message});
+      errorHandler(`Unable to give away lock to ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }   
   }
 }
