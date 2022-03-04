@@ -43,14 +43,15 @@ openId: {
 7. Click on green ("Add group to role") icon
 8. Add `alice-member` group to "Linked Groups"
 
-#### Admin role
+#### Admin and other roles
 1. Go to https://application-portal.web.cern.ch
 2. Edit your application
 3. "Add role"
-4. Provide: "Role Name" and "Description", set ""Role Identifier" as `admin`
+4. Provide: "Role Name" and "Description", set "Role Identifier" as `admin` or any other role supported by your application
 5. Set Minimum Level Of Assurance to most right ("CERN") and submit
 6. Click on green ("Add group to role") icon
-7. Select e-group to be granted with GUI admin access and add it to "Linked Groups"
+7. Select e-group to be granted with GUI admin or special access and add it to "Linked Groups"
+8. On the frontend, list of roles is available in Session service
 
 
 Additional details are available in here: https://auth.docs.cern.ch/user-documentation/oidc/config/

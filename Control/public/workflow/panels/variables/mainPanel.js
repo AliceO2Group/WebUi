@@ -15,7 +15,8 @@
 import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
 import advancedVarsPanel from './advancedPanel.js';
-import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
+import loadConfigurationPanel from '../loadConfiguration/loadConfiguration.js';
+
 
 /**
  * Builds a custom set of panels build based on the user's selection of template
@@ -28,7 +29,8 @@ import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
 export default (workflow) => {
   let basicPanelKey = '';
   Object.keys(workflow.groupedPanels).forEach((key) => {
-    if (key.toLocaleUpperCase() === 'BASIC_CONFIGURATION' || key.toLocaleUpperCase() === 'BASICCONFIGURATION') {
+    if (['BASIC_CONFIGURATION', 'BASICCONFIGURATION', 'GENERAL_CONFIGURATION', 'GENERAL_CONFIGURATION']
+      .indexOf(key.toLocaleUpperCase()) > -1) {
       basicPanelKey = key;
       workflow.panelsUtils[key].isVisible = true;
     }
@@ -108,9 +110,16 @@ const basicPanel = (workflow, variables, name) => {
     h('.p2.panel.text-left', [
       variables
         .filter((variable) => workflow.isVariableVisible(variable.key))
+        .filter((variable) => {
+          try {
+            return eval(variable.isVisible);
+          } catch (error) {
+            console.error(error);
+            return false;
+          }
+        })
         .map((variable) => h('.auto-built-row.p1', autoBuiltBox(variable, workflow.model))),
-      !workflow.isQcWorkflow && readoutPanel(workflow),
-      !workflow.isQcWorkflow && qcUriPanel(workflow)
+      loadConfigurationPanel(workflow),
     ]),
   ]);
 };

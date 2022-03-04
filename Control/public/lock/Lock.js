@@ -20,7 +20,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class Lock extends Observable {
   /**
    * Initialize lock state to NotAsked
- * @param {Observable} model
+   * @param {Observable} model
    */
   constructor(model) {
     super();
@@ -29,6 +29,41 @@ export default class Lock extends Observable {
     this.padlockState = RemoteData.notAsked(); // {lockedBy, lockedByName}
   }
 
+  /**
+   * Provides name and surname of lock holder
+   * @param {string} name Lock name/entity
+   * @returns {string} Name and surname as provided from SSO
+   */
+  getOwner(name) {
+    if (this.padlockState.kind === 'Success' &&
+      this.padlockState.payload.lockedBy &&
+      name in this.padlockState.payload.lockedByName) {
+      return this.padlockState.payload.lockedByName[name];
+    } else {
+      return '';
+    }
+  }
+
+  /**
+   * State whether given lock is in locked state
+   * @param {string} name Lock name/entity
+   * @returns {bool}
+   */
+  isLocked(name) {
+    return this.padlockState.kind === 'Success' &&
+      this.padlockState.payload.lockedBy &&
+      name in this.padlockState.payload.lockedBy;
+  }
+
+  /**
+   * States whether given lock is locked by current user
+   * @param {string} name Lock name/entity
+   * @returns {bool}
+   */
+  isLockedByMe(name) {
+    return this.isLocked(name) &&
+      this.model.session.personid === this.padlockState.payload.lockedBy[name];
+  }
   /**
    * Set padlock state from ajax or websocket as a RemoteData
    * @param {string} padlockState - object representing PadLock from server
@@ -60,49 +95,40 @@ export default class Lock extends Observable {
    * Ask server to get the lock of Control
    * Result of this action will be an update by WS
    */
-  async lock() {
-    this.padlockState = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/lock`);
+  async lock(entity) {
+    const {result, ok} = await this.model.loader.post(`/api/lock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
       return;
     }
 
-    this.model.notification.show(`Lock taken`, 'success');
+    this.model.notification.show(`Lock ${entity} taken`, 'success');
   }
 
   /**
    * Force Control lock (eg. if someone left the lock in locked state)
    * Other peers will be notified by WS
    */
-  async forceUnlock() {
-    this.padlockState = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/forceUnlock`);
+  async forceUnlock(entity) {
+    const {result, ok} = await this.model.loader.post(`/api/forceUnlock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
       return;
     }
-    this.model.notification.show(`Lock forced`, 'success');
+    this.model.notification.show(`Lock ${entity} forced`, 'success');
   }
 
   /**
    * Ask server to release the lock of Control
    * Result of this action will be an update by WS
    */
-  async unlock() {
-    this.padlockState = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/unlock`);
+  async unlock(entity) {
+    const {result, ok} = await this.model.loader.post(`/api/unlock`, {name: entity});
     if (!ok) {
       this.model.notification.show(result.message, 'danger');
       return;
     }
 
-    this.model.notification.show(`Lock released`, 'success');
+    this.model.notification.show(`Lock ${entity} released`, 'success');
   }
 }

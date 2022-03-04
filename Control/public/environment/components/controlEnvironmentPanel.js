@@ -26,7 +26,7 @@ export const controlEnvironmentPanel = (environment, item) => h('.mv2.pv3.ph2', 
       [
         controlButton('.btn-success', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
         controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
-        controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'STANDBY'), ' ',
+        controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'DEPLOYED'), ' ',
         controlButton('', environment, item, 'RESET', 'RESET', 'CONFIGURED'), ' '
       ]
     ),
@@ -80,7 +80,7 @@ const shutdownEnvButton = (environment, item) =>
     id: 'buttonShutdown',
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
-    style: {display: (item.state === 'CONFIGURED' || item.state == 'STANDBY') ? '' : 'none'},
+    style: {display: (item.state === 'CONFIGURED' || item.state == 'DEPLOYED') ? '' : 'none'},
     onclick: () => environment.destroyEnvironment({id: item.id}),
     title: 'Shutdown environment'
   }, 'SHUTDOWN');

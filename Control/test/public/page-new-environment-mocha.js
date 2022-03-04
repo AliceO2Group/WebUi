@@ -58,6 +58,23 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.ok(calls['getActiveDetectors']);
   });
 
+  it('should verify default role', async () => {
+    const role = await page.evaluate(() => window.model.session.role);
+    assert.strictEqual(role, 1);
+  });
+  it('should react on role change to Guest', async () => {
+    const text = await page.evaluate(() => {
+      window.model.session.role = 4;
+      window.model.notify();
+      return document.querySelector('.m4').innerText;
+    });
+    assert.strictEqual(text, 'You are not allowed to create environments.');
+    await page.evaluate(() => {
+      window.model.session.role = 1;
+      window.model.notify();
+    });
+  });
+
   it('should successfully request and parse a list of template objects', async () => {
     const templates = await page.evaluate(() => window.model.workflow.templates);
     const expectedTemplates = {
@@ -96,9 +113,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have `Create` button disabled due to no selected workflow', async () => {
+    await page.waitForSelector('#create-env');
     const button = await page.evaluate(() => {
-      const button = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > button:nth-child(2)');
+      const button = document.querySelector('#create-env');
       return {title: button.title, classList: button.classList, disabled: button.disabled};
     });
     assert.strictEqual(button.title, 'Create environment based on selected workflow');
@@ -117,23 +134,14 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
-  it('should throw error when `Create` button is clicked due to `Control is not locked`', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > button:nth-child(2)').click());
-    await page.waitForTimeout(500);
-    const errorOnCreation = await page.evaluate(() => window.model.environment.itemNew);
-    assert.strictEqual(errorOnCreation.kind, 'Failure');
-    assert.strictEqual(errorOnCreation.payload, 'Request to server failed (403 Forbidden): Control is not locked');
-  });
-
-  it('should display error message due to `Control is not locked`', async () => {
-    const errorMessage = await page.evaluate(() => {
-      const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div > div');
-      return {text: errorElement.innerText, classList: errorElement.classList};
+  it('should have `Create` button disabled due to no selected detectors', async () => {
+    await page.waitForSelector('#create-env');
+    const button = await page.evaluate(() => {
+      const button = document.querySelector('#create-env');
+      const selected = window.model.workflow.flpSelection.selectedDetectors.length;
+      return {disabled: button.disabled, noSelected: selected};
     });
-    assert.strictEqual(errorMessage.text, ' Request to server failed (403 Forbidden): Control is not locked');
-    assert.deepStrictEqual(errorMessage.classList, {0: 'danger'});
+    assert.ok(button.noSelected || button.disabled);
   });
 
   it('should successfully display `Refresh repositories` button', async () => {
@@ -141,15 +149,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
     assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
-  });
-
-  it('should click to refresh repositories but throw error due to `Control is not locked`', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    await page.waitForTimeout(500);
-    const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
-    assert.deepStrictEqual(calls['refreshRepos'], undefined);
-    assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (403 Forbidden): Control is not locked'});
   });
 
   it('should successfully select second repository from dropdown', async () => {
@@ -165,22 +164,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
       return {text: errorElement.innerText};
     });
     assert.strictEqual(errorMessage.text.trim(), 'No revisions found for the selected repository');
-  });
-
-  it('should successfully request LOCK', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitForTimeout(500);
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.deepStrictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
-  });
-
-  it('should successfully request refresh of repositories and NOT request repositories again due to refresh action failing', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    const errorOnRefresh = await page.evaluate(() => window.model.workflow.refreshedRepositories);
-    assert.deepStrictEqual(errorOnRefresh, {kind: 'Failure', payload: 'Request to server failed (403 Forbidden): Control is not locked'});
-    assert.deepStrictEqual(calls['listRepos'], undefined);
   });
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
@@ -202,7 +185,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
   });
 
-  it('should successfully select EPN ON from BasicConfiguration and automatically set DD & DD Sched to ON', async () => {
+  it('should successfully select EPN ON from GeneralConfiguration and automatically set DD & DD Sched to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="epnOn"]`);
     if (label) {
       await label.click();
@@ -213,7 +196,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'true', dd_enabled: 'true', ddsched_enabled: 'true'}, 'odc_enabled, dd_enabled or ddsched_enabled could not be found in basic variables selection set to true');
   });
 
-  it('should successfully select DD OFF from BasicConfiguration and automatically set EPN, DD, DDSCHED, QC to OFF', async () => {
+  it('should successfully select DD OFF from GeneralConfiguration and automatically set EPN, DD, DDSCHED, QC to OFF', async () => {
     const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
     if (label) {
       await label.click();
@@ -224,7 +207,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', ddsched_enabled: 'false', dd_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
-  it('should successfully select QC ON from BasicConfiguration and automatically set DD to ON', async () => {
+  it('should successfully select QC ON from GeneralConfiguration and automatically set DD to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="qcddOn"]`);
     if (label) {
       await label.click();
@@ -235,7 +218,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', ddsched_enabled: 'false', qcdd_enabled: 'true', minimal_dpl_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
-  it('should successfully select DPL Minimal ON from BasicConfiguration and automatically set QC to OFF and keep DD set to ON', async () => {
+  it('should successfully select DPL Minimal ON from GeneralConfiguration and automatically set QC to OFF and keep DD set to ON', async () => {
     const [label] = await page.$x(`//div/input[@id="dplMwOn"]`);
     if (label) {
       await label.click();
@@ -246,7 +229,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', ddsched_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
-  it('should successfully select DD OFF from BasicConfiguration and automatically set QC, dpl, dd_sched to OFF', async () => {
+  it('should successfully select DD OFF from GeneralConfiguration and automatically set QC, dpl, dd_sched to OFF', async () => {
     const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
     if (label) {
       await label.click();
@@ -280,11 +263,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully add trimmed pair (K;V) to variables by pressing enter key', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3)> div > div > input');
+    await page.focus('#keyInputField');
     await page.keyboard.type('TestKey   ');
     await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > textarea');
+    await page.focus('#valueTextAreaField');
     await page.keyboard.type(' TestValue  ');
     await page.waitForTimeout(200);
 
@@ -302,16 +285,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div > div > input');
+    await page.focus('#keyInputField');
     await page.keyboard.type('TestKey2');
     await page.waitForTimeout(200);
 
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2) > textarea');
+    await page.focus('#valueTextAreaField');
     await page.keyboard.type('TestValue2');
     await page.waitForTimeout(200);
 
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div >  div:nth-child(3)').click();
+      document.querySelector('#addKVPairButton').click();
       return window.model.workflow.form.variables;
     });
 
@@ -325,23 +308,23 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
     await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').click();
+      document.querySelector('#removeKeyTestKey').click();
     });
     await page.waitForTimeout(500);
     const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
     assert.deepStrictEqual(variables, expectedVars);
-    const classList = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(3)').classList);
+    const classList = await page.evaluate(() => document.querySelector('#removeKeyTestKey2').classList);
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);
   });
 
   it('should successfully add a JSON with (K;V) pairs in advanced configuration panel', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
+    await page.focus('#kvTextArea');
     await page.keyboard.type('{"testJson": "JsonValue"}');
     await page.waitForTimeout(1000);
     const variables = await page.evaluate(() => {
-      document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click();
+      document.querySelector('#addKVListButton').click();
       return window.model.workflow.form.variables;
     });
     await page.waitForTimeout(500);
@@ -351,12 +334,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should not add a JSON with (K;V) pairs if it is not JSON formatted and text area should keep the wrong JSON to allow user to edit', async () => {
     const currentVariables = await page.evaluate(() => window.model.workflow.form.variables);
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div > textarea');
+    await page.focus('#kvTextArea');
     const toBeTyped = '{"testJson": "JsonValue", somtest: test}';
     await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
     await page.waitForTimeout(500);
 
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div >div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(2)').click())
+    await page.evaluate(() => document.querySelector('#addKVListButton').click())
     const {variables, areaString} = await page.evaluate(() => {
       return {variables: window.model.workflow.form.variables, areaString: window.model.workflow.kvPairsString};
     });
@@ -385,10 +368,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully disable active detectors from the list', async () => {
-    const detectorClass = await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a:nth-child(2)').classList);
-    const expectedClasses = {0: 'menu-item', 1: 'disabled-item'};
-    assert.deepStrictEqual(detectorClass, expectedClasses)
+    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > a:nth-child(1)').classList);
+    assert.ok(Object.values(detectorClass).includes('menu-item'));
+    assert.ok(Object.values(detectorClass).includes('disabled-item'));
   });
 
   it('should have an empty list of hosts before detector selection', async () => {
@@ -396,9 +378,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps.kind, 'NotAsked');
   });
 
-  it('should successfully select a detector and request a list of hosts for that detector', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div:nth-child(2) > div > a').click());
+  it('should not select a detector that is not locked', async () => {
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
+    assert.ok(selectedDet.length == 0, 'Detector selected without lock');
+    await page.waitForTimeout(500);
+  });
+
+  it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
     await page.waitForTimeout(500);
@@ -415,12 +404,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.deepStrictEqual(flps, ['ali-flp-22', 'ali-flp-23']);
   });
 
-  it('should successfully save configuration', async () => {
+  it.skip('should successfully save configuration', async () => {
     page.on('dialog', async dialog => {
       await dialog.accept('My Config');
     });
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div:nth-child(2) > button').click());
+    await page.evaluate(() => document.querySelector('#save-config').click());
     await page.waitForTimeout(200)
 
     const message = await page.evaluate(() => window.model.environment.itemNew.payload);
@@ -430,22 +418,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully create a new environment', async () => {
-    await page.evaluate(() => document.querySelector(
-      'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div  > div:nth-child(2) > div:nth-child(2) > button:nth-child(3)').click());
+    await page.evaluate(() => document.querySelector('#create-env').click());
     await page.waitForTimeout(1000);
     const location = await page.evaluate(() => window.location);
 
     assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
     assert.ok(calls['newEnvironment']);
     assert.ok(calls['getEnvironment']);
-  });
-
-  it('should successfully release LOCK', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-    await page.waitForTimeout(500);
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.deepStrictEqual(lockButton, 'Lock is free');
   });
 
   /**

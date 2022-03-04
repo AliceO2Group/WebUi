@@ -12,12 +12,12 @@
  * or submit itself to any jurisdiction.
 */
 
-const {WebSocketMessage, ConsulService} = require('@aliceo2/web-ui');
+const {ConsulService} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
 // services
-const Padlock = require('./services/Padlock.js');
+const Lock = require('./services/Lock.js');
 const StatusService = require('./services/StatusService.js');
 
 // connectors
@@ -42,17 +42,17 @@ if (!config.apricot) {
 if (!config.grafana) {
   log.error('Grafana Configuration is missing');
 }
-const padLock = new Padlock();
+const lock = new Lock();
 
 let consulService;
 if (config.consul) {
   consulService = new ConsulService(config.consul);
 }
-const consulConnector = new ConsulConnector(consulService, config.consul, padLock);
+const consulConnector = new ConsulConnector(consulService, config.consul);
 consulConnector.testConsulStatus();
 
 const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
-const ctrlService = new ControlService(padLock, ctrlProxy, consulConnector, config.grpc);
+const ctrlService = new ControlService(ctrlProxy, consulConnector, config.grpc);
 
 const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
 const apricotService = new ApricotService(apricotProxy);
@@ -61,10 +61,10 @@ const statusService = new StatusService(config, ctrlService, consulService, apri
 
 module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
+  lock.setWs(ws);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
-    ctrlService.isLockSetUp.bind(ctrlService),
     ctrlService.logAction.bind(ctrlService),
   ];
   ctrlProxy.methods.forEach(
@@ -87,10 +87,10 @@ module.exports.setup = (http, ws) => {
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
-  http.post('/lockState', (_, res) => res.json(padLock));
-  http.post('/lock', lock);
-  http.post('/unlock', unlock);
-  http.post('/forceUnlock', forceUnlock);
+  http.post('/lockState', (req, res) => res.json(lock.state(req.body.name)));
+  http.post('/lock', (req, res) => lock.lockDetector(req, res));
+  http.post('/unlock', (req, res) => lock.unlockDetector(req, res));
+  http.post('/forceUnlock', (req, res) => lock.forceUnlock(req, res));
 
   // Status Service
   http.get('/status/consul', (_, res) => statusService.getConsulStatus().then((data) => res.status(200).json(data)));
@@ -115,62 +115,4 @@ module.exports.setup = (http, ws) => {
   http.get('/consul/crus/config', validateService, (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
   http.get('/consul/crus/aliases', validateService, (req, res) => consulConnector.getCRUsAlias(req, res));
   http.post('/consul/crus/config/save', validateService, (req, res) => consulConnector.saveCRUsConfiguration(req, res));
-
-  /**
-   * Send to all users state of Pad via Websocket
-   */
-  const broadcastPadState = () => {
-    ws.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(padLock));
-  };
-
-  /**
-   * Method to try to acquire lock
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function lock(req, res) {
-    try {
-      padLock.lockBy(req.session.personid, req.session.name);
-      log.info(`Lock taken by ${req.session.name}`);
-      res.status(200).json({ok: true});
-    } catch (error) {
-      log.error(`Unable to lock by ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.message});
-    }
-    broadcastPadState();
-  }
-
-  /**
-   * Method to try to release lock
-   * @param {Request} req
-   * @param {Response} res
-  */
-  function forceUnlock(req, res) {
-    try {
-      padLock.forceUnlock(req.session.access);
-      log.info(`Lock forced by ${req.session.name}`);
-      res.status(200).json({ok: true});
-    } catch (error) {
-      log.error(`Unable to force lock by ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.message});
-    }
-    broadcastPadState();
-  }
-
-  /**
-   * Method to try to release lock
-   * @param {Request} req
-   * @param {Response} res
-   */
-  function unlock(req, res) {
-    try {
-      padLock.unlockBy(req.session.personid);
-      log.info(`Lock released by ${req.session.name}`);
-      res.status(200).json({ok: true});
-    } catch (error) {
-      log.error(`Unable to give away lock by ${req.session.name}: ${error}`);
-      res.status(403).json({message: error.message});
-    }
-    broadcastPadState();
-  }
 };

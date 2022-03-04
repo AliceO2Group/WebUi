@@ -21,7 +21,7 @@ describe('JSON Web Token', () => {
   const username = 'test';
   const name = 'Test';
   const id = 1111;
-  const access = 1;
+  const access = ['admin', 'test'].join(',');
 
   afterEach(() => {
     assert.strictEqual(verified.id, id);

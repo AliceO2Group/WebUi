@@ -102,6 +102,7 @@ Use of Bookkeeping GUI instance is optional. Configuration details about it are 
 Use of utils field is optional. Here, a user can specify configuration fields for various uses of AliECS GUI:
 * `refreshTask` - specifies how often (ms) the page `taskList` should refresh its content if the user has it opened; Default value is `10000`
 * `refreshEnvs` - specifies how often (ms) the page `environments` should refresh its content if the user has it opened; Default value is `10000`
+
 ## Features
 
 ### GUI
@@ -123,16 +124,24 @@ Use of utils field is optional. Here, a user can specify configuration fields fo
    * the updates will be saved directly in Consul for the selected hosts;
    * the CRUs of the selected hosts will be updated with the configuration previously saved in Consul.
 
-It is important to understand that the `Save & Configure` action will also apply any other `CRU` changes that are present in `Consul` and NOT only the state of the links which are updatable via the Interface. 
+It is important to understand that the `Save & Configure` action will also apply any other `CRU` changes that are present in `Consul` and NOT only the state of the links which are updatable via the Interface.
 
 #### Clean Resources/Tasks
 1. Navigate to the `Tasks` page by clicking on the `Task list` sub-menu from the left side-bar
-   
+
 Here, tasks will be grouped by host and each host has an in-line button to provide a download button for the logs of that machine
 
 2. Lock the interface via the top-left lock button
 3. Use the top-right orange text `Clean Resources` button to request AliECS Core to run the `o2-roc-cleanup` workflow
 4. Use the top-right red text `Clean Tasks` button to request AliECS Core to remove all tasks that do not belong to an environment
+
+### Roles
+The GUI adapts its view depending on SSO roles configured in Application Portal (see more details in [OpenID docs](https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/openid.md#admin-role)). Currently supported roles are:
+- Guest - read-only access
+- Detector - only standalone runs for given detector(s)
+- Global - access to global runs and standalone runs for all detectors
+- Admin - "Global" + admin actions such as "Force lock"
+
 
 ### Integration with ControlWorkflows
 
@@ -159,7 +168,7 @@ trg_enabled
 #### Dynamically built Workflow Panels
 From version `1.28.0` onwards, the AliECS GUI allows the user to define custom workflow templates. These are defined in `YAML` in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows) repository.
 
-Each variable belonging to a template will follow the definition present in the [protofile](https://github.com/AliceO2Group/WebUi/blob/dev/Control/protobuf/o2control.proto#L380) and will be dynamically built and displayed by the AliECS GUI based on the conditions provided. 
+Each variable belonging to a template will follow the definition present in the [protofile](https://github.com/AliceO2Group/WebUi/blob/dev/Control/protobuf/o2control.proto#L380) and will be dynamically built and displayed by the AliECS GUI based on the conditions provided.
 e.g
 ```json
   "roc_ctp_emulator_enabled": {
@@ -175,7 +184,7 @@ e.g
     "defaultValue": "Some Default Value",
     "type": 0,
     "label": "DCS SOR parameters",
-    "description": "", // EDIT_BOX with condition to be displayed only if component roc_ctp_emulator_enabled has a value higher or equal to 20 
+    "description": "", // EDIT_BOX with condition to be displayed only if component roc_ctp_emulator_enabled has a value higher or equal to 20
     "panel": "dcsPanel",
     "visibleIf": "$$roc_ctp_emulator_enabled >= \"20\""
   },

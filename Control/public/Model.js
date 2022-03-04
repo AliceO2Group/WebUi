@@ -24,6 +24,7 @@ import Workflow from './workflow/Workflow.js';
 import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
+import {PREFIX, ROLES} from './../workflow/constants.js';
 
 /**
  * Root of model tree
@@ -38,7 +39,7 @@ export default class Model extends Observable {
 
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
-    this.session.access = parseInt(this.session.access, 10);
+    this.session.role = this.getRole();
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
@@ -87,6 +88,31 @@ export default class Model extends Observable {
     this.init();
   }
 
+  /** 
+   * Returns user role
+   * @returns {object} User's role 
+   */ 
+  getRole() {
+    if (this.session.access.includes('admin')) {
+      return ROLES.Admin;
+    } else if (this.session.access.includes('global')) {
+      return ROLES.Global;
+    } else if (this.session.access.some((role) => role.toUpperCase().startsWith(PREFIX.SSO_DET_ROLE.toUpperCase()))) {
+      return ROLES.Detector;
+    }
+    return ROLES.Guest;
+  }
+
+  /** 
+   * Evaluate whether action is allowed for given role
+   * @param {ROLES} role - target role
+   * @param {bool} [strict=false] - The target role must equal current role
+   * @returns {bool} Whether current role (= model.role) is equal or superior to target role
+   */
+  isAllowed(role, strict = false) {
+    return strict ? this.session.role === role : this.session.role <= role;
+  }
+
   /**
    * If no detector view is selected:
    * * load a list of detectors
@@ -98,7 +124,7 @@ export default class Model extends Observable {
       this.router.go('?page=environments');
     }
     await this.detectors.init();
-    if (this.detectors.selected) {
+    if (this.detectors.selected || this.session.role == ROLES.Guest) {
       this.handleLocationChange();
     }
     this.notify();
@@ -164,7 +190,11 @@ export default class Model extends Observable {
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
-        this.environment.refreshInterval = setInterval(() => this.environment.getEnvironments(), COG.REFRESH_ENVS);
+        this.frameworkInfo.getIntegratedServicesInfo();
+        this.environment.refreshInterval = setInterval(() => {
+          this.environment.getEnvironments();
+          this.frameworkInfo.getIntegratedServicesInfo();
+        }, COG.REFRESH_ENVS);
         break;
       case 'environment':
         if (!this.router.params.id) {
@@ -187,6 +217,8 @@ export default class Model extends Observable {
         this.configuration.init();
         this.configuration.getCRUsConfig();
         this.configuration.getCRUsAliases();
+        break;
+      case 'locks':
         break;
       case 'hardware':
         break;

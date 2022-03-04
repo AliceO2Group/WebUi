@@ -54,14 +54,13 @@ export default class FlpSelection extends Observable {
     this.notify();
 
     await this.getAndSetDetectors();
-
-    if (this.workflow.model.detectors.isSingleView()
-      && this.activeDetectors.isSuccess()
+    /*if (this.workflow.model.detectors.isSingleView()
+           && this.activeDetectors.isSuccess()
       && !this.activeDetectors.payload.detectors.includes(this.workflow.model.detectors.selected)
     ) {
       // if single view preselect detectors and hosts for users
       this.toggleDetectorSelection(this.workflow.model.detectors.selected);
-    }
+    }*/
   }
 
   /**
@@ -143,7 +142,15 @@ export default class FlpSelection extends Observable {
   isDetectorActive(name) {
     return this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(name)
   }
-
+  /**
+   * Unselects given detector and its FLPs
+   * @param {string} name
+   */
+  unselectDetector(name) {
+    if (this.selectedDetectors.includes(name)) {
+      this.toggleDetectorSelection(name);
+    }
+  }
   /**
    * Toggle the selection of an FLP from the form host
    * The user can also use SHIFT key to select between 2 FLP machines, thus

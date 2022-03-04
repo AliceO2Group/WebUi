@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: '14.x'
       - run: (cd QualityControl; npm ci )
@@ -27,14 +27,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: '14.x'
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for QualityControl
-        uses: codecov/codecov-action@v1.0.13
+        uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets. NEW_CODECOV_TOKEN }}
           flags: qualitycontrol

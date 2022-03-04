@@ -24,6 +24,7 @@ import {controlEnvironmentPanel} from './components/controlEnvironmentPanel.js';
 import {getTasksByFlp} from './../common/utils.js';
 import {userVarsRow, defaultsRow, varsRow} from './components/expandableEnvRows.js';
 import {infoLoggerButton, bookkeepingButton, qcgButton, mesosLogButton} from './components/buttons.js';
+import {ROLES} from './../workflow/constants.js';
 
 /**
  * @file Page to show 1 environment (content and header)
@@ -51,19 +52,20 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
     Loading: () => h('.w-100.text-center', pageLoading()),
-    Success: (data) => showContent(model.environment, data.environment),
+    Success: (data) => showContent(model, data.environment),
     Failure: (error) => errorPage(error),
   })
 ]);
 
 /**
  * Show all properties of environment and buttons for its actions at bottom
- * @param {Object} environment
+ * @param {Object} model
  * @param {Environment} item - environment to show on this page
  * @return {vnode}
  */
-const showContent = (environment, item) => [
-  controlEnvironmentPanel(environment, item),
+const showContent = (model, item) => [
+  (model.isAllowed(ROLES.Admin) || item.includedDetectors.every(detector => model.lock.isLockedByMe(detector))) &&
+  controlEnvironmentPanel(model.environment, item),
   item.state === 'RUNNING' &&
   h('.m2.flex-row', {style: 'height: 10em;'}, [
     (COG && COG.GRAFANA && COG.GRAFANA.status) ?
@@ -87,16 +89,16 @@ const showContent = (environment, item) => [
     h('',
       h('table.table', [
         h('tbody', [
-          userVarsRow(item.userVars, environment),
-          defaultsRow(item.defaults, environment),
-          varsRow(item.vars, environment),
+          userVarsRow(item.userVars, model.environment),
+          defaultsRow(item.defaults, model.environment),
+          varsRow(item.vars, model.environment),
         ])
       ])
     ),
   ]),
   h('.m2', [
     h('h4', 'Tasks by FLP'),
-    h('.w-100', tasksPerFlpTables(environment, item))
+    h('.w-100', tasksPerFlpTables(model.environment, item))
   ]),
 ];
 

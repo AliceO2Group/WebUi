@@ -24,25 +24,32 @@ const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel
  * @param {HttpServer} http
  */
 module.exports.setup = (http) => {
+  http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), {public: true});
+  http.get('/object/root', model.objectController.getJsonRootObject.bind(model.objectController));
+  http.get('/objects', () => false, {public: true});
+
+  http.get('/listOnlineObjects', listOnlineObjects);
+  http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
+
+  http.get('/layouts', model.layoutService.listLayouts.bind(model.layoutService));
+  http.get('/layout/:id', model.layoutService.readLayout.bind(model.layoutService));
+  http.delete('/layout/:id', model.layoutService.deleteLayout.bind(model.layoutService));
+  http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
+  http.post('/writeLayout', model.layoutService.updateLayout.bind(model.layoutService));
+
+  http.get('/status/gui', model.statusService.getQCGStatus.bind(model.statusService), {public: true});
+  http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService), {public: true});
+
+  http.get('/checkUser', model.userService.addUser.bind(model.userService));
+
+  new WebSocket(http);
+
+  /**
+   *  @deprecated ; to be removed in version 2.10.0
+   */
   http.get('/readObjectData', readObjectData, {public: true});
   http.get('/listObjects', listObjects, {public: true});
   http.get('/objectTimestampList', getObjectTimestampList, {public: true});
-  
-  http.get('/listOnlineObjects', listOnlineObjects);
-  http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
-  
-  http.post('/readLayout', model.layoutService.readLayout.bind(model.layoutService));
-  http.post('/writeLayout', model.layoutService.updateLayout.bind(model.layoutService));
-  http.post('/listLayouts', model.layoutService.listLayouts.bind(model.layoutService));
-  http.delete('/layout/:layoutId', model.layoutService.deleteLayout.bind(model.layoutService));
-  http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
-  
-  http.get('/status/gui', model.statusService.getQCGStatus.bind(model.statusService), {public: true});
-  http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService), {public: true});
-  
-  http.get('/checkUser', model.userService.addUser.bind(model.userService));
-  
-  new WebSocket(http);
 };
 
 /**
@@ -149,13 +156,9 @@ function errorHandler(err, res, status = 500) {
  */
 function getTagsFromServices(services) {
   const prefix = model.queryPrefix;
-  const tags = [];
-  for (const serviceName in services) {
-    if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
-      const tagsToBeAdded = services[serviceName].Tags;
-      tagsToBeAdded.filter((tag) => tag.startsWith(prefix))
-        .forEach((tag) => tags.push({name: tag}));
-    }
-  }
+  const tags = Object.values(services)
+    .flat()
+    .filter((tag) => tag.startsWith(prefix))
+    .map((tag) => ({name: tag}));
   return tags;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/control",
-  "version": "1.41.0",
+  "version": "1.44.0",
   "description": "ALICE O2 Control GUI",
   "author": "George Raduta",
   "contributors": [
@@ -27,7 +27,7 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.21.3",
+    "@aliceo2/web-ui": "1.22.1",
     "@grpc/grpc-js": "^1.5.1",
     "@grpc/proto-loader": "^0.6.5"
   },
@@ -37,12 +37,12 @@
     "@grpc/proto-loader"
   ],
   "devDependencies": {
-    "eslint": "^8.7.0",
+    "eslint": "^8.9.0",
     "mocha": "^9.2.0",
     "nock": "^13.2.2",
     "nyc": "^15.1.0",
-    "puppeteer": "13.1.1",
-    "sinon": "12.0.1"
+    "puppeteer": "13.3.2",
+    "sinon": "13.0.1"
   },
   "main": "index.js"
 }

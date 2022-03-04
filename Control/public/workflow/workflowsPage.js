@@ -23,6 +23,8 @@ import detectorsPanel from './panels/flps/detectorsPanel.js';
 import errorComponent from './../common/errorComponent.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
+import {ROLES} from './../workflow/constants.js';
+
 /**
  * @file Page to show a form for creating a new environment
  * from existing templates
@@ -41,18 +43,20 @@ export const header = (model) => h('h4.w-100 text-center', 'New Environment');
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => h('', [
-  detectorHeader(model),
-  h('.scroll-y.absolute-fill.text-center.p2', {style: 'top:40px;'},
-    model.workflow.repoList.match({
-      NotAsked: () => null,
-      Loading: () => pageLoading(),
-      Success: (repoList) => (repoList.repos.length === 0)
-        ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
-      Failure: (error) => errorPage(error),
-    })
-  )
-]);
+export const content = (model) =>
+  !model.isAllowed(ROLES.Detector) ?
+    h('h3.m4.warning.text-center', ['You are not allowed to create environments.']) : h('', [
+      detectorHeader(model),
+      h('.scroll-y.absolute-fill.text-center.p2', {style: 'top:40px;'},
+        model.workflow.repoList.match({
+          NotAsked: () => null,
+          Loading: () => pageLoading(),
+          Success: (repoList) => (repoList.repos.length === 0)
+            ? h('h3.m4', ['No repositories found.']) : showNewEnvironmentForm(model, repoList.repos),
+          Failure: (error) => errorPage(error),
+        })
+      )
+    ]);
 
 /**
 * Create a form for the user to select inputs for a new environment
@@ -72,7 +76,7 @@ const showNewEnvironmentForm = (model, repoList) => [
           templateAreaList(model.workflow, model.workflow.form.repository, model.workflow.form.revision)
         ]),
       ]),
-      !model.workflow.isQcWorkflow && h('.template-selection', detectorsPanel(model.workflow)),
+      !model.workflow.isQcWorkflow && h('.template-selection', detectorsPanel(model)),
       !model.workflow.isQcWorkflow && h('.template-selection', flpSelectionPanel(model.workflow)),
     ]),
     model.workflow.form.template && workflowSettingsPanels(model.workflow)
@@ -183,8 +187,6 @@ const actionsPanel = (model) =>
       Success: (message) => h('.success', message),
       Failure: (error) => h('.text-center', errorComponent(error)),
     }),
-    btnSaveEnvConfiguration(model),
-    ' ',
     btnCreateEnvironment(model),
   ]);
 
@@ -193,27 +195,11 @@ const actionsPanel = (model) =>
  * @param {Object} model
  * @return {vnode}
  */
-const btnCreateEnvironment = (model) => h('button.btn.btn-primary', {
+const btnCreateEnvironment = (model) => h('button.btn.btn-primary#create-env', {
   class: model.environment.itemNew.isLoading() ? 'loading' : '',
-  disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
+  disabled: model.environment.itemNew.isLoading() ||
+    !model.workflow.form.isInputSelected() ||
+    model.workflow.flpSelection.selectedDetectors.length <= 0,
   onclick: () => model.workflow.createNewEnvironment(),
   title: 'Create environment based on selected workflow'
 }, 'Create');
-
-/**
- * Button which allows the user to save the configuration for a future use
- * @param {Object} model 
- * @returns {vnode}
- */
-const btnSaveEnvConfiguration = (model) =>
-  h('button.btn.btn-default', {
-    class: model.environment.itemNew.isLoading() ? 'loading' : '',
-    disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
-    onclick: () => {
-      const name = prompt('Enter a name for saving the configuration:');
-      if (name && name.trim() !== '') {
-        model.workflow.saveEnvConfiguration(name)
-      }
-    },
-    title: 'Save current configuration for future use'
-  }, 'Save Configuration');

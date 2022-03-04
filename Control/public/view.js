@@ -47,6 +47,10 @@ import {
   header as hardwareHeader
 } from './hardware/hardwarePage.js';
 import {detectorsModal} from './common/detectorModal.js';
+import {
+  content as lockContent,
+  header as lockHeader
+} from './lock/lockPage.js';
 
 /**
  * Main view layout
@@ -85,6 +89,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     configuration: configurationHeader,
     taskList: taskHeader,
     hardware: hardwareHeader,
+    locks: lockHeader
   })(model)
 ]);
 
@@ -102,5 +107,6 @@ const content = (model) => [
     configuration: configurationContent,
     taskList: taskContent,
     hardware: hardwareContent,
+    locks: lockContent
   })(model)
 ];

@@ -14,6 +14,7 @@
 
 import {h, iconCircleX} from '/js/src/index.js';
 import loading from './loading.js';
+import {ROLES} from './../workflow/constants.js';
 
 /**
  * Component which will display a modal allowing the users to select their detector view
@@ -22,7 +23,7 @@ import loading from './loading.js';
  * @return {vnode}
  */
 const detectorsModal = (model) =>
-  !model.detectors.selected && h('.o2-modal',
+  !model.detectors.selected && model.isAllowed(ROLES.Detector) && h('.o2-modal',
     h('.o2-modal-content', [
       h('.p2.text-center', [
         h('h4', 'Select your detector view'),
@@ -34,18 +35,17 @@ const detectorsModal = (model) =>
           Loading: () => h('.w-100.text-center', loading(2)),
           Success: (data) => detectorsList(model, data),
           Failure: (_) => h('.w-100.text-center.danger', [
-            iconCircleX(), ' Unable to load list of detectors. Use GLOBAL View'
+            iconCircleX(), ' Unable to load list of detectors.'
           ])
         })
       ]),
       h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
         h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-          h(`button.btn.btn-default.w-100`, {
-            id: `GLOBALViewButton`,
-            onclick: () => model.setDetectorView('GLOBAL'),
-          }, 'GLOBAL'),
-          h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
-            'Use GLOBAL view to include multiple detectors')
+          model.isAllowed(ROLES.Global) &&
+            h(`button.btn.btn-default.w-100`, {
+              id: `GLOBALViewButton`,
+              onclick: () => model.setDetectorView('GLOBAL'),
+            }, 'GLOBAL')
         ])
       )
     ])
@@ -58,11 +58,13 @@ const detectorsModal = (model) =>
  * @returns {vnode}
  */
 const detectorsList = (model, list) =>
-  list.map((detector) => h('.w-25.pv3.text-center.f3',
-    h('button.btn.btn-default.w-70', {
-      id: `${detector}ViewButton`,
-      onclick: () => model.setDetectorView(detector)
-    }, detector)
-  ));
+  list
+    .filter(detector => model.detectors.authed.includes(detector) || model.isAllowed(ROLES.Global))
+    .map((detector) => h('.w-25.pv3.text-center.f3',
+      h('button.btn.btn-default.w-70', {
+        id: `${detector}ViewButton`,
+        onclick: () => model.setDetectorView(detector)
+      }, detector)
+    ));
 
 export {detectorsModal};

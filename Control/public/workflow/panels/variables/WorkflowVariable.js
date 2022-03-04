@@ -30,7 +30,7 @@ export default class WorkflowVariable {
     this.defaultValue = this.getDefaultValueFromVariable(variable);
     this.label = variable.label ? variable.label : 'Label Unknown';
     this.description = variable.description ? variable.description : '';
-    this.panel = variable.panel ? variable.panel : 'BasicConfiguration';
+    this.panel = variable.panel ? variable.panel : 'GeneralConfiguration';
     this.allowedValues = variable.allowedValues ? variable.allowedValues : [];
     this.key = variable.key;
     this.index = variable.index ? variable.index : 0;
@@ -145,15 +145,12 @@ export default class WorkflowVariable {
       if (Object.keys(varSpecMap).length === 0 || !varSpecMap[key]) {
         // template does not support dynamic workflows or template does not contain provided key
         return {ok: true, key, value};
-      } else {
-        if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
-          return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
-        } else if (varSpecMap[key].allowedValues.length === 0 || varSpecMap[key].allowedValues.includes(value)) {
-          return {ok: true, key, value};
-        } else {
-          return {ok: false, error: `Provided value for key '${key}' is not allowed`};
-        }
+      } else if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
+        return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
+      } else if (varSpecMap[key].widget === WIDGET_VAR.DROPDOWN_BOX && !varSpecMap[key].allowedValues.includes(value)) {
+        return {ok: false, error: `Allowed values for key '${key}' are ${varSpecMap[key].allowedValues.toString()}`};
       }
+      return {ok: true, key, value};
     }
   }
 
@@ -161,7 +158,7 @@ export default class WorkflowVariable {
    * Given a String of KV Pairs it will check if each:
    * * provided string is a valid JSON
    * * key is valid after being trimmed
-   * * value is valid by chechking it's existence in the provided varSpecMap
+   * * value is valid by checking it's existence in the provided varSpecMap
    * @param {String} kvPairsString
    * @param {Map<String, Object>} varSpecMap
    * @return {kvMpa: Map<string, Object>, errors: Array<String>}

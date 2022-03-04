@@ -14,10 +14,10 @@
 
 const config = require('../config.js');
 const TObject2JsonClient = require('../lib/TObject2JsonClient.js');
-const CCDBConnector = require('../lib/CCDBConnector.js');
+const CcdbService = require('../lib/CcdbService.js');
 
 const tobject2json = new TObject2JsonClient(config.listingConnector, config.ccdb);
-const ccdb = new CCDBConnector(config.ccdb);
+const ccdb = new CcdbService(config.ccdb);
 
 let objects = [];
 

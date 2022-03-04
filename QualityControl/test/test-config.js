@@ -37,7 +37,6 @@ module.exports = {
     hostname: 'ccdb',
     port: 8500,
     prefix: 'test',
-    plotUrl: 'localhost:8080/some-instance'
   },
   quality_control: {
     version: '0.19.5-1'

@@ -22,7 +22,7 @@ try {
   console.warn('`test-config.js` file could not be found. Will use default values.');
 }
 
-const workflow = (testConfig && testConfig.workflow) ? testConfig.workflow : 'readout-stfb';
+const workflow = (testConfig && testConfig.workflow) ? testConfig.workflow : 'readout-dataflow';
 const timeout = (testConfig && testConfig.timeout) ? testConfig.timeout : 200000;
 const requestTimeout = (testConfig && testConfig.requestTimeout) ? testConfig.requestTimeout : 90;
 const url = (testConfig && testConfig.hostname && testConfig.port) ? `http://${testConfig.hostname}:${testConfig.port}/` : 'http://localhost:8080/';

@@ -199,7 +199,7 @@ export default class Workflow extends Observable {
   saveEnvConfiguration(name) {
     const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
-      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
     } else if (variables.hosts && variables.hosts.length > 0 && this.form.hosts.length > 0) {
       // Check FLP Selection is not duplicated in vars host
@@ -228,7 +228,7 @@ export default class Workflow extends Observable {
   async createNewEnvironment() {
     const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
-      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
     } else if (this.flpSelection.unavailableDetectors.length !== 0) {
       this.model.environment.itemNew =
@@ -419,8 +419,11 @@ export default class Workflow extends Observable {
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
       return !isVariableDetector || isVariableIncludedDetector;
     }
-    if (this.model.detectors.selected) {
-      // TODO when detector view will be enabled
+    if (this.model.detectors.selected && this.model.detectors.selected !== 'GLOBAL') {
+      const prefix = key.split('_')[0];
+      const isVariableDetector = this.flpSelection.detectors.payload
+        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+      return !isVariableDetector || this.model.detectors.selected.toLocaleUpperCase() === prefix.toLocaleUpperCase();
     }
     return true;
   }
@@ -548,8 +551,17 @@ export default class Workflow extends Observable {
         ) {
           this.flpSelection.detectorViewConfigurationError = true;
         } else {
-          await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
-          this.addVariableJSON(JSON.stringify(variables));
+          const unavailableDetectors = detectors.filter(name =>
+            this.flpSelection.isDetectorActive(name)
+            || !(!this.model.lock.isLocked(name) || this.model.lock.isLockedByMe(name))
+          );
+          if (unavailableDetectors.length <= 0 || (unavailableDetectors.length > 0 && confirm(
+            `The following detectors are not available: ${unavailableDetectors.join(',')}\nDo you want to continue?`)
+          )) {
+            detectors.forEach(detector => this.model.lock.lock(detector));
+            await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
+            this.addVariableJSON(JSON.stringify(variables));
+          }
         }
         this.loadingConfiguration = RemoteData.notAsked();
       } catch (error) {
@@ -597,7 +609,7 @@ export default class Workflow extends Observable {
     if (sameKeys.length > 0) {
       return {
         variables: {}, ok: false,
-        message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
+        message: `Due to General Configuration selection, you cannot use the following keys: ${sameKeys}`
       };
     } else {
       const readoutResult = this.parseReadoutURI(basicVariables);

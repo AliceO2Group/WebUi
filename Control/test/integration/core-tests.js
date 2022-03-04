@@ -72,33 +72,8 @@ describe('Control', function() {
     assert.strictEqual(location.search, '?page=environments', 'Could not load home page of AliECS GUI');
   });
 
-  describe('Check if lock is acquired', () => {
-    it('should successfully request LOCK if it is not already taken', async () => {
-      let lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      if (lockButton !== 'Lock is taken by Anonymous (id 0)') {
-        await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-        await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-        await page.waitForTimeout(1000);
-      }
-      lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)', 'Lock might be taken by another user');
-    });
-  });
-
   require('./create-new-environment');
   require('./control-environment.js');
-
-  describe('Release lock', () => {
-    it('should successfully release LOCK if it is not already released', async () => {
-      let lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      if (lockButton !== 'Lock is free') {
-        await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-        await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-        await page.waitForTimeout(1000);
-      }
-      lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    });
-  });
 
   after(async () => {
     await browser.close();
