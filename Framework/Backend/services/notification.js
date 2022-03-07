@@ -32,11 +32,7 @@ class NotificationService {
     if (!config.brokers || config.brokers.length < 1) {
       throw new Error('Kafka broker list was not provided');
     }
-    if (!config.topic) {
-      this.topic = 'mattermost';
-    } else {
-      this.topic = config.topic;
-    }
+    this.topic = config.topic ? config.topic : 'notification';
     this.kafka = new Kafka({
       clientId: 'webui',
       brokers: config.brokers,
