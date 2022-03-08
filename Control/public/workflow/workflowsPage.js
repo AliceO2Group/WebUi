@@ -199,7 +199,7 @@ const btnCreateEnvironment = (model) => h('button.btn.btn-primary#create-env', {
   class: model.environment.itemNew.isLoading() ? 'loading' : '',
   disabled: model.environment.itemNew.isLoading() ||
     !model.workflow.form.isInputSelected() ||
-    model.workflow.flpSelection.selectedDetectors.length <= 0,
+    (model.workflow.flpSelection.selectedDetectors.length <= 0 && !model.workflow.isQcWorkflow),
   onclick: () => model.workflow.createNewEnvironment(),
   title: 'Create environment based on selected workflow'
 }, 'Create');
