@@ -27,7 +27,7 @@
     "mocha": "mocha --exit $(find test -name 'mocha-*.js') "
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.21.5",
+    "@aliceo2/web-ui": "1.22.1",
     "jsroot": "^6.3.4"
   },
   "bundledDependencies": [
