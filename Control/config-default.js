@@ -28,6 +28,7 @@ module.exports = {
     url: 'http://localhost:3000'
   },
   consul: {
+    ui: 'localhost:8500',
     hostname: 'localhost',
     port: 8500,
     flpHardwarePath: 'o2/hardware/key/prefix',

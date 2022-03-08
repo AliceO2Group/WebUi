@@ -56,8 +56,9 @@ function getConsulConfig(config) {
     conf.readoutPath = conf?.readoutPath || 'o2/components/readout';
     conf.kVPrefix = conf?.kVPrefix || 'ui/alice-o2-cluster/kv';
 
-    conf.kvStoreQC = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.qcPath}`;
-    conf.kvStoreReadout = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.readoutPath}`;
+    conf.ui = conf.ui || `${conf.hostname}:${conf.port}`;
+    conf.kvStoreQC = `${conf.ui}/${conf.kVPrefix}/${conf.qcPath}`;
+    conf.kvStoreReadout = `${conf.ui}/${conf.kVPrefix}/${conf.readoutPath}`;
     conf.qcPrefix = `${conf.hostname}:${conf.port}/${conf.qcPath}/`;
     conf.readoutPrefix = `${conf.hostname}:${conf.port}/${conf.readoutPath}/`;
     return conf;

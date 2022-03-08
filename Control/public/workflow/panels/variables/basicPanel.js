@@ -349,7 +349,7 @@ const readoutPanel = (workflow) => {
           variables['readout_cfg_uri'] ?
             variables['readout_cfg_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + COG.CONSUL.readoutPrefix + (
+      }, consulPre + COG.CONSUL.kvStoreReadout + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
       )
@@ -436,7 +436,7 @@ const qcUriPanel = (workflow) => {
           variables['qc_config_uri'] ?
             variables['qc_config_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + COG.CONSUL.qcPrefix + (
+      }, consulPre + COG.CONSUL.kvStoreQC + (
         variables['qc_config_uri'] ?
           variables['qc_config_uri'] : '')
       )

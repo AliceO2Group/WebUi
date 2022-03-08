@@ -21,6 +21,7 @@
     - [GUI](#gui)
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
       - [Clean Resources/Tasks](#clean-resourcestasks)
+    - [Roles](#roles)
     - [Integration with ControlWorkflows](#integration-with-controlworkflows)
       - [List of fixed variables used by AliECS GUI for user logic](#list-of-fixed-variables-used-by-aliecs-gui-for-user-logic)
       - [Dynamically built Workflow Panels](#dynamically-built-workflow-panels)
@@ -71,6 +72,7 @@ Use of a Consul instance is optional
 
 * `hostname` - Consul head node hostname
 * `port` - Consul head node port
+* `ui` - Consul UI URL (will default to `hostname:port`)
 * `flpHardwarePath` - Prefix for KV Store for the content about the FLPs machines
 * `readoutPath` - Prefix for KV Store for readout's configuration
 * `readoutCardPath` - Prefix for KV Store for readout-card's configuration

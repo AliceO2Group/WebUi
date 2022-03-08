@@ -36,6 +36,7 @@ module.exports = {
     package: 'apricot'
   },
   consul: {
+    ui: 'localhost.cern.ch',
     hostname: 'localhost',
     port: 8550,
     flpHardwarePath: 'test/o2/hardware/flps',

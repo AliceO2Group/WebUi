@@ -141,6 +141,7 @@ describe('Control', function() {
       CONSUL: {
         protocol: 'http',
         hostname: 'localhost',
+        ui: 'localhost.cern.ch',
         port: 8550,
         flpHardwarePath: 'test/o2/hardware/flps',
         detHardwarePath: 'test/o2/hardware/detectors',
@@ -148,8 +149,8 @@ describe('Control', function() {
         readoutCardPath: 'test/o2/readoutcard/components',
         qcPath: 'test/o2/qc/components',
         kVPrefix: 'test/ui/some-cluster/kv',
-        kvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
-        kvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
+        kvStoreQC: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/qc/components',
+        kvStoreReadout: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/readout/components',
         qcPrefix: "localhost:8550/test/o2/qc/components/",
         readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
