@@ -62,7 +62,7 @@ describe('LayoutController test suite', () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         listLayouts: sinon.stub().resolves([{name: 'somelayout'}])
       });
-      const req = {body: {}};
+      const req = {query: {}};
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.listLayouts(req, res);
       assert.ok(res.status.calledWith(200), 'Response status was not 200');
@@ -73,7 +73,7 @@ describe('LayoutController test suite', () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         listLayouts: sinon.stub().resolves([{name: 'somelayout'}])
       });
-      const req = {body: {owner_id: '1'}};
+      const req = {query: {owner_id: '1'}};
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.listLayouts(req, res);
       assert.ok(res.status.calledWith(200), 'Response status was not 200');
