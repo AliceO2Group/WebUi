@@ -106,22 +106,22 @@ export default class Log extends Observable {
    * Increments stats of the severity of the log passed
    * @param {Log} log
    */
-  addStats(log) {
+  addStats(log, increment = 1) {
     switch (log.severity) {
       case 'F':
-        this.stats.fatal++;
+        this.stats.fatal+=increment;
         break;
       case 'E':
-        this.stats.error++;
+        this.stats.error+=increment;
         break;
       case 'W':
-        this.stats.warning++;
+        this.stats.warning+=increment;
         break;
       case 'I':
-        this.stats.info++;
+        this.stats.info+=increment;
         break;
       case 'D':
-        this.stats.debug++;
+        this.stats.debug+=increment;
     }
   }
 
@@ -166,9 +166,17 @@ export default class Log extends Observable {
 
   /**
    * Set "limit" filter (1k, 10k, 100k)
+   * If the limit is being decreased:
+   * * Splices the current log list to the passed limit
+   * * Updates stat box at the bottom if the limit is being decreased
    * @param {number} limit
    */
   setLimit(limit) {
+    if (limit < this.limit) {
+      this.resetStats();
+      this.list.splice(0, this.list.length - limit);
+      this.list.forEach((log) => this.addStats(log));
+    }
     this.limit = limit;
     this.notify();
   }
@@ -473,6 +481,7 @@ export default class Log extends Observable {
     this.addStats(log);
     this.list.push(log);
     if (this.list.length > this.limit) {
+      this.addStats(this.list[0], -1);
       this.list.splice(0, this.list.length - this.limit);
     }
     this.notify();
