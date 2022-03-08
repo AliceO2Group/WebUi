@@ -67,6 +67,10 @@ export default class Log extends Observable {
       visibleOnlyContent: '',
       isVisible: false
     };
+
+    this.dom = {
+      table: ''
+    }
   }
 
   /**
@@ -181,6 +185,8 @@ export default class Log extends Observable {
 
     this.item = this.list.find((item) => item.severity === 'E' || item.severity === 'F');
     this.autoScrollToItem = true;
+    this.autoScrollLive = false;
+
     this.notify();
   }
 
@@ -207,6 +213,7 @@ export default class Log extends Observable {
       if (this.list[i].severity === 'E' || this.list[i].severity === 'F') {
         this.item = this.list[i];
         this.autoScrollToItem = true;
+        this.autoScrollLive = false;
         this.notify();
         break;
       }
@@ -236,6 +243,7 @@ export default class Log extends Observable {
       if (this.list[i].severity === 'E' || this.list[i].severity === 'F') {
         this.item = this.list[i];
         this.autoScrollToItem = true;
+        this.autoScrollLive = false;
         this.notify();
         break;
       }
@@ -261,6 +269,7 @@ export default class Log extends Observable {
     }
 
     this.autoScrollToItem = true;
+    this.autoScrollLive = false;
     this.notify();
   }
 
@@ -474,6 +483,7 @@ export default class Log extends Observable {
    */
   toggleAutoScroll() {
     this.autoScrollLive = !this.autoScrollLive;
+    this.dom.table.focus();
     this.notify();
   }
   /**
