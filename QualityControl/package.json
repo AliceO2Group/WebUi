@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -27,7 +27,7 @@
     "mocha": "mocha --exit $(find test -name 'mocha-*.js') "
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.21.5",
+    "@aliceo2/web-ui": "1.22.1",
     "jsroot": "^6.3.4"
   },
   "bundledDependencies": [
@@ -40,7 +40,7 @@
     "mocha": "^9.2.0",
     "nock": "^13.2.2",
     "nyc": "^15.1.0",
-    "puppeteer": "13.4.1",
-    "sinon": "13.0.1"
+    "puppeteer": "^13.5.0",
+    "sinon": "^13.0.1"
   }
 }
