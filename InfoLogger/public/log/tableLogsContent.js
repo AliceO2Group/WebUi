@@ -132,7 +132,7 @@ const tableContainerHooks = (model) => ({
 
     // call the function when scrolling is updated
     vnode.dom.addEventListener('scroll', onTableScroll);
-
+    model.log.dom.table = vnode.dom;
     // setup window size listener - view needs redraw for smart scrolling
     window.addEventListener('resize', onTableScroll);
 

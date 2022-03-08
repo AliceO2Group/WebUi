@@ -116,7 +116,7 @@ const statusLive = (model, frameworkInfo) => [
 ];
 
 /**
- * Status of the log's list (independant of mode): how many global and how many per severity
+ * Status of the log's list (independent of mode): how many global and how many per severity
  * @param {Object} model
  * @return {vnode}
  */
