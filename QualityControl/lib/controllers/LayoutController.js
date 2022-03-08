@@ -39,8 +39,8 @@ class LayoutService {
   async listLayouts(req, res) {
     try {
       const filter = {};
-      if (req.body.owner_id !== undefined) {
-        filter.owner_id = parseInt(req.body.owner_id, 10);
+      if (req.query.owner_id !== undefined) {
+        filter.owner_id = parseInt(req.query.owner_id, 10);
       }
       const layouts = await this.service.listLayouts(filter);
       res.status(200).json(layouts);

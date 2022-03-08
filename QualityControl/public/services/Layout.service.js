@@ -42,7 +42,8 @@ export default class LayoutService {
    * @return {RemoteData}
    */
   async getLayoutsByUserId(userId) {
-    const {result, ok} = await this.loader.get('/api/layouts', {owner_id: userId});
+    console.log(userId)
+    const {result, ok} = await this.loader.get(`/api/layouts?owner_id=${userId}`);
     if (!ok) {
       return RemoteData.failure(result.error);
     } else {
