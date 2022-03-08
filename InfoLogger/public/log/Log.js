@@ -109,19 +109,19 @@ export default class Log extends Observable {
   addStats(log, increment = 1) {
     switch (log.severity) {
       case 'F':
-        this.stats.fatal+=increment;
+        this.stats.fatal += increment;
         break;
       case 'E':
-        this.stats.error+=increment;
+        this.stats.error += increment;
         break;
       case 'W':
-        this.stats.warning+=increment;
+        this.stats.warning += increment;
         break;
       case 'I':
-        this.stats.info+=increment;
+        this.stats.info += increment;
         break;
       case 'D':
-        this.stats.debug+=increment;
+        this.stats.debug += increment;
     }
   }
 
