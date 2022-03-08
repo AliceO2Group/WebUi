@@ -281,7 +281,7 @@ export default class Model extends Observable {
         if (!message.payload.ok && this.log.activeMode === MODE.QUERY) {
           this.notification.show(
             `SQL QUERY System is unavailable. Retrying in 5 seconds`, 'warning', 2000);
-        } else {
+        } else if (message.payload.ok && this.log.activeMode === MODE.QUERY) {
           this.notification.show(
             `Connection to SQL QUERY System has been restored`, 'success', 2000);
         }
