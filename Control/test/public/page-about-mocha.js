@@ -40,7 +40,7 @@ describe('`pageAbout` test-suite', async () => {
   });
 
   it('should request info about Core and store in frameworkInfo.statuses as RemoteData', async () => {
-    const core = await page.evaluate(() => window.model.frameworkInfo.statuses['kafka']);
+    const core = await page.evaluate(() => window.model.frameworkInfo.statuses['notification']);
     assert.strictEqual(core.kind, 'Success', 'No information was passed regarding kafka');
     assert.ok(!core.payload.status.ok);
   });
@@ -57,7 +57,7 @@ describe('`pageAbout` test-suite', async () => {
   });
 
   it('should request info about Kafka and store in frameworkInfo.statuses as RemoteData', async () => {
-    const kafka = await page.evaluate(() => window.model.frameworkInfo.statuses.kafka);
+    const kafka = await page.evaluate(() => window.model.frameworkInfo.statuses.notification);
     assert.strictEqual(kafka.kind, 'Success', 'No information was passed regarding Kafka');
   });
 

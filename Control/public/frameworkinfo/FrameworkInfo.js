@@ -33,7 +33,7 @@ export default class FrameworkInfo extends Observable {
       ws: RemoteData.notAsked(),
       grafana: RemoteData.notAsked(),
       consul: RemoteData.notAsked(),
-      kafka: RemoteData.notAsked(),
+      notification: RemoteData.notAsked(),
       apricot: RemoteData.notAsked(),
     };
 
@@ -55,7 +55,7 @@ export default class FrameworkInfo extends Observable {
       this.getWSInfo(),
       this.getCoreInfo(),
       this.getGrafanaInfo(),
-      this.getKafkaInfo(),
+      this.getNotificationInfo(),
       this.getApricotInfo(),
       this.getConsulInfo(),
       this.getIntegratedServicesInfo(),
@@ -118,14 +118,14 @@ export default class FrameworkInfo extends Observable {
   /**
    * Make a request to retrieve information about Kafka
    */
-  async getKafkaInfo() {
-    this.statuses.kafka = RemoteData.loading();
+  async getNotificationInfo() {
+    this.statuses.notification = RemoteData.loading();
     this.notify();
-    const {result, ok} = await this.model.loader.get('/api/status/kafka');
+    const {result, ok} = await this.model.loader.get('/api/status/notification');
     if (!ok) {
-      this.statuses.kafka = RemoteData.failure(result.message);
+      this.statuses.notification = RemoteData.failure(result.message);
     } else {
-      this.statuses.kafka = RemoteData.success(result);
+      this.statuses.notification = RemoteData.success(result);
     }
     this.notify();
   }
