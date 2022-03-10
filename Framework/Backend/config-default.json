@@ -40,7 +40,7 @@
     "hostname": "localhost",
     "port": 8080
   },
-  "kafka": {
+  "notification": {
     "brokers": ["localhost:9092"]
   }
 }
