@@ -12,7 +12,7 @@
     - [Apricot gRPC](#apricot-grpc)
     - [Grafana](#grafana)
     - [Consul](#consul)
-    - [Kafka](#kafka)
+    - [Notification service](#notification-service)
     - [InfoLogger GUI](#infologger-gui)
     - [QualityControl GUI](#qualitycontrol-gui)
     - [Bookkeeping GUI](#bookkeeping-gui)
@@ -79,8 +79,8 @@ Use of a Consul instance is optional
 * `qcPath` - Prefix for KV Store for quality-control's configuration
 * `kVPrefix` - Name of the Consul cluster used by AliceO2
 
-### Kafka
-Use of a Kafka instance is optional. It is being used for prompting and receiving notifications, see more in [Kafka connector - Notification](../Framework/docs/guide/kafka.md) framework guide.
+### Notification service
+Use of a Notification service is optional. It is being used for prompting and receiving notifications from global Notification Service, see more in [Notification service](../Framework/docs/guide/notification.md.md) framework guide.
 
 ### InfoLogger GUI
 Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
@@ -113,7 +113,7 @@ Use of utils field is optional. Here, a user can specify configuration fields fo
 3. External resources access:
    * [gRPC](https://grpc.io/)
    * [Consul](https://www.consul.io/) - used for KV Store
-   * [Kafka-Node](https://www.npmjs.com/package/kafka-node) - used for prompting [Browser Notifications](#integration-with-notification-service) to the user
+   * [Kafka-Node](https://www.npmjs.com/package/kafka-node) - used for prompting Native Browser Notifications to the user
    * [Grafana](https://grafana.com/) - used to display control environment plots
 
 #### Enable/Disable CRU Links

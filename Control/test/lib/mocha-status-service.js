@@ -156,16 +156,16 @@ describe('StatusService test suite', () => {
 
     it('should successfully retrieve status and info about Kafka that it is not running', async () => {
       const status = new StatusService(config, {}, {});
-      const kafkaStatus = await status.getNotificationStatus(new NotificationService(config.kafka));
+      const notificationStatus = await status.getNotificationStatus(new NotificationService(config.kafka));
       expectedInfo.status = {ok: false, configured: true, message: 'KafkaJSNumberOfRetriesExceeded'};
-      assert.deepStrictEqual(kafkaStatus, expectedInfo);
+      assert.deepStrictEqual(notificationStatus, expectedInfo);
     }).timeout(5000);
 
     it('should successfully return that Kafka was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
-      const kafkaStatus = await status.getNotificationStatus(new NotificationService());
+      const notificationStatus = await status.getNotificationStatus(new NotificationService());
       const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
-      assert.deepStrictEqual(kafkaStatus, expected);
+      assert.deepStrictEqual(notificationStatus, expected);
     });
   });
 

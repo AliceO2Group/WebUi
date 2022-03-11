@@ -180,6 +180,7 @@ class StatusService {
 
   /**
    * Build a response containing the information and status of the Notification Service
+   * @param {object} notification - configuration of Notification Service, including Kafka brokers
    * @return {Promise<Resolve>}
    */
   async getNotificationStatus(notification) {
