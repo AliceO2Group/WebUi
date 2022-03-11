@@ -21,7 +21,7 @@ const Lock = require('./services/Lock.js');
 const StatusService = require('./services/StatusService.js');
 
 // connectors
-const KafkaConnector = require('@aliceo2/web-ui').KafkaConnector;
+const NotificationService = require('@aliceo2/web-ui').NotificationService;
 const ConsulConnector = require('./connectors/ConsulConnector.js');
 
 // AliECS Core
@@ -76,9 +76,9 @@ module.exports.setup = (http, ws) => {
   http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
   http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
 
-  const kafka = new KafkaConnector(config.kafka);
-  if (kafka.isConfigured()) {
-    kafka.proxyWebNotificationToWs(ws);
+  const notification = new NotificationService(config.kafka);
+  if (notification.isConfigured()) {
+    notification.proxyWebNotificationToWs(ws);
   }
 
   http.post('/configuration/save', (req, res) => apricotService.saveConfiguration(req, res));
@@ -95,7 +95,9 @@ module.exports.setup = (http, ws) => {
   // Status Service
   http.get('/status/consul', (_, res) => statusService.getConsulStatus().then((data) => res.status(200).json(data)));
   http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/kafka', (_, res) => statusService.getKafkaStatus(kafka).then((data) => res.status(200).json(data)));
+  http.get('/status/notification',
+    (_, res) => statusService.getNotificationStatus(notification).then((data) => res.status(200).json(data))
+  );
   http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()), {public: true});
   http.get('/status/apricot', (_, res) => statusService.getApricotStatus().then((data) => res.status(200).json(data)));
   http.get('/status/core',

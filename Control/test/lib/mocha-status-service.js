@@ -16,7 +16,7 @@ const assert = require('assert');
 const nock = require('nock');
 const sinon = require('sinon');
 const StatusService = require('../../lib/services/StatusService.js');
-const KafkaConnector = require('@aliceo2/web-ui').KafkaConnector;
+const NotificationService = require('@aliceo2/web-ui').NotificationService;
 
 describe('StatusService test suite', () => {
   describe('Test StatusService initialization', () => {
@@ -156,16 +156,16 @@ describe('StatusService test suite', () => {
 
     it('should successfully retrieve status and info about Kafka that it is not running', async () => {
       const status = new StatusService(config, {}, {});
-      const kafkaStatus = await status.getKafkaStatus(new KafkaConnector(config.kafka));
+      const notificationStatus = await status.getNotificationStatus(new NotificationService(config.kafka));
       expectedInfo.status = {ok: false, configured: true, message: 'KafkaJSNumberOfRetriesExceeded'};
-      assert.deepStrictEqual(kafkaStatus, expectedInfo);
+      assert.deepStrictEqual(notificationStatus, expectedInfo);
     }).timeout(5000);
 
     it('should successfully return that Kafka was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
-      const kafkaStatus = await status.getKafkaStatus(new KafkaConnector());
+      const notificationStatus = await status.getNotificationStatus(new NotificationService());
       const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
-      assert.deepStrictEqual(kafkaStatus, expected);
+      assert.deepStrictEqual(notificationStatus, expected);
     });
   });
 
