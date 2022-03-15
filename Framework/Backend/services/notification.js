@@ -76,6 +76,9 @@ class NotificationService {
     if (!title) {
       throw new Error('Title is required to send notifications');
     }
+    if (Array.isArray(tag)) {
+      tag = tag.join(',');
+    }
     const message = {
       tag: tag,
       title: title,
