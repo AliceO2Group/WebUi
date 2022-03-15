@@ -29,7 +29,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "1.22.1"
+    "@aliceo2/web-ui": "1.23.0"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui"
