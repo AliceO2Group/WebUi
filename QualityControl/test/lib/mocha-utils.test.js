@@ -18,6 +18,8 @@ const assert = require('assert');
 const {errorHandler, httpHeadJson} = require('../../lib/utils');
 
 describe('Utility methods test suite', () => {
+  before(() => nock.cleanAll());
+
   describe('Check errors are handled and sent successfully', () => {
     let res;
 
@@ -97,6 +99,4 @@ describe('Utility methods test suite', () => {
       }, new Error('Something went wrong'));
     });
   });
-
-  after(() => nock.restore());
 });

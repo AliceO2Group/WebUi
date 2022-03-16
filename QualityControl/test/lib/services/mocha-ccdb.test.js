@@ -21,6 +21,8 @@ const CcdbService = require('../../../lib/services/CcdbService.js');
 const config = require('../../test-config.js');
 
 describe('CCDB Service test suite', () => {
+  before(() => nock.cleanAll());
+
   describe('Creating a new CcdbService instance', () => {
     it('should throw an error if configuration object is not provided', () => {
       assert.throws(() => new CcdbService(), new Error('Empty CCDB config'));
@@ -303,7 +305,4 @@ describe('CCDB Service test suite', () => {
       await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Unable to parse JSON'));
     });
   });
-
-  after(nock.restore);
-  afterEach(nock.cleanAll);
 });
