@@ -28,6 +28,7 @@ const ConsulConnector = require('./connectors/ConsulConnector.js');
 const GrpcProxy = require('./control-core/GrpcProxy.js');
 const ControlService = require('./control-core/ControlService.js');
 const ApricotService = require('./control-core/ApricotService.js');
+const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 
 const path = require('path');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
@@ -57,6 +58,8 @@ const ctrlService = new ControlService(ctrlProxy, consulConnector, config.grpc);
 const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
 const apricotService = new ApricotService(apricotProxy);
 
+const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
+
 const statusService = new StatusService(config, ctrlService, consulService, apricotService);
 
 module.exports.setup = (http, ws) => {
@@ -70,6 +73,9 @@ module.exports.setup = (http, ws) => {
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
   );
+  http.post('/NewEnvironmentRequest', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
+  http.post('/GetEnvironmentRequests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
+
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
   );

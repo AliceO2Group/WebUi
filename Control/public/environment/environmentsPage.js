@@ -51,6 +51,13 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
     Loading: () => pageLoading(),
     Success: (data) => showContent(model, data.environments),
     Failure: (error) => errorPage(error),
+  }),
+  h('hr'),
+  model.environment.requests.match({
+    NotAsked: () => null,
+    Loading: () => pageLoading(),
+    Success: (data) => showRequests(data.requests, data.now),
+    Failure: (error) => errorPage(error)
   })
 ]);
 
@@ -61,10 +68,53 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
  * @param {Array.<Environment>} list
  * @return {vnode}
  */
-const showContent = (model, list) => (list && Object.keys(list).length > 0)
-  ? h('.scroll-auto', environmentsTable(model, list))
-  : h('h3.m4', ['No environments found.']);
+const showContent = (model, list) =>
+  (list && Object.keys(list).length > 0)
+    ? h('.scroll-auto', environmentsTable(model, list))
+    : h('h3.m4', ['No environments found.']);
 
+/**
+ * Show list of create env request to AliECS core as a table
+ * @param {array} requests List of requested stored in the backend
+ * @param {Date} now Current date according to backend
+ */
+const showRequests = (requests, now) =>
+  (requests && requests.length > 0)
+    ? requestsTable(requests, now)
+    : h('h3.m4', ['No requests found.']);
+
+/**
+ * Calculate duration from two dates and pretify result
+ * @param {Date} now Current date
+ * @param {Date} startDate Date when a request was cached
+ */
+const durationDisplay = (now, startDate) => {
+  const seconds = (new Date(now).getTime() - new Date(startDate).getTime())/1000;
+  return seconds < 100 ? Math.floor(seconds) + ' s' : Math.floor(seconds / 60) + 'm' + Math.ceil(seconds % 60)
+}
+
+/**
+ * Renders table of requests based on backend info
+ * @param {array} requests List of requests
+ * @param {Date} now Current date
+ */
+const requestsTable = (requests, now) =>
+  h('table.table', [
+    h('thead', [
+      h('tr.table-primary',  h('th', {colspan: 4}, 'Environment requests')),
+      h('tr', [['Detectors', 'Workflow', 'Created by', 'When'].map((header) =>
+        h('th', {style: 'text-align: center;'}, header)
+      )])
+    ]),
+    h('tbody', [
+      requests.map(item => h('tr', [
+        h('td', {style: 'text-align: center;'}, item.detectors),
+        h('td', {style: 'text-align: center;'}, item.workflow.substring(item.workflow.lastIndexOf('/') + 1)),
+        h('td', {style: 'text-align: center;'}, item.owner),
+        h('td', {style: 'text-align: center;'}, durationDisplay(now, item.date)),
+      ]))
+    ])
+  ]);
 
 /**
  * Create the table of environments
@@ -78,6 +128,7 @@ const environmentsTable = (model, list) => {
   ];
   return h('table.table', [
     h('thead', [
+      h('tr.table-primary',  h('th', {colspan: 12}, 'Created environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [

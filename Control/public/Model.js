@@ -190,9 +190,11 @@ export default class Model extends Observable {
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
+        this.environment.getEnvironmentRequests();
         this.frameworkInfo.getIntegratedServicesInfo();
         this.environment.refreshInterval = setInterval(() => {
           this.environment.getEnvironments();
+          this.environment.getEnvironmentRequests();
           this.frameworkInfo.getIntegratedServicesInfo();
         }, COG.REFRESH_ENVS);
         break;

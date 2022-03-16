@@ -132,6 +132,16 @@ class ControlService {
   }
 
   /**
+   * Execute Command but do not respond to user
+   * @param {string} method - AliECS method name
+   * @param {object} body - request body
+   * @return {Promise}
+   */
+  executeCommandNoResponse(method, body) {
+    return this.ctrlProx[method](body);
+  }
+
+  /**
    * Method to execute specified command return results
    * @return {Promise}
    */
