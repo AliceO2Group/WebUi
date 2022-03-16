@@ -12,15 +12,14 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
       - [CCDB](#ccdb)
       - [Listing Connector](#listing-connector)
   - [Run QCG locally](#run-qcg-locally)
-  - [Public API](#public-api)
   - [Enable HTTPS](#enable-https)
   - [Display a non-standard ROOT object in QCG](#display-a-non-standard-root-object-in-qcg)
   - [Online Mode](#online-mode)
 
 ## Installation
-1. Install `nodeJS` >= `14.16.0`
-  * CC7: `yum install https://rpm.nodesource.com/pub_14.x/el/7/x86_64/nodejs-14.16.1-1nodesource.x86_64.rpm`
-  * Mac: `brew install node@14 ;  echo 'export PATH="/usr/local/opt/node@14/bin:$PATH"' >> $HOME/.bash_profile`
+1. Install `nodeJS` >= `16.x`
+  * CC7: `yum install https://rpm.nodesource.com/pub_16.x/el/8/x86_64/nodejs-16.9.1-1nodesource.x86_64.rpm`
+  * Mac: `brew install node@16 ;  echo 'export PATH="/usr/local/opt/node@16/bin:$PATH"' >> $HOME/.bash_profile`
   * Other: https://nodejs.org/en/download/package-manager
 3. Clone the `WebUi` repository 
 ```
@@ -35,12 +34,6 @@ npm ci
 ```
 cp config-default.js config.js
 ```
-
-### Troubleshooting
-
-Q: When doing `npm ci` I have an error `error: no template named 'remove_cv_t' in namespace 'std'; did you mean 'remove_cv'?` or such. 
-
-A: Make sure you are using nodeJS 14 and not nodeJS 16. 
 
 ## Local Configuration
 In order to customise the QCG you can edit the following configuration file: `WebUi/QualityControl/config.js`
