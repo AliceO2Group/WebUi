@@ -14,6 +14,7 @@
 
 const http = require('http');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
+const {httpHeadJson} = require('./../utils');
 
 /**
  * Gateway for all CCDB calls
@@ -91,6 +92,29 @@ class CcdbService {
           .filter((item) => this.isItemValid(item))
           .map((item) => parseInt(item[this.LAST_MODIFIED]))
       );
+  }
+
+  /**
+   * Make a HEAD HTTP call to CCDB to retrieve the location of the ROOT object
+   * Timestamp is mandatory in this case, otherwise CCDB will return 404
+   * e.g host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138  -H 'Accept: application/json' --head
+   * @param {String} objectName - full name of the object in question
+   * @param {Number} timestamp - version of the object data
+   * @returns {String} '/download/id'
+   */
+  async getRootObjectLocation(name, timestamp) {
+    if (!name || !timestamp) {
+      throw new Error('Missing mandatory parameters: name & timestamp');
+    }
+    const path = `/${name}/${timestamp}`;
+    const {status, headers} = await httpHeadJson(this.hostname, this.port, path);
+    if (status >= 200 && status <= 299) {
+      return headers['content-location']
+    } else if (status >= 300 && status <= 399) {
+      return headers.location;
+    } else {
+      throw new Error(`Unable to retrieve object: ${name}`);
+    }
   }
 
   /**
