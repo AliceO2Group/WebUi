@@ -85,5 +85,17 @@ function httpGetJson(host, port, path) {
   });
 }
 
+/**
+ * Make a HEAD HTTP call and return a promise
+ * @returns {Promise.<{status, headers}, Error>}
+ */
+function httpHeadJson(hostname, port, path, headers = {Accept: 'application/json'}) {
+  const requestOptions = {hostname, port, path, method: 'HEAD', headers};
+  return new Promise((resolve, reject) => {
+    http.request(requestOptions, (res) => resolve({status: res.statusCode, headers: res.headers}))
+      .on('error', (err) => reject(err))
+      .end();
+  });
+}
 
-module.exports = {errorHandler, errorLogger, httpGetJson};
+module.exports = {errorHandler, errorLogger, httpGetJson, httpHeadJson};

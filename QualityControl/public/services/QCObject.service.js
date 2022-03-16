@@ -71,7 +71,7 @@ export default class QCObjectService {
    * If timestamp is not provided, Date.now() will be used to request latest version of the object
    * @param {string} objectName
    * @param {number} timestamp
-   * @return {JSON} {result, ok, status}
+   * @return {Promise<RemoteData>} {result, ok, status}
    */
   async getObjectByName(objectName, timestamp = -1) {
     try {
@@ -81,7 +81,7 @@ export default class QCObjectService {
       const {result, ok, status} =
         await this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`);
       if (ok) {
-        const root = await this.model.loader.get(`/api/object/root?id=${result.info.id}`);
+        const root = await this.model.loader.get(`/api/object/root?path=${objectName}&timestamp=${timestamp}`);
         const obj = {
           info: result.info,
           timestamps: result.timestamps,

@@ -14,6 +14,7 @@
 
 const http = require('http');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
+const {httpHeadJson} = require('./../utils');
 
 /**
  * Gateway for all CCDB calls
@@ -94,12 +95,36 @@ class CcdbService {
   }
 
   /**
+   * Make a HEAD HTTP call to CCDB to retrieve the location of the ROOT object
+   * Timestamp is mandatory in this case, otherwise CCDB will return 404
+   * e.g host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138  -H 'Accept: application/json' --head
+   * @param {String} objectName - full name of the object in question
+   * @param {Number} timestamp - version of the object data
+   * @returns {Promise.<String, Error>} '/download/id'
+   * @reject
+   */
+  async getRootObjectLocation(name, timestamp) {
+    if (!name || !timestamp) {
+      throw new Error('Missing mandatory parameters: name & timestamp');
+    }
+    const path = `/${name}/${timestamp}`;
+    const {status, headers} = await httpHeadJson(this.hostname, this.port, path);
+    if (status >= 200 && status <= 299) {
+      return headers['content-location']
+    } else if (status >= 300 && status <= 399) {
+      return headers.location;
+    } else {
+      throw new Error(`Unable to retrieve object: ${name}`);
+    }
+  }
+
+  /**
    * Get latest version of an object or a specified version through the timestamp;
    * @example
    * {info: <JSON>, timestamps: Array<numbers>}
    * @param {String} path - Complete name of object; e.g qc/MO/CPV/merger1
    * @param {Number} timestamp - version of object that should be queried
-   * @returns {Promise.<JSON>, Error>}
+   * @returns {Promise.<JSON, Error>}
    */
   async getObjectLatestVersionByPath(path, timestamp = '') {
     if (!path) {

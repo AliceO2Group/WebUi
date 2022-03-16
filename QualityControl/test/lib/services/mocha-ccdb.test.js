@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* eslint-disable max-len */
+
 const assert = require('assert');
 const nock = require('nock');
 
@@ -19,6 +21,8 @@ const CcdbService = require('../../../lib/services/CcdbService.js');
 const config = require('../../test-config.js');
 
 describe('CCDB Service test suite', () => {
+  before(() => nock.cleanAll());
+
   describe('Creating a new CcdbService instance', () => {
     it('should throw an error if configuration object is not provided', () => {
       assert.throws(() => new CcdbService(), new Error('Empty CCDB config'));
@@ -210,6 +214,47 @@ describe('CCDB Service test suite', () => {
     });
   });
 
+  describe('`getRootObjectLocation()` tests', () => {
+    let ccdb;
+    before(() => ccdb = new CcdbService(config.ccdb));
+
+    it('should throw error due to missing parameters (name or timestamp)', async () => {
+      await assert.rejects(async () => ccdb.getRootObjectLocation(), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectLocation(null), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectLocation(undefined), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectLocation('', '2'), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectLocation('name'), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectLocation('name', null), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectLocation('name', undefined), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectLocation('name', ''), new Error('Missing mandatory parameters: name & timestamp'));
+    });
+
+    it('should successfully return content-location field on status >=200 <= 299', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({'content-location': '/download/123123-123123', location: '/download/some-id'})
+        .head('/qc/some/test/123455432')
+        .reply(200);
+      const contentLocation = await ccdb.getRootObjectLocation('qc/some/test', 123455432);
+      assert.strictEqual(contentLocation, '/download/123123-123123');
+    });
+
+    it('should successfully return location field on status >=300 <= 399', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({'content-location': '/download/123123-123123', location: '/download/some-id'})
+        .head('/qc/some/test/123455432')
+        .reply(301);
+      const contentLocation = await ccdb.getRootObjectLocation('qc/some/test', 123455432);
+      assert.strictEqual(contentLocation, '/download/some-id');
+    });
+
+    it('should reject with error due to invalid status', async () => {
+      nock('http://ccdb:8500')
+        .head('/qc/some/test/123455432')
+        .reply(404);
+      await assert.rejects(async () => ccdb.getRootObjectLocation('qc/some/test', '123455432'), new Error('Unable to retrieve object: qc/some/test'));
+    });
+  });
+
   describe('`httGetJson()` tests', () => {
     let ccdb;
     before(() => ccdb = new CcdbService(config.ccdb));
@@ -260,7 +305,4 @@ describe('CCDB Service test suite', () => {
       await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Unable to parse JSON'));
     });
   });
-
-  after(nock.restore);
-  afterEach(nock.cleanAll);
 });
