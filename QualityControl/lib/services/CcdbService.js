@@ -100,7 +100,8 @@ class CcdbService {
    * e.g host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138  -H 'Accept: application/json' --head
    * @param {String} objectName - full name of the object in question
    * @param {Number} timestamp - version of the object data
-   * @returns {String} '/download/id'
+   * @returns {Promise.<String, Error>} '/download/id'
+   * @reject
    */
   async getRootObjectLocation(name, timestamp) {
     if (!name || !timestamp) {
@@ -123,7 +124,7 @@ class CcdbService {
    * {info: <JSON>, timestamps: Array<numbers>}
    * @param {String} path - Complete name of object; e.g qc/MO/CPV/merger1
    * @param {Number} timestamp - version of object that should be queried
-   * @returns {Promise.<JSON>, Error>}
+   * @returns {Promise.<JSON, Error>}
    */
   async getObjectLatestVersionByPath(path, timestamp = '') {
     if (!path) {

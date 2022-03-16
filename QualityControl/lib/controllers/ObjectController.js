@@ -49,8 +49,9 @@ class ObjectController {
   }
 
   /**
+   * Query CCDB for object location as it might reply with a redirect (JSROOT is not able to follow redirects)
    * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for interpretation with JSROOT.draw
-   * @param {Request} req - must contain object path
+   * @param {Request} req
    * @param {Response} res 
    */
   async getObjectContent(req, res) {
