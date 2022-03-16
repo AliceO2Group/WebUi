@@ -49,28 +49,22 @@ class ObjectController {
   }
 
   /**
-   * Use JSROOT to decompress a ROOT object and convert it to JSON to be sent back to
-   * the client for interpretation with JSROOT.draw
+   * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for interpretation with JSROOT.draw
    * @param {Request} req - must contain object path
    * @param {Response} res 
    */
-  async getJsonRootObject(req, res) {
-    const id = req.query?.id;
+  async getObjectContent(req, res) {
     const path = req.query?.path;
     const timestamp = req.query?.timestamp ?? Date.now();
-    if (!id & !path) {
-      const message = 'Missing id or path of the object';
-      errorHandler(message, message, res, 400, 'object');
-      return;
-    }
-    const url = this.DB_URL + (id ? `/download/${id}` : `${path}/${timestamp}`);
     try {
+      const downloadLocation = await this.db.getRootObjectLocation(path, timestamp);
+      const url = this.DB_URL + downloadLocation;
+
       const file = await this.jsroot.openFile(url);
       const root = await file.readObject("ccdb_object");
-      const rootJson = await this.jsroot.toJSON(root)
+      const rootJson = await this.jsroot.toJSON(root);
       res.status(200).json(rootJson);
-    }
-    catch (error) {
+    } catch (error) {
       errorHandler(error, 'Unable to read ROOT file', res, 502, 'object');
     }
   }

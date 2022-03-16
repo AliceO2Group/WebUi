@@ -78,7 +78,7 @@ describe('ObjectController test suite', () => {
     });
   });
 
-  describe('`getJsonRootObject()` tests', () => {
+  describe('`getObjectContent()` tests', () => {
     let res;
     beforeEach(() => {
       res = {
@@ -87,73 +87,73 @@ describe('ObjectController test suite', () => {
         json: sinon.stub()
       };
     });
-    it('should respond with error if request does not contain id or path', async () => {
-      const objController = new ObjectController({}, {});
-      await objController.getJsonRootObject({query: {}}, res);
 
-      assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith({message: 'Missing id or path of the object'}), 'Error message was incorrect');
+    it('should respond with error if db service cannot provide location', async () => {
+      const dbService = sinon.createStubInstance(CcdbService, {
+        getRootObjectLocation: sinon.stub().rejects(new Error('Failed to load data for object'))
+      });
+      const objController = new ObjectController(dbService, {});
+      await objController.getObjectContent({query: {}}, res);
+
+      assert.ok(res.status.calledWith(502), 'Request was not called with 502 status');
+      assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
+
     it('should respond with error if JSROOT fails to open file', async () => {
-      const dbStub = {
-        protocol: 'http', host: 'localh', port: 8080
-      };
+      const dbService = sinon.createStubInstance(CcdbService, {
+        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+      });
       const rootMock = {
         openFile: sinon.stub().rejects('Unable to open file'),
       };
-      const objController = new ObjectController(dbStub, rootMock);
+      const objController = new ObjectController(dbService, rootMock);
 
-      await objController.getJsonRootObject({query: {id: '1234'}}, res);
+      await objController.getObjectContent({query: {path: '1234'}}, res);
       assert.ok(res.status.calledWith(502), 'Response status was not 502');
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
+
     it('should respond with error if JSROOT fails to read object in file', async () => {
-      const dbStub = {
-        protocol: 'http', host: 'localh', port: 8080
-      };
-      const fileMock = {
-        readObject: sinon.stub().rejects('Unable')
-      }
-      const rootMock = {
-        openFile: sinon.stub().resolves(fileMock),
-      };
-      const objController = new ObjectController(dbStub, rootMock);
+      const dbService = sinon.createStubInstance(CcdbService, {
+        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+      });
+      const fileMock = {readObject: sinon.stub().rejects('Unable')};
+      const rootMock = {openFile: sinon.stub().resolves(fileMock)};
+      const objController = new ObjectController(dbService, rootMock);
 
-      await objController.getJsonRootObject({query: {path: 'some/qc'}}, res);
+      await objController.getObjectContent({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(502), 'Response status was not 502');
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
+
     it('should respond with error if JSROOT fails convert content to JSON', async () => {
-      const dbStub = {
-        protocol: 'http', host: 'localh', port: 8080
-      };
-      const fileMock = {
-        readObject: sinon.stub().resolves({})
-      }
+      const dbService = sinon.createStubInstance(CcdbService, {
+        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+      });
+      const fileMock = {readObject: sinon.stub().resolves({})};
       const rootMock = {
         openFile: sinon.stub().resolves(fileMock),
         toJSON: sinon.stub().rejects('Unable')
       };
-      const objController = new ObjectController(dbStub, rootMock);
+      const objController = new ObjectController(dbService, rootMock);
 
-      await objController.getJsonRootObject({query: {path: 'some/qc'}}, res);
+      await objController.getObjectContent({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(502), 'Response status was not 502');
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
+
     it('should successfully reply with a JSON respond object', async () => {
-      const dbStub = {
-        protocol: 'http', host: 'localh', port: 8080
-      };
-      const fileMock = {
-        readObject: sinon.stub().resolves({})
-      }
+      const dbService = sinon.createStubInstance(CcdbService, {
+        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+      });
+      const fileMock = {readObject: sinon.stub().resolves({})};
       const rootMock = {
         openFile: sinon.stub().resolves(fileMock),
         toJSON: sinon.stub().resolves({__type: 'THistogram'})
       };
-      const objController = new ObjectController(dbStub, rootMock);
+      const objController = new ObjectController(dbService, rootMock);
 
-      await objController.getJsonRootObject({query: {path: 'some/qc'}}, res);
+      await objController.getObjectContent({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(200), 'Response status was not 200');
       assert.ok(res.json.calledWith({__type: 'THistogram'}), 'Expected JSON Object is different');
     });
