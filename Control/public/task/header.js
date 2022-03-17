@@ -13,6 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
+import {ROLES} from './../workflow/constants.js';
 
 /**
  * @file Header of the Task Page that displays the title and 2 clean operations
@@ -27,7 +28,7 @@ export const header = (model) => [
   h('.w-100.text-center', [
     h('h4', 'Task list')
   ]),
-  model.detectors.selected === 'GLOBAL' && h('.flex-row.text-right', {
+  model.detectors.selected === 'GLOBAL' && model.isAllowed(ROLES.Admin, true) && h('.flex-row.text-right', {
     style: 'position: absolute; right: 0px;'
   }, [
     cleanResourcesButton(model.task),
