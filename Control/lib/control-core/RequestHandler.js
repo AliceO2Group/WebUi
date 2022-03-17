@@ -34,7 +34,7 @@ class RequestHandler {
    * @param {object} req
    * @param {object} res
    */
-  add(req, res) {
+  async add(req, res) {
     const index = Object.keys(this.requestList).length;
     this.requestList[index] = { 
       detectors: req.body.detectors,
@@ -44,13 +44,13 @@ class RequestHandler {
     };
     res.json({ok: 1});
     log.debug('Added request to cache, ID: ' + index);
-    this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body).then(() => {
+    try {
+      await this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body);
       log.debug('Removed request from the cache, ID: ' + index);
-      delete this.requestList[index];
-    }).catch((error) => {
-      delete this.requestList[index];
+    } catch(error) {
       errorHandler(error, res, 504);
-    });
+    }
+    delete this.requestList[index];
   }
 
   /**
