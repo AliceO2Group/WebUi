@@ -42,7 +42,7 @@ export default (model) => {
  */
 const detectorsSelectionArea = (model, list) => {
   return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
-    style: 'max-height: 25em;'
+    style: 'max-height: 40em;'
   }, [
     list.filter(
       (name) => (name === model.workflow.model.detectors.selected || !model.workflow.model.detectors.isSingleView()))
@@ -73,12 +73,12 @@ const detectorItem = (model, name) => {
   }
 
   return h('.flex-row', [
+    detectorLockButton(model, name, 'small'),
     h('a.w-90.menu-item.w-wrapped', {
       className,
       title,
       style,
       onclick: () => model.lock.isLockedByMe(name) && model.workflow.flpSelection.toggleDetectorSelection(name),
     }, model.workflow.flpSelection.getDetectorWithIndexes(name)),
-    detectorLockButton(model, name, 'small')
   ]);
 };
