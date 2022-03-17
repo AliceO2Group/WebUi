@@ -43,9 +43,9 @@ class RequestHandler {
       owner: req.session.name
     };
     res.json({ok: 1});
-    log.debug('Added request to cache, ID:', index);
+    log.debug('Added request to cache, ID: ' + index);
     this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body).then(() => {
-      log.debug('Removed request from the cache, ID:', index);
+      log.debug('Removed request from the cache, ID: ' + index);
       delete this.requestList[index];
     }).catch((error) => {
       delete this.requestList[index];
