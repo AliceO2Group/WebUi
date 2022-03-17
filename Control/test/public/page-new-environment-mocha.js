@@ -423,8 +423,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const location = await page.evaluate(() => window.location);
 
     assert.strictEqual(location.search, '?page=environments');
-    assert.ok(calls['newEnvironment']);
-    assert.ok(calls['getEnvironment']);
+    assert.ok(calls['getEnvironments']);
   });
 
   /**
