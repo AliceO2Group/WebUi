@@ -368,7 +368,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully disable active detectors from the list', async () => {
-    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > a:nth-child(1)').classList);
+    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > a:nth-child(2)').classList);
     assert.ok(Object.values(detectorClass).includes('menu-item'));
     assert.ok(Object.values(detectorClass).includes('disabled-item'));
   });
@@ -386,8 +386,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
     await page.waitForTimeout(500);
