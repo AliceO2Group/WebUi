@@ -46,9 +46,10 @@ export default function objectPropertiesSidebar(model) {
           h('.tooltiptext', ' ROOT draw options')
         ])
       ),
-      h('.flex-row', [
+      h('.flex-row.flex-wrap', [
         btnOption(model, tabObject, 'lego'), ' ',
         btnOption(model, tabObject, 'colz'), ' ',
+        btnOption(model, tabObject, 'lcolz'), ' ',
         btnOption(model, tabObject, 'text'), ' ',
       ]),
       h('.flex-row',
