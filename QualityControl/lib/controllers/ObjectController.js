@@ -63,6 +63,7 @@ class ObjectController {
 
       const file = await this.jsroot.openFile(url);
       const root = await file.readObject("ccdb_object");
+      root['_typename'] = root['mTreatMeAs'] || root['_typename'];
       const rootJson = await this.jsroot.toJSON(root);
       res.status(200).json(rootJson);
     } catch (error) {
