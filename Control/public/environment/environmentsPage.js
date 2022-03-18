@@ -56,7 +56,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
   model.environment.requests.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showRequests(data.requests, data.now),
+    Success: (data) => showRequests(data.requests, data.now, model.environment),
     Failure: (error) => errorPage(error)
   })
 ]);
@@ -78,9 +78,9 @@ const showContent = (model, list) =>
  * @param {array} requests List of requested stored in the backend
  * @param {Date} now Current date according to backend
  */
-const showRequests = (requests, now) =>
+const showRequests = (requests, now, model) =>
   (requests && requests.length > 0)
-    ? requestsTable(requests, now)
+    ? requestsTable(requests, now, model)
     : h('h3.m4', ['No requests found.']);
 
 /**
@@ -98,23 +98,31 @@ const durationDisplay = (now, startDate) => {
  * @param {array} requests List of requests
  * @param {Date} now Current date
  */
-const requestsTable = (requests, now) =>
+const requestsTable = (requests, now, model) =>
   h('table.table', [
     h('thead', [
-      h('tr.table-primary',  h('th', {colspan: 4}, 'Environment requests')),
-      h('tr', [['Detectors', 'Workflow', 'Created by', 'When'].map((header) =>
+      h('tr.table-primary',  h('th', {colspan: 5}, 'Environment requests')),
+      h('tr', [['Detectors', 'Workflow', 'Created by', 'When', 'Action'].map((header) =>
         h('th', {style: 'text-align: center;'}, header)
       )])
     ]),
     h('tbody', [
-      requests.map(item => h('tr', [
+      requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : '' }}, [
         h('td', {style: 'text-align: center;'}, item.detectors),
         h('td', {style: 'text-align: center;'}, item.workflow.substring(item.workflow.lastIndexOf('/') + 1)),
         h('td', {style: 'text-align: center;'}, item.owner),
         h('td', {style: 'text-align: center;'}, durationDisplay(now, item.date)),
+        h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(item.id, model))
       ]))
     ])
   ]);
+
+const buttonRemoveRequest = (id, environment) =>
+  (model.isAllowed(ROLES.Admin) || model.session.personid == item.personid) &&
+  h('button.btn.btn-danger', {
+    title: 'Clear failed environemnt from the list',
+    onclick: () => environment.removeEnvironmentRequest({id})
+  }, 'Acknowledge');
 
 /**
  * Create the table of environments

@@ -106,8 +106,26 @@ export default class Environment extends Observable {
     this.notify();
   }
 
+
   /**
-   * Load all environments into `list` as RemoteData
+   * Remove environment request
+   */
+  async removeEnvironmentRequest(body) {
+    this.requests = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(`/api/RemoveEnvironmentRequest`, body);
+    if (!ok) {
+      this.requests = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.requests = RemoteData.success(result);
+    this.notify();
+  }
+
+  /**
+   * Get environments requests
    */
   async getEnvironmentRequests() {
     this.requests = RemoteData.loading();

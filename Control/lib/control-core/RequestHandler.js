@@ -36,21 +36,34 @@ class RequestHandler {
    */
   async add(req, res) {
     const index = Object.keys(this.requestList).length;
-    this.requestList[index] = { 
+    this.requestList[index] = {
+      id: index,
       detectors: req.body.detectors,
       workflow: req.body.workflowTemplate,
       date: new Date(),
-      owner: req.session.name
+      owner: req.session.name,
+      personid: req.session.personid,
+      failed: false
     };
     res.json({ok: 1});
     log.debug('Added request to cache, ID: ' + index);
     try {
       await this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body);
-      log.debug('Removed request from the cache, ID: ' + index);
-    } catch(error) {
-      errorHandler(error, res, 504);
+      log.debug('Auto-removed request, ID: ' + index);
+      delete this.requestList[index];
+    } catch(err) {
+      log.debug('Request failed, ID: ' + index);
+      this.requestList[index].failed = true;
     }
-    delete this.requestList[index];
+  }
+
+  remove(req, res) {
+    const index = req.body.id;
+    log.debug('User removed request, ID: ' + index);
+    if (index in this.requestList) {
+      delete this.requestList[index];
+    }
+    return this.getAll(req, res);
   }
 
   /**
@@ -59,7 +72,7 @@ class RequestHandler {
    *  @param {object} res
    */
   getAll(req, res) {
-    res.json({
+    return res.json({
       now: new Date(),
       requests: Object.values(this.requestList)
     });
