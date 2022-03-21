@@ -56,7 +56,7 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
   model.environment.requests.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showRequests(data.requests, data.now, model.environment),
+    Success: (data) => showRequests(model, data.requests, data.now),
     Failure: (error) => errorPage(error)
   })
 ]);
@@ -75,12 +75,13 @@ const showContent = (model, list) =>
 
 /**
  * Show list of create env request to AliECS core as a table
+ * @param {Object} model
  * @param {array} requests List of requested stored in the backend
  * @param {Date} now Current date according to backend
  */
-const showRequests = (requests, now, model) =>
+const showRequests = (model, requests, now) =>
   (requests && requests.length > 0)
-    ? requestsTable(requests, now, model)
+    ? requestsTable(model, requests, now)
     : h('h3.m4', ['No requests found.']);
 
 /**
@@ -95,10 +96,11 @@ const durationDisplay = (now, startDate) => {
 
 /**
  * Renders table of requests based on backend info
+ * @param {Object} model
  * @param {array} requests List of requests
  * @param {Date} now Current date
  */
-const requestsTable = (requests, now, model) =>
+const requestsTable = (model, requests, now) =>
   h('table.table', [
     h('thead', [
       h('tr.table-primary',  h('th', {colspan: 6}, 'Environment requests')),
@@ -115,17 +117,18 @@ const requestsTable = (requests, now, model) =>
         h('td', {style: 'text-align: center;'}, item.owner),
         h('td', {style: 'text-align: center;'}, durationDisplay(now, item.date)),
         h('td.f6', {style: 'text-align: center;'}, item.failed && item.message),
-        h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(item.id, item.personid, model))
+        h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(model, item.id, item.personid))
       ]))
     ])
   ]);
 
 /**
  * Button to remove request from the table
- * @param {Number} id Request id (server side generated)
  * @param {Object} model
+ * @param {Number} id Request id (server side generated)
+ * @param {Number} personid Person ID
  */
-const buttonRemoveRequest = (id, personid,  model) =>
+const buttonRemoveRequest = (model, id, personid) =>
   (model.isAllowed(ROLES.Admin) || model.session.personid == personid) &&
   h('button.btn.btn-danger', {
     title: 'Clear failed environemnt from the list',
