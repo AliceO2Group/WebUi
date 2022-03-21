@@ -73,9 +73,9 @@ module.exports.setup = (http, ws) => {
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
   );
-  http.post('/NewEnvironmentRequest', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
-  http.post('/GetEnvironmentRequests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
-  http.post('/RemoveEnvironmentRequest', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
+  http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
+  http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
+  http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
 
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))

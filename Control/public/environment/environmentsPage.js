@@ -52,11 +52,10 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
     Success: (data) => showContent(model, data.environments),
     Failure: (error) => errorPage(error),
   }),
-  h('hr'),
   model.environment.requests.match({
     NotAsked: () => null,
     Loading: () => pageLoading(),
-    Success: (data) => showRequests(model, data.requests, data.now),
+    Success: (data) => showRequests(model, data.requests),
     Failure: (error) => errorPage(error)
   })
 ]);
@@ -77,30 +76,16 @@ const showContent = (model, list) =>
  * Show list of create env request to AliECS core as a table
  * @param {Object} model
  * @param {array} requests List of requested stored in the backend
- * @param {Date} now Current date according to backend
  */
-const showRequests = (model, requests, now) =>
-  (requests && requests.length > 0)
-    ? requestsTable(model, requests, now)
-    : h('h3.m4', ['No requests found.']);
-
-/**
- * Calculate duration from two dates and pretify result
- * @param {Date} now Current date
- * @param {Date} startDate Date when a request was cached
- */
-const durationDisplay = (now, startDate) => {
-  const seconds = (new Date(now).getTime() - new Date(startDate).getTime())/1000;
-  return seconds < 100 ? Math.floor(seconds) + 's' : Math.floor(seconds / 60) + 'm ' + Math.ceil(seconds % 60) + 's'
-}
+const showRequests = (model, requests) =>
+  (requests && requests.length > 0) && [h('hr'), requestsTable(model, requests)];
 
 /**
  * Renders table of requests based on backend info
  * @param {Object} model
  * @param {array} requests List of requests
- * @param {Date} now Current date
  */
-const requestsTable = (model, requests, now) =>
+const requestsTable = (model, requests) =>
   h('table.table', [
     h('thead', [
       h('tr.table-primary',  h('th', {colspan: 6}, 'Environment requests')),
@@ -115,7 +100,7 @@ const requestsTable = (model, requests, now) =>
           item.workflow.lastIndexOf('/') + 1, item.workflow.indexOf('@')
         )),
         h('td', {style: 'text-align: center;'}, item.owner),
-        h('td', {style: 'text-align: center;'}, durationDisplay(now, item.date)),
+        h('td', {style: 'text-align: center;'}, item.date),
         h('td.f6', {style: 'text-align: center;'}, item.failed && item.message),
         h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(model, item.id, item.personid))
       ]))
@@ -132,7 +117,7 @@ const buttonRemoveRequest = (model, id, personid) =>
   (model.isAllowed(ROLES.Admin) || model.session.personid == personid) &&
   h('button.btn.btn-danger', {
     title: 'Clear failed environemnt from the list',
-    onclick: () => model.environment.removeEnvironmentRequest({id})
+    onclick: () => model.environment.removeEnvironmentRequest(id)
   }, 'Acknowledge');
 
 /**
@@ -147,7 +132,7 @@ const environmentsTable = (model, list) => {
   ];
   return h('table.table', [
     h('thead', [
-      h('tr.table-primary',  h('th', {colspan: 12}, 'Created environments')),
+      h('tr.table-primary',  h('th', {colspan: 12}, 'Active Environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [

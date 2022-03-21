@@ -35,6 +35,9 @@ describe('Request Handler of Control Service test suite', () => {
       },
       session: {
         name: 'test'
+      },
+      params: {
+        id: 0
       }
     };
     
@@ -70,8 +73,6 @@ describe('Request Handler of Control Service test suite', () => {
       const ctrl = new ControlService(ctrlProxy);
       const handler = new RequestHandler(ctrl);
       await handler.add(req, res);
-      req.body.id = 0;
-      req.body.personid = 0;
       await handler.remove(req, res);
       assert.strictEqual(Object.keys(handler.requestList).length, 0);
     });

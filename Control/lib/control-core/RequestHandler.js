@@ -14,6 +14,7 @@
 
 const {Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
+const {errorLogger} = require('./../utils.js');
 
 /**
  * Handles AliECS create env requests
@@ -30,11 +31,11 @@ class RequestHandler {
 
   /**
    * Add AliECS request list to "cache", remove it from the "cache" once response comes from AliECS
-   * @param {object} req
-   * @param {object} res
+   * @param {Request} req
+   * @param {Response} res
    */
   async add(req, res) {
-    const index = Object.keys(this.requestList).length;
+    const index = parseInt(Object.keys(this.requestList).pop()) + 1 || 0;
     this.requestList[index] = {
       id: index,
       detectors: req.body.detectors,
@@ -51,7 +52,7 @@ class RequestHandler {
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
     } catch(error) {
-      log.debug('Request failed, ID: ' + index);
+      errorLogger('Request failed, ID: ' + index);
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
     }
@@ -59,22 +60,22 @@ class RequestHandler {
 
   /**
    * Remove request from "cache".
-   * @param {object} req
-   * @param {object} res
+   * @param {Request} req
+   * @param {Response} res
+   * @returns {Object}
    */
   remove(req, res) {
-    const index = req.body.id;
+    const index = req.params.id;
     log.debug('User removed request, ID: ' + index);
-    if (index in this.requestList) {
-      delete this.requestList[index];
-    }
+    delete this.requestList[index];
     return this.getAll(req, res);
   }
 
   /**
    * Get all the requests from the "cache"
-   * @param {object} req
-   *  @param {object} res
+   * @param {Request} req
+   * @param {Response} res
+   * @returns {Object}
    */
   getAll(req, res) {
     return res.json({
