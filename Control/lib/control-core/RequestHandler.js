@@ -14,7 +14,6 @@
 
 const {Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
-const {errorHandler} = require('./../utils.js');
 
 /**
  * Handles AliECS create env requests
@@ -51,12 +50,18 @@ class RequestHandler {
       await this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body);
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
-    } catch(err) {
+    } catch(error) {
       log.debug('Request failed, ID: ' + index);
       this.requestList[index].failed = true;
+      this.requestList[index].message = error.details;
     }
   }
 
+  /**
+   * Remove request from "cache".
+   * @param {object} req
+   * @param {object} res
+   */
   remove(req, res) {
     const index = req.body.id;
     log.debug('User removed request, ID: ' + index);

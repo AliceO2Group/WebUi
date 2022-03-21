@@ -90,7 +90,7 @@ const showRequests = (requests, now, model) =>
  */
 const durationDisplay = (now, startDate) => {
   const seconds = (new Date(now).getTime() - new Date(startDate).getTime())/1000;
-  return seconds < 100 ? Math.floor(seconds) + ' s' : Math.floor(seconds / 60) + 'm' + Math.ceil(seconds % 60)
+  return seconds < 100 ? Math.floor(seconds) + 's' : Math.floor(seconds / 60) + 'm ' + Math.ceil(seconds % 60) + 's'
 }
 
 /**
@@ -101,27 +101,35 @@ const durationDisplay = (now, startDate) => {
 const requestsTable = (requests, now, model) =>
   h('table.table', [
     h('thead', [
-      h('tr.table-primary',  h('th', {colspan: 5}, 'Environment requests')),
-      h('tr', [['Detectors', 'Workflow', 'Created by', 'When', 'Action'].map((header) =>
+      h('tr.table-primary',  h('th', {colspan: 6}, 'Environment requests')),
+      h('tr', [['Detectors', 'Workflow', 'Created by', 'When', 'Message', 'Action'].map((header) =>
         h('th', {style: 'text-align: center;'}, header)
       )])
     ]),
     h('tbody', [
       requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : '' }}, [
         h('td', {style: 'text-align: center;'}, item.detectors),
-        h('td', {style: 'text-align: center;'}, item.workflow.substring(item.workflow.lastIndexOf('/') + 1)),
+        h('td', {style: 'text-align: center;'}, item.workflow.substring(
+          item.workflow.lastIndexOf('/') + 1, item.workflow.indexOf('@')
+        )),
         h('td', {style: 'text-align: center;'}, item.owner),
         h('td', {style: 'text-align: center;'}, durationDisplay(now, item.date)),
-        h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(item.id, model))
+        h('td.f6', {style: 'text-align: center;'}, item.failed && item.message),
+        h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(item.id, item.personid, model))
       ]))
     ])
   ]);
 
-const buttonRemoveRequest = (id, environment) =>
-  (model.isAllowed(ROLES.Admin) || model.session.personid == item.personid) &&
+/**
+ * Button to remove request from the table
+ * @param {Number} id Request id (server side generated)
+ * @param {Object} model
+ */
+const buttonRemoveRequest = (id, personid,  model) =>
+  (model.isAllowed(ROLES.Admin) || model.session.personid == personid) &&
   h('button.btn.btn-danger', {
     title: 'Clear failed environemnt from the list',
-    onclick: () => environment.removeEnvironmentRequest({id})
+    onclick: () => model.environment.removeEnvironmentRequest({id})
   }, 'Acknowledge');
 
 /**

@@ -62,7 +62,7 @@ describe('Request Handler of Control Service test suite', () => {
       assert.rejects(async() => await handler.add(req, res));
     });
 
-    it('Add request and remove it as control promise rejects, check empty list', async() => {
+    it('Add request and remove it, check empty list', async() => {
       const ctrlProxy = {
         isConnectionReady: true,
         NewEnvironment: sinon.stub().rejects()
@@ -70,6 +70,9 @@ describe('Request Handler of Control Service test suite', () => {
       const ctrl = new ControlService(ctrlProxy);
       const handler = new RequestHandler(ctrl);
       await handler.add(req, res);
+      req.body.id = 0;
+      req.body.personid = 0;
+      await handler.remove(req, res);
       assert.strictEqual(Object.keys(handler.requestList).length, 0);
     });
 

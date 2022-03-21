@@ -69,6 +69,7 @@ class GrpcProxy {
 
       return new Promise((resolve, reject) => {
         this.client[methodName](args, options, (error, response) => {
+          console.log(error, response);
           if (error) {
             reject(error);
             return;
