@@ -155,7 +155,7 @@ describe('Control', function() {
         readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
       REFRESH_TASK: 5000,
-      REFRESH_ENVS: 10000,
+      REFRESH_ENVS: 3000,
     }
     assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');
   });

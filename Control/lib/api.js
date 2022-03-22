@@ -29,6 +29,7 @@ const GrpcProxy = require('./control-core/GrpcProxy.js');
 const ControlService = require('./control-core/ControlService.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
+const EnvCache = require('./control-core/EnvCache.js');
 
 const path = require('path');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
@@ -59,6 +60,7 @@ const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
 const apricotService = new ApricotService(apricotProxy);
 
 const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
+const envCache = new EnvCache(ctrlService);
 
 const statusService = new StatusService(config, ctrlService, consulService, apricotService);
 
@@ -76,6 +78,7 @@ module.exports.setup = (http, ws) => {
   http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
   http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
+  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
 
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
