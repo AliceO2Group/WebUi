@@ -31,6 +31,7 @@ export default class Environment extends Observable {
     this.task.bubbleTo(model);
 
     this.model = model;
+    this.requests = RemoteData.notAsked();
     this.list = RemoteData.notAsked();
     this.item = RemoteData.notAsked();
     this.itemControl = RemoteData.notAsked();
@@ -105,6 +106,40 @@ export default class Environment extends Observable {
     this.notify();
   }
 
+
+  /**
+   * Remove environment request
+   */
+  async removeEnvironmentRequest(id) {
+    this.requests = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(`/api/core/removeRequest/${id}`);
+    if (!ok) {
+      this.requests = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.requests = RemoteData.success(result);
+    this.notify();
+  }
+
+  /**
+   * Get environments requests
+   */
+  async getEnvironmentRequests() {
+    this.requests = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.get(`/api/core/requests`);
+    if (!ok) {
+      this.requests = RemoteData.failure(result.message);
+      this.notify();
+      return;
+    }
+    this.requests = RemoteData.success(result);
+    this.notify();
+  }
   /**
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
@@ -152,14 +187,14 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/NewEnvironment`, itemForm);
+    const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
     if (!ok) {
       this.itemNew = RemoteData.failure(result.message);
       this.notify();
       return;
     }
     this.itemNew = RemoteData.notAsked();
-    this.model.router.go(`?page=environment&id=${result.environment.id}`);
+    this.model.router.go(`?page=environments`);
   }
 
   /**
