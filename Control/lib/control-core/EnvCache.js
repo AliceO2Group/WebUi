@@ -12,6 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
+const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
+const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/envcache`);
+const assert = require('assert');
+
 /**
  * Caches AliECS core GetEnvironments response
  */
@@ -27,6 +31,14 @@ class EnvCache {
   }
 
   /**
+   *  Sets WebSocket instance
+   *  @param {object} ws
+   */
+  setWs(ws) {
+    this.webSocket = ws;
+  }
+
+  /**
    * Returns cached response
    * @param {Request} req
    * @param {Response} res
@@ -36,11 +48,29 @@ class EnvCache {
   }
 
   /**
+   * @param {Object} obj Object to compare cache with
+   * @return {bool}
+   */
+  _cacheExpired(obj) {
+    try {
+      assert.deepStrictEqual(this.cache, obj);
+    } catch(error) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Refreshes the cache using Control Service
    */
   async refresh() {
     try {
-      this.cache = await this.ctrlService.executeCommandNoResponse('GetEnvironments');
+      const envs = await this.ctrlService.executeCommandNoResponse('GetEnvironments');
+      if (!this._cacheExpired(envs)) {
+        this.cache = envs;
+        this.webSocket.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
+        log.debug('Updated cache');
+      }
     } catch(error) {
       this.cache = {};
     }

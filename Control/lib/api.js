@@ -67,6 +67,8 @@ const statusService = new StatusService(config, ctrlService, consulService, apri
 module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
   lock.setWs(ws);
+  aliecsReqHandler.setWs(ws);
+  envCache.setWs(ws);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),

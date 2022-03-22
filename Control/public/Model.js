@@ -15,7 +15,7 @@
 /* global COG */
 
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter, Loader, sessionService} from '/js/src/index.js';
+import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData} from '/js/src/index.js';
 import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
@@ -135,16 +135,27 @@ export default class Model extends Observable {
    * @param {WebSocketMessage} message
    */
   handleWSCommand(message) {
-    if (message.command === 'padlock-update') {
-      this.lock.setPadlockState(message.payload);
-      return;
-    } else if (message.command === 'notification') {
-      this.showNativeNotification(JSON.parse(message.payload));
-      return;
-    } else if (message.command === 'resources-cleanup') {
-      this.task.setResourcesRequest(message.payload);
-    } else if (message.command === 'o2-roc-config') {
-      this.configuration.setConfigurationRequest(message.payload);
+    switch (message.command) {
+      case 'padlock-update':
+        this.lock.setPadlockState(message.payload);
+        break;
+      case 'notification':
+        this.showNativeNotification(JSON.parse(message.payload));
+        break;
+      case 'resources-cleanup':
+        this.task.setResourcesRequest(message.payload);
+        break;
+      case 'o2-roc-config':
+        this.configuration.setConfigurationRequest(message.payload);
+        break;
+      case 'environments':
+        this.environment.list = RemoteData.success(message.payload);
+        this.notify();
+        break;
+      case 'requests':
+        this.environment.requests = RemoteData.success(message.payload);
+        this.notify();
+        break;
     }
   }
 
@@ -194,7 +205,6 @@ export default class Model extends Observable {
         this.frameworkInfo.getIntegratedServicesInfo();
         this.environment.refreshInterval = setInterval(() => {
           this.environment.getEnvironments();
-          this.environment.getEnvironmentRequests();
           this.frameworkInfo.getIntegratedServicesInfo();
         }, COG.REFRESH_ENVS);
         break;
