@@ -100,7 +100,7 @@ const requestsTable = (model, requests) =>
           item.workflow.lastIndexOf('/') + 1, item.workflow.indexOf('@')
         )),
         h('td', {style: 'text-align: center;'}, item.owner),
-        h('td', {style: 'text-align: center;'}, item.date),
+        h('td', {style: 'text-align: center;'}, new Date(item.date).toLocaleString()),
         h('td.f6', {style: 'text-align: center;'}, item.failed && item.message),
         h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(model, item.id, item.personid))
       ]))
