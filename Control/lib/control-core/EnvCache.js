@@ -49,7 +49,7 @@ class EnvCache {
 
   /**
    * @param {Object} obj Object to compare cache with
-   * @return {bool}
+   * @return {bool} Whether object and cache are deep equal
    */
   _cacheExpired(obj) {
     try {
@@ -68,7 +68,7 @@ class EnvCache {
       const envs = await this.ctrlService.executeCommandNoResponse('GetEnvironments');
       if (!this._cacheExpired(envs)) {
         this.cache = envs;
-        this.webSocket.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
+        this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
         log.debug('Updated cache');
       }
     } catch(error) {

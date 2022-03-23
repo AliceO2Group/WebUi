@@ -85,7 +85,7 @@ class RequestHandler {
    * Broadcast list of request
    */
   broadcast() {
-    this.webSocket.broadcast(new WebSocketMessage().setCommand('requests').setPayload(
+    this.webSocket?.broadcast(new WebSocketMessage().setCommand('requests').setPayload(
       this._getAll()
     ));
   }
