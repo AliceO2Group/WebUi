@@ -78,8 +78,8 @@ describe('`pageEnvironments` test-suite', () => {
     });
   });
 
-  describe('Verify create environment request', async () => {
-    it('should diplsay failed environment request', async () => {
+  describe('Test new environment request', async () => {
+    it('create failed environment request', async () => {
       await page.goto(url + '?page=newEnvironment');
       const location = await page.evaluate(() => window.location);
       assert(location.search === '?page=newEnvironment');
@@ -90,6 +90,13 @@ describe('`pageEnvironments` test-suite', () => {
       await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
       await page.waitForTimeout(200);
       await page.evaluate(() => document.querySelector('#create-env').click());
+    });
+
+    it('verify request fields', async () => {
+      const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)').innerText);
+      const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)').innerText);
+      assert.strictEqual(detector, 'MID');
+      assert.strictEqual(state, 'FAILED');
     });
   });
 });
