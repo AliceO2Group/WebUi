@@ -421,9 +421,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('#create-env').click());
     await page.waitForTimeout(1000);
     const location = await page.evaluate(() => window.location);
-
     assert.strictEqual(location.search, '?page=environments');
-    assert.ok(calls['getEnvironments']);
   });
 
   /**

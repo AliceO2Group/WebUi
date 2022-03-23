@@ -28,7 +28,20 @@ class EnvCache {
     this.ctrlService = ctrlService;
     this.cache = {};
     this.timeout = 1500;
+    this.cacheEvictionTimeout = 5*60*1000;
+    this.cacheEvictionLast = new Date();
     this.refreshInterval = setInterval(() => this.refresh(), this.timeout);
+  }
+
+  /**
+   * Clears cache if connection with AliECS core is lost (after timeout)
+   */
+  evictCache() {
+    if (new Date() - this.cacheEvictionLast > this.cacheEvictionTimeout) {
+      this.cache = {};
+      this.cacheEvictionLast = new Date();
+      log.info('Cache evicted');
+    }
   }
 
   /**
@@ -52,7 +65,7 @@ class EnvCache {
    * @param {Object} obj Object to compare cache with
    * @return {bool} Whether object and cache are deep equal
    */
-  _cacheExpired(obj) {
+  _cacheInSync(obj) {
     try {
       assert.deepStrictEqual(this.cache, obj);
     } catch(error) {
@@ -70,14 +83,16 @@ class EnvCache {
         this.ctrlService.executeCommandNoResponse('GetEnvironments'),
         new Promise((_, reject) => {setTimeout(() => reject(new Error('GetEnvironments timed out')), this.timeout)})
       ]);
-      if (!this._cacheExpired(envs)) {
+      if (!this._cacheInSync(envs)) {
         this.cache = envs;
         this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
         log.debug('Updated cache');
       }
+      this.cacheEvictionLast = new Date();
     } catch(error) {
       log.debug(error);
     }
+    this.evictCache();
   }
 }
 module.exports = EnvCache;
