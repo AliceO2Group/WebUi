@@ -68,7 +68,8 @@ const coreGRPCServer = (config) => {
       calls['getEnvironment'] = true;
       callback(null, envTest);
     },
-    newEnvironment(call, callback) {
+    async newEnvironment(call, callback) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
       calls['newEnvironment'] = true;
       callback(null, {environment: envTest.environment});
     },

@@ -419,9 +419,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully create a new environment', async () => {
     await page.evaluate(() => document.querySelector('#create-env').click());
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments');
+    await page.waitForSelector('table');
+    assert.strictEqual(document.querySelector('table > tbody > tr > td:nth-child(1)').innerText, 'TST');
+    await page.waitForTimeout(20000);
   });
 
   /**

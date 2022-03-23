@@ -59,7 +59,7 @@ describe('Control', function() {
     this.ok = true;
 
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
     page = await browser.newPage();
 
     // Listen to browser
@@ -166,13 +166,13 @@ describe('Control', function() {
   });
 
   require('./public/page-new-environment-mocha');
-  require('./public/page-about-mocha');
-  require('./public/page-environment-mocha');
-  require('./public/page-environments-mocha');
+  //require('./public/page-about-mocha');
+  //require('./public/page-environment-mocha');
+  //require('./public/page-environments-mocha');
   // require('./public/page-configuration-mocha');
-  require('./public/page-tasks-mocha');
-  require('./public/page-hardware-mocha');
-  require('./public/page-lock-mocha');
+  //require('./public/page-tasks-mocha');
+  //require('./public/page-hardware-mocha');
+  //require('./public/page-lock-mocha');
 
   beforeEach(() => this.ok = true);
 
