@@ -107,7 +107,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const revision = await page.evaluate(() => window.model.workflow.form.revision);
 
     assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
-    assert.ok(location.search.includes('?page=environment&id='), 'GUI did not redirect successfully to the newly created environment. Check logs for more details');
+    assert.ok(location.search.includes('?page=environments'), 'Failed to redirect to environments page');
   });
 });
 
