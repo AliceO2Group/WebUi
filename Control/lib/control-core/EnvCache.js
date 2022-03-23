@@ -27,7 +27,8 @@ class EnvCache {
   constructor(ctrlService) {
     this.ctrlService = ctrlService;
     this.cache = {};
-    this.refreshInterval = setInterval(() => this.refresh(), 1000);
+    this.timeout = 1500;
+    this.refreshInterval = setInterval(() => this.refresh(), this.timeout);
   }
 
   /**
@@ -65,14 +66,17 @@ class EnvCache {
    */
   async refresh() {
     try {
-      const envs = await this.ctrlService.executeCommandNoResponse('GetEnvironments');
+      const envs = await Promise.race([
+        this.ctrlService.executeCommandNoResponse('GetEnvironments'),
+        new Promise((_, reject) => {setTimeout(() => reject(new Error('GetEnvironments timed out')), this.timeout)})
+      ]);
       if (!this._cacheExpired(envs)) {
         this.cache = envs;
         this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
         log.debug('Updated cache');
       }
     } catch(error) {
-      this.cache = {};
+      log.debug(error);
     }
   }
 }

@@ -60,12 +60,12 @@ class RequestHandler {
       await this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body);
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
-      this.broadcast();
     } catch(error) {
       errorLogger('Request failed, ID: ' + index);
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
     }
+    this.broadcast();
   }
 
   /**
