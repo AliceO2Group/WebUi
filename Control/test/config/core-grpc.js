@@ -68,9 +68,14 @@ const coreGRPCServer = (config) => {
       calls['getEnvironment'] = true;
       callback(null, envTest);
     },
-    newEnvironment(call, callback) {
-      calls['newEnvironment'] = true;
-      callback(null, {environment: envTest.environment});
+    async newEnvironment(call, callback) {
+      if (refreshCall++ ==  3) {
+        callback(new Error('Cannot create environment'), {});
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        calls['newEnvironment'] = true;
+        callback(null, {environment: envTest.environment});
+      }
     },
     getWorkflowTemplates(call, callback) {
       calls['getWorkflowTemplates'] = true;

@@ -424,6 +424,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(location.search, '?page=environments');
   });
 
+  it('should display successfull environment request', async () => {
+    const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)').innerText);
+    const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)').innerText);
+    assert.strictEqual(detector, 'MID');
+    assert.strictEqual(state, 'ONGOING');
+  });
   /**
    * Method intercept consul request and return 200
    * @param {Request} request
