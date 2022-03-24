@@ -147,7 +147,7 @@ async function waitForEnvironmentConfiguredState(page, timeout = 90) {
   return new Promise(async (resolve) => {
     let i = 0;
     while (i++ < timeout) {
-      const queryResult = await page.evaluate(() => window.model.environment.list.payload.environments[0].state);
+      const queryResult = await page.evaluate(() => window.model?.environment?.list?.payload?.environments[0]?.state);
       if (queryResult === 'CONFIGURED') {
         await page.waitForTimeout(1000);
         resolve();
