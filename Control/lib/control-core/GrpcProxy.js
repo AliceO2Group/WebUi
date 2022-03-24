@@ -29,7 +29,7 @@ class GrpcProxy {
    */
   constructor(config, path) {
     if (this._isConfigurationValid(config, path)) {
-      const packageDefinition = protoLoader.loadSync(path, {keepCase: false, arrays: true});
+      const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: false, arrays: true});
       const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
       const protoService = octlProto[this._package][this._label];
       const address = `${config.hostname}:${config.port}`;

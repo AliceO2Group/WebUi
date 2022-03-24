@@ -33,7 +33,7 @@ const parseObject = (item, key) => {
     case 'version':
       return `${item.productName} v${item.versionStr}(revision ${item.build})`;
     case 'createdWhen':
-      return new Date(item).toLocaleString();
+      return new Date(Number.parseInt(item)).toLocaleString();
     default:
       return JSON.stringify(item);
   }

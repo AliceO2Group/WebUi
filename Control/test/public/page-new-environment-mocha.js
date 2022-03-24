@@ -386,6 +386,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
+    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(1)');
+    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(2)');
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);

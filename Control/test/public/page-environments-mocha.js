@@ -82,7 +82,7 @@ describe('`pageEnvironments` test-suite', () => {
     it('create failed environment request', async () => {
       await page.goto(url + '?page=newEnvironment');
       const location = await page.evaluate(() => window.location);
-      assert(location.search === '?page=newEnvironment');
+      assert.ok(location.search === '?page=newEnvironment');
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
       await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
@@ -93,6 +93,9 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('verify request fields', async () => {
+      await page.waitForTimeout(1000)
+      await page.waitForSelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)');
+      await page.waitForSelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)');
       const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)').innerText);
       const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)').innerText);
       assert.strictEqual(detector, 'MID');

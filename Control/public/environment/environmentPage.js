@@ -21,7 +21,7 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
 import {controlEnvironmentPanel} from './components/controlEnvironmentPanel.js';
-import {getTasksByFlp} from './../common/utils.js';
+import {parseObject, getTasksByFlp} from './../common/utils.js';
 import {userVarsRow, defaultsRow, varsRow} from './components/expandableEnvRows.js';
 import {infoLoggerButton, bookkeepingButton, qcgButton, mesosLogButton} from './components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
@@ -199,7 +199,7 @@ const showEnvDetailsTable = (item) => {
       ]),
       h('tr', [
         h(`th${width}`, 'Created'),
-        h('td', new Date(item.createdWhen).toLocaleString())
+        h('td', parseObject(item.createdWhen, 'createdWhen'))
       ]),
       h('tr', [
         h(`th${width}`, 'State'),
