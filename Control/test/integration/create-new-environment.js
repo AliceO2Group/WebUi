@@ -108,6 +108,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
     assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
     assert.ok(location.search.includes('?page=environments'), 'Failed to redirect to environments page');
+
+    // Wait for Environment to transition to CONFIGURED state
+    await waitForEnvironmentConfiguredState(page, reqTimeout);
   });
 });
 
@@ -124,6 +127,28 @@ async function waitForCoreResponse(page, timeout = 90) {
     while (i++ < timeout) {
       const isLoaderActive = await page.evaluate(() => window.model.loader.active);
       if (!isLoaderActive) {
+        await page.waitForTimeout(1000);
+        resolve();
+      } else {
+        await page.waitForTimeout(1000);
+      }
+    }
+  });
+}
+
+/**
+ * Wait for the newly created environment to be in CONFIGURED staate
+ * Method will check every second for 90 seconds
+ * @param {Object} page
+ * @param {number} timeout
+ * @return {Promise}
+ */
+async function waitForEnvironmentConfiguredState(page, timeout = 90) {
+  return new Promise(async (resolve) => {
+    let i = 0;
+    while (i++ < timeout) {
+      const queryResult = await page.evaluate(() => window.model.environment.list.payload.environments[0].state);
+      if (queryResult === 'CONFIGURED') {
         await page.waitForTimeout(1000);
         resolve();
       } else {
