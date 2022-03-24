@@ -119,7 +119,7 @@ const coreGRPCServer = (config) => {
 const envTest = {
   environment: {
     id: '6f6d6387-6577-11e8-993a-f07959157220',
-    createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
+    createdWhen: '1648121309974',
     state: 'CONFIGURED',
     tasks: [],
     rootRole: 'copy-push',
@@ -131,7 +131,7 @@ const envTest = {
       dd_enabled: 'true',
       run_type: 'run'
     },
-    vaars: {
+    vars: {
       odc_enabled: 'true',
       mid_enabled: 'false',
       mid_something: 'test',
