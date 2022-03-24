@@ -111,6 +111,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
     // Wait for Environment to transition to CONFIGURED state
     await waitForEnvironmentConfiguredState(page, reqTimeout);
+    const stateEnv = await page.evaluate(() => window.model?.environment?.list?.payload?.environments[0]?.state);
+    assert.strictEqual(stateEnv, 'CONFIGURED', `Environment ${workflowToTest} with revision ${revision} was not in expected state`);
   });
 });
 
