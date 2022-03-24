@@ -88,8 +88,8 @@ const showRequests = (model, requests) =>
 const requestsTable = (model, requests) =>
   h('table.table', [
     h('thead', [
-      h('tr.table-primary',  h('th', {colspan: 6}, 'Environment requests')),
-      h('tr', [['Detectors', 'Workflow', 'Created by', 'When', 'Message', 'Action'].map((header) =>
+      h('tr.table-primary',  h('th', {colspan: 7}, 'Environment requests')),
+      h('tr', [['Detectors', 'Workflow', 'Created by', 'When', 'State', 'Message', 'Action'].map((header) =>
         h('th', {style: 'text-align: center;'}, header)
       )])
     ]),
@@ -101,6 +101,7 @@ const requestsTable = (model, requests) =>
         )),
         h('td', {style: 'text-align: center;'}, item.owner),
         h('td', {style: 'text-align: center;'}, new Date(item.date).toLocaleString()),
+        h('td', {style: 'text-align: center;font-weight: bold;'}, item.failed ? 'FAILED' : 'ONGOING'),
         h('td.f6', {style: 'text-align: center;'}, item.failed && item.message),
         h('td', {style: 'text-align: center;'}, item.failed && buttonRemoveRequest(model, item.id, item.personid))
       ]))

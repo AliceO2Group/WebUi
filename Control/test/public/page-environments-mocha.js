@@ -77,4 +77,26 @@ describe('`pageEnvironments` test-suite', () => {
       assert.strictEqual(location.search, '?page=environments');
     });
   });
+
+  describe('Test new environment request', async () => {
+    it('create failed environment request', async () => {
+      await page.goto(url + '?page=newEnvironment');
+      const location = await page.evaluate(() => window.location);
+      assert(location.search === '?page=newEnvironment');
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
+      await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+      await page.waitForTimeout(200);
+      await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+      await page.waitForTimeout(200);
+      await page.evaluate(() => document.querySelector('#create-env').click());
+    });
+
+    it('verify request fields', async () => {
+      const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)').innerText);
+      const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)').innerText);
+      assert.strictEqual(detector, 'MID');
+      assert.strictEqual(state, 'FAILED');
+    });
+  });
 });

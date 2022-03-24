@@ -11,8 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-
-const {Log} = require('@aliceo2/web-ui');
+const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
 const {errorLogger} = require('./../utils.js');
 
@@ -27,6 +26,14 @@ class RequestHandler {
   constructor(ctrlService) {
     this.ctrlService = ctrlService;
     this.requestList = {};
+  }
+
+  /**
+   *  Sets WebSocket instance
+   *  @param {object} ws
+   */
+  setWs(ws) {
+    this.webSocket = ws;
   }
 
   /**
@@ -46,7 +53,9 @@ class RequestHandler {
       failed: false
     };
     res.json({ok: 1});
+    this.broadcast();
     log.debug('Added request to cache, ID: ' + index);
+
     try {
       await this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body);
       log.debug('Auto-removed request, ID: ' + index);
@@ -56,6 +65,7 @@ class RequestHandler {
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
     }
+    this.broadcast();
   }
 
   /**
@@ -72,16 +82,32 @@ class RequestHandler {
   }
 
   /**
+   * Broadcast list of request
+   */
+  broadcast() {
+    this.webSocket?.broadcast(new WebSocketMessage().setCommand('requests').setPayload(
+      this._getAll()
+    ));
+  }
+
+  /**
+   * @returns {Object} Returns request as array and current date
+   */
+  _getAll() {
+    return {
+      now: new Date(),
+      requests: Object.values(this.requestList)
+    }
+  }
+
+  /**
    * Get all the requests from the "cache"
    * @param {Request} req
    * @param {Response} res
    * @returns {Object}
    */
   getAll(req, res) {
-    return res.json({
-      now: new Date(),
-      requests: Object.values(this.requestList)
-    });
+    return res.json(this._getAll());
   }
 }
 module.exports = RequestHandler;
