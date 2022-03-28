@@ -74,18 +74,14 @@ function getConsulConfig(config) {
 function _getGrafanaConfig(config) {
   if (config?.grafana?.url) {
     const hostPort = config.grafana.url;
-    const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=6';
-    const plotReadoutRate = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=8';
-    const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=4';
-    const plotDDGraph = 'd-solo/HBa9akknk/aliecs-dd?panelId=10';
+    const ecsDashboard = 'd-solo/SoUQ_Oy7z/aliecs-general';
     const theme = '&refresh=5s&theme=light';
     return {
       status: true,
       plots: [
-        `${hostPort}/${plotReadoutRateNumber}${theme}`,
-        `${hostPort}/${plotReadoutRate}${theme}`,
-        `${hostPort}/${plotReadoutRateGraph}${theme}`,
-        `${hostPort}/${plotDDGraph}${theme}`,
+        `${hostPort}/${ecsDashboard}?panelId=16${theme}`,
+        `${hostPort}/${ecsDashboard}?panelId=22${theme}`,
+        `${hostPort}/${ecsDashboard}?panelId=20${theme}`,
       ]
     };
   } else {
