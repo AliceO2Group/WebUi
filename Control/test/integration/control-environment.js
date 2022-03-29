@@ -123,6 +123,14 @@ describe('`Control Environment` test-suite', async () => {
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
   });
+
+  it('should release lock', async() => {
+    await page.goto(config.url + '?page=locks');
+    const location = await page.evaluate(() => window.location);
+    assert.strictEqual(location.search, '?page=locks');
+    await page.waitForSelector('button.danger');
+    await page.evaluate(() =>  document.querySelector('button.danger').click());
+  });
 });
 
 /**
