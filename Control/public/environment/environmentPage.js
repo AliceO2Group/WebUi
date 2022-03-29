@@ -148,11 +148,11 @@ const graphsPanel = (data, runParam) =>
   h('.flex-column.w-100', [
     h('.flex-row.w-100', [
       h('iframe.w-50', {
-        src: data[3] + runParam,
+        src: data[0] + runParam,
         style: 'height: 100%; border: 0'
       }),
       h('iframe.w-50', {
-        src: data[2] + runParam,
+        src: data[1] + runParam,
         style: 'height: 100%; border: 0'
       }),
     ]),
@@ -166,12 +166,8 @@ const graphsPanel = (data, runParam) =>
  */
 const readoutDataPanel = (data, runParam) =>
   h('.flex-row.w-100', [
-    h('iframe.w-50', {
-      src: data[1] + runParam,
-      style: 'height: 10em; border: 0;'
-    }),
-    h('iframe.w-50', {
-      src: data[0] + runParam,
+    h('iframe.w-100', {
+      src: data[2] + runParam,
       style: 'height: 10em; border: 0;'
     }),
   ]);
