@@ -125,7 +125,6 @@ describe('`Control Environment` test-suite', async () => {
   });
 
   it('should release lock', async() => {
-    //await page.evaluate(() => document.querySelector('a.menu-item:nth-child(9)').click());
     await page.goto(config.url + '?page=locks');
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=locks');
