@@ -78,7 +78,7 @@ const showContent = (model, list) =>
  * @param {array} requests List of requested stored in the backend
  */
 const showRequests = (model, requests) =>
-  (requests && requests.length > 0) && [h('hr'), requestsTable(model, requests)];
+  (requests && requests.length > 0) && [h('hr.m4.bg-gray-light'), requestsTable(model, requests)];
 
 /**
  * Renders table of requests based on backend info
@@ -88,7 +88,10 @@ const showRequests = (model, requests) =>
 const requestsTable = (model, requests) =>
   h('table.table', [
     h('thead', [
-      h('tr.table-primary',  h('th', {colspan: 7}, 'Environment requests')),
+      h('tr.primary.bg-white',
+        {style: 'border-top: 2px solid var(--color-gray); border-bottom: 1px solid var(--color-gray)'},
+        h('th', {colspan: 7}, 'Environment creation requests')
+      ),
       h('tr', [['Detectors', 'Workflow', 'Created by', 'When', 'State', 'Message', 'Action'].map((header) =>
         h('th', {style: 'text-align: center;'}, header)
       )])
