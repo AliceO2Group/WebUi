@@ -132,10 +132,9 @@ describe('Control', function() {
       GRAFANA: {
         status: true,
         plots: [
-          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-readout?panelId=6&refresh=5s&theme=light',
-          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-readout?panelId=8&refresh=5s&theme=light',
-          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-readout?panelId=4&refresh=5s&theme=light',
-          'http://localhost:2020/d-solo/HBa9akknk/aliecs-dd?panelId=10&refresh=5s&theme=light'
+          'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&refresh=5s&theme=light',
+          'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&refresh=5s&theme=light',
+          'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&refresh=5s&theme=light'
         ]
       },
       CONSUL: {
