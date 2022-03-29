@@ -93,9 +93,7 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('verify request fields', async () => {
-      await page.waitForTimeout(1000)
-      await page.waitForSelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)');
-      await page.waitForSelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)');
+      await waitForEnvRequest(page);
       const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)').innerText);
       const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)').innerText);
       assert.strictEqual(detector, 'MID');
@@ -103,3 +101,24 @@ describe('`pageEnvironments` test-suite', () => {
     });
   });
 });
+
+/**
+ * Wait for response create env request to fail
+ * @param {Object} page
+ * @param {number} timeout
+ * @return {Promise}
+ */
+async function waitForEnvRequest(page, timeout = 90) {
+  return new Promise(async (resolve) => {
+    let i = 0;
+    while (i++ < timeout) {
+      const requestFailed = await page.evaluate(() => window.model?.environment?.requests?.payload?.requests[0]?.failed);
+      if (!requestFailed) {
+        await page.waitForTimeout(1000);
+        resolve();
+      } else {
+        await page.waitForTimeout(1000);
+      }
+    }
+  });
+}
