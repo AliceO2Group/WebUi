@@ -164,7 +164,7 @@ const templateAreaList = (workflow, repository, revision) =>
                     workflow.generateVariablesSpec(name);
                   }
                 }, name),
-                h('.w-10.flex-column.dropdown#flp_selection_info_icon.items-center.justify-center', {
+                h('.w-10.dropdown#flp_selection_info_icon.items-center.justify-center', {
                   style: 'display: flex'
                 }, [
                   !isMirror ? h(`a`, {
@@ -176,8 +176,7 @@ const templateAreaList = (workflow, repository, revision) =>
                     description)
                 ])
               ])
-            }
-            )
+            })
           )
     })
   ]);
