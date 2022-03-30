@@ -79,7 +79,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const templates = await page.evaluate(() => window.model.workflow.templates);
     const expectedTemplates = {
       kind: 'Success', payload:
-        ['prettyreadout-1']
+        [{name: 'prettyreadout-1', description: 'something'}]
     };
     assert.deepStrictEqual(templates, expectedTemplates);
   });
@@ -276,7 +276,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const variables = await page.evaluate(() => {
       return window.model.workflow.form.variables;
     });
-    assert.deepStrictEqual(variables['TestKey'], ' TestValue  ');
+    assert.deepStrictEqual(variables['TestKey'], 'TestValue');
   });
 
   it('should successfully move focus to key input after KV pair was added', async () => {

@@ -506,7 +506,8 @@ export default class Workflow extends Observable {
     } else {
       const templateList = [];
       result.workflowTemplates.map((templateObject) => {
-        templateList.push(templateObject.template);
+        const description = templateObject.description ? templateObject.description : '';
+        templateList.push({name: templateObject.template, description});
         if (templateObject.varSpecMap && Object.keys(templateObject.varSpecMap).length > 0) {
           this.templatesVarsMap[templateObject.template] = templateObject.varSpecMap;
         }
@@ -627,6 +628,9 @@ export default class Workflow extends Observable {
       }
       basicVariables = qcResult.variables;
       const allVariables = Object.assign({}, basicVariables, variables);
+      Object.keys(allVariables)
+        .filter((key) => allVariables[key])
+        .forEach((key) => allVariables[key] = allVariables[key].trim())
       return {ok: true, message: '', variables: allVariables};
     }
   }

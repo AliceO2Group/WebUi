@@ -152,22 +152,31 @@ const templateAreaList = (workflow, repository, revision) =>
         (templates.length === 0)
           ? h('.text-center', errorComponent('No public templates found on this revision.')) :
           h('.shadow-level1.pv1',
-            templates.map((template) =>
-              h('.flex-row', [
+            templates.map((template) => {
+              const name = template.name;
+              const description = template.description;
+              const isMirror = !repository.startsWith('github'); 
+              return h('.flex-row', [
                 h('a.w-90.menu-item.w-wrapped', {
-                  className: workflow.form.template === template ? 'selected' : null,
+                  className: workflow.form.template === name ? 'selected' : null,
                   onclick: () => {
-                    workflow.form.setTemplate(template);
-                    workflow.generateVariablesSpec(template);
+                    workflow.form.setTemplate(name);
+                    workflow.generateVariablesSpec(name);
                   }
-                }, template),
-                h('a.w-10.flex-row.items-center.justify-center.actionable-icon', {
-                  href: `//${repository}/blob/${revision}/workflows/${template}.yaml`,
-                  target: '_blank',
-                  title: `Open workflow '${template}' definition`
-                }, info())
+                }, name),
+                h('.w-10.dropdown#flp_selection_info_icon.items-center.justify-center', {
+                  style: 'display: flex'
+                }, [
+                  !isMirror ? h(`a`, {
+                    href: `//${repository}/blob/${revision}/workflows/${name}.yaml`,
+                    target: '_blank',
+                    title: `Open workflow '${name}' definition`
+                  }, info()) : description && h('', info()),
+                  description && h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
+                    description)
+                ])
               ])
-            )
+            })
           )
     })
   ]);

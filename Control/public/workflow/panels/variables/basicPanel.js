@@ -345,7 +345,7 @@ const readoutPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${COG.CONSUL.kvStoreReadout}/${(
+        href: `//${COG.CONSUL.kvStoreReadout + (
           variables['readout_cfg_uri'] ?
             variables['readout_cfg_uri'] + '/edit' : '')}`,
         target: '_blank',
@@ -432,7 +432,7 @@ const qcUriPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${COG.CONSUL.kvStoreQC}/${(
+        href: `//${COG.CONSUL.kvStoreQC + (
           variables['qc_config_uri'] ?
             variables['qc_config_uri'] + '/edit' : '')}`,
         target: '_blank',

@@ -15,7 +15,7 @@
 /* global COG */
 
 import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, iconClipboard
 } from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -76,7 +76,7 @@ const showContent = (model, item) => [
   ]),
   h('.m2', [
     h('.flex-row', [
-      h(`.w-50`, showEnvDetailsTable(item)),
+      h(`.w-50`, showEnvDetailsTable(model, item)),
       h('.w-50.text-center.flex-column', [
         item.state === 'RUNNING' && ((COG && COG.GRAFANA && COG.GRAFANA.status) ?
           readoutDataPanel(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
@@ -177,20 +177,30 @@ const readoutDataPanel = (data, runParam) =>
  * @param {Object} item - object to be shown
  * @return {vnode} table view
  */
-const showEnvDetailsTable = (item) => {
-  const width = item.state === 'RUNNING' ? '.w-30' : '.w-15';
+const showEnvDetailsTable = (model, item) => {
+  const width = '.w-30';
   return h('table.table', [
     h('tbody', [
-      item.state === 'RUNNING' && h('tr', [
-        h(`th${width}`, 'Run Number'),
-        h('td',
+      item.state === 'RUNNING' && h(`tr`, [
+        h(`th${width}`,
+          h('.w-100.flex-row', [
+            h('.w-70', 'Run Number'),
+            model.isContextSecure() && copyValueToClipboardButton(model, item.currentRunNumber)
+          ])
+        ),
+        h('td', [
           h('.badge.bg-success.white', {
             style: 'font-size:35px'
-          }, item.currentRunNumber)
+          }, item.currentRunNumber),
+        ]
         )
       ]),
       h('tr', [
-        h(`th${width}`, 'ID'),
+        h(`th${width}`,
+          h('.w-100.flex-row', [
+            h('.w-70', 'ID'),
+            model.isContextSecure() && copyValueToClipboardButton(model, item.id)
+          ])),
         h('td', item.id)
       ]),
       h('tr', [
@@ -305,3 +315,19 @@ const addTaskDetailsTable = (environment, task) => h('tr', environment.task.list
     {style: 'text-align: center;', colspan: 7, title: 'Could not load arguments'},
     [iconCircleX(), ' ', _error]),
 }));
+
+/**
+ * Copy current location to the user's clipboard
+ * @param {Object} model
+ * @return {vnode}
+ */
+const copyValueToClipboardButton = (model, value) =>
+  h('.w-30.text-right',
+    h('button.btn.btn-sm', {
+      title: 'Copy value to clipboard',
+      onclick: () => {
+        navigator.clipboard.writeText(value);
+        model.notification.show('Successfully copied to clipboard', 'success', 1500);
+      }
+    }, iconClipboard())
+  );
