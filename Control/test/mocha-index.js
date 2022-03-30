@@ -148,8 +148,8 @@ describe('Control', function() {
         readoutCardPath: 'test/o2/readoutcard/components',
         qcPath: 'test/o2/qc/components',
         kVPrefix: 'test/ui/some-cluster/kv',
-        kvStoreQC: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/qc/components',
-        kvStoreReadout: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/readout/components',
+        kvStoreQC: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/qc/components/',
+        kvStoreReadout: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/readout/components/',
         qcPrefix: "localhost:8550/test/o2/qc/components/",
         readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
