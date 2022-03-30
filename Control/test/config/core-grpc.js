@@ -69,7 +69,7 @@ const coreGRPCServer = (config) => {
       callback(null, envTest);
     },
     async newEnvironment(call, callback) {
-      if (refreshCall++ ==  3) {
+      if (refreshCall++ == 3) {
         callback(new Error('Cannot create environment'), {});
       } else {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -152,7 +152,10 @@ const envTest = {
   workflow: {},
   workflowTemplates: {
     workflowTemplates: [
-      {repo: 'git.cern.ch/some-user/some-repo/', template: 'prettyreadout-1', revision: 'master'},
+      {
+        repo: 'git.cern.ch/some-user/some-repo/',
+        template: 'prettyreadout-1', revision: 'master', description: 'something'
+      },
     ]
   },
   listRepos: {
