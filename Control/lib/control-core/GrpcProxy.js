@@ -70,10 +70,22 @@ class GrpcProxy {
       return new Promise((resolve, reject) => {
         this.client[methodName](args, options, (error, response) => {
           if (error) {
+            try {
+              if (methodName === 'NewEnvironment' && error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
+                const buffer = error.metadata.internalRepr
+                  .get('grpc-status-details-bin')
+                  .toString('base64').split('\n');
+                const index = buffer.findIndex(record => record.includes('EnvironmentInfo'));
+                if (index > 1) {
+                  error.envId = buffer[index + 1].trim().substring(0, 11);
+                }
+              }
+            } catch(exception) {
+              log.debug('Failed new env details error' + exception);
+            }
             reject(error);
             return;
           }
-
           resolve(response);
         });
       });

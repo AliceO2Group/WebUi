@@ -94,8 +94,8 @@ describe('`pageEnvironments` test-suite', () => {
 
     it('verify request fields', async () => {
       await waitForEnvRequest(page);
-      const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(1)').innerText);
-      const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(5)').innerText);
+      const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(2)').innerText);
+      const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(6)').innerText);
       assert.strictEqual(detector, 'MID');
       assert.strictEqual(state, 'FAILED');
     });
@@ -113,7 +113,7 @@ async function waitForEnvRequest(page, timeout = 90) {
     let i = 0;
     while (i++ < timeout) {
       const requestFailed = await page.evaluate(() => window.model?.environment?.requests?.payload?.requests[0]?.failed);
-      if (!requestFailed) {
+      if (requestFailed) {
         await page.waitForTimeout(1000);
         resolve();
       } else {
