@@ -176,7 +176,7 @@ message GetEnvironmentsReply {
 }
 message EnvironmentInfo {
     string id = 1;
-    int64 createdWhen = 2;
+    int64 createdWhen = 2;  // msec
     string state = 3;
     repeated ShortTaskInfo tasks = 4;
     string rootRole = 5;
@@ -186,6 +186,7 @@ message EnvironmentInfo {
     map<string, string> userVars = 9;
     int32 numberOfFlps = 10;
     repeated string includedDetectors = 11;
+    string description = 12;
 }
 
 message NewEnvironmentRequest {
@@ -233,6 +234,7 @@ message ControlEnvironmentReply {
     string id = 1;
     string state = 2;
     uint32 currentRunNumber = 3;
+    // All times are in milliseconds
     int64 startOfTransition = 4;
     int64 endOfTransition = 5;
     int64 transitionDuration = 6;
@@ -382,6 +384,7 @@ message RoleInfo {
     map<string, string> vars = 8;
     map<string, string> userVars = 9;
     map<string, string> consolidatedStack = 10;
+    string description = 11;
 }
 
 message GetRolesReply {
@@ -432,6 +435,7 @@ message WorkflowTemplateInfo {
     string template = 2;
     string revision = 3;
     map<string, VarSpecMessage> varSpecMap = 4;
+    string description = 5;
 }
 
 message GetWorkflowTemplatesReply{
