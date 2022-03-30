@@ -91,7 +91,7 @@ export default class Model extends Observable {
   /** 
    * Returns user role
    * @returns {object} User's role 
-   */ 
+   */
   getRole() {
     if (this.session.access.includes('admin')) {
       return ROLES.Admin;
@@ -303,5 +303,14 @@ export default class Model extends Observable {
     if (Notification.permission !== 'granted') {
       Notification.requestPermission();
     }
+  }
+
+  /**
+   * Method to check if connection is secure to enable certain improvements
+   * e.g navigator.clipboard, notifications, service workers
+   * @return {boolean}
+   */
+  isContextSecure() {
+    return window.isSecureContext;
   }
 }
