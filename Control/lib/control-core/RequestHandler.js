@@ -64,6 +64,9 @@ class RequestHandler {
       errorLogger('Request failed, ID: ' + index);
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
+      if (error.envId) {
+        this.requestList[index].envId = error.envId;
+      }
     }
     this.broadcast();
   }

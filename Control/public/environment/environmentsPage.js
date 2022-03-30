@@ -90,14 +90,15 @@ const requestsTable = (model, requests) =>
     h('thead', [
       h('tr.primary.bg-white',
         {style: 'border-top: 2px solid var(--color-gray); border-bottom: 1px solid var(--color-gray)'},
-        h('th', {colspan: 7}, 'Environment creation requests')
+        h('th', {colspan: 8}, 'Environment creation requests')
       ),
-      h('tr', [['Detectors', 'Workflow', 'Created by', 'When', 'State', 'Message', 'Action'].map((header) =>
+      h('tr', [['ID', 'Detectors', 'Workflow', 'Created by', 'When', 'State', 'Message', 'Action'].map((header) =>
         h('th', {style: 'text-align: center;'}, header)
       )])
     ]),
     h('tbody', [
       requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : '' }}, [
+        h('td', {style: 'text-align: center;'}, item.envId || '-'),
         h('td', {style: 'text-align: center;'}, item.detectors),
         h('td', {style: 'text-align: center;'}, item.workflow.substring(
           item.workflow.lastIndexOf('/') + 1, item.workflow.indexOf('@')
