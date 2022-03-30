@@ -99,7 +99,9 @@ const requestsTable = (model, requests) =>
     h('tbody', [
       requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : '' }}, [
         h('td', {style: 'text-align: center;'}, item.envId || '-'),
-        h('td', {style: 'text-align: center;'}, item.detectors),
+        h('td', {style: 'text-align: center;'},
+          item.detectors && item.detectors.length > 0 ? item.detectors.join(' ') : '-'
+        ),
         h('td', {style: 'text-align: center;'}, item.workflow.substring(
           item.workflow.lastIndexOf('/') + 1, item.workflow.indexOf('@')
         )),
