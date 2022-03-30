@@ -138,10 +138,14 @@ export default class WorkflowVariable {
    */
   static parseKVPair(key, value, varSpecMap = {}) {
     const isKeyValid = key && key.trim() !== '';
+    const isValueValid = value && value.trim() !== '';
     if (!isKeyValid) {
       return {ok: false, error: `Invalid key '${key}' provided`};
+    } if (!isValueValid) {
+      return {ok: false, error: `Invalid value '${value}' provided`};
     } else {
       key = key.trim();
+      value = value.trim();
       if (Object.keys(varSpecMap).length === 0 || !varSpecMap[key]) {
         // template does not support dynamic workflows or template does not contain provided key
         return {ok: true, key, value};

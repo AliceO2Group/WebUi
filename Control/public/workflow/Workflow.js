@@ -627,6 +627,9 @@ export default class Workflow extends Observable {
       }
       basicVariables = qcResult.variables;
       const allVariables = Object.assign({}, basicVariables, variables);
+      Object.keys(allVariables)
+        .filter((key) => allVariables[key])
+        .forEach((key) => allVariables[key] = allVariables[key].trim())
       return {ok: true, message: '', variables: allVariables};
     }
   }
