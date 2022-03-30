@@ -80,13 +80,12 @@ class GrpcProxy {
                   error.envId = buffer[index + 1].trim().substring(0, 11);
                 }
               }
-            } catch(error) {
-              log.debug('Failed new env details error' + error);
+            } catch(exception) {
+              log.debug('Failed new env details error' + exception);
             }
             reject(error);
             return;
           }
-
           resolve(response);
         });
       });
