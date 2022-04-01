@@ -427,8 +427,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should display successfull environment request', async () => {
-    const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(2)').innerText);
-    const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(6)').innerText);
+    await page.waitForSelector('tr.primary > th:nth-child(1)');
+    const detector = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)').innerText);
+    const state = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(6)').innerText);
     assert.strictEqual(detector, 'MID');
     assert.strictEqual(state, 'ONGOING');
   });
