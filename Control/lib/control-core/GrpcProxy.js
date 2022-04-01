@@ -15,7 +15,9 @@
 // Doc: https://grpc.io/docs/languages/node/
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
-
+const path = require('path');
+const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
+const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo.js'));
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
 
 /**
@@ -72,13 +74,11 @@ class GrpcProxy {
           if (error) {
             try {
               if (methodName === 'NewEnvironment' && error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
-                const buffer = error.metadata.internalRepr
-                  .get('grpc-status-details-bin')
-                  .toString('base64').split('\n');
-                const index = buffer.findIndex(record => record.includes('EnvironmentInfo'));
-                if (index > 1) {
-                  error.envId = buffer[index + 1].trim().substring(0, 11);
-                }
+                const buffer = error.metadata.get('grpc-status-details-bin')[0];
+                const st = Status.deserializeBinary(buffer);
+                st.getDetailsList().map((detail) => {
+                  console.log(detail.unpack(EnvironmentInfo.deserializeBinary, detail.getTypeName()));
+                });
               }
             } catch(exception) {
               log.debug('Failed new env details error' + exception);
