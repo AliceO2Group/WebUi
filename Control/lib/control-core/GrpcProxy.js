@@ -76,7 +76,7 @@ class GrpcProxy {
                   .get('grpc-status-details-bin')
                   .toString('base64').split('\n');
                 const index = buffer.findIndex(record => record.includes('EnvironmentInfo'));
-                if (index > 1) {
+                if (index > 0) {
                   error.envId = buffer[index + 1].trim().substring(0, 11);
                 }
               }
