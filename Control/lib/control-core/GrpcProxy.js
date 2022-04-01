@@ -17,7 +17,7 @@ const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
-const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo.js'));
+const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
 
 /**
@@ -73,11 +73,13 @@ class GrpcProxy {
         this.client[methodName](args, options, (error, response) => {
           if (error) {
             try {
-              if (methodName === 'NewEnvironment' && error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
+              if (error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
                 const buffer = error.metadata.get('grpc-status-details-bin')[0];
-                const st = Status.deserializeBinary(buffer);
-                st.getDetailsList().map((detail) => {
-                  console.log(detail.unpack(EnvironmentInfo.deserializeBinary, detail.getTypeName()));
+                Status.deserializeBinary(buffer).getDetailsList().map((detail) => {
+                  if (detail.getTypeName() == 'o2control.EnvironmentInfo') {
+                    const deserialized = detail.unpack(EnvironmentInfo.deserializeBinary, detail.getTypeName());
+                    error.envId = deserialized.array[0];
+                  }
                 });
               }
             } catch(exception) {
