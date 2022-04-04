@@ -63,10 +63,9 @@ proto.google.rpc.Status.prototype.toObject = function(opt_includeInstance) {
  *     http://goto/soy-param-migration
  * @param {!proto.google.rpc.Status} msg The msg instance to transform.
  * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.google.rpc.Status.toObject = function(includeInstance, msg) {
-  var f, obj = {
+  var obj = {
     code: jspb.Message.getFieldWithDefault(msg, 1, 0),
     message: jspb.Message.getFieldWithDefault(msg, 2, ""),
     detailsList: jspb.Message.toObjectList(msg.getDetailsList(),

@@ -919,10 +919,9 @@ proto.o2control.TaskDeploymentInfo.prototype.toObject = function(opt_includeInst
  *     http://goto/soy-param-migration
  * @param {!proto.o2control.TaskDeploymentInfo} msg The msg instance to transform.
  * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.o2control.TaskDeploymentInfo.toObject = function(includeInstance, msg) {
-  var f, obj = {
+  var obj = {
     hostname: jspb.Message.getFieldWithDefault(msg, 1, ""),
     agentid: jspb.Message.getFieldWithDefault(msg, 2, ""),
     offerid: jspb.Message.getFieldWithDefault(msg, 3, ""),
