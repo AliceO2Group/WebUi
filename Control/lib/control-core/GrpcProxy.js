@@ -73,7 +73,7 @@ class GrpcProxy {
         this.client[methodName](args, options, (error, response) => {
           if (error) {
             try {
-              if (error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
+              if (methodName === 'NewEnvironment' && error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
                 const buffer = error.metadata.get('grpc-status-details-bin')[0];
                 Status.deserializeBinary(buffer).getDetailsList().map((detail) => {
                   if (detail.getTypeName() == 'o2control.EnvironmentInfo') {
