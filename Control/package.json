@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.23.1",
-    "@grpc/grpc-js": "^1.5.1",
+    "@grpc/grpc-js": "^1.6.2",
     "@grpc/proto-loader": "^0.6.5",
     "google-protobuf": "^3.20.0-rc.2"
   },
