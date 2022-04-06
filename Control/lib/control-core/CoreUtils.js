@@ -39,9 +39,13 @@ class CoreUtils {
    * @return {string}
    */
   static parseMethodNameString(method) {
+    if (method === '/core/request') {
+      return 'NewEnvironment'
+    } else if (method?.startsWith('/execute/')) {
+      return 'NewAutoEnvironment';
+    }
     return method?.indexOf('/') === 0 ? method.substring(1, method.length) : method;
   }
-
 
   /**
    * Parse the JSON of the version and return it as a string
