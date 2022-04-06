@@ -155,7 +155,8 @@ describe('`pageEnvironment` test-suite', async () => {
       assert.deepStrictEqual(stopButtonStyle, {0: 'display'});
     });
 
-    it('should have one button hidden for CONFIGURE in state DEPLOYED', async () => {
+    it.skip('should have one button for CONFIGURE in state DEPLOYED', async () => {
+      // skipping due to OCTRL-628
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
       const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').title);
       assert.strictEqual(configureButtonTitle, `CONFIGURE`);

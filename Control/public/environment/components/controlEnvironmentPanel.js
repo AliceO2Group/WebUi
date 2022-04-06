@@ -26,7 +26,7 @@ export const controlEnvironmentPanel = (environment, item) => h('.mv2.pv3.ph2', 
       [
         controlButton('.btn-success', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
         controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
-        controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', 'DEPLOYED'), ' ',
+        controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', ''), ' ', // button will not be displayed in any state due to OCTRL-628
         controlButton('', environment, item, 'RESET', 'RESET', 'CONFIGURED'), ' '
       ]
     ),
