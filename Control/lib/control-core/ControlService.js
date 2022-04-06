@@ -81,7 +81,7 @@ class ControlService {
         vars = !vars ? {} : vars;
         if (!vars.hosts) {
           vars.hosts = await this.consulConnector.getFLPsList();
-        } 
+        }
         vars.hosts = JSON.stringify(vars.hosts);
         const {repos: repositories} = await this.ctrlProx['ListRepos']();
         const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
@@ -189,9 +189,14 @@ class ControlService {
    */
   logAction(req, _, next) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    if (!method.startsWith('Get')) {
+    if (
+      method.startsWith('New') || method.startsWith('Control') || method.startsWith('Destroy')
+      || method.startsWith('CleanupTasks')
+    ) {
       const type = req.body.type ? ` (${req.body.type})` : '';
-      log.info(`${req.session.personid} => ${method} ${type}`, 6);
+      const username = req?.session?.username ?? '';
+      const personid = req?.session?.personid ?? '';
+      log.info(`${username}(${personid}) => ${method} ${type}`, 6);
     }
     next();
   }
