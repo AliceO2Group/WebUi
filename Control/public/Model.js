@@ -167,7 +167,7 @@ export default class Model extends Observable {
    */
   handleWSClose() {
     clearInterval(this.task.refreshInterval);
-    clearInterval(this.environment.refreshInterval);
+    clearInterval(this.frameworkInfo.refreshInterval);
 
     // Release client-side
     this.lock.setPadlockState({lockedBy: null, lockedByName: null});
@@ -197,16 +197,15 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     clearInterval(this.task.refreshInterval);
-    clearInterval(this.environment.refreshInterval);
+    clearInterval(this.frameworkInfo.refreshInterval);
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
         this.environment.getEnvironmentRequests();
         this.frameworkInfo.getIntegratedServicesInfo();
-        this.environment.refreshInterval = setInterval(() => {
-          this.environment.getEnvironments();
+        this.frameworkInfo.refreshInterval = setInterval(() => {
           this.frameworkInfo.getIntegratedServicesInfo();
-        }, COG.REFRESH_ENVS);
+        }, COG.REFRESH_TASK);
         break;
       case 'environment':
         if (!this.router.params.id) {
