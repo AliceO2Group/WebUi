@@ -17,19 +17,19 @@ const Joi = require('joi');
 const ObjectDto = Joi.object({
   id: Joi.string().required(),
   name: Joi.string().required(),
-  x: Joi.number().min(0),
-  y: Joi.number().min(0),
-  h: Joi.number().min(0),
-  w: Joi.number().min(0),
+  x: Joi.number().min(0).default(0),
+  y: Joi.number().min(0).default(0),
+  h: Joi.number().min(0).default(0),
+  w: Joi.number().min(0).default(0),
   options: Joi.array().items(Joi.string()).default([]),
-  autoSize: Joi.boolean().default(false)
+  autoSize: Joi.boolean().default(false),
 });
 
 const TabsDto = Joi.object({
   id: Joi.string().required(),
-  name: Joi.string().min(3).max(10).required(),
+  name: Joi.string().min(1).max(10).required(),
   columns: Joi.number().min(2).max(5).default(2),
-  objects: Joi.array().items(ObjectDto).default([]),
+  objects: Joi.array().max(30).items(ObjectDto).default([]),
 });
 
 const UserDto = Joi.object({
@@ -40,7 +40,7 @@ const UserDto = Joi.object({
 const LayoutDto = Joi.object({
   id: Joi.string().required(),
   name: Joi.string().min(3).max(40).required(),
-  tabs: Joi.array().items(TabsDto),
+  tabs: Joi.array().min(1).max(10).items(TabsDto),
   owner_id: Joi.number().min(0).required(),
   owner_name: Joi.string().required(),
   collaborators: Joi.array().items(UserDto).default([]),
