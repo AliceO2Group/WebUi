@@ -128,6 +128,15 @@ describe('layoutShow page test suite', async () => {
     assert.strictEqual(count, 1);
   });
 
+  it('should have number input field for allowing users to change auto-tab value', async () => {
+    await page.waitForSelector('nav > div > div > div:nth-child(4) > div > label', {timeout: 5000});
+    await page.waitForSelector('nav > div > div > div:nth-child(4) > div:nth-child(2) > input', {timeout: 5000});
+    const autoText = await page.evaluate(() => document.querySelector('nav > div > div > div:nth-child(4) > div > label').innerText);
+    const inputNumber = await page.evaluate(() => document.querySelector('nav > div > div > div:nth-child(4) > div:nth-child(2) > input').type);
+    assert.strictEqual(autoText, 'Tab Auto-Change(sec): 0 (OFF), 10-600 (ON)');
+    assert.deepStrictEqual(inputNumber, 'number')
+  });
+
   it('should have a tree sidebar in edit mode', async () => {
     await page.waitForSelector('nav table tbody tr', {timeout: 5000});
     const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
@@ -135,7 +144,7 @@ describe('layoutShow page test suite', async () => {
   });
 
   it('should have filtered results on input search filled', async () => {
-    await page.type('nav > div > div > div:nth-child(2) > input', 'HistoWithRandom');
+    await page.type('nav > div > div > div:nth-child(6) > input', 'HistoWithRandom');
     await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
   });
 
