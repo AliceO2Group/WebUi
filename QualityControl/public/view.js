@@ -17,8 +17,8 @@ import {h, notification} from '/js/src/index.js';
 import sidebar from './common/sidebar.js';
 import header from './common/header.js';
 
-import layoutListPage from './layout/layoutListPage.js';
-import layoutShowPage from './layout/layoutShowPage.js';
+import layoutListPage from './layout/list/page.js';
+import layoutViewPage from './layout/view/page.js';
 import objectTreePage from './object/objectTreePage.js';
 import objectViewPage from './object/view/objectViewPage.js';
 import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
@@ -51,7 +51,7 @@ export default (model) => [
 function page(model) {
   switch (model.page) {
     case 'layoutList': return layoutListPage(model);
-    case 'layoutShow': return layoutShowPage(model);
+    case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
     case 'objectView': return objectViewPage(model);
     case 'about': return frameworkInfoPage(model);

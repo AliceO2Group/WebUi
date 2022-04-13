@@ -15,7 +15,7 @@
 /* global QCG */
 
 import {h} from '/js/src/index.js';
-import objectTreeSidebar from '../object/objectTreeSidebar.js';
+import layoutSettings from './../layout/view/panels/settings.js';
 import objectPropertiesSidebar from '../object/objectPropertiesSidebar.js';
 import {
   iconLayers, iconPlus, iconBarChart, iconExcerpt, iconMediaSkipBackward, iconMediaSkipForward, iconReload
@@ -28,7 +28,7 @@ import {
  * @return {vnode}
  */
 export default function sidebar(model) {
-  // Spacial case when sidebar is used as a required form or perperty editor
+  // Special case when sidebar is used as a required form or property editor
   if (model.router.params.page === 'layoutShow' && model.layout.editEnabled && model.layout.editingTabObject) {
     return h('nav.sidebar.sidebar-extend', {class: ''}, [
       h('.sidebar-content.scroll-y', [
@@ -37,10 +37,10 @@ export default function sidebar(model) {
     ]);
   }
 
-  // Spacial case when sidebar is used as a required form or perperty editor
+  // Spacial case when sidebar is used as a required form or property editor
   if (model.router.params.page === 'layoutShow' && model.layout.editEnabled) {
     return h('nav.sidebar.sidebar-extend', {class: ''}, [
-      h('.sidebar-content', [objectTreeSidebar(model)])
+      h('.sidebar-content', layoutSettings(model))
     ]);
   }
 
