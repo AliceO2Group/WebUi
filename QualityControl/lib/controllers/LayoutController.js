@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const {errorHandler} = require('../utils.js');
+const LayoutDto = require('../dtos/LayoutDto.js');
 
 /**
  * Gateway for all Layout requests
@@ -98,7 +99,6 @@ class LayoutService {
     } catch (error) {
       errorHandler(error, `Failed to update layout`, res, 502, 'layout')
     }
-
   }
 
   /**
@@ -124,43 +124,23 @@ class LayoutService {
   }
 
   /**
-   * Create a layout specified by body
+   * Validates received payload follows a layout format and if successful, stores it
    * @param {Request} req
    * @param {Response} res
    * @return {Promise}
    */
   async createLayout(req, res) {
     try {
-
-      const layout = req.body;
-
-      if (!layout.name) {
-        const errMsg = 'Missing layout.name parameter';
-        errorHandler(errMsg, errMsg, res, 400, 'layout');
-        return;
-      }
-      if (layout.owner_id === undefined) { // integer from 0 to Infinity
-        const errMsg = 'Missing layout.owner_id parameter';
-        errorHandler(errMsg, errMsg, res, 400, 'layout');
-        return;
-      }
-      if (!layout.owner_name) {
-        const errMsg = 'Missing layout.owner_name parameter';
-        errorHandler(errMsg, errMsg, res, 400, 'layout');
-        return;
-      }
-      if (!layout.tabs) {
-        const errMsg = 'Missing layout.tabs parameter';
-        errorHandler(errMsg, errMsg, res, 400, 'layout');
-        return;
-      }
-
-      const result = await this.service.createLayout(layout)
+      const layout = await LayoutDto.validateAsync(req.body);
+      const result = await this.service.createLayout(layout);
       res.status(201).json(result);
     } catch (error) {
-      errorHandler(error, 'Failed to create layout', res, 409, 'layout');
+      let message = 'Failed to create new layout';
+      if (error?.name === 'ValidationError') { // JOI validation
+        message = `Failed to validate layout: ${error?.details[0]?.message || ''}`;
+      }
+      errorHandler(error, message, res, 409, 'layout');
     }
-
   }
 }
 

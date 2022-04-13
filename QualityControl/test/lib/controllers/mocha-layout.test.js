@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* eslint-disable max-len */
+
 const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 const sinon = require('sinon');
@@ -228,45 +230,62 @@ describe('LayoutController test suite', () => {
       };
     });
 
-    it('should respond with 400 error if request did not contain owner_id when requesting to update', async () => {
+    it('should respond with 409 error if request did not contain layout "id" when requesting to update', async () => {
       const req = {body: {}};
       const layoutConnector = new LayoutController({});
       await layoutConnector.createLayout(req, res);
-      assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith({message: 'Missing layout.name parameter'}), 'Error message was incorrect');
+      assert.ok(res.status.calledWith(409), 'Response status was not 409');
+      assert.ok(res.send.calledWith({message: 'Failed to validate layout: "id" is required'}), 'Error message was incorrect');
     });
-    it('should respond with 400 error if request did not contain layout name when requesting to update', async () => {
-      const req = {body: {name: 'somelayout'}};
+    it('should respond with 409 error if request did not contain layout "name" when requesting to update', async () => {
+      const req = {body: {id: '1'}};
       const layoutConnector = new LayoutController({});
       await layoutConnector.createLayout(req, res);
-      assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith({message: 'Missing layout.owner_id parameter'}), 'Error message was incorrect');
+      assert.ok(res.status.calledWith(409), 'Response status was not 409');
+      assert.ok(res.send.calledWith({message: 'Failed to validate layout: "name" is required'}), 'Error message was incorrect');
     });
-    it('should respond with 400 error if request did not contain owner name when requesting to update', async () => {
-      const req = {body: {name: 'somelayout', owner_id: 1}};
+    it('should respond with 409 error if request did not proper "tabs" when requesting to update', async () => {
+      const req = {body: {name: 'somelayout', tabs: [{some: 'some'}], id: '1'}};
       const layoutConnector = new LayoutController({});
       await layoutConnector.createLayout(req, res);
-      assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith({message: 'Missing layout.owner_name parameter'}), 'Error message was incorrect');
+      assert.ok(res.status.calledWith(409), 'Response status was not 409');
+      assert.ok(res.send.calledWith({message: 'Failed to validate layout: "tabs[0].id" is required'}), 'Error message was incorrect');
     });
-    it('should respond with 400 error if request did not contain tabs when requesting to update', async () => {
-      const req = {body: {name: 'somelayout', owner_id: 1, owner_name: 'admin'}};
+    it('should respond with 409 error if request did not contain "owner_id" when requesting to update', async () => {
+      const req = {body: {name: 'somelayout', tabs: [{id: '1', name: 'tab'}], id: '1'}};
       const layoutConnector = new LayoutController({});
       await layoutConnector.createLayout(req, res);
-      assert.ok(res.status.calledWith(400), 'Response status was not 400');
-      assert.ok(res.send.calledWith({message: 'Missing layout.tabs parameter'}), 'Error message was incorrect');
+      assert.ok(res.status.calledWith(409), 'Response status was not 409');
+      assert.ok(res.send.calledWith({message: 'Failed to validate layout: "owner_id" is required'}), 'Error message was incorrect');
+    });
+    it('should respond with 409 error if request did not contain "owner_name" when requesting to update', async () => {
+      const req = {body: {name: 'somelayout', id: '1', owner_id: 123, tabs: [{id: '123', name: 'tab'}]}};
+      const layoutConnector = new LayoutController({});
+      await layoutConnector.createLayout(req, res);
+      assert.ok(res.status.calledWith(409), 'Response status was not 409');
+      assert.ok(res.send.calledWith({message: 'Failed to validate layout: "owner_name" is required'}), 'Error message was incorrect');
     });
 
-    it('should successfully return created layout', async () => {
+    it('should successfully return created layout with default for missing values', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileConnector, {
         createLayout: sinon.stub().resolves({layout: 'somelayout'})
       });
+      const expected = {
+        id: '1',
+        name: 'somelayout',
+        owner_id: 1,
+        owner_name: 'admin',
+        tabs: [{id: '123', name: 'tab', columns: 2, objects: []}],
+        collaborators: [],
+        displayTimestamp: false,
+        autoTabChange: 0
+      };
       const layoutConnector = new LayoutController(jsonStub);
-      const req = {body: {name: 'somelayout', owner_id: 1, owner_name: 'admin', tabs: []}};
+      const req = {body: {id: '1', name: 'somelayout', owner_id: 1, owner_name: 'admin', tabs: [{id: '123', name: 'tab'}]}};
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(201), 'Response status was not 201');
       assert.ok(res.json.calledWith({layout: 'somelayout'}), 'A layout should have been sent back');
-      assert.ok(jsonStub.createLayout.calledWith(req.body), 'New layout body was not used in data connector call');
+      assert.ok(jsonStub.createLayout.calledWith(expected), 'New layout body was not used in data connector call');
     });
 
     it('should return error if data connector failed to update', async () => {
@@ -274,11 +293,12 @@ describe('LayoutController test suite', () => {
         createLayout: sinon.stub().rejects(new Error('Could not create layout'))
       });
       const layoutConnector = new LayoutController(jsonStub);
-      const req = {body: {name: 'somelayout', owner_id: 1, owner_name: 'admin', tabs: []}};
+      const req = {body: {id: '1', name: 'somelayout', owner_id: 1, owner_name: 'admin', tabs: [{id: '123', name: 'tab'}]}};
+      const expected = {id: '1', name: 'somelayout', owner_id: 1, owner_name: 'admin', tabs: [{id: '123', name: 'tab', columns: 2, objects: []}], collaborators: [], displayTimestamp: false, autoTabChange: 0};
       await layoutConnector.createLayout(req, res);
       assert.ok(res.status.calledWith(409), 'Response status was not 409');
-      assert.ok(res.send.calledWith({message: 'Failed to create layout'}), 'DataConnector error message is incorrect');
-      assert.ok(jsonStub.createLayout.calledWith(req.body), 'New layout body was not used in data connector call');
+      assert.ok(res.send.calledWith({message: 'Failed to create new layout'}), 'DataConnector error message is incorrect');
+      assert.ok(jsonStub.createLayout.calledWith(expected), 'New layout body was not used in data connector call');
     });
   });
 });
