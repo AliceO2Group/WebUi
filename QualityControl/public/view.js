@@ -19,10 +19,9 @@ import header from './common/header.js';
 
 import layoutListPage from './layout/list/page.js';
 import layoutViewPage from './layout/view/page.js';
-import importLayoutModal from './layout/importLayoutModal.js';
+import layoutImportModal from './layout/panels/importModal.js';
 import objectTreePage from './object/objectTreePage.js';
 import objectViewPage from './object/view/objectViewPage.js';
-
 import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
 
 /**
@@ -31,7 +30,7 @@ import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
  * @return {vnode}
  */
 export default (model) => [
-  model.isImportVisible && importLayoutModal(model),
+  model.isImportVisible && layoutImportModal(model),
   model.page === 'objectView' ? objectViewPage(model) :
     h('.absolute-fill.flex-column', [
       h('header.shadow-level2.level2', [

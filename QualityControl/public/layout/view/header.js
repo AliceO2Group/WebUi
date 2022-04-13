@@ -40,7 +40,7 @@ const toolbarViewMode = (model) => [
     h('b.f4', model.layout.item.name),
     ' ',
     // Show group button edit/duplicate only for owner of the layout shown
-    h('.btn-group.mh2', [
+    h('.btn-group', [
       h('button.btn.btn-default', {
         onclick: () => {
           const nameForNewLayout = prompt('Choose a name for the new layout:').trim();
@@ -49,21 +49,20 @@ const toolbarViewMode = (model) => [
         title: 'Duplicate layout'
       }, iconLayers()),
       h('a.btn.btn-default', {
-        title: 'Export Layout skeleton',
-        href: `data:application/octet;,${encodeURIComponent(LayoutUtils.getLayoutSkeleton(model.layout.item))}`,
+        title: 'Export layout skeleton as JSON file',
+        href: `data:application/octet;,${encodeURIComponent(LayoutUtils.toSkeleton(model.layout.item))}`,
         download: `layout-${model.layout.item.name}-skeleton.json`,
       }, iconShareBoxed()),
-    ]),
-    h('.btn-group', [
-      model.session.personid == model.layout.item.owner_id && h('button.btn.btn-primary', {
-        onclick: () => model.layout.edit(),
-        title: 'Edit layout'
-      }, iconPencil()),
-      model.session.personid == model.layout.item.owner_id && h('button.btn.btn-danger', {
-        onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
-        title: 'Delete layout'
-      }, iconTrash()
-      )
+      model.session.personid == model.layout.item.owner_id && [
+        h('button.btn.btn-primary', {
+          onclick: () => model.layout.edit(),
+          title: 'Edit layout'
+        }, iconPencil()),
+        h('button.btn.btn-danger', {
+          onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
+          title: 'Delete layout'
+        }, iconTrash())
+      ]
     ])
   ])
 ];

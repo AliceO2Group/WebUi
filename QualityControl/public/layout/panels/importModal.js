@@ -20,27 +20,35 @@ import {h} from '/js/src/index.js';
  * @param {Object} model
  * @return {vnode}
  */
-const importLayoutModal = (model) =>
+export default (model) =>
   h('.o2-modal',
     h('.o2-modal-content', [
       h('.p2.text-center.flex-column', [
-        h('h4', 'Import a layout in JSON format'),
-        h('.pv2', h('textarea.form-control.w-100', {
+        h('h4.pv1', 'Import a layout in JSON format'),
+        h('', h('textarea.form-control.w-100', {
           rows: 15,
+          placeholder: 'e.g.\n{\n\t"name": "my layout",\n\t"displayTimestamp": "false",' +
+            '\n\t"displayTimestamp": "autoTabChange": "10", \n\t"tabs": "[]"\n}',
+          oninput: (e) => model.layout.setImportValue(e.target.value),
           style: 'resize: vertical;',
         })),
-        h('.btn-group.w-100.align-center', {
+        model.layoutService.new.match({
+          NotAsked: () => null,
+          Loading: () => h('', 'Loading...'),
+          Success: (_) => null,
+          Failure: (error) => h('.danger.pv1', error.message),
+        }),
+        h('.btn-group.w-100.align-center.pv1', {
           style: 'display:flex; justify-content:center;'
         }, [
           h('button.btn.btn-primary', {
-            onclick: () => model.isImportVisible = false,
+            disabled: model.layout.newJSON === undefined || model.layoutService.new.isFailure(),
+            onclick: () => model.layout.newFromJson(model.layout.newJSON),
           }, 'Import'),
           h('button.btn', {
-            onclick: () => model.isImportVisible = false,
+            onclick: () => model.layout.resetImport(),
           }, 'Cancel'),
-        ])
+        ]),
       ]),
     ])
   );
-
-export default importLayoutModal;
