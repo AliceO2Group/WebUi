@@ -135,7 +135,7 @@ describe('layoutShow page test suite', async () => {
   });
 
   it('should have filtered results on input search filled', async () => {
-    await page.type('nav > div > div > div:nth-child(6) > input', 'HistoWithRandom');
+    await page.type('nav > div > div > div:nth-child(2) > input', 'HistoWithRandom');
     await page.waitForFunction(`document.querySelectorAll('nav table tbody tr').length === 1`, {timeout: 5000});
   });
 
