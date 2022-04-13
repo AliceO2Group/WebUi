@@ -119,6 +119,8 @@ export default class Model extends Observable {
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
+    } else if (code === 27 && this.isImportVisible) {
+      this.layout.resetImport();
     }
   }
 

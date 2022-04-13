@@ -15,6 +15,7 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 
 import GridList from './Grid.js';
+import LayoutUtils from './LayoutUtils.js';
 import {objectId, clone} from '../common/utils.js';
 import {assertTabObject, assertLayout, assertLayouts} from '../common/Types.js';
 
@@ -38,6 +39,8 @@ export default class Layout extends Observable {
     this.tab = null; // pointer to a tab from `item`
     this._tabIndex = 0; // index of the cu displayed tab
     this.tabInterval = undefined; // JS Interval to change currently displayed tab
+
+    this.newJSON = undefined;
 
     this.myList = RemoteData.notAsked(); // array of layouts
     this.requestedLayout = RemoteData.notAsked();
@@ -154,6 +157,50 @@ export default class Layout extends Observable {
         this.item[property] = value;
     }
     this.notify();
+  }
+
+  /**
+   * Given a user input value as String, set it as potential imported layout value as JSON
+   * @param {String} layout 
+   */
+  setImportValue(layout) {
+    try {
+      this.newJSON = JSON.parse(layout);
+      this.model.layoutService.new = RemoteData.notAsked();
+    } catch (error) {
+      this.model.layoutService.new = RemoteData.failure(error);
+    }
+    this.notify();
+  }
+
+  /**
+   * Reset import layout modal if user cancels the operation
+   */
+  resetImport() {
+    this.newJSON = undefined;
+    this.model.layoutService.new = RemoteData.notAsked();
+    this.model.isImportVisible = false
+  }
+
+  /**
+   * Create a new layout based on a given JSON skeleton through the import modal
+   * If successful, go to its own page in edit mode afterward
+   * @param {JSON} layout - skeleton of layout to be imported
+   */
+  async newFromJson(layout) {
+    layout = LayoutUtils.fromSkeleton(layout);
+    layout.owner_id = this.model.session.personid;
+    layout.owner_name = this.model.session.name;
+
+    const result = await this.model.layoutService.createNewLayout(layout, this);
+
+    if (result.isSuccess()) {
+      this.resetImport();
+      // Read the new layout created and edit it
+      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
+      // Update user list in background
+      this.loadMyList();
+    }
   }
 
   /**
