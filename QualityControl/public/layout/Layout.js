@@ -34,7 +34,10 @@ export default class Layout extends Observable {
 
     this.list = null; // array of layouts
     this.item = null; // current selected layout containing an array of tabs
+
     this.tab = null; // pointer to a tab from `item`
+    this._tabIndex = 0; // index of the cu displayed tab
+    this.tabInterval = undefined; // JS Interval to change currently displayed tab
 
     this.myList = RemoteData.notAsked(); // array of layouts
     this.requestedLayout = RemoteData.notAsked();
@@ -126,7 +129,9 @@ export default class Layout extends Observable {
 
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
+        this.item.autoTabChange = this.item.autoTabChange || 0;
         this.selectTab(0);
+        this.setTabInterval(this.item.autoTabChange);
         this.notify();
       } else {
         this.model.notification.show(`Unable to load layout, it might have been deleted.`, 'warning');
@@ -141,7 +146,13 @@ export default class Layout extends Observable {
    * @param {object} value
    */
   setLayoutProperty(property, value) {
-    this.item[property] = value;
+    switch (property) {
+      case 'autoTabChange':
+        this.item[property] = value >= 10 ? value : 0;
+        break;
+      default:
+        this.item[property] = value;
+    }
     this.notify();
   }
 
@@ -159,6 +170,7 @@ export default class Layout extends Observable {
         owner_id: this.model.session.personid,
         owner_name: this.model.session.name,
         displayTimestamp: false,
+        autoTabChange: 0,
         tabs: [{
           id: objectId(),
           name: 'main',
@@ -248,7 +260,6 @@ export default class Layout extends Observable {
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }
-
     this.tab = this.item.tabs[index];
     this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const columns = this.item.tabs[index].columns;
@@ -336,7 +347,7 @@ export default class Layout extends Observable {
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
-
+    this.setTabInterval(0);
     this.editEnabled = true;
     this.editOriginalClone = JSON.parse(JSON.stringify(this.item)); // deep clone
     this.editingTabObject = null;
@@ -349,6 +360,7 @@ export default class Layout extends Observable {
    * Ends editing and send back to server the new version of the current layout
    */
   save() {
+    this.setTabInterval(this.item.autoTabChange);
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
@@ -555,5 +567,45 @@ export default class Layout extends Observable {
             .some((name) => this.model.object.isObjectInOnlineList(name)));
     }
     return false;
+  }
+
+  /**
+   * Getters / Setters
+   */
+
+  /**
+   * Sends back the currently displayed tab index
+   * @return {Number}
+   */
+  get tabIndex() {
+    return this._tabIndex;
+  }
+
+  /**
+   * Updates the index of the currently displayed tab
+   * Will default to 0 if the received index is greater than the current possibilities
+   * @param {Number} index
+   * @return {Number}
+   */
+  set tabIndex(index) {
+    this._tabIndex = index >= this.item.tabs.length ? 0 : index;
+  }
+
+  /**
+   * Sets an interval to automatically change current tab selection based on the passed time in seconds
+   * If time is < 10, no interval will be set
+   * @param {Number} time - seconds on how often the tab should be changed
+   * @returns {}
+   */
+  setTabInterval(time) {
+    if (time >= 10) {
+      this.tabInterval = setInterval(() => {
+        this._tabIndex = (this._tabIndex + 1 >= this.item.tabs.length) ? 0 : this._tabIndex + 1;
+        this.selectTab(this._tabIndex);
+      }, time * 1000);
+    } else {
+      clearInterval(this.tabInterval);
+      this.selectTab(0);
+    }
   }
 }

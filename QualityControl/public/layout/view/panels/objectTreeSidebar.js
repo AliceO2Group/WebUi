@@ -13,117 +13,64 @@
 */
 
 import {h} from '/js/src/index.js';
-import spinner from '../loader/spinner.js';
-import {draw} from './objectDraw.js';
-import {iconCaretBottom, iconCaretRight, iconBarChart, iconResizeBoth} from '/js/src/icons.js';
-import virtualTable from './virtualTable.js';
+import spinner from '../../../loader/spinner.js';
+import {draw} from '../../../object/objectDraw.js';
+import {iconCaretBottom, iconCaretRight, iconBarChart} from '/js/src/icons.js';
+import virtualTable from '../../../object/virtualTable.js';
 
 /**
- * Tree of object, searchable, inside the sidebar.
- * Used to find objects and add them inside a layout
+ * Tree of object, searchable, inside the sidebar. Used to find objects and add them inside a layout
  * with page=layoutShow in edit mode.
  * It also contains a preview of selected object.
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('.flex-column.h-100', [
-  layoutSettingsPanel(model),
-  h('.mh2.mv1', searchForm(model)),
-  h('.h-100.scroll-y.flex-column',
-    model.object.searchInput.trim() !== '' ?
-      virtualTable(model, 'side')
-      :
-      model.object.objectsRemote.match({
-        NotAsked: () => null,
-        Loading: () => h('.flex-column.items-center.justify-center.f5', [
-          spinner(3), h('', 'Loading Objects')
-        ]),
-        Success: () => treeTable(model),
-        Failure: () => null, // notification is displayed
-      }),
-  ),
-  objectPreview(model)
-]);
+export default (model) =>
+  model.services.object.list.match({
+    NotAsked: () => null,
+    Loading: () => h('.flex-column.items-center', [
+      spinner(2), h('.f6', 'Loading Objects')
+    ]),
+    Success: () => [
+      searchForm(model),
+      h('.scroll-y',
+        model.object.searchInput.trim() !== '' ? virtualTable(model, 'side') : treeTable(model)
+      ),
+      objectPreview(model)
+    ],
+    Failure: (error) => h('.f6.danger.flex-column.text-center', [
+      h('', 'Unable to list objects due to:'), h('', error.message)]),
+  });
 
 /**
- * Creates a panel used for adding settings specific to layout only
+ * * An input which allows users to search though objects;
+ * * A checkbox to switch to displaying only objects in Online Mode (displayed only if online mode is available)
  * @param {Object} model
  * @return {vnode}
  */
-const layoutSettingsPanel = (model) =>
-  h('.br1.m1.w-100.flex-row', [
-    h('.w-25.mh2', 'Layout settings:'),
-    h('.form-check.f6', [
-      h('input.form-check-input', {
+const searchForm = (model) => h('.flex-column.w-100.mv1', [
+  h('.flex-row.w-100', [
+    h('.w-100', 'Select objects to display:'),
+    model.isOnlineModeEnabled &&
+    h('.w-50.f6.flex-row', {style: 'justify-content: end;'}, [
+      h('label.m0.ph1', {
+        for: 'inputOnlineOnlyTreeSidebar',
+        style: 'cursor: pointer',
+      }, 'Online only'),
+      h('input', {
         type: 'checkbox',
-        id: 'inputShowTimestamp',
-        checked: model.layout.item.displayTimestamp,
-        onchange: (e) => model.layout.setLayoutProperty('displayTimestamp', e.target.checked)
+        id: 'inputOnlineOnlyTreeSidebar',
+        onchange: (e) => model.object.toggleSideTree(e.target.checked)
       }),
-      h('label.form-check-label', {for: 'inputShowTimestamp'}, [
-        'Display timestamp on each plot'
-      ])
     ])
-  ]);
-
-/**
- * Shows an input to search though objects, shows also
- * a checkbox to filter only objects available though 'information service'
- * @param {Object} model
- * @return {vnode}
- */
-const searchForm = (model) => [
+  ]),
   h('input.form-control.w-100', {
     placeholder: 'Search',
     type: 'text',
     value: model.object.searchInput,
     oninput: (e) => model.object.search(e.target.value)
   }),
-  model.isOnlineModeEnabled && h('.form-check.f6', [
-    h('input.form-check-input', {
-      type: 'checkbox',
-      id: 'inputOnlineOnlyTreeSidebar',
-      onchange: (e) => model.object.toggleSideTree(e.target.checked)
-    }),
-    h('label.form-check-label', {for: 'inputOnlineOnlyTreeSidebar'}, [
-      'Online only'
-    ])
-  ])
-];
-
-/**
- * Show a jsroot plot of selected object inside the tree of sidebar
- * @param {Object} model
- * @return {vnode}
- */
-function objectPreview(model) {
-  if (!model.object.selected) {
-    return null;
-  }
-
-  return h('.bg-white', {style: {height: '20em'}}, drawComponent(model, model.object.selected.name));
-}
-
-/**
- * Method to generate a component containing a header with actions and a jsroot plot
- * @param {Object} model
- * @param {String} tabObject
- * @return {vnode}
- */
-function drawComponent(model, tabObject) {
-  return h('', {style: 'height:100%; display: flex; flex-direction: column'},
-    [
-      h('.text-right', {style: 'padding: .25rem .25rem 0rem .25rem'},
-        h('a.btn',
-          {
-            style: 'padding: 0.25em 0.5em',
-            title: 'Open object plot in full screen',
-            href: `?page=objectView&objectName=${tabObject}&layoutId=${model.router.params.layoutId}`,
-            onclick: (e) => model.router.handleLinkEvent(e)
-          }, h('span.f7', iconResizeBoth()))),
-      h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, tabObject, {}, 'treeSidebar'))]);
-}
+]);
 
 /**
  * Shows table of objects
@@ -240,9 +187,23 @@ const leafRow = (model, sideTree, level) => {
     ondblclick: () => model.layout.addItem(sideTree.object.name)
   };
 
-  return [
-    h('tr.object-selectable', attr, [
-      h('td.text-ellipsis', [iconWrapper, ' ', sideTree.name])
-    ]),
-  ];
+  return h('tr.object-selectable', attr,
+    h('td.text-ellipsis', [iconWrapper, ' ', sideTree.name])
+  );
+};
+
+/**
+ * Shows a JSROOT plot of selected object inside the tree of sidebar allowing the user to preview object and decide
+ * if it should be added to layout
+ * @param {Object} model
+ * @return {vnode}
+ */
+const objectPreview = (model) => {
+  const isSelected = model.object.selected;
+  if (isSelected) {
+    const objName = model.object.selected.name;
+    return isSelected && h('.bg-white', {style: 'height: 20em'},
+      draw(model, objName, {}, 'treeSidebar')
+    );
+  }
 };

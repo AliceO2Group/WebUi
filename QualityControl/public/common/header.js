@@ -15,8 +15,8 @@
 import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
 
 import spinner from '../loader/spinner.js';
-import layoutShowHeader from '../layout/layoutShowHeader.js';
-import layoutListHeader from '../layout/layoutListHeader.js';
+import layoutViewHeader from '../layout/view/header.js';
+import layoutListHeader from '../layout/list/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
 import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
 
@@ -43,7 +43,7 @@ let onlineButtonStyle = 'btn-default';
 const headerSpecific = (model) => {
   switch (model.page) {
     case 'layoutList': return layoutListHeader(model);
-    case 'layoutShow': return layoutShowHeader(model);
+    case 'layoutShow': return layoutViewHeader(model);
     case 'objectTree': return objectTreeHeader(model);
     case 'about': return frameworkInfoHeader(model);
     default: return null;

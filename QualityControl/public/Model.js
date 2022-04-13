@@ -23,6 +23,7 @@ import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
 import Folder from './folder/Folder.js';
 import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
+import QCObjectService from './services/QCObject.service.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -89,6 +90,11 @@ export default class Model extends Observable {
     if (QCG.CONSUL_SERVICE) {
       this.checkOnlineModeAvailability();
     }
+    this.services = {
+      object: new QCObjectService(this),
+    };
+    this.services.object.listObjects();
+
     this.object.loadList();
     this.layout.loadMyList();
     this.loader.get('/api/checkUser');

@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import {draw} from '../object/objectDraw.js';
+import {draw} from '../../object/objectDraw.js';
 import {iconArrowLeft, iconArrowTop, iconResizeBoth, info} from '/js/src/icons.js';
 
 /**
