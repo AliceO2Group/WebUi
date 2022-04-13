@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import LayoutUtils from './LayoutUtils.js';
+import LayoutUtils from './../LayoutUtils.js';
 import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan, iconShareBoxed} from '/js/src/icons.js';
 
 /**
