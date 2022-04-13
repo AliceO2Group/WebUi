@@ -145,6 +145,7 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     this.object.objects = {}; // remove any in-memory loaded objects
+    clearInterval(this.layout.tabInterval)
     switch (this.router.params.page) {
       case 'layoutList':
         this.page = 'layoutList';
