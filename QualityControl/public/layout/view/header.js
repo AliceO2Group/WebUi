@@ -13,7 +13,8 @@
 */
 
 import {h} from '/js/src/index.js';
-import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan} from '/js/src/icons.js';
+import LayoutUtils from './../LayoutUtils.js';
+import {iconPencil, iconTrash, iconPlus, iconLayers, iconCheck, iconBan, iconShareBoxed} from '/js/src/icons.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
@@ -47,15 +48,21 @@ const toolbarViewMode = (model) => [
         },
         title: 'Duplicate layout'
       }, iconLayers()),
-      model.session.personid == model.layout.item.owner_id && h('button.btn.btn-primary', {
-        onclick: () => model.layout.edit(),
-        title: 'Edit layout'
-      }, iconPencil()),
-      model.session.personid == model.layout.item.owner_id && h('button.btn.btn-danger', {
-        onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
-        title: 'Delete layout'
-      }, iconTrash()
-      )
+      h('a.btn.btn-default', {
+        title: 'Export layout skeleton as JSON file',
+        href: `data:application/octet;,${encodeURIComponent(LayoutUtils.toSkeleton(model.layout.item))}`,
+        download: `layout-${model.layout.item.name}-skeleton.json`,
+      }, iconShareBoxed()),
+      model.session.personid == model.layout.item.owner_id && [
+        h('button.btn.btn-primary', {
+          onclick: () => model.layout.edit(),
+          title: 'Edit layout'
+        }, iconPencil()),
+        h('button.btn.btn-danger', {
+          onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
+          title: 'Delete layout'
+        }, iconTrash())
+      ]
     ])
   ])
 ];

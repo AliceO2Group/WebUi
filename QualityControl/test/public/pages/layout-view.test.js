@@ -105,21 +105,27 @@ describe('layoutShow page test suite', async () => {
   });
 
   it('should have one delete button in the header to delete layout', async () => {
-    await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
-    const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
+    await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(4)', {timeout: 5000});
+    const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(4)').title);
     assert.strictEqual(deleteButton, 'Delete layout');
   });
 
+  it('should have one link button in the header to download layout skeleton', async () => {
+    await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > a', {timeout: 5000});
+    const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > a').title);
+    assert.strictEqual(editButton, 'Export layout skeleton as JSON file');
+  });
+
   it('should have one edit button in the header to go in edit mode', async () => {
-    await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', {timeout: 5000});
-    const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(2)').title);
+    await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', {timeout: 5000});
+    const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
     assert.strictEqual(editButton, 'Edit layout');
   });
 
   // Begin: Edit Mode;
   it('should click the edit button in the header and enter edit mode', async () => {
-    await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(1)', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
+    await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(3)', {timeout: 5000});
+    await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(3)').click());
   });
 
   it('should have input field for changing layout name in edit mode', async () => {

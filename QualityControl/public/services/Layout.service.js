@@ -25,6 +25,8 @@ export default class LayoutService {
    */
   constructor(loader) {
     this.loader = loader;
+
+    this.new = RemoteData.notAsked();
   }
 
   /**
@@ -82,10 +84,18 @@ export default class LayoutService {
   /**
    * Method to create a new layout
    * @param {JSON} layout
+   * @param {Class<Observable>} that - class that should be notified about changes in state; Defaults to notifying root class
    * @return {RemoteData}
    */
-  async createNewLayout(layout) {
-    const {result, ok} = await this.loader.post('/api/layout', layout);
+  async createNewLayout(layout, that = this.model) {
+    this.new = RemoteData.loading();
+    that.notify();
+
+    const {result, ok} = await this.loader.post('/api/layout', layout, true);
+
+    this.new = ok ? RemoteData.success(result) : RemoteData.failure({message: result.error || result.message});
+    that.notify();
+
     return this.parseResult(result, ok);
   }
 

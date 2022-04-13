@@ -66,6 +66,8 @@ export default class Model extends Observable {
     this.sidebar = true;
     this.accountMenuEnabled = false;
     this.page = null;
+    this._isImportVisible = false; // visibility of modal allowing user to import a layout as JSON
+
 
     // Setup router
     this.router = new QueryRouter();
@@ -117,6 +119,8 @@ export default class Model extends Observable {
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
+    } else if (code === 27 && this.isImportVisible) {
+      this.layout.resetImport();
     }
   }
 
@@ -275,5 +279,27 @@ export default class Model extends Observable {
     this.notify();
 
     this.object.refreshObjects();
+  }
+
+  /**
+   * Getters / Setters
+   */
+
+  /**
+   * Returns the visibility of the import layout modal
+   * @return {boolean}
+   */
+  get isImportVisible() {
+    return this._isImportVisible;
+  }
+
+  /**
+   * Sets the visibility of the import layout modal
+   * @param {boolean} value
+   * @return {boolean}
+   */
+  set isImportVisible(value) {
+    this._isImportVisible = value ? true : false;
+    this.notify();
   }
 }

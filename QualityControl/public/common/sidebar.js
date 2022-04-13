@@ -18,7 +18,8 @@ import {h} from '/js/src/index.js';
 import layoutSettings from './../layout/view/panels/settings.js';
 import objectPropertiesSidebar from '../object/objectPropertiesSidebar.js';
 import {
-  iconLayers, iconPlus, iconBarChart, iconExcerpt, iconMediaSkipBackward, iconMediaSkipForward, iconReload
+  iconLayers, iconPlus, iconBarChart, iconExcerpt, iconMediaSkipBackward, iconMediaSkipForward, iconReload,
+  iconCloudUpload
 } from '/js/src/icons.js';
 
 /**
@@ -98,6 +99,10 @@ const exploreMenu = (model) => [
 const myLayoutsMenu = (model) => [
   h('.menu-title.flex-row', model.sidebar ? [
     h('', {style: 'width: 90%'}, 'My Layouts'),
+    h('.ph2.text-right.actionable-icon', {
+      title: 'Import a layout',
+      onclick: () => model.isImportVisible = true,
+    }, iconCloudUpload()),
     h('.ph2.text-right.actionable-icon', {
       title: 'Create a new layout',
       onclick: () => model.layout.newItem(prompt('Choose a name for the new layout:'))
