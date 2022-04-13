@@ -1,20 +1,25 @@
-# Quality Control GUI (QCG)
+QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https://github.com/AliceO2Group/QualityControl).
 
 [![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/QualityControl/badge.svg)](https://github.com/AliceO2Group/WebUi/actions)
 [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=qualitycontrol)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
-QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https://github.com/AliceO2Group/QualityControl).
-
-  - [Installation](#installation)
-  - [Local configuration](#local-configuration)
-      - [HTTP](#http)
-      - [CCDB](#ccdb)
-      - [Listing Connector](#listing-connector)
-  - [Run QCG locally](#run-qcg-locally)
-  - [Enable HTTPS](#enable-https)
-  - [Display a non-standard ROOT object in QCG](#display-a-non-standard-root-object-in-qcg)
+- [Installation](#installation)
+- [Local Configuration](#local-configuration)
+    - [HTTP](#http)
+    - [CCDB](#ccdb)
+    - [Listing Connector](#listing-connector)
+- [Run QCG locally](#run-qcg-locally)
+- [Enable HTTPS](#enable-https)
+- [Features](#features)
+  - [Display a QC non-standard ROOT object in QCG](#display-a-qc-non-standard-root-object-in-qcg)
   - [Online Mode](#online-mode)
+  - [Export a layout as JSON](#export-a-layout-as-json)
+  - [Import a layout from JSON](#import-a-layout-from-json)
+  - [AutoTransitioning Tabs within Layouts](#autotransitioning-tabs-within-layouts)
+- [Continuous Integration Workflows](#continuous-integration-workflows)
+  - [qc.yml](#qcyml)
+  - [release.yml](#releaseyml)
 
 ## Installation
 1. Install `nodeJS` >= `16.x`
@@ -76,10 +81,12 @@ npm start
 - Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
-## Display a non-standard ROOT object in QCG
+## Features
+
+### Display a QC non-standard ROOT object in QCG
 
 `QCG` is able to display non-standard ROOT objects with the help of QC. More information can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#display-a-non-standard-root-object-in-qcg) 
-## Online Mode
+### Online Mode
 QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class. 
 
 For this, QCG is using Service Discovery capabilities of [Consul](https://www.consul.io/).
@@ -104,6 +111,28 @@ As this functionality is optional, there will be no impact on QCG if a configura
 2020-02-28T10:19:26.110Z warn: [QualityControlModel] Consul Service: No Configuration Found
 ```
 
+### Export a layout as JSON
+In order to facilitate the transition from one environment (e.g. TST) to another (e.g. PROD) while at the same time updating it, an export feature is provided.
+1. Open the layout that you wish to export
+2. Click on the top right second (from left to right) button which on hover shall display: `Export layout skeleton as JSON file`
+3. Following that, QCG will automatically generate a JSON file and store it in your default download location.
+
+### Import a layout from JSON
+Once a layout is exported and modified as needed or created from scratch, one can import it into QCG as such:
+1. On the left sidebar, click on the small button (icon represented as cloud with arrow up) which is in line with `MY LAYOUTS` label.
+2. A pop-up will open which will allow you to paste your JSON structure.
+3. The pop-up will validate that the pasted value is a valid JSON.
+4. Click on `Import` button.
+   1. If successful, a new page will be opened with your imported layout in edit mode
+   2. If there is an issue, a red line with an error message will be displayed above the Import button
+5. Click `Save` Layout from the top right corner button.
+
+### AutoTransitioning Tabs within Layouts
+To easily follow the progress of a RUN, layouts can automatically transition through the displayed tabs every few seconds. To configure:
+1. Open desired layout
+2. Click on the `pencil icon` button to start editing the layout
+3. On the left sidebar, configure the field `Tab Auto-Change(sec): 0 (OFF), 10-600 (ON)` with the desired numerical value
+4. Save 
 ## Continuous Integration Workflows
 QualityControl project makes use of two workflows.
 ### [qc.yml](./../.github/workflows/qc.yml)
