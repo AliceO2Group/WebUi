@@ -26,10 +26,26 @@ export default class QCObjectService {
    */
   constructor(model) {
     this.model = model;
+    this.list = RemoteData.notAsked();
   }
 
   /**
-   * Ask server for all available objects
+   * Retrieve a list of all objects from CCDB
+   * @param {Class.Observer} that - object extending observer class to notify component on request end
+   * @return {JSON} List of Objects
+   */
+  async listObjects(that = this.model) {
+    this.list = RemoteData.loading();
+    that.notify();
+    
+    const {result, ok} = await this.model.loader.get('/api/listObjects', {}, true);
+    this.list = ok ? RemoteData.success(result) : RemoteData.failure({message: result.message});
+    that.notify();
+  }
+
+  /**
+   * @deprecated
+   * Ask server for all available objects from CCDB
    * @return {JSON} List of Objects
    */
   async getObjects() {
