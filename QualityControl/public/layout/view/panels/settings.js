@@ -76,11 +76,8 @@ const displayAutoTabTimeSelector = (model) =>
         min: 0,
         max: 600,
         onchange: (e) => {
-          let time = e.target.value;
-          if (time < 10) {
-            time = 0;
-          }
-          model.layout.setLayoutProperty('autoTabChange', e.target.value);
+          const time = e.target.value >= 10 ? e.target.value : 0;
+          model.layout.setLayoutProperty('autoTabChange', time);
         }
       })
     ),
