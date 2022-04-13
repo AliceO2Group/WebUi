@@ -100,7 +100,7 @@ describe('QCG', function() {
     }
     assert.deepStrictEqual(qcg, expectedConf, 'Public configuration was not loaded successfully');
   });
-  
+
   it('should have a layout with header, sidebar and section', async () => {
     const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
     const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);
@@ -109,8 +109,8 @@ describe('QCG', function() {
     assert.ok(sidebarContent.includes('Explore'));
   });
 
-  require('./pages/index.js');
-  
+  require('./pages');
+
   describe('QCObject - drawing options', async () => {
     // before('reset browser to google', async () => {
     //   // weird bug, if we don't go to external website just here, all next goto will wait forever
