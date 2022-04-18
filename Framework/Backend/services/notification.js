@@ -65,16 +65,22 @@ class NotificationService {
 
   /**
    * Sends a message to selected topic
-   * @param {string} topic Kafka topic
-   * @param {string} message message to be sent
+   * @param {string} tag Bookkeeping tag
+   * @param {string} title Notification title
+   * @param {string} author Notification author
+   * @param {string} url URL poiting to notification details
+   * @param {string} extra Details information
    * @returns {Promise}
    */
-  async send(tag, title, url, extra) {
+  async send(tag, title, author, url, extra) {
     if (!tag) {
       throw new Error('Tag is required to send notifications');
     }
     if (!title) {
       throw new Error('Title is required to send notifications');
+    }
+    if (!author) {
+      throw new Error('Author is required to send notifications');
     }
     if (Array.isArray(tag)) {
       tag = tag.join(',');
@@ -82,6 +88,7 @@ class NotificationService {
     const message = {
       tag: tag,
       title: title,
+      author: author,
       url: url || undefined,
       extra: extra || undefined
     };
