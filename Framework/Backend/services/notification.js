@@ -65,9 +65,9 @@ class NotificationService {
 
   /**
    * Sends a message to selected topic
-   * @param {string} tag Bookkeeping tag
+   * @param {(string|string[])} tag Bookkeeping tag
    * @param {string} title Notification title
-   * @param {(string|string[])} author Notification author
+   * @param {string} author Notification author
    * @param {string} url URL poiting to notification details
    * @param {string} extra Details information
    * @returns {Promise}
