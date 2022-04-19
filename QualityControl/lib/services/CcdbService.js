@@ -44,6 +44,10 @@ class CcdbService {
     this.CREATED = 'Created';
     this.PATH = 'path';
 
+    this.DRAWING_OPTIONS = 'drawoptions';
+    this.CONTENT_LOCATION = 'content-location';
+    this.LOCATION = 'location'
+
     this.headers = {
       Accept: 'application/json',
       'X-Filter-Fields': `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`
@@ -95,27 +99,33 @@ class CcdbService {
   }
 
   /**
-   * Make a HEAD HTTP call to CCDB to retrieve the location of the ROOT object
-   * Timestamp is mandatory in this case, otherwise CCDB will return 404
+   * Make a HEAD HTTP call to CCDB to retrieve data of the ROOT object
+   * Name and timestamp are mandatory in this case, otherwise CCDB will return 404
    * e.g host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138  -H 'Accept: application/json' --head
-   * @param {String} objectName - full name of the object in question
+   * @param {String} objectName - full name(path) of the object in question
    * @param {Number} timestamp - version of the object data
-   * @returns {Promise.<String, Error>} '/download/id'
+   * @returns {Promise.<JSON>, Error>} e.g  {location: '/download/id', drawOptions: 'colz'} 
    * @reject
    */
-  async getRootObjectLocation(name, timestamp) {
+  async getRootObjectDetails(name, timestamp) {
     if (!name || !timestamp) {
       throw new Error('Missing mandatory parameters: name & timestamp');
     }
     const path = `/${name}/${timestamp}`;
     const {status, headers} = await httpHeadJson(this.hostname, this.port, path);
+
+    let location = '';
     if (status >= 200 && status <= 299) {
-      return headers['content-location']
+      location = headers[this.CONTENT_LOCATION];
     } else if (status >= 300 && status <= 399) {
-      return headers.location;
+      location = headers[this.LOCATION];
     } else {
       throw new Error(`Unable to retrieve object: ${name}`);
     }
+    return {
+      drawingOptions: headers[this.DRAWING_OPTIONS] || '',
+      location
+    };
   }
 
   /**
