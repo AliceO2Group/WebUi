@@ -144,9 +144,9 @@ describe('ObjectController test suite', () => {
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
 
-    it('should successfully reply with a JSON respond root object and drawing options', async () => {
+    it('should successfully reply with a JSON respond root object, drawing options and displayHints', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectDetails: sinon.stub().resolves({drawingOptions: 'colz', location: '/download/123456'})
+        getRootObjectDetails: sinon.stub().resolves({drawingOptions: 'colz', displayHints: 'AP', location: '/download/123456'})
       });
       const fileMock = {readObject: sinon.stub().resolves({})};
       const rootMock = {
@@ -157,7 +157,7 @@ describe('ObjectController test suite', () => {
 
       await objController.getObjectContent({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(200), 'Response status was not 200');
-      assert.ok(res.json.calledWith({root: {__type: 'THistogram'}, drawingOptions: 'colz'}), 'Expected JSON Object is different');
+      assert.ok(res.json.calledWith({root: {__type: 'THistogram'}, displayHints: 'AP', drawingOptions: 'colz'}), 'Expected JSON Object is different');
     });
   });
 });

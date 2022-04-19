@@ -45,8 +45,9 @@ class CcdbService {
     this.PATH = 'path';
 
     this.DRAWING_OPTIONS = 'drawoptions';
+    this.DISPLAY_HINTS = 'displayhints';
     this.CONTENT_LOCATION = 'content-location';
-    this.LOCATION = 'location'
+    this.LOCATION = 'location';
 
     this.headers = {
       Accept: 'application/json',
@@ -124,6 +125,7 @@ class CcdbService {
     }
     return {
       drawingOptions: headers[this.DRAWING_OPTIONS] || '',
+      displayHints: headers[this.DISPLAY_HINTS] || '',
       location
     };
   }

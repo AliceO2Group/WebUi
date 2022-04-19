@@ -58,13 +58,14 @@ class ObjectController {
     const path = req.query?.path;
     const timestamp = req.query?.timestamp ?? Date.now();
     try {
-      const {location, drawingOptions} = await this.db.getRootObjectDetails(path, timestamp);
+      const {location, drawingOptions, displayHints} = await this.db.getRootObjectDetails(path, timestamp);
       
       const url = this.DB_URL + location;
       const root = await this._getJsRootFormat(url);
       const objContent = {
         root,
-        drawingOptions
+        drawingOptions,
+        displayHints
       };
       res.status(200).json(objContent);
     } catch (error) {

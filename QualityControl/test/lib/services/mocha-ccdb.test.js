@@ -256,6 +256,24 @@ describe('CCDB Service test suite', () => {
       assert.strictEqual(content.drawingOptions, 'colz');
     });
 
+    it('should successfully return displayHints if present', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({location: '/download/some-id', displayhints: 'AP'})
+        .head('/qc/some/test/123455432')
+        .reply(301);
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.displayHints, 'AP');
+    });
+
+    it('should successfully return empty string if displayHints are not present', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({location: '/download/some-id'})
+        .head('/qc/some/test/123455432')
+        .reply(301);
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.displayHints, '');
+    });
+
     it('should successfully return empty string if drawing options are not present', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({location: '/download/some-id'})

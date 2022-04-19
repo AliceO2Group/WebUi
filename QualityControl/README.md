@@ -12,6 +12,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 - [Run QCG locally](#run-qcg-locally)
 - [Enable HTTPS](#enable-https)
 - [Features](#features)
+  - [Drawing Options and Hints provided via MetaData](#drawing-options-and-hints-provided-via-metadata)
   - [Display a QC non-standard ROOT object in QCG](#display-a-qc-non-standard-root-object-in-qcg)
   - [Online Mode](#online-mode)
   - [Export a layout as JSON](#export-a-layout-as-json)
@@ -82,6 +83,11 @@ npm start
 - Provide your hostname in the `hostname` filed of `http` section of `config.js` file.
 
 ## Features
+
+### Drawing Options and Hints provided via MetaData
+`QCG` is using CCDB as storage service. When storing an object, the user can also add information on how an object should be plotted via the `metadata` field in CCDB. 
+* `drawoption`: comma separated drawing options; e.g. `lcolz,colz`
+* `displayHints`: comma separated hints; e.g. `AP,APB`
 
 ### Display a QC non-standard ROOT object in QCG
 
