@@ -127,9 +127,7 @@ export default class QCObject extends Observable {
     if (this.searchInput) {
       const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
-      this.searchResult = listSource.filter((item) => {
-        return fuzzyRegex.test(item.name);
-      });
+      this.searchResult = listSource.filter((item) => fuzzyRegex.test(item.name));
     } else {
       this.searchResult = [];
     }
@@ -282,7 +280,7 @@ export default class QCObject extends Observable {
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
-      if (this.isObjectChecker(obj.payload.qcObject)) {
+      if (this.isObjectChecker(obj.payload.qcObject.root)) {
         this.objects[objectName] = obj;
         this.notify();
       } else {
@@ -413,12 +411,12 @@ export default class QCObject extends Observable {
     if (qcObject.fOption) {
       objectOptionList = qcObject.fOption.split(' ');
     }
-    if (qcObject.metadata && qcObject.metadata.drawOptions) {
-      const metaOpt = qcObject.metadata.drawOptions.split(' ');
+    if (qcObject.drawingOptions) {
+      const metaOpt = qcObject.drawingOptions.split(' ');
       objectOptionList = objectOptionList.concat(metaOpt);
     }
-    if (qcObject.metadata && qcObject.metadata.displayHints) {
-      const metaHints = qcObject.metadata.displayHints.split(' ');
+    if (qcObject.displayHints) {
+      const metaHints = qcObject.displayHints.split(' ');
       objectOptionList = objectOptionList.concat(metaHints);
     }
     switch (this.model.page) {
