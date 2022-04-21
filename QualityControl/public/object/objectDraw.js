@@ -130,8 +130,8 @@ export function draw(model, tabObject, options, location = '') {
       style: 'word-break: break-all;'
     }, objectRemoteData.payload);
   } else {
-    if (model.object.isObjectChecker(objectRemoteData.payload.qcObject)) {
-      return checkersPanel(objectRemoteData.payload.qcObject, location);
+    if (model.object.isObjectChecker(objectRemoteData.payload.qcObject.root)) {
+      return checkersPanel(objectRemoteData.payload.qcObject.root, location);
     }
   }
   // on success, JSROOT will erase all DOM inside div and put its own
@@ -175,10 +175,10 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   if (
     objectRemoteData &&
     objectRemoteData.isSuccess() &&
-    !model.object.isObjectChecker(objectRemoteData.payload.qcObject) &&
+    !model.object.isObjectChecker(objectRemoteData.payload.qcObject.root) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
-    const qcObject = objectRemoteData.payload.qcObject;
+    const qcObject = objectRemoteData.payload.qcObject.root;
     setTimeout(() => {
       if (JSROOT.cleanup) {
         // Remove previous JSROOT content before draw to do a real redraw.

@@ -101,7 +101,11 @@ export default class QCObjectService {
         const obj = {
           info: result.info,
           timestamps: result.timestamps,
-          qcObject: JSROOT.parse(root.result)
+          qcObject: {
+            root: JSROOT.parse(root.result.root),
+            drawingOptions: root.result.drawingOptions,
+            displayHints: root.result.displayHints,
+          }
         };
         return RemoteData.success(obj);
       } else if (status === 404) {
@@ -123,7 +127,13 @@ export default class QCObjectService {
     try {
       const {result, ok} = await this.model.loader.get(`/api/object/root?path=${objectName}`);
       if (ok) {
-        return RemoteData.success({qcObject: JSROOT.parse(result)});
+        return RemoteData.success({
+          qcObject: {
+            root: JSROOT.parse(result.root),
+            drawingOptions: result.drawingOptions,
+            displayHints: result.displayHints,
+          }
+        });
       } else {
         throw new Error();
       }

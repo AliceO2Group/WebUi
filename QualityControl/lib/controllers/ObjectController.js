@@ -58,17 +58,33 @@ class ObjectController {
     const path = req.query?.path;
     const timestamp = req.query?.timestamp ?? Date.now();
     try {
-      const downloadLocation = await this.db.getRootObjectLocation(path, timestamp);
-      const url = this.DB_URL + downloadLocation;
-
-      const file = await this.jsroot.openFile(url);
-      const root = await file.readObject("ccdb_object");
-      root['_typename'] = root['mTreatMeAs'] || root['_typename'];
-      const rootJson = await this.jsroot.toJSON(root);
-      res.status(200).json(rootJson);
+      const {location, drawingOptions, displayHints} = await this.db.getRootObjectDetails(path, timestamp);
+      
+      const url = this.DB_URL + location;
+      const root = await this._getJsRootFormat(url);
+      const objContent = {
+        root,
+        drawingOptions,
+        displayHints
+      };
+      res.status(200).json(objContent);
     } catch (error) {
       errorHandler(error, 'Unable to read ROOT file', res, 502, 'object');
     }
+  }
+
+  /**
+   * Retrieves a root object from url-location provided
+   * Parses the objects and prepares it in QCG format
+   * @param {String} url - location of Root file to be retrieved
+   * @return {Promise<JSON.Error>}
+   */
+  async _getJsRootFormat(url) {
+    const file = await this.jsroot.openFile(url);
+    const root = await file.readObject("ccdb_object");
+    root['_typename'] = root['mTreatMeAs'] || root['_typename'];
+    const rootJson = await this.jsroot.toJSON(root);
+    return rootJson;
   }
 }
 

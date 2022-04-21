@@ -214,19 +214,19 @@ describe('CCDB Service test suite', () => {
     });
   });
 
-  describe('`getRootObjectLocation()` tests', () => {
+  describe('`getRootObjectDetails()` tests', () => {
     let ccdb;
     before(() => ccdb = new CcdbService(config.ccdb));
 
     it('should throw error due to missing parameters (name or timestamp)', async () => {
-      await assert.rejects(async () => ccdb.getRootObjectLocation(), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getRootObjectLocation(null), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getRootObjectLocation(undefined), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getRootObjectLocation('', '2'), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getRootObjectLocation('name'), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getRootObjectLocation('name', null), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getRootObjectLocation('name', undefined), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getRootObjectLocation('name', ''), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails(), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails(null), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails(undefined), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails('', '2'), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails('name'), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails('name', null), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails('name', undefined), new Error('Missing mandatory parameters: name & timestamp'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails('name', ''), new Error('Missing mandatory parameters: name & timestamp'));
     });
 
     it('should successfully return content-location field on status >=200 <= 299', async () => {
@@ -234,8 +234,8 @@ describe('CCDB Service test suite', () => {
         .defaultReplyHeaders({'content-location': '/download/123123-123123', location: '/download/some-id'})
         .head('/qc/some/test/123455432')
         .reply(200);
-      const contentLocation = await ccdb.getRootObjectLocation('qc/some/test', 123455432);
-      assert.strictEqual(contentLocation, '/download/123123-123123');
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.location, '/download/123123-123123');
     });
 
     it('should successfully return location field on status >=300 <= 399', async () => {
@@ -243,15 +243,51 @@ describe('CCDB Service test suite', () => {
         .defaultReplyHeaders({'content-location': '/download/123123-123123', location: '/download/some-id'})
         .head('/qc/some/test/123455432')
         .reply(301);
-      const contentLocation = await ccdb.getRootObjectLocation('qc/some/test', 123455432);
-      assert.strictEqual(contentLocation, '/download/some-id');
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.location, '/download/some-id');
+    });
+
+    it('should successfully return drawing options if present', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({location: '/download/some-id', drawoptions: 'colz'})
+        .head('/qc/some/test/123455432')
+        .reply(301);
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.drawingOptions, 'colz');
+    });
+
+    it('should successfully return displayHints if present', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({location: '/download/some-id', displayhints: 'AP'})
+        .head('/qc/some/test/123455432')
+        .reply(301);
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.displayHints, 'AP');
+    });
+
+    it('should successfully return empty string if displayHints are not present', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({location: '/download/some-id'})
+        .head('/qc/some/test/123455432')
+        .reply(301);
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.displayHints, '');
+    });
+
+    it('should successfully return empty string if drawing options are not present', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({location: '/download/some-id'})
+        .head('/qc/some/test/123455432')
+        .reply(301);
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.drawingOptions, '');
     });
 
     it('should reject with error due to invalid status', async () => {
       nock('http://ccdb:8500')
         .head('/qc/some/test/123455432')
         .reply(404);
-      await assert.rejects(async () => ccdb.getRootObjectLocation('qc/some/test', '123455432'), new Error('Unable to retrieve object: qc/some/test'));
+      await assert.rejects(async () => ccdb.getRootObjectDetails('qc/some/test', '123455432'), new Error('Unable to retrieve object: qc/some/test'));
     });
   });
 

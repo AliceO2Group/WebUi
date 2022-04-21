@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* eslint-disable max-len */
+
 const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 const sinon = require('sinon');
@@ -90,7 +92,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if db service cannot provide location', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectLocation: sinon.stub().rejects(new Error('Failed to load data for object'))
+        getRootObjectDetails: sinon.stub().rejects(new Error('Failed to load data for object'))
       });
       const objController = new ObjectController(dbService, {});
       await objController.getObjectContent({query: {}}, res);
@@ -101,7 +103,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if JSROOT fails to open file', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+        getRootObjectDetails: sinon.stub().resolves({location: '/download/123456'})
       });
       const rootMock = {
         openFile: sinon.stub().rejects('Unable to open file'),
@@ -115,7 +117,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if JSROOT fails to read object in file', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+        getRootObjectDetails: sinon.stub().resolves({location: '/download/123456'})
       });
       const fileMock = {readObject: sinon.stub().rejects('Unable')};
       const rootMock = {openFile: sinon.stub().resolves(fileMock)};
@@ -128,7 +130,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if JSROOT fails convert content to JSON', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+        getRootObjectDetails: sinon.stub().resolves({location: '/download/123456'})
       });
       const fileMock = {readObject: sinon.stub().resolves({})};
       const rootMock = {
@@ -142,9 +144,9 @@ describe('ObjectController test suite', () => {
       assert.ok(res.send.calledWith({message: 'Unable to read ROOT file'}), 'Error message was incorrect');
     });
 
-    it('should successfully reply with a JSON respond object', async () => {
+    it('should successfully reply with a JSON respond root object, drawing options and displayHints', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectLocation: sinon.stub().resolves('/download/123456')
+        getRootObjectDetails: sinon.stub().resolves({drawingOptions: 'colz', displayHints: 'AP', location: '/download/123456'})
       });
       const fileMock = {readObject: sinon.stub().resolves({})};
       const rootMock = {
@@ -155,7 +157,7 @@ describe('ObjectController test suite', () => {
 
       await objController.getObjectContent({query: {path: 'some/qc'}}, res);
       assert.ok(res.status.calledWith(200), 'Response status was not 200');
-      assert.ok(res.json.calledWith({__type: 'THistogram'}), 'Expected JSON Object is different');
+      assert.ok(res.json.calledWith({root: {__type: 'THistogram'}, displayHints: 'AP', drawingOptions: 'colz'}), 'Expected JSON Object is different');
     });
   });
 });

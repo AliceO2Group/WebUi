@@ -175,7 +175,7 @@ describe('QCG', function() {
         window.model.router.params.objectId = undefined;
         window.model.router.params.layoutId = undefined;
         const tabObject = {options: ['args', 'coly']};
-        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz', metadata: {displayHints: 'hint hint2', drawOptions: 'option option2'}}}};
+        const objectRemoteData = {payload: {qcObject: {fOption: 'lego colz', displayHints: 'hint hint2', drawingOptions: 'option option2'}}};
         return window.model.object.generateDrawingOptions(tabObject, objectRemoteData);
       });
 
