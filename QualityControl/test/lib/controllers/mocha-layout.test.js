@@ -244,6 +244,13 @@ describe('LayoutController test suite', () => {
       assert.ok(res.status.calledWith(409), 'Response status was not 409');
       assert.ok(res.send.calledWith({message: 'Failed to validate layout: "name" is required'}), 'Error message was incorrect');
     });
+    it('should respond with 409 error if request did not contain "tabs" when requesting to update', async () => {
+      const req = {body: {name: 'somelayout', id: '1'}};
+      const layoutConnector = new LayoutController({});
+      await layoutConnector.createLayout(req, res);
+      assert.ok(res.status.calledWith(409), 'Response status was not 409');
+      assert.ok(res.send.calledWith({message: 'Failed to validate layout: "tabs" is required'}), 'Error message was incorrect');
+    });
     it('should respond with 409 error if request did not proper "tabs" when requesting to update', async () => {
       const req = {body: {name: 'somelayout', tabs: [{some: 'some'}], id: '1'}};
       const layoutConnector = new LayoutController({});
