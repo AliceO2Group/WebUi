@@ -209,7 +209,7 @@ export default class Layout extends Observable {
    */
   async newItem(layoutName) {
     if (!layoutName) {
-      this.model.notification.show(`A new layout was not created due to invalid name`, 'warning');
+      this.model.notification.show(`A new layout was not created due to invalid name`, 'warning', 2000);
     } else {
       const layout = assertLayout({
         id: objectId(),
@@ -227,7 +227,7 @@ export default class Layout extends Observable {
 
       const result = await this.model.layoutService.createNewLayout(layout);
       if (result.isFailure()) {
-        this.model.notification.show(result.error || 'Unable to create layout', 'danger', Infinity);
+        this.model.notification.show(result.error || 'Unable to create layout', 'danger', 2000);
         return;
       }
 
@@ -248,7 +248,7 @@ export default class Layout extends Observable {
     }
     await this.model.layoutService.removeLayoutById(this.item.id);
 
-    this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success');
+    this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success', 1500);
     this.model.router.go(`?page=layouts`);
     this.loadMyList();
     this.editEnabled = false;
@@ -561,7 +561,7 @@ export default class Layout extends Observable {
    */
   async duplicate(layoutName) {
     if (!layoutName) {
-      this.model.notification.show(`Layout was not duplicated due to invalid/missing new name`, 'warning');
+      this.model.notification.show(`Layout was not duplicated due to invalid/missing new name`, 'warning', 2000);
       return;
     }
     const itemToDuplicate = clone(this.item);
