@@ -21,10 +21,11 @@ import {fetchClient, RemoteData} from '/js/src/index.js';
 export default class LayoutService {
   /**
    * Initialize model
-   * @param {Object} loader
+   * @param {Object} model
    */
-  constructor(loader) {
-    this.loader = loader;
+  constructor(model) {
+    this.model = model;
+    this.loader = model.loader;
 
     this.new = RemoteData.notAsked();
   }
