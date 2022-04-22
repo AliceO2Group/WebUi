@@ -573,7 +573,8 @@ export default class Layout extends Observable {
       const duplicatedTab = {
         id: objectId(),
         name: tab.name,
-        objects: clone(tab.objects)
+        objects: clone(tab.objects),
+        columns: tab.columns,
       };
       tabs.push(duplicatedTab);
     });
