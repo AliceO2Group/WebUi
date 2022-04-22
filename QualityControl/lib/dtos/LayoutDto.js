@@ -40,7 +40,7 @@ const UserDto = Joi.object({
 const LayoutDto = Joi.object({
   id: Joi.string().required(),
   name: Joi.string().min(3).max(40).required(),
-  tabs: Joi.array().min(1).max(10).items(TabsDto),
+  tabs: Joi.array().min(1).max(10).items(TabsDto).required(),
   owner_id: Joi.number().min(0).required(),
   owner_name: Joi.string().required(),
   collaborators: Joi.array().items(UserDto).default([]),
