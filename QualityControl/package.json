@@ -37,7 +37,7 @@
     "joi"
   ],
   "devDependencies": {
-    "eslint": "^8.13.0",
+    "eslint": "^8.14.0",
     "eslint-config-google": "^0.12.0",
     "mocha": "^9.2.0",
     "nock": "^13.2.2",
