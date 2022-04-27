@@ -23,6 +23,7 @@ const ObjectDto = Joi.object({
   w: Joi.number().min(0).default(0),
   options: Joi.array().items(Joi.string()).default([]),
   autoSize: Joi.boolean().default(false),
+  ignoreDefaults: Joi.boolean().default(false),
 });
 
 const TabsDto = Joi.object({
@@ -40,7 +41,7 @@ const UserDto = Joi.object({
 const LayoutDto = Joi.object({
   id: Joi.string().required(),
   name: Joi.string().min(3).max(40).required(),
-  tabs: Joi.array().min(1).max(10).items(TabsDto).required(),
+  tabs: Joi.array().min(1).max(20).items(TabsDto).required(),
   owner_id: Joi.number().min(0).required(),
   owner_name: Joi.string().required(),
   collaborators: Joi.array().items(UserDto).default([]),
