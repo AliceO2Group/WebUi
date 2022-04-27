@@ -441,15 +441,13 @@ class HttpServer {
   }
 
   /**
-   * Provides access level number for JWT token depending on users' role
+   * Provides access roles for JWT token depending on users' role
    * @param {object} details - user details
    * @return {string} - comma separated access roles
    */
   authorise(details) {
-    let scope = [];
-    if (details.hasOwnProperty('resource_access')) {
-      scope = details.resource_access[Object.keys(details.resource_access)[0]].roles;
-    }
+    const scope = details?.cern_roles ? details.cern_roles : [];
+    this.log.debug(`User Roles: ${scope.join(',')}`);
     return scope.join(',');
   }
 
