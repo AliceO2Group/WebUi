@@ -50,7 +50,7 @@ export default class Model extends Observable {
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
-    this.layoutService = new LayoutService(this.loader);
+    this.layoutService = new LayoutService(this);
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
