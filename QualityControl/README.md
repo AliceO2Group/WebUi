@@ -86,7 +86,7 @@ npm start
 
 ### Canvas Options via MetaData
 `QCG` is using CCDB as storage service. When storing an object, the user can also store information on how an object should be plotted via the `metadata` field in CCDB. QualityControl documentation on how this can be achieved can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#canvas-options)
-* `drawoption`: semi-colon separated drawing options; e.g. `lcolz;colz`
+* `drawOptions`: semi-colon separated drawing options; e.g. `lcolz;colz`
 * `displayHints`: semi-colon separated hints; e.g. `AP;APB`
 
 ### Display a QC non-standard ROOT object in QCG
