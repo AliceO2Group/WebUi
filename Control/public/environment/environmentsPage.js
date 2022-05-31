@@ -97,7 +97,7 @@ const requestsTable = (model, requests) =>
       )])
     ]),
     h('tbody', [
-      requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : '' }}, [
+      requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : ''}}, [
         h('td', {style: 'text-align: center;'}, item.envId || '-'),
         h('td', {style: 'text-align: center;'},
           item.detectors && item.detectors.length > 0 ? item.detectors.join(' ') : '-'
@@ -139,7 +139,7 @@ const environmentsTable = (model, list) => {
   ];
   return h('table.table', [
     h('thead', [
-      h('tr.table-primary',  h('th', {colspan: 12}, 'Active Environments')),
+      h('tr.table-primary', h('th', {colspan: 12}, 'Active Environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
@@ -158,7 +158,9 @@ const environmentsTable = (model, list) => {
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
-        h('td', {style: 'text-align: center;'}, parseOdcStatusPerEnv(item.id, model)),
+        h(`td${parseOdcStatusPerEnv(item.id, model) === 'RUNNING' ? '.success' : ''}`, {
+          style: 'text-align: center;'
+        }, parseOdcStatusPerEnv(item.id, model)),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {
           class: (item.state === 'RUNNING' ?
