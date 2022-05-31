@@ -36,7 +36,7 @@ describe('Control', function() {
   let browser;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(25000);
+  this.timeout(30000);
   this.slow(1000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
