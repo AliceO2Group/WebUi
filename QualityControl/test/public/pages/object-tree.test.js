@@ -25,6 +25,7 @@ describe('objectTree page test suite', async () => {
 
   it('should load', async () => {
     await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
+    await page.waitForTimeout(500)
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=objectTree');
   });
