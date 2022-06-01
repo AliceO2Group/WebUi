@@ -32,7 +32,7 @@ describe('QCG', function() {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(20000);
+  this.timeout(25000);
   this.slow(2000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
