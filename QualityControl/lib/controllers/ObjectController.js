@@ -59,7 +59,7 @@ class ObjectController {
     const timestamp = req.query?.timestamp ?? Date.now();
     try {
       const {location, drawingOptions, displayHints} = await this.db.getRootObjectDetails(path, timestamp);
-      
+
       const url = this.DB_URL + location;
       const root = await this._getJsRootFormat(url);
       const objContent = {

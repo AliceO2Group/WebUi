@@ -37,7 +37,7 @@ export default class QCObjectService {
   async listObjects(that = this.model) {
     this.list = RemoteData.loading();
     that.notify();
-    
+
     const {result, ok} = await this.model.loader.get('/api/listObjects', {}, true);
     this.list = ok ? RemoteData.success(result) : RemoteData.failure({message: result.message});
     that.notify();
@@ -98,16 +98,20 @@ export default class QCObjectService {
         await this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`);
       if (ok) {
         const root = await this.model.loader.get(`/api/object/root?path=${objectName}&timestamp=${timestamp}`);
-        const obj = {
-          info: result.info,
-          timestamps: result.timestamps,
-          qcObject: {
-            root: JSROOT.parse(root.result.root),
-            drawingOptions: root.result.drawingOptions,
-            displayHints: root.result.displayHints,
-          }
-        };
-        return RemoteData.success(obj);
+        if (root.ok) {
+          const obj = {
+            info: result.info,
+            timestamps: result.timestamps,
+            qcObject: {
+              root: JSROOT.parse(root.result.root),
+              drawingOptions: root.result.drawingOptions,
+              displayHints: root.result.displayHints,
+            }
+          };
+          return RemoteData.success(obj);
+        }
+        return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+
       } else if (status === 404) {
         return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
       }
