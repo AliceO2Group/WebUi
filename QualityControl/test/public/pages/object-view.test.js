@@ -230,7 +230,7 @@ describe('objectTree page test suite', async () => {
       await page.waitForTimeout(7000);
       assert.strictEqual(result.title, 'DAQ01/EquipmentSize/CPV/CPV(AliRoot)');
       assert.deepStrictEqual(result.rootPlotClassList, {0: 'relative', 1: 'jsroot-container'});
-      assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV', createTime: 3, lastModified: 100});
+      assert.deepStrictEqual(result.objectSelected, {name: 'DAQ01/EquipmentSize/CPV/CPV'});
       // TODO Add version back
     });
 
