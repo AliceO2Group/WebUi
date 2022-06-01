@@ -132,6 +132,7 @@ describe('objectTree page test suite', async () => {
   describe('objectView called from layoutShow', () => {
     it('should load page=objectView and display error message & icon due to missing objectID parameter', async () => {
       await page.goto(url + '?page=objectView', {waitUntil: 'networkidle0'});
+      await page.waitForTimeout(500);
       const result = await page.evaluate(() => {
         const errorMessage = document.querySelector('body > div > div:nth-child(2) > div > span').textContent;
         const iconClassList = document.querySelector('div div:nth-child(2) div svg').classList;
@@ -215,6 +216,7 @@ describe('objectTree page test suite', async () => {
       const objectId = '5aba4a059b755d517e76ef54';
       const layoutId = '5aba4a059b755d517e76ea10';
       await page.goto(url + `?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, {waitUntil: 'networkidle0'});
+      await page.waitForTimeout(500);
       const result = await page.evaluate(() => {
         const title = document.querySelector('div div b').textContent;
         const rootPlotClassList = document.querySelector('body > div > div:nth-child(2) > div > div').classList;
