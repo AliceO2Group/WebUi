@@ -238,47 +238,56 @@ describe('CCDB Service test suite', () => {
       assert.strictEqual(content.location, '/download/123123-123123');
     });
 
-    it('should successfully return location field on status >=300 <= 399', async () => {
+    it('should successfully return content-location field if is string as array with "alien" second item on status >=200 <= 299', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({'content-location': '/download/123123-123123', location: '/download/some-id'})
+        .defaultReplyHeaders({'content-location': '/download/123123-123123, alien://', location: '/download/some-id'})
         .head('/qc/some/test/123455432')
-        .reply(301);
+        .reply(200);
       const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
-      assert.strictEqual(content.location, '/download/some-id');
+      assert.strictEqual(content.location, '/download/123123-123123');
+    });
+
+    it('should successfully return content-location field if is string as array with "alien" first item on status >=200 <= 299', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({'content-location': 'alien://, /download/123123-123123', location: '/download/some-id'})
+        .head('/qc/some/test/123455432')
+        .reply(200);
+      const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
+      assert.strictEqual(content.location, '/download/123123-123123');
     });
 
     it('should successfully return drawing options if present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({location: '/download/some-id', drawoptions: 'colz'})
+        .defaultReplyHeaders({'content-location': '/download/some-id', drawoptions: 'colz'})
         .head('/qc/some/test/123455432')
-        .reply(301);
+        .reply(200);
       const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
       assert.strictEqual(content.drawingOptions, 'colz');
     });
 
     it('should successfully return displayHints if present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({location: '/download/some-id', displayhints: 'AP'})
+        .defaultReplyHeaders({'content-location': '/download/some-id', displayhints: 'AP'})
         .head('/qc/some/test/123455432')
-        .reply(301);
+        .reply(200);
       const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
       assert.strictEqual(content.displayHints, 'AP');
     });
 
     it('should successfully return empty string if displayHints are not present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({location: '/download/some-id'})
+        .defaultReplyHeaders({'content-location': '/download/some-id'})
         .head('/qc/some/test/123455432')
-        .reply(301);
+        .reply(200);
       const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
       assert.strictEqual(content.displayHints, '');
     });
 
     it('should successfully return empty string if drawing options are not present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({location: '/download/some-id'})
+        .defaultReplyHeaders({'content-location': '/download/some-id'})
         .head('/qc/some/test/123455432')
-        .reply(301);
+        .reply(200);
       const content = await ccdb.getRootObjectDetails('qc/some/test', 123455432);
       assert.strictEqual(content.drawingOptions, '');
     });
@@ -288,6 +297,30 @@ describe('CCDB Service test suite', () => {
         .head('/qc/some/test/123455432')
         .reply(404);
       await assert.rejects(async () => ccdb.getRootObjectDetails('qc/some/test', '123455432'), new Error('Unable to retrieve object: qc/some/test'));
+    });
+
+    it('should reject with error due no content-location without alien', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({'content-location': 'alien/some-id'})
+        .head('/qc/some/test/123455432')
+        .reply(200);
+      await assert.rejects(async () => ccdb.getRootObjectDetails('qc/some/test', '123455432'), new Error('No location provided by CCDB for object with path: /qc/some/test/123455432'));
+    });
+
+    it('should reject with empty content-location', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({'content-location': ''})
+        .head('/qc/some/test/123455432')
+        .reply(200);
+      await assert.rejects(async () => ccdb.getRootObjectDetails('qc/some/test', '123455432'), new Error('No location provided by CCDB for object with path: /qc/some/test/123455432'));
+    });
+
+    it('should reject with missing content-location', async () => {
+      nock('http://ccdb:8500')
+        .defaultReplyHeaders({'content-location': ''})
+        .head('/qc/some/test/123455432')
+        .reply(200);
+      await assert.rejects(async () => ccdb.getRootObjectDetails('qc/some/test', '123455432'), new Error('No location provided by CCDB for object with path: /qc/some/test/123455432'));
     });
   });
 

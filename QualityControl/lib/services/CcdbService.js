@@ -115,19 +115,20 @@ class CcdbService {
     const path = `/${name}/${timestamp}`;
     const {status, headers} = await httpHeadJson(this.hostname, this.port, path);
 
-    let location = '';
     if (status >= 200 && status <= 299) {
-      location = headers[this.CONTENT_LOCATION];
-    } else if (status >= 300 && status <= 399) {
-      location = headers[this.LOCATION];
+      const location = headers[this.CONTENT_LOCATION].split(', ')
+        .filter((location) => !location.startsWith('alien'))[0];
+      if (!location) {
+        throw new Error(`No location provided by CCDB for object with path: ${path}`)
+      }
+      return {
+        drawingOptions: headers[this.DRAWING_OPTIONS] || '',
+        displayHints: headers[this.DISPLAY_HINTS] || '',
+        location
+      };
     } else {
       throw new Error(`Unable to retrieve object: ${name}`);
     }
-    return {
-      drawingOptions: headers[this.DRAWING_OPTIONS] || '',
-      displayHints: headers[this.DISPLAY_HINTS] || '',
-      location
-    };
   }
 
   /**
