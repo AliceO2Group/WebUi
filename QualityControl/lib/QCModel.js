@@ -18,7 +18,7 @@ const jsroot = require('jsroot');
 
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
 const CcdbService = require('./services/CcdbService.js');
-const JsonFileConnector = require('./JsonFileConnector.js');
+const JsonFileService = require('./services/JsonFileService.js');
 const LayoutController = require('./controllers/LayoutController.js');
 const StatusService = require('./StatusService.js');
 const UserService = require('./services/UserService.js');
@@ -31,7 +31,7 @@ const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_l
 const statusService = new StatusService(config, projPackage);
 module.exports.statusService = statusService;
 
-const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+const jsonDb = new JsonFileService(config.dbFile || __dirname + '/../db.json');
 module.exports.userService = new UserService(jsonDb);
 module.exports.layoutService = new LayoutController(jsonDb);
 

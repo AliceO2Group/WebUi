@@ -18,8 +18,8 @@ const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 const sinon = require('sinon');
 
-const LayoutController = require('../../../lib/controllers/LayoutController');
-const JsonFileConnector = require('../../../lib/JsonFileConnector.js');
+const LayoutController = require('./../../../lib/controllers/LayoutController.js');
+const JsonFileService = require('./../../../lib/services/JsonFileService.js');
 
 describe('LayoutController test suite', () => {
   describe('Creating a new LayoutController instance', () => {
@@ -45,7 +45,7 @@ describe('LayoutController test suite', () => {
       };
     });
     it('should respond with error if data connector could not find layouts', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         listLayouts: sinon.stub().rejects(new Error('Unable to connect'))
       });
       const req = {body: {}};
@@ -61,7 +61,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should successfully return a list of layouts', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         listLayouts: sinon.stub().resolves([{name: 'somelayout'}])
       });
       const req = {query: {}};
@@ -72,7 +72,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should successfully return a list of layouts based on owner_id', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         listLayouts: sinon.stub().resolves([{name: 'somelayout'}])
       });
       const req = {query: {owner_id: '1'}};
@@ -102,7 +102,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should successfully return a layout specified by its id', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().resolves([{layout: 'somelayout'}])
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -114,7 +114,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should return error if data connector failed', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().rejects(new Error('Unable to read layout'))
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -153,7 +153,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should successfully return the id of the updated layout', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         updateLayout: sinon.stub().resolves([{id: 'somelayout'}])
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -165,7 +165,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should return error if data connector failed to update', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         updateLayout: sinon.stub().rejects(new Error('Could not update layout'))
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -196,7 +196,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should successfully return the id of the deleted layout', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         deleteLayout: sinon.stub().resolves({id: 'somelayout'})
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -208,7 +208,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should return error if data connector failed to update', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         deleteLayout: sinon.stub().rejects(new Error('Could not delete layout'))
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -274,7 +274,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should successfully return created layout with default for missing values', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         createLayout: sinon.stub().resolves({layout: 'somelayout'})
       });
       const expected = {
@@ -296,7 +296,7 @@ describe('LayoutController test suite', () => {
     });
 
     it('should return error if data connector failed to update', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileConnector, {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
         createLayout: sinon.stub().rejects(new Error('Could not create layout'))
       });
       const layoutConnector = new LayoutController(jsonStub);
