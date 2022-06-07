@@ -14,26 +14,26 @@
 
 const sinon = require('sinon');
 const assert = require('assert');
-const config = require('../test-config.js');
+const config = require('../../test-config.js');
 
-const StatusService = require('../../lib/StatusService.js');
+const StatusController = require('../../../lib/controllers/StatusController.js');
 
 describe('Status Service test suite', () => {
-  describe('Creating a new StatusService instance', () => {
+  describe('Creating a new StatusController instance', () => {
     it('should throw an error if configuration object is not provided', () => {
-      assert.throws(() => new StatusService(), new Error('Empty Framework configuration'));
-      assert.throws(() => new StatusService(null), new Error('Empty Framework configuration'));
-      assert.throws(() => new StatusService(undefined), new Error('Empty Framework configuration'));
+      assert.throws(() => new StatusController(), new Error('Empty Framework configuration'));
+      assert.throws(() => new StatusController(null), new Error('Empty Framework configuration'));
+      assert.throws(() => new StatusController(undefined), new Error('Empty Framework configuration'));
     });
 
-    it('should successfully initialize StatusService', () => {
-      assert.doesNotThrow(() => new StatusService({hostname: 'localhost', port: 8080}, {}));
+    it('should successfully initialize StatusController', () => {
+      assert.doesNotThrow(() => new StatusController({hostname: 'localhost', port: 8080}, {}));
     });
   });
 
   describe('`getDataConnectorStatus()` tests', () => {
     let statusService;
-    before(() => statusService = new StatusService(config));
+    before(() => statusService = new StatusController(config));
     it('successfully return status with error if no data connector was set', async () => {
       const response = await statusService.getDataConnectorStatus();
       assert.deepStrictEqual(response, {ok: false, message: 'Data connector was not configured'});
@@ -59,7 +59,7 @@ describe('Status Service test suite', () => {
 
   describe('`getLiveModeConnectorStatus()` tests', () => {
     let statusService;
-    before(() => statusService = new StatusService(config));
+    before(() => statusService = new StatusController(config));
     it('successfully return status with error if no live connector was set', async () => {
       const response = await statusService.getLiveModeConnectorStatus();
       assert.deepStrictEqual(response, {ok: false, message: 'Live Mode was not configured'});
@@ -84,7 +84,7 @@ describe('Status Service test suite', () => {
 
   describe('`getFrameworkInfo()` tests', () => {
     it('successfully build result JSON with framework information', async () => {
-      const statusService = new StatusService(config)
+      const statusService = new StatusController(config)
       const dataConnector = {testConnection: sinon.stub().resolves()};
       const liveConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
       statusService.setDataConnector(dataConnector);
@@ -104,7 +104,7 @@ describe('Status Service test suite', () => {
 
   describe('`frameworkInfo()` tests', () => {
     it('successfully send back result JSON with framework information', async () => {
-      const statusService = new StatusService(config)
+      const statusService = new StatusController(config)
       const dataConnector = {testConnection: sinon.stub().resolves()};
       const liveConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
       statusService.setDataConnector(dataConnector);
@@ -131,7 +131,7 @@ describe('Status Service test suite', () => {
 
   describe('`getQCGStatus()` tests', () => {
     it('successfully send back result JSON with framework information', async () => {
-      const statusService = new StatusService(config)
+      const statusService = new StatusController(config)
       const res = {
         status: sinon.stub().returnsThis(),
         json: sinon.stub()

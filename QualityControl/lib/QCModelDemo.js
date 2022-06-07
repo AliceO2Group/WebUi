@@ -15,7 +15,7 @@
 
 const LayoutController = require('./controllers/LayoutController');
 const UserService = require('./services/UserService');
-const StatusService = require('./StatusService.js');
+const StatusController = require('./controllers/StatusController.js');
 const config = require('./../test/test-config.js');
 const projPackage = require('./../package.json');
 const ObjectController = require('./controllers/ObjectController');
@@ -287,4 +287,4 @@ module.exports.objectController = new ObjectController(ccdb)
 module.exports.userService = new UserService(dataConnector);
 module.exports.getObjectTimestampList = getObjectTimestampList;
 
-module.exports.statusService = new StatusService(config, projPackage);
+module.exports.statusService = new StatusController(config, projPackage);

@@ -17,7 +17,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const JsonFileConnector = require('../../lib/JsonFileConnector.js');
+const JsonFileService = require('../../../lib/services/JsonFileService.js');
 
 const CONFIG_FILE = path.join(__dirname, 'db.json.temp');
 
@@ -36,7 +36,7 @@ describe('JSON file custom database', () => {
     try {
       fs.unlinkSync(CONFIG_FILE);
     } catch (error) {}
-    jsonConfig = new JsonFileConnector(CONFIG_FILE);
+    jsonConfig = new JsonFileService(CONFIG_FILE);
   });
 
   describe('Creating a new Layout', () => {

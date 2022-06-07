@@ -19,7 +19,7 @@ const path = require('path');
 /**
  * Store layouts inside JSON based file with atomic write
  */
-class JsonFileConnector {
+class JsonFileService {
   /**
    * Initialize connector by synchronizing DB file and its internal state
    * @param {string} pathname - path to JSON DB file
@@ -277,4 +277,4 @@ class Lock {
   }
 }
 
-module.exports = JsonFileConnector;
+module.exports = JsonFileService;
