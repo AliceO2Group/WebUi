@@ -18,7 +18,7 @@ const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 const sinon = require('sinon');
 
-const {ObjectController} = require('../../../lib/controllers');
+const ObjectController = require('../../../lib/controllers/ObjectController');
 const CcdbService = require('../../../lib/services/CcdbService.js');
 
 describe('ObjectController test suite', () => {

@@ -18,7 +18,7 @@ const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 const sinon = require('sinon');
 
-const {LayoutController} = require('../../../lib/controllers');
+const LayoutController = require('../../../lib/controllers/LayoutController');
 const JsonFileConnector = require('../../../lib/JsonFileConnector.js');
 
 describe('LayoutController test suite', () => {
