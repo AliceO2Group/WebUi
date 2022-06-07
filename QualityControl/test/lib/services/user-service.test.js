@@ -17,7 +17,7 @@ const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 const sinon = require('sinon');
 
-const UserService = require('../../lib/services/UserService.js');
+const UserService = require('../../../lib/services/UserService.js');
 
 describe('UserService test suite', () => {
   describe('Creating a new UserService instance', () => {

@@ -14,9 +14,9 @@
 
 const sinon = require('sinon');
 const assert = require('assert');
-const config = require('../test-config.js');
+const config = require('../../test-config.js');
 
-const StatusController = require('../../lib/controllers/StatusController.js');
+const StatusController = require('../../../lib/controllers/StatusController.js');
 
 describe('Status Service test suite', () => {
   describe('Creating a new StatusController instance', () => {

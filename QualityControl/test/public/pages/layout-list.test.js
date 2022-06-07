@@ -13,7 +13,7 @@
 /* eslint-disable max-len */
 
 const assert = require('assert');
-const test = require('../mocha-index');
+const test = require('../index');
 
 describe('layoutList page test suite', async () => {
   let page, url;

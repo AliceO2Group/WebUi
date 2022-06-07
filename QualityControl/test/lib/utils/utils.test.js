@@ -15,7 +15,7 @@
 const sinon = require('sinon');
 const nock = require('nock');
 const assert = require('assert');
-const {errorHandler, httpHeadJson} = require('../../lib/utils');
+const {errorHandler, httpHeadJson} = require('../../../lib/utils');
 
 describe('Utility methods test suite', () => {
   before(() => nock.cleanAll());
