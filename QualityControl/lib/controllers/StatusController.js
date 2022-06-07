@@ -18,9 +18,9 @@ const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_l
  * Gateway for all calls with regards to the status
  * of the framework and its dependencies
  */
-class StatusService {
+class StatusController {
   /**
-   * Setup StatusService
+   * Setup StatusController
    * @param {JSON} config - of the framework
    * @param {JSON} projPackage - package json file
    */
@@ -157,4 +157,4 @@ class StatusService {
   }
 }
 
-module.exports = StatusService;
+module.exports = StatusController;

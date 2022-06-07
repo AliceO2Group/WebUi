@@ -18,17 +18,18 @@ const jsroot = require('jsroot');
 
 const ConsulService = require('@aliceo2/web-ui').ConsulService;
 const CcdbService = require('./services/CcdbService.js');
-const JsonFileService = require('./services/JsonFileService.js');
-const LayoutController = require('./controllers/LayoutController.js');
-const StatusService = require('./StatusService.js');
 const UserService = require('./services/UserService.js');
+const JsonFileService = require('./services/JsonFileService.js');
+
+const LayoutController = require('./controllers/LayoutController.js');
+const StatusController = require('./controllers/StatusController.js');
 const ObjectController = require('./controllers/ObjectController.js');
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
 // --------------------------------------------------------
 // Initialization of model according to config file
-const statusService = new StatusService(config, projPackage);
+const statusService = new StatusController(config, projPackage);
 module.exports.statusService = statusService;
 
 const jsonDb = new JsonFileService(config.dbFile || __dirname + '/../db.json');
