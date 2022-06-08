@@ -79,6 +79,7 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
+
     this.initModel();
   }
 
@@ -95,10 +96,7 @@ export default class Model extends Observable {
       object: new QCObjectService(this),
       layout: new LayoutService(this)
     };
-    this.services.object.listObjects();
-    this.services.layout.getLayoutsByUserId(this.session.personid);
 
-    this.object.loadList();
     this.loader.get('/api/checkUser');
 
     // Init first page
@@ -149,7 +147,10 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     this.object.objects = {}; // remove any in-memory loaded objects
-    clearInterval(this.layout.tabInterval)
+    clearInterval(this.layout.tabInterval);
+
+    this.services.layout.getLayoutsByUserId(this.session.personid);
+
     switch (this.router.params.page) {
       case 'layoutList':
         this.page = 'layoutList';
@@ -157,8 +158,8 @@ export default class Model extends Observable {
         break;
       case 'layoutShow':
         if (!this.router.params.layoutId) {
-          this.notification.show(`Argument layoutId in URL is missing`, 'warning', 2000);
-          this.router.go('?', true);
+          this.notification.show(`layoutId in URL was missing. Redirecting to layout page`, 'warning', 3000);
+          this.router.go('?page=layoutList', true);
           return;
         }
         this.layout.loadItem(this.router.params.layoutId)
@@ -176,6 +177,7 @@ export default class Model extends Observable {
         break;
       case 'objectTree':
         this.page = 'objectTree';
+        this.object.loadList();
         // data is already loaded at beginning
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);

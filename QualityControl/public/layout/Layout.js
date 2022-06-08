@@ -358,6 +358,8 @@ export default class Layout extends Observable {
    * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
    */
   edit() {
+    this.model.services.object.listObjects();
+
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
