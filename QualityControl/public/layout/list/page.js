@@ -25,7 +25,7 @@ export default function layouts(model) {
     style: 'display: flex; flex-direction: column'
   }, [
     Array.from(model.folder.map.values())
-      .map((folder) => createFolder(model, folder, folder.list))
+      .map((folder) => createFolder(model, folder))
   ]
   );
 }
@@ -33,17 +33,16 @@ export default function layouts(model) {
 /**
  * Method to create a folder with various layouts
  * @param {Object} model
- * @param {JSON} folder
- * @param {Array<Layout>} listOfLayouts
+ * @param {Folder} folder
  * @return {vnode}
  */
-function createFolder(model, folder, listOfLayouts) {
+function createFolder(model, folder) {
   return h('.m2.shadow-level3.br3',
     {style: 'display:flex; flex-direction:column;'},
     [
       createHeaderOfFolder(model, folder),
       ' ',
-      folder.isOpened ? table(model, listOfLayouts.filter((item) => item.name.match(folder.searchInput))) : null
+      folder.isOpened ? table(model, folder) : null
     ]
   );
 }
@@ -51,7 +50,7 @@ function createFolder(model, folder, listOfLayouts) {
 /**
  * Create the header of the folder
  * @param {Object} model
- * @param {string} folder
+ * @param {Folder} folder
  * @return {vnode}
  */
 function createHeaderOfFolder(model, folder) {
@@ -72,10 +71,10 @@ function createHeaderOfFolder(model, folder) {
 /**
  * Shows a table containing layouts, one per line
  * @param {Object} model
- * @param {Array<Object>} listOfLayouts
+ * @param {Folder} folder
  * @return {vnode}
  */
-function table(model, listOfLayouts) {
+function table(model, folder) {
   return [
     h('table.table',
       [
@@ -84,11 +83,10 @@ function table(model, listOfLayouts) {
             [
               h('th', 'Name'),
               h('th', 'Owner'),
-              h('th', 'Popularity')
             ]
           )
         ),
-        h('tbody', rows(model, listOfLayouts))
+        h('tbody', rows(model, folder))
       ]
     )
   ];
@@ -97,32 +95,37 @@ function table(model, listOfLayouts) {
 /**
  * Shows layouts as table lines
  * @param {Object} model
- * @param {Array<Object>} listOfLayouts
+ * @param {Folder} folder
  * @return {vnode}
  */
-function rows(model, listOfLayouts) {
-  return (!listOfLayouts || listOfLayouts <= 0) ?
-    h('tr', [
-      h('td.w-50', 'No layouts found'),
-      h('td.w-25', ''),
-      h('td.w-25', '')
-    ])
-    :
-    listOfLayouts.map((layout) => {
-      const key = `key${layout.name}`;
-      return h('tr', {key: key}, [
-        h('td.w-50', [
-          h('', {class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''}, [
-            iconBarChart(), ' ',
-            h('a', {
-              href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
-              onclick: (e) => model.router.handleLinkEvent(e)
-            }, layout.name)
-          ])
-        ]),
-        h('td.w-25', layout.owner_name),
-        h('td.w-25', layout.popularity)
-      ]
-      );
-    });
+function rows(model, folder) {
+  return folder.list.match({
+    NotAsked: () => null,
+    Loading: () => h('', 'Loading...'),
+    Failure: () => h('tr', [
+      h('td', 'Unable to retrieve this list of layouts'),
+    ]),
+    Success: (list) => {
+      if (!list || list.length <= 0) {
+        return h('tr', [
+          h('td', 'No layouts found'),
+        ]);
+      }
+      return list.map((layout) => {
+        const key = `key${layout.name}`;
+        return h('tr', {key: key}, [
+          h('td.w-50', [
+            h('', {class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''}, [
+              iconBarChart(), ' ',
+              h('a', {
+                href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
+                onclick: (e) => model.router.handleLinkEvent(e)
+              }, layout.name)
+            ])
+          ]),
+          h('td.w-25', layout.owner_name),
+        ]);
+      });
+    }
+  });
 }

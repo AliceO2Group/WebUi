@@ -33,7 +33,6 @@ export default class Layout extends Observable {
 
     this.model = model;
 
-    this.list = null; // array of layouts
     this.item = null; // current selected layout containing an array of tabs
 
     this.tab = null; // pointer to a tab from `item`
@@ -42,7 +41,6 @@ export default class Layout extends Observable {
 
     this.newJSON = undefined;
 
-    this.myList = RemoteData.notAsked(); // array of layouts
     this.requestedLayout = RemoteData.notAsked();
 
     this.searchInput = '';
@@ -61,20 +59,6 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // gridList.grid.length: integer, number of rows
-  }
-
-  /**
-   * Load layouts of current user inside `myList`
-   */
-  async loadMyList() {
-    this.myList = RemoteData.loading();
-    this.myList = await this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
-    if (!this.myList.isSuccess()) {
-      this.model.notification.show(`Unable to load your personal layouts.`, 'danger', Infinity);
-    }
-    this.myList.payload = this.myList.payload.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
-    this.model.folder.map.get('My Layouts').list = this.myList.payload;
-    this.notify();
   }
 
   /**

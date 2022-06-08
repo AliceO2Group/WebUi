@@ -44,8 +44,8 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.folder = new Folder(this);
-    this.folder.addFolder({title: 'My Layouts', isOpened: true, list: [], searchInput: ''});
-    this.folder.addFolder({title: 'All Layouts', isOpened: false, list: [], searchInput: ''});
+    this.folder.addFolder({title: 'My Layouts', isOpened: true, searchInput: ''});
+    this.folder.addFolder({title: 'All Layouts', isOpened: false, searchInput: ''});
     this.folder.bubbleTo(this);
 
     this.layout = new Layout(this);
@@ -96,9 +96,9 @@ export default class Model extends Observable {
       layout: new LayoutService(this)
     };
     this.services.object.listObjects();
+    this.services.layout.getLayoutsByUserId(this.session.personid);
 
     this.object.loadList();
-    this.layout.loadMyList();
     this.loader.get('/api/checkUser');
 
     // Init first page

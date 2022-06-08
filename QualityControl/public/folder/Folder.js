@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {Observable} from '/js/src/index.js';
+import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
  * Model namespace for Folder type,
@@ -41,6 +41,9 @@ export default class Folder extends Observable {
     }
     if (folder.isOpened === null || folder.isOpened === 'undefined') {
       folder.isOpened = false;
+    }
+    if (!folder.list) {
+      folder.list = RemoteData.notAsked();
     }
     const folderExistsAlready = this.map.get(folder.title);
     if (folderExistsAlready) {
