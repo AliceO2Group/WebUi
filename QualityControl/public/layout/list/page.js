@@ -24,7 +24,8 @@ export default function layouts(model) {
   return h('.scroll-y.absolute-fill', {
     style: 'display: flex; flex-direction: column'
   }, [
-    Array.from(model.folder.map.values()).map((folder) => createFolder(model, folder, folder.list))
+    Array.from(model.folder.map.values())
+      .map((folder) => createFolder(model, folder, folder.list))
   ]
   );
 }

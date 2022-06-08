@@ -28,15 +28,31 @@ export default class LayoutService {
     this.loader = model.loader;
 
     this.new = RemoteData.notAsked();
+
+    this.list = RemoteData.notAsked(); // list of existing layouts in QCG;
+    this.userList = RemoteData.notAsked(); // list of layouts created by current user;
+
+    this.loaded = RemoteData.notAsked(); // loaded and displayed layout
   }
 
   /**
    * Method to get all layouts shared between users
    * @return {RemoteData}
    */
-  async getLayouts() {
+  async getLayouts(that = this.model) {
+    this.list = RemoteData.loading();
+    that.notify();
+
     const {result, ok} = await this.loader.get('/api/layouts');
-    return this.parseResult(result, ok);
+
+    if (ok) {
+      this.list = RemoteData.success(result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1));
+      this.model.folder.map.get('All Layouts').list = this.list.payload; // Todo not here;
+    } else {
+      this.list = RemoteData.failure(result.error || result.message);
+    }
+    
+    that.notify();
   }
 
   /**

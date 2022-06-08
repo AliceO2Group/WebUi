@@ -50,7 +50,6 @@ export default class Model extends Observable {
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
-    this.layoutService = new LayoutService(this);
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
@@ -94,6 +93,7 @@ export default class Model extends Observable {
     }
     this.services = {
       object: new QCObjectService(this),
+      layout: new LayoutService(this)
     };
     this.services.object.listObjects();
 
@@ -153,7 +153,7 @@ export default class Model extends Observable {
     switch (this.router.params.page) {
       case 'layoutList':
         this.page = 'layoutList';
-        this.layout.loadList();
+        this.services.layout.getLayouts();
         break;
       case 'layoutShow':
         if (!this.router.params.layoutId) {
