@@ -166,7 +166,7 @@ export default class Layout extends Observable {
       // Read the new layout created and edit it
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
       // Update user list in background
-      this.loadMyList();
+      this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     }
   }
 
@@ -202,7 +202,7 @@ export default class Layout extends Observable {
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
 
       // Update user list in background
-      this.loadMyList();
+      this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     }
   }
 
@@ -217,7 +217,7 @@ export default class Layout extends Observable {
 
     this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success', 1500);
     this.model.router.go(`?page=layouts`);
-    this.loadMyList();
+    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.editEnabled = false;
     this.notify();
   }
@@ -380,7 +380,7 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
-    this.loadMyList();
+    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.notify();
   }
 
@@ -564,7 +564,7 @@ export default class Layout extends Observable {
       this.model.notification.show(`Layout "${itemToDuplicate.name}" ` +
         `has been successfully duplicated into "${this.item.name}".`, 'success');
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, false);
-      this.loadMyList();
+      this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     } else {
       this.model.notification.show(`Layout "${itemToDuplicate.name}" has not been duplicated.`, 'danger');
     }

@@ -39,7 +39,15 @@ export default class QCObjectService {
     that.notify();
 
     const {result, ok} = await this.model.loader.get('/api/listObjects', {}, true);
-    this.list = ok ? RemoteData.success(result) : RemoteData.failure({message: result.message});
+
+    if (ok) {
+      this.list = RemoteData.success(result);
+      this.model.object.sideTree.initTree('database');
+      this.model.object.sideTree.addChildren(result);
+    } else {
+      this.list = RemoteData.failure({message: result.message});
+    }
+
     that.notify();
   }
 

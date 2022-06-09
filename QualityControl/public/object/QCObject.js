@@ -208,9 +208,6 @@ export default class QCObject extends Observable {
       this.tree.initTree('database');
       this.tree.addChildren(offlineObjects);
 
-      this.sideTree.initTree('database');
-      this.sideTree.addChildren(offlineObjects);
-
       this.currentList = offlineObjects;
       this.sortBy = {
         field: 'name',
