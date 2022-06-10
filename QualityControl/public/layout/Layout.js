@@ -102,7 +102,6 @@ export default class Layout extends Observable {
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
-        console.log("selectTabbv")
         this.selectTab(0);
         this.setTabInterval(this.item.autoTabChange);
         this.notify();

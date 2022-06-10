@@ -198,7 +198,6 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
         drawingOptions += ';f';
       }
-      console.log(drawingOptions);
       JSROOT.draw(dom, qcObject, drawingOptions).then((painter) => {
         if (painter === null) {
           // jsroot failed to paint it
