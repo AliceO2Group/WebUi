@@ -250,7 +250,7 @@ export default class Model extends Observable {
    * Method to check if Online Mode is available
    */
   async checkOnlineModeAvailability() {
-    const result = await this.object.qcObjectService.isOnlineModeConnectionAlive();
+    const result = await this.services.object.isOnlineModeConnectionAlive();
     if (result.isSuccess()) {
       this.isOnlineModeConnectionAlive = true;
     } else {
