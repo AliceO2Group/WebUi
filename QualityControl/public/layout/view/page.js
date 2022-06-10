@@ -125,7 +125,7 @@ function subcanvasView(model) {
   };
 
   return h('.flex-column.absolute-fill', [
-    layoutFiltersPanel(model),
+    !model.layout.editEnabled && layoutFiltersPanel(model),
     h('.p2', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject))),
   ]);
 }
@@ -226,7 +226,17 @@ const drawComponent = (model, tabObject) =>
                 h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'LAST MODIFIED'),
                 model.object.getLastModifiedByName(tabObject.name)
               ]),
-
+              model.services.object.objectsLoadedMap[tabObject.name].isSuccess() &&
+              Object.keys(model.services.object.objectsLoadedMap[tabObject.name].payload)
+                .filter((key) => [
+                  'objectType', 'qc_detector_name', 'qc_task_name', 'run_type', 'partname',
+                  'drawOptions', 'runNumber', 'displayHints'
+                ].includes(key))
+                .map((key) => h('.m2.gray-darker.text-center.flex-row', [
+                  h('', {style: 'font-weight: bold;'}, key),
+                  h('.w-100.text-right', model.services.object.objectsLoadedMap[tabObject.name].payload[key])
+                ]),
+                )
             ]),
           ])
         ),

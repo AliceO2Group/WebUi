@@ -20,6 +20,7 @@ import {h} from '/js/src/index.js';
  * @returns {vnode}
  */
 const layoutFiltersPanel = (model) => h('.p2.flex-row', {
+  onremove: () => model.layout.filter = {},
 }, [ // PeriodName, PassName, RunNumber, RunType
   filter(model, 'RunNumber', 'runNumberLayoutFilter', 'number', '.w-20'),
   filter(model, 'RunType', 'runTypeLayoutFilter', 'text', '.w-20'),

@@ -58,19 +58,18 @@ class ObjectController {
    */
   async getObjectContent(req, res) {
     const path = req.query?.path;
-    const timestamp = req.query?.timestamp ?? Date.now();
+    const timestamp = req.query?.timestamp;
     const filter = req.query?.filter;
     try {
-      const timestamps = await this.db.getObjectTimestampList(path, timestamp, 10, filter);
-      
-      const validFrom = timestamps[0].validFrom;
-      const lastModified = timestamps.map((obj) => obj.lastModified);
+      const validFrom = await this.db.getObjectValidity(path, timestamp, filter);
       const objDetails = await this.db.getObjectDetails(path, validFrom, filter);
 
       const url = this.DB_URL + objDetails.location;
       const root = await this._getJsRootFormat(url);
       objDetails.root = root;
-      objDetails.timestamps = lastModified;
+
+      const timestamps = await this.db.getObjectTimestampList(path, 1000, filter);
+      objDetails.timestamps = timestamps;
       res.status(200).json(objDetails);
     } catch (error) {
       errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');

@@ -42,6 +42,7 @@ class CcdbService {
     this.PREFIX = this._getPrefix(config);
 
     this.LAST_MODIFIED = 'Last-Modified';
+    this.VALID_FROM = 'Valid-From';
     this.CREATED = 'Created';
     this.PATH = 'path';
 
@@ -105,34 +106,63 @@ class CcdbService {
   }
 
   /**
-   * Retrieve a sorted list of available timestamps for a specified object; Number of timestamps defaults to 50 but it can be passed
+   * Retrieve a sorted list of available timestamps for a specified object; Number of timestamps defaults to 100 but it can be passed a different value
    * @example Equivalent of URL request: `/browse/qc/TPC/object/1`
    * @param {String} objectName - full path of the object
+   * @param {Number} timestamp
    * @param {Number} limit - how many timestamps should retrieve
    * @param {String} filter - filter that should be applied when querying object; e.g. RunNumber=324543
-   * @returns {Promise.<Array<JSON>, Error>}
+   * @returns {Promise.<Array<Number>, Error>}
    */
-  async getObjectTimestampList(objectName, timestamp, limit = 10, filter = '') {
-    const timestampHeaders = {
+  async getObjectTimestampList(objectName, limit = 1000, filter = '') {
+    const headers = {
       Accept: 'application/json',
-      'X-Filter-Fields': `${this.PATH},${this.LAST_MODIFIED},Valid-From`,
+      'X-Filter-Fields': `${this.LAST_MODIFIED}`,
       'Browse-Limit': '' + limit
     };
     try {
-      const url = `/browse/${objectName}/${timestamp}/${filter}`;
-      const {objects} = await httpGetJson(this.hostname, this.port, url, timestampHeaders);
-      return objects
-        .filter(QCObjectDto.isObjectPathValid)
-        .map((object) => {
-          return {
-            lastModified: parseInt(object[this.LAST_MODIFIED]), 
-            validFrom: parseInt(object['Valid-From'])
-          }
-        });
+      const url = `/browse/${objectName}/${filter}`;
+      const {objects} = await httpGetJson(this.hostname, this.port, url, headers);
+      return objects.map((object) => parseInt(object[this.LAST_MODIFIED]));
     } catch (error) {
       errorLogger(error, 'ccdb');
       throw new Error('Unable to retrieve latest timestamps list');
     }
+  }
+
+  /**
+   * Return the validity of an object (looked by name, timestamp and filter) in the form of a timestamp;
+   * @param {String} path 
+   * @param {Number} timestamp
+   * @param {String} filter
+   * @returns 
+   */
+  async getObjectValidity(path, timestamp = '', filter = '') {
+    const headers = {
+      Accept: 'application/json',
+      'X-Filter-Fields': `${this.VALID_FROM}`,
+    };
+    let result = {};
+    let url = `/latest/${path}`;
+    if (timestamp) {
+      url += `/${timestamp}`
+    }
+    if (filter) {
+      url += `/${filter}`;
+    }
+
+    try {
+      result = await httpGetJson(this.hostname, this.port, url, headers);
+    } catch (error) {
+      // errorLogger(error, 'ccdb');
+      throw new Error('Unable to retrieve object validity');
+    }
+    if (result && result.objects && result.objects.length > 0) {
+      return result.objects[0][this.VALID_FROM];
+    } else {
+      throw new Error(`Object: ${url} could not be found`);
+    }
+
   }
 
   /**
@@ -150,7 +180,7 @@ class CcdbService {
       throw new Error('Missing mandatory parameters: name & timestamp');
     }
     const path = `/${name}/${timestamp}/${filter}`;
-    const reqHeaders = { Accept: 'application/json' };
+    const reqHeaders = {Accept: 'application/json'};
 
     const {status, headers} = await httpHeadJson(this.hostname, this.port, path, reqHeaders);
     if (status >= 200 && status <= 299) {
