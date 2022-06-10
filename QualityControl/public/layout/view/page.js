@@ -15,6 +15,7 @@
 import {h} from '/js/src/index.js';
 import {draw} from '../../object/objectDraw.js';
 import {iconArrowLeft, iconArrowTop, iconResizeBoth, info} from '/js/src/icons.js';
+import {layoutFiltersPanel} from './panels/filters.js';
 
 /**
  * Exposes the page that shows one layout and its tabs (one at a time), this page can be in edit mode
@@ -67,13 +68,14 @@ function subcanvasView(model) {
   }
 
   // Sort the list by id to help template engine. It will only update style's positions and not DOM order
-  // which could force recreate some charts and then have an unfriendly blink. The source array can be suffle
+  // which could force recreate some charts and then have an unfriendly blink. The source array can be shuffle
   // because of the GridList algo, the sort below avoid this.
   const tabObjects = cloneSortById(model.layout.tab.objects);
 
   const subcanvasAttributes = {
     style: {
-      height: `${model.layout.cellHeight * model.layout.gridList.grid.length}%`
+      height: `${model.layout.cellHeight * model.layout.gridList.grid.length}%`,
+      position: 'relative',
     },
     id: 'subcanvas',
 
@@ -122,7 +124,10 @@ function subcanvasView(model) {
     }
   };
 
-  return h('div', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject)));
+  return h('.flex-column.absolute-fill', [
+    !model.layout.editEnabled && layoutFiltersPanel(model),
+    h('.p2', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject))),
+  ]);
 }
 
 /**
@@ -221,7 +226,17 @@ const drawComponent = (model, tabObject) =>
                 h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'LAST MODIFIED'),
                 model.object.getLastModifiedByName(tabObject.name)
               ]),
-
+              model.services.object.objectsLoadedMap[tabObject.name].isSuccess() &&
+              Object.keys(model.services.object.objectsLoadedMap[tabObject.name].payload)
+                .filter((key) => [
+                  'objectType', 'qc_detector_name', 'qc_task_name', 'run_type', 'partname',
+                  'drawOptions', 'runNumber', 'displayHints'
+                ].includes(key))
+                .map((key) => h('.m2.gray-darker.text-center.flex-row', [
+                  h('', {style: 'font-weight: bold;'}, key),
+                  h('.w-100.text-right', model.services.object.objectsLoadedMap[tabObject.name].payload[key])
+                ]),
+                )
             ]),
           ])
         ),

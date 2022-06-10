@@ -108,13 +108,13 @@ const myLayoutsMenu = (model) => [
       onclick: () => model.layout.newItem(prompt('Choose a name for the new layout:'))
     }, iconPlus())
   ] : ''),
-  model.layout.myList.match({
+  model.services.layout.userList.match({
     NotAsked: () => null,
     Loading: () => h('.menu-item', 'Loading...'),
     Success: (list) => h('.scroll-y', {
       style: 'min-height: 10em;'
     }, list.map((layout) => myLayoutsMenuItem(model, layout))),
-    Failure: (error) => h('.menu-item', error),
+    Failure: () => null,
   }),
 ];
 

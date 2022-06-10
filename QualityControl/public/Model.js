@@ -44,13 +44,12 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.folder = new Folder(this);
-    this.folder.addFolder({title: 'My Layouts', isOpened: true, list: [], searchInput: ''});
-    this.folder.addFolder({title: 'All Layouts', isOpened: false, list: [], searchInput: ''});
+    this.folder.addFolder({title: 'My Layouts', isOpened: true, searchInput: ''});
+    this.folder.addFolder({title: 'All Layouts', isOpened: false, searchInput: ''});
     this.folder.bubbleTo(this);
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
-    this.layoutService = new LayoutService(this);
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
@@ -80,6 +79,7 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
+
     this.initModel();
   }
 
@@ -94,11 +94,9 @@ export default class Model extends Observable {
     }
     this.services = {
       object: new QCObjectService(this),
+      layout: new LayoutService(this)
     };
-    this.services.object.listObjects();
 
-    this.object.loadList();
-    this.layout.loadMyList();
     this.loader.get('/api/checkUser');
 
     // Init first page
@@ -149,16 +147,19 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     this.object.objects = {}; // remove any in-memory loaded objects
-    clearInterval(this.layout.tabInterval)
+    clearInterval(this.layout.tabInterval);
+
+    this.services.layout.getLayoutsByUserId(this.session.personid);
+
     switch (this.router.params.page) {
       case 'layoutList':
         this.page = 'layoutList';
-        this.layout.loadList();
+        this.services.layout.getLayouts();
         break;
       case 'layoutShow':
         if (!this.router.params.layoutId) {
-          this.notification.show(`Argument layoutId in URL is missing`, 'warning', 2000);
-          this.router.go('?', true);
+          this.notification.show(`layoutId in URL was missing. Redirecting to layout page`, 'warning', 3000);
+          this.router.go('?page=layoutList', true);
           return;
         }
         this.layout.loadItem(this.router.params.layoutId)
@@ -176,6 +177,7 @@ export default class Model extends Observable {
         break;
       case 'objectTree':
         this.page = 'objectTree';
+        this.object.loadList();
         // data is already loaded at beginning
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);

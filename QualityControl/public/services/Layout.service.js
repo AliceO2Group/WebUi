@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-import {assertLayouts} from '../common/Types.js';
 import {fetchClient, RemoteData} from '/js/src/index.js';
 
 /**
@@ -27,30 +26,60 @@ export default class LayoutService {
     this.model = model;
     this.loader = model.loader;
 
-    this.new = RemoteData.notAsked();
+    this.new = RemoteData.notAsked(); // RemoteData for creating a new layout via modal of import or prompt
+
+    this.list = RemoteData.notAsked(); // list of all existing layouts in QCG;
+    this.userList = RemoteData.notAsked(); // list of layouts owned by current user;
   }
 
   /**
    * Method to get all layouts shared between users
+   * @param {Class<Observer>} that - Observer requesting data that should be notified of changes
    * @return {RemoteData}
    */
-  async getLayouts() {
+  async getLayouts(that = this.model) {
+    this.list = RemoteData.loading();
+    that.notify();
+
     const {result, ok} = await this.loader.get('/api/layouts');
-    return this.parseResult(result, ok);
+
+    if (ok) {
+      const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+      this.list = RemoteData.success(sortedLayouts);
+      this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
+    } else {
+      this.list = RemoteData.failure(result.error || result.message);
+      this.model.folder.map.get('All Layouts').list = RemoteData.failure(result.error || result.message);
+    }
+
+    that.notify();
   }
 
   /**
    * Method to get all layouts by the user's id
    * @param {string} userId
+   * @param {Class<Observer>} that - Observer requesting data that should be notified of changes
    * @return {RemoteData}
    */
-  async getLayoutsByUserId(userId) {
-    const {result, ok} = await this.loader.get(`/api/layouts?owner_id=${userId}`);
-    if (!ok) {
-      return RemoteData.failure(result.error);
+  async getLayoutsByUserId(userId, that = this.model) {
+    this.userList = RemoteData.loading();
+    that.notify();
+
+    if (isNaN(userId)) {
+      this.userList = RemoteData.failure('Provided userId is not a number');
     } else {
-      return RemoteData.success(assertLayouts(result));
+      const {result, ok} = await this.loader.get(`/api/layouts?owner_id=${userId}`);
+      if (ok) {
+        const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+        this.userList = RemoteData.success(sortedLayouts);
+        this.model.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
+      } else {
+        this.userList = RemoteData.failure(result.error || result.message);
+        this.model.folder.map.get('My Layouts').list = RemoteData.failure(result.error || result.message);
+      }
     }
+
+    that.notify();
   }
 
   /**

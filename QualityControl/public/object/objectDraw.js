@@ -122,11 +122,11 @@ export function draw(model, tabObject, options, location = '') {
   const objectRemoteData = model.object.objects[tabObject.name];
   if (!objectRemoteData || objectRemoteData.isLoading()) {
     // not asked yet or loading
-    content = h('.absolute-fill.flex-column.items-center.justify-center', [
+    return h('.absolute-fill.flex-column.items-center.justify-center', [
       h('.animate-slow-appearance', 'Loading')
     ]);
   } else if (objectRemoteData.isFailure()) {
-    content = h('.scroll-y.absolute-fill.p1.f6.text-center', {
+    return h('.scroll-y.absolute-fill.p1.f6.text-center', {
       style: 'word-break: break-all;'
     }, objectRemoteData.payload);
   } else {
@@ -211,6 +211,10 @@ function redrawOnDataUpdate(model, dom, tabObject) {
 
     dom.dataset.fingerprintRedraw = redrawHash;
     dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
+  } else if (objectRemoteData && objectRemoteData.isFailure()) {
+    JSROOT.cleanup(dom);
+    // model.object.invalidObject(tabObject.name);
+    // model.notify();
   }
 }
 

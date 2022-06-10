@@ -13,7 +13,6 @@
 */
 
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
-import QCObjectService from './../services/QCObject.service.js';
 import ObjectTree from './ObjectTree.class.js';
 
 /**
@@ -36,8 +35,6 @@ export default class QCObject extends Observable {
     this.selected = null; // object - { name; createTime; lastModified; }
     this.selectedOpen = false;
     this.objects = {}; // objectName -> RemoteData.payload -> plot
-
-    this.qcObjectService = new QCObjectService(this.model);
 
     this.listOnline = []; // list of online objects name
 
@@ -195,7 +192,7 @@ export default class QCObject extends Observable {
       this.notify();
       this.queryingObjects = true;
       let offlineObjects = [];
-      const result = await this.qcObjectService.getObjects();
+      const result = await this.model.services.object.getObjects();
       if (result.isSuccess()) {
         offlineObjects = result.payload;
       } else {
@@ -207,9 +204,6 @@ export default class QCObject extends Observable {
 
       this.tree.initTree('database');
       this.tree.addChildren(offlineObjects);
-
-      this.sideTree.initTree('database');
-      this.sideTree.addChildren(offlineObjects);
 
       this.currentList = offlineObjects;
       this.sortBy = {
@@ -240,7 +234,7 @@ export default class QCObject extends Observable {
     this.queryingObjects = true;
     this.notify();
     let onlineObjects = [];
-    const result = await this.qcObjectService.getOnlineObjects();
+    const result = await this.model.services.object.getOnlineObjects();
     if (result.isSuccess()) {
       onlineObjects = result.payload;
       this.sortListByField(onlineObjects, 'name', 1);
@@ -276,7 +270,7 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = -1) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.qcObjectService.getObjectByName(objectName, timestamp);
+    const obj = await this.model.services.object.getObjectByName(objectName, timestamp, '', this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -316,21 +310,24 @@ export default class QCObject extends Observable {
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
-  async loadObjects(objectsName) {
+  async loadObjects(objectsName, filter = {}) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // remove any in-memory loaded objects
+    this.model.services.object.objectsLoadedMap = {}; // TODO not here
     this.notify();
     if (!objectsName || !objectsName.length) {
       this.objectsRemote = RemoteData.success();
       this.notify();
       return;
     }
-
+    const filterAsString = Object.keys(filter).map((key) => `${key}=${filter[key]}`).join('/');
     await Promise.allSettled(
       objectsName.map(async (objectName) => {
         this.objects[objectName] = RemoteData.Loading()
         this.notify();
-        this.objects[objectName] = await this.qcObjectService.getObjectByNameOnly(objectName);
+        this.objects[objectName] = await this.model.services.object.getObjectByName(
+          objectName, -1, filterAsString, this
+        );
         this.notify();
       })
     );
@@ -498,12 +495,13 @@ export default class QCObject extends Observable {
    * @return {string}
    */
   getLastModifiedByName(objectName) {
-    if (this.currentList.length === 0) {
-      return 'Loading ...';
-    }
-    const object = this.currentList.find((object) => object.name === objectName);
-    if (object) {
-      return new Date(object.lastModified).toLocaleString('en-UK');
+    const objMap = this.model.services.object.objectsLoadedMap;
+    if (objMap[objectName]) {
+      if (objMap[objectName].isSuccess()) {
+        return objMap[objectName].payload.lastModified;
+      } else if (objMap[objectName].isLoading()) {
+        return 'Loading...';
+      }
     }
     return '-';
   }

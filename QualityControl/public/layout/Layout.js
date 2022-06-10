@@ -17,7 +17,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import {objectId, clone} from '../common/utils.js';
-import {assertTabObject, assertLayout, assertLayouts} from '../common/Types.js';
+import {assertTabObject, assertLayout} from '../common/Types.js';
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
@@ -33,7 +33,6 @@ export default class Layout extends Observable {
 
     this.model = model;
 
-    this.list = null; // array of layouts
     this.item = null; // current selected layout containing an array of tabs
 
     this.tab = null; // pointer to a tab from `item`
@@ -42,7 +41,6 @@ export default class Layout extends Observable {
 
     this.newJSON = undefined;
 
-    this.myList = RemoteData.notAsked(); // array of layouts
     this.requestedLayout = RemoteData.notAsked();
 
     this.searchInput = '';
@@ -61,37 +59,8 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // gridList.grid.length: integer, number of rows
-  }
 
-  /**
-   * Load all available layouts shared by users inside `list`
-   */
-  async loadList() {
-    const result = await this.model.layoutService.getLayouts();
-
-    if (result.isSuccess()) {
-      this.list = assertLayouts(result.payload);
-      this.list = this.list.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
-      this.model.folder.map.get('All Layouts').list = this.list;
-    } else {
-      this.model.notification.show(`Unable to load layouts.`, 'danger', Infinity);
-      this.list = [];
-    }
-    this.notify();
-  }
-
-  /**
-   * Load layouts of current user inside `myList`
-   */
-  async loadMyList() {
-    this.myList = RemoteData.loading();
-    this.myList = await this.model.layoutService.getLayoutsByUserId(this.model.session.personid);
-    if (!this.myList.isSuccess()) {
-      this.model.notification.show(`Unable to load your personal layouts.`, 'danger', Infinity);
-    }
-    this.myList.payload = this.myList.payload.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
-    this.model.folder.map.get('My Layouts').list = this.myList.payload;
-    this.notify();
+    this.filter = {};
   }
 
   /**
@@ -102,7 +71,7 @@ export default class Layout extends Observable {
   async getLayoutById(layoutId) {
     this.requestedLayout = RemoteData.loading();
     this.notify();
-    this.requestedLayout = await this.model.layoutService.getLayoutById(layoutId);
+    this.requestedLayout = await this.model.services.layout.getLayoutById(layoutId);
     this.notify();
 
     if (!this.requestedLayout.isSuccess()) {
@@ -128,7 +97,7 @@ export default class Layout extends Observable {
       this.model.notification.show(`Unable to load layout, it might have been deleted.`, 'warning');
       this.model.router.go(`?page=layouts`);
     } else {
-      const result = await this.model.layoutService.getLayoutById(layoutId);
+      const result = await this.model.services.layout.getLayoutById(layoutId);
 
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
@@ -166,9 +135,9 @@ export default class Layout extends Observable {
   setImportValue(layout) {
     try {
       this.newJSON = JSON.parse(layout);
-      this.model.layoutService.new = RemoteData.notAsked();
+      this.model.services.layout.new = RemoteData.notAsked();
     } catch (error) {
-      this.model.layoutService.new = RemoteData.failure(error);
+      this.model.services.layout.new = RemoteData.failure(error);
     }
     this.notify();
   }
@@ -178,7 +147,7 @@ export default class Layout extends Observable {
    */
   resetImport() {
     this.newJSON = undefined;
-    this.model.layoutService.new = RemoteData.notAsked();
+    this.model.services.layout.new = RemoteData.notAsked();
     this.model.isImportVisible = false
   }
 
@@ -192,14 +161,14 @@ export default class Layout extends Observable {
     layout.owner_id = this.model.session.personid;
     layout.owner_name = this.model.session.name;
 
-    const result = await this.model.layoutService.createNewLayout(layout, this);
+    const result = await this.model.services.layout.createNewLayout(layout, this);
 
     if (result.isSuccess()) {
       this.resetImport();
       // Read the new layout created and edit it
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
       // Update user list in background
-      this.loadMyList();
+      this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     }
   }
 
@@ -225,7 +194,7 @@ export default class Layout extends Observable {
         }]
       });
 
-      const result = await this.model.layoutService.createNewLayout(layout);
+      const result = await this.model.services.layout.createNewLayout(layout);
       if (result.isFailure()) {
         this.model.notification.show(result.error || 'Unable to create layout', 'danger', 2000);
         return;
@@ -235,7 +204,7 @@ export default class Layout extends Observable {
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
 
       // Update user list in background
-      this.loadMyList();
+      this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     }
   }
 
@@ -246,11 +215,11 @@ export default class Layout extends Observable {
     if (!this.item) {
       throw new Error('no layout to delete');
     }
-    await this.model.layoutService.removeLayoutById(this.item.id);
+    await this.model.services.layout.removeLayoutById(this.item.id);
 
     this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success', 1500);
     this.model.router.go(`?page=layouts`);
-    this.loadMyList();
+    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.editEnabled = false;
     this.notify();
   }
@@ -262,7 +231,7 @@ export default class Layout extends Observable {
     if (!this.item) {
       throw new Error('no layout to save');
     }
-    const result = await this.model.layoutService.saveLayout(this.item);
+    const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
       this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}&layoutName=${this.item.name}`, true, true);
@@ -308,7 +277,7 @@ export default class Layout extends Observable {
       throw new Error(`index ${index} does not exist`);
     }
     this.tab = this.item.tabs[index];
-    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filter);
     const columns = this.item.tabs[index].columns;
     if (columns > 0) {
       this.resizeGridByXY(columns);
@@ -391,6 +360,8 @@ export default class Layout extends Observable {
    * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
    */
   edit() {
+    this.model.services.object.listObjects();
+
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
@@ -411,7 +382,7 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
-    this.loadMyList();
+    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.notify();
   }
 
@@ -588,14 +559,14 @@ export default class Layout extends Observable {
       tabs: tabs
     });
 
-    const result = await this.model.layoutService.createNewLayout(layout);
+    const result = await this.model.services.layout.createNewLayout(layout);
     // TODO Newly created item should be sent back by the API. This will prevent having to reload the item again below
     if (result.isSuccess()) {
       await this.loadItem(layout.id);
       this.model.notification.show(`Layout "${itemToDuplicate.name}" ` +
         `has been successfully duplicated into "${this.item.name}".`, 'success');
       this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, false);
-      this.loadMyList();
+      this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     } else {
       this.model.notification.show(`Layout "${itemToDuplicate.name}" has not been duplicated.`, 'danger');
     }

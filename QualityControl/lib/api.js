@@ -24,8 +24,8 @@ const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel
  * @param {HttpServer} http
  */
 module.exports.setup = (http) => {
-  http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), {public: true});
-  http.get('/object/root', model.objectController.getObjectContent.bind(model.objectController));
+  // http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), {public: true});
+  http.get('/object', model.objectController.getObjectContent.bind(model.objectController));
   http.get('/objects', () => false, {public: true});
 
   http.get('/listOnlineObjects', listOnlineObjects);
@@ -45,11 +45,9 @@ module.exports.setup = (http) => {
   new WebSocket(http);
 
   /**
-   *  @deprecated ; to be removed in version 2.10.0
+   *  @deprecated ; to be removed in version 2.14.0
    */
-  http.get('/readObjectData', readObjectData, {public: true});
   http.get('/listObjects', listObjects, {public: true});
-  http.get('/objectTimestampList', getObjectTimestampList, {public: true});
 };
 
 /**
@@ -60,20 +58,6 @@ module.exports.setup = (http) => {
 function listObjects(req, res) {
   model.listObjects()
     .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Method to retrieve a list of timestamps for the requested objectName
- * @param {Request} req
- * @param {Response} res
- */
-function getObjectTimestampList(req, res) {
-  model.getObjectTimestampList(req.query.objectName)
-    .then((data) => {
-      res.status(200);
-      res.json(data);
-    })
     .catch((err) => errorHandler(err, res));
 }
 
@@ -107,26 +91,6 @@ function isOnlineModeConnectionAlive(req, res) {
       .catch((err) => errorHandler(`Unable to retrieve Consul Status: ${err}`, res));
   } else {
     errorHandler('Online mode is not enabled due to missing Consul configuration', res, 503);
-  }
-}
-
-/**
- * Request data of an object based on name and optionally timestamp
- * Returned data will contained the QC Object and a list of its corresponding timestamps
- * @param {Request} req
- * @param {Response} res
- */
-async function readObjectData(req, res) {
-  const objectName = req.query.objectName;
-  if (!objectName) {
-    res.status(400).send('parameter objectName is needed');
-    return;
-  }
-  try {
-    const timestamps = await model.getObjectTimestampList(objectName);
-    res.status(timestamps.length > 0 ? 200 : 404).json({timestamps: timestamps.slice(0, 50)});
-  } catch (err) {
-    errorHandler('Reading object data: ' + err, res);
   }
 }
 

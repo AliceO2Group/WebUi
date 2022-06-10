@@ -32,7 +32,7 @@ export default (model) =>
           oninput: (e) => model.layout.setImportValue(e.target.value),
           style: 'resize: vertical;',
         })),
-        model.layoutService.new.match({
+        model.services.layout.new.match({
           NotAsked: () => null,
           Loading: () => h('', 'Loading...'),
           Success: (_) => null,
@@ -42,7 +42,7 @@ export default (model) =>
           style: 'display:flex; justify-content:center;'
         }, [
           h('button.btn.btn-primary', {
-            disabled: model.layout.newJSON === undefined || model.layoutService.new.isFailure(),
+            disabled: model.layout.newJSON === undefined || model.services.layout.new.isFailure(),
             onclick: () => model.layout.newFromJson(model.layout.newJSON),
           }, 'Import'),
           h('button.btn', {

@@ -23,8 +23,6 @@ import {h} from '/js/src/index.js';
 export default (model) => [
   h('.w-50.text-center', [
     h('b.f4', 'Layouts'),
-    ' ',
-    h('span', `(${howManyItems(model)})`),
   ]),
   h('.flex-grow.text-right', [
     h('input.form-control.form-inline.mh1.w-33', {
@@ -35,10 +33,3 @@ export default (model) => [
     })
   ]),
 ];
-
-/**
- * Shows how many layouts are available or correspond to the filtering input
- * @param {Object} model
- * @return {vnode}
- */
-const howManyItems = (model) => `${model.layout.list && model.layout.list.length} items`;

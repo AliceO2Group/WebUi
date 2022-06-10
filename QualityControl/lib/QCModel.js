@@ -56,10 +56,10 @@ if (config.listingConnector === 'ccdb') {
     throw new Error('CCDB config is mandatory');
   }
   const ccdb = new CcdbService(config.ccdb);
-  ccdb.testConnection();
-  module.exports.listObjects = ccdb.listObjects.bind(ccdb);
+  ccdb.isConnectionUp();
+  module.exports.listObjects = ccdb.getObjectsLatestVersionList.bind(ccdb);
   module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
-  module.exports.queryPrefix = ccdb.prefix;
+  module.exports.queryPrefix = ccdb.PREFIX;
 
   module.exports.objectController = new ObjectController(ccdb, jsroot);
   module.exports.layoutService = new LayoutController(jsonDb);

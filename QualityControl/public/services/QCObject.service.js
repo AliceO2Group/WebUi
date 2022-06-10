@@ -26,7 +26,10 @@ export default class QCObjectService {
    */
   constructor(model) {
     this.model = model;
-    this.list = RemoteData.notAsked();
+    this.list = RemoteData.notAsked(); // list of objects in CCDB with some of their parameters
+
+    this.objectsLoadedMap = {};
+    // qcobject --ccdb info; root plot, query params? in ccdb info
   }
 
   /**
@@ -39,9 +42,67 @@ export default class QCObjectService {
     that.notify();
 
     const {result, ok} = await this.model.loader.get('/api/listObjects', {}, true);
-    this.list = ok ? RemoteData.success(result) : RemoteData.failure({message: result.message});
+
+    if (ok) {
+      this.list = RemoteData.success(result);
+      this.model.object.sideTree.initTree('database');
+      this.model.object.sideTree.addChildren(result);
+    } else {
+      this.list = RemoteData.failure({message: result.message});
+    }
+
     that.notify();
   }
+
+  /**
+  * Ask server for an object by name and optionally timestamp
+  * If timestamp is not provided, Date.now() will be used to request latest version of the object
+  * @param {string} objectName
+  * @param {number} timestamp
+  * @return {Promise<RemoteData>} {result, ok, status}
+  */
+  async getObjectByName(objectName, timestamp = -1, filter = '', that = this) {
+    this.objectsLoadedMap[objectName] = RemoteData.loading();
+    that.notify();
+
+    try {
+      let url = `/api/object?path=${objectName}` // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
+      if (timestamp === -1 && filter === '') {
+        url += `&timestamp=${Date.now()}`;
+      } else if (filter !== '') {
+        url += `&filter=${filter}`;
+      } else {
+        url += `&timestamp=${timestamp}`;
+      }
+      const {result, ok} =
+        await this.model.loader.get(url);
+      if (ok) {
+        result.qcObject = {
+          root: JSROOT.parse(result.root),
+          drawingOptions: result.drawOptions,
+          displayHints: result.displayHints,
+        };
+        delete result.root;
+        this.objectsLoadedMap[objectName] = RemoteData.success(result);
+        that.notify();
+        return RemoteData.success(result);
+      } else {
+        this.objectsLoadedMap[objectName] = RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+        that.notify();
+        return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+      }
+    } catch (error) {
+      console.error(error);
+      this.objectsLoadedMap[objectName] = RemoteData.failure(`404: Object "${objectName}" could not be loaded.`);
+      that.notify();
+      return RemoteData.failure(`Object '${objectName}' could not be loaded`);
+    }
+  }
+
+  /**
+   * DEPRECATED
+   * @deprecated all
+   */
 
   /**
    * @deprecated
@@ -50,11 +111,7 @@ export default class QCObjectService {
    */
   async getObjects() {
     const {result, ok} = await this.model.loader.get('/api/listObjects');
-    if (ok) {
-      return RemoteData.success(result);
-    } else {
-      return RemoteData.failure(result);
-    }
+    return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 
   /**
@@ -63,11 +120,7 @@ export default class QCObjectService {
    */
   async getOnlineObjects() {
     const {result, ok} = await this.model.loader.get('/api/listOnlineObjects');
-    if (ok) {
-      return RemoteData.success(result);
-    } else {
-      return RemoteData.failure(result);
-    }
+    return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 
   /**
@@ -75,74 +128,6 @@ export default class QCObjectService {
    */
   async isOnlineModeConnectionAlive() {
     const {ok} = await this.model.loader.get('/api/isOnlineModeConnectionAlive');
-    if (ok) {
-      return RemoteData.success(ok);
-    } else {
-      return RemoteData.failure(ok);
-    }
-  }
-
-  /**
-   * Ask server for an object by name and optionally timestamp
-   * If timestamp is not provided, Date.now() will be used to request latest version of the object
-   * @param {string} objectName
-   * @param {number} timestamp
-   * @return {Promise<RemoteData>} {result, ok, status}
-   */
-  async getObjectByName(objectName, timestamp = -1) {
-    try {
-      if (timestamp === -1) {
-        timestamp = Date.now();
-      }
-      const {result, ok, status} =
-        await this.model.loader.get(`/api/object/info?path=${objectName}&timestamp=${timestamp}`);
-      if (ok) {
-        const root = await this.model.loader.get(`/api/object/root?path=${objectName}&timestamp=${timestamp}`);
-        if (root.ok) {
-          const obj = {
-            info: result.info,
-            timestamps: result.timestamps,
-            qcObject: {
-              root: JSROOT.parse(root.result.root),
-              drawingOptions: root.result.drawingOptions,
-              displayHints: root.result.displayHints,
-            }
-          };
-          return RemoteData.success(obj);
-        }
-        return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
-
-      } else if (status === 404) {
-        return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
-      }
-      return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
-    } catch (error) {
-      console.error(error);
-      return RemoteData.failure(`Object '${objectName}' could not be loaded`);
-    }
-  }
-
-  /**
-   * Retrieve the JSON version of a ROOT Object through JSROOT
-   * @param {string} objectName - full path object name
-   * @return {RemoteData}
-   */
-  async getObjectByNameOnly(objectName) {
-    try {
-      const {result, ok} = await this.model.loader.get(`/api/object/root?path=${objectName}`);
-      if (ok) {
-        return RemoteData.success({
-          qcObject: {
-            root: JSROOT.parse(result.root),
-            drawingOptions: result.drawingOptions,
-            displayHints: result.displayHints,
-          }
-        });
-      } else {
-        throw new Error();
-      }
-    } catch (error) {
-      return RemoteData.failure(`Unable to load object ${objectName}`);
-    }
+    return ok ? RemoteData.success(ok) : RemoteData.failure(ok);
   }
 }
