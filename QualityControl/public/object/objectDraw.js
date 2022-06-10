@@ -198,6 +198,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         // Use user's defined options and add undocumented option "f" allowing color changing on redraw (color is fixed without it)
         drawingOptions += ';f';
       }
+      console.log(drawingOptions);
       JSROOT.draw(dom, qcObject, drawingOptions).then((painter) => {
         if (painter === null) {
           // jsroot failed to paint it
@@ -211,6 +212,10 @@ function redrawOnDataUpdate(model, dom, tabObject) {
 
     dom.dataset.fingerprintRedraw = redrawHash;
     dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
+  } else if (objectRemoteData && objectRemoteData.isFailure() ) {
+    // JSROOT.cleanup(dom);
+    // model.object.invalidObject(tabObject.name);
+    // model.notify();
   }
 }
 

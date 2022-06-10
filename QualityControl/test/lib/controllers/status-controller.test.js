@@ -40,7 +40,7 @@ describe('Status Service test suite', () => {
     });
     it('successfully return status with error if data connector threw an error', async () => {
       const dataConnector = {
-        testConnection: sinon.stub().rejects(new Error('Unable to retrieve status of data store'))
+        isConnectionUp: sinon.stub().rejects(new Error('Unable to retrieve status of data store'))
       }
       statusService.setDataConnector(dataConnector);
       const response = await statusService.getDataConnectorStatus();
@@ -48,7 +48,7 @@ describe('Status Service test suite', () => {
     });
     it('successfully return status with ok if data connector passed checks', async () => {
       const dataConnector = {
-        testConnection: sinon.stub().resolves()
+        isConnectionUp: sinon.stub().resolves()
       }
       statusService.setDataConnector(dataConnector);
       const response = await statusService.getDataConnectorStatus();
@@ -85,7 +85,7 @@ describe('Status Service test suite', () => {
   describe('`getFrameworkInfo()` tests', () => {
     it('successfully build result JSON with framework information', async () => {
       const statusService = new StatusController(config)
-      const dataConnector = {testConnection: sinon.stub().resolves()};
+      const dataConnector = {isConnectionUp: sinon.stub().resolves()};
       const liveConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
       statusService.setDataConnector(dataConnector);
       statusService.setLiveModeConnector(liveConnector);
@@ -105,7 +105,7 @@ describe('Status Service test suite', () => {
   describe('`frameworkInfo()` tests', () => {
     it('successfully send back result JSON with framework information', async () => {
       const statusService = new StatusController(config)
-      const dataConnector = {testConnection: sinon.stub().resolves()};
+      const dataConnector = {isConnectionUp: sinon.stub().resolves()};
       const liveConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
       statusService.setDataConnector(dataConnector);
       statusService.setLiveModeConnector(liveConnector);

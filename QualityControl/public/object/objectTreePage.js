@@ -84,7 +84,7 @@ function objectPanel(model) {
  */
 const drawPlot = (model, object) => {
   const name = model.object.selected.name;
-  const info = object.info;
+  const info = object;
   return h('', {style: 'height:100%; display: flex; flex-direction: column'},
     [
       h('.resize-button.flex-row', [

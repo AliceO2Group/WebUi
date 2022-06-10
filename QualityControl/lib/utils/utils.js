@@ -45,17 +45,9 @@ function errorLogger(err, facility = 'utils') {
   * @param {string} path - path of the server request
   * @return {Promise.<Object, Error>} JSON response
   */
-function httpGetJson(host, port, path) {
+function httpGetJson(hostname, port, path, headers = {Accept: 'application/json'}) {
   return new Promise((resolve, reject) => {
-    const requestOptions = {
-      hostname: host,
-      port: port,
-      path: path,
-      method: 'GET',
-      headers: {
-        Accept: 'application/json'
-      }
-    };
+    const requestOptions = {hostname, port, path, method: 'GET', headers};
     /**
      * Generic handler for client http requests,
      * buffers response, checks status code and parses JSON

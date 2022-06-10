@@ -15,7 +15,7 @@
 describe('Lib Test Suite', async () => {
   try {
     require('./public');
-    require('./lib');
+    // require('./lib');
   } catch (error) {
     console.error(error);
   }

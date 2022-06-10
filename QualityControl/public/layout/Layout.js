@@ -17,7 +17,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import {objectId, clone} from '../common/utils.js';
-import {assertTabObject, assertLayout, assertLayouts} from '../common/Types.js';
+import {assertTabObject, assertLayout} from '../common/Types.js';
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
@@ -59,6 +59,8 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // gridList.grid.length: integer, number of rows
+
+    this.filter = {};
   }
 
   /**
@@ -100,6 +102,7 @@ export default class Layout extends Observable {
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
+        console.log("selectTabbv")
         this.selectTab(0);
         this.setTabInterval(this.item.autoTabChange);
         this.notify();
@@ -275,7 +278,7 @@ export default class Layout extends Observable {
       throw new Error(`index ${index} does not exist`);
     }
     this.tab = this.item.tabs[index];
-    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filter);
     const columns = this.item.tabs[index].columns;
     if (columns > 0) {
       this.resizeGridByXY(columns);

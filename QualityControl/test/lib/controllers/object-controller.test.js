@@ -46,7 +46,7 @@ describe('ObjectController test suite', () => {
     });
     it('should respond with error if data connector could not find latest version', async () => {
       const jsonStub = sinon.createStubInstance(CcdbService, {
-        getObjectLatestVersionByPath: sinon.stub().rejects(new Error('Failed to load data for object'))
+        getObjectLatestVersionInfo: sinon.stub().rejects(new Error('Failed to load data for object'))
       });
       const req = {};
       const objController = new ObjectController(jsonStub);
@@ -57,7 +57,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if data connector could not find latest 50 timestamps', async () => {
       const jsonStub = sinon.createStubInstance(CcdbService, {
-        getObjectLatestVersionByPath: sinon.stub().resolves({}),
+        getObjectLatestVersionInfo: sinon.stub().resolves({}),
         getObjectTimestampList: sinon.stub().rejects(new Error('Unable to retrieve timestamps'))
       });
       const req = {};
@@ -69,7 +69,7 @@ describe('ObjectController test suite', () => {
 
     it('should successfully respond info and timestamps', async () => {
       const jsonStub = sinon.createStubInstance(CcdbService, {
-        getObjectLatestVersionByPath: sinon.stub().resolves({path: 'qc/some/qc'}),
+        getObjectLatestVersionInfo: sinon.stub().resolves({path: 'qc/some/qc'}),
         getObjectTimestampList: sinon.stub().resolves([1, 2, 3, 4])
       });
       const objController = new ObjectController(jsonStub);
@@ -92,7 +92,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if db service cannot provide location', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectDetails: sinon.stub().rejects(new Error('Failed to load data for object'))
+        getObjectDetails: sinon.stub().rejects(new Error('Failed to load data for object'))
       });
       const objController = new ObjectController(dbService, {});
       await objController.getObjectContent({query: {}}, res);
@@ -103,7 +103,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if JSROOT fails to open file', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectDetails: sinon.stub().resolves({location: '/download/123456'})
+        getObjectDetails: sinon.stub().resolves({location: '/download/123456'})
       });
       const rootMock = {
         openFile: sinon.stub().rejects('Unable to open file'),
@@ -117,7 +117,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if JSROOT fails to read object in file', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectDetails: sinon.stub().resolves({location: '/download/123456'})
+        getObjectDetails: sinon.stub().resolves({location: '/download/123456'})
       });
       const fileMock = {readObject: sinon.stub().rejects('Unable')};
       const rootMock = {openFile: sinon.stub().resolves(fileMock)};
@@ -130,7 +130,7 @@ describe('ObjectController test suite', () => {
 
     it('should respond with error if JSROOT fails convert content to JSON', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectDetails: sinon.stub().resolves({location: '/download/123456'})
+        getObjectDetails: sinon.stub().resolves({location: '/download/123456'})
       });
       const fileMock = {readObject: sinon.stub().resolves({})};
       const rootMock = {
@@ -146,7 +146,7 @@ describe('ObjectController test suite', () => {
 
     it('should successfully reply with a JSON respond root object, drawing options and displayHints', async () => {
       const dbService = sinon.createStubInstance(CcdbService, {
-        getRootObjectDetails: sinon.stub().resolves({drawingOptions: 'colz', displayHints: 'AP', location: '/download/123456'})
+        getObjectDetails: sinon.stub().resolves({drawingOptions: 'colz', displayHints: 'AP', location: '/download/123456'})
       });
       const fileMock = {readObject: sinon.stub().resolves({})};
       const rootMock = {

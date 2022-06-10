@@ -13,7 +13,7 @@
 */
 
 const assert = require('assert');
-const {errorHandler} = require('../utils.js');
+const {errorHandler} = require('../utils/utils.js');
 const LayoutDto = require('../dtos/LayoutDto.js');
 
 /**

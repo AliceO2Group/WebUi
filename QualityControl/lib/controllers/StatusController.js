@@ -120,7 +120,7 @@ class StatusController {
       return {ok: false, message: 'Data connector was not configured'}
     }
     try {
-      await this.connector.testConnection();
+      await this.connector.isConnectionUp();
       return {ok: true};
     } catch (err) {
       this.logError(err);

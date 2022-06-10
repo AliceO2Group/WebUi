@@ -12,16 +12,17 @@
  * or submit itself to any jurisdiction.
 */
 
-const http = require('http');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
-const {httpHeadJson} = require('./../utils');
+const QCObjectDto = require('../dtos/QCObjectDto');
+const {httpHeadJson, httpGetJson, errorLogger} = require('../utils/utils');
 
 /**
  * Gateway for all CCDB calls
+ * // TODO - constants should be separate so that QCObjectDTO can used them as well;
  */
 class CcdbService {
   /**
-   * Setup and test CCDB connection
+   * Setup CCDB Service
    * @param {Object} config - {hostname, port}
    */
   constructor(config) {
@@ -38,94 +39,130 @@ class CcdbService {
     this.hostname = config.hostname;
     this.port = config.port;
     this.protocol = config.protocol ?? 'http';
-    this.prefix = this.getPrefix(config);
+    this.PREFIX = this._getPrefix(config);
 
     this.LAST_MODIFIED = 'Last-Modified';
     this.CREATED = 'Created';
     this.PATH = 'path';
 
-    this.DRAWING_OPTIONS = 'drawoptions';
-    this.DISPLAY_HINTS = 'displayhints';
+    this.DRAWING_OPTIONS = 'drawOptions';
+    this.DISPLAY_HINTS = 'displayHints';
     this.CONTENT_LOCATION = 'content-location';
     this.LOCATION = 'location';
 
-    this.headers = {
+    this.HEADERS = {
       Accept: 'application/json',
       'X-Filter-Fields': `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`
     };
   }
 
   /**
-   * Test connection to CCDB
-   * @return {Promise.<Array.<String>, Error>}
+   * Check connection to CCDB service is up and running by requesting a list of sub-folders with a limit of 1;
+   * Such a request is fast as it contains almost no data ;
+   * @returns {Promise.<Boolean, Error>}
    */
-  async testConnection() {
+  async isConnectionUp() {
     const connectionHeaders = {Accept: 'application/json', 'X-Filter-Fields': `${this.PATH}`, 'Browse-Limit': 1};
-    return this.httpGetJson(`/browse/${this.prefix}`, connectionHeaders)
-      .then(() => log.info('Successfully connected to CCDB'))
-      .catch((err) => {
-        log.error('Unable to connect to CCDB');
-        log.trace(err);
-        throw new Error(`Unable to connect to CCDB due to: ${err}`);
-      });
+    const url = `/browse/${this.PREFIX}`;
+    try {
+      await httpGetJson(this.hostname, this.port, url, connectionHeaders);
+      log.info('CCDB connection is up and running');
+      return true;
+    } catch (error) {
+      errorLogger(error, 'ccdb');
+      throw new Error(`Unable to connect to CCDB due to: ${error}`);
+    }
   }
 
   /**
-   * List of all objects
+   * Returns a list of objects (their latest version) based on a given prefix (e.g. 'qc'; default to config file specified prefix);
+   * Fields wished to be requested for each object can be passed through the fields parameter; If missing, a default list will be used:
+   * * default fields list returned: [name, created, lastModified]
+   * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
+   * @param {String} prefix - Prefix for which CCDB should search for objects
+   * @param {Array<String>} fields - List of fields that should be requested for each object 
    * @return {Promise.<Array.<Object>, Error>}
    */
-  async listObjects() {
-    return this.httpGetJson(`/latest/${this.prefix}.*`)
-      .then((result) =>
-        result.objects
-          .filter((item) => this.isItemValid(item))
-          .map((item) => this.itemTransform(item))
-      );
+  async getObjectsLatestVersionList(prefix = this.PREFIX, fields = []) {
+    if (!Array.isArray(fields)) {
+      throw new Error('List of specified fields must be of type Array');
+    }
+
+    try {
+      const headers = {
+        Accept: 'application/json',
+        'X-Filter-Fields': fields.length >= 0 ? fields.join(',') : `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`
+      };
+
+      let {objects} = await httpGetJson(this.hostname, this.port, `/latest/${prefix}.*`, headers);
+      return objects
+        .filter(QCObjectDto.isObjectPathValid)
+        .map(QCObjectDto.toStandardObject);
+    } catch (error) {
+      errorLogger(error, 'ccdb');
+      throw new Error(`Unable to retrieve list of latest versions of objects due to: ${error.message || error}`);
+    }
   }
 
   /**
-   * Retrieve a list of available timestamps for a specified object
+   * Retrieve a sorted list of available timestamps for a specified object; Number of timestamps defaults to 50 but it can be passed
+   * @example Equivalent of URL request: `/browse/qc/TPC/object/1`
    * @param {String} objectName - full path of the object
+   * @param {Number} limit - how many timestamps should retrieve
+   * @param {String} filter - filter that should be applied when querying object; e.g. RunNumber=324543
+   * @returns {Promise.<Array<JSON>, Error>}
    */
-  async getObjectTimestampList(objectName) {
+  async getObjectTimestampList(objectName, timestamp, limit = 10, filter = '') {
     const timestampHeaders = {
-      Accept: 'application/json', 'X-Filter-Fields': `${this.PATH},${this.LAST_MODIFIED}`, 'Browse-Limit': 50
+      Accept: 'application/json',
+      'X-Filter-Fields': `${this.PATH},${this.LAST_MODIFIED},Valid-From`,
+      'Browse-Limit': '' + limit
     };
-    return this.httpGetJson(`/browse/${objectName}`, timestampHeaders)
-      .then((result) =>
-        result.objects
-          .filter((item) => this.isItemValid(item))
-          .map((item) => parseInt(item[this.LAST_MODIFIED]))
-      );
+    try {
+      const url = `/browse/${objectName}/${timestamp}/${filter}`;
+      const {objects} = await httpGetJson(this.hostname, this.port, url, timestampHeaders);
+      return objects
+        .filter(QCObjectDto.isObjectPathValid)
+        .map((object) => {
+          return {
+            lastModified: parseInt(object[this.LAST_MODIFIED]), 
+            validFrom: parseInt(object['Valid-From'])
+          }
+        });
+    } catch (error) {
+      errorLogger(error, 'ccdb');
+      throw new Error('Unable to retrieve latest timestamps list');
+    }
   }
 
   /**
-   * Make a HEAD HTTP call to CCDB to retrieve data of the ROOT object
-   * Name and timestamp are mandatory in this case, otherwise CCDB will return 404
-   * e.g host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138  -H 'Accept: application/json' --head
+   * Make a HEAD HTTP call to CCDB to retrieve data of the QC object; Name and timestamp are mandatory in this case, otherwise CCDB will return 404 while
+   * the filter string is optional;
+   * This is needed in case object is stored on remote alien, case in which CCDB will make a local copy as soon as the HEAD request is done;
+   * @example Equivalent of URL request: host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138/RunNumber=34543543  -H 'Accept: application/json' --head
    * @param {String} objectName - full name(path) of the object in question
    * @param {Number} timestamp - version of the object data
-   * @returns {Promise.<JSON>, Error>} e.g  {location: '/download/id', drawOptions: 'colz'} 
-   * @reject
+   * @param {String} filter - filter that should be applied when querying object; e.g. RunNumber=324543
+   * @returns {Promise.<JSON, Error>} e.g  {location: '/download/id', drawOptions: 'colz'} 
    */
-  async getRootObjectDetails(name, timestamp) {
+  async getObjectDetails(name, timestamp, filter = '') {
     if (!name || !timestamp) {
       throw new Error('Missing mandatory parameters: name & timestamp');
     }
-    const path = `/${name}/${timestamp}`;
-    const {status, headers} = await httpHeadJson(this.hostname, this.port, path);
+    const path = `/${name}/${timestamp}/${filter}`;
+    const reqHeaders = { Accept: 'application/json' };
 
+    const {status, headers} = await httpHeadJson(this.hostname, this.port, path, reqHeaders);
     if (status >= 200 && status <= 299) {
-      const location = headers[this.CONTENT_LOCATION].split(', ')
+      const location = headers[this.CONTENT_LOCATION]
+        .split(', ')
         .filter((location) => !location.startsWith('alien'))[0];
       if (!location) {
         throw new Error(`No location provided by CCDB for object with path: ${path}`)
       }
-      return {
-        drawingOptions: headers[this.DRAWING_OPTIONS] || '',
-        displayHints: headers[this.DISPLAY_HINTS] || '',
-        location
-      };
+      const objectDetails = QCObjectDto.toStandardObject(headers);
+      objectDetails.location = location;
+      return objectDetails;
     } else {
       throw new Error(`Unable to retrieve object: ${name}`);
     }
@@ -133,70 +170,31 @@ class CcdbService {
 
   /**
    * Get latest version of an object or a specified version through the timestamp;
-   * @example
-   * {info: <JSON>, timestamps: Array<numbers>}
    * @param {String} path - Complete name of object; e.g qc/MO/CPV/merger1
    * @param {Number} timestamp - version of object that should be queried
    * @returns {Promise.<JSON, Error>}
    */
-  async getObjectLatestVersionByPath(path, timestamp = '') {
+  async getObjectLatestVersionInfo(path, timestamp = '') {
     if (!path) {
       throw new Error('Failed to load object due to missing path');
     }
     const timestampHeaders = {
       Accept: 'application/json', 'X-Filter-Fields': this._getHeadersForOneObject(), 'Browse-Limit': 1
     };
-    const result = await this.httpGetJson(`/latest/${path}/${timestamp}`, timestampHeaders);
-    if (this.isItemValid(result.objects[0])) {
-      return result.objects[0];
-    } else {
-      throw new Error(`Invalid object provided for: ${path}`)
+    try {
+      const {objects} = await httpGetJson(this.hostname, this.port, `/latest/${path}/${timestamp}`, timestampHeaders);
+      if (objects?.length <= 0) {
+        throw new Error(`No object found for: ${path}`);
+      }
+      if (QCObjectDto.isObjectPathValid(objects[0])) {
+        return objects[0];
+      } else {
+        throw new Error(`Invalid object provided for: ${path}`);
+      }
+    } catch (error) {
+      errorLogger(error);
+      throw new Error(`Unable to retrieve object for: ${path}`);
     }
-  }
-
-  /**
-   * Util to get JSON data (parsed) from CCDB server
-   * @param {string} path - path en CCDB server
-   * @param {JSON} headers - use default initialized in constructor if not provided
-   * @return {Promise.<Object, Error>} JSON response
-   */
-  httpGetJson(path, headers = this.headers) {
-    return new Promise((resolve, reject) => {
-      const requestOptions = {
-        hostname: this.hostname,
-        port: this.port,
-        path: path,
-        method: 'GET',
-        headers: headers
-      };
-
-      /**
-       * Generic handler for client http requests,
-       * buffers response, checks status code and parses JSON
-       * @param {Response} response
-       */
-      const requestHandler = (response) => {
-        if (response.statusCode < 200 || response.statusCode > 299) {
-          reject(new Error('Non-2xx status code: ' + response.statusCode));
-          return;
-        }
-
-        const bodyChunks = [];
-        response.on('data', (chunk) => bodyChunks.push(chunk));
-        response.on('end', () => {
-          try {
-            const body = JSON.parse(bodyChunks.join(''));
-            resolve(body);
-          } catch (e) {
-            reject(new Error('Unable to parse JSON'));
-          }
-        });
-      };
-
-      const request = http.request(requestOptions, requestHandler);
-      request.on('error', (err) => reject(err));
-      request.end();
-    });
   }
 
   /*
@@ -204,55 +202,24 @@ class CcdbService {
    */
 
   /**
-   * Transforms objects received from CCDB to a QCG normalized one
-   * with additional verification of content
-   * @param {Object} item - from CCDB
-   * @return {Object} to QCG use
-   */
-  itemTransform(item) {
-    return {
-      name: item[this.PATH],
-      createTime: parseInt(item[this.CREATED]),
-      lastModified: parseInt(item[this.LAST_MODIFIED])
-    };
-  }
-
-  /**
-   * Check if received object's path from CCDB is valid
-   * @param {JSON} item
-   * @return {JSON}
-   */
-  isItemValid(item) {
-    if (!item || !item[this.PATH]) {
-      log.warn(`CCDB returned an empty ROOT object path, ignoring`);
-      return false;
-    } else if (item[this.PATH].indexOf('/') === -1) {
-      log.warn(`CCDB returned an invalid ROOT object path "${item[this.PATH]}", ignoring`);
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  /**
-   * Get prefix from configuration file and parse it
-   * or use as default empty prefix
+   * Get prefix from configuration file and parse it or use as default empty prefix
    * @param {JSON} config
-   * @return {string} - format `name`
+   * @return {String} - format `name`
    */
-  getPrefix(config) {
+  _getPrefix(config) {
     let prefix = '';
-    if (config.prefix && config.prefix.trim() !== '') {
-      prefix = config.prefix.substr(0, 1) === '/' ? config.prefix.substr(1, config.prefix.length) : config.prefix;
-      prefix = prefix.substr(prefix.length - 1, 1) === '/' ? prefix.substr(0, prefix.length - 1) : prefix;
+    if (config?.prefix?.trim()) {
+      prefix = config.prefix;
+      prefix = prefix.substring(0, 1) === '/' ? prefix.substring(1, prefix.length) : prefix;
+      prefix = prefix.substring(prefix.length - 1, prefix.length) === '/'
+        ? prefix.substring(0, prefix.length - 1) : prefix;
     }
     return prefix;
   }
 
-
   /**
-   * Returns list of headers that are of interest when querying data about 1 object only
-   * @returns {Array<String>>}
+   * Returns list of headers as a String that are of interest when querying data about 1 object only
+   * @returns {String>}
    */
   _getHeadersForOneObject() {
     return `${this.PATH},${this.LAST_MODIFIED},size,fileName,id,metadata`;
