@@ -16,6 +16,7 @@ import {h} from '/js/src/index.js';
 import {draw} from '../../object/objectDraw.js';
 import {iconArrowLeft, iconArrowTop, iconResizeBoth, info} from '/js/src/icons.js';
 import {layoutFiltersPanel} from './panels/filters.js';
+import {minimalObjectInfo} from './panels/minimalObjectInfo.js';
 
 /**
  * Exposes the page that shows one layout and its tabs (one at a time), this page can be in edit mode
@@ -247,7 +248,7 @@ const drawComponent = (model, tabObject) =>
         }, iconResizeBoth())
       ]),
       !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
-      && h('.gray-darker.text-center.f6', {style: 'height:1.3em'}, model.object.getLastModifiedByName(tabObject.name))
+      && minimalObjectInfo(model, tabObject),
     ]);
 
 /**
