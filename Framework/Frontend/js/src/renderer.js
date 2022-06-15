@@ -49,7 +49,7 @@ function frameDebouncer(fn) {
 /**
  * Renders a vnode tree inside the dom element.
  * @param {Element} element - the dom element
- * @param {Vnode} vnode - the vnode tree
+ * @param {vnode} vnode - the vnode tree
  * @example
  * import {h, render} from '/js/src/index.js';
  * let virtualNode = h('h1.title', 'World');
@@ -89,8 +89,8 @@ function render(element, vnode) {
  * @param {Hook} attributes.oncreate - Hook called after a DOM element is created and attached to the document
  * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
  * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
- * @param {Array.<Vnode|string>|string} children - Children inside this tag
- * @return {Vnode} the Vnode representation
+ * @param {Array.<vnode|string>|string} children - Children inside this tag
+ * @return {vnode} the vnode representation
  * @example <caption>Simple tag declaration</caption>
  * import {h, render} from '/js/src/index.js';
  * const virtualNode1 = h('h1.text-center', 'World');
