@@ -27,7 +27,7 @@ export const minimalObjectInfo = (model, tabObject) => {
   const lastModified = model.object.getLastModifiedByName(name);
   const runNumber = model.object.getRunNumberByName(name);
   return h('.gray-darker.text-center.f6.flex-row.w-100.ph2', {
-    style: 'height:1.3em;justify-content:center;'
+    style: 'height:3em;justify-content:center;'
   }, [
     h('.w-50', lastModified),
     h('.w-50.text-right', `RunNumber: ${runNumber}`)

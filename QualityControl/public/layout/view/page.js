@@ -14,9 +14,10 @@
 
 import {h} from '/js/src/index.js';
 import {draw} from '../../object/objectDraw.js';
-import {iconArrowLeft, iconArrowTop, iconResizeBoth, info} from '/js/src/icons.js';
+import {iconArrowLeft, iconArrowTop} from '/js/src/icons.js';
 import {layoutFiltersPanel} from './panels/filters.js';
 import {minimalObjectInfo} from './panels/minimalObjectInfo.js';
+import {objectInfoResizePanel} from './panels/objectInfoResizePanel.js';
 
 /**
  * Exposes the page that shows one layout and its tabs (one at a time), this page can be in edit mode
@@ -181,7 +182,7 @@ function chartView(model, tabObject) {
 
   return h('.absolute.animate-dimensions-position', attrs, [
     // super-container of jsroot data
-    h('.bg-white.m1.absolute-fill.shadow-level1.br3', attrsInternal, drawComponent(model, tabObject)),
+    h('.bg-white.m1.absolute-fill.br3', attrsInternal, drawComponent(model, tabObject)),
 
     // transparent layer to drag&drop in edit mode, avoid interaction with jsroot
     model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3')
@@ -206,47 +207,7 @@ const drawComponent = (model, tabObject) =>
           'flex-direction': 'column'
         }
       }, draw(model, tabObject, {}, 'layoutShow')),
-      h('.text-right.resize-element.resize-button.flex-row', {
-        style: 'display: none; padding: .25rem .25rem 0rem .25rem;'
-      }, [
-        !model.isOnlineModeEnabled &&
-        h('.text-right', {style: 'padding-bottom: 0;'},
-          h('.dropdown.mh1', {class: model.object.selectedOpen ? 'dropdown-open' : ''}, [
-            h('button.btn',
-              {
-                title: 'View details about histogram',
-                onclick: () => model.object.toggleInfoArea(tabObject.name)
-              }, info()
-            ),
-            h('.dropdown-menu', {style: 'right:0.1em; left: auto; white-space: nowrap;'}, [
-              h('.m2.gray-darker.text-center', [
-                h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'PATH'),
-                tabObject.name
-              ]),
-              h('.m2.gray-darker.text-center', [
-                h('.menu-title', {style: 'font-weight: bold; margin-bottom: 0'}, 'LAST MODIFIED'),
-                model.object.getLastModifiedByName(tabObject.name)
-              ]),
-              model.services.object.objectsLoadedMap[tabObject.name].isSuccess() &&
-              Object.keys(model.services.object.objectsLoadedMap[tabObject.name].payload)
-                .filter((key) => [
-                  'objectType', 'qc_detector_name', 'qc_task_name', 'run_type', 'partname',
-                  'drawOptions', 'runNumber', 'displayHints'
-                ].includes(key))
-                .map((key) => h('.m2.gray-darker.text-center.flex-row', [
-                  h('', {style: 'font-weight: bold;'}, key),
-                  h('.w-100.text-right', model.services.object.objectsLoadedMap[tabObject.name].payload[key])
-                ]),
-                )
-            ]),
-          ])
-        ),
-        h('a.btn', {
-          title: 'Open object plot in full screen',
-          href: `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`,
-          onclick: (e) => model.router.handleLinkEvent(e)
-        }, iconResizeBoth())
-      ]),
+      objectInfoResizePanel(model, tabObject),
       !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
       && minimalObjectInfo(model, tabObject),
     ]);
