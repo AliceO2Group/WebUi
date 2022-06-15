@@ -14,6 +14,7 @@
     - [Consul](#consul)
     - [Notification service](#notification-service)
     - [InfoLogger GUI](#infologger-gui)
+    - [InfoLogger EPN GUI](#infologger-epn-gui)
     - [QualityControl GUI](#qualitycontrol-gui)
     - [Bookkeeping GUI](#bookkeeping-gui)
     - [Utils](#utils)
@@ -83,22 +84,24 @@ Use of a Consul instance is optional
 Use of a Notification service is optional. It is being used for prompting and receiving notifications from global Notification Service, see more in [Notification service](../Framework/docs/guide/notification.md.md) framework guide.
 
 ### InfoLogger GUI
-Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
+Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for displaying URLs to help the user navigate the logs of its actions.
 
-* `hostname` - InfoLogger GUI hostname
-* `port` - InfoLogger GUI port
+* `url` - Prebuilt URL which is in format `host:port`
+
+### InfoLogger EPN GUI
+Use of InfoLogger **EPN** GUI instance is optional. Configuration details about it are being used only for displaying URLs to help the user navigate the logs of EPN actions.
+
+* `url` - Prebuilt URL which is in format `host:port`
 
 ### QualityControl GUI
 Use of QualityControl GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the objects created within an environment.
 
-* `hostname` - QualityControl GUI hostname
-* `port` - QualityControl GUI port
+* `url` - Prebuilt URL which is in format `host:port`
 
 ### Bookkeeping GUI
 Use of Bookkeeping GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate to the run details of their environments.
 
-* `hostname` - Bookkeeping GUI hostname
-* `port` - Bookkeeping GUI port
+* `url` - Prebuilt URL which is in format `host:port`
 
 ### Utils
 Use of utils field is optional. Here, a user can specify configuration fields for various uses of AliECS GUI:

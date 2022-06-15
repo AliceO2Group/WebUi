@@ -40,16 +40,16 @@ module.exports = {
     coreServices: 'o2/components/aliecs/some/settings/path',
   },
   infoLoggerGui: {
-    hostname: 'localhost',
-    port: 8081
+    url: 'localhost:8081',
+  },
+  infoLoggerEpnGui: {
+    url: 'localhost:8083',
   },
   qcGui: {
-    hostname: 'localhost',
-    port: 8081
+    url: 'qcg.cern.ch'
   },
   bookkeepingGui: {
-    hostname: 'localhost',
-    port: 8081
+    url: 'ali-bookkeeping.cern.ch'
   },
   utils: {
     refreshTask: 10000, // how often should task list page should refresh its content

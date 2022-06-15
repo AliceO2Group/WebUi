@@ -17,7 +17,7 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {infoLoggerButton} from './components/buttons.js';
+import {infoLoggerButton, infoLoggerEPNButton} from './components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
 
 /**
@@ -146,15 +146,22 @@ const environmentsTable = (model, list) => {
       list.map((item) => h('tr', {
         class: _isGlobalRun(item.userVars) ? 'global-run' : ''
       }, [
-        h('td', {style: 'text-align: center;'}, item.id),
-        h('td', {style: 'text-align: center;'}, item.currentRunNumber ? item.currentRunNumber : '-'),
+        h('td', {style: 'text-align: center;'},
+          h('a', {
+            href: `?page=environment&id=${item.id}`,
+            onclick: (e) => model.router.handleLinkEvent(e),
+          }, item.id
+          )),
+        h('td', {style: 'text-align: center;'},
+          item.currentRunNumber ? h('.badge.bg-success.white.f4', item.currentRunNumber) : '-'
+        ),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
         h('td', {style: 'text-align: center;'}, [
           item.includedDetectors && item.includedDetectors.length > 0 ?
             item.includedDetectors.map((detector) => `${detector} `)
             : '-'
         ]),
-        h('td', {style: 'text-align: center;'}, item.numberOfFlps),
+        h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
@@ -188,11 +195,8 @@ const actionsCell = (model, item) => {
     item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
   if ((isDetectorIncluded || !model.detectors.isSingleView()) && model.isAllowed(ROLES.Detector)) {
     return h('.btn-group', [
-      h('button.btn.btn-primary', {
-        title: 'Open the environment page with more details',
-        onclick: () => model.router.go(`?page=environment&id=${item.id}`),
-      }, 'Details'),
       infoLoggerButton(item, 'ILG'),
+      infoLoggerEPNButton(item, 'ILG_EPN')
       // bookkeepingButton('BKP'),
       // qcgButton('QCG'),
     ]);

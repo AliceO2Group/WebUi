@@ -21,13 +21,29 @@ import {h, iconCloudDownload} from '/js/src/index.js';
  * @param {String} label
  * @return {vnode}
  */
-const infoLoggerButton = (item, label = 'InfoLogger') =>
-  h('a.ph2.btn.primary.w-100', {
+const infoLoggerButton = (item, label = 'ILG') =>
+  h('a.ph2.btn.btn.primary.w-100', {
     style: {display: !COG.ILG_URL ? 'none' : ''},
     title: `Open InfoLogger GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,
     href: item.currentRunNumber ?
       `${COG.ILG_URL}?q={"partition":{"match":"${item.id}"},"run":{"match":"${item.currentRunNumber}"}}`
       : `${COG.ILG_URL}?q={"partition":{"match":"${item.id}"}}`,
+    target: '_blank'
+  }, label);
+
+/**
+ * Open InfoLogger in a new browser tab with run number and environment set if available
+ * @param {Object} environment
+ * @param {String} label
+ * @return {vnode}
+ */
+const infoLoggerEPNButton = (item, label = 'ILG EPN') =>
+  h('a.ph2.btn.primary.w-100', {
+    style: {display: !COG.ILG_EPN_URL ? 'none' : ''},
+    title: `Open InfoLogger EPN GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,
+    href: item.currentRunNumber ?
+      `${COG.ILG_EPN_URL}?q={"partition":{"match":"${item.id}"},"run":{"match":"${item.currentRunNumber}"}}`
+      : `${COG.ILG_EPN_URL}?q={"partition":{"match":"${item.id}"}}`,
     target: '_blank'
   }, label);
 
@@ -42,7 +58,7 @@ const bookkeepingButton = (label = 'Bookkeeping') =>
     title: `Open Bookkeeping GUI run statistics page`,
     href: `//${COG.BKP_URL}?page=run-overview`,
     target: '_blank'
-  },label);
+  }, label);
 
 /**
 * Open QualityControl in a new browser tab on run details page for current run
@@ -55,7 +71,7 @@ const qcgButton = (label = 'Quality Control') =>
     title: `Open Quality Control GUI`,
     href: `//${COG.QCG_URL}?page=objectTree`,
     target: '_blank'
-  },label);
+  }, label);
 
 
 /**
@@ -72,4 +88,4 @@ const mesosLogButton = (href) =>
   }, h('button.btn-sm.primary', iconCloudDownload())
   );
 
-export {infoLoggerButton, bookkeepingButton, qcgButton, mesosLogButton};
+export {infoLoggerButton, infoLoggerEPNButton, bookkeepingButton, qcgButton, mesosLogButton};

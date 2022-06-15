@@ -28,6 +28,7 @@ function buildPublicConfig(config) {
   }
   const publicConfig = {
     ILG_URL: _getInfoLoggerURL(config),
+    ILG_EPN_URL: _getInfoLoggerEpnUrl(config),
     QCG_URL: _getQcgURL(config),
     BKP_URL: _getBookkeepingURL(config),
     GRAFANA: _getGrafanaConfig(config),
@@ -97,6 +98,15 @@ function _getGrafanaConfig(config) {
  */
 function _getInfoLoggerURL(config) {
   const ilg = config?.infoLoggerGui;
+  return (ilg?.url) ? `${ilg.url}` : '';
+}
+
+/**
+ * Retrieves the EPN InfoLogger URL and sends it
+ * @param {JSON} config - server configuration
+ */
+function _getInfoLoggerEpnUrl(config) {
+  const ilg = config?.infoLoggerEpnGui;
   return (ilg?.url) ? `${ilg.url}` : '';
 }
 
