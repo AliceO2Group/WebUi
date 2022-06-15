@@ -54,9 +54,9 @@ describe('Public Configuration Test Suite', () => {
     const expectedConf = {
       status: true,
       plots: [
-        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&refresh=5s&theme=light',
-        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&refresh=5s&theme=light',
-        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&refresh=5s&theme=light'
+        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&theme=light',
+        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&theme=light',
+        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&theme=light'
       ]
     };
     assert.deepStrictEqual(_getGrafanaConfig({grafana: {url: 'http://local:2000'}}), expectedConf);

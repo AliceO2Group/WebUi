@@ -75,7 +75,7 @@ function _getGrafanaConfig(config) {
   if (config?.grafana?.url) {
     const hostPort = config.grafana.url;
     const ecsDashboard = 'd-solo/SoUQ_Oy7z/aliecs-general';
-    const theme = '&refresh=5s&theme=light';
+    const theme = '&theme=light';
     return {
       status: true,
       plots: [
