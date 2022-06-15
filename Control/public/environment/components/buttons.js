@@ -37,7 +37,7 @@ const infoLoggerButton = (item, label = 'ILG') =>
  * @param {String} label
  * @return {vnode}
  */
-const infoLoggerEPNButton = (item, label = 'ILG EPN') =>
+const infoLoggerEpnButton = (item, label = 'ILG EPN') =>
   h('a.ph2.btn.primary.w-100', {
     style: {display: !COG.ILG_EPN_URL ? 'none' : ''},
     title: `Open InfoLogger EPN GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,
@@ -88,4 +88,4 @@ const mesosLogButton = (href) =>
   }, h('button.btn-sm.primary', iconCloudDownload())
   );
 
-export {infoLoggerButton, infoLoggerEPNButton, bookkeepingButton, qcgButton, mesosLogButton};
+export {infoLoggerButton, infoLoggerEpnButton, bookkeepingButton, qcgButton, mesosLogButton};

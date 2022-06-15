@@ -23,7 +23,9 @@ import showTableItem from '../common/showTableItem.js';
 import {controlEnvironmentPanel} from './components/controlEnvironmentPanel.js';
 import {parseObject, getTasksByFlp} from './../common/utils.js';
 import {userVarsRow, defaultsRow, varsRow} from './components/expandableEnvRows.js';
-import {infoLoggerButton, bookkeepingButton, qcgButton, mesosLogButton} from './components/buttons.js';
+import {
+  infoLoggerButton, infoLoggerEpnButton, bookkeepingButton, qcgButton, mesosLogButton
+} from './components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
 
 /**
@@ -111,9 +113,10 @@ const redirectGUIsPanel = (item) => {
   return h('.w-100.text.center.flex-row', {
     style: 'padding-top: var(--space-xl);margin-left: var(--space-s);'
   }, [
-    h('.w-33.flex-row.justify-center', h('.w-70', infoLoggerButton(item))),
-    h('.w-33.flex-row.justify-center', h('.w-70', bookkeepingButton())),
-    h('.w-33.flex-row.justify-center', h('.w-70', qcgButton())),
+    h('.w-25.flex-row.justify-center', h('.w-70', infoLoggerButton(item))),
+    h('.w-25.flex-row.justify-center', h('.w-70', infoLoggerEpnButton(item))),
+    h('.w-25.flex-row.justify-center', h('.w-70', bookkeepingButton())),
+    h('.w-25.flex-row.justify-center', h('.w-70', qcgButton())),
   ]);
 };
 

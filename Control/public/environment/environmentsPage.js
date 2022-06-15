@@ -17,7 +17,7 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {infoLoggerButton, infoLoggerEPNButton} from './components/buttons.js';
+import {infoLoggerButton, infoLoggerEpnButton} from './components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
 
 /**
@@ -196,7 +196,7 @@ const actionsCell = (model, item) => {
   if ((isDetectorIncluded || !model.detectors.isSingleView()) && model.isAllowed(ROLES.Detector)) {
     return h('.btn-group', [
       infoLoggerButton(item, 'ILG'),
-      infoLoggerEPNButton(item, 'ILG_EPN')
+      infoLoggerEpnButton(item, 'ILG_EPN')
       // bookkeepingButton('BKP'),
       // qcgButton('QCG'),
     ]);

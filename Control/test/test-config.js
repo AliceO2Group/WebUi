@@ -49,6 +49,9 @@ module.exports = {
   infoLoggerGui: {
     url: 'http://localhost:8081',
   },
+  infoLoggerEpnGui: {
+    url: 'http://localhost:8083',
+  },
   grafana: {
     url: 'http://localhost:2020'
   },
