@@ -88,19 +88,19 @@ export default class Model extends Observable {
    * mandatory information from server
    */
   async initModel() {
-    // Init data
-    if (QCG.CONSUL_SERVICE) {
-      this.checkOnlineModeAvailability();
-    }
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this)
     };
 
+    if (QCG.CONSUL_SERVICE) {
+      this.checkOnlineModeAvailability();
+    }
+
     this.loader.get('/api/checkUser');
 
     // Init first page
-    this.handleLocationChange();
+    this.handleLocationChange(); 
   }
 
   /**
@@ -200,7 +200,7 @@ export default class Model extends Observable {
         break;
       default:
         // default route, replace the current one not handled
-        this.router.go('?page=objectTree', true);
+        this.router.go('?page=layoutList', true);
         break;
     }
   }

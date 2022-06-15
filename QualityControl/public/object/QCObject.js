@@ -498,7 +498,24 @@ export default class QCObject extends Observable {
     const objMap = this.model.services.object.objectsLoadedMap;
     if (objMap[objectName]) {
       if (objMap[objectName].isSuccess()) {
-        return objMap[objectName].payload.lastModified;
+        return objMap[objectName].payload.lastModified || '-';
+      } else if (objMap[objectName].isLoading()) {
+        return 'Loading...';
+      }
+    }
+    return '-';
+  }
+
+  /**
+   * Method to search for the object which info was requested for and return runNumber
+   * @param {string} objectName
+   * @return {string}
+   */
+  getRunNumberByName(objectName) {
+    const objMap = this.model.services.object.objectsLoadedMap;
+    if (objMap[objectName]) {
+      if (objMap[objectName].isSuccess()) {
+        return objMap[objectName].payload.runNumber || '-';
       } else if (objMap[objectName].isLoading()) {
         return 'Loading...';
       }
