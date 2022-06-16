@@ -41,17 +41,6 @@ describe('`pageEnvironments` test-suite', () => {
       assert.ok(calls['getEnvironments']);
     });
 
-    it('should have a button in Action column for More Details', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div > button', {timeout: 2000});
-      const detailsButton = await page.evaluate(() => {
-        const title = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div >button').title;
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div > button').innerText;
-        return {title, label};
-      });
-      assert.strictEqual(detailsButton.title, 'Open the environment page with more details');
-      assert.strictEqual(detailsButton.label, 'Details');
-    });
-
     it('should have a button in Action column for InfoLogger', async () => {
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div > a', {timeout: 2000});
       const detailsButton = await page.evaluate(() => {
@@ -61,8 +50,8 @@ describe('`pageEnvironments` test-suite', () => {
       assert.strictEqual(detailsButton.label, 'ILG');
     });
 
-    it('should successfully navigate to environment page on click Details', async () => {
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div > button').click());
+    it('should successfully navigate to environment page when clicking on environment ID', async () => {
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(1) > a').click());
       await page.waitForTimeout(200);
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
