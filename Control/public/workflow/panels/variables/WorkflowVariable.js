@@ -130,7 +130,7 @@ export default class WorkflowVariable {
   /**
    * Given a KV Pair it will check if:
    * * key is valid after being trimmed
-   * * value is valid by chechking it's existence in the provided varSpecMap
+   * * value is valid by checking it's existence in the provided varSpecMap
    * @param {String} key
    * @param {Object} value
    * @param {Map<String, JSON>} varSpecMap
