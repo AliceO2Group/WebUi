@@ -16,14 +16,16 @@ import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
 import {autoBuiltBox} from './components.js';
 import advancedVarsPanel from './advancedPanel.js';
 import loadConfigurationPanel from '../loadConfiguration/loadConfiguration.js';
+import WorkflowVariable from './WorkflowVariable.js';
 
+const FLP_WORKFLOW_KEY = 'FLP_WORKFLOWS';
 
 /**
  * Builds a custom set of panels build based on the user's selection of template
  * to configure the workflow
  * The first 2 panels are represented by the basic and advanced panels
  * The panels are build based on the AliECS Core information sent via varSpecMap
- * @param {Object} workflow
+ * @param {Workflow} workflow
  * @return {vnode}
  */
 export default (workflow) => {
@@ -62,16 +64,17 @@ export default (workflow) => {
  * `visibleIf` JS condition. 
  * If the panel contains no visible variables, than it will not be displayed
  * @param {Workflow} workflow
- * @param {Array<JSON>} variables - that should be part of the panel
- * @param {String} name - of the panel
+ * @param {Array<WorkflowVariable>} variables - that should be part of the panel
+ * @param {string} name - of the panel
  * @returns 
  */
 const autoBuiltPanel = (workflow, variables, name) => {
   const nameAsString = name.replace(/([a-z](?=[A-Z]))/g, '$1 ').replace(/_/g, ' ');
   return h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
-      h('.w-100', nameAsString),
-      h('button.btn', {
+      h('', {style: 'flex-grow: 2;'},  nameAsString),
+      name.toLocaleUpperCase() === FLP_WORKFLOW_KEY && toggleInsideValuesForPanel(workflow, variables),
+      h('button.btn.btn-sm', {
         onclick: () => {
           workflow.panelsUtils[name].isVisible = !workflow.panelsUtils[name].isVisible;
           workflow.notify();
@@ -94,10 +97,32 @@ const autoBuiltPanel = (workflow, variables, name) => {
 };
 
 /**
+ * Button which purpose is to set the variables inside values to "none" or "false" depending on the WorkflowVariable type
+ * @param {WorkflowModel} workflow 
+ * @param {WorkflowVariable} variables
+ * @returns {vnode}
+ */
+const toggleInsideValuesForPanel = (workflow, variables) => {
+  return h('button.btn.btn-sm', {
+    title: 'Toggle variables between default values and "none"',
+    onclick: () => {
+      variables.forEach((variable) => {
+        if(WorkflowVariable.parseKVPair(variable.key, 'none', workflow.selectedVarsMap).ok) {
+          workflow.updateBasicVariableByKey(variable.key, 'none');
+        }
+        if(WorkflowVariable.parseKVPair(variable.key, 'false', workflow.selectedVarsMap).ok) {
+          workflow.updateBasicVariableByKey(variable.key, 'false');
+        }
+      });
+    }
+  }, 'Set to NONE');
+};
+
+/**
  * Generate a basic panel containing variables defined in the ControlWorkflows yaml definition
  * This panel should always be visible compared to the others
  * @param {Workflow} workflow
- * @param {Array<JSON>} variables - that should be part of the panel
+ * @param {Array<WorkflowVariable>} variables - that should be part of the panel
  * @param {String} name - of the panel
  * @returns 
  */
