@@ -48,9 +48,9 @@ describe('QCG', function() {
     }
   });
 
-  it('should have redirected to default page "/?page=objectTree"', async () => {
+  it('should have redirected to default page "/?page=layoutList"', async () => {
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=objectTree', 'Could not load home page of QCG');
+    assert.strictEqual(location.search, '?page=layoutList', 'Could not load home page of QCG');
   });
 
   require('./offline-mode.js');

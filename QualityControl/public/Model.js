@@ -15,7 +15,7 @@
 /* global QCG */
 
 import {
-  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData
 } from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
@@ -44,8 +44,8 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.folder = new Folder(this);
-    this.folder.addFolder({title: 'My Layouts', isOpened: true, searchInput: ''});
-    this.folder.addFolder({title: 'All Layouts', isOpened: false, searchInput: ''});
+    this.folder.addFolder({title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: ''});
+    this.folder.addFolder({title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: ''});
     this.folder.bubbleTo(this);
 
     this.layout = new Layout(this);
