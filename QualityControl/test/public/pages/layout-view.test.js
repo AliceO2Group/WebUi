@@ -47,7 +47,7 @@ describe('layoutShow page test suite', async () => {
   //   assert.ok(plotsCount > 1);
   // });
 
-  it('should have an info button with full path and last modified when clicked (plot success)', async () => {
+  it('should have an info button with full path, last modified and metadata when clicked (plot success)', async () => {
     await page.evaluate(() => document.querySelector('body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div > button').click());
 
     const result = await page.evaluate(() => {

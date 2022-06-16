@@ -32,24 +32,26 @@ export default function layouts(model) {
 
 /**
  * Method to create a folder with various layouts
- * @param {Object} model
+ * @param {Model} model
  * @param {Folder} folder
  * @return {vnode}
  */
 function createFolder(model, folder) {
+  const layouts = folder.list;
+  const searchBy = folder.searchInput;
   return h('.m2.shadow-level3.br3',
     {style: 'display:flex; flex-direction:column;'},
     [
       createHeaderOfFolder(model, folder),
       ' ',
-      folder.isOpened ? table(model, folder) : null
+      folder.isOpened ? table(model, layouts, searchBy) : null
     ]
   );
 }
 
 /**
  * Create the header of the folder
- * @param {Object} model
+ * @param {Model} model
  * @param {Folder} folder
  * @return {vnode}
  */
@@ -70,11 +72,11 @@ function createHeaderOfFolder(model, folder) {
 
 /**
  * Shows a table containing layouts, one per line
- * @param {Object} model
- * @param {Folder} folder
+ * @param {Model} model
+ * @param {RemoteData} layouts
  * @return {vnode}
  */
-function table(model, folder) {
+function table(model, layouts, searchBy) {
   return [
     h('table.table',
       [
@@ -86,7 +88,7 @@ function table(model, folder) {
             ]
           )
         ),
-        h('tbody', rows(model, folder))
+        h('tbody', rows(model, layouts, searchBy))
       ]
     )
   ];
@@ -94,12 +96,13 @@ function table(model, folder) {
 
 /**
  * Shows layouts as table lines
- * @param {Object} model
- * @param {Folder} folder
+ * @param {Model} model
+ * @param {RemoteData} layouts
+ * @param {string} searchBy - string by which layouts list should be sorted within the folder
  * @return {vnode}
  */
-function rows(model, folder) {
-  return folder.list.match({
+function rows(model, layouts, searchBy) {
+  return layouts.match({
     NotAsked: () => null,
     Loading: () => h('', 'Loading...'),
     Failure: () => h('tr', [
@@ -111,21 +114,22 @@ function rows(model, folder) {
           h('td', 'No layouts found'),
         ]);
       }
-      return list.map((layout) => {
-        const key = `key${layout.name}`;
-        return h('tr', {key: key}, [
-          h('td.w-50', [
-            h('', {class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''}, [
-              iconBarChart(), ' ',
-              h('a', {
-                href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
-                onclick: (e) => model.router.handleLinkEvent(e)
-              }, layout.name)
-            ])
-          ]),
-          h('td.w-25', layout.owner_name),
-        ]);
-      });
+      return list.filter((item) => item.name.match(searchBy))
+        .map((layout) => {
+          const key = `key${layout.name}`;
+          return h('tr', {key: key}, [
+            h('td.w-50', [
+              h('', {class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''}, [
+                iconBarChart(), ' ',
+                h('a', {
+                  href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
+                  onclick: (e) => model.router.handleLinkEvent(e)
+                }, layout.name)
+              ])
+            ]),
+            h('td.w-25', layout.owner_name),
+          ]);
+        });
     }
   });
 }
