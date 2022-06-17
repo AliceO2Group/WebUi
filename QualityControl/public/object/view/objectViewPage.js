@@ -66,7 +66,7 @@ function getActionsHeader(model) {
       h('.text-center.flex-column', {style: 'flex-grow:1'}, [
         h('b', getObjectTitle(model)),
         h('.w-100.flex-row', {style: 'justify-content: center'},
-          h('.w-25.p2.f6', timestampSelectForm(model))
+          h('.w-40.p2.f6', timestampSelectForm(model))
         )
       ]),
       h('.flex-row', [

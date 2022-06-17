@@ -13,6 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
+import {prettyFormatDate} from './utils.js';
 
 /**
  * Display a select form with the latest timestamps of the current selected object
@@ -37,7 +38,7 @@ export default (model) => h('.w-100.flex-row',
           value: timestamp,
           selected: timestamp === model.object.selected.version ? true : false
         }, [
-          model.object.getDateFromTimestamp(timestamp),
+          prettyFormatDate(timestamp),
           ' (', timestamp, ')'
         ]);
       })

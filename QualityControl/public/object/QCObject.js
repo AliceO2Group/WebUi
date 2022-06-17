@@ -14,6 +14,7 @@
 
 import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
+import {prettyFormatDate} from './../common/utils.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -498,7 +499,8 @@ export default class QCObject extends Observable {
     const objMap = this.model.services.object.objectsLoadedMap;
     if (objMap[objectName]) {
       if (objMap[objectName].isSuccess()) {
-        return objMap[objectName].payload.lastModified || '-';
+        const date = objMap[objectName].payload.lastModified;
+        return prettyFormatDate(date);
       } else if (objMap[objectName].isLoading()) {
         return 'Loading...';
       }
@@ -524,21 +526,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Sends back the timestamp/date for the selected object based on
-   * preferred format
-   * @param {boolean} displayDate
-   * @return {string}
-   */
-  getLastModifiedForSelected(displayDate = false) {
-    if (this.selected && this.selected.lastModified) {
-      return displayDate === 'date' ?
-        new Date(this.selected.lastModified).toLocaleString('en-UK') : this.selected.lastModified.toString();
-    } else {
-      return '-';
-    }
-  }
-
-  /**
    * Return the list of object timestamps
    * @param {string} name
    * @return {array<numbers>}
@@ -548,19 +535,6 @@ export default class QCObject extends Observable {
       return this.objects[name].payload.timestamps;
     } else {
       return [];
-    }
-  }
-
-  /**
-   * Convert a timestamp to a date string in browser format
-   * @param {number} timestamp
-   * @return {string}
-   */
-  getDateFromTimestamp(timestamp) {
-    try {
-      return new Date(timestamp).toLocaleString('en-UK');
-    } catch (_err) {
-      return 'Invalid Timestamp';
     }
   }
 }

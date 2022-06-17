@@ -69,3 +69,34 @@ export function pointerId(obj) {
   }
   return ptr;
 }
+
+/**
+ * Given a string-date or number-timestamp (ms), return it in a format approved by ALICE for QC
+ * e.g. 7 Mar 2022, 19:08 CET / 18:08 UTC
+ * If the passed parameter is not a date-valid format, a string 'Invalid Date' will be returned
+ * @param {string/number}
+ * @returns {string}
+ */
+export function prettyFormatDate(date) {
+  try {
+    if (date) {
+      return new Date(date).toLocaleString('en-GB', {
+        timeZoneName: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + ' / ' + new Date(date).toLocaleString('en-GB', {
+        timeZone: 'UTC',
+        timeZoneName: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } else {
+      return '-';
+    }
+  } catch (error) {
+    return 'Invalid Date';
+  }
+}
