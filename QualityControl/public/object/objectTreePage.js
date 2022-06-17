@@ -102,7 +102,7 @@ const drawPlot = (model, object) => {
         draw(model, name, {stat: true}, 'treePage')
       ),
       h('.scroll-y', {}, [
-        h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model))),
+        h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-80', timestampSelectForm(model))),
         h('.w-100', {style: 'justify-content: center;'}, [
           Object.keys(info)
             .filter((key) =>

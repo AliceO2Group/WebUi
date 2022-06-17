@@ -65,8 +65,11 @@ class QCObjectDto {
       delete item.path;
     }
     if (item['last-modified']) {
-      item.lastModified = item['last-modified'];
-      delete item['last-modified'];
+      try {
+        item.lastModified = new Date(item['last-modified']).getTime();
+      } catch (error) {
+        item.lastModified = item['last-modified'];
+      }
     }
     if (item['drawoptions']) {
       item.drawOptions = item['drawoptions'];
