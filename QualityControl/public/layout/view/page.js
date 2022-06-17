@@ -76,7 +76,7 @@ function subcanvasView(model) {
 
   const subcanvasAttributes = {
     style: {
-      height: `${model.layout.cellHeight * model.layout.gridList.grid.length}%`,
+      height: `100%`,
       position: 'relative',
     },
     id: 'subcanvas',
@@ -151,7 +151,6 @@ function chartView(model, tabObject) {
     left: `${model.layout.cellWidth * tabObject.x}%`,
     opacity: (model.layout.tabObjectMoving && tabObject.id === model.layout.tabObjectMoving.id ? '0' : '1')
   };
-
   // Interactions with user
   const draggable = model.layout.editEnabled;
   const ondragstart = model.layout.editEnabled ? (e) => {
