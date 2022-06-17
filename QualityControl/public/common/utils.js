@@ -99,5 +99,4 @@ export function prettyFormatDate(date) {
   } catch (error) {
     return 'Invalid Date';
   }
-
 }
