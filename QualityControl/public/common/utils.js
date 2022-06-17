@@ -71,7 +71,7 @@ export function pointerId(obj) {
 }
 
 /**
- * Given a date as String or Timestamp, return it in a format approved by ALICE for QC
+ * Given a string-date or number-timestamp (ms), return it in a format approved by ALICE for QC
  * e.g. 7 Mar 2022, 19:08 CET / 18:08 UTC
  * If the passed parameter is not a date-valid format, a string 'Invalid Date' will be returned
  * @param {string/number}
