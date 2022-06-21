@@ -124,7 +124,10 @@ const loadConfigurationButton = (workflow) =>
   h('button.btn.btn-default', {
     class: workflow.loadingConfiguration.isLoading() ? 'loading' : '',
     disabled: workflow.loadingConfiguration.isLoading() || workflow.selectedConfiguration === '',
-    onclick: () => workflow.getAndSetNamedConfiguration(workflow.selectedConfiguration)
+    onclick: () => {
+      workflow.form.resetVariables();
+      workflow.getAndSetNamedConfiguration(workflow.selectedConfiguration);
+    }
   }, 'Load')
 
 /**

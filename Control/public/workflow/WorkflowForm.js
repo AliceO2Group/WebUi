@@ -89,4 +89,13 @@ export default class WorkflowForm extends Observable {
     this.hosts.splice(index, 1);
     this.notify();
   }
+
+  /**
+   * Reset the selection for variables
+   */
+  resetVariables() {
+    this.variables = {};
+    this.basicVariables = {};
+    this.notify();
+  }
 }
