@@ -45,9 +45,9 @@ describe('Filter actions test-suite', async () => {
       system: {size: 'cell-s', visible: true},
       facility: {size: 'cell-m', visible: true},
       detector: {size: 'cell-s', visible: false},
-      partition: {size: 'cell-m', visible: false},
-      run: {size: 'cell-s', visible: false},
-      errcode: {size: 'cell-s', visible: true},
+      partition: {size: 'cell-m', visible: true},
+      run: {size: 'cell-s', visible: true},
+      errcode: {size: 'cell-s', visible: false},
       errline: {size: 'cell-s', visible: false},
       errsource: {size: 'cell-m', visible: false},
       message: {size: 'cell-xl', visible: true}
