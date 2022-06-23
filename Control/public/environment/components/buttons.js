@@ -21,7 +21,7 @@ import {h, iconCloudDownload} from '/js/src/index.js';
  * @param {String} label
  * @return {vnode}
  */
-const infoLoggerButton = (item, label = 'ILG') =>
+const infoLoggerButton = (item, label = 'InfoLogger FLP') =>
   h('a.ph2.btn.btn.primary.w-100', {
     style: {display: !COG.ILG_URL ? 'none' : ''},
     title: `Open InfoLogger GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,
@@ -37,7 +37,7 @@ const infoLoggerButton = (item, label = 'ILG') =>
  * @param {String} label
  * @return {vnode}
  */
-const infoLoggerEpnButton = (item, label = 'ILG EPN') =>
+const infoLoggerEpnButton = (item, label = 'InfoLogger EPN') =>
   h('a.ph2.btn.primary.w-100', {
     style: {display: !COG.ILG_EPN_URL ? 'none' : ''},
     title: `Open InfoLogger EPN GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,

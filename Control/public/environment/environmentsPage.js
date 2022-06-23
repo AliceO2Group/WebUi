@@ -135,7 +135,7 @@ const buttonRemoveRequest = (model, id, personid) =>
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'ID', 'Run', 'Created', 'Detectors', 'FLPs', 'DCS', 'TRG', 'EPN', 'ODC', 'EPN Topology', 'State', 'Actions'
+    'Run', 'ID', 'Created', 'Detectors', 'FLPs', 'DCS', 'TRG', 'EPN', 'ODC', 'EPN Topology', 'State', 'InfoLogger'
   ];
   return h('table.table', [
     h('thead', [
@@ -147,13 +147,14 @@ const environmentsTable = (model, list) => {
         class: _isGlobalRun(item.userVars) ? 'global-run' : ''
       }, [
         h('td', {style: 'text-align: center;'},
+          item.currentRunNumber ? h('.badge.bg-success.white.f4', item.currentRunNumber) : '-'
+        ),
+        h('td', {style: 'text-align: center;'},
           h('a', {
             href: `?page=environment&id=${item.id}`,
             onclick: (e) => model.router.handleLinkEvent(e),
           }, item.id
-          )),
-        h('td', {style: 'text-align: center;'},
-          item.currentRunNumber ? h('.badge.bg-success.white.f4', item.currentRunNumber) : '-'
+          )
         ),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
         h('td', {style: 'text-align: center;'}, [
@@ -195,8 +196,8 @@ const actionsCell = (model, item) => {
     item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
   if ((isDetectorIncluded || !model.detectors.isSingleView()) && model.isAllowed(ROLES.Detector)) {
     return h('.btn-group', [
-      infoLoggerButton(item, 'ILG'),
-      infoLoggerEpnButton(item, 'ILG_EPN')
+      infoLoggerButton(item, 'FLP'),
+      infoLoggerEpnButton(item, 'EPN')
       // bookkeepingButton('BKP'),
       // qcgButton('QCG'),
     ]);

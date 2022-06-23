@@ -47,11 +47,11 @@ describe('`pageEnvironments` test-suite', () => {
         const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div > a').innerText;
         return {label};
       });
-      assert.strictEqual(detailsButton.label, 'ILG');
+      assert.strictEqual(detailsButton.label, 'FLP');
     });
 
     it('should successfully navigate to environment page when clicking on environment ID', async () => {
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(1) > a').click());
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(2) > a').click());
       await page.waitForTimeout(200);
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
