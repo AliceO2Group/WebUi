@@ -115,7 +115,7 @@ export default class LogFilter extends Observable {
         // remote empty inputs
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
-        } else if (operator === 'match') {
+        } else if (operator === 'match' || operator === 'exclude') {
           // encode potential breaking characters
           criterias[field][operator] = encodeURI(criterias[field][operator]);
         }
@@ -136,15 +136,11 @@ export default class LogFilter extends Observable {
    */
   fromObject(criterias) {
     this.resetCriteria();
-    // copy values to inner filters
-    // eslint-disable-next-line guard-for-in
-    for (const field in criterias) {
-      // eslint-disable-next-line guard-for-in
-      for (const operator in criterias[field]) {
-        this.setCriteria(field, operator, criterias[field][operator]);
-      }
-    }
-
+    Object.keys(criterias).forEach((field) => {
+      Object.keys(criterias[field])
+        .filter((operator) => criterias[field][operator])
+        .forEach((operator) => this.setCriteria(field, operator, decodeURI(criterias[field][operator])))
+    });
     this.notify();
   }
 
