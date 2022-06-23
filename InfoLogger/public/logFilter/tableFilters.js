@@ -19,7 +19,7 @@ import {h, iconChevronBottom} from '/js/src/index.js';
 import datePicker from '../common/datePicker.js';
 import {TIME_S, TIME_MS} from '../common/Timezone.js';
 
-const filterLabels = ['Hostname', 'Rolename', 'PID', 'Username', 'System', 'Facility', 'Detector', 'Partition', 'Run', 'ErrCode', 'ErrLine', 'ErrSource', 'Message'];
+const filterLabels = ['Hostname', 'Rolename', 'PID', 'Username', 'System', 'Facility', 'Detector', 'Partition', 'Run', 'ErrCode', 'ErrLine', 'ErrSource'];
 
 export default (model) => h('table.table-filters', [
   h('tbody', [
@@ -54,19 +54,24 @@ export default (model) => h('table.table-filters', [
           )
         ])
       ]),
-      filterLabels.map((label) => createClickableLabel(model, label))
+      filterLabels.map((label) => createClickableLabel(model, label)),
+      createClickableLabel(model, 'Message')
     ]),
     h('tr', [
       h('td.relative',
         model.log.focus.timestampSince && datePicker(model, model.log.filter.criterias.timestamp.$since),
         h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampSince', true), onblur: () => model.log.setFocus('timestampSince', false), oninput: (e) => model.log.setCriteria('timestamp', 'since', e.target.value), placeholder: 'from', value: model.log.filter.criterias.timestamp.since})),
-      filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'match')),
+      filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'match'),
+      ),
+      createTextAreaField(model, 'message', 'match'),
+
     ]),
     h('tr', [
       h('td.relative',
         model.log.focus.timestampUntil && datePicker(model, model.log.filter.criterias.timestamp.$until),
         h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampUntil', true), onblur: () => model.log.setFocus('timestampUntil', false), oninput: (e) => model.log.setCriteria('timestamp', 'until', e.target.value), placeholder: 'to', value: model.log.filter.criterias.timestamp.until})),
       filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'exclude')),
+      createTextAreaField(model, 'message', 'exclude')
     ])
   ])
 ]);
@@ -94,4 +99,26 @@ const createInputField = (log, field, command) => h('td', h('input.form-control'
   oninput: (e) => log.setCriteria(field, command, e.target.value),
   value: log.filter.criterias[field][command].slice(),
   placeholder: field === 'hostname' ? command : ''
+}));
+
+/**
+ * Generate a text area which onfocus will expand, allowing the user to easily input multiple lines of text
+ * @param {Model} model
+ * @param {string} field 
+ * @param {string} command 
+ * @returns 
+ */
+const createTextAreaField = (model, field, command) => h('td', h('textarea.form-control.text-area-for-message', {
+  style: 'height:2em;',
+  placeholder: !model.messageFocused ? '' : `Include/Exclude multiple error messages separated by new line. To partially match an message, use the SQL wildcard '%' \n\ne.g \n\n%error from component%\nTASK %QC% running out of memory\nweird error with strict message`,
+  onfocus: () => {
+    model.messageFocused = true;
+    model.notify();
+  },
+  onfocusout: () => {
+    model.messageFocused = false;
+    model.notify();
+  },
+  oninput: (e) => model.log.setCriteria(field, command, e.target.value),
+  value: model.log.filter.criterias[field][command].slice(),
 }));

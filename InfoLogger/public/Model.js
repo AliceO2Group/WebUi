@@ -191,56 +191,59 @@ export default class Model extends Observable {
     // console.log(`e.code=${e.code}, e.key=${e.key},e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
+
     // Enter
-    if (code === 13 && !this.log.isLiveModeEnabled()) {
+    if (((code === 13 && !this.messageFocused) || (code === 13 && e.metaKey)) && !this.log.isLiveModeEnabled()) {
       this.log.query();
     }
+    if (!this.messageFocused) {
 
-    // don't listen to keys when it comes from an input (they transform into letters)
-    // except spacial ones which are not chars
-    // http://www.foreui.com/articles/Key_Code_Table.htm
-    if (e.target.tagName.toLowerCase() === 'input') {
-      return;
-    }
+      // don't listen to keys when it comes from an input (they transform into letters)
+      // except spacial ones which are not chars
+      // http://www.foreui.com/articles/Key_Code_Table.htm
+      if (e.target.tagName.toLowerCase() === 'input') {
+        return;
+      }
 
-    // shortcuts
-    switch (e.keyCode) {
-      case 27: // escape
-        this.log.removeLogDownloadContent();
-        this.accountMenuEnabled = false;
-        break;
-      case 37: // left
-        if (e.altKey) {
-          this.log.firstError();
-        } else {
-          this.log.previousError();
-        }
-        break;
-      case 39: // right
-        if (e.altKey) {
-          this.log.lastError();
-        } else {
-          this.log.nextError();
-        }
-        break;
-      case 38: // top
-        e.preventDefault(); // avoid scroll
-        this.log.previousItem();
-        break;
-      case 40: // bottom
-        if (e.altKey) {
-          this.log.goToLastItem();
-        } else {
-          this.log.nextItem();
-        }
-        e.preventDefault(); // avoid scroll
-        break;
-      case 67:
-        if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '' && this.isSecureContext()) {
-          navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
-          this.notification.show('Message has been successfully copied to clipboard', 'success', 1500);
-        }
-        break;
+      // shortcuts
+      switch (e.keyCode) {
+        case 27: // escape
+          this.log.removeLogDownloadContent();
+          this.accountMenuEnabled = false;
+          break;
+        case 37: // left
+          if (e.altKey) {
+            this.log.firstError();
+          } else {
+            this.log.previousError();
+          }
+          break;
+        case 39: // right
+          if (e.altKey) {
+            this.log.lastError();
+          } else {
+            this.log.nextError();
+          }
+          break;
+        case 38: // top
+          e.preventDefault(); // avoid scroll
+          this.log.previousItem();
+          break;
+        case 40: // bottom
+          if (e.altKey) {
+            this.log.goToLastItem();
+          } else {
+            this.log.nextItem();
+          }
+          e.preventDefault(); // avoid scroll
+          break;
+        case 67:
+          if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '' && this.isSecureContext()) {
+            navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
+            this.notification.show('Message has been successfully copied to clipboard', 'success', 1500);
+          }
+          break;
+      }
     }
   }
 
@@ -314,7 +317,7 @@ export default class Model extends Observable {
       return;
     } else if (params.q) {
       this.getUserProfile();
-      this.log.filter.fromObject(JSON.parse(params.q));
+      this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
     } else {
       this.getUserProfile();
     }

@@ -88,10 +88,10 @@ module.exports = class SQLDataSource {
           // read date, both input and output are GMT, no timezone to consider here
           values.push((new Date(filters[field][operator])).getTime() / 1000);
         } else {
-          if (field !== 'message' && (operator === '$match' || operator === '$exclude')
-            && filters[field][operator].split(' ').length > 1
+          const separator = field === 'message' ? '\n' : ' ';
+          if ((operator === '$match' || operator === '$exclude') && filters[field][operator].split(separator).length > 1
           ) {
-            const subValues = filters[field][operator].split(' ');
+            const subValues = filters[field][operator].split(separator);
             subValues.forEach((value) => values.push(value));
           } else {
             values.push(filters[field][operator]);
@@ -108,8 +108,9 @@ module.exports = class SQLDataSource {
             criteria.push(`\`${field}\`<=?`);
             break;
           case '$match': {
-            const criteriaArray = filters[field].match.split(' ');
-            if (field === 'message' || criteriaArray.length <= 1) {
+            const separator = field === 'message' ? '\n' : ' ';
+            const criteriaArray = filters[field].match.split(separator);
+            if (criteriaArray.length <= 1) {
               if (criteriaArray.toString().includes('%')) {
                 criteria.push(`\`${field}\` LIKE (?)`);
               } else {
@@ -131,8 +132,9 @@ module.exports = class SQLDataSource {
             break;
           }
           case '$exclude': {
-            const criteriaArray = filters[field].exclude.split(' ');
-            if (field === 'message' || criteriaArray.length <= 1) {
+            const separator = field === 'message' ? '\n' : ' ';
+            const criteriaArray = filters[field].exclude.split(separator);
+            if (criteriaArray.length <= 1) {
               if (criteriaArray.toString().includes('%')) {
                 criteria.push(`NOT(\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL)`);
               } else {

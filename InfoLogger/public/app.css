@@ -92,3 +92,5 @@ footer { border-top: 1px solid var(--color-gray); }
 .btn { background-color: #e0e0e0; color: #404040; }
 .btn:hover { background-color: #a0a0a0; color: var(--color-white); }
 .btn:active, .btn.active, .dropdown-open > .btn { background-color: #c0c0c0; }
+
+.text-area-for-message:focus { width: 50%; height: 10rem !important; right: 0; position: absolute; }
