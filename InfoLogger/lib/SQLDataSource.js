@@ -168,8 +168,8 @@ module.exports = class SQLDataSource {
 
   /**
    * Ask DB for a part of rows and the total count
-   * - total: how many rows available (limited to 100k)
-   * - more: true if has more than 100k rows
+   * - total: how many rows available (limited to 1M)
+   * - more: true if has more than 1M rows
    * - limit: options.limit or 1k
    * - rows: the first `limit` rows
    * - count: how many rows inside `rows`
@@ -182,7 +182,7 @@ module.exports = class SQLDataSource {
     if (!filters) {
       throw new Error('filters parameter is mandatory');
     }
-    options = Object.assign({}, {limit: 100}, options);
+    options = Object.assign({}, {limit: 1000}, options);
 
     const startTime = Date.now(); // ms
     const {criteria, values} = this._filtersToSqlConditions(filters);
