@@ -135,15 +135,15 @@ export default class Table extends Observable {
       },
       partition: {
         size: 'cell-m',
-        visible: false,
+        visible: true,
       },
       run: {
         size: 'cell-s',
-        visible: false,
+        visible: true,
       },
       errcode: {
         size: 'cell-s',
-        visible: true,
+        visible: false,
       },
       errline: {
         size: 'cell-s',
