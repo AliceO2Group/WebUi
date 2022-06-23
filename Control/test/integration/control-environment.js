@@ -29,7 +29,7 @@ describe('`Control Environment` test-suite', async () => {
 
   it(`should be on page of new environment (workflow '${workflowToTest}') just created`, async () => {
     // Click envID link of newly created env
-    await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > div.scroll-auto > table > tbody > tr > td:nth-child(1) > a').click());
+    await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > div.scroll-auto > table > tbody > tr > td:nth-child(2) > a').click());
     const location = await page.evaluate(() => window.location);
     revision = await page.evaluate(() => window.model.workflow.form.revision);
     assert.ok(location.search.includes('?page=environment&id='));
