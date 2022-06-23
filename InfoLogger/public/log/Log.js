@@ -165,7 +165,7 @@ export default class Log extends Observable {
   }
 
   /**
-   * Set "limit" filter (1k, 10k, 100k)
+   * Set "limit" filter (1k, 10k, 100k, 1M)
    * If the limit is being decreased:
    * * Splices the current log list to the passed limit
    * * Updates stat box at the bottom if the limit is being decreased
