@@ -25,9 +25,9 @@ describe('layoutShow page test suite', async () => {
 
   it('should load', async () => {
     // id 5aba4a059b755d517e76ea12 is set in QCModelDemo
-    await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot', {waitUntil: 'networkidle0'});
+    await page.goto(url + '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+    assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10');
   });
 
   it('should have tabs in the header', async () => {
