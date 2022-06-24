@@ -122,7 +122,7 @@ function rows(model, layouts, searchBy) {
               h('', {class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : ''}, [
                 iconBarChart(), ' ',
                 h('a', {
-                  href: `?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`,
+                  href: `?page=layoutShow&layoutId=${layout.id}`,
                   onclick: (e) => model.router.handleLinkEvent(e)
                 }, layout.name)
               ])
