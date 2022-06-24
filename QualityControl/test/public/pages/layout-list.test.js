@@ -53,7 +53,7 @@ describe('layoutList page test suite', async () => {
   it('should have a link to show a layout', async () => {
     await page.evaluate(() => document.querySelector('section table tbody tr a').click());
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10&layoutName=AliRoot');
+    assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10');
     // id 5aba4a059b755d517e76ea10 is set in QCModelDemo
   });
 });

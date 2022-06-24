@@ -45,8 +45,13 @@ const filter = (model, placeholder, key, type = 'text', width = '.w-10') => {
       id: key,
       name: key,
       min: 0,
+      value: model.layout.filter[placeholder],
       oninput: (e) => {
-        model.layout.filter[placeholder] = e.target.value;
+        if (e.target.value) {
+          model.layout.filter[placeholder] = e.target.value;
+        } else {
+          delete model.layout.filter[placeholder];
+        }
         model.layout.notify();
       }
     })
@@ -60,7 +65,10 @@ const filter = (model, placeholder, key, type = 'text', width = '.w-10') => {
  */
 const updateFiltersButton = (model) => {
   return h('.w-20.text-right', h('button.btn.btn-primary', {
-    onclick: () => model.layout.selectTab(0),
+    onclick: () => {
+      model.layout.selectTab(0);
+      model.layout.setFilterToURL();
+    },
   }, 'Update'))
 }
 

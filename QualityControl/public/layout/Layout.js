@@ -102,6 +102,7 @@ export default class Layout extends Observable {
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
+        this.setFilterFromURL();
         this.selectTab(0);
         this.setTabInterval(this.item.autoTabChange);
         this.notify();
@@ -110,6 +111,33 @@ export default class Layout extends Observable {
         this.model.router.go(`?page=layouts`);
       }
     }
+  }
+
+  /**
+   * Look for parameters used for filtering in URL and apply them in the layout if it exists
+   */
+  setFilterFromURL() {
+    const parameters = this.model.router.params;
+    ['PeriodName', 'PassName', 'RunNumber', 'RunType'].forEach((filterKey) => {
+      if (parameters[filterKey]) {
+        this.filter[filterKey] = decodeURI(parameters[filterKey]);
+      }
+    });
+    this.notify();
+  }
+
+  /**
+   * When the user updates the displayed Objects, the filters should be placed in the URL as well
+   */
+  setFilterToURL(layoutId, isSilent = true) {
+    const id = layoutId ? layoutId : this.model.router.params.layoutId;
+    let currentParameters = `?page=layoutShow&layoutId=${id}`;
+    Object.entries(this.filter)
+      .filter(([_, value]) => value)
+      .forEach(([key, value]) => {
+        currentParameters += `&${key}=${encodeURI(value)}`;
+      })
+    this.model.router.go(currentParameters, true, isSilent);
   }
 
   /**
@@ -166,7 +194,7 @@ export default class Layout extends Observable {
     if (result.isSuccess()) {
       this.resetImport();
       // Read the new layout created and edit it
-      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
+      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&edit=true`, false, false);
       // Update user list in background
       this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     }
@@ -201,7 +229,7 @@ export default class Layout extends Observable {
       }
 
       // Read the new layout created and edit it
-      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}&edit=true`, false, false);
+      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&edit=true`, false, false);
 
       // Update user list in background
       this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
@@ -234,7 +262,7 @@ export default class Layout extends Observable {
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
-      this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}&layoutName=${this.item.name}`, true, true);
+      this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}`, true, true);
       this.notify();
     } else {
       this.model.notification.show(`Layout "${this.item.name}" has not been saved.`, 'danger');
@@ -565,7 +593,7 @@ export default class Layout extends Observable {
       await this.loadItem(layout.id);
       this.model.notification.show(`Layout "${itemToDuplicate.name}" ` +
         `has been successfully duplicated into "${this.item.name}".`, 'success');
-      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&layoutName=${layout.name}`, false, false);
+      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}`, false, false);
       this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     } else {
       this.model.notification.show(`Layout "${itemToDuplicate.name}" has not been duplicated.`, 'danger');
