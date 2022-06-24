@@ -109,8 +109,8 @@ const createInputField = (log, field, command) => h('td', h('input.form-control'
  * @returns 
  */
 const createTextAreaField = (model, field, command) => h('td', h('textarea.form-control.text-area-for-message', {
-  style: 'height:2em;',
-  placeholder: !model.messageFocused ? '' : `Include/Exclude multiple error messages separated by new line. To partially match an message, use the SQL wildcard '%' \n\ne.g \n\n%error from component%\nTASK %QC% running out of memory\nweird error with strict message`,
+  style: 'height:2em; resize: none;',
+  placeholder: !model.messageFocused ? '' : `Include/Exclude multiple error messages separated by new line. To partially match a message, use the SQL wildcard '%' \n\ne.g \n\n%[FMQ] IDLE ---> INITIALIZING DEVICE%\nTASK %QC% running out of memory\nweird error with strict message`,
   onfocus: () => {
     model.messageFocused = true;
     model.notify();
@@ -119,6 +119,6 @@ const createTextAreaField = (model, field, command) => h('td', h('textarea.form-
     model.messageFocused = false;
     model.notify();
   },
-  oninput: (e) => model.log.setCriteria(field, command, e.target.value),
+  oninput: (e) => model.log.setCriteria(field, command, e.target.value.trim()),
   value: model.log.filter.criterias[field][command].slice(),
 }));

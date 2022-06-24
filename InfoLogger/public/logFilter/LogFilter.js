@@ -139,7 +139,7 @@ export default class LogFilter extends Observable {
     Object.keys(criterias).forEach((field) => {
       Object.keys(criterias[field])
         .filter((operator) => criterias[field][operator])
-        .forEach((operator) => this.setCriteria(field, operator, decodeURI(criterias[field][operator])))
+        .forEach((operator) => this.setCriteria(field, operator, criterias[field][operator]))
     });
     this.notify();
   }
@@ -203,7 +203,7 @@ export default class LogFilter extends Observable {
           if (criteriaValue === null) {
             continue;
           }
-
+          const separator = field === 'message' ? '\n' : ' ';
           // logValue is sometime required, undefined means test fails and log is rejected
           switch (operator) {
             case '$in':
@@ -212,9 +212,9 @@ export default class LogFilter extends Observable {
               }
               break;
             case '$match': {
-              const criteriaList = criteriaValue.split(' ');
-              if (field !== 'message' && criteriaList.length > 1) {
-                criteriaValue = criteriaValue.replace(new RegExp(' ', 'g'), '|');
+              const criteriaList = criteriaValue.split(separator);
+              if (criteriaList.length > 1) {
+                criteriaValue = criteriaValue.replace(new RegExp(separator, 'g'), '|');
               }
               if (logValue === undefined ||
                 !generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
@@ -223,9 +223,9 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$exclude': {
-              const criteriaList = criteriaValue.split(' ');
-              if (field !== 'message' && criteriaList.length > 1) {
-                criteriaValue = criteriaValue.replace(new RegExp(' ', 'g'), '|');
+              const criteriaList = criteriaValue.split(separator);
+              if (criteriaList.length > 1) {
+                criteriaValue = criteriaValue.replace(new RegExp(separator, 'g'), '|');
               }
               if (logValue !== undefined &&
                 generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
