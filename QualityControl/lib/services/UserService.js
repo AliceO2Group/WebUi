@@ -12,13 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
-const assert = require('assert');
+import assert from 'assert';
+import {Log} from '@aliceo2/web-ui';
+
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
  * Gateway for all User data calls
  */
-class UserService {
+export class UserService {
   /**
    * Setup User Service
    * @param {JSONFileConnector/SQLDataConnector} dataConnector
@@ -71,5 +73,3 @@ class UserService {
     }
   }
 }
-
-module.exports = UserService;

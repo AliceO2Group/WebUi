@@ -10,32 +10,39 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
+'use strict';
 
-const assert = require('assert');
-const {errorHandler} = require('../utils/utils.js');
-const LayoutDto = require('../dtos/LayoutDto.js');
+import assert from 'assert';
+import { errorHandler } from './../utils/utils.js';
+import { LayoutDto } from './../dtos/LayoutDto.js';
 
 /**
- * Gateway for all Layout requests
+ * Gateway for all requests with regards to QCG Layouts
  */
-class LayoutService {
+export class LayoutController {
   /**
-   * Setup Layout Service:
+   * Setup Layout Controller:
    * - JSONFileConnector - recommended for local development
    * - SQLService - recommended for production [WIP]
-   * @param {JSONFileConnector/SQLService} service
+   * @param {JSONFileConnector/SQLService} service - providing ways for retrieving/updating layouts information
    */
   constructor(service) {
     assert(service, 'Missing service for retrieving layout data');
+
+    /**
+     * @type {JSONFileConnector/SQLService}
+     */
     this.service = service;
   }
 
   /**
-   * List all layouts, can be filtered by owner_id
-   * @param {Request} req
-   * @param {Response} res
-   * @return {Promise}
+   * Fetches and responds with all layouts:
+   * * can be filtered by "owner_id"
+   * * if no owner_id is provided, all layouts will be fetched;
+   * @param {Request} req - HTTP request object with information on owner_id
+   * @param {Response} res - HTTP response object to provide layouts information
+   * @return {void}
    */
   async listLayouts(req, res) {
     try {
@@ -51,10 +58,10 @@ class LayoutService {
   }
 
   /**
-   * Read a single layout specified by layoutId
-   * @param {Request} req
-   * @param {Response} res
-   * @return {Promise}
+   * Fetches and responds with a single layout specified by layout "id" if found;
+   * @param {Request} req - HTTP request object with "params" information on layout ID
+   * @param {Response} res - HTTP response object to provide layout information
+   * @return {void}
    */
   async readLayout(req, res) {
     try {
@@ -63,23 +70,24 @@ class LayoutService {
         errorHandler('Missing layoutId parameter', 'Missing layoutId parameter', res, 400, 'layout');
         return;
       }
-      const layout = await this.service.readLayout(layoutId)
+      const layout = await this.service.readLayout(layoutId);
       res.status(200).json(layout);
     } catch (error) {
-      // TODO decide between 404 and 502 based on error response
-      errorHandler(error, `Failed to retrieve layout`, res, 502, 'layout')
+      errorHandler(error, 'Failed to retrieve layout', res, 502, 'layout');
     }
   }
 
   /**
-   * Update a single layout specified by layoutId and body
-   * @param {Request} req
-   * @param {Response} res
-   * @return {Promise}
+   * Update a single layout specified by:
+   * * query.layoutId for identification
+   * * body - for layout data to be updated
+   * @param {Request} req - HTTP request object with "query" and "body" information on layout
+   * @param {Response} res - HTTP response object to provide information on the update
+   * @return {void}
    */
   async updateLayout(req, res) {
     try {
-      const layoutId = req.query.layoutId;
+      const { layoutId } = req.query;
       const data = req.body;
 
       if (!layoutId) {
@@ -94,18 +102,18 @@ class LayoutService {
         return;
       }
 
-      const layout = await this.service.updateLayout(layoutId, data)
+      const layout = await this.service.updateLayout(layoutId, data);
       res.status(201).json(layout);
     } catch (error) {
-      errorHandler(error, `Failed to update layout`, res, 502, 'layout')
+      errorHandler(error, 'Failed to update layout', res, 502, 'layout');
     }
   }
 
   /**
-   * Request to delete a single layout specified by layoutId
-   * @param {Request} req
-   * @param {Response} res
-   * @return {Promise}
+   * Attempts to delete a single layout specified by its id
+   * @param {Request} req - HTTP request object with "params" information on layout ID
+   * @param {Response} res - HTTP response object to inform client if deletion was successful
+   * @return {void}
    */
   async deleteLayout(req, res) {
     try {
@@ -125,9 +133,9 @@ class LayoutService {
 
   /**
    * Validates received payload follows a layout format and if successful, stores it
-   * @param {Request} req
-   * @param {Response} res
-   * @return {Promise}
+   * @param {Request} req - HTTP request object with "body" information on layout to be created
+   * @param {Response} res - HTTP request object with result of the action
+   * @return {void}
    */
   async createLayout(req, res) {
     try {
@@ -143,5 +151,3 @@ class LayoutService {
     }
   }
 }
-
-module.exports = LayoutService;

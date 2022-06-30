@@ -12,13 +12,14 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/status`);
+import {Log} from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/status`);
 
 /**
  * Gateway for all calls with regards to the status
  * of the framework and its dependencies
  */
-class StatusController {
+export class StatusController {
   /**
    * Setup StatusController
    * @param {JSON} config - of the framework
@@ -156,5 +157,3 @@ class StatusController {
     }
   }
 }
-
-module.exports = StatusController;

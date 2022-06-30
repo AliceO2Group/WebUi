@@ -12,14 +12,14 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Log, HttpServer} = require('@aliceo2/web-ui');
+import {Log, HttpServer} from '@aliceo2/web-ui';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
-const path = require('path');
-const api = require('./lib/api.js');
+import path from 'path';
+import {setup} from './lib/api.js';
 
 // Reading config file
-const config = require('./lib/config/configProvider.js');
-const {buildPublicConfig} = require('./lib/config/publicConfigProvider');
+import config from './lib/config/configProvider.cjs';
+import {buildPublicConfig} from './lib/config/publicConfigProvider.cjs';
 
 // Quick check config at start
 
@@ -35,9 +35,18 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
 
 buildPublicConfig(config);
 
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
 http.addStaticPath(path.join(__dirname, 'public'));
-http.addStaticPath(path.join(require.resolve('jsroot'), '../..'), 'jsroot');
 
-api.setup(http);
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const pathName = require.resolve('jsroot');
+http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
+
+setup(http);

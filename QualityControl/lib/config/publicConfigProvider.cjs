@@ -21,7 +21,7 @@ const path = require('path');
  * @param {JSON} config 
  */
 function buildPublicConfig(config) {
-  const publicConfigPath = path.join(__dirname, './../../public/config.js');
+  const publicConfigPath = path.join(__dirname, './../../public/config.cjs');
   const publicConfigExist = fs.existsSync(publicConfigPath);
   if (publicConfigExist) {
     fs.rmSync(publicConfigPath);

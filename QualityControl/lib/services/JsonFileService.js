@@ -12,14 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
-const fs = require('fs');
-const path = require('path');
+import {Log} from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Store layouts inside JSON based file with atomic write
  */
-class JsonFileService {
+export class JsonFileService {
   /**
    * Initialize connector by synchronizing DB file and its internal state
    * @param {string} pathname - path to JSON DB file
@@ -276,5 +277,3 @@ class Lock {
     });
   }
 }
-
-module.exports = JsonFileService;

@@ -10,19 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-const assert = require('assert');
-const {errorHandler} = require('../utils/utils.js');
+ */
+'use strict';
+import assert from 'assert';
+import { errorHandler } from './../utils/utils.js';
 
 /**
  * Gateway for all QC Objects requests
  */
-class ObjectController {
+export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
-   * @param {CcdbServices} db
+   * @param {CcdbServices} db - CCDB service to retrieve
+   * @param {JsrootService} jsroot - service which provides jsroot functionality (`openFile`, `toJSON`)
    */
   constructor(db, jsroot) {
     assert(db, 'Missing service for retrieving objects data');
@@ -42,7 +43,7 @@ class ObjectController {
     try {
       const info = await this.db.getObjectLatestVersionInfo(path, timestamp);
 
-      res.status(200).json({info});
+      res.status(200).json({ info });
     } catch (error) {
       errorHandler(error, 'Failed to load data for object', res, 502, 'object');
     }
@@ -51,10 +52,10 @@ class ObjectController {
   /**
    * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
    * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object information and download it locally on CCDB if it is not already done so
-   * From the information retrieved above, use the location with JSROOT to get a JSON object 
+   * From the information retrieved above, use the location with JSROOT to get a JSON object
    * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for interpretation with JSROOT.draw
    * @param {Request} req
-   * @param {Response} res 
+   * @param {Response} res
    */
   async getObjectContent(req, res) {
     const path = req.query?.path;
@@ -84,11 +85,9 @@ class ObjectController {
    */
   async _getJsRootFormat(url) {
     const file = await this.jsroot.openFile(url);
-    const root = await file.readObject("ccdb_object");
+    const root = await file.readObject('ccdb_object');
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
     const rootJson = await this.jsroot.toJSON(root);
     return rootJson;
   }
 }
-
-module.exports = ObjectController;

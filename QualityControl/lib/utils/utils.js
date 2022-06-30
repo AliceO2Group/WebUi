@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
-const http = require('http');
+import {Log} from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
+import http from 'http';
 
 /**
  * Global HTTP error handler, sends status 500
@@ -21,7 +22,7 @@ const http = require('http');
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
-function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils') {
+export function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils') {
   errorLogger(errToLog, facility);
   res.status(status).send({message: errToSend.message || errToSend});
 }
@@ -30,7 +31,7 @@ function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils'
  * Global Error Logger for AliECS GUI
  * @param {Error} err 
  */
-function errorLogger(err, facility = 'utils') {
+export function errorLogger(err, facility = 'utils') {
   log.facility = `${process.env.npm_config_log_label ?? 'qcg'}/${facility}`;
   if (err.stack) {
     log.trace(err);
@@ -45,7 +46,7 @@ function errorLogger(err, facility = 'utils') {
   * @param {string} path - path of the server request
   * @return {Promise.<Object, Error>} JSON response
   */
-function httpGetJson(hostname, port, path, headers = {Accept: 'application/json'}) {
+export function httpGetJson(hostname, port, path, headers = {Accept: 'application/json'}) {
   return new Promise((resolve, reject) => {
     const requestOptions = {hostname, port, path, method: 'GET', headers};
     /**
@@ -81,7 +82,7 @@ function httpGetJson(hostname, port, path, headers = {Accept: 'application/json'
  * Make a HEAD HTTP call and return a promise
  * @returns {Promise.<{status, headers}, Error>}
  */
-function httpHeadJson(hostname, port, path, headers = {Accept: 'application/json'}) {
+export function httpHeadJson(hostname, port, path, headers = {Accept: 'application/json'}) {
   const requestOptions = {hostname, port, path, method: 'HEAD', headers};
   return new Promise((resolve, reject) => {
     http.request(requestOptions, (res) => resolve({status: res.statusCode, headers: res.headers}))
@@ -90,4 +91,3 @@ function httpHeadJson(hostname, port, path, headers = {Accept: 'application/json
   });
 }
 
-module.exports = {errorHandler, errorLogger, httpGetJson, httpHeadJson};

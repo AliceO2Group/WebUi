@@ -12,15 +12,16 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
-const QCObjectDto = require('../dtos/QCObjectDto');
-const {httpHeadJson, httpGetJson, errorLogger} = require('../utils/utils');
+import {Log} from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
+import QCObjectDto from './../dtos/QCObjectDto.js';
+import {httpHeadJson, httpGetJson, errorLogger} from './../utils/utils.js';
 
 /**
  * Gateway for all CCDB calls
  * // TODO - constants should be separate so that QCObjectDTO can used them as well;
  */
-class CcdbService {
+export class CcdbService {
   /**
    * Setup CCDB Service
    * @param {Object} config - {hostname, port}
@@ -255,5 +256,3 @@ class CcdbService {
     return `${this.PATH},${this.LAST_MODIFIED},size,fileName,id,metadata`;
   }
 }
-
-module.exports = CcdbService;

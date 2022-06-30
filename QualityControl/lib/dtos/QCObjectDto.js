@@ -12,12 +12,13 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
+import {Log} from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
  * QC Object data type object Class
  */
-class QCObjectDto {
+export default class QCObjectDto {
   /**
    */
   constructor() {
@@ -86,5 +87,3 @@ class QCObjectDto {
     return item;
   }
 }
-
-module.exports = QCObjectDto;

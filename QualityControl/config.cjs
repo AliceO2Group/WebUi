@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-export default {
+module.exports = {
   // demoData: false,
 
   http: {
@@ -24,30 +24,27 @@ export default {
     tls: false
   },
 
-  mysql: {
-    host: 'localhost',
-    user: 'qc_user',
-    password: 'qc_user',
-    database: 'quality_control'
-  },
-
   listingConnector: 'ccdb', // ccdb or mysql or amore (default mysql) for listing objects
 
   ccdb: {
-    protocol: 'http',
-    hostname: 'localhost',
+    hostname: 'ccdb-test.cern.ch',
+    // hostname: 'ali-qcdb-gpn.cern.ch',
     port: 8080,
-    prefix: 'qc',
+    // port: 8083,
+    prefix: 'qc/ITS/MO/',
+    // prefix: 'qc/MFT/MO/MFTReadoutTask/mSummaryChipError'
+    // prefix: 'qc/',
+    // prefix: 'qc/'
   },
 
-  // consul: {
-  //   hostname: 'localhost',
-  //   port: 8500,
-  //   refreshRate: {
-  //     min: 10,
-  //     max: 120
-  //   }
-  // }
+  consul: {
+    hostname: 'guis-qc.cern.ch',
+    port: 8500,
+    refreshRate: {
+      min: 10,
+      max: 120
+    }
+  }
 
   // dbFile: '/var/db/qcg-db.json', // absolute path where to save layouts, default = root of this app
 
