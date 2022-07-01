@@ -41,8 +41,7 @@ export default (model) => [
     ]),
     h('span.mh3'),
     h('.btn-group', [
-      buttonLogLimit(model, '1k', 1000),
-      buttonLogLimit(model, '10k', 10000),
+      buttonLogLimit(model, '50k', 50000),
       buttonLogLimit(model, '100k', 100000),
       buttonLogLimit(model, '1M', 1000000),
     ]),
