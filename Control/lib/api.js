@@ -80,7 +80,10 @@ module.exports.setup = (http, ws) => {
   http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
   http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
+  
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
+  http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
+  http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
 
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
@@ -92,8 +95,6 @@ module.exports.setup = (http, ws) => {
   if (notification.isConfigured()) {
     notification.proxyWebNotificationToWs(ws);
   }
-
-  http.post('/configuration/save', (req, res) => apricotService.saveConfiguration(req, res));
 
   http.post('/execute/resources-cleanup', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));

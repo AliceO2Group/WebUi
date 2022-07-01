@@ -14,7 +14,9 @@
 
 const assert = require('assert');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
-const {errorHandler} = require('./../utils.js');
+const {errorHandler, errorLogger} = require('./../utils.js');
+const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
+const User = require('./../dtos/User.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
 
@@ -126,84 +128,95 @@ class ApricotService {
   }
 
   /**
-   * Receive request to save a configuration for creating a new environment
-   * * Parses data to be saved including user data and attempt to save it via Apricot
-   * * If name of the configuration already exists an error message will be sent back to the user
-   * @param {Request} req
-   * @param {Response} res
+   * Responds to request to save a configuration for creating a new environment;
+   * * Parses data to be saved including user data;
+   * * If name of the configuration already exists throws an error to inform user to load and update rather than direct save;
+   * * If name is new, the environment will be saved via Apricot
+   * @param {Request} req - HTTP Object with data on the configuration to be saved/updated
+   * @param {Response} res - HTTP Object used to send a response back to the client with the status of its action
+   * @returns {void}
    */
-  async saveConfiguration(req, res) {
+  async saveCoreEnvConfig(req, res) {
     try {
-      const {key, value} = this._buildConfigurationObject(req);
-      const {payload: existingConfs} = await this.apricotProxy['ListRuntimeEntries']({component: COMPONENT});
-      if (existingConfs.includes(key)) {
-        errorHandler(`A configuration with name '${value.name}' already exists`, res, 409, 'apricotservice');
+      const data = req.body;
+      data.user = new User(req.session);
+      const envConf = CoreEnvConfig.fromJSON(data);
+
+      const {payload: configurations} = await this.apricotProxy['ListRuntimeEntries']({component: COMPONENT});
+      if (configurations.includes(envConf.id)) {
+        errorHandler(`A configuration with name '${envConf.id}' already exists. `
+          + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
       } else {
-        await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key, value: JSON.stringify(value, null, 2)});
-        res.status(200).json({message: `Configuration saved successfully as ${key}`})
+        await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key: envConf.id, value: envConf.toString()});
+        log.info(`${req.session.username} successfully saved new core environment configuration "${envConf.id}"`);
+        res.status(201).json({message: `Configuration successfully saved as ${envConf.id}`});
       }
     } catch (error) {
       errorHandler(error, res, 503, 'apricotservice');
     }
   }
 
-  /*
-   * Helpers
-  */
-
   /**
-   * Builds configuration object to be stored in Apricot based on request
-   * @param {Request} req
-   * @returns {JSON}
+   * Receive request to update a configuration for a CoreEnvConfig;
+   * * Parses data to be saved including user data and attempt to save it via Apricot
+   * * If name of the configuration already exists checks if the user is admin or the author of the existing configuration.
+   * * If it is not, throw an error. Otherwise, updates the configuration;
+   * @param {Request} req - HTTP Object with data on the configuration to be saved/updated
+   * @param {Response} res - HTTP Object used to send a response back to the client with the status of its action
+   * @returns {void}
    */
-  _buildConfigurationObject(req) {
-    const missingFields = [];
-    if (!req.body?.name) {
-      missingFields.push('name');
-    }
-    if (!req.body?.workflow) {
-      missingFields.push('workflow');
-    }
-    if (!req.body?.repository) {
-      missingFields.push('repository');
-    }
-    if (!req.body?.revision) {
-      missingFields.push('revision');
-    }
+  async updateCoreEnvConfig(req, res) {
+    try {
+      const data = req.body;
+      const user = new User(req.session);
+      data.user = user;
+      const envConf = CoreEnvConfig.fromJSON(data);
 
-    if (missingFields.length !== 0) {
-      throw new Error(`Configuration cannot be saved without the following fields: ${missingFields.toString()}`);
-    } else {
-      const user = {
-        username: req?.session?.username ?? 'anonymous',
-        personid: req?.session?.personid ?? 0
-      };
-      const created = Date.now();
-      const edited = Date.now();
-      const variables = req.body?.variables ?? {};
-      const detectors = req.body?.detectors ?? [];
-      const workflow = req.body.workflow;
-      const revision = req.body.revision;
-      const repository = req.body.repository;
-      const name = req.body.name;
-      const id = this._getNameAsId(name);
-      return {
-        key: id, value: {
-          user, created, edited, variables, workflow, repository, revision, detectors, name, id
-        }
-      };
+      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
+      await this.apricotProxy['SetRuntimeEntry']({
+        component: COMPONENT,
+        key: envConfigToSave.id,
+        value: envConfigToSave.toString()
+      });
+      log.info(`${req.session.username} successfully updated existing core environment configuration "${envConf.id}"`);
+      res.status(200).json({message: `Successfully updated configuration: ${envConf.id}`});
+    } catch (error) {
+      errorHandler(error, res, 503, 'apricotservice');
     }
   }
 
   /**
-   * Build the ID of the configuration to be saved from the name:
-   * * Replace any existing `/` from it with `_` so that Apricot is able to understand Consul storage
-   * * Replace any spaces from it with `_`
-   * @param {String} name 
-   * @returns {String}
+   * Helpers
    */
-  _getNameAsId(name) {
-    return `${name.trim().replace(/ /g, '_')}`.replace(/\//g, '_');
+
+  /**
+   * Method to update existing configuration with the new one if user has permissions to do so;
+   * * If the configuration name does not exist, any user is allowed to create one, thus same configuration will be returned;
+   * * If the configuration already exists, only admins or the original author can update it
+   * * * If user is allowed to update the configuration, the existing configuration data will be returned;
+   * * * If the user is not allowed to update, an error will be thrown;
+   * @param {CoreEnvConfig} envConfig - configuration unique id to be searched by
+   * @param {Session} user - object containing information with regards to user requesting the action
+   * @returns {Promise<JSON,Error>} - if user is not allowed, an error will be thrown
+   */
+  async _getUpdatedConfigIfExists(envConfig, user) {
+    let existingConfig = '';
+    try {
+      const {payload: envConfigAsString} = await this.apricotProxy['GetRuntimeEntry']({
+        component: COMPONENT,
+        key: envConfig.id,
+      });
+      existingConfig = CoreEnvConfig.fromString(envConfigAsString);
+    } catch (error) {
+      errorLogger(error, 'apricotservice');
+      throw new Error(`Unable to find any existing configuration named: ${envConfig.id}`);
+    }
+    
+    if (!existingConfig.isUpdatableBy(user)) {
+      throw new Error(`Configuration '${envConfig.id}' exists already and you do NOT have permissions to update it!`);
+    }
+    envConfig.applyUpdatableParams(existingConfig);
+    return envConfig;
   }
 }
 
