@@ -410,7 +410,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     page.on('dialog', async dialog => {
       await dialog.accept('My Config');
     });
-    await page.evaluate(() => document.querySelector('#save-config').click());
+    await page.evaluate(() => document.querySelector('#save-core-env-config').click());
     await page.waitForTimeout(200)
 
     const message = await page.evaluate(() => window.model.environment.itemNew.payload);
