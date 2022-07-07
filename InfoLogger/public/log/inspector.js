@@ -28,10 +28,7 @@ export default (model) => model.log.item ? h('', [
         h('td.cell.text-ellipsis.cell-xl',
           h('.f7.w-100.flex-column.items-end',
             h('.w-10.actionable-icon', {
-              onclick: () => {
-                model.inspectorEnabled = false;
-                model.notify();
-              }
+              onclick: () => model.toggleInspector()
             }, iconX())
           )
         )
@@ -57,5 +54,5 @@ export default (model) => model.log.item ? h('', [
       h('tr', h('td', 'ErrSource'), h('td', model.log.item.errsource)),
     ])
   ),
-  h('.p2.f7', h('', model.log.item.message))
+  h('.p2.f7', {style: 'word-break: break-word'}, model.log.item.message)
 ]) : h('', {className: 'f6 text-center p3'}, 'Click on a log to show its properties');
