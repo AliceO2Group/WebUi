@@ -572,7 +572,8 @@ export default class Workflow extends Observable {
       } catch (error) {
         console.error(error);
         this.loadingConfiguration = RemoteData.notAsked();
-        this.model.notification.show('Unable to load configuration. Please contact an administrator', 'warning', 2000);
+        this.model.notification.show(`SyntaxError - Failed to load configuration '${key}'.`
+          + ' Please contact an administrator', 'warning', 6000);
       }
       this.notify();
     }
