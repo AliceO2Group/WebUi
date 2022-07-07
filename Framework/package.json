@@ -39,7 +39,7 @@
     "mysql": "^2.18.1",
     "openid-client": "^4.2.0",
     "winston": "3.7.2",
-    "ws": "^8.6.0"
+    "ws": "^8.8.0"
   },
   "devDependencies": {
     "eslint": "^8.18.0",
