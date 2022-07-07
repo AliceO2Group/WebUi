@@ -170,15 +170,19 @@ const btnSaveEnvConfiguration = (model) => {
  */
 const btnUpdateEnvConfiguration = (model) => {
   const isEnvLoading = model.environment.itemNew.isLoading();
-  const isConfigurationSelected = 
+  const isConfigurationSelected =
     Boolean(model.workflow.selectedConfiguration) && model.workflow.loadingConfiguration.isNotAsked();
   const name = model.workflow.selectedConfiguration;
 
   let isUserAllowedToUpdate = model.isAllowed(ROLES.Admin, true);
 
   if (isConfigurationSelected) {
-    const owner = JSON.parse(model.workflow.loadedConfiguration.payload.payload).user.personid;
-    isUserAllowedToUpdate = isUserAllowedToUpdate || owner == model.session.personid;
+    try {
+      const owner = JSON.parse(model.workflow.loadedConfiguration.payload.payload).user.personid;
+      isUserAllowedToUpdate = isUserAllowedToUpdate || owner == model.session.personid;
+    } catch (error) {
+      console.error(error);
+    }
   }
   const infoMessage = (isConfigurationSelected && isUserAllowedToUpdate) ?
     `Update the selected configuration "${name}" with the currently displayed and selected configuration`
