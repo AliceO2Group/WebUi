@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -18,10 +18,11 @@ const path = require('path');
 /**
  * Removes (if exists) and creates a new config file which is to be sent to the client side for fixed configurations
  * The configuration file is based on `config.js` file
- * @param {JSON} config 
+ * @param {JSON} config - server configuration
+ * @returns {void}
  */
 function buildPublicConfig(config) {
-  const publicConfigPath = path.join(__dirname, './../../public/config.cjs');
+  const publicConfigPath = path.join(__dirname, './../../public/config.js');
   const publicConfigExist = fs.existsSync(publicConfigPath);
   if (publicConfigExist) {
     fs.rmSync(publicConfigPath);
@@ -29,11 +30,11 @@ function buildPublicConfig(config) {
   const publicConfig = {
     REFRESH_MIN_INTERVAL: config?.consul?.refreshRate?.min || 10,
     REFRESH_MAX_INTERVAL: config?.consul?.refreshRate?.max || 120,
-    CONSUL_SERVICE: config.consul ? true : false
+    CONSUL_SERVICE: config.consul ? true : false,
   };
-  let codeStr = `/* eslint-disable quote-props */\n`
+  const codeStr = '/* eslint-disable quote-props */\n'
     + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as QCG};\n`;
   fs.writeFileSync(publicConfigPath, codeStr);
 }
 
-module.exports = {buildPublicConfig};
+module.exports = { buildPublicConfig };

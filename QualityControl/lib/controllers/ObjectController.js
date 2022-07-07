@@ -34,8 +34,9 @@ export class ObjectController {
 
   /**
    * Build Object Data response based on passed object path
-   * @param {Req} req - must contain object path
-   * @param {Res} res
+   * @param {Request} req - HTTP request object with "query" information on object
+   * @param {Response} res - HTTP response object to provide information on request
+   * @return {void}
    */
   async getObjectInfo(req, res) {
     const path = req.query?.path;
@@ -51,11 +52,14 @@ export class ObjectController {
 
   /**
    * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
-   * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object information and download it locally on CCDB if it is not already done so
+   * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
+   * information and download it locally on CCDB if it is not already done so;
    * From the information retrieved above, use the location with JSROOT to get a JSON object
-   * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for interpretation with JSROOT.draw
-   * @param {Request} req
-   * @param {Response} res
+   * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for
+   * interpretation with JSROOT.draw
+   * @param {Request} req - HTTP request object with "query" information
+   * @param {Response} res - HTTP response object to provide information on request
+   * @return {void}
    */
   async getObjectContent(req, res) {
     const path = req.query?.path;
@@ -81,7 +85,7 @@ export class ObjectController {
    * Retrieves a root object from url-location provided
    * Parses the objects and prepares it in QCG format
    * @param {String} url - location of Root file to be retrieved
-   * @return {Promise<JSON.Error>}
+   * @return {Promise<JSON.Error>} - JSON version of the ROOT object
    */
   async _getJsRootFormat(url) {
     const file = await this.jsroot.openFile(url);

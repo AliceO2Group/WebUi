@@ -10,23 +10,24 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const fs = require('fs');
-const path = require('path');
-const assert = require('assert');
-const config = require('./../../test-config');
+import { existsSync } from 'fs';
+import { join } from 'path';
+import { doesNotThrow, ok } from 'assert';
+import config from './../../test-config';
 
-const {buildPublicConfig} = require('./../../../lib/config/publicConfigProvider');
+import { buildPublicConfig } from './../../../lib/config/publicConfigProvider';
 
 describe('Public Configuration Test Suite', () => {
   const CONF_LOCATION = '../../../public/config.js';
   it('should successfully create JS module with public configuration as export', () => {
-    assert.doesNotThrow(() => buildPublicConfig(config));
+    doesNotThrow(() => buildPublicConfig(config));
   });
 
   it('should successfully import QCG public configuration', async () => {
-    const confExists = fs.existsSync(path.join(__dirname, CONF_LOCATION));
-    assert.ok(confExists, 'Public configuration file was not identified');
+    const confExists = existsSync(join(__dirname, CONF_LOCATION));
+    ok(confExists, 'Public configuration file was not identified');
   });
 });
+s;

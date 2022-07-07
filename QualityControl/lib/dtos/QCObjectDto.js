@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Log} from '@aliceo2/web-ui';
+import { Log } from '@aliceo2/web-ui';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
@@ -34,7 +34,7 @@ export default class QCObjectDto {
     this.drawingOptions = undefined;
     this.displayHints = undefined;
 
-    this.root = {}
+    this.root = {};
   }
 
   /**
@@ -44,7 +44,7 @@ export default class QCObjectDto {
    */
   static isObjectPathValid(object) {
     if (!object || !object['path']) {
-      log.debug(`CCDB returned an empty ROOT object path, ignoring`);
+      log.debug('CCDB returned an empty ROOT object path, ignoring');
       return false;
     } else if (object['path'].indexOf('/') === -1) {
       log.debug(`CCDB returned an invalid ROOT object path "${object['path']}", ignoring`);

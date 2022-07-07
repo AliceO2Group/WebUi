@@ -10,9 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
+/* eslint-disable prefer-destructuring */
 
-const {Log} = require('@aliceo2/web-ui');
+const { Log } = require('@aliceo2/web-ui');
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/config`);
 const fs = require('fs');
 const path = require('path');
@@ -38,6 +40,7 @@ try {
 }
 
 const config = require(configFile);
+
 Log.configure(config);
 log.info(`Read config file "${configFile}"`);
 

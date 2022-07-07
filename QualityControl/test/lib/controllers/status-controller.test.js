@@ -65,18 +65,18 @@ describe('Status Service test suite', () => {
       assert.deepStrictEqual(response, {ok: false, message: 'Live Mode was not configured'});
     });
     it('successfully return status with error if live connector threw an error', async () => {
-      const liveConnector = {
+      const onlineConnector = {
         getConsulLeaderStatus: sinon.stub().rejects(new Error('Unable to retrieve status of live mode'))
       }
-      statusService.setLiveModeConnector(liveConnector);
+      statusService.setLiveModeConnector(onlineConnector);
       const response = await statusService.getLiveModeConnectorStatus();
       assert.deepStrictEqual(response, {ok: false, message: 'Unable to retrieve status of live mode'});
     });
     it('successfully return status ok if live live connector passed checks', async () => {
-      const liveConnector = {
+      const onlineConnector = {
         getConsulLeaderStatus: sinon.stub().resolves()
       }
-      statusService.setLiveModeConnector(liveConnector);
+      statusService.setLiveModeConnector(onlineConnector);
       const response = await statusService.getLiveModeConnectorStatus();
       assert.deepStrictEqual(response, {ok: true});
     });
@@ -86,9 +86,9 @@ describe('Status Service test suite', () => {
     it('successfully build result JSON with framework information', async () => {
       const statusService = new StatusController(config)
       const dataConnector = {isConnectionUp: sinon.stub().resolves()};
-      const liveConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
+      const onlineConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
       statusService.setDataConnector(dataConnector);
-      statusService.setLiveModeConnector(liveConnector);
+      statusService.setLiveModeConnector(onlineConnector);
       const response = await statusService.getFrameworkInfo();
       const result = {
         qcg: {hostname: 'localhost', port: 8181, status: {ok: true}},
@@ -106,9 +106,9 @@ describe('Status Service test suite', () => {
     it('successfully send back result JSON with framework information', async () => {
       const statusService = new StatusController(config)
       const dataConnector = {isConnectionUp: sinon.stub().resolves()};
-      const liveConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
+      const onlineConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
       statusService.setDataConnector(dataConnector);
-      statusService.setLiveModeConnector(liveConnector);
+      statusService.setLiveModeConnector(onlineConnector);
 
       const res = {
         status: sinon.stub().returnsThis(),

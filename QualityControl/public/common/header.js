@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
+import { h, iconPerson, iconMediaPlay, iconMediaStop } from '/js/src/index.js';
 
 import spinner from '../loader/spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
@@ -26,15 +26,16 @@ import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
  * - page title on center
  * - page actions on right side
  * @param {Object} model
- * @return {vnode}
+ * @returns {vnode}
  */
 export default (model) => h('.flex-row.p2', [
   commonHeader(model),
-  headerSpecific(model)
+  headerSpecific(model),
 ]);
 
 let onlineButtonIcon = iconMediaPlay();
 let onlineButtonStyle = 'btn-default';
+
 /**
  * Shows the page specific header (center and right side)
  * @param {Object} model
@@ -61,7 +62,7 @@ const commonHeader = (model) => h('.flex-grow', [
   onlineButton(model),
   ' ',
   h('span.f4.gray', 'Quality Control'),
-  model.loader.active && h('span.f4.mh1.gray', spinner())
+  model.loader.active && h('span.f4.mh1.gray', spinner()),
 ]);
 
 /**
@@ -71,14 +72,14 @@ const commonHeader = (model) => h('.flex-grow', [
  */
 const loginButton = (model) =>
   h('.dropdown', {
-    title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : ''
+    title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : '',
   }, [
-    h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
+    h('button.btn', { onclick: () => model.toggleAccountMenu() }, iconPerson()),
     h('.dropdown-menu', [
       h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-      model.session.personid === 0 // anonymous user has id 0
+      model.session.personid === 0 // Anonymous user has id 0
         ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-        : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+        : h('a.menu-item', { onclick: () => alert('Not implemented') }, 'Logout'),
     ]),
   ]);
 
@@ -87,17 +88,18 @@ const loginButton = (model) =>
  * @param {Object} model
  * @return {vnode}
  */
-const onlineButton = (model) => h('button.btn',
+const onlineButton = (model) => h(
+  'button.btn',
   {
     className: onlineButtonStyle,
     onclick: () => toggleOnlineButton(model),
     disabled: model.object.queryingObjects ? true : false,
     title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.isOnlineModeConnectionAlive ? '' : 'display: none'
+    style: model.isOnlineModeConnectionAlive ? '' : 'display: none',
   },
   'Online',
   ' ',
-  onlineButtonIcon
+  onlineButtonIcon,
 );
 
 /**
