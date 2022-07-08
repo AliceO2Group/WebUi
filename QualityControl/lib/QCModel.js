@@ -72,6 +72,6 @@ if (config.listingConnector === 'ccdb') {
   queryPrefix = ccdb.PREFIX;
 
   objectController = new ObjectController(ccdb, { openFile, toJSON });
-  statusService.dataConnector = ccdb;
+  statusService.setDataConnector(ccdb);
 }
 // --------------------------------------------------------
