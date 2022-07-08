@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -11,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Wait for response from QuailtyControl
@@ -21,17 +20,15 @@
  * @param {number} timeout - seconds
  * @return {Promise}
  */
-module.exports.waitForQCResponse = (page, timeout = 90) => {
-  return new Promise(async (resolve) => {
-    let i = 0;
-    while (i++ < timeout) {
-      const isLoaderActive = await page.evaluate(() => window.model.loader.active);
-      if (!isLoaderActive) {
-        await page.waitForTimeout(1000);
-        resolve();
-      } else {
-        await page.waitForTimeout(1000);
-      }
+module.exports.waitForQCResponse = (page, timeout = 90) => new Promise(async (resolve) => {
+  let i = 0;
+  while (i++ < timeout) {
+    const isLoaderActive = await page.evaluate(() => window.model.loader.active);
+    if (!isLoaderActive) {
+      await page.waitForTimeout(1000);
+      resolve();
+    } else {
+      await page.waitForTimeout(1000);
     }
-  });
-};
+  }
+});
