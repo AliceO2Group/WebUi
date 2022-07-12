@@ -270,13 +270,14 @@ const showEnvTasksTable = (environment, tasks) => {
     h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
       h('thead',
         h('tr', [
-          ['Name', 'Locked', 'Status', 'State', 'Host Name', 'More']
+          ['Name', 'PID', 'Locked', 'Status', 'State', 'Host Name', 'More']
             .map((header) => h('th', header))
         ])
       ),
       h('tbody', [
         tasks.map((task) => [h('tr', [
-          h('td.w-40', task.name),
+          h('td.w-30', task.name),
+          h('td.w-10', task.pid),
           h('td.w-10',
             h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())
           ),
