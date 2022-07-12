@@ -131,6 +131,7 @@ const repositoryDropdownList = (workflow, repoList) =>
 const refreshWorkflowsButton = (workflow) => {
   return h('.flex-column.dropdown#flp_selection_info_icon', [
     h('button.btn', {
+      title: 'Update Workflow Templates',
       class: workflow.refreshedRepositories.isLoading() ? 'loading' : '',
       disabled: workflow.refreshedRepositories.isLoading(),
       onclick: () => workflow.refreshRepositories()

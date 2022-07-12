@@ -148,7 +148,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button', {timeout: 5000});
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
-    assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
+    assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Update Workflow Templates');
   });
 
   it('should successfully select second repository from dropdown', async () => {
