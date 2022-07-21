@@ -297,12 +297,21 @@ export default class Model extends Observable {
   }
 
   /**
-   * After pages load check if the user enabled notifications
+   * Request notification permission
    */
-  checkBrowserNotificationPermissions() {
+  requestBrowserNotificationPermissions() {
     if (Notification.permission !== 'granted') {
       Notification.requestPermission();
     }
+  }
+
+  /**
+   * Check whether it makes sense to ask for notification permission
+   */
+  checkBrowserNotificationPermissions() {
+    return (Notification.permission === 'denied' ||
+      Notification.permission === 'default') &&
+      window.location.protocol == "https:";
   }
 
   /**
