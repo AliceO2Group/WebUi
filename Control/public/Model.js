@@ -300,7 +300,7 @@ export default class Model extends Observable {
    * Request notification permission
    */
   requestBrowserNotificationPermissions() {
-    if (Notification.permission !== 'granted') {
+    if (this.checkBrowserNotificationPermissions()) {
       Notification.requestPermission();
     }
   }
