@@ -308,7 +308,7 @@ export default class Model extends Observable {
   /**
    * Defines policy when user can trigger request for enabling notifications
    * This is used to display/hide enable button
-   * @returns {bool} True when notifications are not enabled and HTTPS is used
+   * @returns {boolean} True when notifications are not enabled and HTTPS is used
    */
   checkBrowserNotificationPermissions() {
     return (Notification.permission === 'denied' ||
