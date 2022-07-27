@@ -153,7 +153,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully select second repository from dropdown', async () => {
     const selectedRepository = await page.select('select', 'git.com/alice-user/alice-repo/');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     assert.deepStrictEqual(selectedRepository, ['git.com/alice-user/alice-repo/']);
   });
 
@@ -169,7 +169,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
     assert.ok(calls['refreshRepos']);
     assert.ok(calls['getWorkflowTemplates']);
     assert.ok(calls['listRepos']);
@@ -242,7 +242,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully select option file:// from dropdown and input box should appear', async () => {
     await page.select('select#readoutURISelection', 'file://');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     const readoutUriPrefix = await page.evaluate(() => window.model.workflow.form.basicVariables.readout_cfg_uri_pre);
     assert.strictEqual(readoutUriPrefix, 'file://');
   });
@@ -250,7 +250,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully fill in readout uri from typed text', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(6) > div > div:nth-child(2) > div:nth-child(2) > input');
     await page.keyboard.type('file-readout');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
 
     assert.strictEqual(variables.readout_cfg_uri, 'file-readout');
@@ -310,7 +310,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.evaluate(() => {
       document.querySelector('#removeKeyTestKey').click();
     });
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
@@ -322,12 +322,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully add a JSON with (K;V) pairs in advanced configuration panel', async () => {
     await page.focus('#kvTextArea');
     await page.keyboard.type('{"testJson": "JsonValue"}');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
     const variables = await page.evaluate(() => {
       document.querySelector('#addKVListButton').click();
       return window.model.workflow.form.variables;
     });
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     const expectedVariables = {TestKey2: 'TestValue2', testJson: 'JsonValue'};
     assert.strictEqual(JSON.stringify(variables), JSON.stringify(expectedVariables));
   });
@@ -337,7 +337,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.focus('#kvTextArea');
     const toBeTyped = '{"testJson": "JsonValue", somtest: test}';
     await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     await page.evaluate(() => document.querySelector('#addKVListButton').click())
     const {variables, areaString} = await page.evaluate(() => {
