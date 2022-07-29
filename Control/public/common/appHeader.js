@@ -42,7 +42,7 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
     model.session.personid === 0 // anonymous user has id 0
       && h('p.m3.gray-darker', 'You are connected as anonymous, no authentification needed for this application.'),
     model.checkBrowserNotificationPermissions() &&
-      h('a.menu-item', {onclick: () => model.requestBrowserNotificationPermissions()}, 'Enable notifications'),
+      h('a.menu-item', {onclick: () => model.toggleAccountMenu() || model.requestBrowserNotificationPermissions()}, 'Enable notifications'),
     model.session.personid !== 0 &&
       h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout')
   ]),
