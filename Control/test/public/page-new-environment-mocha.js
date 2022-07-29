@@ -62,13 +62,17 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const role = await page.evaluate(() => window.model.session.role);
     assert.strictEqual(role, 1);
   });
-  it('should react on role change to Guest', async () => {
-    const text = await page.evaluate(() => {
+
+  it('should successfully display warning message that Guest cannot create environments', async () => {
+    await page.evaluate(() => {
       window.model.session.role = 4;
       window.model.notify();
-      return document.querySelector('.m4').innerText;
     });
+    await page.waitForTimeout(100);
+
+    const text = await page.evaluate(() => document.querySelector('.m4').innerText);
     assert.strictEqual(text, 'You are not allowed to create environments.');
+
     await page.evaluate(() => {
       window.model.session.role = 1;
       window.model.notify();
@@ -169,7 +173,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     assert.ok(calls['refreshRepos']);
     assert.ok(calls['getWorkflowTemplates']);
     assert.ok(calls['listRepos']);
@@ -375,14 +379,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should have an empty list of hosts before detector selection', async () => {
     const flps = await page.evaluate(() => window.model.workflow.flpSelection.list);
-    assert.deepStrictEqual(flps.kind, 'NotAsked');
+    assert.strictEqual(flps.kind, 'NotAsked');
   });
 
   it('should not select a detector that is not locked', async () => {
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    await page.waitForTimeout(100);
+
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.ok(selectedDet.length == 0, 'Detector selected without lock');
-    await page.waitForTimeout(500);
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
