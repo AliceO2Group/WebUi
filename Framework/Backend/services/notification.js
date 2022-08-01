@@ -69,10 +69,11 @@ class NotificationService {
    * @param {string} title Notification title
    * @param {string} author Notification author
    * @param {string} url URL poiting to notification details
+   * @param {(string|string[])} runNumbers Bookkeeping tag
    * @param {string} extra Details information
    * @returns {Promise}
    */
-  async send(tag, title, author, url, extra) {
+  async send(tag, title, author, url, runNumbers, extra) {
     if (!tag) {
       throw new Error('Tag is required to send notifications');
     }
@@ -85,11 +86,15 @@ class NotificationService {
     if (Array.isArray(tag)) {
       tag = tag.join(',');
     }
+    if (runNumbers && Array.isArray(runNumbers)) {
+      runNumbers = runNumbers.join(',');
+    }
     const message = {
       tag: tag,
       title: title,
       author: author,
       url: url || undefined,
+      runNumbers: runNumbers || undefined,
       extra: extra || undefined
     };
     const producer = this.kafka.producer();
