@@ -51,6 +51,8 @@ class HttpServer {
     if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
       this.openid.createIssuer().catch(() => process.exit(1));
+      this.ipAddressWhitelist = (!connectIdConfig.ip_whitelist) ? '127.0.0.1' : connectIdConfig.ip_whitelist;
+      this.serviceAccountRole = (!connectIdConfig.sa_role) ? 'service-account' : connectIdConfig.sa_role;
     }
     this.specifyRoutes();
 
@@ -406,6 +408,26 @@ class HttpServer {
       return res.redirect(this.openid.getAuthUrl(state));
     }
   }
+  /**
+   * Permit service accounts that holds given role and access from restricted IP address rage
+   * @param {object} details Account details from unserinfo endpoint
+   * @param {string} headers HTTP headers including 'X-Forwarded-For' that is actual client IP address set by nginx
+   * @throws {Error} When service account is not allowed to access
+   * @returns true if service account has permission to access the app, false when this is normal account
+   */
+  isAuthorizedServiceAccount(details, headers) {
+    if ('cern_person_id' in details) {
+      return false;
+    }
+    if ('x-forwarded-for' in headers) {
+      const forwarded = headers['x-forwarded-for'];
+      if (details.cern_roles.includes(this.serviceAccountRole) && forwarded.includes(this.ipAddressWhitelist)) {
+        this.log.info(`Authorized service account ${details.cern_upn} from IP address: ${forwarded}`);
+        return true;
+      }
+    }
+    throw new Error('Unauthorized service account');
+  }
 
   /**
    * OpenID Connect callback - when successfully authorized (/callback)
@@ -417,7 +439,10 @@ class HttpServer {
   identCallback(req, res) {
     this.openid.callback(req).then((tokenSet) => {
       const details = tokenSet.claims();
-
+      // Allow some service accoutns to access
+      if (this.isAuthorizedServiceAccount(details, req.headers)) {
+        details.cern_person_id = 0;
+      }
       // Set token and user details in the query
       const query = {
         personid: details.cern_person_id,
