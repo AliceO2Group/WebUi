@@ -45,7 +45,7 @@ class HttpServer {
 
     this.app = express();
 
-    this.configureHelmet(httpConfig.hostname, httpConfig.iframeCsp);
+    this.configureHelmet(httpConfig.hostname, httpConfig.port, httpConfig.iframeCsp);
 
     this.jwt = new JwtToken(jwtConfig);
     if (connectIdConfig) {
@@ -130,7 +130,7 @@ class HttpServer {
    * @param {list}   iframeCsp list of URLs for frame-src CSP
    * @param {number} port secure port number
    */
-  configureHelmet(hostname, iframeCsp = []) {
+  configureHelmet(hostname, httpPort, iframeCsp = []) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -152,7 +152,7 @@ class HttpServer {
         defaultSrc: ["'self'", "data:", hostname + ':*'],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'http://' + hostname + ':*', 'https://' + hostname + ':*', 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*'],
+        connectSrc: ["'self'", 'http://' + hostname + ':' + httpPort, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + httpPort],
         frameSrc: iframeCsp
         /* eslint-enable */
       }
