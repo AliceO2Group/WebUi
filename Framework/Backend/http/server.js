@@ -51,7 +51,7 @@ class HttpServer {
     if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
       this.openid.createIssuer().catch(() => process.exit(1));
-      this.ipAddressWhitelist = (!connectIdConfig.ip_whitelist) ? '127.0.0.1' : connectIdConfig.ip_whitelist;
+      this.ipAddressWhitelist = (!connectIdConfig.sa_whitelist) ? '127.0.0.1' : connectIdConfig.sa_whitelist;
       this.serviceAccountRole = (!connectIdConfig.sa_role) ? 'service-account' : connectIdConfig.sa_role;
     }
     this.specifyRoutes();
