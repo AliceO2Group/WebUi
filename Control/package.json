@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/control",
-  "version": "1.50.2",
+  "version": "1.51.0",
   "description": "ALICE O2 Control GUI",
   "author": "George Raduta",
   "contributors": [
@@ -30,7 +30,7 @@
     "@aliceo2/web-ui": "1.24.0",
     "@grpc/grpc-js": "1.6.2",
     "@grpc/proto-loader": "0.7.0",
-    "google-protobuf": "3.20.1"
+    "google-protobuf": "3.21.0"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui",
@@ -38,11 +38,11 @@
     "@grpc/proto-loader"
   ],
   "devDependencies": {
-    "eslint": "^8.20.0",
+    "eslint": "^8.22.0",
     "mocha": "^10.0.0",
     "nock": "^13.2.2",
     "nyc": "^15.1.0",
-    "puppeteer": "15.5.0",
+    "puppeteer": "16.1.1",
     "sinon": "14.0.0"
   },
   "main": "index.js"
