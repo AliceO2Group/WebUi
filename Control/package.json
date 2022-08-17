@@ -30,7 +30,7 @@
     "@aliceo2/web-ui": "1.24.0",
     "@grpc/grpc-js": "^1.6.2",
     "@grpc/proto-loader": "^0.6.5",
-    "google-protobuf": "^3.20.0-rc.2"
+    "google-protobuf": "^3.21.0"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui",
