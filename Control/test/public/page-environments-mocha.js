@@ -36,7 +36,7 @@ describe('`pageEnvironments` test-suite', () => {
     it('should successfully load page and request data', async () => {
       await page.goto(url + '?page=environments', {waitUntil: 'networkidle0'});
 
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
       const location = await page.evaluate(() => window.location);
 
       assert.strictEqual(location.search, '?page=environments');
