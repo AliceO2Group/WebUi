@@ -7,8 +7,8 @@ on:
       - '.github/workflows/framework.yml'
   push:
     branches:
-      - 'dev'
       - 'main'
+      - 'dev'
 jobs:
   test:
     name: Tests on macos-latest    
