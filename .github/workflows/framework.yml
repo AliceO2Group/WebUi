@@ -23,8 +23,8 @@ jobs:
       - run: (cd Framework; npm ci )
       - run: (cd Framework; npm test )
   coverage:
-    name: Tests & coverage on ubuntu-18.04
-    runs-on: ubuntu-18.04
+    name: Tests & coverage on ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -54,7 +54,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-18.04]
+        os: [macOS-latest, ubuntu-latest]
     steps:
       - name: Run Control tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework";) 
@@ -73,7 +73,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-18.04]
+        os: [macOS-latest, ubuntu-latest]
     steps:
       - name: Run QualityControl tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run QualityControl tests by using @aliceo2/web-ui from local ../Framework";) 
@@ -92,7 +92,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-18.04]
+        os: [macOS-latest, ubuntu-latest]
     steps:
       - name: Run InfoLogger tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run InfoLogger tests by using @aliceo2/web-ui from local ../Framework";) 
