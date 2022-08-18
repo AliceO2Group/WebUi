@@ -125,10 +125,11 @@ describe('StatusService test suite', () => {
 
     it('should successfully retrieve status and info about Grafana that it is running', async () => {
       const status = new StatusService(config, {}, {});
-      const grafanaStatus = await status.getGrafanaStatus();
       nock(config.grafana.url)
         .get('/api/health')
         .reply(200, {});
+      const grafanaStatus = await status.getGrafanaStatus();
+
       assert.deepStrictEqual(grafanaStatus.status, {ok: true, configured: true});
       assert.strictEqual(grafanaStatus.url, `http://${expectedInfo.hostname}:${expectedInfo.port}`);
 
@@ -136,10 +137,11 @@ describe('StatusService test suite', () => {
 
     it('should successfully retrieve status and info about Grafana that it is not running', async () => {
       const status = new StatusService(config, {}, {});
-      const grafanaStatus = await status.getGrafanaStatus();
       nock(config.grafana.url)
         .get('/api/health')
         .replyWithError('Unable to connect');
+      const grafanaStatus = await status.getGrafanaStatus();
+     
       assert.deepStrictEqual(grafanaStatus.status, {ok: false, configured: true, message: 'Error: Unable to connect'});
     });
 
