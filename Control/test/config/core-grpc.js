@@ -69,7 +69,7 @@ const coreGRPCServer = (config) => {
       callback(null, envTest);
     },
     async newEnvironment(call, callback) {
-      if (refreshCall++ == 3) {
+      if (refreshCall++ == 1) {
         callback(new Error('Cannot create environment'), {});
       } else {
         await new Promise(resolve => setTimeout(resolve, 3000));
@@ -87,11 +87,7 @@ const coreGRPCServer = (config) => {
     },
     refreshRepos(call, callback) {
       calls['refreshRepos'] = true;
-      if (refreshCall++ === 0) {
-        callback(new Error('504: Unable to refresh repositories'), {});
-      } else {
-        callback(null, {});
-      }
+      callback(null, {});
     },
     destroyEnvironment(call, callback) {
       calls['destroyEnvironment'] = true;
@@ -164,4 +160,5 @@ const envTest = {
       {name: 'git.com/alice-user/alice-repo/'}]
   }
 };
+
 module.exports = {coreGRPCServer};
