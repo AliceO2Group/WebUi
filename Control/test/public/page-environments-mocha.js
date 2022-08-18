@@ -74,16 +74,21 @@ describe('`pageEnvironments` test-suite', () => {
       await page.goto(url + '?page=newEnvironment');
       const location = await page.evaluate(() => window.location);
       assert.ok(location.search === '?page=newEnvironment');
+      
+      // select workflow from list of templates
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
-      await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
-      await page.waitForTimeout(200);
+      
+      // first detector is already locked (should be MID)
+      // select earlier locked detector which will automatically select all available hosts
       await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+      
       await page.waitForTimeout(200);
       await page.evaluate(() => document.querySelector('#create-env').click());
     });
 
     it('verify request fields', async () => {
+      
       await waitForEnvRequest(page);
       const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(2)').innerText);
       const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(6)').innerText);

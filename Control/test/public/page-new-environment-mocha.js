@@ -383,8 +383,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should not select a detector that is not locked', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
-    await page.waitForTimeout(100);
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click()); // second element is for detector, first for lock
+    await page.waitForTimeout(200);
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.ok(selectedDet.length == 0, 'Detector selected without lock');
@@ -392,10 +392,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
     await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(1)');
-    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(2)');
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    await page.waitForTimeout(200);
+
+    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(2)');
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
     await page.waitForTimeout(200);
+
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
     await page.waitForTimeout(500);
