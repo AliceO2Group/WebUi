@@ -13,21 +13,23 @@
  */
 
 import { existsSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { doesNotThrow, ok } from 'assert';
-import config from './../../test-config';
+import { testConfig as config } from './../../test-config.js';
 
-import { buildPublicConfig } from './../../../lib/config/publicConfigProvider';
+import { buildPublicConfig } from './../../../lib/config/publicConfigProvider.js';
 
 describe('Public Configuration Test Suite', () => {
-  const CONF_LOCATION = '../../../public/config.js';
+  const RELATIVE_CONF_LOCATION = '../../../public/config.js';
   it('should successfully create JS module with public configuration as export', () => {
     doesNotThrow(() => buildPublicConfig(config));
   });
 
   it('should successfully import QCG public configuration', async () => {
-    const confExists = existsSync(join(__dirname, CONF_LOCATION));
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const confExists = existsSync(join(__dirname, RELATIVE_CONF_LOCATION));
     ok(confExists, 'Public configuration file was not identified');
   });
 });
-s;
