@@ -152,7 +152,7 @@ class HttpServer {
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:", hostname + ':*'],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'http://' + hostname + ':' + httpPort, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + httpPort],
         frameSrc: iframeCsp
