@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -28,7 +28,7 @@
     "mocha": "mocha --exit $(find test -name 'public-config.test.js') "
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.24.0",
+    "@aliceo2/web-ui": "1.25.0",
     "jsroot": "7.2.0",
     "joi": "17.6.0"
   },
