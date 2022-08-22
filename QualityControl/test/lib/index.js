@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
- 
+ */
+
 describe('Lib Test Suite', async () => {
   require('./config/public-config.test.js');
-  
+
   require('./controllers/layout-controller.test.js');
   require('./controllers/object-controller.test.js');
   require('./controllers/status-controller.test.js');

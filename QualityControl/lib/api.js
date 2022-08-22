@@ -13,24 +13,23 @@
  */
 
 import { Log, WebSocket } from '@aliceo2/web-ui';
-// Import config from './config/configProvider.cjs';
+import { config } from './config/configProvider.js';
 
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/api`);
 
-/*
- * Load data source (demo or DB)
- * TODO const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
- */
+// Load data source (demo or DB)
+const model = config.demoData ? await import('./QCModelDemo.js') : await import('./QCModel.js');
 import {
   queryPrefix, listObjects, consulService, objectController, layoutService, statusService, userService,
 } from './QCModel.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
- * @param {HttpServer} http
+ * @param {HttpServer} http - web-ui based server implementation
+ * @returns {void}
  */
 export const setup = (http) => {
-  // Http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), {public: true});
+  http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), { public: true });
   http.get('/object', objectController.getObjectContent.bind(objectController));
   http.get('/objects', () => false, { public: true });
 

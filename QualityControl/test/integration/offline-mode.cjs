@@ -68,8 +68,9 @@ describe('`OFFLINE` test-suite', async () => {
 
 /**
  * Method to open the tree for a given path
- * @param {Page} page
- * @param {Array<String>} path
+ * @param {Page} page - puppeteer page
+ * @param {Array<String>} path - path of object to follow in the qc tree
+ * @returns {void}
  */
 async function openGivenObjectPath(page, path) {
   let tempPath = 'qc';
@@ -87,8 +88,9 @@ async function openGivenObjectPath(page, path) {
 
 /**
  * Method to close the tree for a given path
- * @param {Page} page
- * @param {Array<String>} path
+ * @param {Page} page - puppeteer page
+ * @param {Array<String>} path - path of object to follow in the qc tree
+ * @returns {void}
  */
 async function closeGivenObjectPath(page, path) {
   const tempPath = path.slice();

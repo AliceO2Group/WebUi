@@ -33,7 +33,7 @@ export class LayoutController {
     /**
      * @type {JSONFileConnector/SQLService}
      */
-    this.service = service;
+    this._service = service;
   }
 
   /**
@@ -50,7 +50,7 @@ export class LayoutController {
       if (req.query.owner_id !== undefined) {
         filter.owner_id = parseInt(req.query.owner_id, 10);
       }
-      const layouts = await this.service.listLayouts(filter);
+      const layouts = await this._service.listLayouts(filter);
       res.status(200).json(layouts);
     } catch (error) {
       errorHandler(error, 'Failed to retrieve layouts', res, 502, 'layout');
@@ -70,7 +70,7 @@ export class LayoutController {
         errorHandler('Missing layoutId parameter', 'Missing layoutId parameter', res, 400, 'layout');
         return;
       }
-      const layout = await this.service.readLayout(layoutId);
+      const layout = await this._service.readLayout(layoutId);
       res.status(200).json(layout);
     } catch (error) {
       errorHandler(error, 'Failed to retrieve layout', res, 502, 'layout');
@@ -102,7 +102,7 @@ export class LayoutController {
         return;
       }
 
-      const layout = await this.service.updateLayout(layoutId, data);
+      const layout = await this._service.updateLayout(layoutId, data);
       res.status(201).json(layout);
     } catch (error) {
       errorHandler(error, 'Failed to update layout', res, 502, 'layout');
@@ -124,7 +124,7 @@ export class LayoutController {
         return;
       }
 
-      const result = await this.service.deleteLayout(layoutId);
+      const result = await this._service.deleteLayout(layoutId);
       res.status(200).json(result);
     } catch (error) {
       errorHandler(error, 'Failed to delete layout', res, 502, 'layout');
@@ -140,7 +140,7 @@ export class LayoutController {
   async createLayout(req, res) {
     try {
       const layout = await LayoutDto.validateAsync(req.body);
-      const result = await this.service.createLayout(layout);
+      const result = await this._service.createLayout(layout);
       res.status(201).json(result);
     } catch (error) {
       let message = 'Failed to create new layout';

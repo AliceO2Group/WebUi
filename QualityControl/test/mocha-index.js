@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
- 
+ */
+
 describe('Lib Test Suite', async () => {
   try {
     require('./public');
-    // require('./lib');
+    // Require('./lib');
   } catch (error) {
     console.error(error);
   }

@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const sinon = require('sinon');
 const nock = require('nock');
 const assert = require('assert');
-const {errorHandler, httpHeadJson} = require('../../../lib/utils');
+const { errorHandler, httpHeadJson } = require('../../../lib/utils');
 
 describe('Utility methods test suite', () => {
   before(() => nock.cleanAll());
@@ -45,52 +45,51 @@ describe('Utility methods test suite', () => {
       assert.ok(res.status.calledWith(404));
     });
 
-
     it('should successfully respond with built error.message and status', () => {
       const err = {
         message: 'Test Error',
-        stack: 'Some Stack'
+        stack: 'Some Stack',
       };
       errorHandler(err, 'Error To Send', res, 502);
       assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: 'Error To Send'}));
+      assert.ok(res.send.calledWith({ message: 'Error To Send' }));
     });
 
     it('should successfully respond with built error.message, no stack and status', () => {
       const err = 'Test Error';
       errorHandler(err, 'Error To Send', res, 404);
       assert.ok(res.status.calledWith(404));
-      assert.ok(res.send.calledWith({message: 'Error To Send'}));
+      assert.ok(res.send.calledWith({ message: 'Error To Send' }));
     });
   });
 
   describe('"httpHeadJson" test suite ', () => {
     it('should successfully return status and headers with host, port and path provided', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({lastModified: 123132132, location: '/download/some-id'})
+        .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
         .head('/qc/some/test/123455432')
         .reply(200);
 
-      const {status, headers} = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432');
+      const { status, headers } = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432');
       assert.strictEqual(status, 200);
-      assert.deepStrictEqual(headers, {lastmodified: '123132132', location: '/download/some-id'});
+      assert.deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
     });
 
     it('should successfully return status and headers with host, port, path and headers provided', async () => {
       nock('http://ccdb:8500', {
-        reqHeaders: {Accept: 'text'}
+        reqHeaders: { Accept: 'text' },
       })
-        .defaultReplyHeaders({lastModified: 123132132, location: '/download/some-id'})
+        .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
         .head('/qc/some/test/123455432')
         .reply(200);
 
-      const {status, headers} = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432', {Accept: 'text'});
+      const { status, headers } = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432', { Accept: 'text' });
       assert.strictEqual(status, 200);
-      assert.deepStrictEqual(headers, {lastmodified: '123132132', location: '/download/some-id'});
+      assert.deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
     });
     it('should reject if call was not successful', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({lastModified: 123132132, location: '/download/some-id'})
+        .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
         .head('/qc/some/test/123455432')
         .replyWithError('Something went wrong');
 

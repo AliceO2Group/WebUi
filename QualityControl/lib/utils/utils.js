@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Log} from '@aliceo2/web-ui';
+import { Log } from '@aliceo2/web-ui';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
 import http from 'http';
 
@@ -21,15 +21,16 @@ import http from 'http';
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
+ * @returns {void}
  */
 export function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils') {
   errorLogger(errToLog, facility);
-  res.status(status).send({message: errToSend.message || errToSend});
+  res.status(status).send({ message: errToSend.message || errToSend });
 }
 
 /**
  * Global Error Logger for AliECS GUI
- * @param {Error} err 
+ * @param {Error} err
  */
 export function errorLogger(err, facility = 'utils') {
   log.facility = `${process.env.npm_config_log_label ?? 'qcg'}/${facility}`;
@@ -40,15 +41,16 @@ export function errorLogger(err, facility = 'utils') {
 }
 
 /**
-  * Util to get JSON data (parsed) from server
-  * @param {string} host - hostname of the server
-  * @param {number} port - port of the server
-  * @param {string} path - path of the server request
-  * @return {Promise.<Object, Error>} JSON response
-  */
-export function httpGetJson(hostname, port, path, headers = {Accept: 'application/json'}) {
+ * Util to get JSON data (parsed) from server
+ * @param {string} host - hostname of the server
+ * @param {number} port - port of the server
+ * @param {string} path - path of the server request
+ * @return {Promise.<Object, Error>} JSON response
+ */
+export function httpGetJson(hostname, port, path, headers = { Accept: 'application/json' }) {
   return new Promise((resolve, reject) => {
-    const requestOptions = {hostname, port, path, method: 'GET', headers};
+    const requestOptions = { hostname, port, path, method: 'GET', headers };
+
     /**
      * Generic handler for client http requests,
      * buffers response, checks status code and parses JSON
@@ -56,7 +58,7 @@ export function httpGetJson(hostname, port, path, headers = {Accept: 'applicatio
      */
     const requestHandler = (response) => {
       if (response.statusCode < 200 || response.statusCode > 299) {
-        reject(new Error('Non-2xx status code: ' + response.statusCode));
+        reject(new Error(`Non-2xx status code: ${response.statusCode}`));
         return;
       }
 
@@ -82,12 +84,11 @@ export function httpGetJson(hostname, port, path, headers = {Accept: 'applicatio
  * Make a HEAD HTTP call and return a promise
  * @returns {Promise.<{status, headers}, Error>}
  */
-export function httpHeadJson(hostname, port, path, headers = {Accept: 'application/json'}) {
-  const requestOptions = {hostname, port, path, method: 'HEAD', headers};
+export function httpHeadJson(hostname, port, path, headers = { Accept: 'application/json' }) {
+  const requestOptions = { hostname, port, path, method: 'HEAD', headers };
   return new Promise((resolve, reject) => {
-    http.request(requestOptions, (res) => resolve({status: res.statusCode, headers: res.headers}))
+    http.request(requestOptions, (res) => resolve({ status: res.statusCode, headers: res.headers }))
       .on('error', (err) => reject(err))
       .end();
   });
 }
-

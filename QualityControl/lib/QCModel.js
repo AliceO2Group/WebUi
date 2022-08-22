@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import config from './config/configProvider.cjs';
+import { config } from './config/configProvider.js';
 // Import projPackage from './../package.json';
 import { openFile, toJSON } from 'jsroot';
 

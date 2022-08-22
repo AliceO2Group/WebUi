@@ -16,9 +16,9 @@
  * Wait for response from QuailtyControl
  * Method will check if loader is still active (requests still pending) every second
  * for a specified amount of seconds (default 90)
- * @param {Object} page
- * @param {number} timeout - seconds
- * @return {Promise}
+ * @param {Object} page - puppeteer page
+ * @param {number} timeout - seconds with a default value of 90
+ * @returns {Promise<void>} - promise resolves once the request ended
  */
 module.exports.waitForQCResponse = (page, timeout = 90) => new Promise(async (resolve) => {
   let i = 0;

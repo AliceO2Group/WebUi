@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+'use strict';
 
 import { Log } from '@aliceo2/web-ui';
 import { realpath } from 'node:fs/promises';

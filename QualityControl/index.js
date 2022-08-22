@@ -10,16 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Log, HttpServer} from '@aliceo2/web-ui';
+import { Log, HttpServer } from '@aliceo2/web-ui';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 import path from 'path';
-import {setup} from './lib/api.js';
+import { setup } from './lib/api.js';
 
 // Reading config file
-import config from './lib/config/configProvider.cjs';
-import {buildPublicConfig} from './lib/config/publicConfigProvider.cjs';
+import { config } from './lib/config/configProvider.js';
+import { buildPublicConfig } from './lib/config/publicConfigProvider.js';
 
 // Quick check config at start
 
@@ -28,7 +28,7 @@ if (config.http.tls) {
 }
 log.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
 if (typeof config.demoData != 'undefined' && config.demoData) {
-  log.info(`Using demo data`);
+  log.info('Using demo data');
 } else {
   config.demoData = false;
 }

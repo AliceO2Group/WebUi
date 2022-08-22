@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const sinon = require('sinon');
 const assert = require('assert');
@@ -27,34 +27,35 @@ describe('Status Service test suite', () => {
     });
 
     it('should successfully initialize StatusController', () => {
-      assert.doesNotThrow(() => new StatusController({hostname: 'localhost', port: 8080}, {}));
+      assert.doesNotThrow(() => new StatusController({ hostname: 'localhost', port: 8080 }, {}));
     });
   });
 
   describe('`getDataConnectorStatus()` tests', () => {
     let statusService;
-    before(() => statusService = new StatusController(config));
+    before(() => {
+      statusService = new StatusController(config);
+    });
     it('successfully return status with error if no data connector was set', async () => {
       const response = await statusService.getDataConnectorStatus();
-      assert.deepStrictEqual(response, {ok: false, message: 'Data connector was not configured'});
+      assert.deepStrictEqual(response, { ok: false, message: 'Data connector was not configured' });
     });
     it('successfully return status with error if data connector threw an error', async () => {
       const dataConnector = {
-        isConnectionUp: sinon.stub().rejects(new Error('Unable to retrieve status of data store'))
-      }
+        isConnectionUp: sinon.stub().rejects(new Error('Unable to retrieve status of data store')),
+      };
       statusService.setDataConnector(dataConnector);
       const response = await statusService.getDataConnectorStatus();
-      assert.deepStrictEqual(response, {ok: false, message: 'Unable to retrieve status of data store'});
+      assert.deepStrictEqual(response, { ok: false, message: 'Unable to retrieve status of data store' });
     });
     it('successfully return status with ok if data connector passed checks', async () => {
       const dataConnector = {
-        isConnectionUp: sinon.stub().resolves()
-      }
+        isConnectionUp: sinon.stub().resolves(),
+      };
       statusService.setDataConnector(dataConnector);
       const response = await statusService.getDataConnectorStatus();
-      assert.deepStrictEqual(response, {ok: true});
+      assert.deepStrictEqual(response, { ok: true });
     });
-
   });
 
   describe('`getLiveModeConnectorStatus()` tests', () => {
@@ -62,85 +63,85 @@ describe('Status Service test suite', () => {
     before(() => statusService = new StatusController(config));
     it('successfully return status with error if no live connector was set', async () => {
       const response = await statusService.getLiveModeConnectorStatus();
-      assert.deepStrictEqual(response, {ok: false, message: 'Live Mode was not configured'});
+      assert.deepStrictEqual(response, { ok: false, message: 'Live Mode was not configured' });
     });
     it('successfully return status with error if live connector threw an error', async () => {
       const onlineConnector = {
-        getConsulLeaderStatus: sinon.stub().rejects(new Error('Unable to retrieve status of live mode'))
-      }
+        getConsulLeaderStatus: sinon.stub().rejects(new Error('Unable to retrieve status of live mode')),
+      };
       statusService.setLiveModeConnector(onlineConnector);
       const response = await statusService.getLiveModeConnectorStatus();
-      assert.deepStrictEqual(response, {ok: false, message: 'Unable to retrieve status of live mode'});
+      assert.deepStrictEqual(response, { ok: false, message: 'Unable to retrieve status of live mode' });
     });
     it('successfully return status ok if live live connector passed checks', async () => {
       const onlineConnector = {
-        getConsulLeaderStatus: sinon.stub().resolves()
-      }
+        getConsulLeaderStatus: sinon.stub().resolves(),
+      };
       statusService.setLiveModeConnector(onlineConnector);
       const response = await statusService.getLiveModeConnectorStatus();
-      assert.deepStrictEqual(response, {ok: true});
+      assert.deepStrictEqual(response, { ok: true });
     });
   });
 
   describe('`getFrameworkInfo()` tests', () => {
     it('successfully build result JSON with framework information', async () => {
-      const statusService = new StatusController(config)
-      const dataConnector = {isConnectionUp: sinon.stub().resolves()};
-      const onlineConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
+      const statusService = new StatusController(config);
+      const dataConnector = { isConnectionUp: sinon.stub().resolves() };
+      const onlineConnector = { getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured')) };
       statusService.setDataConnector(dataConnector);
       statusService.setLiveModeConnector(onlineConnector);
       const response = await statusService.getFrameworkInfo();
       const result = {
-        qcg: {hostname: 'localhost', port: 8181, status: {ok: true}},
+        qcg: { hostname: 'localhost', port: 8181, status: { ok: true } },
         ccdb: {
-          hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: true}
+          hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: true },
         },
-        consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live mode was not configured'}},
-        quality_control: {version: '0.19.5-1'}
-      }
+        consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live mode was not configured' } },
+        quality_control: { version: '0.19.5-1' },
+      };
       assert.deepStrictEqual(response, result);
     });
   });
 
   describe('`frameworkInfo()` tests', () => {
     it('successfully send back result JSON with framework information', async () => {
-      const statusService = new StatusController(config)
-      const dataConnector = {isConnectionUp: sinon.stub().resolves()};
-      const onlineConnector = {getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured'))};
+      const statusService = new StatusController(config);
+      const dataConnector = { isConnectionUp: sinon.stub().resolves() };
+      const onlineConnector = { getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured')) };
       statusService.setDataConnector(dataConnector);
       statusService.setLiveModeConnector(onlineConnector);
 
       const res = {
         status: sinon.stub().returnsThis(),
-        json: sinon.stub()
-      }
+        json: sinon.stub(),
+      };
       await statusService.frameworkInfo({}, res);
 
       const result = {
-        qcg: {hostname: 'localhost', port: 8181, status: {ok: true}},
+        qcg: { hostname: 'localhost', port: 8181, status: { ok: true } },
         ccdb: {
-          hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: true}
+          hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: true },
         },
-        consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live mode was not configured'}},
-        quality_control: {version: '0.19.5-1'}
-      }
-      assert.ok(res.status.calledWith(200))
-      assert.ok(res.json.calledWith(result))
+        consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live mode was not configured' } },
+        quality_control: { version: '0.19.5-1' },
+      };
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith(result));
     });
   });
 
   describe('`getQCGStatus()` tests', () => {
     it('successfully send back result JSON with framework information', async () => {
-      const statusService = new StatusController(config)
+      const statusService = new StatusController(config);
       const res = {
         status: sinon.stub().returnsThis(),
-        json: sinon.stub()
-      }
+        json: sinon.stub(),
+      };
       await statusService.getQCGStatus({}, res);
 
-      const result = {hostname: 'localhost', port: 8181, status: {ok: true}};
-      assert.ok(res.status.calledWith(200))
-      assert.ok(res.json.calledWith(result))
+      const result = { hostname: 'localhost', port: 8181, status: { ok: true } };
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith(result));
     });
   });
 });
