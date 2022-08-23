@@ -155,6 +155,7 @@ class HttpServer {
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'http://' + hostname + ':' + httpPort, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + httpPort],
+        upgradeInsecureRequests: null,
         frameSrc: iframeCsp
         /* eslint-enable */
       }
