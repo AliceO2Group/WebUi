@@ -45,7 +45,7 @@ try {
 function _getConfigurationFilePath() {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  if (process.argv.length >= 3 && /\.js$/.test(process.argv[2])) {
+  if (process.argv.length >= 3 && /\.m{0,1}js$/.test(process.argv[2])) {
     return process.argv[2];
   } else {
     return join(__dirname, DEFAULT_CONF_LOCATION);
