@@ -6,7 +6,8 @@ on:
       - '.github/workflows/qc.yml'
   push:
     branches:
-      - 'master'
+      - 'main'
+      - 'release/QCG/3.0.0-beta'
       - 'dev'
 
 jobs:
