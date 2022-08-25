@@ -12,12 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-const sinon = require('sinon');
-const nock = require('nock');
-const assert = require('assert');
-const { errorHandler, httpHeadJson } = require('../../../lib/utils');
+import { stub } from 'sinon';
+import nock from 'nock';
+import { ok, strictEqual, deepStrictEqual, rejects } from 'assert';
+import { errorHandler, httpHeadJson } from './../../../lib/utils/utils.js';
 
-describe('Utility methods test suite', () => {
+export default async () => {
   before(() => nock.cleanAll());
 
   describe('Check errors are handled and sent successfully', () => {
@@ -25,24 +25,24 @@ describe('Utility methods test suite', () => {
 
     beforeEach(() => {
       res = {
-        status: sinon.stub().returnsThis(),
-        send: sinon.stub(),
+        status: stub().returnsThis(),
+        send: stub(),
       };
     });
 
     it('should successfully respond with built error message when there is a message and no status', () => {
       errorHandler('Error', 'Error', res);
-      assert.ok(res.status.calledOnce);
+      ok(res.status.calledOnce);
     });
 
     it('should successfully respond with built error message and status > 500', () => {
       errorHandler('Error', 'Error', res, 502);
-      assert.ok(res.status.calledWith(502));
+      ok(res.status.calledWith(502));
     });
 
     it('should successfully respond with built error message and status < 500', () => {
       errorHandler('Error', 'Error', res, 404);
-      assert.ok(res.status.calledWith(404));
+      ok(res.status.calledWith(404));
     });
 
     it('should successfully respond with built error.message and status', () => {
@@ -51,15 +51,15 @@ describe('Utility methods test suite', () => {
         stack: 'Some Stack',
       };
       errorHandler(err, 'Error To Send', res, 502);
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({ message: 'Error To Send' }));
+      ok(res.status.calledWith(502));
+      ok(res.send.calledWith({ message: 'Error To Send' }));
     });
 
     it('should successfully respond with built error.message, no stack and status', () => {
       const err = 'Test Error';
       errorHandler(err, 'Error To Send', res, 404);
-      assert.ok(res.status.calledWith(404));
-      assert.ok(res.send.calledWith({ message: 'Error To Send' }));
+      ok(res.status.calledWith(404));
+      ok(res.send.calledWith({ message: 'Error To Send' }));
     });
   });
 
@@ -71,8 +71,8 @@ describe('Utility methods test suite', () => {
         .reply(200);
 
       const { status, headers } = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432');
-      assert.strictEqual(status, 200);
-      assert.deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
+      strictEqual(status, 200);
+      deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
     });
 
     it('should successfully return status and headers with host, port, path and headers provided', async () => {
@@ -84,8 +84,8 @@ describe('Utility methods test suite', () => {
         .reply(200);
 
       const { status, headers } = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432', { Accept: 'text' });
-      assert.strictEqual(status, 200);
-      assert.deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
+      strictEqual(status, 200);
+      deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
     });
     it('should reject if call was not successful', async () => {
       nock('http://ccdb:8500')
@@ -93,9 +93,9 @@ describe('Utility methods test suite', () => {
         .head('/qc/some/test/123455432')
         .replyWithError('Something went wrong');
 
-      await assert.rejects(async () => {
+      await rejects(async () => {
         await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432');
       }, new Error('Something went wrong'));
     });
   });
-});
+};

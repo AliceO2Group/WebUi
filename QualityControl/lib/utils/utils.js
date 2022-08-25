@@ -18,9 +18,11 @@ import http from 'http';
 
 /**
  * Global HTTP error handler, sends status 500
- * @param {string} err - Message error
+ * @param {string} errToLog - Error for qcg own logs
+ * @param {string} errToSend - Error to be stored in InfoLogger for user investigation
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
+ * @param {string} facility - service that sends the log
  * @returns {void}
  */
 export function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils') {
@@ -30,7 +32,9 @@ export function errorHandler(errToLog, errToSend, res, status = 500, facility = 
 
 /**
  * Global Error Logger for AliECS GUI
- * @param {Error} err
+ * @param {Error} err - error that should be logged
+ * @param {string} facility - service that sends the log
+ * @returns {void}
  */
 export function errorLogger(err, facility = 'utils') {
   log.facility = `${process.env.npm_config_log_label ?? 'qcg'}/${facility}`;
@@ -41,10 +45,11 @@ export function errorLogger(err, facility = 'utils') {
 }
 
 /**
- * Util to get JSON data (parsed) from server
- * @param {string} host - hostname of the server
- * @param {number} port - port of the server
- * @param {string} path - path of the server request
+ * Util to get JSON data (parsed) from server via a GET HTTP request
+ * @param {string} hostname - hostname of the server to where request will be made
+ * @param {number} port - port of the server to where request will be made
+ * @param {string} path - path of the server request to where request will be made
+ * @param {JSON} headers - configurable headers for the request
  * @return {Promise.<Object, Error>} JSON response
  */
 export function httpGetJson(hostname, port, path, headers = { Accept: 'application/json' }) {
@@ -54,7 +59,8 @@ export function httpGetJson(hostname, port, path, headers = { Accept: 'applicati
     /**
      * Generic handler for client http requests,
      * buffers response, checks status code and parses JSON
-     * @param {Response} response
+     * @param {Response} response - response object to be used for building the JSON response
+     * @return {Promise.<Object, Error>} - JSON response
      */
     const requestHandler = (response) => {
       if (response.statusCode < 200 || response.statusCode > 299) {
@@ -81,8 +87,12 @@ export function httpGetJson(hostname, port, path, headers = { Accept: 'applicati
 }
 
 /**
- * Make a HEAD HTTP call and return a promise
- * @returns {Promise.<{status, headers}, Error>}
+ * Util to get JSON data (parsed) from server via a HEAD HTTP request
+ * @param {string} hostname - hostname of the server to where request will be made
+ * @param {number} port - port of the server to where request will be made
+ * @param {string} path - path of the server request to where request will be made
+ * @param {JSON} headers - configurable headers for the request
+ * @returns {Promise.<{status, headers}, Error>} - JSON response
  */
 export function httpHeadJson(hostname, port, path, headers = { Accept: 'application/json' }) {
   const requestOptions = { hostname, port, path, method: 'HEAD', headers };

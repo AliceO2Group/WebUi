@@ -20,7 +20,7 @@ import { testConfig as config } from './../../test-config.js';
 
 import { buildPublicConfig } from './../../../lib/config/publicConfigProvider.js';
 
-describe('Public Configuration Test Suite', () => {
+export default async () => {
   const RELATIVE_CONF_LOCATION = '../../../public/config.js';
   it('should successfully create JS module with public configuration as export', () => {
     doesNotThrow(() => buildPublicConfig(config));
@@ -32,4 +32,4 @@ describe('Public Configuration Test Suite', () => {
     const confExists = existsSync(join(__dirname, RELATIVE_CONF_LOCATION));
     ok(confExists, 'Public configuration file was not identified');
   });
-});
+};
