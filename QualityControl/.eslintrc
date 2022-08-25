@@ -10,8 +10,7 @@
         "mocha": true
     },
     "ignorePatterns": [
-        "node_modules/",
-        "cpp-api-client/"
+        "node_modules/"
     ],
     "globals": {
         "Promise": true
