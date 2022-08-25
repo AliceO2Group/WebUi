@@ -19,13 +19,13 @@
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "start": "node index.js",
-    "test": "npm run eslint && npm run mocha",
+    "test": "npm run mocha",
     "integration-test": "mocha --exit --bail ./test/integration/qcg-test.cjs -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config .eslintrc *.js lib/ public/",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
-    "mocha": "mocha --exit $(find test -name 'public-config.test.js') "
+    "mocha": "mocha --exit test/mocha-index.js"
   },
   "dependencies": {
     "@aliceo2/web-ui": "1.25.1",
@@ -39,7 +39,6 @@
   ],
   "devDependencies": {
     "eslint": "^8.18.0",
-    "eslint-config-google": "^0.12.0",
     "mocha": "^10.0.0",
     "nock": "^13.2.2",
     "nyc": "^15.1.0",
