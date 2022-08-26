@@ -29,7 +29,7 @@ import {getTaskShortName} from './../../../common/utils.js';
  */
 export const calibrationActionCard = (calibrationConfiguration, ongoingCalibrationRun, detector, onclick) => {
   const {runType, configuration, label} = calibrationConfiguration;
-  if (!ongoingCalibrationRun?.kind) {
+  if (!(ongoingCalibrationRun instanceof RemoteData)) {
     ongoingCalibrationRun = RemoteData.success(ongoingCalibrationRun);
   }
 
@@ -49,7 +49,7 @@ export const calibrationActionCard = (calibrationConfiguration, ongoingCalibrati
       ]),
       h('small', `${configuration}`)
     ]), [
-      ongoingCalibrationRun && ongoingCalibrationRun.match({
+      ongoingCalibrationRun?.match({
         NotAsked: () => null,
         Loading: () => null,
         Success: (result) => calibrationEventsDisplay(result?.events),
