@@ -10,11 +10,14 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * RemoteData is tagged union type representing remote data loaded via network.
  * http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html
+ *
+ * @template P, [E=Object]
+ *
  * @example
  * import {RemoteData} from '/js/src/index.js';
  * var item = RemoteData.NotAsked();
@@ -28,13 +31,17 @@
  * }) === 1
  */
 class RemoteData {
+
   /**
    * Private constructor, use factories.
    * @param {string} kind
-   * @param {Any} payload
+   * @param {P|E|undefined} [payload]
    */
   constructor(kind, payload) {
     this.kind = kind;
+    /**
+     * @type {P|E|undefined}
+     */
     this.payload = payload;
   }
 
@@ -42,8 +49,12 @@ class RemoteData {
    * Find the matching kind in the keys of `clauses` and returns
    * the computed value of the corresponding function.
    * An error is thrown if all clauses are not listed.
-   * @param {Object.<string,function>} clauses
-   * @return {Any} result of the function associated to clause
+   * @param {Object} clauses
+   * @param {function():*} clauses.NotAsked the function called when remote data kind is "NotAsked"
+   * @param {function():*} clauses.Loading the function called when remote data kind is "NotAsked"
+   * @param {function(P):*} clauses.Success the function called when remote data kind is "NotAsked"
+   * @param {function(E):*} clauses.Failure the function called when remote data kind is "NotAsked"
+   * @return {P|E|undefined} result of the function associated to clause
    * @example
    * import {RemoteData} from '/js/src/index.js';
    * var item = RemoteData.NotAsked();
@@ -112,48 +123,87 @@ class RemoteData {
   isFailure() {
     return this.kind === 'Failure';
   }
+
+  /**
+   * Factory to create new 'NotAsked' RemoteData kind
+   * (NotAsked is not eslint compatible and deprecated, use notAsked)
+   *
+   * @return {RemoteData}
+   * @static
+   */
+  static notAsked() {
+    return new RemoteData('NotAsked');
+  }
+
+  /**
+   * @see notAsked
+   * @deprecated
+   */
+  static NotAsked() {
+    return RemoteData.notAsked();
+  }
+
+  /**
+   * Factory to create new 'Loading' RemoteData kind
+   * (Loading is not eslint compatible and deprecated, use loading)
+   *
+   * @return {RemoteData}
+   * @static
+   */
+  static loading() {
+    return new RemoteData('Loading');
+  }
+
+  /**
+   * @see loading
+   * @deprecated
+   * @static
+   */
+  static Loading() {
+    return RemoteData.loading();
+  }
+
+  /**
+   * Factory to create new 'Success' RemoteData kind
+   * (Success is not eslint compatible and deprecated, use success)
+   *
+   * @param {P} payload
+   * @return {RemoteData<P>}
+   * @static
+   */
+  static success(payload) {
+    return new RemoteData('Success', payload);
+  }
+
+  /**
+   * @see success
+   * @deprecated
+   * @static
+   */
+  static Success(payload) {
+    return RemoteData.success(payload);
+  }
+
+  /**
+   * Factory to create new 'Failure' RemoteData kind
+   * (Failure is not eslint compatible and deprecated, use failure)
+   *
+   * @param {E} payload
+   * @return {RemoteData<*, E>}
+   * @static
+   */
+  static failure(payload) {
+    return new RemoteData('Failure', payload);
+  }
+
+  /**
+   * @see RemoteData.failure
+   * @deprecated
+   * @static
+   */
+  static Failure(payload) {
+    return RemoteData.failure(payload);
+  }
 }
-
-/**
- * Factory to create new 'NotAsked' RemoteData kind
- * (NotAsked is not eslint compatible and deprecated, use notAsked)
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
- */
-RemoteData.notAsked = RemoteData.NotAsked = () => new RemoteData('NotAsked');
-
-/**
- * Factory to create new 'Loading' RemoteData kind
- * (Loading is not eslint compatible and deprecated, use loading)
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
- */
-RemoteData.loading = RemoteData.Loading = () => new RemoteData('Loading');
-
-/**
- * Factory to create new 'Success' RemoteData kind
- * (Success is not eslint compatible and deprecated, use success)
- * @param {Any} payload
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
- */
-RemoteData.success = RemoteData.Success = (payload) => new RemoteData('Success', payload);
-
-/**
- * Factory to create new 'Failure' RemoteData kind
- * (Failure is not eslint compatible and deprecated, use failure)
- * @param {Any} payload
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
- */
-RemoteData.failure = RemoteData.Failure = (payload) => new RemoteData('Failure', payload);
 
 export default RemoteData;
