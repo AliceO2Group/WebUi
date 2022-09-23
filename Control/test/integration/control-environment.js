@@ -79,14 +79,14 @@ describe('`Control Environment` test-suite', async () => {
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
   });
 
-  it(`should have one button for RESET in state CONFIGURED (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
-    const resetButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
-    const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
+  // it(`should have one button for RESET in state CONFIGURED (workflow '${workflowToTest}')`, async () => {
+  //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
+  //   const resetButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
+  //   const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
 
-    assert.strictEqual(state, 'CONFIGURED', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
-    assert.strictEqual(resetButton, 'RESET', 'Could not found button for resetting (stand-by) environment probably due to bad state of environment');
-  });
+  //   assert.strictEqual(state, 'CONFIGURED', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
+  //   assert.strictEqual(resetButton, 'RESET', 'Could not found button for resetting (stand-by) environment probably due to bad state of environment');
+  // });
 
   // it(`should successfully transition CONFIGURED -> DEPLOYED by clicking RESET button(workflow '${workflowToTest}')`, async () => {
   //   await page.waitForTimeout(5000); // Standby for 5s
