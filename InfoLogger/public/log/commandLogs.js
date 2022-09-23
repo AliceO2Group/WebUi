@@ -136,7 +136,7 @@ const downloadButtonGroup = (log) =>
       }
     }, iconDataTransferDownload(), ' Download'),
     h('.dropdown-menu', [
-      log.limit < 10001 && h('a.menu-item.m3.mv2.text-ellipsis', {
+      log.limit < 100001 && h('a.menu-item.m3.mv2.text-ellipsis', {
         href: `data:application/octet;,${encodeURIComponent(log.download.fullContent)}`,
         download: `InfoLog${new Date().toLocaleString()}.txt`,
         onclick: () => log.removeLogDownloadContent()
