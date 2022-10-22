@@ -14,6 +14,7 @@
 
 const {access, constants: {X_OK}} = require('fs');
 const {execFile} = require('child_process');
+const InfoLoggerMessage = require('./InfoLoggerMessage.js');
 
 /**
  * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
@@ -73,7 +74,7 @@ class InfoLoggerSender {
    */
   send(log, severity = 'Info', facility = '', level = 99) {
     if (this._isConfigured) {
-      log = this._removeNewLinesAndTabs(log);
+      log = InfoLoggerMessage._removeNewLinesAndTabs(log);
       execFile(this._PATH, [
         `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
       ], (error, _, stderr) => {
