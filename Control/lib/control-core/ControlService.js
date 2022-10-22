@@ -201,7 +201,7 @@ class ControlService {
       delete req.body.runNumber;
 
       log.infoMessage(`${username}(${personid}) => ${method} ${type}`, {
-        level: 1, username, facility: 'cog/controlservice', partition, run
+        level: 1, facility: 'cog/controlservice', partition, run
       });
     }
     next();
