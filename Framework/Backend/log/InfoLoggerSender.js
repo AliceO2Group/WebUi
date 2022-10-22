@@ -40,6 +40,24 @@ class InfoLoggerSender {
   }
 
   /**
+   * Send an InfoLoggerMessage to InfoLoggerServer if configured
+   * @param {InfoLoggerMessage} log - log message
+   */
+  sendMessage(log) {
+    if (this._isConfigured) {
+      execFile(this._PATH, log.getComponentsOfMessage(), (error, _, stderr) => {
+        if (error) {
+          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});
+        }
+        if (stderr) {
+          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility});
+        }
+      });
+    }
+  }
+
+  /**
+   * @deprecated
    * Send a message to InfoLogger with certain fields filled.
    * @param {string} log - log message
    * @param {string} severity - one of InfoLogger supported severities: 'Info'(default), 'Error', 'Fatal', 'Warning', 'Debug'
@@ -59,25 +77,6 @@ class InfoLoggerSender {
           this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility});
         }
       });
-    }
-  }
-
-  /**
-   * Replace all occurrences of new lines, tabs or groups of 4 spaces with an empty space
-   * @param {Object|Error|String} log
-   * @return {String}
-   */
-  _removeNewLinesAndTabs(log) {
-    try {
-      if (log instanceof Error) {
-        return log.toString().replace(/ {4}|[\t\n\r]/gm, ' ');
-      } else if (log instanceof Object) {
-        return JSON.stringify(log).replace(/ {4}|[\t\n\r]/gm, ' ');
-      }
-      return log.replace(/ {4}|[\t\n\r]/gm, ' ');
-    } catch (error) {
-      this.winston.error({message: `Unable to parse received log due to: ${error}`, label: 'ilg/sender'});
-      return '';
     }
   }
 

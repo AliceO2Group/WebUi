@@ -22,8 +22,6 @@ const config = require('../config.json');
 
 const Log = require('../../log/Log.js');
 const InfoLoggerReceiver = require('../../log/InfoLoggerReceiver.js');
-const InfoLoggerSender = require('../../log/InfoLoggerSender.js');
-const Winston = require('../../log/WinstonWrapper.js');
 
 describe('Logging via WinstonWrapper', () => {
   it('should successfully instantiate Log class and generate error file (winston)', (done) => {
@@ -35,36 +33,6 @@ describe('Logging via WinstonWrapper', () => {
       assert.ok(fs.existsSync('./Backend/test/log/error.log'));
       done();
     }, 100);
-  });
-});
-
-describe('Logging: InfoLoggerSender', () => {
-  let sender;
-  before(() => {
-    const winston = new Winston();
-    sender = new InfoLoggerSender(winston.instance, 'sender');
-  })
-
-  it('should successfully parse Error into one line string message', () => {
-    assert.strictEqual(sender._removeNewLinesAndTabs(new Error('Error in Error')), 'Error: Error in Error', 'Parsed message from Error is incorrect');
-  });
-
-  it('should successfully parse Object into one line string message', () => {
-    class T {constructor() {this.message = 'Test Class Parse';} }
-    assert.strictEqual(sender._removeNewLinesAndTabs(new T()), '{"message":"Test Class Parse"}', 'Parsed message from class T is incorrect');
-    assert.strictEqual(sender._removeNewLinesAndTabs({error: 'Error in JSON'}), '{"error":"Error in JSON"}', 'Parsed message from JSON is incorrect');
-  });
-
-  it('should successfully parse multi-line string into one line string message', () => {
-    const multiLineString = 'SomeError\nHappenedHere\nAnd\nthere\tplus\tsomeother';
-    assert.strictEqual(sender._removeNewLinesAndTabs(multiLineString), 'SomeError HappenedHere And there plus someother');
-  });
-
-  it('should successfully return empty string if log is undefined or null', () => {
-    assert.strictEqual(sender._removeNewLinesAndTabs(''), '', '1');
-    assert.strictEqual(sender._removeNewLinesAndTabs(undefined), '', '2');
-    assert.strictEqual(sender._removeNewLinesAndTabs(null), '', '3');
-    assert.strictEqual(sender._removeNewLinesAndTabs(), '', '4');
   });
 });
 
