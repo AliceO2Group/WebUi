@@ -39,7 +39,7 @@ try {
 }
 
 const config = require(configFile);
-Log.configure(config);
+Log.configure(config.logging);
 log.info(`Read config file "${configFile}"`);
 
 module.exports = config;
