@@ -47,7 +47,7 @@ class Log {
     if (config?.winston) {
       winston = new WinstonWrapper(config.winston);
     }
-    if (config?.infoLoggerSender) {
+    if (config?.infologger) {
       infologger = new InfoLoggerSender(winston.instance, this.label);
     }
   }

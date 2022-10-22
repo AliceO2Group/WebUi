@@ -26,8 +26,8 @@ class WinstonWrapper {
   constructor(config = {}) {
     this._instance = createLogger({
       transports: [
-        this._consoleTransport(config),
-        ...(config.file ? this._fileTransport(config) : []),
+        this._consoleTransport(config?.console),
+        ...(config.file ? this._fileTransport(config.file) : []),
       ],
       exitOnError: true,
     });
@@ -41,7 +41,7 @@ class WinstonWrapper {
    * @param {JSON} - object which may contain console transport configuration fields
    * @returns {winston.transports.ConsoleTransportInstance}
    */
-  _consoleTransport({consoleSystemd = undefined, consoleLvl = 'debug'}) {
+  _consoleTransport({systemd = undefined, level = 'debug'}) {
     // Mapping between winston levels and journalctl priorities
     const systemdPr = {
       debug: '<7>',
@@ -52,7 +52,7 @@ class WinstonWrapper {
     };
 
     const formatter = format.printf((log) => {
-      const prefix = consoleSystemd ? systemdPr[log.level] : log.timestamp;
+      const prefix = systemd ? systemdPr[log.level] : log.timestamp;
       const label = log.label ? `[${log.label}]` : '[gui/log]';
       const output = `${log.level}: ${log.message}`;
       
@@ -60,7 +60,7 @@ class WinstonWrapper {
     });
 
     return new Console({
-      level: consoleLvl,
+      level,
       format: format.combine(
         format.timestamp(),
         format.colorize(),
@@ -75,10 +75,10 @@ class WinstonWrapper {
    * @param {JSON} - object which may contain file transport configuration fields
    * @returns {winston.transports.FileTransportInstance}
    */
-  _fileTransport({file, fileLvl = 'info'}) {
+  _fileTransport({name, level = 'info'}) {
     return new File({
-      level: fileLvl,
-      filename: file,
+      level,
+      filename: name,
       format: format.combine(
         format.timestamp(),
         format.prettyPrint()
