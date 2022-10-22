@@ -25,6 +25,7 @@ const parseObject = (item, key) => {
         : (item['trg_global_run_enabled'] === "true" ? 'CTP' : 'LTU');
     case 'dcs_enabled':
     case 'epn_enabled':
+    case 'ctp_readout_enabled':
       return item[key] && item[key] === 'true' ? 'ON' : 'OFF'
     case 'odc_topology':
       return _parseTopology(item);

@@ -135,7 +135,8 @@ const buttonRemoveRequest = (model, id, personid) =>
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'Run', 'ID', 'Run Type', 'Created', 'Detectors', 'FLPs', 'EPNs', 'DCS', 'TRG', 'EPN', 'ODC', 'State', 'InfoLogger'
+    'Run', 'ID', 'Run Type', 'Created', 'Detectors', 'FLPs', 'EPNs', 'DCS', 'TRG', 'EPN', 'ODC', 'CTP Readout',
+    'State', 'InfoLogger'
   ];
   return h('table.table', [
     h('thead', [
@@ -168,6 +169,8 @@ const environmentsTable = (model, list) => {
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
+        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_readout_enabled')),
+        
         h(`td${parseOdcStatusPerEnv(item.id, model) === 'RUNNING' ? '.success' : ''}`, {
           style: 'text-align: center;'
         }, parseOdcStatusPerEnv(item.id, model)),
