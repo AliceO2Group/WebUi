@@ -17,57 +17,50 @@
 
 const assert = require('assert');
 const fs = require('fs');
+
+const config = require('./config.json');
+
 const Log = require('./../log/Log.js');
-const config = require('./../config-default.json');
 const InfoLoggerReceiver = require('./../log/InfoLoggerReceiver.js');
 const InfoLoggerSender = require('./../log/InfoLoggerSender.js');
-const Winston = require('./../log/winston.js');
+const Winston = require('./../log/WinstonWrapper.js');
 
-const skip = true;
-
-describe('Logging: winston', () => {
-  it('Generate error file (winston)', (done) => {
-    const winstonConf = {winston: config.log.winston};
-    Log.configure(winstonConf);
-    const logger = new Log('test-winston');
+describe('Logging via WinstonWrapper', () => {
+  it('should successfully generate error file (winston)', (done) => {
+    Log.configure(config.log);
+    
+    const logger = new Log('test/winston');
     logger.error('Test error winston');
     setTimeout(() => {
-      assert.ok(fs.existsSync('./error.log'));
+      assert.ok(fs.existsSync('./Backend/test/error.log'));
       done();
     }, 100);
   });
 });
 
-describe('Logging: InfoLogger sender', () => {
+describe('Logging: InfoLoggerSender', () => {
   let sender;
   before(() => {
     const winston = new Winston();
-    sender = new InfoLoggerSender(winston.instance, config.log.infologger.sender);
+    sender = new InfoLoggerSender(winston.instance, 'sender');
   })
-  it('Send log over named socket', function() {
-    if (skip) {
-      this.skip(); // eslint-disable-line no-invalid-this
-    }
-    sender.send({severity: 'D', message: 'test', rolename: 'il-sender-test'});
-    sender.close()
-  });
 
-  it('should succesfully parse Error into one line string message', () => {
+  it('should successfully parse Error into one line string message', () => {
     assert.strictEqual(sender._removeNewLinesAndTabs(new Error('Error in Error')), 'Error: Error in Error', 'Parsed message from Error is incorrect');
   });
 
-  it('should succesfully parse Object into one line string message', () => {
+  it('should successfully parse Object into one line string message', () => {
     class T {constructor() {this.message = 'Test Class Parse';} }
     assert.strictEqual(sender._removeNewLinesAndTabs(new T()), '{"message":"Test Class Parse"}', 'Parsed message from class T is incorrect');
     assert.strictEqual(sender._removeNewLinesAndTabs({error: 'Error in JSON'}), '{"error":"Error in JSON"}', 'Parsed message from JSON is incorrect');
   });
 
-  it('should succesfully parse multi-line string into one line string message', () => {
+  it('should successfully parse multi-line string into one line string message', () => {
     const multiLineString = 'SomeError\nHappenedHere\nAnd\nthere\tplus\tsomeother';
     assert.strictEqual(sender._removeNewLinesAndTabs(multiLineString), 'SomeError HappenedHere And there plus someother');
   });
 
-  it('should succesfully return empty string if log is undefined or null', () => {
+  it('should successfully return empty string if log is undefined or null', () => {
     assert.strictEqual(sender._removeNewLinesAndTabs(''), '', '1');
     assert.strictEqual(sender._removeNewLinesAndTabs(undefined), '', '2');
     assert.strictEqual(sender._removeNewLinesAndTabs(null), '', '3');
@@ -76,7 +69,7 @@ describe('Logging: InfoLogger sender', () => {
 });
 
 describe('Logging: InfoLogger protocol', () => {
-  it('Parse protocol 1.4 with empty fields', () => {
+  it('should successfully parse protocol 1.4 with empty fields', () => {
     const receiver = new InfoLoggerReceiver();
     const message = '*1.4#I##1505140368.399439#o2test#O2#143388#root#DAQ#P2##PHY##123###test\n';
     const expected = {
@@ -97,7 +90,7 @@ describe('Logging: InfoLogger protocol', () => {
   });
 
 
-  it('Parse protocol 1.3', (done) => {
+  it('should successfully parse protocol 1.3', (done) => {
     const receiver = new InfoLoggerReceiver();
     // eslint-disable-next-line max-len
     const message = '*1.3#I##1505140368.399439#o2test#O2#143388#root#DAQ#P2#Alice#PHY#dest##123#8#source.cpp#test\n';
@@ -125,7 +118,7 @@ describe('Logging: InfoLogger protocol', () => {
     receiver.onData(message);
   });
 
-  it('Parse multiple 1.3 logs', (done) => {
+  it('should successfully parse multiple 1.3 logs', (done) => {
     const receiver = new InfoLoggerReceiver();
     let counter = 0;
     receiver.on('message', (parsed) => {
@@ -147,7 +140,7 @@ describe('Logging: InfoLogger protocol', () => {
     /* eslint-enable max-len */
   });
 
-  it('Parse chopped log', (done) => {
+  it('should successfully parse chopped log', (done) => {
     const receiver = new InfoLoggerReceiver();
     const message = '*1.3#I##1505140368.399439#o2test#O2#143388#ro';
     const message2 = 'ot#DAQ#P2#Alice#PHY#dest##123#8#source.cpp#test\n';
@@ -182,7 +175,7 @@ describe('Logging: InfoLogger protocol', () => {
     receiver.onData(message2);
   });
 
-  it('Parse multiple logs, last one chopped', (done) => {
+  it('should successfully parse multiple logs, last one chopped', (done) => {
     const receiver = new InfoLoggerReceiver();
     let counter = 0;
     receiver.on('message', (parsed) => {

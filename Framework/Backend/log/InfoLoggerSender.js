@@ -51,7 +51,7 @@ class InfoLoggerSender {
       log = this._removeNewLinesAndTabs(log);
       execFile(this._PATH, [
         `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
-      ], (error, stdout, stderr) => {
+      ], (error, _, stderr) => {
         if (error) {
           this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});
         }

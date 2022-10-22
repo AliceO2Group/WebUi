@@ -23,11 +23,11 @@ class WinstonWrapper {
    * Constructor for the ALICEO2 WinstonWrapper which allows custom formatting and transport
    * @param {JSON} config configuration for console and file transports
    */
-  constructor(config = {}) {
+  constructor(config) {
     this._instance = createLogger({
       transports: [
         this._consoleTransport(config?.console),
-        ...(config.file ? this._fileTransport(config.file) : []),
+        ...(config?.file?.name ? [this._fileTransport(config.file)] : []),
       ],
       exitOnError: true,
     });
@@ -38,10 +38,10 @@ class WinstonWrapper {
    * Messages will be prefixed with a timestamp and a label
    * @example
    * // 2022-10-22T10:27:53.903Z [test/service] debug: Created default instance of console logger
-   * @param {JSON} - object which may contain console transport configuration fields
+   * @param {{systemd: string, level: string}} - object which may contain console transport configuration fields
    * @returns {winston.transports.ConsoleTransportInstance}
    */
-  _consoleTransport({systemd = undefined, level = 'debug'}) {
+  _consoleTransport(console = {systemd: undefined, level: 'debug'}) {
     // Mapping between winston levels and journalctl priorities
     const systemdPr = {
       debug: '<7>',
@@ -52,7 +52,7 @@ class WinstonWrapper {
     };
 
     const formatter = format.printf((log) => {
-      const prefix = systemd ? systemdPr[log.level] : log.timestamp;
+      const prefix = console.systemd ? systemdPr[log.level] : log.timestamp;
       const label = log.label ? `[${log.label}]` : '[gui/log]';
       const output = `${log.level}: ${log.message}`;
       
@@ -60,7 +60,7 @@ class WinstonWrapper {
     });
 
     return new Console({
-      level,
+      level: console.level,
       format: format.combine(
         format.timestamp(),
         format.colorize(),
@@ -72,7 +72,7 @@ class WinstonWrapper {
   /**
    * Configures the file transporter and returns a new instance of it
    * Messages will be prefixed with a timestamp and printed using the winston formatter
-   * @param {JSON} - object which may contain file transport configuration fields
+   * @param {{name: string, level: string}} - object which may contain file transport configuration fields
    * @returns {winston.transports.FileTransportInstance}
    */
   _fileTransport({name, level = 'info'}) {
