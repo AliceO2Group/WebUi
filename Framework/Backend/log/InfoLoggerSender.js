@@ -26,6 +26,7 @@ class InfoLoggerSender {
   constructor(winston, label = '') {
     this._isConfigured = false;
     this.winston = winston;
+    this.label = label;
 
     // for security reasons this path is hardcoded
     this._PATH = '/opt/o2-InfoLogger/bin/o2-infologger-log';
@@ -47,10 +48,16 @@ class InfoLoggerSender {
     if (this._isConfigured) {
       execFile(this._PATH, log.getComponentsOfMessage(), (error, _, stderr) => {
         if (error) {
-          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});
+          this.winston.debug({
+            message: `Impossible to write a log to InfoLogger due to: ${error}`, 
+            label: log._facility
+          });
         }
         if (stderr) {
-          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility});
+          this.winston.debug({
+            message: `Impossible to write a log to InfoLogger due to: ${stderr}`,
+            label: log._facility
+          });
         }
       });
     }
