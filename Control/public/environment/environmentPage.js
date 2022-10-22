@@ -198,18 +198,13 @@ const showEnvDetailsTable = (model, item) => {
         ]
         )
       ]),
-      item.state === 'RUNNING' && h(`tr`, [
+      h(`tr`, [
         h(`th${width}`,
           h('.w-100.flex-row', [
             h('.w-70', 'Run Type'),
           ])
         ),
-        h('td', [
-          h('.badge.bg-success.white', {
-            style: 'font-size:35px'
-          }, item.userVars.run_type ? item.userVars.run_type : '-'),
-        ]
-        )
+        h('td',  item.userVars.run_type ? item.userVars.run_type : '-')
       ]),
       h('tr', [
         h(`th${width}`,

@@ -135,12 +135,12 @@ const buttonRemoveRequest = (model, id, personid) =>
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'Run', 'ID', 'Run Type', 'Created', 'Detectors', 'FLPs', 'EPNs', 'DCS', 'TRG', 'EPN', 'ODC', 'CTP Readout',
+    'Run', 'ID', 'Run Type', 'Created', 'Detectors', 'FLPs', 'EPNs', 'DCS', 'TRG', 'EPN', 'CTP Readout', 'ODC',
     'State', 'InfoLogger'
   ];
   return h('table.table', [
     h('thead', [
-      h('tr.table-primary', h('th', {colspan: 12}, 'Active Environments')),
+      h('tr.table-primary', h('th', {colspan: 14}, 'Active Environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
