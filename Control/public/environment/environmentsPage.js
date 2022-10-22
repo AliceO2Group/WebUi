@@ -135,7 +135,7 @@ const buttonRemoveRequest = (model, id, personid) =>
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'Run', 'ID', 'Created', 'Detectors', 'FLPs', 'DCS', 'TRG', 'EPN', 'ODC', 'EPN Topology', 'State', 'InfoLogger'
+    'Run', 'ID', 'Created', 'Detectors', 'FLPs', 'EPNs', 'DCS', 'TRG', 'EPN', 'ODC', 'State', 'InfoLogger'
   ];
   return h('table.table', [
     h('thead', [
@@ -163,13 +163,13 @@ const environmentsTable = (model, list) => {
             : '-'
         ]),
         h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
+        h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.odc_n_epns : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
         h(`td${parseOdcStatusPerEnv(item.id, model) === 'RUNNING' ? '.success' : ''}`, {
           style: 'text-align: center;'
         }, parseOdcStatusPerEnv(item.id, model)),
-        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {
           class: (item.state === 'RUNNING' ?
             'success'
