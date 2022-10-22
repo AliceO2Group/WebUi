@@ -28,7 +28,7 @@
   "log": {
     "winston": {
       "file": {
-        "name": "./Backend/test/error.log",
+        "name": "./Backend/test/log/error.log",
         "level": "error"
       },
       "console": {

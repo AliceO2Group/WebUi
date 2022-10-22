@@ -18,21 +18,21 @@
 const assert = require('assert');
 const fs = require('fs');
 
-const config = require('./config.json');
+const config = require('../config.json');
 
-const Log = require('./../log/Log.js');
-const InfoLoggerReceiver = require('./../log/InfoLoggerReceiver.js');
-const InfoLoggerSender = require('./../log/InfoLoggerSender.js');
-const Winston = require('./../log/WinstonWrapper.js');
+const Log = require('../../log/Log.js');
+const InfoLoggerReceiver = require('../../log/InfoLoggerReceiver.js');
+const InfoLoggerSender = require('../../log/InfoLoggerSender.js');
+const Winston = require('../../log/WinstonWrapper.js');
 
 describe('Logging via WinstonWrapper', () => {
-  it('should successfully generate error file (winston)', (done) => {
+  it('should successfully instantiate Log class and generate error file (winston)', (done) => {
     Log.configure(config.log);
     
     const logger = new Log('test/winston');
     logger.error('Test error winston');
     setTimeout(() => {
-      assert.ok(fs.existsSync('./Backend/test/error.log'));
+      assert.ok(fs.existsSync('./Backend/test/log/error.log'));
       done();
     }, 100);
   });
