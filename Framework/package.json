@@ -18,7 +18,7 @@
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "test": "npm run eslint && npm run mocha",
-    "coverage": "npm run eslint && nyc mocha Backend/test/ --exit",
+    "coverage": "npm run eslint && nyc mocha Backend/test/** --exit",
     "mocha": "npm run mocha-frontend && npm run mocha-backend",
     "mocha-frontend": "mocha --exit ./Frontend/test/mocha*  --retries 2",
     "mocha-backend": "mocha --exit ./Backend/test/*.js ./Backend/test/**/*.js  --retries 2",
