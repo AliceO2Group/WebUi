@@ -54,7 +54,10 @@ module.exports = {
   utils: {
     refreshTask: 10000, // how often should task list page should refresh its content
     refreshEnvs: 10000, // how often should env list page should refresh its content
-  }
+  },
+  logging: {
+    infologger: false,
+  },
   // infoLoggerGui: {
   //   hostname: 'localhost',
   //   port: 8081
