@@ -62,7 +62,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
       disabled: environment.itemControl.isLoading(),
       style: item.state !== stateToHide ? 'display: none;' : '',
       onclick: () => {
-        environment.controlEnvironment({id: item.id, type: type});
+        environment.controlEnvironment({id: item.id, type, runNumber: item.currentRunNumber});
       },
       title: item.state !== stateToHide ? `'${label}' cannot be used in state '${item.state}'` : label
     },
@@ -81,7 +81,7 @@ const shutdownEnvButton = (environment, item) =>
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     style: {display: (item.state === 'CONFIGURED' || item.state == 'DEPLOYED') ? '' : 'none'},
-    onclick: () => environment.destroyEnvironment({id: item.id}),
+    onclick: () => environment.destroyEnvironment({id: item.id, runNumber: item.currentRunNumber}),
     title: 'Shutdown environment'
   }, 'SHUTDOWN');
 
@@ -98,6 +98,8 @@ const killEnvButton = (environment, item) =>
     style: 'margin-left: .3em',
     disabled: environment.itemControl.isLoading(),
     onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
-      && environment.destroyEnvironment({id: item.id, allowInRunningState: true, force: true}),
+      && environment.destroyEnvironment({
+        id: item.id, allowInRunningState: true, force: true,  runNumber: item.currentRunNumber
+      }),
     title: 'Kill environment'
   }, 'KILL');
