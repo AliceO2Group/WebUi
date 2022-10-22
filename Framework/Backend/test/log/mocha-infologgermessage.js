@@ -49,7 +49,7 @@ describe('Logging: InfoLoggerMessage', () => {
     it('should successfully return default values for empty log message', () => {
       const log = new InfoLoggerMessage();
       const expectedComponents = [
-        '-oSeverity=Info', '-oLevel=11', '-oUsername=gui', '-oSystem=GUI', '-oFacility=gui', ''
+        '-oSeverity=Info', '-oLevel=11', '-oSystem=GUI', '-oFacility=gui', ''
       ];
       deepStrictEqual(log.getComponentsOfMessage(), expectedComponents);
     });
@@ -57,15 +57,12 @@ describe('Logging: InfoLoggerMessage', () => {
     it('should successfully return correct values for log message from JSON', () => {
       const log = InfoLoggerMessage.fromJSON({
         severity: 'Error',
-        username: 'mocha',
         system: 'tests',
         run: 12345,
-        rolename: 'mocha-tests',
         message: 'TestWithJSON'
       });
       const expectedComponents = [
-        '-oSeverity=Error', '-oLevel=11', '-oUsername=mocha', '-oSystem=tests', '-oFacility=gui', 
-        '-oRolename=mocha-tests', '-oRun=12345', 'TestWithJSON'
+        '-oSeverity=Error', '-oLevel=11', '-oSystem=tests', '-oFacility=gui', '-oRun=12345', 'TestWithJSON'
       ];
 
       deepStrictEqual(log.getComponentsOfMessage(), expectedComponents);
