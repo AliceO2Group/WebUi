@@ -14,8 +14,15 @@
 
 const WinstonWrapper = require('./WinstonWrapper.js');
 const InfoLoggerSender = require('./InfoLoggerSender.js');
+const InfoLoggerMessage = require('./InfoLoggerMessage.js');
 
+/**
+ * @type {WinstonWrapper}
+ */
 let winston = null;
+/**
+ * @type {InfoLoggerSender}
+ */
 let infologger = null;
 
 /**
@@ -61,6 +68,21 @@ class Log {
   }
 
   /**
+   * Information severity log sent as InfoLoggerMessage
+   * @param {string} message - log message
+   * @param {JSON} log - fields require for building InfoLoggerMessage
+   */
+  infoMessage(message, {level, username, system, facility, rolename, partition, run, errorSource}) {
+    winston.instance.info({message, label: this.label});
+
+    const log = InfoLoggerMessage.fromJSON({
+      severity: 'Info', 
+      message, level, username, system, facility, rolename, partition, run, errorSource
+    });
+    infologger?.sendMessage(log);
+  }
+  /**
+   * @deprecated
    * Information severity log
    * @param {string} log - log message
    * @param {number} level - defaults to 11 for "developer"
@@ -72,6 +94,22 @@ class Log {
   }
 
   /**
+   * Warning severity log sent as InfoLoggerMessage
+   * @param {string} message - log message
+   * @param {JSON} log - fields require for building InfoLoggerMessage
+   */
+  warnMessage(message, {level, username, system, facility, rolename, partition, run, errorSource}) {
+    winston.instance.warn({message, label: this.label});
+
+    const log = InfoLoggerMessage.fromJSON({
+      severity: 'Warning', 
+      message, level, username, system, facility, rolename, partition, run, errorSource
+    });
+    infologger?.sendMessage(log);
+  }
+
+  /**
+   * @deprecated
    * Warning severity log
    * @param {string} log - log message
    * @param {number} level - defaults to 11 for "developer"
@@ -83,6 +121,22 @@ class Log {
   }
 
   /**
+   * Error severity log sent as InfoLoggerMessage
+   * @param {string} message - log message
+   * @param {JSON} log - fields require for building InfoLoggerMessage
+   */
+  errorMessage(message, {level, username, system, facility, rolename, partition, run, errorSource}) {
+    winston.instance.error({message, label: this.label});
+
+    const log = InfoLoggerMessage.fromJSON({
+      severity: 'Error', 
+      message, level, username, system, facility, rolename, partition, run, errorSource
+    });
+    infologger?.sendMessage(log);
+  }
+
+  /**
+   * @deprecated
    * Error severity log
    * @param {string} log - log message
    * @param {number} level - defaults to 11 for "developer"
