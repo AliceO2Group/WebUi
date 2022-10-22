@@ -28,14 +28,14 @@
   "log": {
     "winston": {
       "file": {
-        "name": "./error.log",
+        "name": "./Backend/test/log/error.log",
         "level": "error"
       },
       "console": {
         "level": "debug"
       }
     },
-    "infologger": true
+    "infologger": false
   },
   "consul": {
     "hostname": "localhost",

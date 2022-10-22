@@ -12,29 +12,29 @@
  * or submit itself to any jurisdiction.
 */
 
-const fs = require('fs');
-const {execFile} = require("child_process");
+const {access, constants: {X_OK}} = require('fs');
+const {execFile} = require('child_process');
 
 /**
- * Sends InfoLogger logs to InfoLoggerD over UNIX named socket
+ * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
  * @docs https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md
  */
 class InfoLoggerSender {
   /**
-   * @param {object} winston - local loging object
+   * @param {winston.instance} winston - local winston instance object
    */
-  constructor(winston) {
-    this.configured = false;
+  constructor(winston, label = '') {
+    this._isConfigured = false;
     this.winston = winston;
 
     // for security reasons this path is hardcoded
-    this.path = '/opt/o2-InfoLogger/bin/o2-infologger-log';
-    fs.access(this.path, fs.constants.X_OK, (err) => {
+    this._PATH = '/opt/o2-InfoLogger/bin/o2-infologger-log';
+    access(this._PATH, X_OK, (err) => {
       if (err) {
-        this.winston.debug('[ILSender] InfoLogger executable not found');
+        this.winston.debug({message: 'InfoLogger executable not found', label});
       } else {
-        this.winston.debug('[ILSender] Created instance of InfoLogger sender');
-        this.configured = true;
+        this.winston.debug({message: 'Created instance of InfoLogger sender', label});
+        this._isConfigured = true;
       }
     });
   }
@@ -47,23 +47,23 @@ class InfoLoggerSender {
    * @param {number} level - visibility of the message
    */
   send(log, severity = 'Info', facility = '', level = 99) {
-    if (this.configured) {
+    if (this._isConfigured) {
       log = this._removeNewLinesAndTabs(log);
-      execFile(this.path, [
+      execFile(this._PATH, [
         `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
-      ], (error, stdout, stderr) => {
+      ], (error, _, stderr) => {
         if (error) {
-          this.winston.debug(`[ILSender] Impossible to write a log to InfoLogger due to: ${error}`);
+          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});
         }
         if (stderr) {
-          this.winston.debug(`[ILSender] Impossible to write a log to InfoLogger due to: ${stderr}`);
+          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility});
         }
       });
     }
   }
 
   /**
-   * Replace all occurences of new lines, tabs or groups of 4 spaces with an empty space
+   * Replace all occurrences of new lines, tabs or groups of 4 spaces with an empty space
    * @param {Object|Error|String} log
    * @return {String}
    */
@@ -76,8 +76,17 @@ class InfoLoggerSender {
       }
       return log.replace(/ {4}|[\t\n\r]/gm, ' ');
     } catch (error) {
+      this.winston.error({message: `Unable to parse received log due to: ${error}`, label: 'ilg/sender'});
       return '';
     }
+  }
+
+  /**
+   * Returns if InfoLoggerD service is configured
+   * @returns {boolean}
+   */
+  get isConfigured() {
+    return this._isConfigured;
   }
 }
 

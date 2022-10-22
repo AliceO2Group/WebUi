@@ -13,26 +13,26 @@
 */
 
 'use strict';
-const WebSocket = require('./websocket/server');
-const HttpServer = require('./http/server');
-const WebSocketMessage = require('./websocket/message.js');
-const Log = require('./log/Log.js');
-const InfoLoggerSender = require('./log/InfoLoggerSender.js');
-const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
-const MySQL = require('./db/mysql.js');
-const JwtToken = require('./jwt/token.js');
 const ConsulService = require('./services/consul.service.js');
+const HttpServer = require('./http/server.js');
+const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
+const InfoLoggerSender = require('./log/InfoLoggerSender.js');
 const Jira = require('./services/jira.js');
+const JwtToken = require('./jwt/token.js');
+const Log = require('./log/Log.js');
+const MySQL = require('./db/mysql.js');
 const NotificationService = require('./services/notification.js');
+const WebSocket = require('./websocket/server.js');
+const WebSocketMessage = require('./websocket/message.js');
 
-exports.WebSocket = WebSocket;
+exports.ConsulService = ConsulService;
 exports.HttpServer = HttpServer;
-exports.WebSocketMessage = WebSocketMessage;
+exports.InfoLoggerReceiver = InfoLoggerReceiver;
+exports.InfoLoggerSender = InfoLoggerSender;
+exports.Jira = Jira;
+exports.JwtToken = JwtToken;
 exports.Log = Log;
 exports.MySQL = MySQL;
-exports.JwtToken = JwtToken;
-exports.InfoLoggerSender = InfoLoggerSender;
-exports.InfoLoggerReceiver = InfoLoggerReceiver;
-exports.ConsulService = ConsulService;
-exports.Jira = Jira;
 exports.NotificationService = NotificationService;
+exports.WebSocket = WebSocket;
+exports.WebSocketMessage = WebSocketMessage;

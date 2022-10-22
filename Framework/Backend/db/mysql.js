@@ -14,7 +14,7 @@
 
 const mysql = require('mysql');
 const assert = require('assert');
-const log = new (require('./../log/Log.js'))(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
+const Log =require('./../log/Log.js');
 
 /**
  * MySQL pool wrapper
@@ -39,6 +39,7 @@ class MySQL {
     config.timeout = (!config.timeout) ? 30000 : config.timeout;
 
     this.config = config;
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
     this.pool = mysql.createPool(config);
   }
 
@@ -76,7 +77,7 @@ class MySQL {
         if (error) {
           reject(new Error(this.errorHandler(error)));
         }
-        log.debug(mysql.format(query, parameters));
+        this.log.debug(mysql.format(query, parameters));
         resolve(results);
       });
     });
@@ -108,7 +109,7 @@ class MySQL {
     } else {
       message = `MySQL error: ${err.code}, ${err.message}`;
     }
-    log.error(message);
+    this.log.error(message);
     return message;
   }
 }
