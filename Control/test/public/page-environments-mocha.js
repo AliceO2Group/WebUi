@@ -44,9 +44,9 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('should have a button in Action column for InfoLogger', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div > a', {timeout: 2000});
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(14) > div > a', {timeout: 2000});
       const detailsButton = await page.evaluate(() => {
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(12) > div > a').innerText;
+        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(14) > div > a').innerText;
         return {label};
       });
       assert.strictEqual(detailsButton.label, 'FLP');

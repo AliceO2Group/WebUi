@@ -198,6 +198,14 @@ const showEnvDetailsTable = (model, item) => {
         ]
         )
       ]),
+      h(`tr`, [
+        h(`th${width}`,
+          h('.w-100.flex-row', [
+            h('.w-70', 'Run Type'),
+          ])
+        ),
+        h('td',  item.userVars.run_type ? item.userVars.run_type : '-')
+      ]),
       h('tr', [
         h(`th${width}`,
           h('.w-100.flex-row', [
