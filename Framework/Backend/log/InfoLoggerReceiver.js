@@ -18,14 +18,14 @@ const Log = require('./Log.js');
 
 const protocols = require('./infologger-protocols.js');
 
-/* @class InfoLoggerReceiver
+/** 
+ * @class InfoLoggerReceiver
  * Connects to server
  * Stream data
  * Parse data
  * Emit row ony by one
  */
-
-module.exports = class InfoLoggerReceiver extends EventEmitter {
+class InfoLoggerReceiver extends EventEmitter {
   /**
    * Initialize, without connecting.
    */
@@ -183,4 +183,6 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     return message;
   }
-};
+}
+
+module.exports = InfoLoggerReceiver;
