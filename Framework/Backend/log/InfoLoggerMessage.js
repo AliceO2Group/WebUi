@@ -26,10 +26,8 @@ class InfoLoggerMessage {
 
     this._severity = 'Info'; // Info (default), Error, Fatal, Warning, Debug
     this._level = 11;
-    this._username = 'gui';
     this._system = 'GUI';
     this._facility = 'gui'
-    this._rolename = undefined;
     this._partition = undefined;
     this._run = undefined;
     this._errorSource = undefined;
@@ -45,10 +43,8 @@ class InfoLoggerMessage {
     log._severity = logJson.severity && ['Info', 'Error', 'Fatal', 'Warning', 'Debug'].includes(logJson.severity) ?
       logJson.severity : 'Info';
     log._level = Number.isInteger(logJson?.level) ? logJson.level : 11;
-    log._username = logJson.username ?? 'gui';
     log._system = logJson.system ?? 'GUI';
     log._facility = logJson.facility ?? 'gui';
-    log._rolename = logJson.rolename;
     log._partition = logJson.partition;
     log._run = logJson.run;
     log._errorSource = logJson.errorSource;
@@ -63,12 +59,9 @@ class InfoLoggerMessage {
    */
   getComponentsOfMessage() {
     const components = [
-      `-oSeverity=${this._severity}`, `-oLevel=${this._level}`, `-oUsername=${this._username}`,
+      `-oSeverity=${this._severity}`, `-oLevel=${this._level}`,
       `-oSystem=${this._system}`, `-oFacility=${this._facility}`
     ];
-    if (this._rolename) {
-      components.push(`-oRolename=${this._rolename}`);
-    }
     if (this._partition) {
       components.push(`-oPartition=${this._partition}`);
     }
