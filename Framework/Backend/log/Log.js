@@ -72,12 +72,12 @@ class Log {
    * @param {string} message - log message
    * @param {JSON} log - fields require for building InfoLoggerMessage
    */
-  infoMessage(message, {level, username, system, facility, rolename, partition, run, errorSource}) {
+  infoMessage(message, {level, system, facility, partition, run, errorSource}) {
     winston.instance.info({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
       severity: 'Info', 
-      message, level, username, system, facility, rolename, partition, run, errorSource
+      message, level, system, facility, partition, run, errorSource
     });
     infologger?.sendMessage(log);
   }
@@ -98,12 +98,12 @@ class Log {
    * @param {string} message - log message
    * @param {JSON} log - fields require for building InfoLoggerMessage
    */
-  warnMessage(message, {level, username, system, facility, rolename, partition, run, errorSource}) {
+  warnMessage(message, {level, system, facility, partition, run, errorSource}) {
     winston.instance.warn({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
       severity: 'Warning', 
-      message, level, username, system, facility, rolename, partition, run, errorSource
+      message, level, system, facility, partition, run, errorSource
     });
     infologger?.sendMessage(log);
   }
@@ -125,12 +125,12 @@ class Log {
    * @param {string} message - log message
    * @param {JSON} log - fields require for building InfoLoggerMessage
    */
-  errorMessage(message, {level, username, system, facility, rolename, partition, run, errorSource}) {
+  errorMessage(message, {level, system, facility, partition, run, errorSource}) {
     winston.instance.error({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
       severity: 'Error', 
-      message, level, username, system, facility, rolename, partition, run, errorSource
+      message, level, system, facility, partition, run, errorSource
     });
     infologger?.sendMessage(log);
   }
