@@ -18,7 +18,7 @@
 const assert = require('assert');
 const fs = require('fs');
 
-const config = require('../config.json');
+const config = require('../config.js');
 
 const Log = require('../../log/Log.js');
 const InfoLoggerReceiver = require('../../log/InfoLoggerReceiver.js');
