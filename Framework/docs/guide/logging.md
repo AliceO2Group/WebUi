@@ -40,17 +40,16 @@ Log.configure({
     }
   },
   infologger: true
-  }
-);
+});
 new Log(LABEL);
 ```
 
 Where:
   * [`FILE_NAME`] - path to file where logs will be written;
-  * [`FILE_LVL`] - log severity of logs written to file;
-  * [`CONSOLE_LVL`] - log severity of logs written to console;
+  * [`FILE_LVL`] - log severity of logs written to file; (default: `warn`);
+  * [`CONSOLE_LVL`] - log severity of logs written to console; (default: `debug`)
   * [`CONSOLE_SYSTEMD`] - flags, console logs will be converted to a format more convenient for `journalctl` (where logs are stored from `systemd` services);
-  * [`LABEL`] - label to use as prefix for all log messages;
+  * [`LABEL`] - label to use as prefix for all log messages (default empty);
 
 
 #### Public methods
