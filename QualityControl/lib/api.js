@@ -10,44 +10,49 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log, WebSocket} = require('@aliceo2/web-ui');
-const config = require('./config/configProvider.js');
+import { Log, WebSocket } from '@aliceo2/web-ui';
+import { config } from './config/configProvider.js';
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/api`);
 
 // Load data source (demo or DB)
-const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
+const model = config.demoData ? await import('./QCModelDemo.js') : await import('./QCModel.js');
+import {
+  queryPrefix, listObjects, consulService, objectController, layoutService, statusService, userService,
+} from './QCModel.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
- * @param {HttpServer} http
+ * @param {HttpServer} http - web-ui based server implementation
+ * @returns {void}
  */
-module.exports.setup = (http) => {
-  // http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), {public: true});
-  http.get('/object', model.objectController.getObjectContent.bind(model.objectController));
-  http.get('/objects', () => false, {public: true});
+export const setup = (http) => {
+  http.get('/object/info', model.objectController.getObjectInfo.bind(model.objectController), { public: true });
+  http.get('/object', objectController.getObjectContent.bind(objectController));
+  http.get('/objects', () => false, { public: true });
 
   http.get('/listOnlineObjects', listOnlineObjects);
   http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
 
-  http.get('/layouts', model.layoutService.listLayouts.bind(model.layoutService));
-  http.get('/layout/:id', model.layoutService.readLayout.bind(model.layoutService));
-  http.delete('/layout/:id', model.layoutService.deleteLayout.bind(model.layoutService));
-  http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
-  http.post('/writeLayout', model.layoutService.updateLayout.bind(model.layoutService));
+  http.get('/layouts', layoutService.listLayouts.bind(layoutService));
+  http.get('/layout/:id', layoutService.readLayout.bind(layoutService));
+  http.delete('/layout/:id', layoutService.deleteLayout.bind(layoutService));
+  http.post('/layout', layoutService.createLayout.bind(layoutService));
+  http.post('/writeLayout', layoutService.updateLayout.bind(layoutService));
 
-  http.get('/status/gui', model.statusService.getQCGStatus.bind(model.statusService), {public: true});
-  http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService), {public: true});
+  http.get('/status/gui', statusService.getQCGStatus.bind(statusService), { public: true });
+  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService), { public: true });
 
-  http.get('/checkUser', model.userService.addUser.bind(model.userService));
+  http.get('/checkUser', userService.addUser.bind(userService));
 
   new WebSocket(http);
 
   /**
    *  @deprecated ; to be removed in version 2.14.0
    */
-  http.get('/listObjects', listObjects, {public: true});
+  http.get('/listObjects', listObjectsTwo, { public: true });
 };
 
 /**
@@ -55,8 +60,8 @@ module.exports.setup = (http) => {
  * @param {Request} req
  * @param {Response} res
  */
-function listObjects(req, res) {
-  model.listObjects()
+function listObjectsTwo(req, res) {
+  listObjects()
     .then((data) => res.status(200).json(data))
     .catch((err) => errorHandler(err, res));
 }
@@ -67,8 +72,8 @@ function listObjects(req, res) {
  * @param {Response} res
  */
 function listOnlineObjects(req, res) {
-  if (typeof model.consulService !== 'undefined') {
-    model.consulService.getServices()
+  if (typeof consulService !== 'undefined') {
+    consulService.getServices()
       .then((services) => {
         const tags = getTagsFromServices(services);
         res.status(200).json(tags);
@@ -85,9 +90,9 @@ function listOnlineObjects(req, res) {
  * @param {Response} res
  */
 function isOnlineModeConnectionAlive(req, res) {
-  if (typeof model.consulService !== 'undefined') {
-    model.consulService.getConsulLeaderStatus()
-      .then(() => res.status(200).json({running: true}))
+  if (typeof consulService !== 'undefined') {
+    consulService.getConsulLeaderStatus()
+      .then(() => res.status(200).json({ running: true }))
       .catch((err) => errorHandler(`Unable to retrieve Consul Status: ${err}`, res));
   } else {
     errorHandler('Online mode is not enabled due to missing Consul configuration', res, 503);
@@ -105,7 +110,7 @@ function errorHandler(err, res, status = 500) {
     log.trace(err);
   }
   log.error(err.message || err);
-  res.status(status).send({message: err.message || err});
+  res.status(status).send({ message: err.message || err });
 }
 
 /**
@@ -119,10 +124,10 @@ function errorHandler(err, res, status = 500) {
  * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
  */
 function getTagsFromServices(services) {
-  const prefix = model.queryPrefix;
+  const prefix = queryPrefix;
   const tags = Object.values(services)
     .flat()
     .filter((tag) => tag.startsWith(prefix))
-    .map((tag) => ({name: tag}));
+    .map((tag) => ({ name: tag }));
   return tags;
 }

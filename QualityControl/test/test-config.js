@@ -10,28 +10,28 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-module.exports = {
+export const testConfig = {
   demoData: true,
   http: {
     port: 8181,
     hostname: 'localhost',
-    tls: false
+    tls: false,
   },
   mysql: {
     host: 'aaaa',
     user: 'aaaa',
     password: 'aaaa',
-    database: 'quality_control'
+    database: 'quality_control',
   },
   tobject2json: {
     host: 'localhost',
-    port: 7777
+    port: 7777,
   },
   consul: {
     hostname: 'localhost',
-    port: 8500
+    port: 8500,
   },
   ccdb: {
     hostname: 'ccdb',
@@ -39,6 +39,6 @@ module.exports = {
     prefix: 'test',
   },
   quality_control: {
-    version: '0.19.5-1'
-  }
+    version: '0.19.5-1',
+  },
 };

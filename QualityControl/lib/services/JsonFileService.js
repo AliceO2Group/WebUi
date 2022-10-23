@@ -10,16 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
-const fs = require('fs');
-const path = require('path');
+import { Log } from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Store layouts inside JSON based file with atomic write
  */
-class JsonFileService {
+export class JsonFileService {
   /**
    * Initialize connector by synchronizing DB file and its internal state
    * @param {string} pathname - path to JSON DB file
@@ -29,10 +30,10 @@ class JsonFileService {
     this.pathname = path.join(pathname);
 
     // Path for writing file
-    this.pathnameTmp = this.pathname + '~tmp';
+    this.pathnameTmp = `${this.pathname}~tmp`;
 
     // Mirror data from content of JSON file
-    this.data = {layouts: [], users: []};
+    this.data = { layouts: [], users: [] };
 
     // Write lock access
     this.lock = new Lock();
@@ -58,24 +59,24 @@ class JsonFileService {
     return new Promise((resolve, reject) => {
       fs.readFile(this.pathname, (err, data) => {
         if (err) {
-          // file does not exist, it's ok, we will create it
+          // File does not exist, it's ok, we will create it
           if (err.code === 'ENOENT') {
             log.info('DB file does not exist, will create one');
             return resolve();
           }
 
-          // other errors reading
+          // Other errors reading
           return reject(err);
         }
 
         try {
           const dataFromFile = JSON.parse(data);
 
-          // check data we just read
+          // Check data we just read
           if (!dataFromFile || !dataFromFile.layouts || !Array.isArray(dataFromFile.layouts)) {
             return reject(new Error(`DB file should have an array of layouts ${this.pathname}`));
           }
-          // check if users exists and if not declare and initialize with an empty array
+          // Check if users exists and if not declare and initialize with an empty array
           if (!dataFromFile.users || !Array.isArray(dataFromFile.users)) {
             dataFromFile.users = [];
           }
@@ -105,7 +106,7 @@ class JsonFileService {
           if (err) {
             return reject(err);
           }
-          log.info(`DB file updated`);
+          log.info('DB file updated');
           resolve();
         });
       });
@@ -121,10 +122,10 @@ class JsonFileService {
    */
   async createLayout(newLayout) {
     if (!newLayout.id) {
-      throw new Error(`layout id is mandatory`);
+      throw new Error('layout id is mandatory');
     }
     if (!newLayout.name) {
-      throw new Error(`layout name is mandatory`);
+      throw new Error('layout name is mandatory');
     }
 
     const layout = this.data.layouts.find((layout) => layout.id === newLayout.id);
@@ -189,12 +190,11 @@ class JsonFileService {
 
   /**
    * Check if a user is saved and if not, add it to the in-memory list and db
-   * @param {JSON} user 
+   * @param {JSON} user
    */
   addUser(user) {
     this._validateUser(user);
-    const isUserPresent = this.data.users.findIndex(
-      (userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
+    const isUserPresent = this.data.users.findIndex((userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
 
     if (!isUserPresent) {
       this.data.users.push(user);
@@ -239,11 +239,11 @@ class Lock {
    */
   constructor() {
     this._locked = false;
-    this._queue = []; // callbacks of next owners of the lock
+    this._queue = []; // Callbacks of next owners of the lock
   }
 
   /**
-   * acquires lock if available and returns immediately
+   * Acquires lock if available and returns immediately
    * otherwise wait for lock to be released
    * @return {Promise}
    */
@@ -261,7 +261,7 @@ class Lock {
   }
 
   /**
-   * releases lock and give it to next in queue if any
+   * Releases lock and give it to next in queue if any
    */
   release() {
     // Release the lock immediately
@@ -276,5 +276,3 @@ class Lock {
     });
   }
 }
-
-module.exports = JsonFileService;

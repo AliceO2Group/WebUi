@@ -10,17 +10,18 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
-const QCObjectDto = require('../dtos/QCObjectDto');
-const {httpHeadJson, httpGetJson, errorLogger} = require('../utils/utils');
+import { Log } from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
+import QCObjectDto from './../dtos/QCObjectDto.js';
+import { httpHeadJson, httpGetJson, errorLogger } from './../utils/utils.js';
 
 /**
  * Gateway for all CCDB calls
  * // TODO - constants should be separate so that QCObjectDTO can used them as well;
  */
-class CcdbService {
+export class CcdbService {
   /**
    * Setup CCDB Service
    * @param {Object} config - {hostname, port}
@@ -53,7 +54,7 @@ class CcdbService {
 
     this.HEADERS = {
       Accept: 'application/json',
-      'X-Filter-Fields': `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`
+      'X-Filter-Fields': `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`,
     };
   }
 
@@ -63,7 +64,7 @@ class CcdbService {
    * @returns {Promise.<Boolean, Error>}
    */
   async isConnectionUp() {
-    const connectionHeaders = {Accept: 'application/json', 'X-Filter-Fields': `${this.PATH}`, 'Browse-Limit': 1};
+    const connectionHeaders = { Accept: 'application/json', 'X-Filter-Fields': `${this.PATH}`, 'Browse-Limit': 1 };
     const url = `/browse/${this.PREFIX}`;
     try {
       await httpGetJson(this.hostname, this.port, url, connectionHeaders);
@@ -81,7 +82,7 @@ class CcdbService {
    * * default fields list returned: [name, created, lastModified]
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {String} prefix - Prefix for which CCDB should search for objects
-   * @param {Array<String>} fields - List of fields that should be requested for each object 
+   * @param {Array<String>} fields - List of fields that should be requested for each object
    * @return {Promise.<Array.<Object>, Error>}
    */
   async getObjectsLatestVersionList(prefix = this.PREFIX, fields = []) {
@@ -92,10 +93,10 @@ class CcdbService {
     try {
       const headers = {
         Accept: 'application/json',
-        'X-Filter-Fields': fields.length >= 0 ? fields.join(',') : `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`
+        'X-Filter-Fields': fields.length >= 0 ? fields.join(',') : `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`,
       };
 
-      let {objects} = await httpGetJson(this.hostname, this.port, `/latest/${prefix}.*`, headers);
+      const { objects } = await httpGetJson(this.hostname, this.port, `/latest/${prefix}.*`, headers);
       return objects
         .filter(QCObjectDto.isObjectPathValid)
         .map(QCObjectDto.toStandardObject);
@@ -118,11 +119,11 @@ class CcdbService {
     const headers = {
       Accept: 'application/json',
       'X-Filter-Fields': `${this.LAST_MODIFIED}`,
-      'Browse-Limit': '' + limit
+      'Browse-Limit': `${limit}`,
     };
     try {
       const url = `/browse/${objectName}/${filter}`;
-      const {objects} = await httpGetJson(this.hostname, this.port, url, headers);
+      const { objects } = await httpGetJson(this.hostname, this.port, url, headers);
       return objects.map((object) => parseInt(object[this.LAST_MODIFIED]));
     } catch (error) {
       errorLogger(error, 'ccdb');
@@ -132,10 +133,10 @@ class CcdbService {
 
   /**
    * Return the validity of an object (looked by name, timestamp and filter) in the form of a timestamp;
-   * @param {String} path 
+   * @param {String} path
    * @param {Number} timestamp
    * @param {String} filter
-   * @returns 
+   * @returns
    */
   async getObjectValidity(path, timestamp = '', filter = '') {
     const headers = {
@@ -145,7 +146,7 @@ class CcdbService {
     let result = {};
     let url = `/latest/${path}`;
     if (timestamp) {
-      url += `/${timestamp}`
+      url += `/${timestamp}`;
     }
     if (filter) {
       url += `/${filter}`;
@@ -154,7 +155,7 @@ class CcdbService {
     try {
       result = await httpGetJson(this.hostname, this.port, url, headers);
     } catch (error) {
-      // errorLogger(error, 'ccdb');
+      // ErrorLogger(error, 'ccdb');
       throw new Error('Unable to retrieve object validity');
     }
     if (result && result.objects && result.objects.length > 0) {
@@ -162,7 +163,6 @@ class CcdbService {
     } else {
       throw new Error(`Object: ${url} could not be found`);
     }
-
   }
 
   /**
@@ -173,22 +173,22 @@ class CcdbService {
    * @param {String} objectName - full name(path) of the object in question
    * @param {Number} timestamp - version of the object data
    * @param {String} filter - filter that should be applied when querying object; e.g. RunNumber=324543
-   * @returns {Promise.<JSON, Error>} e.g  {location: '/download/id', drawOptions: 'colz'} 
+   * @returns {Promise.<JSON, Error>} e.g  {location: '/download/id', drawOptions: 'colz'}
    */
   async getObjectDetails(name, timestamp, filter = '') {
     if (!name || !timestamp) {
       throw new Error('Missing mandatory parameters: name & timestamp');
     }
     const path = `/${name}/${timestamp}/${filter}`;
-    const reqHeaders = {Accept: 'application/json'};
+    const reqHeaders = { Accept: 'application/json' };
 
-    const {status, headers} = await httpHeadJson(this.hostname, this.port, path, reqHeaders);
+    const { status, headers } = await httpHeadJson(this.hostname, this.port, path, reqHeaders);
     if (status >= 200 && status <= 299) {
       const location = headers[this.CONTENT_LOCATION]
         .split(', ')
         .filter((location) => !location.startsWith('alien'))[0];
       if (!location) {
-        throw new Error(`No location provided by CCDB for object with path: ${path}`)
+        throw new Error(`No location provided by CCDB for object with path: ${path}`);
       }
       const objectDetails = QCObjectDto.toStandardObject(headers);
       objectDetails.location = location;
@@ -209,10 +209,10 @@ class CcdbService {
       throw new Error('Failed to load object due to missing path');
     }
     const timestampHeaders = {
-      Accept: 'application/json', 'X-Filter-Fields': this._getHeadersForOneObject(), 'Browse-Limit': 1
+      Accept: 'application/json', 'X-Filter-Fields': this._getHeadersForOneObject(), 'Browse-Limit': 1,
     };
     try {
-      const {objects} = await httpGetJson(this.hostname, this.port, `/latest/${path}/${timestamp}`, timestampHeaders);
+      const { objects } = await httpGetJson(this.hostname, this.port, `/latest/${path}/${timestamp}`, timestampHeaders);
       if (objects?.length <= 0) {
         throw new Error(`No object found for: ${path}`);
       }
@@ -255,5 +255,3 @@ class CcdbService {
     return `${this.PATH},${this.LAST_MODIFIED},size,fileName,id,metadata`;
   }
 }
-
-module.exports = CcdbService;

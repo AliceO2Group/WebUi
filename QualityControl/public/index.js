@@ -10,18 +10,24 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
- 
-describe('Lib Test Suite', async () => {
-  require('./config/public-config.test.js');
-  
-  require('./controllers/layout-controller.test.js');
-  require('./controllers/object-controller.test.js');
-  require('./controllers/status-controller.test.js');
+ */
 
-  require('./services/ccdb-service.test.js');
-  require('./services/json-service.test.js');
-  require('./services/user-service.test.js');
+/* global QCG */
 
-  require('./utils/utils.test.js');
-});
+// Import QCG Public Configuration
+import { QCG } from './config.js';
+import { mount, sessionService } from '/js/src/index.js';
+import view from './view.js';
+import Model from './Model.js';
+
+sessionService.loadAndHideParameters();
+window.sessionService = sessionService;
+window.QCG = QCG;
+
+// Start application
+const model = new Model();
+const debug = true; // Shows when redraw is done
+mount(document.body, view, model, debug);
+
+// Expose model to interact with it the browser's console
+window.model = model;

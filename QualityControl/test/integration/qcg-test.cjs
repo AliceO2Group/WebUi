@@ -10,38 +10,38 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* eslint-disable no-invalid-this */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
-const config = require('./config-provider');
+const config = require('./config-provider.cjs');
 
 let page;
-const url = config.url;
-const timeout = config.timeout;
-describe('QCG', function() {
+const { url, timeout } = config;
+describe('QCG', function () {
   let browser;
   this.timeout(timeout);
   this.slow(1000);
 
   before(async () => {
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false });
     page = await browser.newPage();
+
     exports.page = page;
   });
 
   it('should load first page "/"', async () => {
-    // try many times until backend server is ready
+    // Try many times until backend server is ready
     for (let i = 0; i < 40; i++) {
       try {
-        await page.goto(url, {waitUntil: 'networkidle0'});
-        break; // connection ok, this test passed
+        await page.goto(url, { waitUntil: 'networkidle0' });
+        break; // Connection ok, this test passed
       } catch (e) {
         if (e.message.includes('net::ERR_CONNECTION_REFUSED')) {
           await new Promise((done) => setTimeout(done, 500));
-          continue; // try again
+          continue; // Try again
         }
         throw e;
       }
@@ -53,8 +53,8 @@ describe('QCG', function() {
     assert.strictEqual(location.search, '?page=layoutList', 'Could not load home page of QCG');
   });
 
-  require('./offline-mode.js');
-  require('./online-mode.js');
+  require('./offline-mode.cjs');
+  require('./online-mode.cjs');
 
   after(async () => {
     await browser.close();

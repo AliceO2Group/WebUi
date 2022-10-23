@@ -16,22 +16,21 @@ const assert = require('assert');
 const test = require('../index');
 
 describe('objectTree page test suite', async () => {
-  let page, url;
+  let page; let url;
 
   before(async () => {
-    page = test.page;
-    url = test.url;
+    ({ page, url } = test);
   });
 
   it('should load', async () => {
-    await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
-    await page.waitForTimeout(500)
+    await page.goto(`${url}?page=objectTree`, { waitUntil: 'networkidle0' });
+    await page.waitForTimeout(500);
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=objectTree');
   });
 
   it('should have a tree as a table', async () => {
-    await page.waitForSelector('section table tbody tr', {timeout: 5000});
+    await page.waitForSelector('section table tbody tr', { timeout: 5000 });
     const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
     assert.strictEqual(rowsCount, 5); // 5 agents
   });
@@ -49,12 +48,10 @@ describe('objectTree page test suite', async () => {
   it('should sort list of histograms by name in descending order', async () => {
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(4)').click());
-    const sorted = await page.evaluate(() => {
-      return {
-        list: window.model.object.currentList,
-        sort: window.model.object.sortBy
-      };
-    });
+    const sorted = await page.evaluate(() => ({
+      list: window.model.object.currentList,
+      sort: window.model.object.sortBy,
+    }));
     assert.strictEqual(sorted.sort.title, 'Name');
     assert.strictEqual(sorted.sort.order, -1);
     assert.strictEqual(sorted.sort.field, 'name');
@@ -64,12 +61,10 @@ describe('objectTree page test suite', async () => {
   it('should sort list of histograms by name in ascending order', async () => {
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(3)').click());
-    const sorted = await page.evaluate(() => {
-      return {
-        list: window.model.object.currentList,
-        sort: window.model.object.sortBy
-      };
-    });
+    const sorted = await page.evaluate(() => ({
+      list: window.model.object.currentList,
+      sort: window.model.object.sortBy,
+    }));
     assert.strictEqual(sorted.sort.title, 'Name');
     assert.strictEqual(sorted.sort.order, 1);
     assert.strictEqual(sorted.sort.field, 'name');
@@ -79,12 +74,10 @@ describe('objectTree page test suite', async () => {
   it('should sort list of histograms by created time in descending order', async () => {
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(2)').click());
-    const sorted = await page.evaluate(() => {
-      return {
-        list: window.model.object.currentList,
-        sort: window.model.object.sortBy
-      };
-    });
+    const sorted = await page.evaluate(() => ({
+      list: window.model.object.currentList,
+      sort: window.model.object.sortBy,
+    }));
     assert.strictEqual(sorted.sort.title, 'Created Time');
     assert.strictEqual(sorted.sort.order, -1);
     assert.strictEqual(sorted.sort.field, 'createTime');
@@ -94,12 +87,10 @@ describe('objectTree page test suite', async () => {
   it('should sort list of histograms by created time in ascending order', async () => {
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button').click());
     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > div > a:nth-child(1)').click());
-    const sorted = await page.evaluate(() => {
-      return {
-        list: window.model.object.currentList,
-        sort: window.model.object.sortBy
-      };
-    });
+    const sorted = await page.evaluate(() => ({
+      list: window.model.object.currentList,
+      sort: window.model.object.sortBy,
+    }));
     assert.strictEqual(sorted.sort.title, 'Created Time');
     assert.strictEqual(sorted.sort.order, 1);
     assert.strictEqual(sorted.sort.field, 'createTime');
@@ -113,9 +104,11 @@ describe('objectTree page test suite', async () => {
       const rows = [];
       document.querySelectorAll('section table tbody tr').forEach((item) => rows.push(item.innerText));
       return rows;
-    }, {timeout: 5000});
+    }, { timeout: 5000 });
     const filteredRows = rowsDisplayed.filter((name) => name.includes('BIGTREE'));
-    assert.ok(filteredRows.length === rowsDisplayed.length,
-      `Not all rows contain the searched term. Identified filtered: ${filteredRows.length} and displayed: ${rowsDisplayed.length}`);
+    assert.ok(
+      filteredRows.length === rowsDisplayed.length,
+      `Not all rows contain the searched term. Identified filtered: ${filteredRows.length} and displayed: ${rowsDisplayed.length}`,
+    );
   });
 });

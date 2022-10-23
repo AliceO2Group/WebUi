@@ -10,13 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
- 
+ */
+'use strict';
+import utilsTestSuite from './lib/utils/utils.test.js';
+import configurationTestSuite from './lib/config/public-config.test.js';
+
 describe('Lib Test Suite', async () => {
-  try {
-    require('./public');
-    // require('./lib');
-  } catch (error) {
-    console.error(error);
-  }
+  describe('Utility methods test suite', async () => await utilsTestSuite());
+  describe('Configuration File Parser test suite', async () => await configurationTestSuite());
 });

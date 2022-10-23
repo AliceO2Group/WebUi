@@ -10,15 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
-const assert = require('assert');
+import assert from 'assert';
+import { Log } from '@aliceo2/web-ui';
+
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
  * Gateway for all User data calls
  */
-class UserService {
+export class UserService {
   /**
    * Setup User Service
    * @param {JSONFileConnector/SQLDataConnector} dataConnector
@@ -35,18 +37,18 @@ class UserService {
    * @return {boolean}
    */
   async addUser(req, res) {
-    const {personid: id, name, username} = req.session;
+    const { personid: id, name, username } = req.session;
 
     try {
       this._validateUser(username, name, id);
-      await this.dataConnector.addUser({id, name, username});
-      res.status(200).json({ok: true});
+      await this.dataConnector.addUser({ id, name, username });
+      res.status(200).json({ ok: true });
     } catch (err) {
       if (err.stack) {
         log.trace(err);
       }
       log.error('Unable to add user to memory');
-      res.status(502).json({ok: false, message: 'Unable to add user to memory'})
+      res.status(502).json({ ok: false, message: 'Unable to add user to memory' });
     }
   }
 
@@ -71,5 +73,3 @@ class UserService {
     }
   }
 }
-
-module.exports = UserService;

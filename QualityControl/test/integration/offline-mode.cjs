@@ -10,24 +10,24 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* eslint-disable max-len */
 const assert = require('assert');
-const qcg = require('./qcg-test');
-const config = require('./config-provider');
-const waitForQCResponse = require('./utils').waitForQCResponse;
+const qcg = require('./qcg-test.cjs');
+const config = require('./config-provider.cjs');
+const { waitForQCResponse } = require('./utils.cjs');
 
 let page;
 const objects = config.offlineObjects;
-const url = config.url;
+const { url } = config;
 describe('`OFFLINE` test-suite', async () => {
   before(async () => {
-    page = qcg.page;
+    ({ page } = qcg);
   });
 
   it('should successfully load objectTree page', async () => {
-    await page.goto(url + '?page=objectTree', {waitUntil: 'networkidle0'});
+    await page.goto(`${url}?page=objectTree`, { waitUntil: 'networkidle0' });
     await page.waitForTimeout(2000);
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=objectTree', 'Could not load page objectTree');
@@ -35,7 +35,7 @@ describe('`OFFLINE` test-suite', async () => {
 
   it('should successfully receive a list of objects from CCDB', async () => {
     const offlineObjects = await page.evaluate(() => window.model.object.list);
-    assert.ok(offlineObjects.length > 0, `Did not receive any objects from CCDB`);
+    assert.ok(offlineObjects.length > 0, 'Did not receive any objects from CCDB');
   });
 
   it('should successfully receive certain objects from CCDB and be in use', async () => {
@@ -46,7 +46,7 @@ describe('`OFFLINE` test-suite', async () => {
     assert.strictEqual(contains.length, 0, `Could not find following objects from the expected ones: ${contains}`);
   });
 
-  describe('Iterate over given objects and open them', function() {
+  describe('Iterate over given objects and open them', () => {
     for (let i = 0; i < objects.length; ++i) {
       it(`should successfully open subtree of OBJECT  ${objects[i]} and select/open plot`, async () => {
         const path = objects[i].split('/');
@@ -68,13 +68,14 @@ describe('`OFFLINE` test-suite', async () => {
 
 /**
  * Method to open the tree for a given path
- * @param {Page} page
- * @param {Array<String>} path
+ * @param {Page} page - puppeteer page
+ * @param {Array<String>} path - path of object to follow in the qc tree
+ * @returns {void}
  */
 async function openGivenObjectPath(page, path) {
-  let tempPath = `qc`;
+  let tempPath = 'qc';
   for (let i = 0; i < path.length; ++i) {
-    tempPath += `/${path[i]}`
+    tempPath += `/${path[i]}`;
     const [row] = await page.$x(`//tr[@title="${tempPath}"]`);
     if (row) {
       await row.click();
@@ -82,14 +83,14 @@ async function openGivenObjectPath(page, path) {
     } else {
       assert.ok(false, `${path[i]} could not be found in object tree`);
     }
-
   }
 }
 
 /**
  * Method to close the tree for a given path
- * @param {Page} page
- * @param {Array<String>} path
+ * @param {Page} page - puppeteer page
+ * @param {Array<String>} path - path of object to follow in the qc tree
+ * @returns {void}
  */
 async function closeGivenObjectPath(page, path) {
   const tempPath = path.slice();

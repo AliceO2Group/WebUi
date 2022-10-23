@@ -12,32 +12,30 @@
  */
 /* eslint-disable max-len */
 
-const assert = require('assert');
-const test = require('../index');
+import { strictEqual, deepStrictEqual } from 'assert';
+import test from '../index';
 
 describe('about page test suite', async () => {
-  let page, url;
+  let page;
+  let url;
 
-  before(async () => {
-    page = test.page;
-    url = test.url;
-  });
+  before(async () => ({ url, page } = test));
 
   it('should load', async () => {
-    await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
+    await page.goto(`${url}?page=about`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=about');
+    strictEqual(location.search, '?page=about');
   });
 
   it('should have a frameworkInfo item with config fields', async () => {
     const expConfig = {
-      qcg: {port: 8181, hostname: 'localhost', status: {ok: true}},
-      consul: {hostname: 'localhost', port: 8500, status: {ok: false, message: 'Live Mode was not configured'}},
-      ccdb: {hostname: 'ccdb', port: 8500, prefix: 'test', status: {ok: false, message: 'Data connector was not configured'}},
-      quality_control: {version: '0.19.5-1'}
+      qcg: { port: 8181, hostname: 'localhost', status: { ok: true } },
+      consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live Mode was not configured' } },
+      ccdb: { hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: false, message: 'Data connector was not configured' } },
+      quality_control: { version: '0.19.5-1' },
     };
     const config = await page.evaluate(() => window.model.frameworkInfo.item);
     delete config.payload.qcg.version;
-    assert.deepStrictEqual(config.payload, expConfig);
+    deepStrictEqual(config.payload, expConfig);
   });
 });
