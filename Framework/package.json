@@ -48,7 +48,7 @@
     "nyc": "^15.1.0",
     "puppeteer": "17.0.0",
     "sinon": "14.0.0",
-    "supertest": "^6.2.1"
+    "supertest": "^6.3.0"
   },
   "main": "Backend/index.js"
 }
