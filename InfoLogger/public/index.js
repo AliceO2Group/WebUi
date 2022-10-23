@@ -12,25 +12,21 @@
  * or submit itself to any jurisdiction.
 */
 
-module.exports = {
-  http: {
-    port: 8080,
-    // portSecure: 8443,
-    hostname: 'localhost',
-    // key: './cert/key.pem',
-    // cert: './cert/cert.pem',
-    tls: false,
-    allow: true,
-  },
-  infoLoggerServer: {
-    host: 'localhost',
-    port: 6102
-  },
-  jwt: {
-    secret: '<secret>',
-    issuer: 'alice-o2-gui',
-    expiration: '60s',
-    maxAge: '2'
-  },
-  dbFile: './test/testdb.json'
-};
+import sessionService from '/js/src/sessionService.js';
+sessionService.loadAndHideParameters();
+
+// Expose sessionService to interact with it the browser's console
+window.sessionService = sessionService;
+
+// Import MVC
+import {mount} from '/js/src/index.js';
+import view from './view.js';
+import Model from './Model.js';
+
+// Start application
+const model = new Model();
+const debug = true; // shows when redraw is done
+mount(document.body, view, model, debug);
+
+// Expose model to interact with it the browser's console
+window.model = model;
