@@ -20,7 +20,8 @@ module.exports = {
     hostname: 'localhost',
     // key: './cert/key.pem',
     // cert: './cert/cert.pem',
-    tls: false
+    tls: false,
+    allow: true,
   },
 
   // optional data source, comment object if not used
@@ -40,6 +41,9 @@ module.exports = {
   infoLoggerServer: {
     host: 'localhost',
     port: 6102
+  },
+  logging: {
+    infologger: false,
   },
 
   // JWT manages user's session duration

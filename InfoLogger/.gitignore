@@ -7,3 +7,5 @@ node_modules
 coverage*
 db.json
 testdb.json
+
+error.log
