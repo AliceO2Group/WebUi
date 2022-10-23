@@ -42,7 +42,7 @@ export default class Log extends Observable {
     this.isTimeDropdownEnabled = false;
     this.timeFormat = TIME_MS;
 
-    this.limit = 10000;
+    this.limit = 100000;
     this.applicationLimit = 100000; // browser can be slow is `list` array is bigger
 
     this.queryResult = RemoteData.notAsked();
@@ -553,7 +553,7 @@ export default class Log extends Observable {
     if (this.list.length > 0) {
 
       let fullContent = '';
-      if (this.limit < 10001) {
+      if (this.limit < 100001) {
         this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
       }
 

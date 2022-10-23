@@ -135,11 +135,12 @@ const buttonRemoveRequest = (model, id, personid) =>
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'Run', 'ID', 'Created', 'Detectors', 'FLPs', 'DCS', 'TRG', 'EPN', 'ODC', 'EPN Topology', 'State', 'InfoLogger'
+    'Run', 'ID', 'Run Type', 'Created', 'Detectors', 'FLPs', 'EPNs', 'DCS', 'TRG', 'EPN', 'CTP Readout', 'ODC',
+    'State', 'InfoLogger'
   ];
   return h('table.table', [
     h('thead', [
-      h('tr.table-primary', h('th', {colspan: 12}, 'Active Environments')),
+      h('tr.table-primary', h('th', {colspan: 14}, 'Active Environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
@@ -156,6 +157,7 @@ const environmentsTable = (model, list) => {
           }, item.id
           )
         ),
+        h('td', {style: 'text-align: center;'}, item.userVars.run_type ? item.userVars.run_type : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
         h('td', {style: 'text-align: center;'}, [
           item.includedDetectors && item.includedDetectors.length > 0 ?
@@ -163,13 +165,15 @@ const environmentsTable = (model, list) => {
             : '-'
         ]),
         h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
+        h('td', {style: 'text-align: center;'}, item.userVars.odc_n_epns ? item.userVars.odc_n_epns : '-'),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'epn_enabled')),
+        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_readout_enabled')),
+        
         h(`td${parseOdcStatusPerEnv(item.id, model) === 'RUNNING' ? '.success' : ''}`, {
           style: 'text-align: center;'
         }, parseOdcStatusPerEnv(item.id, model)),
-        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_topology')),
         h('td', {
           class: (item.state === 'RUNNING' ?
             'success'

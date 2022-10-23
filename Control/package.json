@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/control",
-  "version": "1.49.1",
+  "version": "1.52.0",
   "description": "ALICE O2 Control GUI",
   "author": "George Raduta",
   "contributors": [
@@ -13,7 +13,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 14.16.1"
+    "node": ">= 16.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
@@ -22,15 +22,15 @@
     "integration-test": "mocha --exit --bail ./test/integration/core-tests.js -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-*.js') --retries 2",
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "1.24.0",
-    "@grpc/grpc-js": "^1.6.2",
-    "@grpc/proto-loader": "^0.6.5",
-    "google-protobuf": "^3.20.0-rc.2"
+    "@aliceo2/web-ui": "2.0.0",
+    "@grpc/grpc-js": "1.7.1",
+    "@grpc/proto-loader": "0.7.0",
+    "google-protobuf": "3.21.0"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui",
@@ -38,11 +38,11 @@
     "@grpc/proto-loader"
   ],
   "devDependencies": {
-    "eslint": "^8.18.0",
-    "mocha": "^10.0.0",
+    "eslint": "^8.25.0",
+    "mocha": "^10.1.0",
     "nock": "^13.2.2",
     "nyc": "^15.1.0",
-    "puppeteer": "14.4.0",
+    "puppeteer": "19.1.0",
     "sinon": "14.0.0"
   },
   "main": "index.js"

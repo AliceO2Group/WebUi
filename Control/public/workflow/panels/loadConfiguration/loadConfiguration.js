@@ -13,6 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
+import {ROLES} from './../../../workflow/constants.js';
 
 /**
  * Build a panel allowing the user to select a stored configuration and load it within
@@ -43,14 +44,14 @@ export default (workflow) =>
  */
 const configurationSelection = (workflow, configurations) => {
   return h('.w-100.flex-column.ph1', [
-    h('.flex-row', [
-      h(`.w-75.dropdown${workflow.isLoadConfigurationVisible && '.dropdown-open'}`, [
+    h('.flex-row.items-center', [
+      h(`.w-70.dropdown${workflow.isLoadConfigurationVisible && '.dropdown-open'}`, [
         searchConfigurationField(workflow),
         configurationDropdownArea(workflow, configurations)
       ]),
-      h('.btn-group.mh2.w-25', [
-        loadConfigurationButton(workflow),
+      h('.mh2.w-30.text-right', [
         btnSaveEnvConfiguration(workflow.model),
+        btnUpdateEnvConfiguration(workflow.model),
       ])
     ]),
   ]);
@@ -109,26 +110,12 @@ const configurationDropdownArea = (workflow, configurations) =>
             workflow.selectedConfiguration = name;
             workflow.selectedConfigurationRaw = name;
             workflow.isLoadConfigurationVisible = false;
-            workflow.notify();
+            workflow.form.resetVariables();
+            workflow.getAndSetNamedConfiguration(workflow.selectedConfiguration);
           }
         }, name)
       )
   );
-
-/**
- * Button to allow the user to load the selected configuration
- * @param {Workflow} workflow 
- * @returns {vnode}
- */
-const loadConfigurationButton = (workflow) =>
-  h('button.btn.btn-default', {
-    class: workflow.loadingConfiguration.isLoading() ? 'loading' : '',
-    disabled: workflow.loadingConfiguration.isLoading() || workflow.selectedConfiguration === '',
-    onclick: () => {
-      workflow.form.resetVariables();
-      workflow.getAndSetNamedConfiguration(workflow.selectedConfiguration);
-    }
-  }, 'Load')
 
 /**
  * Displays any potential errors from loading existing configuration
@@ -155,16 +142,67 @@ const loadErrorPanel = (workflow) => {
  * @param {Object} model 
  * @returns {vnode}
  */
-const btnSaveEnvConfiguration = (model) =>
-  h('button.btn.btn-default', {
-    id: 'save-config',
-    class: model.environment.itemNew.isLoading() ? 'loading' : '',
-    disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
-    onclick: () => {
-      const name = prompt('Enter a name for saving the configuration:');
-      if (name && name.trim() !== '') {
-        model.workflow.saveEnvConfiguration(name)
-      }
-    },
-    title: 'Save current configuration for future use'
-  }, 'Save As');
+const btnSaveEnvConfiguration = (model) => {
+  return h('.flex-column.dropdown#flp_selection_info_icon', [
+    h('button.btn.btn-sm.btn-default', {
+      id: 'save-core-env-config',
+      class: model.environment.itemNew.isLoading() ? 'loading' : '',
+      disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
+      onclick: () => {
+        const name = prompt('Enter a name for saving the configuration:');
+        if (name && name.trim() !== '') {
+          model.workflow.saveEnvConfiguration(name)
+        }
+      },
+      title: 'Save current configuration for future use'
+    }, 'Save As'),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {
+      style: 'width: 200px'
+    }, h('', 'Save as new configuration'))
+  ]);
+};
+
+
+/**
+ * Button which allows the user to update and save an already loaded configuration for a future use
+ * @param {Object} model
+ * @returns {vnode}
+ */
+const btnUpdateEnvConfiguration = (model) => {
+  const isEnvLoading = model.environment.itemNew.isLoading();
+  const isConfigurationSelected =
+    Boolean(model.workflow.selectedConfiguration) && model.workflow.loadingConfiguration.isNotAsked();
+  const name = model.workflow.selectedConfiguration;
+
+  let isUserAllowedToUpdate = model.isAllowed(ROLES.Admin, true);
+
+  if (isConfigurationSelected) {
+    try {
+      const owner = JSON.parse(model.workflow.loadedConfiguration.payload.payload).user.personid;
+      isUserAllowedToUpdate = isUserAllowedToUpdate || owner == model.session.personid;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  const infoMessage = (isConfigurationSelected && isUserAllowedToUpdate) ?
+    `Update the selected configuration "${name}" with the currently displayed and selected configuration`
+    : isUserAllowedToUpdate ? 'In order to update an existing configuration, please first select one from the list'
+      : 'Only admins or the author of the configuration can update this configuration';
+  return h('.flex-column.dropdown#flp_selection_info_icon', [
+    h('button.btn.btn-sm.btn-default', {
+      id: 'update-env-config',
+      class: isEnvLoading ? 'loading' : '',
+      disabled: !isUserAllowedToUpdate || !isConfigurationSelected
+        || isEnvLoading || !model.workflow.form.isInputSelected(),
+      onclick: () => {
+        const isSure = confirm(`Are you sure you would like to update configuration: ${name}`)
+        if (isSure) {
+          model.workflow.saveEnvConfiguration(name, 'update');
+        }
+      },
+    }, 'Update'),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {
+      style: 'width: 400px'
+    }, h('', infoMessage))
+  ]);
+};

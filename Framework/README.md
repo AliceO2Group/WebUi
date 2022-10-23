@@ -10,7 +10,7 @@
       - [Server-side features](#server-side-features)
       - [Client-side features](#client-side-features)
     - [Backend requirements](#backend-requirements)
-      - [CentOS 7](#centos-7)
+      - [CentOS 8](#centos-8)
       - [macOS](#macos)
     - [Minimum browser version support](#minimum-browser-version-support)
     - [Installation](#installation)
@@ -26,7 +26,7 @@ The goal of this UI framework is to identify library and framework sets, provide
 
 #### Server-side features
 - REST and WebSocket API
-- Authentication via CERN SSO (OpenID Connect), authorisation using CERN e-groups
+- Authentication via CERN SSO (OpenID Connect), authorization using CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
 - External resource access: MySQL, gRPC, Consul
 
@@ -36,11 +36,11 @@ The goal of this UI framework is to identify library and framework sets, provide
 - MVC engine with a "diffing" algorithm
 
 ### Backend requirements
-* `nodejs` >= v14.16.0
+* `nodejs` >= v16.x
 
-#### CentOS 7
+#### CentOS 8
 ```
-yum install https://rpm.nodesource.com/pub_14.x/el/7/x86_64/nodejs-14.16.1-1nodesource.x86_64.rpm
+yum install https://rpm.nodesource.com/pub_16.x/el/7/x86_64/nodejs-16.9.1-1nodesource.x86_64.rpm    
 ```
 
 #### macOS
@@ -49,11 +49,10 @@ brew install node
 ```
 
 ### Minimum browser version support
-- Chrome 61
-- Firefox 60
-- Edge 80
-- Safari 10.1
-- Opera 47
+- Chrome 88
+- Firefox 85
+- Edge 89
+- Safari 14.1
 
 ### Installation
 ```

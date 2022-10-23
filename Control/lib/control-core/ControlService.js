@@ -189,14 +189,20 @@ class ControlService {
    */
   logAction(req, _, next) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    if (
-      method.startsWith('New') || method.startsWith('Control') || method.startsWith('Destroy')
-      || method.startsWith('CleanupTasks')
-    ) {
+    const username = req?.session?.username ?? '';
+    const personid = req?.session?.personid ?? '';
+    if (method.startsWith('New') || method.startsWith('CleanupTasks')) {
       const type = req.body.type ? ` (${req.body.type})` : '';
-      const username = req?.session?.username ?? '';
-      const personid = req?.session?.personid ?? '';
       log.info(`${username}(${personid}) => ${method} ${type}`, 6);
+    } else if (method.startsWith('Control') || method.startsWith('Destroy')) {
+      const type = req.body.type ? ` (${req.body.type})` : '';
+      const partition = req.body.id;
+      const run = req.body.runNumber;
+      delete req.body.runNumber;
+
+      log.infoMessage(`${username}(${personid}) => ${method} ${type}`, {
+        level: 1, facility: 'cog/controlservice', partition, run
+      });
     }
     next();
   }

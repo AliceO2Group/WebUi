@@ -12,40 +12,50 @@
  * or submit itself to any jurisdiction.
 */
 
-const Winston = require('./winston.js');
+const WinstonWrapper = require('./WinstonWrapper.js');
 const InfoLoggerSender = require('./InfoLoggerSender.js');
+const InfoLoggerMessage = require('./InfoLoggerMessage.js');
 
+/**
+ * @type {WinstonWrapper}
+ */
 let winston = null;
+/**
+ * @type {InfoLoggerSender}
+ */
 let infologger = null;
 
 /**
- * Handles loging, prints out in console, saves to file or sends to cerntral InfoLogger instance
+ * Handles logging, prints out in console, saves to file or sends to central InfoLogger instance
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class Log {
   /**
-   * Sets the facility and constructs default winston instance
+   * Sets the label and constructs default winston instance
    * @constructor
-   * @param {string} facility - the name of the module/library injecting the message
+   * @param {string} label - the name of the module/library injecting the message
+   * @param {JSON} config - JSON object containing optional configurations for WinstonWrapper and InfoLoggerSender
    */
-  constructor(facility = '') {
-    this.facility = facility;
+  constructor(label = '') {
+    this.label = label;
     if (!winston) {
-      winston = new Winston();
-      winston.instance.debug('Created default instance of console logger');
-    }
-    if (!infologger) {
-      infologger = new InfoLoggerSender(winston.instance);
+      winston = new WinstonWrapper();
+      winston.instance.info({message: 'Default console logger instantiated', label});
     }
   }
 
   /**
-   * Configures Winston instance
-   * @param {object} config
+   * Method to allow clients to configure Log instance to make use:
+   * * WinstonWrapper together with a file
+   * * InfoLoggerSender 
+   * @param {JSON} config - object expected to contain winston and infoLoggerSender configurations
    */
   static configure(config) {
-    if (config && config.winston) {
-      winston = new Winston(config.winston);
+    if (config?.winston) {
+      winston = new WinstonWrapper(config.winston);
+    }
+    if (config?.infologger) {
+      infologger = new InfoLoggerSender(winston.instance, this.label);
     }
   }
 
@@ -54,53 +64,95 @@ class Log {
    * @param {string} log - log message
    */
   debug(log) {
-    const message = (!this.facility) ? log : {message: log, label: this.facility};
-    winston.instance.debug(message);
+    winston.instance.debug({message: log, label: this.label});
   }
 
   /**
+   * Information severity log sent as InfoLoggerMessage
+   * @param {string} message - log message
+   * @param {JSON} log - fields require for building InfoLoggerMessage
+   */
+  infoMessage(message, {level, system, facility, partition, run, errorSource}) {
+    winston.instance.info({message, label: this.label});
+
+    const log = InfoLoggerMessage.fromJSON({
+      severity: 'Info', 
+      message, level, system, facility, partition, run, errorSource
+    });
+    infologger?.sendMessage(log);
+  }
+  /**
+   * @deprecated
    * Information severity log
    * @param {string} log - log message
    * @param {number} level - defaults to 11 for "developer"
    */
   info(log, level = 11) {
-    const message = (!this.facility) ? log : {message: log, label: this.facility};
-    winston.instance.info(message);
+    winston.instance.info({message: log, label: this.label});
 
-    infologger.send(log, 'Info', this.facility, level);
+    infologger?.send(log, 'Info', this.label, level);
   }
 
   /**
+   * Warning severity log sent as InfoLoggerMessage
+   * @param {string} message - log message
+   * @param {JSON} log - fields require for building InfoLoggerMessage
+   */
+  warnMessage(message, {level, system, facility, partition, run, errorSource}) {
+    winston.instance.warn({message, label: this.label});
+
+    const log = InfoLoggerMessage.fromJSON({
+      severity: 'Warning', 
+      message, level, system, facility, partition, run, errorSource
+    });
+    infologger?.sendMessage(log);
+  }
+
+  /**
+   * @deprecated
    * Warning severity log
    * @param {string} log - log message
    * @param {number} level - defaults to 11 for "developer"
    */
   warn(log, level = 11) {
-    const message = (!this.facility) ? log : {message: log, label: this.facility};
-    winston.instance.warn(message);
+    winston.instance.warn({message: log, label: this.label});
 
-    infologger.send(log, 'Warning', this.facility, level);
+    infologger?.send(log, 'Warning', this.label, level);
   }
 
   /**
+   * Error severity log sent as InfoLoggerMessage
+   * @param {string} message - log message
+   * @param {JSON} log - fields require for building InfoLoggerMessage
+   */
+  errorMessage(message, {level, system, facility, partition, run, errorSource}) {
+    winston.instance.error({message, label: this.label});
+
+    const log = InfoLoggerMessage.fromJSON({
+      severity: 'Error', 
+      message, level, system, facility, partition, run, errorSource
+    });
+    infologger?.sendMessage(log);
+  }
+
+  /**
+   * @deprecated
    * Error severity log
    * @param {string} log - log message
    * @param {number} level - defaults to 11 for "developer"
    */
   error(log, level = 11) {
-    const message = (!this.facility) ? log : {message: log, label: this.facility};
-    winston.instance.error(message);
+    winston.instance.error({message: log, label: this.label});
 
-    infologger.send(log, 'Error', this.facility, level);
+    infologger?.send(log, 'Error', this.label, level);
   }
 
   /**
-   * Outputs a stack trace on an object
-   * @param {object} err - any object
+   * Outputs a stack trace on an object with a level of "verbose"
+   * @param {Error} error - error with stack field
    */
-  trace(err) {
-    // eslint-disable-next-line
-    console.trace(err);
+  trace(error) {
+    winston.instance.verbose({message: error.stack, label: this.label});
   }
 }
 

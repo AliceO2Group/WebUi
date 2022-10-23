@@ -62,12 +62,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
     for (const key in confVariables) {
       if (key && confVariables[key] !== undefined) {
         await page.focus('#keyInputField');
-        page.keyboard.type(key);
-        await page.waitForTimeout(500);
+        await page.keyboard.type(key);
+        await page.waitForTimeout(100);
 
         await page.focus('#valueTextAreaField');
-        page.keyboard.type(confVariables[key]);
-        await page.waitForTimeout(500);
+        await page.keyboard.type(confVariables[key]);
+        await page.waitForTimeout(100);
 
         await page.evaluate(() => {
           document.querySelector('#addKVPairButton').click();

@@ -70,11 +70,11 @@ describe('`pageEnvironment` test-suite', async () => {
       assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
     });
 
-    it('should have one button for RESET in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
-      const configuredStateButtons = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(4)').title);
-      assert.strictEqual(configuredStateButtons, 'RESET');
-    });
+    // it('should have one button for RESET in state CONFIGURED', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
+    //   const configuredStateButtons = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(4)').title);
+    //   assert.strictEqual(configuredStateButtons, 'RESET');
+    // });
   });
 
   describe('Check transition from CONFIGURED to RUNNING and presence of buttons in RUNNING state', async () => {
@@ -178,7 +178,7 @@ describe('`pageEnvironment` test-suite', async () => {
       });
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(200);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
       assert.ok(calls['destroyEnvironment']);

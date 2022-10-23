@@ -297,12 +297,23 @@ export default class Model extends Observable {
   }
 
   /**
-   * After pages load check if the user enabled notifications
+   * Request notification permission
    */
-  checkBrowserNotificationPermissions() {
-    if (Notification.permission !== 'granted') {
+  requestBrowserNotificationPermissions() {
+    if (this.checkBrowserNotificationPermissions()) {
       Notification.requestPermission();
     }
+  }
+
+  /**
+   * Defines policy when user can trigger request for enabling notifications
+   * This is used to display/hide enable button
+   * @returns {boolean} True when notifications are not enabled and HTTPS is used
+   */
+  checkBrowserNotificationPermissions() {
+    return (Notification.permission === 'denied' ||
+      Notification.permission === 'default') &&
+      window.location.protocol === "https:";
   }
 
   /**

@@ -108,9 +108,9 @@ const workflowSettingsPanels = (workflow) => [
 const repositoryDropdownList = (workflow, repoList) =>
   h('.text-left.w-100', [
     h('h5', 'Repository:'),
-    h('.flex-row', [
+    h('.flex-row.g1', [
       h('select.form-control', {
-        style: 'cursor: pointer; width: 80%;',
+        style: 'cursor: pointer;',
         onchange: (e) => workflow.setRepository(e.target.value)
       }, [
         repoList.map((repository) => repository.name)
@@ -119,16 +119,27 @@ const repositoryDropdownList = (workflow, repoList) =>
             value: repository
           }, repository))
       ]),
-      h('.text-left.ph2', {style: 'width:13%'},
-        h('button.btn', {
-          title: 'Refresh repositories',
-          class: workflow.refreshedRepositories.isLoading() ? 'loading' : '',
-          disabled: workflow.refreshedRepositories.isLoading(),
-          onclick: () => workflow.refreshRepositories()
-        }, iconReload())
-      )
+      refreshWorkflowsButton(workflow),
     ])
   ]);
+
+/**
+ * Button which will send a request to AliECS to refresh existing ControlWorkflows repositories and their contents
+ * @param {Workflow.js} workflow
+ * @returns {vnode}
+ */
+const refreshWorkflowsButton = (workflow) => {
+  return h('.flex-column.dropdown#flp_selection_info_icon', [
+    h('button.btn', {
+      title: 'Update Workflow Templates',
+      class: workflow.refreshedRepositories.isLoading() ? 'loading' : '',
+      disabled: workflow.refreshedRepositories.isLoading(),
+      onclick: () => workflow.refreshRepositories()
+    }, iconReload()),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
+      'Request AliECS to update workflow templates.')
+  ]);
+};
 
 /**
  * Create the template Area List treating the edge cases:

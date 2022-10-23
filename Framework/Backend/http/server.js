@@ -45,12 +45,14 @@ class HttpServer {
 
     this.app = express();
 
-    this.configureHelmet(httpConfig.hostname, httpConfig.iframeCsp);
+    this.configureHelmet(httpConfig);
 
     this.jwt = new JwtToken(jwtConfig);
     if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
       this.openid.createIssuer().catch(() => process.exit(1));
+      this.ipAddressWhitelist = (!connectIdConfig.sa_whitelist) ? '127.0.0.1' : connectIdConfig.sa_whitelist;
+      this.serviceAccountRole = (!connectIdConfig.sa_role) ? 'service-account' : connectIdConfig.sa_role;
     }
     this.specifyRoutes();
 
@@ -125,12 +127,12 @@ class HttpServer {
   }
 
   /**
-   * Configures Helmet rules to increase web app secuirty
+   * Configures Helmet rules to increase web app security
    * @param {string} hostname whitelisted hostname for websocket connection
    * @param {list}   iframeCsp list of URLs for frame-src CSP
    * @param {number} port secure port number
    */
-  configureHelmet(hostname, iframeCsp = []) {
+  configureHelmet({hostname, port, iframeCsp = [], allow = false}) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -145,14 +147,15 @@ class HttpServer {
     this.app.use(helmet.hidePoweredBy());
     // Disable DNS prefetching
     this.app.use(helmet.dnsPrefetchControl());
-    // Disables external resourcers
+    // Disables external resources
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:", hostname + ':*'],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        scriptSrc: ["'self'",  ...(allow ? ["'unsafe-eval'"] : [])],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'http://' + hostname + ':*', 'https://' + hostname + ':*', 'wss://' + hostname + ':*', 'ws://' + hostname + ':*', 'wss://localhost:*', 'ws://localhost:*'],
+        connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port],
+        upgradeInsecureRequests: null,
         frameSrc: iframeCsp
         /* eslint-enable */
       }
@@ -406,6 +409,26 @@ class HttpServer {
       return res.redirect(this.openid.getAuthUrl(state));
     }
   }
+  /**
+   * Permit service accounts that holds given role and access from restricted IP address rage
+   * @param {object} details Account details from unserinfo endpoint
+   * @param {string} headers HTTP headers including 'X-Forwarded-For' that is actual client IP address set by nginx
+   * @throws {Error} When service account is not allowed to access
+   * @returns true if service account has permission to access the app, false when this is normal account
+   */
+  isAuthorizedServiceAccount(details, headers) {
+    if ('cern_person_id' in details) {
+      return false;
+    }
+    if ('x-forwarded-for' in headers) {
+      const forwarded = headers['x-forwarded-for'];
+      if (details.cern_roles.includes(this.serviceAccountRole) && forwarded.includes(this.ipAddressWhitelist)) {
+        this.log.info(`Authorized service account ${details.cern_upn} from IP address: ${forwarded}`);
+        return true;
+      }
+    }
+    throw new Error('Unauthorized service account');
+  }
 
   /**
    * OpenID Connect callback - when successfully authorized (/callback)
@@ -417,7 +440,10 @@ class HttpServer {
   identCallback(req, res) {
     this.openid.callback(req).then((tokenSet) => {
       const details = tokenSet.claims();
-
+      // Allow some service accoutns to access
+      if (this.isAuthorizedServiceAccount(details, req.headers)) {
+        details.cern_person_id = 0;
+      }
       // Set token and user details in the query
       const query = {
         personid: details.cern_person_id,

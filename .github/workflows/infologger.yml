@@ -6,7 +6,7 @@ on:
       - '.github/workflows/infologger.yml'
   push:
     branches:
-      - 'master'
+      - 'main'
       - 'dev'
 jobs:
   test:
@@ -21,8 +21,8 @@ jobs:
       - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm test )
   coverage:
-    name: Tests & coverage on ubuntu-18.04
-    runs-on: ubuntu-18.04
+    name: Tests & coverage on ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

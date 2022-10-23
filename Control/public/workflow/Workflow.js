@@ -196,7 +196,7 @@ export default class Workflow extends Observable {
    * Make API call to be saved
    * @param {String} name
    */
-  saveEnvConfiguration(name) {
+  saveEnvConfiguration(name, action = 'save') {
     const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
       // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
@@ -216,7 +216,7 @@ export default class Workflow extends Observable {
         const revision = this.form.revision;
         const workflow = this.form.template;
         const data = {name, detectors, repository, revision, workflow, variables};
-        this.model.environment.saveEnvConfiguration(data);
+        this.model.environment.saveEnvConfiguration(data, action);
       }
     }
     this.notify();
@@ -572,7 +572,8 @@ export default class Workflow extends Observable {
       } catch (error) {
         console.error(error);
         this.loadingConfiguration = RemoteData.notAsked();
-        this.model.notification.show('Unable to load configuration. Please contact an administrator', 'warning', 2000);
+        this.model.notification.show(`SyntaxError - Failed to load configuration '${key}'.`
+          + ' Please contact an administrator', 'warning', 6000);
       }
       this.notify();
     }

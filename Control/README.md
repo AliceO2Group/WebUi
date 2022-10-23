@@ -36,7 +36,7 @@ This is a prototype of Control GUI. It aims to replace current ECS HI and provid
 It communicates with [Control agent](https://github.com/AliceO2Group/Control) over gRPC.
 
 ## Requirements
-- `nodejs` >= `14.16.0`
+- `nodejs` >= `16.x`
 
 ## Installation
 1. `git clone https://github.com/AliceO2Group/WebUi.git`

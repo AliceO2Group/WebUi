@@ -49,8 +49,9 @@ describe('`pageLock` test-suite', async () => {
   });
 
   it('force unlock detector', async () => {
-    await page.waitForSelector('button.danger');
-    await page.evaluate(() =>  document.querySelector('button.danger').click());
+    await page.waitForTimeout(500);
+    await page.waitForSelector('table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)'); 
+    await page.evaluate(() =>  document.querySelector('.table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)').click());
     await page.waitForTimeout(500);
 
     const isLocked = await page.evaluate(() => window.model.lock.isLockedByMe('ODC'));

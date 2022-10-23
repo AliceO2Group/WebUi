@@ -12,34 +12,60 @@
  * or submit itself to any jurisdiction.
 */
 
-const fs = require('fs');
-const {execFile} = require("child_process");
+const {access, constants: {X_OK}} = require('fs');
+const {execFile} = require('child_process');
+const InfoLoggerMessage = require('./InfoLoggerMessage.js');
 
 /**
- * Sends InfoLogger logs to InfoLoggerD over UNIX named socket
+ * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
  * @docs https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md
  */
 class InfoLoggerSender {
   /**
-   * @param {object} winston - local loging object
+   * @param {winston.instance} winston - local winston instance object
    */
-  constructor(winston) {
-    this.configured = false;
+  constructor(winston, label = '') {
+    this._isConfigured = false;
     this.winston = winston;
+    this.label = label;
 
     // for security reasons this path is hardcoded
-    this.path = '/opt/o2-InfoLogger/bin/o2-infologger-log';
-    fs.access(this.path, fs.constants.X_OK, (err) => {
+    this._PATH = '/opt/o2-InfoLogger/bin/o2-infologger-log';
+    access(this._PATH, X_OK, (err) => {
       if (err) {
-        this.winston.debug('[ILSender] InfoLogger executable not found');
+        this.winston.debug({message: 'InfoLogger executable not found', label});
       } else {
-        this.winston.debug('[ILSender] Created instance of InfoLogger sender');
-        this.configured = true;
+        this.winston.debug({message: 'Created instance of InfoLogger sender', label});
+        this._isConfigured = true;
       }
     });
   }
 
   /**
+   * Send an InfoLoggerMessage to InfoLoggerServer if configured
+   * @param {InfoLoggerMessage} log - log message
+   */
+  sendMessage(log) {
+    if (this._isConfigured) {
+      execFile(this._PATH, log.getComponentsOfMessage(), (error, _, stderr) => {
+        if (error) {
+          this.winston.debug({
+            message: `Impossible to write a log to InfoLogger due to: ${error}`, 
+            label: log._facility
+          });
+        }
+        if (stderr) {
+          this.winston.debug({
+            message: `Impossible to write a log to InfoLogger due to: ${stderr}`,
+            label: log._facility
+          });
+        }
+      });
+    }
+  }
+
+  /**
+   * @deprecated
    * Send a message to InfoLogger with certain fields filled.
    * @param {string} log - log message
    * @param {string} severity - one of InfoLogger supported severities: 'Info'(default), 'Error', 'Fatal', 'Warning', 'Debug'
@@ -47,37 +73,27 @@ class InfoLoggerSender {
    * @param {number} level - visibility of the message
    */
   send(log, severity = 'Info', facility = '', level = 99) {
-    if (this.configured) {
-      log = this._removeNewLinesAndTabs(log);
-      execFile(this.path, [
+    if (this._isConfigured) {
+      log = InfoLoggerMessage._removeNewLinesAndTabs(log);
+      execFile(this._PATH, [
         `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
-      ], (error, stdout, stderr) => {
+      ], (error, _, stderr) => {
         if (error) {
-          this.winston.debug(`[ILSender] Impossible to write a log to InfoLogger due to: ${error}`);
+          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});
         }
         if (stderr) {
-          this.winston.debug(`[ILSender] Impossible to write a log to InfoLogger due to: ${stderr}`);
+          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility});
         }
       });
     }
   }
 
   /**
-   * Replace all occurences of new lines, tabs or groups of 4 spaces with an empty space
-   * @param {Object|Error|String} log
-   * @return {String}
+   * Returns if InfoLoggerD service is configured
+   * @returns {boolean}
    */
-  _removeNewLinesAndTabs(log) {
-    try {
-      if (log instanceof Error) {
-        return log.toString().replace(/ {4}|[\t\n\r]/gm, ' ');
-      } else if (log instanceof Object) {
-        return JSON.stringify(log).replace(/ {4}|[\t\n\r]/gm, ' ');
-      }
-      return log.replace(/ {4}|[\t\n\r]/gm, ' ');
-    } catch (error) {
-      return '';
-    }
+  get isConfigured() {
+    return this._isConfigured;
   }
 }
 

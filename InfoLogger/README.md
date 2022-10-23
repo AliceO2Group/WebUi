@@ -35,7 +35,7 @@ It interfaces with the system using two modes:
 - Download the logs in a file via the top left download icon
 
 ## Requirements
-- `nodejs` >= `14.16.0`
+- `nodejs` >= `16.x`
 - InfoLogger MySQL database for Query mode
 - InfoLoggerServer endpoint for Live mode
 

@@ -14,7 +14,7 @@
 
 const { Kafka, logLevel } = require('kafkajs')
 const WebSocketMessage = require('../websocket/message.js');
-const log = new (require('./../log/Log.js'))(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
+const Log = require('./../log/Log.js');
 
 /**
  * Gateway for all Kafka notification service
@@ -25,8 +25,9 @@ class NotificationService {
    * @param {object} config Config with list of Kafka brokers
    */
   constructor(config) {
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
     if (!config) {
-      log.warn('Missing configuration');
+      this.log.warn('Missing configuration');
       return;
     }
     if (!config.brokers || config.brokers.length < 1) {
@@ -43,7 +44,7 @@ class NotificationService {
     this.admin = this.kafka.admin();
     this.consumer = null;
     this.webSocket = null;
-    log.info('Kafka connector configured');
+    this.log.info('Kafka connector configured');
   }
 
   /**
@@ -69,10 +70,11 @@ class NotificationService {
    * @param {string} title Notification title
    * @param {string} author Notification author
    * @param {string} url URL poiting to notification details
+   * @param {(string|string[])} runNumbers Bookkeeping tag
    * @param {string} extra Details information
    * @returns {Promise}
    */
-  async send(tag, title, author, url, extra) {
+  async send(tag, title, author, url, runNumbers, extra) {
     if (!tag) {
       throw new Error('Tag is required to send notifications');
     }
@@ -85,11 +87,15 @@ class NotificationService {
     if (Array.isArray(tag)) {
       tag = tag.join(',');
     }
+    if (runNumbers && Array.isArray(runNumbers)) {
+      runNumbers = runNumbers.join(',');
+    }
     const message = {
       tag: tag,
       title: title,
       author: author,
       url: url || undefined,
+      runNumbers: runNumbers || undefined,
       extra: extra || undefined
     };
     const producer = this.kafka.producer();
@@ -106,11 +112,11 @@ class NotificationService {
   async proxyWebNotificationToWs(webSocket) {
     this.webSocket = webSocket;
     this.consumer = this.kafka.consumer({groupId: 'webnotification-group'});
-    log.info('Listening for notifications');
+    this.log.info('Listening for notifications');
     await this.consumer.connect();
     await this.consumer.subscribe({topic: 'webnotification', fromBeginning: false});
     await this.consumer.run({eachMessage: async ({topic, partition, message}) => {
-      log.debug(`Received message on ${topic} topic from ${partition} partition`);
+      this.log.debug(`Received message on ${topic} topic from ${partition} partition`);
       this.webSocket.broadcast(
         new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
       );

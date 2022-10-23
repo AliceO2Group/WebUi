@@ -62,13 +62,17 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const role = await page.evaluate(() => window.model.session.role);
     assert.strictEqual(role, 1);
   });
-  it('should react on role change to Guest', async () => {
-    const text = await page.evaluate(() => {
+
+  it('should successfully display warning message that Guest cannot create environments', async () => {
+    await page.evaluate(() => {
       window.model.session.role = 4;
       window.model.notify();
-      return document.querySelector('.m4').innerText;
     });
+    await page.waitForTimeout(100);
+
+    const text = await page.evaluate(() => document.querySelector('.m4').innerText);
     assert.strictEqual(text, 'You are not allowed to create environments.');
+
     await page.evaluate(() => {
       window.model.session.role = 1;
       window.model.notify();
@@ -148,12 +152,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button', {timeout: 5000});
     const refreshRepositoriesButtonTitle = await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').title);
-    assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Refresh repositories');
+    assert.deepStrictEqual(refreshRepositoriesButtonTitle, 'Update Workflow Templates');
   });
 
   it('should successfully select second repository from dropdown', async () => {
     const selectedRepository = await page.select('select', 'git.com/alice-user/alice-repo/');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     assert.deepStrictEqual(selectedRepository, ['git.com/alice-user/alice-repo/']);
   });
 
@@ -242,15 +246,15 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully select option file:// from dropdown and input box should appear', async () => {
     await page.select('select#readoutURISelection', 'file://');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     const readoutUriPrefix = await page.evaluate(() => window.model.workflow.form.basicVariables.readout_cfg_uri_pre);
     assert.strictEqual(readoutUriPrefix, 'file://');
   });
 
   it('should successfully fill in readout uri from typed text', async () => {
     await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(6) > div > div:nth-child(2) > div:nth-child(2) > input');
-    page.keyboard.type('file-readout');
-    await page.waitForTimeout(500);
+    await page.keyboard.type('file-readout');
+    await page.waitForTimeout(200);
     const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
 
     assert.strictEqual(variables.readout_cfg_uri, 'file-readout');
@@ -310,7 +314,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.evaluate(() => {
       document.querySelector('#removeKeyTestKey').click();
     });
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
@@ -322,12 +326,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully add a JSON with (K;V) pairs in advanced configuration panel', async () => {
     await page.focus('#kvTextArea');
     await page.keyboard.type('{"testJson": "JsonValue"}');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
     const variables = await page.evaluate(() => {
       document.querySelector('#addKVListButton').click();
       return window.model.workflow.form.variables;
     });
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
     const expectedVariables = {TestKey2: 'TestValue2', testJson: 'JsonValue'};
     assert.strictEqual(JSON.stringify(variables), JSON.stringify(expectedVariables));
   });
@@ -337,7 +341,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.focus('#kvTextArea');
     const toBeTyped = '{"testJson": "JsonValue", somtest: test}';
     await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     await page.evaluate(() => document.querySelector('#addKVListButton').click())
     const {variables, areaString} = await page.evaluate(() => {
@@ -375,21 +379,26 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should have an empty list of hosts before detector selection', async () => {
     const flps = await page.evaluate(() => window.model.workflow.flpSelection.list);
-    assert.deepStrictEqual(flps.kind, 'NotAsked');
+    assert.strictEqual(flps.kind, 'NotAsked');
   });
 
   it('should not select a detector that is not locked', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click()); // second element is for detector, first for lock
+    await page.waitForTimeout(200);
+
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.ok(selectedDet.length == 0, 'Detector selected without lock');
-    await page.waitForTimeout(500);
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
     await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(1)');
-    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(2)');
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    await page.waitForTimeout(200);
+
+    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(2)');
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.waitForTimeout(200);
+
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
     await page.waitForTimeout(500);
@@ -410,7 +419,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     page.on('dialog', async dialog => {
       await dialog.accept('My Config');
     });
-    await page.evaluate(() => document.querySelector('#save-config').click());
+    await page.evaluate(() => document.querySelector('#save-core-env-config').click());
     await page.waitForTimeout(200)
 
     const message = await page.evaluate(() => window.model.environment.itemNew.payload);
