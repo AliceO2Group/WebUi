@@ -10,15 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/status`);
+import { Log } from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/status`);
 
 /**
  * Gateway for all calls with regards to the status
  * of the framework and its dependencies
  */
-class StatusController {
+export class StatusController {
   /**
    * Setup StatusController
    * @param {JSON} config - of the framework
@@ -35,7 +36,8 @@ class StatusController {
   /**
    * Set connector that is used for retrieving general information
    * about objects (e.g. CCDB)
-   * @param {Object} connector 
+   * @param {Object} connector - ccdbService
+   * @returns {void}
    */
   setDataConnector(connector) {
     this.connector = connector;
@@ -44,7 +46,8 @@ class StatusController {
   /**
    * Set connector used for live mode for retrieving paths
    * of objects (e.g. Consul)
-   * @param {Object} liveConnector 
+   * @param {Object} liveConnector
+   * @returns {void}
    */
   setLiveModeConnector(liveConnector) {
     this.liveConnector = liveConnector;
@@ -61,9 +64,9 @@ class StatusController {
       result.version = this.projPackage.version;
     }
     if (this.config.http) {
-      const qc = {hostname: this.config.http.hostname, port: this.config.http.port};
+      const qc = { hostname: this.config.http.hostname, port: this.config.http.port };
       result = Object.assign(result, qc);
-      result.status = {ok: true};
+      result.status = { ok: true };
     }
     res.status(200).json(result);
   }
@@ -76,10 +79,10 @@ class StatusController {
   async frameworkInfo(req, res) {
     try {
       const info = await this.getFrameworkInfo();
-      res.status(200).json(info)
+      res.status(200).json(info);
     } catch (error) {
       this.logError(error);
-      res.status(502).json({message: error.message | error});
+      res.status(502).json({ message: error.message | error });
     }
   }
 
@@ -93,9 +96,9 @@ class StatusController {
       result.qcg.version = this.projPackage.version;
     }
     if (this.config.http) {
-      const qc = {hostname: this.config.http.hostname, port: this.config.http.port};
+      const qc = { hostname: this.config.http.hostname, port: this.config.http.port };
       result.qcg = Object.assign(result.qcg, qc);
-      result.qcg.status = {ok: true};
+      result.qcg.status = { ok: true };
     }
     if (this.config.ccdb) {
       result.ccdb = this.config.ccdb;
@@ -117,14 +120,14 @@ class StatusController {
    */
   async getDataConnectorStatus() {
     if (!this.connector) {
-      return {ok: false, message: 'Data connector was not configured'}
+      return { ok: false, message: 'Data connector was not configured' };
     }
     try {
       await this.connector.isConnectionUp();
-      return {ok: true};
+      return { ok: true };
     } catch (err) {
       this.logError(err);
-      return {ok: false, message: err.message || err};
+      return { ok: false, message: err.message || err };
     }
   }
 
@@ -134,27 +137,25 @@ class StatusController {
    */
   async getLiveModeConnectorStatus() {
     if (!this.liveConnector) {
-      return {ok: false, message: 'Live Mode was not configured'}
+      return { ok: false, message: 'Live Mode was not configured' };
     }
     try {
       await this.liveConnector.getConsulLeaderStatus();
-      return {ok: true};
+      return { ok: true };
     } catch (err) {
       this.logError(err);
-      return {ok: false, message: err.message || err};
+      return { ok: false, message: err.message || err };
     }
   }
 
   /**
    * Log the error based on containing a stack trace or not
-   * @param {Error} err 
+   * @param {Error} err
    */
   logError(err) {
-    log.error(err.message || err)
+    log.error(err.message || err);
     if (err.stack) {
       log.trace(err);
     }
   }
 }
-
-module.exports = StatusController;

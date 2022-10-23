@@ -12,33 +12,22 @@
  * or submit itself to any jurisdiction.
  */
 
-export const testConfig = {
-  demoData: true,
-  http: {
-    port: 8181,
-    hostname: 'localhost',
-    tls: false,
-  },
-  mysql: {
-    host: 'aaaa',
-    user: 'aaaa',
-    password: 'aaaa',
-    database: 'quality_control',
-  },
-  tobject2json: {
-    host: 'localhost',
-    port: 7777,
-  },
-  consul: {
-    hostname: 'localhost',
-    port: 8500,
-  },
-  ccdb: {
-    hostname: 'ccdb',
-    port: 8500,
-    prefix: 'test',
-  },
-  quality_control: {
-    version: '0.19.5-1',
-  },
-};
+/* global QCG */
+
+// Import QCG Public Configuration
+import { QCG } from './config.js';
+import { mount, sessionService } from '/js/src/index.js';
+import view from './view.js';
+import Model from './Model.js';
+
+sessionService.loadAndHideParameters();
+window.sessionService = sessionService;
+window.QCG = QCG;
+
+// Start application
+const model = new Model();
+const debug = true; // Shows when redraw is done
+mount(document.body, view, model, debug);
+
+// Expose model to interact with it the browser's console
+window.model = model;

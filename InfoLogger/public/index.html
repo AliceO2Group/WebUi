@@ -1,7 +1,6 @@
 <!doctype html>
 <title>InfoLogger - Alice O2 UI</title>
-<meta name="description" content="Control interface of Alice O2">
-<meta name="author" content="Vladimir Kosmala">
+<meta name="description" content="InfoLogger interface of Alice O2">
 <link rel="stylesheet" href="/css/src/bootstrap.css">
 <link rel="stylesheet" href="/app.css">
 
@@ -20,31 +19,6 @@
   </div>
 </body>
 
-<script src="/js/src/compatibility.js"></script>
 <script src="./common/moment.js"></script>
 <script src="./common/moment-timezone.js"></script>
-
-<!-- Load the session service, parses variables provided by server in the query -->
-<script type="module">
-import sessionService from '/js/src/sessionService.js';
-sessionService.loadAndHideParameters();
-
-// Expose sessionService to interract with it the browser's console
-window.sessionService = sessionService;
-</script>
-
-<!-- Main application controller -->
-<script type="module">
-// Import MVC
-import {mount} from '/js/src/index.js';
-import view from './view.js';
-import Model from './Model.js';
-
-// Start application
-const model = new Model();
-const debug = true; // shows when redraw is done
-mount(document.body, view, model, debug);
-
-// Expose model to interract with it the browser's console
-window.model = model;
-</script>
+<script src="./index.js" type="module"></script>

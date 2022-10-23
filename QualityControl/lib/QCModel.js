@@ -10,45 +10,55 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const config = require('./config/configProvider.js');
-const projPackage = require('./../package.json');
-const jsroot = require('jsroot');
+import { config } from './config/configProvider.js';
+// Import projPackage from './../package.json';
+import { openFile, toJSON } from 'jsroot';
 
-const ConsulService = require('@aliceo2/web-ui').ConsulService;
-const CcdbService = require('./services/CcdbService.js');
-const UserService = require('./services/UserService.js');
-const JsonFileService = require('./services/JsonFileService.js');
+import { ConsulService } from '@aliceo2/web-ui';
+import { CcdbService } from './services/CcdbService.js';
+import { UserService } from './services/UserService.js';
+import { JsonFileService } from './services/JsonFileService.js';
 
-const LayoutController = require('./controllers/LayoutController.js');
-const StatusController = require('./controllers/StatusController.js');
-const ObjectController = require('./controllers/ObjectController.js');
+import { LayoutController } from './controllers/LayoutController.js';
+import { StatusController } from './controllers/StatusController.js';
+import { ObjectController } from './controllers/ObjectController.js';
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
+import { Log } from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
-// --------------------------------------------------------
-// Initialization of model according to config file
-const statusService = new StatusController(config, projPackage);
-module.exports.statusService = statusService;
+/*
+ * --------------------------------------------------------
+ * Initialization of model according to config file
+ */
+const projPackage = {}; // TODO
+export const statusService = new StatusController(config, projPackage);
 
-const jsonDb = new JsonFileService(config.dbFile || __dirname + '/../db.json');
-module.exports.userService = new UserService(jsonDb);
-module.exports.layoutService = new LayoutController(jsonDb);
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
+export const userService = new UserService(jsonDb);
+export const layoutService = new LayoutController(jsonDb);
 
+export let consulService = undefined;
 if (config.consul) {
-  const consulService = new ConsulService(config.consul);
+  consulService = new ConsulService(config.consul);
   consulService.getConsulLeaderStatus()
     .then(() => log.info('Consul Service connection was successfully tested.'))
     .catch((error) => log.error('Consul Service connection could not be established. '
-      + `Please try restarting the service due to: ${error}`)
-    );
-  module.exports.consulService = consulService;
+      + `Please try restarting the service due to: ${error}`));
   statusService.setLiveModeConnector(consulService);
 } else {
   log.warn('Consul Service: No Configuration Found');
-  module.exports.consulService = undefined;
 }
+
+export let objectController = undefined;
+export let listObjects = undefined;
+export let getObjectTimestampList = undefined;
+export let queryPrefix = undefined;
 
 if (config.listingConnector === 'ccdb') {
   log.info('Object listing: CCDB');
@@ -57,14 +67,11 @@ if (config.listingConnector === 'ccdb') {
   }
   const ccdb = new CcdbService(config.ccdb);
   ccdb.isConnectionUp();
-  module.exports.listObjects = ccdb.getObjectsLatestVersionList.bind(ccdb);
-  module.exports.getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
-  module.exports.queryPrefix = ccdb.PREFIX;
+  listObjects = ccdb.getObjectsLatestVersionList.bind(ccdb);
+  getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
+  queryPrefix = ccdb.PREFIX;
 
-  module.exports.objectController = new ObjectController(ccdb, jsroot);
-  module.exports.layoutService = new LayoutController(jsonDb);
+  objectController = new ObjectController(ccdb, { openFile, toJSON });
   statusService.setDataConnector(ccdb);
-
 }
-
 // --------------------------------------------------------

@@ -19,7 +19,8 @@ module.exports = {
     hostname: 'localhost',
     // key: './cert/key.pem',
     // cert: './cert/cert.pem',
-    tls: false
+    tls: false,
+    allow: true,
   },
   infoLoggerServer: {
     host: 'localhost',

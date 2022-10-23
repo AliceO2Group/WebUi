@@ -11,17 +11,22 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
- 
-describe('Lib Test Suite', async () => {
-  require('./config/public-config.test.js');
-  
-  require('./controllers/layout-controller.test.js');
-  require('./controllers/object-controller.test.js');
-  require('./controllers/status-controller.test.js');
 
-  require('./services/ccdb-service.test.js');
-  require('./services/json-service.test.js');
-  require('./services/user-service.test.js');
+import sessionService from '/js/src/sessionService.js';
+sessionService.loadAndHideParameters();
 
-  require('./utils/utils.test.js');
-});
+// Expose sessionService to interact with it the browser's console
+window.sessionService = sessionService;
+
+// Import MVC
+import {mount} from '/js/src/index.js';
+import view from './view.js';
+import Model from './Model.js';
+
+// Start application
+const model = new Model();
+const debug = true; // shows when redraw is done
+mount(document.body, view, model, debug);
+
+// Expose model to interact with it the browser's console
+window.model = model;

@@ -10,27 +10,33 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
-const http = require('http');
+import { Log } from '@aliceo2/web-ui';
+const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
+import http from 'http';
 
 /**
  * Global HTTP error handler, sends status 500
- * @param {string} err - Message error
+ * @param {string} errToLog - Error for qcg own logs
+ * @param {string} errToSend - Error to be stored in InfoLogger for user investigation
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
+ * @param {string} facility - service that sends the log
+ * @returns {void}
  */
-function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils') {
+export function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils') {
   errorLogger(errToLog, facility);
-  res.status(status).send({message: errToSend.message || errToSend});
+  res.status(status).send({ message: errToSend.message || errToSend });
 }
 
 /**
  * Global Error Logger for AliECS GUI
- * @param {Error} err 
+ * @param {Error} err - error that should be logged
+ * @param {string} facility - service that sends the log
+ * @returns {void}
  */
-function errorLogger(err, facility = 'utils') {
+export function errorLogger(err, facility = 'utils') {
   log.facility = `${process.env.npm_config_log_label ?? 'qcg'}/${facility}`;
   if (err.stack) {
     log.trace(err);
@@ -39,23 +45,26 @@ function errorLogger(err, facility = 'utils') {
 }
 
 /**
-  * Util to get JSON data (parsed) from server
-  * @param {string} host - hostname of the server
-  * @param {number} port - port of the server
-  * @param {string} path - path of the server request
-  * @return {Promise.<Object, Error>} JSON response
-  */
-function httpGetJson(hostname, port, path, headers = {Accept: 'application/json'}) {
+ * Util to get JSON data (parsed) from server via a GET HTTP request
+ * @param {string} hostname - hostname of the server to where request will be made
+ * @param {number} port - port of the server to where request will be made
+ * @param {string} path - path of the server request to where request will be made
+ * @param {JSON} headers - configurable headers for the request
+ * @return {Promise.<Object, Error>} JSON response
+ */
+export function httpGetJson(hostname, port, path, headers = { Accept: 'application/json' }) {
   return new Promise((resolve, reject) => {
-    const requestOptions = {hostname, port, path, method: 'GET', headers};
+    const requestOptions = { hostname, port, path, method: 'GET', headers };
+
     /**
      * Generic handler for client http requests,
      * buffers response, checks status code and parses JSON
-     * @param {Response} response
+     * @param {Response} response - response object to be used for building the JSON response
+     * @return {Promise.<Object, Error>} - JSON response
      */
     const requestHandler = (response) => {
       if (response.statusCode < 200 || response.statusCode > 299) {
-        reject(new Error('Non-2xx status code: ' + response.statusCode));
+        reject(new Error(`Non-2xx status code: ${response.statusCode}`));
         return;
       }
 
@@ -78,16 +87,18 @@ function httpGetJson(hostname, port, path, headers = {Accept: 'application/json'
 }
 
 /**
- * Make a HEAD HTTP call and return a promise
- * @returns {Promise.<{status, headers}, Error>}
+ * Util to get JSON data (parsed) from server via a HEAD HTTP request
+ * @param {string} hostname - hostname of the server to where request will be made
+ * @param {number} port - port of the server to where request will be made
+ * @param {string} path - path of the server request to where request will be made
+ * @param {JSON} headers - configurable headers for the request
+ * @returns {Promise.<{status, headers}, Error>} - JSON response
  */
-function httpHeadJson(hostname, port, path, headers = {Accept: 'application/json'}) {
-  const requestOptions = {hostname, port, path, method: 'HEAD', headers};
+export function httpHeadJson(hostname, port, path, headers = { Accept: 'application/json' }) {
+  const requestOptions = { hostname, port, path, method: 'HEAD', headers };
   return new Promise((resolve, reject) => {
-    http.request(requestOptions, (res) => resolve({status: res.statusCode, headers: res.headers}))
+    http.request(requestOptions, (res) => resolve({ status: res.statusCode, headers: res.headers }))
       .on('error', (err) => reject(err))
       .end();
   });
 }
-
-module.exports = {errorHandler, errorLogger, httpGetJson, httpHeadJson};

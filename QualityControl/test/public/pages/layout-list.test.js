@@ -16,18 +16,17 @@ const assert = require('assert');
 const test = require('../index');
 
 describe('layoutList page test suite', async () => {
-  let page, url;
+  let page; let url;
 
   before(async () => {
-    page = test.page;
-    url = test.url;
-    await page.goto(url + '?page=layoutList', {waitUntil: 'networkidle0'});
+    ({ page, url } = test);
+    await page.goto(`${url}?page=layoutList`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=layoutList');
   });
 
   it('should have a button for online mode in the header', async () => {
-    await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)', {timeout: 5000});
+    await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)', { timeout: 5000 });
     const onlineButton = await page.evaluate(() =>
       document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)').title);
     assert.strictEqual(onlineButton, 'Toggle Mode (Online/Offline)');
@@ -54,6 +53,6 @@ describe('layoutList page test suite', async () => {
     await page.evaluate(() => document.querySelector('section table tbody tr a').click());
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10');
-    // id 5aba4a059b755d517e76ea10 is set in QCModelDemo
+    // Id 5aba4a059b755d517e76ea10 is set in QCModelDemo
   });
 });

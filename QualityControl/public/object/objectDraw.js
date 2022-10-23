@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* global JSROOT */
 
-import {h} from '/js/src/index.js';
-import {timerDebouncer, pointerId} from '../common/utils.js';
+import { h } from '/js/src/index.js';
+import { timerDebouncer, pointerId } from '../common/utils.js';
 import checkersPanel from './checkersPanel.js';
 
 /**
@@ -39,10 +39,10 @@ export function draw(model, tabObject, options, location = '') {
   const defaultOptions = {
     width: '100%', // CSS size
     height: '100%', // CSS size
-    className: '', // any CSS class
+    className: '', // Any CSS class
   };
 
-  options = Object.assign({}, defaultOptions, options);
+  options = { ...defaultOptions, ...options };
   const drawingOptions = [];
   if (options.stat) {
     drawingOptions.push('stat');
@@ -61,12 +61,12 @@ export function draw(model, tabObject, options, location = '') {
   }
 
   const attributes = {
-    'data-fingerprint-key': fingerprintReplacement(tabObject), // just for humans in inspector
-    key: fingerprintReplacement(tabObject), // completely re-create this div if the chart is not the same at all
+    'data-fingerprint-key': fingerprintReplacement(tabObject), // Just for humans in inspector
+    key: fingerprintReplacement(tabObject), // Completely re-create this div if the chart is not the same at all
     class: options.className,
     style: {
       height: options.height,
-      width: options.width
+      width: options.width,
     },
 
     /**
@@ -74,17 +74,17 @@ export function draw(model, tabObject, options, location = '') {
      * @param {vnode} vnode
      */
     oncreate(vnode) {
-      // ask model to load data to be shown
+      // Ask model to load data to be shown
 
-      // setup resize function
+      // Setup resize function
       vnode.dom.onresize = timerDebouncer(() => {
         if (JSROOT.resize) {
-          // resize might not be loaded yet
+          // Resize might not be loaded yet
           JSROOT.resize(vnode.dom);
         }
       }, 200);
 
-      // resize on window size change
+      // Resize on window size change
       window.addEventListener('resize', vnode.dom.onresize);
 
       // JSROOT setup
@@ -109,32 +109,30 @@ export function draw(model, tabObject, options, location = '') {
     onremove(vnode) {
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {
-        // cleanup might not be loaded yet
+        // Cleanup might not be loaded yet
         JSROOT.cleanup(vnode.dom);
       }
 
-      // stop listening for window size change
+      // Stop listening for window size change
       window.removeEventListener('resize', vnode.dom.onresize);
-    }
+    },
   };
 
-  let content = null;
+  const content = null;
   const objectRemoteData = model.object.objects[tabObject.name];
   if (!objectRemoteData || objectRemoteData.isLoading()) {
-    // not asked yet or loading
-    return h('.absolute-fill.flex-column.items-center.justify-center', [
-      h('.animate-slow-appearance', 'Loading')
-    ]);
+    // Not asked yet or loading
+    return h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]);
   } else if (objectRemoteData.isFailure()) {
-    return h('.scroll-y.absolute-fill.p1.f6.text-center', {
-      style: 'word-break: break-all;'
+    return h('.scroll-y.p1.f6.text-center', {
+      style: 'word-break: break-all;',
     }, objectRemoteData.payload);
   } else {
     if (model.object.isObjectChecker(objectRemoteData.payload.qcObject.root)) {
       return checkersPanel(objectRemoteData.payload.qcObject.root, location);
     }
   }
-  // on success, JSROOT will erase all DOM inside div and put its own
+  // On success, JSROOT will erase all DOM inside div and put its own
   return h('.relative.jsroot-container', attributes, content);
 }
 
@@ -181,9 +179,11 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     const qcObject = objectRemoteData.payload.qcObject.root;
     setTimeout(() => {
       if (JSROOT.cleanup) {
-        // Remove previous JSROOT content before draw to do a real redraw.
-        // Official redraw will keep options whenever they changed, we don't want this.
-        // (cleanup might not be loaded yet)
+        /*
+         * Remove previous JSROOT content before draw to do a real redraw.
+         * Official redraw will keep options whenever they changed, we don't want this.
+         * (cleanup might not be loaded yet)
+         */
         JSROOT.cleanup(dom);
       }
 
@@ -200,12 +200,12 @@ function redrawOnDataUpdate(model, dom, tabObject) {
       }
       JSROOT.draw(dom, qcObject, drawingOptions).then((painter) => {
         if (painter === null) {
-          // jsroot failed to paint it
+          // Jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
         }
       }).catch((error) => {
         console.error(error);
-        model.object.invalidObject(tabObject.name)
+        model.object.invalidObject(tabObject.name);
       });
     }, 0);
 
@@ -213,8 +213,11 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
   } else if (objectRemoteData && objectRemoteData.isFailure()) {
     JSROOT.cleanup(dom);
-    // model.object.invalidObject(tabObject.name);
-    // model.notify();
+
+    /*
+     * Model.object.invalidObject(tabObject.name);
+     * model.notify();
+     */
   }
 }
 

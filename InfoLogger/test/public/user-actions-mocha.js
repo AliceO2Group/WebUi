@@ -50,7 +50,7 @@ describe('User Profile test-suite', async () => {
 
   describe('User is NOT anonymous', async () => {
     it('should have a button in action dropdown button to save user profile', async () => {
-      await page.goto(baseUrl + `?personid=1&name=test&token=${testToken}`, {waitUntil: 'networkidle0'});
+      await page.goto(baseUrl + `?personid=1&username=test&name=Test&access=admin&token=${testToken}`, {waitUntil: 'networkidle0'});
       const profileMenuItem = await page.evaluate(() => {
         const title = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').title;
         const text = document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').innerText;
@@ -82,7 +82,7 @@ describe('User Profile test-suite', async () => {
     });
 
     it('should successfully load profile saved for user when accessing the page', async () => {
-      await page.goto(baseUrl + `?personid=1&name=test&token=${testToken}`, {waitUntil: 'networkidle0'});
+      await page.goto(baseUrl + `?personid=1&username=test&name=Test&access=admin&token=${testToken}`, {waitUntil: 'networkidle0'});
       const userProfile = await page.evaluate(() => {
         window.model.table.colsHeader.date.size = 'cell-xl';
         document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();

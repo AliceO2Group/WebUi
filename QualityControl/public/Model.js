@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* global QCG */
+/* global QCG, JSROOT */
 
 import {
-  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData,
 } from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
@@ -35,7 +35,7 @@ export default class Model extends Observable {
   constructor() {
     super();
     this.session = sessionService.get();
-    this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
+    this.session.personid = parseInt(this.session.personid, 10); // Cast, sessionService has only strings
 
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
@@ -44,8 +44,8 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.folder = new Folder(this);
-    this.folder.addFolder({title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: ''});
-    this.folder.addFolder({title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: ''});
+    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
+    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.bubbleTo(this);
 
     this.layout = new Layout(this);
@@ -58,15 +58,14 @@ export default class Model extends Observable {
     this.frameworkInfo.bubbleTo(this);
 
     this.isOnlineModeConnectionAlive = false;
-    this.isOnlineModeEnabled = false; // show only online objects or all (offline)
+    this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
 
     this.refreshTimer = 0;
-    this.refreshInterval = 0; // seconds
+    this.refreshInterval = 0; // Seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
     this.page = null;
-    this._isImportVisible = false; // visibility of modal allowing user to import a layout as JSON
-
+    this._isImportVisible = false; // Visibility of modal allowing user to import a layout as JSON
 
     // Setup router
     this.router = new QueryRouter();
@@ -84,13 +83,13 @@ export default class Model extends Observable {
   }
 
   /**
-   * Initialize steps in a certain order based on 
+   * Initialize steps in a certain order based on
    * mandatory information from server
    */
   async initModel() {
     this.services = {
       object: new QCObjectService(this),
-      layout: new LayoutService(this)
+      layout: new LayoutService(this),
     };
 
     if (QCG.CONSUL_SERVICE) {
@@ -99,8 +98,18 @@ export default class Model extends Observable {
 
     this.loader.get('/api/checkUser');
 
+    // JSROOT.settings.ContextMenu = true;
+    JSROOT.settings.AutoStat = true;
+    JSROOT.settings.CanEnlarge = false;
+    JSROOT.settings.DragAndDrop = false;
+    JSROOT.settings.MoveResize = false; // Div 2
+    JSROOT.settings.ToolBar = false;
+    JSROOT.settings.ZoomWheel = false;
+    JSROOT.settings.ApproxTextSize = true;
+    JSROOT.settings.fFrameLineColor = 16;
+
     // Init first page
-    this.handleLocationChange(); 
+    this.handleLocationChange();
   }
 
   /**
@@ -108,7 +117,7 @@ export default class Model extends Observable {
    * @param {Event} e
    */
   handleKeyboardDown(e) {
-    // console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // Console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
 
     // Delete key + layout page + object select => delete this object
@@ -126,10 +135,8 @@ export default class Model extends Observable {
    * Handle authed event from WS when connection is ready to be used,
    */
   handleWSAuthed() {
-    // subscribe to all notifications from server (information service)
-    this.ws.setFilter(() => {
-      return true;
-    });
+    // Subscribe to all notifications from server (information service)
+    this.ws.setFilter(() => true);
   }
 
   /**
@@ -137,8 +144,8 @@ export default class Model extends Observable {
    */
   handleWSClose() {
     const self = this;
-    setTimeout(function() {
-      self.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
+    setTimeout(() => {
+      self.notification.show('Connection to server has been lost, please reload the page.', 'danger', Infinity);
     }, 3000);
   }
 
@@ -146,7 +153,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
-    this.object.objects = {}; // remove any in-memory loaded objects
+    this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
 
     this.services.layout.getLayoutsByUserId(this.session.personid);
@@ -158,7 +165,7 @@ export default class Model extends Observable {
         break;
       case 'layoutShow':
         if (!this.router.params.layoutId) {
-          this.notification.show(`layoutId in URL was missing. Redirecting to layout page`, 'warning', 3000);
+          this.notification.show('layoutId in URL was missing. Redirecting to layout page', 'warning', 3000);
           this.router.go('?page=layoutList', true);
           return;
         }
@@ -173,12 +180,12 @@ export default class Model extends Observable {
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}`, true, true);
             }
             this.notify();
-          }).catch(() => true); // error is handled inside loadItem
+          }).catch(() => true); // Error is handled inside loadItem
         break;
       case 'objectTree':
         this.page = 'objectTree';
         this.object.loadList();
-        // data is already loaded at beginning
+        // Data is already loaded at beginning
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
         }
@@ -186,7 +193,7 @@ export default class Model extends Observable {
         break;
       case 'objectView': {
         this.page = 'objectView';
-        const layoutId = this.router.params.layoutId;
+        const { layoutId } = this.router.params;
         if (layoutId) {
           this.layout.getLayoutById(layoutId);
         }
@@ -199,7 +206,7 @@ export default class Model extends Observable {
         this.notify();
         break;
       default:
-        // default route, replace the current one not handled
+        // Default route, replace the current one not handled
         this.router.go('?page=layoutList', true);
         break;
     }

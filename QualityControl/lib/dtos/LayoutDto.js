@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const Joi = require('joi');
+import Joi from 'joi';
 
 const ObjectDto = Joi.object({
   id: Joi.string().required(),
@@ -38,7 +38,7 @@ const UserDto = Joi.object({
   name: Joi.string().required(),
 });
 
-const LayoutDto = Joi.object({
+export const LayoutDto = Joi.object({
   id: Joi.string().required(),
   name: Joi.string().min(3).max(40).required(),
   tabs: Joi.array().min(1).max(20).items(TabsDto).required(),
@@ -48,5 +48,3 @@ const LayoutDto = Joi.object({
   displayTimestamp: Joi.boolean().default(false),
   autoTabChange: Joi.number().min(0).max(600).default(0),
 });
-
-module.exports = LayoutDto;

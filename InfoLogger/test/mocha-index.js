@@ -82,7 +82,6 @@ describe('InfoLogger', function() {
   require('./public/log-filter-actions-mocha');
   require('./public/live-mode-mocha');
   require('./public/query-mode-mocha');
-  require('./public/utils-mocha');
 
   after(async () => {
     await browser.close();
