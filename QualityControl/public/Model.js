@@ -107,8 +107,11 @@ export default class Model extends Observable {
     JSROOT.settings.ZoomWheel = false;
     JSROOT.settings.ApproxTextSize = true;
     JSROOT.settings.fFrameLineColor = 16;
+    JSROOT.settings.PreferSavedPoints = true;
 
-    // Init first page
+    /*
+     * Init first page
+     */
     this.handleLocationChange();
   }
 
