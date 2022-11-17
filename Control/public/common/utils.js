@@ -77,12 +77,17 @@ const getTaskShortName = (taskName) => {
 
 /**
  * Look through the AliECS Integrated services and return the status of ODC for a given environment id
+ * ODC status should be displayed as `-` if EPN is set to OFF
  * @param {string} envId 
  * @param {Model} model
- * @returns 
+ * @param {JSON} userVars - payload from AliECS with variables set by the user
+ * @returns {vnode}
  */
-const parseOdcStatusPerEnv = (envId, model) => {
+const parseOdcStatusPerEnv = (envId, model, userVars) => {
   const status = model.frameworkInfo.integratedServices;
+  if (userVars['epn_enabled'] && userVars['epn_enabled'] === 'false') {
+    return '-';
+  }
   if (status.isSuccess()) {
     if (status.payload && status.payload.odc && status.payload.odc.data) {
       try {

@@ -170,9 +170,9 @@ const environmentsTable = (model, list) => {
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
         h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_readout_enabled')),
         
-        h(`td${parseOdcStatusPerEnv(item.id, model) === 'RUNNING' ? '.success' : ''}`, {
+        h(`td${parseOdcStatusPerEnv(item.id, model, item.userVars) === 'RUNNING' ? '.success' : ''}`, {
           style: 'text-align: center;'
-        }, parseOdcStatusPerEnv(item.id, model)),
+        }, parseOdcStatusPerEnv(item.id, model, item.userVars)),
         h('td', {
           class: (item.state === 'RUNNING' ?
             'success'
