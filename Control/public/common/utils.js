@@ -24,7 +24,6 @@ const parseObject = (item, key) => {
       return item['trg_enabled'] === 'false' ? 'OFF'
         : (item['trg_global_run_enabled'] === "true" ? 'CTP' : 'LTU');
     case 'dcs_enabled':
-    case 'epn_enabled':
     case 'ctp_readout_enabled':
       return item[key] && item[key] === 'true' ? 'ON' : 'OFF'
     case 'odc_topology':
@@ -35,6 +34,8 @@ const parseObject = (item, key) => {
       return `${item.productName} v${item.versionStr}(revision ${item.build})`;
     case 'createdWhen':
       return new Date(Number.parseInt(item)).toLocaleString();
+    case 'odc_n_epns':
+      return (item['epn_enabled'] && item['epn_enabled'] == 'true') ? item['odc_n_epns'] : 'OFF';
     default:
       return JSON.stringify(item);
   }
