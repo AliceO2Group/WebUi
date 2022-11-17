@@ -39,16 +39,16 @@
     "mysql": "^2.18.1",
     "openid-client": "^5.1.8",
     "winston": "3.8.1",
-    "ws": "^8.6.0"
+    "ws": "^8.11.0"
   },
   "devDependencies": {
-    "eslint": "^8.26.0",
-    "mocha": "^10.0.0",
+    "eslint": "^8.27.0",
+    "mocha": "^10.1.0",
     "nock": "13.2.2",
     "nyc": "^15.1.0",
     "puppeteer": "19.1.0",
     "sinon": "14.0.0",
-    "supertest": "^6.2.1"
+    "supertest": "^6.3.0"
   },
   "main": "Backend/index.js"
 }

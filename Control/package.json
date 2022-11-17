@@ -38,11 +38,11 @@
     "@grpc/proto-loader"
   ],
   "devDependencies": {
-    "eslint": "^8.25.0",
+    "eslint": "^8.27.0",
     "mocha": "^10.1.0",
     "nock": "^13.2.2",
     "nyc": "^15.1.0",
-    "puppeteer": "19.1.0",
+    "puppeteer": "19.2.2",
     "sinon": "14.0.0"
   },
   "main": "index.js"
