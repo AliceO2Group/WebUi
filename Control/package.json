@@ -19,15 +19,17 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "nodemon --watch index.js --watch src/lib --watch config.js src/index.js",
     "test": "npm run eslint && npm run mocha",
-    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
-    "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
-    "coverage-local": "nyc --reporter=lcov npm run mocha"
+    "coverage-local": "nyc --reporter=lcov npm run mocha",
+    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js src/",
+    "mocha": "mocha --exit $(find test -name 'mocha-*.js')"
   },
+  "eslintIgnore": ["src/lib/protobuf/"],
   "files": [
-
+    "src",
+    "index.js"
   ],
   "dependencies": {
     "@aliceo2/web-ui": "2.0.0",

@@ -16,7 +16,7 @@
 
 /* eslint-disable max-len */
 
-const ControlService = require('./../../lib/control-core/ControlService.js');
+const ControlService = require('./../../src/lib/control-core/ControlService.js');
 const sinon = require('sinon');
 const assert = require('assert');
 const AssertionError = require('assert').AssertionError;

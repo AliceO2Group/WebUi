@@ -19,7 +19,7 @@ const path = require('path');
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 
-const PROTO_PATH = path.join(__dirname, './../../protobuf/o2control.proto');
+const PROTO_PATH = path.join(__dirname, './../../src/lib/protobuf/o2control.proto');
 
 /**
  * Create and run a mock gRPC server for O2Core

@@ -15,8 +15,8 @@
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 
-const ControlService = require('./../../lib/control-core/ControlService.js');
-const EnvCache = require('./../../lib/control-core/EnvCache.js');
+const ControlService = require('./../../src/lib/control-core/ControlService.js');
+const EnvCache = require('./../../src/lib/control-core/EnvCache.js');
 const sinon = require('sinon');
 const assert = require('assert');
 

@@ -15,7 +15,7 @@
 const assert = require('assert');
 const nock = require('nock');
 const sinon = require('sinon');
-const StatusService = require('../../lib/services/StatusService.js');
+const StatusService = require('../../src/lib/services/StatusService.js');
 const NotificationService = require('@aliceo2/web-ui').NotificationService;
 
 describe('StatusService test suite', () => {

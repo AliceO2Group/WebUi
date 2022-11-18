@@ -1,8 +1,11 @@
-public/config.js
-config.js
 *~
 .DS_Store
 cert/*
+
 node_modules
+
 .nyc*
 coverage
+
+src/public/config.js
+config.js
