@@ -15,6 +15,7 @@
 const assert = require('assert');
 const path = require('path');
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
+const GrpcProxy = require('./GrpcProxy.js');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
@@ -30,11 +31,14 @@ class ControlService {
    * @param {ConsulConnector} consulConnector
    * * @param {JSON} coreConfig
    */
-  constructor(ctrlProx, consulConnector, coreConfig) {
+  constructor(ctrlProx, consulConnector, coreConfig, O2_CONTROL_PROTO_PATH) {
     assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
     this.ctrlProx = ctrlProx;
     this.consulConnector = consulConnector;
     this.coreConfig = coreConfig;
+    this.O2_CONTROL_PROTO_PATH = O2_CONTROL_PROTO_PATH;
+
+    this.intervalHeartBeat = this.initiateHeartBeat();
   }
 
   /**
@@ -43,6 +47,31 @@ class ControlService {
    */
   setWS(webSocket) {
     this.webSocket = webSocket;
+  }
+
+  /**
+   * Initiate a JS interval to check that proxy to AliECS Core is healthy
+   * Interval will be running every 10 seconds and in case of failure, a reconnection will be attempted
+   * @returns {Interval}
+   */
+  initiateHeartBeat() {
+    let wasInError = false;
+    return setInterval(async () => {
+      try {
+        await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 2000});
+        wasInError = false;
+      } catch (err) {
+        if (!wasInError) {
+          log.errorMessage('Unable to reach AliECS, attempting reconnection in silence', {
+            level: 20,
+            system: 'GUI',
+            facility: 'cog/controlservice'
+          });
+        }
+        wasInError = true;
+        this.ctrlProx = new GrpcProxy(this.coreConfig, this.O2_CONTROL_PROTO_PATH, wasInError);
+      }
+    }, 10000);
   }
 
   /**
