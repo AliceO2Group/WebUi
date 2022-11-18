@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const Lock = require('../../lib/services/Lock.js');
+const Lock = require('../../src/lib/services/Lock.js');
 
 describe('Lock test suite', () => {
   let req, res, fakeWs, lock;
@@ -67,7 +67,7 @@ describe('Lock test suite', () => {
 
   it('Should fail to release empty lock', () => {
     lock.unlockDetector(req, res);
-     assert.ok(res.status.calledWith(403));
+    assert.ok(res.status.calledWith(403));
   });
 
   it('Should fail to lock once again by same user', () => {

@@ -14,7 +14,7 @@
 
 const http = require('http');
 const url = require('url');
-const projPackage = require('../../package.json');
+const projPackage = require('../../../package.json');
 
 /**
  * Gateway for all Status Consumer calls

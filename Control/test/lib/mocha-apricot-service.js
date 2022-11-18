@@ -17,7 +17,7 @@ const sinon = require('sinon');
 const assert = require('assert');
 const AssertionError = require('assert').AssertionError;
 
-const ApricotService = require('./../../lib/control-core/ApricotService.js');
+const ApricotService = require('./../../src/lib/control-core/ApricotService.js');
 
 describe('ApricotService test suite', () => {
   describe('Check Constructor', () => {

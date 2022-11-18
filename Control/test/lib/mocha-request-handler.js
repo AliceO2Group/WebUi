@@ -15,8 +15,8 @@
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 
-const ControlService = require('./../../lib/control-core/ControlService.js');
-const RequestHandler = require('./../../lib/control-core/RequestHandler.js');
+const ControlService = require('./../../src/lib/control-core/ControlService.js');
+const RequestHandler = require('./../../src/lib/control-core/RequestHandler.js');
 const sinon = require('sinon');
 const assert = require('assert');
 

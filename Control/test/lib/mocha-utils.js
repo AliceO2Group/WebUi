@@ -14,7 +14,7 @@
 
 const sinon = require('sinon');
 const assert = require('assert');
-const errorHandler = require('./../../lib/utils.js').errorHandler;
+const errorHandler = require('./../../src/lib/utils.js').errorHandler;
 
 describe('Check errors are handled and sent successfully', () => {
   let res;

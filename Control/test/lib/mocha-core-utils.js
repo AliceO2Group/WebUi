@@ -15,7 +15,7 @@
 
 const assert = require('assert');
 
-const CoreUtils = require('./../../lib/control-core/CoreUtils.js');
+const CoreUtils = require('./../../src/lib/control-core/CoreUtils.js');
 
 describe('CoreUtils test suite', () => {
   describe('Check parseMethodNameString', () => {
