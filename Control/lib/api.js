@@ -44,31 +44,32 @@ if (!config.apricot) {
 if (!config.grafana) {
   log.error('Grafana Configuration is missing');
 }
-const lock = new Lock();
-
-let consulService;
-if (config.consul) {
-  consulService = new ConsulService(config.consul);
-}
-const consulConnector = new ConsulConnector(consulService, config.consul);
-consulConnector.testConsulStatus();
-
-const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
-const ctrlService = new ControlService(ctrlProxy, consulConnector, config.grpc);
-
-const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
-const apricotService = new ApricotService(apricotProxy);
-
-const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
-const envCache = new EnvCache(ctrlService);
-
-const statusService = new StatusService(config, ctrlService, consulService, apricotService);
 
 module.exports.setup = (http, ws) => {
-  ctrlService.setWS(ws);
+  const lock = new Lock();
   lock.setWs(ws);
+
+  let consulService;
+  if (config.consul) {
+    consulService = new ConsulService(config.consul);
+  }
+  const consulConnector = new ConsulConnector(consulService, config.consul);
+  consulConnector.testConsulStatus();
+
+  const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
+  const ctrlService = new ControlService(ctrlProxy, consulConnector, config.grpc, O2_CONTROL_PROTO_PATH);
+  ctrlService.setWS(ws);
+
+  const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
+  const apricotService = new ApricotService(apricotProxy);
+
+  const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
   aliecsReqHandler.setWs(ws);
+
+  const envCache = new EnvCache(ctrlService);
   envCache.setWs(ws);
+
+  const statusService = new StatusService(config, ctrlService, consulService, apricotService);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
