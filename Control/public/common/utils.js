@@ -24,7 +24,6 @@ const parseObject = (item, key) => {
       return item['trg_enabled'] === 'false' ? 'OFF'
         : (item['trg_global_run_enabled'] === "true" ? 'CTP' : 'LTU');
     case 'dcs_enabled':
-    case 'epn_enabled':
     case 'ctp_readout_enabled':
       return item[key] && item[key] === 'true' ? 'ON' : 'OFF'
     case 'odc_topology':
@@ -35,6 +34,8 @@ const parseObject = (item, key) => {
       return `${item.productName} v${item.versionStr}(revision ${item.build})`;
     case 'createdWhen':
       return new Date(Number.parseInt(item)).toLocaleString();
+    case 'odc_n_epns':
+      return (item['epn_enabled'] && item['epn_enabled'] == 'true') ? item['odc_n_epns'] : 'OFF';
     default:
       return JSON.stringify(item);
   }
@@ -76,12 +77,17 @@ const getTaskShortName = (taskName) => {
 
 /**
  * Look through the AliECS Integrated services and return the status of ODC for a given environment id
+ * ODC status should be displayed as `-` if EPN is set to OFF
  * @param {string} envId 
  * @param {Model} model
- * @returns 
+ * @param {JSON} userVars - payload from AliECS with variables set by the user
+ * @returns {vnode}
  */
-const parseOdcStatusPerEnv = (envId, model) => {
+const parseOdcStatusPerEnv = (envId, model, userVars) => {
   const status = model.frameworkInfo.integratedServices;
+  if (userVars['epn_enabled'] && userVars['epn_enabled'] === 'false') {
+    return '-';
+  }
   if (status.isSuccess()) {
     if (status.payload && status.payload.odc && status.payload.odc.data) {
       try {
