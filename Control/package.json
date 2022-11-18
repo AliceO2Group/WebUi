@@ -16,16 +16,19 @@
     "node": ">= 16.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
-    "integration-test": "mocha --exit --bail ./test/integration/core-tests.js -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
+  "files": [
+
+  ],
   "dependencies": {
     "@aliceo2/web-ui": "2.0.0",
     "@grpc/grpc-js": "1.7.1",
@@ -44,6 +47,5 @@
     "nyc": "^15.1.0",
     "puppeteer": "19.2.2",
     "sinon": "14.0.0"
-  },
-  "main": "index.js"
+  }
 }
