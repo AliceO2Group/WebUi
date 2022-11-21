@@ -107,9 +107,8 @@ const killEnvButton = (environment, item) =>
     }, 'KILL'),
     h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 400px'}, [
       h('', `Environments can only be killed:`),
-      h('', `- if no other transition is in progress`),
-      h('', `- by the shifter when it is in ERROR state`),
-      h('', `- by admins when in any other state`)
+      h('', `- by the shifter if it is in ERROR state`),
+      h('', `- by admins in any other state`)
     ])
   ]);
 
@@ -119,5 +118,5 @@ const killEnvButton = (environment, item) =>
  * * admins at any point
  */
 function _isKillActionAllowed(item, model) {
-  return item.state === 'ERROR' || !model.isAllowed(ROLES.Admin)
+  return item.state === 'ERROR' || model.isAllowed(ROLES.Admin);
 }
