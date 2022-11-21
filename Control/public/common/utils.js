@@ -83,23 +83,16 @@ const getTaskShortName = (taskName) => {
  * @param {JSON} userVars - payload from AliECS with variables set by the user
  * @returns {vnode}
  */
-const parseOdcStatusPerEnv = (envId, model, userVars) => {
-  const status = model.frameworkInfo.integratedServices;
-  if (userVars['epn_enabled'] && userVars['epn_enabled'] === 'false') {
-    return '-';
-  }
-  if (status.isSuccess()) {
-    if (status.payload && status.payload.odc && status.payload.odc.data) {
-      try {
-        const odcs = JSON.parse(status.payload.odc.data);
-        return odcs[envId] ? odcs[envId] : 'NOT FOUND'
-      } catch (error) {
-        console.error('Unable to parse ODC information')
-        return 'UNKNOWN'
-      }
+const parseOdcStatusPerEnv = (environment) => {
+  try {
+    if (environment.integratedServicesData && environment.integratedServicesData['odc']) {
+      const odc = JSON.parse(environment.integratedServicesData['odc']);
+      return odc.State;
     }
+  } catch (error) {
+    console.error(error);
   }
-  return 'UNKNOWN';
+  return '-';
 }
 
 /**

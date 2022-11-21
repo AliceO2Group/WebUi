@@ -202,10 +202,8 @@ export default class Model extends Observable {
       case 'environments':
         this.environment.getEnvironments();
         this.environment.getEnvironmentRequests();
-        this.frameworkInfo.getIntegratedServicesInfo();
         this.environment.refreshInterval = setInterval(() => {
           this.environment.getEnvironments();
-          this.frameworkInfo.getIntegratedServicesInfo();
         }, COG.REFRESH_ENVS);
         break;
       case 'environment':
