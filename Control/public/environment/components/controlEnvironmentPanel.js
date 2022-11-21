@@ -13,6 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
+import {ROLES} from './../../workflow/constants.js';
 
 /**
  * List of buttons, each one is an action to do on the current environment `item`
@@ -92,14 +93,30 @@ const shutdownEnvButton = (environment, item) =>
  * @return {vnode}
  */
 const killEnvButton = (environment, item) =>
-  h(`button.btn.btn-danger active`, {
-    id: 'buttonForceShutdown',
-    class: environment.itemControl.isLoading() ? 'loading' : '',
-    style: 'margin-left: .3em',
-    disabled: environment.itemControl.isLoading(),
-    onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
+  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
+    h(`button.btn.btn-danger active`, {
+      id: 'buttonForceShutdown',
+      class: environment.itemControl.isLoading() ? 'loading' : '',
+      style: 'margin-left: .3em',
+      disabled: environment.itemControl.isLoading() || !_isKillActionAllowed(item, environment.model),
+      onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
       && environment.destroyEnvironment({
         id: item.id, allowInRunningState: true, force: true,  runNumber: item.currentRunNumber
       }),
-    title: 'Kill environment'
-  }, 'KILL');
+      title: 'Kill environment'
+    }, 'KILL'),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 400px'}, [
+      h('', `Environments can only be killed:`),
+      h('', `- by the shifter if it is in ERROR state`),
+      h('', `- by admins in any other state`)
+    ])
+  ]);
+
+/**
+ * Logic behind enabling the kill button of the environment. It can be used by:
+ * * any user if environment is in ERROR state
+ * * admins at any point
+ */
+function _isKillActionAllowed(item, model) {
+  return item.state === 'ERROR' || model.isAllowed(ROLES.Admin);
+}
