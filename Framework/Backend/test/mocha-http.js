@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 process.env.NODE_ENV = 'test';
 
@@ -27,12 +27,19 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let httpServer;
 const tokenService = new O2TokenService(config.jwt);
+const USER = {
+  personid: 0,
+  username: 'test',
+  name: 'Test',
+  access: 'admin'
+}
 const token = tokenService.generateToken(0, 'test', 'Test', 'admin');
 
 describe('REST API', () => {
   before(() => {
     httpServer = new HttpServer(config.http, config.jwt);
     httpServer.get('/get-insecure', (req, res) => res.json({ok: 1}), {public: true});
+    httpServer.get('/get-authenticated-insecure', (req, res) => res.json({session: req.session}), {public: true});
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
     httpServer.get('/get-error', (req, res, next) => next(new Error('Some unexpected error')));
     httpServer.get('/get-crash', () => {
@@ -113,6 +120,14 @@ describe('REST API', () => {
       .expect('Content-Type', /json/)
       .expect(200)
       .expect({ok: 1}, done);
+  });
+
+  it('GET public with a token should authenticate user', (done) => {
+    request(httpServer)
+      .get('/api/get-authenticated-insecure?token=' + token)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .expect({session: USER}, done);
   });
 
   it('GET with an incorrect token should respond 403', (done) => {
