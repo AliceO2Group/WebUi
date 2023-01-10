@@ -39,7 +39,7 @@
     "eslint-config-google": "^0.14.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "puppeteer": "19.4.1",
+    "puppeteer": "19.5.0",
     "sinon": "^15.0.1"
   }
 }
