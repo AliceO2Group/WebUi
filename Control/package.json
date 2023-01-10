@@ -42,7 +42,7 @@
     "mocha": "^10.2.0",
     "nock": "^13.2.2",
     "nyc": "^15.1.0",
-    "puppeteer": "19.4.0",
+    "puppeteer": "19.5.0",
     "sinon": "15.0.1"
   },
   "main": "index.js"
