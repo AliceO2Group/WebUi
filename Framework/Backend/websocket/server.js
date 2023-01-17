@@ -72,32 +72,33 @@ class WebSocket {
    */
   processRequest(req) {
     return new Promise((resolve, reject) => {
-      // 1. Verify JWT token
+      let data;
       try {
-        const data = this.http.o2WebToken.verify(req.getToken())
-        // 2. Transfer decoded JWT data to request
-        Object.assign(req, data);
-        this.log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
-        // 3. Check whether callback exists
-        if (this.callbackArray.hasOwnProperty(req.getCommand())) {
-          const res = this.callbackArray[req.getCommand()](req);
-          // 4. Verify that response is type of WebSocketMessage
-          if (res && res.constructor.name === 'WebSocketMessage') {
-            if (typeof res.getCommand() !== 'string') {
-              res.setCommand(req.getCommand());
-            }
-            resolve(res);
-          } else {
-            // 5. 500 when callback does not return WebSocketMessage
-            resolve(new WebSocketMessage(500));
-          }
-        } else {
-          // 6. When callback does not exist return 404
-          resolve(new WebSocketMessage(404));
-        }
+        data = this.http.o2TokenService.verify(req.getToken())
       } catch (error) {
-        // 7. When JWT fails
         reject(error);
+        return;
+      }
+      
+      // Transfer decoded JWT data to request
+      Object.assign(req, data);
+      this.log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
+      // Check whether callback exists
+      if (this.callbackArray.hasOwnProperty(req.getCommand())) {
+        const res = this.callbackArray[req.getCommand()](req);
+        // Verify that response is type of WebSocketMessage
+        if (res && res.constructor.name === 'WebSocketMessage') {
+          if (typeof res.getCommand() !== 'string') {
+            res.setCommand(req.getCommand());
+          }
+          resolve(res);
+        } else {
+          // 500 when callback does not return WebSocketMessage
+          resolve(new WebSocketMessage(500));
+        }
+      } else {
+        // When callback does not exist return 404
+        resolve(new WebSocketMessage(404));
       }
     });
   }
@@ -109,19 +110,20 @@ class WebSocket {
    */
   onconnection(client, request) {
     const token = url.parse(request.url, true).query.token;
+    let decoded;
     try {
-      const decoded = this.http.o2WebToken.verify(token);
-      
-      client.id = decoded.id;
-      client.send(JSON.stringify({command: 'authed', id: client.id}));
-      client.on('message', (message) => this.onmessage(message, client));
-      client.on('close', () => this.onclose(client));
-      client.on('pong', () => client.isAlive = true);
-      client.on('error', (err) => this.log.error(`Connection ${err.code}`));
-    } catch (error){
+      decoded = this.http.o2TokenService.verify(token);
+    } catch (error) {
       this.log.debug(`${error.name} : ${error.message}`);
       client.close(1008);
+      return;
     }
+    client.id = decoded.id;
+    client.send(JSON.stringify({command: 'authed', id: client.id}));
+    client.on('message', (message) => this.onmessage(message, client));
+    client.on('close', () => this.onclose(client));
+    client.on('pong', () => client.isAlive = true);
+    client.on('error', (err) => this.log.error(`Connection ${err.code}`));
   }
 
   /**

@@ -19,9 +19,9 @@ const {randomBytes} = require('crypto');
  * Provides JSON Web Token functionality such as token generation and verification with `jsonwebtoken` library
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
-class O2WebToken {
+class O2TokenService {
   /**
-   * Constructor which initializes the O2WebToken with provided configuration
+   * Constructor which initializes the O2TokenService with provided configuration
    * @constructor
    * @param {object} config - configuration object
    */
@@ -60,4 +60,4 @@ class O2WebToken {
   }
 }
 
-module.exports = O2WebToken;
+module.exports = O2TokenService;

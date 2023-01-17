@@ -19,7 +19,7 @@ const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
 const Log = require('./../log/Log.js');
-const O2WebToken = require('./O2WebToken.js');
+const O2TokenService = require('./../services/O2TokenService.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
@@ -47,7 +47,7 @@ class HttpServer {
 
     this.configureHelmet(httpConfig);
 
-    this.o2WebToken = new O2WebToken(jwtConfig);
+    this.o2TokenService = new O2TokenService(jwtConfig);
     if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
       this.openid.createIssuer().catch(() => process.exit(1));
@@ -247,7 +247,7 @@ class HttpServer {
       query.username = 'anonymous';
       query.name = 'Anonymous';
       query.access = 'admin'
-      query.token = this.o2WebToken.generateToken(query.personid, query.username, query.name, query.access);
+      query.token = this.o2TokenService.generateToken(query.personid, query.username, query.name, query.access);
 
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);
@@ -400,7 +400,7 @@ class HttpServer {
 
     if (token) {
       try {
-        this.o2WebToken.verify(req.query.token);
+        this.o2TokenService.verify(req.query.token);
         next();
       } catch (error) {
         this.log.debug(`${error.name} : ${error.message}`);
@@ -455,7 +455,7 @@ class HttpServer {
         name,
         username: cern_upn,
         access,
-        token: this.o2WebToken.generateToken(cern_person_id, cern_upn, name, access),
+        token: this.o2TokenService.generateToken(cern_person_id, cern_upn, name, access),
       };
 
       // Read back user params from state
@@ -499,7 +499,7 @@ class HttpServer {
    */
   jwtVerify(req, res, next) {
     try {
-      const {decoded, id, username, name, access} = this.o2WebToken.verify(req.query.token);
+      const {decoded, id, username, name, access} = this.o2TokenService.verify(req.query.token);
       req.decoded = decoded;
       req.session = {
         personid: parseInt(id),

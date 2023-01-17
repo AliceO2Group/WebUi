@@ -17,18 +17,18 @@ const WebSocketClient = require('ws');
 const assert = require('assert');
 const WebSocket = require('./../websocket/server');
 const HttpServer = require('./../http/server');
-const O2WebToken = require('./../http/O2WebToken.js');
+const O2TokenService = require('./../services/O2TokenService.js');
 const WebSocketMessage = require('./../websocket/message.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 
-let http, ws, o2WebToken, token; // eslint-disable-line
+let http, ws, tokenService, token; // eslint-disable-line
 
 describe('websocket', () => {
   before(() => {
-    o2WebToken = new O2WebToken(config.jwt);
-    token = o2WebToken.generateToken(0, 'test', 'Test', 'admin');
+    tokenService = new O2TokenService(config.jwt);
+    token = tokenService.generateToken(0, 'test', 'Test', 'admin');
 
     http = new HttpServer(config.http, config.jwt);
     ws = new WebSocket(http, config.jwt, 'localhost');

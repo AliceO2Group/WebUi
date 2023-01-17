@@ -13,15 +13,15 @@
 */
 
 const {jwt} = require('../config-default.json');
-const O2WebToken = require('../http/O2WebToken.js');
+const O2TokenService = require('./../services/O2TokenService.js');
 const {JsonWebTokenError} = require('jsonwebtoken');
 const assert = require('assert');
 
 describe('JSON Web Token', () => {
 
-  describe('O2WebToken Initialization', () => {
+  describe('O2TokenService Initialization', () => {
     it('should successfully initialize constructor with provided configuration', () => {
-      const o2Token = new O2WebToken(jwt);
+      const o2Token = new O2TokenService(jwt);
       assert.strictEqual(o2Token._expiration, jwt.expiration);
       assert.strictEqual(o2Token._maxAge, jwt.maxAge);
       assert.strictEqual(o2Token._secret, jwt.secret);
@@ -34,7 +34,7 @@ describe('JSON Web Token', () => {
         issuer: 'alice-o2-gui',
         secret: null
       }
-      const o2Token = new O2WebToken(jwtConfig);
+      const o2Token = new O2TokenService(jwtConfig);
       assert.strictEqual(o2Token._expiration, '1d');
       assert.strictEqual(o2Token._maxAge, jwtConfig.maxAge);
       assert.strictEqual(o2Token._secret.length, 512);
@@ -42,9 +42,9 @@ describe('JSON Web Token', () => {
     });
   });
 
-  describe('O2WebToken "generateToken"', () => {
+  describe('O2TokenService "generateToken"', () => {
     it('should successfully generate token based on provided configuration', () => {
-      const o2Token = new O2WebToken(jwt);
+      const o2Token = new O2TokenService(jwt);
       const token = o2Token.generateToken(100, 'bob', 'John Bob', 'admin');
       const {id, username, name, access} = o2Token.verify(token);
       assert.strictEqual(id, 100);
@@ -54,7 +54,7 @@ describe('JSON Web Token', () => {
     });
 
     it('should successfully generate token based on provided configuration and default parameters', () => {
-      const o2Token = new O2WebToken(jwt);
+      const o2Token = new O2TokenService(jwt);
       const token = o2Token.generateToken(101, 'alice', 'Alice O2');
       const {id, username, name, access} = o2Token.verify(token);
       assert.strictEqual(id, 101);
@@ -64,9 +64,9 @@ describe('JSON Web Token', () => {
     });
   });
 
-  describe('O2WebToken "verify"', () => {
+  describe('O2TokenService "verify"', () => {
     it('should successfully verify token', async () => {
-      const o2Token = new O2WebToken(jwt);
+      const o2Token = new O2TokenService(jwt);
       const token = o2Token.generateToken(100, 'bob', 'John Bob', 'admin');
       assert.doesNotThrow(() => o2Token.verify(token));
 
@@ -78,7 +78,7 @@ describe('JSON Web Token', () => {
     });
 
     it('should throw error if verify function fails', async () => {
-      const o2Token = new O2WebToken(jwt);
+      const o2Token = new O2TokenService(jwt);
       const token = o2Token.generateToken(101, 'alice', 'Alice O2');
       o2Token._secret = 'changed';
       assert.throws(() => o2Token.verify(token), new JsonWebTokenError('invalid signature'));
