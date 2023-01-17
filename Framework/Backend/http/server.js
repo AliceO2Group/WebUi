@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const assert = require('assert');
 const fs = require('fs');
@@ -184,13 +184,21 @@ class HttpServer {
     // Router for public API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.routerPublic = express.Router();
+    this.routerPublic.use(async (req, _res, next) => {
+      try {
+        this.jwtAuthenticate(req);
+      } catch (_e) {
+        // User is simply not authenticated
+      }
+      next();
+    });
     this.routerPublic.use(express.json({limit: this.limit})); // parse json body for API calls
     this.app.use('/api', this.routerPublic);
 
     // Router for secure API (can grow with get, post and delete)
     // eslint-disable-next-line
     this.router = express.Router();
-    this.router.use((req, res, next) => this.jwtVerify(req, res, next));
+    this.router.use(this.jwtVerify.bind(this));
     this.router.use(express.json({limit: this.limit})); // parse json body for API calls
     this.app.use('/api', this.router);
 
@@ -377,7 +385,7 @@ class HttpServer {
    * Redirects HTTP to HTTPS.
    */
   enableHttpRedirect() {
-    this.app.use(function(req, res, next) {
+    this.app.use(function (req, res, next) {
       if (!req.secure) {
         return res.redirect('https://' + req.headers.host + req.url);
       }
@@ -412,6 +420,7 @@ class HttpServer {
       return res.redirect(this.openid.getAuthUrl(state));
     }
   }
+
   /**
    * Permit service accounts that holds given role and access from restricted IP address rage
    * @param {object} details Account details from unserinfo endpoint
@@ -499,17 +508,9 @@ class HttpServer {
    */
   jwtVerify(req, res, next) {
     try {
-      const {decoded, id, username, name, access} = this.o2TokenService.verify(req.query.token);
-      req.decoded = decoded;
-      req.session = {
-        personid: parseInt(id),
-        username,
-        name,
-        access,
-      };
-      next();
-    } catch ({message}) {
-      this.log.debug(`JsonWebTokenError : ${message}`);
+      this.jwtAuthenticate(req)
+    } catch ({name, message}) {
+      this.log.debug(`${name} : ${message}`);
 
       const response = {error: '403 - Json Web Token Error'};
 
@@ -524,7 +525,28 @@ class HttpServer {
       }
 
       res.status(403).json(response);
+      return;
     }
+
+    next();
+  }
+
+  /**
+   * Parse the jwt from request and fill request's session and decoded fields accordingly
+   *
+   * @param req the request
+   * @return {void} resolves once the request is filled with authentication, and reject if jwt verification failed
+   */
+  jwtAuthenticate(req) {
+    const data = this.o2TokenService.verify(req.query.token);
+
+    req.decoded = data.decoded;
+    req.session = {
+      personid: parseInt(data.id),
+      username: data.username,
+      name: data.name,
+      access: data.access
+    };
   }
 
   /**
@@ -540,4 +562,5 @@ class HttpServer {
     }
   }
 }
+
 module.exports = HttpServer;
