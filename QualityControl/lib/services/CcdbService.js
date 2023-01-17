@@ -118,13 +118,13 @@ export class CcdbService {
   async getObjectTimestampList(objectName, limit = 1000, filter = '') {
     const headers = {
       Accept: 'application/json',
-      'X-Filter-Fields': `${this.LAST_MODIFIED}`,
+      'X-Filter-Fields': `${this.VALID_FROM}`,
       'Browse-Limit': `${limit}`,
     };
     try {
       const url = `/browse/${objectName}/${filter}`;
       const { objects } = await httpGetJson(this.hostname, this.port, url, headers);
-      return objects.map((object) => parseInt(object[this.LAST_MODIFIED]));
+      return objects.map((object) => parseInt(object[this.VALID_FROM]));
     } catch (error) {
       errorLogger(error, 'ccdb');
       throw new Error('Unable to retrieve latest timestamps list');
