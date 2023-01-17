@@ -19,15 +19,15 @@ const assert = require('assert');
 const path = require('path');
 const url = require('url');
 const config = require('./../config-default.json');
-const JwtToken = require('./../jwt/token.js');
+const O2TokenService = require('./../services/O2TokenService.js');
 const HttpServer = require('./../http/server');
 
-// as CERN cerfiticates are not signed by any CA
+// as CERN certificates are not signed by any CA
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let httpServer;
-const jwt = new JwtToken(config.jwt);
-const token = jwt.generateToken(0, 'test', 'Test', 'admin');
+const tokenService = new O2TokenService(config.jwt);
+const token = tokenService.generateToken(0, 'test', 'Test', 'admin');
 
 describe('REST API', () => {
   before(() => {

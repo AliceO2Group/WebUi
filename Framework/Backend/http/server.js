@@ -19,7 +19,7 @@ const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
 const Log = require('./../log/Log.js');
-const JwtToken = require('./../jwt/token.js');
+const O2TokenService = require('./../services/O2TokenService.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
@@ -47,7 +47,7 @@ class HttpServer {
 
     this.configureHelmet(httpConfig);
 
-    this.jwt = new JwtToken(jwtConfig);
+    this.o2TokenService = new O2TokenService(jwtConfig);
     if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
       this.openid.createIssuer().catch(() => process.exit(1));
@@ -152,7 +152,7 @@ class HttpServer {
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:", hostname + ':*'],
-        scriptSrc: ["'self'",  ...(allow ? ["'unsafe-eval'"] : [])],
+        scriptSrc: ["'self'", ...(allow ? ["'unsafe-eval'"] : [])],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port],
         upgradeInsecureRequests: null,
@@ -247,7 +247,7 @@ class HttpServer {
       query.username = 'anonymous';
       query.name = 'Anonymous';
       query.access = 'admin'
-      query.token = this.jwt.generateToken(query.personid, query.username, query.name, query.access);
+      query.token = this.o2TokenService.generateToken(query.personid, query.username, query.name, query.access);
 
       const homeUrlAuthentified = url.format({pathname: '/', query: query});
       return res.redirect(homeUrlAuthentified);
@@ -399,10 +399,13 @@ class HttpServer {
     const token = req.query.token;
 
     if (token) {
-      this.jwt.verify(req.query.token).then(() => next(), (error) => {
+      try {
+        this.o2TokenService.verify(req.query.token);
+        next();
+      } catch (error) {
         this.log.debug(`${error.name} : ${error.message}`);
         res.status(403).json({message: error.name});
-      });
+      }
     } else {
       // Redirects to the OpenID flow
       const state = Buffer.from(JSON.stringify(query)).toString('base64');
@@ -432,25 +435,27 @@ class HttpServer {
 
   /**
    * OpenID Connect callback - when successfully authorized (/callback)
-   * Redirects to the application deserializes the query parameters from state variable
-   * and injects them to the url
-   * @param {object} req - HTTP request
-   * @param {object} res - HTTP response
+   * Redirects to the application deserializes the query parameters from state variable and injects them to the url
+   * @param {Request} req - HTTP request
+   * @param {Response} res - HTTP response
    */
   identCallback(req, res) {
     this.openid.callback(req).then((tokenSet) => {
       const details = tokenSet.claims();
-      // Allow some service accoutns to access
+      // Allow some service accounts to access
       if (this.isAuthorizedServiceAccount(details, req.headers)) {
         details.cern_person_id = 0;
       }
+
+      const {cern_person_id, cern_upn, name} = details;
+      const access = this.authorise(details);
       // Set token and user details in the query
       const query = {
-        personid: details.cern_person_id,
-        name: details.name,
-        username: details.cern_upn,
-        access: this.authorise(details),
-        token: this.jwt.generateToken(details.cern_person_id, details.cern_upn, details.name, this.authorise(details)),
+        personid: cern_person_id,
+        name,
+        username: cern_upn,
+        access,
+        token: this.o2TokenService.generateToken(cern_person_id, cern_upn, name, access),
       };
 
       // Read back user params from state
@@ -493,33 +498,33 @@ class HttpServer {
    * @param {function} next - passes control to next matching route
    */
   jwtVerify(req, res, next) {
-    this.jwt.verify(req.query.token)
-      .then((data) => {
-        req.decoded = data.decoded;
-        req.session = {
-          personid: parseInt(data.id),
-          username: data.username,
-          name: data.name,
-          access: data.access
-        };
-        next();
-      }, ({name, message}) => {
-        this.log.debug(`${name} : ${message}`);
+    try {
+      const {decoded, id, username, name, access} = this.o2TokenService.verify(req.query.token);
+      req.decoded = decoded;
+      req.session = {
+        personid: parseInt(id),
+        username,
+        name,
+        access,
+      };
+      next();
+    } catch ({message}) {
+      this.log.debug(`JsonWebTokenError : ${message}`);
 
-        const response = {error: '403 - Json Web Token Error'};
+      const response = {error: '403 - Json Web Token Error'};
 
-        // Allow for a custom message for known error messages
-        switch (message) {
-          case 'jwt must be provided':
-            response.message = 'You must provide a JWT token';
-            break;
-          default:
-            response.message = 'Invalid JWT token provided';
-            break;
-        }
+      // Allow for a custom message for known error messages
+      switch (message) {
+        case 'jwt must be provided':
+          response.message = 'You must provide a JWT token';
+          break;
+        default:
+          response.message = 'Invalid JWT token provided';
+          break;
+      }
 
-        res.status(403).json(response);
-      });
+      res.status(403).json(response);
+    }
   }
 
   /**
