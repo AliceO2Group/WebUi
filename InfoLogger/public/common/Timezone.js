@@ -113,10 +113,11 @@ export default class Timezone extends Observable {
     const regDate = /([0-9]+)\/(([0-9]+)(\/([0-9]+)(\/([0-9]+))?)?)?/i;
     const regDateResult = regDate.exec(humanString);
     if (regDateResult) {
-      date.date(parseInt(regDateResult[1], 10)); // mandatory day
-      if (regDateResult[3]) { // optional month
-        date.month(parseInt(regDateResult[3], 10) - 1); // zero-based
-      }
+      /*
+       * Start from year to day because js will limit days in the month automatically
+       * Then, if running this script the 1st of November and parsing the 31st of October, we first need to define the month to October to
+       * avoid js to consider 31 out of bounds
+       */
       if (regDateResult[5]) { // optional year
         let newYear = parseInt(regDateResult[5], 10); // zero-based
         if (newYear < 100) { // 20 => 2020
@@ -124,6 +125,10 @@ export default class Timezone extends Observable {
         }
         date.year(newYear);
       }
+      if (regDateResult[3]) { // optional month
+        date.month(parseInt(regDateResult[3], 10) - 1); // zero-based
+      }
+      date.date(parseInt(regDateResult[1], 10)); // mandatory day
 
       // Midnight of this day
       date.hours(0);
