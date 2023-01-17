@@ -15,20 +15,20 @@
 /* eslint-disable max-len */
 
 const assert = require('assert');
-const {JwtToken} = require('@aliceo2/web-ui');
+const {O2TokenService} = require('@aliceo2/web-ui');
 
 const test = require('../mocha-index');
 
 describe('User Profile test-suite', async () => {
   let baseUrl;
   let page;
-  let jwt, testToken;
+  let tokenService, testToken;
 
   before(async () => {
     baseUrl = test.helpers.baseUrl;
     page = test.page;
-    jwt = new JwtToken(test.helpers.jwt);
-    testToken = jwt.generateToken(1, 'test', 'Test', 'admin');
+    tokenService = new O2TokenService(test.helpers.jwt);
+    testToken = tokenService.generateToken(1, 'test', 'Test', 'admin');
   });
 
   describe('User is anonymous', async () => {

@@ -1,11 +1,12 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.11.4",
+  "version": "1.11.5",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
+    "Adam Wegrzynek",
     "George Raduta",
-    "Adam Wegrzynek"
+    "Martin Boulais"
   ],
   "license": "GPL-3.0",
   "repository": {
@@ -13,7 +14,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 8.9.4"
+    "node": ">= 16.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
@@ -29,7 +30,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.0.0"
+    "@aliceo2/web-ui": "2.1.0"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui"
