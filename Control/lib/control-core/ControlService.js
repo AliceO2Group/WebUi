@@ -164,10 +164,11 @@ class ControlService {
    * Execute Command but do not respond to user
    * @param {string} method - AliECS method name
    * @param {object} body - request body
+   * @param {JSON} options - optional parameters that are to be set to the gRPC call (e.g deadline)
    * @return {Promise}
    */
-  executeCommandNoResponse(method, body) {
-    return this.ctrlProx[method](body);
+  executeCommandNoResponse(method, body = {}, options = {}) {
+    return this.ctrlProx[method](body, options);
   }
 
   /**
