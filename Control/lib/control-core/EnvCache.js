@@ -27,8 +27,8 @@ class EnvCache {
   constructor(ctrlService) {
     this.ctrlService = ctrlService;
     this.cache = {};
-    this.timeout = 1500;
-    this.cacheEvictionTimeout = 5*60*1000;
+    this.timeout = 5000;
+    this.cacheEvictionTimeout = 5 * 60 * 1000;
     this.cacheEvictionLast = new Date();
     this.refreshInterval = setInterval(() => this.refresh(), this.timeout);
   }
@@ -68,7 +68,7 @@ class EnvCache {
   _cacheInSync(obj) {
     try {
       assert.deepStrictEqual(this.cache, obj);
-    } catch(error) {
+    } catch (error) {
       return false;
     }
     return true;
@@ -79,17 +79,15 @@ class EnvCache {
    */
   async refresh() {
     try {
-      const envs = await Promise.race([
-        this.ctrlService.executeCommandNoResponse('GetEnvironments'),
-        new Promise((_, reject) => {setTimeout(() => reject(new Error('GetEnvironments timed out')), this.timeout)})
-      ]);
+      const deadline = Date.now() + this.timeout;
+      const envs = await this.ctrlService.executeCommandNoResponse('GetEnvironments', {}, {deadline});
       if (!this._cacheInSync(envs)) {
         this.cache = envs;
         this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
         log.debug('Updated cache');
       }
       this.cacheEvictionLast = new Date();
-    } catch(error) {
+    } catch (error) {
       log.debug(error);
     }
     this.evictCache();
