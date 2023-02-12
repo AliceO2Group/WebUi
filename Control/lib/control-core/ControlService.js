@@ -28,13 +28,13 @@ class ControlService {
    * Constructor initializing dependencies
    * @param {GrpcProxy} ctrlProx
    * @param {WebSocket} webSocket
-   * @param {ConsulConnector} consulConnector
+   * @param {ConsulController} consulController
    * * @param {JSON} coreConfig
    */
-  constructor(ctrlProx, consulConnector, coreConfig, O2_CONTROL_PROTO_PATH) {
+  constructor(ctrlProx, consulController, coreConfig, O2_CONTROL_PROTO_PATH) {
     assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
     this.ctrlProx = ctrlProx;
-    this.consulConnector = consulConnector;
+    this.consulController = consulController;
     this.coreConfig = coreConfig;
     this.O2_CONTROL_PROTO_PATH = O2_CONTROL_PROTO_PATH;
 
@@ -109,7 +109,7 @@ class ControlService {
       try {
         vars = !vars ? {} : vars;
         if (!vars.hosts) {
-          vars.hosts = await this.consulConnector.getFLPsList();
+          vars.hosts = await this.consulController.getFLPsList();
         }
         vars.hosts = JSON.stringify(vars.hosts);
         const {repos: repositories} = await this.ctrlProx['ListRepos']();
