@@ -12,17 +12,21 @@
  * or submit itself to any jurisdiction.
 */
 
-const {ConsulService} = require('@aliceo2/web-ui');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
-// services
-const Lock = require('./services/Lock.js');
-const StatusService = require('./services/StatusService.js');
+// controllers
+const {StatusController} = require('./controllers/Status.controller.js');
+const {WebSocketController} = require('./controllers/WebSocket.controller.js');
 
-// connectors
-const NotificationService = require('@aliceo2/web-ui').NotificationService;
-const ConsulConnector = require('./connectors/ConsulConnector.js');
+// local services
+const Lock = require('./services/Lock.js');
+const {StatusService} = require('./services/Status.service.js');
+const {Intervals} = require('./services/Intervals.service.js');
+
+// web-ui services
+const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
+const {ConsulController} = require('./controllers/Consul.controller.js');
 
 // AliECS Core
 const GrpcProxy = require('./control-core/GrpcProxy.js');
@@ -53,11 +57,11 @@ module.exports.setup = (http, ws) => {
   if (config.consul) {
     consulService = new ConsulService(config.consul);
   }
-  const consulConnector = new ConsulConnector(consulService, config.consul);
-  consulConnector.testConsulStatus();
+  const consulController = new ConsulController(consulService, config.consul);
+  consulController.testConsulStatus();
 
   const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
-  const ctrlService = new ControlService(ctrlProxy, consulConnector, config.grpc, O2_CONTROL_PROTO_PATH);
+  const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
   ctrlService.setWS(ws);
 
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
@@ -69,19 +73,32 @@ module.exports.setup = (http, ws) => {
   const envCache = new EnvCache(ctrlService);
   envCache.setWs(ws);
 
-  const statusService = new StatusService(config, ctrlService, consulService, apricotService);
+  const notificationService = new NotificationService(config.kafka);
+  if (notificationService.isConfigured()) {
+    notificationService.proxyWebNotificationToWs(ws);
+  }
+
+  const statusService = new StatusService(config, ctrlService, consulService, apricotService, notificationService);
+  const statusController = new StatusController(statusService);
+
+  const intervals = new Intervals(statusService);
+  intervals.initializeIntervals();
+
+  const wsController = new WebSocketController(ws);
+  wsController.addIntervalForBroadcast(statusService.statusMap, 2500);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
     ctrlService.logAction.bind(ctrlService),
   ];
+
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
   );
   http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
   http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
-  
+
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
@@ -91,11 +108,6 @@ module.exports.setup = (http, ws) => {
   );
   http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
   http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
-
-  const notification = new NotificationService(config.kafka);
-  if (notification.isConfigured()) {
-    notification.proxyWebNotificationToWs(ws);
-  }
 
   http.post('/execute/resources-cleanup', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
@@ -107,28 +119,23 @@ module.exports.setup = (http, ws) => {
   http.post('/forceUnlock', (req, res) => lock.forceUnlock(req, res));
 
   // Status Service
-  http.get('/status/consul', (_, res) => statusService.getConsulStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/grafana', (_, res) => statusService.getGrafanaStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/notification',
-    (_, res) => statusService.getNotificationStatus(notification).then((data) => res.status(200).json(data))
-  );
-  http.get('/status/gui', (_, res) => res.status(200).json(statusService.getGuiStatus()), {public: true});
-  http.get('/status/apricot', (_, res) => statusService.getApricotStatus().then((data) => res.status(200).json(data)));
-  http.get('/status/core',
-    (req, res, next) => ctrlService.isConnectionReady(req, res, next),
-    (_, res) => statusService.getAliEcsCoreStatus().then((data) => res.status(200).json(data))
-  );
-  http.get('/status/core/services',
-    (req, res, next) => ctrlService.isConnectionReady(req, res, next),
-    (_, res) => statusService.getIntegratedServicesInfo().then((data) => res.status(200).json(data)),
-    { public: true }
+  http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
+  http.get('/status/grafana', statusController.getGrafanaStatus.bind(statusController));
+  http.get('/status/notification', statusController.getNotificationSystemStatus.bind(statusController));
+  http.get('/status/gui', statusController.getGuiStatus.bind(statusController), {public: true});
+  http.get('/status/apricot', statusController.getApricotStatus.bind(statusController));
+  http.get('/status/core', coreMiddleware[0], statusController.getAliECSStatus.bind(statusController));
+  http.get('/status/core/services', coreMiddleware[0],
+    statusController.getAliECSIntegratedServicesStatus.bind(statusController)
   );
 
   // Consul
-  const validateService = consulConnector.validateService.bind(consulConnector);
-  http.get('/consul/flps', validateService, (req, res) => consulConnector.getFLPs(req, res));
-  http.get('/consul/crus', validateService, (req, res) => consulConnector.getCRUs(req, res));
-  http.get('/consul/crus/config', validateService, (req, res) => consulConnector.getCRUsWithConfiguration(req, res));
-  http.get('/consul/crus/aliases', validateService, (req, res) => consulConnector.getCRUsAlias(req, res));
-  http.post('/consul/crus/config/save', validateService, (req, res) => consulConnector.saveCRUsConfiguration(req, res));
+  const validateService = consulController.validateService.bind(consulController);
+  http.get('/consul/flps', validateService, (req, res) => consulController.getFLPs(req, res));
+  http.get('/consul/crus', validateService, (req, res) => consulController.getCRUs(req, res));
+  http.get('/consul/crus/config', validateService, (req, res) => consulController.getCRUsWithConfiguration(req, res));
+  http.get('/consul/crus/aliases', validateService, (req, res) => consulController.getCRUsAlias(req, res));
+  http.post('/consul/crus/config/save', validateService,
+    (req, res) => consulController.saveCRUsConfiguration(req, res)
+  );
 };
