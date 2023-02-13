@@ -43,7 +43,7 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, {}, consulService);
       const consul = await status.getConsulAsComponent();
       delete consul.status.retrievedAt;
-      
+
       expectedInfo.status = {ok: true, configured: true};
       assert.deepStrictEqual(consul, expectedInfo);
     });
@@ -51,14 +51,14 @@ describe('StatusService test suite', () => {
     it('should successfully retrieve status and info about Consul that it is not running', async () => {
       consulService = {
         getConsulLeaderStatus: sinon.stub().rejects('Unable to query Consul'),
-        hostname: 'local',
-        port: 8081,
       };
-      const status = new StatusService(config, {}, consulService);
+      const status = new StatusService({consul: {hostname: 'local', port: 8081}}, {}, consulService);
       const consul = await status.getConsulAsComponent();
       delete consul.status.retrievedAt;
 
       expectedInfo.status = {ok: false, configured: true, message: 'Unable to query Consul'};
+      console.log(consul);
+      console.log(expectedInfo);
       assert.deepStrictEqual(consul, expectedInfo);
     });
 

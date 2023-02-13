@@ -91,8 +91,7 @@ class StatusService {
       status: await this.retrieveConsulStatus(),
     }
     if (component.status.configured) {
-      const {hostname, port} = this._consulService;
-      Object.assign(component, {hostname, port});
+      Object.assign(component, this.config?.consul);
     }
     return component;
   }
