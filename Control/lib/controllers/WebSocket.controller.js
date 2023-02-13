@@ -14,7 +14,7 @@
 const {WebSocketMessage} = require('@aliceo2/web-ui');
 
 /**
- * Controller for dealing with all API requests on framework information such as:
+ * Controller for dealing with broadcasting information about the on framework such as:
  * - GUI information (status, host, port)
  * - AliECS information
  * - AliECS Integrated Services information
@@ -24,7 +24,7 @@ const {WebSocketMessage} = require('@aliceo2/web-ui');
  */
 class WebSocketController {
   /**
-   * @param {WebSocket} - object to be used to send messages to clients
+   * @param {WebSocket} ws - object to be used to send messages to clients
    */
   constructor(ws) {
     this._ws = ws;
