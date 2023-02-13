@@ -47,11 +47,12 @@ function errorLogger(err, facility = 'utils') {
   * @param {JSON} options - specific request options (e.g range of accepted status code)
   * @return {Promise.<Object, Error>} JSON response
   */
-function httpGetJson(hostname, port, path, params = undefined) {
-  const options = params ?? {
+function httpGetJson(hostname, port, path, options = undefined) {
+  options = {
     statusCodeMin: 200,
     statusCodeMax: 299,
-    rejectMessage: 'Non-2xx status code: '
+    rejectMessage: 'Non-2xx status code: ',
+    ...options ?? {}
   };
   return new Promise((resolve, reject) => {
     const requestOptions = {
