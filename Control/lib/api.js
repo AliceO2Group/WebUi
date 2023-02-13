@@ -18,6 +18,7 @@ const config = require('./config/configProvider.js');
 // controllers
 const {StatusController} = require('./controllers/Status.controller.js');
 const {WebSocketController} = require('./controllers/WebSocket.controller.js');
+const {ConsulController} = require('./controllers/Consul.controller.js');
 
 // local services
 const Lock = require('./services/Lock.js');
@@ -26,7 +27,6 @@ const {Intervals} = require('./services/Intervals.service.js');
 
 // web-ui services
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
-const {ConsulController} = require('./controllers/Consul.controller.js');
 
 // AliECS Core
 const GrpcProxy = require('./control-core/GrpcProxy.js');
