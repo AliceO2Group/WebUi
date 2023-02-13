@@ -40,31 +40,37 @@ function errorLogger(err, facility = 'utils') {
 }
 
 /**
-  * Util to get JSON data (parsed) from server
+  * Util to get JSON data (parsed) following a GET request
   * @param {string} host - hostname of the server
   * @param {number} port - port of the server
   * @param {string} path - path of the server request
+  * @param {JSON} options - specific request options (e.g range of accepted status code)
   * @return {Promise.<Object, Error>} JSON response
   */
-function httpGetJson(host, port, path) {
+function httpGetJson(hostname, port, path, options = undefined) {
+  options = {
+    statusCodeMin: 200,
+    statusCodeMax: 299,
+    rejectMessage: 'Non-2xx status code: ',
+    ...options ?? {}
+  };
   return new Promise((resolve, reject) => {
     const requestOptions = {
-      hostname: host,
-      port: port,
-      path: path,
+      hostname,
+      port,
+      path,
       method: 'GET',
       headers: {
         Accept: 'application/json'
       }
     };
     /**
-     * Generic handler for client http requests,
-     * buffers response, checks status code and parses JSON
+     * Generic handler for GET HTTP requests, buffers response, checks status code and parses JSON
      * @param {Response} response
      */
     const requestHandler = (response) => {
-      if (response.statusCode < 200 || response.statusCode > 299) {
-        reject(new Error('Non-2xx status code: ' + response.statusCode));
+      if (response.statusCode < options.statusCodeMin || response.statusCode > options.statusCodeMax) {
+        reject(new Error(options.rejectMessage + response.statusCode));
         return;
       }
 

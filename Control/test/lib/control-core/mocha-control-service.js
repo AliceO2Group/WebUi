@@ -16,10 +16,11 @@
 
 /* eslint-disable max-len */
 
-const ControlService = require('./../../lib/control-core/ControlService.js');
 const sinon = require('sinon');
 const assert = require('assert');
-const AssertionError = require('assert').AssertionError;
+const {AssertionError} = require('assert');
+
+const ControlService = require('./../../../lib/control-core/ControlService.js');
 
 describe('Control Service test suite', () => {
   describe('Check Constructor', () => {

@@ -13,15 +13,15 @@
 */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
-const {errorHandler, errorLogger} = require('./../utils.js');
-const {getConsulConfig} = require('./../config/publicConfigProvider.js');
+const {errorHandler, errorLogger} = require('../utils.js');
+const {getConsulConfig} = require('../config/publicConfigProvider.js');
 
 /**
  * Gateway for all Consul Consumer calls
  */
-class ConsulConnector {
+class ConsulController {
   /**
-   * Setup ConsulConnector
+   * Setup ConsulController
    * @param {ConsulService} consulService
    * @param {JSON} config
    * @param {Padlock} padlock
@@ -369,4 +369,4 @@ class ConsulConnector {
   }
 }
 
-module.exports = ConsulConnector;
+exports.ConsulController = ConsulController;
