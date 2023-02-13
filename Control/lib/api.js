@@ -131,11 +131,9 @@ module.exports.setup = (http, ws) => {
 
   // Consul
   const validateService = consulController.validateService.bind(consulController);
-  http.get('/consul/flps', validateService, (req, res) => consulController.getFLPs(req, res));
-  http.get('/consul/crus', validateService, (req, res) => consulController.getCRUs(req, res));
-  http.get('/consul/crus/config', validateService, (req, res) => consulController.getCRUsWithConfiguration(req, res));
-  http.get('/consul/crus/aliases', validateService, (req, res) => consulController.getCRUsAlias(req, res));
-  http.post('/consul/crus/config/save', validateService,
-    (req, res) => consulController.saveCRUsConfiguration(req, res)
-  );
+  http.get('/consul/flps', validateService, consulController.getFLPs.bind(consulController));
+  http.get('/consul/crus', validateService, consulController.getCRUs.bind(consulController));
+  http.get('/consul/crus/config', validateService, consulController.getCRUsWithConfiguration.bind(consulController));
+  http.get('/consul/crus/aliases', validateService, consulController.getCRUsAlias.bind(consulController));
+  http.post('/consul/crus/config/save', validateService, consulController.saveCRUsConfiguration.bind(consulController));
 };
