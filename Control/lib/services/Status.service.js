@@ -16,6 +16,15 @@ const url = require('url');
 const projPackage = require('./../../package.json');
 const {httpGetJson} = require('./../utils.js');
 
+const CONSUL_KEY = 'CONSUL';
+const GRAFANA_KEY = 'GRAFANA';
+const NOTIFICATION_SYSTEM_KEY = 'NOTIFICATION_SYSTEM';
+
+const ALIECS_SERVICES_KEY = 'ALIECS_SERVICES';
+const ALIECS_CORE_KEY = 'ALIECS_CORE';
+const APRICOT_KEY = 'APRICOT';
+const NOT_CONFIGURED_MESSAGE = 'This service was not configured';
+
 /**
  * Gateway for all Status Consumer calls
  */
@@ -26,8 +35,8 @@ class StatusService {
    * @param {JSON} config - server configuration
    * @param {ControlService} ctrlService
    * @param {ConsulService} consulService
-   * @param {apricotService} apricotService
-   * @param {apricotService} notificationService
+   * @param {ApricotService} apricotService
+   * @param {NotificationService} notificationService
    */
   constructor(config, ctrlService, consulService, apricotService, notificationService) {
     this.config = config;
@@ -52,16 +61,6 @@ class StatusService {
      */
     this._apricotService = apricotService;
 
-    this.CONSUL_KEY = 'CONSUL';
-    this.GRAFANA_KEY = 'GRAFANA';
-    this.NOTIFICATION_SYSTEM_KEY = 'NOTIFICATION_SYSTEM';
-
-    this.ALIECS_SERVICES = 'ALIECS_SERVICES';
-    this.ALIECS_CORE = 'ALIECS_CORE';
-    this.APRICOT_KEY = 'APRICOT';
-
-    this.NOT_CONFIGURED = 'This service was not configured';
-
     this._statusMap = new Map();
   }
 
@@ -70,7 +69,7 @@ class StatusService {
    * @returns {Promise<JSON>} - return of JSON with requested information 
    */
   async retrieveConsulStatus() {
-    let status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+    let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE};
     if (this._consulService) {
       try {
         await this._consulService.getConsulLeaderStatus();
@@ -79,7 +78,7 @@ class StatusService {
         status = {ok: false, configured: true, message: error.toString(), retrievedAt: Date.now()};
       }
     }
-    this._statusMap.set(this.CONSUL_KEY, status);
+    this._statusMap.set(CONSUL_KEY, status);
     return status;
   }
 
@@ -104,7 +103,7 @@ class StatusService {
    */
   async retrieveAliEcsCoreInfo() {
     let configuration = {};
-    let status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+    let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE};
     if (this._ctrlService?.coreConfig) {
       const {hostname, port, timeout, maxMessageLength} = this._ctrlService.coreConfig;
       configuration = {
@@ -121,7 +120,7 @@ class StatusService {
       }
     }
     const aliecs = Object.assign(configuration, {status})
-    this._statusMap.set(this.ALIECS_CORE, status);
+    this._statusMap.set(ALIECS_CORE_KEY, status);
     return aliecs;
   }
 
@@ -143,7 +142,7 @@ class StatusService {
           connectionState: 'TRANSIENT_FAILURE',
           data: {message: error.toString()}
         };
-        this._statusMap.set(this.ALIECS_SERVICES, integServices);
+        this._statusMap.set(ALIECS_SERVICES_KEY, integServices);
         return integServices;
       }
     }
@@ -154,7 +153,7 @@ class StatusService {
    * @returns {Promise<JSON>} - return of JSON with requested information 
    */
   async retrieveApricotStatus() {
-    let status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+    let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE};
     if (this._apricotService) {
       try {
         await this._apricotService.getStatus();
@@ -163,7 +162,7 @@ class StatusService {
         status = {ok: false, configured: true, message: error.toString(), retrievedAt: Date.now()}
       }
     }
-    this._statusMap.set(this.APRICOT_KEY, status);
+    this._statusMap.set(APRICOT_KEY, status);
     return status;
   }
 
@@ -191,7 +190,7 @@ class StatusService {
    * @returns {Promise<JSON>} - return of JSON with requested information 
    */
   async retrieveGrafanaStatus() {
-    let status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+    let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE};
     if (this.config?.grafana?.url) {
       try {
         const {hostname, port} = url.parse(this.config.grafana.url);
@@ -205,7 +204,7 @@ class StatusService {
         status = {ok: false, configured: true, message: error.toString(), retrievedAt: Date.now()};
       }
     }
-    this._statusMap.set(this.GRAFANA_KEY, status);
+    this._statusMap.set(GRAFANA_KEY, status);
     return status;
   }
 
@@ -227,7 +226,7 @@ class StatusService {
    * Retrieve status of the notification system (Kafka)
    */
   async retrieveNotificationSystemStatus() {
-    let status = {ok: false, configured: false, message: this.NOT_CONFIGURED};
+    let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE};
     if (this._notificationService && this._notificationService.isConfigured()) {
       try {
         await this._notificationService.health();
@@ -236,7 +235,7 @@ class StatusService {
         status = {configured: true, ok: false, message: error.name, retrievedAt: Date.now()};
       }
     }
-    this._statusMap.set(this.NOTIFICATION_SYSTEM_KEY, status);
+    this._statusMap.set(NOTIFICATION_SYSTEM_KEY, status);
     return status;
   }
   /**
