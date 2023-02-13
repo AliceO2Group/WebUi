@@ -13,11 +13,11 @@
 */
 
 /**
- * Class which deals with setting up intervals for sending messages to clients via WebSocket
+ * Class which deals with setting up intervals for retrieving information constantly
  */
 class Intervals {
   /**
-   * Expect services t
+   * Expected services to be used to retrieve information
    */
   constructor(statusService) {
     this._statusService = statusService;
