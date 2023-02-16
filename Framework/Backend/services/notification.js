@@ -66,15 +66,18 @@ class NotificationService {
 
   /**
    * Sends a message to selected topic
+   * @todo OGUI-1321 - message should be built on BKP side
    * @param {(string|string[])} tag Bookkeeping tag
    * @param {string} title Notification title
    * @param {string} author Notification author
    * @param {string} url URL poiting to notification details
    * @param {(string|string[])} runNumbers Bookkeeping tag
    * @param {string} extra Details information
+   * @param {number} id - id of the log
+   * @param {number} parentLogId - id of the parent of the log if exists
    * @returns {Promise}
    */
-  async send(tag, title, author, url, runNumbers, extra) {
+  async send(tag, title, author, url, runNumbers, extra, id = undefined, parentLogId = undefined ) {
     if (!tag) {
       throw new Error('Tag is required to send notifications');
     }
@@ -91,9 +94,7 @@ class NotificationService {
       runNumbers = runNumbers.join(',');
     }
     const message = {
-      tag: tag,
-      title: title,
-      author: author,
+      id, parentLogId, tag, title, author,
       url: url || undefined,
       runNumbers: runNumbers || undefined,
       extra: extra || undefined
