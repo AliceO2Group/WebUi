@@ -42,24 +42,39 @@ const autoBuiltBox = (variable, model) => {
 
 /**
  * Builds a component of type EDIT_BOX to be used within the Variables Panel
- * The type will be number / text based on the passed variable's type and will
- * allow the user to input their own values
+ * The type will be number / text based on the passed variable's type and will allow the user to input their own values;
+ * If of type STRING, the editbox will be defined as `textarea` rather than `input` to allow for easy editing of long values
  * @param {WorkflowVariable} variable
  * @param {Object} model
  * @returns {vnode}
  */
-const editBox = (variable, model) =>
-  h('.flex-row', [
+const editBox = (variable, model) => {
+  let box = 'input';
+  let options = {
+    type: 'text'
+  };
+  let style = {};
+  if (variable.type === VAR_TYPE.NUMBER) {
+    options.type = 'number';
+  } else if (variable.type === VAR_TYPE.STRING) {
+    box = 'textarea';
+    delete options.type;
+    style = {style: 'resize: vertical; height: 2em;'};
+  }
+
+  return h('.flex-row', [
     variableLabel(variable),
     h('', {class: 'w-50'},
-      h('input.form-control', {
-        type: variable.type === VAR_TYPE.NUMBER ? 'number' : 'text',
+      h(`${box}.form-control`, {
+        ...options,
+        ...style,
         value: model.workflow.form.basicVariables[variable.key] !== undefined ?
           model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
         oninput: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
       })
     ),
   ]);
+};
 
 /**
  * Builds a component of type SLIDER to be used within the Variables Panel
