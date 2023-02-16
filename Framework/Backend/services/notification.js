@@ -66,38 +66,10 @@ class NotificationService {
 
   /**
    * Sends a message to selected topic
-   * @param {(string|string[])} tag Bookkeeping tag
-   * @param {string} title Notification title
-   * @param {string} author Notification author
-   * @param {string} url URL poiting to notification details
-   * @param {(string|string[])} runNumbers Bookkeeping tag
-   * @param {string} extra Details information
+   * @param {object} message - JSON message that is to be sent via notification
    * @returns {Promise}
    */
-  async send(tag, title, author, url, runNumbers, extra) {
-    if (!tag) {
-      throw new Error('Tag is required to send notifications');
-    }
-    if (!title) {
-      throw new Error('Title is required to send notifications');
-    }
-    if (!author) {
-      throw new Error('Author is required to send notifications');
-    }
-    if (Array.isArray(tag)) {
-      tag = tag.join(',');
-    }
-    if (runNumbers && Array.isArray(runNumbers)) {
-      runNumbers = runNumbers.join(',');
-    }
-    const message = {
-      tag: tag,
-      title: title,
-      author: author,
-      url: url || undefined,
-      runNumbers: runNumbers || undefined,
-      extra: extra || undefined
-    };
+  async send(message = undefined) {
     const producer = this.kafka.producer();
     await producer.connect();
     await producer.send({topic: this.topic, messages: [{value: JSON.stringify(message)}]});
