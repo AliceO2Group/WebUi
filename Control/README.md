@@ -106,7 +106,6 @@ Use of Bookkeeping GUI instance is optional. Configuration details about it are 
 ### Utils
 Use of utils field is optional. Here, a user can specify configuration fields for various uses of AliECS GUI:
 * `refreshTask` - specifies how often (ms) the page `taskList` should refresh its content if the user has it opened; Default value is `10000`
-* `refreshEnvs` - specifies how often (ms) the page `environments` should refresh its content if the user has it opened; Default value is `10000`
 
 ## Features
 

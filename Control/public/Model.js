@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global COG */
-
 // Import frontend framework
 import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData} from '/js/src/index.js';
 import {Notification as O2Notification} from '/js/src/index.js';
@@ -167,7 +165,6 @@ export default class Model extends Observable {
    */
   handleWSClose() {
     clearInterval(this.task.refreshInterval);
-    clearInterval(this.environment.refreshInterval);
 
     // Release client-side
     this.lock.setPadlockState({lockedBy: null, lockedByName: null});
@@ -197,14 +194,10 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     clearInterval(this.task.refreshInterval);
-    clearInterval(this.environment.refreshInterval);
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
         this.environment.getEnvironmentRequests();
-        this.environment.refreshInterval = setInterval(() => {
-          this.environment.getEnvironments();
-        }, COG.REFRESH_ENVS);
         break;
       case 'environment':
         if (!this.router.params.id) {

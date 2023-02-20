@@ -63,6 +63,5 @@ module.exports = {
   },
   utils: {
     refreshTask: 5000, // how often should task list page should refresh its content
-    refreshEnvs: 30000, // how often should env list page should refresh its content
   }
 };
