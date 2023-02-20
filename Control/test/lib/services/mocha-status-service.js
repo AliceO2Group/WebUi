@@ -44,7 +44,7 @@ describe('StatusService test suite', () => {
       const consul = await status.getConsulAsComponent();
       delete consul.status.retrievedAt;
 
-      expectedInfo.status = {ok: true, configured: true};
+      expectedInfo.status = {ok: true, configured: true, isCritical: true};
       assert.deepStrictEqual(consul, expectedInfo);
     });
 
@@ -56,7 +56,7 @@ describe('StatusService test suite', () => {
       const consul = await status.getConsulAsComponent();
       delete consul.status.retrievedAt;
 
-      expectedInfo.status = {ok: false, configured: true, message: 'Unable to query Consul'};
+      expectedInfo.status = {ok: false, configured: true, isCritical: true, message: 'Unable to query Consul'};
       console.log(consul);
       console.log(expectedInfo);
       assert.deepStrictEqual(consul, expectedInfo);
@@ -65,7 +65,11 @@ describe('StatusService test suite', () => {
     it('should successfully return consul was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, undefined)
       const consul = await status.getConsulAsComponent();
-      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
+      const expected = {
+        status: {
+          ok: false, configured: false, isCritical: true, message: 'This service was not configured'
+        }
+      };
       assert.deepStrictEqual(consul, expected);
     });
   });
@@ -88,7 +92,7 @@ describe('StatusService test suite', () => {
       const core = await status.retrieveAliEcsCoreInfo();
       delete core.status.retrievedAt;
 
-      expectedInfo.status = {ok: true, configured: true};
+      expectedInfo.status = {ok: true, configured: true, isCritical: true};
       expectedInfo.version = '0.20';
       assert.deepStrictEqual(core, expectedInfo);
     });
@@ -99,7 +103,7 @@ describe('StatusService test suite', () => {
       const core = await status.retrieveAliEcsCoreInfo();
       delete core.status.retrievedAt;
 
-      expectedInfo.status = {ok: false, configured: true, message: 'Unable to query Core'};
+      expectedInfo.status = {ok: false, configured: true, isCritical: true, message: 'Unable to query Core'};
       delete expectedInfo.version;
       assert.deepStrictEqual(core, expectedInfo);
     });
@@ -107,7 +111,11 @@ describe('StatusService test suite', () => {
     it('should successfully return that AliECS was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, undefined, {});
       const core = await status.retrieveAliEcsCoreInfo();
-      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
+      const expected = {
+        status: {
+          ok: false, configured: false, isCritical: true, message: 'This service was not configured'
+        }
+      };
       assert.deepStrictEqual(core, expected);
     });
   });
@@ -120,7 +128,7 @@ describe('StatusService test suite', () => {
       const status = new StatusService(config, {}, {});
       const guiStatus = status.getGuiStatus();
 
-      expectedInfo.status = {ok: true, configured: true};
+      expectedInfo.status = {ok: true, configured: true, isCritical: true};
       delete guiStatus.version;
       assert.deepStrictEqual(guiStatus, expectedInfo);
     });
@@ -138,7 +146,7 @@ describe('StatusService test suite', () => {
       const grafana = await status.getGrafanaAsComponent();
       delete grafana.status.retrievedAt;
 
-      assert.deepStrictEqual(grafana.status, {ok: true, configured: true});
+      assert.deepStrictEqual(grafana.status, {ok: true, configured: true, isCritical: false});
       assert.strictEqual(grafana.url, `http://${expectedInfo.hostname}:${expectedInfo.port}`);
 
     });
@@ -151,13 +159,17 @@ describe('StatusService test suite', () => {
       const grafana = await status.getGrafanaAsComponent();
       delete grafana.status.retrievedAt;
 
-      assert.deepStrictEqual(grafana.status, {ok: false, configured: true, message: 'Error: Unable to connect'});
+      assert.deepStrictEqual(grafana.status, {
+        ok: false, configured: true, isCritical: false, message: 'Error: Unable to connect'
+      });
     });
 
     it('should successfully return that grafana was not configured if configuration is not provided', async () => {
       const status = new StatusService({}, {}, {});
       const grafana = await status.getGrafanaAsComponent();
-      assert.deepStrictEqual(grafana.status, {ok: false, configured: false, message: 'This service was not configured'});
+      assert.deepStrictEqual(grafana.status, {
+        ok: false, configured: false, isCritical: false, message: 'This service was not configured'
+      });
     });
   });
 
@@ -170,7 +182,7 @@ describe('StatusService test suite', () => {
       const notification = await status.getNotificationSystemAsComponent();
       delete notification.status.retrievedAt;
 
-      expectedInfo.status = {ok: false, configured: true, message: 'KafkaJSNumberOfRetriesExceeded'};
+      expectedInfo.status = {ok: false, configured: true, isCritical: false, message: 'KafkaJSNumberOfRetriesExceeded'};
       assert.deepStrictEqual(notification, expectedInfo);
     }).timeout(5000);
 
@@ -178,7 +190,9 @@ describe('StatusService test suite', () => {
       const status = new StatusService({}, {}, {}, {}, new NotificationService());
       const notification = await status.getNotificationSystemAsComponent();
 
-      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
+      const expected = {
+        status: {ok: false, configured: false, isCritical: false, message: 'This service was not configured'}
+      };
       assert.deepStrictEqual(notification, expected);
     });
   });
@@ -238,7 +252,7 @@ describe('StatusService test suite', () => {
       const apricot = await statusService.getApricotAsComponent();
       delete apricot.status.retrievedAt;
 
-      expectedInfo.status = {ok: true, configured: true};
+      expectedInfo.status = {ok: true, configured: true, isCritical: true};
       assert.deepStrictEqual(apricot, expectedInfo);
     });
 
@@ -249,7 +263,9 @@ describe('StatusService test suite', () => {
       const apricot = await statusService.getApricotAsComponent();
       delete apricot.status.retrievedAt;
 
-      expectedInfo.status = {ok: false, configured: true, message: 'Unable to check status of Apricot'};
+      expectedInfo.status = {
+        ok: false, configured: true, isCritical: true, message: 'Unable to check status of Apricot'
+      };
       assert.deepStrictEqual(apricot, expectedInfo);
     });
 
@@ -257,7 +273,9 @@ describe('StatusService test suite', () => {
       const statusService = new StatusService({}, apricotService, {});
       const status = await statusService.getApricotAsComponent();
 
-      const expected = {status: {ok: false, configured: false, message: 'This service was not configured'}};
+      const expected = {
+        status: {ok: false, configured: false, isCritical: true, message: 'This service was not configured'}
+      };
       assert.deepStrictEqual(status, expected);
     });
   });

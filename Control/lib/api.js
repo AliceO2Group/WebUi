@@ -17,7 +17,7 @@ const config = require('./config/configProvider.js');
 
 // controllers
 const {StatusController} = require('./controllers/Status.controller.js');
-const {WebSocketController} = require('./controllers/WebSocket.controller.js');
+const {WebSocketService} = require('./services/WebSocket.service.js');
 const {ConsulController} = require('./controllers/Consul.controller.js');
 
 // local services
@@ -57,6 +57,8 @@ module.exports.setup = (http, ws) => {
   if (config.consul) {
     consulService = new ConsulService(config.consul);
   }
+  const wsService = new WebSocketService(ws);
+
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
 
@@ -78,14 +80,13 @@ module.exports.setup = (http, ws) => {
     notificationService.proxyWebNotificationToWs(ws);
   }
 
-  const statusService = new StatusService(config, ctrlService, consulService, apricotService, notificationService);
+  const statusService = new StatusService(
+    config, ctrlService, consulService, apricotService, notificationService, wsService
+  );
   const statusController = new StatusController(statusService);
 
   const intervals = new Intervals(statusService);
   intervals.initializeIntervals();
-
-  const wsController = new WebSocketController(ws);
-  wsController.addIntervalForBroadcast(statusService.statusMap, 2500);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
