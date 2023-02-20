@@ -15,6 +15,7 @@
 const url = require('url');
 const projPackage = require('./../../package.json');
 const {httpGetJson} = require('./../utils.js');
+const {Service} = require('./../dtos/Service.js');
 const {SERVICES: {STATUS}} = require('./../common/constants.js');
 
 const CONSUL_KEY = 'CONSUL';
@@ -92,17 +93,16 @@ class StatusService {
    * @returns {Promise<JSON>} - resolves with a JSON object containing information about the service
    */
   async getConsulAsComponent() {
-    const component = {
-      status: await this.retrieveConsulStatus(),
+    const status = await this.retrieveConsulStatus();
+    return {
+      status,
+      ...status.configured && Service.fromJSON(this.config?.consul)
     }
-    if (component.status.configured) {
-      Object.assign(component, this.config?.consul);
-    }
-    return component;
   }
 
   /**
-   * Provide configuration of AliECS Core and retrieve current status
+   * Provide configuration of AliECS Core and retrieve current status plus extra information
+   * Compared to the other components, AliECS sends back needed info via its status check thus it is not split in multiple calls
    * @returns {Promise<Resolve>}
    */
   async retrieveAliEcsCoreInfo() {
@@ -111,7 +111,7 @@ class StatusService {
     if (this._ctrlService?.coreConfig) {
       const {hostname, port, timeout, maxMessageLength} = this._ctrlService.coreConfig;
       configuration = {
-        url: `${hostname}:${port}`,
+        endpoint: `${hostname}:${port}`,
         timeout,
         maxMessageLength,
       };
@@ -123,15 +123,16 @@ class StatusService {
         status = {ok: false, configured: true, isCritical: true, message: error.toString()};
       }
     }
-    const aliecs = Object.assign(configuration, {status})
+    const aliecs = Object.assign({status}, Service.fromJSON(configuration))
     this._updateStatusMaps(ALIECS_CORE_KEY, status);
     return aliecs;
   }
 
   /**
    * Build a response containing the information and status of the integrated services
-   * If core responds successfully than each service will be added to a Map with its name as the key
-   * Otherwise, an entry with label 'Integrated Services' will be added in the response
+   * * If core responds successfully than each service will be added to a Map with its name as the key and the general key for error case
+   * will be removed
+   * * Otherwise, an entry with label 'Integrated Services' will be added in the response
    * @returns {Promise<Resolve>}
    */
   async retrieveAliECSIntegratedInfo() {
@@ -139,17 +140,38 @@ class StatusService {
     if (this._ctrlService) {
       try {
         const {services} = await this._ctrlService.getIntegratedServicesInfo();
-        return services;
+        Object.entries(services)
+          .forEach(([key, value]) => {
+            const status = {
+              ok: value?.connectionState === 'READY',
+              configured: Boolean(value?.enabled),
+              isCritical: true
+            };
+            delete value.connectionState;
+            delete value.enabled;
+
+            integServices[key] = {
+              status,
+              ...status.configured && Service.fromJSON(value)
+            };
+            this._updateStatusMaps(ALIECS_SERVICES_KEY, {status: {ok: true, configured: true}});
+            this._updateStatusMaps(`ALIECS_INTEG-${key.toLocaleUpperCase()}`, integServices[key]);
+          });
       } catch (error) {
-        integServices.all = {
-          name: 'Integrated Services',
-          connectionState: 'TRANSIENT_FAILURE',
-          data: {message: error.toString()}
+        const status = {ok: false, configured: true, message: error.toString(), isCritical: true};
+        this._updateStatusMaps(ALIECS_SERVICES_KEY);
+        integServices = {
+          ALL: {status}
         };
-        this._statusMap.set(ALIECS_SERVICES_KEY, integServices);
-        return integServices;
+      }
+    } else {
+      const status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE, isCritical: true};
+      this._updateStatusMaps(ALIECS_SERVICES_KEY, status);
+      integServices = {
+        ALL: {status}
       }
     }
+    return integServices;
   }
 
   /**
@@ -175,18 +197,11 @@ class StatusService {
    * @returns {Promise<JSON>} - JSON with requested information
    */
   async getApricotAsComponent() {
-    let apricot = {
-      status: await this.retrieveApricotStatus(),
+    const status = await this.retrieveApricotStatus();
+    return {
+      status,
+      ...status.configured && Service.fromJSON(this.config.apricot)
     };
-    if (apricot.status.configured) {
-      const {hostname, port, timeout, maxMessageLength} = this.config.apricot;
-      Object.assign(apricot, {
-        url: `${hostname}:${port}`,
-        timeout,
-        maxMessageLength
-      });
-    }
-    return apricot;
   }
 
   /**
@@ -217,13 +232,11 @@ class StatusService {
    * @return {Promise<Resolve>}
    */
   async getGrafanaAsComponent() {
-    let grafana = {
-      status: await this.retrieveGrafanaStatus()
+    const status = await this.retrieveGrafanaStatus();
+    return {
+      status,
+      ...status.configured && Service.fromJSON({endpoint: this.config.grafana.url})
     };
-    if (grafana.status.configured) {
-      Object.assign(grafana, {url: this.config.grafana.url});
-    }
-    return grafana;
   }
 
   /**
@@ -248,13 +261,11 @@ class StatusService {
    * @return {Promise<Resolve>}
    */
   async getNotificationSystemAsComponent() {
-    let notification = {
-      status: await this.retrieveNotificationSystemStatus(),
+    const status = await this.retrieveNotificationSystemStatus();
+    return {
+      status,
+      ...status.configured && Service.fromJSON(this.config?.kafka)
     };
-    if (notification.status.configured) {
-      Object.assign(notification, this.config.kafka);
-    }
-    return notification;
   }
 
   /**
@@ -288,7 +299,7 @@ class StatusService {
 
   /**
    * Return the current stored statuses of the components interacting with AliECS GUI;
-   * @returns {JSON} - // TODO set type
+   * @returns {object} - // TODO set type
    */
   get statusMap() {
     return this._statusMap;

@@ -31,7 +31,12 @@ describe('StatusService test suite', () => {
   describe('Test Consul info retrieval via StatusService', async () => {
     let consulService;
     const config = {consul: {hostname: 'local', port: 8081}};
-    const expectedInfo = config.consul;
+    const expectedInfo = {
+      endpoint: 'local:8081',
+      extras: {},
+      name: '',
+      version: '',
+    };
     beforeEach(() => consulService = {});
 
     it('should successfully retrieve status and info about Consul that it is running', async () => {
@@ -42,7 +47,6 @@ describe('StatusService test suite', () => {
       };
       const status = new StatusService(config, {}, consulService);
       const consul = await status.getConsulAsComponent();
-      delete consul.status.retrievedAt;
 
       expectedInfo.status = {ok: true, configured: true, isCritical: true};
       assert.deepStrictEqual(consul, expectedInfo);
@@ -54,11 +58,8 @@ describe('StatusService test suite', () => {
       };
       const status = new StatusService({consul: {hostname: 'local', port: 8081}}, {}, consulService);
       const consul = await status.getConsulAsComponent();
-      delete consul.status.retrievedAt;
 
       expectedInfo.status = {ok: false, configured: true, isCritical: true, message: 'Unable to query Consul'};
-      console.log(consul);
-      console.log(expectedInfo);
       assert.deepStrictEqual(consul, expectedInfo);
     });
 
@@ -78,9 +79,12 @@ describe('StatusService test suite', () => {
     let ctrlService;
     const config = {grpc: {hostname: 'local', port: 8081, timeout: 20, maxMessageLength: 50}};
     const expectedInfo = {
-      url: `${config.grpc.hostname}:${config.grpc.port}`,
-      timeout: config.grpc.timeout,
-      maxMessageLength: config.grpc.maxMessageLength
+      endpoint: `${config.grpc.hostname}:${config.grpc.port}`,
+      extras: {
+        timeout: config.grpc.timeout,
+        maxMessageLength: config.grpc.maxMessageLength
+      },
+      name: '',
     };
     beforeEach(() => ctrlService = {
       coreConfig: {hostname: 'local', port: 8081, timeout: 20, maxMessageLength: 50}
@@ -90,7 +94,6 @@ describe('StatusService test suite', () => {
       ctrlService.getAliECSInfo = sinon.stub().resolves({version: '0.20'});
       const status = new StatusService(config, ctrlService, {});
       const core = await status.retrieveAliEcsCoreInfo();
-      delete core.status.retrievedAt;
 
       expectedInfo.status = {ok: true, configured: true, isCritical: true};
       expectedInfo.version = '0.20';
@@ -101,10 +104,9 @@ describe('StatusService test suite', () => {
       ctrlService.getAliECSInfo = sinon.stub().rejects('Unable to query Core');
       const status = new StatusService(config, ctrlService, {});
       const core = await status.retrieveAliEcsCoreInfo();
-      delete core.status.retrievedAt;
 
       expectedInfo.status = {ok: false, configured: true, isCritical: true, message: 'Unable to query Core'};
-      delete expectedInfo.version;
+      expectedInfo.version = '';
       assert.deepStrictEqual(core, expectedInfo);
     });
 
@@ -112,6 +114,10 @@ describe('StatusService test suite', () => {
       const status = new StatusService({}, undefined, {});
       const core = await status.retrieveAliEcsCoreInfo();
       const expected = {
+        endpoint: '',
+        extras: {},
+        name: '',
+        version: '',
         status: {
           ok: false, configured: false, isCritical: true, message: 'This service was not configured'
         }
@@ -144,10 +150,9 @@ describe('StatusService test suite', () => {
         .get('/api/health')
         .reply(200, {});
       const grafana = await status.getGrafanaAsComponent();
-      delete grafana.status.retrievedAt;
 
       assert.deepStrictEqual(grafana.status, {ok: true, configured: true, isCritical: false});
-      assert.strictEqual(grafana.url, `http://${expectedInfo.hostname}:${expectedInfo.port}`);
+      assert.strictEqual(grafana.endpoint, `http://${expectedInfo.hostname}:${expectedInfo.port}`);
 
     });
 
@@ -157,7 +162,6 @@ describe('StatusService test suite', () => {
         .get('/api/health')
         .replyWithError('Unable to connect');
       const grafana = await status.getGrafanaAsComponent();
-      delete grafana.status.retrievedAt;
 
       assert.deepStrictEqual(grafana.status, {
         ok: false, configured: true, isCritical: false, message: 'Error: Unable to connect'
@@ -174,13 +178,17 @@ describe('StatusService test suite', () => {
   });
 
   describe('Test Kafka Status', async () => {
-    const config = {kafka: {brokers: ['localhost:8083']}};
-    const expectedInfo = {brokers: ['localhost:8083']};
+    const config = {kafka: {endpoint: 'localhost:8080', brokers: ['localhost:8083']}};
+    const expectedInfo = {
+      endpoint: 'localhost:8080',
+      name: '',
+      version: '',
+      extras: {brokers: ['localhost:8083']}
+    };
 
     it('should successfully retrieve status and info about Kafka that it is not running', async () => {
       const status = new StatusService(config, {}, {}, {}, new NotificationService(config.kafka));
       const notification = await status.getNotificationSystemAsComponent();
-      delete notification.status.retrievedAt;
 
       expectedInfo.status = {ok: false, configured: true, isCritical: false, message: 'KafkaJSNumberOfRetriesExceeded'};
       assert.deepStrictEqual(notification, expectedInfo);
@@ -202,11 +210,11 @@ describe('StatusService test suite', () => {
     const config = {grpc: {hostname: 'local', port: 8081}};
     beforeEach(() => ctrlService = {});
 
-    it('should successfully retrieve status and info about AliECS services and add status field', async () => {
+    it('should successfully retrieve status and info about AliECS services', async () => {
       const services = {
         services: {
-          dcs: {connectionState: 'READY'},
-          otherDcs: {connectionState: 'TRANSIENT_FAILURE'}
+          dcs: {connectionState: 'READY', enabled: true},
+          otherDcs: {connectionState: 'TRANSIENT_FAILURE', enabled: true}
         }
       }
       ctrlService.getIntegratedServicesInfo = sinon.stub().resolves(services);
@@ -215,21 +223,24 @@ describe('StatusService test suite', () => {
 
       const expServices = {
         dcs: {
-          connectionState: 'READY'
+          endpoint: '', extras: {}, name: '', version: '',
+          status: {ok: true, configured: true, isCritical: true}
         },
-        otherDcs: {connectionState: 'TRANSIENT_FAILURE'}
+        otherDcs: {
+          endpoint: '', extras: {}, name: '', version: '',
+          status: {ok: false, configured: true, isCritical: true}
+        }
       }
       assert.deepStrictEqual(coreStatus, expServices);
     });
 
-    it('should successfully retrieve status and info about AliECS that it is not running', async () => {
+    it('should successfully retrieve status and info about AliECS that it is not running for integration', async () => {
       ctrlService.getIntegratedServicesInfo = sinon.stub().rejects('Unable to query Core');
       const status = new StatusService(config, ctrlService, {});
       const coreStatus = await status.retrieveAliECSIntegratedInfo();
 
       const expectedInfo = {
-        all:
-          {name: 'Integrated Services', connectionState: 'TRANSIENT_FAILURE', data: {message: 'Unable to query Core'}}
+        ALL: {status: {ok: false, configured: true, isCritical: true, message: 'Unable to query Core'}}
       };
       assert.deepStrictEqual(coreStatus, expectedInfo);
     });
@@ -239,9 +250,13 @@ describe('StatusService test suite', () => {
     let apricotService;
     const config = {apricot: {hostname: 'local', port: 8081, timeout: 20, maxMessageLength: 50}};
     const expectedInfo = {
-      url: `${config.apricot.hostname}:${config.apricot.port}`,
-      timeout: config.apricot.timeout,
-      maxMessageLength: config.apricot.maxMessageLength
+      endpoint: `${config.apricot.hostname}:${config.apricot.port}`,
+      extras: {
+        timeout: config.apricot.timeout,
+        maxMessageLength: config.apricot.maxMessageLength,
+      },
+      version: '',
+      name: '',
     };
     beforeEach(() => apricotService = {});
 
@@ -250,18 +265,16 @@ describe('StatusService test suite', () => {
       const statusService = new StatusService(config, {}, {}, apricotService);
 
       const apricot = await statusService.getApricotAsComponent();
-      delete apricot.status.retrievedAt;
 
       expectedInfo.status = {ok: true, configured: true, isCritical: true};
       assert.deepStrictEqual(apricot, expectedInfo);
     });
 
-    it('should successfully retrieve status and info about Apricot that it is not running', async () => {
+    it('should successfully retrieve status and info about Apricot that it is NOT running', async () => {
       apricotService.getStatus = sinon.stub().rejects('Unable to check status of Apricot');
       const statusService = new StatusService(config, {}, {}, apricotService);
 
       const apricot = await statusService.getApricotAsComponent();
-      delete apricot.status.retrievedAt;
 
       expectedInfo.status = {
         ok: false, configured: true, isCritical: true, message: 'Unable to check status of Apricot'
@@ -269,7 +282,7 @@ describe('StatusService test suite', () => {
       assert.deepStrictEqual(apricot, expectedInfo);
     });
 
-    it('should successfully return that AliECS was not configured if configuration is not provided', async () => {
+    it('should successfully return that Apricot was not configured if configuration is not provided', async () => {
       const statusService = new StatusService({}, apricotService, {});
       const status = await statusService.getApricotAsComponent();
 
