@@ -58,7 +58,7 @@ class ControlService {
     let wasInError = false;
     return setInterval(async () => {
       try {
-        await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 2000});
+        await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 3500});
         wasInError = false;
       } catch (err) {
         if (!wasInError) {
@@ -69,6 +69,7 @@ class ControlService {
           });
         }
         wasInError = true;
+        this.ctrlProx.client.close()
         this.ctrlProx = new GrpcProxy(this.coreConfig, this.O2_CONTROL_PROTO_PATH, wasInError);
       }
     }, 10000);

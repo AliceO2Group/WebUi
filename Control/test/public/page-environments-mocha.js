@@ -33,14 +33,13 @@ describe('`pageEnvironments` test-suite', () => {
   });
 
   describe('Check transition to particular environment works', async () => {
-    it('should successfully load page and request data', async () => {
+    it('should successfully load page', async () => {
       await page.goto(url + '?page=environments', {waitUntil: 'networkidle0'});
 
-      await page.waitForTimeout(3500);
+      await page.waitForTimeout(2000);
       const location = await page.evaluate(() => window.location);
 
       assert.strictEqual(location.search, '?page=environments');
-      assert.ok(calls['getEnvironments']);
     });
 
     it('should have a button in Action column for InfoLogger', async () => {

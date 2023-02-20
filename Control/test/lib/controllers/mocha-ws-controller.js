@@ -11,20 +11,22 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-/* eslint-disable max-len */
 
 const assert = require('assert');
 const sinon = require('sinon');
-const {WebSocketController} = require('./../../../lib/controllers/WebSocket.controller');
+const {WebSocketService} = require('./../../../lib/services/WebSocket.service.js');
+
+const {SERVICES: {STATUS}} = require('./../../../lib/common/constants.js');
 
 
-describe('WebSocket Controller Test Suite', () => {
-  it('should successfully set an interval and call the provided method', async () =>{
+describe('WebSocket Service Test Suite', () => {
+  it('should successfully send data only when it is different on update', async () =>{
     const ws = { broadcast: sinon.spy() };
-    const wsCtrl = new WebSocketController(ws);
-    wsCtrl.addIntervalForBroadcast(new Map(), 1000);
-    await new Promise((a) => setTimeout(a, 3200));
+    const wsCtrl = new WebSocketService(ws);
+    wsCtrl.updateData(STATUS, 'aliecs-core', {ok: true, configured: true});
+    wsCtrl.updateData(STATUS, 'aliecs-core', {ok: true, configured: true});
+    wsCtrl.updateData(STATUS, 'aliecs-core', {ok: false, configured: true});
 
-    assert.ok(ws.broadcast.calledThrice);
-  }).timeout(3500);
+    assert.ok(ws.broadcast.calledTwice);
+  });
 });
