@@ -26,7 +26,6 @@ export const controlEnvironmentPanel = (environment, item) => h('.mv2.pv3.ph2', 
     h('.w-75',
       [
         controlButton('.btn-success', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
-        controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
         controlButton('.btn-warning', environment, item, 'CONFIGURE', 'CONFIGURE', ''), ' ', // button will not be displayed in any state due to OCTRL-628
         controlButton('', environment, item, 'RESET', 'RESET', ''), ' '
       ]
@@ -35,6 +34,7 @@ export const controlEnvironmentPanel = (environment, item) => h('.mv2.pv3.ph2', 
       style: 'display: flex; justify-content: flex-end;'
     }, [
       shutdownEnvButton(environment, item),
+      controlButton('.btn-danger', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
       killEnvButton(environment, item)
     ])
   ]),
@@ -100,9 +100,9 @@ const killEnvButton = (environment, item) =>
       style: 'margin-left: .3em',
       disabled: environment.itemControl.isLoading() || !_isKillActionAllowed(item, environment.model),
       onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
-      && environment.destroyEnvironment({
-        id: item.id, allowInRunningState: true, force: true,  runNumber: item.currentRunNumber
-      }),
+        && environment.destroyEnvironment({
+          id: item.id, allowInRunningState: true, force: true, runNumber: item.currentRunNumber
+        }),
       title: 'Kill environment'
     }, 'KILL'),
     h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 400px'}, [
