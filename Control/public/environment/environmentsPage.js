@@ -138,55 +138,92 @@ const environmentsTable = (model, list) => {
     'Run', 'ID', 'Detectors', 'Run Type', 'Created', 'FLPs', 'EPNs', 'DCS', 'TRG', 'CTP Readout', 'ODC',
     'State', 'InfoLogger'
   ];
+
   return h('table.table', [
     h('thead', [
       h('tr.table-primary', h('th', {colspan: 13}, 'Active Environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
-      list.map((item) => h('tr', {
-        class: _isGlobalRun(item.userVars) ? 'global-run' : ''
-      }, [
-        h('td', {style: 'text-align: center;'},
-          item.currentRunNumber ? h('.badge.bg-success.white.f4', item.currentRunNumber) : '-'
-        ),
-        h('td', {style: 'text-align: center;'},
-          h('a', {
-            href: `?page=environment&id=${item.id}`,
-            onclick: (e) => model.router.handleLinkEvent(e),
-          }, item.id
-          )
-        ),
-        h('td', {style: 'text-align: center;'}, [
-          item.includedDetectors && item.includedDetectors.length > 0 ?
-            item.includedDetectors.map((detector) => `${detector} `)
-            : '-'
-        ]),
-        h('td', {style: 'text-align: center;'}, item.userVars.run_type ? item.userVars.run_type : '-'),
-        h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
-        h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
-        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_n_epns')),
-        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
-        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
-        h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_readout_enabled')),
-        
-        h('td', {
-          style: 'text-align: center;' ,
-          class: parseOdcStatusPerEnv(item) === 'RUNNING' ? '.success' : '',
-        }, parseOdcStatusPerEnv(item)),
-        h('td', {
-          class: (item.state === 'RUNNING' ?
-            'success'
-            : (item.state === 'CONFIGURED' ? 'warning' : (item.state === 'ERROR' ? 'danger' : ''))),
-          style: 'font-weight: bold; text-align: center;'
-        }, item.state
-        ),
-        h('td', {style: 'text-align: center;'}, actionsCell(model, item))
-      ]),
-      ),
+      list.map((item) => {
+        const odcState = parseOdcStatusPerEnv(item);
+        const odcClasses = odcState === 'RUNNING' ? 'success' :
+          (odcState === 'READY' ? 'primary' : 
+            (odcState === 'ERROR' ? 'danger' : ''));
+
+        return h('tr', {
+          class: _isGlobalRun(item.userVars) ? 'global-run' : ''
+        }, [
+          runColumn(item),
+          h('td', {style: 'text-align: center;'},
+            h('a', {
+              href: `?page=environment&id=${item.id}`,
+              onclick: (e) => model.router.handleLinkEvent(e),
+            }, item.id
+            )
+          ),
+          h('td', {style: 'text-align: center;'}, [
+            item.includedDetectors && item.includedDetectors.length > 0 ?
+              item.includedDetectors.map((detector) => `${detector} `)
+              : '-'
+          ]),
+          h('td', {style: 'text-align: center;'}, item.userVars.run_type ? item.userVars.run_type : '-'),
+          h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
+          h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_n_epns')),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_readout_enabled')),
+
+          h('td', {
+            style: 'text-align: center;',
+            class: odcClasses,
+          }, odcState),
+          h('td', {
+            class: (item.state === 'RUNNING' ?
+              'success'
+              : (item.state === 'CONFIGURED' ? 'warning' : (item.state === 'ERROR' ? 'danger' : ''))),
+            style: 'font-weight: bold; text-align: center;'
+          }, item.state
+          ),
+          h('td', {style: 'text-align: center;'}, actionsCell(model, item))
+        ]);
+      }),
     ]),
   ]);
 };
+
+/**
+ * Build a cell for dispalying the state of a RUN based on conditions if:
+ * * EPN is enabled:
+ * * * a run is considered READY if ODC status is READY and such a text will be displayed
+ * * * a run is considered "in progress (...)" if state is CONFIGURED but ODC is not ready yet
+ * * EPN is NOT enabled, a run is considered READY if it is in state CONFIGURED otherwise a '-' will be displayed
+ * 
+ * @param {EnvironmentDTO} item 
+ * @returns {vnode}
+ */
+const runColumn = (item) => {
+  let classes = '';
+  let text = '-';
+  const epnEnabled = Boolean(item.userVars.epn_enabled === 'true');
+  const odcState = parseOdcStatusPerEnv(item);
+  if (item.currentRunNumber) {
+    classes = 'bg-success white';
+    text = item.currentRunNumber;
+  } else if (
+    ((epnEnabled && odcState === 'READY') || !epnEnabled) && item.state === 'CONFIGURED'
+  ) {
+    classes = 'bg-primary white';
+    text = 'READY';
+  } else if ((epnEnabled && odcState !== '-' && odcState !== 'READY') && item.state === 'CONFIGURED') {
+    classes = 'bg-primary white';
+    text = '...';
+  }
+  return h('td', {style: 'text-align: center;'},
+    h('.badge.f4', {class: classes}, text)
+  );
+}
 
 /**
  * Return a button if detector of the environment is among
