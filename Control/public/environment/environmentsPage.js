@@ -147,7 +147,9 @@ const environmentsTable = (model, list) => {
     h('tbody', [
       list.map((item) => {
         const odcState = parseOdcStatusPerEnv(item);
-        const odcClasses = odcState === 'RUNNING' ? 'success' : (odcState === 'READY' ? 'primary' : '');
+        const odcClasses = odcState === 'RUNNING' ? 'success' :
+          (odcState === 'READY' ? 'primary' : 
+            (odcState === 'ERROR' ? 'danger' : ''));
 
         return h('tr', {
           class: _isGlobalRun(item.userVars) ? 'global-run' : ''
@@ -214,7 +216,7 @@ const runColumn = (item) => {
   ) {
     classes = 'bg-primary white';
     text = 'READY';
-  } else if (( epnEnabled && odcState !== '-' && odcState !== 'READY') && item.state === 'CONFIGURED') {
+  } else if ((epnEnabled && odcState !== '-' && odcState !== 'READY') && item.state === 'CONFIGURED') {
     classes = 'bg-primary white';
     text = '...';
   }
