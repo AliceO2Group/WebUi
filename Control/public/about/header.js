@@ -24,6 +24,5 @@ import {h} from '/js/src/index.js';
  * @returns {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', h('h4', 'About')),
-  h('.flex-grow text-right', [])
+  h('.w-100 text-center', h('h4', 'About')),
 ];

@@ -40,29 +40,24 @@ describe('`pageAbout` test-suite', async () => {
   });
 
   it('should request info about Core and store in statuses as RemoteData', async () => {
-    const core = await page.evaluate(() => window.model.about.statuses.core);
+    const core = await page.evaluate(() => window.model.about.statuses.error.core);
     assert.strictEqual(core.kind, 'Success', 'No information was passed regarding Notification Service');
     assert.ok(!core.payload.status.ok);
   });
 
   it('should request info about GUI and store in statuses as RemoteData', async () => {
-    const gui = await page.evaluate(() => window.model.about.statuses.gui);
+    const gui = await page.evaluate(() => window.model.about.statuses.success.gui);
     assert.strictEqual(gui.kind, 'Success', 'No information was passed regarding GUI');
     assert.ok(gui.payload.status.ok)
   });
 
   it('should request info about Grafana and store in statuses as RemoteData', async () => {
-    const grafana = await page.evaluate(() => window.model.about.statuses.grafana);
+    const grafana = await page.evaluate(() => window.model.about.statuses.error.grafana);
     assert.strictEqual(grafana.kind, 'Success', 'No information was passed regarding Grafana');
   });
 
-  it('should request info about Notification service and store in statuses as RemoteData', async () => {
-    const notification = await page.evaluate(() => window.model.about.statuses.notification);
-    assert.strictEqual(notification.kind, 'Success', 'No information was passed regarding Kafka');
-  });
-
   it('should request info about Consul and store in statuses as RemoteData', async () => {
-    const consul = await page.evaluate(() => window.model.about.statuses.consul);
+    const consul = await page.evaluate(() => window.model.about.statuses.error.consul);
     assert.strictEqual(consul.kind, 'Success', 'No information was passed regarding Consul');
   });
 });

@@ -18,18 +18,19 @@ import {serviceCard} from './../serviceCard.js';
 
 /**
  * Build a reusable panel to display a wrapped list of service panels with their respective information
- * @param {Array<Service>} services 
- * @param {string|undefined} category - 'success', 'error'
+ * @param {Map<Service>} services 
+ * @param {'success'|'error'|undefined} category - 'success', 'error'
  * @returns {vnode}
  */
 export const servicesResolvedPanel = (services, category = undefined) => {
-  const label = `Services that are ${category ? 'in ' + category.toLocaleUpperCase() + ' state' : 'not enabled'}:`;
-  const classes = category === 'error' ? 'danger' : (category ?? '');
-  
-  return services.length > 0 && h('.w-100.flex-column.p2.shadow-level1',
-    h('h4', {class: classes}, label),
-    h('.flex-wrap.g1', [
-      services.map((service) => serviceCard(service))
-    ])
-  );
+  if (Object.keys(services).length > 0) {
+    const label = `Services that are ${category ? 'in ' + category.toLocaleUpperCase() + ' state' : 'not enabled'}:`;
+    const classes = category === 'error' ? 'danger' : (category ?? '');
+    return h('.w-100.flex-column.p2.shadow-level1',
+      h('h4', {class: classes}, label),
+      h('.flex-wrap.g1', [
+        Object.entries(services).map(([_, {payload}]) => serviceCard(payload))
+      ])
+    );
+  }
 };
