@@ -224,7 +224,7 @@ const showEnvDetailsTable = (model, item) => {
           {
             class: item.state === 'RUNNING' ?
               'success' :
-              (item.state === 'CONFIGURED' ? 'warning' : (item.state === 'ERROR' ? 'danger' : '')),
+              (item.state === 'CONFIGURED' ? 'primary' : (item.state === 'ERROR' ? 'danger' : '')),
             style: 'font-weight: bold;'
           },
           item.state)
@@ -292,7 +292,7 @@ const showEnvTasksTable = (environment, tasks) => {
           h('td.w-10', task.status),
           h('td.w-10', {
             class: (task.state === 'RUNNING' ? 'success' :
-              (task.state === 'CONFIGURED' ? 'warning' :
+              (task.state === 'CONFIGURED' ? 'primary' :
                 ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
             style: 'font-weight: bold;'
           }, task.state),
