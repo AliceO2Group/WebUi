@@ -170,7 +170,7 @@ export default class Model extends Observable {
     this.lock.setPadlockState({lockedBy: null, lockedByName: null});
 
     this.notification.show(`Connection to server has been lost. Retrying to connect in 10 seconds...`, 'danger', 10000);
-    this.about.setWsInfo({
+    this.about.setWsInfo('error', {
       status: {ok: false, configured: true, message: 'Cannot establish connection to server'}
     });
 
@@ -181,7 +181,9 @@ export default class Model extends Observable {
         this.ws.addListener('command', this.handleWSCommand.bind(this));
         this.ws.addListener('close', this.handleWSClose.bind(this));
         clearInterval(wsReconnectInterval);
-        this.about.setWsInfo({status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
+        this.about.setWsInfo('success', {
+          status: {ok: true, configured: true}, message: 'WebSocket connection is alive'
+        });
         this.notification.show(`Connection to server has been restored`, 'success', 3000);
       } catch (error) {
         console.error(error);
