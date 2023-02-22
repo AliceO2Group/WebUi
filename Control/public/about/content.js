@@ -26,11 +26,11 @@ import {servicesInQueryPanel} from './components/panels/servicesInQueryPanel.js'
  * @param {Model} model
  * @returns {vnode}
  */
-export const content = (model) => {
-  const inError = model.frameworkInfo.getInErrorServices();
-  const inLoading = model.frameworkInfo.getInLoadingComponents();
-  const inSuccess = model.frameworkInfo.getInSuccessServices();
-  const notEnabled = model.frameworkInfo.getNotConfiguredServices();
+export const content = ({about}) => {
+  const inError = about.getInErrorServices();
+  const inLoading = about.getInLoadingComponents();
+  const inSuccess = about.getInSuccessServices();
+  const notEnabled = about.getNotEnabledServices();
   return h('.scroll-y.absolute-fill.flex-column.p2.g2',
     servicesInQueryPanel(inLoading),
     servicesResolvedPanel(inError, 'error'),

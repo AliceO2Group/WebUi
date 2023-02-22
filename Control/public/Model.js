@@ -17,7 +17,7 @@ import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, Remote
 import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
-import FrameworkInfo from './about/FrameworkInfo.js';
+import About from './about/About.js';
 import Workflow from './workflow/Workflow.js';
 import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
@@ -57,8 +57,8 @@ export default class Model extends Observable {
     this.task = new Task(this);
     this.task.bubbleTo(this);
 
-    this.frameworkInfo = new FrameworkInfo(this);
-    this.frameworkInfo.bubbleTo(this);
+    this.about = new About(this);
+    this.about.bubbleTo(this);
 
     // Setup router
     this.router = new QueryRouter();
@@ -170,7 +170,7 @@ export default class Model extends Observable {
     this.lock.setPadlockState({lockedBy: null, lockedByName: null});
 
     this.notification.show(`Connection to server has been lost. Retrying to connect in 10 seconds...`, 'danger', 10000);
-    this.frameworkInfo.setWsInfo({
+    this.about.setWsInfo({
       status: {ok: false, configured: true, message: 'Cannot establish connection to server'}
     });
 
@@ -181,7 +181,7 @@ export default class Model extends Observable {
         this.ws.addListener('command', this.handleWSCommand.bind(this));
         this.ws.addListener('close', this.handleWSClose.bind(this));
         clearInterval(wsReconnectInterval);
-        this.frameworkInfo.setWsInfo({status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
+        this.about.setWsInfo({status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
         this.notification.show(`Connection to server has been restored`, 'success', 3000);
       } catch (error) {
         console.error(error);
@@ -214,7 +214,7 @@ export default class Model extends Observable {
         this.task.getTasks();
         break;
       case 'about':
-        this.frameworkInfo.getFrameworkInfo();
+        this.about.retrieveInfo();
         break;
       case 'configuration':
         this.configuration.init();
