@@ -13,59 +13,94 @@
 */
 'use strict';
 
+const KNOWN_FIELDS = ['data', 'hostname', 'port', 'connectionState', 'enabled', 'endpoint'];
+
 /**
  * Service DTO representation
+ *
+ * @property {string} name
+ * @property {string} endpoint
+ * @property {string} [version]
+ * @property {string} [connectionState] [READY, CONNECTING, TRANSIENT_FAILURE, IDLE, SHUTDOWN]
+ * @property {string} originalName
+ * @property {Map<string, string>} extras
  */
 class Service {
   /**
-   * Initializing a Service object to empty values
+   * Initializing a Service object to empty object
    */
-  constructor() {
-    /**
-     * @type {string}
-     */
-    this.endpoint = '';
+  constructor() {}
 
-    /**
-     * @type {object}
-     */
-    this.extras = {};
+  /**
+   * Method to build a Service object from multiple sources and return a JSON version of Service
+   * @param {object} service - json object with values of the service
+   * @returns {JSON}
+   */
+  static fromObjectAsJson(service) {
+    service = JSON.parse(JSON.stringify(service));
 
-    /**
-     * @type {string}
-     */
-    this.version = '';
+    const name = Service._getNameOfService(service);
+    const endpoint = Service._getEndpoint(service);
+    const data = Service._getDataOfService(service);
+    
+    const serviceToReturn = {
+      ...name && {name},
+      ...endpoint && {endpoint},
+      ...service.version && {version: service.version},
+      ...service.connectionState && {connectionState: service.connectionState},
+      extras: {...data},
+    }
+    Object.keys(service)
+      .filter((name) => !(KNOWN_FIELDS.includes(name)))
+      .filter((name) => !serviceToReturn[name])
+      .forEach((key) => serviceToReturn.extras[key] = service[key]);
+    return serviceToReturn;
   }
 
   /**
-   * Method to build a Service object from multiple source and return a generalized Service
-   * @param {object} service - json object with values of the service
-   * @returns {Service}
+   * Given a general service object, build the endpoint of it or return undefined if not possible
+   * @param {object} service 
+   * @returns {string|undefined}
    */
-  static fromJSON(service) {
-    service = JSON.parse(JSON.stringify(service));
-    const serviceObj = new Service();
+  static _getEndpoint(service) {
     if (service.endpoint) {
-      serviceObj.endpoint = service.endpoint;
-      delete service.endpoint;
+      return service.endpoint;
     } else if (service.hostname) {
       const protocol = service.protocol ? `${service.protocol}://` : '';
       const hostname = service.hostname;
       const port = service.port ?? '';
-      serviceObj.endpoint = `${protocol}${hostname}:${port}`;
-      delete service.protocol;
-      delete service.hostname;
-      delete service.port;
-    }
-    serviceObj.version = service.version ?? '';
-    delete service.version;
-    serviceObj.name = service.name ?? '';
-    delete service.name;
+      return `${protocol}${hostname}:${port}`;
+    } 
+    return undefined;
+  }
 
-    Object.keys(service).forEach((key) => serviceObj.extras[key] = service[key]);
-    return serviceObj;
+  /**
+   * Given a general service object, return its trimmed value if there is or undefined
+   * @param {object} service 
+   * @returns {string|undefined}
+   */
+  static _getNameOfService({name}) {
+    return name && name?.trim() !== '' ? name : undefined;
+  }
+
+  /**
+   * Given a general service object, look for AliECS Integrated services particularities such as "data" field of type string and return it parsed as JSON
+   * @param {object} service 
+   * @returns {JSON|undefined}
+   */
+  static _getDataOfService({data}) {
+    if (data && typeof data === 'string') {
+      try {
+        const dataJson = JSON.parse(data);
+        if (Object.keys(dataJson).length > 0) {
+          return dataJson;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    return undefined;
   }
 }
 
 exports.Service = Service;
-
