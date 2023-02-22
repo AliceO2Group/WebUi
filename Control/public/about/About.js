@@ -29,7 +29,7 @@ export default class About extends Observable {
 
     this.model = model;
 
-    this.services = new Map(Object.entries({
+    this.services = {
       apricot: 'apricot',
       core: 'core',
       consul: 'consul',
@@ -37,7 +37,7 @@ export default class About extends Observable {
       gui: 'gui',
       [INTEGRATED_SERVICE_LABEL]: 'core/services',
       notification: 'notification',
-    }));
+    };
 
     this.statuses = {};
   }
@@ -47,7 +47,7 @@ export default class About extends Observable {
    * @returns {void}
    */
   async retrieveInfo() {
-    this.services.forEach((path, key) => this.retrieveServiceState(key, path));
+    this.services.forEach((key, path) => this.retrieveServiceState(key, path));
     this.retrieveWsInfo();
   }
 
