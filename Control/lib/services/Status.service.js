@@ -96,8 +96,8 @@ class StatusService {
     const status = await this.retrieveConsulStatus();
     return {
       status,
-      name: 'Consul',
-      ...status.configured && Service.fromJSON(this.config?.consul)
+      name: 'Consul - KV Store',
+      ...status.configured && Service.fromObjectAsJson(this.config?.consul)
     }
   }
 
@@ -124,7 +124,7 @@ class StatusService {
         status = {ok: false, configured: true, isCritical: true, message: error.toString()};
       }
     }
-    const aliecs = Object.assign({status, name: 'AliECS Core'}, Service.fromJSON(configuration))
+    const aliecs = Object.assign({status, name: 'AliECS Core'}, Service.fromObjectAsJson(configuration))
     this._updateStatusMaps(ALIECS_CORE_KEY, status);
     return aliecs;
   }
@@ -145,7 +145,7 @@ class StatusService {
           .filter(([key]) => key !=='testplugin')
           .forEach(([key, value]) => {
             const status = {
-              ok: value?.connectionState !== 'TRANSIENT_FAILURE' || value?.connectionState !== 'SHUTDOWN',
+              ok: value?.connectionState !== 'TRANSIENT_FAILURE' && value?.connectionState !== 'SHUTDOWN',
               configured: Boolean(value?.enabled),
               isCritical: true
             };
@@ -153,7 +153,7 @@ class StatusService {
 
             integServices[key] = {
               status,
-              ...status.configured && Service.fromJSON(value)
+              ...status.configured && Service.fromObjectAsJson(value)
             };
             this._updateStatusMaps(ALIECS_SERVICES_KEY, {status: {ok: true, configured: true}});
             this._updateStatusMaps(`INTEG_SERVICE-${key.toLocaleUpperCase()}`, integServices[key]);
@@ -202,7 +202,7 @@ class StatusService {
     return {
       status,
       name: 'Apricot',
-      ...status.configured && Service.fromJSON(this.config.apricot)
+      ...status.configured && Service.fromObjectAsJson(this.config.apricot)
     };
   }
 
@@ -237,8 +237,8 @@ class StatusService {
     const status = await this.retrieveGrafanaStatus();
     return {
       status,
-      name: 'Grafana',
-      ...status.configured && Service.fromJSON({endpoint: this.config.grafana.url})
+      name: 'Grafana - Monitoring',
+      ...status.configured && Service.fromObjectAsJson({endpoint: this.config.grafana.url})
     };
   }
 
@@ -268,7 +268,7 @@ class StatusService {
     return {
       status,
       name: 'Kafka - Notification',
-      ...status.configured && Service.fromJSON(this.config?.kafka)
+      ...status.configured && Service.fromObjectAsJson(this.config?.kafka)
     };
   }
 

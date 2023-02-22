@@ -34,8 +34,7 @@ describe('StatusService test suite', () => {
     const expectedInfo = {
       endpoint: 'local:8081',
       extras: {},
-      name: '',
-      version: '',
+      name: 'Consul - KV Store',
     };
     beforeEach(() => consulService = {});
 
@@ -67,6 +66,7 @@ describe('StatusService test suite', () => {
       const status = new StatusService({}, {}, undefined)
       const consul = await status.getConsulAsComponent();
       const expected = {
+        name: 'Consul - KV Store',
         status: {
           ok: false, configured: false, isCritical: true, message: 'This service was not configured'
         }
@@ -84,7 +84,7 @@ describe('StatusService test suite', () => {
         timeout: config.grpc.timeout,
         maxMessageLength: config.grpc.maxMessageLength
       },
-      name: '',
+      name: 'AliECS Core',
     };
     beforeEach(() => ctrlService = {
       coreConfig: {hostname: 'local', port: 8081, timeout: 20, maxMessageLength: 50}
@@ -106,7 +106,7 @@ describe('StatusService test suite', () => {
       const core = await status.retrieveAliEcsCoreInfo();
 
       expectedInfo.status = {ok: false, configured: true, isCritical: true, message: 'Unable to query Core'};
-      expectedInfo.version = '';
+      delete expectedInfo.version;
       assert.deepStrictEqual(core, expectedInfo);
     });
 
@@ -114,10 +114,8 @@ describe('StatusService test suite', () => {
       const status = new StatusService({}, undefined, {});
       const core = await status.retrieveAliEcsCoreInfo();
       const expected = {
-        endpoint: '',
         extras: {},
-        name: '',
-        version: '',
+        name: 'AliECS Core',
         status: {
           ok: false, configured: false, isCritical: true, message: 'This service was not configured'
         }
@@ -128,7 +126,7 @@ describe('StatusService test suite', () => {
 
   describe('Test GUI Status retrieval via StatusService', async () => {
     const config = {http: {hostname: 'local', port: 8081}};
-    const expectedInfo = {};
+    const expectedInfo = {name: 'AliECS GUI'};
 
     it('should successfully retrieve status and info about AliECS GUI that it is running', async () => {
       const status = new StatusService(config, {}, {});
@@ -142,7 +140,7 @@ describe('StatusService test suite', () => {
 
   describe('Test Grafana Status', async () => {
     const config = {grafana: {url: 'http://localhost:8084'}};
-    const expectedInfo = {protocol: 'http:', hostname: 'localhost', port: '8084'};
+    const expectedInfo = {protocol: 'http:', hostname: 'localhost', port: '8084', name: 'Grafana - Monitoring'};
 
     it('should successfully retrieve status and info about Grafana that it is running', async () => {
       const status = new StatusService(config, {}, {});
@@ -181,8 +179,7 @@ describe('StatusService test suite', () => {
     const config = {kafka: {endpoint: 'localhost:8080', brokers: ['localhost:8083']}};
     const expectedInfo = {
       endpoint: 'localhost:8080',
-      name: '',
-      version: '',
+      name: 'Kafka - Notification',
       extras: {brokers: ['localhost:8083']}
     };
 
@@ -199,6 +196,7 @@ describe('StatusService test suite', () => {
       const notification = await status.getNotificationSystemAsComponent();
 
       const expected = {
+        name: 'Kafka - Notification',
         status: {ok: false, configured: false, isCritical: false, message: 'This service was not configured'}
       };
       assert.deepStrictEqual(notification, expected);
@@ -223,11 +221,13 @@ describe('StatusService test suite', () => {
 
       const expServices = {
         dcs: {
-          endpoint: '', extras: {}, name: '', version: '',
+          extras: {},
+          connectionState: 'READY',
           status: {ok: true, configured: true, isCritical: true}
         },
         otherDcs: {
-          endpoint: '', extras: {}, name: '', version: '',
+          connectionState: 'TRANSIENT_FAILURE',
+          extras: {},
           status: {ok: false, configured: true, isCritical: true}
         }
       }
@@ -250,13 +250,12 @@ describe('StatusService test suite', () => {
     let apricotService;
     const config = {apricot: {hostname: 'local', port: 8081, timeout: 20, maxMessageLength: 50}};
     const expectedInfo = {
+      name: 'Apricot',
       endpoint: `${config.apricot.hostname}:${config.apricot.port}`,
       extras: {
         timeout: config.apricot.timeout,
         maxMessageLength: config.apricot.maxMessageLength,
       },
-      version: '',
-      name: '',
     };
     beforeEach(() => apricotService = {});
 
@@ -287,6 +286,7 @@ describe('StatusService test suite', () => {
       const status = await statusService.getApricotAsComponent();
 
       const expected = {
+        name: 'Apricot',
         status: {ok: false, configured: false, isCritical: true, message: 'This service was not configured'}
       };
       assert.deepStrictEqual(status, expected);
