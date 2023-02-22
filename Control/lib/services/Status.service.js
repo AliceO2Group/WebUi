@@ -96,6 +96,7 @@ class StatusService {
     const status = await this.retrieveConsulStatus();
     return {
       status,
+      name: 'Consul',
       ...status.configured && Service.fromJSON(this.config?.consul)
     }
   }
@@ -123,7 +124,7 @@ class StatusService {
         status = {ok: false, configured: true, isCritical: true, message: error.toString()};
       }
     }
-    const aliecs = Object.assign({status}, Service.fromJSON(configuration))
+    const aliecs = Object.assign({status, name: 'AliECS Core'}, Service.fromJSON(configuration))
     this._updateStatusMaps(ALIECS_CORE_KEY, status);
     return aliecs;
   }
@@ -141,13 +142,13 @@ class StatusService {
       try {
         const {services} = await this._ctrlService.getIntegratedServicesInfo();
         Object.entries(services)
+          .filter(([key]) => key !=='testplugin')
           .forEach(([key, value]) => {
             const status = {
-              ok: value?.connectionState === 'READY',
+              ok: value?.connectionState !== 'TRANSIENT_FAILURE' || value?.connectionState !== 'SHUTDOWN',
               configured: Boolean(value?.enabled),
               isCritical: true
             };
-            delete value.connectionState;
             delete value.enabled;
 
             integServices[key] = {
@@ -155,7 +156,7 @@ class StatusService {
               ...status.configured && Service.fromJSON(value)
             };
             this._updateStatusMaps(ALIECS_SERVICES_KEY, {status: {ok: true, configured: true}});
-            this._updateStatusMaps(`ALIECS_INTEG-${key.toLocaleUpperCase()}`, integServices[key]);
+            this._updateStatusMaps(`INTEG_SERVICE-${key.toLocaleUpperCase()}`, integServices[key]);
           });
       } catch (error) {
         const status = {ok: false, configured: true, message: error.toString(), isCritical: true};
@@ -200,6 +201,7 @@ class StatusService {
     const status = await this.retrieveApricotStatus();
     return {
       status,
+      name: 'Apricot',
       ...status.configured && Service.fromJSON(this.config.apricot)
     };
   }
@@ -235,6 +237,7 @@ class StatusService {
     const status = await this.retrieveGrafanaStatus();
     return {
       status,
+      name: 'Grafana',
       ...status.configured && Service.fromJSON({endpoint: this.config.grafana.url})
     };
   }
@@ -264,6 +267,7 @@ class StatusService {
     const status = await this.retrieveNotificationSystemStatus();
     return {
       status,
+      name: 'Kafka - Notification',
       ...status.configured && Service.fromJSON(this.config?.kafka)
     };
   }
@@ -273,7 +277,9 @@ class StatusService {
    * @returns {JSON}
    */
   getGuiStatus() {
-    let gui = {};
+    let gui = {
+      name: 'AliECS GUI'
+    };
     if (projPackage?.version) {
       gui.version = projPackage.version;
     }
