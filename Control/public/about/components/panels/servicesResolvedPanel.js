@@ -22,7 +22,7 @@ import {serviceCard} from './../serviceCard.js';
  * @param {string|undefined} category - 'success', 'error'
  * @returns {vnode}
  */
-export const serviceListPanel = (services, category = undefined) => {
+export const servicesResolvedPanel = (services, category = undefined) => {
   const label = `Services that are ${category ? 'in ' + category.toLocaleUpperCase() + ' state' : 'not enabled'}:`;
   const classes = category === 'error' ? 'danger' : (category ?? '');
   
