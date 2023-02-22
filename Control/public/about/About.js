@@ -39,79 +39,23 @@ export default class About extends Observable {
       notification: 'notification',
     };
 
-    this.statuses = {};
+    this.statuses = {
+      error: {},
+      success: {},
+      loading: {},
+      notEnabled: {},
+    };
   }
 
   /**
-   * Load AliECSGUI and its dependencies data in control-remoteData
+   * Retrieve information on all AliECS GUI dependent services
    * @returns {void}
    */
   async retrieveInfo() {
     for (const key in this.services) {
-      this.retrieveServiceState(key, this.services[key])
+      this.retrieveServiceStatus(key, this.services[key])
     }
     this.retrieveWsInfo();
-  }
-
-  /**
-   * Return a list of services that are in error state being either:
-   * * RemoteData.failure - case in which the name and message is returned only
-   * * Service in configured state but in failure - case in which full payload is returned
-   * @returns {Array<{name, message}|Service>} - list of services
-   */
-  getInErrorServices() {
-    return Object.entries(this.statuses)
-      .filter(([_, value]) => {
-        if (value.isFailure()) {
-          return true;
-        } else if (value.isSuccess()) {
-          const {status: {ok, configured}} = value.payload;
-          return configured && !ok;
-        }
-        return false;
-      })
-      .map(([name, value]) => {
-        if (value.isFailure()) {
-          return {
-            name,
-            message: this.statuses[name].payload.message
-          };
-        } else {
-          return value.payload;
-        }
-      });
-  }
-
-  /**
-   * Return a list of names of components in RemoteData.loading state
-   * @returns {Array<string>}
-   */
-  getInLoadingComponents() {
-    return Object.entries(this.statuses)
-      .filter(([_, value]) => Boolean(value.isLoading()))
-      .map(([name, _]) => name);
-  }
-
-  /**
-   * Method to retrieve a list of Services from components in RemoteData.success and status.ok
-   * @returns {Array<Service>}
-   */
-  getInSuccessServices() {
-    return Object.entries(this.statuses)
-      .filter(([_, value]) => Boolean(value.isSuccess()))
-      .map(([_, value]) => value.payload)
-      .filter((service) => service.status.ok & service.status.configured);
-  }
-  /**
-   * Method to retrieve a list of components that are not enabled
-   * @returns {Array<Service>}
-   */
-  getNotEnabledServices() {
-    const t = Object.entries(this.statuses)
-      .filter(([_, value]) => Boolean(value.isSuccess()))
-      .filter(([_, value]) => !value.payload.status.configured)
-      .map(([name, value]) => ({name, ...value.payload}))
-    return t;
   }
 
   /**
@@ -123,32 +67,21 @@ export default class About extends Observable {
    * @param {string} key
    * @param {string} path - e.g. core/services
    */
-  async retrieveServiceState(key, path) {
-    if (key === INTEGRATED_SERVICE_LABEL) {
-      Object.keys(this.statuses)
-        .filter((name) => name.startsWith(INTEGRATED_SERVICE_LABEL))
-        .forEach((name) => delete this.statuses[name]); // remove status of existing components in case they were removed in the meantime
-    }
-
-    this.statuses[key] = RemoteData.loading();  // adds general loading state of integrated services
+  async retrieveServiceStatus(key, path) {
+    this._removeServiceFromMap(key);
+    this.statuses.loading[key] = RemoteData.loading();  // adds general loading state of integrated services
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/status/${path}`);
+    delete this.statuses.loading[key];
 
     if (!ok) {
-      this.statuses[key] = RemoteData.failure(result.message);
+      this.statuses.error[key] = RemoteData.failure({
+        name: key, status: {configured: true, ok: false, message: result.message}
+      });
     } else {
-      if (key === INTEGRATED_SERVICE_LABEL) {
-        Object.entries(result)
-          .forEach(([name, service]) => {
-            this.statuses[`${INTEGRATED_SERVICE_LABEL}-${name}`] = RemoteData.success(service);
-          });
-        delete this.statuses[key]; // removes general loading state of integrated services
-      } else {
-        this.statuses[key] = RemoteData.success(result);
-      }
+      this._addServicesToMap(key, result);
     }
-
     this.notify();
   }
 
@@ -167,10 +100,64 @@ export default class About extends Observable {
 
   /**
    * Method to allow the update of WS connection while not being on the about page
-   * @param {JSON} info 
+   * @param {object} info 
    */
   setWsInfo(info) {
     this.statuses.ws = RemoteData.success({name: 'WebSocket Service', ...info});
     this.notify();
+  }
+
+  /**
+   * Given a status of a service, return the category to which it belongs
+   * @param {boolean} isConfigured 
+   * @param {boolean} isOk 
+   * @returns {'notEnabled'|'error'|'success'}
+   */
+  _getCategoryOnStatus(isConfigured, isOk) {
+    if (!isConfigured) {
+      return 'notEnabled';
+    } else if (!isOk) {
+      return 'error';
+    }
+    return 'success';
+  }
+
+  /**
+   * Given a service key, remove its pair from the status map per category;
+   * If the key represents AliECS Integrated Services, then all belonging services are removed
+   * @param {string} serviceKey - key of the service to be removed
+   * @returns {void}
+   */
+  _removeServiceFromMap(serviceKey) {
+    for (const category in this.statuses) {
+      if (serviceKey === INTEGRATED_SERVICE_LABEL) {
+        Object.keys(this.statuses[category])
+          .filter((name) => name.startsWith(INTEGRATED_SERVICE_LABEL))
+          .forEach((name) => delete this.statuses[category][name]);
+      } else {
+        delete this.statuses[category][serviceKey];
+      }
+    }
+  }
+
+  /**
+   * Given a Map of services, add it to the list of queried services
+   * @param {string} key - key of the service
+   * @param {Service|Map<String,Service>} services - map of services to be added
+   * @returns {void}
+   */
+  _addServicesToMap(key, services) {
+    if (key === INTEGRATED_SERVICE_LABEL) {
+      Object.entries(services)
+        .forEach(([name, service]) => {
+          const {status: {ok, configured} = {}} = service;
+          const category = this._getCategoryOnStatus(configured, ok);
+          this.statuses[category][`${INTEGRATED_SERVICE_LABEL}-${name}`] = RemoteData.success(service);
+        });
+    } else {
+      const {status: {ok, configured}} = services;
+      const category = this._getCategoryOnStatus(configured, ok);
+      this.statuses[category][key] = RemoteData.success(services);
+    }
   }
 }

@@ -23,7 +23,7 @@ import loading from '../../../common/loading.js';
 export const servicesInLoadingPanel = (services) => {
   if (Object.keys(services).length > 0) {
 
-    const namesAsString = Object.entries(services).map(([_, service]) => service.name).join(', ');
+    const namesAsString = Object.keys(services).join(', ');
     return h('.w-100.flex-row.items-center.p2.shadow-level1', [
       loading(2),
       h('.ph2', `Loading status for: ${namesAsString}`),
