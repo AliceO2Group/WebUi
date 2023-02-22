@@ -21,7 +21,9 @@ import {serviceRow as itemRow} from './serviceRow.js';
  * @returns {vnode}
  */
 export const serviceCard = (service, showExtras = false) => {
-  const {status: {ok, configured, message}, endpoint, version, extras, name, connectionState} = service;
+  const {
+    status: {ok, configured, message} = {}, endpoint, version, extras, name = 'UNDEFINED', connectionState
+  } = service;
   const isDown = configured && !ok;
   showExtras = showExtras && extras && Object.keys(extras).length > 0;
 
