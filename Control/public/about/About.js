@@ -149,15 +149,20 @@ export default class About extends Observable {
   _addServicesToMap(key, services) {
     if (key === INTEGRATED_SERVICE_LABEL) {
       Object.entries(services)
-        .forEach(([name, service]) => {
-          const {status: {ok, configured} = {}} = service;
-          const category = this._getCategoryOnStatus(configured, ok);
-          this.statuses[category][`${INTEGRATED_SERVICE_LABEL}-${name}`] = RemoteData.success(service);
-        });
+        .forEach(([name, service]) => this._addServiceToMap(`${INTEGRATED_SERVICE_LABEL}-${name}`, service));
     } else {
-      const {status: {ok, configured}} = services;
-      const category = this._getCategoryOnStatus(configured, ok);
-      this.statuses[category][key] = RemoteData.success(services);
+      this._addServiceToMap(key, services);
     }
+  }
+
+  /**
+   * Add a service to the current list of statuses enquired
+   * @param {string} key 
+   * @param {Service} service - to be added
+   */
+  _addServiceToMap(key, service) {
+    const {status: {ok, configured}} = service;
+    const category = this._getCategoryOnStatus(configured, ok);
+    this.statuses[category][key] = RemoteData.success(service);
   }
 }
