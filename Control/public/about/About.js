@@ -87,23 +87,28 @@ export default class About extends Observable {
 
   /**
    * Update the status of the WSClient in the statuses objects used by the about component
+   * @returns {void}
    */
   retrieveWsInfo() {
     this.statuses.ws = RemoteData.loading();
     this.notify();
     if (this.model.ws.connection.readyState === WebSocket.OPEN) {
-      this.setWsInfo({status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
+      this.setWsInfo('success', {status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
     } else {
-      this.setWsInfo({status: {ok: false, configured: true, message: 'Cannot establish connection to the server'}});
+      this.setWsInfo('error', {
+        status: {ok: false, configured: true, message: 'Cannot establish connection to the server'}
+      });
     }
   }
 
   /**
    * Method to allow the update of WS connection while not being on the about page
+   * @param {string} category
    * @param {object} info 
+   * @returns {void}
    */
-  setWsInfo(info) {
-    this.statuses.ws = RemoteData.success({name: 'WebSocket Service', ...info});
+  setWsInfo(category, info) {
+    this.statuses[category].ws = RemoteData.success({name: 'GUI Stream', ...info});
     this.notify();
   }
 
