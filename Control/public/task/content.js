@@ -180,7 +180,7 @@ const tasksTables = (model, tasksByHost) =>
                 h('td.w-10', task.pid),
                 h('td.w-10', {
                   class: (task.state === 'RUNNING' ? 'success'
-                    : (task.state === 'CONFIGURED' ? 'warning'
+                    : (task.state === 'CONFIGURED' ? 'primary'
                       : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
                   style: 'font-weight: bold;'
                 }, task.state),
