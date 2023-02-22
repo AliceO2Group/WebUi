@@ -17,7 +17,7 @@ import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, Remote
 import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
-import FrameworkInfo from './frameworkinfo/FrameworkInfo.js';
+import FrameworkInfo from './about/FrameworkInfo.js';
 import Workflow from './workflow/Workflow.js';
 import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
