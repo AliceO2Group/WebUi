@@ -150,10 +150,10 @@ class StatusService {
               isCritical: true
             };
             delete value.enabled;
-
+            value.name = value.name ?? key;
             integServices[key] = {
               status,
-              ...status.configured && Service.fromObjectAsJson(value)
+              ...Service.fromObjectAsJson(value)
             };
             this._updateStatusMaps(ALIECS_SERVICES_KEY, {status: {ok: true, configured: true}});
             this._updateStatusMaps(`INTEG_SERVICE-${key.toLocaleUpperCase()}`, integServices[key]);
