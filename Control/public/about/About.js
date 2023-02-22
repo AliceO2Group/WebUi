@@ -47,7 +47,9 @@ export default class About extends Observable {
    * @returns {void}
    */
   async retrieveInfo() {
-    this.services.forEach((key, path) => this.retrieveServiceState(key, path));
+    for (const key in this.services) {
+      this.retrieveServiceState(key, this.services[key])
+    }
     this.retrieveWsInfo();
   }
 
