@@ -15,6 +15,8 @@
 import {h} from '/js/src/index.js';
 import {servicesResolvedPanel} from './components/panels/servicesResolvedPanel.js';
 import {servicesInLoadingPanel} from './components/panels/servicesInLoadingPanel.js';
+import { SERVICE_STATES } from '../common/constants/serviceStates.js';
+const {IN_ERROR, IN_LOADING, IN_SUCCESS, NOT_ENABLED} = SERVICE_STATES;
 
 /**
  * @file Content for About Page
@@ -26,9 +28,9 @@ import {servicesInLoadingPanel} from './components/panels/servicesInLoadingPanel
  * @param {Model} model
  * @returns {vnode}
  */
-export const content = ({about: {statuses} = {}}) => h('.scroll-y.absolute-fill.flex-column.p2.g2',
-  servicesInLoadingPanel(statuses.loading),
-  servicesResolvedPanel(statuses.error, 'error'),
-  servicesResolvedPanel(statuses.success, 'success'),
-  servicesResolvedPanel(statuses.notEnabled),
+export const content = ({about: {services} = {}}) => h('.scroll-y.absolute-fill.flex-column.p2.g2',
+  servicesInLoadingPanel(services[IN_LOADING]),
+  servicesResolvedPanel(services[IN_ERROR], 'error'),
+  servicesResolvedPanel(services[IN_SUCCESS], 'success'),
+  servicesResolvedPanel(services[NOT_ENABLED]),
 );

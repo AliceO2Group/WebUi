@@ -13,6 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {SERVICE_STATES} from './../common/constants/serviceStates.js';
 
 const INTEGRATED_SERVICE_LABEL = 'INTEG_SERVICE';
 
@@ -29,7 +30,7 @@ export default class About extends Observable {
 
     this.model = model;
 
-    this.services = {
+    this.servicesPath = {
       apricot: 'apricot',
       core: 'core',
       consul: 'consul',
@@ -39,12 +40,10 @@ export default class About extends Observable {
       notification: 'notification',
     };
 
-    this.statuses = {
-      error: {},
-      success: {},
-      loading: {},
-      notEnabled: {},
-    };
+    this.services = {};
+    for (const state in SERVICE_STATES) {
+      this.services[state] = {};
+    }
   }
 
   /**
@@ -52,8 +51,8 @@ export default class About extends Observable {
    * @returns {void}
    */
   async retrieveInfo() {
-    for (const key in this.services) {
-      this.retrieveServiceStatus(key, this.services[key])
+    for (const key in this.servicesPath) {
+      this.retrieveServiceStatus(key, this.servicesPath[key])
     }
     this.retrieveWsInfo();
   }
@@ -69,14 +68,14 @@ export default class About extends Observable {
    */
   async retrieveServiceStatus(key, path) {
     this._removeServiceFromMap(key);
-    this.statuses.loading[key] = RemoteData.loading();  // adds general loading state of integrated services
+    this.services[SERVICE_STATES.IN_LOADING][key] = RemoteData.loading();  // adds general loading state of integrated services
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/status/${path}`);
-    delete this.statuses.loading[key];
+    delete this.services[SERVICE_STATES.IN_LOADING][key];
 
     if (!ok) {
-      this.statuses.error[key] = RemoteData.failure({
+      this.services[SERVICE_STATES.IN_ERROR][key] = RemoteData.failure({
         name: key, status: {configured: true, ok: false, message: result.message}
       });
     } else {
@@ -90,15 +89,19 @@ export default class About extends Observable {
    * @returns {void}
    */
   retrieveWsInfo() {
-    this.statuses.ws = RemoteData.loading();
+    this.services[SERVICE_STATES.IN_LOADING].ws = RemoteData.loading();
     this.notify();
     if (this.model.ws.connection.readyState === WebSocket.OPEN) {
-      this.setWsInfo('success', {status: {ok: true, configured: true}, message: 'WebSocket connection is alive'});
+      this.setWsInfo(
+        SERVICE_STATES.IN_SUCCESS, {status: {ok: true, configured: true}, message: 'WebSocket connection is alive'}
+      );
     } else {
-      this.setWsInfo('error', {
+      this.setWsInfo(SERVICE_STATES.IN_ERROR, {
         status: {ok: false, configured: true, message: 'Cannot establish connection to the server'}
       });
     }
+    delete this.services[SERVICE_STATES.IN_LOADING].ws;
+    this.notify();
   }
 
   /**
@@ -108,7 +111,7 @@ export default class About extends Observable {
    * @returns {void}
    */
   setWsInfo(category, info) {
-    this.statuses[category].ws = RemoteData.success({name: 'GUI Stream', ...info});
+    this.services[category].ws = RemoteData.success({name: 'GUI Stream', ...info});
     this.notify();
   }
 
@@ -116,15 +119,15 @@ export default class About extends Observable {
    * Given a status of a service, return the category to which it belongs
    * @param {boolean} isConfigured 
    * @param {boolean} isOk 
-   * @returns {'notEnabled'|'error'|'success'}
+   * @returns {string} - constant SERVICE_STATES
    */
   _getCategoryOnStatus(isConfigured, isOk) {
     if (!isConfigured) {
-      return 'notEnabled';
+      return SERVICE_STATES.NOT_ENABLED;
     } else if (!isOk) {
-      return 'error';
+      return SERVICE_STATES.IN_ERROR;
     }
-    return 'success';
+    return SERVICE_STATES.IN_SUCCESS;
   }
 
   /**
@@ -134,13 +137,13 @@ export default class About extends Observable {
    * @returns {void}
    */
   _removeServiceFromMap(serviceKey) {
-    for (const category in this.statuses) {
+    for (const category in this.services) {
       if (serviceKey === INTEGRATED_SERVICE_LABEL) {
-        Object.keys(this.statuses[category])
+        Object.keys(this.services[category])
           .filter((name) => name.startsWith(INTEGRATED_SERVICE_LABEL))
-          .forEach((name) => delete this.statuses[category][name]);
+          .forEach((name) => delete this.services[category][name]);
       } else {
-        delete this.statuses[category][serviceKey];
+        delete this.services[category][serviceKey];
       }
     }
   }
@@ -168,6 +171,6 @@ export default class About extends Observable {
   _addServiceToMap(key, service) {
     const {status: {ok, configured}} = service;
     const category = this._getCategoryOnStatus(configured, ok);
-    this.statuses[category][key] = RemoteData.success(service);
+    this.services[category][key] = RemoteData.success(service);
   }
 }

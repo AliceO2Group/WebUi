@@ -23,6 +23,7 @@ import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
+import {SERVICE_STATES} from './common/constants/serviceStates.js';
 
 /**
  * Root of model tree
@@ -170,7 +171,7 @@ export default class Model extends Observable {
     this.lock.setPadlockState({lockedBy: null, lockedByName: null});
 
     this.notification.show(`Connection to server has been lost. Retrying to connect in 10 seconds...`, 'danger', 10000);
-    this.about.setWsInfo('error', {
+    this.about.setWsInfo(SERVICE_STATES.IN_ERROR, {
       status: {ok: false, configured: true, message: 'Cannot establish connection to server'}
     });
 
@@ -181,7 +182,7 @@ export default class Model extends Observable {
         this.ws.addListener('command', this.handleWSCommand.bind(this));
         this.ws.addListener('close', this.handleWSClose.bind(this));
         clearInterval(wsReconnectInterval);
-        this.about.setWsInfo('success', {
+        this.about.setWsInfo(SERVICE_STATES.IN_SUCCESS, {
           status: {ok: true, configured: true}, message: 'WebSocket connection is alive'
         });
         this.notification.show(`Connection to server has been restored`, 'success', 3000);
