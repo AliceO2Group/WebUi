@@ -223,11 +223,13 @@ describe('StatusService test suite', () => {
         dcs: {
           extras: {},
           connectionState: 'READY',
+          name: 'dcs',
           status: {ok: true, configured: true, isCritical: true}
         },
         otherDcs: {
           connectionState: 'TRANSIENT_FAILURE',
           extras: {},
+          name: 'otherDcs',
           status: {ok: false, configured: true, isCritical: true}
         }
       }

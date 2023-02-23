@@ -32,10 +32,8 @@ import {
   content as environmentContent,
   header as environmentHeader
 } from './environment/environmentPage.js';
-import {
-  content as statusContent,
-  header as statusHeader
-} from './frameworkinfo/frameworkInfoPage.js';
+import {header as statusHeader} from './about/header.js';
+import {content as statusContent} from './about/content.js';
 import {
   content as configurationContent,
   header as configurationHeader

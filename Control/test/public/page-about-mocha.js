@@ -20,6 +20,13 @@ describe('`pageAbout` test-suite', async () => {
   let page;
   let calls;
 
+  const SERVICE_STATES = {
+    IN_ERROR: 'IN_ERROR',
+    IN_SUCCESS: 'IN_SUCCESS',
+    IN_LOADING: 'IN_LOADING',
+    NOT_ENABLED: 'NOT_ENABLED'
+  };
+
   before(async () => {
     url = test.helpers.url;
     page = test.page;
@@ -39,30 +46,37 @@ describe('`pageAbout` test-suite', async () => {
     assert.strictEqual(location.search, '?page=about');
   });
 
-  it('should request info about Core and store in frameworkInfo.statuses as RemoteData', async () => {
-    const core = await page.evaluate(() => window.model.frameworkInfo.statuses['notification']);
+  it('should request info about Core and store in statuses as RemoteData', async () => {
+    const core = await page.evaluate(
+      (SERVICE_STATES) => window.model.about.services[SERVICE_STATES.IN_ERROR].core,
+      SERVICE_STATES
+    );
     assert.strictEqual(core.kind, 'Success', 'No information was passed regarding Notification Service');
     assert.ok(!core.payload.status.ok);
   });
 
-  it('should request info about GUI and store in frameworkInfo.statuses as RemoteData', async () => {
-    const gui = await page.evaluate(() => window.model.frameworkInfo.statuses.gui);
+  it('should request info about GUI and store in statuses as RemoteData', async () => {
+    const gui = await page.evaluate(
+      (SERVICE_STATES) => window.model.about.services[SERVICE_STATES.IN_SUCCESS].gui,
+      SERVICE_STATES
+    );
     assert.strictEqual(gui.kind, 'Success', 'No information was passed regarding GUI');
     assert.ok(gui.payload.status.ok)
   });
 
-  it('should request info about Grafana and store in frameworkInfo.statuses as RemoteData', async () => {
-    const grafana = await page.evaluate(() => window.model.frameworkInfo.statuses.grafana);
+  it('should request info about Grafana and store in statuses as RemoteData', async () => {
+    const grafana = await page.evaluate(
+      (SERVICE_STATES) => window.model.about.services[SERVICE_STATES.IN_ERROR].grafana,
+      SERVICE_STATES
+    );
     assert.strictEqual(grafana.kind, 'Success', 'No information was passed regarding Grafana');
   });
 
-  it('should request info about Kafka and store in frameworkInfo.statuses as RemoteData', async () => {
-    const notification = await page.evaluate(() => window.model.frameworkInfo.statuses.notification);
-    assert.strictEqual(notification.kind, 'Success', 'No information was passed regarding Kafka');
-  });
-
-  it('should request info about Consul and store in frameworkInfo.statuses as RemoteData', async () => {
-    const consul = await page.evaluate(() => window.model.frameworkInfo.statuses.consul);
+  it('should request info about Consul and store in statuses as RemoteData', async () => {
+    const consul = await page.evaluate(
+      (SERVICE_STATES) => window.model.about.services[SERVICE_STATES.IN_ERROR].consul,
+      SERVICE_STATES
+    );
     assert.strictEqual(consul.kind, 'Success', 'No information was passed regarding Consul');
   });
 });
