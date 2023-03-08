@@ -39,7 +39,7 @@ export const environmentPanel = (model, environment, isMinified = false) => {
     environmentHeader(environment, model),
     !isMinified && [
       environmentActionPanel(environment, model),
-      environmentContent(environment, model),
+      environmentContent(environment),
     ]
   ]);
 };
@@ -52,7 +52,7 @@ export const environmentPanel = (model, environment, isMinified = false) => {
  */
 const environmentHeader = ({state = 'UNKNOWN', id, createdWhen}, model) =>
   h(`.flex-row.g2.p2.white.bg-${STATE_COLOR[state]}`, [
-    copyToClipboardButton(model, id),
+    copyToClipboardButton(id),
     h('h3.w-50', `${id} - ${state}`),
     h('.w-50.text-right', 'Created At: ' + parseObject(createdWhen, 'createdWhen'))
   ]);
@@ -74,14 +74,13 @@ const environmentActionPanel = (environment, model) => {
 /**
  * Builds a component which is to contain multiple cards with environment details
  * @param {EnvironmentInfo} environment - DTO representing an environment
- * @param {Model} model - root object of the application
  * @returns {vnode}
  */
-const environmentContent = (environment, model) => {
+const environmentContent = (environment) => {
   const isRunning = environment.state === 'RUNNING';
   return h('.g2.flex-column.flex-wrap', {
   }, [
-    isRunning && environmentRunningCards(environment, model),
+    isRunning && environmentRunningCards(environment),
     h('.flex-row.flex-wrap.g2', [
       miniCard('General Information', [environmentGeneralInfoPanel(environment)]),
       miniCard('FLP Tasks Summary', [taskCounterContent(environment.tasks)]),
@@ -92,10 +91,9 @@ const environmentContent = (environment, model) => {
 /**
  * Build a panel with cards specific for environments in RUNNING state
  * @param {EnvironmentInfo} environment - DTO representing an environment
- * @param {Model} model - root object of the application
  * @returns {vnode}
  */
-const environmentRunningCards = ({currentRunNumber}, model) => {
+const environmentRunningCards = ({currentRunNumber}) => {
   const isMonitoringConfigured = COG && COG.GRAFANA && COG.GRAFANA.status;
   let readoutMonitoringSource = '';
   let flpMonitoringSource = '';
@@ -111,7 +109,7 @@ const environmentRunningCards = ({currentRunNumber}, model) => {
         h('.w-100', 'Grafana plots were not loaded, please contact an administrator')
     ),
     h('.flex-row.flex-wrap.g2', [
-      miniCard([copyToClipboardButton(model, currentRunNumber), ' ', 'Run Number'], [
+      miniCard([copyToClipboardButton(currentRunNumber), ' ', 'Run Number'], [
         h('.badge.bg-success.white.h-100', {
           style: 'display:flex;font-size:2.3em;align-items: center; justify-content: center'
         }, currentRunNumber)

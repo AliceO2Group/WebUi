@@ -13,21 +13,31 @@
 */
 
 import {h, iconClipboard} from '/js/src/index.js';
+import {di} from '../../utilities/diContainer.js';
 
 /**
  * Copy passed value to the user's clipboard
- * @param {Object} model
- * @return {vnode}
+ * @param {string} value - value to be copied to user's clipboard
+ * @returns {vnode}
  */
-export const copyToClipboardButton = (model, value) => {
-  if (model.isContextSecure()) {
+export const copyToClipboardButton = (value) => {
+  if (isContextSecure()) {
     return h('button.btn.btn-sm', {
       title: 'Copy value to clipboard',
       onclick: () => {
         navigator.clipboard.writeText(value);
-        model.notification.show('Successfully copied to clipboard', 'success', 1500);
+        di.notification.show('Successfully copied to clipboard', 'success', 1500);
       }
     }, iconClipboard())
   }
   return;
 };
+
+/**
+ * Method to check if connection is secure to enable certain improvements
+ * e.g navigator.clipboard, notifications, service workers
+ * @return {boolean}
+ */
+const isContextSecure = () => {
+  return window.isSecureContext;
+}

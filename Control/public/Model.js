@@ -24,6 +24,7 @@ import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
 import {SERVICE_STATES} from './common/constants/serviceStates.js';
+import {di} from './utilities/diContainer.js';
 
 /**
  * Root of model tree
@@ -69,8 +70,9 @@ export default class Model extends Observable {
     // services
     this.detectors = new DetectorService(this);
 
-    this.notification = new O2Notification(this);
+    this.notification = new O2Notification();
     this.notification.bubbleTo(this);
+    di.notification = this.notification;
 
     // Setup WS connection
     this.ws = new WebSocketClient();
@@ -308,14 +310,5 @@ export default class Model extends Observable {
     return (Notification.permission === 'denied' ||
       Notification.permission === 'default') &&
       window.location.protocol === "https:";
-  }
-
-  /**
-   * Method to check if connection is secure to enable certain improvements
-   * e.g navigator.clipboard, notifications, service workers
-   * @return {boolean}
-   */
-  isContextSecure() {
-    return window.isSecureContext;
   }
 }
