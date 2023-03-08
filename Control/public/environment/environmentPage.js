@@ -15,7 +15,7 @@
 /* global COG */
 
 import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, iconClipboard
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList
 } from '/js/src/index.js';
 import {environmentPanel} from './components/environmentPanel.js';
 import pageLoading from '../common/pageLoading.js';
