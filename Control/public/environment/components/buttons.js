@@ -11,68 +11,30 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-/* global COG */
 
 import {h, iconCloudDownload} from '/js/src/index.js';
 
 /**
- * Open InfoLogger in a new browser tab with run number and environment set if available
- * @param {Object} environment
- * @param {String} label
- * @return {vnode}
+ * Build a link displayed as a button which allows users to open InfoLogger in a new browser tab with run number and environment set if available
+ * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {string} label - string representation of the type of infologger to be opened (FLP/EPN)
+ * @returns {vnode}
  */
-const infoLoggerButton = (item, label = 'InfoLogger FLP') =>
-  h('a.ph2.btn.btn.primary.w-100', {
-    style: {display: !COG.ILG_URL ? 'none' : ''},
-    title: `Open InfoLogger GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,
-    href: item.currentRunNumber ?
-      `${COG.ILG_URL}?q={"partition":{"match":"${item.id}"},"run":{"match":"${item.currentRunNumber}"}}`
-      : `${COG.ILG_URL}?q={"partition":{"match":"${item.id}"}}`,
-    target: '_blank'
-  }, label);
-
-/**
- * Open InfoLogger in a new browser tab with run number and environment set if available
- * @param {Object} environment
- * @param {String} label
- * @return {vnode}
- */
-const infoLoggerEpnButton = (item, label = 'InfoLogger EPN') =>
-  h('a.ph2.btn.primary.w-100', {
-    style: {display: !COG.ILG_EPN_URL ? 'none' : ''},
-    title: `Open InfoLogger EPN GUI with environment: ${item.id} and run ${item.currentRunNumber} set`,
-    href: item.currentRunNumber ?
-      `${COG.ILG_EPN_URL}?q={"partition":{"match":"${item.id}"},"run":{"match":"${item.currentRunNumber}"}}`
-      : `${COG.ILG_EPN_URL}?q={"partition":{"match":"${item.id}"}}`,
-    target: '_blank'
-  }, label);
-
-/**
-* Open Bookkeeping in a new browser tab on run details page for current run
-* @param {String} label
-* @return {vnode}
-*/
-const bookkeepingButton = (label = 'Bookkeeping') =>
-  h('a.ph2.btn.primary.w-100', {
-    style: {display: !COG.BKP_URL ? 'none' : ''},
-    title: `Open Bookkeeping GUI run statistics page`,
-    href: `//${COG.BKP_URL}?page=run-overview`,
-    target: '_blank'
-  }, label);
-
-/**
-* Open QualityControl in a new browser tab on run details page for current run
-* @param {String} label
-* @return {vnode}
-*/
-const qcgButton = (label = 'Quality Control') =>
-  h('a.btn.primary.w-100', {
-    style: {display: !COG.QCG_URL ? 'none' : ''},
-    title: `Open Quality Control GUI`,
-    href: `//${COG.QCG_URL}?page=objectTree`,
-    target: '_blank'
-  }, label);
-
+const infoLoggerButton = ({id, currentRunNumber}, label = 'InfoLogger', source = '') => {
+  if (source) {
+    let title = currentRunNumber ? `Open InfoLogger GUI with partition: ${id} and run: ${currentRunNumber}`
+      : `Open InfoLogger GUI with partition: ${id}`;
+    let href = currentRunNumber ? `${source}?q={"partition":{"match":"${id}"},"run":{"match":"${currentRunNumber}"}}`
+      : `${source}?q={"partition":{"match":"${id}"}}`;
+    return h('a.ph2.btn.primary.w-100', {
+      style: {display: !source ? 'none' : ''},
+      title,
+      href,
+      target: '_blank'
+    }, label);
+  }
+  return;
+}
 
 /**
 * Button to allow the user to download a file with logs from Messos
@@ -83,9 +45,9 @@ const mesosLogButton = (href) =>
   h('a', {
     style: {display: !href ? 'none' : ''},
     title: 'Download Mesos Environment Logs',
-    href: href,
+    href,
     target: '_blank'
   }, h('button.btn-sm.primary', iconCloudDownload())
   );
 
-export {infoLoggerButton, infoLoggerEpnButton, bookkeepingButton, qcgButton, mesosLogButton};
+export {infoLoggerButton, mesosLogButton};
