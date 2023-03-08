@@ -64,6 +64,7 @@ export const controlEnvironmentPanel = (environment, item) => h('', [
 const controlButton = (buttonType, environment, item, label, type, stateToHide) =>
   h(`button.btn${buttonType}`,
     {
+      id: `buttonTo${label}`,
       class: environment.itemControl.isLoading() ? 'loading' : '',
       disabled: environment.itemControl.isLoading(),
       style: item.state !== stateToHide ? 'display: none;' : '',
@@ -84,7 +85,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
  */
 const shutdownEnvButton = (environment, item) =>
   h(`button.btn.btn-danger`, {
-    id: 'buttonShutdown',
+    id: 'buttonToSHUTDOWN',
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     style: {display: (item.state === 'CONFIGURED' || item.state == 'DEPLOYED') ? '' : 'none'},
@@ -102,7 +103,7 @@ const shutdownEnvButton = (environment, item) =>
 const killEnvButton = (environment, item) =>
   h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
     h(`button.btn.btn-danger active`, {
-      id: 'buttonForceShutdown',
+      id: 'buttonToFORCESHUTDOWN',
       class: environment.itemControl.isLoading() ? 'loading' : '',
       style: 'margin-left: .3em',
       disabled: environment.itemControl.isLoading() || !_isKillActionAllowed(item, environment.model),

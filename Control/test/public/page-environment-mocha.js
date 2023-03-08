@@ -25,6 +25,9 @@ describe('`pageEnvironment` test-suite', async () => {
     url = test.helpers.url;
     page = test.page;
     calls = test.helpers.calls;
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
   });
 
   beforeEach(() => {
@@ -42,30 +45,30 @@ describe('`pageEnvironment` test-suite', async () => {
   });
 
   it('should have one button for `Shutdown` environment', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').title);
+    await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').title);
     assert.strictEqual(shutdownButton, 'Shutdown environment');
   });
 
   describe('Check presence of buttons in CONFIGURED state', async () => {
     it('should have one button for START in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      const startButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(1)').title);
+      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      const startButton = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
       assert.strictEqual(startButton, 'START');
     });
 
     it('should have one button hidden for STOP in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)', {timeout: 5000});
-      const stopButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div:nth-child(2) > button:nth-child(2)').title);
-      const stopButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div:nth-child(2) > button:nth-child(2)').style);
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+      const stopButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
+      const stopButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTOP').style);
       assert.strictEqual(stopButtonTitle, `'STOP' cannot be used in state 'CONFIGURED'`);
       assert.deepStrictEqual(stopButtonStyle, {0: 'display'});
     });
 
     it('should have one button hidden for CONFIGURE in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
-      const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(2)').title);
-      const configureButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(2)').style);
+      await page.waitForSelector('#buttonToCONFIGURE', {timeout: 5000});
+      const configureButtonTitle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').title);
+      const configureButtonStyle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').style);
       assert.strictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'CONFIGURED'`);
       assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
     });
@@ -79,8 +82,8 @@ describe('`pageEnvironment` test-suite', async () => {
 
   describe('Check transition from CONFIGURED to RUNNING and presence of buttons in RUNNING state', async () => {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
+      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('#buttonToSTART').click());
       await page.waitForTimeout(200);
       const state = await page.evaluate(() => {
         return window.model.environment.item.payload.environment.state;
@@ -90,31 +93,31 @@ describe('`pageEnvironment` test-suite', async () => {
     });
 
     it('should have one button hidden for START in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      const startButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').title);
-      const startButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').style);
+      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      const startButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
+      const startButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTART').style);
       assert.strictEqual(startButtonTitle, `'START' cannot be used in state 'RUNNING'`);
       assert.deepStrictEqual(startButtonStyle, {0: 'display'});
     });
 
     it('should have one button for STOP in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)', {timeout: 5000});
-      const stopButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').title);
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+      const stopButton = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
       assert.strictEqual(stopButton, 'STOP');
     });
 
     it('should have one button hidden for CONFIGURE in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
-      const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(2)').title);
-      const configureButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(2)').style);
+      await page.waitForSelector('#buttonToCONFIGURE', {timeout: 5000});
+      const configureButtonTitle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').title);
+      const configureButtonStyle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').style);
       assert.strictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'RUNNING'`);
       assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
     });
 
     it('should have one button hidden for RESET in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
-      const resetButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').title);
-      const resetButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').style);
+      await page.waitForSelector('#buttonToRESET', {timeout: 5000});
+      const resetButtonTitle = await page.evaluate(() => document.querySelector('#buttonToRESET').title);
+      const resetButtonStyle = await page.evaluate(() => document.querySelector('#buttonToRESET').style);
       assert.strictEqual(resetButtonTitle, `'RESET' cannot be used in state 'RUNNING'`);
       assert.deepStrictEqual(resetButtonStyle, {0: 'display'});
     });
@@ -122,16 +125,16 @@ describe('`pageEnvironment` test-suite', async () => {
 
   describe('Check transition from RUNNING to CONFIGURED to DEPLOYED and presence of buttons', async () => {
     it('should click STOP then RESET button states (RUNNING -> CONFIGURED -> DEPLOYED)', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)', {timeout: 5000});
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
       // click STOP
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').click());
+      await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
       await page.waitForTimeout(200);
       const configuredState = await page.evaluate(() => {
         return window.model.environment.item.payload.environment.state;
       });
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)').click());
+      await page.evaluate(() => document.querySelector('#buttonToRESET').click());
       await page.waitForTimeout(200);
       const standbyState = await page.evaluate(() => {
         return window.model.environment.item.payload.environment.state;
@@ -140,32 +143,32 @@ describe('`pageEnvironment` test-suite', async () => {
     });
 
     it('should have one button hidden for START in state DEPLOYED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      const startButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').title);
-      const startButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').style);
+      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      const startButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
+      const startButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTART').style);
       assert.strictEqual(startButtonTitle, `'START' cannot be used in state 'DEPLOYED'`);
       assert.deepStrictEqual(startButtonStyle, {0: 'display'});
     });
 
     it('should have one button hidden for STOP in state DEPLOYED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)', {timeout: 5000});
-      const stopButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').title);
-      const stopButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').style);
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+      const stopButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
+      const stopButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTOP').style);
       assert.strictEqual(stopButtonTitle, `'STOP' cannot be used in state 'DEPLOYED'`);
       assert.deepStrictEqual(stopButtonStyle, {0: 'display'});
     });
 
     it.skip('should have one button for CONFIGURE in state DEPLOYED', async () => {
       // skipping due to OCTRL-628
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
-      const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').title);
+      await page.waitForSelector('#buttonToCONFIGURE', {timeout: 5000});
+      const configureButtonTitle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').title);
       assert.strictEqual(configureButtonTitle, `CONFIGURE`);
     });
 
     it('should have one button hidden for RESET in state DEPLOYED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
-      const resetButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').title);
-      const resetButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').style);
+      await page.waitForSelector('#buttonToRESET', {timeout: 5000});
+      const resetButtonTitle = await page.evaluate(() => document.querySelector('#buttonToRESET').title);
+      const resetButtonStyle = await page.evaluate(() => document.querySelector('#buttonToRESET').style);
       assert.strictEqual(resetButtonTitle, `'RESET' cannot be used in state 'DEPLOYED'`);
       assert.deepStrictEqual(resetButtonStyle, {0: 'display'});
     });
@@ -176,8 +179,8 @@ describe('`pageEnvironment` test-suite', async () => {
       page.on('dialog', async (dialog) => {
         await dialog.accept();
       });
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
+      await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').click());
       await page.waitForTimeout(200);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
@@ -230,35 +233,37 @@ describe('`pageEnvironment` test-suite', async () => {
       assert.strictEqual(mesosStdout, '');
     });
 
-    it('should filter out variables which do not belong to a detector', async() => {
+    it('should filter out variables which do not belong to a detector', async () => {
       const env = await page.evaluate(() => {
-        const result = {environment: {
-          includedDetectors: ['ODC'],
-          userVars: {
-            odc_enabled: 'true',
-            mid_enabled: 'false',
-            mid_something: 'test',
-            dd_enabled: 'true',
-            run_type: 'run'
-          },
-          vars: {
-            odc_enabled: 'true',
-            mid_enabled: 'false',
-            other_useful_var: 'very',
-            dd_enabled: 'true',
-            run_type: 'run'
-          },
-          defaults: {
-            dcs_topology: 'test',
-            dd_enabled: 'true',
-            run_type: 'run'
+        const result = {
+          environment: {
+            includedDetectors: ['ODC'],
+            userVars: {
+              odc_enabled: 'true',
+              mid_enabled: 'false',
+              mid_something: 'test',
+              dd_enabled: 'true',
+              run_type: 'run'
+            },
+            vars: {
+              odc_enabled: 'true',
+              mid_enabled: 'false',
+              other_useful_var: 'very',
+              dd_enabled: 'true',
+              run_type: 'run'
+            },
+            defaults: {
+              dcs_topology: 'test',
+              dd_enabled: 'true',
+              run_type: 'run'
+            }
           }
-        }};
+        };
         return window.model.environment._parseEnvResult(result).environment;
       });
-      assert.deepStrictEqual(env.vars, { odc_enabled: 'true', dd_enabled: 'true', run_type: 'run', other_useful_var: 'very' });
-      assert.deepStrictEqual(env.userVars,  { odc_enabled: 'true', dd_enabled: 'true', run_type: 'run' });
-      assert.deepStrictEqual(env.defaults, { dd_enabled: 'true', run_type: 'run' });
+      assert.deepStrictEqual(env.vars, {odc_enabled: 'true', dd_enabled: 'true', run_type: 'run', other_useful_var: 'very'});
+      assert.deepStrictEqual(env.userVars, {odc_enabled: 'true', dd_enabled: 'true', run_type: 'run'});
+      assert.deepStrictEqual(env.defaults, {dd_enabled: 'true', run_type: 'run'});
     })
   });
 });
