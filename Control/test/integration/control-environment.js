@@ -25,6 +25,9 @@ describe('`Control Environment` test-suite', async () => {
   let revision = '';
   before(async () => {
     page = coreTests.page;
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
   });
 
   it(`should be on page of new environment (workflow '${workflowToTest}') just created`, async () => {
@@ -36,8 +39,8 @@ describe('`Control Environment` test-suite', async () => {
   });
 
   it(`should have one button for START in state CONFIGURED (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-    const startButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(1)').title);
+    await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+    const startButton = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
     const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
 
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
@@ -45,8 +48,8 @@ describe('`Control Environment` test-suite', async () => {
   });
 
   it(`should successfully transition CONFIGURED -> RUNNING by clicking START button (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
+    await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+    await page.evaluate(() => document.querySelector('#buttonToSTART').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
@@ -58,8 +61,8 @@ describe('`Control Environment` test-suite', async () => {
   });
 
   it(`should have one button for STOP in state RUNNING (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)', {timeout: 5000});
-    const stopButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').title);
+    await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+    const stopButton = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
     const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
 
     assert.strictEqual(state, 'RUNNING', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
@@ -67,8 +70,8 @@ describe('`Control Environment` test-suite', async () => {
   });
 
   it(`should successfully transition RUNNING -> CONFIGURED by clicking STOP button (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button:nth-child(2)').click());
+    await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+    await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
@@ -102,19 +105,15 @@ describe('`Control Environment` test-suite', async () => {
   // });
 
   it(`should have one button for 'Force Shutdown' environment (workflow '${workflowToTest}')`, async () => {
-    await page.waitForSelector('#buttonForceShutdown', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonForceShutdown').title);
+    await page.waitForSelector('#buttonToFORCESHUTDOWN', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToFORCESHUTDOWN').title);
     assert.strictEqual(shutdownButton, 'Kill environment');
   });
 
   it(`should successfully shutdown environment (workflow '${workflowToTest}') and redirect to environments page`, async () => {
     await page.waitForTimeout(5000); // Standby for 5s
-    page.on('dialog', async (dialog) => {
-      await dialog.accept();
-    });
-
-    await page.waitForSelector('#buttonForceShutdown', {timeout: 5000});
-    await page.evaluate(() => document.querySelector('#buttonForceShutdown').click());
+    await page.waitForSelector('#buttonToFORCESHUTDOWN', {timeout: 5000});
+    await page.evaluate(() => document.querySelector('#buttonToFORCESHUTDOWN').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);

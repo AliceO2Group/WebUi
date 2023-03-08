@@ -15,18 +15,15 @@
 /* global COG */
 
 import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList, iconClipboard
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList
 } from '/js/src/index.js';
+import {environmentPanel} from './components/environmentPanel.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
-import {controlEnvironmentPanel} from './components/controlEnvironmentPanel.js';
-import {parseObject, getTasksByFlp} from './../common/utils.js';
+import {getTasksByFlp} from './../common/utils.js';
 import {userVarsRow, defaultsRow, varsRow} from './components/expandableEnvRows.js';
-import {
-  infoLoggerButton, infoLoggerEpnButton, bookkeepingButton, qcgButton, mesosLogButton
-} from './components/buttons.js';
-import {ROLES} from './../workflow/constants.js';
+import {mesosLogButton} from './components/buttons.js';
 
 /**
  * @file Page to show 1 environment (content and header)
@@ -66,29 +63,9 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode}
  */
 const showContent = (model, item) => [
-  (model.isAllowed(ROLES.Admin) || item.includedDetectors.every(detector => model.lock.isLockedByMe(detector))) &&
-  controlEnvironmentPanel(model.environment, item),
-  item.state === 'RUNNING' &&
-  h('.m2.flex-row', {style: 'height: 10em;'}, [
-    (COG && COG.GRAFANA && COG.GRAFANA.status) ?
-      graphsPanel(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
-      h('.w-100.text-center.grafana-font',
-        'Grafana plots were not loaded, please contact an administrator'
-      ),
-  ]),
+  h('.m2', environmentPanel(model, item, false)),
   h('.m2', [
-    h('.flex-row', [
-      h(`.w-50`, showEnvDetailsTable(model, item)),
-      h('.w-50.text-center.flex-column', [
-        item.state === 'RUNNING' && ((COG && COG.GRAFANA && COG.GRAFANA.status) ?
-          readoutDataPanel(COG.GRAFANA.plots, '&var-run=' + item.currentRunNumber) :
-          h('.w-100.text-center.grafana-font',
-            'Grafana plots were not loaded, please contact an administrator'
-          )),
-        redirectGUIsPanel(item),
-      ])
-    ]),
-    h('',
+    h('.shadow-level1',
       h('table.table', [
         h('tbody', [
           userVarsRow(item.userVars, model.environment),
@@ -103,22 +80,6 @@ const showContent = (model, item) => [
     h('.w-100', tasksPerFlpTables(model.environment, item))
   ]),
 ];
-
-/**
- *  Build a panel containing buttons which will redirect the user to other GUIs based on 
- * environment information:
- * @param {Object} item - environment information
- */
-const redirectGUIsPanel = (item) => {
-  return h('.w-100.text.center.flex-row', {
-    style: 'padding-top: var(--space-xl);margin-left: var(--space-s);'
-  }, [
-    h('.w-25.flex-row.justify-center', h('.w-70', infoLoggerButton(item))),
-    h('.w-25.flex-row.justify-center', h('.w-70', infoLoggerEpnButton(item))),
-    h('.w-25.flex-row.justify-center', h('.w-70', bookkeepingButton())),
-    h('.w-25.flex-row.justify-center', h('.w-70', qcgButton())),
-  ]);
-};
 
 /**
  * Build multiple tables of the tasks frouped by FLP
@@ -140,115 +101,6 @@ const tasksPerFlpTables = (environmentModel, environment) => {
       showEnvTasksTable(environmentModel, tasksByFlp[host].list)
     ])
   )];
-};
-
-/**
- * Method to display plots from Grafana
- * @param {Array<String>} data
- * @return {vnode}
- */
-const graphsPanel = (data, runParam) =>
-  h('.flex-column.w-100', [
-    h('.flex-row.w-100', [
-      h('iframe.w-50', {
-        src: data[0] + runParam,
-        style: 'height: 100%; border: 0'
-      }),
-      h('iframe.w-50', {
-        src: data[1] + runParam,
-        style: 'height: 100%; border: 0'
-      }),
-    ]),
-  ]);
-
-/**
- * Builds a panel with 2 data plots from Grafana about Readout data rate
- * @param {Array<String>} data
- * @param {Strig} runParam
- * @returns 
- */
-const readoutDataPanel = (data, runParam) =>
-  h('.flex-row.w-100', [
-    h('iframe.w-100', {
-      src: data[2] + runParam,
-      style: 'height: 10em; border: 0;'
-    }),
-  ]);
-
-/**
- * Table to display Environment details
- * @param {Object} item - object to be shown
- * @return {vnode} table view
- */
-const showEnvDetailsTable = (model, item) => {
-  const width = '.w-30';
-  return h('table.table', [
-    h('tbody', [
-      item.state === 'RUNNING' && h(`tr`, [
-        h(`th${width}`,
-          h('.w-100.flex-row', [
-            h('.w-70', 'Run Number'),
-            model.isContextSecure() && copyValueToClipboardButton(model, item.currentRunNumber)
-          ])
-        ),
-        h('td', [
-          h('.badge.bg-success.white', {
-            style: 'font-size:35px'
-          }, item.currentRunNumber),
-        ]
-        )
-      ]),
-      h(`tr`, [
-        h(`th${width}`,
-          h('.w-100.flex-row', [
-            h('.w-70', 'Run Type'),
-          ])
-        ),
-        h('td',  item.userVars.run_type ? item.userVars.run_type : '-')
-      ]),
-      h('tr', [
-        h(`th${width}`,
-          h('.w-100.flex-row', [
-            h('.w-70', 'ID'),
-            model.isContextSecure() && copyValueToClipboardButton(model, item.id)
-          ])),
-        h('td', item.id)
-      ]),
-      h('tr', [
-        h(`th${width}`, 'Created'),
-        h('td', parseObject(item.createdWhen, 'createdWhen'))
-      ]),
-      h('tr', [
-        h(`th${width}`, 'State'),
-        h('td',
-          {
-            class: item.state === 'RUNNING' ?
-              'success' :
-              (item.state === 'CONFIGURED' ? 'primary' : (item.state === 'ERROR' ? 'danger' : '')),
-            style: 'font-weight: bold;'
-          },
-          item.state)
-      ]),
-      h('tr', [
-        h(`th${width}`, 'Root Role'),
-        h('td', item.rootRole)
-      ]),
-      h('tr', [
-        h(`th${width}`, 'Number of Tasks'),
-        h('td', item.tasks.length)
-      ]),
-      h('tr', [
-        h(`th${width}`, 'FLP count'),
-        h('td', item.numberOfFlps)
-      ]),
-      h('tr', [
-        h(`th${width}`, 'Detectors'),
-        item.includedDetectors && item.includedDetectors.length > 0 ?
-          h('td', [item.includedDetectors.map((detector) => `${detector} `)])
-          : h('td', '-')
-      ]),
-    ])
-  ]);
 };
 
 /**
@@ -327,19 +179,3 @@ const addTaskDetailsTable = (environment, task) => h('tr', environment.task.list
     {style: 'text-align: center;', colspan: 7, title: 'Could not load arguments'},
     [iconCircleX(), ' ', _error]),
 }));
-
-/**
- * Copy current location to the user's clipboard
- * @param {Object} model
- * @return {vnode}
- */
-const copyValueToClipboardButton = (model, value) =>
-  h('.w-30.text-right',
-    h('button.btn.btn-sm', {
-      title: 'Copy value to clipboard',
-      onclick: () => {
-        navigator.clipboard.writeText(value);
-        model.notification.show('Successfully copied to clipboard', 'success', 1500);
-      }
-    }, iconClipboard())
-  );

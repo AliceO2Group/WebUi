@@ -12,12 +12,14 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 import {h, iconPlus} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {infoLoggerButton, infoLoggerEpnButton} from './components/buttons.js';
+import {infoLoggerButton} from './components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
 
 /**
@@ -237,10 +239,8 @@ const actionsCell = (model, item) => {
     item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
   if ((isDetectorIncluded || !model.detectors.isSingleView()) && model.isAllowed(ROLES.Detector)) {
     return h('.btn-group', [
-      infoLoggerButton(item, 'FLP'),
-      infoLoggerEpnButton(item, 'EPN')
-      // bookkeepingButton('BKP'),
-      // qcgButton('QCG'),
+      infoLoggerButton(item, 'FLP', COG.ILG_URL),
+      infoLoggerButton(item, 'EPN', COG.ILG_EPN_URL)
     ]);
   } else {
     return h('', '')
