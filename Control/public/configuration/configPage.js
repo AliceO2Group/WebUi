@@ -321,7 +321,7 @@ const linksPanel = (model, cru, host) => {
               id = ` ${linksAlias[index].alias}`;
             }
           } catch (error) {
-            console.log(error)
+            console.error(error)
             id = link;
           }
 
