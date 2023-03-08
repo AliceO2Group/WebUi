@@ -179,19 +179,3 @@ const addTaskDetailsTable = (environment, task) => h('tr', environment.task.list
     {style: 'text-align: center;', colspan: 7, title: 'Could not load arguments'},
     [iconCircleX(), ' ', _error]),
 }));
-
-/**
- * Copy current location to the user's clipboard
- * @param {Object} model
- * @return {vnode}
- */
-const copyValueToClipboardButton = (model, value) =>
-  h('.w-30.text-right',
-    h('button.btn.btn-sm', {
-      title: 'Copy value to clipboard',
-      onclick: () => {
-        navigator.clipboard.writeText(value);
-        model.notification.show('Successfully copied to clipboard', 'success', 1500);
-      }
-    }, iconClipboard())
-  );

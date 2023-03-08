@@ -22,6 +22,7 @@ import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
 import {rowForCard} from './../../common/card/rowForCard.js';
 import {miniCard} from './../../common/card/miniCard.js';
 import {iframe} from './../../common/iframe/iframe.js';
+import {copyToClipboardButton} from './../../common/buttons/copyToClipboardButton.js';
 
 import {ROLES} from './../../workflow/constants.js';
 import {STATE_COLOR} from './../../common/constants/stateColors.js';
@@ -35,10 +36,10 @@ import {STATE_COLOR} from './../../common/constants/stateColors.js';
  */
 export const environmentPanel = (model, environment, isMinified = false) => {
   return h('.w-100.shadow-level1.flex-column.g1', [
-    environmentHeader(environment),
+    environmentHeader(environment, model),
     !isMinified && [
       environmentActionPanel(environment, model),
-      environmentContent(environment),
+      environmentContent(environment, model),
     ]
   ]);
 };
@@ -46,10 +47,12 @@ export const environmentPanel = (model, environment, isMinified = false) => {
 /**
  * Build a header of an environment with its ID, state and time of creation
  * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {Model} model - root object of the application
  * @returns {vnode}
  */
-const environmentHeader = ({state = 'UNKNOWN', id, createdWhen}) =>
-  h(`.flex-row.p2.white.bg-${STATE_COLOR[state]}`, [
+const environmentHeader = ({state = 'UNKNOWN', id, createdWhen}, model) =>
+  h(`.flex-row.g2.p2.white.bg-${STATE_COLOR[state]}`, [
+    copyToClipboardButton(model, id),
     h('h3.w-50', `${id} - ${state}`),
     h('.w-50.text-right', 'Created At: ' + parseObject(createdWhen, 'createdWhen'))
   ]);
@@ -57,7 +60,7 @@ const environmentHeader = ({state = 'UNKNOWN', id, createdWhen}) =>
 /**
  * Build a panel with multiple mini cards which contain actions allowed to the user for the environment
  * @param {EnvironmentInfo} environment - DTO representing an environment
- * @param {Model} model - root object
+ * @param {Model} model - root object of the application
  * @returns {vnode}
  */
 const environmentActionPanel = (environment, model) => {
@@ -71,13 +74,14 @@ const environmentActionPanel = (environment, model) => {
 /**
  * Builds a component which is to contain multiple cards with environment details
  * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {Model} model - root object of the application
  * @returns {vnode}
  */
-const environmentContent = (environment) => {
+const environmentContent = (environment, model) => {
   const isRunning = environment.state === 'RUNNING';
   return h('.g2.flex-column.flex-wrap', {
   }, [
-    isRunning && environmentRunningCards(environment),
+    isRunning && environmentRunningCards(environment, model),
     h('.flex-row.flex-wrap.g2', [
       miniCard('General Information', [environmentGeneralInfoPanel(environment)]),
       miniCard('FLP Tasks Summary', [taskCounterContent(environment.tasks)]),
@@ -88,9 +92,10 @@ const environmentContent = (environment) => {
 /**
  * Build a panel with cards specific for environments in RUNNING state
  * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {Model} model - root object of the application
  * @returns {vnode}
  */
-const environmentRunningCards = ({currentRunNumber}) => {
+const environmentRunningCards = ({currentRunNumber}, model) => {
   const isMonitoringConfigured = COG && COG.GRAFANA && COG.GRAFANA.status;
   let readoutMonitoringSource = '';
   let flpMonitoringSource = '';
@@ -106,7 +111,7 @@ const environmentRunningCards = ({currentRunNumber}) => {
         h('.w-100', 'Grafana plots were not loaded, please contact an administrator')
     ),
     h('.flex-row.flex-wrap.g2', [
-      miniCard('Run Number', [
+      miniCard([copyToClipboardButton(model, currentRunNumber), ' ', 'Run Number'], [
         h('.badge.bg-success.white.h-100', {
           style: 'display:flex;font-size:2.3em;align-items: center; justify-content: center'
         }, currentRunNumber)

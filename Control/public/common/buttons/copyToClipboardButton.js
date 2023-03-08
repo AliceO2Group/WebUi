@@ -12,17 +12,22 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+import {h, iconClipboard} from '/js/src/index.js';
 
 /**
- * Builds a miniCard frame and adds inside the passed children
- * @param {Array<node>|string} title - components or string to be displayed as title
- * @param {Array<vnode>} children - child components to be added inside the miniCard
- * @returns {vnode}
+ * Copy passed value to the user's clipboard
+ * @param {Object} model
+ * @return {vnode}
  */
-export const miniCard = (title, children) => {
-  return h('.miniCard.flex-column.shadow-level1.br2.p2.g2', [
-    title && h('h4', {style: 'text-decoration:underline'}, title),
-    ...children,
-  ]);
-}
+export const copyToClipboardButton = (model, value) => {
+  if (model.isContextSecure()) {
+    return h('button.btn.btn-sm', {
+      title: 'Copy value to clipboard',
+      onclick: () => {
+        navigator.clipboard.writeText(value);
+        model.notification.show('Successfully copied to clipboard', 'success', 1500);
+      }
+    }, iconClipboard())
+  }
+  return;
+};
