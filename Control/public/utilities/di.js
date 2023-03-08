@@ -14,7 +14,7 @@
 /**
  * Container to be used for sharing services across the project
  */
-export class DIContainer {
+export class DI {
   /**
    * Constructor to define expected services
    */
@@ -39,4 +39,4 @@ export class DIContainer {
   }
 }
 
-export const di = new DIContainer();
+export const di = new DI();
