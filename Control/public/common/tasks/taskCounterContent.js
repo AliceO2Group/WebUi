@@ -36,7 +36,6 @@ export const taskCounterContent = (tasks) => {
       h('.flex-column.ph2.w-100', [
         Object.entries(states)
           .map(([key, value]) => {
-            console.log(key)
             return rowForCard(key, `${value}/${totalTasks}`, {
               keyClasses: [STATE_COLOR[key.toLocaleUpperCase()]],
               valueClasses: [STATE_COLOR[key.toLocaleUpperCase()]],
