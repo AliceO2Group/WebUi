@@ -13,7 +13,7 @@
 */
 
 import {h, iconClipboard} from '/js/src/index.js';
-import {di} from '../../utilities/diContainer.js';
+import {di} from '../../utilities/di.js';
 
 /**
  * Copy passed value to the user's clipboard

@@ -24,7 +24,7 @@ import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
 import {SERVICE_STATES} from './common/constants/serviceStates.js';
-import {di} from './utilities/diContainer.js';
+import {di} from './utilities/di.js';
 
 /**
  * Root of model tree

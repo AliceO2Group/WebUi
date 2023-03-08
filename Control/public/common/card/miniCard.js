@@ -17,7 +17,7 @@ import {h} from '/js/src/index.js';
 /**
  * Builds a miniCard frame and adds inside the passed children
  * @param {Array<node>|string} title - components or string to be displayed as title
- * @param {Array<vnode>} [children] - child components to be added inside the miniCard
+ * @param {Array<vnode>|vnode} [children] - child components to be added inside the miniCard
  * @returns {vnode}
  */
 export const miniCard = (title, children = []) => {

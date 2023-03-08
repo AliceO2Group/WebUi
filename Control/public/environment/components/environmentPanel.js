@@ -82,8 +82,8 @@ const environmentContent = (environment) => {
   }, [
     isRunning && environmentRunningCards(environment),
     h('.flex-row.flex-wrap.g2', [
-      miniCard('General Information', [environmentGeneralInfoPanel(environment)]),
-      miniCard('FLP Tasks Summary', [taskCounterContent(environment.tasks)]),
+      miniCard('General Information', environmentGeneralInfoPanel(environment)),
+      miniCard('FLP Tasks Summary', taskCounterContent(environment.tasks)),
     ])
   ]);
 };
@@ -109,11 +109,11 @@ const environmentRunningCards = ({currentRunNumber}) => {
         h('.w-100', 'Grafana plots were not loaded, please contact an administrator')
     ),
     h('.flex-row.flex-wrap.g2', [
-      miniCard([copyToClipboardButton(currentRunNumber), ' ', 'Run Number'], [
+      miniCard([copyToClipboardButton(currentRunNumber), ' ', 'Run Number'],
         h('.badge.bg-success.white.h-100', {
           style: 'display:flex;font-size:2.3em;align-items: center; justify-content: center'
         }, currentRunNumber)
-      ]),
+      ),
       isMonitoringConfigured && h('', {style: 'flex-grow:1;'}, [
         iframe(flpMonitoringSource, 'height: 10em; border: 0; width:50%'),
         iframe(epnMonitoringSource, 'height: 10em; border: 0; width:50%'
