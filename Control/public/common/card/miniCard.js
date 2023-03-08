@@ -17,12 +17,12 @@ import {h} from '/js/src/index.js';
 /**
  * Builds a miniCard frame and adds inside the passed children
  * @param {Array<node>|string} title - components or string to be displayed as title
- * @param {Array<vnode>} children - child components to be added inside the miniCard
+ * @param {Array<vnode>} [children] - child components to be added inside the miniCard
  * @returns {vnode}
  */
-export const miniCard = (title, children) => {
+export const miniCard = (title, children = []) => {
   return h('.miniCard.flex-column.shadow-level1.br2.p2.g2', [
     title && h('h4', {style: 'text-decoration:underline'}, title),
-    ...children,
+    children,
   ]);
 }

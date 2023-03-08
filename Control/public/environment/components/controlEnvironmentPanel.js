@@ -70,7 +70,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
       style: item.state !== stateToHide ? 'display: none;' : '',
       onclick: () => {
         confirm(`Are you sure you want to ${label} this ${item.state} environment?`)
-        && environment.controlEnvironment({id: item.id, type, runNumber: item.currentRunNumber});
+          && environment.controlEnvironment({id: item.id, type, runNumber: item.currentRunNumber});
       },
       title: item.state !== stateToHide ? `'${label}' cannot be used in state '${item.state}'` : label
     },
@@ -89,8 +89,8 @@ const shutdownEnvButton = (environment, item) =>
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: environment.itemControl.isLoading(),
     style: {display: (item.state === 'CONFIGURED' || item.state == 'DEPLOYED') ? '' : 'none'},
-    onclick: () =>  confirm(`Are you sure you want to SHUTDOWN this ${item.state} environment?`)
-    && environment.destroyEnvironment({id: item.id, runNumber: item.currentRunNumber}),
+    onclick: () => confirm(`Are you sure you want to SHUTDOWN this ${item.state} environment?`)
+      && environment.destroyEnvironment({id: item.id, runNumber: item.currentRunNumber}),
     title: 'Shutdown environment'
   }, 'SHUTDOWN');
 
