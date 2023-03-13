@@ -100,8 +100,8 @@ const environmentRunningCards = ({currentRunNumber}) => {
   let epnMonitoringSource = '';
   if (isMonitoringConfigured) {
     readoutMonitoringSource = COG.GRAFANA.plots[2] + '&var-run=' + currentRunNumber;
-    flpMonitoringSource = COG.GRAFANA.plots[1] + '&var-run=' + currentRunNumber;
-    epnMonitoringSource = COG.GRAFANA.plots[0] + '&var-run=' + currentRunNumber;
+    flpMonitoringSource = COG.GRAFANA.plots[0] + '&var-run=' + currentRunNumber;
+    epnMonitoringSource = COG.GRAFANA.plots[1] + '&var-run=' + currentRunNumber;
   }
   return h('.flex-column.w-100.g2', [
     h('.flex-row.text-center.grafana-font.w-100',
