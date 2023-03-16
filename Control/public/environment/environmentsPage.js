@@ -150,7 +150,7 @@ const environmentsTable = (model, list) => {
       list.map((item) => {
         const odcState = parseOdcStatusPerEnv(item);
         const odcClasses = odcState === 'RUNNING' ? 'success' :
-          (odcState === 'READY' ? 'primary' : 
+          (odcState === 'READY' ? 'primary' :
             (odcState === 'ERROR' ? 'danger' : ''));
 
         return h('tr', {
@@ -228,23 +228,15 @@ const runColumn = (item) => {
 }
 
 /**
- * Return a button if detector of the environment is among
- * the ones belonging the environment
- * @param {Object} model
- * @param {JSON} item
- * @return {vnode}
+ * Returns a  group of buttons which allows the user to open ILG with pre-set parameters
+ * @param {EnvironmentInfo} environment
+ * @returns {vnode}
  */
-const actionsCell = (model, item) => {
-  const isDetectorIncluded =
-    item.includedDetectors.length === 1 && item.includedDetectors[0] === model.detectors.selected;
-  if ((isDetectorIncluded || !model.detectors.isSingleView()) && model.isAllowed(ROLES.Detector)) {
-    return h('.btn-group', [
-      infoLoggerButton(item, 'FLP', COG.ILG_URL),
-      infoLoggerButton(item, 'EPN', COG.ILG_EPN_URL)
-    ]);
-  } else {
-    return h('', '')
-  }
+const actionsCell = (environment) => {
+  return h('.btn-group', [
+    infoLoggerButton(environment, 'FLP', COG.ILG_URL),
+    infoLoggerButton(environment, 'EPN', COG.ILG_EPN_URL)
+  ]);
 }
 
 /**
