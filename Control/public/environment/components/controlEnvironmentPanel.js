@@ -20,19 +20,22 @@ import {infoLoggerButton} from './buttons.js';
 import {ROLES} from './../../workflow/constants.js';
 
 /**
- * List of buttons, each one is an action to do on the current environment `item`
+ * List of buttons for:
+ * * controlling the currently displayed environment (in need of permissions to be operated)
+ * * open ILG sessions with parameters preset
  * @param {Environment} environment - model of the environment class
  * @param {EnvironmentInfo} item - DTO representing an environment
+ * @param {boolean} isAllowedToControl - value stipulating if user has enough permissions to control environment
  * @returns {vnode}
  */
-export const controlEnvironmentPanel = (environment, item) => h('', [
+export const controlEnvironmentPanel = (environment, item, isAllowedToControl = false) => h('', [
   h('.flex-row', [
     h('.w-30.flex-row.g2', {
     }, [
       infoLoggerButton(item, 'InfoLogger FLP', COG.ILG_URL),
       infoLoggerButton(item, 'InfoLogger EPN', COG.ILG_EPN_URL),
     ]),
-    h('.w-70.g4', {style: 'display: flex; justify-content: flex-end;'},
+    isAllowedToControl && h('.w-70.g4', {style: 'display: flex; justify-content: flex-end;'},
       [
         controlButton('.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
         controlButton('.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', ''), ' ', // button will not be displayed in any state due to OCTRL-628

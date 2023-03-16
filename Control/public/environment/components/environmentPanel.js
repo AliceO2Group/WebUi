@@ -64,11 +64,9 @@ const environmentHeader = ({state = 'UNKNOWN', id, createdWhen}, model) =>
  * @returns {vnode}
  */
 const environmentActionPanel = (environment, model) => {
-  const hasLocks = environment.includedDetectors.every(detector => model.lock.isLockedByMe(detector));
-  if (model.isAllowed(ROLES.Admin) || hasLocks) {
-    return miniCard('', [controlEnvironmentPanel(model.environment, environment)]);
-  }
-  return;
+  const hasLocks = environment.includedDetectors.every((detector) => model.lock.isLockedByMe(detector));
+  const isAllowedToControl = model.isAllowed(ROLES.Detector) && hasLocks;
+  return miniCard('', controlEnvironmentPanel(model.environment, environment, isAllowedToControl));
 }
 
 /**
