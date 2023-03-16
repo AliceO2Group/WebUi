@@ -15,11 +15,11 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
-const config = require('../test-config.js');
+const config = require('./../../../test-config.js');
 
 const {
   _getBookkeepingURL, _getQcgURL, buildPublicConfig, _getInfoLoggerURL, _getGrafanaConfig
-} = require('../../lib/config/publicConfigProvider');
+} = require('./../../../lib/config/publicConfigProvider');
 
 describe('Public Configuration Test Suite', () => {
   const CONF_LOCATION = '../../public/config.js';
