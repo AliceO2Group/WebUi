@@ -53,11 +53,11 @@ describe('Public Configuration Test Suite', () => {
   it('should successfully return status true and plot list JSON if configuration is provided for Grafana', () => {
     const expectedConf = {
       status: true,
-      plots: [
-        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&theme=light',
-        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&theme=light',
-        'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&theme=light'
-      ]
+      plots: {
+        flpStats: 'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&theme=light',
+        epnStats: 'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&theme=light',
+        readoutPlot: 'http://local:2000/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&theme=light'
+      }
     };
     assert.deepStrictEqual(_getGrafanaConfig({grafana: {url: 'http://local:2000'}}), expectedConf);
   });

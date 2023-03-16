@@ -78,11 +78,11 @@ function _getGrafanaConfig(config) {
     const theme = '&theme=light';
     return {
       status: true,
-      plots: [
-        `${hostPort}/${ecsDashboard}?panelId=16${theme}`,
-        `${hostPort}/${ecsDashboard}?panelId=22${theme}`,
-        `${hostPort}/${ecsDashboard}?panelId=20${theme}`,
-      ]
+      plots: {
+        flpStats: `${hostPort}/${ecsDashboard}?panelId=16${theme}`,
+        epnStats: `${hostPort}/${ecsDashboard}?panelId=22${theme}`,
+        readoutPlot: `${hostPort}/${ecsDashboard}?panelId=20${theme}`,
+      }
     };
   } else {
     return {status: false};

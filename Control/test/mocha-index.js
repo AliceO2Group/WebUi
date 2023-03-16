@@ -46,7 +46,7 @@ describe('Control', function() {
     const {calls} = coreGRPCServer(config);
     // Start gRPC server, this replaces the real APRICOT server written in Go.
     const {calls: apricotCalls} = apricotGRPCServer(config);
-    
+
     // Start web-server in background
     subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => {
@@ -76,7 +76,7 @@ describe('Control', function() {
         console.log(`        ${msg.args()[i]}`);
       }
     });
-    await page.setViewport({ width: 1200, height: 770});
+    await page.setViewport({width: 1200, height: 770});
     exports.page = page;
     const helpers = {url, calls, apricotCalls};
     exports.helpers = helpers;
@@ -98,7 +98,7 @@ describe('Control', function() {
     }
   });
 
-  it('should select detector view GLOBAL and redirect to environments page', async() => {
+  it('should select detector view GLOBAL and redirect to environments page', async () => {
     const [label] = await page.$x(`//div/button[@id="GLOBALViewButton"]`);
     if (label) {
       await label.click();
@@ -110,12 +110,12 @@ describe('Control', function() {
     }
   });
 
-  it('should successfully set selected detector', async() => {
+  it('should successfully set selected detector', async () => {
     const selected = await page.evaluate(() => window.model.detectors.selected);
     assert.strictEqual(selected, 'GLOBAL');
   });
 
-  it ('should successfully display detector view header', async() => {
+  it('should successfully display detector view header', async () => {
     const detectorViewLabel = await page.evaluate(() => {
       return document.querySelector(
         'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > h4').innerText;
@@ -123,7 +123,7 @@ describe('Control', function() {
     assert.strictEqual(detectorViewLabel, 'Detector View: GLOBAL')
   });
 
-  it('should have correctly load COG configuration', async () => {
+  it('should successfully load COG configuration', async () => {
     const cog = await page.evaluate(() => window.COG);
     const expectedConf = {
       ILG_URL: 'http://localhost:8081',
@@ -132,11 +132,11 @@ describe('Control', function() {
       QCG_URL: 'http://localhost:2022',
       GRAFANA: {
         status: true,
-        plots: [
-          'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&theme=light',
-          'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&theme=light',
-          'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&theme=light'
-        ]
+        plots: {
+          flpStats: 'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&theme=light',
+          epnStats: 'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&theme=light',
+          readoutPlot: 'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&theme=light'
+        }
       },
       CONSUL: {
         protocol: 'http',
