@@ -154,7 +154,7 @@ const environmentsTable = (model, list) => {
             (odcState === 'ERROR' ? 'danger' : ''));
 
         return h('tr', {
-          class: _isGlobalRun(item.userVars) ? 'global-run' : ''
+          class: isGlobalRun(item.userVars) ? 'global-run' : ''
         }, [
           runColumn(item),
           h('td', {style: 'text-align: center;'},
@@ -244,6 +244,6 @@ const actionsCell = (environment) => {
  * @param {JSON} vars 
  * @returns {boolean}
  */
-const _isGlobalRun = (vars) => {
+export const isGlobalRun = (vars) => {
   return vars['trg_enabled'] === 'true' && vars['trg_global_run_enabled'] === 'true';
 }

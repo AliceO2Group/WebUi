@@ -23,6 +23,7 @@ import {rowForCard} from './../../common/card/rowForCard.js';
 import {miniCard} from './../../common/card/miniCard.js';
 import {iframe} from './../../common/iframe/iframe.js';
 import {copyToClipboardButton} from './../../common/buttons/copyToClipboardButton.js';
+import {isGlobalRun} from './../environmentsPage.js';
 
 import {ROLES} from './../../workflow/constants.js';
 import {STATE_COLOR} from './../../common/constants/stateColors.js';
@@ -80,7 +81,10 @@ const environmentContent = (environment) => {
   }, [
     isRunning && environmentRunningCards(environment),
     h('.flex-row.flex-wrap.g2', [
-      miniCard('General Information', environmentGeneralInfoPanel(environment)),
+      miniCard(
+        'General Information',
+        environmentGeneralInfoPanel(environment),
+        isGlobalRun(environment.userVars) ? {'background-color': '#dbedff'} : {}),
       miniCard('FLP Tasks Summary', taskCounterContent(environment.tasks)),
     ])
   ]);
@@ -135,5 +139,6 @@ const environmentGeneralInfoPanel = (environment) => {
     rowForCard('Template:', rootRole),
     rowForCard('FLPs:', numberOfFlps),
     rowForCard('Detectors:', detectorsAsString),
+    rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-')
   ])
 }
