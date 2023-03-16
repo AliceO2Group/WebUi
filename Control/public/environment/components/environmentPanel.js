@@ -40,7 +40,7 @@ export const environmentPanel = (model, environment, isMinified = false) => {
     environmentHeader(environment, model),
     !isMinified && [
       environmentActionPanel(environment, model),
-      environmentContent(environment),
+      environmentContent(environment, model),
     ]
   ]);
 };
@@ -65,7 +65,8 @@ const environmentHeader = ({state = 'UNKNOWN', id, createdWhen}, model) =>
  * @returns {vnode}
  */
 const environmentActionPanel = (environment, model) => {
-  const hasLocks = environment.includedDetectors.every((detector) => model.lock.isLockedByMe(detector));
+  const {includedDetectors = []} = environment;
+  const hasLocks = includedDetectors.every((detector) => model.lock.isLockedByMe(detector));
   const isAllowedToControl = model.isAllowed(ROLES.Detector) && hasLocks;
   return miniCard('', controlEnvironmentPanel(model.environment, environment, isAllowedToControl));
 }
@@ -73,10 +74,12 @@ const environmentActionPanel = (environment, model) => {
 /**
  * Builds a component which is to contain multiple cards with environment details
  * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {Model} model - root object of the application
  * @returns {vnode}
  */
-const environmentContent = (environment) => {
+const environmentContent = (environment, model) => {
   const isRunning = environment.state === 'RUNNING';
+  const allDetectors = model.detectors.hostsByDetectorRemote;
   return h('.g2.flex-column.flex-wrap', {
   }, [
     isRunning && environmentRunningCards(environment),
@@ -86,7 +89,8 @@ const environmentContent = (environment) => {
         environmentGeneralInfoPanel(environment),
         isGlobalRun(environment.userVars) ? {'background-color': '#dbedff'} : {}),
       miniCard('FLP Tasks Summary', taskCounterContent(environment.tasks)),
-    ])
+    ]),
+    allDetectors.isSuccess() && envTasksPerDetector(environment, allDetectors.payload),
   ]);
 };
 
@@ -141,4 +145,32 @@ const environmentGeneralInfoPanel = (environment) => {
     rowForCard('Detectors:', detectorsAsString),
     rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-')
   ])
+}
+
+/**
+ * Build a series of cards containing information about the tasks and hosts of each detector
+ * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {Map<string, Array<string>>} allDetectors - map of all known detectors with their associated hosts
+ * @returns {vnode}
+ */
+const envTasksPerDetector = (environment, allDetectors) => {
+  const {includedDetectors = [], userVars: {hosts = '[]'} = {}} = environment;
+  const hostList = JSON.parse(hosts)
+
+  if (includedDetectors.length > 0 && hostList.length > 0) {
+    return h('.flex-column.flex-wrap.g2', [
+      h('h4', `Detector(s) Summary`),
+      h('.flex-row.flex-wrap.g2', [
+        includedDetectors.map((detector) => {
+          const hostsUsed = hostList.filter((host) => allDetectors[detector].includes(host));
+          const tasks = environment.tasks.filter((task) => hostsUsed.includes(task.deploymentInfo.hostname));
+          const info = [
+            rowForCard('# Hosts:', hostsUsed.length),
+            taskCounterContent(tasks)
+          ];
+          return miniCard(detector, info)
+        })
+      ])
+    ]);
+  }
 }
