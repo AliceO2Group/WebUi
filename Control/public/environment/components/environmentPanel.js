@@ -84,8 +84,8 @@ const environmentContent = (environment, model) => {
   const isRunning = environment.state === 'RUNNING';
   const allDetectors = model.detectors.hostsByDetectorRemote;
   const {currentRunNumber} = environment;
-  const {flpSummary, qcNodes, trgNodes} = environment.hardware;
-  const allHosts = flpSummary.machines + qcNodes.machines + trgNodes.machines;
+  const {flpTasks, qcTasks, trgTasks} = environment.hardware;
+  const allHosts = flpTasks.machines + qcTasks.machines + trgTasks.machines;
   return h('.g2.flex-column.flex-wrap', {
   }, [
     isRunning && environmentRunningPanels(environment),
@@ -111,15 +111,15 @@ const environmentContent = (environment, model) => {
           miniCard(
             miniCardTitle('ALL', `# hosts: ${allHosts}`),
             taskCounterContent(environment.tasks)),
-          flpSummary.tasks.length > 0 && miniCard(
-            miniCardTitle('FLP', `# hosts: ${flpSummary.machines}`),
-            taskCounterContent(flpSummary.tasks)),
-          qcNodes.tasks.length > 0 && miniCard(
-            miniCardTitle('QC Nodes', `# hosts: ${qcNodes.machines}`),
-            taskCounterContent(qcNodes.tasks)),
-          trgNodes.tasks.length > 0 && miniCard(
-            miniCardTitle('CTP Readout', `# hosts: ${trgNodes.machines}`),
-            taskCounterContent(trgNodes.tasks)),
+          flpTasks.tasks.length > 0 && miniCard(
+            miniCardTitle('FLP', `# hosts: ${flpTasks.machines}`),
+            taskCounterContent(flpTasks.tasks)),
+          qcTasks.tasks.length > 0 && miniCard(
+            miniCardTitle('QC Nodes', `# hosts: ${qcTasks.machines}`),
+            taskCounterContent(qcTasks.tasks)),
+          trgTasks.tasks.length > 0 && miniCard(
+            miniCardTitle('CTP Readout', `# hosts: ${trgTasks.machines}`),
+            taskCounterContent(trgTasks.tasks)),
         ])
       ]),
     ]),

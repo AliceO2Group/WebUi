@@ -16,6 +16,8 @@ import {Observable, RemoteData} from '/js/src/index.js';
 import Task from './Task.js';
 import {getTaskShortName} from '../common/utils.js';
 
+const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
+
 /**
  * Model representing Environment CRUD
  */
@@ -266,6 +268,77 @@ export default class Environment extends Observable {
   }
 
   /**
+   * Return a list of tasks that belong to QC Nodes as per the naming convention
+   * @param {Array<TaskInfo>} tasks - list of tasks belonging to an environment
+   * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to QC Nodes and number of unique hosts
+   */
+  _getQcTasks(tasks) {
+    const machines = new Set();
+    const qcTasks = tasks.filter(({deploymentInfo: {hostname}}) => {
+      if (hostname.match(QC_NODES_NAME_REGEX)) {
+        machines.add(hostname)
+        return true;
+      }
+      return false;
+    });
+    return {tasks: qcTasks, machines: machines.size}
+  }
+
+  /**
+   * Return a list of tasks that belong to FLP nodes as per detector list we receive from Apricot
+   * @param {EnvironmentInfo} environment - DTO representing an environment
+   * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to FLP Nodes and number of unique hosts
+   */
+  _getFlpTasks(environment) {
+    if (this.model.detectors.hostsByDetectorRemote.isSuccess()) {
+      const hostsByDetectors = this.model.detectors.hostsByDetectorRemote.payload;
+
+      const machines = new Set();
+      const {tasks, includedDetectors} = environment;
+
+      const tasksFiltered = tasks.filter(({deploymentInfo: {hostname}}) => !hostname.match(QC_NODES_NAME_REGEX))
+        .filter(({deploymentInfo: {hostname}}) => {
+          const keyDetector = Object.keys(hostsByDetectors)
+            .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
+          if (includedDetectors.includes(keyDetector)) {
+            machines.add(hostname);
+            return true;
+          }
+          return false;
+        })
+      return {tasks: tasksFiltered, machines: machines.size}
+    }
+    return {tasks: [], machines: 0};
+  }
+
+  /**
+   * Return a list of tasks that belong to TRG nodes if CTP Readout is enabled and detector list is available
+   * @param {EnvironmentInfo} environment - DTO representing an environment
+   * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to FLP Nodes and number of unique hosts
+   */
+  _getTrgTasks(environment) {
+    const isReadoutEnabled = environment.userVars.ctp_readout_enabled === 'true';
+    if (this.model.detectors.hostsByDetectorRemote.isSuccess() && isReadoutEnabled) {
+      const {tasks, includedDetectors} = environment;
+      const machines = new Set();
+      const hostsByDetectors = this.model.detectors.hostsByDetectorRemote.payload;
+      const tasksFiltered = tasks.filter(({deploymentInfo: {hostname}}) => !hostname.match(QC_NODES_NAME_REGEX))
+        .filter(({deploymentInfo: {hostname}}) => {
+          const keyDetector = Object.keys(hostsByDetectors)
+            .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
+          if (includedDetectors.includes(keyDetector)) {
+            return false;
+          }
+          machines.add(hostname);
+          return true;
+        }
+        )
+      return {tasks: tasksFiltered, machines: machines.size}
+    }
+    return {tasks: [], machines: 0};
+  }
+
+  /**
    * Method to remove and parse fields from environment result
    * @param {JSON} result
    * @return {JSON}
@@ -281,6 +354,13 @@ export default class Environment extends Observable {
     result.environment = this._filterOutDetectorsVariables(result.environment, 'vars');
     result.environment = this._filterOutDetectorsVariables(result.environment, 'userVars');
     result.environment = this._filterOutDetectorsVariables(result.environment, 'defaults');
+
+    const {tasks} = result.environment;
+    result.environment.hardware = {
+      qcTasks: this._getQcTasks(tasks),
+      trgTasks: this._getTrgTasks(result.environment),
+      flpTasks: this._getFlpTasks(result.environment)
+    }
     return result;
   }
 }
