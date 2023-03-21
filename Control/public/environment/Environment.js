@@ -272,9 +272,9 @@ export default class Environment extends Observable {
    * @param {Array<TaskInfo>} tasks - list of tasks belonging to an environment
    * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to QC Nodes and number of unique hosts
    */
-  _getQcTasks(tasks) {
+  _getQcTasks(tasks = []) {
     const machines = new Set();
-    const qcTasks = tasks.filter(({deploymentInfo: {hostname}}) => {
+    const qcTasks = tasks.filter(({deploymentInfo: {hostname = ''} = {}}) => {
       if (hostname.match(QC_NODES_NAME_REGEX)) {
         machines.add(hostname)
         return true;
@@ -294,10 +294,11 @@ export default class Environment extends Observable {
       const hostsByDetectors = this.model.detectors.hostsByDetectorRemote.payload;
 
       const machines = new Set();
-      const {tasks, includedDetectors} = environment;
+      const {tasks = [], includedDetectors = []} = environment;
 
-      const tasksFiltered = tasks.filter(({deploymentInfo: {hostname}}) => !hostname.match(QC_NODES_NAME_REGEX))
-        .filter(({deploymentInfo: {hostname}}) => {
+      const tasksFiltered = tasks
+        .filter(({deploymentInfo: {hostname = ''} = {}}) => !hostname.match(QC_NODES_NAME_REGEX))
+        .filter(({deploymentInfo: {hostname = ''} = {}}) => {
           const keyDetector = Object.keys(hostsByDetectors)
             .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
           if (includedDetectors.includes(keyDetector)) {
@@ -317,9 +318,10 @@ export default class Environment extends Observable {
    * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to FLP Nodes and number of unique hosts
    */
   _getTrgTasks(environment) {
-    const isReadoutEnabled = environment.userVars.ctp_readout_enabled === 'true';
+    const {userVars: {ctp_readout_enabled = 'false'} = {}} = environment;
+    const isReadoutEnabled = ctp_readout_enabled === 'true';
     if (this.model.detectors.hostsByDetectorRemote.isSuccess() && isReadoutEnabled) {
-      const {tasks, includedDetectors} = environment;
+      const {tasks = [], includedDetectors = []} = environment;
       const machines = new Set();
       const hostsByDetectors = this.model.detectors.hostsByDetectorRemote.payload;
       const tasksFiltered = tasks.filter(({deploymentInfo: {hostname}}) => !hostname.match(QC_NODES_NAME_REGEX))

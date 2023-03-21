@@ -182,7 +182,7 @@ const envTasksPerDetector = (environment, allDetectors) => {
 
   if (includedDetectors.length > 0 && hostList.length > 0) {
     return h('.flex-column.flex-wrap.g2', [
-      h('h4', `Tasks by Detector(s) Summary`),
+      h('h4', `FLP Tasks by Detector(s) Summary`),
       h('.flex-row.flex-wrap.g2', [
         includedDetectors.map((detector) => {
           const hostsUsed = hostList.filter((host) => allDetectors[detector].includes(host));
