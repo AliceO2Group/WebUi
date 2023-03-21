@@ -16,6 +16,7 @@ export const STATE_COLOR = {
   RUNNING: 'success',
   CONFIGURED: 'primary',
   ERROR: 'danger',
+  UNKNOWN: 'danger',
   MIXED: 'danger-less',
   STANDBY: 'gray-darker',
   DEPLOYED: 'gray-darker',
