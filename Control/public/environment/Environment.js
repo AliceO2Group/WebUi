@@ -277,8 +277,8 @@ export default class Environment extends Observable {
     const flp = {tasks: [], hosts: new Set()};
     const trg = {tasks: [], hosts: new Set()};
 
-    const {hostsByDetectorRemote} = this.model.detectors;
-    const {tasks, includedDetectors} = environment;
+    const {hostsByDetectorRemote = RemoteData.notAsked()} = this.model.detectors;
+    const {tasks = [], includedDetectors = []} = environment;
     for (const task of tasks) {
       const {deploymentInfo: {hostname = ''} = {}} = task;
       if (hostname.match(QC_NODES_NAME_REGEX)) {
