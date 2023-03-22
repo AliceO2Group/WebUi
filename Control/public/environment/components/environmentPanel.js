@@ -88,26 +88,27 @@ const environmentContent = (environment, model) => {
   const {currentRunNumber} = environment;
   const {flp, qc, trg} = environment.hardware;
   const allHosts = flp.hosts.size + qc.hosts.size + trg.hosts.size;
-  return h('.g2.flex-column.flex-wrap', {
+  return h('.cardGroupColumn', {
   }, [
     isRunning && environmentRunningPanels(environment),
-    h('.flex-column.flex-wrap.g2', [
+    h('.cardGroupColumn', [
       h('.flex-row', [
         isRunning && miniCard(
           h('.flex-row.g1', [
             copyToClipboardButton(currentRunNumber),
-            h('h4', {style: 'text-decoration:underline'}, 'Run Number')
+            miniCardTitle('Run Number')
           ]),
-          h('.badge.bg-success.white.h-100', {
-            style: 'display:flex;font-size:2.3em;align-items: center; justify-content: center'
-          }, currentRunNumber)
+          h('.badge.runNumber', currentRunNumber)
         ),
         miniCard(
           'General Information',
           environmentGeneralInfoPanel(environment),
-          isGlobalRun(environment.userVars) ? {'background-color': '#dbedff'} : {}),
+          isGlobalRun(environment.userVars)
+            ? ['bg-global-run']
+            : []
+        ),
       ]),
-      environment.tasks.length > 0 && h('.flex-column.flex-wrap.g2', [
+      environment.tasks.length > 0 && h('.cardGroupColumn', [
         h('h4', `Tasks Summary`),
         h('.flex-row.flex-wrap.g2', [
           miniCard(
