@@ -14,7 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {rowForCard} from '../card/rowForCard.js';
-import {STATE_COLOR} from '../constants/stateColors.js';
+import {ALIECS_STATE_COLOR} from '../constants/stateColors.js';
 
 /**
  * Given a list of tasks, build a panel which will display counters of different states and statuses
@@ -37,8 +37,8 @@ export const taskCounterContent = (tasks) => {
         Object.entries(states)
           .map(([key, value]) => {
             return rowForCard(key, `${value}/${totalTasks}`, {
-              keyClasses: [STATE_COLOR[key.toLocaleUpperCase()]],
-              valueClasses: [STATE_COLOR[key.toLocaleUpperCase()]],
+              keyClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
+              valueClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
             })
           })
       ]),
