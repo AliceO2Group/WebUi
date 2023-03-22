@@ -61,7 +61,6 @@
 .miniCard { min-width: 22em; }
 .miniCard > .runNumber { display:flex; font-size:2.3em; align-items: center; justify-content: center; background-color: var(--color-success); color: var(--color-white); height: 100%}
 
-.bg-global-run, tr.bg-global-run td { background-color: #dbedff; }
 .bg-danger-less { background-color: var(--color-soft-red); }
 
 @media (max-width: 1000px) {
