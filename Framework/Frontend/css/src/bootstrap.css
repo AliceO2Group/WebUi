@@ -206,8 +206,9 @@ h6, .f6 { font-size: .875rem; }
 .warning { color: var(--color-warning) !important; }
 .danger { color: var(--color-danger) !important; }
 .success { color: var(--color-success) !important; }
+.global-run-color {color: var(--color-global-run) !important;}
+
 .white { color: var(--color-white) !important; }
-.global-run {color: var(--color-light-blue) !important;}
 .gray { color: var(--color-gray) !important; }
 .gray-darker { color: var(--color-gray-darker) !important; }
 .black { color: var(--color-black) !important; }
@@ -216,7 +217,8 @@ h6, .f6 { font-size: .875rem; }
 .bg-warning { background-color: var(--color-warning) !important; }
 .bg-danger { background-color: var(--color-danger) !important; }
 .bg-success { background-color: var(--color-success) !important; }
-.bg-global-run {background-color: var(--color-light-blue) !important;}
+.bg-global-run {background-color: var(--color-global-run) !important;}
+
 .bg-white { background-color: var(--color-white) !important; }
 .bg-gray-darker { background-color: var(--color-gray-darker) !important; }
 .bg-gray { background-color: var(--color-gray) !important; }
