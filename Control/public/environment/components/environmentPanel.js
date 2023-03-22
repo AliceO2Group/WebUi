@@ -16,7 +16,7 @@
 
 import {h} from '/js/src/index.js';
 
-import {parseObject} from './../../common/utils.js';
+import {parseObject, parseOdcStatusPerEnv} from './../../common/utils.js';
 import {taskCounterContent} from './../../common/tasks/taskCounterContent.js';
 import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
 import {rowForCard} from './../../common/card/rowForCard.js';
@@ -92,7 +92,7 @@ const environmentContent = (environment, model) => {
   }, [
     isRunning && environmentRunningPanels(environment),
     h('.cardGroupColumn', [
-      h('.flex-row', [
+      h('.cardGroupRow', [
         isRunning && miniCard(
           h('.flex-row.g1', [
             copyToClipboardButton(currentRunNumber),
@@ -102,15 +102,19 @@ const environmentContent = (environment, model) => {
         ),
         miniCard(
           'General Information',
-          environmentGeneralInfoPanel(environment),
+          environmentGeneralInfoContent(environment),
           isGlobalRun(environment.userVars)
             ? ['bg-global-run']
             : []
         ),
+        miniCard(
+          'Components',
+          environmentComponentsContent(environment),
+        ),
       ]),
       environment.tasks.length > 0 && h('.cardGroupColumn', [
         h('h4', `Tasks Summary`),
-        h('.flex-row.flex-wrap.g2', [
+        h('.cardGroupRow', [
           miniCard(
             miniCardTitle('ALL', `# hosts: ${allHosts}`),
             taskCounterContent(environment.tasks)),
@@ -155,11 +159,11 @@ const environmentRunningPanels = ({currentRunNumber}) => {
 }
 
 /**
- * Builds a panel containing multiple cards with specific environment details
+ * Returns content for a mini card containing specific environment general details
  * @param {EnvironmentInfo} environment - DTO representing an environment
  * @returns {vnode}
  */
-const environmentGeneralInfoPanel = (environment) => {
+const environmentGeneralInfoContent = (environment) => {
   const {includedDetectors = [], state, userVars = {}, createdWhen, rootRole, numberOfFlps} = environment;
   const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
   return h('.flex-column', [
@@ -172,6 +176,25 @@ const environmentGeneralInfoPanel = (environment) => {
     rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-')
   ]);
 }
+
+/**
+ * Returns content for a miniCard with information on what components are used by the Environment
+ * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @returns {vnode}
+ */
+const environmentComponentsContent = (environment) => {
+  const {userVars} = environment;
+  const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
+
+  return h('.flex-column', [
+    rowForCard('DCS:', parseObject(userVars, 'dcs_enabled')),
+    rowForCard('DCS:', parseObject(userVars, 'dd_enabled')),
+    rowForCard('EPNs:', parseObject(userVars, 'odc_n_epns')),
+    rowForCard('TRG:', parseObject(userVars, 'trg_enabled')),
+    rowForCard('CTP Readout:', parseObject(userVars, 'ctp_readout_enabled')),
+    rowForCard('ODC:', odcState, {valueClasses: [odcStyle]})
+  ]);
+};
 
 /**
  * Build a series of cards containing information about the tasks and hosts of each detector

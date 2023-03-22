@@ -148,10 +148,7 @@ const environmentsTable = (model, list) => {
     ]),
     h('tbody', [
       list.map((item) => {
-        const odcState = parseOdcStatusPerEnv(item);
-        const odcClasses = odcState === 'RUNNING' ? 'success' :
-          (odcState === 'READY' ? 'primary' :
-            (odcState === 'ERROR' ? 'danger' : ''));
+        const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(item);
 
         return h('tr', {
           class: isGlobalRun(item.userVars) ? 'bg-global-run' : ''
@@ -176,11 +173,7 @@ const environmentsTable = (model, list) => {
           h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
           h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
           h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_readout_enabled')),
-
-          h('td', {
-            style: 'text-align: center;',
-            class: odcClasses,
-          }, odcState),
+          h('td', {style: 'text-align: center;', class: odcStyle}, odcState),
           h('td', {
             class: (item.state === 'RUNNING' ?
               'success'

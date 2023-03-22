@@ -25,6 +25,7 @@ const parseObject = (item, key) => {
         : (item['trg_global_run_enabled'] === "true" ? 'CTP' : 'LTU');
     case 'dcs_enabled':
     case 'ctp_readout_enabled':
+    case 'dd_enabled':
       return item[key] && item[key] === 'true' ? 'ON' : 'OFF'
     case 'odc_topology':
       return _parseTopology(item);
@@ -76,7 +77,7 @@ const getTaskShortName = (taskName) => {
 }
 
 /**
- * Look through the AliECS Integrated services and return the status of ODC for a given environment id
+ * Look through the AliECS Integrated services and return the status and style associated to it of ODC for a given environment
  * ODC status should be displayed as `-` if EPN is set to OFF
  * @param {string} envId 
  * @param {Model} model
@@ -86,13 +87,20 @@ const getTaskShortName = (taskName) => {
 const parseOdcStatusPerEnv = (environment) => {
   try {
     if (environment.integratedServicesData && environment.integratedServicesData['odc']) {
-      const odc = JSON.parse(environment.integratedServicesData['odc']);
-      return odc.State;
+      const {State: state} = JSON.parse(environment.integratedServicesData['odc']);
+      const styleClass = state === 'RUNNING'
+        ? 'success'
+        : (state === 'READY'
+          ? 'primary'
+          : (state === 'ERROR'
+            ? 'danger'
+            : ''));
+      return {state, styleClass};
     }
   } catch (error) {
     console.error(error);
   }
-  return '-';
+  return {state: '-', styleClass: ''};
 }
 
 /**
