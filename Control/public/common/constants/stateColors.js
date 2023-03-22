@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-export const STATE_COLOR = {
+export const ALIECS_STATE_COLOR = {
   RUNNING: 'success',
   CONFIGURED: 'primary',
   ERROR: 'danger',
@@ -21,4 +21,11 @@ export const STATE_COLOR = {
   STANDBY: 'gray-darker',
   DEPLOYED: 'gray-darker',
   PENDING: 'gray-darker'
+};
+
+export const ODC_STATE_COLOR = {
+  RUNNING: 'success',
+  READY: 'primary',
+  ERROR: 'danger',
+  UNKNOWN: 'danger',
 };

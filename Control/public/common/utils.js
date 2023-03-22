@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+import {ODC_STATE_COLOR} from "./constants/stateColors";
+
 /**
  * Method to display specific JSON fields in a particular way
  * @param {Object} item
@@ -88,13 +90,7 @@ const parseOdcStatusPerEnv = (environment) => {
   try {
     if (environment.integratedServicesData && environment.integratedServicesData['odc']) {
       const {State: state} = JSON.parse(environment.integratedServicesData['odc']);
-      const styleClass = state === 'RUNNING'
-        ? 'success'
-        : (state === 'READY'
-          ? 'primary'
-          : (state === 'ERROR'
-            ? 'danger'
-            : ''));
+      const styleClass = ODC_STATE_COLOR[state] ?? '';
       return {state, styleClass};
     }
   } catch (error) {
