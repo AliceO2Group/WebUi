@@ -26,7 +26,7 @@ import {copyToClipboardButton} from './../../common/buttons/copyToClipboardButto
 import {isGlobalRun} from './../environmentsPage.js';
 
 import {ROLES} from './../../workflow/constants.js';
-import {STATE_COLOR} from './../../common/constants/stateColors.js';
+import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
 
 /**
  * Builds a panel with environment information
@@ -56,7 +56,7 @@ const environmentHeader = (environment) => {
     ? `${id} - ${state} - ${currentRunNumber}`
     : `${id} - ${state}`;
 
-  return h(`.flex-row.g2.p2.white.bg-${STATE_COLOR[state]}`, [
+  return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
     copyToClipboardButton(id),
     h('h3.w-60', title),
     h('.w-40.text-right', 'Created At: ' + parseObject(createdWhen, 'createdWhen'))
@@ -167,7 +167,7 @@ const environmentGeneralInfoContent = (environment) => {
   const {includedDetectors = [], state, userVars = {}, createdWhen, rootRole, numberOfFlps} = environment;
   const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
   return h('.flex-column', [
-    rowForCard('State:', state, {valueClasses: [STATE_COLOR[state]]}),
+    rowForCard('State:', state, {valueClasses: [ALIECS_STATE_COLOR[state]]}),
     rowForCard('Run Type:', userVars.run_type),
     rowForCard('Created:', parseObject(createdWhen, 'createdWhen')),
     rowForCard('Template:', rootRole),

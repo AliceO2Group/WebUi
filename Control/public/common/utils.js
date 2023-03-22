@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {ODC_STATE_COLOR} from "./constants/stateColors";
+import {ODC_STATE_COLOR} from './constants/stateColors.js';
 
 /**
  * Method to display specific JSON fields in a particular way
