@@ -22,6 +22,7 @@
   --color-orange: #ef8239; /* Alice color */
   --color-dark-blue: #4290C5; /* Alice color */
   --color-blue: #39A6EF; /* Complementary color of orange */
+  --color-light-blue: #dbedff;
   --color-green: #4caf50;
 
   --color-black: #000; /* Darkest color */
@@ -41,6 +42,7 @@
   --color-danger-dark: #b51822;
   --color-success: var(--color-green);
   --color-success-dark: #357a38;
+  --color-global-run: var(--color-light-blue);
 
   /* padding and margin */
   --space-xs: .25rem;
@@ -205,6 +207,7 @@ h6, .f6 { font-size: .875rem; }
 .danger { color: var(--color-danger) !important; }
 .success { color: var(--color-success) !important; }
 .white { color: var(--color-white) !important; }
+.global-run {color: var(--color-light-blue) !important;}
 .gray { color: var(--color-gray) !important; }
 .gray-darker { color: var(--color-gray-darker) !important; }
 .black { color: var(--color-black) !important; }
@@ -213,6 +216,7 @@ h6, .f6 { font-size: .875rem; }
 .bg-warning { background-color: var(--color-warning) !important; }
 .bg-danger { background-color: var(--color-danger) !important; }
 .bg-success { background-color: var(--color-success) !important; }
+.bg-global-run {background-color: var(--color-light-blue) !important;}
 .bg-white { background-color: var(--color-white) !important; }
 .bg-gray-darker { background-color: var(--color-gray-darker) !important; }
 .bg-gray { background-color: var(--color-gray) !important; }
