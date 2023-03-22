@@ -152,9 +152,8 @@ const environmentsTable = (model, list) => {
         const odcClasses = odcState === 'RUNNING' ? 'success' :
           (odcState === 'READY' ? 'primary' :
             (odcState === 'ERROR' ? 'danger' : ''));
-
         return h('tr', {
-          class: isGlobalRun(item.userVars) ? 'global-run' : ''
+          class: isGlobalRun(item.userVars) ? 'bg-global-run' : ''
         }, [
           runColumn(item),
           h('td', {style: 'text-align: center;'},

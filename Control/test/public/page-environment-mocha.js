@@ -237,6 +237,7 @@ describe('`pageEnvironment` test-suite', async () => {
       const env = await page.evaluate(() => {
         const result = {
           environment: {
+            tasks: [],
             includedDetectors: ['ODC'],
             userVars: {
               odc_enabled: 'true',
