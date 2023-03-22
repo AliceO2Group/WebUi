@@ -188,7 +188,7 @@ const environmentComponentsContent = (environment) => {
 
   return h('.flex-column', [
     rowForCard('DCS:', parseObject(userVars, 'dcs_enabled')),
-    rowForCard('DCS:', parseObject(userVars, 'dd_enabled')),
+    rowForCard('Data Distribution (FLP):', parseObject(userVars, 'dd_enabled')),
     rowForCard('EPNs:', parseObject(userVars, 'odc_n_epns')),
     rowForCard('TRG:', parseObject(userVars, 'trg_enabled')),
     rowForCard('CTP Readout:', parseObject(userVars, 'ctp_readout_enabled')),
