@@ -188,7 +188,7 @@ const environmentsTable = (model, list) => {
             style: 'font-weight: bold; text-align: center;'
           }, item.state
           ),
-          h('td', {style: 'text-align: center;'}, actionsCell(model, item))
+          h('td', {style: 'text-align: center;'}, actionsCell(item))
         ]);
       }),
     ]),
