@@ -268,76 +268,39 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Return a list of tasks that belong to QC Nodes as per the naming convention
-   * @param {Array<TaskInfo>} tasks - list of tasks belonging to an environment
-   * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to QC Nodes and number of unique hosts
+   * Given an environment, group its tasks by the 3 main categories: FLP, QC Nodes and CTP Readout
+   * @param {EnvironmentInfo} environment - DTO representing an environment
+   * @returns {object{tasks: Array<TaskInfo>, hosts: Set}} - Object with groups of tasks and set of unique hosts
    */
-  _getQcTasks(tasks = []) {
-    const machines = new Set();
-    const qcTasks = tasks.filter(({deploymentInfo: {hostname = ''} = {}}) => {
+  _getTasksGroupedByCategory(environment) {
+    const qc = {tasks: [], hosts: new Set()};
+    const flp = {tasks: [], hosts: new Set()};
+    const trg = {tasks: [], hosts: new Set()};
+
+    const {hostsByDetectorRemote} = this.model.detectors;
+    const {tasks, includedDetectors} = environment;
+    for (const task of tasks) {
+      const {deploymentInfo: {hostname = ''} = {}} = task;
       if (hostname.match(QC_NODES_NAME_REGEX)) {
-        machines.add(hostname)
-        return true;
-      }
-      return false;
-    });
-    return {tasks: qcTasks, machines: machines.size}
-  }
+        qc.tasks.push(task);
+        qc.hosts.add(hostname);
+      } else if (hostsByDetectorRemote.isSuccess()) {
+        const {userVars: {ctp_readout_enabled = 'false'} = {}} = environment;
+        const isReadoutEnabled = ctp_readout_enabled === 'true';
 
-  /**
-   * Return a list of tasks that belong to FLP nodes as per detector list we receive from Apricot
-   * @param {EnvironmentInfo} environment - DTO representing an environment
-   * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to FLP Nodes and number of unique hosts
-   */
-  _getFlpTasks(environment) {
-    if (this.model.detectors.hostsByDetectorRemote.isSuccess()) {
-      const hostsByDetectors = this.model.detectors.hostsByDetectorRemote.payload;
-
-      const machines = new Set();
-      const {tasks = [], includedDetectors = []} = environment;
-
-      const tasksFiltered = tasks
-        .filter(({deploymentInfo: {hostname = ''} = {}}) => !hostname.match(QC_NODES_NAME_REGEX))
-        .filter(({deploymentInfo: {hostname = ''} = {}}) => {
-          const keyDetector = Object.keys(hostsByDetectors)
-            .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
-          if (includedDetectors.includes(keyDetector)) {
-            machines.add(hostname);
-            return true;
-          }
-          return false;
-        })
-      return {tasks: tasksFiltered, machines: machines.size}
-    }
-    return {tasks: [], machines: 0};
-  }
-
-  /**
-   * Return a list of tasks that belong to TRG nodes if CTP Readout is enabled and detector list is available
-   * @param {EnvironmentInfo} environment - DTO representing an environment
-   * @returns {{tasks: Array<TaskInfo, machines: number}} - tasks that belong to FLP Nodes and number of unique hosts
-   */
-  _getTrgTasks(environment) {
-    const {userVars: {ctp_readout_enabled = 'false'} = {}} = environment;
-    const isReadoutEnabled = ctp_readout_enabled === 'true';
-    if (this.model.detectors.hostsByDetectorRemote.isSuccess() && isReadoutEnabled) {
-      const {tasks = [], includedDetectors = []} = environment;
-      const machines = new Set();
-      const hostsByDetectors = this.model.detectors.hostsByDetectorRemote.payload;
-      const tasksFiltered = tasks.filter(({deploymentInfo: {hostname}}) => !hostname.match(QC_NODES_NAME_REGEX))
-        .filter(({deploymentInfo: {hostname}}) => {
-          const keyDetector = Object.keys(hostsByDetectors)
-            .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
-          if (includedDetectors.includes(keyDetector)) {
-            return false;
-          }
-          machines.add(hostname);
-          return true;
+        const hostsByDetectors = hostsByDetectorRemote.payload;
+        const keyDetector = Object.keys(hostsByDetectors)
+          .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
+        if (includedDetectors.includes(keyDetector)) {
+          flp.tasks.push(task);
+          flp.hosts.add(hostname)
+        } else if (isReadoutEnabled) {
+          trg.tasks.push(task);
+          trg.hosts.add(hostname)
         }
-        )
-      return {tasks: tasksFiltered, machines: machines.size}
+      }
     }
-    return {tasks: [], machines: 0};
+    return {qc, flp, trg};
   }
 
   /**
@@ -357,12 +320,8 @@ export default class Environment extends Observable {
     result.environment = this._filterOutDetectorsVariables(result.environment, 'userVars');
     result.environment = this._filterOutDetectorsVariables(result.environment, 'defaults');
 
-    const {tasks} = result.environment;
-    result.environment.hardware = {
-      qcTasks: this._getQcTasks(tasks),
-      trgTasks: this._getTrgTasks(result.environment),
-      flpTasks: this._getFlpTasks(result.environment)
-    }
+    const {qc, flp, trg} = this._getTasksGroupedByCategory(result.environment);
+    result.environment.hardware = {qc, trg, flp};
     return result;
   }
 }

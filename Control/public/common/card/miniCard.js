@@ -23,8 +23,8 @@ import {h} from '/js/src/index.js';
  */
 export const miniCard = (title, children = [], style = {}) => {
   return h('.miniCard.flex-column.shadow-level1.br2.p2.g2', {style}, [
-    typeof title === 'string' ?
-      miniCardTitle(title)
+    typeof title === 'string'
+      ? miniCardTitle(title)
       : title,
     children,
   ]);
@@ -33,13 +33,16 @@ export const miniCard = (title, children = [], style = {}) => {
 /**
  * Builds a title group for a mini-card
  * @param {string} main - main part of the title group
- * @param {string} [sub] -  optional sub-title to be added at the end of the title group
+ * @param {string} [sub] - optional sub-title to be added at the end of the title group
  * @returns {vnode}
  */
 export const miniCardTitle = (main, sub = '') => {
-  const width = !sub ? '100' : '60';
   return h(`.w-100.flex-row`, [
-    h(`h4.w-${width}`, {style: 'text-decoration: underline'}, main),
-    h('.w-40.text-right', {style: 'font-style: italic;'}, sub)
+    h(`h4`, {
+      style: 'text-decoration: underline; flex-grow: 6;'
+    }, main),
+    sub && h('.text-right', {
+      style: 'font-style: italic; flex-grow: 4;'
+    }, sub)
   ]);
 }

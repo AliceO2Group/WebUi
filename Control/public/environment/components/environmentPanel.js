@@ -52,7 +52,9 @@ export const environmentPanel = (model, environment, isMinified = false) => {
  */
 const environmentHeader = (environment) => {
   const {currentRunNumber, state = 'UNKNOWN', id, createdWhen} = environment;
-  let title = (state === 'RUNNING') ? `${id} - ${state}` : `${id} - ${state} - ${currentRunNumber}`;
+  let title = (state === 'RUNNING')
+    ? `${id} - ${state} - ${currentRunNumber}`
+    : `${id} - ${state}`;
 
   return h(`.flex-row.g2.p2.white.bg-${STATE_COLOR[state]}`, [
     copyToClipboardButton(id),
@@ -84,8 +86,8 @@ const environmentContent = (environment, model) => {
   const isRunning = environment.state === 'RUNNING';
   const allDetectors = model.detectors.hostsByDetectorRemote;
   const {currentRunNumber} = environment;
-  const {flpTasks, qcTasks, trgTasks} = environment.hardware;
-  const allHosts = flpTasks.machines + qcTasks.machines + trgTasks.machines;
+  const {flp, qc, trg} = environment.hardware;
+  const allHosts = flp.hosts.size + qc.hosts.size + trg.hosts.size;
   return h('.g2.flex-column.flex-wrap', {
   }, [
     isRunning && environmentRunningPanels(environment),
@@ -111,15 +113,15 @@ const environmentContent = (environment, model) => {
           miniCard(
             miniCardTitle('ALL', `# hosts: ${allHosts}`),
             taskCounterContent(environment.tasks)),
-          flpTasks.tasks.length > 0 && miniCard(
-            miniCardTitle('FLP', `# hosts: ${flpTasks.machines}`),
-            taskCounterContent(flpTasks.tasks)),
-          qcTasks.tasks.length > 0 && miniCard(
-            miniCardTitle('QC Nodes', `# hosts: ${qcTasks.machines}`),
-            taskCounterContent(qcTasks.tasks)),
-          trgTasks.tasks.length > 0 && miniCard(
-            miniCardTitle('CTP Readout', `# hosts: ${trgTasks.machines}`),
-            taskCounterContent(trgTasks.tasks)),
+          flp.tasks.length > 0 && miniCard(
+            miniCardTitle('FLP', `# hosts: ${flp.hosts.size}`),
+            taskCounterContent(flp.tasks)),
+          qc.tasks.length > 0 && miniCard(
+            miniCardTitle('QC Nodes', `# hosts: ${qc.hosts.size}`),
+            taskCounterContent(qc.tasks)),
+          trg.tasks.length > 0 && miniCard(
+            miniCardTitle('CTP Readout', `# hosts: ${trg.hosts.size}`),
+            taskCounterContent(trg.tasks)),
         ])
       ]),
     ]),
