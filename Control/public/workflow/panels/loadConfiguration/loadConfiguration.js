@@ -111,6 +111,8 @@ const configurationDropdownArea = (workflow, configurations) =>
             workflow.selectedConfigurationRaw = name;
             workflow.isLoadConfigurationVisible = false;
             workflow.form.resetVariables();
+            workflow.form.setTemplate(workflow.form.template);
+            workflow.generateVariablesSpec(workflow.form.template);
             workflow.getAndSetNamedConfiguration(workflow.selectedConfiguration);
           }
         }, name)
