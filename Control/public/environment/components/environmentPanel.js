@@ -139,15 +139,20 @@ const environmentContent = (environment, model) => {
  * @param {EnvironmentInfo} environment - DTO representing an environment
  * @returns {vnode}
  */
-const environmentRunningPanels = ({currentRunNumber}) => {
+const environmentRunningPanels = ({currentRunNumber, userVars}) => {
   const isMonitoringConfigured = COG && COG.GRAFANA && COG.GRAFANA.status;
+  const {readoutPlot, flpStats, epnStats} = COG.GRAFANA.plots;
+  const {run_start_time_ms: runStart} = userVars;
   let readoutMonitoringSource = '';
   let flpMonitoringSource = '';
   let epnMonitoringSource = '';
   if (isMonitoringConfigured) {
-    readoutMonitoringSource = COG.GRAFANA.plots.readoutPlot + '&var-run=' + currentRunNumber;
-    flpMonitoringSource = COG.GRAFANA.plots.flpStats + '&var-run=' + currentRunNumber;
-    epnMonitoringSource = COG.GRAFANA.plots.epnStats + '&var-run=' + currentRunNumber;
+    const runStartParam = runStart > 0
+      ? `&from=${runStart}`
+      : '';
+    readoutMonitoringSource = readoutPlot + '&var-run=' + currentRunNumber + runStartParam;
+    flpMonitoringSource = flpStats + '&var-run=' + currentRunNumber;
+    epnMonitoringSource = epnStats + '&var-run=' + currentRunNumber;
   }
   return isMonitoringConfigured ? h('.flex-column.w-100.g2', [
     iframe(readoutMonitoringSource, 'height: 12em; border: 0; width:100%'),
