@@ -137,13 +137,13 @@ const buttonRemoveRequest = (model, id, personid) =>
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'Run', 'ID', 'Detectors', 'Run Type', 'Created', 'FLPs', 'EPNs', 'DCS', 'TRG', 'CTP Readout', 'ODC',
-    'State', 'InfoLogger'
+    'Run', 'ID', 'Detectors', 'Run Type', 'Created', 'Started', 'Ended', 'FLPs', 'EPNs', 'DCS', 'TRG', 'CTP Readout',
+    'ODC', 'State', 'InfoLogger'
   ];
 
   return h('table.table', [
     h('thead', [
-      h('tr.table-primary', h('th', {colspan: 13}, 'Active Environments')),
+      h('tr.table-primary', h('th', {colspan: tableHeaders.length}, 'Active Environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
@@ -168,6 +168,8 @@ const environmentsTable = (model, list) => {
           ]),
           h('td', {style: 'text-align: center;'}, item.userVars.run_type ? item.userVars.run_type : '-'),
           h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars['run_start_time_ms'], 'run_start_time_ms')),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars['run_end_time_ms'], 'run_end_time_ms')),
           h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
           h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_n_epns')),
           h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),

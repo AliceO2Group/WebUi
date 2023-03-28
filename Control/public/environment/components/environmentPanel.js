@@ -51,15 +51,19 @@ export const environmentPanel = (model, environment, isMinified = false) => {
  * @returns {vnode}
  */
 const environmentHeader = (environment) => {
-  const {currentRunNumber, state = 'UNKNOWN', id, createdWhen} = environment;
-  let title = (state === 'RUNNING')
-    ? `${id} - ${state} - ${currentRunNumber}`
-    : `${id} - ${state}`;
-
+  const {currentRunNumber, state = 'UNKNOWN', id, createdWhen, userVars} = environment;
+  let title = `${id} - ${state}`;
+  let transitionTime = parseObject(createdWhen, 'createdWhen');
+  let transitionLabel = 'Created At: ';
+  if (state === 'RUNNING') {
+    title = `${id} - ${state} - ${currentRunNumber}`;
+    transitionTime = parseObject(userVars['run_start_time_ms'], 'run_start_time_ms');
+    transitionLabel = 'Running since: ';
+  }
   return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
     copyToClipboardButton(id),
     h('h3.w-60', title),
-    h('.w-40.text-right', 'Created At: ' + parseObject(createdWhen, 'createdWhen'))
+    h('.w-40.text-right', transitionLabel + transitionTime)
   ]);
 };
 
@@ -169,15 +173,14 @@ const environmentRunningPanels = ({currentRunNumber, userVars}) => {
  * @returns {vnode}
  */
 const environmentGeneralInfoContent = (environment) => {
-  const {includedDetectors = [], state, userVars = {}, createdWhen, rootRole, numberOfFlps} = environment;
-  const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
+  const {state, userVars = {}, createdWhen, rootRole } = environment;
   return h('.flex-column', [
+    rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
     rowForCard('State:', state, {valueClasses: [ALIECS_STATE_COLOR[state]]}),
     rowForCard('Run Type:', userVars.run_type),
-    rowForCard('Created:', parseObject(createdWhen, 'createdWhen')),
+    rowForCard('RUN Started:', parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),
+    rowForCard('RUN Ended:', parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')),
     rowForCard('Template:', rootRole),
-    rowForCard('FLPs:', numberOfFlps),
-    rowForCard('Detectors:', detectorsAsString),
     rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-')
   ]);
 }
@@ -188,10 +191,13 @@ const environmentGeneralInfoContent = (environment) => {
  * @returns {vnode}
  */
 const environmentComponentsContent = (environment) => {
-  const {userVars} = environment;
+  const {userVars, numberOfFlps, includedDetectors = []} = environment;
+  const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
   const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
 
   return h('.flex-column', [
+    rowForCard('FLPs:', numberOfFlps),
+    rowForCard('Detectors:', detectorsAsString),
     rowForCard('DCS:', parseObject(userVars, 'dcs_enabled')),
     rowForCard('Data Distribution (FLP):', parseObject(userVars, 'dd_enabled')),
     rowForCard('EPNs:', parseObject(userVars, 'odc_n_epns')),

@@ -36,7 +36,11 @@ const parseObject = (item, key) => {
     case 'version':
       return `${item.productName} v${item.versionStr}(revision ${item.build})`;
     case 'createdWhen':
-      return new Date(Number.parseInt(item)).toLocaleString();
+    case 'run_start_time_ms':
+    case 'run_end_time_ms':
+      return item
+        ? new Date(Number.parseInt(item)).toLocaleString()
+        : '-';
     case 'odc_n_epns':
       return (item['epn_enabled'] && item['epn_enabled'] == 'true') ? item['odc_n_epns'] : 'OFF';
     default:
