@@ -51,15 +51,19 @@ export const environmentPanel = (model, environment, isMinified = false) => {
  * @returns {vnode}
  */
 const environmentHeader = (environment) => {
-  const {currentRunNumber, state = 'UNKNOWN', id, createdWhen} = environment;
-  let title = (state === 'RUNNING')
-    ? `${id} - ${state} - ${currentRunNumber}`
-    : `${id} - ${state}`;
-
+  const {currentRunNumber, state = 'UNKNOWN', id, createdWhen, userVars} = environment;
+  let title = `${id} - ${state}`;
+  let transitionTime = parseObject(createdWhen, 'createdWhen');
+  let transitionLabel = 'Created At: ';
+  if (state === 'RUNNING') {
+    title = `${id} - ${state} - ${currentRunNumber}`;
+    transitionTime = parseObject(userVars['run_start_time_ms'], 'run_start_time_ms');
+    transitionLabel = 'Running since: ';
+  }
   return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
     copyToClipboardButton(id),
     h('h3.w-60', title),
-    h('.w-40.text-right', 'Created At: ' + parseObject(createdWhen, 'createdWhen'))
+    h('.w-40.text-right', transitionLabel + transitionTime)
   ]);
 };
 
