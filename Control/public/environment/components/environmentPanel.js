@@ -141,7 +141,7 @@ const environmentContent = (environment, model) => {
  */
 const environmentRunningPanels = ({currentRunNumber, userVars}) => {
   const isMonitoringConfigured = COG && COG.GRAFANA && COG.GRAFANA.status;
-  const {readoutPlot, flpStats, epnStats} = COG.GRAFANA.plots;
+  const {readoutPlot, flpStats, epnStats} = COG && COG.GRAFANA && COG.GRAFANA.plots;
   const {run_start_time_ms: runStart} = userVars;
   let readoutMonitoringSource = '';
   let flpMonitoringSource = '';
