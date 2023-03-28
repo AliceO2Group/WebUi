@@ -202,7 +202,7 @@ const runColumn = (item) => {
   let classes = '';
   let text = '-';
   const epnEnabled = Boolean(item.userVars.epn_enabled === 'true');
-  const odcState = parseOdcStatusPerEnv(item);
+  const {state: odcState} = parseOdcStatusPerEnv(item);
   if (item.currentRunNumber) {
     classes = 'bg-success white';
     text = item.currentRunNumber;
