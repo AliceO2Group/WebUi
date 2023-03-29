@@ -130,19 +130,19 @@ export default class WorkflowVariable {
   /**
    * Given a KV Pair it will check if:
    * * key is valid after being trimmed
-   * * value is valid by checking it's existence in the provided varSpecMap
+   * * value is valid by checking it's existence in the provided varSpecMap and it is not empty unless in EDIT mode
    * @param {String} key
    * @param {Object} value
    * @param {Map<String, JSON>} varSpecMap
    * @return {key:string, value:object, ok: boolean, error: string}
    */
-  static parseKVPair(key, value, varSpecMap = {}) {
+  static parseKVPair(key, value, varSpecMap = {}, inEdit = false) {
     const isKeyValid = key && key.trim() !== '';
-    const isValueValid = value && value.trim() !== '';
+    const isValueValid = (value && value.trim() !== '') || inEdit;
     if (!isKeyValid) {
       return {ok: false, error: `Invalid key '${key}' provided`};
     } if (!isValueValid) {
-      return {ok: false, error: `Invalid value '${value}' provided`};
+      return {ok: false, error: `Invalid value '${value}' provided for key: '${key}'`};
     } else {
       key = key.trim();
       value = value.trim();
