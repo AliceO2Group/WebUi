@@ -151,9 +151,15 @@ export default class WorkflowVariable {
         return {ok: true, key, value};
       } else if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
         return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
-      } else if (varSpecMap[key].widget === WIDGET_VAR.DROPDOWN_BOX && !varSpecMap[key].allowedValues.includes(value)) {
+      } else if (varSpecMap[key].type === VAR_TYPE.STRING && !varSpecMap[key].allowedValues.includes(value)) {
         return {ok: false, error: `Allowed values for key '${key}' are ${varSpecMap[key].allowedValues.toString()}`};
-      }
+      } else if (varSpecMap[key].type === VAR_TYPE.NUMBER && Number.isNaN(Number(value))) {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type Number`};
+      } else if (varSpecMap[key].type === VAR_TYPE.ARRAY && !Array.isArray(value)) {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type Array`};
+      } else if (varSpecMap[key].type === VAR_TYPE.JSON && typeof value !== 'object') {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type a JSON`};
+      } 
       return {ok: true, key, value};
     }
   }
