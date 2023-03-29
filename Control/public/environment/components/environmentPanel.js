@@ -146,12 +146,13 @@ const environmentContent = (environment, model) => {
 const environmentRunningPanels = ({currentRunNumber, userVars}) => {
   const isMonitoringConfigured = COG && COG.GRAFANA && COG.GRAFANA.status;
   const {readoutPlot, flpStats, epnStats} = COG && COG.GRAFANA && COG.GRAFANA.plots;
-  const {run_start_time_ms: runStart} = userVars;
+  const runStart = Number(userVars['run_start_time_ms']);
   let readoutMonitoringSource = '';
   let flpMonitoringSource = '';
   let epnMonitoringSource = '';
   if (isMonitoringConfigured) {
-    const runStartParam = runStart > 0
+    const THIRTY_MINUTES_IN_MS = 1000 * 60 * 30;
+    const runStartParam = (Number.isInteger(runStart) && (Date.now() - runStart) < THIRTY_MINUTES_IN_MS)
       ? `&from=${runStart}`
       : '';
     readoutMonitoringSource = readoutPlot + '&var-run=' + currentRunNumber + runStartParam;
