@@ -13,6 +13,7 @@
  */
 
 export const QC_CHECKER_TYPE = 'qualityobject';
+export const OBJECT_TYPE_KEY = '_typename';
 
 /**
  * Given a QCObject representation, return if the type of the object is checker
