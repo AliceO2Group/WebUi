@@ -10,11 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
+import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
-import {prettyFormatDate} from './../common/utils.js';
+import { prettyFormatDate } from './../common/utils.js';
+import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -33,20 +34,20 @@ export default class QCObject extends Observable {
     this.list = null;
 
     this.objectsRemote = RemoteData.notAsked();
-    this.selected = null; // object - { name; createTime; lastModified; }
+    this.selected = null; // Object - { name; createTime; lastModified; }
     this.selectedOpen = false;
-    this.objects = {}; // objectName -> RemoteData.payload -> plot
+    this.objects = {}; // ObjectName -> RemoteData.payload -> plot
 
-    this.listOnline = []; // list of online objects name
+    this.listOnline = []; // List of online objects name
 
-    this.searchInput = ''; // string - content of input search
-    this.searchResult = []; // array<object> - result list of search
+    this.searchInput = ''; // String - content of input search
+    this.searchResult = []; // Array<object> - result list of search
     this.sortBy = {
       field: 'name',
       title: 'Name',
       order: 1,
       icon: iconArrowTop(),
-      open: false
+      open: false,
     };
 
     this.tree = new ObjectTree('database');
@@ -79,9 +80,9 @@ export default class QCObject extends Observable {
     this.notify();
     if (objectName) {
       if (!this.list) {
-        this.selected = {name: objectName};
+        this.selected = { name: objectName };
       } else if (this.selectedOpen && this.list
-        && ((this.selected && !this.selected.lastModified)
+        && (this.selected && !this.selected.lastModified
           || !this.selected)
       ) {
         this.selected = this.list.find((object) => object.name === objectName);
@@ -123,7 +124,7 @@ export default class QCObject extends Observable {
    */
   _computeFilters() {
     if (this.searchInput) {
-      const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
+      const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // With fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => fuzzyRegex.test(item.name));
     } else {
@@ -143,13 +144,13 @@ export default class QCObject extends Observable {
         if (a[field] < b[field]) {
           return -1 * order;
         } else {
-          return 1 * order;
+          return Number(order);
         }
       } else if (field === 'name') {
         if (a[field].toUpperCase() < b[field].toUpperCase()) {
           return -1 * order;
         } else {
-          return 1 * order;
+          return Number(order);
         }
       }
     });
@@ -179,7 +180,7 @@ export default class QCObject extends Observable {
       title: title,
       order: order,
       icon: icon,
-      open: false
+      open: false,
     };
     this.notify();
   }
@@ -197,7 +198,7 @@ export default class QCObject extends Observable {
       if (result.isSuccess()) {
         offlineObjects = result.payload;
       } else {
-        const failureMessage = `Failed to retrieve list of objects. Please contact an administrator`;
+        const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
         this.model.notification.show(failureMessage, 'danger', Infinity);
       }
       this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
@@ -212,7 +213,7 @@ export default class QCObject extends Observable {
         title: 'Name',
         order: 1,
         icon: iconArrowTop(),
-        open: false
+        open: false,
       };
       this._computeFilters();
 
@@ -244,10 +245,10 @@ export default class QCObject extends Observable {
         title: 'Name',
         order: 1,
         icon: iconArrowTop(),
-        open: false
+        open: false,
       };
     } else {
-      const failureMessage = `Failed to retrieve list of online objects. Please contact an administrator`;
+      const failureMessage = 'Failed to retrieve list of online objects. Please contact an administrator';
       this.model.notification.show(failureMessage, 'danger', Infinity);
     }
 
@@ -275,11 +276,11 @@ export default class QCObject extends Observable {
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
-      if (this.isObjectChecker(obj.payload.qcObject.root)) {
+      if (isObjectOfTypeChecker(obj.payload.qcObject.root)) {
         this.objects[objectName] = obj;
         this.notify();
       } else {
-        // link JSROOT methods to object. JSROOT.parse call was removed due to bug
+        // Link JSROOT methods to object. JSROOT.parse call was removed due to bug
         this.objects[objectName] = RemoteData.success(obj.payload);
         this.notify();
       }
@@ -294,26 +295,12 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to check if passed object type is a checker
-   * @param {JSON} object
-   * @return {boolean}
-   */
-  isObjectChecker(object) {
-    const objectType = object['_typename'];
-    if (objectType && objectType.toLowerCase().includes('qualityobject')) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    */
   async loadObjects(objectsName, filter = {}) {
     this.objectsRemote = RemoteData.loading();
-    this.objects = {}; // remove any in-memory loaded objects
+    this.objects = {}; // Remove any in-memory loaded objects
     this.model.services.object.objectsLoadedMap = {}; // TODO not here
     this.notify();
     if (!objectsName || !objectsName.length) {
@@ -322,16 +309,12 @@ export default class QCObject extends Observable {
       return;
     }
     const filterAsString = Object.keys(filter).map((key) => `${key}=${filter[key]}`).join('/');
-    await Promise.allSettled(
-      objectsName.map(async (objectName) => {
-        this.objects[objectName] = RemoteData.Loading()
-        this.notify();
-        this.objects[objectName] = await this.model.services.object.getObjectByName(
-          objectName, -1, filterAsString, this
-        );
-        this.notify();
-      })
-    );
+    await Promise.allSettled(objectsName.map(async (objectName) => {
+      this.objects[objectName] = RemoteData.Loading();
+      this.notify();
+      this.objects[objectName] = await this.model.services.object.getObjectByName(objectName, -1, filterAsString, this);
+      this.notify();
+    }));
     this.objectsRemote = RemoteData.success();
     this.notify();
   }
@@ -395,7 +378,6 @@ export default class QCObject extends Observable {
       && this.listOnline.map((item) => item.name).includes(objectName);
   }
 
-
   /**
    * Method to generate drawing options based on where in the application the plot is displayed
    * @param {Object} tabObject
@@ -405,7 +387,7 @@ export default class QCObject extends Observable {
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
     let drawingOptions = [];
-    const qcObject = objectRemoteData.payload.qcObject;
+    const { qcObject } = objectRemoteData.payload;
     if (qcObject.fOption) {
       objectOptionList = qcObject.fOption.split(' ');
     }
@@ -432,18 +414,18 @@ export default class QCObject extends Observable {
         } else {
           drawingOptions = JSON.parse(JSON.stringify(tabObject.options));
         }
-        // merge all options or ignore if in layout view and user specifies so
+        // Merge all options or ignore if in layout view and user specifies so
         break;
       }
       case 'objectView': {
-        const layoutId = this.model.router.params.layoutId;
-        const objectId = this.model.router.params.objectId;
+        const { layoutId } = this.model.router.params;
+        const { objectId } = this.model.router.params;
 
         if (!layoutId || !objectId) {
-          // object opened from tree view -> use only its own options
+          // Object opened from tree view -> use only its own options
           drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
         } else {
-          // object opened from layout view -> use the layout/tab configuration
+          // Object opened from layout view -> use the layout/tab configuration
           if (this.model.layout.requestedLayout.isSuccess()) {
             let objectData = {};
             this.model.layout.requestedLayout.payload.tabs.forEach((tab) => {

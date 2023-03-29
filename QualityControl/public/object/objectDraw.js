@@ -16,6 +16,7 @@
 
 import { h } from '/js/src/index.js';
 import { timerDebouncer, pointerId } from '../common/utils.js';
+import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import checkersPanel from './checkersPanel.js';
 
 /**
@@ -128,7 +129,7 @@ export function draw(model, tabObject, options, location = '') {
       style: 'word-break: break-all;',
     }, objectRemoteData.payload);
   } else {
-    if (model.object.isObjectChecker(objectRemoteData.payload.qcObject.root)) {
+    if (isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root)) {
       return checkersPanel(objectRemoteData.payload.qcObject.root, location);
     }
   }
@@ -173,7 +174,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
   if (
     objectRemoteData &&
     objectRemoteData.isSuccess() &&
-    !model.object.isObjectChecker(objectRemoteData.payload.qcObject.root) &&
+    !isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
     const qcObject = objectRemoteData.payload.qcObject.root;

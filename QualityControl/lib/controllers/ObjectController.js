@@ -14,6 +14,7 @@
 'use strict';
 import assert from 'assert';
 import { errorHandler } from './../utils/utils.js';
+import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
 
 /**
  * Gateway for all QC Objects requests
@@ -82,15 +83,21 @@ export class ObjectController {
   }
 
   /**
-   * Retrieves a root object from url-location provided
-   * Parses the objects and prepares it in QCG format
-   * @param {String} url - location of Root file to be retrieved
-   * @return {Promise<JSON.Error>} - JSON version of the ROOT object
+   * Retrieves a root object from url-location provided and parses it depending on its type:
+   * * if it is a checker, uses default JSON utility to parse it and replace 'bigint' with string
+   * * if of ROOT type, uses jsroot.toJSON
+   * @param {string} url - location of Root file to be retrieved
+   * @return {Promise<JSON.Error>} - JSON version of the object
    */
   async _getJsRootFormat(url) {
     const file = await this.jsroot.openFile(url);
     const root = await file.readObject('ccdb_object');
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
+
+    if (isObjectOfTypeChecker(root)) {
+      return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
+    }
+
     const rootJson = await this.jsroot.toJSON(root);
     return rootJson;
   }
