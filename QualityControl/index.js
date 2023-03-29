@@ -41,6 +41,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
+http.addStaticPath(path.join(__dirname, 'common'));
 http.addStaticPath(path.join(__dirname, 'public'));
 
 import { createRequire } from 'module';

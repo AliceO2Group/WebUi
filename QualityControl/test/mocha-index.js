@@ -15,7 +15,13 @@
 import utilsTestSuite from './lib/utils/utils.test.js';
 import configurationTestSuite from './lib/config/public-config.test.js';
 
+import { commonLibraryQcObjectUtilsTestSuite as objectUtilityTestSuite } from './common/library/qcObject/utils.test.js';
+
 describe('Lib Test Suite', async () => {
   describe('Utility methods test suite', async () => await utilsTestSuite());
   describe('Configuration File Parser test suite', async () => await configurationTestSuite());
+});
+
+describe('Common Library - Test Suite', () => {
+  describe('CL - Utility methods test suite', () => objectUtilityTestSuite());
 });
