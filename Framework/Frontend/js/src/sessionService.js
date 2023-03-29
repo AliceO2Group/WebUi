@@ -10,23 +10,27 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* global: window */
 
 const location = window.location;
 const history = window.history;
 
-// This are the parameters coming from the server only and represent
+// These are the parameters coming from the server only and represent
 // the current session
 const parametersNames = ['personid', 'name', 'token', 'username', 'access'];
 
 /**
- * Singleton to retrieve and hide the parameters passed as query string.
- * @module sessionService
+ * Class to store authenticated users's session and provide session-related services
  */
-export default {
-  session: null,
+export class SessionService {
+  /**
+   * Constructor
+   */
+  constructor() {
+    this.session = null;
+  }
 
   /**
    * Load parameters from the query string inside sessionService
@@ -35,7 +39,7 @@ export default {
   loadAndHideParameters() {
     this._loadParameters();
     this._hideParameters();
-  },
+  }
 
   /**
    * Load the session parameters from query string into the session object
@@ -47,13 +51,15 @@ export default {
     const url = new URL(location);
     this.session = {};
     parametersNames.forEach((parameterName) => {
-      this.session[parameterName] = parameterName === 'access' ?
-        url.searchParams.get(parameterName).split(',') : url.searchParams.get(parameterName);
+      this.session[parameterName] = parameterName === 'access'
+        ? url.searchParams.get(parameterName).split(',')
+        : url.searchParams.get(parameterName);
+
       if (!this.session[parameterName]) {
         throw new Error(`query string should contain the parameter ${parameterName}`);
       }
     });
-  },
+  }
 
   /**
    * Replace the current URL without the session parameters
@@ -61,10 +67,10 @@ export default {
   _hideParameters() {
     const url = new URL(location);
     parametersNames.forEach((parameterName) =>
-      url.searchParams.delete(parameterName)
+      url.searchParams.delete(parameterName),
     );
     history.replaceState({}, '', url);
-  },
+  }
 
   /**
    * Returns the current session object with all server parameters inside
@@ -77,5 +83,22 @@ export default {
 
     return this.session;
   }
-};
 
+  /**
+   * States if the currently authenticated user has at least one of the given role
+   *
+   * @param {string|string[]} roles the role(s) to check
+   * @return {boolean} true if the user has one of the given roles, else false
+   */
+  hasAccess(roles) {
+    const {access} = this.get();
+
+    return access.some((userRole) => roles.includes(userRole));
+  }
+}
+
+/**
+ * Singleton to retrieve and hide the parameters passed as query string.
+ * @module sessionService
+ */
+export default new SessionService();

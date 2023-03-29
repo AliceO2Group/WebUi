@@ -16,6 +16,8 @@ import {Observable, RemoteData} from '/js/src/index.js';
 import Task from './Task.js';
 import {getTaskShortName} from '../common/utils.js';
 
+const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
+
 /**
  * Model representing Environment CRUD
  */
@@ -266,6 +268,42 @@ export default class Environment extends Observable {
   }
 
   /**
+   * Given an environment, group its tasks by the 3 main categories: FLP, QC Nodes and CTP Readout
+   * @param {EnvironmentInfo} environment - DTO representing an environment
+   * @returns {object{tasks: Array<TaskInfo>, hosts: Set}} - Object with groups of tasks and set of unique hosts
+   */
+  _getTasksGroupedByCategory(environment) {
+    const qc = {tasks: [], hosts: new Set()};
+    const flp = {tasks: [], hosts: new Set()};
+    const trg = {tasks: [], hosts: new Set()};
+
+    const {hostsByDetectorRemote = RemoteData.notAsked()} = this.model.detectors;
+    const {tasks = [], includedDetectors = []} = environment;
+    for (const task of tasks) {
+      const {deploymentInfo: {hostname = ''} = {}} = task;
+      if (hostname.match(QC_NODES_NAME_REGEX)) {
+        qc.tasks.push(task);
+        qc.hosts.add(hostname);
+      } else if (hostsByDetectorRemote.isSuccess()) {
+        const {userVars: {ctp_readout_enabled = 'false'} = {}} = environment;
+        const isReadoutEnabled = ctp_readout_enabled === 'true';
+
+        const hostsByDetectors = hostsByDetectorRemote.payload;
+        const keyDetector = Object.keys(hostsByDetectors)
+          .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
+        if (includedDetectors.includes(keyDetector)) {
+          flp.tasks.push(task);
+          flp.hosts.add(hostname)
+        } else if (isReadoutEnabled) {
+          trg.tasks.push(task);
+          trg.hosts.add(hostname)
+        }
+      }
+    }
+    return {qc, flp, trg};
+  }
+
+  /**
    * Method to remove and parse fields from environment result
    * @param {JSON} result
    * @return {JSON}
@@ -281,6 +319,9 @@ export default class Environment extends Observable {
     result.environment = this._filterOutDetectorsVariables(result.environment, 'vars');
     result.environment = this._filterOutDetectorsVariables(result.environment, 'userVars');
     result.environment = this._filterOutDetectorsVariables(result.environment, 'defaults');
+
+    const {qc, flp, trg} = this._getTasksGroupedByCategory(result.environment);
+    result.environment.hardware = {qc, trg, flp};
     return result;
   }
 }

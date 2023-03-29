@@ -130,19 +130,19 @@ export default class WorkflowVariable {
   /**
    * Given a KV Pair it will check if:
    * * key is valid after being trimmed
-   * * value is valid by checking it's existence in the provided varSpecMap
+   * * value is valid by checking it's existence in the provided varSpecMap and it is not empty unless in EDIT mode
    * @param {String} key
    * @param {Object} value
    * @param {Map<String, JSON>} varSpecMap
    * @return {key:string, value:object, ok: boolean, error: string}
    */
-  static parseKVPair(key, value, varSpecMap = {}) {
+  static parseKVPair(key, value, varSpecMap = {}, inEdit = false) {
     const isKeyValid = key && key.trim() !== '';
-    const isValueValid = value && value.trim() !== '';
+    const isValueValid = (value && value.trim() !== '') || inEdit;
     if (!isKeyValid) {
       return {ok: false, error: `Invalid key '${key}' provided`};
     } if (!isValueValid) {
-      return {ok: false, error: `Invalid value '${value}' provided`};
+      return {ok: false, error: `Invalid value '${value}' provided for key: '${key}'`};
     } else {
       key = key.trim();
       value = value.trim();
@@ -151,9 +151,15 @@ export default class WorkflowVariable {
         return {ok: true, key, value};
       } else if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
         return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
-      } else if (varSpecMap[key].widget === WIDGET_VAR.DROPDOWN_BOX && !varSpecMap[key].allowedValues.includes(value)) {
+      } else if (varSpecMap[key].type === VAR_TYPE.STRING && !varSpecMap[key].allowedValues.includes(value)) {
         return {ok: false, error: `Allowed values for key '${key}' are ${varSpecMap[key].allowedValues.toString()}`};
-      }
+      } else if (varSpecMap[key].type === VAR_TYPE.NUMBER && Number.isNaN(Number(value))) {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type Number`};
+      } else if (varSpecMap[key].type === VAR_TYPE.ARRAY && !Array.isArray(value)) {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type Array`};
+      } else if (varSpecMap[key].type === VAR_TYPE.JSON && typeof value !== 'object') {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type a JSON`};
+      } 
       return {ok: true, key, value};
     }
   }

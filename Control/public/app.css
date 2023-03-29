@@ -23,9 +23,6 @@
 
 .grafana-font { font-family: Roboto, Helvetica Neue, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #52545c; font-weight: 515; text-align: center; }
 
-/* tr:hover td { background-color: var(--color-gray-light) } */
-tr.global-run td { background-color: #dbedff};
-
 .actionable-row:hover { cursor: pointer; }
 
 .actionable-icon { cursor: pointer; }
@@ -60,9 +57,13 @@ tr.global-run td { background-color: #dbedff};
 
 .template-selection { width: 33%; }
 
-.miniCard {min-width: 25em;}
-.bg-danger-less { background-color: var(--color-soft-red); }
+.cardGroupColumn { display: flex; flex-direction: column; flex-wrap: wrap; gap: var(--space-s); }
+.cardGroupRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--space-s); }
 
+.miniCard { min-width: 22em; }
+.miniCard > .runNumber { display:flex; font-size:2.3em; align-items: center; justify-content: center; background-color: var(--color-success); color: var(--color-white); height: 100%}
+
+.bg-danger-less { background-color: var(--color-soft-red); }
 
 @media (max-width: 1000px) {
   .auto-built-panel { width: 100%; }

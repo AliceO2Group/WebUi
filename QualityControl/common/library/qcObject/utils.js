@@ -10,22 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-export const ALIECS_STATE_COLOR = {
-  RUNNING: 'success',
-  CONFIGURED: 'primary',
-  ERROR: 'danger',
-  UNKNOWN: 'danger',
-  MIXED: 'danger-less',
-  STANDBY: 'gray-darker',
-  DEPLOYED: 'gray-darker',
-  PENDING: 'gray-darker'
-};
+export const QC_CHECKER_TYPE = 'qualityobject';
+export const OBJECT_TYPE_KEY = '_typename';
 
-export const ODC_STATE_COLOR = {
-  RUNNING: 'success',
-  READY: 'primary',
-  ERROR: 'danger',
-  UNKNOWN: 'danger',
-};
+/**
+ * Given a QCObject representation, return if the type of the object is checker
+ * @param {object} object - qc object representation as JSON
+ * @returns {boolean} - true/false depending on type of object
+ */
+export function isObjectOfTypeChecker(object) {
+  const objectType = object['_typename'] ?? '';
+  return objectType.toLowerCase().includes(QC_CHECKER_TYPE);
+}

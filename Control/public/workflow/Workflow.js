@@ -275,8 +275,8 @@ export default class Workflow extends Observable {
    * @param {string} key
    * @param {Object} value
    */
-  addVariable(keyToAdd, valueToAdd) {
-    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap);
+  addVariable(keyToAdd, valueToAdd, inEdit = false) {
+    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap, inEdit);
     if (ok) {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
@@ -305,15 +305,15 @@ export default class Workflow extends Observable {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
         this.form.basicVariables[key] = parsedKVJSON[key];
-        this.model.notification.show(
-          'Variables have been successfully imported in the configuration panels', 'success', 3000
-        );
       } else {
         this.form.variables[key] = parsedKVJSON[key];
       }
     });
     if (errors.length === 0) {
       this.kvPairsString = '';
+      this.model.notification.show(
+        'Variables have been successfully imported in the configuration panels', 'success', 3000
+      );
     }
     this.advErrorPanel = errors;
     this.notify();

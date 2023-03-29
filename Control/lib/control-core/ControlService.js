@@ -223,8 +223,10 @@ class ControlService {
     const username = req?.session?.username ?? '';
     const personid = req?.session?.personid ?? '';
     if (method.startsWith('New') || method.startsWith('CleanupTasks')) {
-      const type = req.body.type ? ` (${req.body.type})` : '';
-      log.info(`${username}(${personid}) => ${method} ${type}`, 6);
+      const operation = req.body.operation ? ` (${req.body.operation})` : '';
+      log.infoMessage(`${username}(${personid}) => ${method} ${operation}`, {
+        level: 1, facility: 'cog/controlservice'
+      });
     } else if (method.startsWith('Control') || method.startsWith('Destroy')) {
       const type = req.body.type ? ` (${req.body.type})` : '';
       const partition = req.body.id;
