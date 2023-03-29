@@ -18,7 +18,7 @@ import advancedVarsPanel from './advancedPanel.js';
 import loadConfigurationPanel from '../loadConfiguration/loadConfiguration.js';
 import WorkflowVariable from './WorkflowVariable.js';
 
-const WORKFLOWS_ALLOWING_FOR_NONE = ['FLPS_WORKFLOWS', 'QC_NODES_WORKFLOWS'];
+const WORKFLOWS_ALLOWING_FOR_NONE = ['FLP_WORKFLOWS', 'FLPS_WORKFLOWS', 'QC_NODES_WORKFLOWS'];
 
 /**
  * Builds a custom set of panels build based on the user's selection of template
@@ -72,8 +72,8 @@ const autoBuiltPanel = (workflow, variables, name) => {
   const nameAsString = name.replace(/([a-z](?=[A-Z]))/g, '$1 ').replace(/_/g, ' ');
   return h('.w-100', [
     h('h5.bg-gray-light.p2.panel-title.w-100.flex-row',
-      h('', {style: 'flex-grow: 2;'}, nameAsString),
       WORKFLOWS_ALLOWING_FOR_NONE.includes(name.toLocaleUpperCase()) && toggleInsideValuesForPanel(workflow, variables),
+      h('', {style: 'flex-grow: 2;'}, nameAsString),
       h('button.btn.btn-sm', {
         onclick: () => {
           workflow.panelsUtils[name].isVisible = !workflow.panelsUtils[name].isVisible;
