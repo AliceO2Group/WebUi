@@ -142,7 +142,7 @@ export default class WorkflowVariable {
     if (!isKeyValid) {
       return {ok: false, error: `Invalid key '${key}' provided`};
     } if (!isValueValid) {
-      return {ok: false, error: `Invalid value '${value}' provided`};
+      return {ok: false, error: `Invalid value '${value}' provided for key: '${key}'`};
     } else {
       key = key.trim();
       value = value.trim();
