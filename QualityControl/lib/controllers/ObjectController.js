@@ -37,7 +37,7 @@ export class ObjectController {
    * Build Object Data response based on passed object path
    * @param {Request} req - HTTP request object with "query" information on object
    * @param {Response} res - HTTP response object to provide information on request
-   * @return {void}
+   * @returns {void}
    */
   async getObjectInfo(req, res) {
     const path = req.query?.path;
@@ -60,7 +60,7 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @return {void}
+   * @returns {void}
    */
   async getObjectContent(req, res) {
     const path = req.query?.path;
@@ -87,7 +87,7 @@ export class ObjectController {
    * * if it is a checker, uses default JSON utility to parse it and replace 'bigint' with string
    * * if of ROOT type, uses jsroot.toJSON
    * @param {string} url - location of Root file to be retrieved
-   * @return {Promise<JSON.Error>} - JSON version of the object
+   * @returns {Promise<JSON.Error>} - JSON version of the object
    */
   async _getJsRootFormat(url) {
     const file = await this.jsroot.openFile(url);

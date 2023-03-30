@@ -57,8 +57,9 @@ export const setup = (http) => {
 
 /**
  * List all objects without data
- * @param {Request} req
- * @param {Response} res
+ * @param {Request} req - HTTP request object with information on owner_id
+ * @param {Response} res - HTTP response object to provide layouts information
+ * @returns {undefined}
  */
 function listObjectsTwo(req, res) {
   listObjects()
@@ -68,8 +69,9 @@ function listObjectsTwo(req, res) {
 
 /**
  * List all Online objects' name if online mode is enabled
- * @param {Request} req
- * @param {Response} res
+ * @param {Request} req - HTTP request object with information on owner_id
+ * @param {Response} res - HTTP response object to provide layouts information
+ * @returns {undefined}
  */
 function listOnlineObjects(req, res) {
   if (typeof consulService !== 'undefined') {
@@ -86,8 +88,9 @@ function listOnlineObjects(req, res) {
 
 /**
  * Check the state of OnlineMode by checking the status of Consul Leading Agent
- * @param {Request} req
- * @param {Response} res
+ * @param {Request} req - HTTP request object with information on owner_id
+ * @param {Response} res - HTTP response object to provide layouts information
+ * @returns {undefined}
  */
 function isOnlineModeConnectionAlive(req, res) {
   if (typeof consulService !== 'undefined') {
@@ -104,6 +107,7 @@ function isOnlineModeConnectionAlive(req, res) {
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
+ * @returns {undefined}
  */
 function errorHandler(err, res, status = 500) {
   if (err.stack) {
@@ -120,8 +124,8 @@ function errorHandler(err, res, status = 500) {
 /**
  * Method to extract the tags (with a specified prefix) from a list of services.
  * This represents objects that are in online mode
- * @param {JSON} services
- * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
+ * @param {JSON} services - services as per ConsulService
+ * @returns {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
  */
 function getTagsFromServices(services) {
   const prefix = queryPrefix;

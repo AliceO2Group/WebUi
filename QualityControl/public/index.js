@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global QCG */
-
 // Import QCG Public Configuration
 import { QCG } from './config.js';
 import { mount, sessionService } from '/js/src/index.js';

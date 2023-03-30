@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -26,6 +25,9 @@ const ownerNameUser1 = 'John Doe';
 const ownerIdUser2 = 101;
 const ownerNameUser2 = 'Samantha Smith';
 
+/* eslint-disable valid-jsdoc */
+/* eslint-disable max-len */
+
 /**
  * This is a static model running without any datastore to make tests locally for example.
  * It produces layouts, folders, objects and the contents.
@@ -36,7 +38,7 @@ const ownerNameUser2 = 'Samantha Smith';
 /**
  * Fake promise latency
  * @param {Any} data
- * @return {Promise} data is returned
+ * @returns {Promise} data is returned
  */
 function promiseResolveWithLatency(data) {
   return new Promise((resolve) => {
@@ -46,7 +48,7 @@ function promiseResolveWithLatency(data) {
 
 /**
  * Fake promise latency
- * @return {Promise} error is returned
+ * @returns {Promise} error is returned
  */
 function promiseRejectWithLatency() {
   return new Promise((resolve, reject) => {
@@ -57,7 +59,7 @@ function promiseRejectWithLatency() {
 /**
  * Read object's data or null if it fails
  * @param {string} name - Object's path like agentName/objectName/objectNameSub
- * @return {Object|null}
+ * @returns {Object|null}
  */
 function readObjectData(name) {
   if (name === 'DAQ01/EventSize/ACORDE/ACORDE') {
@@ -70,15 +72,21 @@ function readObjectData(name) {
 
 /**
  * List all object without the data which are heavy
- * @return {Array<Layout>}
+ * @returns {Array<Layout>}
  */
 function listObjects() {
-  return promiseResolveWithLatency(objects.map((object) => ({ name: object.name, createTime: parseInt(object['Created']), lastModified: parseInt(object['Last-Modified']) })));
+  return promiseResolveWithLatency(objects.map((object) => (
+    {
+      name: object.name,
+      createTime: parseInt(object['Created'], 10),
+      lastModified: parseInt(object['Last-Modified'], 10),
+    }
+  )));
 }
 
 /**
  * Return an empty array
- * @return {Array<Layout>}
+ * @returns {Array<Layout>}
  */
 function getObjectTimestampList() {
   return promiseResolveWithLatency([]);
@@ -86,7 +94,7 @@ function getObjectTimestampList() {
 
 /**
  * Return true for checking online mode connection
- * @return {Array<Layout>}
+ * @returns {Array<Layout>}
  */
 function isOnlineModeConnectionAlive() {
   return promiseResolveWithLatency({ running: true });
@@ -95,7 +103,7 @@ function isOnlineModeConnectionAlive() {
 /**
  * Create a layout
  * @param {Layout} layout
- * @return {Object} Empty details
+ * @returns {Object} Empty details
  */
 function createLayout(layout) {
   layout.owner_id = ownerIdUser1;
@@ -108,7 +116,7 @@ function createLayout(layout) {
 /**
  * List layouts, can be filtered
  * @param {Object} filter - undefined or {owner_id: XXX}
- * @return {Array<Layout>}
+ * @returns {Array<Layout>}
  */
 function listLayouts(filter = {}) {
   filter.owner_id = filter.owner_id !== undefined ? ownerIdUser1 : filter.owner_id;
@@ -118,7 +126,7 @@ function listLayouts(filter = {}) {
 /**
  * Retrieve a layout or null
  * @param {string} layoutId - layout id
- * @return {Layout|null}
+ * @returns {Layout|null}
  */
 function readLayout(layoutId) {
   return promiseResolveWithLatency(layouts.find((layout) => layout.id === layoutId));
@@ -128,7 +136,7 @@ function readLayout(layoutId) {
  * Update a single layout by its id
  * @param {string} layoutId
  * @param {Layout} data
- * @return {Object} Empty details
+ * @returns {Object} Empty details
  */
 function updateLayout(layoutId, data) {
   const layout = layouts.find((layout) => layout.id === layoutId);
@@ -142,7 +150,7 @@ function updateLayout(layoutId, data) {
 /**
  * Delete a single layout by its id
  * @param {string} layoutId
- * @return {Object} Empty details
+ * @returns {Object} Empty details
  */
 function deleteLayout(layoutId) {
   const layout = layouts.find((layout) => layout.id === layoutId);

@@ -42,7 +42,7 @@ export class LayoutController {
    * * if no owner_id is provided, all layouts will be fetched;
    * @param {Request} req - HTTP request object with information on owner_id
    * @param {Response} res - HTTP response object to provide layouts information
-   * @return {void}
+   * @returns {undefined}
    */
   async listLayouts(req, res) {
     try {
@@ -61,7 +61,7 @@ export class LayoutController {
    * Fetches and responds with a single layout specified by layout "id" if found;
    * @param {Request} req - HTTP request object with "params" information on layout ID
    * @param {Response} res - HTTP response object to provide layout information
-   * @return {void}
+   * @returns {undefined}
    */
   async readLayout(req, res) {
     try {
@@ -83,7 +83,7 @@ export class LayoutController {
    * * body - for layout data to be updated
    * @param {Request} req - HTTP request object with "query" and "body" information on layout
    * @param {Response} res - HTTP response object to provide information on the update
-   * @return {void}
+   * @returns {undefined}
    */
   async updateLayout(req, res) {
     try {
@@ -113,7 +113,7 @@ export class LayoutController {
    * Attempts to delete a single layout specified by its id
    * @param {Request} req - HTTP request object with "params" information on layout ID
    * @param {Response} res - HTTP response object to inform client if deletion was successful
-   * @return {void}
+   * @returns {undefined}
    */
   async deleteLayout(req, res) {
     try {
@@ -135,7 +135,7 @@ export class LayoutController {
    * Validates received payload follows a layout format and if successful, stores it
    * @param {Request} req - HTTP request object with "body" information on layout to be created
    * @param {Response} res - HTTP request object with result of the action
-   * @return {void}
+   * @returns {undefined}
    */
   async createLayout(req, res) {
     try {

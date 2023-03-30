@@ -23,7 +23,7 @@ import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 export default class QCObject extends Observable {
   /**
    * Initialize model with empty values
-   * @param {Object} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
@@ -64,6 +64,7 @@ export default class QCObject extends Observable {
    * Set searched items table UI sizes to allow virtual scrolling
    * @param {number} scrollTop - position of the user's scroll cursor
    * @param {number} scrollHeight - height of table's viewport (not content height which is higher)
+   * @returns {undefined}
    */
   setScrollTop(scrollTop, scrollHeight) {
     this.scrollTop = scrollTop;
@@ -73,7 +74,8 @@ export default class QCObject extends Observable {
 
   /**
    * Method to toggle the box displaying more information about the histogram
-   * @param {string} objectName
+   * @param {string} objectName - object for which the toggle should be done
+   * @returns {undefined}
    */
   toggleInfoArea(objectName) {
     this.selectedOpen = !this.selectedOpen;
@@ -93,7 +95,8 @@ export default class QCObject extends Observable {
 
   /**
    * Method to display sideTree(edit layout mode) based on onlineList / offlineList
-   * @param {boolean} isOnlineListRequested
+   * @param {boolean} isOnlineListRequested - whether user would like to view only online list
+   * @returns {undefined}
    */
   toggleSideTree(isOnlineListRequested) {
     this.sideTree.bubbleTo(this);
@@ -109,6 +112,7 @@ export default class QCObject extends Observable {
 
   /**
    * Toggle the display of the sort by dropdown
+   * @returns {undefined}
    */
   toggleSortDropdown() {
     this.sortBy.open = !this.sortBy.open;
@@ -121,6 +125,7 @@ export default class QCObject extends Observable {
    * - online objects according to information service
    * - search input from user
    * If any of those changes, this method should be called to update the outputs.
+   * @returns {undefined}
    */
   _computeFilters() {
     if (this.searchInput) {
@@ -134,9 +139,10 @@ export default class QCObject extends Observable {
 
   /**
    * Method to sort a list of JSON objects by one of its fields
-   * @param {Array<JSON>} listSource
-   * @param {string} field
-   * @param {string} order
+   * @param {Array<JSON>} listSource - list of objects to be sorted
+   * @param {string} field - filed by which the sort should be done
+   * @param {number} order - order by which it should be done
+   * @returns {undefined}
    */
   sortListByField(listSource, field, order) {
     listSource.sort((a, b) => {
@@ -158,10 +164,11 @@ export default class QCObject extends Observable {
 
   /**
    * Sort Tree of Objects by specified field and order
-   * @param {string} title
-   * @param {string} field
+   * @param {string} title - title of the tree to be sorted
+   * @param {string} field - field by which the sort operation should happen
    * @param {number} order {-1; 1}
-   * @param {function} icon
+   * @param {function} icon - icon to be displayed based on sort order
+   * @returns {undefined}
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
@@ -187,6 +194,7 @@ export default class QCObject extends Observable {
 
   /**
    * Ask server for all available objects, fills `tree` of objects
+   * @returns {undefined}
    */
   async loadList() {
     if (!this.model.isOnlineModeEnabled) {
@@ -230,6 +238,7 @@ export default class QCObject extends Observable {
 
   /**
    * Ask server for online objects and fills tree with them
+   * @returns {undefined}
    */
   async loadOnlineList() {
     this.objectsRemote = RemoteData.loading();
@@ -267,7 +276,8 @@ export default class QCObject extends Observable {
   /**
    * Load full content of an object in-memory
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
-   * @param {number} timestamp
+   * @param {number} timestamp - timestamp in ms
+   * @returns {undefined}
    */
   async loadObjectByName(objectName, timestamp = -1) {
     this.objects[objectName] = RemoteData.loading();
@@ -285,8 +295,9 @@ export default class QCObject extends Observable {
         this.notify();
       }
       if (this.selected) {
-        this.selected.version = timestamp === -1 ?
-          parseInt(this.objects[objectName].payload.timestamps[0]) : parseInt(timestamp);
+        this.selected.version = timestamp === -1
+          ? parseInt(this.objects[objectName].payload.timestamps[0], 10)
+          : parseInt(timestamp, 10);
       }
     } else {
       this.objects[objectName] = obj;
@@ -297,6 +308,8 @@ export default class QCObject extends Observable {
   /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
+   * @param {object} filter - to be applied on quering objects
+   * @returns {undefined}
    */
   async loadObjects(objectsName, filter = {}) {
     this.objectsRemote = RemoteData.loading();
@@ -322,6 +335,7 @@ export default class QCObject extends Observable {
   /**
    * Refreshes currently displayed objects and requests an updated list
    * of online objects from Consul
+   * @returns {undefined}
    */
   refreshObjects() {
     this.loadObjects(Object.keys(this.objects));
@@ -331,6 +345,7 @@ export default class QCObject extends Observable {
   /**
    * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
    * @param {string} name - name of the object
+   * @returns {undefined}
    */
   invalidObject(name) {
     this.objects[name] = RemoteData.failure('JSROOT was unable to draw this object');
@@ -341,7 +356,8 @@ export default class QCObject extends Observable {
    * Set the current selected object by user
    * Search within `currentList`;
    * If user is in online mode, `list` will be used instead
-   * @param {QCObject} object
+   * @param {QCObject} object - object to be selected and loaded
+   * @returns {undefined}
    */
   async select(object) {
     if (this.currentList.length > 0) {
@@ -359,7 +375,8 @@ export default class QCObject extends Observable {
 
   /**
    * Set the current user search string and compute next visible list of objects
-   * @param {string} searchInput
+   * @param {string} searchInput - user input by which the sort should be done
+   * @returns {undefined}
    */
   search(searchInput) {
     this.searchInput = searchInput;
@@ -371,7 +388,7 @@ export default class QCObject extends Observable {
   /**
    * Method to check if an object is in online mode
    * @param {string} objectName format: QcTask/example
-   * @return {boolean}
+   * @returns {boolean} - whether the object is in the online list
    */
   isObjectInOnlineList(objectName) {
     return this.model.isOnlineModeEnabled && this.listOnline
@@ -380,9 +397,9 @@ export default class QCObject extends Observable {
 
   /**
    * Method to generate drawing options based on where in the application the plot is displayed
-   * @param {Object} tabObject
-   * @param {Object} objectRemoteData
-   * @return {Array<string>}
+   * @param {object} tabObject - tab dto representation
+   * @param {object} objectRemoteData - object within a remotedata
+   * @returns {Array<string>} - list of drawing options
    */
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
@@ -457,9 +474,9 @@ export default class QCObject extends Observable {
 
   /**
    * Method to parse through tabs and objects of a layout to return one object by ID
-   * @param {Object} layout
-   * @param {string} objectId
-   * @return {string}
+   * @param {Object} layout - layout dto representation
+   * @param {string} objectId - id of the object within the layout
+   * @returns {string} - object name queried by id
    */
   getObjectNameByIdFromLayout(layout, objectId) {
     let objectName = '';
@@ -474,8 +491,8 @@ export default class QCObject extends Observable {
 
   /**
    * Method to search for the object which info was requested for and return lastModified timestamp
-   * @param {string} objectName
-   * @return {string}
+   * @param {string} objectName - name of the object
+   * @returns {string|'Loading'|'-'} - date of last modified
    */
   getLastModifiedByName(objectName) {
     const objMap = this.model.services.object.objectsLoadedMap;
@@ -492,8 +509,8 @@ export default class QCObject extends Observable {
 
   /**
    * Method to search for the object which info was requested for and return runNumber
-   * @param {string} objectName
-   * @return {string}
+   * @param {string} objectName - name of the object in question
+   * @returns {string|'Loading'|'-'} - RunNumber of the object
    */
   getRunNumberByName(objectName) {
     const objMap = this.model.services.object.objectsLoadedMap;
@@ -509,8 +526,8 @@ export default class QCObject extends Observable {
 
   /**
    * Return the list of object timestamps
-   * @param {string} name
-   * @return {array<numbers>}
+   * @param {string} name - name of the object to be retrieving the list
+   * @returns {Array<number>} - list of timestamps for queried object
    */
   getObjectTimestamps(name) {
     if (this.objects[name] && this.objects[name].kind === 'Success') {

@@ -10,17 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /*
-Javascript is weakly-typed.
-Properties of an object can be checked
-*/
+ *Javascript is weakly-typed.
+ *Properties of an object can be checked
+ */
 
 /**
  * Checks type of passed argument
- * @param {Array.<Layout>} array
- * @return {boolean} true is correct
+ * @param {Array.<Layout>} array - list of layouts to be asserted
+ * @returns {boolean} true is correct
  */
 export function assertLayouts(array) {
   assertArray(array);
@@ -30,8 +30,8 @@ export function assertLayouts(array) {
 
 /**
  * Checks type of passed argument
- * @param {Layout} obj
- * @return {boolean} true is correct
+ * @param {Layout} obj - layout dto representation
+ * @returns {boolean} true is correct
  */
 export function assertLayout(obj) {
   assertString(obj.id);
@@ -44,8 +44,8 @@ export function assertLayout(obj) {
 
 /**
  * Checks type of passed argument
- * @param {Array.<Tab>} array
- * @return {boolean} true is correct
+ * @param {Array.<Tab>} array - list of tabs to be asserted
+ * @returns {boolean} true is correct
  */
 export function assertTabs(array) {
   assertArray(array);
@@ -55,8 +55,8 @@ export function assertTabs(array) {
 
 /**
  * Checks type of passed argument
- * @param {Tab} obj
- * @return {boolean} true is correct
+ * @param {Tab} obj - tab dto to be asserted
+ * @returns {boolean} true is correct
  */
 export function assertTab(obj) {
   assertString(obj.id);
@@ -67,8 +67,8 @@ export function assertTab(obj) {
 
 /**
  * Checks type of passed argument
- * @param {TabObject} obj
- * @return {boolean} true is correct
+ * @param {TabObject} obj - tab element to be asserted
+ * @returns {boolean} true is correct
  */
 export function assertTabObject(obj) {
   assertString(obj.id);
@@ -85,8 +85,8 @@ export function assertTabObject(obj) {
 
 /**
  * Checks type of passed argument
- * @param {number} value
- * @return {boolean} true is correct
+ * @param {number} value - value to be asserted as number
+ * @returns {boolean} true is correct
  */
 export function assertNumber(value) {
   if (typeof value !== 'number') {
@@ -97,8 +97,8 @@ export function assertNumber(value) {
 
 /**
  * Checks type of passed argument
- * @param {string} value
- * @return {boolean} true is correct
+ * @param {string} value - value to be asserted as string
+ * @returns {boolean} true is correct
  */
 export function assertString(value) {
   if (typeof value !== 'string') {
@@ -109,8 +109,8 @@ export function assertString(value) {
 
 /**
  * Checks type of passed argument
- * @param {array} value
- * @return {boolean} true is correct
+ * @param {array} value - to be asserted as array
+ * @returns {boolean} true is correct
  */
 export function assertArray(value) {
   if (!Array.isArray(value)) {
@@ -118,4 +118,3 @@ export function assertArray(value) {
   }
   return value;
 }
-

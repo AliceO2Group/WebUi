@@ -20,6 +20,7 @@ const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
  */
 export default class QCObjectDto {
   /**
+   * Constructor to initialize QCObject fields with default values
    */
   constructor() {
     this.id = '';
@@ -38,9 +39,11 @@ export default class QCObjectDto {
   }
 
   /**
-   * Checks if passed object's path is valid
-   * @param {JSON} object
-   * @returns {Boolean}
+   * Checks if passed object's path is valid:
+   * * contains 'path' attribute
+   * * path is composed of multiple blocks separated by '/'
+   * @param {JSON} object - qc object representation
+   * @returns {boolean} - whether the path is valid or not
    */
   static isObjectPathValid(object) {
     if (!object || !object['path']) {
@@ -58,7 +61,7 @@ export default class QCObjectDto {
    * * known keys are mapped to camelCase format
    * * timestamps (ms) are converted from string to number
    * @param {Object} item - from CCDB
-   * @return {Object} - JSON with keys in camelCase format
+   * @returns {Object} - JSON with keys in camelCase format
    */
   static toStandardObject(item) {
     if (item['path']) {

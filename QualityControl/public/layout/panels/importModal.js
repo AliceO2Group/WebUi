@@ -10,18 +10,18 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Component which will display a modal allowing the users to select their detector view
  * No matter the page location, modal will be displayed if user did not make a selection
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 export default (model) =>
-  h('.o2-modal',
+  h('.o2-modal', [
     h('.o2-modal-content', [
       h('.p2.text-center.flex-column', [
         h('h4.pv1', 'Import a layout in JSON format'),
@@ -39,7 +39,7 @@ export default (model) =>
           Failure: (error) => h('.danger.pv1', error.message),
         }),
         h('.btn-group.w-100.align-center.pv1', {
-          style: 'display:flex; justify-content:center;'
+          style: 'display:flex; justify-content:center;',
         }, [
           h('button.btn.btn-primary', {
             disabled: model.layout.newJSON === undefined || model.services.layout.new.isFailure(),
@@ -50,5 +50,5 @@ export default (model) =>
           }, 'Cancel'),
         ]),
       ]),
-    ])
-  );
+    ]),
+  ]);

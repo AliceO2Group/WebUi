@@ -10,15 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import spinner from '../loader/spinner.js';
 
 /**
  * Shows header of Framework Information
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 export default (model) => [
   h('.w-50.flex-row.justify-center', [
@@ -26,5 +26,5 @@ export default (model) => [
     model.frameworkInfo.item.isLoading() &&
     h('.f4', spinner()),
   ]),
-  h('.flex-grow')
+  h('.flex-grow'),
 ];
