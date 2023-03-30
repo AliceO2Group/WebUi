@@ -10,7 +10,10 @@
         "mocha": true
     },
     "ignorePatterns": [
-        "node_modules/"
+        "node_modules/",
+        "public/config.js",
+        "docs",
+        "lib/demoData"
     ],
     "globals": {
         "Promise": true

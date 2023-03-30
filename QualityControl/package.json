@@ -19,7 +19,7 @@
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "start": "node index.js",
-    "test": "npm run mocha",
+    "test": "npm run eslint && npm run mocha",
     "integration-test": "mocha --exit --bail ./test/integration/qcg-test.cjs -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "eslint": "./node_modules/.bin/eslint --config .eslintrc *.js lib/ public/",

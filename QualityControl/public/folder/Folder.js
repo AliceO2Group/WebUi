@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model namespace for Folder type,
@@ -21,8 +21,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class Folder extends Observable {
   /**
    * Initialize with empty values
-   * @param {string} model
-   * @param {boolean} isOpened
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
@@ -32,8 +31,8 @@ export default class Folder extends Observable {
 
   /**
    * Add new folder and return if it was successful or not
-   * @param {JSON} folder
-   * @return {boolean}
+   * @param {JSON} folder - folder representation
+   * @returns {boolean} - where the folder was successfully added or not
    */
   addFolder(folder) {
     if (!folder.title || folder.title.trim() === '') {
@@ -57,8 +56,8 @@ export default class Folder extends Observable {
 
   /**
    * Method to close/open a folder
-   * @param {string} title
-   * @return {boolean}
+   * @param {string} title - folder to change state for
+   * @return {boolean} - current state of the folder
    */
   toggleFolder(title) {
     const state = this.map.get(title).isOpened;

@@ -25,8 +25,8 @@ import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
  * - app part on left side
  * - page title on center
  * - page actions on right side
- * @param {Object} model
- * @returns {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - header element
  */
 export default (model) => h('.flex-row.p2', [
   commonHeader(model),
@@ -38,8 +38,8 @@ let onlineButtonStyle = 'btn-default';
 
 /**
  * Shows the page specific header (center and right side)
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @return {vnode} - virtual node element
  */
 const headerSpecific = (model) => {
   switch (model.page) {
@@ -53,8 +53,8 @@ const headerSpecific = (model) => {
 
 /**
  * Shows app header, common to all pages (profile button + app title)
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @return {vnode} - virtual node element
  */
 const commonHeader = (model) => h('.flex-grow', [
   loginButton(model),
@@ -67,8 +67,8 @@ const commonHeader = (model) => h('.flex-grow', [
 
 /**
  * Shows profile button to logout or check who is the current owner of session
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @return {vnode} - virtual node element
  */
 const loginButton = (model) =>
   h('.dropdown', {
@@ -85,8 +85,8 @@ const loginButton = (model) =>
 
 /**
  * Create button which will allow user to enable/disable online mode
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @return {vnode} - virtual node element
  */
 const onlineButton = (model) => h(
   'button.btn',
@@ -104,7 +104,8 @@ const onlineButton = (model) => h(
 
 /**
  * Action to disable/enable online mode
- * @param {Object} model
+ * @param {Model} model - root model of the application
+ * @return {undefined}
  */
 function toggleOnlineButton(model) {
   model.toggleMode();

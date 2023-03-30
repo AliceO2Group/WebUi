@@ -10,64 +10,66 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Shows a page to view framework information
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @return {vnode} - virtual node element
  */
-export default (model) => h('.p2.absolute-fill.text-center',
+export default (model) => h(
+  '.p2.absolute-fill.text-center',
   model.frameworkInfo.item.match({
     NotAsked: () => null,
     Loading: () => null,
     Success: (data) => showContent(data),
-    Failure: (error) => showContent({error: {message: error}}),
-  })
+    Failure: (error) => showContent({ error: { message: error } }),
+  }),
 );
 
 /**
-* Display a table with QC GUI and its dependencies status
-* @param {Object} item
-* @return {vnode}
-*/
-const showContent = (componentList) =>
-  Object.keys(componentList).map((component) => [
+ * Display a table with QC GUI and its dependencies status
+ * @param {Map<string, object>} componentMap - JSON representation of the components used by QCG
+ * @return {vnode} - virtual node element
+ */
+const showContent = (componentMap) =>
+  Object.keys(componentMap).map((component) => [
     h('.shadow-level1', [
       h('table.table', {
-        style: 'white-space: pre-wrap;'
+        style: 'white-space: pre-wrap;',
       }, [
         h('tbody', [
-          h('tr',
-            h('th.flex-row', componentHeader(componentList[component].status, component))
+          h(
+            'tr',
+            h('th.flex-row', componentHeader(componentMap[component].status, component)),
           ),
-          Object.keys(componentList[component]).map((name) => componentInfoRow(name, componentList[component]))])
-      ])
-    ])
+          Object.keys(componentMap[component]).map((name) => componentInfoRow(name, componentMap[component])),
+        ]),
+      ]),
+    ]),
   ]);
 
 /**
  * Display the header of the component with a green check or
  * red x depending on the status
  * @param {JSON} status { <ok>: boolean, [message]: string}
- * @param {string} component
- * @return {vnode}
+ * @param {string} component - component dto representation
+ * @return {vnode} - virtual node element
  */
 const componentHeader = (status, component) => [
   status && status.ok && h('.badge.bg-success.white.f6', '✓'),
   status && !status.ok && h('.badge.bg-danger.white.f6', '✕'),
-  h('.mh2', {style: 'text-decoration: underline'}, component.toUpperCase()),
+  h('.mh2', { style: 'text-decoration: underline' }, component.toUpperCase()),
 ];
-
 
 /**
  * Create a row with 2 columns: name and value
  * containing information about a sub-property of the component
  * @param {string} name - sub-property of component
- * @param {string} componentProps
- * @return {vnode}
+ * @param {string} componentProps - component properties
+ * @return {vnode} - virtual node element
  */
 const componentInfoRow = (name, componentProps) =>
   name === 'status' ?

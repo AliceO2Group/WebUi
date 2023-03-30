@@ -85,6 +85,7 @@ export default class Model extends Observable {
   /**
    * Initialize steps in a certain order based on
    * mandatory information from server
+   * @returns {undefined}
    */
   async initModel() {
     this.services = {
@@ -117,7 +118,8 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending on incoming keyboard event
-   * @param {Event} e
+   * @param {Event} e - event for which to handle action
+   * @returns {undefined}
    */
   handleKeyboardDown(e) {
     // Console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
@@ -135,7 +137,8 @@ export default class Model extends Observable {
   }
 
   /**
-   * Handle authed event from WS when connection is ready to be used,
+   * Handle authed event from WS when connection is ready to be used
+   * @returns {undefined}
    */
   handleWSAuthed() {
     // Subscribe to all notifications from server (information service)
@@ -144,6 +147,7 @@ export default class Model extends Observable {
 
   /**
    * Handle close event from WS when connection has been lost (server restart, etc.)
+   * @returns {undefined}
    */
   handleWSClose() {
     const self = this;
@@ -154,6 +158,7 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending new location of the page
+   * @returns {undefined}
    */
   handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
@@ -217,6 +222,7 @@ export default class Model extends Observable {
 
   /**
    * Show or hide sidebar
+   * @returns {undefined}
    */
   toggleSidebar() {
     this.sidebar = !this.sidebar;
@@ -225,6 +231,7 @@ export default class Model extends Observable {
 
   /**
    * Toggle account menu dropdown
+   * @returns {undefined}
    */
   toggleAccountMenu() {
     this.accountMenuEnabled = !this.accountMenuEnabled;
@@ -233,6 +240,7 @@ export default class Model extends Observable {
 
   /**
    * Toggle mode (Online/Offline)
+   * @returns {undefined}
    */
   toggleMode() {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
@@ -250,7 +258,7 @@ export default class Model extends Observable {
   /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
-   * @return {boolean}
+   * @return {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
@@ -258,6 +266,7 @@ export default class Model extends Observable {
 
   /**
    * Method to check if Online Mode is available
+   * @returns {undefined}
    */
   async checkOnlineModeAvailability() {
     const result = await this.services.object.isOnlineModeConnectionAlive();
@@ -272,6 +281,7 @@ export default class Model extends Observable {
    * Set the interval to update objects currently loaded and shown to user.
    * This will reload only data associated to them
    * @param {number} intervalSeconds - in seconds
+   * @returns {undefined}
    */
   setRefreshInterval(intervalSeconds) {
     // Stop any other timer
@@ -299,7 +309,7 @@ export default class Model extends Observable {
 
   /**
    * Returns the visibility of the import layout modal
-   * @return {boolean}
+   * @return {boolean} - whether import modal is visible
    */
   get isImportVisible() {
     return this._isImportVisible;
@@ -307,8 +317,8 @@ export default class Model extends Observable {
 
   /**
    * Sets the visibility of the import layout modal
-   * @param {boolean} value
-   * @return {boolean}
+   * @param {boolean} value - value to be set for modal visibility
+   * @return {boolean} - new value of modal visibility
    */
   set isImportVisible(value) {
     this._isImportVisible = value ? true : false;

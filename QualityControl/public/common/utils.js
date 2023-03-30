@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Generates a new ObjectId
@@ -18,14 +18,12 @@
  */
 export function objectId() {
   const timestamp = (new Date().getTime() / 1000 | 0).toString(16);
-  return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function() {
-    return (Math.random() * 16 | 0).toString(16);
-  }).toLowerCase();
+  return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => (Math.random() * 16 | 0).toString(16)).toLowerCase();
 }
 
 /**
  * Make a deep clone of object provided
- * @param {object} obj
+ * @param {object} obj - to be cloned
  * @return {object} a deep copy
  */
 export function clone(obj) {
@@ -41,11 +39,11 @@ export function clone(obj) {
  */
 export function timerDebouncer(fn, time) {
   let timer;
-  return function(...args) {
+  return function (...args) {
     if (timer) {
       clearTimeout(timer);
     }
-    timer = setTimeout(function() {
+    timer = setTimeout(() => {
       fn(...args); // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters
     }, time);
   };
@@ -74,25 +72,25 @@ export function pointerId(obj) {
  * Given a string-date or number-timestamp (ms), return it in a format approved by ALICE for QC
  * e.g. 7 Mar 2022, 19:08 CET / 18:08 UTC
  * If the passed parameter is not a date-valid format, a string 'Invalid Date' will be returned
- * @param {string/number}
- * @returns {string}
+ * @param {string|number} date - value of date to be parsed
+ * @returns {string} - string representation of the 2 date values combined
  */
 export function prettyFormatDate(date) {
   try {
     if (date) {
-      return new Date(date).toLocaleString('en-GB', {
+      return `${new Date(date).toLocaleString('en-GB', {
         timeZoneName: 'short',
         year: 'numeric',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
-      }) + ' / ' + new Date(date).toLocaleString('en-GB', {
+        minute: '2-digit',
+      })} / ${new Date(date).toLocaleString('en-GB', {
         timeZone: 'UTC',
         timeZoneName: 'short',
         hour: '2-digit',
-        minute: '2-digit'
-      });
+        minute: '2-digit',
+      })}`;
     } else {
       return '-';
     }

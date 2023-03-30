@@ -10,15 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Build a panel for displaying a checker quality object
  * @param {JSON} checker - Object returned by CCDB
  * @param {string} location - location from where the `draw` method is called; Used for styling
- * @return {vnode}
+ * @returns {vnode} - virtual node element
  */
 export default (checker, location) => h('.relative.p2.flex-column.scroll-y', {
 
@@ -33,10 +33,10 @@ export default (checker, location) => h('.relative.p2.flex-column.scroll-y', {
 
 /**
  * One row with a label and the value of the checker[label]
- * @param {string} label
- * @param {string} value
- * @param {string} location
- * @return {vnode}
+ * @param {string} label - label to be displayed for the checker
+ * @param {string} value - value of the checker
+ * @param {string} location - location of the checker
+ * @returns {vnode} - virtual node element
  */
 const checkerValue = (label, value, location) => {
   let padding = '';
@@ -68,6 +68,6 @@ const checkerValue = (label, value, location) => {
 
   return h(`.flex-row.${padding}`, [
     h('label.ph2.w-50.w-wrapped.text-right.checker-label', label),
-    h('.w-wrapped.w-50.text-left', value)
+    h('.w-wrapped.w-50.text-left', value),
   ]);
 };

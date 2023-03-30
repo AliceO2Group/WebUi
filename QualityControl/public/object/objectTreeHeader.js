@@ -10,17 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {iconCollapseUp, iconArrowBottom, iconArrowTop} from '/js/src/icons.js';
+import { h } from '/js/src/index.js';
+import { iconCollapseUp, iconArrowBottom, iconArrowTop } from '/js/src/icons.js';
 
 /**
  * Shows header for the objects tree page, buttons allow to open/close the entire tree,
  * filter only 'online' objects thanks to information service and a search input allow to filter
  * by name.
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 export default function objectTreeHeader(model) {
   if (!model.object.currentList) {
@@ -39,11 +39,11 @@ export default function objectTreeHeader(model) {
     ]),
     h('.flex-grow.text-right', [
       h('.dropdown', {
-        title: 'Sort by', class: model.object.sortBy.open ? 'dropdown-open' : ''
+        title: 'Sort by', class: model.object.sortBy.open ? 'dropdown-open' : '',
       }, [
         h('button.btn', {
           title: 'Sort by',
-          onclick: () => model.object.toggleSortDropdown()
+          onclick: () => model.object.toggleSortDropdown(),
         }, [model.object.sortBy.title, ' ', model.object.sortBy.icon]),
         h('.dropdown-menu.text-left', [
           !model.isOnlineModeEnabled
@@ -59,7 +59,7 @@ export default function objectTreeHeader(model) {
       h('button.btn', {
         title: 'Close whole tree',
         onclick: () => model.object.tree.closeAll(),
-        disabled: !!model.object.searchInput
+        disabled: Boolean(model.object.searchInput),
       }, iconCollapseUp()),
       ' ',
       h('input.form-control.form-inline.mh1.w-33', {
@@ -67,24 +67,22 @@ export default function objectTreeHeader(model) {
         type: 'text',
         value: model.object.searchInput,
         disabled: model.object.queryingObjects ? true : false,
-        oninput: (e) => model.object.search(e.target.value)
-      })
+        oninput: (e) => model.object.search(e.target.value),
+      }),
     ]),
   ];
 }
 
 /**
  * Create a menu-item for sort-by dropdown
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {string} shortTitle - title that gets displayed to the user
  * @param {string} title - title that gets displayed to the user on hover
- * @param {Icon} icon
+ * @param {Icon} icon - svg icon to be used
  * @param {string} field - field by which sorting should happen
  * @param {number} order - {-1/1}/{DESC/ASC}
- * @return {vnode}
+ * @returns {vnode} - virtual node element
  */
 const sortMenuItem = (model, shortTitle, title, icon, field, order) => h('a.menu-item', {
-  title: title, style: 'white-space: nowrap;', onclick: () => model.object.sortTree(shortTitle, field, order, icon)
-}, [
-  shortTitle, ' ', icon
-]);
+  title: title, style: 'white-space: nowrap;', onclick: () => model.object.sortTree(shortTitle, field, order, icon),
+}, [shortTitle, ' ', icon]);
