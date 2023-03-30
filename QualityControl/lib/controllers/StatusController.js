@@ -36,8 +36,8 @@ export class StatusController {
   /**
    * Set connector that is used for retrieving general information
    * about objects (e.g. CCDB)
-   * @param {Object} connector - ccdbService
-   * @returns {void}
+   * @param {CcdbService} connector - ccdbService
+   * @returns {undefined}
    */
   setDataConnector(connector) {
     this.connector = connector;
@@ -46,8 +46,8 @@ export class StatusController {
   /**
    * Set connector used for live mode for retrieving paths
    * of objects (e.g. Consul)
-   * @param {Object} liveConnector
-   * @returns {void}
+   * @param {ConsulService} liveConnector - consul service instance
+   * @returns {undefined}
    */
   setLiveModeConnector(liveConnector) {
     this.liveConnector = liveConnector;
@@ -55,8 +55,9 @@ export class StatusController {
 
   /**
    * Method to use response object to reply with status and information about QCG
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP request object
+   * @param {Response} res - HTTP response object
+   * @returns {undefined}
    */
   async getQCGStatus(req, res) {
     let result = {};
@@ -73,8 +74,9 @@ export class StatusController {
 
   /**
    * Send back information and status about the framework and its dependencies
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP request object
+   * @param {Response} res - HTTP response object
+   * @returns {undefined}
    */
   async frameworkInfo(req, res) {
     try {
@@ -88,6 +90,7 @@ export class StatusController {
 
   /**
    * Send back info about the framework
+   * @returns {object} - object containing status and framework information
    */
   async getFrameworkInfo() {
     const result = {};
@@ -116,7 +119,7 @@ export class StatusController {
 
   /**
    * Retrieve Data Connector status
-   * @return {Promise<Resolve, Reject>}
+   * @return {Promise<Resolve, Reject>} - status of the data connector
    */
   async getDataConnectorStatus() {
     if (!this.connector) {
@@ -133,7 +136,7 @@ export class StatusController {
 
   /**
    * Retrieve Live Connector status
-   * @return {Promise<Resolve, Reject>}
+   * @return {Promise<Resolve, Reject>} - status of the live mode connector
    */
   async getLiveModeConnectorStatus() {
     if (!this.liveConnector) {
@@ -150,7 +153,8 @@ export class StatusController {
 
   /**
    * Log the error based on containing a stack trace or not
-   * @param {Error} err
+   * @param {Error|string} err - error object or string message to be logged
+   * @returns {undefined}
    */
   logError(err) {
     log.error(err.message || err);

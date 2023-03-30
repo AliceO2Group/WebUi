@@ -22,19 +22,23 @@ const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
  */
 export class UserService {
   /**
-   * Setup User Service
-   * @param {JSONFileConnector/SQLDataConnector} dataConnector
+   * Setup User Service constructor and initialize needed dataConnector
+   * @param {JSONFileConnector/SQLDataConnector} dataConnector - dataconnector to be used for local/prod development
    */
   constructor(dataConnector) {
     assert(dataConnector, 'Missing Data Connector');
+
+    /**
+     *  @type {JSONFileConnector/SQLDataConnector}
+     */
     this.dataConnector = dataConnector;
   }
 
   /**
    * Given a user, save it in DB
-   * @param {Request} req
-   * @param {Response} res
-   * @return {boolean}
+   * @param {Request} req - HTTP request object with information on owner_id
+   * @param {Response} res - HTTP response object to provide layouts information
+   * @return {undefined}
    */
   async addUser(req, res) {
     const { personid: id, name, username } = req.session;
@@ -54,9 +58,11 @@ export class UserService {
 
   /**
    * Validate that user's parameters contains all the mandatory fields
-   * @param {string} username
-   * @param {string} name
-   * @param {number} id
+   * @param {string} username - expected username
+   * @param {string} name - expected name of the user
+   * @param {number} id - cernid of the user
+   * @returns {undefined}
+   * @throws {Error}
    */
   _validateUser(username, name, id) {
     if (!username) {

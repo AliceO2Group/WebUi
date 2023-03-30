@@ -43,6 +43,7 @@ export class JsonFileService {
 
   /**
    * Synchronize DB file content and `this.data` property
+   * @returns {undefined}
    */
   async _syncFileAndInternalState() {
     await this._readFromFile();
@@ -91,6 +92,7 @@ export class JsonFileService {
 
   /**
    * Write data to disk, atomically, with lock
+   * @returns {undefined}
    */
   async _writeToFile() {
     await this.lock.acquire();
@@ -117,8 +119,8 @@ export class JsonFileService {
 
   /**
    * Create a layout
-   * @param {Layout} newLayout
-   * @return {Object} Empty details
+   * @param {Layout} newLayout - layout object to be saved
+   * @return {object} Empty details
    */
   async createLayout(newLayout) {
     if (!newLayout.id) {
@@ -140,7 +142,8 @@ export class JsonFileService {
   /**
    * Retrieve a layout or undefined
    * @param {string} layoutId - layout id
-   * @return {Layout|undefined}
+   * @return {Layout} - layout object
+   * @throws {Error}
    */
   async readLayout(layoutId) {
     const layout = this.data.layouts.find((layout) => layout.id === layoutId);
@@ -152,8 +155,8 @@ export class JsonFileService {
 
   /**
    * Update a single layout by its id
-   * @param {string} layoutId
-   * @param {Layout} data
+   * @param {string} layoutId - id of the layout to be updated
+   * @param {Layout} data - layout new data
    * @return {Object} Empty details
    */
   async updateLayout(layoutId, data) {
@@ -165,7 +168,7 @@ export class JsonFileService {
 
   /**
    * Delete a single layout by its id
-   * @param {string} layoutId
+   * @param {string} layoutId - id of the layout to be removed
    * @return {Object} Empty details
    */
   async deleteLayout(layoutId) {
@@ -179,7 +182,7 @@ export class JsonFileService {
   /**
    * List layouts, can be filtered
    * @param {Object} filter - undefined or {owner_id: XXX}
-   * @return {Array<Layout>}
+   * @return {Array<Layout>} - list of layouts as per the filte
    */
   async listLayouts(filter = {}) {
     return this.data.layouts.filter((layout) =>
@@ -190,11 +193,13 @@ export class JsonFileService {
 
   /**
    * Check if a user is saved and if not, add it to the in-memory list and db
-   * @param {JSON} user
+   * @param {JSON} user - data of the user to be added
+   * @returns {undefined}
    */
   addUser(user) {
     this._validateUser(user);
-    const isUserPresent = this.data.users.findIndex((userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
+    const isUserPresent = this.data.users
+      .findIndex((userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
 
     if (!isUserPresent) {
       this.data.users.push(user);
@@ -204,7 +209,9 @@ export class JsonFileService {
 
   /**
    * Validate that a user JSON contains all the mandatory fields
-   * @param {JSON} user
+   * @param {JSON} user - data of the user to be added
+   * @returns {undefined}
+   * @throws {Error}
    */
   _validateUser(user) {
     if (!user) {
@@ -245,7 +252,7 @@ class Lock {
   /**
    * Acquires lock if available and returns immediately
    * otherwise wait for lock to be released
-   * @return {Promise}
+   * @return {Promise} - result of the lock
    */
   acquire() {
     return new Promise((resolve) => {
@@ -262,6 +269,7 @@ class Lock {
 
   /**
    * Releases lock and give it to next in queue if any
+   * @returns {object|undefined} - next owner of the lock
    */
   release() {
     // Release the lock immediately

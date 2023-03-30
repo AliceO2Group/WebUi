@@ -61,7 +61,7 @@ export class CcdbService {
   /**
    * Check connection to CCDB service is up and running by requesting a list of sub-folders with a limit of 1;
    * Such a request is fast as it contains almost no data ;
-   * @returns {Promise.<Boolean, Error>}
+   * @returns {Promise.<Boolean, Error>} - promise with results of the query to ccdb
    */
   async isConnectionUp() {
     const connectionHeaders = { Accept: 'application/json', 'X-Filter-Fields': `${this.PATH}`, 'Browse-Limit': 1 };
@@ -77,13 +77,15 @@ export class CcdbService {
   }
 
   /**
-   * Returns a list of objects (their latest version) based on a given prefix (e.g. 'qc'; default to config file specified prefix);
-   * Fields wished to be requested for each object can be passed through the fields parameter; If missing, a default list will be used:
+   * Returns a list of objects (their latest version) based on a given prefix (e.g. 'qc'; default to config file
+   * specified prefix); Fields wished to be requested for each object can be passed through the fields parameter;
+   * If missing, a default list will be used:
    * * default fields list returned: [name, created, lastModified]
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {String} prefix - Prefix for which CCDB should search for objects
    * @param {Array<String>} fields - List of fields that should be requested for each object
-   * @return {Promise.<Array.<Object>, Error>}
+   * @return {Promise.<Array<Object>>} - results of objects query or error
+   * @throws {Error
    */
   async getObjectsLatestVersionList(prefix = this.PREFIX, fields = []) {
     if (!Array.isArray(fields)) {
@@ -107,13 +109,14 @@ export class CcdbService {
   }
 
   /**
-   * Retrieve a sorted list of available timestamps for a specified object; Number of timestamps defaults to 100 but it can be passed a different value
+   * Retrieve a sorted list of available timestamps for a specified object; Number of timestamps defaults to 100
+   * but it can be passed a different value
    * @example Equivalent of URL request: `/browse/qc/TPC/object/1`
-   * @param {String} objectName - full path of the object
-   * @param {Number} timestamp
-   * @param {Number} limit - how many timestamps should retrieve
+   * @param {string} objectName - full path of the object
+   * @param {number} limit - how many timestamps should retrieve
    * @param {String} filter - filter that should be applied when querying object; e.g. RunNumber=324543
-   * @returns {Promise.<Array<Number>, Error>}
+   * @returns {Promise.<Array<Number>>} - results with list of timestamps
+   * @throws {Error}
    */
   async getObjectTimestampList(objectName, limit = 1000, filter = '') {
     const headers = {
@@ -124,7 +127,7 @@ export class CcdbService {
     try {
       const url = `/browse/${objectName}/${filter}`;
       const { objects } = await httpGetJson(this.hostname, this.port, url, headers);
-      return objects.map((object) => parseInt(object[this.VALID_FROM]));
+      return objects.map((object) => parseInt(object[this.VALID_FROM], 10));
     } catch (error) {
       errorLogger(error, 'ccdb');
       throw new Error('Unable to retrieve latest timestamps list');
@@ -133,10 +136,11 @@ export class CcdbService {
 
   /**
    * Return the validity of an object (looked by name, timestamp and filter) in the form of a timestamp;
-   * @param {String} path
-   * @param {Number} timestamp
-   * @param {String} filter
-   * @returns
+   * @param {string} path - full path of the object to query; no regex allowed
+   * @param {number} timestamp - timestamp in ms
+   * @param {string} filter - filter to be applied to query object such as '?RunNumber=54323423'
+   * @returns {Promise.<object>} - returns object validity
+   * @throws {Error}
    */
   async getObjectValidity(path, timestamp = '', filter = '') {
     const headers = {
@@ -166,14 +170,17 @@ export class CcdbService {
   }
 
   /**
-   * Make a HEAD HTTP call to CCDB to retrieve data of the QC object; Name and timestamp are mandatory in this case, otherwise CCDB will return 404 while
-   * the filter string is optional;
-   * This is needed in case object is stored on remote alien, case in which CCDB will make a local copy as soon as the HEAD request is done;
-   * @example Equivalent of URL request: host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138/RunNumber=34543543  -H 'Accept: application/json' --head
-   * @param {String} objectName - full name(path) of the object in question
-   * @param {Number} timestamp - version of the object data
-   * @param {String} filter - filter that should be applied when querying object; e.g. RunNumber=324543
-   * @returns {Promise.<JSON, Error>} e.g  {location: '/download/id', drawOptions: 'colz'}
+   * Make a HEAD HTTP call to CCDB to retrieve data of the QC object; Name and timestamp are mandatory in this case,
+   * otherwise CCDB will return 404 while the filter string is optional;
+   * This is needed in case object is stored on remote alien, case in which CCDB will make a local copy as soon as the
+   * HEAD request is done;
+   * @example Equivalent of URL request:
+   * host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138/RunNumber=34543543  -H 'Accept: application/json' --head
+   * @param {string} name - full name(path) of the object in question
+   * @param {number} timestamp - version of the object data
+   * @param {string} filter - filter that should be applied when querying object; e.g. RunNumber=324543
+   * @returns {Promise.<JSON>} e.g  {location: '/download/id', drawOptions: 'colz'}
+   * @throws {Error}
    */
   async getObjectDetails(name, timestamp, filter = '') {
     if (!name || !timestamp) {
@@ -184,6 +191,7 @@ export class CcdbService {
 
     const { status, headers } = await httpHeadJson(this.hostname, this.port, path, reqHeaders);
     if (status >= 200 && status <= 299) {
+      // eslint-disable-next-line prefer-destructuring
       const location = headers[this.CONTENT_LOCATION]
         .split(', ')
         .filter((location) => !location.startsWith('alien'))[0];
@@ -200,9 +208,10 @@ export class CcdbService {
 
   /**
    * Get latest version of an object or a specified version through the timestamp;
-   * @param {String} path - Complete name of object; e.g qc/MO/CPV/merger1
-   * @param {Number} timestamp - version of object that should be queried
-   * @returns {Promise.<JSON, Error>}
+   * @param {string} path - Complete name of object; e.g qc/MO/CPV/merger1
+   * @param {number} timestamp - version of object that should be queried
+   * @returns {Promise.<JSON>} - object details for a given timestamp
+   * @throws {Error}
    */
   async getObjectLatestVersionInfo(path, timestamp = '') {
     if (!path) {
@@ -233,13 +242,12 @@ export class CcdbService {
 
   /**
    * Get prefix from configuration file and parse it or use as default empty prefix
-   * @param {JSON} config
-   * @return {String} - format `name`
+   * @param {JSON} config - object as JSON with configuration
+   * @return {string} - format `name`
    */
   _getPrefix(config) {
-    let prefix = '';
+    let { prefix = '' } = config;
     if (config?.prefix?.trim()) {
-      prefix = config.prefix;
       prefix = prefix.substring(0, 1) === '/' ? prefix.substring(1, prefix.length) : prefix;
       prefix = prefix.substring(prefix.length - 1, prefix.length) === '/'
         ? prefix.substring(0, prefix.length - 1) : prefix;
@@ -248,8 +256,8 @@ export class CcdbService {
   }
 
   /**
-   * Returns list of headers as a String that are of interest when querying data about 1 object only
-   * @returns {String>}
+   * Returns list of headers as a string that are of interest when querying data about 1 object only
+   * @returns {string} - headers list joined by ','
    */
   _getHeadersForOneObject() {
     return `${this.PATH},${this.LAST_MODIFIED},size,fileName,id,metadata`;

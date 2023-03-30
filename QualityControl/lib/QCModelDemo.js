@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -25,6 +24,9 @@ const ownerIdUser1 = 0;
 const ownerNameUser1 = 'John Doe';
 const ownerIdUser2 = 101;
 const ownerNameUser2 = 'Samantha Smith';
+
+/* eslint-disable valid-jsdoc */
+/* eslint-disable max-len */
 
 /**
  * This is a static model running without any datastore to make tests locally for example.
@@ -73,7 +75,13 @@ function readObjectData(name) {
  * @return {Array<Layout>}
  */
 function listObjects() {
-  return promiseResolveWithLatency(objects.map((object) => ({ name: object.name, createTime: parseInt(object['Created']), lastModified: parseInt(object['Last-Modified']) })));
+  return promiseResolveWithLatency(objects.map((object) => (
+    {
+      name: object.name,
+      createTime: parseInt(object['Created'], 10),
+      lastModified: parseInt(object['Last-Modified'], 10),
+    }
+  )));
 }
 
 /**
