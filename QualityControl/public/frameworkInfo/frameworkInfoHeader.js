@@ -18,7 +18,7 @@ import spinner from '../loader/spinner.js';
 /**
  * Shows header of Framework Information
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 export default (model) => [
   h('.w-50.flex-row.justify-center', [

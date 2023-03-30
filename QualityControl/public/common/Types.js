@@ -20,7 +20,7 @@
 /**
  * Checks type of passed argument
  * @param {Array.<Layout>} array - list of layouts to be asserted
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertLayouts(array) {
   assertArray(array);
@@ -31,7 +31,7 @@ export function assertLayouts(array) {
 /**
  * Checks type of passed argument
  * @param {Layout} obj - layout dto representation
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertLayout(obj) {
   assertString(obj.id);
@@ -45,7 +45,7 @@ export function assertLayout(obj) {
 /**
  * Checks type of passed argument
  * @param {Array.<Tab>} array - list of tabs to be asserted
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertTabs(array) {
   assertArray(array);
@@ -56,7 +56,7 @@ export function assertTabs(array) {
 /**
  * Checks type of passed argument
  * @param {Tab} obj - tab dto to be asserted
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertTab(obj) {
   assertString(obj.id);
@@ -68,7 +68,7 @@ export function assertTab(obj) {
 /**
  * Checks type of passed argument
  * @param {TabObject} obj - tab element to be asserted
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertTabObject(obj) {
   assertString(obj.id);
@@ -86,7 +86,7 @@ export function assertTabObject(obj) {
 /**
  * Checks type of passed argument
  * @param {number} value - value to be asserted as number
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertNumber(value) {
   if (typeof value !== 'number') {
@@ -98,7 +98,7 @@ export function assertNumber(value) {
 /**
  * Checks type of passed argument
  * @param {string} value - value to be asserted as string
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertString(value) {
   if (typeof value !== 'string') {
@@ -110,7 +110,7 @@ export function assertString(value) {
 /**
  * Checks type of passed argument
  * @param {array} value - to be asserted as array
- * @return {boolean} true is correct
+ * @returns {boolean} true is correct
  */
 export function assertArray(value) {
   if (!Array.isArray(value)) {

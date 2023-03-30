@@ -17,7 +17,7 @@ import { h } from '/js/src/index.js';
 /**
  * Shows header of list of layouts with one search input to filter them
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 export default (model) => [
   h('.w-50.text-center', [h('b.f4', 'Layouts')]),

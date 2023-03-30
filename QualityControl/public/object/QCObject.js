@@ -399,7 +399,7 @@ export default class QCObject extends Observable {
    * Method to generate drawing options based on where in the application the plot is displayed
    * @param {object} tabObject - tab dto representation
    * @param {object} objectRemoteData - object within a remotedata
-   * @return {Array<string>} - list of drawing options
+   * @returns {Array<string>} - list of drawing options
    */
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
@@ -476,7 +476,7 @@ export default class QCObject extends Observable {
    * Method to parse through tabs and objects of a layout to return one object by ID
    * @param {Object} layout - layout dto representation
    * @param {string} objectId - id of the object within the layout
-   * @return {string} - object name queried by id
+   * @returns {string} - object name queried by id
    */
   getObjectNameByIdFromLayout(layout, objectId) {
     let objectName = '';
@@ -492,7 +492,7 @@ export default class QCObject extends Observable {
   /**
    * Method to search for the object which info was requested for and return lastModified timestamp
    * @param {string} objectName - name of the object
-   * @return {string|'Loading'|'-'} - date of last modified
+   * @returns {string|'Loading'|'-'} - date of last modified
    */
   getLastModifiedByName(objectName) {
     const objMap = this.model.services.object.objectsLoadedMap;
@@ -510,7 +510,7 @@ export default class QCObject extends Observable {
   /**
    * Method to search for the object which info was requested for and return runNumber
    * @param {string} objectName - name of the object in question
-   * @return {string|'Loading'|'-'} - RunNumber of the object
+   * @returns {string|'Loading'|'-'} - RunNumber of the object
    */
   getRunNumberByName(objectName) {
     const objMap = this.model.services.object.objectsLoadedMap;
@@ -527,7 +527,7 @@ export default class QCObject extends Observable {
   /**
    * Return the list of object timestamps
    * @param {string} name - name of the object to be retrieving the list
-   * @return {Array<number>} - list of timestamps for queried object
+   * @returns {Array<number>} - list of timestamps for queried object
    */
   getObjectTimestamps(name) {
     if (this.objects[name] && this.objects[name].kind === 'Success') {

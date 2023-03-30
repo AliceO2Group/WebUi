@@ -57,7 +57,7 @@ export default class Folder extends Observable {
   /**
    * Method to close/open a folder
    * @param {string} title - folder to change state for
-   * @return {boolean} - current state of the folder
+   * @returns {boolean} - current state of the folder
    */
   toggleFolder(title) {
     const state = this.map.get(title).isOpened;

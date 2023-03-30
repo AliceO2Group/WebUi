@@ -38,7 +38,7 @@ export class UserService {
    * Given a user, save it in DB
    * @param {Request} req - HTTP request object with information on owner_id
    * @param {Response} res - HTTP response object to provide layouts information
-   * @return {undefined}
+   * @returns {undefined}
    */
   async addUser(req, res) {
     const { personid: id, name, username } = req.session;

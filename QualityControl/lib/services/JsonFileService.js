@@ -54,7 +54,7 @@ export class JsonFileService {
   /**
    * Read
    * @param {string} argName - blabla
-   * @return {string} blabla
+   * @returns {string} blabla
    */
   async _readFromFile() {
     return new Promise((resolve, reject) => {
@@ -120,7 +120,7 @@ export class JsonFileService {
   /**
    * Create a layout
    * @param {Layout} newLayout - layout object to be saved
-   * @return {object} Empty details
+   * @returns {object} Empty details
    */
   async createLayout(newLayout) {
     if (!newLayout.id) {
@@ -142,7 +142,7 @@ export class JsonFileService {
   /**
    * Retrieve a layout or undefined
    * @param {string} layoutId - layout id
-   * @return {Layout} - layout object
+   * @returns {Layout} - layout object
    * @throws {Error}
    */
   async readLayout(layoutId) {
@@ -157,7 +157,7 @@ export class JsonFileService {
    * Update a single layout by its id
    * @param {string} layoutId - id of the layout to be updated
    * @param {Layout} data - layout new data
-   * @return {Object} Empty details
+   * @returns {Object} Empty details
    */
   async updateLayout(layoutId, data) {
     const layout = await this.readLayout(layoutId);
@@ -169,7 +169,7 @@ export class JsonFileService {
   /**
    * Delete a single layout by its id
    * @param {string} layoutId - id of the layout to be removed
-   * @return {Object} Empty details
+   * @returns {Object} Empty details
    */
   async deleteLayout(layoutId) {
     const layout = await this.readLayout(layoutId);
@@ -182,7 +182,7 @@ export class JsonFileService {
   /**
    * List layouts, can be filtered
    * @param {Object} filter - undefined or {owner_id: XXX}
-   * @return {Array<Layout>} - list of layouts as per the filte
+   * @returns {Array<Layout>} - list of layouts as per the filte
    */
   async listLayouts(filter = {}) {
     return this.data.layouts.filter((layout) =>
@@ -252,7 +252,7 @@ class Lock {
   /**
    * Acquires lock if available and returns immediately
    * otherwise wait for lock to be released
-   * @return {Promise} - result of the lock
+   * @returns {Promise} - result of the lock
    */
   acquire() {
     return new Promise((resolve) => {

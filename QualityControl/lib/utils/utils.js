@@ -50,7 +50,7 @@ export function errorLogger(err, facility = 'utils') {
  * @param {number} port - port of the server to where request will be made
  * @param {string} path - path of the server request to where request will be made
  * @param {JSON} headers - configurable headers for the request
- * @return {Promise.<Object, Error>} JSON response
+ * @returns {Promise.<Object, Error>} JSON response
  */
 export function httpGetJson(hostname, port, path, headers = { Accept: 'application/json' }) {
   return new Promise((resolve, reject) => {
@@ -60,7 +60,7 @@ export function httpGetJson(hostname, port, path, headers = { Accept: 'applicati
      * Generic handler for client http requests,
      * buffers response, checks status code and parses JSON
      * @param {Response} response - response object to be used for building the JSON response
-     * @return {Promise.<Object, Error>} - JSON response
+     * @returns {Promise.<Object, Error>} - JSON response
      */
     const requestHandler = (response) => {
       if (response.statusCode < 200 || response.statusCode > 299) {

@@ -34,7 +34,7 @@ import checkersPanel from './checkersPanel.js';
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
  * @param {object} options - optional options of presentation
  * @param {string} location - location from where `draw` method is called; Used for different style
- * @return {vdom} output virtual-dom, a single div with JSROOT attached to it
+ * @returns {vdom} output virtual-dom, a single div with JSROOT attached to it
  */
 export function draw(model, tabObject, options, location = '') {
   const defaultOptions = {
@@ -236,7 +236,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
  * When it changes, element should be replaced
  * - tabObject.id (associated to .name) is dependency of oncreate and onremove to load/unload
  * @param {object} tabObject - tab dto representation
- * @return {vnode} - virtual node
+ * @returns {vnode} - virtual node
  */
 function fingerprintReplacement(tabObject) {
   return `${tabObject.id}`;
@@ -247,7 +247,7 @@ function fingerprintReplacement(tabObject) {
  * When it changes, JSROOT should resize canvas
  * - tabObject.w and tabObject.h change size
  * @param {object} tabObject - tab dto representation
- * @return {vnode} - virtual node
+ * @returns {vnode} - virtual node
  */
 function fingerprintResize(tabObject) {
   return `${tabObject.w}:${tabObject.h}`;

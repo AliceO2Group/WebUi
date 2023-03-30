@@ -78,7 +78,7 @@ const toolbarViewModeTab = (model, tab, i) => {
 
   /**
    * Handler when user click on a tab to select it
-   * @return {undefined}
+   * @returns {undefined}
    */
   const selectTab = () => model.layout.selectTab(i);
 
@@ -145,7 +145,7 @@ const toolbarEditModeTab = (model, tab, i) => {
 
   /**
    * Handler when user click on a tab to select it
-   * @return {undefined}
+   * @returns {undefined}
    */
   const selectTab = () => model.layout.selectTab(i);
 
@@ -202,6 +202,6 @@ const resizeGridTabDropDown = (model, tab) =>
 /**
  * Single tab button
  * @param {Object} args - arguments to be passed to button
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const tabBtn = (...args) => h('button.br-pill.ph2.btn', ...args);

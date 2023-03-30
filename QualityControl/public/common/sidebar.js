@@ -26,7 +26,7 @@ import {
  * Shows sidebar of application, can be object property editor in edit mode or a tree of objects
  * on edit mode or by default a navigation menu
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 export default function sidebar(model) {
   // Special case when sidebar is used as a required form or property editor
@@ -48,7 +48,7 @@ export default function sidebar(model) {
 /**
  * Shows navigation menu of application with link to pages and a list of layouts owned by user session
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const sidebarMenu = (model) => [
   exploreMenu(model),
@@ -61,7 +61,7 @@ const sidebarMenu = (model) => [
 /**
  * Shows links to common pages (available layouts and objects tree)
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const exploreMenu = (model) => [
   h('.menu-title', model.sidebar ? 'Explore' : ''),
@@ -84,7 +84,7 @@ const exploreMenu = (model) => [
 /**
  * Shows links to layouts of user and link to create a new one
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const myLayoutsMenu = (model) => [
   h('.menu-title.flex-row', model.sidebar ? [
@@ -113,7 +113,7 @@ const myLayoutsMenu = (model) => [
 /**
  * Show link to status page
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const statusMenu = (model) =>
   h('a.menu-item', {
@@ -128,7 +128,7 @@ const statusMenu = (model) =>
  * Shows one link to a layout
  * @param {Model} model - root model of the application
  * @param {Object} layout - layout dto representation
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
   title: layout.name,
@@ -141,7 +141,7 @@ const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
  * `refreshInterval` is id of a timer, when changed this "highlight" the form to
  * inform user objects have been loaded
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const refreshOptions = (model) => [
   h('', {
@@ -176,7 +176,7 @@ const refreshOptions = (model) => [
 /**
  * Show link to status page
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const collapseSidebarMenuItem = (model) =>
   h('a.menu-item', {
@@ -189,6 +189,6 @@ const collapseSidebarMenuItem = (model) =>
 /**
  * Display text with item properties
  * @param {string} text - string to be displayed
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const itemMenuText = (text) => h('span.ph2', text);

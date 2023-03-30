@@ -457,7 +457,7 @@ export default class Layout extends Observable {
   /**
    * Add a new object chart
    * @param {string} objectName - name of object like a/b/c
-   * @return {Object} the new tabObject created
+   * @returns {Object} the new tabObject created
    */
   addItem(objectName) {
     const newTabObject = assertTabObject({
@@ -641,7 +641,7 @@ export default class Layout extends Observable {
   /**
    * Method to check if passed layout contains any objects in online mode
    * @param {Layout} layout - layout dto representation
-   * @return {boolean} - whether there are online objects
+   * @returns {boolean} - whether there are online objects
    */
   doesLayoutContainOnlineObjects(layout) {
     if (layout && layout.tabs && layout.tabs.length > 0) {

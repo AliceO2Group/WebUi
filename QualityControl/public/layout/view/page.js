@@ -233,7 +233,7 @@ function compareById(a, b) {
 /**
  * Creates a copy of array and sort it by id's object
  * @param {Array.<Object>} array - list of elements to sort by id
- * @return {Array.<Object>} copy
+ * @returns {Array.<Object>} copy
  */
 function cloneSortById(array) {
   return array.concat().sort(compareById);

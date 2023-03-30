@@ -17,7 +17,7 @@ import { h } from '/js/src/index.js';
 /**
  * Shows a page to view framework information
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 export default (model) => h(
   '.p2.absolute-fill.text-center',
@@ -32,7 +32,7 @@ export default (model) => h(
 /**
  * Display a table with QC GUI and its dependencies status
  * @param {Map<string, object>} componentMap - JSON representation of the components used by QCG
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const showContent = (componentMap) =>
   Object.keys(componentMap).map((component) => [
@@ -56,7 +56,7 @@ const showContent = (componentMap) =>
  * red x depending on the status
  * @param {JSON} status { <ok>: boolean, [message]: string}
  * @param {string} component - component dto representation
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const componentHeader = (status, component) => [
   status && status.ok && h('.badge.bg-success.white.f6', '✓'),
@@ -69,7 +69,7 @@ const componentHeader = (status, component) => [
  * containing information about a sub-property of the component
  * @param {string} name - sub-property of component
  * @param {string} componentProps - component properties
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const componentInfoRow = (name, componentProps) =>
   name === 'status' ?

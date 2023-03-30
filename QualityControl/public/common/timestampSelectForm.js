@@ -18,7 +18,7 @@ import { prettyFormatDate } from './utils.js';
 /**
  * Display a select form with the latest timestamps of the current selected object
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 export default (model) => h(
   '.w-100.flex-row',

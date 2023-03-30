@@ -61,7 +61,7 @@ export default class QCObjectDto {
    * * known keys are mapped to camelCase format
    * * timestamps (ms) are converted from string to number
    * @param {Object} item - from CCDB
-   * @return {Object} - JSON with keys in camelCase format
+   * @returns {Object} - JSON with keys in camelCase format
    */
   static toStandardObject(item) {
     if (item['path']) {

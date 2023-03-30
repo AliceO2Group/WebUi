@@ -19,7 +19,7 @@ import { h, info } from '/js/src/index.js';
  * which expects an object
  * @param {Object} object - model of the object
  * @param {boolean} isOnlineModeEnabled - value if online mode is enabled
- * @return {vnode} - header element
+ * @returns {vnode} - header element
  */
 export default (object, isOnlineModeEnabled) => object.selected && !isOnlineModeEnabled &&
   h('.p1.text-right', {

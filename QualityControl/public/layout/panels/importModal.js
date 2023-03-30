@@ -18,7 +18,7 @@ import { h } from '/js/src/index.js';
  * Component which will display a modal allowing the users to select their detector view
  * No matter the page location, modal will be displayed if user did not make a selection
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 export default (model) =>
   h('.o2-modal', [

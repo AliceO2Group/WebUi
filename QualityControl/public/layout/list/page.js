@@ -18,7 +18,7 @@ import { iconBarChart, iconChevronBottom, iconChevronTop } from '/js/src/icons.j
 /**
  * Shows a list of layouts grouped by user and more
  * @param {Model} model - root model of the application
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 export default function layouts(model) {
   return h('.scroll-y.absolute-fill', {
@@ -33,7 +33,7 @@ export default function layouts(model) {
  * Method to create a folder with various layouts
  * @param {Model} model - root model of the application
  * @param {Folder} folder - folder model
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 function createFolder(model, folder) {
   const layouts = folder.list;
@@ -53,7 +53,7 @@ function createFolder(model, folder) {
  * Create the header of the folder
  * @param {Model} model - root model of the application
  * @param {Folder} folder - folder model
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 function createHeaderOfFolder(model, folder) {
   return h(
@@ -77,7 +77,7 @@ function createHeaderOfFolder(model, folder) {
  * @param {Model} model - root model of the application
  * @param {RemoteData} layouts - list of layouts as remoteData object
  * @param {string} searchBy - string to search by in the list of layouts
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 function table(model, layouts, searchBy) {
   return [
@@ -105,7 +105,7 @@ function table(model, layouts, searchBy) {
  * @param {Model} model - root model of the application
  * @param {RemoteData} layouts - list of layouts as remoteData object
  * @param {string} searchBy - string to search by in the list of layouts
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 function rows(model, layouts, searchBy) {
   return layouts.match({

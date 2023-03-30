@@ -35,7 +35,7 @@ export default class QCObjectService {
   /**
    * Retrieve a list of all objects from CCDB
    * @param {Class<Observable>} that - object extending observer class to notify component on request end
-   * @return {JSON} List of Objects
+   * @returns {JSON} List of Objects
    */
   async listObjects(that = this.model) {
     this.list = RemoteData.loading();
@@ -115,7 +115,7 @@ export default class QCObjectService {
 
   /**
    * Ask server for all available objects
-   * @return {JSON} List of Objects
+   * @returns {JSON} List of Objects
    */
   async getOnlineObjects() {
     const { result, ok } = await this.model.loader.get('/api/listOnlineObjects');

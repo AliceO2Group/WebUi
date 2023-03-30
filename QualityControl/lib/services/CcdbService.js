@@ -84,7 +84,7 @@ export class CcdbService {
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {String} prefix - Prefix for which CCDB should search for objects
    * @param {Array<String>} fields - List of fields that should be requested for each object
-   * @return {Promise.<Array<Object>>} - results of objects query or error
+   * @returns {Promise.<Array<Object>>} - results of objects query or error
    * @throws {Error
    */
   async getObjectsLatestVersionList(prefix = this.PREFIX, fields = []) {
@@ -243,7 +243,7 @@ export class CcdbService {
   /**
    * Get prefix from configuration file and parse it or use as default empty prefix
    * @param {JSON} config - object as JSON with configuration
-   * @return {string} - format `name`
+   * @returns {string} - format `name`
    */
   _getPrefix(config) {
     let { prefix = '' } = config;

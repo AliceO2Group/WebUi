@@ -59,7 +59,7 @@ export default class LayoutService {
    * Method to get all layouts by the user's id
    * @param {string} userId - user id for which to query layouts
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
-   * @return {undefined}
+   * @returns {undefined}
    */
   async getLayoutsByUserId(userId, that = this.model) {
     this.userList = RemoteData.loading();

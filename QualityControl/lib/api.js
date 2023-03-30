@@ -59,7 +59,7 @@ export const setup = (http) => {
  * List all objects without data
  * @param {Request} req - HTTP request object with information on owner_id
  * @param {Response} res - HTTP response object to provide layouts information
- * @return {undefined}
+ * @returns {undefined}
  */
 function listObjectsTwo(req, res) {
   listObjects()
@@ -71,7 +71,7 @@ function listObjectsTwo(req, res) {
  * List all Online objects' name if online mode is enabled
  * @param {Request} req - HTTP request object with information on owner_id
  * @param {Response} res - HTTP response object to provide layouts information
- * @return {undefined}
+ * @returns {undefined}
  */
 function listOnlineObjects(req, res) {
   if (typeof consulService !== 'undefined') {
@@ -90,7 +90,7 @@ function listOnlineObjects(req, res) {
  * Check the state of OnlineMode by checking the status of Consul Leading Agent
  * @param {Request} req - HTTP request object with information on owner_id
  * @param {Response} res - HTTP response object to provide layouts information
- * @return {undefined}
+ * @returns {undefined}
  */
 function isOnlineModeConnectionAlive(req, res) {
   if (typeof consulService !== 'undefined') {
@@ -125,7 +125,7 @@ function errorHandler(err, res, status = 500) {
  * Method to extract the tags (with a specified prefix) from a list of services.
  * This represents objects that are in online mode
  * @param {JSON} services - services as per ConsulService
- * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
+ * @returns {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
  */
 function getTagsFromServices(services) {
   const prefix = queryPrefix;

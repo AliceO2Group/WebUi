@@ -77,7 +77,7 @@ function objectPanel(model) {
  * Draw the object including the info button and history dropdown
  * @param {Model} model - root model of the application
  * @param {JSON} object - {qcObject, info, timestamps}
- * @return {vnode} - virtual node element
+ * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
   const { name } = model.object.selected;

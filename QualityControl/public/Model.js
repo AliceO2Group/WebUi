@@ -258,7 +258,7 @@ export default class Model extends Observable {
   /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
-   * @return {boolean} - whether window is in secure context
+   * @returns {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
@@ -309,7 +309,7 @@ export default class Model extends Observable {
 
   /**
    * Returns the visibility of the import layout modal
-   * @return {boolean} - whether import modal is visible
+   * @returns {boolean} - whether import modal is visible
    */
   get isImportVisible() {
     return this._isImportVisible;
@@ -318,7 +318,7 @@ export default class Model extends Observable {
   /**
    * Sets the visibility of the import layout modal
    * @param {boolean} value - value to be set for modal visibility
-   * @return {boolean} - new value of modal visibility
+   * @returns {boolean} - new value of modal visibility
    */
   set isImportVisible(value) {
     this._isImportVisible = value ? true : false;

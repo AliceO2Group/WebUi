@@ -119,7 +119,7 @@ export class StatusController {
 
   /**
    * Retrieve Data Connector status
-   * @return {Promise<Resolve, Reject>} - status of the data connector
+   * @returns {Promise<Resolve, Reject>} - status of the data connector
    */
   async getDataConnectorStatus() {
     if (!this.connector) {
@@ -136,7 +136,7 @@ export class StatusController {
 
   /**
    * Retrieve Live Connector status
-   * @return {Promise<Resolve, Reject>} - status of the live mode connector
+   * @returns {Promise<Resolve, Reject>} - status of the live mode connector
    */
   async getLiveModeConnectorStatus() {
     if (!this.liveConnector) {
