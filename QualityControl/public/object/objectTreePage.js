@@ -95,7 +95,7 @@ const drawPlot = (model, object) => {
         iconResizeBoth(),
       )),
     ]),
-    h('', { style: 'height:77%;' }, draw(model, name, { stat: true }, 'treePage')),
+    h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [
       h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
       h('.w-100', { style: 'justify-content: center;' }, [

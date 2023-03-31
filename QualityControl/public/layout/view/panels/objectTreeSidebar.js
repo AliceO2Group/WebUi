@@ -198,6 +198,6 @@ const objectPreview = (model) => {
   const isSelected = model.object.selected;
   if (isSelected) {
     const objName = model.object.selected.name;
-    return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model, objName, {}, 'treeSidebar'));
+    return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model, objName, {}));
   }
 };

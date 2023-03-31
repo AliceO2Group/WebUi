@@ -17,7 +17,7 @@
 import { h } from '/js/src/index.js';
 import { timerDebouncer, pointerId } from '../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
-import checkersPanel from './checkersPanel.js';
+import checkersPanel from './../common/object/checkersPanel.js';
 
 /**
  * Draw an object using JSROOT.
@@ -33,10 +33,9 @@ import checkersPanel from './checkersPanel.js';
  * @param {object} model - root model object
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
  * @param {object} options - optional options of presentation
- * @param {string} location - location from where `draw` method is called; Used for different style
  * @returns {vdom} output virtual-dom, a single div with JSROOT attached to it
  */
-export function draw(model, tabObject, options, location = '') {
+export function draw(model, tabObject, options) {
   const defaultOptions = {
     width: '100%', // CSS size
     height: '100%', // CSS size
@@ -133,7 +132,7 @@ export function draw(model, tabObject, options, location = '') {
     }, objectRemoteData.payload);
   } else {
     if (isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root)) {
-      return checkersPanel(objectRemoteData.payload.qcObject.root, location);
+      return checkersPanel(objectRemoteData.payload.qcObject.root);
     }
   }
   // On success, JSROOT will erase all DOM inside div and put its own
