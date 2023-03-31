@@ -15,13 +15,26 @@
 import utilsTestSuite from './lib/utils/utils.test.js';
 import configurationTestSuite from './lib/config/public-config.test.js';
 
+/**
+ * Services
+ */
+import { ccdbServiceTestSuite } from './lib/services/ccdb-service.test.js';
+
 import { commonLibraryQcObjectUtilsTestSuite as objectUtilityTestSuite } from './common/library/qcObject/utils.test.js';
+import {
+  commonLibraryUtilsDateTimeTestSuite as dateTimeUtilityTestSuite,
+} from './common/library/utils/dateTimeFormat.test.js';
 
 describe('Lib Test Suite', async () => {
   describe('Utility methods test suite', async () => await utilsTestSuite());
   describe('Configuration File Parser test suite', async () => await configurationTestSuite());
+
+  describe.skip('Services - Test Suites', () => {
+    describe('CCDB Service - Test Suite', () => ccdbServiceTestSuite()); // TODO
+  });
 });
 
 describe('Common Library - Test Suite', () => {
-  describe('CL - Utility methods test suite', () => objectUtilityTestSuite());
+  describe('CL - Object Utility methods test suite', () => objectUtilityTestSuite());
+  describe('CL - DateTime Utility methods test suite', () => dateTimeUtilityTestSuite());
 });
