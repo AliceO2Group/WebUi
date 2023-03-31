@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import spinner from '../loader/spinner.js';
+import { spinner } from '../common/spinner.js';
 
 /**
  * Shows header of Framework Information

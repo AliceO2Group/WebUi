@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import spinner from '../../../loader/spinner.js';
+import { spinner } from '../../../common/spinner.js';
 import { draw } from '../../../object/objectDraw.js';
 import { iconCaretBottom, iconCaretRight, iconBarChart } from '/js/src/icons.js';
 import virtualTable from '../../../object/virtualTable.js';

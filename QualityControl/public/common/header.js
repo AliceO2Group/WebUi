@@ -14,7 +14,7 @@
 
 import { h, iconPerson, iconMediaPlay, iconMediaStop } from '/js/src/index.js';
 
-import spinner from '../loader/spinner.js';
+import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
 import layoutListHeader from '../layout/list/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
@@ -56,7 +56,7 @@ const headerSpecific = (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-grow', [
+const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
   loginButton(model),
   ' ',
   onlineButton(model),

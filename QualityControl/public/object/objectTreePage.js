@@ -13,7 +13,7 @@
  */
 
 import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
-import spinner from '../loader/spinner.js';
+import { spinner } from '../common/spinner.js';
 import { draw } from './objectDraw.js';
 import infoButton from './../common/infoButton.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';

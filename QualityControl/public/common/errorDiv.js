@@ -12,27 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import { h, iconCircleX } from '/js/src/index.js';
 
 /**
- * Element for building a spinner based on provided size
- * @param {number} size - size which is to be used in 'em'
- * @returns {vnode} - virtual node
+ * Display error message & icon
+ * @param {string} message - message to be displayed to the user
+ * @returns {vnode} - virtual node element
  */
-export default (size) => h('span.pageLoading', {
-  style: size ? `font-size: ${size}em` : '',
-}, h(
-  '.atom-spinner',
-  h(
-    '.spinner-inner',
-    [
-      h('.spinner-line'),
-      h('.spinner-line'),
-      h('.spinner-line'),
-      h(
-        '.spinner-circle',
-        h('div', '●'),
-      ),
-    ],
-  ),
-));
+export const errorDiv = (message) =>h(
+  '.flex-column.items-center.justify-center',
+  [
+    h('.f1', iconCircleX()),
+    h('span.f3', message),
+  ],
+);
