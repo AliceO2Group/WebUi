@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
+import { getDateAsTimestamp } from './../../common/library/utils/dateTimeFormat.js';
 
 /**
  * QC Object data type object Class
@@ -47,10 +46,8 @@ export default class QCObjectDto {
    */
   static isObjectPathValid(object) {
     if (!object || !object['path']) {
-      log.debug('CCDB returned an empty ROOT object path, ignoring');
       return false;
     } else if (object['path'].indexOf('/') === -1) {
-      log.debug(`CCDB returned an invalid ROOT object path "${object['path']}", ignoring`);
       return false;
     }
     return true;
@@ -61,32 +58,32 @@ export default class QCObjectDto {
    * * known keys are mapped to camelCase format
    * * timestamps (ms) are converted from string to number
    * @param {Object} item - from CCDB
-   * @returns {Object} - JSON with keys in camelCase format
+   * @return {Object} - JSON with keys in camelCase format
    */
   static toStandardObject(item) {
-    if (item['path']) {
-      item.name = item['path'];
-      delete item.path;
-    }
-    if (item['last-modified']) {
-      try {
-        item.lastModified = new Date(item['last-modified']).getTime();
-      } catch (error) {
-        item.lastModified = item['last-modified'];
-      }
-    }
-    if (item['drawoptions']) {
-      item.drawOptions = item['drawoptions'];
-      delete item['drawoptions'];
-    }
-    if (item['runnumber']) {
-      item.runNumber = item['runnumber'];
-      delete item['runnumber'];
-    }
-    if (item['displayhints']) {
-      item.displayHints = item['displayhints'];
-      delete item['displayhints'];
-    }
-    return item;
+    const object = {
+      id: item.id,
+      path: item.path,
+      name: item.path,
+      validFrom: getDateAsTimestamp(item['valid-from']),
+      validUntil: getDateAsTimestamp(item['valid-until']),
+      createdAt: getDateAsTimestamp(item.created),
+      lastModified: getDateAsTimestamp(item['last-modified']),
+      fileName: item?.fileName,
+      size: item?.size,
+      drawOptions: item?.drawoptions ?? '',
+      displayHints: item?.displayhints ?? '',
+      etag: item?.etag,
+      runNumber: item?.runnumber,
+      runType: item?.runtype,
+      partName: item?.partname,
+      periodName: item?.periodname,
+      qcCheckName: item?.qc_check_name,
+      qcQuality: item?.qc_quality,
+      qcDetectorName: item?.qc_detector_name,
+      qcVersion: item?.qc_version,
+      objectType: item?.objecttype,
+    };
+    return object;
   }
 }
