@@ -24,3 +24,29 @@ export function isObjectOfTypeChecker(object) {
   const objectType = object['_typename'] ?? '';
   return objectType.toLowerCase().includes(QC_CHECKER_TYPE);
 }
+
+/**
+ * Method to generate drawing option list based on provided options and object type
+ * @param {QcObjectDef} object - QC object to be plotted
+ * @param {Array<string>} options - list of drawing options and display hints
+ * @returns {string} - drawing options joined by ';'
+ */
+export function generateDrawingOptionList(object, options) {
+  options = Array.from(new Set(options));
+
+  const index = options.indexOf('stat');
+  if (index >= 0) {
+    options[index] = 'optstat=1111';
+  } else {
+    options.push('nostat');
+  }
+
+  if (object?._typename !== 'TGraph') {
+    /*
+     * Use user's defined options and add undocumented option "f" allowing color changing on redraw
+     * (color is fixed without it)
+     */
+    options.push('f');
+  }
+  return options;
+}

@@ -397,13 +397,14 @@ export default class QCObject extends Observable {
 
   /**
    * Method to generate drawing options based on where in the application the plot is displayed
-   * @param {object} tabObject - tab dto representation
-   * @param {object} objectRemoteData - object within a remotedata
+   * @param {TabObjectDef} tabObject - tab dto representation
+   * @param {RemoteData<{king: string, payload: QcObjectDef}>} objectRemoteData - QC object within RemoteData type
    * @returns {Array<string>} - list of drawing options
    */
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
     let drawingOptions = [];
+
     const { qcObject } = objectRemoteData.payload;
     if (qcObject.fOption) {
       objectOptionList = qcObject.fOption.split(' ');
@@ -415,6 +416,9 @@ export default class QCObject extends Observable {
     if (qcObject.displayHints) {
       const metaHints = qcObject.displayHints.split(' ');
       objectOptionList = objectOptionList.concat(metaHints);
+    }
+    if (tabObject.options) {
+      objectOptionList = objectOptionList.concat(tabObject.options);
     }
     switch (this.model.page) {
       case 'objectTree':
