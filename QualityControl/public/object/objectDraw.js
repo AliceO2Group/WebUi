@@ -198,7 +198,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
       drawingOptions = generateDrawingOptionList(qcObject, drawingOptions);
 
-      JSROOT.draw(dom, qcObject, drawingOptions).then((painter) => {
+      JSROOT.draw(dom, qcObject, drawingOptions.join(';')).then((painter) => {
         if (painter === null) {
           // Jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
