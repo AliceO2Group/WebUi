@@ -45,16 +45,13 @@ export function draw(model, tabObject, options, location = '') {
   };
 
   options = { ...defaultOptions, ...options };
-  const drawingOptions = [];
-  if (options.stat) {
-    drawingOptions.push('stat');
-    delete options.stat;
-  }
+
   if (typeof tabObject === 'string') {
     tabObject = {
       id: tabObject,
       name: tabObject,
-      options: drawingOptions,
+      ignoreDefaults: false,
+      options: options.stat ? ['stat'] : [],
       x: 0,
       y: 0,
       h: 0,
