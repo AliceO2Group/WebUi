@@ -27,7 +27,7 @@ export function isObjectOfTypeChecker(object) {
 
 /**
  * Method to generate drawing option list based on provided options and object type
- * @param {RootObjectDef} object - QC object to be plotted
+ * @param {RootObject} object - QC object to be plotted
  * @param {Array<string>} options - list of drawing options and display hints
  * @returns {string} - drawing options joined by ';'
  */

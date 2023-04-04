@@ -12,9 +12,15 @@
  */
 
 /**
- * @typedef QcObjectDef
+ * @typedef TabObject
  *
- * @property {object} root - ROOT object in JSON format
- * @property {Array<string>} drawingOptions - list of drawing options
- * @property {Array<string>} displayHints - list of display hints
+ * @property {string} id
+ * @property {string} name
+ * @property {number} x
+ * @property {number} y
+ * @property {number} h
+ * @property {number} w
+ * @property {Array<string>} options - list of drawing options and display hints
+ * @property {boolean} autoSize
+ * @property {boolean} ignoreDefaults
  */

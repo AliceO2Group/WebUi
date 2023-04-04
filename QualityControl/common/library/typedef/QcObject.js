@@ -12,8 +12,9 @@
  */
 
 /**
- * @typedef RootObjectDef
+ * @typedef QcObject
  *
- * @property {string} _typename - type of the ROOT object
- * @property {string} foption - plot option for the object
+ * @property {object} root - ROOT object in JSON format
+ * @property {Array<string>} drawingOptions - list of drawing options
+ * @property {Array<string>} displayHints - list of display hints
  */

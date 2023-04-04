@@ -397,8 +397,8 @@ export default class QCObject extends Observable {
 
   /**
    * Method to generate drawing options based on where in the application the plot is displayed
-   * @param {TabObjectDef} tabObject - tab dto representation
-   * @param {RemoteData<{king: string, payload: QcObjectDef}>} objectRemoteData - QC object within RemoteData type
+   * @param {TabObject} tabObject - tab dto representation
+   * @param {RemoteData<{king: string, payload: QcObject}>} objectRemoteData - QC object within RemoteData type
    * @returns {Array<string>} - list of drawing options
    */
   generateDrawingOptions(tabObject, objectRemoteData) {
