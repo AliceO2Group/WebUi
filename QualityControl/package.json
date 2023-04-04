@@ -27,6 +27,12 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha",
     "mocha": "mocha --exit test/mocha-index.js"
   },
+  "files": [
+    "common/",
+    "lib/",
+    "public/",
+    "index.js"
+  ],
   "dependencies": {
     "@aliceo2/web-ui": "2.3.0",
     "jsroot": "7.3.0",
