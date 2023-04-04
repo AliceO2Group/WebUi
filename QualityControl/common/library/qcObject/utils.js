@@ -27,21 +27,25 @@ export function isObjectOfTypeChecker(object) {
 
 /**
  * Method to generate drawing option list based on provided options and object type
- * @param {RootObject} object - QC object to be plotted
+ * @param {RootObject} rootObject - QC object to be plotted
  * @param {Array<string>} options - list of drawing options and display hints
  * @returns {string} - drawing options joined by ';'
  */
-export function generateDrawingOptionList(object, options) {
+export function generateDrawingOptionList(rootObject, options) {
   options = Array.from(new Set(options));
 
   const index = options.indexOf('stat');
   if (index >= 0) {
+    /*
+     * Usage of statbox is done via the: 'optstat' and 'nostat'
+     * https://github.com/root-project/jsroot/blob/master/docs/JSROOT.md#drawing-objects-in-jsroot
+     */
     options[index] = 'optstat=1111';
   } else {
     options.push('nostat');
   }
 
-  if (object?._typename !== 'TGraph') {
+  if (rootObject?._typename !== 'TGraph') {
     /*
      * Use user's defined options and add undocumented option "f" allowing color changing on redraw
      * (color is fixed without it)
