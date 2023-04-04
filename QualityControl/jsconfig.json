@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "target": "es6"
+  },
+  "exclude": ["node_modules"],
+  "include": [
+    "common/**/*.js",
+    "public/**/*.js",
+    "lib/**/*.js",
+    "test/**/*.js",
+  ]
+}
