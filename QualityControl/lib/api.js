@@ -18,7 +18,7 @@ import { config } from './config/configProvider.js';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/api`);
 
 // Load data source (demo or DB)
-const model = config.demoData ? await import('./QCModelDemo.js') : await import('./QCModel.js');
+const model = config.demoData ? await import('./../test/QCModelDemo.js') : await import('./QCModel.js');
 import {
   queryPrefix, listObjects, consulService, objectController, layoutService, statusService, userService,
 } from './QCModel.js';
