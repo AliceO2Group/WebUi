@@ -19,11 +19,12 @@ import { httpHeadJson, httpGetJson, errorLogger } from './../utils/utils.js';
 
 /**
  * Gateway for all CCDB calls
- * // TODO - constants should be separate so that QCObjectDTO can used them as well;
+ * @class
  */
 export class CcdbService {
   /**
    * Setup CCDB Service
+   * @constructor
    * @param {Object} config - {hostname, port}
    */
   constructor(config) {
@@ -85,13 +86,9 @@ export class CcdbService {
    * @param {String} prefix - Prefix for which CCDB should search for objects
    * @param {Array<String>} fields - List of fields that should be requested for each object
    * @returns {Promise.<Array<Object>>} - results of objects query or error
-   * @throws {Error
+   * @throws {Error}
    */
   async getObjectsLatestVersionList(prefix = this.PREFIX, fields = []) {
-    if (!Array.isArray(fields)) {
-      throw new Error('List of specified fields must be of type Array');
-    }
-
     try {
       const headers = {
         Accept: 'application/json',
