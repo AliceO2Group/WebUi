@@ -54,3 +54,18 @@ export function generateDrawingOptionList(rootObject, options) {
   }
   return options;
 }
+
+/**
+ * Method to extract the tags (with a specified prefix) from a list of services.
+ * @param {object} services - map of services
+ * @param {string} [prefix = ''] - prefix for which tags should be extracted for
+ * @returns {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
+ */
+export function getTagsFromServices(services, prefix = '') {
+  return Object.values(services)
+    .filter((service) => service?.Tags)
+    .map((service) => service.Tags)
+    .flat()
+    .filter((tag) => tag.startsWith(prefix))
+    .map((tag) => ({ name: tag }));
+}

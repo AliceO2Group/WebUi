@@ -17,7 +17,9 @@ import {
   isObjectOfTypeChecker,
   OBJECT_TYPE_KEY,
   generateDrawingOptionList,
+  getTagsFromServices,
 } from './../../../../common/library/qcObject/utils.js';
+import { ONLINE_SERVICES } from './../../../demoData/online-services.mock.js';
 
 /**
  * Test Suite for the common library of qcg - utils module
@@ -72,6 +74,38 @@ export const commonLibraryQcObjectUtilsTestSuite = async () => {
         generateDrawingOptionList({ _typename: 'TGraph' }, ['gridx', 'stat']),
         ['gridx', 'optstat=1111'],
       );
+    });
+  });
+
+  describe('getTagsFromServices - test suite', () => {
+    it('should successfully return a list of mapped tags prefix is provided', () => {
+      const expectedTags = [
+        { name: 'QcTask/example' },
+        { name: 'QcTask/other' },
+        { name: 'QcTask/p2' },
+      ];
+      assert.deepStrictEqual(getTagsFromServices(ONLINE_SERVICES, 'Qc'), expectedTags);
+    });
+
+    it('should successfully return all tags when no prefix is provided', () => {
+      const expectedTags = [
+        { name: 'QcTask/example' },
+        { name: 'ITSRAWDS/example' },
+        { name: 'QcTask/other' },
+        { name: 'TOF_RAWS/example' },
+        { name: 'QcTask/p2' },
+        { name: 'ABC/p2' },
+      ];
+      assert.deepStrictEqual(getTagsFromServices(ONLINE_SERVICES), expectedTags);
+    });
+
+    it('should successfully return an empty list if tags are missing', () => {
+      const services = {
+        task: {},
+        task2: { tag: [] },
+        task3: undefined,
+      };
+      assert.deepStrictEqual(getTagsFromServices(services), []);
     });
   });
 };
