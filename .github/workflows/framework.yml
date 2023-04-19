@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - run: (cd Framework; npm ci )
@@ -44,7 +44,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - run: cd Framework; npm ci
@@ -60,7 +60,7 @@ jobs:
         run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework";) 
       - uses: actions/checkout@v3
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - run: (cd Framework; npm ci)
@@ -80,7 +80,7 @@ jobs:
         run : (echo "Run QualityControl tests by using @aliceo2/web-ui from local ../Framework";) 
       - uses: actions/checkout@v3
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - run: (cd Framework; npm ci)
@@ -100,7 +100,7 @@ jobs:
         run : (echo "Run InfoLogger tests by using @aliceo2/web-ui from local ../Framework";) 
       - uses: actions/checkout@v3
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - run: (cd Framework; npm ci)
