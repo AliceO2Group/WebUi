@@ -9,7 +9,7 @@ jobs:
       PROJECT: ${{ steps.set-project.outputs.project }}
       VERSION: ${{ steps.set-project.outputs.version }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions/setup-node@v1
       with:
         node-version: '16.x'
@@ -47,7 +47,7 @@ jobs:
     outputs:
       ASSET_URL: ${{ steps.upload.outputs.asset_url }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions/setup-node@v1
       with:
         node-version: '16.x'

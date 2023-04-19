@@ -9,7 +9,7 @@ jobs:
     name: Create a PR in WebUI repo with updated proto file
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Copy new proto file
       run: |
         git clone https://github.com/AliceO2Group/Control.git AliEcs && cp AliEcs/core/protos/o2control.proto Control/protobuf && rm -rf AliEcs
