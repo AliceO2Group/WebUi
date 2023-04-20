@@ -29,6 +29,7 @@
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
     - [release.yml](#releaseyml)
+    - [proto-sync.yml](#proto-syncyml)
 
 ## Description
 This is a prototype of Control GUI. It aims to replace current ECS HI and provide intuitive way of controlling the O<sup>2</sup> data taking.
@@ -214,3 +215,9 @@ Control project makes use of two workflows.
 ### [release.yml](../.github/workflows/release.yml)
 * Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/control](https://www.npmjs.com/package/@aliceo2/control)
 * Builds a `tgz` file which contains an archive of the project. This can than be used for local repositories installations
+
+### [proto-sync.yml](../.github/workflows/proto-sync.yml)
+* Every week the workflow will be checking if there are any updates on the 2 proto files from [Control](https://github.com/AliceO2Group/Control) that are being used in AliECS GUI:
+  * o2control
+  * apricot 
+* If there are any changes, the workflow will automatically raise a PR with the file(s) updates.
