@@ -30,5 +30,6 @@ jobs:
           git checkout -b deps/control-protos-changed
           git add .
           git commit -m "Update PROTO files from AliECS"
+          git push origin deps/control-protos-changed
           gh pr create -t "Update PROTO files from AliECS" -b "Update PROTO files from AliECS" -r "graduta" -l "Control"
         fi
