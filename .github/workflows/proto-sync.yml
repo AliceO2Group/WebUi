@@ -23,6 +23,8 @@ jobs:
       run: |
         is_different="$(git diff --name-only)"
         if [ ! -z "$is_different" ]; then
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add .
           git commit -m "Update PROTO files from AliECS"
           gh pr create --head --fill -r graduta -l "Control"
