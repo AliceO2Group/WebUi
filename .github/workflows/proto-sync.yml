@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Copy new proto file(s)
       run: |
         git clone https://github.com/AliceO2Group/Control.git aliecs
