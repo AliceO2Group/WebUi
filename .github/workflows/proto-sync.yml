@@ -27,7 +27,8 @@ jobs:
         if [ ! -z "$is_different" ]; then
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git checkout -b deps/control-protos-changed
           git add .
           git commit -m "Update PROTO files from AliECS"
-          gh pr create --head --fill -r graduta -l "Control"
+          gh pr create -t "Update PROTO files from AliECS" -b "Update PROTO files from AliECS" -r "graduta" -l "Control"
         fi
