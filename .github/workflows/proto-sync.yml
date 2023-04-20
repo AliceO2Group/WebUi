@@ -9,6 +9,8 @@ jobs:
   check-proto-changes:
     name: Create a PR in WebUI repo with updated proto file
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
     - uses: actions/checkout@v3
       with:
