@@ -41,7 +41,7 @@ export default class QCObjectService {
     this.list = RemoteData.loading();
     that.notify();
 
-    const { result, ok } = await this.model.loader.get('/api/listObjects', {}, true);
+    const { result, ok } = await this.model.loader.get('/api/objects/all', {}, true);
 
     if (ok) {
       this.list = RemoteData.success(result);
@@ -68,8 +68,8 @@ export default class QCObjectService {
     that.notify();
 
     try {
-      // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      let url = `/api/object?path=${objectName}`;
+      // `/api/objects?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
+      let url = `/api/objects?path=${objectName}`;
       if (timestamp === -1 && filter === '') {
         url += `&timestamp=${Date.now()}`;
       } else if (filter !== '') {
@@ -109,7 +109,7 @@ export default class QCObjectService {
    * @deprecated
    */
   async getObjects() {
-    const { result, ok } = await this.model.loader.get('/api/listObjects');
+    const { result, ok } = await this.model.loader.get('/api/objects/all');
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 
