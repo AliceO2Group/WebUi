@@ -15,7 +15,7 @@
 /* global JSROOT */
 
 import { h } from '/js/src/index.js';
-import { isObjectOfTypeChecker } from './../../../library/qcObject/utils.js';
+import { generateDrawingOptionList, isObjectOfTypeChecker } from './../../../library/qcObject/utils.js';
 import checkersPanel from './checkersPanel.js';
 
 /**
@@ -78,26 +78,8 @@ const rootPlotPanel = (object, options, drawingOptions) => {
  * @returns {undefined}
  */
 function drawOnCreate(id, root, drawingOptions) {
-  if (root._typename === 'TGraph' && (root.fOption === '' || root.fOption === undefined)) {
-    root.fOption = 'alp';
-  }
-
-  const index = drawingOptions.indexOf('stat');
-  if (index >= 0) {
-    drawingOptions[index] = 'optstat=1111';
-  } else {
-    drawingOptions.push('nostat');
-  }
-
-  drawingOptions = drawingOptions.join(';');
-  if (root._typename !== 'TGraph') {
-    /*
-     * Use user's defined options and add undocumented option "f" allowing color changing on redraw
-     * (color is fixed without it)
-     */
-    drawingOptions += ';f';
-  }
-  JSROOT.draw(id, root, drawingOptions).then((painter) => {
+  drawingOptions = generateDrawingOptionList(root, drawingOptions);
+  JSROOT.draw(id, root, drawingOptions.join(';')).then((painter) => {
     if (painter === null) {
       // eslint-disable-next-line no-console
       console.error('null painter in JSROOT');
