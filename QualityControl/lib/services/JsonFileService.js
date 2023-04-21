@@ -52,9 +52,8 @@ export class JsonFileService {
   }
 
   /**
-   * Read
-   * @param {string} argName - blabla
-   * @returns {string} blabla
+   * Method to read from file and update the data variable
+   * @returns {Promise<undefined.Error>} - rejects if unable to read file
    */
   async _readFromFile() {
     return new Promise((resolve, reject) => {
@@ -187,6 +186,27 @@ export class JsonFileService {
   async listLayouts(filter = {}) {
     return this.data.layouts.filter((layout) =>
       filter.owner_id === undefined || layout.owner_id === filter.owner_id);
+  }
+
+  /**
+   * Return an object by its id that is saved within a layout
+   * @param {string} id - id of the object to retrieve
+   * @return {object} - object configuration stored
+   */
+  getObjectById(id) {
+    if (!id) {
+      throw new Error('Missing mandatory parameter: id');
+    }
+    for (const layout of this.data.layouts) {
+      for (const tab of layout.tabs) {
+        for (const object of tab.objects) {
+          if (object.id === id) {
+            return object;
+          }
+        }
+      }
+    }
+    throw new Error(`Object with ${id} could not be found`);
   }
 
   /* User helpers */
