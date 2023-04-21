@@ -12,15 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
+/* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 
-const assert = require('assert');
-const nock = require('nock');
+import assert from 'assert';
+import nock from 'nock';
 
-const CcdbService = require('../../../lib/services/CcdbService.js');
-const config = require('../../test-config.js');
+import { CcdbService } from '../../../lib/services/CcdbService.js';
+import { testConfig as config } from '../../test-config.js';
 
-describe('CCDB Service test suite', () => {
+export const ccdbServiceTestSuite = async () => {
   before(() => nock.cleanAll());
 
   describe('Creating a new CcdbService instance', () => {
@@ -70,27 +71,46 @@ describe('CCDB Service test suite', () => {
       const ccdb = new CcdbService(config.ccdb);
       await assert.rejects(
         async () => await ccdb.getObjectsLatestVersionList('/qc', 'bad-fields'),
-        new Error('List of specified fields must be of type Array'),
+        new Error('Unable to retrieve list of latest versions of objects due to: fields.join is not a function'),
       );
     });
 
-    it('should successfully return a list of the objects', async () => {
+    it('should successfully return a list of the objects with requested default headers', async () => {
       const ccdb = new CcdbService(config.ccdb);
       const objects = [
-        { path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id' },
-        { path: 'object/two', Created: '101', 'Last-Modified': '102', id: 'id' },
-        { path: 'object/three', Created: '101', 'Last-Modified': '102', id: 'id' },
+        { path: 'object/one', Created: '101', 'Last-Modified': '102' },
+        { path: 'object/two', Created: '101', 'Last-Modified': '102' },
+        { path: 'object/three', Created: '101', 'Last-Modified': '102' },
       ];
-      const expectedObjects = [
-        { name: 'object/one', created: 101, lastModified: 102, id: 'id' },
-        { name: 'object/two', created: 101, lastModified: 102, id: 'id' },
-        { name: 'object/three', created: 101, lastModified: 102, id: 'id' },
-      ];
-      nock('http://ccdb:8500')
+      nock('http://ccdb:8500', {
+        reqheaders: {
+          Accept: 'application/json',
+          'X-Filter-Fields': 'path,Created,Last-Modified',
+        },
+      })
         .get('/latest/test.*')
         .reply(200, { objects: objects, subfolders: [] });
       const objectsRetrieved = await ccdb.getObjectsLatestVersionList();
-      assert.deepStrictEqual(objectsRetrieved, expectedObjects, 'Received objects are not alike');
+      assert.deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
+    });
+
+    it('should successfully return a list of the objects with specified headers', async () => {
+      const ccdb = new CcdbService(config.ccdb);
+      const objects = [
+        { path: 'object/one', Created: '101', 'Last-Modified': '102', Id: 1 },
+        { path: 'object/two', Created: '101', 'Last-Modified': '102', Id: 2 },
+        { path: 'object/three', Created: '101', 'Last-Modified': '102', Id: 3 },
+      ];
+      nock('http://ccdb:8500', {
+        reqheaders: {
+          Accept: 'application/json',
+          'X-Filter-Fields': 'Id',
+        },
+      })
+        .get('/latest/.*')
+        .reply(200, { objects: objects, subfolders: [] });
+      const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', ['Id']);
+      assert.deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
     });
 
     it('should reject due to HTTP request error', async () => {
@@ -104,32 +124,30 @@ describe('CCDB Service test suite', () => {
   });
 
   describe('`getObjectTimestampList()` tests', () => {
-    it('should successfully return a list of last modified timestamps for a specific object', async () => {
+    it('should successfully return a list of Valid-From timestamps for a specific object', async () => {
       const ccdb = new CcdbService(config.ccdb);
       const objects = [
-        { path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: [] },
-        { path: 'object/one', Created: '101', 'Last-Modified': '103', id: 'id', metadata: [] },
-        { path: 'object/one', Created: '101', 'Last-Modified': '104', id: 'id', metadata: [] },
+        { path: 'object/one', Created: '101', 'Valid-From': '102', id: 'id', metadata: [] },
+        { path: 'object/one', Created: '101', 'Valid-From': '103', id: 'id', metadata: [] },
+        { path: 'object/one', Created: '101', 'Valid-From': '104', id: 'id', metadata: [] },
       ];
       const expectedTimestamps = [102, 103, 104];
       nock('http://ccdb:8500')
-        .get('/browse/object/one')
+        .get('/browse/object/one/')
         .reply(200, { objects, subfolders: [] });
 
-      await ccdb.getObjectTimestampList('object/one').then((result) => {
-        assert.deepStrictEqual(result, expectedTimestamps);
-      });
+      const result = await ccdb.getObjectTimestampList('object/one');
+      assert.deepStrictEqual(result, expectedTimestamps);
     });
 
     it('should successfully return an empty list due to empty reply from CCDB', async () => {
       const ccdb = new CcdbService(config.ccdb);
       nock('http://ccdb:8500')
-        .get('/browse/object/one')
+        .get('/browse/object/one/')
         .reply(200, { objects: [], subfolders: [] });
 
-      await ccdb.getObjectTimestampList('object/one').then((result) => {
-        assert.deepStrictEqual(result, []);
-      });
+      const result = await ccdb.getObjectTimestampList('object/one');
+      assert.deepStrictEqual(result, []);
     });
   });
 
@@ -186,47 +204,6 @@ describe('CCDB Service test suite', () => {
       assert.deepStrictEqual(result, objects[0]);
     });
   });
-
-  /*
-   * Describe('`itemTransform()` & `isItemValid() tests', () => {
-   *   let ccdb;
-   *   before(() => ccdb = new CcdbService(config.ccdb));
-   */
-
-  /*
-   *   It('should successfully return false for an item with missing path', () => {
-   *     assert.strictEqual(ccdb.isItemValid({}), false);
-   *     assert.strictEqual(ccdb.isItemValid({path: undefined}), false);
-   *     assert.strictEqual(ccdb.isItemValid({path: false}), false);
-   *     assert.strictEqual(ccdb.isItemValid({path: ''}), false);
-   *   });
-   */
-
-  /*
-   *   It('should successfully return false for an item with a path missing a forward slash(/)', () => {
-   *     assert.strictEqual(ccdb.isItemValid({path: 'wrongPath'}), false);
-   *   });
-   */
-
-  /*
-   *   It('should successfully return true for an item that fits criteria', () => {
-   *     const item = {
-   *       path: 'correct/path', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []
-   *     };
-   *     assert.deepStrictEqual(ccdb.isItemValid(item), true);
-   *   });
-   */
-
-  /*
-   *   It('should successfully return a JSON with 3 fields if item fits criteria', () => {
-   *     const item = {
-   *       path: 'correct/path', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []
-   *     };
-   *     const expectedItem = {name: 'correct/path', createTime: 101, lastModified: 102};
-   *     assert.deepStrictEqual(ccdb.itemTransform(item), expectedItem);
-   *   });
-   * });
-   */
 
   describe('`getObjectDetails()` tests', () => {
     let ccdb;
@@ -322,79 +299,6 @@ describe('CCDB Service test suite', () => {
     });
   });
 
-  /*
-   * Describe('`httGetJson()` tests', () => {
-   *   let ccdb;
-   *   before(() => ccdb = new CcdbService(config.ccdb));
-   */
-
-  /*
-   *   It('should successfully return a list of the objects', async () => {
-   *     nock('http://ccdb:8500')
-   *       .get('/latest/test.*')
-   *       .reply(200, '{}');
-   */
-
-  /*
-   *     Await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*'));
-   *   });
-   */
-
-  /*
-   *   It('should successfully add default headers to request if none were provided', async () => {
-   *     nock('http://ccdb:8500', {
-   *       reqheaders: {
-   *         Accept: 'application/json',
-   *         'X-Filter-Fields': 'path,Created,Last-Modified'
-   *       }
-   *     }).get('/latest/test.*')
-   *       .reply(200, '{}');
-   */
-
-  /*
-   *     Await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*'), 'Provided headers are not matching the default ones');
-   *   });
-   */
-
-  /*
-   *   It('should successfully use provided headers to request', async () => {
-   *     const timestampHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'lastModified', 'Browse-Limit': 50};
-   */
-
-  /*
-   *     nock('http://ccdb:8500', {
-   *       reqheaders: timestampHeaders
-   *     }).get('/latest/test.*')
-   *       .reply(200, '{}');
-   *     await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*', timestampHeaders), 'Expected headers are not matching');
-   *   });
-   */
-
-  /*
-   *   It('should reject with error due to status code', async () => {
-   *     nock('http://ccdb:8500')
-   *       .get('/latest/test.*')
-   *       .reply(502, 'Some error');
-   */
-
-  /*
-   *     Await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Non-2xx status code: 502'));
-   *   });
-   */
-
-  /*
-   *   It('should reject with error due to bad JSON body', async () => {
-   *     nock('http://ccdb:8500')
-   *       .get('/latest/test.*')
-   *       .reply(200, 'Bad formatted JSON');
-   */
-
-  /*
-   *     Await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Unable to parse JSON'));
-   *   });
-   * });
-   */
-
   describe('`_getPrefix()` tests', () => {
     let ccdb;
     before(() => {
@@ -412,4 +316,4 @@ describe('CCDB Service test suite', () => {
       assert.strictEqual(ccdb._getPrefix({ prefix: '/qc/tst/' }), 'qc/tst');
     });
   });
-});
+};
