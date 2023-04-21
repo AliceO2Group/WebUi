@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
 import { h, iconResizeBoth, info } from '/js/src/index.js';
 
 /**
@@ -24,17 +25,8 @@ import { h, iconResizeBoth, info } from '/js/src/index.js';
 export const objectInfoResizePanel = (model, tabObject) => {
   const { name } = tabObject;
   const isSelectedOpen = model.object.selectedOpen;
-  const metadata = [
-    'drawOptions',
-    'displayHints',
-    'objectType',
-    'partname',
-    'run_type',
-    'runNumber',
-    'qc_detector_name',
-    'qc_task_name',
-    'qc_version',
-  ];
+  const objectRemoteData = model.services.object.objectsLoadedMap[name];
+
   return h('.text-right.resize-element.resize-button.flex-row', {
     style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
   }, [
@@ -44,23 +36,11 @@ export const objectInfoResizePanel = (model, tabObject) => {
         title: 'View details about histogram',
         onclick: () => model.object.toggleInfoArea(name),
       }, info()),
-      h('.dropdown-menu', { style: 'right:0.1em; width: 25em;left: auto;' }, [
-        h('.m1.gray-darker.flex-row', [
-          h('.w-30.text-left', { style: 'font-weight: bold;' }, 'Name'),
-          h('.w-70.text-right', { style: 'word-break: break-all;' }, name),
-        ]),
-        h('.m1.gray-darker.flex-row', [
-          h('.w-30.text-left', { style: 'font-weight: bold;' }, 'Last Modified'),
-          h('.w-70.text-right', { style: 'word-break: break-all;' }, model.object.getLastModifiedByName(name)),
-        ]),
-        model.services.object.objectsLoadedMap[name].isSuccess() &&
-          Object.keys(model.services.object.objectsLoadedMap[name].payload)
-            .filter((key) => metadata.includes(key))
-            .map((key) => h('.m1.gray-darker.flex-row', [
-              h('.w-30.text-left', { style: 'font-weight: bold;' }, key),
-              h('.w-70.text-right', model.services.object.objectsLoadedMap[name].payload[key]),
-            ])),
-      ]),
+      h(
+        '.dropdown-menu',
+        { style: 'right:0.1em; width: 35em;left: auto;' },
+        objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
+      ),
     ])),
     h('a.btn', {
       title: 'Open object plot in full screen',
