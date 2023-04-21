@@ -12,11 +12,8 @@
  */
 
 /**
- * @typedef QcObject
+ * @typedef RootService
  *
- * @property {object} root - ROOT object in JSON format
- * @property {Array<string>} drawingOptions - list of drawing options
- * @property {Array<string>} displayHints - list of display hints
- * @property {string} layoutDisplayOptions
- * @property {boolean} ignoreDefaults - should the object be plotted with its drawingOptions and displayHints or not
+ * @property {function} openFile - JSROOT method for opening the ROOT file and load the content
+ * @property {function} toJSON - JSROOT override toJSON method to cover function parsing as well
  */
