@@ -27,8 +27,19 @@ import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
  */
 export default (model) => {
   const { objectViewModel } = model;
+  const { objectName, objectId } = model.router.params;
+
+  let title = objectName;
+  if (objectId) {
+    if (objectViewModel.selected.isSuccess()) {
+      const { path, layoutName } = objectViewModel.selected.payload;
+      title = `${path} (from layout: ${layoutName})`;
+    } else {
+      title = objectId;
+    }
+  }
   return h('.absolute-fill.flex-column', [
-    header(model),
+    header(model, title),
     objectPlotAndInfo(objectViewModel),
   ]);
 };
@@ -54,9 +65,9 @@ const objectPlotAndInfo = (objectViewModel) =>
           qcObject.timestamps,
           objectViewModel.updateObjectSelection.bind(objectViewModel),
         ))),
-        h('.w-100.flex-row', { style: 'height: 90%;' }, [
-          h('.text-center.h-100.w-70', draw(qcObject, {}, drawingOptions)),
-          h('.w-30.h-100.scroll-y', qcObjectInfoPanel(qcObject)),
+        h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
+          h('.w-70', draw(qcObject, {}, drawingOptions)),
+          h('.w-30.scroll-y', qcObjectInfoPanel(qcObject)),
         ]),
       ]);
     },

@@ -101,12 +101,14 @@ export class ObjectService {
    * @throws
    */
   async getObjectById(id, timestamp = -1, filter = '') {
-    const { name, options = {}, ignoreDefaults = false } = this._dataService.getObjectById(id);
-    const object = await this.getObject(name, timestamp, filter);
+    const { object, layoutName } = this._dataService.getObjectById(id);
+    const { name, options = {}, ignoreDefaults = false } = object;
+    const qcObject = await this.getObject(name, timestamp, filter);
 
     return {
-      ...object,
+      ...qcObject,
       layoutDisplayOptions: options,
+      layoutName,
       ignoreDefaults,
     };
   }

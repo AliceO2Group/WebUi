@@ -191,7 +191,7 @@ export class JsonFileService {
   /**
    * Return an object by its id that is saved within a layout
    * @param {string} id - id of the object to retrieve
-   * @return {object} - object configuration stored
+   * @return {{object: object, layoutName: string}} - object configuration stored
    */
   getObjectById(id) {
     if (!id) {
@@ -201,7 +201,7 @@ export class JsonFileService {
       for (const tab of layout.tabs) {
         for (const object of tab.objects) {
           if (object.id === id) {
-            return object;
+            return { object, layoutName: layout.name };
           }
         }
       }

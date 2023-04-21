@@ -15,7 +15,7 @@
 import { h } from '/js/src/index.js';
 import { prettyFormatDate } from './../utils.js';
 
-const DATE_FIELDS = ['validFrom', 'validUntil', 'createdAt'];
+const DATE_FIELDS = ['validFrom', 'validUntil', 'createdAt', 'lastModified'];
 const TO_REMOVE_FIELDS = ['qcObject', 'timestamps', 'name', 'location'];
 
 /**

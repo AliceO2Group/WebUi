@@ -17,6 +17,7 @@
  * @property {object} root - ROOT object in JSON format
  * @property {Array<string>} drawingOptions - list of drawing options
  * @property {Array<string>} displayHints - list of display hints
- * @property {string} layoutDisplayOptions
- * @property {boolean} ignoreDefaults - should the object be plotted with its drawingOptions and displayHints or not
+ * @property {string} [layoutDisplayOptions] - displayOptions from layout configuration if object is retrieved from one
+ * @property {string} [layoutName] - name of the layout if object is retrieved from one
+ * @property {boolean} [ignoreDefaults] - should the object be plotted with its drawingOptions and displayHints or not
  */

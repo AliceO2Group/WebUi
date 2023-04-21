@@ -17,18 +17,14 @@ import { h, iconBook, iconArrowThickLeft } from '/js/src/index.js';
 /**
  * Builds header which contains information on plotted object and actions that can be applied
  * @param {Model} model - root model of the application
+ * @param {string} title - title of the page depending on the object loading location (tree or layout)
  * @returns {vnode} - virtual node element
  */
-export const header = (model) => {
-  const { objectName, objectId } = model.router.params;
-  const title = objectName ?? objectId;
-
-  return h('.flex-row.items-center.shadow-level1.p2', [
-    getBackToQCGButton(model),
-    h('.flex-column.text-center', { style: 'flex-grow:1' }, h('b', title)),
-    model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
-  ]);
-};
+export const header = (model, title) => h('.flex-row.items-center.shadow-level1.p2', [
+  getBackToQCGButton(model),
+  h('.flex-column.text-center', { style: 'flex-grow:1' }, h('b', title)),
+  model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
+]);
 
 /**
  * Button for redirecting the user back to QCG object tree page
