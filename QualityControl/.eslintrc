@@ -13,7 +13,7 @@
         "node_modules/",
         "public/config.js",
         "docs",
-        "lib/demoData"
+        "test/demoData"
     ],
     "globals": {
         "Promise": true

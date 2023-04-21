@@ -18,6 +18,7 @@ import { h } from '/js/src/index.js';
 import { timerDebouncer, pointerId } from '../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import checkersPanel from './../common/object/checkersPanel.js';
+import { generateDrawingOptionList } from '../../library/qcObject/utils.js';
 
 /**
  * Draw an object using JSROOT.
@@ -43,16 +44,13 @@ export function draw(model, tabObject, options) {
   };
 
   options = { ...defaultOptions, ...options };
-  const drawingOptions = [];
-  if (options.stat) {
-    drawingOptions.push('stat');
-    delete options.stat;
-  }
+
   if (typeof tabObject === 'string') {
     tabObject = {
       id: tabObject,
       name: tabObject,
-      options: drawingOptions,
+      ignoreDefaults: false,
+      options: options.stat ? ['stat'] : [],
       x: 0,
       y: 0,
       h: 0,
@@ -145,7 +143,7 @@ export function draw(model, tabObject, options) {
  * State is stored DOM dataset of element
  * @param {Model} model - root model of the application
  * @param {object} dom - the div containing jsroot plot
- * @param {object} tabObject - tabObject to be redrawn inside dom
+ * @param {TabObject} tabObject - tabObject to be redrawn inside dom
  * @returns {undefined}
  */
 function resizeOnSizeUpdate(model, dom, tabObject) {
@@ -163,7 +161,7 @@ function resizeOnSizeUpdate(model, dom, tabObject) {
  * State is stored DOM dataset of element
  * @param {Model} model - root model of the application
  * @param {object} dom - the div containing jsroot plot
- * @param {object} tabObject - tabObject to be redrawn inside dom
+ * @param {TabObject} tabObject - tabObject to be redrawn inside dom
  * @returns {undefined}
  */
 function redrawOnDataUpdate(model, dom, tabObject) {
@@ -192,31 +190,9 @@ function redrawOnDataUpdate(model, dom, tabObject) {
         JSROOT.cleanup(dom);
       }
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      drawingOptions = generateDrawingOptionList(qcObject, drawingOptions);
 
-      if (qcObject._typename === 'TGraph') {
-        if (qcObject.fOption === '' || qcObject.fOption === undefined) {
-          qcObject.fOption = 'alp';
-        }
-      } else {
-        /*
-         * Use user's defined options and add undocumented option "f" allowing color changing on redraw
-         * (color is fixed without it)
-         */
-        drawingOptions.push('f');
-      }
-
-      const index = drawingOptions.indexOf('stat');
-      if (index >= 0) {
-        drawingOptions[index] = 'optstat=1111';
-      } else {
-        drawingOptions.push('nostat');
-      }
-
-      drawingOptions = Array.from(new Set(drawingOptions));
-      drawingOptions = drawingOptions.join(';');
-
-      console.log(drawingOptions, 'layout');
-      JSROOT.draw(dom, qcObject, drawingOptions).then((painter) => {
+      JSROOT.draw(dom, qcObject, drawingOptions.join(';')).then((painter) => {
         if (painter === null) {
           // Jsroot failed to paint it
           model.object.invalidObject(tabObject.name);
@@ -244,7 +220,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
  * Generates a replacement fingerprint.
  * When it changes, element should be replaced
  * - tabObject.id (associated to .name) is dependency of oncreate and onremove to load/unload
- * @param {object} tabObject - tab dto representation
+ * @param {TabObject} tabObject - tab dto representation
  * @returns {vnode} - virtual node
  */
 function fingerprintReplacement(tabObject) {
@@ -255,7 +231,7 @@ function fingerprintReplacement(tabObject) {
  * Generates a resize fingerprint.
  * When it changes, JSROOT should resize canvas
  * - tabObject.w and tabObject.h change size
- * @param {object} tabObject - tab dto representation
+ * @param {TabObject} tabObject - tab dto representation
  * @returns {vnode} - virtual node
  */
 function fingerprintResize(tabObject) {
@@ -268,7 +244,7 @@ function fingerprintResize(tabObject) {
  * - object data could be replaced on data refresh
  * - tabObject.options change requires redraw
  * @param {Model} model - root model of the application
- * @param {object} tabObject - tab dto representation
+ * @param {TabObject} tabObject - tab dto representation
  * @returns {string} - id of the redraw
  */
 function fingerprintRedraw(model, tabObject) {
@@ -282,7 +258,7 @@ function fingerprintRedraw(model, tabObject) {
  * When it changes, JSROOT should clean and redraw canvas
  * - tabObject.options change requires clean-redraw, not just redraw
  * @param {Model} model - root model of the application
- * @param {object} tabObject - tab dto representation
+ * @param {TabObject} tabObject - tab dto representation
  * @returns {string} - id of the redraw
  */
 function fingerprintCleanRedraw(model, tabObject) {

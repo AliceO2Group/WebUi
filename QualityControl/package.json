@@ -27,6 +27,12 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha",
     "mocha": "mocha --exit test/mocha-index.js"
   },
+  "files": [
+    "common/",
+    "lib/",
+    "public/",
+    "index.js"
+  ],
   "dependencies": {
     "@aliceo2/web-ui": "2.3.0",
     "jsroot": "7.3.1",
@@ -38,11 +44,11 @@
     "joi"
   ],
   "devDependencies": {
-    "eslint": "^8.36.0",
+    "eslint": "^8.38.0",
     "mocha": "^10.2.0",
     "nock": "^13.3.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^19.8.0",
+    "puppeteer": "^19.9.1",
     "sinon": "^15.0.1"
   }
 }

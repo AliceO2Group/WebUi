@@ -18,11 +18,12 @@ import { httpHeadJson, httpGetJson, errorLogger } from './../utils/utils.js';
 
 /**
  * Gateway for all CCDB calls
- * // TODO - constants should be separate so that QCObjectDTO can used them as well;
+ * @class
  */
 export class CcdbService {
   /**
    * Setup CCDB Service
+   * @constructor
    * @param {Object} config - {hostname, port}
    */
   constructor(config) {
@@ -85,23 +86,16 @@ export class CcdbService {
    * @param {String} prefix - Prefix for which CCDB should search for objects
    * @param {Array<String>} fields - List of fields that should be requested for each object
    * @returns {Promise.<Array<Object>>} - results of objects query or error
-   * @throws {Error
+   * @throws {Error}
    */
   async getObjectsLatestVersionList(prefix = this.PREFIX, fields = []) {
-    if (!Array.isArray(fields)) {
-      throw new Error('List of specified fields must be of type Array');
-    }
-
     try {
       const headers = {
-        Accept: 'application/json',
-        'X-Filter-Fields': fields.length >= 0 ? fields.join(',') : `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`,
+        accept: 'application/json',
+        'x-filter-fields': fields.length > 0 ? fields.join(',') : `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`,
       };
-
       const { objects } = await httpGetJson(this.hostname, this.port, `/latest/${prefix}.*`, headers);
-      return objects
-        .filter(QCObjectDto.isObjectPathValid)
-        .map(QCObjectDto.toStandardObject);
+      return objects;
     } catch (error) {
       errorLogger(error, 'ccdb');
       throw new Error(`Unable to retrieve list of latest versions of objects due to: ${error.message || error}`);
@@ -114,7 +108,7 @@ export class CcdbService {
    * @example Equivalent of URL request: `/browse/qc/TPC/object/1`
    * @param {string} objectName - full path of the object
    * @param {number} limit - how many timestamps should retrieve
-   * @param {String} filter - filter that should be applied when querying object; e.g. RunNumber=324543
+   * @param {string} filter - filter that should be applied when querying object; e.g. RunNumber=324543
    * @returns {Promise.<Array<Number>>} - results with list of timestamps
    * @throws {Error}
    */
@@ -246,7 +240,7 @@ export class CcdbService {
    * @returns {string} - format `name`
    */
   _getPrefix(config) {
-    let { prefix = '' } = config;
+    let { prefix = '' } = config ?? {};
     if (config?.prefix?.trim()) {
       prefix = prefix.substring(0, 1) === '/' ? prefix.substring(1, prefix.length) : prefix;
       prefix = prefix.substring(prefix.length - 1, prefix.length) === '/'

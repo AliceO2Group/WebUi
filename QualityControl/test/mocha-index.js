@@ -25,16 +25,16 @@ import {
   commonLibraryUtilsDateTimeTestSuite as dateTimeUtilityTestSuite,
 } from './common/library/utils/dateTimeFormat.test.js';
 
-describe('Lib Test Suite', async () => {
+describe('Lib - Test Suite', async () => {
   describe('Utility methods test suite', async () => await utilsTestSuite());
   describe('Configuration File Parser test suite', async () => await configurationTestSuite());
-
-  describe.skip('Services - Test Suites', () => {
-    describe('CCDB Service - Test Suite', () => ccdbServiceTestSuite()); // TODO
-  });
 });
 
 describe('Common Library - Test Suite', () => {
   describe('CL - Object Utility methods test suite', () => objectUtilityTestSuite());
   describe('CL - DateTime Utility methods test suite', () => dateTimeUtilityTestSuite());
+});
+
+describe('Services - Test Suite', async () => {
+  describe('CcdbService - Test Suite', async () => ccdbServiceTestSuite());
 });

@@ -41,7 +41,7 @@ export default class QCObjectService {
     this.list = RemoteData.loading();
     that.notify();
 
-    const { result, ok } = await this.model.loader.get('/api/listObjects', {}, true);
+    const { result, ok } = await this.model.loader.get('/api/objects/all', {}, true);
 
     if (ok) {
       this.list = RemoteData.success(result);
@@ -159,7 +159,7 @@ export default class QCObjectService {
    * @deprecated
    */
   async getObjects() {
-    const { result, ok } = await this.model.loader.get('/api/listObjects');
+    const { result, ok } = await this.model.loader.get('/api/objects/all');
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 
