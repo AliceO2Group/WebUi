@@ -17,7 +17,7 @@ import {
   isObjectOfTypeChecker,
   OBJECT_TYPE_KEY,
   generateDrawingOptionList,
-  getTagsFromServices,
+  getObjectsNameFromConsulMap,
 } from './../../../../common/library/qcObject/utils.js';
 import { ONLINE_SERVICES } from './../../../demoData/online-services.mock.js';
 
@@ -77,14 +77,14 @@ export const commonLibraryQcObjectUtilsTestSuite = async () => {
     });
   });
 
-  describe('getTagsFromServices - test suite', () => {
+  describe('getObjectsNameFromConsulMap - test suite', () => {
     it('should successfully return a list of mapped tags prefix is provided', () => {
       const expectedTags = [
         { name: 'QcTask/example' },
         { name: 'QcTask/other' },
         { name: 'QcTask/p2' },
       ];
-      assert.deepStrictEqual(getTagsFromServices(ONLINE_SERVICES, 'Qc'), expectedTags);
+      assert.deepStrictEqual(getObjectsNameFromConsulMap(ONLINE_SERVICES, 'Qc'), expectedTags);
     });
 
     it('should successfully return all tags when no prefix is provided', () => {
@@ -96,7 +96,7 @@ export const commonLibraryQcObjectUtilsTestSuite = async () => {
         { name: 'QcTask/p2' },
         { name: 'ABC/p2' },
       ];
-      assert.deepStrictEqual(getTagsFromServices(ONLINE_SERVICES), expectedTags);
+      assert.deepStrictEqual(getObjectsNameFromConsulMap(ONLINE_SERVICES), expectedTags);
     });
 
     it('should successfully return an empty list if tags are missing', () => {
@@ -105,7 +105,7 @@ export const commonLibraryQcObjectUtilsTestSuite = async () => {
         task2: { tag: [] },
         task3: undefined,
       };
-      assert.deepStrictEqual(getTagsFromServices(services), []);
+      assert.deepStrictEqual(getObjectsNameFromConsulMap(services), []);
     });
   });
 };
