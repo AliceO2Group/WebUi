@@ -22,11 +22,10 @@ import { consulService, objectController, layoutService, statusService, userServ
  * @returns {void}
  */
 export const setup = (http) => {
-  http.get('/objects/:id', objectController.getObjectById.bind(objectController));
-  http.get('/objects', objectController.getObjectContent.bind(objectController));
-  http.get('/objects/all', objectController.getObjects.bind(objectController), { public: true });
-
-  http.get('/objects/all/online', onlineMiddleware, objectController.getObjects.bind(objectController));
+  http.get('/object/:id', objectController.getObjectById.bind(objectController));
+  http.get('/object', objectController.getObjectContent.bind(objectController));
+  http.get('/objects', objectController.getObjects.bind(objectController), { public: true });
+  http.get('/objects/online', onlineMiddleware, objectController.getObjects.bind(objectController));
   http.get(
     '/isOnlineModeConnectionAlive',
     onlineMiddleware,

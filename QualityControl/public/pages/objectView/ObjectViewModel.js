@@ -55,7 +55,13 @@ export default class ObjectViewModel extends Observable {
    * @param {object} filter - specific fields that should be applied
    * @returns {undefined}
    */
-  async updateObjectSelection({ objectName, objectId }, timestamp = -1, filter = {}) {
+  async updateObjectSelection({ objectName = undefined, objectId = undefined }, timestamp = -1, filter = {}) {
+    if (!objectName && !objectId && !this.selected.isSuccess()) {
+      return;
+    } else if (!objectName && !objectId) {
+      objectName = this.selected.payload.path;
+    }
+
     this.selected = RemoteData.loading();
     this.notify();
 
@@ -67,11 +73,7 @@ export default class ObjectViewModel extends Observable {
     } else if (objectName) {
       this.selected = await this.model.services.object.getObjectByName(objectName, timestamp, filterAsString, this);
     }
-    if (!objectName && !objectId && !this.selected.isSuccess()) {
-      return;
-    } else if (!objectName && !objectId) {
-      objectName = this.selected.payload.path;
-    }
+
     this.notify();
   }
 

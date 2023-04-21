@@ -41,7 +41,7 @@ export default class QCObjectService {
     this.list = RemoteData.loading();
     that.notify();
 
-    const { result, ok } = await this.model.loader.get('/api/objects/all', {}, true);
+    const { result, ok } = await this.model.loader.get('/api/objects', {}, true);
 
     if (ok) {
       this.list = RemoteData.success(result);
@@ -107,7 +107,7 @@ export default class QCObjectService {
   async getObjectById(objectId, timestamp = -1, filter = '', that = this) {
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      const url = this._buildURL(`/api/objects/${objectId}?`, timestamp, filter);
+      const url = this._buildURL(`/api/object/${objectId}?`, timestamp, filter);
 
       const { result, ok } = await this.model.loader.get(url);
       if (ok) {
@@ -159,7 +159,7 @@ export default class QCObjectService {
    * @deprecated
    */
   async getObjects() {
-    const { result, ok } = await this.model.loader.get('/api/objects/all');
+    const { result, ok } = await this.model.loader.get('/api/objects');
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 
@@ -168,7 +168,7 @@ export default class QCObjectService {
    * @returns {JSON} List of Objects
    */
   async getOnlineObjects() {
-    const { result, ok } = await this.model.loader.get('/api/listOnlineObjects');
+    const { result, ok } = await this.model.loader.get('/api/objects/online');
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 

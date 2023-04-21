@@ -27,7 +27,7 @@ export const dateSelector = (selected, timestamps, callback) => h(
   h('select.form-control.gray-darker.text-center.w-25', {
     onchange: (e) => {
       const { value } = e.target;
-      callback(undefined, value);
+      callback({}, value);
     },
   }, [
     timestamps
