@@ -21,7 +21,7 @@ import layoutListPage from './layout/list/page.js';
 import layoutViewPage from './layout/view/page.js';
 import layoutImportModal from './layout/panels/importModal.js';
 import objectTreePage from './object/objectTreePage.js';
-import objectViewPage from './object/view/objectViewPage.js';
+import ObjectViewPage from './pages/objectView/ObjectViewPage.js';
 import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
 
 /**
@@ -31,7 +31,7 @@ import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
  */
 export default (model) => [
   model.isImportVisible && layoutImportModal(model),
-  model.page === 'objectView' ? objectViewPage(model) :
+  model.page === 'objectView' ? ObjectViewPage(model) :
     h('.absolute-fill.flex-column', [
       h('header.shadow-level2.level2', [header(model)]),
       h('.flex-grow.flex-row.outline-gray', [
@@ -52,7 +52,7 @@ function page(model) {
     case 'layoutList': return layoutListPage(model);
     case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
-    case 'objectView': return objectViewPage(model);
+    case 'objectView': return ObjectViewPage(model);
     case 'about': return frameworkInfoPage(model);
 
     // Should be seen only at the first start when the view is not yet really to be shown (data loading)

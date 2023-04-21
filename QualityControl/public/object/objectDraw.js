@@ -191,21 +191,31 @@ function redrawOnDataUpdate(model, dom, tabObject) {
          */
         JSROOT.cleanup(dom);
       }
-
-      if (qcObject._typename === 'TGraph' && (qcObject.fOption === '' || qcObject.fOption === undefined)) {
-        qcObject.fOption = 'alp';
-      }
-
       let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
-      drawingOptions = drawingOptions.join(';');
-      drawingOptions += ';stat';
-      if (qcObject._typename !== 'TGraph') {
+
+      if (qcObject._typename === 'TGraph') {
+        if (qcObject.fOption === '' || qcObject.fOption === undefined) {
+          qcObject.fOption = 'alp';
+        }
+      } else {
         /*
          * Use user's defined options and add undocumented option "f" allowing color changing on redraw
          * (color is fixed without it)
          */
-        drawingOptions += ';f';
+        drawingOptions.push('f');
       }
+
+      const index = drawingOptions.indexOf('stat');
+      if (index >= 0) {
+        drawingOptions[index] = 'optstat=1111';
+      } else {
+        drawingOptions.push('nostat');
+      }
+
+      drawingOptions = Array.from(new Set(drawingOptions));
+      drawingOptions = drawingOptions.join(';');
+
+      console.log(drawingOptions, 'layout');
       JSROOT.draw(dom, qcObject, drawingOptions).then((painter) => {
         if (painter === null) {
           // Jsroot failed to paint it

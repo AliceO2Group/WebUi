@@ -24,6 +24,7 @@ import LayoutService from './services/Layout.service.js';
 import Folder from './folder/Folder.js';
 import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
+import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -39,6 +40,9 @@ export default class Model extends Observable {
 
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
+
+    this.objectViewModel = new ObjectViewModel(this);
+    this.objectViewModel.bubbleTo(this);
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
@@ -201,10 +205,8 @@ export default class Model extends Observable {
         break;
       case 'objectView': {
         this.page = 'objectView';
-        const { layoutId } = this.router.params;
-        if (layoutId) {
-          this.layout.getLayoutById(layoutId);
-        }
+        const { params } = this.router;
+        this.objectViewModel.init(params);
         this.notify();
         break;
       }
