@@ -12,42 +12,84 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import assert from 'assert';
+import { getTagsFromServices } from '../../common/library/qcObject/utils.js';
 import { errorHandler } from './../utils/utils.js';
-import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
 
 /**
  * Gateway for all QC Objects requests
+ * @class
  */
 export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
-   * @param {CcdbServices} db - CCDB service to retrieve
-   * @param {JsrootService} jsroot - service which provides jsroot functionality (`openFile`, `toJSON`)
+   * @constructor
+   * @param {ObjectService} objService - objService to be used for retrieval of information
+   * @param {ConsulService} onlineService - retrieve information on which objects are currently generated
    */
-  constructor(db, jsroot) {
-    assert(db, 'Missing service for retrieving objects data');
-    this.db = db;
-    this.jsroot = jsroot;
-    this.DB_URL = `${this.db.protocol}://${this.db.hostname}:${this.db.port}/`;
+  constructor(objService, onlineService) {
+    /**
+     * @type {ObjectService}
+     */
+    this._objService = objService;
+
+    /**
+     * @type {ConsulService}
+     */
+    this._onlineService = onlineService;
   }
 
   /**
-   * Build Object Data response based on passed object path
+   * Retrieve a list of objects from CCDB with requested fields or default selection
    * @param {Request} req - HTTP request object with "query" information on object
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {void}
    */
-  async getObjectInfo(req, res) {
-    const path = req.query?.path;
-    const timestamp = req.query?.timestamp;
-    try {
-      const info = await this.db.getObjectLatestVersionInfo(path, timestamp);
+  async getObjects(req, res) {
+    const { prefix, fields = [] } = req.query;
+    if (prefix && typeof prefix !== 'string') {
+      res.status(400).json({ message: 'Invalid parameters provided: prefix must be of type string' });
+    } else if (!Array.isArray(fields)) {
+      res.status(400).json({ message: 'Invalid parameters provided: fields must be of type Array' });
+    } else {
+      try {
+        const list = await this._objService.getLatestVersionOfObjects(prefix, fields);
+        res.status(200).json(list);
+      } catch (error) {
+        errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');
+      }
+    }
+  }
 
-      res.status(200).json({ info });
+  /**
+   * List all Online objects' name if online mode is enabled
+   * @param {Request} req - HTTP request object with "query" information on object
+   * @param {Response} res - HTTP response object to provide information on request
+   * @returns {void}
+   */
+  async getOnlineObjects(req, res) {
+    try {
+      const services = await this._onlineService.getServices();
+      const tags = getTagsFromServices(this._db.prefix, services);
+      res.status(200).json(tags);
     } catch (error) {
-      errorHandler(error, 'Failed to load data for object', res, 502, 'object');
+      errorHandler(error, 'Unable to retrieve list of Online Objects', res, 503, 'online');
+    }
+  }
+
+  /**
+   * Check the state of OnlineMode by checking the status of Consul Leading Agent
+   * @param {Request} req - HTTP request object with information on owner_id
+   * @param {Response} res - HTTP response object to provide layouts information
+   * @returns {undefined}
+   */
+  async isOnlineModeConnectionAlive(req, res) {
+    try {
+      await this._onlineService.getConsulLeaderStatus();
+      res.status(200).json({ running: true });
+    } catch (error) {
+      const message = 'Unable to retrieve Consul Status';
+      errorHandler(error, message, res, 503, 'consul');
     }
   }
 
@@ -66,39 +108,42 @@ export class ObjectController {
     const path = req.query?.path;
     const timestamp = req.query?.timestamp;
     const filter = req.query?.filter;
-    try {
-      const validFrom = await this.db.getObjectValidity(path, timestamp, filter);
-      const objDetails = await this.db.getObjectDetails(path, validFrom, filter);
-
-      const url = this.DB_URL + objDetails.location;
-      const root = await this._getJsRootFormat(url);
-      objDetails.root = root;
-
-      const timestamps = await this.db.getObjectTimestampList(path, 1000, filter);
-      objDetails.timestamps = timestamps;
-      res.status(200).json(objDetails);
-    } catch (error) {
-      errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
+    if (!path) {
+      res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
+    } else {
+      try {
+        const object = await this._objService.getObject(path, timestamp, filter);
+        res.status(200).json(object);
+      } catch (error) {
+        errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
+      }
     }
   }
 
   /**
-   * Retrieves a root object from url-location provided and parses it depending on its type:
-   * * if it is a checker, uses default JSON utility to parse it and replace 'bigint' with string
-   * * if of ROOT type, uses jsroot.toJSON
-   * @param {string} url - location of Root file to be retrieved
-   * @returns {Promise<JSON.Error>} - JSON version of the object
+   * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
+   * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
+   * information and download it locally on CCDB if it is not already done so;
+   * From the information retrieved above, use the location with JSROOT to get a JSON object
+   * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for
+   * interpretation with JSROOT.draw
+   * @param {Request} req - HTTP request object with "query" information
+   * @param {Response} res - HTTP response object to provide information on request
+   * @returns {void}
    */
-  async _getJsRootFormat(url) {
-    const file = await this.jsroot.openFile(url);
-    const root = await file.readObject('ccdb_object');
-    root['_typename'] = root['mTreatMeAs'] || root['_typename'];
-
-    if (isObjectOfTypeChecker(root)) {
-      return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
+  async getObjectById(req, res) {
+    const id = req.params?.id;
+    const timestamp = req.query?.timestamp;
+    const filter = req.query?.filter;
+    if (!id) {
+      res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
+    } else {
+      try {
+        const object = await this._objService.getObjectById(id, timestamp, filter);
+        res.status(200).json(object);
+      } catch (error) {
+        errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
+      }
     }
-
-    const rootJson = await this.jsroot.toJSON(root);
-    return rootJson;
   }
 }

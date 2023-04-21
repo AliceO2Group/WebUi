@@ -18,6 +18,7 @@ import { openFile, toJSON } from 'jsroot';
 
 import { ConsulService } from '@aliceo2/web-ui';
 import { CcdbService } from './services/CcdbService.js';
+import { ObjectService } from './services/ObjectService.js';
 import { UserService } from './services/UserService.js';
 import { JsonFileService } from './services/JsonFileService.js';
 
@@ -56,8 +57,6 @@ if (config.consul) {
 }
 
 export let objectController = undefined;
-export let listObjects = undefined;
-export let getObjectTimestampList = undefined;
 export let queryPrefix = undefined;
 
 if (config.listingConnector === 'ccdb') {
@@ -67,11 +66,10 @@ if (config.listingConnector === 'ccdb') {
   }
   const ccdb = new CcdbService(config.ccdb);
   ccdb.isConnectionUp();
-  listObjects = ccdb.getObjectsLatestVersionList.bind(ccdb);
-  getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
   queryPrefix = ccdb.PREFIX;
 
-  objectController = new ObjectController(ccdb, { openFile, toJSON });
+  const objService = new ObjectService(ccdb, jsonDb, { openFile, toJSON });
+  objectController = new ObjectController(objService, consulService);
   statusService.setDataConnector(ccdb);
 }
 // --------------------------------------------------------
