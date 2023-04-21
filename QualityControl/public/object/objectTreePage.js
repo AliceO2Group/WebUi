@@ -15,9 +15,9 @@
 import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from './objectDraw.js';
-import infoButton from './../common/infoButton.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
+import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -84,7 +84,6 @@ const drawPlot = (model, object) => {
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.resize-button.flex-row', [
-      infoButton(model.object, model.isOnlineModeEnabled),
       h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
         'a.btn',
         {
@@ -98,23 +97,7 @@ const drawPlot = (model, object) => {
     h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [
       h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
-      h('.w-100', { style: 'justify-content: center;' }, [
-        Object.keys(info)
-          .filter((key) =>
-            [
-              'ObjectType',
-              'qc_detector_name',
-              'RunNumber',
-              'qc_task_name',
-              'qc_task_class',
-              'qc_version',
-              'Last-Modified',
-            ].includes(key))
-          .map((key) => h('.flex-row.f6', [
-            h('.w-30', key),
-            h('.w-70', info[key]),
-          ])),
-      ]),
+      qcObjectInfoPanel(info, { 'font-size': '.875rem;' }),
     ]),
   ]);
 };

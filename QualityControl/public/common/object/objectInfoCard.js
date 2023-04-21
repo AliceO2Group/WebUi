@@ -21,16 +21,15 @@ const TO_REMOVE_FIELDS = ['qcObject', 'timestamps', 'name', 'location'];
 /**
  * Builds a panel with information of the object; Fields are parsed according to their category
  * @param {QCObjectDTO} qcObject - QC object with its associated details
+ * @param {object} style - properties of the vnode
  * @returns {vnode} - panel with information about the object
  */
-export const qcObjectInfoPanel = (qcObject) => h('.flex-column.g4', [
-  h('h3.text-center', 'Object information'),
-  h('.g2.flex-column.scroll-y', [
+export const qcObjectInfoPanel = (qcObject, style = {}) =>
+  h('.flex-column.scroll-y', { style }, [
     Object.keys(qcObject)
       .filter((key) => !TO_REMOVE_FIELDS.includes(key))
       .map((key) => infoRow(key, qcObject[key])),
-  ]),
-]);
+  ]);
 
 /**
  * Builds a raw with the key and value information parsed based on their type
@@ -53,7 +52,9 @@ const infoPretty = (key, value) => {
   if (DATE_FIELDS.includes(key)) {
     return prettyFormatDate(value);
   } else if (Array.isArray(value)) {
-    return value.join(', ');
+    return value.length > 0
+      ? value.join(', ')
+      : '-';
   }
   return h('', value);
 };

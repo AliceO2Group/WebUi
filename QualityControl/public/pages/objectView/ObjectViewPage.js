@@ -67,7 +67,10 @@ const objectPlotAndInfo = (objectViewModel) =>
         ))),
         h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
           h('.w-70', draw(qcObject, {}, drawingOptions)),
-          h('.w-30.scroll-y', qcObjectInfoPanel(qcObject)),
+          h('.w-30.scroll-y', [
+            h('h3.text-center', 'Object information'),
+            qcObjectInfoPanel(qcObject, { gap: '.5em' }),
+          ]),
         ]),
       ]);
     },
