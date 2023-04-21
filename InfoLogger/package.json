@@ -36,11 +36,11 @@
     "@aliceo2/web-ui"
   ],
   "devDependencies": {
-    "eslint": "^8.37.0",
+    "eslint": "^8.38.0",
     "eslint-config-google": "^0.14.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "puppeteer": "19.8.0",
+    "puppeteer": "19.9.1",
     "sinon": "^15.0.1"
   }
 }

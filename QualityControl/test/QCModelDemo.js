@@ -12,12 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import LayoutController from './controllers/LayoutController';
-import UserService from './services/UserService';
-import StatusController from './controllers/StatusController.js';
-import config from './../test/test-config.js';
+import LayoutController from '../lib/controllers/LayoutController';
+import UserService from '../lib/services/UserService';
+import StatusController from '../lib/controllers/StatusController.js';
+import config from './test-config.js';
 import projPackage from './../package.json';
-import ObjectController from './controllers/ObjectController';
+import ObjectController from '../lib/controllers/ObjectController';
 
 // Force user accounts during demo
 const ownerIdUser1 = 0;
