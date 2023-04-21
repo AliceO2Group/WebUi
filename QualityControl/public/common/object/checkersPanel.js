@@ -17,33 +17,26 @@ import { h } from '/js/src/index.js';
 /**
  * Build a panel for displaying a checker quality object
  * @param {JSON} checker - Object returned by CCDB
- * @param {string} location - location from where the `draw` method is called; Used for styling
  * @returns {vnode} - virtual node element
  */
-export default (checker, location) => h('.relative.p2.flex-column.scroll-y', {
+export default (checker) => h('.relative.p2.flex-column.scroll-y.g4', {
 
 }, [
-  checkerValue('Checker:', checker.mCheckName, location),
-  checkerValue('Detector:', checker.mDetectorName, location),
-  checkerValue('Quality Name:', checker.mQuality.mName, location),
-  checkerValue('Quality Lv.:', checker.mQuality.mLevel, location),
-  checkerValue('Inputs:', checker.mInputs, location),
-  checkerValue('User Metadata:', checker.mUserMetadata, location),
+  checkerValue('Checker:', checker.mCheckName),
+  checkerValue('Detector:', checker.mDetectorName),
+  checkerValue('Quality Name:', checker.mQuality.mName),
+  checkerValue('Quality Lv.:', checker.mQuality.mLevel),
+  checkerValue('Inputs:', checker.mInputs),
+  checkerValue('User Metadata:', checker.mUserMetadata),
 ]);
 
 /**
  * One row with a label and the value of the checker[label]
  * @param {string} label - label to be displayed for the checker
  * @param {string} value - value of the checker
- * @param {string} location - location of the checker
  * @returns {vnode} - virtual node element
  */
-const checkerValue = (label, value, location) => {
-  let padding = '';
-  if (location === 'objectView' || location === 'treePage') {
-    padding = 'p3';
-  }
-
+const checkerValue = (label, value) => {
   switch (typeof value) {
     case 'string':
       value = value && value.trim() !== '' ? value : '-';
@@ -66,7 +59,7 @@ const checkerValue = (label, value, location) => {
       value = value && JSON.stringify(value).trim() !== '' ? JSON.stringify(value) : '-';
   }
 
-  return h(`.flex-row.${padding}`, [
+  return h('.flex-row', [
     h('label.ph2.w-50.w-wrapped.text-right.checker-label', label),
     h('.w-wrapped.w-50.text-left', value),
   ]);

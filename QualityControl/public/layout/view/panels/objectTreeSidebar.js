@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import spinner from '../../../loader/spinner.js';
+import { spinner } from '../../../common/spinner.js';
 import { draw } from '../../../object/objectDraw.js';
 import { iconCaretBottom, iconCaretRight, iconBarChart } from '/js/src/icons.js';
 import virtualTable from '../../../object/virtualTable.js';
@@ -198,6 +198,6 @@ const objectPreview = (model) => {
   const isSelected = model.object.selected;
   if (isSelected) {
     const objName = model.object.selected.name;
-    return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model, objName, {}, 'treeSidebar'));
+    return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model, objName, {}));
   }
 };

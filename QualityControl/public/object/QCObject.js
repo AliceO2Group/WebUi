@@ -409,13 +409,12 @@ export default class QCObject extends Observable {
     if (qcObject.fOption) {
       objectOptionList = qcObject.fOption.split(' ');
     }
-    if (qcObject.drawingOptions) {
-      const metaOpt = qcObject.drawingOptions.split(' ');
-      objectOptionList = objectOptionList.concat(metaOpt);
+
+    if (qcObject.drawOptions) {
+      objectOptionList = [...objectOptionList, ...qcObject.drawOptions];
     }
     if (qcObject.displayHints) {
-      const metaHints = qcObject.displayHints.split(' ');
-      objectOptionList = objectOptionList.concat(metaHints);
+      objectOptionList = [...objectOptionList, ...qcObject.displayHints];
     }
     if (tabObject.options) {
       objectOptionList = objectOptionList.concat(tabObject.options);

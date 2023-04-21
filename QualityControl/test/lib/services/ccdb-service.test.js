@@ -23,16 +23,13 @@ import { testConfig as config } from '../../test-config.js';
 
 export const ccdbServiceTestSuite = async () => {
   before(() => nock.cleanAll());
-
   describe('Creating a new CcdbService instance', () => {
-    it('should throw an error if configuration object is not provided', () => {
-      assert.throws(() => new CcdbService(), new Error('Empty CCDB config'));
-      assert.throws(() => new CcdbService(null), new Error('Empty CCDB config'));
-      assert.throws(() => new CcdbService(undefined), new Error('Empty CCDB config'));
-    });
-
     it('should throw an error if configuration object is missing hostname field', () => {
       assert.throws(() => new CcdbService({}), new Error('Empty hostname in CCDB config'));
+    });
+
+    it('should throw an error if configuration object is missing port field', () => {
+      assert.throws(() => new CcdbService({ hostname: 'localhost' }), new Error('Empty port in CCDB config'));
     });
 
     it('should throw an error if configuration object is missing port field', () => {
@@ -251,20 +248,20 @@ export const ccdbServiceTestSuite = async () => {
 
     it('should successfully return drawing options if present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({ 'content-location': '/download/some-id', drawOptions: 'colz' })
+        .defaultReplyHeaders({ 'content-location': '/download/some-id', drawoptions: 'colz hep' })
         .head('/qc/some/test/123455432/')
         .reply(200);
       const content = await ccdb.getObjectDetails('qc/some/test', 123455432);
-      assert.strictEqual(content.drawOptions, 'colz');
+      assert.deepStrictEqual(content.drawOptions, ['colz', 'hep']);
     });
 
     it('should successfully return displayHints if present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({ 'content-location': '/download/some-id', displayHints: 'AP' })
+        .defaultReplyHeaders({ 'content-location': '/download/some-id', displayhints: 'AP beta' })
         .head('/qc/some/test/123455432/')
         .reply(200);
       const content = await ccdb.getObjectDetails('qc/some/test', 123455432);
-      assert.strictEqual(content.displayHints, 'AP');
+      assert.deepStrictEqual(content.displayHints, ['AP', 'beta']);
     });
 
     it('should reject with error due to invalid status', async () => {

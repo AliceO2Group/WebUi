@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { Log } from '@aliceo2/web-ui';
 import QCObjectDto from './../dtos/QCObjectDto.js';
 import { httpHeadJson, httpGetJson, errorLogger } from './../utils/utils.js';
 
@@ -55,6 +56,7 @@ export class CcdbService {
       Accept: 'application/json',
       'X-Filter-Fields': `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`,
     };
+    this.log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
   }
 
   /**
@@ -67,6 +69,7 @@ export class CcdbService {
     const url = `/browse/${this.PREFIX}`;
     try {
       await httpGetJson(this.hostname, this.port, url, connectionHeaders);
+      this.log.infoMessage('CCDB connection is up and running', { level: 99 });
       return true;
     } catch (error) {
       errorLogger(error, 'ccdb');
@@ -136,9 +139,8 @@ export class CcdbService {
   async getObjectValidity(path, timestamp = '', filter = '') {
     const headers = {
       Accept: 'application/json',
-      'X-Filter-Fields': `${this.VALID_FROM}`,
+      'X-Filter-Fields': this.VALID_FROM,
     };
-    let result = {};
     let url = `/latest/${path}`;
     if (timestamp) {
       url += `/${timestamp}`;
@@ -147,13 +149,14 @@ export class CcdbService {
       url += `/${filter}`;
     }
 
+    let result = {};
     try {
       result = await httpGetJson(this.hostname, this.port, url, headers);
     } catch (error) {
       // ErrorLogger(error, 'ccdb');
       throw new Error('Unable to retrieve object validity');
     }
-    if (result && result.objects && result.objects.length > 0) {
+    if (result?.objects?.length > 0) {
       return result.objects[0][this.VALID_FROM];
     } else {
       throw new Error(`Object: ${url} could not be found`);
@@ -169,7 +172,7 @@ export class CcdbService {
    * host:port/qc/CPV/MO/NoiseOnFLP/ClusterMapM2/1646925158138/RunNumber=34543543  -H 'Accept: application/json' --head
    * @param {string} name - full name(path) of the object in question
    * @param {number} timestamp - version of the object data
-   * @param {string} filter - filter that should be applied when querying object; e.g. RunNumber=324543
+   * @param {string} [filter] - filter that should be applied when querying object; e.g. RunNumber=324543
    * @returns {Promise.<JSON>} e.g  {location: '/download/id', drawOptions: 'colz'}
    * @throws {Error}
    */
@@ -183,9 +186,9 @@ export class CcdbService {
     const { status, headers } = await httpHeadJson(this.hostname, this.port, path, reqHeaders);
     if (status >= 200 && status <= 299) {
       // eslint-disable-next-line prefer-destructuring
-      const location = headers[this.CONTENT_LOCATION]
+      const [location = ''] = headers[this.CONTENT_LOCATION]
         .split(', ')
-        .filter((location) => !location.startsWith('alien'))[0];
+        .filter((location) => !location.startsWith('alien'));
       if (!location) {
         throw new Error(`No location provided by CCDB for object with path: ${path}`);
       }

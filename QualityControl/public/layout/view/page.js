@@ -206,7 +206,7 @@ const drawComponent = (model, tabObject) =>
         display: 'flex',
         'flex-direction': 'column',
       },
-    }, draw(model, tabObject, {}, 'layoutShow')),
+    }, draw(model, tabObject, {})),
     objectInfoResizePanel(model, tabObject),
     !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
       && minimalObjectInfo(model, tabObject),
