@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { getTagsFromServices } from '../../common/library/qcObject/utils.js';
+import { getObjectsNameFromConsulMap } from '../../common/library/qcObject/utils.js';
 import { errorHandler } from './../utils/utils.js';
 
 /**
@@ -70,7 +70,7 @@ export class ObjectController {
   async getOnlineObjects(req, res) {
     try {
       const services = await this._onlineService.getServices();
-      const tags = getTagsFromServices(this._db.prefix, services);
+      const tags = getObjectsNameFromConsulMap(this._db.prefix, services);
       res.status(200).json(tags);
     } catch (error) {
       errorHandler(error, 'Unable to retrieve list of Online Objects', res, 503, 'online');
