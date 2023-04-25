@@ -74,12 +74,12 @@ export class ObjectService {
    * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for
    * interpretation with JSROOT.draw
    * @param {string} objectName - name(known as path) of the object to retrieve information
-   * @param {number} [timestamp = -1] - timestamp in ms
+   * @param {number|null} [timestamp] - timestamp in ms
    * @param {string} [filter = ''] - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async getObject(objectName, timestamp = -1, filter = '') {
+  async getObject(objectName, timestamp = null, filter = '') {
     const validFrom = await this._dbService.getObjectValidity(objectName, timestamp, filter);
     const object = await this._dbService.getObjectDetails(objectName, validFrom, filter);
     const rootObj = await this._getJsRootFormat(this._DB_URL + object.location);
@@ -95,12 +95,12 @@ export class ObjectService {
   /**
    * Retrieve an object by its id (stored in the customized data service) with its information
    * @param {string} id - id of the object to be retrieved
-   * @param {number} [timestamp = -1] - timestamp in ms
+   * @param {number|null} [timestamp] - timestamp in ms
    * @param {string} [filter = ''] - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async getObjectById(id, timestamp = -1, filter = '') {
+  async getObjectById(id, timestamp = null, filter = '') {
     const { object, layoutName } = this._dataService.getObjectById(id);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.getObject(name, timestamp, filter);
