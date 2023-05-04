@@ -13,7 +13,7 @@
 */
 
 /**
- * Shared methods used within Core Services/Controlers
+ * Shared methods used within Core Services/Controllers
  */
 class CoreUtils {
   /**
@@ -64,6 +64,21 @@ class CoreUtils {
       version += ' (revision ' + versionJSON.build + ')';
     }
     return version;
+  }
+
+  /**
+   * Checks for mandatory fields and parses variables to:
+   * - replace new lines with spaces
+   * @param {EnvironmentCreation} payload -  configuration for creating an environment in raw format
+   * @return {EnvironmentCreation} - validated and parsed configuration 
+   */
+  static parseEnvironmentCreationPayload(payload) {
+    const {workflowTemplate, vars} = payload;
+    if (!workflowTemplate || !vars) {
+      throw new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`)
+    }
+    Object.keys(vars).forEach((key) => vars[key] = vars[key].trim().replace(/\r?\n/g,' '));
+    return payload;
   }
 }
 

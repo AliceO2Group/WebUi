@@ -14,6 +14,7 @@
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
 const {errorLogger} = require('./../utils.js');
+const CoreUtils = require('./CoreUtils.js');
 
 /**
  * Handles AliECS create env requests
@@ -57,7 +58,8 @@ class RequestHandler {
     log.debug('Added request to cache, ID: ' + index);
 
     try {
-      await this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body);
+      const payload = CoreUtils.parseEnvironmentCreationPayload(req.body);
+      await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
     } catch(error) {
