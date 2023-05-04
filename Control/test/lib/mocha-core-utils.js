@@ -64,4 +64,32 @@ describe('CoreUtils test suite', () => {
       assert.strictEqual(version, '');
     });
   });
+
+  describe('Check "parseEnvironmentCreationPayload"', () => {
+    it('should throw error if mandatory fields are missing', () => {
+      assert.throws(() => CoreUtils.parseEnvironmentCreationPayload({}), new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`))
+      assert.throws(() => CoreUtils.parseEnvironmentCreationPayload({workflowTemplate: 'some-workflow'}), new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`))
+      assert.throws(() => CoreUtils.parseEnvironmentCreationPayload({vars: {key: 'value'}}), new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`))
+    });
+
+    it('should successfully replace new lines with spaces from variables', () => {
+      const payload = {
+        workflowTemplate: 'some-workflow',
+        vars: {
+          keyWithNoNewLine: 'value is good to be used',
+          keyWithNewLine: 'value\nvalue-value',
+          keyWithMultipleNewLines: 'value\nvaluevalue\r\nend',
+        }
+      };
+      const expectedPayload = {
+        workflowTemplate: 'some-workflow',
+        vars: {
+          keyWithNoNewLine: 'value is good to be used',
+          keyWithNewLine: 'value value-value',
+          keyWithMultipleNewLines: 'value valuevalue end',
+        }
+      }
+      assert.deepStrictEqual(CoreUtils.parseEnvironmentCreationPayload(payload), expectedPayload);
+    });
+  })
 });
