@@ -27,12 +27,7 @@ export const config = {
     tls: false,
   },
 
-  mysql: {
-    host: 'localhost',
-    user: 'qc_user',
-    password: 'qc_user',
-    database: 'quality_control',
-  },
+  listingConnector: 'ccdb',
 
   ccdb: {
     protocol: 'http',
