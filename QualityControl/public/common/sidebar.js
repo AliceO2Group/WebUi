@@ -36,7 +36,7 @@ export default function sidebar(model) {
 
   // Spacial case when sidebar is used as a required form or property editor
   if (model.router.params.page === 'layoutShow' && model.layout.editEnabled) {
-    return h('nav.sidebar.sidebar-extend', [h('.sidebar-content', layoutSettings(model))]);
+    return h('nav.sidebar.sidebar-extend', [h('.sidebar-content.h-100', layoutSettings(model))]);
   }
 
   // General case with an optional menu on the left
