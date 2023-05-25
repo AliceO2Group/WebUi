@@ -60,18 +60,34 @@ export default (model) => h('table.table-filters', [
     h('tr', [
       h('td.relative',
         model.log.focus.timestampSince && datePicker(model, model.log.filter.criterias.timestamp.$since),
-        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampSince', true), onblur: () => model.log.setFocus('timestampSince', false), oninput: (e) => model.log.setCriteria('timestamp', 'since', e.target.value), placeholder: 'from', value: model.log.filter.criterias.timestamp.since})),
-      filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'match'),
+        h('input.form-control', {
+          type: 'text',
+          tabIndex: 1,
+          onfocus: () => model.log.setFocus('timestampSince', true),
+          onblur: () => model.log.setFocus('timestampSince', false),
+          oninput: (e) => model.log.setCriteria('timestamp', 'since', e.target.value),
+          placeholder: 'from',
+          value: model.log.filter.criterias.timestamp.since
+        })),
+      filterLabels.map((label, index) => createInputField(model.log, label.toLowerCase(), 'match', (index + 2)),
       ),
-      createTextAreaField(model, 'message', 'match'),
+      createTextAreaField(model, 'message', 'match', filterLabels.length + 2),
 
     ]),
     h('tr', [
       h('td.relative',
         model.log.focus.timestampUntil && datePicker(model, model.log.filter.criterias.timestamp.$until),
-        h('input.form-control', {type: 'text', onfocus: () => model.log.setFocus('timestampUntil', true), onblur: () => model.log.setFocus('timestampUntil', false), oninput: (e) => model.log.setCriteria('timestamp', 'until', e.target.value), placeholder: 'to', value: model.log.filter.criterias.timestamp.until})),
-      filterLabels.map((label) => createInputField(model.log, label.toLowerCase(), 'exclude')),
-      createTextAreaField(model, 'message', 'exclude')
+        h('input.form-control', {
+          type: 'text',
+          tabIndex: 1,
+          onfocus: () => model.log.setFocus('timestampUntil', true),
+          onblur: () => model.log.setFocus('timestampUntil', false),
+          oninput: (e) => model.log.setCriteria('timestamp', 'until', e.target.value),
+          placeholder: 'to',
+          value: model.log.filter.criterias.timestamp.until
+        })),
+      filterLabels.map((label, index) => createInputField(model.log, label.toLowerCase(), 'exclude', (index + 2))),
+      createTextAreaField(model, 'message', 'exclude', filterLabels.length + 2)
     ])
   ])
 ]);
@@ -92,24 +108,30 @@ const createClickableLabel = (model, label) => h('td', h('button.btn.w-100', {
 * @param {object} log
 * @param {string} field
 * @param {string} command
+* @param {number} tabIndex - value for order of the tab when using keyboard `tab` action
 * @return {vnode}
 */
-const createInputField = (log, field, command) => h('td', h('input.form-control', {
-  type: 'text',
-  oninput: (e) => log.setCriteria(field, command, e.target.value),
-  value: log.filter.criterias[field][command].slice(),
-  placeholder: field === 'hostname' ? command : ''
-}));
+const createInputField = (log, field, command, tabIndex = 1) => {
+  return h('td', h('input.form-control', {
+    type: 'text',
+    tabIndex,
+    oninput: (e) => log.setCriteria(field, command, e.target.value),
+    value: log.filter.criterias[field][command].slice(),
+    placeholder: field === 'hostname' ? command : ''
+  }));
+}
 
 /**
  * Generate a text area which onfocus will expand, allowing the user to easily input multiple lines of text
  * @param {Model} model
  * @param {string} field 
  * @param {string} command 
+ * @param {number} tabIndex - value for order of the tab when using keyboard `tab` action
  * @returns 
  */
-const createTextAreaField = (model, field, command) => h('td', h('textarea.form-control.text-area-for-message', {
+const createTextAreaField = (model, field, command, tabIndex) => h('td', h('textarea.form-control.text-area-for-message', {
   style: 'height:2em; resize: none;',
+  tabIndex,
   placeholder: !model.messageFocused ? '' : `Include/Exclude multiple error messages separated by new line. To partially match a message, use the SQL wildcard '%' \n\ne.g \n\n%[FMQ] IDLE ---> INITIALIZING DEVICE%\nTASK %QC% running out of memory\nweird error with strict message`,
   onfocus: () => {
     model.messageFocused = true;
