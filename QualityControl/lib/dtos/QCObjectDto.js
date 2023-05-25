@@ -77,6 +77,7 @@ export default class QCObjectDto {
       runNumber: item?.runnumber,
       runType: item?.runtype ?? item?.run_type,
       partName: item?.partname,
+      passName: item?.passname,
       periodName: item?.periodname,
       qcCheckName: item?.qc_check_name,
       qcQuality: item?.qc_quality,
