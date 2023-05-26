@@ -279,7 +279,7 @@ export default class QCObject extends Observable {
    * @param {number} timestamp - timestamp in ms
    * @returns {undefined}
    */
-  async loadObjectByName(objectName, timestamp = -1) {
+  async loadObjectByName(objectName, timestamp = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
     const obj = await this.model.services.object.getObjectByName(objectName, timestamp, '', this);
@@ -295,7 +295,7 @@ export default class QCObject extends Observable {
         this.notify();
       }
       if (this.selected) {
-        this.selected.version = timestamp === -1
+        this.selected.version = !timestamp
           ? parseInt(this.objects[objectName].payload.timestamps[0], 10)
           : parseInt(timestamp, 10);
       }
@@ -325,7 +325,8 @@ export default class QCObject extends Observable {
     await Promise.allSettled(objectsName.map(async (objectName) => {
       this.objects[objectName] = RemoteData.Loading();
       this.notify();
-      this.objects[objectName] = await this.model.services.object.getObjectByName(objectName, -1, filterAsString, this);
+      this.objects[objectName] = await this
+        .model.services.object.getObjectByName(objectName, undefined, filterAsString, this);
       this.notify();
     }));
     this.objectsRemote = RemoteData.success();

@@ -79,7 +79,7 @@ export class ObjectService {
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async getObject(objectName, timestamp = null, filter = '') {
+  async getObject(objectName, timestamp = undefined, filter = '') {
     const validFrom = await this._dbService.getObjectValidity(objectName, timestamp, filter);
     const object = await this._dbService.getObjectDetails(objectName, validFrom, filter);
     const rootObj = await this._getJsRootFormat(this._DB_URL + object.location);
@@ -100,7 +100,7 @@ export class ObjectService {
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async getObjectById(id, timestamp = null, filter = '') {
+  async getObjectById(id, timestamp = undefined, filter = '') {
     const { object, layoutName } = this._dataService.getObjectById(id);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.getObject(name, timestamp, filter);
