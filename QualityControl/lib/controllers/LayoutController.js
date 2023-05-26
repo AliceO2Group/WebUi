@@ -65,12 +65,12 @@ export class LayoutController {
    */
   async readLayout(req, res) {
     try {
-      const layoutId = req.params.id;
-      if (!layoutId) {
-        errorHandler('Missing layoutId parameter', 'Missing layoutId parameter', res, 400, 'layout');
+      const { id } = req.params;
+      if (!id) {
+        errorHandler('Missing id of the layout parameter', 'Missing id of the layout parameter', res, 400, 'layout');
         return;
       }
-      const layout = await this._service.readLayout(layoutId);
+      const layout = await this._service.readLayout(id);
       res.status(200).json(layout);
     } catch (error) {
       errorHandler(error, 'Failed to retrieve layout', res, 502, 'layout');
@@ -79,7 +79,7 @@ export class LayoutController {
 
   /**
    * Update a single layout specified by:
-   * * query.layoutId for identification
+   * * query.id for identification
    * * body - for layout data to be updated
    * @param {Request} req - HTTP request object with "query" and "body" information on layout
    * @param {Response} res - HTTP response object to provide information on the update
@@ -87,25 +87,24 @@ export class LayoutController {
    */
   async updateLayout(req, res) {
     try {
-      const { layoutId } = req.query;
-      const data = req.body;
+      const { id } = req.query;
 
-      if (!layoutId) {
-        const errMsg = 'Missing layoutId parameter';
+      if (!id) {
+        const errMsg = 'Missing id of the layout parameter';
         errorHandler(errMsg, errMsg, res, 400, 'layout');
         return;
       }
 
-      if (!data) {
+      if (!req.body) {
         const errMsg = 'Missing body content parameter';
         errorHandler(errMsg, errMsg, res, 400, 'layout');
         return;
       }
-
-      const layout = await this._service.updateLayout(layoutId, data);
+      const data = await LayoutDto.validateAsync(req.body);
+      const layout = await this._service.updateLayout(id, data);
       res.status(201).json(layout);
     } catch (error) {
-      errorHandler(error, 'Failed to update layout', res, 502, 'layout');
+      errorHandler(error, `Failed to update layout ${error?.details?.[0]?.message || ''}`, res, 502, 'layout');
     }
   }
 
@@ -117,14 +116,14 @@ export class LayoutController {
    */
   async deleteLayout(req, res) {
     try {
-      const layoutId = req.params.id;
-      if (!layoutId) {
-        const errMsg = 'Missing layoutId parameter';
+      const { id } = req.params;
+      if (!id) {
+        const errMsg = 'Missing id of the layout parameter';
         errorHandler(errMsg, errMsg, res, 400, 'layout');
         return;
       }
 
-      const result = await this._service.deleteLayout(layoutId);
+      const result = await this._service.deleteLayout(id);
       res.status(200).json(result);
     } catch (error) {
       errorHandler(error, 'Failed to delete layout', res, 502, 'layout');

@@ -16,6 +16,11 @@ import utilsTestSuite from './lib/utils/utils.test.js';
 import configurationTestSuite from './lib/config/public-config.test.js';
 
 /**
+ * Controllers
+ */
+import { layoutControllerTestSuite } from './lib/controllers/layout-controller.test.js';
+
+/**
  * Services
  */
 import { ccdbServiceTestSuite } from './lib/services/ccdb-service.test.js';
@@ -36,5 +41,9 @@ describe('Common Library - Test Suite', () => {
 });
 
 describe('Services - Test Suite', async () => {
-  describe('CcdbService - Test Suite', async () => ccdbServiceTestSuite());
+  describe('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
+});
+
+describe('Controllers - Test Suite', async () => {
+  describe('LayoutController test suite', async () => await layoutControllerTestSuite());
 });

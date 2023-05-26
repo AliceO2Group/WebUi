@@ -109,7 +109,7 @@ export default class LayoutService {
    * @returns {RemoteData} - result within a RemoteData object
    */
   async saveLayout(layoutItem) {
-    const { result, ok } = await this.loader.post(`/api/writeLayout?layoutId=${layoutItem.id}`, layoutItem);
+    const { result, ok } = await this.loader.post(`/api/writeLayout?id=${layoutItem.id}`, layoutItem, true);
     return this.parseResult(result, ok);
   }
 
