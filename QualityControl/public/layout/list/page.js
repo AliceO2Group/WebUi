@@ -91,6 +91,7 @@ function table(model, layouts, searchBy) {
             [
               h('th', 'Name'),
               h('th', 'Owner'),
+              h('th', 'Description'),
             ],
           ),
         ),
@@ -120,7 +121,7 @@ function rows(model, layouts, searchBy) {
         .map((layout) => {
           const key = `key${layout.name}`;
           return h('tr', { key: key }, [
-            h('td.w-50', [
+            h('td.w-40', [
               h('', { class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : '' }, [
                 iconBarChart(),
                 ' ',
@@ -130,7 +131,8 @@ function rows(model, layouts, searchBy) {
                 }, layout.name),
               ]),
             ]),
-            h('td.w-25', layout.owner_name),
+            h('td.w-20', layout.owner_name),
+            h('td.w-40', layout.description ?? '-'),
           ]);
         });
     },

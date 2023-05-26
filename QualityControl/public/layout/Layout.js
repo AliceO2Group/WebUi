@@ -226,6 +226,7 @@ export default class Layout extends Observable {
         name: layoutName,
         owner_id: this.model.session.personid,
         owner_name: this.model.session.name,
+        description: '',
         displayTimestamp: false,
         autoTabChange: 0,
         tabs: [
@@ -279,11 +280,11 @@ export default class Layout extends Observable {
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
-      this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}`, true, true);
-      this.notify();
     } else {
-      this.model.notification.show(`Layout "${this.item.name}" has not been saved.`, 'danger');
+      this.model.notification.show(result.payload, 'danger');
     }
+    this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}`, false, false);
+    this.notify();
   }
 
   /**
