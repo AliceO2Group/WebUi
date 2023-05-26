@@ -136,7 +136,7 @@ export class CcdbService {
    * @returns {Promise.<object>} - returns object validity
    * @throws {Error}
    */
-  async getObjectValidity(path, timestamp = '', filter = '') {
+  async getObjectValidity(path, timestamp = undefined, filter = '') {
     const headers = {
       Accept: 'application/json',
       'X-Filter-Fields': this.VALID_FROM,
@@ -176,7 +176,7 @@ export class CcdbService {
    * @returns {Promise.<JSON>} e.g  {location: '/download/id', drawOptions: 'colz'}
    * @throws {Error}
    */
-  async getObjectDetails(name, timestamp, filter = '') {
+  async getObjectDetails(name, timestamp = undefined, filter = '') {
     if (!name || !timestamp) {
       throw new Error('Missing mandatory parameters: name & timestamp');
     }
@@ -203,7 +203,7 @@ export class CcdbService {
   /**
    * Get latest version of an object or a specified version through the timestamp;
    * @param {string} path - Complete name of object; e.g qc/MO/CPV/merger1
-   * @param {number} timestamp - version of object that should be queried
+   * @param {number} timestamp - version of object that should be queried; default value ''
    * @returns {Promise.<JSON>} - object details for a given timestamp
    * @throws {Error}
    */

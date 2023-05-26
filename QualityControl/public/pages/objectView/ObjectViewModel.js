@@ -55,7 +55,7 @@ export default class ObjectViewModel extends Observable {
    * @param {object} filter - specific fields that should be applied
    * @returns {undefined}
    */
-  async updateObjectSelection({ objectName = undefined, objectId = undefined }, timestamp = -1, filter = {}) {
+  async updateObjectSelection({ objectName = undefined, objectId = undefined }, timestamp = undefined, filter = {}) {
     if (!objectName && !objectId && !this.selected.isSuccess()) {
       return;
     } else if (!objectName && !objectId) {
@@ -86,12 +86,12 @@ export default class ObjectViewModel extends Observable {
     this.selected = RemoteData.loading();
     this.notify();
 
-    const { objectName, layoutId, objectId } = urlParams;
+    const { objectName, layoutId, objectId, ts = undefined } = urlParams;
 
     if (objectName) {
-      this.updateObjectSelection({ objectName }, -1, {});
+      this.updateObjectSelection({ objectName }, ts, {});
     } else if (layoutId && objectId) {
-      this.updateObjectSelection({ objectId }, -1, {});
+      this.updateObjectSelection({ objectId }, ts, {});
     } else {
       this.selected = RemoteData.failure('Invalid URL parameters provided');
     }
