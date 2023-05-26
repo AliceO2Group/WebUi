@@ -74,6 +74,14 @@ export default class ObjectViewModel extends Observable {
       this.selected = await this.model.services.object.getObjectByName(objectName, timestamp, filterAsString, this);
     }
 
+    let currentParams = '?page=objectView';
+    Object.entries(this.model.router.params)
+      .filter(([key, value]) => value && key !== 'ts' && key !== 'page')
+      .forEach(([key, value]) => {
+        currentParams += `&${key}=${encodeURI(value)}`;
+      });
+    this.model.router.go(`${currentParams}&ts=${timestamp}`, false, true);
+
     this.notify();
   }
 
