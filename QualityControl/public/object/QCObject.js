@@ -14,7 +14,7 @@
 
 import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
-import { prettyFormatDate } from './../common/utils.js';
+import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 
 /**
@@ -370,6 +370,7 @@ export default class QCObject extends Observable {
     if (!this.selected) {
       this.selected = object;
     }
+    setBrowserTabTitle(object.name);
     await this.loadObjectByName(object.name);
     this.notify();
   }
