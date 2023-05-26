@@ -80,8 +80,14 @@ export class ObjectService {
    * @throws
    */
   async getObject(objectName, timestamp = undefined, filter = '') {
-    const validFrom = await this._dbService.getObjectValidity(objectName, timestamp, filter);
-    const object = await this._dbService.getObjectDetails(objectName, validFrom, filter);
+    if (!timestamp) {
+      /*
+       * Timestamp provided by the user is taken from a dropdown list of valid-from timestamps.
+       * Thus there is no point in requesting it again
+       */
+      timestamp = await this._dbService.getObjectValidity(objectName, timestamp, filter);
+    }
+    const object = await this._dbService.getObjectDetails(objectName, timestamp, filter);
     const rootObj = await this._getJsRootFormat(this._DB_URL + object.location);
     const timestampList = await this._dbService.getObjectTimestampList(objectName, 1000, filter);
 
