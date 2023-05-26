@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import { h, iconMagnifyingGlass } from '/js/src/index.js';
 import { draw } from './../../common/object/draw.js';
 import { header } from './components/header.js';
 import { spinner } from './../../common/spinner.js';
@@ -39,10 +39,54 @@ export default (model) => {
     }
   }
   return h('.absolute-fill.flex-column', [
-    header(model, title),
+    h('.shadow-level1', [
+      header(model, title),
+      objectViewModel.isFilterVisible() && filtersPanel(objectViewModel),
+    ]),
     objectPlotAndInfo(objectViewModel),
   ]);
 };
+
+/**
+ * Panel containing input boxes for user to filter the object selection by
+ * @param {ObjectViewModel} objectViewModel - model of the current page
+ * @returns {vnode} - virtual node element
+ */
+const filtersPanel = (objectViewModel) => {
+  const { filter, updateFilterKeyValue } = objectViewModel;
+  return h('.w-100.flex-row.p2.g2', [
+    filterInput('RunNumber', 'runNumberFilter', 'number', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    filterInput('RunType', 'runTypeFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    filterInput('PeriodName', 'periodNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    filterInput('PassName', 'passNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    h('button.btn.btn-primary.w-20', {
+      onclick: () => objectViewModel.updateObjectSelection({}, undefined, objectViewModel.filter),
+    }, ['Search ', iconMagnifyingGlass()]),
+  ]);
+};
+
+/**
+ * Builds a filter element that will allow the user to specify a parameter that should be applied when querying objects
+ * @param {string} placeholder - value to be placed as holder for input
+ * @param {string} key - string to be used as unique id
+ * @param {string} type - type of the filter
+ * @param {string} width - size of the filter
+ * @param {string} value - value of the input text field
+ * @param {function} callback - callback for oninput event
+ * @returns {vnode} - virtual node element
+ */
+const filterInput = (placeholder, key, type = 'text', width = '.w-10', value, callback) =>
+  h(`${width}`, [
+    h('input.form-control', {
+      type,
+      placeholder,
+      id: key,
+      name: key,
+      min: 0,
+      value: value[placeholder],
+      oninput: (e) => callback(placeholder, e.target.value),
+    }),
+  ]);
 
 /**
  * Build an element which plots the object and displays metadata information
