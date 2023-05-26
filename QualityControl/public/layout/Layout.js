@@ -16,7 +16,7 @@ import { Observable, RemoteData } from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
-import { objectId, clone } from '../common/utils.js';
+import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 
 /**
@@ -321,6 +321,8 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   selectTab(index) {
+    setBrowserTabTitle(`${this.item.name}/${this.item.tabs[index].name}`);
+
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }

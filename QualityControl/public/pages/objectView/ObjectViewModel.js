@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { setBrowserTabTitle } from '../../common/utils.js';
 import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
@@ -61,7 +62,6 @@ export default class ObjectViewModel extends Observable {
     } else if (!objectName && !objectId) {
       objectName = this.selected.payload.path;
     }
-
     this.selected = RemoteData.loading();
     this.notify();
 
@@ -73,6 +73,7 @@ export default class ObjectViewModel extends Observable {
     } else if (objectName) {
       this.selected = await this.model.services.object.getObjectByName(objectName, timestamp, filterAsString, this);
     }
+    setBrowserTabTitle(this.selected.payload.name);
     if (timestamp) {
       let currentParams = '?page=objectView';
       Object.entries(this.model.router.params)
