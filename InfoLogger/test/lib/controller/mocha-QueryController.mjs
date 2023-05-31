@@ -15,7 +15,7 @@
 
 import assert from 'assert';
 import {QueryController} from '../../../lib/controller/QueryController.mjs';
-import sinon, {spy, stub} from 'sinon';
+import {spy, stub} from 'sinon';
 
 describe('QueryController test suite', () => {
   describe('getQueryStats() - test suite', () => {
