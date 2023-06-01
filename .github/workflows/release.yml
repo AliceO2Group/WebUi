@@ -8,6 +8,7 @@ jobs:
     outputs:
       PROJECT: ${{ steps.set-project.outputs.project }}
       VERSION: ${{ steps.set-project.outputs.version }}
+      TAG: ${{ steps.set-project.outputs.tag }}
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
@@ -20,7 +21,7 @@ jobs:
           echo "TAG: ${GITHUB_REF} does not match expected pattern";
           exit 1;
         else
-          echo "TAG is correct"
+          echo "TAG is correct: ${GITHUB_REF}"
         fi
     - name: Set variable TAG as name of project that is being released
       id: set-project
@@ -35,8 +36,9 @@ jobs:
         fi
         echo "Identified project is $PROJECT with version $VERSION"
         echo "PROJECT=$PROJECT" >> $GITHUB_ENV
-        echo "::set-output name=project::$(echo "$PROJECT")"
-        echo "::set-output name=version::$(echo "$VERSION")"
+        echo "project=$PROJECT" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
     - run: (cd $PROJECT; npm publish)
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
@@ -56,19 +58,14 @@ jobs:
       run: npm install --only=production
       working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
     - name: Create package tarball
-      run:  echo ::set-output name=tgz_name::$(npm pack)
+      run:  echo "tgz_name=$(npm pack)" >> $GITHUB_OUTPUT
       working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
       id: tgz
-    - name: Upload tarball to release assets
-      uses: actions/upload-release-asset@v1
-      id: upload
+    - name: Upload tarball to release assets via GH HTTP API
+      working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_content_type: application/tar+gzip
-        asset_path: ./${{ needs.deploy-npm-module.outputs.PROJECT }}/${{ steps.tgz.outputs.tgz_name }}
-        asset_name: ${{ steps.tgz.outputs.tgz_name }}
+      run: gh release upload @aliceo2/${{ needs.deploy-npm-module.outputs.TAG }}@${{ needs.deploy-npm-module.outputs.VERSION }} ${{ steps.tgz.outputs.tgz_name }}
     - name: Upload TARball to S3
       uses: awegrzyn/s3-put-action@v1
       with:
