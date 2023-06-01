@@ -39,7 +39,7 @@ describe('Status Service test suite', () => {
   describe('`getProjectInfo()` tests', () => {
     it('should successfully return ilg info even if version is missing', () => {
       const statusService = new StatusService(config, undefined);
-      const info = {hostname: 'localhost', port: 8080, status: {ok: true}};
+      const info = {hostname: 'localhost', port: 8080, status: {ok: true}, name: 'TST'};
       assert.deepStrictEqual(statusService.getProjectInfo(), info);
     });
     it('should successfully return ilg version even if http configuration is missing', () => {
@@ -49,7 +49,7 @@ describe('Status Service test suite', () => {
     });
     it('should successfully add project version if package.json was provided', () => {
       const statusService = new StatusService(config, {version: '1.9.2'});
-      const info = {hostname: 'localhost', port: 8080, status: {ok: true}, version: '1.9.2'};
+      const info = {hostname: 'localhost', port: 8080, status: {ok: true}, version: '1.9.2', name: 'TST'};
       assert.deepStrictEqual(statusService.getProjectInfo(), info);
     });
   });
@@ -110,7 +110,7 @@ describe('Status Service test suite', () => {
       await statusService.frameworkInfo(undefined, res);
 
       const info = {
-        'infoLogger-gui': {hostname: 'localhost', port: 8080, status: {ok: true}},
+        'infoLogger-gui': {hostname: 'localhost', port: 8080, status: {ok: true}, name: 'TST'},
         mysql: {host: 'localhost', port: 6103, database: 'INFOLOGGER', status: {ok: false, message: 'There was no data source set up'}},
         infoLoggerServer: {host: 'localhost', port: 6102, status: {ok: false, message: 'Unable to connect to InfoLogger Server'}}
       };

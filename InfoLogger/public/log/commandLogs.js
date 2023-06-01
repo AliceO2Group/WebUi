@@ -15,6 +15,7 @@
 import {h, iconPerson, iconMediaPlay, iconMediaStop, iconDataTransferDownload} from '/js/src/index.js';
 import {BUTTON} from '../constants/button-states.const.js';
 import {MODE} from '../constants/mode.const.js';
+import {setBrowserTabTitle} from '../common/utils.js';
 
 let queryButtonType = BUTTON.PRIMARY;
 let liveButtonType = BUTTON.DEFAULT;
@@ -186,17 +187,20 @@ function toggleButtonStates(model, wasLivePressed) {
           model.log.liveStart();
           setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
           model.log.enableAutoScroll();
+          setBrowserTabTitle(window.ILG.name + ' LIVE')
         } catch (error) {
           model.notification.show(error.toString(), 'danger', 3000);
         }
         break;
       default: // MODE.LIVE.RUNNING
         model.log.liveStop(MODE.LIVE.PAUSED);
+        setBrowserTabTitle(window.ILG.name + ' LIVE PAUSED')
         setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
         model.log.disableAutoScroll();
     }
   } else {
     model.log.query();
+    setBrowserTabTitle(window.ILG.name + ' QUERY')
     setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
   }
 
