@@ -22,8 +22,8 @@ updates:
         - "sinon"
     grpc:
       patterns:
-      - "@grpc/grpc-js"
-      - "@grpc/proto-loader"
+        - "@grpc/grpc-js"
+        - "@grpc/proto-loader"
   labels:
     - "Control"
   open-pull-requests-limit: 10
