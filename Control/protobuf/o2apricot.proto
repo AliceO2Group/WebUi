@@ -67,7 +67,7 @@ enum RunType {
     NULL                     =   0;
     PHYSICS                  =   1;
     TECHNICAL                =   2;
-    PEDESTALS                =   3;
+    PEDESTAL                 =   3;
     PULSER                   =   4;
     LASER                    =   5;
     CALIBRATION_ITHR_TUNING  =   6;
