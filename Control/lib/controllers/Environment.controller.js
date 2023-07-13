@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 const {Log} = require('@aliceo2/web-ui');
-const {updateExpressResponseFromNativeError} = require('../errors/updateExpressResponseFromNativeError');
+const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 
 /**
  * Controller for dealing with all API requests on environments from AliECS:
@@ -23,7 +23,7 @@ class EnvironmentController {
    * @param {EnvironmentService} envService - service to use to query AliECS with regards to environments
    */
   constructor(envService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/framework`);
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/env-ctrl`);
 
     /**
      * @type {EnvironmentService}
