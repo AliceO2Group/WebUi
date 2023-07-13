@@ -54,7 +54,7 @@ describe('`Control Environment` test-suite', async () => {
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.environment.state;
+    const state = environment.payload.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'RUNNING', 'Environment was expected to be running');
@@ -76,7 +76,7 @@ describe('`Control Environment` test-suite', async () => {
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.environment.state;
+    const state = environment.payload.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
@@ -98,7 +98,7 @@ describe('`Control Environment` test-suite', async () => {
 
   //   const controlAction = await page.evaluate(() => window.model.environment.itemControl);
   //   const environment = await page.evaluate(() => window.model.environment.item);
-  //   const state = environment.payload.environment.state;
+  //   const state = environment.payload.state;
 
   //   assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
   //   assert.strictEqual(state, 'DEPLOYED');

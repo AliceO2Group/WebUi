@@ -26,24 +26,27 @@ export const taskCounterContent = (tasks) => {
   const statuses = {};
   tasks.map((task) => ({state: task.state, status: task.status}))
     .forEach(({state, status}) => {
-      states[state] = (states[state] + 1) || 1;
-      statuses[status] = (statuses[status] + 1) || 1;
+      if (state) {
+        states[state] = (states[state] + 1) || 1;
+      }
+      if (status) {
+        statuses[status] = (statuses[status] + 1) || 1;
+      }
     });
   const totalTasks = tasks.length;
   return [
-    h('.w-100.justify-between', [
+    Object.keys(states).length > 0 && h('.w-100.justify-between', [
       h('h5', 'Tasks by state: '),
       h('.flex-column.ph2.w-100', [
         Object.entries(states)
-          .map(([key, value]) => {
-            return rowForCard(key, `${value}/${totalTasks}`, {
-              keyClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
-              valueClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
-            })
+          .map(([key, value]) => rowForCard(key, `${value}/${totalTasks}`, {
+            keyClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
+            valueClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
           })
+          )
       ]),
     ]),
-    h('.w-100.justify-between', [
+    Object.keys(statuses).length > 0 && h('.w-100.justify-between', [
       h('h5', 'Tasks by status: '),
       h('.flex-column.ph2.w-100', [
         Object.entries(statuses)

@@ -90,7 +90,7 @@ const environmentContent = (environment, model) => {
   const isRunning = environment.state === 'RUNNING';
   const allDetectors = model.detectors.hostsByDetectorRemote;
   const {currentRunNumber} = environment;
-  const {flp, qc, trg} = environment.hardware;
+  const {flp, qc, trg, epn} = environment.hardware;
   const allHosts = flp.hosts.size + qc.hosts.size + trg.hosts.size;
   return h('.cardGroupColumn', {
   }, [
@@ -121,7 +121,7 @@ const environmentContent = (environment, model) => {
         h('.cardGroupRow', [
           miniCard(
             miniCardTitle('ALL', `# hosts: ${allHosts}`),
-            taskCounterContent(environment.tasks)),
+            taskCounterContent(environment.tasks.concat(epn.tasks))),
           flp.tasks.length > 0 && miniCard(
             miniCardTitle('FLP', `# hosts: ${flp.hosts.size}`),
             taskCounterContent(flp.tasks)),
@@ -131,6 +131,9 @@ const environmentContent = (environment, model) => {
           trg.tasks.length > 0 && miniCard(
             miniCardTitle('CTP Readout', `# hosts: ${trg.hosts.size}`),
             taskCounterContent(trg.tasks)),
+          epn.tasks.length > 0 && miniCard(
+            miniCardTitle('EPN'),
+            taskCounterContent(epn.tasks)),
         ])
       ]),
     ]),
@@ -192,7 +195,8 @@ const environmentGeneralInfoContent = (environment) => {
  * @returns {vnode}
  */
 const environmentComponentsContent = (environment) => {
-  const {userVars, numberOfFlps, includedDetectors = []} = environment;
+  const {userVars, numberOfFlps, includedDetectors = [], hardware = {epn: {}}} = environment;
+  const {epn} = hardware;
   const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
   const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
 
@@ -204,7 +208,8 @@ const environmentComponentsContent = (environment) => {
     rowForCard('EPNs:', parseObject(userVars, 'odc_n_epns')),
     rowForCard('TRG:', parseObject(userVars, 'trg_enabled')),
     rowForCard('CTP Readout:', parseObject(userVars, 'ctp_readout_enabled')),
-    rowForCard('ODC:', odcState, {valueClasses: [odcStyle]})
+    rowForCard('ODC:', odcState, {valueClasses: [odcStyle]}),
+    rowForCard('DDS:', epn.ddsSessionStatus ? epn.ddsSessionStatus : '-'),
   ]);
 };
 

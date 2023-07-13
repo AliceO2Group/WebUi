@@ -304,6 +304,21 @@ export default class Environment extends Observable {
   }
 
   /**
+   * Prepare an EPN object to be added to the environment hardware section
+   * @param {EnvironmentDetails} environment - object with details of the environment
+   */
+  _getDevicesGroupedByCategory(environment) {
+    try {
+      const {integratedServicesData: {odc}} = environment
+      const {devices = []} = JSON.parse(odc);
+      return {tasks: devices, hosts: new Set()};
+    } catch (error) {
+      console.error(error);
+    }
+    return {tasks: [], hosts: new Set()};
+  }
+
+  /**
    * Method to remove and parse fields from environment result
    * @param {EnvironmentDetails} environment - object with in-depth details of the environment
    * @return {JSON}
@@ -321,7 +336,8 @@ export default class Environment extends Observable {
     environment = this._filterOutDetectorsVariables(environment, 'defaults');
 
     const {qc, flp, trg} = this._getTasksGroupedByCategory(environment);
-    environment.hardware = {qc, trg, flp};
+    const epn = this._getDevicesGroupedByCategory(environment);
+    environment.hardware = {qc, trg, flp, epn};
     return environment;
   }
 }
