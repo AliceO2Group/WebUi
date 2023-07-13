@@ -16,6 +16,7 @@
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
+const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
@@ -45,6 +46,7 @@ class GrpcProxy {
         (error) => this._logConnectionResponse(error, wasInError, address));
 
       // set all the available gRPC methods in object and build a separate array with names only
+      console.log(Object.keys(protoService.prototype))
       this.methods = Object.keys(protoService.prototype)
         .filter((item) => item.charAt(0) !== '$')
         .map((method) => this._getAndSetPromisfiedMethod(method));
@@ -80,7 +82,7 @@ class GrpcProxy {
             } catch (exception) {
               log.debug('Failed new env details error' + exception);
             }
-            reject(error);
+            reject(grpcErrorToNativeError(error));
             return;
           }
           resolve(response);
