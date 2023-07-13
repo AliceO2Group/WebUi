@@ -86,7 +86,7 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.evaluate(() => document.querySelector('#buttonToSTART').click());
       await page.waitForTimeout(200);
       const state = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
+        return window.model.environment.item.payload.state;
       });
       assert.strictEqual(state, 'RUNNING');
       assert.ok(calls['controlEnvironment']);
@@ -130,14 +130,14 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
       await page.waitForTimeout(200);
       const configuredState = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
+        return window.model.environment.item.payload.state;
       });
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
       await page.waitForTimeout(200);
       const standbyState = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
+        return window.model.environment.item.payload.state;
       });
       assert.strictEqual(standbyState, 'DEPLOYED');
     });
@@ -192,16 +192,16 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should replace task name if regex is matched', async () => {
       const tagModified = await page.evaluate(() => {
         const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
+        result.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment._parseEnvResult(result).tasks[0].name;
       });
       assert.strictEqual(tagModified, 'readout');
     });
     it('should not replace task name due to regex not matching the name (missing tasks/ group)', async () => {
       const tagModified = await page.evaluate(() => {
         const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
+        result.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment._parseEnvResult(result).tasks[0].name;
       });
       assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
     });
@@ -209,8 +209,8 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should not replace task name due to regex not matching the name (missing @ character)', async () => {
       const tagModified = await page.evaluate(() => {
         const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
+        result.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        return window.model.environment._parseEnvResult(result).tasks[0].name;
       });
       assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
     });
@@ -218,7 +218,7 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should successfully add mesosStdout if available in tasks', async () => {
       const mesosStdout = await page.evaluate(() => {
         const result = {environment: {}};
-        result.environment.tasks = [{mesosStdout: 'location/location', name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        result.tasks = [{mesosStdout: 'location/location', name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
         return window.model.environment._parseEnvResult(result).mesosStdout;
       });
       assert.strictEqual(mesosStdout, 'location/location');
@@ -227,7 +227,7 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should successfully add mesosStdout empty if not available in tasks', async () => {
       const mesosStdout = await page.evaluate(() => {
         const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
+        result.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
         return window.model.environment._parseEnvResult(result).mesosStdout;
       });
       assert.strictEqual(mesosStdout, '');
@@ -236,31 +236,29 @@ describe('`pageEnvironment` test-suite', async () => {
     it('should filter out variables which do not belong to a detector', async () => {
       const env = await page.evaluate(() => {
         const result = {
-          environment: {
-            tasks: [],
-            includedDetectors: ['ODC'],
-            userVars: {
-              odc_enabled: 'true',
-              mid_enabled: 'false',
-              mid_something: 'test',
-              dd_enabled: 'true',
-              run_type: 'run'
-            },
-            vars: {
-              odc_enabled: 'true',
-              mid_enabled: 'false',
-              other_useful_var: 'very',
-              dd_enabled: 'true',
-              run_type: 'run'
-            },
-            defaults: {
-              dcs_topology: 'test',
-              dd_enabled: 'true',
-              run_type: 'run'
-            }
+          tasks: [],
+          includedDetectors: ['ODC'],
+          userVars: {
+            odc_enabled: 'true',
+            mid_enabled: 'false',
+            mid_something: 'test',
+            dd_enabled: 'true',
+            run_type: 'run'
+          },
+          vars: {
+            odc_enabled: 'true',
+            mid_enabled: 'false',
+            other_useful_var: 'very',
+            dd_enabled: 'true',
+            run_type: 'run'
+          },
+          defaults: {
+            dcs_topology: 'test',
+            dd_enabled: 'true',
+            run_type: 'run'
           }
         };
-        return window.model.environment._parseEnvResult(result).environment;
+        return window.model.environment._parseEnvResult(result);
       });
       assert.deepStrictEqual(env.vars, {odc_enabled: 'true', dd_enabled: 'true', run_type: 'run', other_useful_var: 'very'});
       assert.deepStrictEqual(env.userVars, {odc_enabled: 'true', dd_enabled: 'true', run_type: 'run'});
