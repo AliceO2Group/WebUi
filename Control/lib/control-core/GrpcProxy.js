@@ -46,7 +46,6 @@ class GrpcProxy {
         (error) => this._logConnectionResponse(error, wasInError, address));
 
       // set all the available gRPC methods in object and build a separate array with names only
-      console.log(Object.keys(protoService.prototype))
       this.methods = Object.keys(protoService.prototype)
         .filter((item) => item.charAt(0) !== '$')
         .map((method) => this._getAndSetPromisfiedMethod(method));
