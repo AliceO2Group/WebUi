@@ -51,7 +51,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
     Loading: () => h('.w-100.text-center', pageLoading()),
-    Success: (data) => showContent(model, data.environment),
+    Success: (data) => showContent(model, data),
     Failure: (error) => errorPage(error),
   })
 ]);
@@ -59,7 +59,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 /**
  * Show all properties of environment and buttons for its actions at bottom
  * @param {Object} model
- * @param {Environment} item - environment to show on this page
+ * @param {EnvironmentDetails} item - environment to show on this page
  * @return {vnode}
  */
 const showContent = (model, item) => [
