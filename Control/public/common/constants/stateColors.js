@@ -15,6 +15,7 @@
 export const ALIECS_STATE_COLOR = {
   RUNNING: 'success',
   CONFIGURED: 'primary',
+  READY: 'primary', // EPN
   ERROR: 'danger',
   UNKNOWN: 'danger',
   MIXED: 'danger-less',

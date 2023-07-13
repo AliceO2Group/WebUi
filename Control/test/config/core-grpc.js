@@ -143,6 +143,8 @@ const envTest = {
       dcs_topology: 'test',
       dd_enabled: 'true',
       run_type: 'run'
+    },
+    integratedServices: {
     }
   },
   workflow: {},
