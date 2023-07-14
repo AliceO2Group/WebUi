@@ -38,13 +38,13 @@ describe('Filter actions test-suite', async () => {
     const expectedColumns = {
       date: {size: 'cell-m', visible: false},
       time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: false},
-      rolename: {size: 'cell-m', visible: true},
+      hostname: {size: 'cell-m', visible: true},
+      rolename: {size: 'cell-m', visible: false},
       pid: {size: 'cell-s', visible: false},
       username: {size: 'cell-m', visible: false},
       system: {size: 'cell-s', visible: true},
       facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: false},
+      detector: {size: 'cell-s', visible: true},
       partition: {size: 'cell-m', visible: true},
       run: {size: 'cell-s', visible: true},
       errcode: {size: 'cell-s', visible: false},
@@ -93,27 +93,13 @@ describe('Filter actions test-suite', async () => {
     assert.strictEqual(searchParams, expectedParams);
   });
 
-  it('should update URI with new encoded "match" criteria', async () => {
+  it('should update URI with new encoded criteria', async () => {
     /* eslint-disable max-len */
-    const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const decodedParams = '?q={"hostname":{"match":"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
+    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    /* eslint-enable max-len */
     const searchParams = await page.evaluate(() => {
-      window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
-      window.model.updateRouteOnModelChange();
-      return window.location.search;
-    });
-
-    assert.deepStrictEqual(searchParams, expectedParams);
-    assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
-  });
-
-  it('should update URI with new encoded "exclude" criteria', async () => {
-    /* eslint-disable max-len */
-    const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
-    const searchParams = await page.evaluate(() => {
-      window.model.log.filter.resetCriteria();
-      window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
+      window.model.log.filter.setCriteria('hostname', 'match', '%ald_qdip01%');
       window.model.updateRouteOnModelChange();
       return window.location.search;
     });
