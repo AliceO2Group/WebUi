@@ -50,7 +50,7 @@ describe('Framework Frontend', function() {
       subprocessOutput += chunk.toString();
     });
 
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: 'new'});
     page = await browser.newPage();
     page.on('requestfailed', (request) => {
       console.error(`Navigator failed to load ${request.url()}`);
