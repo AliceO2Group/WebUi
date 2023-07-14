@@ -117,6 +117,7 @@ describe('Filter actions test-suite', async () => {
       window.model.updateRouteOnModelChange();
       return window.location.search;
     });
+
     assert.deepStrictEqual(searchParams, expectedParams);
     assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
   });
