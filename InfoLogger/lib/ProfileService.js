@@ -28,13 +28,13 @@ class ProfileService {
     this.defaultUserConfig = {
       date: {size: 'cell-m', visible: false},
       time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: false},
-      rolename: {size: 'cell-m', visible: true},
+      hostname: {size: 'cell-m', visible: true},
+      rolename: {size: 'cell-m', visible: false},
       pid: {size: 'cell-s', visible: false},
       username: {size: 'cell-m', visible: false},
       system: {size: 'cell-s', visible: true},
       facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: false},
+      detector: {size: 'cell-s', visible: true},
       partition: {size: 'cell-m', visible: true},
       run: {size: 'cell-s', visible: true},
       errcode: {size: 'cell-s', visible: false},
@@ -135,6 +135,5 @@ class ProfileService {
     res.status(status).json({message: error.message});
   }
 }
-
 
 module.exports = ProfileService;
