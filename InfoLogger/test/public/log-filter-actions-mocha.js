@@ -117,6 +117,9 @@ describe('Filter actions test-suite', async () => {
       window.model.updateRouteOnModelChange();
       return window.location.search;
     });
+    assert.deepStrictEqual(searchParams, expectedParams);
+    assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
+  });
 
   it('should parse dates in format DD/MM/YY', async () => {
     // default Geneva time
