@@ -79,9 +79,15 @@ export class ObjectService {
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async getObject(objectName, timestamp = null, filter = '') {
-    const validFrom = await this._dbService.getObjectValidity(objectName, timestamp, filter);
-    const object = await this._dbService.getObjectDetails(objectName, validFrom, filter);
+  async getObject(objectName, timestamp = undefined, filter = '') {
+    if (!timestamp) {
+      /*
+       * Timestamp provided by the user is taken from a dropdown list of valid-from timestamps.
+       * Thus there is no point in requesting it again
+       */
+      timestamp = await this._dbService.getObjectValidity(objectName, timestamp, filter);
+    }
+    const object = await this._dbService.getObjectDetails(objectName, timestamp, filter);
     const rootObj = await this._getJsRootFormat(this._DB_URL + object.location);
     const timestampList = await this._dbService.getObjectTimestampList(objectName, 1000, filter);
 
@@ -100,7 +106,7 @@ export class ObjectService {
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async getObjectById(id, timestamp = null, filter = '') {
+  async getObjectById(id, timestamp = undefined, filter = '') {
     const { object, layoutName } = this._dataService.getObjectById(id);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.getObject(name, timestamp, filter);

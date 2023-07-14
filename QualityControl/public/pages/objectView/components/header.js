@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBook, iconArrowThickLeft } from '/js/src/index.js';
+import { h, iconBook, iconArrowThickLeft, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
 /**
  * Builds header which contains information on plotted object and actions that can be applied
@@ -20,9 +20,10 @@ import { h, iconBook, iconArrowThickLeft } from '/js/src/index.js';
  * @param {string} title - title of the page depending on the object loading location (tree or layout)
  * @returns {vnode} - virtual node element
  */
-export const header = (model, title) => h('.flex-row.items-center.shadow-level1.p2', [
+export const header = (model, title) => h('.flex-row.items-center.p2.g2', [
   getBackToQCGButton(model),
   h('.flex-column.text-center', { style: 'flex-grow:1' }, h('b', title)),
+  filterByParametersButton(model.objectViewModel),
   model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
 ]);
 
@@ -52,6 +53,18 @@ function getBackToQCGButton(model) {
       title,
     ]),
   );
+}
+
+/**
+ * Button for toggling visibility of the filter by parameters panel
+ * @param {ObjectViewModel} objectViewModel - model of the current page
+ * @returns {vnode} - virtual node element
+ */
+function filterByParametersButton(objectViewModel) {
+  return h('button.btn.btn-default', {
+    class: objectViewModel.isFilterVisible() ? 'active' : '',
+    onclick: () => objectViewModel.toggleFilterVisibility(),
+  }, ['Filters ', objectViewModel.isFilterVisible() ? iconChevronTop() : iconChevronBottom()]);
 }
 
 /**

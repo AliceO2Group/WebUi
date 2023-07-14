@@ -22,6 +22,7 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false,
     allow: true,
+    name: 'ILG'
   },
 
   // optional data source, comment object if not used

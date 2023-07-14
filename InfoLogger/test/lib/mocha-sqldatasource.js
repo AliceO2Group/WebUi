@@ -211,4 +211,43 @@ describe('SQLDataSource', () => {
     delete result.time;
     assert.deepStrictEqual(result, expectedResult);
   });
+
+  describe('queryGroupCountLogsBySeverity() - test suite', ()=> {
+    it('should successfully return stats when queried for all known severities even if none is returned by data service', async () => {
+      const sqlStub = {
+        query: sinon.stub().resolves([
+          { severity: 'E', 'COUNT(*)': 102 },
+          { severity: 'F', 'COUNT(*)': 1 },
+        ])
+      }
+      const dataService = new SQLDataSource(sqlStub, config.mysql);
+      const data = await dataService.queryGroupCountLogsBySeverity(51234);
+      assert.deepStrictEqual(data, {
+        D: 0,
+        I: 0,
+        W: 0,
+        E: 102,
+        F: 1,
+      })
+    });
+
+    it('should throw error if data service throws error', async () => {
+      const sqlStub = {
+        query: sinon.stub().rejects(new Error('Data Service went bad'))
+      }
+      const dataService = new SQLDataSource(sqlStub, config.mysql);
+      
+      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'))
+    });
+
+    it('should throw error if data service throws error', async () => {
+      const sqlStub = {
+        query: sinon.stub().throws(new Error('Data Service went bad'))
+      }
+      const dataService = new SQLDataSource(sqlStub, config.mysql);
+      
+      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'))
+    });
+
+  });
 });

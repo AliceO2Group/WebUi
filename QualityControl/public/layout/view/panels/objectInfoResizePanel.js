@@ -26,7 +26,12 @@ export const objectInfoResizePanel = (model, tabObject) => {
   const { name } = tabObject;
   const isSelectedOpen = model.object.selectedOpen;
   const objectRemoteData = model.services.object.objectsLoadedMap[name];
-
+  let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`;
+  Object.entries(model.layout.filter)
+    .filter(([_, value]) => value)
+    .forEach(([key, value]) => {
+      uri += `&${key}=${encodeURI(value)}`;
+    });
   return h('.text-right.resize-element.resize-button.flex-row', {
     style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
   }, [
@@ -44,7 +49,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
     ])),
     h('a.btn', {
       title: 'Open object plot in full screen',
-      href: `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`,
+      href: uri,
       onclick: (e) => model.router.handleLinkEvent(e),
     }, iconResizeBoth()),
   ]);

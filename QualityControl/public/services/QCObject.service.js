@@ -63,7 +63,7 @@ export default class QCObjectService {
    * @param {Class<Observable>} that - object to be used to notify
    * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectByName(objectName, timestamp = -1, filter = '', that = this) {
+  async getObjectByName(objectName, timestamp = undefined, filter = '', that = this) {
     this.objectsLoadedMap[objectName] = RemoteData.loading();
     that.notify();
 
@@ -104,7 +104,7 @@ export default class QCObjectService {
    * @param {Class<Observable>} that - object to be used to notify
    * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectById(objectId, timestamp = -1, filter = '', that = this) {
+  async getObjectById(objectId, timestamp = undefined, filter = '', that = this) {
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
       const url = this._buildURL(`/api/object/${objectId}?`, timestamp, filter);
@@ -142,12 +142,11 @@ export default class QCObjectService {
    * @param {string} filter - filter as string
    * @returns {string} - url with appended parameters
    */
-  _buildURL(url, timestamp, filter) {
-    if (timestamp === -1 && filter === '') {
-      url += `&timestamp=${Date.now()}`;
-    } else if (filter !== '') {
+  _buildURL(url, timestamp = undefined, filter = '') {
+    if (filter) {
       url += `&filter=${filter}`;
-    } else {
+    }
+    if (timestamp) {
       url += `&timestamp=${timestamp}`;
     }
     return url;

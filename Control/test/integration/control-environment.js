@@ -41,7 +41,7 @@ describe('`Control Environment` test-suite', async () => {
   it(`should have one button for START in state CONFIGURED (workflow '${workflowToTest}')`, async () => {
     await page.waitForSelector('#buttonToSTART', {timeout: 5000});
     const startButton = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
-    const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
+    const state = await page.evaluate(() => window.model.environment.item.payload.state);
 
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
     assert.strictEqual(startButton, 'START', 'Could not find button for starting environment probably due to bad state of environment');
@@ -54,7 +54,7 @@ describe('`Control Environment` test-suite', async () => {
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.environment.state;
+    const state = environment.payload.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'RUNNING', 'Environment was expected to be running');
@@ -63,7 +63,7 @@ describe('`Control Environment` test-suite', async () => {
   it(`should have one button for STOP in state RUNNING (workflow '${workflowToTest}')`, async () => {
     await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
     const stopButton = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
-    const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
+    const state = await page.evaluate(() => window.model.environment.item.payload.state);
 
     assert.strictEqual(state, 'RUNNING', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
     assert.strictEqual(stopButton, 'STOP', 'Could not found button for stopping environment probably due to bad state of environment');
@@ -76,7 +76,7 @@ describe('`Control Environment` test-suite', async () => {
 
     const controlAction = await page.evaluate(() => window.model.environment.itemControl);
     const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.environment.state;
+    const state = environment.payload.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
@@ -85,7 +85,7 @@ describe('`Control Environment` test-suite', async () => {
   // it(`should have one button for RESET in state CONFIGURED (workflow '${workflowToTest}')`, async () => {
   //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
   //   const resetButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
-  //   const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
+  //   const state = await page.evaluate(() => window.model.environment.item.payload.state);
 
   //   assert.strictEqual(state, 'CONFIGURED', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
   //   assert.strictEqual(resetButton, 'RESET', 'Could not found button for resetting (stand-by) environment probably due to bad state of environment');
@@ -98,7 +98,7 @@ describe('`Control Environment` test-suite', async () => {
 
   //   const controlAction = await page.evaluate(() => window.model.environment.itemControl);
   //   const environment = await page.evaluate(() => window.model.environment.item);
-  //   const state = environment.payload.environment.state;
+  //   const state = environment.payload.state;
 
   //   assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
   //   assert.strictEqual(state, 'DEPLOYED');

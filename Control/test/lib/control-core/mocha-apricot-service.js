@@ -237,7 +237,7 @@ describe('ApricotService test suite', () => {
       };
     });
 
-    it('should successfully save configuration', async () => {
+    it('should successfully save configuration with alphabetically sorted pairs', async () => {
       const body = {
         name: 'My TST Configuration',
         variables: {
@@ -251,6 +251,16 @@ describe('ApricotService test suite', () => {
         repository: 'git/repo.git',
       };
       const session = {username: 'user', personid: 11};
+      const expectedSortedVars = {
+        user: { username: 'user', personid: 11 },
+        variables: { hosts: [ 'flp01' ], some_enabled: 'true', some_other: 'false' },
+        detectors: [ 'TST' ],
+        workflow: 'readout',
+        revision: 'master',
+        repository: 'git/repo.git',
+        name: 'My TST Configuration',
+        id: 'My_TST_Configuration'
+      };
       req = {body, session};
 
       const apricotProxy = {
@@ -264,6 +274,11 @@ describe('ApricotService test suite', () => {
       assert.ok(res.status.calledWith(201));
       assert.ok(res.json.calledOnce);
       assert.ok(res.json.calledWith({message: 'Configuration successfully saved as My_TST_Configuration'}));
+
+      const stubArgs = JSON.parse(apricotProxy.SetRuntimeEntry.getCall(0).args[0].value);
+      delete stubArgs.created;
+      delete stubArgs.edited;
+      assert.deepStrictEqual(stubArgs, expectedSortedVars, 'Saved configuration is not sorted alphabetically')
     });
 
     it('should reply with error due to bad configuration object', async () => {

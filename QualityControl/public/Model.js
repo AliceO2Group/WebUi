@@ -25,6 +25,7 @@ import Folder from './folder/Folder.js';
 import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
+import { setBrowserTabTitle } from './common/utils.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -173,9 +174,11 @@ export default class Model extends Observable {
     switch (this.router.params.page) {
       case 'layoutList':
         this.page = 'layoutList';
+        setBrowserTabTitle('QCG-Layouts');
         this.services.layout.getLayouts();
         break;
       case 'layoutShow':
+        setBrowserTabTitle('QCG-LayoutShow');
         if (!this.router.params.layoutId) {
           this.notification.show('layoutId in URL was missing. Redirecting to layout page', 'warning', 3000);
           this.router.go('?page=layoutList', true);
@@ -196,6 +199,7 @@ export default class Model extends Observable {
         break;
       case 'objectTree':
         this.page = 'objectTree';
+        setBrowserTabTitle('QCG-Tree');
         this.object.loadList();
         // Data is already loaded at beginning
         if (this.object.selected) {
@@ -205,6 +209,7 @@ export default class Model extends Observable {
         break;
       case 'objectView': {
         this.page = 'objectView';
+        setBrowserTabTitle('QCG-View');
         const { params } = this.router;
         this.objectViewModel.init(params);
         this.notify();
@@ -212,6 +217,7 @@ export default class Model extends Observable {
       }
       case 'about':
         this.page = 'about';
+        setBrowserTabTitle('QCG-About');
         this.frameworkInfo.getFrameworkInfo();
         this.notify();
         break;
