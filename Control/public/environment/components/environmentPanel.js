@@ -196,7 +196,7 @@ const environmentGeneralInfoContent = (environment) => {
  */
 const environmentComponentsContent = (environment) => {
   const {userVars, numberOfFlps, includedDetectors = [], hardware = {epn: {}}} = environment;
-  const {epn} = hardware;
+  const {epn: {info}} = hardware;
   const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
   const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
 
@@ -209,7 +209,8 @@ const environmentComponentsContent = (environment) => {
     rowForCard('TRG:', parseObject(userVars, 'trg_enabled')),
     rowForCard('CTP Readout:', parseObject(userVars, 'ctp_readout_enabled')),
     rowForCard('ODC:', odcState, {valueClasses: [odcStyle]}),
-    rowForCard('DDS:', epn.ddsSessionStatus ? epn.ddsSessionStatus : '-'),
+    rowForCard('DDS:', info.ddsSessionStatus ? info.ddsSessionStatus : '-'),
+    info.ddsSessionStatus && rowForCard('DDS Session ID:', info.ddsSessionId ? info.ddsSessionId : '-'),
   ]);
 };
 

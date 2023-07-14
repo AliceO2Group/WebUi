@@ -310,12 +310,12 @@ export default class Environment extends Observable {
   _getDevicesGroupedByCategory(environment) {
     try {
       const {integratedServicesData: {odc}} = environment
-      const {devices = []} = JSON.parse(odc);
-      return {tasks: devices, hosts: new Set()};
+      const {devices = [], ddsSessionId, ddsSessionStatus} = JSON.parse(odc);
+      return {tasks: devices, hosts: new Set(), info: {ddsSessionId, ddsSessionStatus}};
     } catch (error) {
       console.error(error);
     }
-    return {tasks: [], hosts: new Set()};
+    return {tasks: [], hosts: new Set(), info: {}};
   }
 
   /**
