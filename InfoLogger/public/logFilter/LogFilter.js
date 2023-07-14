@@ -116,8 +116,8 @@ export default class LogFilter extends Observable {
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
         } else if (operator === 'match' || operator === 'exclude') {
-          // encode potential breaking characters
-          criterias[field][operator] = encodeURI(criterias[field][operator]);
+          // encode potential breaking characters and escape double quotes as are used by browser by default
+          criterias[field][operator] = encodeURI(criterias[field][operator].replace(/["]+/g, '\\"'));
         }
 
         // remove empty fields
@@ -126,7 +126,6 @@ export default class LogFilter extends Observable {
         }
       }
     }
-
     return criterias;
   }
 

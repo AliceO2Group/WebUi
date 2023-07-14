@@ -172,7 +172,7 @@ module.exports = class SQLDataSource {
    * Ask DB for a part of rows and the total count
    * - total: how many rows available (limited to 1M)
    * - more: true if has more than 1M rows
-   * - limit: options.limit or 1k
+   * - limit: options.limit or 100k
    * - rows: the first `limit` rows
    * - count: how many rows inside `rows`
    * - time: how much did it take, in ms
@@ -184,7 +184,7 @@ module.exports = class SQLDataSource {
     if (!filters) {
       throw new Error('filters parameter is mandatory');
     }
-    options = Object.assign({}, {limit: 1000}, options);
+    options = Object.assign({}, {limit: 100000}, options);
 
     const startTime = Date.now(); // ms
     const {criteria, values} = this._filtersToSqlConditions(filters);
@@ -205,6 +205,34 @@ module.exports = class SQLDataSource {
       time: totalTime, // ms
       queryAsString: this._getSQLQueryAsString(criteriaString, options.limit)
     };
+  }
+
+  /**
+   * Given a runNumber, query logs for it and return a count of the logs grouped by severity
+   * @param {number|string} runNumber - number of the run for which the query should be performed
+   * @returns 
+   */
+  async queryGroupCountLogsBySeverity(runNumber) {
+    const groupByStatement =
+      'SELECT severity, COUNT(*) FROM messages WHERE run=? and severity '
+       + `in ('D', 'I', 'W', 'E', 'F') GROUP BY severity;`;
+    return this.connection.query(groupByStatement, [runNumber]).then((data) => {
+      const result = {
+        D: 0,
+        I: 0,
+        W: 0,
+        E: 0,
+        F: 0,
+      };
+      /**
+       * data is of structure:
+       * [
+       *  RowDataPacket { severity: 'E', 'COUNT(*)': 102 }
+       * ]
+       */
+      data.forEach((group) => result[group['severity']] = group['COUNT(*)']);
+      return result;
+    });
   }
 
   /**

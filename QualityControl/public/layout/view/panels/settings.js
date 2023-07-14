@@ -26,11 +26,35 @@ export default (model) =>
   h('.br1.w-100.flex-column.ph2.f6.h-100', [
     h('.w-100.f4.text-center', 'Configure your layout'),
     h('hr.w-100'),
+    descriptionLayoutInput(
+      model.layout.item.description,
+      (e)=> model.layout.setLayoutProperty('description', e.target.value),
+    ),
     displayObjectTime(model),
     displayAutoTabTimeSelector(model),
     h('hr.w-100'),
     objectTreeSidebar(model),
   ]);
+
+/**
+ * Build an input box, allowing users to add description
+ * @param {string} description - description of the layout
+ * @param {function} oninput - function to be executed when there is input change
+ * @returns {vnode} - virtual node element
+ */
+const descriptionLayoutInput = (description, oninput) => h('.w-100.flex-row', [
+  h('.w-40', {
+    id: 'inputDescriptionLabel',
+  }, 'Description'),
+  h('input.form-control.w-60', {
+    type: 'text',
+    value: description ?? '',
+    placeholder: '100 characters max',
+    for: 'inputDescriptionLabel',
+    id: 'inputDescription',
+    oninput,
+  }),
+]);
 
 /**
  * Panel allowing users to select if object date/time info should be displayed

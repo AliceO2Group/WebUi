@@ -98,3 +98,14 @@ export function prettyFormatDate(date) {
     return 'Invalid Date';
   }
 }
+
+/**
+ * Given a string, it will attempt to update the tab title if the `document` object exists
+ * @param {string} title - name that should be updating the browser tab
+ * @returns {void}
+ */
+export function setBrowserTabTitle(title = undefined) {
+  if (document && title) {
+    document.title = title;
+  }
+}

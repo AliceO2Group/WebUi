@@ -80,7 +80,8 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name } = model.object.selected;
+  const { name, version } = model.object.selected;
+  const href = version ? `?page=objectView&objectName=${name}&ts=${version}` : `?page=objectView&objectName=${name}`;
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.resize-button.flex-row', [
@@ -88,7 +89,7 @@ const drawPlot = (model, object) => {
         'a.btn',
         {
           title: 'Open object plot in full screen',
-          href: `?page=objectView&objectName=${name}`,
+          href,
           onclick: (e) => model.router.handleLinkEvent(e),
         },
         iconResizeBoth(),

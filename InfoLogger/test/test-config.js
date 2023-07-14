@@ -21,6 +21,7 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false,
     allow: true,
+    name: 'TST'
   },
   infoLoggerServer: {
     host: 'localhost',
