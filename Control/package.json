@@ -42,8 +42,13 @@
     "mocha": "^10.2.0",
     "nock": "^13.3.0",
     "nyc": "^15.1.0",
-    "puppeteer": "20.8.0",
+    "puppeteer": "^20.8.2",
     "sinon": "15.2.0"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "bundleDependencies": [
+    "@aliceo2/web-ui",
+    "@grpc/grpc-js",
+    "@grpc/proto-loader"
+  ]
 }
