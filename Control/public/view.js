@@ -24,6 +24,7 @@ import {
   content as workflowsContent,
   header as workflowsHeader
 } from './workflow/workflowsPage.js';
+import {EnvCreationHeader, EnvCreationPage} from './pages/EnvCreation/EnvCreation.page.js';
 import {
   content as environmentsContent,
   header as environmentsHeader
@@ -81,6 +82,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
   switchCase(model.router.params.page, {
     newEnvironment: workflowsHeader,
+    createEnv: EnvCreationHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
     about: statusHeader,
@@ -99,6 +101,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
 const content = (model) => [
   switchCase(model.router.params.page, {
     newEnvironment: workflowsContent,
+    createEnv: EnvCreationPage,
     environments: environmentsContent,
     environment: environmentContent,
     about: statusContent,
