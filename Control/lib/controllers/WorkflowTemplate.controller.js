@@ -37,8 +37,8 @@ class WorkflowTemplateController {
    */
   async getDefaultTemplateSource(_, res) {
     try {
-      const response = await this._workflowService.getDefaultTemplateSource();
-      res.status(200).json(response);
+      const defaultTemplateSource = await this._workflowService.getDefaultTemplateSource();
+      res.status(200).json(defaultTemplateSource);
     } catch (error) {
       updateExpressResponseFromNativeError(res, error);
     }
