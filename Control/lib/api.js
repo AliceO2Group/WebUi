@@ -35,9 +35,12 @@ const ApricotService = require('./control-core/ApricotService.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const EnvCache = require('./control-core/EnvCache.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
+const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
+
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
 
 const path = require('path');
+const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.controller.js');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
@@ -68,7 +71,10 @@ module.exports.setup = (http, ws) => {
   const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
   ctrlService.setWS(ws);
   const envService = new EnvironmentService(ctrlProxy);
+  const workflowService = new WorkflowTemplateService(ctrlProxy);
+  
   const envController = new EnvironmentController(envService);
+  const workflowController = new WorkflowTemplateController(workflowService);
 
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
@@ -104,6 +110,8 @@ module.exports.setup = (http, ws) => {
   http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
 
+  http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
+  
   http.get('/environment/:id', coreMiddleware, envController.getEnvironment.bind(envController), {public: true});
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
