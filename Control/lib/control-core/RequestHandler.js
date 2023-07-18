@@ -64,6 +64,7 @@ class RequestHandler {
       delete this.requestList[index];
     } catch(error) {
       errorLogger('Request failed, ID: ' + index);
+      errorLogger(error);
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
       if (error.envId) {
