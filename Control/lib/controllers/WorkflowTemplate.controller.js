@@ -11,7 +11,6 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {Log} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 
 /**
@@ -23,7 +22,6 @@ class WorkflowTemplateController {
    * @param {WorkflowTemplateService} workflowService - service to use to query AliECS with regards to workflow templates
    */
   constructor(workflowService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/workflow-ctrl`);
 
     /**
      * @type {WorkflowTemplateService}

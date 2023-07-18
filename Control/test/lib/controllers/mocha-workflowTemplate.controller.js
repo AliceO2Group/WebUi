@@ -20,12 +20,6 @@ const {WorkflowTemplateController} = require('../../../lib/controllers/WorkflowT
 const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 describe('WorkflowController test suite', () => {
-
-  const stub = sinon.stub();
-  const workflowService = {
-    getDefaultTemplateSource: stub
-  };
-  const envCtrl = new WorkflowTemplateController(workflowService);
   const res = {
     status: sinon.stub().returnsThis(),
     json: sinon.stub()
@@ -33,19 +27,19 @@ describe('WorkflowController test suite', () => {
 
   describe(`'getDefaultTemplateSource' test suite`, async () => {
     it('should successfully build a response with workflow template info', async () => {
-      const envCtrl = new WorkflowTemplateController({
+      const workflowCtrl = new WorkflowTemplateController({
         getDefaultTemplateSource: sinon.stub().resolves({name: 'some-name', revision: 'some-revision', repository: 'some-repository'})
       });
-      await envCtrl.getDefaultTemplateSource({}, res);
+      await workflowCtrl.getDefaultTemplateSource({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({name: 'some-name', revision: 'some-revision', repository: 'some-repository'}));
     });
 
     it('should return 404 response as there was no default revision found', async () => {
-      const envCtrl = new WorkflowTemplateController({
+      const workflowCtrl = new WorkflowTemplateController({
         getDefaultTemplateSource: sinon.stub().rejects(new NotFoundError('No default revision identified'))
       });
-      await envCtrl.getDefaultTemplateSource({}, res);
+      await workflowCtrl.getDefaultTemplateSource({}, res);
       assert.ok(res.status.calledWith(404));
       assert.ok(res.json.calledWith({message: 'No default revision identified'}));
     });
