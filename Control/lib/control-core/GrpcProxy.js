@@ -81,6 +81,7 @@ class GrpcProxy {
               reject(error);
             } catch (exception) {
               log.debug('Failed new env details error' + exception);
+              reject(exception);
             }
             reject(grpcErrorToNativeError(error));
             return;
