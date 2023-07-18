@@ -16,7 +16,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 
-const {EnvironmentController} = require('./../../../lib/controllers/Environment.controller.js');
+const {EnvironmentController} = require('../../../lib/controllers/Environment.controller.js');
 const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 describe('EnvironmentController test suite', () => {
