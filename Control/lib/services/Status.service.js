@@ -142,7 +142,7 @@ class StatusService {
       try {
         const {services} = await this._ctrlService.getIntegratedServicesInfo();
         Object.entries(services)
-          .filter(([key]) => key !=='testplugin')
+          .filter(([key]) => key !== 'testplugin')
           .forEach(([key, value]) => {
             const status = {
               ok: value?.connectionState !== 'TRANSIENT_FAILURE' && value?.connectionState !== 'SHUTDOWN',
@@ -215,12 +215,13 @@ class StatusService {
     if (this.config?.grafana?.url) {
       try {
         const {hostname, port} = url.parse(this.config.grafana.url);
-        await httpGetJson(hostname, port, '/api/health', {
+        const {version = '-'} = await httpGetJson(hostname, port, '/api/health', {
           statusCodeMin: 200,
           statusCodeMax: 301,
+          rejectUnauthorized: false, 
           rejectMessage: 'Invalid status code: '
         });
-        status = {ok: true, configured: true, isCritical: false};
+        status = {ok: true, configured: true, isCritical: false, version};
       } catch (error) {
         status = {ok: false, configured: true, isCritical: false, message: error.toString()};
       }
@@ -238,7 +239,7 @@ class StatusService {
     return {
       status,
       name: 'Grafana - Monitoring',
-      ...status.configured && Service.fromObjectAsJson({endpoint: this.config.grafana.url})
+      ...status.configured && Service.fromObjectAsJson({endpoint: this.config.grafana.url, version: status?.version})
     };
   }
 

@@ -13,7 +13,7 @@
 */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
-const http = require('http');
+const https = require('https');
 
 /**
  * Global HTTP error handler, sends status 500
@@ -60,6 +60,7 @@ function httpGetJson(hostname, port, path, options = undefined) {
       port,
       path,
       method: 'GET',
+      rejectUnauthorized: Boolean(options.rejectUnauthorized),
       headers: {
         Accept: 'application/json'
       }
@@ -86,7 +87,7 @@ function httpGetJson(hostname, port, path, options = undefined) {
       });
     };
 
-    const request = http.request(requestOptions, requestHandler);
+    const request = https.request(requestOptions, requestHandler);
     request.on('error', (err) => reject(err));
     request.end();
   });

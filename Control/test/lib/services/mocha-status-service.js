@@ -139,8 +139,8 @@ describe('StatusService test suite', () => {
   });
 
   describe('Test Grafana Status', async () => {
-    const config = {grafana: {url: 'http://localhost:8084'}};
-    const expectedInfo = {protocol: 'http:', hostname: 'localhost', port: '8084', name: 'Grafana - Monitoring'};
+    const config = {grafana: {url: 'https://localhost:8084'}};
+    const expectedInfo = {protocol: 'https:', hostname: 'localhost', port: '8084', name: 'Grafana - Monitoring'};
 
     it('should successfully retrieve status and info about Grafana that it is running', async () => {
       const status = new StatusService(config, {}, {});
@@ -149,8 +149,8 @@ describe('StatusService test suite', () => {
         .reply(200, {});
       const grafana = await status.getGrafanaAsComponent();
 
-      assert.deepStrictEqual(grafana.status, {ok: true, configured: true, isCritical: false});
-      assert.strictEqual(grafana.endpoint, `http://${expectedInfo.hostname}:${expectedInfo.port}`);
+      assert.deepStrictEqual(grafana.status, {ok: true, configured: true, isCritical: false, version: '-'});
+      assert.strictEqual(grafana.endpoint, `https://${expectedInfo.hostname}:${expectedInfo.port}`);
 
     });
 
