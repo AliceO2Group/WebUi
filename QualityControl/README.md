@@ -8,7 +8,6 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 - [Local Configuration](#local-configuration)
     - [HTTP](#http)
     - [CCDB](#ccdb)
-    - [Listing Connector](#listing-connector)
 - [Run QCG locally](#run-qcg-locally)
 - [Enable HTTPS](#enable-https)
 - [Features](#features)
@@ -60,9 +59,6 @@ Edit the `ccdb` section to define a custom:
 - `hostname`
 - `port`
 - `prefix` - (optional) prefix to use for filtering on pathName
-
-#### Listing Connector
-Specify the connector that should be used for retrieving QC objects. Default value for `listingConnector` is `ccdb`.
 
 ## Run QCG locally 
 

@@ -14,7 +14,7 @@
 
 import { WebSocket } from '@aliceo2/web-ui';
 
-import { consulService, objectController, layoutService, statusService, userService } from './QCModel.js';
+import { consulService, objectController, layoutService, statusController, userService } from './QCModel.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -38,8 +38,8 @@ export const setup = (http) => {
   http.post('/layout', layoutService.createLayout.bind(layoutService));
   http.post('/writeLayout', layoutService.updateLayout.bind(layoutService));
 
-  http.get('/status/gui', statusService.getQCGStatus.bind(statusService), { public: true });
-  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService), { public: true });
+  http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
+  http.get('/getFrameworkInfo', statusController.frameworkInfo.bind(statusController), { public: true });
 
   http.get('/checkUser', userService.addUser.bind(userService));
 

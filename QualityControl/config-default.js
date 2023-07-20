@@ -27,8 +27,6 @@ export const config = {
     tls: false,
   },
 
-  listingConnector: 'ccdb',
-
   ccdb: {
     protocol: 'http',
     hostname: 'localhost',

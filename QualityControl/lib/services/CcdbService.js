@@ -60,6 +60,21 @@ export class CcdbService {
   }
 
   /**
+   * Given an object configuration, attempt to create a service and test its connection
+   * @param {object} config - configuration object with needed parameter fields
+   * @returns {CcdbService} - an instance of the newly created service
+   */
+  static setup(config) {
+    const logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-service`);
+
+    if (!config) {
+      logger.errorMessage('Missing configuration for CCDB', { level: 1, system: 'GUI', facility: 'qcg/setup' });
+      return undefined;
+    }
+    return new CcdbService(config);
+  }
+
+  /**
    * Check connection to CCDB service is up and running by requesting a list of sub-folders with a limit of 1;
    * Such a request is fast as it contains almost no data ;
    * @returns {Promise.<Boolean, Error>} - promise with results of the query to ccdb

@@ -18,7 +18,7 @@ import { openFile, toJSON } from 'jsroot';
 
 import { ConsulService } from '@aliceo2/web-ui';
 import { CcdbService } from './services/CcdbService.js';
-import { ObjectService } from './services/QcObjectService.js';
+import { QcObjectService } from './services/QcObject.service.js';
 import { UserService } from './services/UserService.js';
 import { JsonFileService } from './services/JsonFileService.js';
 
@@ -34,7 +34,7 @@ const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
  * Initialization of model according to config file
  */
 const projPackage = {}; // TODO
-export const statusService = new StatusController(config, projPackage);
+export const statusController = new StatusController(config, projPackage);
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -51,25 +51,13 @@ if (config.consul) {
     .then(() => log.info('Consul Service connection was successfully tested.'))
     .catch((error) => log.error('Consul Service connection could not be established. '
       + `Please try restarting the service due to: ${error}`));
-  statusService.setLiveModeConnector(consulService);
+  statusController.setLiveModeConnector(consulService);
 } else {
   log.warn('Consul Service: No Configuration Found');
 }
 
-export let objectController = undefined;
-export let queryPrefix = undefined;
+const ccdb = CcdbService.setup(config.ccdb);
+statusController.setDataConnector(ccdb);
 
-if (config.listingConnector === 'ccdb') {
-  log.info('Object listing: CCDB');
-  if (!config.ccdb) {
-    throw new Error('CCDB config is mandatory');
-  }
-  const ccdb = new CcdbService(config.ccdb);
-  ccdb.isConnectionUp();
-  queryPrefix = ccdb.PREFIX;
-
-  const objService = new ObjectService(ccdb, jsonDb, { openFile, toJSON });
-  objectController = new ObjectController(objService, consulService);
-  statusService.setDataConnector(ccdb);
-}
-// --------------------------------------------------------
+const objService = new QcObjectService(ccdb, jsonDb, { openFile, toJSON });
+export const objectController = new ObjectController(objService, consulService);
