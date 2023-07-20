@@ -18,7 +18,7 @@ import { openFile, toJSON } from 'jsroot';
 
 import { ConsulService } from '@aliceo2/web-ui';
 import { CcdbService } from './services/CcdbService.js';
-import { ObjectService } from './services/ObjectService.js';
+import { ObjectService } from './services/QcObjectService.js';
 import { UserService } from './services/UserService.js';
 import { JsonFileService } from './services/JsonFileService.js';
 
