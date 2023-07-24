@@ -29,18 +29,19 @@ export class IntervalsService {
 
   /**
    * Method to allow other services to register events that should trigger based on an interval rate
-   * @param {string} key - under which the callback should be registered so that it can be deregister at a later stage
    * @param {function} callback - function that should be called based on interval rate
-   * @param {number} intervalRate = 60 * 1000 - (ms) on how often the cache should be refreshed
-   * @returns {void}
+   * @param {number} intervalRate = 60 * 1000 - (ms) on how often the callback should be called
+   * @returns {Symbol} - unique key for registered callback
    */
-  register(key, callback, intervalRate = 60 * 1000) {
+  register(callback, intervalRate = 60 * 1000) {
+    const key = Symbol(Math.random());
     this._intervals[key] = setInterval(callback, intervalRate);
+    return key;
   }
 
   /**
    * Method to allow services to deregister and clear an interval
-   * @param {string} key - key under which the interval was registered
+   * @param {Symbol} key - key under which the interval was registered
    * @returns {void}
    */
   deregister(key) {
