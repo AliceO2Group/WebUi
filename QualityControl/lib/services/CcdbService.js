@@ -56,7 +56,7 @@ export class CcdbService {
     const logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
 
     const { hostname, port } = config;
-    if (!config || !hostname || !port) {
+    if (!hostname || !port) {
       logger.warnMessage(
         'Missing or incomplete configuration for CCDB. Will proceed with using default values',
         { level: 1, system: 'GUI', facility: 'qcg/ccdb-setup' },
