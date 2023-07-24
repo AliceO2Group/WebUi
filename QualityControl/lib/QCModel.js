@@ -21,6 +21,7 @@ import { CcdbService } from './services/CcdbService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { UserService } from './services/UserService.js';
 import { JsonFileService } from './services/JsonFileService.js';
+import { Intervals } from './services/Intervals.service.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
@@ -38,7 +39,6 @@ export const statusController = new StatusController(config, projPackage);
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { Intervals } from './services/Intervals.service.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);

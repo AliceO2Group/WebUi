@@ -21,10 +21,10 @@ export class Intervals {
   /**
    * Expected services to be used to retrieve information
    * @constructor
-   * @param {QcObjectService} dataService - data service for retrieving qc objects information
+   * @param {QcObjectService} qcObjectService - data service for retrieving qc objects information
    */
-  constructor(dataService) {
-    this._dataService = dataService;
+  constructor(qcObjectService) {
+    this._qcObjectService = qcObjectService;
     this._intervals = [];
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/intervals`);
   }
@@ -34,7 +34,7 @@ export class Intervals {
    * @returns {void}
    */
   initializeIntervals() {
-    this._dataService && this._initializeQcObjectInterval(this._dataService.cacheRefresh);
+    this._initializeQcObjectInterval(this._qcObjectService.getCacheRefresh());
   }
 
   /**
@@ -43,9 +43,8 @@ export class Intervals {
    * @returns {void}
    */
   _initializeQcObjectInterval(cacheRefresh = 60 * 1000) {
-    this._logger.debug('Interval for Object - Cache - initialized');
-    this._dataService.refreshCache();
-
-    this._intervals.push(setInterval(() => this._dataService.refreshCache(), cacheRefresh));
+    this._logger.debug('Cache - objects - has been initialized');
+    this._qcObjectService.refreshCache();
+    this._intervals.push(setInterval(() => this._qcObjectService.refreshCache(), cacheRefresh));
   }
 }

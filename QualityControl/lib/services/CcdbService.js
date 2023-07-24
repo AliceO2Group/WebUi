@@ -247,8 +247,8 @@ export class CcdbService {
   }
 
   /**
-   * Return the number of ms for the interval of updating the cache
-   * @returns {number} - prefix to be used for caching
+   * Return the number of ms for the interval for refreshing the cache
+   * @returns {number} - number of ms
    */
   get cacheRefresh() {
     return this._cacheRefresh;

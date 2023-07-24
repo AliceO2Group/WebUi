@@ -69,7 +69,6 @@ export class QcObjectService {
       const objects = await this._dbService.getObjectsLatestVersionList(this._dbService.cachePrefix);
       this._cache.objects = this._parseObjects(objects);
       this._cache.lastUpdate = Date.now();
-      this._logger.debug('Cache - objects - has been updated');
     } catch (error) {
       this._logger.errorMessage(
         `Unable to update cache - objects; Last update ${new Date(this._cache.lastUpdate)}`,
@@ -87,14 +86,14 @@ export class QcObjectService {
    * * make a new request and get data directly from data service
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {string} prefix - Prefix for which CCDB should search for objects
-   * @param {Array<string>} [fields=[]] - List of fields that should be requested for each object
-   * @param {boolean} [useCache] - if the list should be the cached version or not
+   * @param {Array<string>} [fields = []] - List of fields that should be requested for each object
+   * @param {boolean} [useCache = true] - if the list should be the cached version or not
    * @returns {Promise.<Array<object>>} - results of objects with required fields
    * @rejects {Error}
    */
   async getLatestVersionOfObjects(prefix = 'qc/', fields = [], useCache = true) {
     if (useCache && this._cache?.objects) {
-      return this._cache.objects.filter((object) => object.name.startsWith(prefix)); // TODO test Filter by prefix
+      return this._cache.objects.filter((object) => object.name.startsWith(prefix));
     } else {
       const objects = await this._dbService.getObjectsLatestVersionList(prefix, fields);
       return this._parseObjects(objects);
@@ -191,5 +190,13 @@ export class QcObjectService {
       }
     }
     return list;
+  }
+
+  /**
+   * Check the database service and return the interval specified for refreshing the cache
+   * @returns {number} - ms for interval to refresh cache
+   */
+  getCacheRefresh() {
+    return this._dbService.cacheRefresh;
   }
 }
