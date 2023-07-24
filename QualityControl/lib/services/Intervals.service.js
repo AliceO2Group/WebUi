@@ -15,36 +15,36 @@
 import { Log } from '@aliceo2/web-ui';
 
 /**
- * Class which deals with setting up intervals for retrieving information constantly
+ * Class which deals with setting up intervals for repeated actions
  */
 export class IntervalsService {
   /**
-   * Expected services to be used to retrieve information
+   * Constructor for initializing an object which is to register intervals
    * @constructor
-   * @param {QcObjectService} qcObjectService - data service for retrieving qc objects information
    */
-  constructor(qcObjectService) {
-    this._qcObjectService = qcObjectService;
-    this._intervals = [];
+  constructor() {
+    this._intervals = {};
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/intervals`);
   }
 
   /**
-   * Method to initialize all intervals used by AlIECS GUI to acquire data
+   * Method to allow other services to register events that should trigger based on an interval rate
+   * @param {string} key - under which the callback should be registered so that it can be deregister at a later stage
+   * @param {function} callback - function that should be called based on interval rate
+   * @param {number} intervalRate = 60 * 1000 - (ms) on how often the cache should be refreshed
    * @returns {void}
    */
-  initializeIntervals() {
-    this._initializeQcObjectInterval(this._qcObjectService.getCacheRefreshRate());
+  register(key, callback, intervalRate = 60 * 1000) {
+    this._intervals[key] = setInterval(callback, intervalRate);
   }
 
   /**
-   * Setup initial request of data and interval for retrieving and updating cache of objects paths from CCDB
-   * @param {number} cacheRefreshRate - (ms) on how often the cache should be refreshed
+   * Method to allow services to deregister and clear an interval
+   * @param {string} key - key under which the interval was registered
    * @returns {void}
    */
-  _initializeQcObjectInterval(cacheRefreshRate = 60 * 1000) {
-    this._logger.debug('Cache - objects - has been initialized');
-    this._qcObjectService.refreshCache();
-    this._intervals.push(setInterval(() => this._qcObjectService.refreshCache(), cacheRefreshRate));
+  deregister(key) {
+    const intervalToDeregister = this._intervals[key];
+    clearInterval(intervalToDeregister);
   }
 }

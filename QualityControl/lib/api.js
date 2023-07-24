@@ -24,8 +24,6 @@ import {
  * @returns {void}
  */
 export const setup = (http) => {
-  intervalsService.initializeIntervals();
-
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
   http.get('/object', objectController.getObjectContent.bind(objectController));
   http.get('/objects', objectController.getObjects.bind(objectController), { public: true });

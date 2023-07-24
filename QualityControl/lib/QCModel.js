@@ -39,6 +39,7 @@ export const statusController = new StatusController(config, projPackage);
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { INTERVAL_KEYS } from './constants/intervalKeys.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
@@ -61,5 +62,13 @@ const ccdb = CcdbService.setup(config.ccdb);
 statusController.setDataConnector(ccdb);
 
 const qcObjectService = new QcObjectService(ccdb, jsonDb, { openFile, toJSON });
+qcObjectService.refreshCache();
+
 export const objectController = new ObjectController(qcObjectService, consulService);
 export const intervalsService = new IntervalsService(qcObjectService);
+
+intervalsService.register(
+  INTERVAL_KEYS.OBJECTS,
+  qcObjectService.refreshCache.bind(qcObjectService),
+  qcObjectService.getCacheRefreshRate(),
+);
