@@ -41,7 +41,7 @@ cp config-default.js config.js
 ```
 
 ## Local Configuration
-In order to customise the QCG you can edit the following configuration file: `WebUi/QualityControl/config.js`
+In order to customize QCG, you can edit the following configuration file: `WebUi/QualityControl/config.js`
 
 #### HTTP
 Attribute to define the `http` endpoint of the application.
@@ -49,16 +49,15 @@ Attribute to define the `http` endpoint of the application.
 Edit the `http` section to define a custom:
 - `hostname`
 - `port`
-- `prefix` - a prefix as string which will be used when querying objects from CCDB to request only objects containing the aforementioned string
 
 #### CCDB
 Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
 
 Edit the `ccdb` section to define a custom:
-- `protocol` - default 'http';
-- `hostname`
-- `port`
-- `prefix` - (optional) prefix to use for filtering on pathName
+- `protocol = 'http'` - protocol to use when querying CCDB via HTTP API.
+- `hostname = 'localhost'` - hostname of the CCDB instance
+- `port = '8080'` - port for accessing CCDB API
+- `[prefix = '']` - prefix to use for filtering on pathName
 
 ## Run QCG locally 
 
