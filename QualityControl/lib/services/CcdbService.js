@@ -31,7 +31,7 @@ export class CcdbService {
     this.port = config.port ?? 8080;
     this.protocol = config.protocol ?? 'http';
     this._cachePrefix = config.cachePrefix ?? 'qc';
-    this._cacheRefresh = config.cacheRefresh ?? 120 * 1000;
+    this._cacheRefreshRate = config.cacheRefreshRate ?? 120 * 1000;
     this.PREFIX = this._getPrefix(config);
 
     this.LAST_MODIFIED = 'Last-Modified';
@@ -250,8 +250,8 @@ export class CcdbService {
    * Return the number of ms for the interval for refreshing the cache
    * @returns {number} - number of ms
    */
-  get cacheRefresh() {
-    return this._cacheRefresh;
+  get cacheRefreshRate() {
+    return this._cacheRefreshRate;
   }
 
   /*

@@ -34,17 +34,17 @@ export class IntervalsService {
    * @returns {void}
    */
   initializeIntervals() {
-    this._initializeQcObjectInterval(this._qcObjectService.getCacheRefresh());
+    this._initializeQcObjectInterval(this._qcObjectService.getCacheRefreshRate());
   }
 
   /**
    * Setup initial request of data and interval for retrieving and updating cache of objects paths from CCDB
-   * @param {number} cacheRefresh - (ms) on how often the cache should be refreshed
+   * @param {number} cacheRefreshRate - (ms) on how often the cache should be refreshed
    * @returns {void}
    */
-  _initializeQcObjectInterval(cacheRefresh = 60 * 1000) {
+  _initializeQcObjectInterval(cacheRefreshRate = 60 * 1000) {
     this._logger.debug('Cache - objects - has been initialized');
     this._qcObjectService.refreshCache();
-    this._intervals.push(setInterval(() => this._qcObjectService.refreshCache(), cacheRefresh));
+    this._intervals.push(setInterval(() => this._qcObjectService.refreshCache(), cacheRefreshRate));
   }
 }

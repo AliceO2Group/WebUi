@@ -59,7 +59,7 @@ Edit the `ccdb` section to define a custom:
 - `port = '8080'` - port for accessing CCDB API
 - `[prefix = '']` - prefix to use for filtering on pathName
 - `[cachePrefix = 'qc']` - prefix to use for building the cache of object paths from CCDB
-- `[cacheRefresh = 120 * 1000]` - interval on which the paths of objects from CCDB should be refreshed
+- `[cacheRefreshRate = 120 * 1000]` - interval on which the paths of objects from CCDB should be refreshed
 
 ## Run QCG locally 
 

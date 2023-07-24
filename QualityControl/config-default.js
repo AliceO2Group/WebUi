@@ -33,7 +33,7 @@ export const config = {
     port: 8080,
     prefix: 'qc',
     cachePrefix: 'qc',
-    cacheRefresh: 120 * 1000,
+    cacheRefreshRate: 120 * 1000,
   },
 
   /*

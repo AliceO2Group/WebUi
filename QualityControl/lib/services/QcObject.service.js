@@ -196,7 +196,7 @@ export class QcObjectService {
    * Check the database service and return the interval specified for refreshing the cache
    * @returns {number} - ms for interval to refresh cache
    */
-  getCacheRefresh() {
-    return this._dbService.cacheRefresh;
+  getCacheRefreshRate() {
+    return this._dbService.cacheRefreshRate;
   }
 }
