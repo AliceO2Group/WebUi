@@ -283,7 +283,6 @@ export default class Layout extends Observable {
     } else {
       this.model.notification.show(result.payload, 'danger');
     }
-    this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}`, false, false);
     this.notify();
   }
 
@@ -328,6 +327,7 @@ export default class Layout extends Observable {
       throw new Error(`index ${index} does not exist`);
     }
     this.tab = this.item.tabs[index];
+    this._tabIndex = index;
     this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filter);
     const { columns } = this.item.tabs[index];
     if (columns > 0) {
@@ -453,7 +453,7 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.item = this.editOriginalClone;
-    this.selectTab(0);
+    this.selectTab(this._tabIndex);
     this.notify();
   }
 
@@ -693,7 +693,7 @@ export default class Layout extends Observable {
       }, time * 1000);
     } else {
       clearInterval(this.tabInterval);
-      this.selectTab(0);
+      this.selectTab(this._tabIndex);
     }
   }
 }
