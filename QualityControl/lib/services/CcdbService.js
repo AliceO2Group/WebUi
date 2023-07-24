@@ -17,28 +17,18 @@ import QCObjectDto from './../dtos/QCObjectDto.js';
 import { httpHeadJson, httpGetJson, errorLogger } from './../utils/utils.js';
 
 /**
- * Gateway for all CCDB calls
+ * Gateway for calls to CCDB - Calibration and Conditions Database
  * @class
  */
 export class CcdbService {
   /**
    * Setup CCDB Service
    * @constructor
-   * @param {Object} config - {hostname, port}
+   * @param {object} config - {hostname, port}
    */
-  constructor(config) {
-    if (!config) {
-      throw new Error('Empty CCDB config');
-    }
-    if (!config.hostname) {
-      throw new Error('Empty hostname in CCDB config');
-    }
-    if (!config.port) {
-      throw new Error('Empty port in CCDB config');
-    }
-
-    this.hostname = config.hostname;
-    this.port = config.port;
+  constructor(config = {}) {
+    this.hostname = config.hostname ?? 'localhost';
+    this.port = config.port ?? 8080;
     this.protocol = config.protocol ?? 'http';
     this.PREFIX = this._getPrefix(config);
 
@@ -47,8 +37,6 @@ export class CcdbService {
     this.CREATED = 'Created';
     this.PATH = 'path';
 
-    this.DRAWING_OPTIONS = 'drawOptions';
-    this.DISPLAY_HINTS = 'displayHints';
     this.CONTENT_LOCATION = 'content-location';
     this.LOCATION = 'location';
 
@@ -57,6 +45,24 @@ export class CcdbService {
       'X-Filter-Fields': `${this.PATH},${this.CREATED},${this.LAST_MODIFIED}`,
     };
     this.log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb`);
+  }
+
+  /**
+   * Given an object configuration, attempt to create and configure the service
+   * @param {object} config = {} - configuration object with needed parameter fields
+   * @returns {CcdbService} - an instance of the newly created service
+   */
+  static setup(config = {}) {
+    const logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
+
+    const { hostname, port } = config;
+    if (!hostname || !port) {
+      logger.warnMessage(
+        'Missing or incomplete configuration for CCDB. Will proceed with using default values',
+        { level: 1, system: 'GUI', facility: 'qcg/ccdb-setup' },
+      );
+    }
+    return new CcdbService(config);
   }
 
   /**
@@ -241,7 +247,8 @@ export class CcdbService {
    */
   _getPrefix(config) {
     let { prefix = '' } = config ?? {};
-    if (config?.prefix?.trim()) {
+
+    if (prefix.trim()) {
       prefix = prefix.substring(0, 1) === '/' ? prefix.substring(1, prefix.length) : prefix;
       prefix = prefix.substring(prefix.length - 1, prefix.length) === '/'
         ? prefix.substring(0, prefix.length - 1) : prefix;

@@ -12,14 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { isObjectOfTypeChecker } from './../../common/library/qcObject/utils.js';
-import QCObjectDto from './../dtos/QCObjectDto.js';
+import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
+import QCObjectDto from '../dtos/QCObjectDto.js';
 
 /**
  * Service class for retrieving and composing object information
  * @class
  */
-export class ObjectService {
+export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
    * @constructor
