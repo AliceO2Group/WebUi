@@ -103,10 +103,8 @@ export class StatusController {
       result.qcg = Object.assign(result.qcg, qc);
       result.qcg.status = { ok: true };
     }
-    if (this.config.ccdb) {
-      result.ccdb = this.config.ccdb;
-      result.ccdb.status = await this.getDataConnectorStatus();
-    }
+    result.ccdb = this.config.ccdb ?? {};
+    result.ccdb.status = await this.getDataConnectorStatus();
     if (this.config.consul) {
       result.consul = this.config.consul;
       result.consul.status = await this.getLiveModeConnectorStatus();
