@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
-
 /**
  * Class which deals with setting up intervals for repeated actions
  */
@@ -24,7 +22,6 @@ export class IntervalsService {
    */
   constructor() {
     this._intervals = {};
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/intervals`);
   }
 
   /**
