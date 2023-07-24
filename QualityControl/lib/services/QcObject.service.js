@@ -12,8 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
+import { Log } from '@aliceo2/web-ui';
 import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
+
+const LOG_FACILITY = 'qcg/obj-service';
 
 /**
  * Service class for retrieving and composing object information
@@ -48,22 +51,54 @@ export class QcObjectService {
      * @type {string}
      */
     this._DB_URL = `${this._dbService.protocol}://${this._dbService.hostname}:${this._dbService.port}/`;
+
+    this._cache = {
+      objects: undefined,
+      lastUpdate: undefined,
+    };
+    this._logger = new Log(LOG_FACILITY);
+  }
+
+  /**
+   * Method to update list of objects paths currently stored in cache by a configured cache prefix
+   * Prefix will not be accepted as passed parameter so that the configured file one is used
+   * @returns {void}
+   */
+  async refreshCache() {
+    try {
+      const objects = await this._dbService.getObjectsLatestVersionList(this._dbService.cachePrefix);
+      this._cache.objects = this._parseObjects(objects);
+      this._cache.lastUpdate = Date.now();
+      this._logger.debug('Cache - objects - has been updated');
+    } catch (error) {
+      this._logger.errorMessage(
+        `Unable to update cache - objects; Last update ${new Date(this._cache.lastUpdate)}`,
+        { level: 1, facility: LOG_FACILITY },
+      );
+    }
   }
 
   /**
    * Returns a list of objects (their latest version) based on a given prefix (e.g. 'qc'; default to config file
    * specified prefix); Fields wished to be requested for each object can be passed through the fields parameter;
    * If fields list is missing, a default list will be used: [name, created, lastModified]
+   * The service can return objects either:
+   * * from cache if it is requested by the client and the system is configured to use a cache;
+   * * make a new request and get data directly from data service
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {string} prefix - Prefix for which CCDB should search for objects
    * @param {Array<string>} [fields=[]] - List of fields that should be requested for each object
+   * @param {boolean} [useCache] - if the list should be the cached version or not
    * @returns {Promise.<Array<object>>} - results of objects with required fields
-   * @throws {Error}
+   * @rejects {Error}
    */
-  async getLatestVersionOfObjects(prefix, fields = []) {
-    const objects = await this._dbService.getObjectsLatestVersionList(prefix, fields);
-    return objects.filter(QCObjectDto.isObjectPathValid)
-      .map(QCObjectDto.toStandardObject);
+  async getLatestVersionOfObjects(prefix = 'qc/', fields = [], useCache = true) {
+    if (useCache && this._cache?.objects) {
+      return this._cache.objects.filter((object) => object.name.startsWith(prefix)); // TODO test Filter by prefix
+    } else {
+      const objects = await this._dbService.getObjectsLatestVersionList(prefix, fields);
+      return this._parseObjects(objects);
+    }
   }
 
   /**
@@ -140,5 +175,21 @@ export class QcObjectService {
 
     const rootJson = await this._rootService.toJSON(root);
     return rootJson;
+  }
+
+  /**
+   * Given a list of objects form CCDB, parse, filter and keep only valid objects.
+   * Use `for loop` to iterate only once rather than chained array operations as we expect lots of objects
+   * @param {Array<object>} objects - objects to be filtered
+   * @returns {Array<QCObjectDto>} - list of objects parsed and filtered
+   */
+  _parseObjects(objects) {
+    const list = [];
+    for (const object of objects) {
+      if (QCObjectDto.isObjectPathValid(object)) {
+        list.push(QCObjectDto.toStandardObject(object));
+      }
+    }
+    return list;
   }
 }

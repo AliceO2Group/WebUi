@@ -40,6 +40,8 @@ export class CcdbService {
     this.hostname = config.hostname;
     this.port = config.port;
     this.protocol = config.protocol ?? 'http';
+    this._cachePrefix = config.cachePrefix ?? 'qc';
+    this._cacheRefresh = config.cacheRefresh ?? 120 * 1000;
     this.PREFIX = this._getPrefix(config);
 
     this.LAST_MODIFIED = 'Last-Modified';
@@ -243,6 +245,22 @@ export class CcdbService {
       errorLogger(error);
       throw new Error(`Unable to retrieve object for: ${path}`);
     }
+  }
+
+  /**
+   * Return the string that should be used as a prefix for caching objects
+   * @returns {string} - prefix to be used for caching
+   */
+  get cachePrefix() {
+    return this._cachePrefix;
+  }
+
+  /**
+   * Return the number of ms for the interval of updating the cache
+   * @returns {number} - prefix to be used for caching
+   */
+  get cacheRefresh() {
+    return this._cacheRefresh;
   }
 
   /*

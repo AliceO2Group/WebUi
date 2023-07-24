@@ -38,6 +38,7 @@ export const statusController = new StatusController(config, projPackage);
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { Intervals } from './services/Intervals.service.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
@@ -59,5 +60,6 @@ if (config.consul) {
 const ccdb = CcdbService.setup(config.ccdb);
 statusController.setDataConnector(ccdb);
 
-const objService = new QcObjectService(ccdb, jsonDb, { openFile, toJSON });
-export const objectController = new ObjectController(objService, consulService);
+const qcObjectService = new QcObjectService(ccdb, jsonDb, { openFile, toJSON });
+export const objectController = new ObjectController(qcObjectService, consulService);
+export const intervalsService = new Intervals(qcObjectService);
