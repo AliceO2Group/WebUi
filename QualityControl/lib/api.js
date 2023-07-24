@@ -14,9 +14,7 @@
 
 import { WebSocket } from '@aliceo2/web-ui';
 
-import {
-  consulService, objectController, layoutService, statusController, userService, intervalsService,
-} from './QCModel.js';
+import { consulService, objectController, layoutService, statusController, userService } from './QCModel.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
