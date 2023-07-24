@@ -32,6 +32,8 @@ export const config = {
     hostname: 'localhost',
     port: 8080,
     prefix: 'qc',
+    cachePrefix: 'qc',
+    cacheRefreshRate: 120 * 1000,
   },
 
   /*
