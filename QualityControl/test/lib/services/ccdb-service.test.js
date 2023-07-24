@@ -24,20 +24,40 @@ import { testConfig as config } from '../../test-config.js';
 export const ccdbServiceTestSuite = async () => {
   before(() => nock.cleanAll());
   describe('Creating a new CcdbService instance', () => {
-    it('should throw an error if configuration object is missing hostname field', () => {
-      assert.throws(() => new CcdbService({}), new Error('Empty hostname in CCDB config'));
-    });
-
-    it('should throw an error if configuration object is missing port field', () => {
-      assert.throws(() => new CcdbService({ hostname: 'localhost' }), new Error('Empty port in CCDB config'));
-    });
-
-    it('should throw an error if configuration object is missing port field', () => {
-      assert.throws(() => new CcdbService({ hostname: 'localhost' }), new Error('Empty port in CCDB config'));
-    });
-
     it('should successfully initialize CcdbService', () => {
-      assert.doesNotThrow(() => new CcdbService({ hostname: 'localhost', port: 8080 }));
+      const ccdbService = new CcdbService({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
+
+      assert.strictEqual(ccdbService.hostname, 'ccdb-local');
+      assert.strictEqual(ccdbService.port, 8083);
+      assert.strictEqual(ccdbService.protocol, 'https');
+      assert.strictEqual(ccdbService.PREFIX, 'qc');
+    });
+
+    it('should successfully initialize CcdbService with default values', () => {
+      const ccdbService = new CcdbService();
+
+      assert.strictEqual(ccdbService.hostname, 'localhost');
+      assert.strictEqual(ccdbService.port, 8080);
+      assert.strictEqual(ccdbService.protocol, 'http');
+      assert.strictEqual(ccdbService.PREFIX, '');
+    });
+
+    it('should successfully setup CcdbService with default values', () => {
+      const ccdbService = CcdbService.setup();
+
+      assert.strictEqual(ccdbService.hostname, 'localhost');
+      assert.strictEqual(ccdbService.port, 8080);
+      assert.strictEqual(ccdbService.protocol, 'http');
+      assert.strictEqual(ccdbService.PREFIX, '');
+    });
+
+    it('should successfully setup CcdbService', () => {
+      const ccdbService = CcdbService.setup({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
+
+      assert.strictEqual(ccdbService.hostname, 'ccdb-local');
+      assert.strictEqual(ccdbService.port, 8083);
+      assert.strictEqual(ccdbService.protocol, 'https');
+      assert.strictEqual(ccdbService.PREFIX, 'qc');
     });
   });
 
