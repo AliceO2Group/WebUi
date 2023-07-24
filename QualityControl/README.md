@@ -55,10 +55,12 @@ Edit the `http` section to define a custom:
 Attribute to define the `Computer Centre DataBase (CCDB)` endpoint.
 
 Edit the `ccdb` section to define a custom:
-- `protocol` - default 'http';
+- `protocol = 'http'`
 - `hostname`
 - `port`
-- `prefix` - (optional) prefix to use for filtering on pathName
+- `[prefix = 'qc']` - prefix to use for filtering on pathName
+- `[cachePrefix = 'qc']` - prefix to use for building the cache of object paths from CCDB
+- `[cacheRefresh = 120 * 1000]` - interval on which the paths of objects from CCDB should be refreshed
 
 ## Run QCG locally 
 
