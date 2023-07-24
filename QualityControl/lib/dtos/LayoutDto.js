@@ -44,7 +44,7 @@ export const LayoutDto = Joi.object({
   tabs: Joi.array().min(1).max(45).items(TabsDto).required(),
   owner_id: Joi.number().min(0).required(),
   owner_name: Joi.string().required(),
-  description: Joi.string().min(0).max(100).optional(),
+  description: Joi.string().max(100).optional(),
   collaborators: Joi.array().items(UserDto).default([]),
   displayTimestamp: Joi.boolean().default(false),
   autoTabChange: Joi.number().min(0).max(600).default(0),
