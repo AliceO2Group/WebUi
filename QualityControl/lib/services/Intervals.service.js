@@ -17,7 +17,7 @@ import { Log } from '@aliceo2/web-ui';
 /**
  * Class which deals with setting up intervals for retrieving information constantly
  */
-export class Intervals {
+export class IntervalsService {
   /**
    * Expected services to be used to retrieve information
    * @constructor

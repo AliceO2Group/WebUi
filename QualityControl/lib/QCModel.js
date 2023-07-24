@@ -21,7 +21,7 @@ import { CcdbService } from './services/CcdbService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { UserService } from './services/UserService.js';
 import { JsonFileService } from './services/JsonFileService.js';
-import { Intervals } from './services/Intervals.service.js';
+import { IntervalsService } from './services/Intervals.service.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
@@ -62,4 +62,4 @@ statusController.setDataConnector(ccdb);
 
 const qcObjectService = new QcObjectService(ccdb, jsonDb, { openFile, toJSON });
 export const objectController = new ObjectController(qcObjectService, consulService);
-export const intervalsService = new Intervals(qcObjectService);
+export const intervalsService = new IntervalsService(qcObjectService);
