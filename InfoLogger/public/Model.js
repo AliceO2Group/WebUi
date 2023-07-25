@@ -101,7 +101,7 @@ export default class Model extends Observable {
     this.frameworkInfo = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.loader.get(`/api/status/framework`);
+    const {result, ok} = await this.loader.get(`/api/getFrameworkInfo`);
     if (!ok) {
       this.frameworkInfo = RemoteData.failure(result.message);
     } else {
