@@ -37,7 +37,7 @@ export default class FrameworkInfo extends Observable {
     this.item = RemoteData.loading();
     this.notify();
 
-    const { result, ok } = await this.model.loader.get('/api/getFrameworkInfo');
+    const { result, ok } = await this.model.loader.get('/api/status/framework');
     if (!ok) {
       this.item = RemoteData.failure(result.message);
       this.model.notification.show('Unable to retrieve framework information', 'danger', 2000);
