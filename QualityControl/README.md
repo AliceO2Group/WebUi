@@ -8,6 +8,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 - [Local Configuration](#local-configuration)
     - [HTTP](#http)
     - [CCDB](#ccdb)
+    - [QC](#qc)
 - [Run QCG locally](#run-qcg-locally)
 - [Enable HTTPS](#enable-https)
 - [Features](#features)
@@ -60,6 +61,10 @@ Edit the `ccdb` section to define a custom:
 - `[prefix = '']` - prefix to use for filtering on pathName
 - `[cachePrefix = 'qc']` - prefix to use for building the cache of object paths from CCDB
 - `[cacheRefreshRate = 120 * 1000]` - interval on which the paths of objects from CCDB should be refreshed
+
+#### QC
+Attribute to define if QCG is to be started as part of a QC integrated environment.
+- `enabled = false`
 
 ## Run QCG locally 
 

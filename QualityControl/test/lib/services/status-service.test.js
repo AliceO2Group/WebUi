@@ -76,10 +76,20 @@ export const statusServiceTestSuite = async () => {
       const response = await statusService.retrieveFrameworkInfo();
       const result = {
         qcg: { version: '-', status: { ok: true } },
+        qc: { status: { ok: true }, version: 'Not part of an FLP deployment' },
         ccdb: { status: { ok: true }, version: '0.0.1-beta' },
         consul: { status: { ok: false, message: 'Live mode was not configured' } },
       };
       assert.deepStrictEqual(response, result);
+    });
+
+    describe('`retrieveQcVersion()` tests', () => {
+      it('should return message that is not part of an FLP deployment', async () => {
+        const statusService = new StatusService();
+        const response = statusService.retrieveQcVersion();
+        const result = { status: { ok: true }, version: 'Not part of an FLP deployment' };
+        assert.deepStrictEqual(response, result);
+      });
     });
   });
 

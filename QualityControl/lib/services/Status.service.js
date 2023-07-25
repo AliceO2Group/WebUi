@@ -13,6 +13,9 @@
  */
 
 import { Log } from '@aliceo2/web-ui';
+import { execSync } from 'node:child_process';
+
+const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 
 /**
  * Service for retrieving information and status of QCG dependencies
@@ -21,8 +24,9 @@ export class StatusService {
   /**
    * Setup StatusService constructor and initialize needed dependencies
    * @param {object} packageInfo - object containing partial information from package.json file
+   * @param {object} config - partial configuration of QCG setup
    */
-  constructor(packageInfo) {
+  constructor(packageInfo, config = {}) {
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/status-service`);
 
     /**
@@ -36,6 +40,7 @@ export class StatusService {
     this._onlineService = undefined;
 
     this._packageInfo = packageInfo;
+    this._config = config;
   }
 
   /**
@@ -56,6 +61,7 @@ export class StatusService {
   async retrieveFrameworkInfo() {
     return {
       qcg: this.retrieveOwnStatus(),
+      qc: this.retrieveQcVersion(),
       ccdb: await this.retrieveDataServiceStatus(),
       consul: {
         status: await this.retrieveOnlineServiceStatus(),
@@ -90,6 +96,22 @@ export class StatusService {
     } catch (err) {
       return { ok: false, message: err.message || err };
     }
+  }
+
+  /**
+   * Method to execute QC version retrieval command
+   * @returns {string} - version of QC deployed on the system
+   */
+  retrieveQcVersion() {
+    let version = 'Not part of an FLP deployment';
+    if (this._config.qc?.enabled) {
+      try {
+        version = execSync(QC_VERSION_EXEC_COMMAND, { timeout: 3000 }).toString().trim();
+      } catch (error) {
+        this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'status-service' });
+      }
+    }
+    return { status: { ok: true }, version };
   }
 
   /*

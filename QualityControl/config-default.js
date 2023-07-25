@@ -35,6 +35,9 @@ export const config = {
     cachePrefix: 'qc',
     cacheRefreshRate: 120 * 1000,
   },
+  qc: {
+    enabled: false,
+  },
 
   /*
    * Consul configuration object
