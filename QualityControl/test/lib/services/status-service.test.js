@@ -28,17 +28,17 @@ export const statusServiceTestSuite = async () => {
     });
     it('should return status in error is data connector throws error', async () => {
       statusService.dataService = {
-        isConnectionUp: stub().throws(new Error('Service is currently unavailable')),
+        retrieveVersion: stub().throws(new Error('Service is currently unavailable')),
       };
       const result = await statusService.retrieveDataServiceStatus();
-      assert.deepStrictEqual(result, { ok: false, message: 'Service is currently unavailable' });
+      assert.deepStrictEqual(result, { status: { ok: false, message: 'Service is currently unavailable' } });
     });
     it('should successfully return status ok if data connector passed checks', async () => {
       statusService.dataService = {
-        isConnectionUp: stub().resolves(),
+        retrieveVersion: stub().resolves({ version: '0.0.1' }),
       };
       const response = await statusService.retrieveDataServiceStatus();
-      assert.deepStrictEqual(response, { ok: true });
+      assert.deepStrictEqual(response, { status: { ok: true }, version: '0.0.1' });
     });
   });
 
@@ -70,15 +70,13 @@ export const statusServiceTestSuite = async () => {
   describe('`retrieveFrameworkInfo()` tests', () => {
     it('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
-      statusService.dataService = { isConnectionUp: stub().resolves() };
+      statusService.dataService = { retrieveVersion: stub().resolves({ version: '0.0.1-beta' }) };
       statusService.onlineService = { getConsulLeaderStatus: stub().rejects(new Error('Live mode was not configured')) };
 
       const response = await statusService.retrieveFrameworkInfo();
       const result = {
         qcg: { version: '-', status: { ok: true } },
-        ccdb: {
-          status: { ok: true },
-        },
+        ccdb: { status: { ok: true }, version: '0.0.1-beta' },
         consul: { status: { ok: false, message: 'Live mode was not configured' } },
       };
       assert.deepStrictEqual(response, result);

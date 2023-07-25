@@ -16,6 +16,9 @@ import { Log } from '@aliceo2/web-ui';
 import QCObjectDto from './../dtos/QCObjectDto.js';
 import { httpHeadJson, httpGetJson, errorLogger } from './../utils/utils.js';
 
+export const CCDB_MONITOR = 'ALIEN_ch.alice.o2.ccdb.webserver.EmbeddedTomcat_Nodes';
+export const CCDB_VERSION_KEY = 'ccdb_version';
+
 /**
  * Gateway for calls to CCDB - Calibration and Conditions Database
  * @class
@@ -68,21 +71,35 @@ export class CcdbService {
   }
 
   /**
-   * Check connection to CCDB service is up and running by requesting a list of sub-folders with a limit of 1;
-   * Such a request is fast as it contains almost no data ;
-   * @returns {Promise.<Boolean, Error>} - promise with results of the query to ccdb
+   * Check connection to CCDB service is up and running by requesting its version from healthcheck point.
+   * Format of the response is a bit complex as follows:
+   * {
+   *   ${CCDB_MONITOR}: {
+   *     <hostname>: [
+   *       { param: 'ccdb_version', updated: 1690295929225, value: '1.0.27' }
+   *     ]
+   *    }
+   * }
+   * @returns {Promise.<object, Error>} - promise with results of the query to ccdb
    */
-  async isConnectionUp() {
-    const connectionHeaders = { Accept: 'application/json', 'X-Filter-Fields': `${this.PATH}`, 'Browse-Limit': 1 };
-    const url = `/browse/${this.PREFIX}`;
+  async retrieveVersion() {
+    const connectionHeaders = { Accept: 'application/json' };
+    let serviceInfo = {};
+    let version = '-';
     try {
-      await httpGetJson(this.hostname, this.port, url, connectionHeaders);
+      const url = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
+      serviceInfo = await httpGetJson(this.hostname, this.port, url, connectionHeaders);
       this.log.infoMessage('CCDB connection is up and running', { level: 99 });
-      return true;
     } catch (error) {
       errorLogger(error, 'ccdb');
       throw new Error(`Unable to connect to CCDB due to: ${error}`);
     }
+    try {
+      version = Object.values(serviceInfo[CCDB_MONITOR])[0][0]?.value ?? '-';
+    } catch (error) {
+      errorLogger(`Unable to read version of CCDB due to ${error}`);
+    }
+    return { version };
   }
 
   /**

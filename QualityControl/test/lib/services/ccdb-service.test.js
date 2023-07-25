@@ -18,7 +18,7 @@
 import assert from 'assert';
 import nock from 'nock';
 
-import { CcdbService } from '../../../lib/services/CcdbService.js';
+import { CcdbService, CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/CcdbService.js';
 import { testConfig as config } from '../../test-config.js';
 
 export const ccdbServiceTestSuite = async () => {
@@ -61,25 +61,34 @@ export const ccdbServiceTestSuite = async () => {
     });
   });
 
-  describe('`isConnectionUp()` tests', () => {
+  describe('`retrieveVersion()` tests', () => {
     let ccdb;
+    let CCDB_URL_HEALTH_POINT = '';
+    let CCDB_HOSTNAME = '';
     before(() => {
       ccdb = new CcdbService(config.ccdb);
+      CCDB_URL_HEALTH_POINT = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
+      CCDB_HOSTNAME = config.ccdb.ccdb;
     });
 
     it('should successfully test connection to CCDB', async () => {
-      nock('http://ccdb:8500')
-        .get('/browse/test')
-        .reply(200, { objects: [], subfolders: [] });
+      const response = {};
+      response[CCDB_MONITOR] = {};
+      response[CCDB_MONITOR][CCDB_HOSTNAME] = [{ param: 'ccdb_version', updated: 1690295929225, value: '1.0.27' }];
 
-      await assert.doesNotReject(ccdb.isConnectionUp());
+      nock('http://ccdb:8500')
+        .get(CCDB_URL_HEALTH_POINT)
+        .reply(200, response);
+
+      const info = await ccdb.retrieveVersion();
+      assert.deepStrictEqual(info, { version: '1.0.27' });
     });
 
     it('should return rejected promise when attempting to test connection on CCDB', async () => {
       nock('http://ccdb:8500')
-        .get('/browse/test')
+        .get(CCDB_URL_HEALTH_POINT)
         .replyWithError('getaddrinfo ENOTFOUND ccdb ccdb:8500');
-      await assert.rejects(async () => await ccdb.isConnectionUp(), new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb:8500'));
+      await assert.rejects(async () => await ccdb.retrieveVersion(), new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb:8500'));
     });
   });
 

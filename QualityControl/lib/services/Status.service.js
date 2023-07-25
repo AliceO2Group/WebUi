@@ -56,9 +56,7 @@ export class StatusService {
   async retrieveFrameworkInfo() {
     return {
       qcg: this.retrieveOwnStatus(),
-      ccdb: {
-        status: await this.retrieveDataServiceStatus(),
-      },
+      ccdb: await this.retrieveDataServiceStatus(),
       consul: {
         status: await this.retrieveOnlineServiceStatus(),
       },
@@ -71,10 +69,10 @@ export class StatusService {
    */
   async retrieveDataServiceStatus() {
     try {
-      await this._dataService.isConnectionUp();
-      return { ok: true };
+      const { version } = await this._dataService.retrieveVersion();
+      return { status: { ok: true }, version };
     } catch (err) {
-      return { ok: false, message: err.message || err };
+      return { status: { ok: false, message: err.message || err } };
     }
   }
 
