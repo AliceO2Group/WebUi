@@ -12,11 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { config } from './config/configProvider.js';
-// Import projPackage from './../package.json';
-import { openFile, toJSON } from 'jsroot';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { readFileSync } from 'fs';
 
-import { ConsulService } from '@aliceo2/web-ui';
+import { openFile, toJSON } from 'jsroot';
+import { Log, ConsulService } from '@aliceo2/web-ui';
+
 import { CcdbService } from './services/CcdbService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { UserService } from './services/UserService.js';
@@ -27,23 +29,24 @@ import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
 
-import { Log } from '@aliceo2/web-ui';
+import { config } from './config/configProvider.js';
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
 /*
  * --------------------------------------------------------
  * Initialization of model according to config file
  */
-const projPackage = {}; // TODO
-export const statusController = new StatusController(config, projPackage);
 
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
+
 const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
 export const userService = new UserService(jsonDb);
 export const layoutService = new LayoutController(jsonDb);
+
+export const statusController = new StatusController(config, { version: packageJSON?.version ?? '-' });
 
 export let consulService = undefined;
 if (config.consul) {
