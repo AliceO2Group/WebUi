@@ -12,7 +12,7 @@
  */
 
 /**
- * Specific error to throw when an user provided input is not valid
+ * Specific error to throw when a user provided input is not valid
  */
 class InvalidInputError extends Error {}
 
