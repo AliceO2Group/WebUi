@@ -100,7 +100,7 @@ export class StatusService {
       await this._onlineService.getConsulLeaderStatus();
       return { status: { ok: true } };
     } catch (err) {
-      return { status: { ok: false }, message: err.message || err };
+      return { status: { ok: false, message: err.message || err } };
     }
   }
 
