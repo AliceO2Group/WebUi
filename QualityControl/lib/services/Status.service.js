@@ -12,10 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
+import { promisify } from 'node:util';
+import { exec } from 'node:child_process';
+
 import { Log } from '@aliceo2/web-ui';
-import { execSync } from 'node:child_process';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
+const execPromise = promisify(exec);
 
 /**
  * Service for retrieving information and status of QCG dependencies
@@ -61,7 +64,7 @@ export class StatusService {
   async retrieveFrameworkInfo() {
     return {
       qcg: this.retrieveOwnStatus(),
-      qc: this.retrieveQcVersion(),
+      qc: await this.retrieveQcVersion(),
       ccdb: await this.retrieveDataServiceStatus(),
       consul: {
         status: await this.retrieveOnlineServiceStatus(),
@@ -102,11 +105,12 @@ export class StatusService {
    * Method to execute QC version retrieval command
    * @returns {string} - version of QC deployed on the system
    */
-  retrieveQcVersion() {
+  async retrieveQcVersion() {
     let version = 'Not part of an FLP deployment';
     if (this._config.qc?.enabled) {
       try {
-        version = execSync(QC_VERSION_EXEC_COMMAND, { timeout: 3000 }).toString().trim();
+        const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 3000 });
+        version = stdout.trim();
       } catch (error) {
         this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'status-service' });
       }

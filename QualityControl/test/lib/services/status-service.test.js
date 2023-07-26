@@ -86,7 +86,7 @@ export const statusServiceTestSuite = async () => {
     describe('`retrieveQcVersion()` tests', () => {
       it('should return message that is not part of an FLP deployment', async () => {
         const statusService = new StatusService();
-        const response = statusService.retrieveQcVersion();
+        const response = await statusService.retrieveQcVersion();
         const result = { status: { ok: true }, version: 'Not part of an FLP deployment' };
         assert.deepStrictEqual(response, result);
       });
