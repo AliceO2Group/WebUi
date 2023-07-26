@@ -47,23 +47,23 @@ export const statusServiceTestSuite = async () => {
     before(() => {
       statusService = new StatusService();
     });
-    it('should successfully return status with error if no online service was configured', async () => {
+    it('should successfully return status if no online service was configured with customized version', async () => {
       const response = await statusService.retrieveOnlineServiceStatus();
-      assert.deepStrictEqual(response, { ok: false, message: 'Live Mode was not configured' });
+      assert.deepStrictEqual(response, { status: { ok: true }, version: 'Live Mode was not configured' });
     });
     it('should return status in error if online service threw an error', async () => {
       statusService.onlineService = {
         getConsulLeaderStatus: stub().rejects(new Error('Unable to retrieve status of live mode')),
       };
       const response = await statusService.retrieveOnlineServiceStatus();
-      assert.deepStrictEqual(response, { ok: false, message: 'Unable to retrieve status of live mode' });
+      assert.deepStrictEqual(response, { status: { ok: false, message: 'Unable to retrieve status of live mode' } });
     });
     it('should successfully return status ok if online service passed checks', async () => {
       statusService.onlineService = {
         getConsulLeaderStatus: stub().resolves(),
       };
       const response = await statusService.retrieveOnlineServiceStatus();
-      assert.deepStrictEqual(response, { ok: true });
+      assert.deepStrictEqual(response, { status: { ok: true } });
     });
   });
 
@@ -71,14 +71,14 @@ export const statusServiceTestSuite = async () => {
     it('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
       statusService.dataService = { retrieveVersion: stub().resolves({ version: '0.0.1-beta' }) };
-      statusService.onlineService = { getConsulLeaderStatus: stub().rejects(new Error('Live mode was not configured')) };
+      statusService.onlineService = { getConsulLeaderStatus: stub().rejects(new Error('Online mode failed to retrieve')) };
 
       const response = await statusService.retrieveFrameworkInfo();
       const result = {
         qcg: { version: '-', status: { ok: true } },
         qc: { status: { ok: true }, version: 'Not part of an FLP deployment' },
-        ccdb: { status: { ok: true }, version: '0.0.1-beta' },
-        consul: { status: { ok: false, message: 'Live mode was not configured' } },
+        data_service_ccdb: { status: { ok: true }, version: '0.0.1-beta' },
+        online_service_consul: { status: { ok: false, message: 'Online mode failed to retrieve' } },
       };
       assert.deepStrictEqual(response, result);
     });
