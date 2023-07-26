@@ -39,7 +39,7 @@ export const setup = (http) => {
   http.post('/writeLayout', layoutService.updateLayout.bind(layoutService));
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
-  http.get('/getFrameworkInfo', statusController.frameworkInfo.bind(statusController), { public: true });
+  http.get('/status/framework', statusController.getFrameworkInfo.bind(statusController), { public: true });
 
   http.get('/checkUser', userService.addUser.bind(userService));
 
