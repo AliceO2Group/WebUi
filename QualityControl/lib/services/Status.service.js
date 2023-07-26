@@ -62,13 +62,16 @@ export class StatusService {
    * @returns {object} - object containing status and framework information
    */
   async retrieveFrameworkInfo() {
+    const [qc, data_service_ccdb, online_service_consul] = await Promise.all([
+      this.retrieveQcVersion(),
+      this.retrieveDataServiceStatus(),
+      this.retrieveOnlineServiceStatus(),
+    ]);
     return {
       qcg: this.retrieveOwnStatus(),
-      qc: await this.retrieveQcVersion(),
-      ccdb: await this.retrieveDataServiceStatus(),
-      consul: {
-        status: await this.retrieveOnlineServiceStatus(),
-      },
+      qc,
+      data_service_ccdb,
+      online_service_consul,
     };
   }
 
@@ -91,13 +94,13 @@ export class StatusService {
    */
   async retrieveOnlineServiceStatus() {
     if (!this._onlineService) {
-      return { ok: false, message: 'Live Mode was not configured' };
+      return { status: { ok: true }, version: 'Live Mode was not configured' };
     }
     try {
       await this._onlineService.getConsulLeaderStatus();
-      return { ok: true };
+      return { status: { ok: true } };
     } catch (err) {
-      return { ok: false, message: err.message || err };
+      return { status: { ok: false }, message: err.message || err };
     }
   }
 
