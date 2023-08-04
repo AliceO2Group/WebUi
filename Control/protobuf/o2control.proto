@@ -190,6 +190,7 @@ message EnvironmentInfo {
     int32 numberOfHosts = 13;
     map<string, string> integratedServicesData = 14;
     int32 numberOfTasks = 15;
+    string currentTransition = 16;
 }
 
 message NewEnvironmentRequest {
