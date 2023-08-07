@@ -69,6 +69,9 @@ const environmentHeader = (environment) => {
 
 /**
  * Build a panel with multiple mini cards which contain actions allowed to the user for the environment
+ * A user should be able to control the environment if:
+ * - it is an admin as defined by CERN applications
+ * - it is part of the Detector group and has all locks of detectors part of the environment
  * @param {EnvironmentInfo} environment - DTO representing an environment
  * @param {Model} model - root object of the application
  * @returns {vnode}
@@ -76,7 +79,7 @@ const environmentHeader = (environment) => {
 const environmentActionPanel = (environment, model) => {
   const {includedDetectors = []} = environment;
   const hasLocks = includedDetectors.every((detector) => model.lock.isLockedByMe(detector));
-  const isAllowedToControl = model.isAllowed(ROLES.Detector) && hasLocks;
+  const isAllowedToControl = model.isAllowed(ROLES.Admin) || (model.isAllowed(ROLES.Detector) && hasLocks);
   return miniCard('', controlEnvironmentPanel(model.environment, environment, isAllowedToControl));
 }
 
