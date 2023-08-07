@@ -44,10 +44,45 @@ describe('`pageEnvironment` test-suite', async () => {
     assert.ok(calls['getEnvironment']);
   });
 
-  it('should have one button for `Shutdown` environment', async () => {
+  it('should have one button for `Shutdown` environment with lock in possession', async () => {
+    const lockInPossession = await page.evaluate(() => window.model.lock.isLockedByMe('MID'));
+    assert.ok(lockInPossession, 'User is not in possession of lock');
+
     await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
     const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').title);
     assert.strictEqual(shutdownButton, 'Shutdown environment');
+  });
+
+  it('should have one button for `Shutdown` environment without lock in possession but with user as admin', async () => {
+    await page.evaluate(() => {
+      window.model.lock.unlock('MID');
+    });
+    const isLocked = await page.evaluate(() => {
+      window.model.lock.isLocked('MID');
+    });
+    assert.ok(!isLocked, 'Detector still appears as locked');
+
+    await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').title);
+    assert.strictEqual(shutdownButton, 'Shutdown environment');
+  });
+
+  it('should not have button displayed if user is not admin or does not have the lock', async () => {
+    await page.evaluate(() => {
+      window.model.session.role = 2;
+      window.model.notify();
+    });
+    await page.waitForTimeout(200);
+    const shutdownButton = await page.$('#buttonToSHUTDOWN');
+    assert.ok(shutdownButton === null, 'button still exists');
+
+    // adds permissions and lock back
+    await page.evaluate(() => {
+      window.model.session.role = 1;
+      window.model.lock.lock('MID');
+      window.model.notify();
+    });
+    await page.waitForTimeout(200);
   });
 
   describe('Check presence of buttons in CONFIGURED state', async () => {
