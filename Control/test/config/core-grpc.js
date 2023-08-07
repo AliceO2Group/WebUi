@@ -125,6 +125,7 @@ const envTest = {
     tasks: [],
     rootRole: 'copy-push',
     numberOfFlps: 2,
+    includedDetectors: ['MID'],
     userVars: {
       odc_enabled: 'true',
       mid_enabled: 'false',
