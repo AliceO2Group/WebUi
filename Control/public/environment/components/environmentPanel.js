@@ -180,9 +180,10 @@ const environmentRunningPanels = ({currentRunNumber, userVars}) => {
  * @returns {vnode}
  */
 const environmentGeneralInfoContent = (environment) => {
-  const {state, userVars = {}, createdWhen, rootRole } = environment;
+  const {currentTransition = '-', state, userVars = {}, createdWhen, rootRole } = environment;
   return h('.flex-column', [
     rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
+    rowForCard('Transitioning:', currentTransition),
     rowForCard('State:', state, {valueClasses: [ALIECS_STATE_COLOR[state]]}),
     rowForCard('Run Type:', userVars.run_type),
     rowForCard('RUN Started:', parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),

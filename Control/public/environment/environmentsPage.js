@@ -203,17 +203,13 @@ const environmentsTable = (model, list) => {
 const runColumn = (item) => {
   let classes = '';
   let text = '-';
-  const epnEnabled = Boolean(item.userVars.epn_enabled === 'true');
-  const {state: odcState} = parseOdcStatusPerEnv(item);
   if (item.currentRunNumber) {
     classes = 'bg-success white';
     text = item.currentRunNumber;
-  } else if (
-    ((epnEnabled && odcState === 'READY') || !epnEnabled) && item.state === 'CONFIGURED'
-  ) {
+  } else if (!item.currentTransition && item.state === 'CONFIGURED') {
     classes = 'bg-primary white';
     text = 'READY';
-  } else if ((epnEnabled && odcState !== '-' && odcState !== 'READY') && item.state === 'CONFIGURED') {
+  } else if ( item.currentTransition && item.state === 'CONFIGURED') {
     classes = 'bg-primary white';
     text = '...';
   }
