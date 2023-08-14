@@ -74,8 +74,15 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
  * @param {boolean} isInTransition - if environment is currently transitioning
  * @return {vnode}
  */
-const controlButton = (buttonType, environment, item, label, type, stateToHide, isInTransition) => 
-  h(`button.btn${buttonType}`,
+const controlButton = (buttonType, environment, item, label, type, stateToHide, isInTransition) =>  {
+  let title = label;
+  if (isInTransition) {
+    title = 'Environment is currently transitioning, please wait';
+  } else if (item.state !== stateToHide) {
+    title = `'${label}' cannot be used in state '${item.state}'`;
+  } 
+
+  return h(`button.btn${buttonType}`,
     {
       id: `buttonTo${label}`,
       class: environment.itemControl.isLoading() ? 'loading' : '',
@@ -85,10 +92,10 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide, 
         confirm(`Are you sure you want to ${label} this ${item.state} environment?`)
           && environment.controlEnvironment({id: item.id, type, runNumber: item.currentRunNumber});
       },
-      title: isInTransition ? 'Environment is currently transitioning, please wait' : '-'
+      title
     },
-    label
-  );
+    label);
+}
 
 /**
  * Create a button to shutdown env
