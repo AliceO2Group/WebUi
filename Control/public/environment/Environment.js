@@ -146,9 +146,11 @@ export default class Environment extends Observable {
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
-  async getEnvironment(body) {
-    this.item = RemoteData.loading();
-    this.notify();
+  async getEnvironment(body, itShouldLoad = true) {
+    if (itShouldLoad) {
+      this.item = RemoteData.loading();
+      this.notify();
+    }
     const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}`);
     if (!ok) {
       this.item = RemoteData.failure(result.message);
@@ -313,7 +315,7 @@ export default class Environment extends Observable {
       const {devices = [], ddsSessionId, ddsSessionStatus} = JSON.parse(odc);
       return {tasks: devices, hosts: new Set(), info: {ddsSessionId, ddsSessionStatus}};
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
     return {tasks: [], hosts: new Set(), info: {}};
   }
@@ -339,5 +341,33 @@ export default class Environment extends Observable {
     const epn = this._getDevicesGroupedByCategory(environment);
     environment.hardware = {qc, trg, flp, epn};
     return environment;
+  }
+
+  /**
+   * If the user has the environment page opened and there is an 
+   * @param {EnvironmentInfo} environments - partial env info from AliECS via WebSocket message
+   */
+  updateItemEnvironment(environments) {
+    if (this.item.isSuccess()) {
+      const {id, currentTransition} = this.item.payload;
+      let envExists = false;
+      environments.forEach((env) => {
+        if (env.id === id) {
+          envExists = true;
+          if (!env.currentTransition) {
+            env.currentTransition = undefined;
+          }
+          Object.assign(this.item.payload, env);
+          this.notify();
+          if (currentTransition && !env.currentTransition) {
+            this.getEnvironment({id}, false);
+          }
+          return;
+        }
+      });
+      if (!envExists) {
+        this.item = RemoteData.failure('Environment was destroyed');
+      }
+    }
   }
 }

@@ -28,31 +28,40 @@ import {ROLES} from './../../workflow/constants.js';
  * @param {boolean} isAllowedToControl - value stipulating if user has enough permissions to control environment
  * @returns {vnode}
  */
-export const controlEnvironmentPanel = (environment, item, isAllowedToControl = false) => h('', [
-  h('.flex-row', [
-    h('.w-30.flex-row.g2', {
-    }, [
-      infoLoggerButton(item, 'InfoLogger FLP', COG.ILG_URL),
-      infoLoggerButton(item, 'InfoLogger EPN', COG.ILG_EPN_URL),
-    ]),
-    isAllowedToControl && h('.w-70.g4', {style: 'display: flex; justify-content: flex-end;'},
-      [
-        controlButton('.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED'), ' ',
-        controlButton('.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', ''), ' ', // button will not be displayed in any state due to OCTRL-628
-        controlButton('', environment, item, 'RESET', 'RESET', ''), ' ',
-        controlButton('.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING'), ' ',
+export const controlEnvironmentPanel = (environment, item, isAllowedToControl = false) =>  {
+  const {currentTransition} = item;
+  return h('', [
+    h('.flex-row', [
+      h('.w-30.flex-row.g2', {
+      }, [
+        infoLoggerButton(item, 'InfoLogger FLP', COG.ILG_URL),
+        infoLoggerButton(item, 'InfoLogger EPN', COG.ILG_EPN_URL),
+      ]),
+      isAllowedToControl && h('.w-70.g4', {style: 'display: flex; justify-content: flex-end;'},
+        [
+          controlButton(
+            '.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED', Boolean(currentTransition)
+          ), ' ',
+          controlButton(
+            '.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
+          ), ' ', // button will not be displayed in any state due to OCTRL-628
+          controlButton('', environment, item, 'RESET', 'RESET', '', Boolean(currentTransition)), ' ',
+          controlButton(
+            '.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
+          ), ' ',
 
-        shutdownEnvButton(environment, item),
-        killEnvButton(environment, item)
-      ])
-  ]),
-  environment.itemControl.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Success: (_data) => null,
-    Failure: (error) => h('p.danger', error),
-  })
-]);
+          shutdownEnvButton(environment, item, Boolean(currentTransition)),
+          killEnvButton(environment, item, Boolean(currentTransition))
+        ])
+    ]),
+    environment.itemControl.match({
+      NotAsked: () => null,
+      Loading: () => null,
+      Success: (_data) => null,
+      Failure: (error) => h('p.danger', error),
+    })
+  ]);
+};
 
 /**
  * Makes a button to toggle severity
@@ -62,20 +71,21 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
  * @param {string} label - button's label
  * @param {string} type - action
  * @param {string} stateToHide - state in which button should not be displayed
+ * @param {boolean} isInTransition - if environment is currently transitioning
  * @return {vnode}
  */
-const controlButton = (buttonType, environment, item, label, type, stateToHide) =>
+const controlButton = (buttonType, environment, item, label, type, stateToHide, isInTransition) => 
   h(`button.btn${buttonType}`,
     {
       id: `buttonTo${label}`,
       class: environment.itemControl.isLoading() ? 'loading' : '',
-      disabled: environment.itemControl.isLoading(),
+      disabled: isInTransition || environment.itemControl.isLoading(),
       style: item.state !== stateToHide ? 'display: none;' : '',
       onclick: () => {
         confirm(`Are you sure you want to ${label} this ${item.state} environment?`)
           && environment.controlEnvironment({id: item.id, type, runNumber: item.currentRunNumber});
       },
-      title: item.state !== stateToHide ? `'${label}' cannot be used in state '${item.state}'` : label
+      title: isInTransition ? 'Environment is currently transitioning, please wait' : '-'
     },
     label
   );
@@ -84,17 +94,18 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide) 
  * Create a button to shutdown env
  * @param {Object} environment
  * @param {JSON} item
+ * @param {boolean} isInTransition - if environment is currently transitioning
  * @return {vnode}
  */
-const shutdownEnvButton = (environment, item) =>
+const shutdownEnvButton = (environment, item, isInTransition) =>
   h(`button.btn.btn-danger`, {
     id: 'buttonToSHUTDOWN',
     class: environment.itemControl.isLoading() ? 'loading' : '',
-    disabled: environment.itemControl.isLoading(),
+    disabled: isInTransition || environment.itemControl.isLoading(),
     style: {display: (item.state === 'CONFIGURED' || item.state == 'DEPLOYED') ? '' : 'none'},
     onclick: () => confirm(`Are you sure you want to SHUTDOWN this ${item.state} environment?`)
       && environment.destroyEnvironment({id: item.id, runNumber: item.currentRunNumber}),
-    title: 'Shutdown environment'
+    title: isInTransition ? 'Environment is currently transitioning, please wait' : 'Shutdown environment'
   }, 'SHUTDOWN');
 
 /**

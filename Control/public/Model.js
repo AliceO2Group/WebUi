@@ -151,6 +151,7 @@ export default class Model extends Observable {
         break;
       case 'environments':
         this.environment.list = RemoteData.success(message.payload);
+        this.environment.updateItemEnvironment(message.payload.environments)
         this.notify();
         break;
       case 'requests':
