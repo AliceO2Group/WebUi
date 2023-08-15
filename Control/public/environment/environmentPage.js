@@ -115,7 +115,7 @@ const tasksPerFlpTables = (environmentModel, environment) => {
 const tasksPerEpnTables = (environment) => {
   const {hardware = {}} = environment;
   if (hardware.epn) {
-    const epnTasks = hardware.epn.tasks;
+    const epnTasks = hardware.epn.tasks ?? [];
     
     const epnHosts = new Set();
     epnTasks.forEach((task) => epnHosts.add(task.host));
