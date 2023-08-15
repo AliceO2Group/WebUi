@@ -21,24 +21,22 @@ import {ALIECS_STATE_COLOR} from '../constants/stateColors.js';
  * @param {Array<TaskInfo>} tasks - list of tasks to be parsed
  * @returns {vnode}
  */
-export const taskCounterContent = (tasks) => {
-  const states = {};
-  const statuses = {};
-  tasks.map((task) => ({state: task.state, status: task.status}))
-    .forEach(({state, status}) => {
-      if (state) {
-        states[state] = (states[state] + 1) || 1;
-      }
-      if (status) {
-        statuses[status] = (statuses[status] + 1) || 1;
-      }
-    });
+export const taskCounterContent = (tasks = []) => {
+  const stateList = {};
+  const statusList = {};
+  for (const task of tasks) {
+    if (task) {
+      const {state = 'UNKNOWN-STATE', status = 'UNKNOWN-STATUS'} = task;
+      stateList[state] = (stateList[state] + 1) || 1;
+      statusList[status] = (statusList[status] + 1) || 1;
+    }  
+  }
   const totalTasks = tasks.length;
   return [
-    Object.keys(states).length > 0 && h('.w-100.justify-between', [
+    Object.keys(stateList).length > 0 && h('.w-100.justify-between', [
       h('h5', 'Tasks by state: '),
       h('.flex-column.ph2.w-100', [
-        Object.entries(states)
+        Object.entries(stateList)
           .map(([key, value]) => rowForCard(key, `${value}/${totalTasks}`, {
             keyClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
             valueClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
@@ -46,10 +44,10 @@ export const taskCounterContent = (tasks) => {
           )
       ]),
     ]),
-    Object.keys(statuses).length > 0 && h('.w-100.justify-between', [
+    Object.keys(statusList).length > 0 && h('.w-100.justify-between', [
       h('h5', 'Tasks by status: '),
       h('.flex-column.ph2.w-100', [
-        Object.entries(statuses)
+        Object.entries(statusList)
           .map(([key, value]) => rowForCard(key, `${value}/${totalTasks}`))
       ]),
     ]),

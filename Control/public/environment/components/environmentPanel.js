@@ -125,16 +125,16 @@ const environmentContent = (environment, model) => {
           miniCard(
             miniCardTitle('ALL', `# hosts: ${allHosts}`),
             taskCounterContent(environment.tasks.concat(epn.tasks))),
-          flp.tasks.length > 0 && miniCard(
+          flp.tasks?.length > 0 && miniCard(
             miniCardTitle('FLP', `# hosts: ${flp.hosts.size}`),
             taskCounterContent(flp.tasks)),
-          qc.tasks.length > 0 && miniCard(
+          qc.tasks?.length > 0 && miniCard(
             miniCardTitle('QC Nodes', `# hosts: ${qc.hosts.size}`),
             taskCounterContent(qc.tasks)),
-          trg.tasks.length > 0 && miniCard(
+          trg.tasks?.length > 0 && miniCard(
             miniCardTitle('CTP Readout', `# hosts: ${trg.hosts.size}`),
             taskCounterContent(trg.tasks)),
-          epn.tasks.length > 0 && miniCard(
+          epn.tasks?.length > 0 && miniCard(
             miniCardTitle('EPN'),
             taskCounterContent(epn.tasks)),
         ])
