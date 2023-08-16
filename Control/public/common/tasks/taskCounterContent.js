@@ -22,24 +22,12 @@ import {ALIECS_STATE_COLOR} from '../constants/stateColors.js';
  * @returns {vnode}
  */
 export const taskCounterContent = (tasks) => {
-  const states = {};
-  const statuses = {};
-  tasks.map((task) => ({state: task.state, status: task.status}))
-    .forEach(({state, status}) => {
-      if (state) {
-        states[state] = (states[state] + 1) || 1;
-      }
-      if (status) {
-        statuses[status] = (statuses[status] + 1) || 1;
-      }
-    });
-  const totalTasks = tasks.length;
+  const {total, states = {}, statuses = {}} = tasks;
   return [
     Object.keys(states).length > 0 && h('.w-100.justify-between', [
-      h('h5', 'Tasks by state: '),
-      h('.flex-column.ph2.w-100', [
+      h('.flex-column.w-100', [
         Object.entries(states)
-          .map(([key, value]) => rowForCard(key, `${value}/${totalTasks}`, {
+          .map(([key, value]) => rowForCard(key, `${value}/${total}`, {
             keyClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
             valueClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
           })
@@ -47,10 +35,9 @@ export const taskCounterContent = (tasks) => {
       ]),
     ]),
     Object.keys(statuses).length > 0 && h('.w-100.justify-between', [
-      h('h5', 'Tasks by status: '),
-      h('.flex-column.ph2.w-100', [
+      h('.flex-column.w-100', [
         Object.entries(statuses)
-          .map(([key, value]) => rowForCard(key, `${value}/${totalTasks}`))
+          .map(([key, value]) => rowForCard(key, `${value}/${total}`))
       ]),
     ]),
   ]
