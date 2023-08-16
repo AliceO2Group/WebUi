@@ -21,34 +21,23 @@ import {ALIECS_STATE_COLOR} from '../constants/stateColors.js';
  * @param {Array<TaskInfo>} tasks - list of tasks to be parsed
  * @returns {vnode}
  */
-export const taskCounterContent = (tasks = []) => {
-  const stateList = {};
-  const statusList = {};
-  for (const task of tasks) {
-    if (task) {
-      const {state = 'UNKNOWN-STATE', status = 'UNKNOWN-STATUS'} = task;
-      stateList[state] = (stateList[state] + 1) || 1;
-      statusList[status] = (statusList[status] + 1) || 1;
-    }  
-  }
-  const totalTasks = tasks.length;
+export const taskCounterContent = (tasks) => {
+  const {total, states = {}, statuses = {}} = tasks;
   return [
-    Object.keys(stateList).length > 0 && h('.w-100.justify-between', [
-      h('h5', 'Tasks by state: '),
-      h('.flex-column.ph2.w-100', [
-        Object.entries(stateList)
-          .map(([key, value]) => rowForCard(key, `${value}/${totalTasks}`, {
+    Object.keys(states).length > 0 && h('.w-100.justify-between', [
+      h('.flex-column.w-100', [
+        Object.entries(states)
+          .map(([key, value]) => rowForCard(key, `${value}/${total}`, {
             keyClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
             valueClasses: [ALIECS_STATE_COLOR[key.toLocaleUpperCase()]],
           })
           )
       ]),
     ]),
-    Object.keys(statusList).length > 0 && h('.w-100.justify-between', [
-      h('h5', 'Tasks by status: '),
-      h('.flex-column.ph2.w-100', [
-        Object.entries(statusList)
-          .map(([key, value]) => rowForCard(key, `${value}/${totalTasks}`))
+    Object.keys(statuses).length > 0 && h('.w-100.justify-between', [
+      h('.flex-column.w-100', [
+        Object.entries(statuses)
+          .map(([key, value]) => rowForCard(key, `${value}/${total}`))
       ]),
     ]),
   ]

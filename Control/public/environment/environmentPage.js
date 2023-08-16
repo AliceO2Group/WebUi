@@ -115,10 +115,9 @@ const tasksPerFlpTables = (environmentModel, environment) => {
 const tasksPerEpnTables = (environment) => {
   const {hardware = {}} = environment;
   if (hardware.epn) {
-    const epnTasks = hardware.epn.tasks ?? [];
+    const {tasks} = hardware.epn;
     
     const epnHosts = new Set();
-    epnTasks.forEach((task) => epnHosts.add(task.host));
     return [
       [...epnHosts].map((host) =>
         h('', [
@@ -132,7 +131,7 @@ const tasksPerEpnTables = (environment) => {
               ])
             ),
             h('tbody', [
-              epnTasks.map((task) => {
+              tasks.map((task) => {
                 if (task.host === host) {
                   return h('tr', [
                     h('td.w-30', task.taskId),

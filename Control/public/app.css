@@ -60,7 +60,7 @@
 .cardGroupColumn { display: flex; flex-direction: column; flex-wrap: wrap; gap: var(--space-s); }
 .cardGroupRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--space-s); }
 
-.miniCard { min-width: 22em; }
+.miniCard { min-width: 18em; }
 .miniCard > .runNumber { display:flex; font-size:2.3em; align-items: center; justify-content: center; background-color: var(--color-success); color: var(--color-white); height: 100%}
 
 .bg-danger-less { background-color: var(--color-soft-red); }
