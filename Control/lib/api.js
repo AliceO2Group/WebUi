@@ -70,14 +70,14 @@ module.exports.setup = (http, ws) => {
   const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
   const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
   ctrlService.setWS(ws);
-  const envService = new EnvironmentService(ctrlProxy);
+  const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
+  const apricotService = new ApricotService(apricotProxy);
+
+  const envService = new EnvironmentService(ctrlProxy, apricotService);
   const workflowService = new WorkflowTemplateService(ctrlProxy);
   
   const envController = new EnvironmentController(envService);
   const workflowController = new WorkflowTemplateController(workflowService);
-
-  const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
-  const apricotService = new ApricotService(apricotProxy);
 
   const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
   aliecsReqHandler.setWs(ws);
