@@ -38,18 +38,18 @@ class EnvironmentController {
    * @returns {void}
    */
   async getEnvironment(req, res) {
-    const {id} = req.params;
+    const {id, source} = req.params;
     if (!id) {
       res.status(400).json({message: 'Missing environment ID parameter'});
     }
     try {
-      const response = await this._envService.getEnvironment(id);
+      const response = await this._envService.getEnvironment(id, source);
       res.status(200).json(response);
     } catch (error) {
+      this._logger.debug(error);
       updateExpressResponseFromNativeError(res, error);
     }
   }
-
 }
 
 module.exports = {EnvironmentController};

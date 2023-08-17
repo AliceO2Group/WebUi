@@ -14,6 +14,18 @@
 const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
 
 /**
+ * Enum with potential sources of tasks for AliECS environment
+ * @readonly
+ * @enum {String}
+ */
+const TASKS_SOURCE = {
+  EPN: 'EPN',
+  FLP: 'FLP',
+  TRG: 'TRG',
+  QC: 'QC',
+}
+
+/**
  * EnvironmentInfoAdapter - Given an AliECS Environment, construct an EnvironmentInfo object for GUI purposes
  */
 class EnvironmentInfoAdapter {
@@ -24,14 +36,14 @@ class EnvironmentInfoAdapter {
   }
 
   /**
-   * Converts the given proto object (o2control.proto) to an entity object.
+   * Converts the given proto object (o2control.proto) to an entity overview object.
    *
    * @param {EnvironmentInfoProto} protoObject - object to convert
    * @param {Array<String>} detectorsAll - list of all detectors in the current AliECS deployment
    * @param {Map<String, Array<String>>} hostsByDetector - object with list of hosts grouped by detector
    * @returns {EnvironmentInfo} entity of environment with needed information
    */
-  static toEntity(environment, detectorsAll, hostsByDetector) {
+  static toOverviewEntity(environment, detectorsAll, hostsByDetector) {
     const {
       id,
       currentRunNumber,
@@ -47,7 +59,6 @@ class EnvironmentInfoAdapter {
       defaults = {},
       vars = {},
       userVars = {},
-      tasks = [],
       integratedServicesData = {},
     } = environment;
 
@@ -69,13 +80,62 @@ class EnvironmentInfoAdapter {
         ...EnvironmentInfoAdapter._getHardwareCountersPerComponent(environment, hostsByDetector),
         epn: EnvironmentInfoAdapter._getOdcCounters(integratedServicesData.odc ?? {}),
       },
+      tasks: [],
       includedDetectors,
       defaults: EnvironmentInfoAdapter._filterOutDetectorsVariables(defaults, includedDetectors, detectorsAll),
       vars: EnvironmentInfoAdapter._filterOutDetectorsVariables(vars, includedDetectors, detectorsAll),
       userVars: EnvironmentInfoAdapter._filterOutDetectorsVariables(userVars, includedDetectors, detectorsAll),
-      tasks
     };
+    return environmentInfo;
+  }
 
+  /**
+   * Method to build an environment info with tasks from specified source
+   * @param {EnvironmentInfoProto} environment - environment as from AliECS
+   * @param {String} taskSource - source of tasks
+   * @param {Array<String>} detectorsAll - list of all detectors in the current AliECS deployment
+   * @param {Map<String, Array<String>>} hostsByDetectors - object with list of hosts grouped by detector
+   */
+  static toEntity(environment, taskSource = '', detectorsAll, hostsByDetectors) {
+    taskSource = taskSource.toLocaleUpperCase();
+
+    const environmentInfo = EnvironmentInfoAdapter.toOverviewEntity(environment, detectorsAll, hostsByDetectors);
+    if (taskSource === TASKS_SOURCE.EPN) {
+      const {integratedServicesData: {odc = '{}'}} = environment;
+      const odcParsed = JSON.parse(odc);
+      environmentInfo.tasks = odcParsed.devices;
+    } else if (taskSource === TASKS_SOURCE.FLP) {
+      const {tasks = [], includedDetectors} = environment;
+      environmentInfo.tasks = [];
+      for (const task of tasks) {
+        const {deploymentInfo: {hostname = ''} = {}} = task;
+        const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
+          .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
+        if (!hostname.match(QC_NODES_NAME_REGEX) && includedDetectors.includes(keyDetector)) {
+          environmentInfo.tasks.push(task);
+        }
+      }
+    } else if (taskSource === TASKS_SOURCE.QC) {
+      const {tasks = []} = environment;
+      environmentInfo.tasks = [];
+      for (const task of tasks) {
+        const {deploymentInfo: {hostname = ''} = {}} = task;
+        if (hostname.match(QC_NODES_NAME_REGEX)) {
+          environmentInfo.tasks.push(task);
+        }
+      }
+    } else if (taskSource === TASKS_SOURCE.TRG) {
+      const {tasks = [], includedDetectors} = environment;
+      environmentInfo.tasks = [];
+      for (const task of tasks) {
+        const {deploymentInfo: {hostname = ''} = {}} = task;
+        const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
+          .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
+        if (!hostname.match(QC_NODES_NAME_REGEX) && !includedDetectors.includes(keyDetector)) {
+          environmentInfo.tasks.push(task);
+        }
+      }
+    }
     return environmentInfo;
   }
 
@@ -106,7 +166,7 @@ class EnvironmentInfoAdapter {
 
     for (const task of tasks) {
       const {state = 'NOT-KNOWN', status = 'NOT-KNOWN', deploymentInfo: {hostname = ''} = {}} = task;
-      
+
       if (hostname.match(QC_NODES_NAME_REGEX)) {
         qcTasksTotal++;
         qcStates[state] = (qcStates[state] + 1) || 1;
@@ -132,7 +192,7 @@ class EnvironmentInfoAdapter {
           flpDetectors[keyDetector].total++;
           flpDetectors[keyDetector].states[state] = (flpDetectors[keyDetector].states[state] + 1) || 1;
           flpDetectors[keyDetector].statuses[status] = (flpDetectors[keyDetector].statuses[status] + 1) || 1;
-          
+
           flpHosts.add(hostname)
         } else if (isReadoutEnabled) {
           trgTasksTotal++;
@@ -147,15 +207,15 @@ class EnvironmentInfoAdapter {
       qc: {
         tasks: {
           total: qcTasksTotal,
-          states: qcStates, 
+          states: qcStates,
           statuses: qcStatuses,
         },
         hosts: qcHosts.size,
-      }, 
+      },
       flp: {
         tasks: {
           total: flpTasksTotal,
-          states: flpStates, 
+          states: flpStates,
           statuses: flpStatuses,
         },
         hosts: flpHosts.size,
@@ -163,11 +223,12 @@ class EnvironmentInfoAdapter {
       }, trg: {
         tasks: {
           total: trgTasksTotal,
-          states: trgStates, 
+          states: trgStates,
           statuses: trgStatuses,
         },
         hosts: trgHosts.size,
-      }};
+      }
+    };
   }
 
   /**
@@ -192,7 +253,7 @@ class EnvironmentInfoAdapter {
           total: devices.length,
           states
         },
-        hosts: hosts.size, 
+        hosts: hosts.size,
         info: {ddsSessionId, ddsSessionStatus}
       };
     } catch (error) {
@@ -200,8 +261,8 @@ class EnvironmentInfoAdapter {
         tasks: {
           total: 0,
           states: {},
-        }, 
-        hosts: 0, 
+        },
+        hosts: 0,
         info: {ddsSessionId: '-', ddsSessionStatus: '-'}
       };
     }
