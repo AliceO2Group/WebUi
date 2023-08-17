@@ -128,12 +128,12 @@ export default class Environment extends Observable {
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
-  async getEnvironment(body, itShouldLoad = true) {
+  async getEnvironment(body, itShouldLoad = true, panel = '') {
     if (itShouldLoad) {
       this.item = RemoteData.loading();
       this.notify();
     }
-    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}`);
+    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
     this.item = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.itemControl = RemoteData.notAsked();
     this.notify();

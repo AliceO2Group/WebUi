@@ -68,6 +68,23 @@ const getTasksByFlp = (tasks) => {
 }
 
 /**
+  * Create a map of tasks grouped by their EPN host
+  * @param {object} tasks - raw data
+  * @return {JSON} {<string>:{list: <array>, stdout: <string>}}
+  */
+const getTasksByEpn = (tasks) => {
+  var taskMap = {};
+  tasks.forEach((task) => {
+    const hostname = task.host;
+    if (!taskMap.hasOwnProperty(hostname)) {
+      taskMap[hostname] = {list: []};
+    }
+    taskMap[hostname].list.push(task);
+  });
+  return taskMap;
+}
+
+/**
  * Method to check if a task name is the long version.
  * If yes, return the short version
  * @param {string} taskName
@@ -135,4 +152,4 @@ const _parseTopology = (item) => {
   }
   return '-';
 }
-export {getTasksByFlp, parseObject, getTaskShortName, parseOdcStatusPerEnv};
+export {getTasksByFlp, getTasksByEpn, parseObject, getTaskShortName, parseOdcStatusPerEnv};
