@@ -32,14 +32,15 @@ class EnvironmentService {
    * Given an environment ID, use the gRPC client to retrieve needed information
    * Parses the environment and prepares the information for GUI purposes
    * @param {string} id - environment id as defined by AliECS Core
+   * @param {string} taskSource - Source of where to request tasks from: FLP, EPN, QC, TRG
    * @return {EnvironmentDetails}
    * @throws {Error}
    */
-  async getEnvironment(id) {
+  async getEnvironment(id, taskSource) {
     const {environment} = await this._coreGrpc['GetEnvironment']({id});
     const detectorsAll = this._apricotGrpc.detectors ?? [];
     const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-    const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, detectorsAll, hostsByDetector);
+    const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, taskSource, detectorsAll, hostsByDetector);
     
     return environmentInfo;
   }
