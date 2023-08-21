@@ -45,7 +45,7 @@ class Intervals {
         this._statusService.retrieveApricotStatus();
         this._statusService.retrieveGrafanaStatus();
         this._statusService.retrieveNotificationSystemStatus();
-      }, 2000)
+      }, 10000)
     );
   }
 

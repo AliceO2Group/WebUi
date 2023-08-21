@@ -151,6 +151,7 @@ export default class Model extends Observable {
         break;
       case 'environments':
         this.environment.list = RemoteData.success(message.payload);
+        this.environment.updateItemEnvironment(message.payload.environments)
         this.notify();
         break;
       case 'requests':
@@ -210,7 +211,10 @@ export default class Model extends Observable {
           this.router.go('?page=environments');
           return;
         }
-        this.environment.getEnvironment({id: this.router.params.id});
+        if (!this.router.params.panel) {
+          this.router.go(`?page=environment&id=${this.router.params.id}&panel=configuration`, true, true);
+        }
+        this.environment.getEnvironment({id: this.router.params.id}, true, this.router.params.panel);
         break;
       case 'newEnvironment':
         this.workflow.initWorkflowPage();

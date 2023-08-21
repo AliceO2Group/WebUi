@@ -14,9 +14,6 @@
 
 import {Observable, RemoteData} from '/js/src/index.js';
 import Task from './Task.js';
-import {getTaskShortName} from '../common/utils.js';
-
-const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
 
 /**
  * Model representing Environment CRUD
@@ -99,12 +96,7 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/core/environments`);
-    if (!ok) {
-      this.list = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.list = RemoteData.success(result);
+    this.list = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
 
@@ -117,12 +109,7 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/core/removeRequest/${id}`);
-    if (!ok) {
-      this.requests = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.requests = RemoteData.success(result);
+    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
 
@@ -134,28 +121,20 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/core/requests`);
-    if (!ok) {
-      this.requests = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.requests = RemoteData.success(result);
+    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
   /**
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
-  async getEnvironment(body) {
-    this.item = RemoteData.loading();
-    this.notify();
-    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}`);
-    if (!ok) {
-      this.item = RemoteData.failure(result.message);
+  async getEnvironment(body, itShouldLoad = true, panel = '') {
+    if (itShouldLoad) {
+      this.item = RemoteData.loading();
       this.notify();
-      return;
     }
-    this.item = RemoteData.success(this._parseEnvResult(result));
+    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
+    this.item = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.itemControl = RemoteData.notAsked();
     this.notify();
   }
@@ -169,12 +148,7 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/ControlEnvironment`, body);
-    if (!ok) {
-      this.itemControl = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.itemControl = RemoteData.success(result);
+    this.itemControl = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.itemNew = RemoteData.notAsked();
     this.model.router.go(`?page=environment&id=${result.id}`);
     this.notify();
@@ -190,12 +164,7 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
-    if (!ok) {
-      this.itemNew = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.itemNew = RemoteData.notAsked();
+    this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
     this.model.router.go(`?page=environments`);
   }
 
@@ -237,107 +206,30 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Helpers
+   * If the user has the environment page opened and there is an 
+   * @param {EnvironmentInfo} environments - partial env info from AliECS via WebSocket message
    */
-
-  /**
-   * Given a JSON containing environment information and a specific key:
-   * * check if that key maps to an existing values
-   * * remove any variables that are a detector variable but are not part of the included detector
-   * @param {JSON} dataToFilter
-   * @param {string} label
-   * @return {JSON}
-   */
-  _filterOutDetectorsVariables(dataToFilter, label) {
-    const data = JSON.parse(JSON.stringify(dataToFilter));
-    const detectors = this.model.detectors.listRemote;
-    const includedDetectors = data.includedDetectors;
-    if (data[label] && includedDetectors && includedDetectors.length !== 0 && detectors.isSuccess()) {
-      Object.keys(data[label])
-        .filter((variable) => {
-          const prefix = variable.split('_')[0];
-          const isVariableDetector =
-            detectors.payload.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
-          const isVariableIncludedDetector =
-            includedDetectors.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
-          return isVariableDetector && !isVariableIncludedDetector;
-        })
-        .forEach((variable) => delete data[label][variable])
-    }
-    return data;
-  }
-
-  /**
-   * Given an environment, group its tasks by the 3 main categories: FLP, QC Nodes and CTP Readout
-   * @param {EnvironmentInfo} environment - DTO representing an environment
-   * @returns {object{tasks: Array<TaskInfo>, hosts: Set}} - Object with groups of tasks and set of unique hosts
-   */
-  _getTasksGroupedByCategory(environment) {
-    const qc = {tasks: [], hosts: new Set()};
-    const flp = {tasks: [], hosts: new Set()};
-    const trg = {tasks: [], hosts: new Set()};
-
-    const {hostsByDetectorRemote = RemoteData.notAsked()} = this.model.detectors;
-    const {tasks = [], includedDetectors = []} = environment;
-    for (const task of tasks) {
-      const {deploymentInfo: {hostname = ''} = {}} = task;
-      if (hostname.match(QC_NODES_NAME_REGEX)) {
-        qc.tasks.push(task);
-        qc.hosts.add(hostname);
-      } else if (hostsByDetectorRemote.isSuccess()) {
-        const {userVars: {ctp_readout_enabled = 'false'} = {}} = environment;
-        const isReadoutEnabled = ctp_readout_enabled === 'true';
-
-        const hostsByDetectors = hostsByDetectorRemote.payload;
-        const keyDetector = Object.keys(hostsByDetectors)
-          .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
-        if (includedDetectors.includes(keyDetector)) {
-          flp.tasks.push(task);
-          flp.hosts.add(hostname)
-        } else if (isReadoutEnabled) {
-          trg.tasks.push(task);
-          trg.hosts.add(hostname)
+  updateItemEnvironment(environments) {
+    if (this.item.isSuccess()) {
+      const {id, currentTransition} = this.item.payload;
+      let envExists = false;
+      environments.forEach((env) => {
+        if (env.id === id) {
+          envExists = true;
+          if (!env.currentTransition) {
+            env.currentTransition = undefined;
+          }
+          Object.assign(this.item.payload, env);
+          this.notify();
+          if (currentTransition && !env.currentTransition) {
+            this.getEnvironment({id}, false);
+          }
+          return;
         }
+      });
+      if (!envExists) {
+        this.item = RemoteData.failure('Environment was destroyed');
       }
     }
-    return {qc, flp, trg};
-  }
-
-  /**
-   * Prepare an EPN object to be added to the environment hardware section
-   * @param {EnvironmentDetails} environment - object with details of the environment
-   */
-  _getDevicesGroupedByCategory(environment) {
-    try {
-      const {integratedServicesData: {odc}} = environment
-      const {devices = [], ddsSessionId, ddsSessionStatus} = JSON.parse(odc);
-      return {tasks: devices, hosts: new Set(), info: {ddsSessionId, ddsSessionStatus}};
-    } catch (error) {
-      console.error(error);
-    }
-    return {tasks: [], hosts: new Set(), info: {}};
-  }
-
-  /**
-   * Method to remove and parse fields from environment result
-   * @param {EnvironmentDetails} environment - object with in-depth details of the environment
-   * @return {JSON}
-   */
-  _parseEnvResult(environment) {
-    let task = undefined;
-    if (environment.tasks) {
-      task = environment.tasks.find((task) => task.mesosStdout);
-      environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
-    }
-    environment.mesosStdout = (task && task.mesosStdout) ? task.mesosStdout : '';
-
-    environment = this._filterOutDetectorsVariables(environment, 'vars');
-    environment = this._filterOutDetectorsVariables(environment, 'userVars');
-    environment = this._filterOutDetectorsVariables(environment, 'defaults');
-
-    const {qc, flp, trg} = this._getTasksGroupedByCategory(environment);
-    const epn = this._getDevicesGroupedByCategory(environment);
-    environment.hardware = {qc, trg, flp, epn};
-    return environment;
   }
 }

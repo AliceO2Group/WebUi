@@ -70,14 +70,14 @@ module.exports.setup = (http, ws) => {
   const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
   const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
   ctrlService.setWS(ws);
-  const envService = new EnvironmentService(ctrlProxy);
-  const workflowService = new WorkflowTemplateService(ctrlProxy);
-  
-  const envController = new EnvironmentController(envService);
-  const workflowController = new WorkflowTemplateController(workflowService);
-
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
+
+  const envService = new EnvironmentService(ctrlProxy, apricotService);
+  const workflowService = new WorkflowTemplateService(ctrlProxy);
+  
+  const envCtrl = new EnvironmentController(envService);
+  const workflowController = new WorkflowTemplateController(workflowService);
 
   const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
   aliecsReqHandler.setWs(ws);
@@ -112,7 +112,7 @@ module.exports.setup = (http, ws) => {
 
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
   
-  http.get('/environment/:id', coreMiddleware, envController.getEnvironment.bind(envController), {public: true});
+  http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironment.bind(envCtrl), {public: true});
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));

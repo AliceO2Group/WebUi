@@ -81,7 +81,7 @@ export class StatusService {
    */
   async retrieveDataServiceStatus() {
     try {
-      const { version } = await this._dataService.getVersion();
+      const { version } = await this._dataService.retrieveVersion();
       return { status: { ok: true }, version };
     } catch (err) {
       return { status: { ok: false, message: err.message || err } };

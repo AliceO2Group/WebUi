@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-const url = require('url');
 const projPackage = require('./../../package.json');
 const {httpGetJson} = require('./../utils.js');
 const {Service} = require('./../dtos/Service.js');
@@ -214,11 +213,13 @@ class StatusService {
     let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE, isCritical: false};
     if (this.config?.grafana?.url) {
       try {
-        const {hostname, port} = url.parse(this.config.grafana.url);
+        const {protocol, hostname, port} = new URL(this.config.grafana.url);
         await httpGetJson(hostname, port, '/api/health', {
           statusCodeMin: 200,
           statusCodeMax: 301,
-          rejectMessage: 'Invalid status code: '
+          protocol,
+          rejectMessage: 'Invalid status code: ',
+          rejectUnauthorized: false,
         });
         status = {ok: true, configured: true, isCritical: false};
       } catch (error) {

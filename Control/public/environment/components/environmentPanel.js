@@ -37,10 +37,10 @@ import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
  */
 export const environmentPanel = (model, environment, isMinified = false) => {
   return h('.w-100.shadow-level1.flex-column.g1', [
-    environmentHeader(environment, model),
+    environmentHeader(environment),
     !isMinified && [
       environmentActionPanel(environment, model),
-      environmentContent(environment, model),
+      environmentContent(environment),
     ]
   ]);
 };
@@ -69,6 +69,9 @@ const environmentHeader = (environment) => {
 
 /**
  * Build a panel with multiple mini cards which contain actions allowed to the user for the environment
+ * A user should be able to control the environment if:
+ * - it is an admin as defined by CERN applications
+ * - it is part of the Detector group and has all locks of detectors part of the environment
  * @param {EnvironmentInfo} environment - DTO representing an environment
  * @param {Model} model - root object of the application
  * @returns {vnode}
@@ -76,7 +79,7 @@ const environmentHeader = (environment) => {
 const environmentActionPanel = (environment, model) => {
   const {includedDetectors = []} = environment;
   const hasLocks = includedDetectors.every((detector) => model.lock.isLockedByMe(detector));
-  const isAllowedToControl = model.isAllowed(ROLES.Detector) && hasLocks;
+  const isAllowedToControl = model.isAllowed(ROLES.Admin) || (model.isAllowed(ROLES.Detector) && hasLocks);
   return miniCard('', controlEnvironmentPanel(model.environment, environment, isAllowedToControl));
 }
 
@@ -86,12 +89,10 @@ const environmentActionPanel = (environment, model) => {
  * @param {Model} model - root object of the application
  * @returns {vnode}
  */
-const environmentContent = (environment, model) => {
+const environmentContent = (environment) => {
   const isRunning = environment.state === 'RUNNING';
-  const allDetectors = model.detectors.hostsByDetectorRemote;
   const {currentRunNumber} = environment;
   const {flp, qc, trg, epn} = environment.hardware;
-  const allHosts = flp.hosts.size + qc.hosts.size + trg.hosts.size;
   return h('.cardGroupColumn', {
   }, [
     isRunning && environmentRunningPanels(environment),
@@ -116,28 +117,29 @@ const environmentContent = (environment, model) => {
           environmentComponentsContent(environment),
         ),
       ]),
-      environment.tasks.length > 0 && h('.cardGroupColumn', [
+      h('.cardGroupColumn', [
         h('h4', `Tasks Summary`),
         h('.cardGroupRow', [
+          // miniCard(
+          //   miniCardTitle('ALL', `# hosts: ${allTasks.total}`),
+          //   taskCounterContent(environment.tasks.concat(epn.tasks))
+          // ),
           miniCard(
-            miniCardTitle('ALL', `# hosts: ${allHosts}`),
-            taskCounterContent(environment.tasks.concat(epn.tasks))),
-          flp.tasks.length > 0 && miniCard(
-            miniCardTitle('FLP', `# hosts: ${flp.hosts.size}`),
+            miniCardTitle('FLP', `# hosts: ${flp.hosts}`),
             taskCounterContent(flp.tasks)),
-          qc.tasks.length > 0 && miniCard(
-            miniCardTitle('QC Nodes', `# hosts: ${qc.hosts.size}`),
+          miniCard(
+            miniCardTitle('QC Nodes', `# hosts: ${qc.hosts}`),
             taskCounterContent(qc.tasks)),
-          trg.tasks.length > 0 && miniCard(
-            miniCardTitle('CTP Readout', `# hosts: ${trg.hosts.size}`),
+          miniCard(
+            miniCardTitle('CTP Readout', `# hosts: ${trg.hosts}`),
             taskCounterContent(trg.tasks)),
-          epn.tasks.length > 0 && miniCard(
-            miniCardTitle('EPN'),
+          miniCard(
+            miniCardTitle('EPN', `# hosts: ${epn.hosts}`),
             taskCounterContent(epn.tasks)),
         ])
       ]),
     ]),
-    allDetectors.isSuccess() && envTasksPerDetector(environment, allDetectors.payload),
+    envTasksPerDetector(flp.detectorCounters),
   ]);
 };
 
@@ -177,9 +179,10 @@ const environmentRunningPanels = ({currentRunNumber, userVars}) => {
  * @returns {vnode}
  */
 const environmentGeneralInfoContent = (environment) => {
-  const {state, userVars = {}, createdWhen, rootRole } = environment;
+  const {currentTransition = '-', state, userVars = {}, createdWhen, rootRole } = environment;
   return h('.flex-column', [
     rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
+    rowForCard('Transitioning:', currentTransition),
     rowForCard('State:', state, {valueClasses: [ALIECS_STATE_COLOR[state]]}),
     rowForCard('Run Type:', userVars.run_type),
     rowForCard('RUN Started:', parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),
@@ -216,27 +219,21 @@ const environmentComponentsContent = (environment) => {
 
 /**
  * Build a series of cards containing information about the tasks and hosts of each detector
- * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {Map<String, Object>} detectorCounters - DTO representing an environment
  * @param {Map<string, Array<string>>} allDetectors - map of all known detectors with their associated hosts
  * @returns {vnode}
  */
-const envTasksPerDetector = (environment, allDetectors) => {
-  const {includedDetectors = [], userVars: {hosts = '[]'} = {}} = environment;
-  const hostList = JSON.parse(hosts)
+const envTasksPerDetector = (detectorCounters) => {
 
-  if (includedDetectors.length > 0 && hostList.length > 0) {
-    return h('.flex-column.flex-wrap.g2', [
-      h('h4', `FLP Tasks by Detector(s) Summary`),
-      h('.flex-row.flex-wrap.g2', [
-        includedDetectors.map((detector) => {
-          const hostsUsed = hostList.filter((host) => allDetectors[detector].includes(host));
-          const tasks = environment.tasks.filter((task) => hostsUsed.includes(task.deploymentInfo.hostname));
-          return miniCard(
-            miniCardTitle(detector, `# hosts: ${hostsUsed.length}`),
-            taskCounterContent(tasks)
-          )
-        })
-      ])
-    ]);
-  }
-}
+  return h('.flex-column.flex-wrap.g2', [
+    h('h4', `FLP Tasks by Detector(s) Summary`),
+    h('.flex-row.flex-wrap.g2', [
+      Object.keys(detectorCounters).map((detector) => {
+        return miniCard(
+          miniCardTitle(detector, `# hosts: ${detectorCounters[detector].total}`),
+          taskCounterContent(detectorCounters[detector])
+        )
+      })
+    ])
+  ]);
+};
