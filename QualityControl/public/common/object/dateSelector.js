@@ -37,7 +37,7 @@ export const dateSelector = (selected, versions, callback) => h(
         selected: Boolean(version.id === selected.id),
       }, [
         'Created: ',
-        prettyFormatDate(version.validFrom),
+        prettyFormatDate(version.createdAt),
         ' (id: ',
         version.id,
         ')',
