@@ -28,14 +28,14 @@ export const statusServiceTestSuite = async () => {
     });
     it('should return status in error is data connector throws error', async () => {
       statusService.dataService = {
-        retrieveVersion: stub().throws(new Error('Service is currently unavailable')),
+        getVersion: stub().throws(new Error('Service is currently unavailable')),
       };
       const result = await statusService.retrieveDataServiceStatus();
       assert.deepStrictEqual(result, { status: { ok: false, message: 'Service is currently unavailable' } });
     });
     it('should successfully return status ok if data connector passed checks', async () => {
       statusService.dataService = {
-        retrieveVersion: stub().resolves({ version: '0.0.1' }),
+        getVersion: stub().resolves({ version: '0.0.1' }),
       };
       const response = await statusService.retrieveDataServiceStatus();
       assert.deepStrictEqual(response, { status: { ok: true }, version: '0.0.1' });
@@ -70,7 +70,7 @@ export const statusServiceTestSuite = async () => {
   describe('`retrieveFrameworkInfo()` tests', () => {
     it('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
-      statusService.dataService = { retrieveVersion: stub().resolves({ version: '0.0.1-beta' }) };
+      statusService.dataService = { getVersion: stub().resolves({ version: '0.0.1-beta' }) };
       statusService.onlineService = { getConsulLeaderStatus: stub().rejects(new Error('Online mode failed to retrieve')) };
 
       const response = await statusService.retrieveFrameworkInfo();
