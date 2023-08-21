@@ -13,6 +13,9 @@
  */
 
 import { getDateAsTimestamp } from './../../common/library/utils/dateTimeFormat.js';
+import { CCDB_RESPONSE_BODY_KEYS, CCDB_RESPONSE_HEADER_KEYS as HEAD } from './../services/ccdb/CcdbConstants.js';
+
+const { VALID_FROM, PATH, CREATED } = CCDB_RESPONSE_BODY_KEYS;
 
 /**
  * QC Object data type object Class
@@ -58,17 +61,24 @@ export default class QCObjectDto {
    * * known keys are mapped to camelCase format
    * * timestamps (ms) are converted from string to number
    * @param {Object} item - from CCDB
-   * @return {Object} - JSON with keys in camelCase format
+   * @returns {Object} - JSON with keys in camelCase format
    */
   static toStandardObject(item) {
+    if (item.etag) {
+      try {
+        item.etag = JSON.parse(item.etag);
+      } catch (error) {
+        // nothing to do
+      }
+    }
     const object = {
-      id: item.id,
+      id: item.etag,
       path: item.path,
       name: item.path,
-      validFrom: getDateAsTimestamp(item['valid-from']),
-      validUntil: getDateAsTimestamp(item['valid-until']),
-      createdAt: getDateAsTimestamp(item.created),
-      lastModified: getDateAsTimestamp(item['last-modified']),
+      validFrom: getDateAsTimestamp(item[HEAD.VALID_FROM]),
+      validUntil: getDateAsTimestamp(item[HEAD.VALID_UNTIL]),
+      createdAt: getDateAsTimestamp(item[HEAD.CREATED_AT]),
+      lastModified: getDateAsTimestamp(item[HEAD.LAST_MODIFIED]),
       fileName: item?.fileName,
       size: item?.size,
       drawOptions: item?.drawoptions?.split(' ') ?? [],
@@ -85,7 +95,22 @@ export default class QCObjectDto {
       qcTaskName: item?.qc_task_name,
       qcVersion: item?.qc_version,
       objectType: item?.objecttype,
+      location: item?.location,
     };
     return object;
+  }
+
+  /**
+   * Given a CCDB object response from GET request, parse the fields and return the new object as of type QcObjectLeaf
+   * @param {Object} item - CCDB object from GET request
+   * @returns {QcObjectLeaf} - parsed object
+   */
+  static toQcObjectLeaf(item) {
+    return {
+      path: item[PATH],
+      name: item[PATH],
+      validFrom: getDateAsTimestamp(item[VALID_FROM]),
+      createdAt: getDateAsTimestamp(item[CREATED]),
+    };
   }
 }

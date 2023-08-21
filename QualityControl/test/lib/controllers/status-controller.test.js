@@ -12,136 +12,76 @@
  * or submit itself to any jurisdiction.
  */
 
-const sinon = require('sinon');
-const assert = require('assert');
-const config = require('../../test-config.js');
+/* eslint-disable require-jsdoc */
+/* eslint-disable max-len */
 
-const StatusController = require('../../../lib/controllers/StatusController.js');
+import { stub } from 'sinon';
+import assert from 'assert';
 
-describe('Status Service test suite', () => {
-  describe('Creating a new StatusController instance', () => {
-    it('should throw an error if configuration object is not provided', () => {
-      assert.throws(() => new StatusController(), new Error('Empty Framework configuration'));
-      assert.throws(() => new StatusController(null), new Error('Empty Framework configuration'));
-      assert.throws(() => new StatusController(undefined), new Error('Empty Framework configuration'));
-    });
+import { StatusController } from './../../../lib/controllers/StatusController.js';
 
-    it('should successfully initialize StatusController', () => {
-      assert.doesNotThrow(() => new StatusController({ hostname: 'localhost', port: 8080 }, {}));
-    });
-  });
-
-  describe('`getDataConnectorStatus()` tests', () => {
-    let statusService;
-    before(() => {
-      statusService = new StatusController(config);
-    });
-    it('successfully return status with error if no data connector was set', async () => {
-      const response = await statusService.getDataConnectorStatus();
-      assert.deepStrictEqual(response, { ok: false, message: 'Data connector was not configured' });
-    });
-    it('successfully return status with error if data connector threw an error', async () => {
-      const dataConnector = {
-        isConnectionUp: sinon.stub().rejects(new Error('Unable to retrieve status of data store')),
-      };
-      statusService.setDataConnector(dataConnector);
-      const response = await statusService.getDataConnectorStatus();
-      assert.deepStrictEqual(response, { ok: false, message: 'Unable to retrieve status of data store' });
-    });
-    it('successfully return status with ok if data connector passed checks', async () => {
-      const dataConnector = {
-        isConnectionUp: sinon.stub().resolves(),
-      };
-      statusService.setDataConnector(dataConnector);
-      const response = await statusService.getDataConnectorStatus();
-      assert.deepStrictEqual(response, { ok: true });
-    });
-  });
-
-  describe('`getLiveModeConnectorStatus()` tests', () => {
-    let statusService;
-    before(() => statusService = new StatusController(config));
-    it('successfully return status with error if no live connector was set', async () => {
-      const response = await statusService.getLiveModeConnectorStatus();
-      assert.deepStrictEqual(response, { ok: false, message: 'Live Mode was not configured' });
-    });
-    it('successfully return status with error if live connector threw an error', async () => {
-      const onlineConnector = {
-        getConsulLeaderStatus: sinon.stub().rejects(new Error('Unable to retrieve status of live mode')),
-      };
-      statusService.setLiveModeConnector(onlineConnector);
-      const response = await statusService.getLiveModeConnectorStatus();
-      assert.deepStrictEqual(response, { ok: false, message: 'Unable to retrieve status of live mode' });
-    });
-    it('successfully return status ok if live live connector passed checks', async () => {
-      const onlineConnector = {
-        getConsulLeaderStatus: sinon.stub().resolves(),
-      };
-      statusService.setLiveModeConnector(onlineConnector);
-      const response = await statusService.getLiveModeConnectorStatus();
-      assert.deepStrictEqual(response, { ok: true });
-    });
-  });
-
+export const statusControllerTestSuite = async () => {
   describe('`getFrameworkInfo()` tests', () => {
-    it('successfully build result JSON with framework information', async () => {
-      const statusService = new StatusController(config);
-      const dataConnector = { isConnectionUp: sinon.stub().resolves() };
-      const onlineConnector = { getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured')) };
-      statusService.setDataConnector(dataConnector);
-      statusService.setLiveModeConnector(onlineConnector);
-      const response = await statusService.getFrameworkInfo();
-      const result = {
-        qcg: { hostname: 'localhost', port: 8181, status: { ok: true } },
-        ccdb: {
-          hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: true },
-        },
-        consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live mode was not configured' } },
-        quality_control: { version: '0.19.5-1' },
+    it('should successfully respond with framework information', async () => {
+      const statusService = {
+        retrieveFrameworkInfo: stub().resolves({
+          qcg: {
+            status: { ok: true },
+            version: '0.0.1',
+          },
+          ccdb: {
+            status: { ok: false, message: 'Something went wrong here' },
+          },
+        }),
       };
-      assert.deepStrictEqual(response, result);
-    });
-  });
-
-  describe('`frameworkInfo()` tests', () => {
-    it('successfully send back result JSON with framework information', async () => {
-      const statusService = new StatusController(config);
-      const dataConnector = { isConnectionUp: sinon.stub().resolves() };
-      const onlineConnector = { getConsulLeaderStatus: sinon.stub().rejects(new Error('Live mode was not configured')) };
-      statusService.setDataConnector(dataConnector);
-      statusService.setLiveModeConnector(onlineConnector);
-
+      const statusController = new StatusController(statusService);
       const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
+        status: stub().returnsThis(),
+        json: stub(),
       };
-      await statusService.frameworkInfo({}, res);
+      await statusController.getFrameworkInfo({}, res);
 
       const result = {
-        qcg: { hostname: 'localhost', port: 8181, status: { ok: true } },
-        ccdb: {
-          hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: true },
-        },
-        consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live mode was not configured' } },
-        quality_control: { version: '0.19.5-1' },
+        qcg: { status: { ok: true }, version: '0.0.1' },
+        ccdb: { status: { ok: false, message: 'Something went wrong here' } },
       };
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(result));
+    });
+    it('should respond with error if service failed to retrieve information', async () => {
+      const statusService = {
+        retrieveFrameworkInfo: stub().throws(new Error('Service could not retrieve status')),
+      };
+      const statusController = new StatusController(statusService);
+      const res = {
+        status: stub().returnsThis(),
+        json: stub(),
+      };
+      await statusController.getFrameworkInfo({}, res);
+
+      assert.ok(res.status.calledWith(503));
+      assert.ok(res.json.calledWith({ message: 'Service could not retrieve status' }));
     });
   });
 
   describe('`getQCGStatus()` tests', () => {
-    it('successfully send back result JSON with framework information', async () => {
-      const statusService = new StatusController(config);
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
+    it('should successfully respond with result JSON with its status and specified version', () => {
+      const statusService = {
+        retrieveOwnStatus: stub().returns({
+          status: { ok: true },
+          version: '0.0.1',
+        }),
       };
-      await statusService.getQCGStatus({}, res);
+      const statusController = new StatusController(statusService);
+      const res = {
+        status: stub().returnsThis(),
+        json: stub(),
+      };
+      statusController.getQCGStatus({}, res);
 
-      const result = { hostname: 'localhost', port: 8181, status: { ok: true } };
+      const result = { status: { ok: true }, version: '0.0.1' };
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(result));
     });
   });
-});
+};

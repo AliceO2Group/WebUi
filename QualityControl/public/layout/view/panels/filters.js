@@ -67,7 +67,7 @@ const filter = (model, placeholder, key, type = 'text', width = '.w-10') =>
  */
 const updateFiltersButton = (model) => h('.w-20.text-right', h('button.btn.btn-primary', {
   onclick: () => {
-    model.layout.selectTab(0);
+    model.layout.selectTab(model.layout.tabIndex);
     model.layout.setFilterToURL();
   },
 }, 'Update'));

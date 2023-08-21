@@ -17,27 +17,29 @@ import { prettyFormatDate } from './../utils.js';
 
 /**
  * Display a select form with a given list of timestamps and optional callback
- * @param {number} selected - element that should be displayed as selected
- * @param {Array<number>} timestamps - list of timestamps available for an object in ms
+ * @param {{validFrom: number, id: string}} selected - element that should be displayed as selected
+ * @param {Array<{validFrom: number, id: string}>} versions - list of versions available for an object in ms
  * @param {function} callback - onchange callback function
  * @returns {vnode} - select form with passed values
  */
-export const dateSelector = (selected, timestamps, callback) => h(
+export const dateSelector = (selected, versions, callback) => h(
   '.w-100.flex-row',
   h('select.form-control.gray-darker.text-center.w-25', {
     onchange: (e) => {
       const { value } = e.target;
-      callback({}, value);
+      const { validFrom, id } = JSON.parse(value);
+      callback({}, validFrom, id);
     },
   }, [
-    timestamps
-      .map((timestamp) => h('option.text-center', {
-        value: timestamp,
-        selected: Boolean(timestamp === selected),
+    versions
+      .map((version) => h('option.text-center', {
+        value: JSON.stringify(version),
+        selected: Boolean(version.id === selected.id),
       }, [
-        prettyFormatDate(timestamp),
-        ' (',
-        timestamp,
+        'Created: ',
+        prettyFormatDate(version.validFrom),
+        ' (id: ',
+        version.id,
         ')',
       ])),
   ]),

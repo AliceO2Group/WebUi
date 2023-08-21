@@ -15,6 +15,7 @@
  * @typedef QcObject
  *
  * @property {object} root - ROOT object in JSON format
+ * @property {Array<CcdbObjectIdentification>} versions
  * @property {Array<string>} drawingOptions - list of drawing options
  * @property {Array<string>} displayHints - list of display hints
  * @property {string} [layoutDisplayOptions] - displayOptions from layout configuration if object is retrieved from one

@@ -15,7 +15,7 @@
 /**
  * Given a date representation , return the timestamp as a number
  * @example 'Sun, 10 Jul 2022 07:15:06 GMT'  -> 1657437306000
- * @example '1657437306000'
+ * @example '1657437306000' -> 1657437306000
  * @param {string | Date} dateAsString - string or number representation of a date
  * @return {number} Given date as a number or unparsed value if could not be parsed
  */

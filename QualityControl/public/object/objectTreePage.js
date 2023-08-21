@@ -80,8 +80,10 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name, version } = model.object.selected;
-  const href = version ? `?page=objectView&objectName=${name}&ts=${version}` : `?page=objectView&objectName=${name}`;
+  const { name, validFrom, id } = object;
+  const href = validFrom ?
+    `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
+    : `?page=objectView&objectName=${name}`;
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.resize-button.flex-row', [
@@ -202,7 +204,7 @@ function treeRow(model, tree, level) {
  */
 const leafRow = (path, selectItem, className, padding, leafName) =>
   h('tr.object-selectable', {
-    key: path, title: path, onclick: selectItem, class: className,
+    key: path, title: path, onclick: selectItem, class: className, id: path,
   }, [
     h('td.highlight', [
       h('span', { style: { paddingLeft: padding } }, iconBarChart()),

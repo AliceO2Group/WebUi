@@ -55,10 +55,6 @@
                 "allowSingleLine": false
             }
         ],
-        "capitalized-comments": [
-            "error",
-            "always"
-        ],
         "comma-dangle": [
             "error",
             "always-multiline"
@@ -120,10 +116,6 @@
             {
                 "code": 120
             }
-        ],
-        "multiline-comment-style": [
-            "error",
-            "starred-block"
         ],
         "no-console": "error",
         "no-extra-parens": "error",

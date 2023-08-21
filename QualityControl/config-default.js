@@ -27,13 +27,16 @@ export const config = {
     tls: false,
   },
 
-  listingConnector: 'ccdb',
-
   ccdb: {
     protocol: 'http',
     hostname: 'localhost',
     port: 8080,
     prefix: 'qc',
+    cachePrefix: 'qc',
+    cacheRefreshRate: 120 * 1000,
+  },
+  qc: {
+    enabled: false,
   },
 
   /*

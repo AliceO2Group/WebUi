@@ -19,11 +19,13 @@ import configurationTestSuite from './lib/config/public-config.test.js';
  * Controllers
  */
 import { layoutControllerTestSuite } from './lib/controllers/layout-controller.test.js';
+import { statusControllerTestSuite } from './lib/controllers/status-controller.test.js';
 
 /**
  * Services
  */
 import { ccdbServiceTestSuite } from './lib/services/ccdb-service.test.js';
+import { statusServiceTestSuite } from './lib/services/status-service.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite as objectUtilityTestSuite } from './common/library/qcObject/utils.test.js';
 import {
@@ -42,8 +44,10 @@ describe('Common Library - Test Suite', () => {
 
 describe('Services - Test Suite', async () => {
   describe('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
+  describe('StatusService - Test Suite', async () => await statusServiceTestSuite());
 });
 
 describe('Controllers - Test Suite', async () => {
   describe('LayoutController test suite', async () => await layoutControllerTestSuite());
+  describe('StatusController test suite', async () => await statusControllerTestSuite());
 });

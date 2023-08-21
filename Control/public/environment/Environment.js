@@ -149,7 +149,7 @@ export default class Environment extends Observable {
   async getEnvironment(body) {
     this.item = RemoteData.loading();
     this.notify();
-    const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
+    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}`);
     if (!ok) {
       this.item = RemoteData.failure(result.message);
       this.notify();
@@ -304,24 +304,40 @@ export default class Environment extends Observable {
   }
 
   /**
+   * Prepare an EPN object to be added to the environment hardware section
+   * @param {EnvironmentDetails} environment - object with details of the environment
+   */
+  _getDevicesGroupedByCategory(environment) {
+    try {
+      const {integratedServicesData: {odc}} = environment
+      const {devices = [], ddsSessionId, ddsSessionStatus} = JSON.parse(odc);
+      return {tasks: devices, hosts: new Set(), info: {ddsSessionId, ddsSessionStatus}};
+    } catch (error) {
+      console.error(error);
+    }
+    return {tasks: [], hosts: new Set(), info: {}};
+  }
+
+  /**
    * Method to remove and parse fields from environment result
-   * @param {JSON} result
+   * @param {EnvironmentDetails} environment - object with in-depth details of the environment
    * @return {JSON}
    */
-  _parseEnvResult(result) {
+  _parseEnvResult(environment) {
     let task = undefined;
-    if (result.environment.tasks) {
-      task = result.environment.tasks.find((task) => task.mesosStdout);
-      result.environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
+    if (environment.tasks) {
+      task = environment.tasks.find((task) => task.mesosStdout);
+      environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
     }
-    result.mesosStdout = (task && task.mesosStdout) ? task.mesosStdout : '';
+    environment.mesosStdout = (task && task.mesosStdout) ? task.mesosStdout : '';
 
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'vars');
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'userVars');
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'defaults');
+    environment = this._filterOutDetectorsVariables(environment, 'vars');
+    environment = this._filterOutDetectorsVariables(environment, 'userVars');
+    environment = this._filterOutDetectorsVariables(environment, 'defaults');
 
-    const {qc, flp, trg} = this._getTasksGroupedByCategory(result.environment);
-    result.environment.hardware = {qc, trg, flp};
-    return result;
+    const {qc, flp, trg} = this._getTasksGroupedByCategory(environment);
+    const epn = this._getDevicesGroupedByCategory(environment);
+    environment.hardware = {qc, trg, flp, epn};
+    return environment;
   }
 }
