@@ -60,17 +60,17 @@ export default class ObjectViewModel extends Observable {
     this.selected = RemoteData.loading();
     this.notify();
 
-    const { objectName, layoutId, objectId, ts = undefined } = urlParams;
+    const { objectName, layoutId, objectId, id, ts = undefined } = urlParams;
     const filter = {};
     Object.keys(urlParams)
-      .filter((key) => !['page', 'objectName', 'layoutId', 'objectId', 'ts'].includes(key))
+      .filter((key) => !['page', 'objectName', 'layoutId', 'objectId', 'ts', 'id'].includes(key))
       .forEach((key) => {
         filter[key] = urlParams[key];
       });
     if (objectName) {
-      this.updateObjectSelection({ objectName }, ts, filter);
+      this.updateObjectSelection({ objectName }, ts, id, filter);
     } else if (layoutId && objectId) {
-      this.updateObjectSelection({ objectId }, ts, filter);
+      this.updateObjectSelection({ objectId }, ts, id, filter);
     } else {
       this.selected = RemoteData.failure('Invalid URL parameters provided');
     }
@@ -79,11 +79,12 @@ export default class ObjectViewModel extends Observable {
   /**
    * Updates the selected object from ObjectViewModel
    * @param {object} object - object with name or id to be used for content retrieval
-   * @param {number} timestamp - timestamp in ms for a specific object
-   * @param {object} filter - specific fields that should be applied
+   * @param {number} validFrom - timestamp in ms for a specific object
+   * @param {string} id - id as per the CCDB storage
+   * @param {object} filters - specific fields that should be applied
    * @returns {undefined}
    */
-  async updateObjectSelection(object, timestamp = undefined, filter = this.filter) {
+  async updateObjectSelection(object, validFrom = undefined, id = '', filters = this.filter) {
     let { objectName = undefined, objectId = undefined } = object;
     const { objectName: objectNameUrl, objectId: objectIdUrl, layoutId } = this.model.router.params;
 
@@ -101,27 +102,29 @@ export default class ObjectViewModel extends Observable {
     this.selected = RemoteData.loading();
     this.notify();
 
-    this.filter = filter;
-    const filterAsString = Object.keys(filter).map((key) => `${key}=${this.filter[key]}`).join('/');
-
+    this.filter = filters;
     let currentParams = '?page=objectView';
     if (objectId) {
       currentParams += `&objectId=${encodeURI(objectId)}&layoutId=${encodeURI(layoutId)}`;
-      this.selected = await this.model.services.object.getObjectById(objectId, timestamp, filterAsString, this);
+      this.selected = await this.model.services.object.getObjectById(objectId, validFrom, filters, this);
     } else if (objectName) {
       currentParams += `&objectName=${encodeURI(objectName)}`;
-      this.selected = await this.model.services.object.getObjectByName(objectName, timestamp, filterAsString, this);
+      this.selected = await this.model.services.object.getObjectByName(objectName, id, validFrom, filters, this);
     }
     setBrowserTabTitle(this.selected.payload.name);
 
-    if (filter && Object.keys(filter).length > 0) {
-      Object.entries(filter)
+    if (filters && Object.keys(filters).length > 0) {
+      Object.entries(filters)
         .forEach(([key, value]) => {
           currentParams += `&${key}=${encodeURI(value)}`;
         });
     }
-    if (timestamp) {
-      this.model.router.go(`${currentParams}&ts=${timestamp}`, false, true);
+    if (validFrom) {
+      let path = `${currentParams}&ts=${validFrom}`;
+      if (id) {
+        path += `&id=${id}`;
+      }
+      this.model.router.go(path, false, true);
     } else {
       this.model.router.go(`${currentParams}`, false, true);
     }

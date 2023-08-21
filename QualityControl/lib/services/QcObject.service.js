@@ -15,19 +15,20 @@
 import { Log } from '@aliceo2/web-ui';
 import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
+import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
 const LOG_FACILITY = 'qcg/obj-service';
 
 /**
- * Service class for retrieving and composing object information
+ * High-level service class for retrieving and composing object information from storage (CCDB/QCDB)
  * @class
  */
 export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
    * @constructor
-   * @param {CcdbService} dbService - CCDB service to retrieve
-   * @param {JsonFileService} dataService - service to be used for retrieving customized information
+   * @param {CcdbService} dbService - CCDB service to retrieve raw information about the QC objects
+   * @param {JsonFileService} dataService - service to be used for retrieving configurations on saved layouts
    * @param {RootService} rootService - root library to be used for interacting with ROOT Objects
    */
   constructor(dbService, dataService, rootService) {
@@ -50,7 +51,7 @@ export class QcObjectService {
      * @constant
      * @type {string}
      */
-    this._DB_URL = `${this._dbService.protocol}://${this._dbService.hostname}:${this._dbService.port}/`;
+    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}/`;
 
     this._cache = {
       objects: undefined,
@@ -66,12 +67,12 @@ export class QcObjectService {
    */
   async refreshCache() {
     try {
-      const objects = await this._dbService.getObjectsLatestVersionList(this._dbService.cachePrefix);
+      const objects = await this._dbService.getObjectsLatestVersionList(this._dbService.CACHE_PREFIX);
       this._cache.objects = this._parseObjects(objects);
       this._cache.lastUpdate = Date.now();
     } catch (error) {
       this._logger.errorMessage(
-        `Unable to update cache - objects; Last update ${new Date(this._cache.lastUpdate)}`,
+        `Last update ${new Date(this._cache.lastUpdate)}; Unable to update cache - objects due to ${error}`,
         { level: 1, facility: LOG_FACILITY },
       );
     }
@@ -85,13 +86,13 @@ export class QcObjectService {
    * * from cache if it is requested by the client and the system is configured to use a cache;
    * * make a new request and get data directly from data service
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
-   * @param {string} prefix - Prefix for which CCDB should search for objects
+   * @param {string|Regex} prefix - Prefix for which CCDB should search for objects.
    * @param {Array<string>} [fields = []] - List of fields that should be requested for each object
    * @param {boolean} [useCache = true] - if the list should be the cached version or not
-   * @returns {Promise.<Array<object>>} - results of objects with required fields
+   * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async getLatestVersionOfObjects(prefix = 'qc/', fields = [], useCache = true) {
+  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, fields = [], useCache = true) {
     if (useCache && this._cache?.objects) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
     } else {
@@ -101,49 +102,66 @@ export class QcObjectService {
   }
 
   /**
-   * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
-   * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
-   * information and download the root file locally on CCDB if it is not already there;
-   * From the information retrieved above, use the location with JSROOT to get a JSON object
-   * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for
-   * interpretation with JSROOT.draw
-   * @param {string} objectName - name(known as path) of the object to retrieve information
-   * @param {number|null} [timestamp] - timestamp in ms
-   * @param {string} [filter = ''] - filter as string to be sent to CCDB
+   * Using `browse` option, request a list of versions(identifications) for a specified path for an object.
+   * Use the first version to retrieve details about the exact object.
+   * From the information retrieved above, use the location attribute and pass it to JSROOT to get a JSON
+   * decompressed version of the ROOT object which will be plotted/drawn with JSROOT.draw on the client side.
+   * @param {string} path - name(known as path) of the object to retrieve information
+   * @param {number|null} [validFrom = undefined] - timestamp in ms
+   * @param {string} [id = ''] - id with respect to CCDB storage
+   * @param {string} [filters = {}] - filter attributes for specific objects
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
-   * @throws
+   * @throws {Error}
    */
-  async getObject(objectName, timestamp = undefined, filter = '') {
-    if (!timestamp) {
+  async retrieveQcObject(path, validFrom = undefined, id = undefined, filters = {}) {
+    /**
+     * @type {CcdbObjectIdentification}
+     */
+    let identification = { path, validFrom, id, filters };
+    if (!validFrom) {
       /*
-       * Timestamp provided by the user is taken from a dropdown list of valid-from timestamps.
-       * Thus there is no point in requesting it again
+       * If no validFrom timestamp was provided, it means the exact version of the object is unknown.
+       * Thus, we need to query versions of the object before retrieving details of the latest version of the object.
        */
-      timestamp = await this._dbService.getObjectValidity(objectName, timestamp, filter);
+      const rawIdentification = await this._dbService.getObjectIdentification({ path, filters });
+      Object.assign(identification, rawIdentification);
+      identification = QcObjectIdentificationDto.fromGetFormat(identification);
     }
-    const object = await this._dbService.getObjectDetails(objectName, timestamp, filter);
-    const rootObj = await this._getJsRootFormat(this._DB_URL + object.location);
-    const timestampList = await this._dbService.getObjectTimestampList(objectName, 1000, filter);
+    const objectDetails = await this._dbService.getObjectDetails(identification);
+    const object = QCObjectDto.toStandardObject(objectDetails);
 
+    const rootObj = await this._getJsRootFormat(this._DB_URL + object.location);
+
+    /**
+     * @type {CcdbObjectIdentification}
+     */
+    const partialIdentification = {
+      path,
+      filters,
+    };
+    // Partial identification to retrieve various versions of an object with specified name and metadata attributes
+    let versions = await this._dbService.getObjectVersions(partialIdentification, 1000);
+    versions = versions.map((version) => QcObjectIdentificationDto.fromGetFormat(version));
     return {
       ...object,
       root: rootObj,
-      timestamps: timestampList,
+      versions,
     };
   }
 
   /**
    * Retrieve an object by its id (stored in the customized data service) with its information
-   * @param {string} id - id of the object to be retrieved
-   * @param {number|null} [timestamp] - timestamp in ms
-   * @param {string} [filter = ''] - filter as string to be sent to CCDB
+   * @param {string} qcgId - id of the object configuration stored in QCG database (different than CCDB)
+   * @param {string} id - id of the object to be retrieved as per CCDB etag
+   * @param {number|null} [validFrom] - timestamp in ms
+   * @param {string} [filters = {}] - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async getObjectById(id, timestamp = undefined, filter = '') {
-    const { object, layoutName } = this._dataService.getObjectById(id);
+  async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
+    const { object, layoutName } = this._dataService.getObjectById(qcgId);
     const { name, options = {}, ignoreDefaults = false } = object;
-    const qcObject = await this.getObject(name, timestamp, filter);
+    const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
 
     return {
       ...qcObject,
@@ -180,13 +198,13 @@ export class QcObjectService {
    * Given a list of objects form CCDB, parse, filter and keep only valid objects.
    * Use `for loop` to iterate only once rather than chained array operations as we expect lots of objects
    * @param {Array<object>} objects - objects to be filtered
-   * @returns {Array<QCObjectDto>} - list of objects parsed and filtered
+   * @returns {Array<QcObjectLeaf>} - list of objects parsed and filtered
    */
   _parseObjects(objects) {
     const list = [];
     for (const object of objects) {
       if (QCObjectDto.isObjectPathValid(object)) {
-        list.push(QCObjectDto.toStandardObject(object));
+        list.push(QCObjectDto.toQcObjectLeaf(object));
       }
     }
     return list;
@@ -197,6 +215,6 @@ export class QcObjectService {
    * @returns {number} - ms for interval to refresh cache
    */
   getCacheRefreshRate() {
-    return this._dbService.cacheRefreshRate;
+    return this._dbService.CACHE_REFRESH_RATE;
   }
 }

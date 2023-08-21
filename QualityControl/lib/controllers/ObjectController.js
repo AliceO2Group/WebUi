@@ -53,7 +53,7 @@ export class ObjectController {
       res.status(400).json({ message: 'Invalid parameters provided: fields must be of type Array' });
     } else {
       try {
-        const list = await this._objService.getLatestVersionOfObjects(prefix, fields);
+        const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields);
         res.status(200).json(list);
       } catch (error) {
         errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');
@@ -105,14 +105,12 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjectContent(req, res) {
-    const path = req.query?.path;
-    const timestamp = req.query?.timestamp;
-    const filter = req.query?.filter;
+    const { path, validFrom, id, filters } = req.query;
     if (!path) {
-      res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
+      res.status(400).json({ message: 'Invalid URL parameters: missing object path' });
     } else {
       try {
-        const object = await this._objService.getObject(path, timestamp, filter);
+        const object = await this._objService.retrieveQcObject(path, Number(validFrom), id, filters);
         res.status(200).json(object);
       } catch (error) {
         errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
@@ -132,17 +130,16 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjectById(req, res) {
-    const id = req.params?.id;
-    const timestamp = req.query?.timestamp;
-    const filter = req.query?.filter;
-    if (!id) {
+    const qcgId = req.params?.id;
+    const { validFrom, filters, id } = req.query;
+    if (!qcgId) {
       res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
     } else {
       try {
-        const object = await this._objService.getObjectById(id, timestamp, filter);
+        const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
         res.status(200).json(object);
       } catch (error) {
-        errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
+        errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
       }
     }
   }

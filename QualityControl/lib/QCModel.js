@@ -19,7 +19,7 @@ import { readFileSync } from 'fs';
 import { openFile, toJSON } from 'jsroot';
 import { Log, ConsulService } from '@aliceo2/web-ui';
 
-import { CcdbService } from './services/CcdbService.js';
+import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';

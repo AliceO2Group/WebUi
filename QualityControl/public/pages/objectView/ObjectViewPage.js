@@ -60,7 +60,7 @@ const filtersPanel = (objectViewModel) => {
     filterInput('PeriodName', 'periodNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
     filterInput('PassName', 'passNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
     h('button.btn.btn-primary.w-20', {
-      onclick: () => objectViewModel.updateObjectSelection({}, undefined, objectViewModel.filter),
+      onclick: () => objectViewModel.updateObjectSelection({}, undefined, undefined, objectViewModel.filter),
     }, ['Search ', iconMagnifyingGlass()]),
   ]);
 };
@@ -99,14 +99,16 @@ const objectPlotAndInfo = (objectViewModel) =>
     Loading: () => spinner(10, 'Loading object...'),
     Failure: (error) => errorDiv(error),
     Success: (qcObject) => {
-      const { ignoreDefaults = false, drawOptions = [], displayHints = [], layoutDisplayOptions = [] } = qcObject;
+      const {
+        id, validFrom, ignoreDefaults = false, drawOptions = [], displayHints = [], layoutDisplayOptions = [], versions,
+      } = qcObject;
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off', [
         h('.flex-row.justify-center.h-10', h('.w-40.p2.f6', dateSelector(
-          qcObject.validFrom,
-          qcObject.timestamps,
+          { validFrom, id },
+          versions,
           objectViewModel.updateObjectSelection.bind(objectViewModel),
         ))),
         h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [

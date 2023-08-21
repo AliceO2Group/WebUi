@@ -112,10 +112,10 @@ export class StatusService {
     let version = 'Not part of an FLP deployment';
     if (this._config.qc?.enabled) {
       try {
-        const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 3000 });
+        const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 6000 });
         version = stdout.trim();
       } catch (error) {
-        this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'status-service' });
+        this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'qcg/status-service' });
       }
     }
     return { status: { ok: true }, version };

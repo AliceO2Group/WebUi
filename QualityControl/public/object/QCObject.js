@@ -277,12 +277,13 @@ export default class QCObject extends Observable {
    * Load full content of an object in-memory
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
    * @param {number} timestamp - timestamp in ms
+   * @param {string} id - id of object as per data storage
    * @returns {undefined}
    */
-  async loadObjectByName(objectName, timestamp = undefined) {
+  async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, timestamp, '', this);
+    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, undefined, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -296,7 +297,7 @@ export default class QCObject extends Observable {
       }
       if (this.selected) {
         this.selected.version = !timestamp
-          ? parseInt(this.objects[objectName].payload.timestamps[0], 10)
+          ? parseInt(this.objects[objectName].payload.versions[0].createdAt, 10)
           : parseInt(timestamp, 10);
       }
     } else {
@@ -321,12 +322,11 @@ export default class QCObject extends Observable {
       this.notify();
       return;
     }
-    const filterAsString = Object.keys(filter).map((key) => `${key}=${filter[key]}`).join('/');
     await Promise.allSettled(objectsName.map(async (objectName) => {
       this.objects[objectName] = RemoteData.Loading();
       this.notify();
       this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, filterAsString, this);
+        .model.services.object.getObjectByName(objectName, undefined, undefined, filter, this);
       this.notify();
     }));
     this.objectsRemote = RemoteData.success();
@@ -534,9 +534,9 @@ export default class QCObject extends Observable {
    * @param {string} name - name of the object to be retrieving the list
    * @returns {Array<number>} - list of timestamps for queried object
    */
-  getObjectTimestamps(name) {
+  getObjectVersions(name) {
     if (this.objects[name] && this.objects[name].kind === 'Success') {
-      return this.objects[name].payload.timestamps;
+      return this.objects[name].payload.versions;
     } else {
       return [];
     }

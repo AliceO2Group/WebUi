@@ -13,18 +13,16 @@
  */
 
 import { h } from '/js/src/index.js';
-import { spinner } from '../common/spinner.js';
 
 /**
  * Shows header of Framework Information
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default (model) => [
-  h('.w-50.flex-row.justify-center', [
+export default () => [
+  h(
+    '.w-50.flex-row.justify-center',
     h('b.f4.ph2', 'About'),
-    model.frameworkInfo.item.isLoading() &&
-    h('.f4', spinner()),
-  ]),
+  ),
   h('.flex-grow'),
 ];

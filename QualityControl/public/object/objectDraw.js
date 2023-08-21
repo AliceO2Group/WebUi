@@ -57,7 +57,6 @@ export function draw(model, tabObject, options) {
       w: 0,
     };
   }
-
   const attributes = {
     'data-fingerprint-key': fingerprintReplacement(tabObject), // Just for humans in inspector
     key: fingerprintReplacement(tabObject), // Completely re-create this div if the chart is not the same at all

@@ -88,7 +88,7 @@ function listObjects() {
  * Return an empty array
  * @returns {Array<Layout>}
  */
-function getObjectTimestampList() {
+function getObjectVersions() {
   return promiseResolveWithLatency([]);
 }
 
@@ -300,7 +300,7 @@ export const objectController = new ObjectController(ccdb);
 
 export const userService = new UserService(dataConnector);
 
-const _getObjectTimestampList = getObjectTimestampList;
-export { _getObjectTimestampList as getObjectTimestampList };
+const _getObjectVersions = getObjectVersions;
+export { _getObjectVersions as getObjectVersions };
 
 export const statusService = new StatusController(config, projPackage);
