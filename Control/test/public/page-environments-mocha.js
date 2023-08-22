@@ -70,9 +70,9 @@ describe('`pageEnvironments` test-suite', () => {
 
   describe('Test new environment request', async () => {
     it('create failed environment request', async () => {
-      await page.goto(url + '?page=newEnvironment');
+      await page.goto(url + '?page=newEnvironmentAdvanced');
       const location = await page.evaluate(() => window.location);
-      assert.ok(location.search === '?page=newEnvironment');
+      assert.ok(location.search === '?page=newEnvironmentAdvanced');
       
       // select workflow from list of templates
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
