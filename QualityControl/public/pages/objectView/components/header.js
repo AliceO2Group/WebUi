@@ -13,6 +13,7 @@
  */
 
 import { h, iconBook, iconArrowThickLeft, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
+import { getUrlPathFromObject } from '../../../common/filterToFromUrlParams.js';
 
 /**
  * Builds header which contains information on plotted object and actions that can be applied
@@ -34,11 +35,12 @@ export const header = (model, title) => h('.flex-row.items-center.p2.g2', [
  */
 function getBackToQCGButton(model) {
   const { layoutId = undefined } = model.router.params;
+  const { objectViewModel: { filter } } = model;
   let title = 'Back';
   let href = '?page=objectTree';
   if (layoutId) {
     title = 'Back to layout';
-    href = `?page=layoutShow&layoutId=${layoutId}`;
+    href = `?page=layoutShow&layoutId=${layoutId}${getUrlPathFromObject(filter)}`;
   }
 
   return h(

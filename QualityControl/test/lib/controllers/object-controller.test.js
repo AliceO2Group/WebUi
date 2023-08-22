@@ -19,7 +19,7 @@ const { AssertionError } = require('assert');
 const sinon = require('sinon');
 
 const ObjectController = require('../../../lib/controllers/ObjectController');
-const CcdbService = require('../../../lib/services/CcdbService.js');
+const CcdbService = require('../../../lib/services/ccdb/CcdbService.js');
 
 describe('ObjectController test suite', () => {
   describe('Creating a new ObjectController instance', () => {
@@ -62,7 +62,7 @@ describe('ObjectController test suite', () => {
     it('should respond with error if data connector could not find latest 50 timestamps', async () => {
       const jsonStub = sinon.createStubInstance(CcdbService, {
         getObjectLatestVersionInfo: sinon.stub().resolves({}),
-        getObjectTimestampList: sinon.stub().rejects(new Error('Unable to retrieve timestamps')),
+        getObjectVersions: sinon.stub().rejects(new Error('Unable to retrieve timestamps')),
       });
       const req = {};
       const objController = new ObjectController(jsonStub);
@@ -74,7 +74,7 @@ describe('ObjectController test suite', () => {
     it('should successfully respond info and timestamps', async () => {
       const jsonStub = sinon.createStubInstance(CcdbService, {
         getObjectLatestVersionInfo: sinon.stub().resolves({ path: 'qc/some/qc' }),
-        getObjectTimestampList: sinon.stub().resolves([1, 2, 3, 4]),
+        getObjectVersions: sinon.stub().resolves([1, 2, 3, 4]),
       });
       const objController = new ObjectController(jsonStub);
       await objController.getObjectInfo({}, res);

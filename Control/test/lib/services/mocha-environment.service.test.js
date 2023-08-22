@@ -29,12 +29,13 @@ describe('EnvironmentService test suite', () => {
   stub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}).rejects(new Error(`Proxy service failed`));
   stub.withArgs({id: ENVIRONMENT_VALID}).resolves({environment: {id: ENVIRONMENT_VALID, description: 'Some description'}});
 
-  const envService = new EnvironmentService({GetEnvironment: stub});
+  const envService = new EnvironmentService({GetEnvironment: stub}, {detectors: [], includedDetectors: []});
 
   describe(`'getEnvironment' test suite`, async () => {
     it('should successfully build a response with environment details given an id', async () => {
       const env = await envService.getEnvironment(ENVIRONMENT_VALID);
-      assert.deepStrictEqual(env, {id: ENVIRONMENT_VALID, description: 'Some description'});
+      assert.strictEqual(env.id, ENVIRONMENT_VALID);
+      assert.strictEqual(env.description, 'Some description');
     });
 
     it('should reject with error if service for retrieving information failed', async () => {

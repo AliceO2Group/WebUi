@@ -34,6 +34,28 @@ class ApricotService {
 
     this.detectors = [];
     this.hostsByDetector = new Map();
+    this.init();
+  }
+
+  /**
+   * Initialize service with static data from AliECS
+   */
+  async init() {
+    try {
+      this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+      await Promise.allSettled(
+        this.detectors.map(async (detector) => {
+          try {
+            const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
+            this.hostsByDetector.set(detector, hosts);
+          } catch (error) {
+            log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+          }
+        })
+      );
+    } catch (error) {
+      log.error('Unable to list detectors');
+    }
   }
 
   /**
@@ -211,7 +233,7 @@ class ApricotService {
       errorLogger(error, 'apricotservice');
       throw new Error(`Unable to find any existing configuration named: ${envConfig.id}`);
     }
-    
+
     if (!existingConfig.isUpdatableBy(user)) {
       throw new Error(`Configuration '${envConfig.id}' exists already and you do NOT have permissions to update it!`);
     }

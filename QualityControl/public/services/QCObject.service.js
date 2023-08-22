@@ -58,18 +58,19 @@ export default class QCObjectService {
    * Ask server for an object by name and optionally timestamp
    * If timestamp is not provided, Date.now() will be used to request latest version of the object
    * @param {string} objectName - name/path of the object to get
-   * @param {number} timestamp - timestamp in ms
-   * @param {string} filter - filter as string to be applied on query
+   * @param {string} id - if as per CCDB storage
+   * @param {number} validFrom - timestamp in ms
+   * @param {Map<string, string>} filters - metadata attributes to filter by
    * @param {Class<Observable>} that - object to be used to notify
    * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectByName(objectName, timestamp = undefined, filter = '', that = this) {
+  async getObjectByName(objectName, id = '', validFrom = undefined, filters = undefined, that = this) {
     this.objectsLoadedMap[objectName] = RemoteData.loading();
     that.notify();
 
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      const url = this._buildURL(`/api/object?path=${objectName}`, timestamp, filter);
+      const url = this._buildURL(`/api/object?path=${objectName}`, id, validFrom, filters);
       const { result, ok } = await this.model.loader.get(url);
       if (ok) {
         result.qcObject = {
@@ -104,10 +105,10 @@ export default class QCObjectService {
    * @param {Class<Observable>} that - object to be used to notify
    * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectById(objectId, timestamp = undefined, filter = '', that = this) {
+  async getObjectById(objectId, timestamp = undefined, filter = undefined, that = this) {
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      const url = this._buildURL(`/api/object/${objectId}?`, timestamp, filter);
+      const url = this._buildURL(`/api/object/${objectId}?`, undefined, timestamp, filter);
 
       const { result, ok } = await this.model.loader.get(url);
       if (ok) {
@@ -137,17 +138,22 @@ export default class QCObjectService {
 
   /**
    * Given a prebuild URL, append timestamp and filter if provided
-   * @param {string} url - initial URL with objectId or objectna,e
-   * @param {number} timestamp - timestamps in ms
-   * @param {string} filter - filter as string
+   * @param {string} url - initial URL with objectId or object name
+   * @param {string} id - id of the object
+   * @param {number} validFrom - timestamps in ms
+   * @param {Map<string, string>} filters - Metadata attributes for retrieving specific object
    * @returns {string} - url with appended parameters
    */
-  _buildURL(url, timestamp = undefined, filter = '') {
-    if (filter) {
-      url += `&filter=${filter}`;
+  _buildURL(url, id, validFrom = undefined, filters = undefined) {
+    if (filters && Object.keys(filters).length > 0) {
+      const filterAsString = Object.entries(filters).map(([key, value]) => `filters[${key}]=${value}`).join('&');
+      url += `&${filterAsString}`;
     }
-    if (timestamp) {
-      url += `&timestamp=${timestamp}`;
+    if (validFrom) {
+      url += `&validFrom=${validFrom}`;
+    }
+    if (id) {
+      url += `&id=${id}`;
     }
     return url;
   }
