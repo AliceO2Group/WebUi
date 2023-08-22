@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import {detectorHeader} from './../../common/detectorHeader.js';
 import {workflowTemplateComponent} from './components/workflowTemplate.component.js';
 
@@ -26,16 +26,18 @@ export const EnvironmentCreationHeader = (model) => h('h4.w-100 text-center', 'N
  * Simplified environment creation page
  *
  * @param {Model} model - the global model
- * @return {vnode}
+ * @return {vnode} - main component for the creation page of an environment
  */
 export const EnvironmentCreationPage = (model) => {
-  const {envCreationModel} = model;
-  return  h('', [
+  const {envCreationModel: {currentWorkflow}} = model;
+  return h('', [
     detectorHeader(model),
+
     h('.ph2.w-100.text-right', h('a', {
       style: 'cursor: pointer',
       onclick: () => model.router.go('?page=newEnvironmentAdvanced')
-    },'Advanced Configuration')),
-    workflowTemplateComponent(envCreationModel.currentWorkflow)
+    }, 'Advanced Configuration')),
+
+    workflowTemplateComponent(currentWorkflow)
   ]);
 };

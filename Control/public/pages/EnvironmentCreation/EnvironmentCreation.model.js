@@ -19,13 +19,16 @@ import {jsonFetch} from '../../utilities/jsonFetch.js';
  */
 export class EnvironmentCreationModel extends Observable {
   /**
-     * Constructor
-     * @param {Model} model - the global model
-     */
+   * Constructor
+   * @param {Model} model - the global model
+   */
   constructor(model) {
     super();
 
     this._creationModel = null;
+    /**
+     * @type {Model}
+     */
     this._model = model;
 
     this._currentWorkflow = RemoteData.notAsked();
