@@ -12,12 +12,12 @@
  */
 
 import {Observable, RemoteData} from '/js/src/index.js';
-import {jsonFetch} from './../../utilities/jsonFetch.js';
+import {jsonFetch} from '../../utilities/jsonFetch.js';
 
 /**
  * Model to store the state of the simplified environment creation page
  */
-export class EnvCreationModel extends Observable {
+export class EnvironmentCreationModel extends Observable {
   /**
      * Constructor
      * @param {Model} model - the global model
@@ -49,7 +49,7 @@ export class EnvCreationModel extends Observable {
   /**
      * Returns the creation model
      *
-     * @return {EnvCreationModel|null} the creation model
+     * @return {EnvironmentCreationModel|null} the creation model
      */
   get creationModel() {
     return this._creationModel;

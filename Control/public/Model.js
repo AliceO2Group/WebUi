@@ -25,7 +25,7 @@ import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
 import {SERVICE_STATES} from './common/constants/serviceStates.js';
 import {di} from './utilities/di.js';
-import {EnvCreationModel} from './pages/EnvCreation/EnvCreation.model.js';
+import {EnvironmentCreationModel} from './pages/EnvironmentCreation/EnvironmentCreation.model.js';
 
 /**
  * Root of model tree
@@ -57,7 +57,7 @@ export default class Model extends Observable {
     this.workflow = new Workflow(this);
     this.workflow.bubbleTo(this);
 
-    this.envCreationModel = new EnvCreationModel(this);
+    this.envCreationModel = new EnvironmentCreationModel(this);
     this.envCreationModel.bubbleTo(this);
 
     this.task = new Task(this);
@@ -220,10 +220,10 @@ export default class Model extends Observable {
         }
         this.environment.getEnvironment({id: this.router.params.id}, true, this.router.params.panel);
         break;
-      case 'newEnvironment':
+      case 'newEnvironmentAdvanced':
         this.workflow.initWorkflowPage();
         break;
-      case 'createEnv':
+      case 'newEnvironment':
         this.envCreationModel.initPage();
         break;
       case 'taskList':

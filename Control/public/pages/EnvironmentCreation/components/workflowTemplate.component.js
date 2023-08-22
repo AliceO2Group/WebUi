@@ -21,7 +21,7 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export const workflowTemplateComponent = (workflow) =>
-  h('.w-100.flex-column.p2', [
+  h('.w-100.flex-column.ph2', [
     h('h5.p2.panel-title.text-center', 'Workflow Template Source Information'),
     h('.panel',
       workflow.match({

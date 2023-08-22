@@ -20,7 +20,7 @@ import {workflowTemplateComponent} from './components/workflowTemplate.component
  * @param {Model} model - global model of the application
  * @returns {vnode}
  */
-export const EnvCreationHeader = (model) => h('h4.w-100 text-center', 'New Environment');
+export const EnvironmentCreationHeader = (model) => h('h4.w-100 text-center', 'New Environment');
 
 /**
  * Simplified environment creation page
@@ -28,10 +28,14 @@ export const EnvCreationHeader = (model) => h('h4.w-100 text-center', 'New Envir
  * @param {Model} model - the global model
  * @return {vnode}
  */
-export const EnvCreationPage = (model) => {
+export const EnvironmentCreationPage = (model) => {
   const {envCreationModel} = model;
   return  h('', [
     detectorHeader(model),
+    h('.ph2.w-100.text-right', h('a', {
+      style: 'cursor: pointer',
+      onclick: () => model.router.go('?page=newEnvironmentAdv')
+    },'Advanced Configuration')),
     workflowTemplateComponent(envCreationModel.currentWorkflow)
   ]);
 };
