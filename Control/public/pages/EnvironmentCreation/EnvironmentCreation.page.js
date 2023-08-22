@@ -34,8 +34,8 @@ export const EnvironmentCreationPage = (model) => {
     detectorHeader(model),
 
     h('.ph2.w-100.text-right', h('a', {
-      style: 'cursor: pointer',
-      onclick: () => model.router.go('?page=newEnvironmentAdvanced')
+      href: '?page=newEnvironmentAdvanced',
+      onclick: (e) => model.router.handleLinkEvent(e)
     }, 'Advanced Configuration')),
 
     workflowTemplateComponent(currentWorkflow)

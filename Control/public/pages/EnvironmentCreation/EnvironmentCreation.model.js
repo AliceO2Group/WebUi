@@ -38,6 +38,8 @@ export class EnvironmentCreationModel extends Observable {
    * Initialize model for environment creation page
    */
   initPage() {
+    this._currentWorkflow = RemoteData.loading();
+    this.notify();
     jsonFetch('/api/workflow/template/default/source', {method: 'GET'})
       .then((data) => {
         this._currentWorkflow = RemoteData.success(data);
