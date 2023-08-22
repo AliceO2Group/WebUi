@@ -49,10 +49,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
     calls['getActiveDetectors'] = undefined;
   });
 
-  it('should successfully load newEnvironment page and needed resources', async () => {
-    await page.goto(url + '?page=newEnvironment', {waitUntil: 'networkidle0'});
+  it('should successfully load newEnvironmentAdvanced page and needed resources', async () => {
+    await page.goto(url + '?page=newEnvironmentAdvanced', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    assert(location.search === '?page=newEnvironment');
+    assert(location.search === '?page=newEnvironmentAdvanced');
     assert.ok(calls['getWorkflowTemplates']);
     assert.ok(calls['listRepos']);
     assert.ok(calls['getActiveDetectors']);
