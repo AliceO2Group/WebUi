@@ -90,12 +90,12 @@ const environmentActionPanel = (environment, model) => {
  * @returns {vnode}
  */
 const environmentContent = (environment) => {
-  const isRunning = environment.state === 'RUNNING';
-  const {currentRunNumber} = environment;
+  const {state, currentRunNumber, currentTransition = undefined} = environment;
+  const isRunning = state === 'RUNNING';
   const {flp, qc, trg, epn} = environment.hardware;
   return h('.cardGroupColumn', {
   }, [
-    isRunning && environmentRunningPanels(environment),
+    isRunning && !currentTransition && environmentRunningPanels(environment),
     h('.cardGroupColumn', [
       h('.cardGroupRow', [
         isRunning && miniCard(
@@ -158,7 +158,7 @@ const environmentRunningPanels = ({currentRunNumber, userVars}) => {
   if (isMonitoringConfigured) {
     const THIRTY_MINUTES_IN_MS = 1000 * 60 * 30;
     const runStartParam = (Number.isInteger(runStart) && (Date.now() - runStart) < THIRTY_MINUTES_IN_MS)
-      ? `&from=${runStart}`
+      ? `&from=${runStart}&to=now`
       : '';
     readoutMonitoringSource = readoutPlot + '&var-run=' + currentRunNumber + runStartParam;
     flpMonitoringSource = flpStats + '&var-run=' + currentRunNumber;
