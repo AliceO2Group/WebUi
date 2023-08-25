@@ -15,6 +15,7 @@
 const {grpcErrorToNativeError} = require('../errors/grpcErrorToNativeError.js');
 const {NotFoundError} = require('./../errors/NotFoundError.js');
 const RUNTIME_COMPONENT = 'COG';
+const RUNTIME_CONFIGURATION = 'COG-v1';
 const RUNTIME_KEY = 'workflow-mappings';
 
 /**
@@ -64,6 +65,21 @@ class WorkflowTemplateService {
       const mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_COMPONENT, RUNTIME_KEY);
       const mappings = JSON.parse(mappingsString);
       return Array.isArray(mappings) ? mappings : [];
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
+  }
+
+  /**
+   * Using apricot service, retrieve the content of a saved configuration by name
+   * @param {String} name - configuration that needs to be retrieved
+   * @return {Object} - object with saved configuration
+   */
+  async retrieveWorkflowSavedConfiguration(name) {
+    try {
+      const configurationString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_CONFIGURATION, name);
+      const configuration = JSON.parse(configurationString);
+      return configuration
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
