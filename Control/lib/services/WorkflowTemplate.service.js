@@ -12,7 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
+const {grpcErrorToNativeError} = require('../errors/grpcErrorToNativeError.js');
 const {NotFoundError} = require('./../errors/NotFoundError.js');
+const RUNTIME_COMPONENT = 'COG';
+const RUNTIME_KEY = 'workflow-mappings';
 
 /**
  * WorkflowTemplateService class to be used to retrieve data from AliEcs Core about workflow templates to be used for environment creation
@@ -20,10 +23,12 @@ const {NotFoundError} = require('./../errors/NotFoundError.js');
 class WorkflowTemplateService {
   /**
    * Constructor for inserting dependencies needed to retrieve environment data
-   * @param {GrpcProxy} coreGrpc 
+   * @param {GrpcProxy} coreGrpc - service for retrieving information through AliECS Core gRPC connection
+   * @param {ApricotService} apricotGrpc - service for retrieving information through AliECS Apricot gRPC connection
    */
-  constructor(coreGrpc) {
+  constructor(coreGrpc, apricotGrpc) {
     this._coreGrpc = coreGrpc;
+    this._apricotGrpc = apricotGrpc;
   }
 
   /**
@@ -39,15 +44,30 @@ class WorkflowTemplateService {
       throw new NotFoundError(`Unable to find a default repository`);
     }
     const {name: repositoryName, defaultRevision} = defaultRepository;
-    
+
     if (!defaultRevision) {
       throw new NotFoundError(`Unable to find a default revision`);
     }
     return {
-      repository: repositoryName, 
+      repository: repositoryName,
       revision: defaultRevision,
       name: 'readout-dataflow'
     };
+  }
+
+  /**
+   * Retrieve a list of mappings for simplified creation of environments based on workflow saved configurations
+   * @return {Array<{label: String, configuration: String}>} - list of mappings to be displayed
+   */
+  async retrieveWorkflowMappings() {
+    try {
+      const mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(`${RUNTIME_COMPONENT}/${RUNTIME_KEY}`);
+      const mappings = JSON.parse(mappingsString);
+      return Array.isArray(mappings) ? mappings : [];
+    } catch (error) {
+      console.log(error);
+      throw grpcErrorToNativeError(error);
+    }
   }
 }
 

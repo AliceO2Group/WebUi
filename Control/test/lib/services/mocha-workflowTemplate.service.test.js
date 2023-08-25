@@ -16,7 +16,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 
-const {WorkflowTemplateService} = require('./../../../lib/services/WorkflowTemplate.service.js');
+const {WorkflowTemplateService} = require('../../../lib/services/WorkflowTemplate.service.js');
 const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 const mockRepoList = [
@@ -62,6 +62,37 @@ describe('WorkflowTemplateService test suite', () => {
       const workflowTemplate = new WorkflowTemplateService({ListRepos: stub});
       await assert.rejects(() => workflowTemplate.getDefaultTemplateSource(), new NotFoundError('Unable to find a default revision'));
     });
+  });
 
+  describe(`'retrieveWorkflowMappings' test suite`, async () => {
+    it('should successfully return mappings array', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify([{label: 'config1', component: 'Config_1'}])
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      const mappings = await workflowTemplate.retrieveWorkflowMappings();
+      assert.deepStrictEqual(mappings, [{label: 'config1', component: 'Config_1'}]);
+    });
+
+    it('should successfully return empty array if Apricot returned empty object', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify('{}')
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      const mappings = await workflowTemplate.retrieveWorkflowMappings();
+      assert.deepStrictEqual(mappings, []);
+    });
+
+    it('should throw NotFoundError due to apricot service throwing gRPC code 5', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().rejects({code: 5, details: 'Could not be found'});
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new NotFoundError('Could not be found'));
+    });
+
+    it('should throw general native error due to code being present', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().rejects({noCode: 'noCode'});
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new Error());
+    });
   });
 });
