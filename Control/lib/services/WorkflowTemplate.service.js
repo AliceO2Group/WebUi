@@ -61,7 +61,7 @@ class WorkflowTemplateService {
    */
   async retrieveWorkflowMappings() {
     try {
-      const mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(`${RUNTIME_COMPONENT}/${RUNTIME_KEY}`);
+      const mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_COMPONENT, RUNTIME_KEY);
       const mappings = JSON.parse(mappingsString);
       return Array.isArray(mappings) ? mappings : [];
     } catch (error) {

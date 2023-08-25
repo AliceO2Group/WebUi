@@ -510,23 +510,23 @@ describe('ApricotService test suite', () => {
     let apricotService;
     before(() => {
       stub = sinon.stub();
-      stub.withArgs({component: 'COG/found-one'}).resolves({payload: JSON.stringify([{label: 'test', configuration: 'test_1'}])});
-      stub.withArgs({component: 'COG/not-found'}).rejects({code: 2, details: 'nil response for that key'});
-      stub.withArgs({component: 'COG/general-error'}).rejects({code: 2, details: 'some general error'});
+      stub.withArgs({component: 'COG', key: 'found-one'}).resolves({payload: JSON.stringify([{label: 'test', configuration: 'test_1'}])});
+      stub.withArgs({component: 'COG', key: 'not-found'}).rejects({code: 2, details: 'nil response for that key'});
+      stub.withArgs({component: 'COG', key: 'general-error'}).rejects({code: 2, details: 'some general error'});
       apricotService = new ApricotService({[GetRuntimeEntry]: stub});
     });
 
     it('should successfully return payload for component specified', async () => {
-      const content = await apricotService.getRuntimeEntryByComponent('COG/found-one');
+      const content = await apricotService.getRuntimeEntryByComponent('COG', 'found-one');
       assert.deepStrictEqual(content, JSON.stringify([{label: 'test', configuration: 'test_1'}]));
     });
 
     it('should reject with updated error code on gRPC error', async () => {
-      await assert.rejects(() => apricotService.getRuntimeEntryByComponent('COG/not-found'), {code: 5, details: 'nil response for that key'});
+      await assert.rejects(() => apricotService.getRuntimeEntryByComponent('COG', 'not-found'), {code: 5, details: 'nil response for that key'});
     });
 
     it('should successfully return payload for component specified', async () => {
-      await assert.rejects(() => apricotService.getRuntimeEntryByComponent('COG/general-error'), {code: 2, details: 'some general error'});
+      await assert.rejects(() => apricotService.getRuntimeEntryByComponent('COG', 'general-error'), {code: 2, details: 'some general error'});
     });
   });
 });
