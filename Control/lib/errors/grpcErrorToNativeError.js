@@ -23,17 +23,16 @@ const {TimeoutError} = require('./TimeoutError.js');
  * @returns {Error}
  */
 const grpcErrorToNativeError = (error) => {
-  const { code, message } = error;
-
+  const { code, details } = error;
   switch (code) {
     case 3:
-      return new InvalidInputError(message);
+      return new InvalidInputError(details);
     case 4:
-      return new TimeoutError(message);
+      return new TimeoutError(details);
     case 5:
-      return new NotFoundError(message);
+      return new NotFoundError(details);
     default:
-      return new Error(message);
+      return new Error(details);
   }
 };
 
