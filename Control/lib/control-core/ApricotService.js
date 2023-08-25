@@ -61,6 +61,11 @@ class ApricotService {
 
   /**
    * Use Apricot defined `o2apricot.proto` `GetRuntimeEntry` to retrieve the value stored in a specified key
+   * 
+   * Corner cases for Apricot returns:
+   * * if key(component) does not exist, Apricot wrongly returns code 2 instead of 5 in the gRPC error;
+   * * if key exists but there is no content, Apricot returns '{}'
+   * * if key exists and there is content, Apricot returns content within payload attribute '{payload}'
    * @param {String} component - component for which it should query
    * @returns {Promise<String>} - value stored by apricot
    */
