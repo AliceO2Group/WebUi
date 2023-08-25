@@ -44,4 +44,42 @@ describe('WorkflowController test suite', () => {
       assert.ok(res.json.calledWith({message: 'No default revision identified'}));
     });
   });
+
+  describe(`'getWorkflowMapping' test suite`, async () => {
+    it('should successfully return 200 with mappings array', async () => {
+      const workflowCtrl = new WorkflowTemplateController({
+        retrieveWorkflowMappings: sinon.stub().resolves([{label: 'test', configuration: 'something'}])
+      });
+      await workflowCtrl.getWorkflowMapping({}, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith([{label: 'test', configuration: 'something'}]));
+    });
+
+    it('should successfully return 200 with empty array if nothing was found', async () => {
+      const workflowCtrl = new WorkflowTemplateController({
+        retrieveWorkflowMappings: sinon.stub().resolves([])
+      });
+      await workflowCtrl.getWorkflowMapping({}, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith([]));
+    });
+
+    it('should return 404 response as there was no default revision found', async () => {
+      const workflowCtrl = new WorkflowTemplateController({
+        retrieveWorkflowMappings: sinon.stub().rejects(new NotFoundError('No mappings found'))
+      });
+      await workflowCtrl.getWorkflowMapping({}, res);
+      assert.ok(res.status.calledWith(404));
+      assert.ok(res.json.calledWith({message: 'No mappings found'}));
+    });
+
+    it('should return 502 response as there was specific error provided', async () => {
+      const workflowCtrl = new WorkflowTemplateController({
+        retrieveWorkflowMappings: sinon.stub().rejects(new Error('No mappings found'))
+      });
+      await workflowCtrl.getWorkflowMapping({}, res);
+      assert.ok(res.status.calledWith(502));
+      assert.ok(res.json.calledWith({message: 'No mappings found'}));
+    });
+  });
 });

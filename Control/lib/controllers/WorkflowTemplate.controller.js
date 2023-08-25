@@ -43,6 +43,21 @@ class WorkflowTemplateController {
       updateExpressResponseFromNativeError(res, error);
     }
   }
+
+  /**
+   * API - GET endpoint for retrieving mappings of what environment creations are allowed in simplified mode
+   * @param {Request} _ - HTTP Request object
+   * @param {Response} res - HTTP Response object with EnvironmentDetails
+   * @returns {void}
+   */
+  async getWorkflowMapping(_, res) {
+    try {
+      const mappings = await this._workflowService.retrieveWorkflowMappings();
+      res.status(200).json(mappings);
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, error);
+    }
+  }
 }
 
 module.exports = {WorkflowTemplateController};
