@@ -65,13 +65,13 @@ describe('WorkflowTemplateService test suite', () => {
   });
 
   describe(`'retrieveWorkflowMappings' test suite`, async () => {
-    it('should successfully return mappings array', async () => {
+    it('should successfully return mappings array sorted alphabetically by label', async () => {
       const getRuntimeEntryByComponent = sinon.stub().resolves(
-        JSON.stringify([{label: 'config1', component: 'Config_1'}])
+        JSON.stringify([{label: 'config1', component: 'Config_1'}, {label: 'Aconfig1', component: 'Config_1'}])
       );
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
       const mappings = await workflowTemplate.retrieveWorkflowMappings();
-      assert.deepStrictEqual(mappings, [{label: 'config1', component: 'Config_1'}]);
+      assert.deepStrictEqual(mappings, [{label: 'Aconfig1', component: 'Config_1'}, {label: 'config1', component: 'Config_1'}]);
     });
 
     it('should successfully return empty array if Apricot returned empty object', async () => {
