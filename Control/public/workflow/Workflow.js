@@ -536,11 +536,11 @@ export default class Workflow extends Observable {
       this.model.environment.itemNew = RemoteData.notAsked();
       this.loadingConfiguration = RemoteData.loading();
       this.notify();
-      this.loadedConfiguration = await this.remoteDataPostRequest(
-        this.loadedConfiguration, '/api/GetRuntimeEntry', {component: 'COG-v1', key}
-      );
+
+      const {result: configuration, ok} = await this.model.loader.get(`/api/workflow/configuration`, {name: key});
+      this.loadedConfiguration = ok ? RemoteData.success(configuration) : RemoteData.failure(configuration.message);
+      this.notify();
       try {
-        const configuration = JSON.parse(this.loadedConfiguration.payload.payload);
         const variables = configuration.variables;
         let hosts = [];
         if (variables.hosts) {

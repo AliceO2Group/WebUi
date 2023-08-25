@@ -95,4 +95,15 @@ describe('WorkflowTemplateService test suite', () => {
       await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new Error());
     });
   });
+
+  describe(`'retrieveWorkflowSavedConfiguration' test suite`, async () => {
+    it('should successfully return workflow content parsed as JSON', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify({name: 'some config', detectors: ['TPC', 'FSA']})
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      const mappings = await workflowTemplate.retrieveWorkflowSavedConfiguration();
+      assert.deepStrictEqual(mappings, {name: 'some config', detectors: ['TPC', 'FSA']});
+    });
+  });
 });

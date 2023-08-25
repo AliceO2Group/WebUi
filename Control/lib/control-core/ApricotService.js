@@ -67,11 +67,12 @@ class ApricotService {
    * * if key exists but there is no content, Apricot returns '{}'
    * * if key exists and there is content, Apricot returns content within payload attribute '{payload}'
    * @param {String} component - component for which it should query
+   * @param {String} key - key for which value should be retrieved
    * @returns {Promise<String>} - value stored by apricot
    */
-  async getRuntimeEntryByComponent(component) {
+  async getRuntimeEntryByComponent(component, key) {
     try {
-      const {payload = '{}'} = await this.apricotProxy[GetRuntimeEntry]({component});
+      const {payload = '{}'} = await this.apricotProxy[GetRuntimeEntry]({component, key});
       return payload;
     } catch (error) {
       const {code, details = ''} = error;
