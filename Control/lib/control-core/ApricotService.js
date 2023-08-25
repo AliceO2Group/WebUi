@@ -19,6 +19,7 @@ const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
 const User = require('./../dtos/User.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
+const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
 
 /**
  * Gateway for all Apricot - Core calls
@@ -55,6 +56,24 @@ class ApricotService {
       );
     } catch (error) {
       log.error('Unable to list detectors');
+    }
+  }
+
+  /**
+   * Use Apricot defined `o2apricot.proto` `GetRuntimeEntry` to retrieve the value stored in a specified key
+   * @param {String} component - component for which it should query
+   * @returns {Promise<String>} - value stored by apricot
+   */
+  async getRuntimeEntryByComponent(component) {
+    try {
+      const {payload = '{}'} = await this.apricotProxy[GetRuntimeEntry]({component});
+      return payload;
+    } catch (error) {
+      const {code, details = ''} = error;
+      if (code === 2 && details.includes('nil')) {
+        error.code = 5;
+      }
+      throw error;
     }
   }
 
@@ -164,7 +183,7 @@ class ApricotService {
       data.user = new User(req.session);
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const {payload: configurations} = await this.apricotProxy['ListRuntimeEntries']({component: COMPONENT});
+      const {payload: configurations} = await this.apricotProxy[ListRuntimeEntries]({component: COMPONENT});
       if (configurations.includes(envConf.id)) {
         errorHandler(`A configuration with name '${envConf.id}' already exists. `
           + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
