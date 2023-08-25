@@ -43,14 +43,14 @@ class WorkflowTemplateService {
     if (!defaultRepository) {
       throw new NotFoundError(`Unable to find a default repository`);
     }
-    const {name: repositoryName, defaultRevision} = defaultRepository;
+    const {name: repository, defaultRevision: revision} = defaultRepository;
 
-    if (!defaultRevision) {
+    if (!revision) {
       throw new NotFoundError(`Unable to find a default revision`);
     }
     return {
-      repository: repositoryName,
-      revision: defaultRevision,
+      repository,
+      revision,
       name: 'readout-dataflow'
     };
   }
