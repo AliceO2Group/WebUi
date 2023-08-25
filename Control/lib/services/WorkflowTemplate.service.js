@@ -65,7 +65,6 @@ class WorkflowTemplateService {
       const mappings = JSON.parse(mappingsString);
       return Array.isArray(mappings) ? mappings : [];
     } catch (error) {
-      console.log(error);
       throw grpcErrorToNativeError(error);
     }
   }
