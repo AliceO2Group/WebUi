@@ -135,7 +135,7 @@ export class EnvironmentCreationModel extends Observable {
    */
   setOdcNumberOfEpns(numberOfEpns) {
     if (!isNaN(numberOfEpns)) {
-      this._creationModel.variables['odc_n_epns'] = Number(numberOfEpns);
+      this._creationModel.variables['odc_n_epns'] = numberOfEpns;
     }
   }
 
