@@ -49,11 +49,7 @@ export class EnvironmentCreationModel extends Observable {
 
     this._selectedConfigurationLabel = '';
 
-    this._services = model.services;
-    this._detectorsAvailability = RemoteData.notAsked();
-
     this._isReady = false;
-
   }
 
   /**
@@ -64,7 +60,6 @@ export class EnvironmentCreationModel extends Observable {
 
     this._defaultWorkflow = RemoteData.loading();
     this._workflowMappings = RemoteData.loading();
-    this._detectorsAvailability = RemoteData.loading();
     this.notify();
 
     const {result: mappingResult, ok: isMappingOk} = await this._model.loader.get('/api/workflow/template/mappings');
@@ -182,23 +177,6 @@ export class EnvironmentCreationModel extends Observable {
    */
   get selectedConfigurationLabel() {
     return this._selectedConfigurationLabel;
-  }
-
-
-  /**
-   * Getter for retrieving information on the detectors state
-   * @returns {RemoteData<Array<DetectorAvailability>>} - list of detectors state
-   */
-  get detectorsAvailability() {
-    return this._detectorsAvailability;
-  }
-
-  /**
-   * Getter for returning an instance of the current detectors as per AliECS
-   * @returns {RemoteData<Array<String>>} - list of detectors name
-   */
-  get detectorsList() {
-    return this._detectorsList;
   }
 
   /**
