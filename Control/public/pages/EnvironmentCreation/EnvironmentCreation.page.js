@@ -14,6 +14,8 @@
 import {h} from '/js/src/index.js';
 import {detectorHeader} from './../../common/detectorHeader.js';
 import {workflowTemplateComponent} from './components/workflowTemplate.component.js';
+import {workflowMappingsComponent} from './components/workflowMappings.component.js';
+import {workflowCreationButtonComponent} from './components/workflowCreationButton.component.js';
 
 /**
  * Header for the simplified creation environment page
@@ -29,15 +31,27 @@ export const EnvironmentCreationHeader = (model) => h('h4.w-100 text-center', 'N
  * @return {vnode} - main component for the creation page of an environment
  */
 export const EnvironmentCreationPage = (model) => {
-  const {envCreationModel: {currentWorkflow}} = model;
+  const {envCreationModel} = model;
+  const {
+    workflowLoaded, selectedConfigurationLabel, workflowMappings, setCreationModelConfiguration
+  } = envCreationModel;
+  const { deployEnvironment, defaultWorkflow } = envCreationModel;
+
+  const isReady = false;
   return h('', [
     detectorHeader(model),
+    h('.g2.flex-column.p2', [
+      h('.w-100.text-right', h('a', {
+        href: '?page=newEnvironmentAdvanced',
+        onclick: (e) => model.router.handleLinkEvent(e)
+      }, 'Advanced Configuration')),
 
-    h('.ph2.w-100.text-right', h('a', {
-      href: '?page=newEnvironmentAdvanced',
-      onclick: (e) => model.router.handleLinkEvent(e)
-    }, 'Advanced Configuration')),
-
-    workflowTemplateComponent(currentWorkflow)
-  ]);
+      workflowTemplateComponent(defaultWorkflow),
+      workflowMappingsComponent(
+        workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
+        workflowLoaded
+      ),
+      workflowCreationButtonComponent(isReady, deployEnvironment)
+    ])
+  ])
 };

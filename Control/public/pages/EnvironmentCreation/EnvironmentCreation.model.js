@@ -12,7 +12,7 @@
  */
 
 import {Observable, RemoteData} from '/js/src/index.js';
-import {jsonFetch} from '../../utilities/jsonFetch.js';
+import WorkflowForm from '../../workflow/WorkflowForm.js';
 
 /**
  * Model to store the state of the simplified environment creation page
@@ -25,46 +25,121 @@ export class EnvironmentCreationModel extends Observable {
   constructor(model) {
     super();
 
-    this._creationModel = null;
+    this._creationModel = new WorkflowForm();
+
     /**
      * @type {Model}
      */
     this._model = model;
 
-    this._currentWorkflow = RemoteData.notAsked();
+    /**
+     * Default workflow metadata information as set by AliECS (repository, revision, template)
+     */
+    this._defaultWorkflow = RemoteData.notAsked();
+    
+    /**
+     * Workflow Mappings (label, configuration) stored for deployment;
+     */
+    this._workflowMappings = RemoteData.notAsked();
+    
+    /**
+     * Saved Configuration retrieved for selected workflow from the mappings
+     */
+    this._workflowLoaded = RemoteData.notAsked();
+
+    this._selectedConfigurationLabel = '';
   }
 
   /**
    * Initialize model for environment creation page
    */
-  initPage() {
-    this._currentWorkflow = RemoteData.loading();
+  async initPage() {
+    this._defaultWorkflow = RemoteData.loading();
+    this._workflowMappings = RemoteData.loading();
     this.notify();
-    jsonFetch('/api/workflow/template/default/source', {method: 'GET'})
-      .then((data) => {
-        this._currentWorkflow = RemoteData.success(data);
-        this.notify();
-      })
-      .catch((error) => {
-        this._currentWorkflow = RemoteData.failure(error);
-        this.notify();
-      });
+
+    const {result: mappingResult, ok: isMappingOk} = await this._model.loader.get('/api/workflow/template/mappings');
+    this._workflowMappings = isMappingOk
+      ? RemoteData.success(mappingResult) : RemoteData.failure(mappingResult.message);
+
+    const {result: workflowResult, ok} = await this._model.loader.get('/api/workflow/template/default/source');
+    if (ok) {
+      this._defaultWorkflow = RemoteData.success(workflowResult);
+      this._creationModel.setTemplateInfo(workflowResult);
+    } else {
+      this._defaultWorkflow = RemoteData.failure(workflowResult.message);
+      this._creationModel = new WorkflowForm();
+    }
+    this.notify();
   }
 
   /**
-     * Returns the creation model
-     *
-     * @return {EnvironmentCreationModel|null} the creation model
-     */
+   * Check for selected user input and if ok, trigger action to deploy environment based on given configuration
+   * @param {String} configuration - selected configuration to deploy environment
+   * @returns {void}
+   */
+  async deployEnvironment(configuration) {
+    console.log('configuration selected', configuration)
+  }
+
+  /**
+   * Attempts to retrieve configuration for selected workflow template.
+   * If unable to load it, the Workflow form variables are reset
+   */
+  async setCreationModelConfiguration(configuration) {
+    this._workflowLoaded = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this._model.loader.get('/api/workflow/configuration', {name: configuration});
+    if (ok) {
+      this._workflowLoaded = RemoteData.success(result);
+      this._selectedConfigurationLabel = configuration;
+      this._creationModel.variables = result.variables;
+    } else {  
+      this._workflowLoaded = RemoteData.failure(result.message);
+      this._selectedConfigurationLabel = '';
+      this._creationModel.variables = {};
+    }
+    this.notify();
+  }
+
+  /**
+   * Returns the creation model that is to be passed to AliECS for deployment
+   *
+   * @return {WorkflowForm} the creation model
+   */
   get creationModel() {
     return this._creationModel;
   }
-
   /**
    * Getter for returning an instance of the current workflow remote data object
-   * @returns {RemoteData}
+   * @return {RemoteData}
    */
-  get currentWorkflow() {
-    return this._currentWorkflow;
+  get defaultWorkflow() {
+    return this._defaultWorkflow;
+  }
+
+  /**
+   * Getter for returning a list of environment creation mappings if they exist
+   * @return {<Array<{label:String, configuration:String}>}
+   */
+  get workflowMappings() {
+    return this._workflowMappings;
+  }
+
+  /**
+   * Return the loaded configuration RemoteData object
+   * @return {RemoteData}
+   */
+  get workflowLoaded() {
+    return this._workflowLoaded;
+  }
+
+  /**
+   * Return the label of the configuration selected by the user
+   * @return {String} - selected configuration label
+   */
+  get selectedConfigurationLabel() {
+    return this._selectedConfigurationLabel;
   }
 }

@@ -111,7 +111,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
       template: '',
       variables: {},
       basicVariables: {},
-      hosts: []
+      hosts: [],
+      _detectors: [],
     };
     assert.deepStrictEqual(initialForm, expectedForm, 'Initial form was not filled correctly');
   });
