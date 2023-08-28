@@ -48,9 +48,22 @@ export default class Model extends Observable {
     this.lock = new Lock(this);
     this.lock.bubbleTo(this);
 
+    // Setup router
+    this.router = new QueryRouter();
+    this.router.observe(this.handleLocationChange.bind(this));
+    this.router.bubbleTo(this);
+
+    // Services
+    this.detectors = new DetectorService(this);
+
+    this.services = {
+      detectors: this.detectors
+    }
+
     this.configuration = new Config(this);
     this.configuration.bubbleTo(this);
 
+    // Pages Models
     this.environment = new Environment(this);
     this.environment.bubbleTo(this);
 
@@ -66,13 +79,7 @@ export default class Model extends Observable {
     this.about = new About(this);
     this.about.bubbleTo(this);
 
-    // Setup router
-    this.router = new QueryRouter();
-    this.router.observe(this.handleLocationChange.bind(this));
-    this.router.bubbleTo(this);
 
-    // services
-    this.detectors = new DetectorService(this);
 
     this.notification = new O2Notification();
     this.notification.bubbleTo(this);

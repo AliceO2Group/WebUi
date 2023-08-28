@@ -14,6 +14,8 @@
 import {h} from '/js/src/index.js';
 import {detectorHeader} from './../../common/detectorHeader.js';
 import {workflowTemplateComponent} from './components/workflowTemplate.component.js';
+import {detectorsComponent} from './components/detectors.component.js';
+import {panel} from '../../common/panel/panel.js';
 
 /**
  * Header for the simplified creation environment page
@@ -29,7 +31,7 @@ export const EnvironmentCreationHeader = (model) => h('h4.w-100 text-center', 'N
  * @return {vnode} - main component for the creation page of an environment
  */
 export const EnvironmentCreationPage = (model) => {
-  const {envCreationModel: {currentWorkflow}} = model;
+  const {envCreationModel: {currentWorkflow, detectorsAvailability}} = model;
   return h('', [
     detectorHeader(model),
 
@@ -38,6 +40,15 @@ export const EnvironmentCreationPage = (model) => {
       onclick: (e) => model.router.handleLinkEvent(e)
     }, 'Advanced Configuration')),
 
-    workflowTemplateComponent(currentWorkflow)
+    h('.w-100.flex-column.ph2.g4', [
+      panel(
+        'Workflow Template Source Information',
+        workflowTemplateComponent(currentWorkflow),
+      ),
+      h('.flex-row', [
+        panel('Detectors', detectorsComponent(detectorsAvailability)),
+        panel('Hosts')
+      ]),
+    ]),
   ]);
 };

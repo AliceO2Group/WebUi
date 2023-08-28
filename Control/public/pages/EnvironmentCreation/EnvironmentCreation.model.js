@@ -32,14 +32,20 @@ export class EnvironmentCreationModel extends Observable {
     this._model = model;
 
     this._currentWorkflow = RemoteData.notAsked();
+
+    this._services = model.services;
+    
+    this._detectorsAvailability = RemoteData.notAsked();
   }
 
   /**
    * Initialize model for environment creation page
    */
-  initPage() {
+  async initPage() {
     this._currentWorkflow = RemoteData.loading();
+    this._detectorsAvailability = RemoteData.loading();
     this.notify();
+
     jsonFetch('/api/workflow/template/default/source', {method: 'GET'})
       .then((data) => {
         this._currentWorkflow = RemoteData.success(data);
@@ -49,6 +55,17 @@ export class EnvironmentCreationModel extends Observable {
         this._currentWorkflow = RemoteData.failure(error);
         this.notify();
       });
+    
+    this._detectorsAvailability = await this._services.detectors.getDetectorsAvailabilityAsRemote(true);
+    this.notify();
+  }
+
+  /**
+   * Getter for retrieving information on the detectors state
+   * @returns {RemoteData<Array<DetectorAvailability>>} - list of detectors state
+   */
+  get detectorsAvailability(){
+    return this._detectorsAvailability;
   }
 
   /**
@@ -66,5 +83,13 @@ export class EnvironmentCreationModel extends Observable {
    */
   get currentWorkflow() {
     return this._currentWorkflow;
+  }
+
+  /**
+   * Getter for returning an instance of the current detectors as per AliECS
+   * @returns {RemoteData<Array<String>>} - list of detectors name
+   */
+  get detectorsList() {
+    return this._detectorsList;
   }
 }
