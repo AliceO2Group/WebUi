@@ -52,7 +52,7 @@ class WorkflowTemplateService {
     return {
       repository,
       revision,
-      name: 'readout-dataflow'
+      template: 'readout-dataflow'
     };
   }
 
@@ -64,7 +64,11 @@ class WorkflowTemplateService {
     try {
       const mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_COMPONENT, RUNTIME_KEY);
       const mappings = JSON.parse(mappingsString);
-      return Array.isArray(mappings) ? mappings : [];
+      if (Array.isArray(mappings)) {
+        return mappings.sort(({label: labelA}, {label: labelB}) => labelA < labelB ? -1 : 1);
+      }
+
+      return [];
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }

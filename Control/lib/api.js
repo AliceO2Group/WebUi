@@ -115,7 +115,7 @@ module.exports.setup = (http, ws) => {
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironment.bind(envCtrl), {public: true});
-  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
+  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
 

@@ -43,7 +43,7 @@ describe('WorkflowTemplateService test suite', () => {
       assert.deepStrictEqual(templateInfo, {
         repository: 'optimal-workflow',
         revision: 'flp-suite',
-        name: 'readout-dataflow'
+        template: 'readout-dataflow'
       });
     });
 
@@ -65,13 +65,13 @@ describe('WorkflowTemplateService test suite', () => {
   });
 
   describe(`'retrieveWorkflowMappings' test suite`, async () => {
-    it('should successfully return mappings array', async () => {
+    it('should successfully return mappings array sorted alphabetically by label', async () => {
       const getRuntimeEntryByComponent = sinon.stub().resolves(
-        JSON.stringify([{label: 'config1', component: 'Config_1'}])
+        JSON.stringify([{label: 'config1', component: 'Config_1'}, {label: 'Aconfig1', component: 'Config_1'}])
       );
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
       const mappings = await workflowTemplate.retrieveWorkflowMappings();
-      assert.deepStrictEqual(mappings, [{label: 'config1', component: 'Config_1'}]);
+      assert.deepStrictEqual(mappings, [{label: 'Aconfig1', component: 'Config_1'}, {label: 'config1', component: 'Config_1'}]);
     });
 
     it('should successfully return empty array if Apricot returned empty object', async () => {
@@ -99,11 +99,11 @@ describe('WorkflowTemplateService test suite', () => {
   describe(`'retrieveWorkflowSavedConfiguration' test suite`, async () => {
     it('should successfully return workflow content parsed as JSON', async () => {
       const getRuntimeEntryByComponent = sinon.stub().resolves(
-        JSON.stringify({name: 'some config', detectors: ['TPC', 'FSA']})
+        JSON.stringify({template: 'some config', detectors: ['TPC', 'FSA']})
       );
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
       const mappings = await workflowTemplate.retrieveWorkflowSavedConfiguration();
-      assert.deepStrictEqual(mappings, {name: 'some config', detectors: ['TPC', 'FSA']});
+      assert.deepStrictEqual(mappings, {template: 'some config', detectors: ['TPC', 'FSA']});
     });
   });
 });
