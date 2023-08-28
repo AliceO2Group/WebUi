@@ -58,6 +58,8 @@ export class EnvironmentCreationModel extends Observable {
    * Initialize model for environment creation page
    */
   async initPage() {
+    this._model.workflow.initWorkflowPage();
+
     this._defaultWorkflow = RemoteData.loading();
     this._workflowMappings = RemoteData.loading();
     this._detectorsAvailability = RemoteData.loading();
@@ -76,7 +78,6 @@ export class EnvironmentCreationModel extends Observable {
       this._creationModel = new WorkflowForm();
     }
 
-    this._detectorsAvailability = await this._services.detectors.getDetectorsAvailabilityAsRemote(true);
     this.notify();
   }
 
@@ -101,11 +102,11 @@ export class EnvironmentCreationModel extends Observable {
     if (ok) {
       this._workflowLoaded = RemoteData.success(result);
       this._selectedConfigurationLabel = configuration;
-      this._creationModel.variables = result.variables;
+      this._model.workflow.form.variables = result.variables;
     } else {  
       this._workflowLoaded = RemoteData.failure(result.message);
       this._selectedConfigurationLabel = '';
-      this._creationModel.variables = {};
+      this._model.workflow.form.variables = {};
     }
     this.notify();
   }

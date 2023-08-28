@@ -22,8 +22,7 @@ import {detectorLockButton} from './../../../lock/lockButton.js';
  * @return {vnode}
  */
 export default (model) => {
-  const activeDetectors = model.workflow.flpSelection.activeDetectors;
-  const detectors = model.workflow.flpSelection.detectors;
+  const {detectors, activeDetectors} = model.workflow.flpSelection;
   return h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', h('h5.w-100.bg-gray-light', 'Detectors Selection')),
     h('.w-100.p2.panel',
@@ -41,11 +40,11 @@ export default (model) => {
  * @return {vnode}
  */
 const detectorsSelectionArea = (model, list) => {
-  return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
+  return h('.w-100.m1.text-left.shadow-level1.grid', {
     style: 'max-height: 40em;'
   }, [
-    list.filter(
-      (name) => (name === model.workflow.model.detectors.selected || !model.workflow.model.detectors.isSingleView()))
+    list
+      .filter((name) => (name === model.detectors.selected || !model.detectors.isSingleView()))
       .map((name) => detectorItem(model, name))
   ]);
 };

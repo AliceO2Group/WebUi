@@ -66,8 +66,8 @@ export default (workflow) =>
 const flpSelectionArea = (list, workflow) => {
   return list.length === 0 ? h('.f7.flex-column', 'Please select detector(s) first')
     :
-    h('.w-100.m1.text-left.shadow-level1.scroll-y', {
-      style: 'max-height: 40em;'
+    h('.w-100.m1.text-left.shadow-level1.grid-hosts.scroll-y', {
+      style: 'max-height: 30em;'
     }, [
       list.map((name) => {
         const detector = workflow.flpSelection.getDetectorForHost(name);

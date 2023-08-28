@@ -18,6 +18,8 @@ import {detectorsComponent} from './components/detectors.component.js';
 import {panel} from '../../common/panel/panel.js';
 import {workflowMappingsComponent} from './components/workflowMappings.component.js';
 import {workflowCreationButtonComponent} from './components/workflowCreationButton.component.js';
+import detectorsPanel from '../../workflow/panels/flps/detectorsPanel.js';
+import flpSelectionPanel from '../../workflow/panels/flps/flpSelectionPanel.js';
 
 /**
  * Header for the simplified creation environment page
@@ -37,15 +39,16 @@ export const EnvironmentCreationPage = (model) => {
   const {
     workflowLoaded, selectedConfigurationLabel, workflowMappings, setCreationModelConfiguration
   } = envCreationModel;
-  const {deployEnvironment, defaultWorkflow, detectorsAvailability} = envCreationModel;
+  const {deployEnvironment, defaultWorkflow} = envCreationModel;
 
   const isReady = false;
-  return h('', [
+  return h('.absolute-fill.scroll-y', [
     detectorHeader(model),
     h('.g2.flex-column.p2', [
-      h('.w-100.text-right', h('a', {
-        href: '?page=newEnvironmentAdvanced',
-        onclick: (e) => model.router.handleLinkEvent(e)
+      h('.w-100.text-right', h('', {
+        onclick: (e) => {
+          model.router.go('?page=newEnvironmentAdvanced');
+        },
       }, 'Advanced Configuration')),
 
       h('.w-100.flex-column.ph2.g3', [
@@ -60,10 +63,12 @@ export const EnvironmentCreationPage = (model) => {
             workflowLoaded
           ),
         ),
-        h('.flex-row', [
-          panel('Detectors', detectorsComponent(detectorsAvailability)),
-          panel('Hosts')
+        h('.flex-row.text-center', [
+          h('.w-30', detectorsPanel(model)),
+          h('.w-70', flpSelectionPanel(model.workflow))
         ]),
+
+
         workflowCreationButtonComponent(isReady, deployEnvironment)
       ])
     ])
