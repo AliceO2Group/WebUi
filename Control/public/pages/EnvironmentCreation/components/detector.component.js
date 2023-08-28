@@ -26,9 +26,12 @@ import {h, iconLockLocked, iconLockUnlocked} from '/js/src/index.js';
 export const detectorComponent =
   (detector, lockCallback, selectionCallback) => {
     const {name, isLockedBy, isActive} = detector;
-    return h('.text-center.f3.shadow-level1.flex-row', [
+    return h('.text-center.f3.shadow-level1.flex-row', {
+      id: `${name}-detector`,
+      key: `${name}-detector`,
+    }, [
       h('.w-40', detectorLock(name, isLockedBy, undefined, lockCallback)),
-      h('.w-60', detectorSelection(detector, undefined, isLockedBy && isCurrentOwner, isActive, selectionCallback))
+      // h('.w-60', detectorSelection(detector, undefined, isLockedBy && isCurrentOwner, isActive, selectionCallback))
     ])
   };
 

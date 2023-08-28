@@ -23,29 +23,26 @@ import {h} from '/js/src/index.js';
  * @returns {vnode}
  */
 export const workflowMappingsComponent = (mapping, selected = '', callbackSelection, workflowLoaded) =>
-  h('.w-100.flex-column', [
-    h('h5.p2.panel-title.text-center', 'Choose from an existing configuration'),
-    h('.w-100.flex-column.panel.pv2',
-      h('.flex-row.flex-wrap.g2.justify-center', mapping.match({
-        NotAsked: () => null,
-        Loading: () => 'Retrieving pre-saved configurations from AliECS...',
-        Success: (list) =>
-          list.length === 0
-            ? errorMapping('No Configurations found, please use Advanced Configuration for environment creation')
-            : list.map(({label, configuration}) =>
-              selectConfiguration(label, label === selected, configuration, callbackSelection)
-            ),
-        Failure: () => errorMapping('Unable to retrieve list of pre-saved configuration from AliECS')
-      }),
-      ),
-      h('.flex-row.justify-center', workflowLoaded.match({
-        NotAsked: () => null,
-        Loading: () => `Retrieving configuration for ${selected}`,
-        Success: () => h('', `Successfully loaded configuration for ${selected}`),
-        Failure: (error) => errorMapping(`Unable to retrieve configuration for ${selected} due to ${error}`)
-      })
-      )
+  h('.w-100.flex-column.pv2', [
+    h('.flex-row.flex-wrap.g2.justify-center', mapping.match({
+      NotAsked: () => null,
+      Loading: () => 'Retrieving pre-saved configurations from AliECS...',
+      Success: (list) =>
+        list.length === 0
+          ? errorMapping('No Configurations found, please use Advanced Configuration for environment creation')
+          : list.map(({label, configuration}) =>
+            selectConfiguration(label, label === selected, configuration, callbackSelection)
+          ),
+      Failure: () => errorMapping('Unable to retrieve list of pre-saved configuration from AliECS')
+    }),
     ),
+    h('.flex-row.justify-center', workflowLoaded.match({
+      NotAsked: () => null,
+      Loading: () => `Retrieving configuration for ${selected}`,
+      Success: () => h('', `Successfully loaded configuration for ${selected}`),
+      Failure: (error) => errorMapping(`Unable to retrieve configuration for ${selected} due to ${error}`)
+    })
+    )
   ]);
 
 /**
@@ -65,5 +62,7 @@ const errorMapping = (message) => h('.danger', message);
 const selectConfiguration = (label, isSelected = true, configuration, callback) =>
   h('button.btn', {
     class: isSelected ? 'active' : '',
+    key: `${label}-configuration`,
+    id: `${label}-configuration`,
     onclick: () => callback(configuration)
   }, label);

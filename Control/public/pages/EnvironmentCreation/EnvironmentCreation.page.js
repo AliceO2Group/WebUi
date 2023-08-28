@@ -48,14 +48,17 @@ export const EnvironmentCreationPage = (model) => {
         onclick: (e) => model.router.handleLinkEvent(e)
       }, 'Advanced Configuration')),
 
-      h('.w-100.flex-column.ph2.g4', [
+      h('.w-100.flex-column.ph2.g3', [
         panel(
           'Workflow Template Source Information',
           workflowTemplateComponent(defaultWorkflow),
         ),
-        workflowMappingsComponent(
-          workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
-          workflowLoaded
+        panel(
+          'Choose from an existing configuration',
+          workflowMappingsComponent(
+            workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
+            workflowLoaded
+          ),
         ),
         h('.flex-row', [
           panel('Detectors', detectorsComponent(detectorsAvailability)),
