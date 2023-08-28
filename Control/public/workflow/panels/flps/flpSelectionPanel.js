@@ -20,7 +20,7 @@ import pageLoading from './../../../common/pageLoading.js';
  * @param {Object} workflow
  * @return {vnode}
  */
-export default (workflow) =>
+export default (workflow, maxHeight) =>
   h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', [
       h('.flex-column.justify-center.f6',
@@ -44,7 +44,7 @@ export default (workflow) =>
       workflow.flpSelection.list.match({
         NotAsked: () => h('.f7.flex-column', 'Please select detector(s) first'),
         Loading: () => pageLoading(2),
-        Success: (list) => flpSelectionArea(list, workflow),
+        Success: (list) => flpSelectionArea(list, workflow, maxHeight),
         Failure: (error) => h('.f7.flex-column', [
           error.includes(404) ?
             h('', error)
@@ -63,11 +63,11 @@ export default (workflow) =>
  * @param {Object} workflow
  * @return {vnode}
  */
-const flpSelectionArea = (list, workflow) => {
+const flpSelectionArea = (list, workflow, maxHeight = 34.2) => {
   return list.length === 0 ? h('.f7.flex-column', 'Please select detector(s) first')
     :
     h('.w-100.m1.text-left.shadow-level1.grid-hosts.scroll-y', {
-      style: 'max-height: 30em;'
+      style: `max-height: ${maxHeight}em;`
     }, [
       list.map((name) => {
         const detector = workflow.flpSelection.getDetectorForHost(name);

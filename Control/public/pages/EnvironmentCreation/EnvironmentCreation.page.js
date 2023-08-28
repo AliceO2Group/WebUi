@@ -39,38 +39,35 @@ export const EnvironmentCreationPage = (model) => {
   const {
     workflowLoaded, selectedConfigurationLabel, workflowMappings, setCreationModelConfiguration
   } = envCreationModel;
-  const {deployEnvironment, defaultWorkflow} = envCreationModel;
+  const {deployEnvironment, defaultWorkflow, isReady, setOdcNumberOfEpns} = envCreationModel;
 
-  const isReady = false;
   return h('.absolute-fill.scroll-y', [
     detectorHeader(model),
     h('.g2.flex-column.p2', [
-      h('.w-100.text-right', h('', {
-        onclick: (e) => {
-          model.router.go('?page=newEnvironmentAdvanced');
-        },
-      }, 'Advanced Configuration')),
-
-      h('.w-100.flex-column.ph2.g3', [
-        panel(
-          'Workflow Template Source Information',
-          workflowTemplateComponent(defaultWorkflow),
-        ),
-        panel(
-          'Choose from an existing configuration',
-          workflowMappingsComponent(
-            workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
-            workflowLoaded
+      h('.w-100.flex-row.g3', [
+        h('.w-40.flex-column', [
+          panel(
+            'Workflow Template',
+            workflowTemplateComponent(defaultWorkflow),
           ),
-        ),
-        h('.flex-row.text-center', [
-          h('.w-30', detectorsPanel(model)),
-          h('.w-70', flpSelectionPanel(model.workflow))
+          panel(
+            'Choose configuration',
+            h('.flex-column', [
+              workflowMappingsComponent(
+                workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
+                workflowLoaded, setOdcNumberOfEpns.bind(envCreationModel)
+              ),
+            ])
+          ),
+          h('.w-100.text-center', detectorsPanel(model)),
+        ]),
+        h('.flex-row.text-center.w-100', [
+          flpSelectionPanel(model.workflow, 43.3)
         ]),
 
+      ]),
+      workflowCreationButtonComponent(isReady, deployEnvironment.bind(envCreationModel))
 
-        workflowCreationButtonComponent(isReady, deployEnvironment)
-      ])
     ])
   ]);
 };
