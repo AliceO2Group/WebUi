@@ -26,7 +26,8 @@ import {
 export default (model) => h('.absolute-fill scroll-y.flex-column', [
   h('h5.menu-title-large.mh1',
     model.sideBarMenu ? 'Environments' : 'ENVS'),
-  menuItem(model, 'Create', 'newEnvironment', iconPlus()),
+  menuItem(model, 'Create', 'newEnvironmentAdvanced', iconPlus()),
+  menuItem(model, 'Create (Beta)', 'newEnvironment', iconPlus()),
   menuItem(model, 'Active', 'environments', iconGridTwoUp()),
   menuItem(model, 'Task list', 'taskList', iconGridThreeUp()),
   h('h5.menu-title-large.mh1',
