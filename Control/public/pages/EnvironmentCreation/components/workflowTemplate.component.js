@@ -11,7 +11,6 @@
  *  or submit itself to any jurisdiction.
  */
 
-import {rowForCard} from '../../../common/card/rowForCard.js';
 import {h} from '/js/src/index.js';
 
 /**

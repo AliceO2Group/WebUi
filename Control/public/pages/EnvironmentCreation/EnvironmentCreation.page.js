@@ -14,7 +14,6 @@
 import {h} from '/js/src/index.js';
 import {detectorHeader} from './../../common/detectorHeader.js';
 import {workflowTemplateComponent} from './components/workflowTemplate.component.js';
-import {detectorsComponent} from './components/detectors.component.js';
 import {panel} from '../../common/panel/panel.js';
 import {workflowMappingsComponent} from './components/workflowMappings.component.js';
 import {workflowCreationButtonComponent} from './components/workflowCreationButton.component.js';
