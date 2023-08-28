@@ -43,7 +43,7 @@ describe('WorkflowTemplateService test suite', () => {
       assert.deepStrictEqual(templateInfo, {
         repository: 'optimal-workflow',
         revision: 'flp-suite',
-        name: 'readout-dataflow'
+        template: 'readout-dataflow'
       });
     });
 
@@ -99,11 +99,11 @@ describe('WorkflowTemplateService test suite', () => {
   describe(`'retrieveWorkflowSavedConfiguration' test suite`, async () => {
     it('should successfully return workflow content parsed as JSON', async () => {
       const getRuntimeEntryByComponent = sinon.stub().resolves(
-        JSON.stringify({name: 'some config', detectors: ['TPC', 'FSA']})
+        JSON.stringify({template: 'some config', detectors: ['TPC', 'FSA']})
       );
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
       const mappings = await workflowTemplate.retrieveWorkflowSavedConfiguration();
-      assert.deepStrictEqual(mappings, {name: 'some config', detectors: ['TPC', 'FSA']});
+      assert.deepStrictEqual(mappings, {template: 'some config', detectors: ['TPC', 'FSA']});
     });
   });
 });

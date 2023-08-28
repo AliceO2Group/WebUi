@@ -52,7 +52,7 @@ class WorkflowTemplateService {
     return {
       repository,
       revision,
-      name: 'readout-dataflow'
+      template: 'readout-dataflow'
     };
   }
 

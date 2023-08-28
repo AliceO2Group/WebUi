@@ -21,14 +21,14 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export const workflowTemplateComponent = (workflow) =>
-  h('.w-100.flex-column.ph2', [
+  h('.w-100.flex-column', [
     h('h5.p2.panel-title.text-center', 'Workflow Template Source Information'),
     h('.panel',
       workflow.match({
         NotAsked: () => null,
         Loading: () => 'Retrieving information from AliECS...',
-        Success: ({name, repository, revision}) => h('.flex-row.flex-wrap.justify-around', [
-          rowForCard(h('h5', 'Name: '), name),
+        Success: ({template, repository, revision}) => h('.flex-row.flex-wrap.justify-around', [
+          rowForCard(h('h5', 'Template: '), template),
           rowForCard(h('h5', 'Repository: '), repository),
           rowForCard(h('h5', 'Revision: '), revision),
         ]),
