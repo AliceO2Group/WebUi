@@ -24,8 +24,8 @@ export const workflowTemplateComponent = (workflow) =>
   workflow.match({
     NotAsked: () => null,
     Loading: () => 'Retrieving information from AliECS...',
-    Success: ({name, repository, revision}) => h('.flex-row.flex-wrap.justify-around', [
-      rowForCard(h('h5', 'Name: '), name),
+    Success: ({template, repository, revision}) => h('.flex-row.flex-wrap.justify-around', [
+      rowForCard(h('h5', 'Template: '), template),
       rowForCard(h('h5', 'Repository: '), repository),
       rowForCard(h('h5', 'Revision: '), revision),
     ]),

@@ -74,8 +74,8 @@ module.exports.setup = (http, ws) => {
   const apricotService = new ApricotService(apricotProxy);
 
   const envService = new EnvironmentService(ctrlProxy, apricotService);
-  const workflowService = new WorkflowTemplateService(ctrlProxy);
-  
+  const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
+
   const envCtrl = new EnvironmentController(envService);
   const workflowController = new WorkflowTemplateController(workflowService);
 
@@ -111,9 +111,11 @@ module.exports.setup = (http, ws) => {
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
 
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
-  
+  http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController))
+  http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
+
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironment.bind(envCtrl), {public: true});
-  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
+  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
 

@@ -168,7 +168,7 @@ class ControlService {
    * @param {JSON} options - optional parameters that are to be set to the gRPC call (e.g deadline)
    * @return {Promise}
    */
-  executeCommandNoResponse(method, body = {}, options = {}) {
+  executeCommandNoResponse(method, body = {}, options = undefined) {
     return this.ctrlProx[method](body, options);
   }
 

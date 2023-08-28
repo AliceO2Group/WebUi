@@ -44,7 +44,6 @@ export const jsonFetch = async (endpoint, options) => {
       detail: e.message,
     };
   }
-
   if (result === null || result) {
     return result;
   }

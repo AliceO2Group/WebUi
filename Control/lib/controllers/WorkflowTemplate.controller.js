@@ -43,6 +43,41 @@ class WorkflowTemplateController {
       updateExpressResponseFromNativeError(res, error);
     }
   }
+
+  /**
+   * API - GET endpoint for retrieving mappings of what environment creations are allowed in simplified mode
+   * @param {Request} _ - HTTP Request object
+   * @param {Response} res - HTTP Response object with EnvironmentDetails
+   * @returns {void}
+   */
+  async getWorkflowMapping(_, res) {
+    try {
+      const mappings = await this._workflowService.retrieveWorkflowMappings();
+      res.status(200).json(mappings);
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
+   * API - GET endpoint for retrieving by name a saved configuration content
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object with EnvironmentDetails
+   * @returns {void}
+   */
+  async getWorkflowConfiguration(req, res) {
+    try {
+      const {name} = req.query;
+      if (!name) {
+        res.status(400).json({message: 'No name for the configuration provided'});
+        return;
+      }
+      const mappings = await this._workflowService.retrieveWorkflowSavedConfiguration(name);
+      res.status(200).json(mappings);
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, error);
+    }
+  }
 }
 
 module.exports = {WorkflowTemplateController};

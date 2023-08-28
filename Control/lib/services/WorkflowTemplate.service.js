@@ -12,7 +12,11 @@
  * or submit itself to any jurisdiction.
 */
 
+const {grpcErrorToNativeError} = require('../errors/grpcErrorToNativeError.js');
 const {NotFoundError} = require('./../errors/NotFoundError.js');
+const RUNTIME_COMPONENT = 'COG';
+const RUNTIME_CONFIGURATION = 'COG-v1';
+const RUNTIME_KEY = 'workflow-mappings';
 
 /**
  * WorkflowTemplateService class to be used to retrieve data from AliEcs Core about workflow templates to be used for environment creation
@@ -20,10 +24,12 @@ const {NotFoundError} = require('./../errors/NotFoundError.js');
 class WorkflowTemplateService {
   /**
    * Constructor for inserting dependencies needed to retrieve environment data
-   * @param {GrpcProxy} coreGrpc 
+   * @param {GrpcProxy} coreGrpc - service for retrieving information through AliECS Core gRPC connection
+   * @param {ApricotService} apricotGrpc - service for retrieving information through AliECS Apricot gRPC connection
    */
-  constructor(coreGrpc) {
+  constructor(coreGrpc, apricotGrpc) {
     this._coreGrpc = coreGrpc;
+    this._apricotGrpc = apricotGrpc;
   }
 
   /**
@@ -38,16 +44,49 @@ class WorkflowTemplateService {
     if (!defaultRepository) {
       throw new NotFoundError(`Unable to find a default repository`);
     }
-    const {name: repositoryName, defaultRevision} = defaultRepository;
-    
-    if (!defaultRevision) {
+    const {name: repository, defaultRevision: revision} = defaultRepository;
+
+    if (!revision) {
       throw new NotFoundError(`Unable to find a default revision`);
     }
     return {
-      repository: repositoryName, 
-      revision: defaultRevision,
-      name: 'readout-dataflow'
+      repository,
+      revision,
+      template: 'readout-dataflow'
     };
+  }
+
+  /**
+   * Retrieve a list of mappings for simplified creation of environments based on workflow saved configurations
+   * @return {Array<{label: String, configuration: String}>} - list of mappings to be displayed
+   */
+  async retrieveWorkflowMappings() {
+    try {
+      const mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_COMPONENT, RUNTIME_KEY);
+      const mappings = JSON.parse(mappingsString);
+      if (Array.isArray(mappings)) {
+        return mappings.sort(({label: labelA}, {label: labelB}) => labelA < labelB ? -1 : 1);
+      }
+
+      return [];
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
+  }
+
+  /**
+   * Using apricot service, retrieve the content of a saved configuration by name
+   * @param {String} name - configuration that needs to be retrieved
+   * @return {Object} - object with saved configuration
+   */
+  async retrieveWorkflowSavedConfiguration(name) {
+    try {
+      const configurationString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_CONFIGURATION, name);
+      const configuration = JSON.parse(configurationString);
+      return configuration
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
   }
 }
 

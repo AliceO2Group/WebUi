@@ -180,7 +180,7 @@ const btnUpdateEnvConfiguration = (model) => {
 
   if (isConfigurationSelected) {
     try {
-      const owner = JSON.parse(model.workflow.loadedConfiguration.payload.payload).user.personid;
+      const owner = model.workflow.loadedConfiguration.payload.user.personid;
       isUserAllowedToUpdate = isUserAllowedToUpdate || owner == model.session.personid;
     } catch (error) {
       console.error(error);

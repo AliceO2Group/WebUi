@@ -18,6 +18,7 @@ const assert = require('assert');
 const {AssertionError} = require('assert');
 
 const ApricotService = require('./../../../lib/control-core/ApricotService.js');
+const {APRICOT_COMMANDS: {GetRuntimeEntry}} = require('./../../../lib/control-core/ApricotCommands.js');
 
 describe('ApricotService test suite', () => {
   describe('Check Constructor', () => {
@@ -252,9 +253,9 @@ describe('ApricotService test suite', () => {
       };
       const session = {username: 'user', personid: 11};
       const expectedSortedVars = {
-        user: { username: 'user', personid: 11 },
-        variables: { hosts: [ 'flp01' ], some_enabled: 'true', some_other: 'false' },
-        detectors: [ 'TST' ],
+        user: {username: 'user', personid: 11},
+        variables: {hosts: ['flp01'], some_enabled: 'true', some_other: 'false'},
+        detectors: ['TST'],
         workflow: 'readout',
         revision: 'master',
         repository: 'git/repo.git',
@@ -501,6 +502,31 @@ describe('ApricotService test suite', () => {
 
       assert.throws(() => service._buildConfigurationObject(req),
         new Error(`Configuration cannot be saved without the following fields: repository`));
+    });
+  });
+
+  describe('`getRuntimeEntryByComponent` test suite', () => {
+    let stub;
+    let apricotService;
+    before(() => {
+      stub = sinon.stub();
+      stub.withArgs({component: 'COG', key: 'found-one'}).resolves({payload: JSON.stringify([{label: 'test', configuration: 'test_1'}])});
+      stub.withArgs({component: 'COG', key: 'not-found'}).rejects({code: 2, details: 'nil response for that key'});
+      stub.withArgs({component: 'COG', key: 'general-error'}).rejects({code: 2, details: 'some general error'});
+      apricotService = new ApricotService({[GetRuntimeEntry]: stub});
+    });
+
+    it('should successfully return payload for component specified', async () => {
+      const content = await apricotService.getRuntimeEntryByComponent('COG', 'found-one');
+      assert.deepStrictEqual(content, JSON.stringify([{label: 'test', configuration: 'test_1'}]));
+    });
+
+    it('should reject with updated error code on gRPC error', async () => {
+      await assert.rejects(() => apricotService.getRuntimeEntryByComponent('COG', 'not-found'), {code: 5, details: 'nil response for that key'});
+    });
+
+    it('should successfully return payload for component specified', async () => {
+      await assert.rejects(() => apricotService.getRuntimeEntryByComponent('COG', 'general-error'), {code: 2, details: 'some general error'});
     });
   });
 });
