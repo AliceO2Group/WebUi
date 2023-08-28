@@ -31,9 +31,11 @@ export const workflowMappingsComponent = (mapping, selected = '', callbackSelect
       Success: (list) =>
         list.length === 0
           ? errorMapping('No Configurations found, please use Advanced Configuration for environment creation')
-          : h('.flex-row.flex-wrap.g1', [list.map(({label, configuration}) =>
-            selectConfigurationButton(label, configuration === selected, configuration, callbackSelection)
-          )]),
+          : h('.flex-row.flex-wrap.g1.w-100', [
+            list.map(({label, configuration}) =>
+              selectConfigurationButton(label, configuration === selected, configuration, callbackSelection)
+            )]
+          ),
       Failure: () => errorMapping('No saved configurations, use advanced creation')
     }),
     ),
