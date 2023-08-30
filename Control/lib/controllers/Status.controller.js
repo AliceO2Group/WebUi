@@ -138,7 +138,7 @@ class StatusController {
   /**
    * API - GET endpoint for retrieving data about AliECS Integrated Services
    * @param {Request} _ - HTTP request object
-   * @param {*} res - HTTP response object
+   * @param {Response} res - HTTP response object
    */
   async getAliECSIntegratedServicesStatus(_, res) {
     try {
@@ -147,6 +147,22 @@ class StatusController {
     } catch (error) {
       const message = 'Unable to retrieve status of AliECS Integrated Services';
       this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      res.status(502).json({message});
+    }
+  }
+
+  /**
+   * API - GET endpoint for retrieving information on system compatibility
+   * @param {Request} _ - HTTP request object
+   * @param {Response} res - HTTP response object
+   */
+  async getSystemCompatibility(_, res) {
+    try {
+      const systemCompatibility = await this._statusService.getCompatibilityStateAsComponent();
+      res.status(200).json(systemCompatibility);
+    } catch (error) {
+      console.error(error);
+      const message = 'Unable to retrieve FLP and PDP versions';
       res.status(502).json({message});
     }
   }

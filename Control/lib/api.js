@@ -141,6 +141,7 @@ module.exports.setup = (http, ws) => {
   http.get('/status/gui', statusController.getGuiStatus.bind(statusController), {public: true});
   http.get('/status/apricot', statusController.getApricotStatus.bind(statusController));
   http.get('/status/core', coreMiddleware[0], statusController.getAliECSStatus.bind(statusController));
+  http.get('/status/system', statusController.getSystemCompatibility.bind(statusController));
   http.get('/status/core/services', coreMiddleware[0],
     statusController.getAliECSIntegratedServicesStatus.bind(statusController)
   );
