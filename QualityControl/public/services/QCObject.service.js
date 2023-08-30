@@ -100,15 +100,16 @@ export default class QCObjectService {
    * Ask server for an object by name and optionally timestamp
    * If timestamp is not provided, Date.now() will be used to request latest version of the object
    * @param {string} objectId - name/path of the object to get
+   * @param {string} id - id/etag as stored by CCDB
    * @param {number} timestamp - timestamp in ms
    * @param {string} filter - filter as string to be applied on query
    * @param {Class<Observable>} that - object to be used to notify
    * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectById(objectId, timestamp = undefined, filter = undefined, that = this) {
+  async getObjectById(objectId, id = '', timestamp = undefined, filter = undefined, that = this) {
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      const url = this._buildURL(`/api/object/${objectId}?`, undefined, timestamp, filter);
+      const url = this._buildURL(`/api/object/${objectId}?`, id, timestamp, filter);
 
       const { result, ok } = await this.model.loader.get(url);
       if (ok) {
