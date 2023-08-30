@@ -38,6 +38,7 @@ export default class About extends Observable {
       gui: 'gui',
       [INTEGRATED_SERVICE_LABEL]: 'core/services',
       notification: 'notification',
+      system: 'system',
     };
 
     this.services = {};
