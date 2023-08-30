@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+/* eslint-disable max-len */
 
 const assert = require('assert');
 const nock = require('nock');
@@ -18,6 +19,7 @@ const sinon = require('sinon');
 const {NotificationService} = require('@aliceo2/web-ui');
 
 const {StatusService} = require('./../../../lib/services/Status.service.js');
+const {RUNTIME_COMPONENTS} = require('./../../../lib/common/runtimeComponents.enum.js');
 
 describe('StatusService test suite', () => {
   describe('Test StatusService initialization', () => {
@@ -151,7 +153,6 @@ describe('StatusService test suite', () => {
 
       assert.deepStrictEqual(grafana.status, {ok: true, configured: true, isCritical: false});
       assert.strictEqual(grafana.endpoint, `http://${expectedInfo.hostname}:${expectedInfo.port}`);
-
     });
 
     it('should successfully retrieve status and info about Grafana that it is not running', async () => {
@@ -292,6 +293,60 @@ describe('StatusService test suite', () => {
         status: {ok: false, configured: false, isCritical: true, message: 'This service was not configured'}
       };
       assert.deepStrictEqual(status, expected);
+    });
+  });
+
+  describe('System Components status test suite', async () => {
+    it('should successfully return both FLP and PDP versions', async () => {
+      const getRuntimeEntryByComponent = sinon.stub();
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).resolves('0.101.0-1');
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1')
+
+      const statusService = new StatusService();
+      statusService._apricotService = {getRuntimeEntryByComponent};
+
+      const {status, extras} = await statusService.retrieveSystemCompatibility();
+      assert.deepStrictEqual(status, {ok: true, configured: true, isCritical: true});
+      assert.deepStrictEqual(extras, {flpVersion: '0.101.0-1', pdpVersion: 'DDv1.5.6-experimental-flp-suite-v0.101.0-1'});
+    });
+
+    it('should successfully return only PDP version even when FLP fails', async () => {
+      const getRuntimeEntryByComponent = sinon.stub();
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).rejects(new Error('nil'));
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1');
+
+      const statusService = new StatusService();
+      statusService._apricotService = {getRuntimeEntryByComponent};
+
+      const {status, extras} = await statusService.retrieveSystemCompatibility();
+      assert.deepStrictEqual(status, {ok: true, configured: true, isCritical: true});
+      assert.deepStrictEqual(extras, {flpVersion: '', pdpVersion: 'DDv1.5.6-experimental-flp-suite-v0.101.0-1'});
+    });
+
+    it('should successfully return only FLP version even when PDP fails', async () => {
+      const getRuntimeEntryByComponent = sinon.stub();
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).resolves('0.101.0-1');
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).rejects(new Error('nil'));
+
+      const statusService = new StatusService();
+      statusService._apricotService = {getRuntimeEntryByComponent};
+
+      const {status, extras} = await statusService.retrieveSystemCompatibility();
+      assert.deepStrictEqual(status, {ok: true, configured: true, isCritical: true});
+      assert.deepStrictEqual(extras, {flpVersion: '0.101.0-1', pdpVersion: ''});
+    });
+
+    it('should return error status when the 2 versions do not match', async () => {
+      const getRuntimeEntryByComponent = sinon.stub();
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).resolves('0.102.0-1');
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1');
+
+      const statusService = new StatusService();
+      statusService._apricotService = {getRuntimeEntryByComponent};
+
+      const {status, extras} = await statusService.retrieveSystemCompatibility();
+      assert.deepStrictEqual(status, {ok: false, configured: true, isCritical: true});
+      assert.deepStrictEqual(extras, {flpVersion: '0.102.0-1', pdpVersion: 'DDv1.5.6-experimental-flp-suite-v0.101.0-1'});
     });
   });
 

@@ -16,14 +16,9 @@ const projPackage = require('./../../package.json');
 const {httpGetJson} = require('./../utils.js');
 const {Service} = require('./../dtos/Service.js');
 const {SERVICES: {STATUS}} = require('./../common/constants.js');
-
-const CONSUL_KEY = 'CONSUL';
-const GRAFANA_KEY = 'GRAFANA';
-const NOTIFICATION_SYSTEM_KEY = 'NOTIFICATION_SYSTEM';
-
-const ALIECS_SERVICES_KEY = 'ALIECS_SERVICES';
-const ALIECS_CORE_KEY = 'ALIECS_CORE';
-const APRICOT_KEY = 'APRICOT';
+const {Log} = require('@aliceo2/web-ui');
+const {STATUS_COMPONENTS_KEYS} = require('./../common/statusComponents.enum.js');
+const {RUNTIME_COMPONENTS} = require('./../common/runtimeComponents.enum.js');
 
 const NOT_CONFIGURED_MESSAGE = 'This service was not configured';
 
@@ -67,6 +62,7 @@ class StatusService {
     this._wsService = wsService;
 
     this._statusMap = new Map();
+    this._logger = new Log('cog/status');
   }
 
   /**
@@ -83,7 +79,7 @@ class StatusService {
         status = {ok: false, configured: true, isCritical: true, message: error.toString()};
       }
     }
-    this._updateStatusMaps(CONSUL_KEY, status);
+    this._updateStatusMaps(STATUS_COMPONENTS_KEYS.CONSUL_KEY, status);
     return status;
   }
 
@@ -124,7 +120,7 @@ class StatusService {
       }
     }
     const aliecs = Object.assign({status, name: 'AliECS Core'}, Service.fromObjectAsJson(configuration))
-    this._updateStatusMaps(ALIECS_CORE_KEY, status);
+    this._updateStatusMaps(STATUS_COMPONENTS_KEYS.ALIECS_CORE_KEY, status);
     return aliecs;
   }
 
@@ -141,7 +137,7 @@ class StatusService {
       try {
         const {services} = await this._ctrlService.getIntegratedServicesInfo();
         Object.entries(services)
-          .filter(([key]) => key !=='testplugin')
+          .filter(([key]) => key !== 'testplugin')
           .forEach(([key, value]) => {
             const status = {
               ok: value?.connectionState !== 'TRANSIENT_FAILURE' && value?.connectionState !== 'SHUTDOWN',
@@ -154,19 +150,19 @@ class StatusService {
               status,
               ...Service.fromObjectAsJson(value)
             };
-            this._updateStatusMaps(ALIECS_SERVICES_KEY, {status: {ok: true, configured: true}});
+            this._updateStatusMaps(STATUS_COMPONENTS_KEYS.ALIECS_SERVICES_KEY, {status: {ok: true, configured: true}});
             this._updateStatusMaps(`INTEG_SERVICE-${key.toLocaleUpperCase()}`, integServices[key]);
           });
       } catch (error) {
         const status = {ok: false, configured: true, message: error.toString(), isCritical: true};
-        this._updateStatusMaps(ALIECS_SERVICES_KEY);
+        this._updateStatusMaps(STATUS_COMPONENTS_KEYS.ALIECS_SERVICES_KEY);
         integServices = {
           ALL: {status}
         };
       }
     } else {
       const status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE, isCritical: true};
-      this._updateStatusMaps(ALIECS_SERVICES_KEY, status);
+      this._updateStatusMaps(STATUS_COMPONENTS_KEYS.ALIECS_SERVICES_KEY, status);
       integServices = {
         ALL: {status}
       }
@@ -188,7 +184,7 @@ class StatusService {
         status = {ok: false, configured: true, isCritical: true, message: error.toString()}
       }
     }
-    this._updateStatusMaps(APRICOT_KEY, status);
+    this._updateStatusMaps(STATUS_COMPONENTS_KEYS.APRICOT_KEY, status);
     return status;
   }
 
@@ -226,7 +222,7 @@ class StatusService {
         status = {ok: false, configured: true, isCritical: false, message: error.toString()};
       }
     }
-    this._updateStatusMaps(GRAFANA_KEY, status);
+    this._updateStatusMaps(STATUS_COMPONENTS_KEYS.GRAFANA_KEY, status);
     return status;
   }
 
@@ -256,7 +252,7 @@ class StatusService {
         status = {configured: true, ok: false, isCritical: false, message: error.name};
       }
     }
-    this._updateStatusMaps(NOTIFICATION_SYSTEM_KEY, status);
+    this._updateStatusMaps(STATUS_COMPONENTS_KEYS.NOTIFICATION_SYSTEM_KEY, status);
     return status;
   }
   /**
@@ -286,6 +282,57 @@ class StatusService {
     }
     gui.status = {ok: true, configured: true, isCritical: true};
     return gui;
+  }
+
+  /**
+   * Method to retrieve versions of FLP & PDP and check their compatibility
+   * @returns {object<FLP: <string>, PDP: string>} - 
+   */
+  async getCompatibilityStateAsComponent() {
+    const {status, extras} = await this.retrieveSystemCompatibility();
+    return {
+      status,
+      name: 'General System Components',
+      ...status.configured && Service.fromObjectAsJson({...extras, showExtras: true})
+    }
+  }
+
+  /**
+   * Retrieve the compatibility of the system by checking FLP and PDP versions are compatible
+   * @returns {object} - containing status of the system and extra information on the 2 components versions
+   */
+  async retrieveSystemCompatibility() {
+    let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE, isCritical: false};
+
+    let flpVersion = '';
+    try {
+      flpVersion = await this._apricotService.getRuntimeEntryByComponent(RUNTIME_COMPONENTS.FLP_VERSION_KEY, '');
+    } catch (error) {
+      this._logger.warnMessage(error, {level: 26, system: 'GUI', facility: 'cog/status'});
+    }
+
+    let pdpVersion = '';
+    try {
+      pdpVersion = await this._apricotService.getRuntimeEntryByComponent(
+        RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY
+      );
+    } catch (error) {
+      this._logger.warnMessage(error, {level: 26, system: 'GUI', facility: 'cog/status'});
+    }
+
+    if (flpVersion && pdpVersion) {
+      const flpVersionLabel = `flp-suite-v${flpVersion}`;
+      const isMatch = pdpVersion.toLocaleUpperCase().includes(flpVersionLabel.toLocaleUpperCase());
+      status = {ok: isMatch, configured: true, isCritical: true};
+    } else if (flpVersion || pdpVersion) {
+      status = {ok: true, configured: true, isCritical: true};
+    }
+
+    this._updateStatusMaps(STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY, status);
+    return {
+      status,
+      extras: {flpVersion, pdpVersion}
+    }
   }
 
   /**
