@@ -43,9 +43,9 @@ export const workflowMappingsComponent = (mapping, selected = '', callbackSelect
       NotAsked: () => null,
       Loading: () => `Retrieving configuration for ${selected}`,
       Success: ({variables}) => h('.flex-column.w-100.text-center', [
-        h('', `Successfully loaded: ${selected}`),
-        variables['epn_enabled'] === 'true' && h('.flex-row.g2.justify-center', [
-          h('label', 'Number of EPNs: '),
+        h('.f6.success', `Successfully loaded: ${selected}`),
+        variables['epn_enabled'] === 'true' && h('.flex-row.g2.items-center.justify-center', [
+          h('', 'Number of EPNs: '),
           h('', h('input.form-control', {
             type: 'number',
             value: variables['odc_n_epns'],
@@ -74,7 +74,7 @@ const errorMapping = (message) => h('.danger', message);
  */
 const selectConfigurationButton = (label, isSelected = true, configuration, callback) =>
   h('button.btn', {
-    class: isSelected ? 'active' : '',
+    class: isSelected ? 'btn-primary active' : '',
     key: `${label}-configuration`,
     id: `${label}-configuration`,
     style: {width: '49%'},

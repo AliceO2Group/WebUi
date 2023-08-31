@@ -21,10 +21,10 @@ import {h} from '/js/src/index.js';
  * @returns {vnode}
  */
 export const workflowCreationButtonComponent = (isReady = false, onclick) =>
-  h('.w-100.flex-column.text-center.f4', [
+  h('.w-100.text-center', [
     h('button', {
       class: 'btn btn-primary',
       disabled: !isReady,
       onclick,
-    },'Deploy')
+    },'Create')
   ]);

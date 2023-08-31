@@ -46,10 +46,6 @@ export const EnvironmentCreationPage = (model) => {
       h('.w-100.flex-row.g3', [
         h('.w-40.flex-column', [
           panel(
-            'Workflow Template',
-            workflowTemplateComponent(defaultWorkflow),
-          ),
-          panel(
             'Choose configuration',
             h('.flex-column', [
               workflowMappingsComponent(
@@ -58,12 +54,15 @@ export const EnvironmentCreationPage = (model) => {
               ),
             ])
           ),
-          h('.w-100.text-center', detectorsPanel(model)),
+          h('.w-100.text-center', detectorsPanel(model, true)),
+          panel(
+            'Workflow Template',
+            workflowTemplateComponent(defaultWorkflow),
+          ),
         ]),
         h('.flex-row.text-center.w-100', [
           flpSelectionPanel(model.workflow, 43.3)
         ]),
-
       ]),
       workflowCreationButtonComponent(isReady, deployEnvironment.bind(envCreationModel))
 
