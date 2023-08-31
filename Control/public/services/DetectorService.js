@@ -30,7 +30,8 @@ export default class DetectorService extends Observable {
       .filter((role) => role.startsWith(PREFIX.SSO_DET_ROLE))
       .map((role) => role.replace(PREFIX.SSO_DET_ROLE, '').toUpperCase());
     this.storage = new BrowserStorage(`COG-${this.model.router.location.hostname}`);
-    this.listRemote = RemoteData.notAsked();
+
+    this._listRemote = RemoteData.notAsked();
     this.hostsByDetectorRemote = RemoteData.notAsked();
     this._selected = '';
   }
@@ -44,11 +45,11 @@ export default class DetectorService extends Observable {
     this._selected = (stored && stored.SELECTED &&
       (this.model.isAllowed(ROLES.Global) || this.authed.includes(stored.SELECTED))) ? stored.SELECTED : '';
     this.notify();
-    this.listRemote = await this.getDetectorsAsRemoteData(this.listRemote, this);
+    this._listRemote = await this.getDetectorsAsRemoteData(this._listRemote, this);
     this.notify();
-    if (this.listRemote.isSuccess()) {
+    if (this._listRemote.isSuccess()) {
       this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(
-        this.hostsByDetectorRemote, this.listRemote.payload, this
+        this.hostsByDetectorRemote, this._listRemote.payload, this
       );
     }
     this.notify();
@@ -118,14 +119,14 @@ export default class DetectorService extends Observable {
    * @param {RemoteData} item
    */
   async getAndSetDetectorsAsRemoteData() {
-    this.listRemote = RemoteData.loading();
+    this._listRemote = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/core/detectors`);
     if (!ok) {
-      this.listRemote = RemoteData.failure(result.message);
+      this._listRemote = RemoteData.failure(result.message);
     } else {
-      this.listRemote = RemoteData.success(result.detectors);
+      this._listRemote = RemoteData.success(result.detectors);
     }
     this.notify();
   }
@@ -169,6 +170,71 @@ export default class DetectorService extends Observable {
   /**
    * Getters & Setters
    */
+
+  /**
+   * Method to return a RemoteData object containing list of detectors fetched from AliECS
+   * @param {boolean} [restrictToUser = true] - if the list should be restricted to user permissions only
+   * @returns {RemoteData<Array<String>>}
+   */
+  getDetectorsAsRemote(restrictToUser = true) {
+    if (this._listRemote.isSuccess() && restrictToUser) {
+      if (this.isSingleView()) {
+        const detectors = this._listRemote.payload.filter((detector) => detector === this._selected);
+        return RemoteData.success(detectors);
+      }
+    }
+    return this._listRemote;
+  }
+
+  /**
+   * Method to return a RemoteData object containing list of detectors fetched from AliECS and their availability
+   * @param {boolean} [restrictToUser = true] - if the list should be restricted to user permissions only
+   * @param {RemoteData} item - item in which data should be loaded and notified
+   * @param {typeof Model} that - model that should be notified after a change in data fetching
+   * @returns {RemoteData<Array<DetectorAvailability>>} - returns the state of the detectors
+   */
+  async getDetectorsAvailabilityAsRemote(restrictToUser = true, item = RemoteData.notAsked(), that = this) {
+    item = RemoteData.loading();
+    that.notify();
+
+    let {result: {detectors}, ok: detectorsOk} = await this.model.loader.get(`/api/core/detectors`);
+    const {
+      result: {detectors: activeDetectors},
+      ok: detectorsActivityOk
+    } = await this.model.loader.post(`/api/GetActiveDetectors`);
+    const isLockDataOk = this.model.lock.padlockState.isSuccess();
+
+    if (detectorsOk && detectorsActivityOk && isLockDataOk) {
+      const padLock = this.model.lock.padlockState.payload;
+      if (restrictToUser && this.isSingleView()) {
+        detectors = detectors.filter((detector) => detector === this._selected);
+      }
+      /**
+       * @type {Array<DetectorAvailability>}
+       */
+      const detectorsAvailability = detectors.map((detector) => ({
+        name: detector,
+        isActive: activeDetectors.includes(detector),
+        isLockedBy: padLock.lockedBy[detector],
+      }));
+      item = RemoteData.success(detectorsAvailability);
+      that.notify();
+      return item;
+    } else {
+      item = RemoteData.failure('Unable to fetch information on detectors state');
+      that.notify();
+      return item;
+    }
+  }
+
+  /**
+   * Method to return a RemoteData object containing list of detectors fetched from AliECS
+   * @deprecated as it should be using `getDetectorsAsRemote` instead
+   * @returns {RemoteData<Array<String>>}
+   */
+  get listRemote() {
+    return this._listRemote;
+  }
 
   /**
    * Return selected detectors

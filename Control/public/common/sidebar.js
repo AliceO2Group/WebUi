@@ -26,8 +26,9 @@ import {
 export default (model) => h('.absolute-fill scroll-y.flex-column', [
   h('h5.menu-title-large.mh1',
     model.sideBarMenu ? 'Environments' : 'ENVS'),
-  menuItem(model, 'Create', 'newEnvironment', iconPlus()),
-  menuItem(model, 'Active', 'environments', iconGridTwoUp()),
+  menuItem(model, 'Global Runs', 'newEnvironment', iconPlus()),
+  menuItem(model, 'Active Runs', 'environments', iconGridTwoUp()),
+  menuItem(model, 'Create', 'newEnvironmentAdvanced', iconPlus()),
   menuItem(model, 'Task list', 'taskList', iconGridThreeUp()),
   h('h5.menu-title-large.mh1',
     model.sideBarMenu ? 'Hardware' : 'HDW'),

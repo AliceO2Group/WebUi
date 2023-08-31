@@ -36,24 +36,28 @@ export class EnvironmentCreationModel extends Observable {
      * Default workflow metadata information as set by AliECS (repository, revision, template)
      */
     this._defaultWorkflow = RemoteData.notAsked();
-    
+
     /**
      * Workflow Mappings (label, configuration) stored for deployment;
      */
     this._workflowMappings = RemoteData.notAsked();
-    
+
     /**
      * Saved Configuration retrieved for selected workflow from the mappings
      */
     this._workflowLoaded = RemoteData.notAsked();
 
     this._selectedConfigurationLabel = '';
+
+    this._isReady = false;
   }
 
   /**
    * Initialize model for environment creation page
    */
   async initPage() {
+    this._model.workflow.initWorkflowPage();
+
     this._defaultWorkflow = RemoteData.loading();
     this._workflowMappings = RemoteData.loading();
     this.notify();
@@ -70,16 +74,38 @@ export class EnvironmentCreationModel extends Observable {
       this._defaultWorkflow = RemoteData.failure(workflowResult.message);
       this._creationModel = new WorkflowForm();
     }
+
     this.notify();
   }
 
   /**
    * Check for selected user input and if ok, trigger action to deploy environment based on given configuration
-   * @param {String} configuration - selected configuration to deploy environment
    * @returns {void}
    */
-  async deployEnvironment(configuration) {
-    console.log('configuration selected', configuration)
+  async deployEnvironment() {
+    this._creationModel.variables.hosts = JSON.stringify(this._model.workflow.form.hosts);
+    const path = this.parseRepository(this._creationModel.repository)
+      + `/workflows/${this._creationModel.template}@${this._creationModel.revision}`;
+
+    this._model.environment.newEnvironment({
+      workflowTemplate: path,
+      vars: this._creationModel.variables,
+      detectors: this._model.workflow.flpSelection.selectedDetectors
+    });
+  }
+
+  /**
+   * Ensure there is no slash at the end of the workflow URL
+   * @param {String} url
+   * @return {String}
+   */
+  parseRepository(url) {
+    const copy = url.slice();
+    if (copy[copy.length - 1] === '/') {
+      return copy.slice(0, -1)
+    } else {
+      return copy;
+    }
   }
 
   /**
@@ -95,12 +121,22 @@ export class EnvironmentCreationModel extends Observable {
       this._workflowLoaded = RemoteData.success(result);
       this._selectedConfigurationLabel = configuration;
       this._creationModel.variables = result.variables;
-    } else {  
+    } else {
       this._workflowLoaded = RemoteData.failure(result.message);
       this._selectedConfigurationLabel = '';
       this._creationModel.variables = {};
     }
     this.notify();
+  }
+
+  /**
+   * Set the number of EPNs that are to be used
+   * @param {Number} nEpns
+   */
+  setOdcNumberOfEpns(numberOfEpns) {
+    if (!isNaN(numberOfEpns)) {
+      this._creationModel.variables['odc_n_epns'] = numberOfEpns;
+    }
   }
 
   /**
@@ -142,4 +178,16 @@ export class EnvironmentCreationModel extends Observable {
   get selectedConfigurationLabel() {
     return this._selectedConfigurationLabel;
   }
+
+  /**
+   * Check if the environment configuration is ready to be deployed
+   * @return {boolean}
+   */
+  get isReady() {
+    const isLabelSelected = Boolean(this._selectedConfigurationLabel);
+    const areHostsSelected = this._model.workflow.form.hosts?.length > 0;
+    const areEpnsCounted = !isNaN(this._creationModel.variables['odc_n_epns']);
+    return isLabelSelected && areHostsSelected && areEpnsCounted;
+  }
+
 }

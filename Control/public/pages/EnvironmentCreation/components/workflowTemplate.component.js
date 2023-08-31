@@ -11,7 +11,6 @@
  *  or submit itself to any jurisdiction.
  */
 
-import {rowForCard} from '../../../common/card/rowForCard.js';
 import {h} from '/js/src/index.js';
 
 /**
@@ -21,18 +20,13 @@ import {h} from '/js/src/index.js';
  * @return {vnode}
  */
 export const workflowTemplateComponent = (workflow) =>
-  h('.w-100.flex-column', [
-    h('h5.p2.panel-title.text-center', 'Workflow Template Source Information'),
-    h('.panel',
-      workflow.match({
-        NotAsked: () => null,
-        Loading: () => 'Retrieving information from AliECS...',
-        Success: ({template, repository, revision}) => h('.flex-row.flex-wrap.justify-around', [
-          rowForCard(h('h5', 'Template: '), template),
-          rowForCard(h('h5', 'Repository: '), repository),
-          rowForCard(h('h5', 'Revision: '), revision),
-        ]),
-        Failure: () => h('.error', 'Unable to retrieve default workflow template information from AliECS')
-      })
-    ),
-  ]);
+  workflow.match({
+    NotAsked: () => null,
+    Loading: () => 'Retrieving information from AliECS...',
+    Success: ({template, repository, revision}) => h('.flex-column.p2.f6', [
+      h('.flex-row',h('h5.w-30.f6', 'Template: '), h('.w-70', template)),
+      h('.flex-row',h('h5.w-30.f6', 'Repository: '), h('.w-70', repository)),
+      h('.flex-row',h('h5.w-30.f6', 'Revision: '), h('.w-70', revision)),
+    ]),
+    Failure: () => h('.error', 'Unable to retrieve default workflow template information from AliECS')
+  });

@@ -14,8 +14,11 @@
 import {h} from '/js/src/index.js';
 import {detectorHeader} from './../../common/detectorHeader.js';
 import {workflowTemplateComponent} from './components/workflowTemplate.component.js';
+import {panel} from '../../common/panel/panel.js';
 import {workflowMappingsComponent} from './components/workflowMappings.component.js';
 import {workflowCreationButtonComponent} from './components/workflowCreationButton.component.js';
+import detectorsPanel from '../../workflow/panels/flps/detectorsPanel.js';
+import flpSelectionPanel from '../../workflow/panels/flps/flpSelectionPanel.js';
 
 /**
  * Header for the simplified creation environment page
@@ -35,23 +38,34 @@ export const EnvironmentCreationPage = (model) => {
   const {
     workflowLoaded, selectedConfigurationLabel, workflowMappings, setCreationModelConfiguration
   } = envCreationModel;
-  const { deployEnvironment, defaultWorkflow } = envCreationModel;
+  const {deployEnvironment, defaultWorkflow, isReady, setOdcNumberOfEpns} = envCreationModel;
 
-  const isReady = false;
-  return h('', [
+  return h('.absolute-fill.scroll-y', [
     detectorHeader(model),
     h('.g2.flex-column.p2', [
-      h('.w-100.text-right', h('a', {
-        href: '?page=newEnvironmentAdvanced',
-        onclick: (e) => model.router.handleLinkEvent(e)
-      }, 'Advanced Configuration')),
+      h('.w-100.flex-row.g3', [
+        h('.w-40.flex-column', [
+          panel(
+            'Choose configuration',
+            h('.flex-column', [
+              workflowMappingsComponent(
+                workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
+                workflowLoaded, setOdcNumberOfEpns.bind(envCreationModel)
+              ),
+            ])
+          ),
+          h('.w-100.text-center', detectorsPanel(model, true)),
+          panel(
+            'Workflow Template',
+            workflowTemplateComponent(defaultWorkflow),
+          ),
+        ]),
+        h('.flex-row.text-center.w-100', [
+          flpSelectionPanel(model.workflow, 43.3)
+        ]),
+      ]),
+      workflowCreationButtonComponent(isReady, deployEnvironment.bind(envCreationModel))
 
-      workflowTemplateComponent(defaultWorkflow),
-      workflowMappingsComponent(
-        workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
-        workflowLoaded
-      ),
-      workflowCreationButtonComponent(isReady, deployEnvironment)
     ])
-  ])
+  ]);
 };

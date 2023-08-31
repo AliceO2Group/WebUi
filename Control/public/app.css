@@ -56,6 +56,7 @@
 .auto-built-row:hover { border-radius: .25rem; background-color: var(--color-gray-light); }
 
 .template-selection { width: 33%; }
+.template-selection-large { width: 66%; }
 
 .cardGroupColumn { display: flex; flex-direction: column; flex-wrap: wrap; gap: var(--space-s); }
 .cardGroupRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--space-s); }
@@ -68,6 +69,7 @@
 @media (max-width: 1000px) {
   .auto-built-panel { width: 100%; }
   .template-selection { width: 100% }
+  .template-selection-large {width: 100%}
 }
 
 @media (min-width: 2000px) {
@@ -93,4 +95,6 @@
 .tab-content > .tab-pane { display: none; }
 .tab-content > .active { display: block; }
 
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr)); }
+.grid-hosts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); }
 .flex-end { justify-content: flex-end; }

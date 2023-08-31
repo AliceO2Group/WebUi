@@ -38,7 +38,7 @@ const alertPanel = (servicesByCategory, model) => {
     },
     h('.g2.danger.items-center.flex-row.actionable-icon', [
       h('span', iconCircleX()),
-      h('.f4', `${numberOfCriticalErrors} Error${numberOfCriticalErrors > 1 ? 's' : ''}`),
+      h('h3', `Errors`),
     ])
     )
   }

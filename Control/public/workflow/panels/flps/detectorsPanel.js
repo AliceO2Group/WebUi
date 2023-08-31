@@ -19,16 +19,17 @@ import {detectorLockButton} from './../../../lock/lockButton.js';
 /**
  * Create a selection area for all detectors retrieved from AliECS
  * @param {Object} model
+ * @param {boolean} onlyGlobal - if it should display global detectors only
  * @return {vnode}
  */
-export default (model) => {
-  const activeDetectors = model.workflow.flpSelection.activeDetectors;
-  const detectors = model.workflow.flpSelection.detectors;
+export default (model, onlyGlobal = false) => {
+  const {detectors, activeDetectors} = model.workflow.flpSelection;
+  const areDetectorsReady = activeDetectors.isSuccess() && detectors.isSuccess();
   return h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', h('h5.w-100.bg-gray-light', 'Detectors Selection')),
     h('.w-100.p2.panel',
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
-      (activeDetectors.isSuccess() && detectors.isSuccess()) && detectorsSelectionArea(model, detectors.payload),
+      (areDetectorsReady) && detectorsSelectionArea(model, detectors.payload, onlyGlobal),
       (activeDetectors.isFailure() || detectors.isFailure()) && h('.f7.flex-column', 'Unavailable to load detectors'),
     )
   ]);
@@ -38,14 +39,16 @@ export default (model) => {
  * Display an area with selectable elements representing detectors
  * @param {Object} model
  * @param {Array<string>} list
+ * @param {boolean} onlyGlobal - if only global detectors should be displayed
  * @return {vnode}
  */
-const detectorsSelectionArea = (model, list) => {
-  return h('.w-100.m1.text-left.shadow-level1.scroll-y', {
+const detectorsSelectionArea = (model, list, onlyGlobal) => {
+  return h('.w-100.m1.text-left.shadow-level1.grid', {
     style: 'max-height: 40em;'
   }, [
-    list.filter(
-      (name) => (name === model.workflow.model.detectors.selected || !model.workflow.model.detectors.isSingleView()))
+    list
+      .filter((name) => (name === model.detectors.selected || !model.detectors.isSingleView()))
+      .filter((name) => !onlyGlobal || (onlyGlobal && name !== 'TST'))
       .map((name) => detectorItem(model, name))
   ]);
 };

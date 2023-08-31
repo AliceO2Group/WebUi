@@ -162,7 +162,8 @@ export default class Environment extends Observable {
   async newEnvironment(itemForm) {
     this.itemNew = RemoteData.loading();
     this.notify();
-
+    
+    console.log(itemForm)
     const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
     this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
     this.model.router.go(`?page=environments`);
