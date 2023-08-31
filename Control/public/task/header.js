@@ -13,7 +13,6 @@
 */
 
 import {h} from '/js/src/index.js';
-import {ROLES} from './../workflow/constants.js';
 
 /**
  * @file Header of the Task Page that displays the title and 2 clean operations
@@ -28,41 +27,4 @@ export const header = (model) => [
   h('.w-100.text-center', [
     h('h4', 'Task list')
   ]),
-  model.detectors.selected === 'GLOBAL' && model.isAllowed(ROLES.Admin, true) && h('.flex-row.text-right', {
-    style: 'position: absolute; right: 0px;'
-  }, [
-    cleanResourcesButton(model.task),
-    cleanTasksButton(model.task)
-  ])
 ];
-
-/**
- * Prepares cleanup tasks button in top right corner
- */
-const cleanTasksButton = (task) =>
-  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
-    h(`button.btn.btn-danger.mh1`, {
-      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
-      disabled: task.cleanUpTasksRequest.isLoading(),
-      onclick: () => confirm(`Are you sure you know what you are doing?`)
-        && task.cleanUpTasks(),
-    }, 'Clean tasks'),
-    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
-      'Shutdowns or kills any task that is unlocked and not part of an active environment')
-  ]);
-
-/**
- * Prepares cleanup resources button in top right corner
- */
-const cleanResourcesButton = (task) =>
-  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
-    h(`button.btn.btn-warning.mh1`, {
-      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
-      disabled: task.cleanUpTasksRequest.isLoading(),
-      onclick: () => task.cleanUpResources(),
-    }, 'Clean resources'),
-    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 500px'}, [
-      h('', `It runs 'roc-cleanup' and 'fairmq-shmmonitor -c' to clean RAM and disk resources, including SHM files.`),
-      h('', `It does nothing to tasks.`)
-    ])
-  ]);
