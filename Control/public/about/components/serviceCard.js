@@ -20,12 +20,15 @@ import {serviceRow as itemRow} from './serviceRow.js';
  * @param {object} service - JSON with information about the service such as name, status, etc.
  * @returns {vnode}
  */
-export const serviceCard = (service, showExtras = false) => {
+export const serviceCard = (service) => {
   const {
-    status: {ok, configured, message} = {}, endpoint, version, extras, name = 'UNDEFINED', connectionState
+    status: {ok, configured, message} = {}, endpoint, version, extras = {}, name = 'UNDEFINED', connectionState
   } = service;
   const isDown = configured && !ok;
-  showExtras = showExtras && extras && Object.keys(extras).length > 0;
+  
+  const showExtras = extras?.showExtras && Object.keys(extras).length > 0;
+  const extrasToDisplay = JSON.parse(JSON.stringify(extras));
+  delete extrasToDisplay.showExtras;
 
   const titleClass = (configured && ok) ? 'success' : (configured && !ok) ? 'bg-danger white' : '';
 
@@ -39,7 +42,7 @@ export const serviceCard = (service, showExtras = false) => {
         isDown && itemRow('Error', message),
         itemRow('Endpoint', endpoint),
         itemRow('Connection State', connectionState),
-        showExtras && h('pre', {style: 'max-height: 10em'}, JSON.stringify(extras, null, 2))
+        showExtras && h('pre', {style: 'max-height: 10em'}, JSON.stringify(extrasToDisplay, null, 2))
       ]
     ])
   ]);

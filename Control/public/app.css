@@ -92,3 +92,5 @@
 
 .tab-content > .tab-pane { display: none; }
 .tab-content > .active { display: block; }
+
+.flex-end { justify-content: flex-end; }
