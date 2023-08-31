@@ -12,19 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+const STATUS_COMPONENTS_KEYS = Object.freeze({
+  CONSUL_KEY: 'CONSUL',
+  GRAFANA_KEY: 'GRAFANA',
+  NOTIFICATION_SYSTEM_KEY: 'NOTIFICATION_SYSTEM',
+  GENERAL_SYSTEM_KEY: 'GENERAL_SYSTEM',
 
-/**
- * @file Header of the Task Page that displays the title and 2 clean operations
- */
+  ALIECS_SERVICES_KEY: 'ALIECS_SERVICES',
+  ALIECS_CORE_KEY: 'ALIECS_CORE',
+  APRICOT_KEY: 'APRICOT',
+});
 
-/**
- * Header
- * @param {Object} model
- * @return {vnode}
- */
-export const header = (model) => [
-  h('.w-100.text-center', [
-    h('h4', 'Task list')
-  ]),
-];
+module.exports.STATUS_COMPONENTS_KEYS = STATUS_COMPONENTS_KEYS;

@@ -38,6 +38,7 @@ export default class About extends Observable {
       gui: 'gui',
       [INTEGRATED_SERVICE_LABEL]: 'core/services',
       notification: 'notification',
+      system: 'system',
     };
 
     this.services = {};
@@ -131,6 +132,18 @@ export default class About extends Observable {
   }
 
   /**
+   * Given a component key and an updated status, remove the service from the current grouped lists
+   * and add it to the corresponding new list based on its new status
+   * @return {void}
+   */
+  updateComponentStatus(component, status) {
+    const service = this._removeServiceFromMap(component) ?? {};
+    service.status = status;
+    this._addServicesToMap(component, service);
+    this.notify();
+  }
+
+  /**
    * Given a service key, remove its pair from the status map per category;
    * If the key represents AliECS Integrated Services, then all belonging services are removed
    * @param {string} serviceKey - key of the service to be removed
@@ -142,8 +155,10 @@ export default class About extends Observable {
         Object.keys(this.services[category])
           .filter((name) => name.startsWith(INTEGRATED_SERVICE_LABEL))
           .forEach((name) => delete this.services[category][name]);
-      } else {
+      } else if (this.services[category][serviceKey]){
+        const toReturn = JSON.parse(JSON.stringify(this.services[category][serviceKey].payload ?? {}));
         delete this.services[category][serviceKey];
+        return toReturn;
       }
     }
   }

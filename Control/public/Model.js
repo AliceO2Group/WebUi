@@ -26,6 +26,7 @@ import {PREFIX, ROLES} from './../workflow/constants.js';
 import {SERVICE_STATES} from './common/constants/serviceStates.js';
 import {di} from './utilities/di.js';
 import {EnvironmentCreationModel} from './pages/EnvironmentCreation/EnvironmentCreation.model.js';
+import {STATUS_COMPONENTS_KEYS} from './common/constants/statusComponents.enum.js';
 
 /**
  * Root of model tree
@@ -169,6 +170,11 @@ export default class Model extends Observable {
         this.environment.requests = RemoteData.success(message.payload);
         this.notify();
         break;
+      case 'components-STATUS':
+        if (message?.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]) {
+          this.about.updateComponentStatus('system', message.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY])
+        }
+
     }
   }
 
@@ -211,6 +217,7 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     clearInterval(this.task.refreshInterval);
+    this.about.retrieveInfo();
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();

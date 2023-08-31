@@ -106,7 +106,7 @@ export default class ObjectViewModel extends Observable {
     let currentParams = '?page=objectView';
     if (objectId) {
       currentParams += `&objectId=${encodeURI(objectId)}&layoutId=${encodeURI(layoutId)}`;
-      this.selected = await this.model.services.object.getObjectById(objectId, validFrom, filters, this);
+      this.selected = await this.model.services.object.getObjectById(objectId, id, validFrom, filters, this);
     } else if (objectName) {
       currentParams += `&objectName=${encodeURI(objectName)}`;
       this.selected = await this.model.services.object.getObjectByName(objectName, id, validFrom, filters, this);

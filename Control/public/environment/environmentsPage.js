@@ -14,7 +14,7 @@
 
 /* global COG */
 
-import {h, iconPlus} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
@@ -33,12 +33,9 @@ import {ROLES} from './../workflow/constants.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', [
+  h('.w-100 text-center', [
     h('h4', 'Environments')
   ]),
-  h('.flex-grow text-right', [
-    h('button.btn', {onclick: () => model.router.go('?page=newEnvironment')}, iconPlus())
-  ])
 ];
 
 /**

@@ -12,19 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+const RUNTIME_COMPONENTS = Object.freeze({
+  FLP_VERSION_KEY: 'flp_suite_version',
+  PDP_VERSION_COMPONENT: 'aliecs/defaults',
+  PDP_VERSION_KEY: 'pdp_o2pdpsuite_version',
+});
 
-/**
- * @file Header of the Task Page that displays the title and 2 clean operations
- */
-
-/**
- * Header
- * @param {Object} model
- * @return {vnode}
- */
-export const header = (model) => [
-  h('.w-100.text-center', [
-    h('h4', 'Task list')
-  ]),
-];
+module.exports.RUNTIME_COMPONENTS = RUNTIME_COMPONENTS;
