@@ -53,6 +53,7 @@ import {
   content as lockContent,
   header as lockHeader
 } from './lock/lockPage.js';
+import {alertPanel} from './common/alertPanel.js';
 
 /**
  * Main view layout
@@ -93,7 +94,8 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     taskList: taskHeader,
     hardware: hardwareHeader,
     locks: lockHeader
-  })(model)
+  })(model),
+  alertPanel(model.about.services, model)
 ]);
 
 /**
