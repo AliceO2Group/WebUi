@@ -23,6 +23,7 @@ const O2TokenService = require('./../services/O2TokenService.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
+const limit = require('express-rate-limit');
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
@@ -42,6 +43,8 @@ class HttpServer {
     httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
     httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
     this.limit = (!httpConfig.limit) ? '100kb' : httpConfig.limit;
+    this.rate_limit = httpConfig.rate_limit || 10000;
+    this.rate_limit_window = httpConfig.rate_limit_window || 15 * 60 * 1000; // 15 minutes
 
     this.app = express();
 
@@ -166,6 +169,16 @@ class HttpServer {
    * Specified routes and their callbacks.
    */
   specifyRoutes() {
+    // Rate limiter
+    const limiter = limit({
+      windowMs: this.rate_limit_window,
+      max: this.rate_limit,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: 'You have exceeded the available number of requests. Please try again later',
+    });
+    this.app.use('/', limiter);
+
     // Routes of authorization
     if (this.openid) {
       this.app.get('/', (req, res, next) => this.ident(req, res, next));
