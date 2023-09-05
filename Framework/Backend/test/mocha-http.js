@@ -293,3 +293,25 @@ describe('HTTP constructor checks', () => {
     assert.strictEqual(httpServer.limit, '10Mb', 'Provided limit was not set')
   });
 });
+
+describe('Rate limiter', async () => {
+  const period = config.http.rate_limit_window;
+  it('should rate limit all requests made', async () => {
+    // 22 requests made in the previous tests
+    const max = config.http.rate_limit;    
+    for (let i = 0; i <= max - 22; i++) {
+      await request(httpServer)
+        .get('/')
+        .expect(302);
+    }
+    await request(httpServer)
+      .get('/')
+      .expect(429);
+  }).timeout(period);
+  it('should reset after the time window', async () => {
+    await new Promise(resolve => setTimeout(resolve, period));
+    await request(httpServer)
+      .get('/')
+      .expect(302);
+  }).timeout(period + 50);
+});
