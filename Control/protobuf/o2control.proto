@@ -191,6 +191,8 @@ message EnvironmentInfo {
     map<string, string> integratedServicesData = 14;
     int32 numberOfTasks = 15;
     string currentTransition = 16;
+    int32 numberOfActiveTasks = 17;
+    int32 numberOfInactiveTasks = 18;
 }
 
 message NewEnvironmentRequest {
