@@ -11,6 +11,7 @@
     - [O2Control gRPC](#o2control-grpc)
     - [Apricot gRPC](#apricot-grpc)
     - [Grafana](#grafana)
+    - [Bookkeeping](#bookkeeping)
     - [Consul](#consul)
     - [Notification service](#notification-service)
     - [InfoLogger GUI](#infologger-gui)
@@ -66,8 +67,11 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 * `package` - name of the gRPC package
 
 ### Grafana
-* `hostname` - Grafana instance hostname
-* `port` - Grafana instance port
+* `url` - built URL which points to grafana instance: `<protocol>://<instance>:<port>`
+
+### Bookkeeping
+* `url` - URL which points to Bookkeeping API: `<protocol>://<instance>:<port>`
+* `token` - token to be allowed to retrieve data from Bookkeeping
 
 ### Consul
 Use of a Consul instance is optional
