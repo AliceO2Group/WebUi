@@ -12,12 +12,12 @@
  */
 
 /**
- * CalibrationRunInfoAdapter - Given an object with RUN information as per Bookkeeping Database (https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js),
+ * RunInfoAdapter - Given an object with RUN information as per Bookkeeping Database (https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js),
  * return a minified version of it with only the information needed for calibration page
  */
-class CalibrationRunInfoAdapter {
+class RunInfoAdapter {
   /**
-   * CalibrationRunInfoAdapter
+   * RunInfoAdapter
    */
   constructor() {}
 
@@ -49,4 +49,4 @@ class CalibrationRunInfoAdapter {
   }
 }
 
-module.exports = CalibrationRunInfoAdapter;
+module.exports = RunInfoAdapter;

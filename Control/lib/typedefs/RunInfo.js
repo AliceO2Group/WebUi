@@ -12,13 +12,15 @@
  */
 
 /**
- * @typedef CalibrationRunInfo
+ * @typedef RunInfo
  *
- * CalibrationRunInfo is an object which contains minimum needed information with regards to runs of definition calibration
+ * RunInfo is an object which contains minimum needed information with regards to runs of definition calibration
  *
  * @property {Number} runNumber 
  * @property {String} environmentId
  * @property {String} definition
  * @property {String} calibrationStatus
  * @property {String} runType
+ * @property {Number} startTime
+ * @property {Number} endTime
  */

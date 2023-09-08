@@ -14,7 +14,7 @@
 
 const {Log} = require('@aliceo2/web-ui');
 const {httpGetJson} = require('./../utils.js');
-const CalibrationRunInfoAdapter = require('../adapters/CalibrationRunInfoAdapter.js');
+const RunInfoAdapter = require('../adapters/RunInfoAdapter.js');
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -62,7 +62,7 @@ class BookkeepingService {
           rejectUnauthorized: false,
         });
         if (data?.length > 0) {
-          return CalibrationRunInfoAdapter.toEntity(data[0]);
+          return RunInfoAdapter.toEntity(data[0]);
         }
       } catch (error) {
         this._logger.debug(error);
