@@ -22,7 +22,7 @@ const RunInfoAdapter = require('../adapters/RunInfoAdapter.js');
 class BookkeepingService {
   /**
    * Constructor for configuring the service to retrieve data via Bookkeeping HTTP API
-   * @param {object} config - configuration for using BKP service
+   * @param {object} config = {url: string, token: string} - configuration for using BKP service
    */
   constructor({url = '', token = ''}) {
     this._url = url;
@@ -33,7 +33,7 @@ class BookkeepingService {
 
     this._token = token;
 
-    this._runTypes = {}; // in-memory object which is filled with runTypes on server load
+    this._runTypes = {}; // in-memory object which is filled with runTypes on server start
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/bkp-service`);
   }
 
@@ -73,7 +73,7 @@ class BookkeepingService {
 
   /**
    * Method to fetch run types from Bookkeeping and build a map of types to IDs as needed for filtering in RUNs API
-   * @returns {Map<string, number>} - map of runtypes to their ID
+   * @returns {Object<string, number>} - map of runtypes to their ID
    */
   async _getRunTypes() {
     try {
@@ -90,6 +90,18 @@ class BookkeepingService {
       this._logger.debug(error);
     }
     return {};
+  }
+
+  /**
+   * Getters/Setters
+   */
+
+  /**
+   * Return the object storing run types by their name with ID
+   * @return {Object<string, number>}
+   */
+  get runTypes() {
+    return this._runTypes;
   }
 }
 

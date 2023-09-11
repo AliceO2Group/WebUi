@@ -35,6 +35,7 @@ class RunInfoAdapter {
       calibrationStatus,
       runType,
       startTime,
+      detectors,
       endTime,
     } = run;
     return  {
@@ -43,6 +44,7 @@ class RunInfoAdapter {
       definition,
       calibrationStatus,
       runType: runType.name,
+      detectors,
       startTime,
       endTime,
     };

@@ -15,6 +15,7 @@ module.exports = {
     "ecmaVersion": 11,
     "sourceType": "module"
   },
+  "ignorePatterns": ["config.js", "test-config.js", "config-default.js", "package.json", "package-lock.json"],
   "rules": {
     "max-len": ['error', {"code": 120, "ignoreComments": true}], // default 80
     "indent": ['error', 2, {"SwitchCase": 1}], // not set by default
