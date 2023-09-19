@@ -42,8 +42,8 @@
     "mocha": "^10.2.0",
     "nock": "^13.3.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^21.1.0",
-    "sinon": "15.2.0"
+    "puppeteer": "^21.2.1",
+    "sinon": "16.0.0"
   },
   "main": "index.js",
   "bundleDependencies": [
