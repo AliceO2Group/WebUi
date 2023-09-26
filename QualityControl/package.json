@@ -44,11 +44,11 @@
     "joi"
   ],
   "devDependencies": {
-    "eslint": "^8.49.0",
+    "eslint": "^8.50.0",
     "mocha": "^10.2.0",
     "nock": "^13.3.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^21.1.0",
-    "sinon": "^15.2.0"
+    "puppeteer": "^21.3.4",
+    "sinon": "^16.0.0"
   }
 }
