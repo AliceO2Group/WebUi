@@ -11,6 +11,8 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+const KNOWN_RUN_TYPES = ['SYNTHETIC', 'PHYSICS', 'COSMICS', 'TECHNICAL', 'REPLAY'];
+const KNOWN_FLPS = ['alio2-cr1-flp145'];
 
 /**
  * Shared methods used within Core Services/Controllers
@@ -77,7 +79,40 @@ class CoreUtils {
     if (!workflowTemplate || !vars) {
       throw new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`)
     }
-    Object.keys(vars).forEach((key) => vars[key] = vars[key].trim().replace(/\r?\n/g,' '));
+    payload = CoreUtils._removeFlpBasedOnRunType(payload);
+    Object.keys(vars).forEach((key) => vars[key] = vars[key].trim().replace(/\r?\n/g, ' '));
+    return payload;
+  }
+
+  /**
+   * Temporal removal of bad FLP host if run_type is as per specified
+   * @param {EnvironmentCreation} payload -  configuration for creating an environment in raw format
+   * @returns {EnvironmentCreation} - validated and parsed configuration 
+   */
+  static _removeFlpBasedOnRunType(payload) {
+    try {
+      const {vars} = payload;
+      const {run_type = ''} = vars;
+      if (KNOWN_RUN_TYPES.includes(run_type.toLocaleUpperCase())) {
+        const {hosts} = vars;
+        const hostsJson = JSON.parse(hosts);
+        KNOWN_FLPS.forEach((knownHost) => {
+          try {
+            const index = hostsJson.findIndex((host) => knownHost === host);
+            if (index >= 0) {
+              hostsJson.splice(index, 1);
+            }
+            vars.hosts = JSON.stringify(hostsJson);
+            payload.vars = vars;
+          } catch (error) {
+            console.error(error);
+          }
+        });
+      }
+    } catch (error) {
+      console.error(error)
+    }
+
     return payload;
   }
 }
