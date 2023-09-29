@@ -27,6 +27,11 @@ class RequestHandler {
   constructor(ctrlService) {
     this.ctrlService = ctrlService;
     this.requestList = {};
+
+    /**
+     * @type {WorkflowService}
+     */
+    this._workflowService = undefined;
   }
 
   /**
@@ -57,12 +62,31 @@ class RequestHandler {
     this.broadcast();
     log.debug('Added request to cache, ID: ' + index);
 
+    const {selectedConfiguration} = req.body;
+    if (selectedConfiguration) {
+      // workaround for reloading configuration before deployment from global page
+      try {
+        const {variables} = await this._workflowService.retrieveWorkflowSavedConfiguration(selectedConfiguration);
+        variables.hosts = req.body.vars.hosts;
+
+        const {epn_enabled, odc_n_epns} = req.body.vars;
+        if (epn_enabled === 'true') {
+          variables.odc_n_epns = odc_n_epns;
+        }
+        req.body.vars = variables;
+        console.log('-------------------------');
+        console.log(req.body.vars);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     try {
       const payload = CoreUtils.parseEnvironmentCreationPayload(req.body);
       await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
-    } catch(error) {
+    } catch (error) {
       errorLogger('Request failed, ID: ' + index);
       errorLogger(error);
       this.requestList[index].failed = true;
@@ -114,6 +138,19 @@ class RequestHandler {
    */
   getAll(req, res) {
     return res.json(this._getAll());
+  }
+
+  /**
+   * Getters & Setters
+   */
+
+  /**
+   * Setter for updating workflowService to use
+   * @param {WorkflowService} - service to be used for retrieving workflow configuration
+   * @return {void}
+   */
+  set workflowService(service) {
+    this._workflowService = service;
   }
 }
 module.exports = RequestHandler;
