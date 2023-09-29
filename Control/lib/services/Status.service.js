@@ -274,14 +274,14 @@ class StatusService {
    * @returns {JSON}
    */
   getGuiStatus() {
-    let gui = {
-      name: 'AliECS GUI'
+    return {
+      name: 'AliECS GUI',
+      version: projPackage?.version ?? '-',
+      status: {
+        ok: true, configured: true, isCritical: true
+      },
+      clients: this?._wsService?._ws?.server?.clients?.size ?? 0
     };
-    if (projPackage?.version) {
-      gui.version = projPackage.version;
-    }
-    gui.status = {ok: true, configured: true, isCritical: true};
-    return gui;
   }
 
   /**
