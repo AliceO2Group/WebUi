@@ -42,12 +42,12 @@
     "ws": "^8.14.2"
   },
   "devDependencies": {
-    "eslint": "^8.48.0",
+    "eslint": "^8.50.0",
     "mocha": "^10.2.0",
     "nock": "13.3.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^21.1.0",
-    "sinon": "15.2.0",
+    "puppeteer": "^21.3.6",
+    "sinon": "16.0.0",
     "supertest": "^6.3.0"
   },
   "main": "Backend/index.js"
