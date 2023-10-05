@@ -28,12 +28,14 @@ let liveSource = null;
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
 
 const profileService = new ProfileService(jsonDb);
-const statusService = new StatusService(config, projPackage);
 
 
 module.exports.attachTo = async (http, ws) => {
   const { QueryController } = await import('./controller/QueryController.mjs');
   const queryController = new QueryController();
+
+  const statusService = new StatusService(config, projPackage, ws);
+
 
   http.post('/query', query);
   http.get('/query/stats', queryController.getQueryStats.bind(queryController), {public: true});
