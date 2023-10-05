@@ -148,7 +148,7 @@ export default class LogFilter extends Observable {
    * Output of function is boolean.
    * @return {function.<WebSocketMessage, boolean>}
    */
-  toFunction() {
+  toStringifyFunction() {
     /**
      * This function will be stringified then sent to server so it can filter logs
      * 'DATA_PLACEHOLDER' will be replaced by the stringified filters too so the function contains de data
@@ -283,8 +283,7 @@ export default class LogFilter extends Observable {
     const criteriasJSON = JSON.stringify(this.criterias);
     const functionAsString = filterFunction.toString();
     const functionWithCriterias = functionAsString.replace('\'DATA_PLACEHOLDER\'', criteriasJSON);
-    const functionPure = eval(`(${functionWithCriterias})`);
-    return functionPure;
+    return functionWithCriterias;
   }
 
   /**
