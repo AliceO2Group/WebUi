@@ -554,9 +554,7 @@ export default class Log extends Observable {
     if (this.list.length > 0) {
 
       let fullContent = '';
-      if (this.limit < 100001) {
-        this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
-      }
+      this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
 
       let visibleOnlyContent = '';
       this.listLogsInViewportOnly().forEach((item) => {
