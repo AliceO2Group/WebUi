@@ -95,7 +95,7 @@ class StatusService {
     }
     if (this.config.http) {
       const {http} = this.config;
-      const ilg = {hostname: http.hostname, port: http.port, status: {ok: true}, name: http.name };
+      const ilg = {hostname: http.hostname, port: http.port, status: {ok: true}, name: http.name ?? '' };
       info = Object.assign(info, ilg);
     }
     return info;
