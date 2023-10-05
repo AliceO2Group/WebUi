@@ -75,7 +75,7 @@ export const statusServiceTestSuite = async () => {
 
       const response = await statusService.retrieveFrameworkInfo();
       const result = {
-        qcg: { version: '-', status: { ok: true } },
+        qcg: { version: '-', status: { ok: true }, clients: -1 },
         qc: { status: { ok: true }, version: 'Not part of an FLP deployment' },
         data_service_ccdb: { status: { ok: true }, version: '0.0.1-beta' },
         online_service_consul: { status: { ok: false, message: 'Online mode failed to retrieve' } },
@@ -96,29 +96,23 @@ export const statusServiceTestSuite = async () => {
   describe('`retrieveOwnStatus()` tests', () => {
     it('should successfully return an object with status and version of itself', async () => {
       const statusService = new StatusService({ version: '0.0.1' });
-      const res = {
-        status: stub().returnsThis(),
-        json: stub(),
-      };
-      const result = statusService.retrieveOwnStatus({}, res);
+      const result = statusService.retrieveOwnStatus();
 
       assert.deepStrictEqual(result, {
         status: { ok: true },
         version: '0.0.1',
+        clients: -1,
       });
     });
 
     it('should successfully return an object with status and no version of itself', async () => {
       const statusService = new StatusService();
-      const res = {
-        status: stub().returnsThis(),
-        json: stub(),
-      };
-      const result = statusService.retrieveOwnStatus({}, res);
+      const result = statusService.retrieveOwnStatus();
 
       assert.deepStrictEqual(result, {
         status: { ok: true },
         version: '-',
+        clients: -1,
       });
     });
   });
