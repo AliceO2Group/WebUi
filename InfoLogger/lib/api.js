@@ -39,7 +39,7 @@ module.exports.attachTo = async (http, ws) => {
   http.get('/query/stats', queryController.getQueryStats.bind(queryController), {public: true});
 
   http.get('/status/gui', statusService.getILGStatus.bind(statusService), {public: true});
-  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService), {public: true});
+  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService));
 
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));

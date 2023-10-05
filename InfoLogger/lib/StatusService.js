@@ -59,7 +59,7 @@ class StatusService {
       result.version = this.projPackage.version;
     }
     if (this.config.http) {
-      const ilg = {hostname: this.config.http.hostname, port: this.config.http.port, status: {ok: true}};
+      const ilg = {status: {ok: true}};
       result = Object.assign(result, ilg);
     }
     res.status(200).json(result);
@@ -95,7 +95,7 @@ class StatusService {
     }
     if (this.config.http) {
       const {http} = this.config;
-      const ilg = {hostname: http.hostname, port: http.port, status: {ok: true}, name: http.name };
+      const ilg = {hostname: http.hostname, port: http.port, status: {ok: true}, name: http.name ?? '' };
       info = Object.assign(info, ilg);
     }
     return info;
