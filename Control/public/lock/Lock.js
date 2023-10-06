@@ -101,8 +101,8 @@ export default class Lock extends Observable {
       this.model.notification.show(result.message, 'danger');
       return;
     }
-
-    this.model.notification.show(`Lock ${entity} taken`, 'success');
+    this.padlockState = RemoteData.success(result);
+    this.model.notification.show(`Lock ${entity} taken`, 'success', 1500);
   }
 
   /**
@@ -115,7 +115,8 @@ export default class Lock extends Observable {
       this.model.notification.show(result.message, 'danger');
       return;
     }
-    this.model.notification.show(`Lock ${entity} forced`, 'success');
+    this.padlockState = RemoteData.success(result);
+    this.model.notification.show(`Lock ${entity} forced`, 'success', 1500);
   }
 
   /**
@@ -129,6 +130,7 @@ export default class Lock extends Observable {
       return;
     }
 
-    this.model.notification.show(`Lock ${entity} released`, 'success');
+    this.padlockState = RemoteData.success(result);
+    this.model.notification.show(`Lock ${entity} released`, 'success', 1500);
   }
 }

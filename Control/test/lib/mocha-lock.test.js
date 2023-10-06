@@ -59,27 +59,20 @@ describe('Lock test suite', () => {
 
   it('Should lock and unlock', () => {
     lock.lockDetector(req, res);
-    assert.ok(res.status.calledWith(200));
+    assert.ok(res.status.calledWith(201));
     lock.unlockDetector(req, res);
-    assert.ok(res.status.calledWith(200));
+    assert.ok(res.status.calledWith(201));
     assert.deepStrictEqual(lock.state(), {lockedBy: {}, lockedByName: {}});
   });
 
-  it('Should fail to release empty lock', () => {
+  it('Should be able to release lock even if empty', () => {
     lock.unlockDetector(req, res);
-     assert.ok(res.status.calledWith(403));
-  });
-
-  it('Should fail to lock once again by same user', () => {
-    lock.lockDetector(req, res);
     assert.ok(res.status.calledWith(200));
-    lock.lockDetector(req, res);
-    assert.ok(res.status.calledWith(403));
   });
 
   it('Should fail to lock if another user holds the lock', () => {
     lock.lockDetector(req, res);
-    assert.ok(res.status.calledWith(200));
+    assert.ok(res.status.calledWith(201));
     req.session.personid = 2;
     lock.lockDetector(req, res);
     assert.ok(res.status.calledWith(403));
@@ -87,7 +80,7 @@ describe('Lock test suite', () => {
 
   it('Should force lock occupied lock if user has admin rights', () => {
     lock.lockDetector(req, res);
-    assert.ok(res.status.calledWith(200));
+    assert.ok(res.status.calledWith(201));
     lock.forceUnlock(req, res);
     assert.ok(res.status.calledWith(200));
     assert.deepStrictEqual(lock.state(), {lockedBy: {}, lockedByName: {}});
@@ -96,7 +89,7 @@ describe('Lock test suite', () => {
   it('Should fail to force lock occupied lock if user has no admin rights', () => {
     req.session.access = [];
     lock.lockDetector(req, res);
-    assert.ok(res.status.calledWith(200));
+    assert.ok(res.status.calledWith(201));
     lock.forceUnlock(req, res);
     assert.ok(res.status.calledWith(403));
     assert.deepStrictEqual(lock.state(), {lockedBy: {test: 1}, lockedByName: {test: 'Test'}});
