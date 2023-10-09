@@ -42,6 +42,11 @@ export class StatusService {
      */
     this._onlineService = undefined;
 
+    /**
+     * @type {WebSocket}
+     */
+    this._ws = undefined;
+
     this._packageInfo = packageInfo;
     this._config = config;
   }
@@ -54,6 +59,7 @@ export class StatusService {
     return {
       status: { ok: true },
       version: this._packageInfo?.version ?? '-',
+      clients: this._ws?.server?.clients?.size ?? -1,
     };
   }
 
@@ -128,6 +134,7 @@ export class StatusService {
   /**
    * Set service to be used for querying status of data layer (CCDB)
    * @param {CcdbService} dataService - service used for retrieving QC objects
+   * @return {void}
    */
   set dataService(dataService) {
     this._dataService = dataService;
@@ -136,8 +143,18 @@ export class StatusService {
   /**
    * Set service to be used for querying status of online mode provider (Consul)
    * @param {ConsulService} onlineService - service used for retrieving list of objects currently being produced
+   * @return {void}
    */
   set onlineService(onlineService) {
     this._onlineService = onlineService;
+  }
+
+  /**
+   * Set instance of websocket server
+   * @param {WebSocket} ws - instance of the WS server
+   * @return {void}
+   */
+  set ws(ws) {
+    this._ws = ws;
   }
 }

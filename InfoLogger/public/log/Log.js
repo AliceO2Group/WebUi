@@ -350,7 +350,8 @@ export default class Log extends Observable {
     this.list = result.rows;
 
     this.resetStats();
-    result.rows.forEach(this.addStats.bind(this));
+    result.rows.forEach((log) => this.addStats(log));
+
     this.goToLastItem();
     this.notify();
   }
@@ -376,7 +377,7 @@ export default class Log extends Observable {
     }
     if (this.filter.setCriteria(field, operator, value)) {
       if (this.isLiveModeRunning()) {
-        this.model.ws.setFilter(this.model.log.filter.toFunction());
+        this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
         this.model.notification.show(
           `The current live session has been adapted to the new filter configuration.`, 'primary', 2000);
       } else if (this.isActiveModeQuery()) {
@@ -414,7 +415,7 @@ export default class Log extends Observable {
     // kill this interval when live mode is off
     this.liveInterval = setInterval(this.notify.bind(this), 1000);
 
-    this.model.ws.setFilter(this.model.log.filter.toFunction());
+    this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
 
     this.notify();
   }
@@ -553,9 +554,7 @@ export default class Log extends Observable {
     if (this.list.length > 0) {
 
       let fullContent = '';
-      if (this.limit < 100001) {
-        this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
-      }
+      this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
 
       let visibleOnlyContent = '';
       this.listLogsInViewportOnly().forEach((item) => {

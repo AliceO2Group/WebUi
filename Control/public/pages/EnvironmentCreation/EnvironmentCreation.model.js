@@ -89,6 +89,7 @@ export class EnvironmentCreationModel extends Observable {
 
     this._model.environment.newEnvironment({
       workflowTemplate: path,
+      selectedConfiguration: this._selectedConfigurationLabel,
       vars: this._creationModel.variables,
       detectors: this._model.workflow.flpSelection.selectedDetectors
     });

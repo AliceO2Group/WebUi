@@ -81,6 +81,7 @@ module.exports.setup = (http, ws) => {
 
   const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
   aliecsReqHandler.setWs(ws);
+  aliecsReqHandler.workflowService = workflowService;
 
   const envCache = new EnvCache(ctrlService);
   envCache.setWs(ws);

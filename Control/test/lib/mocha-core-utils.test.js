@@ -15,7 +15,7 @@
 
 const assert = require('assert');
 
-const CoreUtils = require('./../../lib/control-core/CoreUtils.js');
+const CoreUtils = require('../../lib/control-core/CoreUtils.js');
 
 describe('CoreUtils test suite', () => {
   describe('Check parseMethodNameString', () => {
@@ -32,6 +32,38 @@ describe('CoreUtils test suite', () => {
       assert.strictEqual(CoreUtils.parseMethodNameString(undefined), undefined);
       assert.strictEqual(CoreUtils.parseMethodNameString(''), '');
     });
+  });
+
+  describe('Check `_removeFlpBasedOnRunType` test suite', () => {
+    it('should remove flp145 for specific run_type', () => {
+      const KNOWN_RUN_TYPES = ['SYNTHETIC', 'PHYSICS', 'COSMICS', 'TECHNICAL', 'REPLAY'];
+
+      KNOWN_RUN_TYPES.forEach((runType) => {
+        const payload = {
+          vars: {
+            run_type: runType,
+            hosts: JSON.stringify(['alio2-cr1-flp145', 'alio2-cr1-flp146'])
+          }
+        };
+        const expectedPayload = {
+          vars: {
+            run_type: runType,
+            hosts: JSON.stringify(['alio2-cr1-flp146'])
+          }
+        }
+        assert.deepStrictEqual(CoreUtils._removeFlpBasedOnRunType(payload), expectedPayload);
+      });
+    });
+
+    it('should not remove flp145 for specific run_type', () => {
+      const payload = {
+        vars: {
+          run_type: 'CALIBRATION',
+          hosts: JSON.stringify(['alio2-cr1-flp145', 'alio2-cr1-flp146'])
+        }
+      };
+      assert.deepStrictEqual(CoreUtils._removeFlpBasedOnRunType(payload), payload);
+    })
   });
 
   describe('Check parseFrameworkInfo', () => {

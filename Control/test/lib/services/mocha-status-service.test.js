@@ -128,7 +128,7 @@ describe('StatusService test suite', () => {
 
   describe('Test GUI Status retrieval via StatusService', async () => {
     const config = {http: {hostname: 'local', port: 8081}};
-    const expectedInfo = {name: 'AliECS GUI'};
+    const expectedInfo = {name: 'AliECS GUI', clients: 0};
 
     it('should successfully retrieve status and info about AliECS GUI that it is running', async () => {
       const status = new StatusService(config, {}, {});

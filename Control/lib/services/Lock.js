@@ -61,17 +61,30 @@ class Lock {
   lockDetector(req, res) {
     try {
       const entity = req.body?.name;
+      const {personid, name} = req.session;
       if (!entity) {
         throw new Error('Unspecified lock entity');
       }
       if (entity in this.lockedBy) {
+        const lockUser = this.lockedBy[entity];
+        const lockUsername = this.lockedByName[entity];
+        if (lockUser === personid && name === lockUsername) {
+          res.status(200).json({
+            lockedBy: this.lockedBy,
+            lockedByName: this.lockedByName
+          });
+          return
+        }
         throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
       }   
       this.lockedBy[entity] = req.session.personid;
       this.lockedByName[entity] = req.session.name;
       log.info(`Lock ${entity} taken by ${req.session.name}`);
       this.broadcastLockState();
-      res.status(200).json({ok: true});
+      res.status(201).json({
+        lockedBy: this.lockedBy,
+        lockedByName: this.lockedByName
+      });
     } catch (error) {
       errorHandler(`Unable to lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }
@@ -89,7 +102,10 @@ class Lock {
         throw new Error('Unspecified lock entity');
       }
       if (!(entity in this.lockedBy)) {
-        throw new Error(`Lock ${entity} is already released`);
+        res.status(200).json({
+          lockedBy: this.lockedBy,
+          lockedByName: this.lockedByName
+        });
       }   
       if (!req.session.access.includes('admin')) {
         throw new Error(`Insufficient permission`);
@@ -98,7 +114,10 @@ class Lock {
       delete this.lockedByName[entity];
       log.info(`Lock ${entity} forced by ${req.session.name}`);
       this.broadcastLockState();
-      res.status(200).json({ok: true});
+      res.status(200).json({
+        lockedBy: this.lockedBy,
+        lockedByName: this.lockedByName
+      });
     } catch (error) {
       errorHandler(`Unable to force lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }   
@@ -116,7 +135,11 @@ class Lock {
         throw new Error('Unspecified lock entity');
       }
       if (!(entity in this.lockedBy)) {
-        throw new Error('Lock is already released');
+        res.status(200).json({
+          lockedBy: this.lockedBy,
+          lockedByName: this.lockedByName
+        });
+        return;
       }
       if (this.lockedBy[entity] !== req.session.personid) {
         throw new Error(`${entity} owner is ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
@@ -125,7 +148,10 @@ class Lock {
       delete this.lockedByName[entity];
       log.info(`Lock ${entity} released by ${req.session.name}`);
       this.broadcastLockState();
-      res.status(200).json({ok: true});
+      res.status(200).json({
+        lockedBy: this.lockedBy,
+        lockedByName: this.lockedByName
+      });
     } catch (error) {
       errorHandler(`Unable to give away lock to ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }   

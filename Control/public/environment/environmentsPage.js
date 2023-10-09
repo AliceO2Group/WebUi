@@ -99,7 +99,7 @@ const requestsTable = (model, requests) =>
       requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : ''}}, [
         h('td', {style: 'text-align: center;'}, item.envId || '-'),
         h('td', {style: 'text-align: center;'},
-          item.detectors && item.detectors.length > 0 ? item.detectors.join(' ') : '-'
+          item.detectors && item.detectors.length > 0 ? item.detectors.sort().join(' ') : '-'
         ),
         h('td', {style: 'text-align: center;'}, item.workflow.substring(
           item.workflow.lastIndexOf('/') + 1, item.workflow.indexOf('@')
@@ -160,7 +160,7 @@ const environmentsTable = (model, list) => {
           ),
           h('td', {style: 'text-align: center;'}, [
             item.includedDetectors && item.includedDetectors.length > 0 ?
-              item.includedDetectors.map((detector) => `${detector} `)
+              item.includedDetectors.sort().map((detector) => `${detector} `)
               : '-'
           ]),
           h('td', {style: 'text-align: center;'}, item.userVars.run_type ? item.userVars.run_type : '-'),

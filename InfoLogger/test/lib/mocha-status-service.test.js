@@ -31,6 +31,7 @@ describe('Status Service test suite', () => {
       assert.throws(() => new StatusService(null), new Error('Empty Framework configuration'));
       assert.throws(() => new StatusService(undefined), new Error('Empty Framework configuration'));
     });
+
     it('should successfully initialize StatusService', () => {
       assert.doesNotThrow(() => new StatusService({hostname: 'localhost', port: 8080}, {}));
     });
@@ -39,17 +40,19 @@ describe('Status Service test suite', () => {
   describe('`getProjectInfo()` tests', () => {
     it('should successfully return ilg info even if version is missing', () => {
       const statusService = new StatusService(config, undefined);
-      const info = {hostname: 'localhost', port: 8080, status: {ok: true}, name: 'TST'};
+      const info = {hostname: 'localhost', port: 8080, status: {ok: true}, name: 'TST', clients: -1};
       assert.deepStrictEqual(statusService.getProjectInfo(), info);
     });
+
     it('should successfully return ilg version even if http configuration is missing', () => {
       const statusService = new StatusService({}, {version: '1.9.2'});
-      const info = {version: '1.9.2'};
+      const info = {version: '1.9.2', clients: -1};
       assert.deepStrictEqual(statusService.getProjectInfo(), info);
     });
+
     it('should successfully add project version if package.json was provided', () => {
       const statusService = new StatusService(config, {version: '1.9.2'});
-      const info = {hostname: 'localhost', port: 8080, status: {ok: true}, version: '1.9.2', name: 'TST'};
+      const info = {hostname: 'localhost', port: 8080, status: {ok: true}, version: '1.9.2', name: 'TST', clients: -1};
       assert.deepStrictEqual(statusService.getProjectInfo(), info);
     });
   });
@@ -60,6 +63,7 @@ describe('Status Service test suite', () => {
       const info = {host: 'localhost', port: 6102, status: {ok: false, message: 'Unable to connect to InfoLogger Server'}};
       assert.deepStrictEqual(statusService.getLiveSourceStatus(config.infoLoggerServer), info);
     });
+
     it('should successfully return InfoLogger Server info with status ok when live source is present', () => {
       const statusService = new StatusService(config, undefined);
       statusService.setLiveSource({isConnected: true, onconnect: () => true});
@@ -76,6 +80,7 @@ describe('Status Service test suite', () => {
       const mysql = await statusService.getDataSourceStatus(config.mysql);
       assert.deepStrictEqual(mysql, info);
     });
+
     it('should successfully return mysql info with status ok true when data source is present and connected', async () => {
       const statusService = new StatusService(config, undefined);
       const info = {host: 'localhost', port: 6103, database: 'INFOLOGGER', status: {ok: true}};
@@ -87,6 +92,7 @@ describe('Status Service test suite', () => {
       const mysql = await statusService.getDataSourceStatus(config.mysql);
       assert.deepStrictEqual(mysql, info);
     });
+
     it('should successfully return mysql info with status ok false when data source is present but it is not connected', async () => {
       const statusService = new StatusService(config, undefined);
       const info = {host: 'localhost', port: 6103, database: 'INFOLOGGER', status: {ok: false, message: 'Could not connect'}};
@@ -110,7 +116,7 @@ describe('Status Service test suite', () => {
       await statusService.frameworkInfo(undefined, res);
 
       const info = {
-        'infoLogger-gui': {hostname: 'localhost', port: 8080, status: {ok: true}, name: 'TST'},
+        'infoLogger-gui': {hostname: 'localhost', port: 8080, status: {ok: true}, name: 'TST', clients: -1},
         mysql: {host: 'localhost', port: 6103, database: 'INFOLOGGER', status: {ok: false, message: 'There was no data source set up'}},
         infoLoggerServer: {host: 'localhost', port: 6102, status: {ok: false, message: 'Unable to connect to InfoLogger Server'}}
       };
@@ -129,7 +135,7 @@ describe('Status Service test suite', () => {
       }
       await statusService.getILGStatus(undefined, res);
 
-      const info = {hostname: 'localhost', port: 8080, status: {ok: true}};
+      const info = {status: {ok: true}, clients: -1};
 
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(info));

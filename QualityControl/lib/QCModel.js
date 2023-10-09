@@ -47,7 +47,7 @@ const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
 export const userService = new UserService(jsonDb);
 export const layoutService = new LayoutController(jsonDb);
 
-const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
+export const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
 export const statusController = new StatusController(statusService);
 
 export let consulService = undefined;
