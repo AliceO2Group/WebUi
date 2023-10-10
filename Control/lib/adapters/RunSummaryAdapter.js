@@ -43,7 +43,7 @@ class RunSummaryAdapter {
       environmentId,
       definition,
       calibrationStatus,
-      runType: runType?.name ?? '-',
+      runType: runType?.name,
       startTime,
       detectors: detectors.sort(),
       endTime,
