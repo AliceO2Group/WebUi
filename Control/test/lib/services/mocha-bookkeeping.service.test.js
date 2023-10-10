@@ -59,7 +59,7 @@ describe('BookkeepingService test suite', () => {
     });
   });
 
-  describe(`'_getRunTypes' test suite`, async () => {
+  describe(`'getRunTypes' test suite`, async () => {
     before(() => {
       bkp = new BookkeepingService({url, token: ''});
       nock(url)
@@ -79,19 +79,19 @@ describe('BookkeepingService test suite', () => {
     after(() => nock.cleanAll());
 
     it('should successfully return runTypes as object from bookkeeping', async () => {
-      const runTypes = await bkp._getRunTypes();
+      const runTypes = await bkp.getRunTypes();
       assert.deepStrictEqual(runTypes, {NOISE: 1, PHYSICS: 2, SYNTHETIC: 3});
     });
 
     it('should successfully load an empty object if no runTypes are provided', async () => {
       bkp._token = 'no-data';
-      const runTypes = await bkp._getRunTypes();
+      const runTypes = await bkp.getRunTypes();
       assert.deepStrictEqual(runTypes, {});
     });
 
     it('should successfully load an empty object even if bookkeeping returned an error', async () => {
       bkp._token = 'error';
-      const runTypes = await bkp._getRunTypes();
+      const runTypes = await bkp.getRunTypes();
       assert.deepStrictEqual(runTypes, {});
     });
   });
