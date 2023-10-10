@@ -12,20 +12,20 @@
  */
 
 /**
- * RunInfoAdapter - Given an object with RUN information as per Bookkeeping Database (https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js),
- * return a minified version of it with only the information needed for calibration page
+ * RunSummaryAdapter - Given an object with RUN information as per Bookkeeping Database (https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js),
+ * return a minified version of it with only the summary
  */
-class RunInfoAdapter {
+class RunSummaryAdapter {
   /**
-   * RunInfoAdapter
+   * RunSummaryAdapter
    */
   constructor() {}
 
   /**
    * Converts the given object to an entity object.
    *
-   * @param {Object} run - object to convert
-   * @returns {CalibrationRunInfo} entity of a task with needed information
+   * @param {Object} run - Run Entity as per Bookkeeping https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js
+   * @returns {RunSummary} entity of a task with needed information
    */
   static toEntity(run) {
     const {
@@ -35,8 +35,8 @@ class RunInfoAdapter {
       calibrationStatus,
       runType,
       startTime,
-      detectors,
       endTime,
+      detectors = [],
     } = run;
     return  {
       runNumber,
@@ -44,11 +44,11 @@ class RunInfoAdapter {
       definition,
       calibrationStatus,
       runType: runType.name,
-      detectors,
       startTime,
+      detectors: detectors.sort(),
       endTime,
     };
   }
 }
 
-module.exports = RunInfoAdapter;
+module.exports = RunSummaryAdapter;

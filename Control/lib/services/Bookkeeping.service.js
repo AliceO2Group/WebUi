@@ -14,7 +14,7 @@
 
 const {Log} = require('@aliceo2/web-ui');
 const {httpGetJson} = require('./../utils.js');
-const RunInfoAdapter = require('../adapters/RunInfoAdapter.js');
+const RunSummaryAdapter = require('../adapters/RunSummaryAdapter.js');
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -22,7 +22,7 @@ const RunInfoAdapter = require('../adapters/RunInfoAdapter.js');
 class BookkeepingService {
   /**
    * Constructor for configuring the service to retrieve data via Bookkeeping HTTP API
-   * @param {object} config = {url: string, token: string} - configuration for using BKP service
+   * @param {Object} config = {url: string, token: string} - configuration for using BKP service
    */
   constructor({url = '', token = ''}) {
     this._url = url;
@@ -47,10 +47,10 @@ class BookkeepingService {
 
   /**
    * Given a definition, a type of a run and a detector, fetch from Bookkeeping the last RUN matching the parameters
-   * @param {string} definition - definition of the run to query
-   * @param {string} type - type of the run to query
-   * @param {string} detector - detector which contained the run
-   * @return {CalibrationRunInfo|{}} - run object from Bookkeeping
+   * @param {String} definition - definition of the run to query
+   * @param {String} type - type of the run to query
+   * @param {String} detector - detector which contained the run
+   * @return {RunSummary|{}} - run object from Bookkeeping
    */
   async getRun(definition, type, detector) {
     if (this._runTypes[type]) {
@@ -62,7 +62,7 @@ class BookkeepingService {
           rejectUnauthorized: false,
         });
         if (data?.length > 0) {
-          return RunInfoAdapter.toEntity(data[0]);
+          return RunSummaryAdapter.toEntity(data[0]);
         }
       } catch (error) {
         this._logger.debug(error);
@@ -73,7 +73,7 @@ class BookkeepingService {
 
   /**
    * Method to fetch run types from Bookkeeping and build a map of types to IDs as needed for filtering in RUNs API
-   * @returns {Object<string, number>} - map of runtypes to their ID
+   * @returns {Object<String, Number>} - map of runtypes to their ID
    */
   async _getRunTypes() {
     try {
@@ -98,7 +98,7 @@ class BookkeepingService {
 
   /**
    * Return the object storing run types by their name with ID
-   * @return {Object<string, number>}
+   * @return {Object<String, Number>}
    */
   get runTypes() {
     return this._runTypes;

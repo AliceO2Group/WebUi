@@ -12,9 +12,9 @@
  */
 
 /**
- * @typedef RunInfo
+ * @typedef RunSummary
  *
- * RunInfo is an object which contains minimum needed information with regards to runs of definition calibration
+ * RunSummary is an object which contains just a summary of an entire run entity: https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js
  *
  * @property {Number} runNumber 
  * @property {String} environmentId
@@ -23,4 +23,5 @@
  * @property {String} runType
  * @property {Number} startTime
  * @property {Number} endTime
+ * @property {Array<String>} detectors
  */
