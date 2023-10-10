@@ -18,7 +18,7 @@ const {Service} = require('./../dtos/Service.js');
 const {SERVICES: {STATUS}} = require('./../common/constants.js');
 const {Log} = require('@aliceo2/web-ui');
 const {STATUS_COMPONENTS_KEYS} = require('./../common/statusComponents.enum.js');
-const {RUNTIME_COMPONENTS} = require('./../common/runtimeComponents.enum.js');
+const {RUNTIME_COMPONENTS} = require('./../common/kvStore/runtime.enum.js');
 
 const NOT_CONFIGURED_MESSAGE = 'This service was not configured';
 

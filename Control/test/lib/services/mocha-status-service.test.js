@@ -19,7 +19,7 @@ const sinon = require('sinon');
 const {NotificationService} = require('@aliceo2/web-ui');
 
 const {StatusService} = require('./../../../lib/services/Status.service.js');
-const {RUNTIME_COMPONENTS} = require('./../../../lib/common/runtimeComponents.enum.js');
+const {RUNTIME_COMPONENTS} = require('./../../../lib/common/kvStore/runtime.enum.js');
 
 describe('StatusService test suite', () => {
   describe('Test StatusService initialization', () => {
