@@ -11,6 +11,7 @@
     - [O2Control gRPC](#o2control-grpc)
     - [Apricot gRPC](#apricot-grpc)
     - [Grafana](#grafana)
+    - [Bookkeeping](#bookkeeping)
     - [Consul](#consul)
     - [Notification service](#notification-service)
     - [InfoLogger GUI](#infologger-gui)
@@ -66,8 +67,13 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 * `package` - name of the gRPC package
 
 ### Grafana
-* `hostname` - Grafana instance hostname
-* `port` - Grafana instance port
+* `url` - built URL which points to grafana instance: `<protocol>://<instance>:<port>`
+
+### Bookkeeping
+* `url` - URL which points to Bookkeeping API: `<protocol>://<instance>:<port>`, `<protocol>://<domain_name>`
+* `token` - token needed for permissions to retrieve data from Bookkeeping
+
+Bookkeeping is going to be used as the source of latest `CALIBRATION` runs as per the [definition](https://github.com/AliceO2Group/Bookkeeping/blob/main/docs/RUN_DEFINITIONS.md). Detectors may need these run before stable beams, with some needing _none_, some only _one_ run and others _multiple_ ones defined by the `RUN TYPE` attribute. As this can vary depending on the period, the types corresponding to a detector will be defined and retrieved from the KV store of [O2Apricot](https://github.com/AliceO2Group/Control/tree/master/apricot) (key and value TBD).
 
 ### Consul
 Use of a Consul instance is optional

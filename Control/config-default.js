@@ -27,6 +27,10 @@ module.exports = {
   grafana: {
     url: 'http://localhost:3000'
   },
+  bookkeeping: {
+    url: 'http://localhost:4000',
+    token: 'some-token'
+  },
   consul: {
     ui: 'localhost:8500',
     hostname: 'localhost',
