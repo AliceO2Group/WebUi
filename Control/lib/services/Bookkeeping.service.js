@@ -14,7 +14,7 @@
 
 const {Log} = require('@aliceo2/web-ui');
 const {httpGetJson} = require('./../utils.js');
-const RunSummaryAdapter = require('../adapters/RunSummaryAdapter.js');
+const RunSummaryAdapter = require('./../adapters/RunSummaryAdapter.js');
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
