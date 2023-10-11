@@ -16,7 +16,7 @@ const {Log} = require('@aliceo2/web-ui');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
-const {LOG_LEVEL} = require('./../common/log.level.js');
+const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 
 /**
  * @class
