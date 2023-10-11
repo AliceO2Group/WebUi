@@ -16,6 +16,7 @@ const {Log} = require('@aliceo2/web-ui');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
+const {LOG_LEVEL} = require('./../common/log.level.js');
 
 /**
  * @class
@@ -72,7 +73,7 @@ class CalibrationRunService {
     } catch (error) {
       const err = grpcErrorToNativeError(error);
       this._logger.errorMessage(`Unable to load calibration mapping due to: ${err}`,
-        {level: 5, system: 'GUI', facility: 'calibration-service'}
+        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'calibration-service'}
       )
       this._calibrationPerDetectorMap = {};
     }
