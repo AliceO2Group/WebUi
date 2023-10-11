@@ -18,7 +18,7 @@ const {Service} = require('./../dtos/Service.js');
 const {SERVICES: {STATUS}} = require('./../common/constants.js');
 const {Log} = require('@aliceo2/web-ui');
 const {STATUS_COMPONENTS_KEYS} = require('./../common/statusComponents.enum.js');
-const {RUNTIME_COMPONENTS} = require('./../common/runtimeComponents.enum.js');
+const {RUNTIME_COMPONENT, RUNTIME_KEY} = require('./../common/kvStore/runtime.enum.js');
 
 const NOT_CONFIGURED_MESSAGE = 'This service was not configured';
 
@@ -306,7 +306,7 @@ class StatusService {
 
     let flpVersion = '';
     try {
-      flpVersion = await this._apricotService.getRuntimeEntryByComponent(RUNTIME_COMPONENTS.FLP_VERSION_KEY, '');
+      flpVersion = await this._apricotService.getRuntimeEntryByComponent('', RUNTIME_KEY.FLP_VERSION);
     } catch (error) {
       this._logger.warnMessage(error, {level: 26, system: 'GUI', facility: 'cog/status'});
     }
@@ -314,7 +314,7 @@ class StatusService {
     let pdpVersion = '';
     try {
       pdpVersion = await this._apricotService.getRuntimeEntryByComponent(
-        RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY
+        RUNTIME_COMPONENT.PDP_VERSION, RUNTIME_KEY.PDP_VERSION
       );
     } catch (error) {
       this._logger.warnMessage(error, {level: 26, system: 'GUI', facility: 'cog/status'});

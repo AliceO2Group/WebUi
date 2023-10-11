@@ -22,44 +22,7 @@ describe('BookkeepingService test suite', () => {
   const url = 'http://bkp-test.cern.ch:8888';
   let bkp = new BookkeepingService({url, token: ''});
 
-  describe(`'init' test suite`, async () => {
-    before(() => {
-      bkp = new BookkeepingService({url, token: ''});
-      nock(url)
-        .get('/api/runTypes?token=')
-        .reply(200, {
-          data: [
-            {name: 'NOISE', id: 1}, {name: 'PHYSICS', id: 2}, {name: 'SYNTHETIC', id: 3}
-          ]
-        });
-      nock(url)
-        .get('/api/runTypes?token=no-data')
-        .reply(200, {data: []});
-      nock(url)
-        .get('/api/runTypes?token=error')
-        .replyWithError('Unable to connect');
-    });
-    after(() => nock.cleanAll());
-
-    it('should successfully load runTypes from bookkeeping', async () => {
-      await bkp.init();
-      assert.deepStrictEqual(bkp.runTypes, {NOISE: 1, PHYSICS: 2, SYNTHETIC: 3});
-    });
-
-    it('should successfully load an empty object if no runTypes are provided', async () => {
-      bkp._token = 'no-data';
-      await bkp.init();
-      assert.deepStrictEqual(bkp.runTypes, {});
-    });
-
-    it('should successfully load an empty object even if bookkeeping returned an error', async () => {
-      bkp._token = 'error';
-      await bkp.init();
-      assert.deepStrictEqual(bkp.runTypes, {});
-    });
-  });
-
-  describe(`'_getRunTypes' test suite`, async () => {
+  describe(`'getRunTypes' test suite`, async () => {
     before(() => {
       bkp = new BookkeepingService({url, token: ''});
       nock(url)
@@ -79,19 +42,19 @@ describe('BookkeepingService test suite', () => {
     after(() => nock.cleanAll());
 
     it('should successfully return runTypes as object from bookkeeping', async () => {
-      const runTypes = await bkp._getRunTypes();
+      const runTypes = await bkp.getRunTypes();
       assert.deepStrictEqual(runTypes, {NOISE: 1, PHYSICS: 2, SYNTHETIC: 3});
     });
 
     it('should successfully load an empty object if no runTypes are provided', async () => {
       bkp._token = 'no-data';
-      const runTypes = await bkp._getRunTypes();
+      const runTypes = await bkp.getRunTypes();
       assert.deepStrictEqual(runTypes, {});
     });
 
     it('should successfully load an empty object even if bookkeeping returned an error', async () => {
       bkp._token = 'error';
-      const runTypes = await bkp._getRunTypes();
+      const runTypes = await bkp.getRunTypes();
       assert.deepStrictEqual(runTypes, {});
     });
   });
@@ -111,7 +74,7 @@ describe('BookkeepingService test suite', () => {
     };
     before(() => {
       bkp = new BookkeepingService({url, token: ''});
-      bkp._runTypes = {NOISE: 1, PHYSICS: 2, SYNTHETIC: 3};
+      // runTypes = {NOISE: 1, PHYSICS: 2, SYNTHETIC: 3}; mapping describing usecases below
       nock(url)
         .get('/api/runs?filter[definitions]=CALIBRATION&filter[runTypes]=1&page[limit]=1&'
           + 'filter[detectors][operator]=and&filter[detectors][values]=TPC&token=')
@@ -134,7 +97,7 @@ describe('BookkeepingService test suite', () => {
     after(() => nock.cleanAll());
 
     it('should successfully return a run based on existing runType and provided def, type and detector', async () => {
-      const run = await bkp.getRun('CALIBRATION', 'NOISE', 'TPC');
+      const run = await bkp.getRun('CALIBRATION', 1, 'TPC');
       const runInfo = JSON.parse(JSON.stringify(runToReturn));
       runInfo.runType = runInfo.runType.name;
       delete runInfo.extraField;
@@ -143,12 +106,12 @@ describe('BookkeepingService test suite', () => {
     });
 
     it('should successfully return an empty run if none was found', async () => {
-      const run = await bkp.getRun('CALIBRATION', 'PHYSICS', 'TPC');
+      const run = await bkp.getRun('CALIBRATION', 2, 'TPC');
       assert.deepStrictEqual(run, {});
     });
 
     it('should successfully return an empty run even if bkp service throws error', async () => {
-      const run = await bkp.getRun('CALIBRATION', 'SYNTHETIC', 'TPC');
+      const run = await bkp.getRun('CALIBRATION', 3, 'TPC');
       assert.deepStrictEqual(run, {});
     });
   });

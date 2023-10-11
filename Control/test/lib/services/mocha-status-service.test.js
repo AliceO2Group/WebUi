@@ -19,7 +19,7 @@ const sinon = require('sinon');
 const {NotificationService} = require('@aliceo2/web-ui');
 
 const {StatusService} = require('./../../../lib/services/Status.service.js');
-const {RUNTIME_COMPONENTS} = require('./../../../lib/common/runtimeComponents.enum.js');
+const {RUNTIME_COMPONENT, RUNTIME_KEY} = require('./../../../lib/common/kvStore/runtime.enum.js');
 
 describe('StatusService test suite', () => {
   describe('Test StatusService initialization', () => {
@@ -299,8 +299,8 @@ describe('StatusService test suite', () => {
   describe('System Components status test suite', async () => {
     it('should successfully return both FLP and PDP versions', async () => {
       const getRuntimeEntryByComponent = sinon.stub();
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).resolves('0.101.0-1');
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1')
+      getRuntimeEntryByComponent.withArgs('', RUNTIME_KEY.FLP_VERSION).resolves('0.101.0-1');
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENT.PDP_VERSION, RUNTIME_KEY.PDP_VERSION).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1')
 
       const statusService = new StatusService();
       statusService._apricotService = {getRuntimeEntryByComponent};
@@ -312,8 +312,8 @@ describe('StatusService test suite', () => {
 
     it('should successfully return only PDP version even when FLP fails', async () => {
       const getRuntimeEntryByComponent = sinon.stub();
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).rejects(new Error('nil'));
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1');
+      getRuntimeEntryByComponent.withArgs('', RUNTIME_KEY.FLP_VERSION).rejects(new Error('nil'));
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENT.PDP_VERSION, RUNTIME_KEY.PDP_VERSION).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1');
 
       const statusService = new StatusService();
       statusService._apricotService = {getRuntimeEntryByComponent};
@@ -325,8 +325,8 @@ describe('StatusService test suite', () => {
 
     it('should successfully return only FLP version even when PDP fails', async () => {
       const getRuntimeEntryByComponent = sinon.stub();
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).resolves('0.101.0-1');
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).rejects(new Error('nil'));
+      getRuntimeEntryByComponent.withArgs('', RUNTIME_KEY.FLP_VERSION).resolves('0.101.0-1');
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENT.PDP_VERSION, RUNTIME_KEY.PDP_VERSION).rejects(new Error('nil'));
 
       const statusService = new StatusService();
       statusService._apricotService = {getRuntimeEntryByComponent};
@@ -338,8 +338,8 @@ describe('StatusService test suite', () => {
 
     it('should return error status when the 2 versions do not match', async () => {
       const getRuntimeEntryByComponent = sinon.stub();
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.FLP_VERSION_KEY).resolves('0.102.0-1');
-      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENTS.PDP_VERSION_COMPONENT, RUNTIME_COMPONENTS.PDP_VERSION_KEY).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1');
+      getRuntimeEntryByComponent.withArgs('', RUNTIME_KEY.FLP_VERSION).resolves('0.102.0-1');
+      getRuntimeEntryByComponent.withArgs(RUNTIME_COMPONENT.PDP_VERSION, RUNTIME_KEY.PDP_VERSION).resolves('DDv1.5.6-experimental-flp-suite-v0.101.0-1');
 
       const statusService = new StatusService();
       statusService._apricotService = {getRuntimeEntryByComponent};
