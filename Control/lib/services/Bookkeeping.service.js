@@ -39,12 +39,12 @@ class BookkeepingService {
   /**
    * Given a definition, a type of a run and a detector, fetch from Bookkeeping the last RUN matching the parameters
    * @param {String} definition - definition of the run to query
-   * @param {Number} type - type of the run to query as per BKP mapping
+   * @param {Number} typeId - type of the run to query as per BKP mapping
    * @param {String} detector - detector which contained the run
    * @return {RunSummary|{}} - run object from Bookkeeping
    */
-  async getRun(definition, type, detector) {
-    let filter = `filter[definitions]=${definition}&filter[runTypes]=${type}&page[limit]=1&`;
+  async getRun(definition, typeId, detector) {
+    let filter = `filter[definitions]=${definition}&filter[runTypes]=${typeId}&page[limit]=1&`;
     filter += `filter[detectors][operator]=and&filter[detectors][values]=${detector}`
     try {
       const {data} = await httpGetJson(this._hostname, this._port, `/api/runs?${filter}&token=${this._token}`, {
