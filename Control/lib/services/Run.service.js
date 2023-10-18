@@ -16,16 +16,17 @@ const {Log} = require('@aliceo2/web-ui');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
-const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
+const {RUN_DEFINITIONS} = require('./../common/runDefinition.enum.js')
+const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 
 /**
  * @class
- * CalibrationRunService class to be used for retrieving and building information needed for the CalibrationRun page:
+ * RunService class to be used for retrieving and building information on runs(active/previous) from Bookkeeping:
  * * store in-memory information with regards to runTypes(name-id mapping), calibration per detector mappings, etc.
  * * displaying latest calibration runs as per mapping defined in KV Store
  * * allowing user to deploy calibration runs and follow their progress via streams
  */
-class CalibrationRunService {
+class RunService {
   /**
    * @constructor
    * Constructor for configuring the service to retrieve data via passed services
@@ -62,21 +63,50 @@ class CalibrationRunService {
    */
   async init() {
     this._runTypes = await this._bkpService.getRunTypes();
+    this._calibrationPerDetectorMap = await this._loadCalibrationForDetector();
+    this._calibrationRunsPerDetector = await this.retrieveCalibrationRuns();
+  }
 
+  /**
+   * Based on already loaded calibration configuration mapping from KV store, retrieve runs with those characteristics from Bookkeeping
+   * @return {Promise<Object.Error>} - list of calibration runs per detector
+   */
+  async retrieveCalibrationRuns() {
+    const calibrationRunsPerDetector = {};
+    for (const detector of Object.keys(this._calibrationPerDetectorMap)) {
+      const runTypesPerDetector = this._calibrationPerDetectorMap[detector] ?? [];
+      calibrationRunsPerDetector[detector] = [];
+      for (const runType of runTypesPerDetector) {
+        const runTypeId = this._runTypes[runType];
+        const runInfo = await this._bkpService.getRun(RUN_DEFINITIONS.CALIBRATION, runTypeId, detector);
+        calibrationRunsPerDetector[detector].push(runInfo);
+      }
+    }
+    return calibrationRunsPerDetector;
+  }
+
+  /*
+   * Private Loaders
+   */
+
+  /**
+   * Load calibration mapping for each detector as per the KV store
+   * @return {Promise<Object.Error>} - map of calibration configuration
+   *  
+   * @example 
+   * { "XYZ": ["CALIB1", "CALIB2"], "ABC": ["XCALIB"] }
+   */
+  async _loadCalibrationForDetector() {
     try {
-      /**
-       * @type {Object<String, Array<String>>}
-       * @example 
-       * { "XYZ": ["CALIB1", "CALIB2"], "ABC": ["XCALIB"] }
-       */
-      this._calibrationPerDetectorMap = await this._apricotService.getRuntimeEntryByComponent(COG, CALIBRATION_MAPPING);
+      const calibrationMappings = await this._apricotService.getRuntimeEntryByComponent(COG, CALIBRATION_MAPPING);
+      return JSON.parse(calibrationMappings);
     } catch (error) {
       const err = grpcErrorToNativeError(error);
       this._logger.errorMessage(`Unable to load calibration mapping due to: ${err}`,
         {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'calibration-service'}
       )
-      this._calibrationPerDetectorMap = {};
     }
+    return {};
   }
 
   /**
@@ -100,4 +130,4 @@ class CalibrationRunService {
   }
 }
 
-module.exports = {CalibrationRunService};
+module.exports = {RunService};
