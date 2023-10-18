@@ -12,16 +12,11 @@
  * or submit itself to any jurisdiction.
 */
 
-const RUNTIME_COMPONENT = Object.freeze({
-  PDP_VERSION: 'aliecs/defaults',
-  COG: 'COG',
-  COG_V1: 'COG_V1',
+/**
+ * Run Definitions as per Bookkeeping's implementation: https://github.com/AliceO2Group/Bookkeeping/blob/main/docs/RUN_DEFINITIONS.md 
+ */
+const RUN_DEFINITIONS = Object.freeze({
+  CALIBRATION: 'CALIBRATION'
 });
 
-const RUNTIME_KEY = Object.freeze({
-  FLP_VERSION: 'flp_suite_version',
-  PDP_VERSION: 'pdp_o2pdpsuite_version',
-  CALIBRATION_MAPPING: 'calibration-mappings',
-});
-
-module.exports = {RUNTIME_COMPONENT, RUNTIME_KEY};
+exports.RUN_DEFINITIONS = RUN_DEFINITIONS;
