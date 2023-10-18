@@ -19,7 +19,7 @@ class RunSummaryAdapter {
   /**
    * RunSummaryAdapter
    */
-  constructor() {}
+  constructor() { }
 
   /**
    * Converts the given object to an entity object.
@@ -36,16 +36,21 @@ class RunSummaryAdapter {
       runType,
       startTime,
       endTime,
-      detectors = [],
     } = run;
-    return  {
+
+    let {detectors = []} = run;
+    if (typeof detectors === 'string') {
+      detectors = detectors.split(',').sort();
+    }
+
+    return {
       runNumber,
       environmentId,
       definition,
       calibrationStatus,
       runType: runType?.name,
       startTime,
-      detectors: detectors.sort(),
+      detectors,
       endTime,
     };
   }
