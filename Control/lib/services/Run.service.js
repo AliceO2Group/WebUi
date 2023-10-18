@@ -69,7 +69,7 @@ class RunService {
 
   /**
    * Based on already loaded calibration configuration mapping from KV store, retrieve runs with those characteristics from Bookkeeping
-   * @return {Promise<Object.Error>} - list of calibration runs per detector
+   * @return {Promise<Object<String, Array<RunSummary>.Error>} - list of calibration runs grouped by detector
    */
   async retrieveCalibrationRuns() {
     const calibrationRunsPerDetector = {};
