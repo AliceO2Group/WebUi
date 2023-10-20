@@ -52,7 +52,7 @@ class RunService {
     /**
      * @type {Object<String, Array<String>>}
      */
-    this._calibrationPerDetectorMap = [];
+    this._calibrationPerDetectorMap = {};
 
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/calibration-service`);
   }
@@ -63,15 +63,15 @@ class RunService {
    */
   async init() {
     this._runTypes = await this._bkpService.getRunTypes();
-    this._calibrationPerDetectorMap = await this._loadCalibrationForDetector();
-    this._calibrationRunsPerDetector = await this.retrieveCalibrationRuns();
+    this._calibrationPerDetectorMap = await this._retrieveCalibrationForDetector();
+    this._calibrationRunsPerDetector = await this.retrieveCalibrationRunsGroupedByDetector();
   }
 
   /**
    * Based on already loaded calibration configuration mapping from KV store, retrieve runs with those characteristics from Bookkeeping
    * @return {Promise<Object<String, Array<RunSummary>.Error>} - list of calibration runs grouped by detector
    */
-  async retrieveCalibrationRuns() {
+  async retrieveCalibrationRunsGroupedByDetector() {
     const calibrationRunsPerDetector = {};
     for (const detector of Object.keys(this._calibrationPerDetectorMap)) {
       const runTypesPerDetector = this._calibrationPerDetectorMap[detector] ?? [];
@@ -79,7 +79,9 @@ class RunService {
       for (const runType of runTypesPerDetector) {
         const runTypeId = this._runTypes[runType];
         const runInfo = await this._bkpService.getRun(RUN_DEFINITIONS.CALIBRATION, runTypeId, detector);
-        calibrationRunsPerDetector[detector].push(runInfo);
+        if (runInfo) {
+          calibrationRunsPerDetector[detector].push(runInfo);
+        }
       }
     }
     return calibrationRunsPerDetector;
@@ -96,7 +98,7 @@ class RunService {
    * @example 
    * { "XYZ": ["CALIB1", "CALIB2"], "ABC": ["XCALIB"] }
    */
-  async _loadCalibrationForDetector() {
+  async _retrieveCalibrationForDetector() {
     try {
       const calibrationMappings = await this._apricotService.getRuntimeEntryByComponent(COG, CALIBRATION_MAPPING);
       return JSON.parse(calibrationMappings);
