@@ -122,7 +122,7 @@ module.exports.setup = (http, ws) => {
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController))
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
-  http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController), {public: true})
+  http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController))
 
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironment.bind(envCtrl), {public: true});
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
