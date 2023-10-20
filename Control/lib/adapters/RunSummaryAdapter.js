@@ -40,8 +40,9 @@ class RunSummaryAdapter {
 
     let {detectors = []} = run;
     if (typeof detectors === 'string') {
-      detectors = detectors.split(',').sort();
+      detectors = detectors.split(',');
     }
+    detectors.sort();
 
     return {
       runNumber,

@@ -32,19 +32,19 @@ describe(`'RunController' test suite`, () => {
           {runNumber: 2},
         ]
       };
-      const runCtrl = new RunController({
+      const runController = new RunController({
         retrieveCalibrationRunsGroupedByDetector: sinon.stub().resolves(runs)
       });
-      await runCtrl.getCalibrationRunsHandler({}, res);
+      await runController.getCalibrationRunsHandler({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(runs));
     });
 
     it('should return 500 response as there was a problem internally', async () => {
-      const runCtrl = new RunController({
+      const runController = new RunController({
         retrieveCalibrationRunsGroupedByDetector: sinon.stub().rejects(new Error('Something went wrong'))
       });
-      await runCtrl.getCalibrationRunsHandler({}, res);
+      await runController.getCalibrationRunsHandler({}, res);
       assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: 'Something went wrong'}));
     });

@@ -73,7 +73,7 @@ class RunService {
    */
   async retrieveCalibrationRunsGroupedByDetector() {
     const calibrationRunsPerDetector = {};
-    for (const detector of Object.keys(this._calibrationPerDetectorMap)) {
+    for (const detector in this._calibrationPerDetectorMap) {
       const runTypesPerDetector = this._calibrationPerDetectorMap[detector] ?? [];
       calibrationRunsPerDetector[detector] = [];
       for (const runType of runTypesPerDetector) {

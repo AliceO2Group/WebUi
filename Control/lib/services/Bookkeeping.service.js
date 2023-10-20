@@ -57,7 +57,7 @@ class BookkeepingService {
     } catch (error) {
       this._logger.debug(error);
     }
-    return undefined;
+    return null;
   }
 
   /**
