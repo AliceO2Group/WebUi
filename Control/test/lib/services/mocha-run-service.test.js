@@ -77,7 +77,6 @@ describe(`'RunService' test suite`, async () => {
         XYZ: ['NONEXISTENT', 'PULSE'], // detector with no run found or nonexistent type
       }
       const result = await runSrv.retrieveCalibrationRunsGroupedByDetector();
-      console.log(result)
       assert.deepStrictEqual(result, {
         TPC: [
           {runNumber: 1},

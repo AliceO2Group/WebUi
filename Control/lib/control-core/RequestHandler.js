@@ -74,8 +74,6 @@ class RequestHandler {
           variables.odc_n_epns = odc_n_epns;
         }
         req.body.vars = variables;
-        console.log('-------------------------');
-        console.log(req.body.vars);
       } catch (error) {
         console.error(error);
       }
