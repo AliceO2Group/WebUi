@@ -12,10 +12,17 @@
  * or submit itself to any jurisdiction.
 */
 
-const RUNTIME_COMPONENTS = Object.freeze({
-  FLP_VERSION_KEY: 'flp_suite_version',
-  PDP_VERSION_COMPONENT: 'aliecs/defaults',
-  PDP_VERSION_KEY: 'pdp_o2pdpsuite_version',
+const RUNTIME_COMPONENT = Object.freeze({
+  PDP_VERSION: 'aliecs/defaults',
+  COG: 'COG',
+  COG_V1: 'COG_V1',
 });
 
-module.exports.RUNTIME_COMPONENTS = RUNTIME_COMPONENTS;
+const RUNTIME_KEY = Object.freeze({
+  FLP_VERSION: 'flp_suite_version',
+  PDP_VERSION: 'pdp_o2pdpsuite_version',
+  CALIBRATION_MAPPING: 'calibration-mappings',
+
+});
+
+module.exports = {RUNTIME_COMPONENT, RUNTIME_KEY};

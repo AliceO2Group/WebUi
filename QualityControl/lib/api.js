@@ -12,16 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { WebSocket } from '@aliceo2/web-ui';
-
-import { consulService, objectController, layoutService, statusController, userService } from './QCModel.js';
+import {
+  consulService, objectController, layoutService, statusController, userService, statusService,
+} from './QCModel.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
  * @param {HttpServer} http - web-ui based server implementation
+ * @param {WebSocket} ws - web-ui websocket server implementation
  * @returns {void}
  */
-export const setup = (http) => {
+export const setup = (http, ws) => {
+  statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
   http.get('/object', objectController.getObjectContent.bind(objectController));
   http.get('/objects', objectController.getObjects.bind(objectController), { public: true });
@@ -42,8 +44,6 @@ export const setup = (http) => {
   http.get('/status/framework', statusController.getFrameworkInfo.bind(statusController), { public: true });
 
   http.get('/checkUser', userService.addUser.bind(userService));
-
-  new WebSocket(http);
 };
 
 /**

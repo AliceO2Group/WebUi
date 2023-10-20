@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -36,12 +36,12 @@
     "@aliceo2/web-ui"
   ],
   "devDependencies": {
-    "eslint": "^8.48.0",
+    "eslint": "^8.51.0",
     "eslint-config-google": "^0.14.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^21.1.0",
-    "sinon": "^15.2.0"
+    "puppeteer": "^21.3.6",
+    "sinon": "^16.1.0"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui"

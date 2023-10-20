@@ -27,7 +27,7 @@ class EnvCache {
   constructor(ctrlService) {
     this.ctrlService = ctrlService;
     this.cache = {};
-    this.timeout = 5000;
+    this.timeout = 9000;
     this.cacheEvictionTimeout = 5 * 60 * 1000;
     this.cacheEvictionLast = new Date();
     this.refreshInterval = setInterval(() => this.refresh(), this.timeout);
