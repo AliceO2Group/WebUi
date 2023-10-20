@@ -37,9 +37,9 @@ class RunController {
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
-  async getCalibrationRunsHandler(req, res) {
+  async getCalibrationRunsHandler(_, res) {
     try {
-      const response = await this._runService.retrieveCalibrationRuns();
+      const response = await this._runService.retrieveCalibrationRunsGroupedByDetector();
       res.status(200).json(response);
     } catch (error) {
       this._logger.debug(error);
