@@ -23,7 +23,7 @@ class RunController {
    * @param {RunService} runService - service to use to build information on runs
    */
   constructor(runService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/env-ctrl`);
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-ctrl`);
 
     /**
      * @type {RunService}

@@ -54,7 +54,7 @@ class RunService {
      */
     this._calibrationPerDetectorMap = {};
 
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/calibration-service`);
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
   }
 
   /**
