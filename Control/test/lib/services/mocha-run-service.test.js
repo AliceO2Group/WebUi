@@ -71,11 +71,11 @@ describe(`'RunService' test suite`, async () => {
         PULSE: 1,
         SOMEOTHER: 2,
       };
-      runSrv._calibrationPerDetectorMap = {
+      runSrv._runTypesPerDetectorStoredMapping = {
         TPC: ['NOISE', 'PULSE'],
         ABC: ['SOMEOTHER', 'PULSE'],
         XYZ: ['NONEXISTENT', 'PULSE'], // detector with no run found or nonexistent type
-      }
+      };
       const result = await runSrv.retrieveCalibrationRunsGroupedByDetector();
       assert.deepStrictEqual(result, {
         TPC: [

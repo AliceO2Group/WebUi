@@ -15,7 +15,7 @@
 const {Log} = require('@aliceo2/web-ui');
 const {httpGetJson} = require('./../utils.js');
 const RunSummaryAdapter = require('./../adapters/RunSummaryAdapter.js');
-const REFRESH_RATE = 10000;
+const DEFAULT_REFRESH_RATE = 10000;
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -33,7 +33,7 @@ class BookkeepingService {
     this._protocol = protocol;
 
     this._token = token ?? '';
-    this._refreshRate = refreshRate ?? REFRESH_RATE;
+    this._refreshRate = refreshRate ?? DEFAULT_REFRESH_RATE;
 
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/bkp-service`);
   }
