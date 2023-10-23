@@ -78,7 +78,7 @@ describe('WorkflowController test suite', () => {
         retrieveWorkflowMappings: sinon.stub().rejects(new Error('No mappings found'))
       });
       await workflowCtrl.getWorkflowMapping({}, res);
-      assert.ok(res.status.calledWith(502));
+      assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: 'No mappings found'}));
     });
   });

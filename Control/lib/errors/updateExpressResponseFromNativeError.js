@@ -24,7 +24,7 @@ const {TimeoutError} = require('./TimeoutError.js');
  * @returns {void}
  */
 const updateExpressResponseFromNativeError = (response, error) => {
-  let status = 502;
+  let status = 500;
   const {message, constructor} = error;
   switch (constructor) {
     case InvalidInputError:
@@ -36,10 +36,7 @@ const updateExpressResponseFromNativeError = (response, error) => {
     case TimeoutError:
       status = 408;
       break;
-    default:
-      status = 502;
   }
-
   response.status(status).json({message});
 };
 
