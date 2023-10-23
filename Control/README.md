@@ -72,6 +72,7 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 ### Bookkeeping
 * `url` - URL which points to Bookkeeping API: `<protocol>://<instance>:<port>`, `<protocol>://<domain_name>`
 * `token` - token needed for permissions to retrieve data from Bookkeeping
+* `[refreshRate = 10000]` - number representing how often should the data from Bookkeeping be refreshed in ms;
 
 Bookkeeping is going to be used as the source of latest `CALIBRATION` runs as per the [definition](https://github.com/AliceO2Group/Bookkeeping/blob/main/docs/RUN_DEFINITIONS.md). Detectors may need these run before stable beams, with some needing _none_, some only _one_ run and others _multiple_ ones defined by the `RUN TYPE` attribute. As this can vary depending on the period, the types corresponding to a detector will be defined and retrieved from the KV store of [O2Apricot](https://github.com/AliceO2Group/Control/tree/master/apricot) (key and value TBD).
 

@@ -24,14 +24,15 @@ class BookkeepingService {
    * Constructor for configuring the service to retrieve data via Bookkeeping HTTP API
    * @param {Object} config = {url: string, token: string} - configuration for using BKP service
    */
-  constructor({url = '', token = ''}) {
-    this._url = url;
+  constructor({url, token, refreshRate}) {
+    this._url = url ?? '';
     const {protocol, hostname, port} = url ? new URL(this._url) : {};
     this._hostname = hostname;
     this._port = port;
     this._protocol = protocol;
 
-    this._token = token;
+    this._token = token ?? '';
+    this._refreshRate = refreshRate ?? 100000;
 
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/bkp-service`);
   }
@@ -79,6 +80,18 @@ class BookkeepingService {
       this._logger.debug(error);
     }
     return {};
+  }
+
+  /**
+   * Getters & Setters
+   */
+
+  /**
+   * Getter for retrieving the rate of refreshing data from Bookkeeping
+   * @return {Number}
+   */
+  get refreshRate() {
+    return this._refreshRate;
   }
 }
 
