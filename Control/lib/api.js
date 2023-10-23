@@ -90,7 +90,7 @@ module.exports.setup = (http, ws) => {
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService);
-  runService.init();
+  // runService.init();
   const runController = new RunController(runService);
 
   const notificationService = new NotificationService(config.kafka);
@@ -103,8 +103,8 @@ module.exports.setup = (http, ws) => {
   );
   const statusController = new StatusController(statusService);
 
-  const intervals = new Intervals(statusService);
-  intervals.initializeIntervals();
+  const intervals = new Intervals();
+  _initializeIntervals(intervals, statusService, runService, bkpService);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
@@ -122,7 +122,7 @@ module.exports.setup = (http, ws) => {
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController))
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
-  http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController))
+  http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController), {public: true})
 
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironment.bind(envCtrl), {public: true});
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
@@ -164,3 +164,34 @@ module.exports.setup = (http, ws) => {
   http.get('/consul/crus/aliases', validateService, consulController.getCRUsAlias.bind(consulController));
   http.post('/consul/crus/config/save', validateService, consulController.saveCRUsConfiguration.bind(consulController));
 };
+
+/**
+ * Method to register services at the start of the server
+ * @param {Intervals} intervalsService - wrapper for storing intervals
+ * @param {StatusService} statusService - service used for retrieving status on dependent services
+ * @param {RunService} runService - service for retrieving and building information on runs
+ * @param {BookkeepingService} bkpService - service for retrieving information on runs from Bookkeeping
+ * @return {void}
+ */
+function _initializeIntervals(intervalsService, statusService, runService, bkpService) {
+  const STATUS_SERVICE_REFRESH_RATE = 10000;
+  intervalsService.register(statusService.retrieveConsulStatus.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveAliEcsCoreInfo.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveApricotStatus.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveGrafanaStatus.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveSystemCompatibility.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
+  intervalsService.register(
+    statusService.retrieveNotificationSystemStatus.bind(statusService),
+    STATUS_SERVICE_REFRESH_RATE
+  );
+  intervalsService.register(
+    statusService.retrieveAliECSIntegratedInfo.bind(statusService),
+    STATUS_SERVICE_REFRESH_RATE
+  );
+
+  const CALIBRATION_RUNS_REFRESH_RATE = bkpService.refreshRate;
+  intervalsService.register(
+    runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
+    CALIBRATION_RUNS_REFRESH_RATE
+  );
+}
