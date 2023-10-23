@@ -54,6 +54,11 @@ class RunService {
      */
     this._calibrationPerDetectorMap = {};
 
+    /**
+     * @type {Object<String, Array<RunSummary>>}
+     */
+    this._calibrationRunsPerDetector = {};
+
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
   }
 
@@ -62,8 +67,8 @@ class RunService {
    * @return {void}
    */
   async init() {
-    this._runTypes = await this._bkpService.getRunTypes();
     this._calibrationPerDetectorMap = await this._retrieveCalibrationForDetector();
+    this._runTypes = await this._bkpService.getRunTypes();
     this._calibrationRunsPerDetector = await this.retrieveCalibrationRunsGroupedByDetector();
   }
 
@@ -84,6 +89,7 @@ class RunService {
         }
       }
     }
+    this._calibrationRunsPerDetector = calibrationRunsPerDetector;
     return calibrationRunsPerDetector;
   }
 
@@ -129,6 +135,14 @@ class RunService {
    */
   get calibrationPerDetectorMap() {
     return this._calibrationPerDetectorMap;
+  }
+
+  /**
+   * Return the object containing a KV object with detector and its corresponding last calibration runs
+   * @return {Object<String, Array<RunSummary>>}
+   */
+  get calibrationRunsPerDetector() {
+    return this._calibrationRunsPerDetector;
   }
 }
 
