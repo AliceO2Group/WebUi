@@ -174,22 +174,17 @@ module.exports.setup = (http, ws) => {
  * @return {void}
  */
 function _initializeIntervals(intervalsService, statusService, runService, bkpService) {
-  const STATUS_SERVICE_REFRESH_RATE = 10000;
-  intervalsService.register(statusService.retrieveConsulStatus.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
-  intervalsService.register(statusService.retrieveAliEcsCoreInfo.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
-  intervalsService.register(statusService.retrieveApricotStatus.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
-  intervalsService.register(statusService.retrieveGrafanaStatus.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
-  intervalsService.register(statusService.retrieveSystemCompatibility.bind(statusService), STATUS_SERVICE_REFRESH_RATE);
-  intervalsService.register(
-    statusService.retrieveNotificationSystemStatus.bind(statusService),
-    STATUS_SERVICE_REFRESH_RATE
-  );
-  intervalsService.register(
-    statusService.retrieveAliECSIntegratedInfo.bind(statusService),
-    STATUS_SERVICE_REFRESH_RATE
-  );
-
+  const SERVICES_REFRESH_RATE = 10000;
   const CALIBRATION_RUNS_REFRESH_RATE = bkpService.refreshRate;
+
+  intervalsService.register(statusService.retrieveConsulStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveAliEcsCoreInfo.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveApricotStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveGrafanaStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveSystemCompatibility.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveNotificationSystemStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
+
   intervalsService.register(
     runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
     CALIBRATION_RUNS_REFRESH_RATE
