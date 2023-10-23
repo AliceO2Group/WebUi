@@ -53,7 +53,7 @@ describe('EnvironmentController test suite', () => {
 
     it('should respond with error if service for retrieving information failed', async () => {
       await envCtrl.getEnvironment({params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}}, res);
-      assert.ok(res.status.calledWith(502));
+      assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: `Data service failed`}));
     });
 

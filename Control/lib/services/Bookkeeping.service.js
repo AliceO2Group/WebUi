@@ -26,7 +26,7 @@ class BookkeepingService {
    */
   constructor({url = '', token = ''}) {
     this._url = url;
-    const {protocol, hostname, port} = new URL(this._url);
+    const {protocol, hostname, port} = url ? new URL(this._url) : {};
     this._hostname = hostname;
     this._port = port;
     this._protocol = protocol;
@@ -57,7 +57,7 @@ class BookkeepingService {
     } catch (error) {
       this._logger.debug(error);
     }
-    return {};
+    return null;
   }
 
   /**

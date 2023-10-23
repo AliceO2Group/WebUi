@@ -105,14 +105,14 @@ describe('BookkeepingService test suite', () => {
       assert.deepStrictEqual(run, runInfo);
     });
 
-    it('should successfully return an empty run if none was found', async () => {
+    it('should successfully return null run if none was found', async () => {
       const run = await bkp.getRun('CALIBRATION', 2, 'TPC');
-      assert.deepStrictEqual(run, {});
+      assert.deepStrictEqual(run, null);
     });
 
-    it('should successfully return an empty run even if bkp service throws error', async () => {
+    it('should successfully return null run even if bkp service throws error', async () => {
       const run = await bkp.getRun('CALIBRATION', 3, 'TPC');
-      assert.deepStrictEqual(run, {});
+      assert.deepStrictEqual(run, null);
     });
   });
 });
