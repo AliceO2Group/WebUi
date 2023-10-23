@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+const DEFAULT_INTERVAL_RATE = 60 * 1000;
+
 /**
  * @class
  * Class which deals with setting up intervals for retrieving information constantly
@@ -34,7 +36,7 @@ class Intervals {
    * @param {number} intervalRate = 60 * 1000 - (ms) on how often the callback should be called
    * @return {Symbol} - unique key for registered callback
    */
-  register(callback, intervalRate = 60 * 1000) {
+  register(callback, intervalRate = DEFAULT_INTERVAL_RATE) {
     const key = Symbol(Math.random());
     this._intervals[key] = setInterval(callback, intervalRate);
     return key;
@@ -46,8 +48,7 @@ class Intervals {
    * @return {void}
    */
   deregister(key) {
-    const intervalToDeregister = this._intervals[key];
-    clearInterval(intervalToDeregister);
+    clearInterval(this._intervals[key]);
   }
 }
 

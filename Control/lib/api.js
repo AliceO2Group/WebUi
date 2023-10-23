@@ -104,7 +104,7 @@ module.exports.setup = (http, ws) => {
   const statusController = new StatusController(statusService);
 
   const intervals = new Intervals();
-  _initializeIntervals(intervals, statusService, runService, bkpService);
+  initializeIntervals(intervals, statusService, runService, bkpService);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
@@ -173,7 +173,7 @@ module.exports.setup = (http, ws) => {
  * @param {BookkeepingService} bkpService - service for retrieving information on runs from Bookkeeping
  * @return {void}
  */
-function _initializeIntervals(intervalsService, statusService, runService, bkpService) {
+function initializeIntervals(intervalsService, statusService, runService, bkpService) {
   const SERVICES_REFRESH_RATE = 10000;
   const CALIBRATION_RUNS_REFRESH_RATE = bkpService.refreshRate;
 
