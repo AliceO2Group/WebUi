@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 import {
   iconGridTwoUp, iconGridThreeUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog,
-  iconCalculator, iconLockLocked
+  iconCalculator, iconLockLocked, iconWrench
 } from '/js/src/icons.js';
 
 /**
@@ -27,6 +27,7 @@ export default (model) => h('.absolute-fill scroll-y.flex-column', [
   h('h5.menu-title-large.mh1',
     model.sideBarMenu ? 'Environments' : 'ENVS'),
   menuItem(model, 'Global Runs', 'newEnvironment', iconPlus()),
+  menuItem(model, 'Calibration Runs', 'calibrationRuns', iconWrench()),
   menuItem(model, 'Active Runs', 'environments', iconGridTwoUp()),
   menuItem(model, 'Create', 'newEnvironmentAdvanced', iconPlus()),
   menuItem(model, 'Task list', 'taskList', iconGridThreeUp()),
