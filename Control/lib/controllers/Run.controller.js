@@ -37,10 +37,9 @@ class RunController {
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
-  async getCalibrationRunsHandler(_, res) {
+  getCalibrationRunsHandler(_, res) {
     try {
-      const response = await this._runService.retrieveCalibrationRunsGroupedByDetector();
-      res.status(200).json(response);
+      res.status(200).json(this._runService.calibrationRunsPerDetector);
     } catch (error) {
       this._logger.debug(error);
       updateExpressResponseFromNativeError(res, error);

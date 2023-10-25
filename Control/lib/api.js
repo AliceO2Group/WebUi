@@ -103,8 +103,8 @@ module.exports.setup = (http, ws) => {
   );
   const statusController = new StatusController(statusService);
 
-  const intervals = new Intervals(statusService);
-  intervals.initializeIntervals();
+  const intervals = new Intervals();
+  initializeIntervals(intervals, statusService, runService, bkpService);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
@@ -164,3 +164,29 @@ module.exports.setup = (http, ws) => {
   http.get('/consul/crus/aliases', validateService, consulController.getCRUsAlias.bind(consulController));
   http.post('/consul/crus/config/save', validateService, consulController.saveCRUsConfiguration.bind(consulController));
 };
+
+/**
+ * Method to register services at the start of the server
+ * @param {Intervals} intervalsService - wrapper for storing intervals
+ * @param {StatusService} statusService - service used for retrieving status on dependent services
+ * @param {RunService} runService - service for retrieving and building information on runs
+ * @param {BookkeepingService} bkpService - service for retrieving information on runs from Bookkeeping
+ * @return {void}
+ */
+function initializeIntervals(intervalsService, statusService, runService, bkpService) {
+  const SERVICES_REFRESH_RATE = 10000;
+  const CALIBRATION_RUNS_REFRESH_RATE = bkpService.refreshRate;
+
+  intervalsService.register(statusService.retrieveConsulStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveAliEcsCoreInfo.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveApricotStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveGrafanaStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveSystemCompatibility.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveNotificationSystemStatus.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
+
+  intervalsService.register(
+    runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
+    CALIBRATION_RUNS_REFRESH_RATE
+  );
+}

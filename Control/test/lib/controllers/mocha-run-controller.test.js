@@ -24,8 +24,8 @@ describe(`'RunController' test suite`, () => {
     json: sinon.stub()
   }
 
-  describe(`'getCalibrationRunsHandler' test suite`, async () => {
-    it('should successfully return calibrations runs grouped by detector', async () => {
+  describe(`'getCalibrationRunsHandler' test suite`, () => {
+    it('should successfully return calibrations runs grouped by detector', () => {
       const runs = {
         TPC: [
           {runNumber: 1},
@@ -33,20 +33,18 @@ describe(`'RunController' test suite`, () => {
         ]
       };
       const runController = new RunController({
-        retrieveCalibrationRunsGroupedByDetector: sinon.stub().resolves(runs)
+        calibrationRunsPerDetector: runs
       });
-      await runController.getCalibrationRunsHandler({}, res);
+      runController.getCalibrationRunsHandler({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(runs));
     });
 
-    it('should return 500 response as there was a problem internally', async () => {
-      const runController = new RunController({
-        retrieveCalibrationRunsGroupedByDetector: sinon.stub().rejects(new Error('Something went wrong'))
-      });
-      await runController.getCalibrationRunsHandler({}, res);
-      assert.ok(res.status.calledWith(500));
-      assert.ok(res.json.calledWith({message: 'Something went wrong'}));
+    it('should return an empty object if no runs were loaded', () => {
+      const runController = new RunController({calibrationRunsPerDetector: {}});
+      runController.getCalibrationRunsHandler({}, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({}));
     });
   });
 

@@ -50,9 +50,15 @@ class RunService {
     this._runTypes = {};
 
     /**
+     * Contains an object with list of run types that should be fetched for each detector
      * @type {Object<String, Array<String>>}
      */
-    this._calibrationPerDetectorMap = {};
+    this._runTypesPerDetectorStoredMapping = {};
+
+    /**
+     * @type {Object<String, Array<RunSummary>>}
+     */
+    this._calibrationRunsPerDetector = {};
 
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
   }
@@ -62,8 +68,8 @@ class RunService {
    * @return {void}
    */
   async init() {
+    this._runTypesPerDetectorStoredMapping = await this._retrieveCalibrationForDetector();
     this._runTypes = await this._bkpService.getRunTypes();
-    this._calibrationPerDetectorMap = await this._retrieveCalibrationForDetector();
     this._calibrationRunsPerDetector = await this.retrieveCalibrationRunsGroupedByDetector();
   }
 
@@ -73,8 +79,8 @@ class RunService {
    */
   async retrieveCalibrationRunsGroupedByDetector() {
     const calibrationRunsPerDetector = {};
-    for (const detector in this._calibrationPerDetectorMap) {
-      const runTypesPerDetector = this._calibrationPerDetectorMap[detector] ?? [];
+    for (const detector in this._runTypesPerDetectorStoredMapping) {
+      const runTypesPerDetector = this._runTypesPerDetectorStoredMapping[detector] ?? [];
       calibrationRunsPerDetector[detector] = [];
       for (const runType of runTypesPerDetector) {
         const runTypeId = this._runTypes[runType];
@@ -84,6 +90,7 @@ class RunService {
         }
       }
     }
+    this._calibrationRunsPerDetector = calibrationRunsPerDetector;
     return calibrationRunsPerDetector;
   }
 
@@ -127,8 +134,16 @@ class RunService {
    * Return the object containing a KV object with detector and its corresponding run types needed for calibration runs
    * @return {Object<String, Array<String>>}
    */
-  get calibrationPerDetectorMap() {
-    return this._calibrationPerDetectorMap;
+  get runTypesPerDetectorStoredMapping() {
+    return this._runTypesPerDetectorStoredMapping;
+  }
+
+  /**
+   * Return the object containing a KV object with detector and its corresponding last calibration runs
+   * @return {Object<String, Array<RunSummary>>}
+   */
+  get calibrationRunsPerDetector() {
+    return this._calibrationRunsPerDetector;
   }
 }
 
