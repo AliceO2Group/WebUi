@@ -24,6 +24,9 @@ export {default as QueryRouter} from './QueryRouter.js';
 // Utils
 export {default as switchCase} from './switchCase.js';
 
+// Formatters
+export {formatTimeDuration} from "./formatter/formatTimeDuration.js";
+
 // Singleton retrieving session data
 export {default as sessionService} from './sessionService.js';
 
