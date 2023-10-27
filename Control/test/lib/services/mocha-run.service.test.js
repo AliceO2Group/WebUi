@@ -17,18 +17,16 @@ const assert = require('assert');
 const sinon = require('sinon');
 
 const {RUN_DEFINITIONS} = require('./../../../lib/common/runDefinition.enum.js');
-
 const {RunService} = require('./../../../lib/services/Run.service.js');
-
 const {NotFoundError} = require('./../../../lib/errors/NotFoundError.js');
 
 describe(`'RunService' test suite`, async () => {
-  describe(`'_retrieveCalibrationForDetector test suite`, async () => {
+  describe(`'_retrieveCalibrationConfigurationsForDetectors test suite`, async () => {
     it('should return empty object if apricot service throws error', async () => {
       const getRuntimeEntryByComponent = sinon.stub().rejects(new NotFoundError('key not found'));
       const runSrv = new RunService({}, {getRuntimeEntryByComponent});
 
-      const result = await runSrv._retrieveCalibrationForDetector();
+      const result = await runSrv._retrieveCalibrationConfigurationsForDetectors();
       assert.deepStrictEqual(result, {});
     });
 
@@ -36,17 +34,26 @@ describe(`'RunService' test suite`, async () => {
       const getRuntimeEntryByComponent = sinon.stub().resolves('{"prop": "Invalid Object}');
       const runSrv = new RunService({}, {getRuntimeEntryByComponent});
 
-      const result = await runSrv._retrieveCalibrationForDetector();
+      const result = await runSrv._retrieveCalibrationConfigurationsForDetectors();
       assert.deepStrictEqual(result, {});
     });
 
     it('should successfully return results', async () => {
-      const getRuntimeEntryByComponent = sinon.stub().resolves('{"TPC": ["NOISE", "PULSE"], "ABC": ["SOME-OTHER"]}');
+      const calibrationConfigurations = {
+        TPC: [
+          {runType: 'NOISE', configuration: 'cpv-noise', label: 'CPV NOISE'},
+          {runType: 'PULSE', configuration: 'cpv-pulse', label: 'CPV PULSE'},
+        ],
+        ABC: [
+          {runType: 'SOMEOTHER', configuration: 'abc-someother', label: 'ABC SOME OTHER'},
+        ]
+      };
+      const getRuntimeEntryByComponent = sinon.stub().resolves(JSON.stringify(calibrationConfigurations));
       const runSrv = new RunService({}, {getRuntimeEntryByComponent});
 
-      const result = await runSrv._retrieveCalibrationForDetector();
+      const result = await runSrv._retrieveCalibrationConfigurationsForDetectors();
 
-      assert.deepStrictEqual(result, {TPC: ['NOISE', 'PULSE'], ABC: ['SOME-OTHER']});
+      assert.deepStrictEqual(result, calibrationConfigurations);
     });
   });
 
@@ -71,10 +78,17 @@ describe(`'RunService' test suite`, async () => {
         PULSE: 1,
         SOMEOTHER: 2,
       };
-      runSrv._runTypesPerDetectorStoredMapping = {
-        TPC: ['NOISE', 'PULSE'],
-        ABC: ['SOMEOTHER', 'PULSE'],
-        XYZ: ['NONEXISTENT', 'PULSE'], // detector with no run found or nonexistent type
+      runSrv._calibrationConfigurationPerDetectorMap = {
+        TPC: [
+          {runType: 'NOISE', configuration: 'cpv-noise', label: 'CPV NOISE'},
+          {runType: 'PULSE', configuration: 'cpv-pulse', label: 'CPV PULSE'},
+        ],
+        ABC:  [
+          {runType: 'SOMEOTHER', configuration: 'abc-someother', label: 'ABC SOME OTHER'},
+        ],
+        XYZ: [
+          {runType: 'NONEXISTENT', configuration: 'xyz-someother', label: 'XYZ NON'},
+        ], // detector with no run found or nonexistent type
       };
       const result = await runSrv.retrieveCalibrationRunsGroupedByDetector();
       assert.deepStrictEqual(result, {
@@ -84,7 +98,6 @@ describe(`'RunService' test suite`, async () => {
         ],
         ABC: [
           {runNumber: 3},
-          {runNumber: 4},
         ],
         XYZ: []
       });
