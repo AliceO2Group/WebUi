@@ -17,10 +17,12 @@
  * RunSummary is an object which contains just a summary of an entire run entity: https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js
  *
  * @property {Number} runNumber 
+ * @property {Number} id 
  * @property {String} environmentId
  * @property {String} definition
  * @property {String} calibrationStatus
  * @property {String} runType
+ * @property {Number} runDuration
  * @property {Number} startTime
  * @property {Number} endTime
  * @property {Array<String>} detectors

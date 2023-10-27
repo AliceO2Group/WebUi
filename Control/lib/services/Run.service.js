@@ -84,7 +84,11 @@ class RunService {
       calibrationRunsPerDetector[detector] = [];
       for (const calibrationConfiguration of calibrationConfigurationList) {
         const runTypeId = this._runTypes[calibrationConfiguration.runType];
-        const runInfo = await this._bkpService.getRun(RUN_DEFINITIONS.CALIBRATION, runTypeId, detector);
+        const runInfo = await this._bkpService.getRun({
+          definitions: RUN_DEFINITIONS.CALIBRATION,
+          runTypes: runTypeId,
+          detectors: detector
+        });
         if (runInfo) {
           calibrationRunsPerDetector[detector].push(runInfo);
         }
