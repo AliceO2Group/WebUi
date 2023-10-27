@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import {coloredCell} from './../../../common/coloredCell.js';
+import {coloredBadge} from './../../../common/coloredBadge.js';
 import {RUN_CALIBRATION_STATUS_COLOR_MAP} from './../../../common/enums/runCalibrationStatus.enum.js';
 
 /* global COG */
@@ -35,5 +35,5 @@ export const calibrationRunCardTitle = (run) =>
         target: '_blank',
       }, run.environmentId)
     ]),
-    coloredCell(run.calibrationStatus, RUN_CALIBRATION_STATUS_COLOR_MAP),
+    coloredBadge(run.calibrationStatus, RUN_CALIBRATION_STATUS_COLOR_MAP),
   ]);

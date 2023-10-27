@@ -20,7 +20,7 @@ import {h} from '/js/src/index.js';
  * @param {Object<String, String>} colorMap - map storing color based on value 
  * @return {vnode} - the colored cell
  */
-export const coloredCell = (value = '', colorMap = {}) => {
+export const coloredBadge = (value = '', colorMap = {}) => {
   const valueAsKey = value.split(' ').join('_');
   return h('.badge.white', {
     class: `bg-${colorMap[valueAsKey] ?? 'gray'}`,
