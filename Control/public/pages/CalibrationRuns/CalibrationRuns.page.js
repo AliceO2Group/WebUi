@@ -29,6 +29,6 @@ export const CalibrationRunsHeader = () => h('h4.w-100 text-center', 'Calibratio
 export const CalibrationRunsContent = (model) => {
   const {calibrationRunsModel} = model;
 
-  return h('.page-content', calibrationRunsContent(calibrationRunsModel)
+  return h('.absolute-fill.scroll-y', calibrationRunsContent(calibrationRunsModel)
   );
 };

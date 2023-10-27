@@ -17,7 +17,6 @@
  */
 .pageLoading { font-size: 5em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
 .errorPage { font-size: 3em; color: var(--color-dark); margin: var(--space-l); line-height: 1; }
-.page-content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-x: hidden !important; overflow-y: auto !important; }
 
 .disabled-content { pointer-events: none; opacity: .5; }
 .disabled-item, .disabled-item:hover { cursor: not-allowed; background-color: var(--color-white); color: var(--color-gray-darker);  opacity: .5;}
