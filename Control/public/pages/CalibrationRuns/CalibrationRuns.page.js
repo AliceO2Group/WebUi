@@ -12,8 +12,7 @@
  */
 
 import {h} from '/js/src/index.js';
-import errorPage from './../../common/errorPage.js';
-import pageLoading from './../../common/pageLoading.js';
+import {calibrationRunsContent} from './components/calibrationRunsContent.js';
 
 /**
  * Header for the simplified creation environment page
@@ -22,20 +21,14 @@ import pageLoading from './../../common/pageLoading.js';
 export const CalibrationRunsHeader = () => h('h4.w-100 text-center', 'Calibration Runs');
 
 /**
- * Simplified environment creation page
+ * Page for displaying calibration runs and related actions
  *
  * @param {Model} model - the global model
  * @return {vnode} - main component for the creation page of an environment
  */
 export const CalibrationRunsContent = (model) => {
-  const {calibrationRunsModel: {calibrationRuns}} = model;
-  
-  return  h('.page-content', 
-    calibrationRuns.match({
-      NotAsked: () => h('.f7.flex-column', 'Calibration Runs page not initialized'),
-      Loading: () => pageLoading(2),
-      Success: (calibrationRuns) => JSON.stringify(calibrationRuns),
-      Failure: (error) => errorPage(error),
-    })
+  const {calibrationRunsModel} = model;
+
+  return h('.page-content', calibrationRunsContent(calibrationRunsModel)
   );
 };
