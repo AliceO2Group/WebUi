@@ -39,7 +39,7 @@ class BookkeepingFilterAdapter {
       let operator = 'and';
       let values = '';
       if (typeof detectors === 'object') {
-        if (detectors?.operator === 'and' || detectors?.operator === 'or') {
+        if (detectors.operator === 'and' || detectors.operator === 'or') {
           operator = detectors.operator;
         }
         if (detectors.values) {
@@ -48,8 +48,8 @@ class BookkeepingFilterAdapter {
       } else {
         values = detectors;
       }
-      values = BookkeepingFilterAdapter._parseValueIntoString(values);
-      filter += `&filter[detectors][operator]=${operator}&filter[detectors][values]=${values}`;
+      const valuesAsString = BookkeepingFilterAdapter._parseValueIntoString(values);
+      filter += `&filter[detectors][operator]=${operator}&filter[detectors][values]=${valuesAsString}`;
     }
 
     const runTypesString = BookkeepingFilterAdapter._parseValueIntoString(runTypes);
