@@ -50,7 +50,7 @@ function getConsulConfig(config) {
     const conf = config.consul;
     conf.protocol = conf?.protocol || 'http';
     conf.flpHardwarePath = conf?.flpHardwarePath || 'o2/hardware/flps';
-    conf.detHardwarePath = conf?.detHardwarePath ||'o2/hardware/detectors',
+    conf.detHardwarePath = conf?.detHardwarePath || 'o2/hardware/detectors',
     conf.readoutCardPath = conf?.readoutCardPath || 'o2/components/readoutcard';
     conf.qcPath = conf?.qcPath || 'o2/components/qc';
     conf.readoutPath = conf?.readoutPath || 'o2/components/readout';
@@ -126,9 +126,8 @@ function _getQcgURL(config) {
  * @param {JSON} config - server configuration
  * @returns {string}
  */
-function _getBookkeepingURL(config) {
-  const bkp = config?.bookkeepingGui;
-  return (bkp?.url) ? `${bkp.url}` : '';
+function _getBookkeepingURL({bookkeeping}) {
+  return bookkeeping?.url ? new URL(bookkeeping?.url) : null
 }
 
 module.exports = {
