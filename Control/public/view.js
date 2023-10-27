@@ -29,6 +29,10 @@ import {
   EnvironmentCreationPage
 } from './pages/EnvironmentCreation/EnvironmentCreation.page.js';
 import {
+  CalibrationRunsHeader,
+  CalibrationRunsContent
+} from './pages/CalibrationRuns/CalibrationRuns.page.js';
+import {
   content as environmentsContent,
   header as environmentsHeader
 } from './environment/environmentsPage.js';
@@ -87,6 +91,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   switchCase(model.router.params.page, {
     newEnvironmentAdvanced: workflowsHeader,
     newEnvironment: EnvironmentCreationHeader,
+    calibrationRuns: CalibrationRunsHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
     about: statusHeader,
@@ -107,6 +112,7 @@ const content = (model) => [
   switchCase(model.router.params.page, {
     newEnvironmentAdvanced: workflowsContent,
     newEnvironment: EnvironmentCreationPage,
+    calibrationRuns: CalibrationRunsContent,
     environments: environmentsContent,
     environment: environmentContent,
     about: statusContent,

@@ -25,7 +25,10 @@ import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
 import {SERVICE_STATES} from './common/constants/serviceStates.js';
 import {di} from './utilities/di.js';
+
 import {EnvironmentCreationModel} from './pages/EnvironmentCreation/EnvironmentCreation.model.js';
+import {CalibrationRunsModel} from './pages/CalibrationRuns/CalibrationRuns.model.js';
+
 import {STATUS_COMPONENTS_KEYS} from './common/constants/statusComponents.enum.js';
 
 /**
@@ -73,6 +76,9 @@ export default class Model extends Observable {
 
     this.envCreationModel = new EnvironmentCreationModel(this);
     this.envCreationModel.bubbleTo(this);
+
+    this.calibrationRunsModel = new CalibrationRunsModel(this);
+    this.calibrationRunsModel.bubbleTo(this);
 
     this.task = new Task(this);
     this.task.bubbleTo(this);
@@ -239,6 +245,9 @@ export default class Model extends Observable {
         break;
       case 'newEnvironment':
         this.envCreationModel.initPage();
+        break;
+      case 'calibrationRuns':
+        this.calibrationRunsModel.initPage();
         break;
       case 'taskList':
         this.task.getTasks();

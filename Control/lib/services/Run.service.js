@@ -60,6 +60,11 @@ class RunService {
      */
     this._calibrationRunsPerDetector = {};
 
+    /**
+     * @type {Object<String, Array<RunSummary>>}
+     */
+    this._calibrationRunsPerDetector = {};
+
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
   }
 

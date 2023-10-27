@@ -128,7 +128,7 @@ describe('Control', function() {
     const expectedConf = {
       ILG_URL: 'http://localhost:8081',
       ILG_EPN_URL: 'http://localhost:8083',
-      BKP_URL: 'http://localhost:2021',
+      BKP_URL: 'http://localhost:2021/',
       QCG_URL: 'http://localhost:2022',
       GRAFANA: {
         status: true,
