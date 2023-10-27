@@ -29,11 +29,13 @@ class RunSummaryAdapter {
    */
   static toEntity(run) {
     const {
+      id,
       runNumber,
       environmentId,
       definition,
       calibrationStatus,
       runType,
+      runDuration,
       startTime,
       endTime,
     } = run;
@@ -45,11 +47,13 @@ class RunSummaryAdapter {
     detectors.sort();
 
     return {
+      id,
       runNumber,
       environmentId,
       definition,
       calibrationStatus,
       runType: runType?.name,
+      runDuration,
       startTime,
       detectors,
       endTime,

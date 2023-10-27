@@ -66,11 +66,11 @@ describe(`'RunService' test suite`, async () => {
 
     it('should return an object with calibration runs grouped by detector', async () => {
       const getRun = sinon.stub();
-      getRun.withArgs(RUN_DEFINITIONS.CALIBRATION, 0, 'TPC').resolves({runNumber: 1});
-      getRun.withArgs(RUN_DEFINITIONS.CALIBRATION, 1, 'TPC').resolves({runNumber: 2});
-      getRun.withArgs(RUN_DEFINITIONS.CALIBRATION, 2, 'ABC').resolves({runNumber: 3});
-      getRun.withArgs(RUN_DEFINITIONS.CALIBRATION, 1, 'ABC').resolves({runNumber: 4});
-      getRun.withArgs(RUN_DEFINITIONS.CALIBRATION, 1, 'XYZ').resolves(undefined);
+      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 0, detectors: 'TPC'}).resolves({runNumber: 1});
+      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 1, detectors: 'TPC'}).resolves({runNumber: 2});
+      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 2, detectors: 'ABC'}).resolves({runNumber: 3});
+      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 1, detectors: 'ABC'}).resolves({runNumber: 4});
+      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 1, detectors: 'XYZ'}).resolves(undefined);
 
       const runSrv = new RunService({getRun}, {});
       runSrv._runTypes = {
@@ -83,7 +83,7 @@ describe(`'RunService' test suite`, async () => {
           {runType: 'NOISE', configuration: 'cpv-noise', label: 'CPV NOISE'},
           {runType: 'PULSE', configuration: 'cpv-pulse', label: 'CPV PULSE'},
         ],
-        ABC:  [
+        ABC: [
           {runType: 'SOMEOTHER', configuration: 'abc-someother', label: 'ABC SOME OTHER'},
         ],
         XYZ: [

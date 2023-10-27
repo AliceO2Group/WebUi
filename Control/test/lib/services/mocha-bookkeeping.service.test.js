@@ -61,7 +61,9 @@ describe('BookkeepingService test suite', () => {
 
   describe(`'getRun' test suite`, async () => {
     let runToReturn = {
+      id: 123,
       runNumber: 123,
+      runDuration: 100,
       environmentId: 'abc',
       definition: 'CALIBRATION',
       calibrationStatus: 'good',
