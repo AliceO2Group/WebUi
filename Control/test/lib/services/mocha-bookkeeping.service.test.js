@@ -76,42 +76,55 @@ describe('BookkeepingService test suite', () => {
       bkp = new BookkeepingService({url, token: ''});
       // runTypes = {NOISE: 1, PHYSICS: 2, SYNTHETIC: 3}; mapping describing usecases below
       nock(url)
-        .get('/api/runs?filter[definitions]=CALIBRATION&filter[runTypes]=1&page[limit]=1&'
-          + 'filter[detectors][operator]=and&filter[detectors][values]=TPC&token=')
+        .get('/api/runs?page[limit]=1&filter[detectors][operator]=and&filter[detectors][values]=TPC'
+          + '&filter[runTypes]=1&filter[definitions]=CALIBRATION'
+          + '&token=')
         .reply(200, {
           data: [runToReturn]
         });
-
       nock(url)
-        .get('/api/runs?filter[definitions]=CALIBRATION&filter[runTypes]=2&page[limit]=1&'
-          + 'filter[detectors][operator]=and&filter[detectors][values]=TPC&token=')
+        .get('/api/runs?page[limit]=1&filter[detectors][operator]=and&filter[detectors][values]=TPC'
+          + '&filter[runTypes]=2&filter[definitions]=CALIBRATION'
+          + '&token=')
         .reply(200, {
           data: []
         });
-
       nock(url)
-        .get('/api/runs?filter[definitions]=CALIBRATION&filter[runTypes]=3&page[limit]=1&'
-          + 'filter[detectors][operator]=and&filter[detectors][values]=TPC&token=')
+        .get('/api/runs?page[limit]=1&filter[detectors][operator]=and&filter[detectors][values]=TPC'
+          + '&filter[runTypes]=3&filter[definitions]=CALIBRATION'
+          + '&token=')
         .replyWithError('Unable');
     });
     after(() => nock.cleanAll());
 
     it('should successfully return a run based on existing runType and provided def, type and detector', async () => {
-      const run = await bkp.getRun('CALIBRATION', 1, 'TPC');
-      const runInfo = JSON.parse(JSON.stringify(runToReturn));
-      runInfo.runType = runInfo.runType.name;
-      delete runInfo.extraField;
-      delete runInfo.someOther;
-      assert.deepStrictEqual(run, runInfo);
+      const run = await bkp.getRun({
+        definitions: 'CALIBRATION',
+        runTypes: 1,
+        detectors: 'TPC'
+      });
+      const expectedRun = JSON.parse(JSON.stringify(runToReturn));
+      expectedRun.runType = expectedRun.runType.name;
+      delete expectedRun.extraField;
+      delete expectedRun.someOther;
+      assert.deepStrictEqual(run, expectedRun);
     });
 
     it('should successfully return null run if none was found', async () => {
-      const run = await bkp.getRun('CALIBRATION', 2, 'TPC');
+      const run = await bkp.getRun({
+        definitions: 'CALIBRATION',
+        runTypes: 2,
+        detectors: 'TPC'
+      });
       assert.deepStrictEqual(run, null);
     });
 
     it('should successfully return null run even if bkp service throws error', async () => {
-      const run = await bkp.getRun('CALIBRATION', 3, 'TPC');
+      const run = await bkp.getRun({
+        definitions: 'CALIBRATION',
+        runTypes: 3,
+        detectors: 'TPC'
+      });
       assert.deepStrictEqual(run, null);
     });
   });

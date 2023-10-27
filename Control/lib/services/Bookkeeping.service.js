@@ -15,6 +15,8 @@
 const {Log} = require('@aliceo2/web-ui');
 const {httpGetJson} = require('./../utils.js');
 const RunSummaryAdapter = require('./../adapters/RunSummaryAdapter.js');
+const {BookkeepingFilterAdapter} = require('./../adapters/external/BookkeepingFilterAdapter.js');
+
 const DEFAULT_REFRESH_RATE = 10000;
 
 /**
@@ -40,16 +42,13 @@ class BookkeepingService {
 
   /**
    * Given a definition, a type of a run and a detector, fetch from Bookkeeping the last RUN matching the parameters
-   * @param {String} definition - definition of the run to query
-   * @param {Number} typeId - type of the run to query as per BKP mapping
-   * @param {String} detector - detector which contained the run
+   * @param {Object<String, Object>} filter - definition of the run to query
    * @return {RunSummary|{}} - run object from Bookkeeping
    */
-  async getRun(definition, typeId, detector) {
-    let filter = `filter[definitions]=${definition}&filter[runTypes]=${typeId}&page[limit]=1&`;
-    filter += `filter[detectors][operator]=and&filter[detectors][values]=${detector}`
+  async getRun(filter) {
+    const filterAsString = BookkeepingFilterAdapter.toString(filter);
     try {
-      const {data} = await httpGetJson(this._hostname, this._port, `/api/runs?${filter}&token=${this._token}`, {
+      const {data} = await httpGetJson(this._hostname, this._port, `/api/runs?${filterAsString}&token=${this._token}`, {
         protocol: this._protocol,
         rejectUnauthorized: false,
       });
