@@ -15,8 +15,8 @@
 /**
  * Run Definitions as per Bookkeeping's implementation: https://github.com/AliceO2Group/Bookkeeping/blob/main/docs/RUN_DEFINITIONS.md 
  */
-const RUN_DEFINITIONS = Object.freeze({
+const RunDefinitions = Object.freeze({
   CALIBRATION: 'CALIBRATION'
 });
 
-exports.RUN_DEFINITIONS = RUN_DEFINITIONS;
+exports.RunDefinitions = RunDefinitions;

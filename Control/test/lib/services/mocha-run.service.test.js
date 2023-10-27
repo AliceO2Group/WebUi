@@ -16,7 +16,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 
-const {RUN_DEFINITIONS} = require('./../../../lib/common/runDefinition.enum.js');
+const {RunDefinitions} = require('./../../../lib/common/runDefinition.enum.js');
 const {RunService} = require('./../../../lib/services/Run.service.js');
 const {NotFoundError} = require('./../../../lib/errors/NotFoundError.js');
 
@@ -66,15 +66,15 @@ describe(`'RunService' test suite`, async () => {
 
     it('should return an object with calibration runs grouped by detector', async () => {
       const getRun = sinon.stub();
-      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 0, detectors: 'TPC'}).resolves({runNumber: 1});
-      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 0, detectors: 'TPC', calibrationStatuses: 'SUCCESS'}).resolves({runNumber: 1});
-      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 1, detectors: 'TPC'}).resolves({runNumber: 2});
-      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 1, detectors: 'TPC', calibrationStatuses: 'SUCCESS'}).resolves({runNumber: 2});
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 0, detectors: 'TPC'}).resolves({runNumber: 1});
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 0, detectors: 'TPC', calibrationStatuses: 'SUCCESS'}).resolves({runNumber: 1});
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 1, detectors: 'TPC'}).resolves({runNumber: 2});
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 1, detectors: 'TPC', calibrationStatuses: 'SUCCESS'}).resolves({runNumber: 2});
 
-      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 2, detectors: 'ABC'}).resolves({runNumber: 3});
-      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 2, detectors: 'ABC', calibrationStatuses: 'SUCCESS'}).resolves({runNumber: 2});
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 2, detectors: 'ABC'}).resolves({runNumber: 3});
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 2, detectors: 'ABC', calibrationStatuses: 'SUCCESS'}).resolves({runNumber: 2});
 
-      getRun.withArgs({definitions: RUN_DEFINITIONS.CALIBRATION, runTypes: 1, detectors: 'XYZ'}).resolves(undefined);
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 1, detectors: 'XYZ'}).resolves(undefined);
 
       const runSrv = new RunService({getRun}, {});
       runSrv._runTypes = {

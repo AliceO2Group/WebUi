@@ -16,7 +16,7 @@ const {Log} = require('@aliceo2/web-ui');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
-const {RUN_DEFINITIONS} = require('./../common/runDefinition.enum.js')
+const {RunDefinitions} = require('./../common/runDefinition.enum.js')
 const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 const {RunCalibrationStatus} = require('./../common/runCalibrationStatus.enum.js');
 
@@ -91,23 +91,21 @@ class RunService {
       for (const calibrationConfiguration of calibrationConfigurationList) {
         const runTypeId = this._runTypes[calibrationConfiguration.runType];
         const lastCalibrationRun = await this._bkpService.getRun({
-          definitions: RUN_DEFINITIONS.CALIBRATION,
+          definitions: RunDefinitions.CALIBRATION,
           runTypes: runTypeId,
           detectors: detector
         });
         const lastSuccessfulCalibrationRun = await this._bkpService.getRun({
-          definitions: RUN_DEFINITIONS.CALIBRATION,
+          definitions: RunDefinitions.CALIBRATION,
           runTypes: runTypeId,
           detectors: detector,
           calibrationStatuses: RunCalibrationStatus.SUCCESS
         });
         if (lastCalibrationRun || lastSuccessfulCalibrationRun) {
-          {
-            calibrationRunsPerDetector[detector].push({
-              lastCalibrationRun,
-              lastSuccessfulCalibrationRun,
-            });
-          }
+          calibrationRunsPerDetector[detector].push({
+            lastCalibrationRun,
+            lastSuccessfulCalibrationRun,
+          });
         }
       }
     }
