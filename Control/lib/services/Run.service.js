@@ -53,7 +53,7 @@ class RunService {
      * Contains an object with list of run types that should be fetched for each detector
      * @type {Object<String, Array<String>>}
      */
-    this._runTypesPerDetectorStoredMapping = {};
+    this._calibrationConfigurationPerDetectorMap = {};
 
     /**
      * @type {Object<String, Array<RunSummary>>}
@@ -68,7 +68,7 @@ class RunService {
    * @return {void}
    */
   async init() {
-    this._runTypesPerDetectorStoredMapping = await this._retrieveCalibrationForDetector();
+    this._calibrationConfigurationPerDetectorMap = await this._retrieveCalibrationConfigurationsForDetectors();
     this._runTypes = await this._bkpService.getRunTypes();
     this._calibrationRunsPerDetector = await this.retrieveCalibrationRunsGroupedByDetector();
   }
@@ -79,11 +79,11 @@ class RunService {
    */
   async retrieveCalibrationRunsGroupedByDetector() {
     const calibrationRunsPerDetector = {};
-    for (const detector in this._runTypesPerDetectorStoredMapping) {
-      const runTypesPerDetector = this._runTypesPerDetectorStoredMapping[detector] ?? [];
+    for (const detector in this._calibrationConfigurationPerDetectorMap) {
+      const calibrationConfigurationList = this._calibrationConfigurationPerDetectorMap[detector] ?? [];
       calibrationRunsPerDetector[detector] = [];
-      for (const runType of runTypesPerDetector) {
-        const runTypeId = this._runTypes[runType];
+      for (const calibrationConfiguration of calibrationConfigurationList) {
+        const runTypeId = this._runTypes[calibrationConfiguration.runType];
         const runInfo = await this._bkpService.getRun(RUN_DEFINITIONS.CALIBRATION, runTypeId, detector);
         if (runInfo) {
           calibrationRunsPerDetector[detector].push(runInfo);
@@ -100,12 +100,12 @@ class RunService {
 
   /**
    * Load calibration mapping for each detector as per the KV store
-   * @return {Promise<Object.Error>} - map of calibration configuration
+   * @return {Promise<Object<String, CalibrationConfiguration.Error>} - map of calibration configurations
    *  
    * @example 
-   * { "XYZ": ["CALIB1", "CALIB2"], "ABC": ["XCALIB"] }
+   * { "XYZ": [ { "runType": "PEDESTAL", "configuration": "cpv-pedestal-20220412", "label": "CPV PEDESTAL" }]}
    */
-  async _retrieveCalibrationForDetector() {
+  async _retrieveCalibrationConfigurationsForDetectors() {
     try {
       const calibrationMappings = await this._apricotService.getRuntimeEntryByComponent(COG, CALIBRATION_MAPPING);
       return JSON.parse(calibrationMappings);
@@ -135,7 +135,7 @@ class RunService {
    * @return {Object<String, Array<String>>}
    */
   get runTypesPerDetectorStoredMapping() {
-    return this._runTypesPerDetectorStoredMapping;
+    return this._calibrationConfigurationPerDetectorMap;
   }
 
   /**
