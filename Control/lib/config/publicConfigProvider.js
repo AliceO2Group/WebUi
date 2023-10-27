@@ -126,8 +126,9 @@ function _getQcgURL(config) {
  * @param {JSON} config - server configuration
  * @returns {string}
  */
-function _getBookkeepingURL({bookkeeping}) {
-  return bookkeeping?.url ? new URL(bookkeeping?.url) : null
+function _getBookkeepingURL(config = {}) {
+  const {bookkeeping = {}} = config;
+  return bookkeeping.url ? new URL(bookkeeping.url) : null
 }
 
 module.exports = {

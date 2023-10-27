@@ -55,9 +55,6 @@ module.exports = {
   grafana: {
     url: 'http://localhost:2020'
   },
-  bookkeepingGui: {
-    url: 'http://localhost:2021'
-  },
   bookkeeping: {
     url: 'http://localhost:2021',
   },
