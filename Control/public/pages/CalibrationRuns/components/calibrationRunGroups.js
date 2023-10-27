@@ -43,11 +43,13 @@ export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector) => {
  * @param {Array<RunSummary>} runs - list of runs for which to build the components
  * @return {vnode}
  */
-const calibrationRunsPerDetectorCard = (runs) =>
+const calibrationRunsPerDetectorCard = (runGroups) =>
   miniCard(null, [
-    runs.map((run) =>
-      h('.p1.flex-row.g2', [
-        calibrationRunCard(run),
-      ])
+    runGroups.map((group) =>
+      h('.p1.flex-row.g2', 
+        [
+          calibrationRunCard(group.lastCalibrationRun),
+          calibrationRunCard(group.lastSuccessfulCalibrationRun),
+        ])
     )
   ], ['m1', 'g1', 'p1']);
