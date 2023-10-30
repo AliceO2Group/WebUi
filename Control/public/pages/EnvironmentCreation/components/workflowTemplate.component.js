@@ -24,9 +24,12 @@ export const workflowTemplateComponent = (workflow) =>
     NotAsked: () => null,
     Loading: () => 'Retrieving information from AliECS...',
     Success: ({template, repository, revision}) => h('.flex-column.p2.f6', [
-      h('.flex-row',h('h5.w-30.f6', 'Template: '), h('.w-70', template)),
-      h('.flex-row',h('h5.w-30.f6', 'Repository: '), h('.w-70', repository)),
-      h('.flex-row',h('h5.w-30.f6', 'Revision: '), h('.w-70', revision)),
+      h('.flex-row', h('h5.w-30.f6', 'Template: '), h('.w-70', template)),
+      h('.flex-row', h('h5.w-30.f6', 'Repository: '), h('.w-70', repository)),
+      h('.flex-row', h('h5.w-30.f6', 'Revision: '), h('.w-70', revision)),
     ]),
-    Failure: () => h('.error', 'Unable to retrieve default workflow template information from AliECS')
+    Failure: () => h('.danger.text-center', [
+      h('p', 'Missing workflow template information from AliECS.'),
+      h('p', 'Please contact an administrator.')
+    ])
   });
