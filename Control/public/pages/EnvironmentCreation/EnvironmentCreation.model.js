@@ -185,10 +185,11 @@ export class EnvironmentCreationModel extends Observable {
    * @return {boolean}
    */
   get isReady() {
+    const isWorkflowLoaded = this._defaultWorkflow.isSuccess();
     const isLabelSelected = Boolean(this._selectedConfigurationLabel);
     const areHostsSelected = this._model.workflow.form.hosts?.length > 0;
     const areEpnsCounted = !isNaN(this._creationModel.variables['odc_n_epns']);
-    return isLabelSelected && areHostsSelected && areEpnsCounted;
+    return isWorkflowLoaded && isLabelSelected && areHostsSelected && areEpnsCounted;
   }
 
 }
