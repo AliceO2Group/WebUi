@@ -25,27 +25,60 @@ describe(`'RunController' test suite`, () => {
   }
 
   describe(`'getCalibrationRunsHandler' test suite`, () => {
-    it('should successfully return calibrations runs grouped by detector', () => {
+    it('should successfully return calibrations runs grouped by detector by requesting information as cache is not enabled', async () => {
       const runs = {
         TPC: [
           {runNumber: 1},
           {runNumber: 2},
         ]
       };
-      const runController = new RunController({
-        calibrationRunsPerDetector: runs
-      });
-      runController.getCalibrationRunsHandler({}, res);
+      const runController = new RunController(
+        {
+          retrieveCalibrationRunsGroupedByDetector: sinon.stub().resolves(runs)
+        }
+      );
+      await runController.getCalibrationRunsHandler({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(runs));
     });
 
-    it('should return an empty object if no runs were loaded', () => {
-      const runController = new RunController({calibrationRunsPerDetector: {}});
-      runController.getCalibrationRunsHandler({}, res);
+    it('should successfully return calibrations runs grouped by detector by from cache', async () => {
+      const runs = {
+        TPC: [
+          {runNumber: 1},
+          {runNumber: 2},
+        ]
+      };
+      const runController = new RunController(
+        {
+          getByKey: runs
+        }
+      );
+      await runController.getCalibrationRunsHandler({}, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith(runs));
+    });
+
+    it('should successfully return an empty object if no runs were loaded', async () => {
+      const runController = new RunController(
+        {
+          retrieveCalibrationRunsGroupedByDetector: sinon.stub().resolves({})
+        }
+      );
+      await runController.getCalibrationRunsHandler({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({}));
     });
-  });
 
+    it('should return error if both cache and retrieve live options failed', async () => {
+      const runController = new RunController(
+        {
+          retrieveCalibrationRunsGroupedByDetector: sinon.stub().rejects(new Error('Unable to retrieve such runs'))
+        }
+      );
+      await runController.getCalibrationRunsHandler({}, res);
+      assert.ok(res.status.calledWith(500));
+      assert.ok(res.json.calledWith({message: 'Unable to retrieve such runs'}));
+    });
+  });
 });

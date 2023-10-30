@@ -54,7 +54,7 @@ class CacheService {
     try {
       updatedInfo = await getUpdate();
     } catch (error) {
-      this._logger(`Unable to update key ${key} based on ${getUpdate} due to ${error}`);
+      this._logger.debug(`Unable to update key ${key} based on ${getUpdate} due to ${error}`);
       return;
     }
 
@@ -64,14 +64,13 @@ class CacheService {
       } catch (error) {
         if (error instanceof AssertionError) {
           this._memory[key] = updatedInfo;
-          this._logger.debug(`Updated information for ${key}`);
 
           const message = new WebSocketMessage()
             .setCommand(command)
             .setPayload(updatedInfo);
           this._wsService?.broadcast(message)
         } else {
-          this._logger(`Unable to update key ${key} due to ${error}`);
+          this._logger.debug(`Unable to update key ${key} due to ${error}`);
         }
       }
     }

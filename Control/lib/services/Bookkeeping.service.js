@@ -17,7 +17,7 @@ const {httpGetJson} = require('./../utils.js');
 const RunSummaryAdapter = require('./../adapters/RunSummaryAdapter.js');
 const {BookkeepingFilterAdapter} = require('./../adapters/external/BookkeepingFilterAdapter.js');
 
-const DEFAULT_REFRESH_RATE = 10000;
+const DEFAULT_REFRESH_RATE = 30000;
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
