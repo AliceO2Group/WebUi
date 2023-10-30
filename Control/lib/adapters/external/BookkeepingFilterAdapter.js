@@ -63,7 +63,7 @@ class BookkeepingFilterAdapter {
 
     const calibrationStatusesString = BookkeepingFilterAdapter._parseValueIntoString(calibrationStatuses);
     if (calibrationStatusesString) {
-      filter += `&filter[calibrationStatuses]=${calibrationStatusesString}`;
+      filter += `&filter[calibrationStatuses][]=${calibrationStatusesString}`;
     }
     return filter;
   }
