@@ -25,7 +25,8 @@ import {calibrationRunCard} from './calibrationRunCard.js';
  */
 
 /**
- * Panel which contains all calibration runs data grouped by detector
+ * Panel which contains all calibration runs data grouped by detector.
+ * If there are not any runs for at least a detector, an informative message will be displayed.
  * @param {Object<String, Array<RunSummary>} calibrationsRunsByDetector - object with calibration runs information grouped by their detector
  * @return {vnode}
  */
@@ -33,7 +34,15 @@ export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector) => {
   const detectorsGroupPanel = [];
   for (const detector in calibrationsRunsByDetector) {
     const runsForDetector = calibrationsRunsByDetector[detector];
-    detectorsGroupPanel.push(calibrationRunsPerDetectorCard(runsForDetector));
+    if (runsForDetector?.length > 0) {
+      detectorsGroupPanel.push(calibrationRunsPerDetectorCard(runsForDetector));
+    }
+  }
+  if (detectorsGroupPanel.length === 0) {
+    return h('.text-center', [
+      h('p', 'No Calibration Runs were found.'),
+      h('p', 'If such information should be present, please contact an administrator.')
+    ]);
   }
   return detectorsGroupPanel
 };
@@ -46,7 +55,7 @@ export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector) => {
 const calibrationRunsPerDetectorCard = (runGroups) =>
   miniCard(null, [
     runGroups.map((group) =>
-      h('.p1.flex-row.g2', 
+      h('.p1.flex-row.g2',
         [
           calibrationRunCard(group.lastCalibrationRun),
           calibrationRunCard(group.lastSuccessfulCalibrationRun),
