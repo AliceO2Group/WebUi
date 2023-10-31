@@ -13,12 +13,13 @@
 */
 
 const {Log} = require('@aliceo2/web-ui');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
-const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
-const {RunDefinitions} = require('./../common/runDefinition.enum.js')
+const {CacheKeys} = require('../common/cacheKeys.enum.js');
+const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 const {RunCalibrationStatus} = require('./../common/runCalibrationStatus.enum.js');
+const {RunDefinitions} = require('./../common/runDefinition.enum.js')
+const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
 
 /**
  * @class
@@ -33,8 +34,9 @@ class RunService {
    * Constructor for configuring the service to retrieve data via passed services
    * @param {BookkeepingService} bkpService - service for retrieving RUNs information
    * @param {ApricotService} apricotService - service for retrieving information through AliECS Apricot gRPC connection, mainly KV Store data
+   * @param {CacheService} cacheService - service to store information in-memory
    */
-  constructor(bkpService, apricotService) {
+  constructor(bkpService, apricotService, cacheService) {
     /**
      * @type {BookkeepingService}
      */
@@ -44,6 +46,11 @@ class RunService {
      * @type {ApricotService}
      */
     this._apricotService = apricotService;
+
+    /**
+     * @type {CacheService}
+     */
+    this._cacheService = cacheService;
 
     /**
      * @type {Object<String, Number>}
@@ -99,6 +106,11 @@ class RunService {
         }
       }
     }
+    this._cacheService?.updateByKeyAndBroadcast(
+      CacheKeys.CALIBRATION_RUNS_BY_DETECTOR,
+      calibrationRunsPerDetector,
+      {command: CacheKeys.CALIBRATION_RUNS_BY_DETECTOR}
+    );
     return calibrationRunsPerDetector;
   }
 

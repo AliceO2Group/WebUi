@@ -13,7 +13,6 @@
 */
 
 const {Log} = require('@aliceo2/web-ui');
-const {WebSocketMessage} = require('@aliceo2/web-ui');
 const {deepStrictEqual, AssertionError} = require('assert');
 
 /**
@@ -26,9 +25,9 @@ class CacheService {
    * Constructor for initializing the service with:
    * - empty maps for needed information
    * - optional service for broadcasting information
-   * @param {WebSocket} wsService - which is to be used for broadcasting
+   * @param {BroadcastService} broadcastService - which is to be used for broadcasting
    */
-  constructor(wsService) {
+  constructor(broadcastService) {
 
     /**
      * @type {Object<String, Object>}
@@ -38,7 +37,7 @@ class CacheService {
     /**
      * @type {WebSocket}
      */
-    this._wsService = wsService;
+    this._broadcastService = broadcastService;
 
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/cache-service`);
   }
@@ -46,29 +45,19 @@ class CacheService {
   /**
    * Method to receive a function for retrieval of information and a key under which the information should be updated 
    * @param {String} key - key under which the information should be stored
-   * @param {String} command - command to be used for broadcasting message
-   * @param {Function} update - function to be used for retrieving information; Assumed async with no parameters
+   * @param {String} value - command to be used for broadcasting message
+   * @param {Object} broadcastConfig - object containing broadcast information; if present information will be broadcasted
    */
-  async updateByKeyAndBroadcast(key, command = 'message', getUpdate) {
-    let updatedInfo = null;
-    try {
-      updatedInfo = await getUpdate();
-    } catch (error) {
-      this._logger.debug(`Unable to update key ${key} based on ${getUpdate} due to ${error}`);
-      return;
-    }
-
-    if (updatedInfo) {
+  async updateByKeyAndBroadcast(key, value, {command} = {}) {
+    if (value) {
       try {
-        deepStrictEqual(updatedInfo, this._memory[key]);
+        deepStrictEqual(value, this._memory[key]);
       } catch (error) {
         if (error instanceof AssertionError) {
-          this._memory[key] = updatedInfo;
-
-          const message = new WebSocketMessage()
-            .setCommand(command)
-            .setPayload(updatedInfo);
-          this._wsService?.broadcast(message)
+          this._memory[key] = value;
+          if (command) {
+            this._broadcastService.broadcast(command, value);
+          }
         } else {
           this._logger.debug(`Unable to update key ${key} due to ${error}`);
         }

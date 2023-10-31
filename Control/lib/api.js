@@ -43,9 +43,8 @@ const ApricotService = require('./control-core/ApricotService.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const EnvCache = require('./control-core/EnvCache.js');
 
-const {CacheKeys} = require('./common/cacheKeys.enum.js');
-
 const path = require('path');
+const {BroadcastService} = require('./services/Broadcast.service.js');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
@@ -68,7 +67,8 @@ module.exports.setup = (http, ws) => {
     consulService = new ConsulService(config.consul);
   }
   const wsService = new WebSocketService(ws);
-  const cacheService = new CacheService(ws);
+  const broadcastService = new BroadcastService(ws);
+  const cacheService = new CacheService(broadcastService);
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
@@ -93,7 +93,7 @@ module.exports.setup = (http, ws) => {
   envCache.setWs(ws);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
-  const runService = new RunService(bkpService, apricotService);
+  const runService = new RunService(bkpService, apricotService, cacheService);
   runService.init();
   const runController = new RunController(runService, cacheService);
 
@@ -108,7 +108,7 @@ module.exports.setup = (http, ws) => {
   const statusController = new StatusController(statusService);
 
   const intervals = new Intervals();
-  initializeIntervals(intervals, cacheService, statusService, runService, bkpService);
+  initializeIntervals(intervals, statusService, runService, bkpService);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
@@ -172,13 +172,12 @@ module.exports.setup = (http, ws) => {
 /**
  * Method to register services at the start of the server
  * @param {Intervals} intervalsService - wrapper for storing intervals
- * @param {CacheService} cacheService - service to use for keeping in-memory information
  * @param {StatusService} statusService - service used for retrieving status on dependent services
  * @param {RunService} runService - service for retrieving and building information on runs
  * @param {BookkeepingService} bkpService - service for retrieving information on runs from Bookkeeping
  * @return {void}
  */
-function initializeIntervals(intervalsService, cacheService, statusService, runService, bkpService) {
+function initializeIntervals(intervalsService, statusService, runService, bkpService) {
   const SERVICES_REFRESH_RATE = 10000;
   const CALIBRATION_RUNS_REFRESH_RATE = bkpService.refreshRate;
 
@@ -193,12 +192,7 @@ function initializeIntervals(intervalsService, cacheService, statusService, runS
 
   if (config.bookkeeping) {
     intervalsService.register(
-      cacheService.updateByKeyAndBroadcast.bind(
-        cacheService,
-        CacheKeys.CALIBRATION_RUNS_BY_DETECTOR,
-        CacheKeys.CALIBRATION_RUNS_BY_DETECTOR,
-        runService.retrieveCalibrationRunsGroupedByDetector.bind(runService)
-      ),
+      runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
       CALIBRATION_RUNS_REFRESH_RATE
     );
   }
