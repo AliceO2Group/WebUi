@@ -36,7 +36,7 @@ class BroadcastService {
    * @param {String} command - command to be added to websocket message
    * @param {Object} payload - payload to be sent to the clients
    */
-  async broadcast(command, payload) {
+  broadcast(command, payload) {
     if (payload) {
       const message = new WebSocketMessage()
         .setCommand(command)
