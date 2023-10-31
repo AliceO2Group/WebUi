@@ -35,6 +35,7 @@ class BroadcastService {
    * Method to receive command and payload to build a WebSocket message and broadcast it to all listening clients
    * @param {String} command - command to be added to websocket message
    * @param {Object} payload - payload to be sent to the clients
+   * @return {void}
    */
   broadcast(command, payload) {
     if (payload) {

@@ -35,7 +35,7 @@ class CacheService {
     this._memory = {};
 
     /**
-     * @type {WebSocket}
+     * @type {BroadcastService}
      */
     this._broadcastService = broadcastService;
 
@@ -47,6 +47,7 @@ class CacheService {
    * @param {String} key - key under which the information should be stored
    * @param {String} value - command to be used for broadcasting message
    * @param {Object} broadcastConfig - object containing broadcast information; if present information will be broadcasted
+   * @return {void}
    */
   async updateByKeyAndBroadcast(key, value, {command} = {}) {
     if (value) {
