@@ -25,26 +25,26 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 
 // local services
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
+const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
-const Lock = require('./services/Lock.js');
 const {RunService} = require('./services/Run.service.js');
 const {StatusService} = require('./services/Status.service.js');
 const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
+const Lock = require('./services/Lock.js');
 
 // web-ui services
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
-const GrpcProxy = require('./control-core/GrpcProxy.js');
-const ControlService = require('./control-core/ControlService.js');
-const ApricotService = require('./control-core/ApricotService.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
+const ApricotService = require('./control-core/ApricotService.js');
+const ControlService = require('./control-core/ControlService.js');
 const EnvCache = require('./control-core/EnvCache.js');
+const GrpcProxy = require('./control-core/GrpcProxy.js');
 
 const path = require('path');
-const {BroadcastService} = require('./services/Broadcast.service.js');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
