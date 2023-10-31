@@ -68,4 +68,13 @@ export class CalibrationRunsModel extends Observable {
   get calibrationRuns() {
     return this._calibrationRuns;
   }
+
+  /**
+   * Setter for updating the calibration runs object with a new RemoteData object
+   * @param {RemoteData} remoteDataRuns - updated information
+   * @return {void}
+   */
+  set calibrationRuns(remoteDataRuns) {
+    this._calibrationRuns = remoteDataRuns;
+  }
 }

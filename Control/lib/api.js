@@ -25,22 +25,24 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 
 // local services
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
+const {BroadcastService} = require('./services/Broadcast.service.js');
+const {CacheService} = require('./services/Cache.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
-const Lock = require('./services/Lock.js');
 const {RunService} = require('./services/Run.service.js');
 const {StatusService} = require('./services/Status.service.js');
 const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
+const Lock = require('./services/Lock.js');
 
 // web-ui services
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
-const GrpcProxy = require('./control-core/GrpcProxy.js');
-const ControlService = require('./control-core/ControlService.js');
-const ApricotService = require('./control-core/ApricotService.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
+const ApricotService = require('./control-core/ApricotService.js');
+const ControlService = require('./control-core/ControlService.js');
 const EnvCache = require('./control-core/EnvCache.js');
+const GrpcProxy = require('./control-core/GrpcProxy.js');
 
 const path = require('path');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
@@ -65,6 +67,8 @@ module.exports.setup = (http, ws) => {
     consulService = new ConsulService(config.consul);
   }
   const wsService = new WebSocketService(ws);
+  const broadcastService = new BroadcastService(ws);
+  const cacheService = new CacheService(broadcastService);
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
@@ -89,9 +93,9 @@ module.exports.setup = (http, ws) => {
   envCache.setWs(ws);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
-  const runService = new RunService(bkpService, apricotService);
+  const runService = new RunService(bkpService, apricotService, cacheService);
   runService.init();
-  const runController = new RunController(runService);
+  const runController = new RunController(runService, cacheService);
 
   const notificationService = new NotificationService(config.kafka);
   if (notificationService.isConfigured()) {
@@ -185,8 +189,11 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
   intervalsService.register(statusService.retrieveNotificationSystemStatus.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
 
-  intervalsService.register(
-    runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
-    CALIBRATION_RUNS_REFRESH_RATE
-  );
+
+  if (config.bookkeeping) {
+    intervalsService.register(
+      runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
+      CALIBRATION_RUNS_REFRESH_RATE
+    );
+  }
 }

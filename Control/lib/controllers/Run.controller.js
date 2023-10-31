@@ -13,6 +13,7 @@
 */
 const {Log} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 
 /**
  * Controller for dealing with all API requests on retrieving information on runs
@@ -21,14 +22,20 @@ class RunController {
   /**
    * Constructor for initializing controller of runs
    * @param {RunService} runService - service to use to build information on runs
+   * @param {CacheService} cacheService - service to use for retrieving information stored in-memory
    */
-  constructor(runService) {
+  constructor(runService, cacheService) {
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-ctrl`);
 
     /**
      * @type {RunService}
      */
     this._runService = runService;
+
+    /**
+     * @type {CacheService}
+     */
+    this._cacheService = cacheService;
   }
 
   /**
@@ -37,9 +44,18 @@ class RunController {
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
-  getCalibrationRunsHandler(_, res) {
+  async getCalibrationRunsHandler(_, res) {
+    let calibrationRuns;
     try {
-      res.status(200).json(this._runService.calibrationRunsPerDetector);
+      calibrationRuns = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_BY_DETECTOR);
+    } catch (error) {
+      this._logger.debug(`Unable to serve from cache due to: ${error}`);
+    }
+    try {
+      if (!calibrationRuns) {
+        calibrationRuns = await this._runService.retrieveCalibrationRunsGroupedByDetector();
+      }
+      res.status(200).json(calibrationRuns);
     } catch (error) {
       this._logger.debug(error);
       updateExpressResponseFromNativeError(res, error);

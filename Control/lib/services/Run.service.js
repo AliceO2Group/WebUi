@@ -13,12 +13,13 @@
 */
 
 const {Log} = require('@aliceo2/web-ui');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
-const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
-const {RunDefinitions} = require('./../common/runDefinition.enum.js')
+const {CacheKeys} = require('../common/cacheKeys.enum.js');
+const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 const {RunCalibrationStatus} = require('./../common/runCalibrationStatus.enum.js');
+const {RunDefinitions} = require('./../common/runDefinition.enum.js')
+const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
 
 /**
  * @class
@@ -33,8 +34,9 @@ class RunService {
    * Constructor for configuring the service to retrieve data via passed services
    * @param {BookkeepingService} bkpService - service for retrieving RUNs information
    * @param {ApricotService} apricotService - service for retrieving information through AliECS Apricot gRPC connection, mainly KV Store data
+   * @param {CacheService} cacheService - service to store information in-memory
    */
-  constructor(bkpService, apricotService) {
+  constructor(bkpService, apricotService, cacheService) {
     /**
      * @type {BookkeepingService}
      */
@@ -44,6 +46,11 @@ class RunService {
      * @type {ApricotService}
      */
     this._apricotService = apricotService;
+
+    /**
+     * @type {CacheService}
+     */
+    this._cacheService = cacheService;
 
     /**
      * @type {Object<String, Number>}
@@ -56,16 +63,6 @@ class RunService {
      */
     this._calibrationConfigurationPerDetectorMap = {};
 
-    /**
-     * @type {Object<String, Array<RunSummary>>}
-     */
-    this._calibrationRunsPerDetector = {};
-
-    /**
-     * @type {Object<String, Array<RunSummary>>}
-     */
-    this._calibrationRunsPerDetector = {};
-
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
   }
 
@@ -76,7 +73,7 @@ class RunService {
   async init() {
     this._calibrationConfigurationPerDetectorMap = await this._retrieveCalibrationConfigurationsForDetectors();
     this._runTypes = await this._bkpService.getRunTypes();
-    this._calibrationRunsPerDetector = await this.retrieveCalibrationRunsGroupedByDetector();
+    await this.retrieveCalibrationRunsGroupedByDetector();
   }
 
   /**
@@ -109,7 +106,11 @@ class RunService {
         }
       }
     }
-    this._calibrationRunsPerDetector = calibrationRunsPerDetector;
+    this._cacheService?.updateByKeyAndBroadcast(
+      CacheKeys.CALIBRATION_RUNS_BY_DETECTOR,
+      calibrationRunsPerDetector,
+      {command: CacheKeys.CALIBRATION_RUNS_BY_DETECTOR}
+    );
     return calibrationRunsPerDetector;
   }
 
@@ -157,13 +158,6 @@ class RunService {
     return this._calibrationConfigurationPerDetectorMap;
   }
 
-  /**
-   * Return the object containing a KV object with detector and its corresponding last calibration runs
-   * @return {Object<String, Array<RunSummary>>}
-   */
-  get calibrationRunsPerDetector() {
-    return this._calibrationRunsPerDetector;
-  }
 }
 
 module.exports = {RunService};
