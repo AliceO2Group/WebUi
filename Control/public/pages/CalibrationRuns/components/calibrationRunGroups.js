@@ -15,6 +15,7 @@
 import {h} from '/js/src/index.js';
 import {miniCard} from '../../../common/card/miniCard.js';
 import {calibrationRunCard} from './calibrationRunCard.js';
+import {calibrationActionCard} from './calibrationActionCard.js';
 
 /**
  * @file contains grouped needed for displaying actions and information on calibration runs that are grouped
@@ -28,14 +29,15 @@ import {calibrationRunCard} from './calibrationRunCard.js';
  * Panel which contains all calibration runs data grouped by detector.
  * If there are not any runs for at least a detector, an informative message will be displayed.
  * @param {Object<String, Array<RunSummary>} calibrationsRunsByDetector - object with calibration runs information grouped by their detector
+ * @param {CalibrationRunsModel} calibrationRunsModel - model to use for actions on calibration runs
  * @return {vnode}
  */
-export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector) => {
+export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector, calibrationRunsModel) => {
   const detectorsGroupPanel = [];
   for (const detector in calibrationsRunsByDetector) {
     const runsForDetector = calibrationsRunsByDetector[detector];
-    if (runsForDetector?.length > 0) {
-      detectorsGroupPanel.push(calibrationRunsPerDetectorCard(runsForDetector));
+    if (Object.keys(runsForDetector)?.length > 0) {
+      detectorsGroupPanel.push(calibrationRunsPerDetectorCard(detector, runsForDetector, calibrationRunsModel));
     }
   }
   if (detectorsGroupPanel.length === 0) {
@@ -49,16 +51,24 @@ export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector) => {
 
 /**
  * Component for mapping each detector to its group of calibration runs
- * @param {Array<RunSummary>} runs - list of runs for which to build the components
+ * @param {String} detector - to which the run group belongs to
+ * @param {Object<String, RunSummary|CalibrationConfiguration|RemoteData>} runGroups - list of runs for which to build the components
+ * @param {CalibrationRunsModel} calibrationRunsModel - model of the component
  * @return {vnode}
  */
-const calibrationRunsPerDetectorCard = (runGroups) =>
-  miniCard(null, [
-    runGroups.map((group) =>
-      h('.p1.flex-row.g2',
+const calibrationRunsPerDetectorCard = (detector, runGroups, calibrationRunsModel) => {
+  const {newCalibrationRun} = calibrationRunsModel;
+  return miniCard(null, [
+    Object.values(runGroups).map((runGroup) => {
+      const {configuration, lastCalibrationRun, lastSuccessfulCalibrationRun, ongoingCalibrationRun} = runGroup;
+      return h('.p1.flex-row.g2',
         [
-          calibrationRunCard(group.lastCalibrationRun),
-          calibrationRunCard(group.lastSuccessfulCalibrationRun),
+          calibrationActionCard(
+            configuration, ongoingCalibrationRun, detector, newCalibrationRun.bind(calibrationRunsModel)
+          ),
+          calibrationRunCard(lastCalibrationRun),
+          calibrationRunCard(lastSuccessfulCalibrationRun),
         ])
-    )
+    })
   ], ['m1', 'g1', 'p1']);
+};
