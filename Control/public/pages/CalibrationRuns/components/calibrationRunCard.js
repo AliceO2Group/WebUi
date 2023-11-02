@@ -25,6 +25,6 @@ import {calibrationRunCardTitle} from './calibrationRunCardTitle.js';
 export const calibrationRunCard = (run) => miniCard(
   calibrationRunCardTitle(run), [
     rowForCard(formatTimeDuration(run.runDuration), `Start: ${new Date(run.startTime).toLocaleString()}`),
-    rowForCard(`${run.detectors}/${run.runType}`, `End: ${new Date(run.endTime).toLocaleString()}`),
-  ], ['w-30', 'g0', 'p2']
+    rowForCard(null, `End: ${new Date(run.endTime).toLocaleString()}`),
+  ], ['w-25', 'g0', 'p2']
 );
