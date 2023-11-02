@@ -96,14 +96,26 @@ describe(`'RunService' test suite`, async () => {
       };
       const result = await runSrv.retrieveCalibrationRunsGroupedByDetector();
       assert.deepStrictEqual(result, {
-        TPC: [
-          {lastCalibrationRun: {runNumber: 1}, lastSuccessfulCalibrationRun: {runNumber: 1}},
-          {lastCalibrationRun: {runNumber: 2}, lastSuccessfulCalibrationRun: {runNumber: 2}}
-        ],
-        ABC: [
-          {lastCalibrationRun: {runNumber: 3}, lastSuccessfulCalibrationRun: {runNumber: 2}},
-        ],
-        XYZ: []
+        TPC: {
+          NOISE: {
+            configuration: {runType: 'NOISE', configuration: 'cpv-noise', label: 'CPV NOISE'},
+            lastCalibrationRun: {runNumber: 1},
+            lastSuccessfulCalibrationRun: {runNumber: 1}
+          },
+          PULSE: {
+            configuration: {runType: 'PULSE', configuration: 'cpv-pulse', label: 'CPV PULSE'},
+            lastCalibrationRun: {runNumber: 2},
+            lastSuccessfulCalibrationRun: {runNumber: 2}
+          }
+        },
+        ABC: {
+          SOMEOTHER: {
+            configuration: {runType: 'SOMEOTHER', configuration: 'abc-someother', label: 'ABC SOME OTHER'},
+            lastCalibrationRun: {runNumber: 3},
+            lastSuccessfulCalibrationRun: {runNumber: 2}
+          },
+        },
+        XYZ: {}
       });
     });
   });
