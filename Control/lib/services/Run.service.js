@@ -78,13 +78,13 @@ class RunService {
 
   /**
    * Based on already loaded calibration configuration mapping from KV store, retrieve runs with those characteristics from Bookkeeping
-   * @return {Promise<Object<String, Array<RunSummary>.Error>} - list of calibration runs grouped by detector
+   * @return {Promise<Object<String(Detector), Map<String(RunType), Object(CalibrationConfiguration, RunSummary, RunSummary)>.Error>} - list of calibration runs grouped by detector
    */
   async retrieveCalibrationRunsGroupedByDetector() {
     const calibrationRunsPerDetector = {};
     for (const detector in this._calibrationConfigurationPerDetectorMap) {
       const calibrationConfigurationList = this._calibrationConfigurationPerDetectorMap[detector] ?? [];
-      calibrationRunsPerDetector[detector] = [];
+      calibrationRunsPerDetector[detector] = {};
       for (const calibrationConfiguration of calibrationConfigurationList) {
         const runTypeId = this._runTypes[calibrationConfiguration.runType];
         const lastCalibrationRun = await this._bkpService.getRun({
@@ -99,10 +99,11 @@ class RunService {
           calibrationStatuses: RunCalibrationStatus.SUCCESS
         });
         if (lastCalibrationRun || lastSuccessfulCalibrationRun) {
-          calibrationRunsPerDetector[detector].push({
+          calibrationRunsPerDetector[detector][calibrationConfiguration.runType] = {
+            configuration: calibrationConfiguration,
             lastCalibrationRun,
             lastSuccessfulCalibrationRun,
-          });
+          };
         }
       }
     }
