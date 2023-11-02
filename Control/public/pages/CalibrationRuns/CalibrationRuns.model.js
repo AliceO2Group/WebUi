@@ -34,8 +34,12 @@ export class CalibrationRunsModel extends Observable {
      * @example
      * RemoteData {
      *  "TPC": [
-     *    {<RunSummary>},
-     *    {<RunSummary>}
+     *    {
+     *      configuration: <CalibrationConfiguration>,
+     *      ongoingCalibrationRun: RemoteData<EnvironmentSummary>,
+     *      lastCalibrationRun: <RunSummary>,
+     *      lastSuccessfulCalibrationRun: <RunSummary>
+     *    },
      *  ]
      * }
      */
@@ -53,6 +57,29 @@ export class CalibrationRunsModel extends Observable {
     this._calibrationRuns = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
 
     this.notify();
+  }
+
+  /**
+   * Send an HTTP POST request to trigger a new auto transitioning environment
+   * @param {String} detector - for which the environment should be created
+   * @param {String} runType - of the type of environment
+   * @param {String} configurationName - name of the saved configuration to use
+   * @return {void}
+   */
+  async newCalibrationRun(detector, runType, configurationName) {
+    if (this._calibrationRuns.isSuccess()) {
+      this._calibrationRuns.payload[detector][runType].ongoingCalibrationRun = RemoteData.loading();
+      this.notify();
+
+      const payload = {
+        configurationName
+      };
+      const {result, ok} = await this._model.loader.post('/api/environment/auto', payload);
+
+      this._calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
+        ok ? RemoteData.success(result) : RemoteData.failure(result.message);
+      this.notify();
+    }
   }
 
   /**
