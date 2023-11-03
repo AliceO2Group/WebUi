@@ -16,7 +16,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 
-const {EnvironmentController} = require('./../../../lib/controllers/Environment.controller.js');
+const {EnvironmentController} = require('../../../lib/controllers/Environment.controller.js');
 const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 describe('EnvironmentController test suite', () => {
@@ -40,33 +40,33 @@ describe('EnvironmentController test suite', () => {
 
   describe(`'getEnvironment' test suite`, async () => {
     it('should successfully build a response with environment details given an id', async () => {
-      await envCtrl.getEnvironment({params: {id: ENVIRONMENT_VALID}}, res);
+      await envCtrl.getEnvironmentHandler({params: {id: ENVIRONMENT_VALID}}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({id: ENVIRONMENT_VALID, description: 'Some description'}));
     });
 
     it('should respond with error if provided environment id cannot be found', async () => {
-      await envCtrl.getEnvironment({params: {id: ENVIRONMENT_NOT_FOUND_ID}}, res);
+      await envCtrl.getEnvironmentHandler({params: {id: ENVIRONMENT_NOT_FOUND_ID}}, res);
       assert.ok(res.status.calledWith(404));
       assert.ok(res.json.calledWith({message: `Environment with ID: ${ENVIRONMENT_NOT_FOUND_ID} could not be found`}));
     });
 
     it('should respond with error if service for retrieving information failed', async () => {
-      await envCtrl.getEnvironment({params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}}, res);
+      await envCtrl.getEnvironmentHandler({params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}}, res);
       assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: `Data service failed`}));
     });
 
     it('should respond with error if client did not provide valid request for ID', async () => {
-      await envCtrl.getEnvironment({params: {id: null}}, res);
+      await envCtrl.getEnvironmentHandler({params: {id: null}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
 
-      await envCtrl.getEnvironment({params: {}}, res);
+      await envCtrl.getEnvironmentHandler({params: {}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
 
-      await envCtrl.getEnvironment({params: {id: ''}}, res);
+      await envCtrl.getEnvironmentHandler({params: {id: ''}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
     });

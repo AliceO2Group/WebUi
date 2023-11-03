@@ -25,7 +25,7 @@ class EnvironmentService {
    * @param {ApricotProxy} apricotGrpc 
    * @param {CacheService} cacheService - to use for updating information on environments
    */
-  constructor(coreGrpc, apricotGrpc, cacheService) {
+  constructor(coreGrpc, apricotGrpc, cacheService, broadcastService) {
     /**
      * @type {GrpcProxy}
      */
@@ -38,7 +38,12 @@ class EnvironmentService {
     /**
      * @type {CacheService}
      */
-    this._cacheService = cacheService
+    this._cacheService = cacheService;
+
+    /**
+     * @type {BroadcastService}
+     */
+    this._broadcastService = broadcastService;
   }
 
   /**
@@ -63,94 +68,117 @@ class EnvironmentService {
    * new auto transitioning environment
    * @param {String} workflowTemplate - name in format `repository/revision/template`
    * @param {Object<String, String>} vars - KV string pairs to define environment configuration
-   * @return {String} - if environment request was successfully sent
+   * @param {String} detector - on which the environment is deployed
+   * @param {String} runType - for which the environment is deployed
+   * @return {AutoEnvironmentDeployment} - if environment request was successfully sent
    */
-  async newAutoEnvironment(workflowTemplate, vars) {
+  async newAutoEnvironment(workflowTemplate, vars, detector, runType) {
     const channelIdString = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
+    const autoEnvironment = {
+      channelIdString,
+      inProgress: true,
+      detector,
+      runType,
+      events: [
+        {
+          type: 'ENVIRONMENT',
+          payload: {
+            id: '-',
+            message: 'request was sent to AliECS',
+            at: Date.now(),
+          }
+        }
+      ],
+    };
+    let calibrationRunsRequests = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
+    if (!calibrationRunsRequests) {
+      calibrationRunsRequests = {};
+    }
+    if (!calibrationRunsRequests[detector]) {
+      calibrationRunsRequests[detector] = {};
+    }
+    if (!calibrationRunsRequests[detector[runType]]) {
+      calibrationRunsRequests[detector][runType] = autoEnvironment;
 
-    let environmentRequests = this._cacheService.getByKey(CacheKeys.ENVIRONMENT_REQUESTS);
-    if (!environmentRequests) {
-      environmentRequests = {};
     }
-    if (!environmentRequests[channelIdString]) {
-      environmentRequests[channelIdString] = {
-        channelIdString,
-        events: [],
-      };
-    }
-    this._cacheService.updateByKeyAndBroadcast(
-      CacheKeys.ENVIRONMENT_REQUESTS,
-      environmentRequests,
-    );
+    this._cacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
+    this._broadcastService.broadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests[detector][runType]);
+
     const subscribeChannel = this._coreGrpc.client.Subscribe({id: channelIdString});
-    subscribeChannel.on('data', (data) => this._onData(data, channelIdString));
-    subscribeChannel.on('error', (error) => this._onError(error, channelIdString));
-    subscribeChannel.on('end', () => this._onEnd(channelIdString));
+    subscribeChannel.on('data', (data) => this._onData(data, channelIdString, detector, runType));
+    subscribeChannel.on('error', (error) => this._onError(error, channelIdString, detector, runType));
+    subscribeChannel.on('end', () => this._onEnd(channelIdString, detector, runType));
 
 
-    await this._coreGrpc.NewAutoEnvironment({
+    this._coreGrpc.NewAutoEnvironment({
       vars,
       workflowTemplate,
       id: channelIdString
     });
 
-    return channelIdString;
+    return autoEnvironment;
   }
 
   /**
-     * Method to parse incoming messages from stream channel
-     * @param {Event} event - AliECS Event (proto)
-     * @param {Symbol} id - id of the request that was sent for a new auto environment
-     * @return {void}
-     */
-  _onData(event, id) {
+   * Method to parse incoming messages from stream channel
+   * @param {Event} event - AliECS Event (proto)
+   * @param {Symbol} id - id of the request that was sent for a new auto environment
+   * @return {void}
+   */
+  _onData(event, id, detector, runType) {
     const events = [];
     const {taskEvent, environmentEvent} = event;
 
-    if (taskEvent && taskEvent.status === 'TASK_FAILED') {
-      environmentRequests[id].events.push({
+    if (taskEvent && (taskEvent.state === 'ERROR' || taskEvent.status === 'TASK_FAILED')) {
+      events.push({
         type: 'TASK',
         payload: {
-          ...taskEvent
+          ...taskEvent,
+          at: Date.now(),
+          message: 'Please ensure environment is killed before retrying',
         }
       });
     } else if (environmentEvent) {
-      environmentRequests[id].events.push({
+      events.push({
         type: 'ENVIRONMENT',
         payload: {
-          ...environmentEvent
+          ...environmentEvent,
+          at: Date.now()
         }
       });
     }
-    const environmentRequests = this._cacheService.getByKey(CacheKeys.ENVIRONMENT_REQUESTS);
-    environmentRequests[id].events = events;
-
-    this._cacheService.updateByKeyAndBroadcast(
-      CacheKeys.ENVIRONMENT_REQUESTS,
-      environmentRequests,
-      {command: CacheKeys.ENVIRONMENT_REQUESTS}
-    );
+    if (events.length > 0) {
+      const calibrationRunsRequests = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
+      calibrationRunsRequests[detector][runType].events.push(...events);
+      this._cacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
+      this._broadcastService.broadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests[detector][runType]);
+    }
   }
 
   /**
-     * Method to be used in case of AliECS environment creation request error
-     * @param {Error} error - error encountered during the creation of environment
-     * @param {String} id - id of the environment request in question
-     * @return {void}
-     */
-  _onError(error, id) {
-    const environmentRequests = this._cacheService.getByKey(CacheKeys.ENVIRONMENT_REQUESTS);
-    environmentRequests[id].events.push({
+   * Method to be used in case of AliECS environment creation request error
+   * @param {Error} error - error encountered during the creation of environment
+   * @param {String} id - id of the environment request in question
+   * @return {void}
+   */
+  _onError(error, id, detector, runType) {
+    const calibrationRunsRequests = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
+    calibrationRunsRequests[detector][runType].events.push({
       type: 'ERROR',
       payload: {
-        error
+        error,
+        at: Date.now()
       }
     });
-    this._cacheService.updateByKeyAndBroadcast(
-      CacheKeys.ENVIRONMENT_REQUESTS,
-      environmentRequests,
-      {command: CacheKeys.ENVIRONMENT_REQUESTS}
-    )
+    calibrationRunsRequests[detector][runType].events.push({
+      type: 'ERROR',
+      payload: {
+        error: 'Please ensure environment is killed before retrying',
+        at: Date.now()
+      }
+    });
+    this._cacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
+    this._broadcastService.broadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests[detector][runType]);
   }
 
   /**
@@ -158,19 +186,18 @@ class EnvironmentService {
    * @param {String} id - id of the environment request in question
    * @return {void}
    */
-  _onEnd(id) {
-    const environmentRequests = this._cacheService.getByKey(CacheKeys.ENVIRONMENT_REQUESTS);
-    environmentRequests[id].events.push({
-      type: 'END',
+  _onEnd(id, detector, runType) {
+    const calibrationRunsRequests = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
+    calibrationRunsRequests[detector][runType].events.push({
+      type: 'ENVIRONMENT',
       payload: {
+        at: Date.now(),
         message: 'Stream has now ended'
       }
     });
-    this._cacheService.updateByKeyAndBroadcast(
-      CacheKeys.ENVIRONMENT_REQUESTS,
-      environmentRequests,
-      {command: CacheKeys.ENVIRONMENT_REQUESTS}
-    );
+    calibrationRunsRequests[detector][runType].inProgress = false;
+    this._cacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
+    this._broadcastService.broadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests[detector][runType]);
   }
 }
 

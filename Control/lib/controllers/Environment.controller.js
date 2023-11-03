@@ -23,9 +23,8 @@ class EnvironmentController {
    * Constructor for initializing controller of environments
    * @param {EnvironmentService} envService - service to use to query AliECS with regards to environments
    * @param {WorkflowTemplateService} workflowService - service to use to query Apricot for workflow details
-   * @param {ApricotService} hardwareService - service to use to retrieve information on hardware of detectors
    */
-  constructor(envService, workflowService, hardwareService) {
+  constructor(envService, workflowService) {
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/env-ctrl`);
 
     /**
@@ -37,11 +36,6 @@ class EnvironmentController {
      * @type {WorkflowTemplateService}
      */
     this._workflowService = workflowService;
-
-    /**
-     * @type {ApricotService}
-     */
-    this._hardwareService = hardwareService;
   }
 
   /**
@@ -71,9 +65,10 @@ class EnvironmentController {
    * @returns {void}
    */
   async newAutoEnvironmentHandler(req, res) {
+    // TODO LOCK TAKEN
     let workflowTemplatePath;
     let variables;
-    const {configurationName} = req.body;
+    const {detector, runType, configurationName} = req.body;
 
     if (!configurationName) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing Configuration Name for deployment'));
@@ -103,13 +98,13 @@ class EnvironmentController {
       updateExpressResponseFromNativeError(res, error);
       return;
     }
-
     // Attempt to deploy environment
     try {
-      const channelId = await this._envService.newAutoEnvironment(workflowTemplatePath, variables);
-      res.status(200).json({channelId});
+      const environment = await this._envService.newAutoEnvironment(workflowTemplatePath, variables, detector, runType);
+      res.status(200).json(environment);
     } catch (error) {
       this._logger.debug(`Unable to deploy environment for ${workflowTemplatePath}`);
+      this._logger.debug(error);
       updateExpressResponseFromNativeError(res, error);
     }
   }
