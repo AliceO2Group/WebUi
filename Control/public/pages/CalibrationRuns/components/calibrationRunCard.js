@@ -18,13 +18,15 @@ import {miniCard} from './../../../common/card/miniCard.js';
 import {calibrationRunCardTitle} from './calibrationRunCardTitle.js';
 
 /**
- * Builds a card with information specific to a calibration run
+ * Builds a card with information specific to a calibration run.
  * @param {RunSummary} run - information about the run
  * @return {vnode}
  */
-export const calibrationRunCard = (run) => miniCard(
-  calibrationRunCardTitle(run), [
-    rowForCard(formatTimeDuration(run.runDuration), `Start: ${new Date(run.startTime).toLocaleString()}`),
-    rowForCard(null, `End: ${new Date(run.endTime).toLocaleString()}`),
-  ], ['w-25', 'g0', 'p2']
-);
+export const calibrationRunCard = (run) => !run ?
+  null
+  : miniCard(
+    calibrationRunCardTitle(run), [
+      rowForCard(formatTimeDuration(run.runDuration), `Start: ${new Date(run.startTime).toLocaleString()}`),
+      rowForCard(null, `End: ${new Date(run.endTime).toLocaleString()}`),
+    ], ['w-25', 'g0', 'p2']
+  );

@@ -31,7 +31,14 @@ export const calibrationRunsContent = (calibrationRunsModel) => {
   return calibrationRuns.match({
     NotAsked: () => h('.f7.flex-column', 'Calibration Runs data not asked'),
     Loading: () => pageLoading(2),
-    Success: (runsGroupedByDetector) => groupedCalibrationRunsPanel(runsGroupedByDetector, calibrationRunsModel),
+    Success: (runsGroupedByDetector) => [
+      h('.flex-row.p1', [
+        h('.w-50.f4.text-center', 'Start/Ongoing calibration runs'),
+        h('.w-25.f4.text-center', 'Last calibration runs'),
+        h('.w-25.f4.text-center', 'Last SUCCESSFUL calibration runs')
+      ]),
+      groupedCalibrationRunsPanel(runsGroupedByDetector, calibrationRunsModel),
+    ],
     Failure: (error) => errorPage(error),
   });
 };
