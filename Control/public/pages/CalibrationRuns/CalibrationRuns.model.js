@@ -53,7 +53,7 @@ export class CalibrationRunsModel extends Observable {
     this._calibrationRuns = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this._model.loader.get('/api/runs/calibration');
+    const {result, ok} = await this._model.loader.get('/api/runs/calibration', true);
     this._calibrationRuns = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
 
     this.notify();
@@ -74,7 +74,7 @@ export class CalibrationRunsModel extends Observable {
       const payload = {
         detector, runType, configurationName
       };
-      const {result, ok} = await this._model.loader.post('/api/environment/auto', payload);
+      const {result, ok} = await this._model.loader.post('/api/environment/auto', payload, true);
 
       this._calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
         ok ? RemoteData.success(result) : RemoteData.failure(result.message);

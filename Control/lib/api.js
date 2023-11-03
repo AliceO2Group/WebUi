@@ -29,10 +29,10 @@ const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
+const {LockService} = require('./services/Lock.service.js');
 const {RunService} = require('./services/Run.service.js');
 const {StatusService} = require('./services/Status.service.js');
 const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
-const Lock = require('./services/Lock.js');
 
 // web-ui services
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
@@ -59,8 +59,8 @@ if (!config.grafana) {
 }
 
 module.exports.setup = (http, ws) => {
-  const lock = new Lock();
-  lock.setWs(ws);
+  const lockService = new LockService();
+  lockService.setWs(ws);
 
   let consulService;
   if (config.consul) {
@@ -82,7 +82,7 @@ module.exports.setup = (http, ws) => {
   const envService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService);
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
 
-  const envCtrl = new EnvironmentController(envService, workflowService);
+  const envCtrl = new EnvironmentController(envService, workflowService, lockService);
   const workflowController = new WorkflowTemplateController(workflowService);
 
   const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
@@ -145,10 +145,10 @@ module.exports.setup = (http, ws) => {
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
-  http.post('/lockState', (req, res) => res.json(lock.state(req.body.name)));
-  http.post('/lock', (req, res) => lock.lockDetector(req, res));
-  http.post('/unlock', (req, res) => lock.unlockDetector(req, res));
-  http.post('/forceUnlock', (req, res) => lock.forceUnlock(req, res));
+  http.post('/lockState', (req, res) => res.json(lockService.state(req.body.name)));
+  http.post('/lock', (req, res) => lockService.lockDetector(req, res));
+  http.post('/unlock', (req, res) => lockService.unlockDetector(req, res));
+  http.post('/forceUnlock', (req, res) => lockService.forceUnlock(req, res));
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));

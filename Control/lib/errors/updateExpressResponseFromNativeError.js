@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
+const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
 const {InvalidInputError} = require('./InvalidInputError.js');
 const {NotFoundError} = require('./NotFoundError.js');
 const {TimeoutError} = require('./TimeoutError.js');
@@ -29,6 +30,9 @@ const updateExpressResponseFromNativeError = (response, error) => {
   switch (constructor) {
     case InvalidInputError:
       status = 400;
+      break;
+    case UnauthorizedAccessError:
+      status = 403;
       break;
     case NotFoundError:
       status = 404;

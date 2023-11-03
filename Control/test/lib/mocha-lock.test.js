@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const Lock = require('../../lib/services/Lock.js');
+const {LockService} = require('../../lib/services/Lock.service.js');
 
 describe('Lock test suite', () => {
   let req, res, fakeWs, lock;
@@ -37,7 +37,7 @@ describe('Lock test suite', () => {
       json: sinon.spy(),
       send: sinon.spy(),
     };
-    lock = new Lock();
+    lock = new LockService();
     lock.setWs(fakeWs);
   });
 
