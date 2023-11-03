@@ -13,7 +13,6 @@
 */
 
 import {h} from '/js/src/index.js';
-import {miniCard} from '../../../common/card/miniCard.js';
 import {calibrationRunCard} from './calibrationRunCard.js';
 import {calibrationActionCard} from './calibrationActionCard.js';
 
