@@ -16,7 +16,7 @@
  *
  * WorkflowTemplate type definition as parsed and sent to the client by the GUI server
  *
- * @property {string} name
- * @property {string} repository
- * @property {string} revision
+ * @property {String} template
+ * @property {String} repository
+ * @property {String} revision
  */
