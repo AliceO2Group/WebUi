@@ -13,7 +13,6 @@
 */
 
 import {h} from '/js/src/index.js';
-import {miniCard} from '../../../common/card/miniCard.js';
 import {calibrationRunCard} from './calibrationRunCard.js';
 import {calibrationActionCard} from './calibrationActionCard.js';
 
@@ -58,7 +57,7 @@ export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector, calibrat
  */
 const calibrationRunsPerDetectorCard = (detector, runGroups, calibrationRunsModel) => {
   const {newCalibrationRun} = calibrationRunsModel;
-  return miniCard(null, [
+  return [
     Object.values(runGroups).map((runGroup) => {
       const {configuration, lastCalibrationRun, lastSuccessfulCalibrationRun, ongoingCalibrationRun} = runGroup;
       return h('.p1.flex-row.g2',
@@ -70,5 +69,5 @@ const calibrationRunsPerDetectorCard = (detector, runGroups, calibrationRunsMode
           calibrationRunCard(lastSuccessfulCalibrationRun),
         ])
     })
-  ], ['m1', 'g1', 'p1']);
+  ];
 };

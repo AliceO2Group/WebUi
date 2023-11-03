@@ -16,7 +16,8 @@
  * Keys that are used to set/get information to/from the CacheService
  */
 const CacheKeys =  Object.freeze({
-  CALIBRATION_RUNS_BY_DETECTOR: 'CALIBRATION_RUNS_BY_DETECTOR'
+  CALIBRATION_RUNS_BY_DETECTOR: 'CALIBRATION_RUNS_BY_DETECTOR',
+  CALIBRATION_RUNS_REQUESTS: 'CALIBRATION_RUNS_REQUESTS',
 });
 
 exports.CacheKeys = CacheKeys;
