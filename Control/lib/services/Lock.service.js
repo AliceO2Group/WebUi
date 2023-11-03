@@ -12,19 +12,20 @@
  * or submit itself to any jurisdiction.
 */
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lockservice`);
 const {errorHandler} = require('../utils.js');
 
 /**
  * Model representing the lock of the UI, one owner at a time
  */
-class Lock {
+class LockService {
   /**
    * Initialize lock as free / unlocked.
    */
   constructor() {
     this.lockedBy = {};
     this.lockedByName = {};
+
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lockservice`);
   }
 
   /**
@@ -79,7 +80,7 @@ class Lock {
       }
       this.lockedBy[entity] = req.session.personid;
       this.lockedByName[entity] = req.session.name;
-      log.info(`Lock ${entity} taken by ${req.session.name}`);
+      this._logger.info(`Lock ${entity} taken by ${req.session.name}`);
       this.broadcastLockState();
       res.status(201).json({
         lockedBy: this.lockedBy,
@@ -112,7 +113,7 @@ class Lock {
       }
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];
-      log.info(`Lock ${entity} forced by ${req.session.name}`);
+      this._logger.info(`Lock ${entity} forced by ${req.session.name}`);
       this.broadcastLockState();
       res.status(200).json({
         lockedBy: this.lockedBy,
@@ -146,7 +147,7 @@ class Lock {
       }
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];
-      log.info(`Lock ${entity} released by ${req.session.name}`);
+      this._logger.info(`Lock ${entity} released by ${req.session.name}`);
       this.broadcastLockState();
       res.status(200).json({
         lockedBy: this.lockedBy,
@@ -164,11 +165,8 @@ class Lock {
    * @param {String} userName - username of the user that should be checked against
    */
   isLockTakenByUser(detector, userId, userName) {
-    console.log(this.lockedBy)
-    console.log(this.lockedByName)
-    console.log(detector, userId, userName)
     return this.lockedBy[detector] === userId && this.lockedByName[detector] === userName;
   }
 }
 
-module.exports = Lock;
+module.exports = {LockService};

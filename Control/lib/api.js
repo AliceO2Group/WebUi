@@ -29,10 +29,10 @@ const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
+const {LockService} = require('./services/Lock.service.js');
 const {RunService} = require('./services/Run.service.js');
 const {StatusService} = require('./services/Status.service.js');
 const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
-const Lock = require('./services/Lock.service.js');
 
 // web-ui services
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
@@ -59,7 +59,7 @@ if (!config.grafana) {
 }
 
 module.exports.setup = (http, ws) => {
-  const lockService = new Lock();
+  const lockService = new LockService();
   lockService.setWs(ws);
 
   let consulService;
