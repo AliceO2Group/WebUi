@@ -13,7 +13,8 @@
 */
 const {Log} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
-const {InvalidInputError} = require('../errors/InvalidInputError.js');
+const {InvalidInputError} = require('./../errors/InvalidInputError.js');
+const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
 
 /**
  * Controller for dealing with all API requests on environments from AliECS:
@@ -23,8 +24,9 @@ class EnvironmentController {
    * Constructor for initializing controller of environments
    * @param {EnvironmentService} envService - service to use to query AliECS with regards to environments
    * @param {WorkflowTemplateService} workflowService - service to use to query Apricot for workflow details
+   * @param {LockService} lockService - service to use to check lock is taken
    */
-  constructor(envService, workflowService) {
+  constructor(envService, workflowService, lockService) {
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/env-ctrl`);
 
     /**
@@ -36,6 +38,11 @@ class EnvironmentController {
      * @type {WorkflowTemplateService}
      */
     this._workflowService = workflowService;
+
+    /**
+     * @type {LockService}
+     */
+    this._lockService = lockService;
   }
 
   /**
@@ -65,10 +72,15 @@ class EnvironmentController {
    * @returns {void}
    */
   async newAutoEnvironmentHandler(req, res) {
-    // TODO LOCK TAKEN
+    const {personid, name} = req.session;
     let workflowTemplatePath;
     let variables;
     const {detector, runType, configurationName} = req.body;
+
+    if (!this._lockService.isLockTakenByUser(detector, personid, name)) {
+      updateExpressResponseFromNativeError(res, new UnauthorizedAccessError('Lock not taken'));
+      return;
+    }
 
     if (!configurationName) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing Configuration Name for deployment'));
