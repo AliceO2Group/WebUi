@@ -13,7 +13,7 @@
 */
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lockservice`);
-const {errorHandler} = require('./../utils.js');
+const {errorHandler} = require('../utils.js');
 
 /**
  * Model representing the lock of the UI, one owner at a time
@@ -51,7 +51,7 @@ class Lock {
    */
   broadcastLockState() {
     this.webSocket.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state()));
-  } 
+  }
 
   /** 
    * Method to try to acquire lock with given name
@@ -76,7 +76,7 @@ class Lock {
           return
         }
         throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
-      }   
+      }
       this.lockedBy[entity] = req.session.personid;
       this.lockedByName[entity] = req.session.name;
       log.info(`Lock ${entity} taken by ${req.session.name}`);
@@ -106,10 +106,10 @@ class Lock {
           lockedBy: this.lockedBy,
           lockedByName: this.lockedByName
         });
-      }   
+      }
       if (!req.session.access.includes('admin')) {
         throw new Error(`Insufficient permission`);
-      }   
+      }
       delete this.lockedBy[entity];
       delete this.lockedByName[entity];
       log.info(`Lock ${entity} forced by ${req.session.name}`);
@@ -120,7 +120,7 @@ class Lock {
       });
     } catch (error) {
       errorHandler(`Unable to force lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
-    }   
+    }
   }
 
   /** 
@@ -154,7 +154,20 @@ class Lock {
       });
     } catch (error) {
       errorHandler(`Unable to give away lock to ${req.session.name}: ${error}`, res, 403, 'lockservice');
-    }   
+    }
+  }
+
+  /**
+   * Method to check if lock is taken by specific user
+   * @param {String} detector - detector for which check should be done
+   * @param {Number} userId - id of the user that should be checked against
+   * @param {String} userName - username of the user that should be checked against
+   */
+  isLockTakenByUser(detector, userId, userName) {
+    console.log(this.lockedBy)
+    console.log(this.lockedByName)
+    console.log(detector, userId, userName)
+    return this.lockedBy[detector] === userId && this.lockedByName[detector] === userName;
   }
 }
 
