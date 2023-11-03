@@ -79,7 +79,7 @@ module.exports.setup = (http, ws) => {
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
 
-  const envService = new EnvironmentService(ctrlProxy, apricotService, cacheService);
+  const envService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService);
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
 
   const envCtrl = new EnvironmentController(envService, workflowService);

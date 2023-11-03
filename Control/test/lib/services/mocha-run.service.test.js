@@ -74,7 +74,7 @@ describe(`'RunService' test suite`, async () => {
       getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 2, detectors: 'ABC'}).resolves({runNumber: 3});
       getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 2, detectors: 'ABC', calibrationStatuses: 'SUCCESS'}).resolves({runNumber: 2});
 
-      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 1, detectors: 'XYZ'}).resolves(undefined);
+      getRun.withArgs({definitions: RunDefinitions.CALIBRATION, runTypes: 1, detectors: 'XYZ'}).resolves(null);
 
       const runSrv = new RunService({getRun}, {});
       runSrv._runTypes = {
@@ -100,22 +100,36 @@ describe(`'RunService' test suite`, async () => {
           NOISE: {
             configuration: {runType: 'NOISE', configuration: 'cpv-noise', label: 'CPV NOISE'},
             lastCalibrationRun: {runNumber: 1},
-            lastSuccessfulCalibrationRun: {runNumber: 1}
+            lastSuccessfulCalibrationRun: {runNumber: 1},
+            ongoingCalibrationRun: null
           },
           PULSE: {
             configuration: {runType: 'PULSE', configuration: 'cpv-pulse', label: 'CPV PULSE'},
             lastCalibrationRun: {runNumber: 2},
-            lastSuccessfulCalibrationRun: {runNumber: 2}
+            lastSuccessfulCalibrationRun: {runNumber: 2},
+            ongoingCalibrationRun: null
           }
         },
         ABC: {
           SOMEOTHER: {
             configuration: {runType: 'SOMEOTHER', configuration: 'abc-someother', label: 'ABC SOME OTHER'},
             lastCalibrationRun: {runNumber: 3},
-            lastSuccessfulCalibrationRun: {runNumber: 2}
+            lastSuccessfulCalibrationRun: {runNumber: 2},
+            ongoingCalibrationRun: null
           },
         },
-        XYZ: {}
+        XYZ: {
+          NONEXISTENT: {
+            configuration: {
+              configuration: 'xyz-someother',
+              label: 'XYZ NON',
+              runType: 'NONEXISTENT',
+            },
+            lastCalibrationRun: null,
+            lastSuccessfulCalibrationRun: null,
+            ongoingCalibrationRun: null
+          }
+        }
       });
     });
   });
