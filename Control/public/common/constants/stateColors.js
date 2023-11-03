@@ -21,7 +21,8 @@ export const ALIECS_STATE_COLOR = {
   MIXED: 'danger-less',
   STANDBY: 'gray-darker',
   DEPLOYED: 'gray-darker',
-  PENDING: 'gray-darker'
+  PENDING: 'gray-darker',
+  DONE: 'primary'
 };
 
 export const ODC_STATE_COLOR = {

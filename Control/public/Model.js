@@ -180,13 +180,21 @@ export default class Model extends Observable {
         if (message?.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]) {
           this.about.updateComponentStatus('system', message.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY])
         }
-        break
+        break;
       case 'CALIBRATION_RUNS_BY_DETECTOR':
         if (message.payload) {
           this.calibrationRunsModel.calibrationRuns = RemoteData.success(message?.payload)
           this.notify();
         }
-        break
+        break;
+      case 'CALIBRATION_RUNS_REQUESTS':
+        if (message.payload && this.calibrationRunsModel.calibrationRuns.isSuccess()) {
+          const {detector, runType} = message.payload;
+          this.calibrationRunsModel.calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
+            RemoteData.success(message.payload);
+          this.calibrationRunsModel.notify();
+        }
+        break;
     }
   }
 

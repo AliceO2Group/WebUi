@@ -67,18 +67,20 @@ export class CalibrationRunsModel extends Observable {
    * @return {void}
    */
   async newCalibrationRun(detector, runType, configurationName) {
-    if (this._calibrationRuns.isSuccess()) {
+    try {
       this._calibrationRuns.payload[detector][runType].ongoingCalibrationRun = RemoteData.loading();
       this.notify();
 
       const payload = {
-        configurationName
+        detector, runType, configurationName
       };
       const {result, ok} = await this._model.loader.post('/api/environment/auto', payload);
 
       this._calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
         ok ? RemoteData.success(result) : RemoteData.failure(result.message);
       this.notify();
+    } catch (error) {
+      console.error('Unable to deploy environment due to ', error)
     }
   }
 
