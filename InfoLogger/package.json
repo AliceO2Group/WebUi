@@ -14,7 +14,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 18.x"
+    "node": ">= 20.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
