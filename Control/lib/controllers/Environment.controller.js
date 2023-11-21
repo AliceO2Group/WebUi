@@ -92,6 +92,26 @@ class EnvironmentController {
   }
 
   /**
+   * API - DELETE endpoint for destroying an environment
+   * @param {Request} req - HTTP Request object which expects an `id` as mandatory parameter
+   * @param {Response} res - HTTP Response object with result of the transition of the environment
+   * @returns {void}
+   */
+  async destroyEnvironmentHandler(req, res) {
+    const {id} = req.params ?? {};
+    const {keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
+    if (!id) {
+      updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
+    }
+    try {
+      const response = await this._envService.destroyEnvironment(id, {keepTasks, allowInRunningState, force});
+      res.status(200).json(response);
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
    * API - POST endpoint for deploying a new environment based on a given configuration name
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object with EnvironmentDetails
