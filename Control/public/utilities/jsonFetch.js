@@ -11,47 +11,34 @@
  * or submit itself to any jurisdiction.
  */
 
-import { fetchClient } from '/js/src/index.js';
+import {fetchClient} from '/js/src/index.js';
 
 /**
- * @source {Bookkeeping} - https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/public/utilities/fetch/jsonFetch.js
- * Send a request to a remote endpoint, and extract the response. If errors occurred, an array of errors containing title and detail is thrown
+ * Send a request to a remote endpoint, and extract the response. If errors occurred, an error containing a message field will be returned
  *
  * The endpoint is expected to follow some conventions:
  *   - If request is valid but no data must be sent, it must return a 204
- *   - If data must be returned, the json response must contain a top level "data" key
- *   - If an error occurred, NO "data" key must be present, and there can be one of the following keys:
- *     - errors: a list of errors containing title and detail
- *     - error and message describing the error that occurred
+ *   - If an error occurred, there can be error with a message field describing the error that occurred
  *
- * @param {string} endpoint the remote endpoint to send request to
- * @param {RequestInit} options the request options, see {@see fetch} native function
- * @return {Promise<*>} resolve with the result of the request or reject with the list of errors if any error occurred
+ * @param {String} endpoint - the remote endpoint to send request to
+ * @param {RequestInit} options - the request options, see {@see fetch } native function
+ * @return {Promise<Resolve<Object>.Error<{message: String}>>} resolve with the result of the request or reject with the error message
  */
 export const jsonFetch = async (endpoint, options) => {
-  let result;
+  let response;
   try {
-    const response = await fetchClient(endpoint, options);
-    
-    // 204 means no data and the response do not have a body
-    if (response.status === 204) {
-      result = null;
-    } else {
-      result = await response.json();
-    }
-  } catch (e) {
-    result = {
-      detail: e.message,
-    };
+    response = await fetchClient(endpoint, options);
+  } catch (error) {
+    return Promise.reject({message: 'Connection to server failed, please try again'});
   }
-  if (result === null || result) {
-    return result;
+  try {
+    const result = response.status === 204 // case in which response is empty
+      ? null
+      : await response.json();
+    return response.ok
+      ? result
+      : Promise.reject({message: result.message || 'Unknown error received'});
+  } catch (error) {
+    return Promise.reject({message: 'Parsing result from server failed'});
   }
-
-  return Promise.reject(result.errors || [
-    {
-      title: result.error || 'Request failure',
-      detail: result.message || 'An error occurred while fetching data',
-    },
-  ]);
-};
+}

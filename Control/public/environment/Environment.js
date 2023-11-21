@@ -13,6 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {jsonPut} from './../utilities/jsonPut.js';
 import Task from './Task.js';
 
 /**
@@ -140,17 +141,25 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Control a remote environment, store action result into `itemControl` as RemoteData
-   * @param {Object} body - See protobuf definition for properties
+   * Request the control of an environment to transition to a new state. 
+   * In case of success, the user will be redirected to the environment details page with the new state
+   * In case of failure, an error message which be stored in `itemControl` and displayed under the button action panel
+   * @param {String} id - environmentId that the user whishes to control
+   * @param {String} type - type of the transition that the user whishes to apply
+   * @param {Number} runNumber - current run number if the environment is in RUNNING state
+   * @return {void}
    */
-  async controlEnvironment(body) {
+  async controlEnvironment(id, type, runNumber) {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/ControlEnvironment`, body);
-    this.itemControl = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
-    this.itemNew = RemoteData.notAsked();
-    this.model.router.go(`?page=environment&id=${result.id}`);
+    try {(id, type)
+      const result = await jsonPut(`/api/environment/${id}`, {body: {id, type, runNumber}});
+      this.itemControl = RemoteData.success(result);
+      this.model.router.go(`?page=environment&id=${result.id}`);
+    } catch (error) {
+      this.itemControl = RemoteData.failure(error);
+    }
     this.notify();
   }
 
@@ -162,7 +171,7 @@ export default class Environment extends Observable {
   async newEnvironment(itemForm) {
     this.itemNew = RemoteData.loading();
     this.notify();
-    
+
     const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
     this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
     this.model.router.go(`?page=environments`);

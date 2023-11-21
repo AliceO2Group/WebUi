@@ -58,7 +58,7 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
       NotAsked: () => null,
       Loading: () => null,
       Success: (_data) => null,
-      Failure: (error) => h('p.danger', error),
+      Failure: ({message}) => h('p.danger.text-right', message),
     })
   ]);
 };
@@ -90,7 +90,7 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide, 
       style: item.state !== stateToHide ? 'display: none;' : '',
       onclick: () => {
         confirm(`Are you sure you want to ${label} this ${item.state} environment?`)
-          && environment.controlEnvironment({id: item.id, type, runNumber: item.currentRunNumber});
+          && environment.controlEnvironment(item.id, type, item.currentRunNumber);
       },
       title
     },
