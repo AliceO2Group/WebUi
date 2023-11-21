@@ -24,12 +24,21 @@ describe('EnvironmentService test suite', () => {
   const ENVIRONMENT_VALID = '1234ENV';
   const ENVIRONMENT_ID_FAILED_TO_RETRIEVE = '2432ENV502';
 
-  const stub = sinon.stub();
-  stub.withArgs({id: ENVIRONMENT_NOT_FOUND_ID}).rejects(new NotFoundError(`Environment with ID: ${ENVIRONMENT_NOT_FOUND_ID} could not be found`));
-  stub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}).rejects(new Error(`Proxy service failed`));
-  stub.withArgs({id: ENVIRONMENT_VALID}).resolves({environment: {id: ENVIRONMENT_VALID, description: 'Some description'}});
+  const GetEnvironmentStub = sinon.stub();
+  GetEnvironmentStub.withArgs({id: ENVIRONMENT_NOT_FOUND_ID}).rejects({code: 5, details: `Environment with ID: ${ENVIRONMENT_NOT_FOUND_ID} could not be found`});
+  GetEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}).rejects({code: 1, details: `Proxy service failed`});
+  GetEnvironmentStub.withArgs({id: ENVIRONMENT_VALID}).resolves({environment: {id: ENVIRONMENT_VALID, description: 'Some description'}});
 
-  const envService = new EnvironmentService({GetEnvironment: stub}, {detectors: [], includedDetectors: []});
+  const ControlEnvironmentStub = sinon.stub();
+  ControlEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE, type: 'START_ACTIVITY'}).rejects({code: 5, details: 'Environment not found'});
+  ControlEnvironmentStub.withArgs({id: ENVIRONMENT_VALID, type: 'START_ACTIVITY'}).resolves({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1});
+
+  const envService = new EnvironmentService(
+    {
+      GetEnvironment: GetEnvironmentStub,
+      ControlEnvironment: ControlEnvironmentStub,
+    }, {detectors: [], includedDetectors: []}
+  );
 
   describe(`'getEnvironment' test suite`, async () => {
     it('should successfully build a response with environment details given an id', async () => {
@@ -43,6 +52,16 @@ describe('EnvironmentService test suite', () => {
     });
     it('should reject with NotFoundError if service for retrieving information failed', async () => {
       await assert.rejects(envService.getEnvironment(ENVIRONMENT_NOT_FOUND_ID), new NotFoundError(`Environment with ID: ${ENVIRONMENT_NOT_FOUND_ID} could not be found`));
+    });
+  });
+
+  describe(`'transitionEnvironment' test suite`, async () => {
+    it('should throw gRPC type of error due to issue', async () => {
+      await assert.rejects(envService.transitionEnvironment(ENVIRONMENT_ID_FAILED_TO_RETRIEVE, 'START_ACTIVITY'), new NotFoundError('Environment not found'));
+    });
+    it('should successfully return environment transition results', async () => {
+      const environmentTransitioned = await envService.transitionEnvironment(ENVIRONMENT_VALID, 'START_ACTIVITY');
+      assert.deepStrictEqual(environmentTransitioned, {id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1})
     });
   });
 });
