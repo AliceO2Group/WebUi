@@ -78,10 +78,12 @@ class RequestHandler {
         console.error(error);
       }
     }
-
     try {
+      const deploymentRequestedAt = Date.now();
       const payload = CoreUtils.parseEnvironmentCreationPayload(req.body);
-      await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
+      const {environment} = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
+      log.debug(`NEW_ENVIRONMENT,${environment.id},,${deploymentRequestedAt},${Date.now()}`);
+
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
     } catch (error) {

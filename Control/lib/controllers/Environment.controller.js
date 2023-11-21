@@ -75,12 +75,13 @@ class EnvironmentController {
    */
   async transitionEnvironmentHandler(req, res) {
     const {id} = req.params;
-    const {type: transitionType} = req.body;
+    const {type: transitionType, runNumber = ''} = req.body;
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
     } else if (!(transitionType in EnvironmentTransitionType)) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Invalid environment transition to perform'));
     } else {
+      const transitionRequestedAt = Date.now();
       try {
         const response = await this._envService.transitionEnvironment(id, transitionType);
         res.status(200).json(response);
@@ -88,6 +89,7 @@ class EnvironmentController {
         this._logger.debug(error);
         updateExpressResponseFromNativeError(res, error);
       }
+      this._logger.debug(`${transitionType},${id},${runNumber},${transitionRequestedAt},${Date.now()}`);
     }
   }
 
@@ -99,15 +101,18 @@ class EnvironmentController {
    */
   async destroyEnvironmentHandler(req, res) {
     const {id} = req.params ?? {};
-    const {keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
+    const {runNumber = '', keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
-    }
-    try {
-      const response = await this._envService.destroyEnvironment(id, {keepTasks, allowInRunningState, force});
-      res.status(200).json(response);
-    } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+    } else {
+      const destroyRequestedAt = Date.now();
+      try {
+        const response = await this._envService.destroyEnvironment(id, {keepTasks, allowInRunningState, force});
+        res.status(200).json(response);
+      } catch (error) {
+        updateExpressResponseFromNativeError(res, error);
+      }
+      this._logger.debug(`DESTROY_ENVIRONMENT,${id},${runNumber},${destroyRequestedAt},${Date.now()}`);
     }
   }
 
