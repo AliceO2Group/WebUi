@@ -14,6 +14,8 @@
 
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
+const EnvironmentTransitionResultAdapter = require('./../adapters/EnvironmentTransitionResultAdapter.js');
+const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 /**
  * EnvironmentService class to be used to retrieve data from AliEcs Core via the gRPC Control client
@@ -55,12 +57,30 @@ class EnvironmentService {
    * @throws {Error}
    */
   async getEnvironment(id, taskSource) {
-    const {environment} = await this._coreGrpc.GetEnvironment({id});
-    const detectorsAll = this._apricotGrpc.detectors ?? [];
-    const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-    const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, taskSource, detectorsAll, hostsByDetector);
+    try {
+      const {environment} = await this._coreGrpc.GetEnvironment({id});
+      const detectorsAll = this._apricotGrpc.detectors ?? [];
+      const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+      const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, taskSource, detectorsAll, hostsByDetector);
+      return environmentInfo;
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
+  }
 
-    return environmentInfo;
+  /**
+   * Given an environment ID and a transition type, use the gRPC client to perform the transition
+   * @param {String} id - environment id as defined by AliECS Core
+   * @param {EnvironmentTransitionType} transitionType - allowed transitions for an environment
+   * @return {EnvironmentTransitionResult} - result of the environment transition
+   */
+  async transitionEnvironment(id, transitionType) {
+    try {
+      const transitionedEnvironment = await this._coreGrpc.ControlEnvironment({id, type: transitionType});
+      return EnvironmentTransitionResultAdapter.toEntity(transitionedEnvironment);
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
   }
 
   /**

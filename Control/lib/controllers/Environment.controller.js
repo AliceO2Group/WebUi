@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 const {Log} = require('@aliceo2/web-ui');
+const {EnvironmentTransitionType} = require('./../common/environmentTransitionType.enum.js');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {InvalidInputError} = require('./../errors/InvalidInputError.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
@@ -54,7 +55,8 @@ class EnvironmentController {
   async getEnvironmentHandler(req, res) {
     const {id, source} = req.params;
     if (!id) {
-      res.status(400).json({message: 'Missing environment ID parameter'});
+      updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
+      return;
     }
     try {
       const response = await this._envService.getEnvironment(id, source);
@@ -62,6 +64,30 @@ class EnvironmentController {
     } catch (error) {
       this._logger.debug(error);
       updateExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
+   * API - PUT endpoint for transitioning an environment to a new state
+   * @param {Request} req - HTTP Request object which expects an `id` in params and `type` in body
+   * @param {Response} res - HTTP Response object with result of the transition of the environment
+   * @returns {void}
+   */
+  async transitionEnvironmentHandler(req, res) {
+    const {id} = req.params;
+    const {type: transitionType} = req.body;
+    if (!id) {
+      updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
+    } else if (!transitionType || !EnvironmentTransitionType[transitionType]) {
+      updateExpressResponseFromNativeError(res, new InvalidInputError('Invalid environment transition to perform'));
+    } else {
+      try {
+        const response = await this._envService.transitionEnvironment(id, transitionType);
+        res.status(200).json(response);
+      } catch (error) {
+        this._logger.debug(error);
+        updateExpressResponseFromNativeError(res, error);
+      }
     }
   }
 
