@@ -78,7 +78,7 @@ class EnvironmentController {
     const {type: transitionType} = req.body;
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
-    } else if (!transitionType || !EnvironmentTransitionType[transitionType]) {
+    } else if (!(transitionType in EnvironmentTransitionType)) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Invalid environment transition to perform'));
     } else {
       try {

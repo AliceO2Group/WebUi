@@ -14,7 +14,7 @@
 
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
-const EnvironmentTransitionResultAdapter = require('./../adapters/EnvironmentTransitionResultAdapter.js');
+const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentTransitionResultAdapter.js');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 /**
@@ -61,8 +61,7 @@ class EnvironmentService {
       const {environment} = await this._coreGrpc.GetEnvironment({id});
       const detectorsAll = this._apricotGrpc.detectors ?? [];
       const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-      const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, taskSource, detectorsAll, hostsByDetector);
-      return environmentInfo;
+      return EnvironmentInfoAdapter.toEntity(environment, taskSource, detectorsAll, hostsByDetector);
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
