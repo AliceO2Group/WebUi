@@ -24,21 +24,30 @@ describe('EnvironmentController test suite', () => {
   const ENVIRONMENT_VALID = '1234ENV';
   const ENVIRONMENT_ID_FAILED_TO_RETRIEVE = '2432ENV502';
 
-  const stub = sinon.stub();
-  stub.withArgs(ENVIRONMENT_NOT_FOUND_ID).rejects(new NotFoundError(`Environment with ID: ${ENVIRONMENT_NOT_FOUND_ID} could not be found`));
-  stub.withArgs(ENVIRONMENT_ID_FAILED_TO_RETRIEVE).rejects(new Error(`Data service failed`));
-  stub.withArgs(ENVIRONMENT_VALID).resolves({id: ENVIRONMENT_VALID, description: 'Some description'});
+  const getEnvironmentStub = sinon.stub();
+  getEnvironmentStub.withArgs(ENVIRONMENT_NOT_FOUND_ID).rejects(new NotFoundError(`Environment with ID: ${ENVIRONMENT_NOT_FOUND_ID} could not be found`));
+  getEnvironmentStub.withArgs(ENVIRONMENT_ID_FAILED_TO_RETRIEVE).rejects(new Error(`Data service failed`));
+  getEnvironmentStub.withArgs(ENVIRONMENT_VALID).resolves({id: ENVIRONMENT_VALID, description: 'Some description'});
+
+  const transitionEnvironmentStub = sinon.stub();
+  transitionEnvironmentStub.withArgs(ENVIRONMENT_ID_FAILED_TO_RETRIEVE, 'START_ACTIVITY').rejects(new Error(`Cannot transition environment`));
+  transitionEnvironmentStub.withArgs(ENVIRONMENT_VALID, 'START_ACTIVITY').resolves({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1});
 
   const envService = {
-    getEnvironment: stub
+    getEnvironment: getEnvironmentStub,
+    transitionEnvironment: transitionEnvironmentStub
   };
   const envCtrl = new EnvironmentController(envService);
-  const res = {
-    status: sinon.stub().returnsThis(),
-    json: sinon.stub()
-  }
+  let res;
 
-  describe(`'getEnvironment' test suite`, async () => {
+  describe(`'getEnvironmentHandler' test suite`, async () => {
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub()
+      };
+    });
+
     it('should successfully build a response with environment details given an id', async () => {
       await envCtrl.getEnvironmentHandler({params: {id: ENVIRONMENT_VALID}}, res);
       assert.ok(res.status.calledWith(200));
@@ -69,6 +78,45 @@ describe('EnvironmentController test suite', () => {
       await envCtrl.getEnvironmentHandler({params: {id: ''}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
+    });
+  });
+
+  describe(`'transitionEnvironmentHandler' test suite`, async () => {
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub()
+      };
+    });
+
+    it('should return error due to missing id', async () => {
+      await envCtrl.transitionEnvironmentHandler({params: {id: null}, body: {type: null}}, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
+    });
+
+    it('should return error due to missing transition type', async () => {
+      await envCtrl.transitionEnvironmentHandler({params: {id: 'ABC123'}, body: {type: null}}, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({message: `Invalid environment transition to perform`}));
+    });
+
+    it('should return error due to invalid transition type', async () => {
+      await envCtrl.transitionEnvironmentHandler({params: {id: 'ABC123'}, body: {type: 'NON_EXISTENT'}}, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({message: `Invalid environment transition to perform`}));
+    });
+
+    it('should return error due to transition environment issue', async () => {
+      await envCtrl.transitionEnvironmentHandler({params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {type: 'START_ACTIVITY'}}, res);
+      assert.ok(res.status.calledWith(500));
+      assert.ok(res.json.calledWith({message: `Cannot transition environment`}));
+    });
+
+    it('should successfully return environment in transition state', async () => {
+      await envCtrl.transitionEnvironmentHandler({params: {id: ENVIRONMENT_VALID}, body: {type: 'START_ACTIVITY'}}, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1}));
     });
   });
 });
