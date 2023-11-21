@@ -111,7 +111,7 @@ const shutdownEnvButton = (environment, item, isInTransition) =>
     disabled: isInTransition || environment.itemControl.isLoading(),
     style: {display: (item.state === 'CONFIGURED' || item.state == 'DEPLOYED') ? '' : 'none'},
     onclick: () => confirm(`Are you sure you want to SHUTDOWN this ${item.state} environment?`)
-      && environment.destroyEnvironment({id: item.id, runNumber: item.currentRunNumber}),
+      && environment.destroyEnvironment(item.id, item.currentRunNumber),
     title: isInTransition ? 'Environment is currently transitioning, please wait' : 'Shutdown environment'
   }, 'SHUTDOWN');
 
@@ -129,9 +129,7 @@ const killEnvButton = (environment, item) =>
       style: 'margin-left: .3em',
       disabled: environment.itemControl.isLoading() || !_isKillActionAllowed(item, environment.model),
       onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
-        && environment.destroyEnvironment({
-          id: item.id, allowInRunningState: true, force: true, runNumber: item.currentRunNumber
-        }),
+        && environment.destroyEnvironment(item.id, item.currentRunNumber, true, true),
       title: 'Kill environment'
     }, 'KILL'),
     h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 400px'}, [
