@@ -42,4 +42,4 @@ class EnvironmentTransitionResultAdapter {
   }
 }
 
-module.exports = EnvironmentTransitionResultAdapter;
+module.exports.EnvironmentTransitionResultAdapter = EnvironmentTransitionResultAdapter;
