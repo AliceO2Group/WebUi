@@ -83,6 +83,21 @@ class EnvironmentService {
   }
 
   /**
+   * Given an environment ID and optional parameters, use the gRPC client to send a request to destroy an environment
+   * @param {String} id - environment id as defined by AliECS Core
+   * @param {{keepTasks: Boolean, allowInRunningState: Boolean, force: Boolean}} - options for destroying the environment
+   * @return {Promise.<{String}, Error>} - if operation was a success or not
+   */
+  async destroyEnvironment(id, {keepTasks = false, allowInRunningState = false, force = false} = {}) {
+    try {
+      await this._coreGrpc.DestroyEnvironment({id, keepTasks, allowInRunningState, force});
+      return {id};
+    } catch (grpcError) {
+      throw grpcErrorToNativeError(grpcError);
+    }
+  }
+
+  /**
    * Given the workflowTemplate and variables configuration, it will generate a unique string and send all to AliECS to create a
    * new auto transitioning environment
    * @param {String} workflowTemplate - name in format `repository/revision/template`

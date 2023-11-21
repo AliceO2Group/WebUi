@@ -32,10 +32,16 @@ describe('EnvironmentController test suite', () => {
   const transitionEnvironmentStub = sinon.stub();
   transitionEnvironmentStub.withArgs(ENVIRONMENT_ID_FAILED_TO_RETRIEVE, 'START_ACTIVITY').rejects(new Error(`Cannot transition environment`));
   transitionEnvironmentStub.withArgs(ENVIRONMENT_VALID, 'START_ACTIVITY').resolves({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1});
+  
+  const destroyEnvironmentStub = sinon.stub();
+  destroyEnvironmentStub.withArgs(ENVIRONMENT_ID_FAILED_TO_RETRIEVE).rejects(new Error(`Cannot destroy environment`));
+  destroyEnvironmentStub.withArgs(ENVIRONMENT_VALID).resolves({id: ENVIRONMENT_VALID});
+
 
   const envService = {
     getEnvironment: getEnvironmentStub,
-    transitionEnvironment: transitionEnvironmentStub
+    transitionEnvironment: transitionEnvironmentStub,
+    destroyEnvironment: destroyEnvironmentStub 
   };
   const envCtrl = new EnvironmentController(envService);
   let res;
@@ -117,6 +123,33 @@ describe('EnvironmentController test suite', () => {
       await envCtrl.transitionEnvironmentHandler({params: {id: ENVIRONMENT_VALID}, body: {type: 'START_ACTIVITY'}}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1}));
+    });
+  });
+
+  describe(`'destroyEnvironmentHandler' test suite`, async () => {
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub()
+      };
+    });
+
+    it('should return error due to missing id when attempting to destroy environment', async () => {
+      await envCtrl.destroyEnvironmentHandler({params: {id: null}, body: {type: null}}, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
+    });
+
+    it('should return error due to destroy environment issue', async () => {
+      await envCtrl.destroyEnvironmentHandler({params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {}}, res);
+      assert.ok(res.status.calledWith(500));
+      assert.ok(res.json.calledWith({message: `Cannot destroy environment`}));
+    });
+
+    it('should successfully return environment following destroy action', async () => {
+      await envCtrl.destroyEnvironmentHandler({params: {id: ENVIRONMENT_VALID}, body: {}}, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({id: ENVIRONMENT_VALID}));
     });
   });
 });

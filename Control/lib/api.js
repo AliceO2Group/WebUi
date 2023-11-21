@@ -131,6 +131,7 @@ module.exports.setup = (http, ws) => {
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
   http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
+  http.delete('/environment/:id', coreMiddleware, envCtrl.destroyEnvironmentHandler.bind(envCtrl));
 
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
