@@ -33,10 +33,16 @@ describe('EnvironmentService test suite', () => {
   ControlEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE, type: 'START_ACTIVITY'}).rejects({code: 5, details: 'Environment not found'});
   ControlEnvironmentStub.withArgs({id: ENVIRONMENT_VALID, type: 'START_ACTIVITY'}).resolves({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1});
 
+  const DestroyEnvironmentStub = sinon.stub();
+  DestroyEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE, keepTasks: false, allowInRunningState: false, force: false}).rejects({code: 5, details: 'Environment not found'});
+  DestroyEnvironmentStub.withArgs({id: ENVIRONMENT_VALID, keepTasks: true, allowInRunningState: false, force: false}).resolves({id: ENVIRONMENT_VALID});
+  DestroyEnvironmentStub.rejects({code: 1, details: 'Wrong arguments, using default stub reject'});
+
   const envService = new EnvironmentService(
     {
       GetEnvironment: GetEnvironmentStub,
       ControlEnvironment: ControlEnvironmentStub,
+      DestroyEnvironment: DestroyEnvironmentStub,
     }, {detectors: [], includedDetectors: []}
   );
 
@@ -59,9 +65,21 @@ describe('EnvironmentService test suite', () => {
     it('should throw gRPC type of error due to issue', async () => {
       await assert.rejects(envService.transitionEnvironment(ENVIRONMENT_ID_FAILED_TO_RETRIEVE, 'START_ACTIVITY'), new NotFoundError('Environment not found'));
     });
+
     it('should successfully return environment transition results', async () => {
       const environmentTransitioned = await envService.transitionEnvironment(ENVIRONMENT_VALID, 'START_ACTIVITY');
       assert.deepStrictEqual(environmentTransitioned, {id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1})
+    });
+  });
+
+  describe(`'destroyEnvironment' test suite`, async () => {
+    it('should throw gRPC type of error due to issue encountered when trying to destroy environment and have default values set', async () => {
+      await assert.rejects(envService.destroyEnvironment(ENVIRONMENT_ID_FAILED_TO_RETRIEVE), new NotFoundError('Environment not found'));
+    });
+
+    it('should successfully return environment id if successfully destroyed', async () => {
+      const environmentTransitioned = await envService.destroyEnvironment(ENVIRONMENT_VALID, {keepTasks: true});
+      assert.deepStrictEqual(environmentTransitioned, {id: ENVIRONMENT_VALID})
     });
   });
 });
