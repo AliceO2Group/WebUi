@@ -13,6 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {jsonDelete} from './../utilities/jsonDelete.js';
 import {jsonPut} from './../utilities/jsonPut.js';
 import Task from './Task.js';
 
@@ -153,7 +154,7 @@ export default class Environment extends Observable {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    try {(id, type)
+    try {
       const result = await jsonPut(`/api/environment/${id}`, {body: {id, type, runNumber}});
       this.itemControl = RemoteData.success(result);
       this.model.router.go(`?page=environment&id=${result.id}`);
@@ -179,21 +180,24 @@ export default class Environment extends Observable {
 
   /**
    * Destroy a remote environment, store action result into `this.itemControl` as RemoteData
-   * @param {Object} body - See protobuf definition for properties
+   * @param {String} id - id of the environment to be destroyed
+   * @param {Number} runNumber - if environment is in running state
+   * @param {Boolean} [allowInRunningState = false] - if the environment should be allowed to stop in running state
+   * @param {Boolean} [force = false] - if the environment should be killed via force flag
    */
-  async destroyEnvironment(body) {
+  async destroyEnvironment(id, runNumber, allowInRunningState, force) {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/DestroyEnvironment`, body);
-    if (!ok) {
-      this.model.notification.show(result.message, 'danger', 5000);
-      this.itemControl = RemoteData.failure(result.message);
+    try {
+      await jsonDelete(`/api/environment/${id}`, {body: {id, runNumber, allowInRunningState, force}});
+      this.itemControl = RemoteData.notAsked();
+      this.model.router.go(`?page=environments`);
+    } catch (error) {
+      this.model.notification.show(error.message, 'danger', 5000);
+      this.itemControl = RemoteData.failure(error.message);
       this.notify();
-      return;
     }
-    this.itemControl = RemoteData.notAsked();
-    this.model.router.go(`?page=environments`);
   }
 
   /**
