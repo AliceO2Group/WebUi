@@ -78,11 +78,11 @@ class RequestHandler {
         console.error(error);
       }
     }
+    const deploymentRequestedAt = Date.now();
+    let creationResponse = null;
     try {
-      const deploymentRequestedAt = Date.now();
       const payload = CoreUtils.parseEnvironmentCreationPayload(req.body);
-      const {environment} = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
-      log.debug(`NEW_ENVIRONMENT,${environment.id},,${deploymentRequestedAt},${Date.now()}`);
+      creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
 
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
@@ -95,6 +95,9 @@ class RequestHandler {
         this.requestList[index].envId = error.envId;
       }
     }
+    const id = creationResponse ? creationResponse.environment.id : '';
+    log.debug(`NEW_ENVIRONMENT,${id},,${deploymentRequestedAt},${Date.now()}`);
+
     this.broadcast();
   }
 
