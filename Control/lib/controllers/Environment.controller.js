@@ -82,14 +82,16 @@ class EnvironmentController {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Invalid environment transition to perform'));
     } else {
       const transitionRequestedAt = Date.now();
+      let response = null;
       try {
-        const response = await this._envService.transitionEnvironment(id, transitionType);
+        response = await this._envService.transitionEnvironment(id, transitionType);
         res.status(200).json(response);
       } catch (error) {
         this._logger.debug(error);
         updateExpressResponseFromNativeError(res, error);
       }
-      this._logger.debug(`${transitionType},${id},${runNumber},${transitionRequestedAt},${Date.now()}`);
+      const currentRunNumber = response?.currentRunNumber ?? runNumber;
+      this._logger.debug(`${transitionType},${id},${currentRunNumber},${transitionRequestedAt},${Date.now()}`);
     }
   }
 
