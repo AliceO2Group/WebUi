@@ -78,10 +78,12 @@ class RequestHandler {
         console.error(error);
       }
     }
-
+    const deploymentRequestedAt = Date.now();
+    let creationResponse = null;
     try {
       const payload = CoreUtils.parseEnvironmentCreationPayload(req.body);
-      await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
+      creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
+
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
     } catch (error) {
@@ -93,6 +95,9 @@ class RequestHandler {
         this.requestList[index].envId = error.envId;
       }
     }
+    const id = creationResponse ? creationResponse.environment.id : '';
+    log.debug(`NEW_ENVIRONMENT,${id},,${deploymentRequestedAt},${Date.now()}`);
+
     this.broadcast();
   }
 
