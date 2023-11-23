@@ -123,12 +123,12 @@ describe('`Control Environment` test-suite', async () => {
     assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
   });
 
-  it('should release lock', async() => {
+  it('should release lock', async () => {
     await page.goto(config.url + '?page=locks');
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=locks');
     await page.waitForSelector('button.danger');
-    await page.evaluate(() =>  document.querySelector('button.danger').click());
+    await page.evaluate(() => document.querySelector('button.danger').click());
   });
 });
 
@@ -144,7 +144,7 @@ async function waitForCoreResponse(page, timeout = 90) {
   return new Promise(async (resolve) => {
     let i = 0;
     while (i++ < timeout) {
-      const isLoaderActive = await page.evaluate(() => window.model.loader.active);
+      const isLoaderActive = await page.evaluate(() => window.model.environment.itemControl.isLoading());
       if (!isLoaderActive) {
         await page.waitForTimeout(1000);
         resolve();
