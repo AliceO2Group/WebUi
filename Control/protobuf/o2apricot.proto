@@ -56,6 +56,7 @@ service Apricot {
     rpc GetComponentConfigurationWithLastIndex(ComponentRequest) returns (ComponentResponseWithLastIndex) {}
     rpc ResolveComponentQuery(ComponentQuery) returns (ComponentQuery) {}
     rpc ImportComponentConfiguration(ImportComponentConfigurationRequest) returns (ImportComponentConfigurationResponse) {}
+    rpc InvalidateComponentTemplateCache(Empty) returns (Empty) {}
 }
 
 // NOTE: make sure the enum values include and match those in RunType in dcs.pb.go and runtype.go
