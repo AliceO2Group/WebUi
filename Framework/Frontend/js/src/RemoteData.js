@@ -158,7 +158,7 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @return {NotAskedRemoteData<P, E>}
+   * @return {RemoteData<P, E>}
    * @static
    */
   static notAsked() {
@@ -178,7 +178,7 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @return {LoadingRemoteData<P, E>}
+   * @return {RemoteData<P, E>}
    * @static
    */
   static loading() {
@@ -200,7 +200,7 @@ export class RemoteData {
    * @template E
    *
    * @param {P} payload
-   * @return {SuccessRemoteData<P, E>}
+   * @return {RemoteData<P, E>}
    * @static
    */
   static success(payload) {
@@ -222,7 +222,7 @@ export class RemoteData {
    * @template E
    *
    * @param {E} error
-   * @return {FailureRemoteData<P, E>}
+   * @return {RemoteData<P, E>}
    * @static
    */
   static failure(error) {
