@@ -119,20 +119,37 @@ As a utility, the framework provides RemoteData type to encapsulate the differen
 ```js
 import {RemoteData} from '/js/src/index.js';
 
-var item = RemoteData.NotAsked();
-item.isNotAsked() === true
-item.isSuccess() === false
+// A function that should display data from server (for example the name of the user) must handle every possibilities
+// Keep in mind that, at any time, the remote data will only match one of these possibilities
+const getWelcomeMessage = (remoteData) => remoteData.match({
+  NotAsked: () => 'Data has not been fetched from the server', // Display a message to the user saying that data has not been fetched
+  Loading: () => 'Loading, please wait', // A request has probably been sent to the server but we did not received any response yet
+  Success: (name) => `Hello ${name}`, // The server response has been stored in the remote data payload, and it is passed as parameter to the Success callback
+  Failure: (error) => `An error has occurred: ${error.message}`, // An error has occurred, displays its message
+})
 
-var item = RemoteData.Success({...});
-item.isNotAsked() === false
-item.isSuccess() === true
+// When starting the application, the data may be not asked
+let userNameRemoteData = RemoteData.notAsked();
+getWelcomeMessage(userNameRemoteData); // Yields `Data has not been fetched from the server`
 
-item.match({
-  NotAsked: () => ...,
-  Loading: () => ...,
-  Success: (data) => ...,
-  Failure: (error) => ...,
-});
+// At some point in the code, we fetch the data. We first set the remote data state to loading, then re-render (in real case, re-render is automated)
+userNameRemoteData = RemoteData.loading();
+// Update the message:
+getWelcomeMessage(userNameRemoteData); // Yields `Loading, please wait`
+
+fetchUsernameFromServer() // Suppose we have a function that resolves with the current user name fetched from the server
+  .then(
+      (username) => userNameRemoteData = RemoteData.success(username), // Everything gone right: store the username in a success remote data
+      (error) => userNameRemoteData = RemoteData.failure(error), // An error occured, store it in a failure remote data
+  )
+  .finaly(() => getWelcomeMessage()) // And re-render!
+
+// Sometimes, we need to execute some code only in case of successful remote data, in this case we can use the short branching of `match`
+// For example, let's consider that we receive the total items count every time we fetch a page. We want to update the displayed pagination to update only if we actually receive a new pagination info, but keep the previous one in any case:
+totalItems = remoteData.match({
+  Success: ({newTotalItems}) => newTotalItems, // Use the new value if we have a success
+  Other: () => totalItems // In any other cases, keep the previous value
+})
 ```
 
 This pattern uses tagged union type and is explained here: http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html it is also comparable to solving the "accessing data from null pointer" problem.

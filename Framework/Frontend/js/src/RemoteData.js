@@ -38,15 +38,21 @@
  *
  * @example
  * import {RemoteData} from '/js/src/index.js';
- * var item = RemoteData.NotAsked();
- * item.isNotAsked() === true
- * item.isLoading() === false
+ * var item = RemoteData.notAsked();
+ *
+ * // Using all branches explicitly
  * item.match({
  *   NotAsked: () => 1,
  *   Loading: () => 2,
  *   Success: (data) => 3,
  *   Failure: (error) => 4,
- * }) === 1
+ * }) === 1 // => true
+ *
+ * // Or using
+ * items.match({
+ *   Success: (data) => data,
+ *   Other: () => [] // NotAsked is included in here
+ * }).length > 0 // => true
  */
 export class RemoteData {
   /**
