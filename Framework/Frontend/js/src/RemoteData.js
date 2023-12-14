@@ -132,6 +132,14 @@ export class RemoteData {
   }
 
   /**
+   * Returns the kind of the remote data
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply}
+   */
+  get kind() {
+    throw new Error('Abstract function call');
+  }
+
+  /**
    * Test if current kind is a `NotAsked`
    * @return {boolean}
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
@@ -277,6 +285,13 @@ export class NotAskedRemoteData extends RemoteData {
   isNotAsked() {
     return true;
   }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "NotAsked";
+  }
 }
 
 /**
@@ -301,6 +316,13 @@ export class LoadingRemoteData extends RemoteData {
    */
   isLoading() {
     return true;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "Loading";
   }
 }
 
@@ -344,6 +366,13 @@ export class SuccessRemoteData extends RemoteData {
   get payload() {
     return this._payload;
   }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "Success";
+  }
 }
 
 /**
@@ -385,5 +414,12 @@ export class FailureRemoteData extends RemoteData {
    */
   get payload() {
     return this._error;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "Failure";
   }
 }
