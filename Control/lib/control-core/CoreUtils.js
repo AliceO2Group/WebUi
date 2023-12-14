@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 const KNOWN_RUN_TYPES = ['SYNTHETIC', 'PHYSICS', 'COSMICS', 'TECHNICAL', 'REPLAY'];
-const KNOWN_FLPS = ['alio2-cr1-flp145'];
+const KNOWN_FLPS = [''];
 
 /**
  * Shared methods used within Core Services/Controllers

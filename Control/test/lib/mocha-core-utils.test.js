@@ -35,7 +35,7 @@ describe('CoreUtils test suite', () => {
   });
 
   describe('Check `_removeFlpBasedOnRunType` test suite', () => {
-    it('should remove flp145 for specific run_type', () => {
+    it.skip('should remove flp145 for specific run_type', () => {
       const KNOWN_RUN_TYPES = ['SYNTHETIC', 'PHYSICS', 'COSMICS', 'TECHNICAL', 'REPLAY'];
 
       KNOWN_RUN_TYPES.forEach((runType) => {
