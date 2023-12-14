@@ -87,7 +87,7 @@ export class RemoteData {
    *     concrete data transform from the current remote data to the new one
    * @return {RemoteData<NP, NE>} the resulting remote data
    */
-  map(transformation) {
+  apply(transformation) {
     return this.match({
       NotAsked: () => RemoteData.notAsked(),
       Loading: () => RemoteData.loading(),
@@ -122,9 +122,19 @@ export class RemoteData {
   }
 
   /**
+   * Returns the remote data payload if it applies
+   *
+   * @return {P|E|undefined} the remote data payload or error
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply}
+   */
+  get payload() {
+    return undefined;
+  }
+
+  /**
    * Test if current kind is a `NotAsked`
    * @return {boolean}
-   * @deprecated use {@see RemoteData#match} or {@see RemoteData#map} instead
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
   isNotAsked() {
     return false;
@@ -134,7 +144,7 @@ export class RemoteData {
    * Test is current kind is a `Loading`
    * @return {boolean}
    * @example
-   * @deprecated use {@see RemoteData#match} or {@see RemoteData#map} instead
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
   isLoading() {
     return false;
@@ -142,7 +152,7 @@ export class RemoteData {
 
   /**
    * Test is current kind is a `Success`
-   * @deprecated use {@see RemoteData#match} or {@see RemoteData#map} instead
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    * @return {boolean}
    */
   isSuccess() {
@@ -151,7 +161,7 @@ export class RemoteData {
 
   /**
    * States if current kind is a `Failure`
-   * @deprecated use {@see RemoteData#match} or {@see RemoteData#map} instead
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    * @return {boolean}
    */
   isFailure() {
@@ -326,6 +336,14 @@ export class SuccessRemoteData extends RemoteData {
   isSuccess() {
     return true;
   }
+
+  /**
+   * @inheritDoc
+   * @return {P} the payload
+   */
+  get payload() {
+    return this._payload;
+  }
 }
 
 /**
@@ -359,5 +377,13 @@ export class FailureRemoteData extends RemoteData {
    */
   isFailure() {
     return true;
+  }
+
+  /**
+   * @inheritDoc
+   * @return {E} the error
+   */
+  get payload() {
+    return this._error;
   }
 }
