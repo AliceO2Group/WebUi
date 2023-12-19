@@ -42,11 +42,11 @@
     "ws": "^8.14.2"
   },
   "devDependencies": {
-    "eslint": "^8.55.0",
+    "eslint": "^8.56.0",
     "mocha": "^10.2.0",
     "nock": "13.4.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^21.5.0",
+    "puppeteer": "^21.6.1",
     "sinon": "17.0.0",
     "supertest": "^6.3.0"
   },
