@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
+import {h} from './renderer.js';
+
 /* eslint max-len:0, require-jsdoc:0 */
-import {h} from './index.js';
 
 // SVG icon wrapper
 export const icon = (svg, className = 'fill-primary') => h('svg.icon', {className: className, viewBox: '0 0 8 8'}, svg);
