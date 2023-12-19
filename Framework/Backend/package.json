@@ -1,0 +1,52 @@
+{
+  "name": "@aliceo2/web-ui-backend",
+  "version": "2.5.0",
+  "description": "ALICE O2 Web UX framework",
+  "author": "Adam Wegrzynek",
+  "contributors": [
+    "George Raduta",
+    "Vladimir Kosmala",
+    "Martin Boulais"
+  ],
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AliceO2Group/WebUi.git"
+  },
+  "engines": {
+    "node": ">= 20.x"
+  },
+  "homepage": "https://alice-o2-project.web.cern.ch/",
+  "scripts": {
+    "coverage": "nyc mocha ./test/** --exit",
+    "mocha": "mocha --exit ./test/*.js ./test/**/*.js  --retries 2",
+    "coverage-local": "nyc --reporter=lcov npm run mocha"
+  },
+  "nyc": {
+    "exclude": [
+      "test/**/*"
+    ]
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.0",
+    "kafkajs": "^2.2.0",
+    "mithril": "1.1.7",
+    "mysql": "^2.18.1",
+    "openid-client": "^5.6.0",
+    "winston": "3.11.0",
+    "ws": "^8.14.2",
+    "ejs": "^3.1.9"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "nock": "13.4.0",
+    "nyc": "^15.1.0",
+    "puppeteer": "^21.5.0",
+    "sinon": "17.0.0",
+    "supertest": "^6.3.0"
+  },
+  "main": "index.js"
+}

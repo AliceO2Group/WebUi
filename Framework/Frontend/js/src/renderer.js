@@ -17,13 +17,12 @@
  * @module renderer
  */
 
-// mithril function 'm' will be injected into window
-// it is used by renderer as an abstracted engine
-import '/mithril/mithril.min.js';
+/**
+ * @typedef {Children} vnode
+ */
 
-if (!window.m) {
-  throw new Error('mithril must be loaded into window');
-}
+import m from "mithril";
+
 if (!window.requestAnimationFrame) {
   throw new Error('renderer must be run inside a browser envirnnement');
 }
@@ -57,7 +56,7 @@ function frameDebouncer(fn) {
  */
 function render(element, vnode) {
   // encapsulate mithril engine so we can change if needed
-  window.m.render(element, vnode);
+  m.render(element, vnode);
 }
 
 /**
@@ -74,7 +73,7 @@ function render(element, vnode) {
  */
 
 /**
- * Hyperscript function to represente a DOM element
+ * Hyperscript function to represent a DOM element
  * it produces a vnode usable by render function.
  *
  * @param {String} selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
@@ -114,7 +113,7 @@ function render(element, vnode) {
  */
 function h(...args) {
   // encapsulate mithril engine so we can change if needed
-  return window.m(...args);
+  return m(...args);
 }
 
 /**

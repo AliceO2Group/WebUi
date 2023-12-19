@@ -11,10 +11,11 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+import {HttpServer} from "@aliceo2/web-ui-backend";
+import * as path from "path";
+import {fileURLToPath} from "url";
 
-
-const HttpServer = require('../../Backend/http/server.js');
-const path = require('path');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Reading config file
 // Start servers

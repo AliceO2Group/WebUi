@@ -14,12 +14,12 @@
 
 /* eslint-disable */
 
-const puppeteer = require('puppeteer');
-const assert = require('assert');
-const {spawn} = require('child_process');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import * as puppeteer from 'puppeteer';
+import * as assert from 'assert';
+import {spawn} from 'child_process';
+import {fileURLToPath} from 'url';
+import * as path from "path";
+
 const port = 8085;
 
 let browser;
@@ -33,6 +33,8 @@ let page;
 // Network and rendering can have delays this can leads to random failures
 // if they are tested just after their initialization.
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 describe('Framework Frontend', function() {
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
@@ -42,7 +44,7 @@ describe('Framework Frontend', function() {
   // Start browser to test UI
   before(async function() {
     // Start web-server in background
-    subprocess = spawn('node', ['Frontend/test/index-test.js'], {stdio: 'pipe'});
+    subprocess = spawn('node', [path.join(__dirname, 'index-test.js')], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => {
       subprocessOutput += chunk.toString();
     });

@@ -23,6 +23,9 @@ const O2TokenService = require('./../services/O2TokenService.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
+const cors = require('cors');
+
+const isDevelopment = process.env.NODE_ENV === 'development'
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
@@ -45,7 +48,11 @@ class HttpServer {
 
     this.app = express();
 
-    this.configureHelmet(httpConfig);
+    if(isDevelopment) {
+      this.app.use(cors({origin: '*'}));
+    } else {
+      this.configureHelmet(httpConfig);
+    }
 
     this.o2TokenService = new O2TokenService(jwtConfig);
     if (connectIdConfig) {
@@ -61,7 +68,7 @@ class HttpServer {
       assert(httpConfig.cert, 'Missing HTTP config value: cert');
       const credentials = {
         key: fs.readFileSync(httpConfig.key),
-        cert: fs.readFileSync(httpConfig.cert)
+        cert: fs.readFileSync(httpConfig.cert),
       };
       this.server = https.createServer(credentials, this.app);
       this.enableHttpRedirect();
@@ -137,7 +144,7 @@ class HttpServer {
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
     this.app.use(helmet.hsts({
-      maxAge: 5184000
+      maxAge: 5184000,
     }));
     // Sets "Referrer-Policy: same-origin"
     this.app.use(helmet.referrerPolicy({policy: 'same-origin'}));
@@ -156,9 +163,9 @@ class HttpServer {
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port],
         upgradeInsecureRequests: null,
-        frameSrc: iframeCsp
+        frameSrc: iframeCsp,
         /* eslint-enable */
-      }
+      },
     }));
   }
 
@@ -177,8 +184,6 @@ class HttpServer {
     // Router for static files (can grow with addStaticPath)
     // eslint-disable-next-line
     this.routerStatics = express.Router();
-    this.addStaticPath(path.join(__dirname, '../../Frontend'));
-    this.addStaticPath(path.join(require.resolve('mithril'), '..'), 'mithril');
     this.app.use(this.routerStatics);
 
     // Router for public API (can grow with get, post and delete)
@@ -207,7 +212,7 @@ class HttpServer {
       this.log.debug(`Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).json({
         error: '404 - Page not found',
-        message: 'The requested URL was not found on this server.'
+        message: 'The requested URL was not found on this server.',
       });
     });
 
@@ -221,14 +226,14 @@ class HttpServer {
       this.log.error(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
       this.log.trace(err);
 
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopment) {
         res.status(500).json({
           error: err,
         });
       } else {
         res.status(500).json({
           error: '500 - Server error',
-          message: 'Something went wrong, please try again or contact an administrator.'
+          message: 'Something went wrong, please try again or contact an administrator.',
         });
       }
     });
@@ -545,7 +550,7 @@ class HttpServer {
       personid: parseInt(data.id),
       username: data.username,
       name: data.name,
-      access: data.access
+      access: data.access,
     };
   }
 

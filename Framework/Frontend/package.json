@@ -1,0 +1,23 @@
+{
+  "name": "@aliceo2/web-ui-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "js/src/index.js",
+  "scripts": {
+    "mocha": "mocha --exit ./test/mocha*  --retries 2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AliceO2Group/WebUi.git"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/mithril": "^2.2.6",
+    "mocha": "^10.2.0",
+    "vite": "^5.0.10"
+  },
+  "dependencies": {
+    "mithril": "1.1.7"
+  }
+}

@@ -1,54 +1,15 @@
 {
-  "name": "@aliceo2/web-ui",
-  "version": "2.5.0",
-  "description": "ALICE O2 Web UX framework",
-  "author": "Adam Wegrzynek",
-  "contributors": [
-    "George Raduta",
-    "Vladimir Kosmala"
-  ],
-  "license": "GPL-3.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/AliceO2Group/WebUi.git"
-  },
-  "engines": {
-    "node": ">= 20.x"
-  },
-  "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
+    "mocha": "npm run -w @aliceo2/web-ui-frontend mocha && npm run -w @aliceo2/web-ui-backend mocha",
     "test": "npm run eslint && npm run mocha",
-    "coverage": "npm run eslint && nyc mocha Backend/test/** --exit",
-    "mocha": "npm run mocha-frontend && npm run mocha-backend",
-    "mocha-frontend": "mocha --exit ./Frontend/test/mocha*  --retries 2",
-    "mocha-backend": "mocha --exit ./Backend/test/*.js ./Backend/test/**/*.js  --retries 2",
     "eslint": "eslint --config ../.eslintrc.js Backend/ Frontend/ docs/tutorial/*.js",
-    "coverage-local": "nyc --reporter=lcov npm run mocha-backend"
+    "coverage": "npm run eslint && npm run -w @aliceo2/web-ui-backend coverage"
   },
-  "nyc": {
-    "exclude": [
-      "Backend/test/**/*"
-    ]
-  },
-  "dependencies": {
-    "express": "^4.18.0",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.0",
-    "kafkajs": "^2.2.0",
-    "mithril": "1.1.7",
-    "mysql": "^2.18.1",
-    "openid-client": "^5.6.0",
-    "winston": "3.11.0",
-    "ws": "^8.14.2"
-  },
+  "workspaces": [
+    "Backend",
+    "Frontend"
+  ],
   "devDependencies": {
-    "eslint": "^8.55.0",
-    "mocha": "^10.2.0",
-    "nock": "13.4.0",
-    "nyc": "^15.1.0",
-    "puppeteer": "^21.5.0",
-    "sinon": "17.0.0",
-    "supertest": "^6.3.0"
-  },
-  "main": "Backend/index.js"
+    "eslint": "^8.55.0"
+  }
 }
