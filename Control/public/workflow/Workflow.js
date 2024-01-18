@@ -282,7 +282,7 @@ export default class Workflow extends Observable {
       if (isKnownKey) {
         this.form.basicVariables[key] = value;
         this.model.notification.show(
-          'Variable has been successfully imported in the configuration panels', 'success', 3000
+          'Variable has been successfully imported in the configuration panels', 'success', 1000
         );
       } else {
         this.form.variables[key] = value;
@@ -312,7 +312,7 @@ export default class Workflow extends Observable {
     if (errors.length === 0) {
       this.kvPairsString = '';
       this.model.notification.show(
-        'Variables have been successfully imported in the configuration panels', 'success', 3000
+        'Variables have been successfully imported in the configuration panels', 'success', 1000
       );
     }
     this.advErrorPanel = errors;
