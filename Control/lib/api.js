@@ -18,6 +18,7 @@ const config = require('./config/configProvider.js');
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
+const {LockController} = require('./controllers/Lock.controller.js');
 const {RunController} = require('./controllers/Run.controller.js');
 const {StatusController} = require('./controllers/Status.controller.js');
 const {WebSocketService} = require('./services/WebSocket.service.js');
@@ -49,7 +50,7 @@ const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.prot
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
 if (!config.grpc) {
-  throw new Error('Control gRPC Configuration is missing');
+  throw new Error('Control gRPC Configuration is mistarssing');
 }
 if (!config.apricot) {
   throw new Error('Apricot gRPC Configuration is missing');
@@ -59,9 +60,7 @@ if (!config.grafana) {
 }
 
 module.exports.setup = (http, ws) => {
-  const lockService = new LockService();
-  lockService.setWs(ws);
-
+  
   let consulService;
   if (config.consul) {
     consulService = new ConsulService(config.consul);
@@ -69,6 +68,9 @@ module.exports.setup = (http, ws) => {
   const wsService = new WebSocketService(ws);
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
+
+  const lockService = new LockService(ws);
+  const lockController = new LockController(lockService);
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
@@ -147,10 +149,8 @@ module.exports.setup = (http, ws) => {
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
-  http.post('/lockState', (req, res) => res.json(lockService.state(req.body.name)));
-  http.post('/lock', (req, res) => lockService.lockDetector(req, res));
-  http.post('/unlock', (req, res) => lockService.unlockDetector(req, res));
-  http.post('/forceUnlock', (req, res) => lockService.forceUnlock(req, res));
+  http.get('/locks', lockController.getLocksState.bind(lockController));
+  http.put('/locks/:action/:detectorId/:shouldForce?', lockController.actionLock.bind(lockController));
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
