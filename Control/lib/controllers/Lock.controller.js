@@ -53,7 +53,7 @@ class LockController {
   }
 
   /**
-   * API - PUT endpoint for updating the state of a detector
+   * API - PUT endpoint for updating the state of a detector lock
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
    * @returns {void}

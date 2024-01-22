@@ -50,7 +50,7 @@ const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.prot
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
 if (!config.grpc) {
-  throw new Error('Control gRPC Configuration is mistarssing');
+  throw new Error('Control gRPC Configuration is missing');
 }
 if (!config.apricot) {
   throw new Error('Apricot gRPC Configuration is missing');
