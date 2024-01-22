@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* eslint-disable max-len */
 const assert = require('assert');
@@ -81,25 +81,23 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request and parse a list of template objects', async () => {
     const templates = await page.evaluate(() => window.model.workflow.templates);
-    const expectedTemplates = {
-      kind: 'Success', payload:
-        [{name: 'prettyreadout-1', description: 'something'}]
-    };
-    assert.deepStrictEqual(templates, expectedTemplates);
+    const expectedTemplates = [{name: 'prettyreadout-1', description: 'something'}];
+
+    assert.strictEqual(templates.kind, "Success");
+    assert.deepStrictEqual(templates.payload, expectedTemplates);
   });
 
   it('should successfully request and parse a list of repositories objects', async () => {
     const repositories = await page.evaluate(() => window.model.workflow.repoList);
     const expectedRepositories = {
-      kind: 'Success',
-      payload: {
-        repos: [
-          {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: ['master', 'dev']},
-          {name: 'git.com/alice-user/alice-repo/', revisions: []}
-        ]
-      }
+      repos: [
+        {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: ['master', 'dev']},
+        {name: 'git.com/alice-user/alice-repo/', revisions: []},
+      ],
     };
-    assert.deepStrictEqual(repositories, expectedRepositories);
+
+    assert.strictEqual(repositories.kind, 'Success');
+    assert.deepStrictEqual(repositories.payload, expectedRepositories);
   });
 
   it('should successfully fill form with default revision and repo passed from core', async () => {
@@ -361,15 +359,18 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully request a list of detectors', async () => {
     const detectors = await page.evaluate(() => window.model.workflow.flpSelection.detectors);
-    const expDetectors = {kind: 'Success', payload: ['MID', 'DCS', 'ODC']};
-    assert.deepStrictEqual(detectors, expDetectors, 'Missing detectors');
+    const expDetectors = ['MID', 'DCS', 'ODC'];
+
+    assert.strictEqual(detectors.kind, "Success");
+    assert.deepStrictEqual(detectors.payload, expDetectors, 'Missing detectors');
   });
 
   it('should successfully request a list of ACTIVE detectors', async () => {
     const activeDetectors = await page.evaluate(() => window.model.workflow.flpSelection.activeDetectors);
-    const expActiveDetectors = {kind: 'Success', payload: {detectors: ['DCS']}};
+    const expActiveDetectors = {detectors: ['DCS']};
 
-    assert.deepStrictEqual(activeDetectors, expActiveDetectors, 'Missing active detectors');
+    assert.strictEqual(activeDetectors.kind, 'Success');
+    assert.deepStrictEqual(activeDetectors.payload, expActiveDetectors, 'Missing active detectors');
   });
 
   it('should successfully disable active detectors from the list', async () => {
@@ -443,6 +444,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(detector, 'MID');
     assert.strictEqual(state, 'ONGOING');
   });
+
   /**
    * Method intercept consul request and return 200
    * @param {Request} request
@@ -452,8 +454,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
       request.respond({
         status: 200, contentType: 'application/json', body: JSON.stringify({
           flps: ['alio2-cr1-flp134', 'alio2-cr1-flp136', 'alio2-cr1-flp137'],
-          readoutPath: 'localhost:8500/some/readout/path'
-        })
+          readoutPath: 'localhost:8500/some/readout/path',
+        }),
       });
     } else {
       request.continue();

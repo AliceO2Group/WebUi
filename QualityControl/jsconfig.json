@@ -8,6 +8,6 @@
     "common/**/*.js",
     "public/**/*.js",
     "lib/**/*.js",
-    "test/**/*.js",
+    "test/**/*.js"
   ]
 }
