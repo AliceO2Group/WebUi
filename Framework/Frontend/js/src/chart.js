@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from './index.js';
+import {h} from './renderer.js';
 
 /**
  * Displays time-series based chart of recent data
