@@ -11,29 +11,29 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const {errorHandler} = require('../utils.js');
+const {UnauthorizedAccessError} = require('../errors/UnauthorizedAccessError');
 
 /**
- * Model representing the lock of the UI, one owner at a time
+ * @class
+ * LockService class to be used for retrieving and updating state of locks to control hardware components via AliECS:
+ * * take/release lock/all-locks as normal role
+ * * force take/release lock/all-locks as administrator
  */
 class LockService {
   /**
-   * Initialize lock as free / unlocked.
+   * @constructor
+   * Constructor for configuring the initial state of stored information
+   * @param {WebSocket} webSocketService - service to use to broadcast lock state changes
    */
-  constructor() {
-    this.lockedBy = {};
-    this.lockedByName = {};
+  constructor(webSocketService) {
+    this._wss = webSocketService;
 
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lockservice`);
-  }
+    this._lockedBy = {};
+    this._lockedByName = {};
 
-  /**
-   *  Sets WebSocket instance
-   *  @param {object} ws
-   */
-  setWs(ws) {
-    this.webSocket = ws;
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lock-service`);
   }
 
   /**
@@ -42,8 +42,8 @@ class LockService {
    */
   state() {
     return {
-      lockedBy: this.lockedBy,
-      lockedByName: this.lockedByName
+      lockedBy: this._lockedBy,
+      lockedByName: this._lockedByName
     }
   }
 
@@ -51,111 +51,55 @@ class LockService {
    * Send to all users state of Pad via Websocket
    */
   broadcastLockState() {
-    this.webSocket.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state()));
+    this._wss.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state()));
   }
 
   /** 
-   * Method to try to acquire lock with given name
-   * @param {Request} req - expects lock name under req.body.name
-   * @param {Response} res
+   * Method to try to acquire lock for a specified detector by a user
+   * @param {String} detector - detector as defined by AliECS
+   * @param {Number} userId - id of the user attempting to acquire lock
+   * @param {String} userName - userName of the user attempting to acquire lock
+   * @param {Boolean} shouldForce - lock should be taken even if held by another user
    */
-  lockDetector(req, res) {
-    try {
-      const entity = req.body?.name;
-      const {personid, name} = req.session;
-      if (!entity) {
-        throw new Error('Unspecified lock entity');
+  takeLock(detector, userId, userName, shouldForce = false) {
+    if (detector in this._lockedBy && detector in this._lockedByName) {
+      const userIdOwningLock = this._lockedBy[detector];
+      const userNameOwningLock = this._lockedByName[detector];
+      if (userIdOwningLock === userId && userName === userNameOwningLock) {
+        return this.state();
       }
-      if (entity in this.lockedBy) {
-        const lockUser = this.lockedBy[entity];
-        const lockUsername = this.lockedByName[entity];
-        if (lockUser === personid && name === lockUsername) {
-          res.status(200).json({
-            lockedBy: this.lockedBy,
-            lockedByName: this.lockedByName
-          });
-          return
-        }
-        throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
+      if (!shouldForce) {
+        throw new UnauthorizedAccessError(
+          `Lock ${detector} is already held by ${userNameOwningLock} (id ${userIdOwningLock})`
+        );
       }
-      this.lockedBy[entity] = req.session.personid;
-      this.lockedByName[entity] = req.session.name;
-      this._logger.info(`Lock ${entity} taken by ${req.session.name}`);
-      this.broadcastLockState();
-      res.status(201).json({
-        lockedBy: this.lockedBy,
-        lockedByName: this.lockedByName
-      });
-    } catch (error) {
-      errorHandler(`Unable to lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }
+    this._lockedBy[detector] = userId;
+    this._lockedByName[detector] = userName;
+    this.broadcastLockState();
+    return this.state();
   }
 
   /** 
-   * Method to try to release lock with given name
-   * @param {Request} req - expects lock name under req.body.name
-   * @param {Response} res
-  */
-  forceUnlock(req, res) {
-    try {
-      const entity = req.body?.name;
-      if (!entity) {
-        throw new Error('Unspecified lock entity');
-      }
-      if (!(entity in this.lockedBy)) {
-        res.status(200).json({
-          lockedBy: this.lockedBy,
-          lockedByName: this.lockedByName
-        });
-      }
-      if (!req.session.access.includes('admin')) {
-        throw new Error(`Insufficient permission`);
-      }
-      delete this.lockedBy[entity];
-      delete this.lockedByName[entity];
-      this._logger.info(`Lock ${entity} forced by ${req.session.name}`);
-      this.broadcastLockState();
-      res.status(200).json({
-        lockedBy: this.lockedBy,
-        lockedByName: this.lockedByName
-      });
-    } catch (error) {
-      errorHandler(`Unable to force lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
-    }
-  }
-
-  /** 
-   * Method to try to release lock with given name
-   * @param {Request} req - expects lock name under req.body.name
-   * @param {Response} res
+   * Method to try to release lock for a specified detector by a user
+   * @param {String} detector - detector as defined by AliECS
+   * @param {Number} userId - id of the user attempting to acquire lock
+   * @param {String} userName - userName of the user attempting to acquire lock
+   * @param {Boolean} shouldForce - lock should be taken even if held by another user
    */
-  unlockDetector(req, res) {
-    try {
-      const entity = req.body?.name;
-      if (!entity) {
-        throw new Error('Unspecified lock entity');
-      }
-      if (!(entity in this.lockedBy)) {
-        res.status(200).json({
-          lockedBy: this.lockedBy,
-          lockedByName: this.lockedByName
-        });
-        return;
-      }
-      if (this.lockedBy[entity] !== req.session.personid) {
-        throw new Error(`${entity} owner is ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
-      }
-      delete this.lockedBy[entity];
-      delete this.lockedByName[entity];
-      this._logger.info(`Lock ${entity} released by ${req.session.name}`);
-      this.broadcastLockState();
-      res.status(200).json({
-        lockedBy: this.lockedBy,
-        lockedByName: this.lockedByName
-      });
-    } catch (error) {
-      errorHandler(`Unable to give away lock to ${req.session.name}: ${error}`, res, 403, 'lockservice');
+  releaseLock(detector, userId, userName, shouldForce = false) {
+    if (!(detector in this._lockedBy) && !(detector in this._lockedByName)) {
+      return this.state();
     }
+    if (this._lockedBy[detector] !== userId && this._lockedByName[detector] !== userName && !shouldForce) {
+      throw new UnauthorizedAccessError(
+        `Owner for ${detector} lock is ${this._lockedByName[detector]} (id ${this._lockedBy[detector]})`
+      );
+    }
+    delete this._lockedBy[detector];
+    delete this._lockedByName[detector];
+    this.broadcastLockState();
+    return this.state();
   }
 
   /**
@@ -164,8 +108,8 @@ class LockService {
    * @param {Number} userId - id of the user that should be checked against
    * @param {String} userName - username of the user that should be checked against
    */
-  isLockTakenByUser(detector, userId, userName) {
-    return this.lockedBy[detector] === userId && this.lockedByName[detector] === userName;
+  isLockOwnedByUser(detector, userId, userName) {
+    return this._lockedBy[detector] === userId && this._lockedByName[detector] === userName;
   }
 }
 
