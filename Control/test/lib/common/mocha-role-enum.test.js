@@ -13,7 +13,7 @@
 */
 
 const assert = require('assert');
-const {Role, isWithinRole} = require("../../../lib/common/role.enum");
+const {Role, isRoleSufficient} = require("../../../lib/common/role.enum");
 
 describe('`Role Enum` test suite, needed to ensure no change in Roles hierarchy', () => {
   it('should successfully return the hierarchy of roles', () => {
@@ -27,12 +27,12 @@ describe('`Role Enum` test suite, needed to ensure no change in Roles hierarchy'
   });
 
   it('should successfully compare strings with Role types', () => {
-    assert.ok(isWithinRole('admin', Role.ADMIN));
-    assert.ok(isWithinRole('ADMIN', Role.GUEST));
-    assert.ok(isWithinRole('det-its', Role.GUEST));
-    assert.ok(isWithinRole('det-tpc', Role.DETECTOR));
-    assert.ok(isWithinRole('default-role', Role.DEFAULT_ROLE));
-    assert.ok(!isWithinRole('guest', Role.DETECTOR));
-    assert.ok(!isWithinRole('det-its', Role.ADMIN));
+    assert.ok(isRoleSufficient('admin', Role.ADMIN));
+    assert.ok(isRoleSufficient('ADMIN', Role.GUEST));
+    assert.ok(isRoleSufficient('det-its', Role.GUEST));
+    assert.ok(isRoleSufficient('det-tpc', Role.DETECTOR));
+    assert.ok(isRoleSufficient('default-role', Role.DEFAULT_ROLE));
+    assert.ok(!isRoleSufficient('guest', Role.DETECTOR));
+    assert.ok(!isRoleSufficient('det-its', Role.ADMIN));
   });
 });

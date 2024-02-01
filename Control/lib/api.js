@@ -49,7 +49,7 @@ const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.prot
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
 const {Role} = require('./common/role.enum.js');
-const {meetsRoleCriteria} = require('./middleware/role.middleware.js');
+const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 
 if (!config.grpc) {
   throw new Error('Control gRPC Configuration is missing');
@@ -130,7 +130,7 @@ module.exports.setup = (http, ws) => {
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
   http.get('/runs/calibration/config', [
-    meetsRoleCriteria(Role.GLOBAL)
+    minimumRoleMiddleware(Role.GLOBAL)
   ], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
   
   http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController))

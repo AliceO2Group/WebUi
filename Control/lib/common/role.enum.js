@@ -22,23 +22,25 @@ const Role = Object.freeze({
 
 /**
  * Method to check if the provided access as per WebUI server is stronger than the minimum required role
- * @param {String} role - admin, global, det-, guest
+ * @param {String} roleName - admin, global, det-, guest
  * @param {Role} minimumRole - minimum role that user should have
  * @return {Boolean}
  */
-const isWithinRole = (roleName, minimumRole) => {
-  const isDetectorRole = roleName.toLocaleUpperCase().startsWith('DET-');
-  const isDefaultRole = roleName.toLocaleUpperCase().startsWith('DEFAULT-');
+const isRoleSufficient = (roleName, minimumRole) => {
+  const roleInUpperCase = roleName.toLocaleUpperCase();
+  const isDetectorRole = roleInUpperCase.startsWith('DET-');
+  const isDefaultRole = roleInUpperCase.startsWith('DEFAULT-');
+
   let role;
   if (isDetectorRole) {
     role = Role.DETECTOR;
   } else if (isDefaultRole) {
     role = Role.DEFAULT_ROLE;
-  } else if (Role[roleName.toLocaleUpperCase()]) {
-    role = Role[roleName.toLocaleUpperCase()];
+  } else if (Role[roleInUpperCase]) {
+    role = Role[roleInUpperCase];
   }
   return role <= minimumRole;
 }
 
 exports.Role = Role;
-exports.isWithinRole = isWithinRole;
+exports.isRoleSufficient = isRoleSufficient;

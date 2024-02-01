@@ -12,16 +12,16 @@
  * or submit itself to any jurisdiction.
 */
 
-const {isWithinRole} = require('./../common/role.enum.js');
-const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+const {isRoleSufficient} = require('../common/role.enum.js');
+const {UnauthorizedAccessError} = require('../errors/UnauthorizedAccessError.js');
+const {updateExpressResponseFromNativeError} = require('../errors/updateExpressResponseFromNativeError.js');
 
 /**
  * Method to receive a minimum role that needs to be met by owner of request and to return a middleware function
  * @param {Role} minimumRole - minimum role that should be fulfilled by the requestor
  * @return {function(req, res, next): void} - middleware function
  */
-const meetsRoleCriteria = (minimumRole) => {
+const minimumRoleMiddleware = (minimumRole) => {
   /**
    * Returned middleware method
    * @param {Request} req - HTTP Request object
@@ -32,8 +32,10 @@ const meetsRoleCriteria = (minimumRole) => {
   return (req, res, next) => {
     try {
       const {access} = req.session;
-      if (!isWithinRole(access, minimumRole)) {
-        throw new UnauthorizedAccessError('Not enough permissions for this operation');
+      if (!isRoleSufficient(access, minimumRole)) {
+        updateExpressResponseFromNativeError(res,
+          new UnauthorizedAccessError('Not enough permissions for this operation')
+        );
       }
       next();
     } catch (error) {
@@ -42,4 +44,4 @@ const meetsRoleCriteria = (minimumRole) => {
   }
 };
 
-exports.meetsRoleCriteria = meetsRoleCriteria;
+exports.minimumRoleMiddleware = minimumRoleMiddleware;
