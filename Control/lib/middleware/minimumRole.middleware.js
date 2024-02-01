@@ -36,6 +36,7 @@ const minimumRoleMiddleware = (minimumRole) => {
         updateExpressResponseFromNativeError(res,
           new UnauthorizedAccessError('Not enough permissions for this operation')
         );
+        return;
       }
       next();
     } catch (error) {
