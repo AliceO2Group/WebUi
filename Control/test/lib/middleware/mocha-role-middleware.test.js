@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const {meetsRoleCriteria} = require('../../../lib/middleware/role.middleware');
+const {meetsRoleCriteria} = require('../../../lib/middleware/minimumRole.middleware');
 const {Role} = require('../../../lib/common/role.enum');
 
 describe('`Role Middleware` test suite', () => {
