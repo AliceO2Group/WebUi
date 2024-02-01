@@ -59,6 +59,26 @@ export class CalibrationRunsModel extends Observable {
     this.notify();
   }
 
+
+  /**
+   * Request a reset of the calibration page including the calibration configurations and reload
+   * the calibration runs if the reset was successful
+   * @return {void}
+   */
+  async requestReload() {
+    this._calibrationRuns = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this._model.loader.get('/api/runs/calibration/config', true);
+    if (ok) {
+      const {result, ok} = await this._model.loader.get('/api/runs/calibration', true);
+      this._calibrationRuns = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
+    } else {
+      this._calibrationRuns = RemoteData.failure(result.message);
+    }
+    this.notify();
+  }
+
   /**
    * Send an HTTP POST request to trigger a new auto transitioning environment
    * @param {String} detector - for which the environment should be created

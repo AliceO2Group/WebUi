@@ -13,6 +13,7 @@
 
 import {h} from '/js/src/index.js';
 import {calibrationRunsContent} from './components/calibrationRunsContent.js';
+import {calibrationRefreshContentButton} from './components/calibrationRefreshContentButton.js';
 
 /**
  * Header for the simplified creation environment page
@@ -29,6 +30,9 @@ export const CalibrationRunsHeader = () => h('h4.w-100 text-center', 'Calibratio
 export const CalibrationRunsContent = (model) => {
   const {calibrationRunsModel} = model;
 
-  return h('.absolute-fill.scroll-y', calibrationRunsContent(calibrationRunsModel)
+  return h('.absolute-fill.scroll-y', [
+    calibrationRefreshContentButton(calibrationRunsModel.requestReload.bind(calibrationRunsModel)),
+    calibrationRunsContent(calibrationRunsModel)
+  ]
   );
 };
