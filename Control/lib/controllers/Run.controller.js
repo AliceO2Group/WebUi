@@ -72,7 +72,7 @@ class RunController {
    */
   async refreshCalibrationRunsConfigurationHandler(_, res) {
     try {
-      await this._runService.loadStaticConfigurations();
+      await this._runService.retrieveStaticConfigurations();
       res.status(200).json({ok: true});
     } catch (error) {
       this._logger.errorMessage(error, {level: LOG_LEVEL.OPERATIONS, facility: 'cog/run-ctrl'})
