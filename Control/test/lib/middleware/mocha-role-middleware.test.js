@@ -14,14 +14,14 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const {meetsRoleCriteria} = require('../../../lib/middleware/minimumRole.middleware');
+const {minimumRoleMiddleware} = require('../../../lib/middleware/minimumRole.middleware');
 const {Role} = require('../../../lib/common/role.enum');
 
 describe('`Role Middleware` test suite', () => {
   it('should successfully call next() from Express with minimum role condition met', () => {
     const req = {session: {access: 'det-its'}};
     const next = sinon.stub().returns();
-    meetsRoleCriteria(Role.GUEST)(req, null, next);
+    minimumRoleMiddleware(Role.GUEST)(req, null, next);
     assert.ok(next.calledOnce);
   });
 
@@ -31,7 +31,7 @@ describe('`Role Middleware` test suite', () => {
       status: sinon.stub().returnsThis(),
       json: sinon.stub()
     };
-    meetsRoleCriteria(Role.ADMIN)(req, res, null);
+    minimumRoleMiddleware(Role.ADMIN)(req, res, null);
     assert.ok(res.status.calledWith(403));
     assert.ok(res.json.calledWith({message: 'Not enough permissions for this operation'}))
   });
@@ -42,7 +42,7 @@ describe('`Role Middleware` test suite', () => {
       status: sinon.stub().returnsThis(),
       json: sinon.stub()
     };
-    meetsRoleCriteria(Role.ADMIN)(req, res, null);
+    minimumRoleMiddleware(Role.ADMIN)(req, res, null);
     assert.ok(res.status.calledWith(500));
   });
 });
