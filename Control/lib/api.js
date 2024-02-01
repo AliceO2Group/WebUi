@@ -97,7 +97,7 @@ module.exports.setup = (http, ws) => {
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService, cacheService);
-  runService.load();
+  runService.loadStaticConfigurations();
   const runController = new RunController(runService, cacheService);
 
   const notificationService = new NotificationService(config.kafka);
