@@ -48,6 +48,9 @@ const path = require('path');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
+const {Role} = require('./common/role.enum.js');
+const {meetsRoleCriteria} = require('./middleware/role.middleware.js');
+
 if (!config.grpc) {
   throw new Error('Control gRPC Configuration is missing');
 }
@@ -94,7 +97,7 @@ module.exports.setup = (http, ws) => {
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService, cacheService);
-  runService.init();
+  runService.load();
   const runController = new RunController(runService, cacheService);
 
   const notificationService = new NotificationService(config.kafka);
@@ -126,6 +129,10 @@ module.exports.setup = (http, ws) => {
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController))
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
+  http.get('/runs/calibration/config', [
+    meetsRoleCriteria(Role.GLOBAL)
+  ], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
+  
   http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController))
 
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});

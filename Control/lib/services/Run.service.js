@@ -70,7 +70,7 @@ class RunService {
    * Method to initialize the service with data such as runTypes and calibration mappings
    * @return {void}
    */
-  async init() {
+  async load() {
     this._calibrationConfigurationPerDetectorMap = await this._retrieveCalibrationConfigurationsForDetectors();
     this._runTypes = await this._bkpService.getRunTypes();
     await this.retrieveCalibrationRunsGroupedByDetector();
