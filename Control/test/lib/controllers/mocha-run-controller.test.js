@@ -17,6 +17,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 
 const {RunController} = require('../../../lib/controllers/Run.controller.js');
+const {TimeoutError} = require('../../../lib/errors/TimeoutError.js');
 
 describe(`'RunController' test suite`, () => {
   const res = {
@@ -79,6 +80,29 @@ describe(`'RunController' test suite`, () => {
       await runController.getCalibrationRunsHandler({}, res);
       assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: 'Unable to retrieve such runs'}));
+    });
+  });
+
+  describe(`'refreshCalibrationRunsConfigurationHandler' test suite`, async () => {
+    it('should successfully request a re-load of the configurations for calibration page', async () => {
+      const runController = new RunController(
+        {
+          retrieveStaticConfigurations: sinon.stub().resolves()
+        }
+      );
+      await runController.refreshCalibrationRunsConfigurationHandler({}, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({ok: true}));
+    });
+    it('should respond with error if the re-load process failed', async () => {
+      const runController = new RunController(
+        {
+          retrieveStaticConfigurations: sinon.stub().throws(new TimeoutError('Request Expired'))
+        }
+      );
+      await runController.refreshCalibrationRunsConfigurationHandler({}, res);
+      assert.ok(res.status.calledWith(408));
+      assert.ok(res.json.calledWith({message: 'Request Expired'}));
     });
   });
 });
