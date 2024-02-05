@@ -87,7 +87,7 @@ describe(`'RunController' test suite`, () => {
     it('should successfully request a re-load of the configurations for calibration page', async () => {
       const runController = new RunController(
         {
-          load: sinon.stub().resolves()
+          retrieveStaticConfigurations: sinon.stub().resolves()
         }
       );
       await runController.refreshCalibrationRunsConfigurationHandler({}, res);
@@ -97,7 +97,7 @@ describe(`'RunController' test suite`, () => {
     it('should respond with error if the re-load process failed', async () => {
       const runController = new RunController(
         {
-          load: sinon.stub().throws(new TimeoutError('Request Expired'))
+          retrieveStaticConfigurations: sinon.stub().throws(new TimeoutError('Request Expired'))
         }
       );
       await runController.refreshCalibrationRunsConfigurationHandler({}, res);
