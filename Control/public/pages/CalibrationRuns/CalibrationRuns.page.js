@@ -31,7 +31,7 @@ export const CalibrationRunsContent = (model) => {
   const {calibrationRunsModel} = model;
 
   return h('.absolute-fill.scroll-y', [
-    calibrationRefreshContentButton(calibrationRunsModel.requestReload.bind(calibrationRunsModel)),
+    calibrationRefreshContentButton(calibrationRunsModel.refreshCalibrationConfigurations.bind(calibrationRunsModel)),
     calibrationRunsContent(calibrationRunsModel)
   ]
   );

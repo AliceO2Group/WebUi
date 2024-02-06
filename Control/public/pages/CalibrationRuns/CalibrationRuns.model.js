@@ -65,7 +65,7 @@ export class CalibrationRunsModel extends Observable {
    * the calibration runs if the reset was successful
    * @return {void}
    */
-  async requestReload() {
+  async refreshCalibrationConfigurations() {
     this._calibrationRuns = RemoteData.loading();
     this.notify();
 
