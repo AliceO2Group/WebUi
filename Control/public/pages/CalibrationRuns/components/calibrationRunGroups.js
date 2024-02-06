@@ -41,7 +41,7 @@ export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector, calibrat
   }
   if (detectorsGroupPanel.length === 0) {
     return h('.text-center', [
-      h('p', 'No Calibration Runs were found.'),
+      h('p', 'No Calibration Runs were found for provided configuration.'),
       h('p', 'If such information should be present, please contact an administrator.')
     ]);
   }
