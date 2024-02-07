@@ -86,7 +86,6 @@ const environmentActionPanel = (environment, model) => {
 /**
  * Builds a component which is to contain multiple cards with environment details
  * @param {EnvironmentInfo} environment - DTO representing an environment
- * @param {Model} model - root object of the application
  * @returns {vnode}
  */
 const environmentContent = (environment) => {
@@ -179,7 +178,7 @@ const environmentRunningPanels = ({currentRunNumber, userVars}) => {
  * @returns {vnode}
  */
 const environmentGeneralInfoContent = (environment) => {
-  const {currentTransition = '-', state, userVars = {}, createdWhen, rootRole } = environment;
+  const {currentTransition = '-', state, userVars = {}, createdWhen, rootRole} = environment;
   return h('.flex-column', [
     rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
     rowForCard('Transitioning:', currentTransition),
