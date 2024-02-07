@@ -13,6 +13,7 @@
 */
 
 import {h, iconCheck, iconX} from '/js/src/index.js';
+import {DetectorState} from './../enums/DetectorState.enum.js';
 
 /**
  * Construct a visual element under the form of a row that displays the state of properties of a detector as per DCS
@@ -33,6 +34,7 @@ export const dcsPropertiesRow = (detector = {}) => {
  * Construct a visual element that it will help the user in understanding the property of DCS and what actions can be taken
  * @param {DetectorState} state - state of the DCS property that we wish to display
  * @param {String['PFR', 'SOR']} name - dcs component that we display availability for
+ * @return {vnode}
  */
 const dcsProperty = (state = '', name) => {
   let stateClass = '';
@@ -45,7 +47,7 @@ const dcsProperty = (state = '', name) => {
     stateClass = 'danger';
     icon = iconX();
   }
-  if (state) {
+  if (state !== DetectorState.UNDEFINED) {
     return h('.flex-row.g1', [
       h(``, {class: stateClass}, icon),
       name
