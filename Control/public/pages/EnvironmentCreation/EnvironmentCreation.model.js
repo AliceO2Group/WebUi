@@ -13,6 +13,7 @@
 
 import {Observable, RemoteData} from '/js/src/index.js';
 import WorkflowForm from '../../workflow/WorkflowForm.js';
+import {DetectorState} from '../../common/enums/DetectorState.enum.js';
 
 /**
  * Model to store the state of the simplified environment creation page
@@ -189,7 +190,27 @@ export class EnvironmentCreationModel extends Observable {
     const isLabelSelected = Boolean(this._selectedConfigurationLabel);
     const areHostsSelected = this._model.workflow.form.hosts?.length > 0;
     const areEpnsCounted = !isNaN(this._creationModel.variables['odc_n_epns']);
-    return isWorkflowLoaded && isLabelSelected && areHostsSelected && areEpnsCounted;
+
+    return this.isPfrAvailable() && isWorkflowLoaded && isLabelSelected && areHostsSelected && areEpnsCounted;
   }
 
+  /**
+   * Check if all selected detectors are PFR ready. 
+   * @return {Boolean}
+   */
+  isPfrAvailable() {
+    let isPfrAvailable = true;
+    const detectorsAvailability = this._model.services.detectors.availability;
+    if (this._creationModel.variables?.dcs_enabled === 'true') {
+      const detectorsSelected = this._model.workflow.flpSelection.selectedDetectors;
+      console.log(detectorsSelected)
+      return detectorsSelected.every(
+        (detectorName) => (
+          detectorsAvailability[detectorName].pfrAvailability === DetectorState.PFR_AVAILABLE
+          || detectorsAvailability[detectorName].pfrAvailability === DetectorState.UNDEFINED
+        )
+      );
+    }
+    return isPfrAvailable;
+  }
 }

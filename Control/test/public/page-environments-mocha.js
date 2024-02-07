@@ -83,7 +83,7 @@ describe('`pageEnvironments` test-suite', () => {
       await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
       
       await page.waitForTimeout(200);
-      await page.evaluate(() => document.querySelector('#create-env').click());
+      await page.evaluate(() => document.querySelector('#deploy-env').click());
     });
 
     it('verify request fields', async () => {

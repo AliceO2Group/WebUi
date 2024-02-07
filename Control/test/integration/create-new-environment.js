@@ -99,7 +99,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
     await page.evaluate(() => document.querySelector(
-      '#create-env').click());
+      '#deploy-env').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const location = await page.evaluate(() => window.location);
