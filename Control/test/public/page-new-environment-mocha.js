@@ -116,12 +116,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have `Create` button disabled due to no selected workflow', async () => {
-    await page.waitForSelector('#create-env');
+    await page.waitForSelector('#deploy-env');
     const button = await page.evaluate(() => {
-      const button = document.querySelector('#create-env');
+      const button = document.querySelector('#deploy-env');
       return {title: button.title, classList: button.classList, disabled: button.disabled};
     });
-    assert.strictEqual(button.title, 'Create environment based on selected workflow');
+    assert.strictEqual(button.title, 'Deploy environment');
     assert.ok(button.disabled);
     assert.deepStrictEqual(button.classList, {0: 'btn', 1: 'btn-primary'});
   });
@@ -138,9 +138,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have `Create` button disabled due to no selected detectors', async () => {
-    await page.waitForSelector('#create-env');
+    await page.waitForSelector('#deploy-env');
     const button = await page.evaluate(() => {
-      const button = document.querySelector('#create-env');
+      const button = document.querySelector('#deploy-env');
       const selected = window.model.workflow.flpSelection.selectedDetectors.length;
       return {disabled: button.disabled, noSelected: selected};
     });
@@ -431,7 +431,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully create a new environment', async () => {
-    await page.evaluate(() => document.querySelector('#create-env').click());
+    await page.evaluate(() => document.querySelector('#deploy-env').click());
     await page.waitForTimeout(1000);
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments');

@@ -13,16 +13,21 @@
 */
 
 import {h, iconReload, info} from '/js/src/index.js';
+
 import revisionPanel from './panels/revision/revisionPanel.js';
-import {detectorHeader} from './../common/detectorHeader.js';
 import {basicPanel} from './panels/variables/basicPanel.js';
 import mainPanel from './panels/variables/mainPanel.js';
 import advancedVarsPanel from './panels/variables/advancedPanel.js';
 import flpSelectionPanel from './panels/flps/flpSelectionPanel.js';
 import detectorsPanel from './panels/flps/detectorsPanel.js';
+
+import {detectorHeader} from './../common/detectorHeader.js';
 import errorComponent from './../common/errorComponent.js';
-import pageLoading from '../common/pageLoading.js';
-import errorPage from '../common/errorPage.js';
+import pageLoading from './../common/pageLoading.js';
+import errorPage from './../common/errorPage.js';
+import {DetectorState} from './../common/enums/DetectorState.enum.js';
+import {deployEnvironmentButton} from './../common/deployEnvironmentButton.component.js';
+
 import {ROLES} from './../workflow/constants.js';
 
 /**
@@ -166,7 +171,7 @@ const templateAreaList = (workflow, repository, revision) =>
             templates.map((template) => {
               const name = template.name;
               const description = template.description;
-              const isMirror = !repository.startsWith('github'); 
+              const isMirror = !repository.startsWith('github');
               return h('.flex-row', [
                 h('a.w-90.menu-item.w-wrapped', {
                   className: workflow.form.template === name ? 'selected' : null,
@@ -193,33 +198,48 @@ const templateAreaList = (workflow, repository, revision) =>
   ]);
 
 /**
- * Create a panel with:
- * * a text area in case of failure
- * * a button which requests the creation of environment
- * @param {Object} model
+ * Create a panel at the bottom of the page that is to allow user to deploy an environment
+ * if criteria is met.
+ * To contain:
+ * * a text output in case of failure with the error message
+ * * a text output that informs the user on why create button is disabled (such as PFR not available on DCS selection)
+ * * a button which triggers the creation of environment and redirects the user to active envs page is successful
+ * @param {Object} model - global model of the application
  * @return {vnode}
  */
-const actionsPanel = (model) =>
-  h('.mv2', [
+const actionsPanel = (model) => {
+  const {workflow: workflowModel} = model;
+  const {form: formModel, flpSelection} = workflowModel;
+  const {services: {detectors}} = model;
+
+  let isPfrAvailable = true;
+
+  if (formModel.basicVariables?.dcs_enabled === 'true') {
+    const detectorsSelected = flpSelection.selectedDetectors;
+    isPfrAvailable = detectorsSelected.every(
+      (detectorName) => (
+        detectors.availability[detectorName].pfrAvailability === DetectorState.PFR_AVAILABLE
+        || detectors.availability[detectorName].pfrAvailability === DetectorState.UNDEFINED
+      )
+    );
+  }
+  const isReady = isPfrAvailable
+    && model.workflow.form.isInputSelected()
+    && (model.workflow.flpSelection.selectedDetectors.length > 0 || model.workflow.isQcWorkflow);
+
+
+  return h('.mv2', [
     model.environment.itemNew.match({
       NotAsked: () => null,
       Loading: () => null,
-      Success: (message) => h('.success', message),
+      Success: () => null, // on success user is redirected to active envs page.
       Failure: (error) => h('.text-center', errorComponent(error)),
     }),
-    btnCreateEnvironment(model),
+    !isPfrAvailable && h('.danger', 'PFR is not available for one or more of the selected detectors.'),
+    deployEnvironmentButton(
+      model.environment.itemNew.isLoading(),
+      isReady,
+      workflowModel.createNewEnvironment.bind(workflowModel)
+    ),
   ]);
-
-/**
- * Method to add a button for creation of environment
- * @param {Object} model
- * @return {vnode}
- */
-const btnCreateEnvironment = (model) => h('button.btn.btn-primary#create-env', {
-  class: model.environment.itemNew.isLoading() ? 'loading' : '',
-  disabled: model.environment.itemNew.isLoading() ||
-    !model.workflow.form.isInputSelected() ||
-    (model.workflow.flpSelection.selectedDetectors.length <= 0 && !model.workflow.isQcWorkflow),
-  onclick: () => model.workflow.createNewEnvironment(),
-  title: 'Create environment based on selected workflow'
-}, 'Create');
+};
