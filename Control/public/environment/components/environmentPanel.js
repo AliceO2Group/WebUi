@@ -16,17 +16,18 @@
 
 import {h} from '/js/src/index.js';
 
-import {parseObject, parseOdcStatusPerEnv} from './../../common/utils.js';
-import {taskCounterContent} from './../../common/tasks/taskCounterContent.js';
-import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
-import {rowForCard} from './../../common/card/rowForCard.js';
-import {miniCard, miniCardTitle} from './../../common/card/miniCard.js';
-import {iframe} from './../../common/iframe/iframe.js';
-import {copyToClipboardButton} from './../../common/buttons/copyToClipboardButton.js';
-import {isGlobalRun} from './../environmentsPage.js';
-
-import {ROLES} from './../../workflow/constants.js';
 import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
+import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
+import {copyToClipboardButton} from './../../common/buttons/copyToClipboardButton.js';
+import {dcsPropertiesRow} from './../../common/dcs/dcsPropertiesRow.js'
+import {iframe} from './../../common/iframe/iframe.js';
+import {miniCard, miniCardTitle} from './../../common/card/miniCard.js';
+import {parseObject, parseOdcStatusPerEnv} from './../../common/utils.js';
+import {rowForCard} from './../../common/card/rowForCard.js';
+import {taskCounterContent} from './../../common/tasks/taskCounterContent.js';
+
+import {isGlobalRun} from './../environmentsPage.js';
+import {ROLES} from './../../workflow/constants.js';
 
 /**
  * Builds a panel with environment information
@@ -40,7 +41,7 @@ export const environmentPanel = (model, environment, isMinified = false) => {
     environmentHeader(environment),
     !isMinified && [
       environmentActionPanel(environment, model),
-      environmentContent(environment),
+      environmentContent(environment, model),
     ]
   ]);
 };
@@ -86,10 +87,12 @@ const environmentActionPanel = (environment, model) => {
 /**
  * Builds a component which is to contain multiple cards with environment details
  * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param {Model} model - global model of the application
  * @returns {vnode}
  */
-const environmentContent = (environment) => {
+const environmentContent = (environment, model) => {
   const {state, currentRunNumber, currentTransition = undefined} = environment;
+  const isDcsEnabled = environment.userVars?.['dcs_enabled'] === 'true';
   const isRunning = state === 'RUNNING';
   const {flp, qc, trg, epn} = environment.hardware;
   return h('.cardGroupColumn', {
@@ -108,8 +111,8 @@ const environmentContent = (environment) => {
           'General Information',
           environmentGeneralInfoContent(environment),
           isGlobalRun(environment.userVars)
-            ? ['bg-global-run']
-            : []
+            ? ['bg-global-run', 'p2', 'g2']
+            : ['p2', 'g2']
         ),
         miniCard(
           'Components',
@@ -119,10 +122,6 @@ const environmentContent = (environment) => {
       h('.cardGroupColumn', [
         h('h4', `Tasks Summary`),
         h('.cardGroupRow', [
-          // miniCard(
-          //   miniCardTitle('ALL', `# hosts: ${allTasks.total}`),
-          //   taskCounterContent(environment.tasks.concat(epn.tasks))
-          // ),
           miniCard(
             miniCardTitle('FLP', `# hosts: ${flp.hosts}`),
             taskCounterContent(flp.tasks)),
@@ -138,7 +137,10 @@ const environmentContent = (environment) => {
         ])
       ]),
     ]),
-    envTasksPerDetector(flp.detectorCounters),
+    detectorCard(
+      flp.detectorCounters,
+      isDcsEnabled ? model.services.detectors.availability : {}
+    ),
   ]);
 };
 
@@ -219,20 +221,21 @@ const environmentComponentsContent = (environment) => {
 /**
  * Build a series of cards containing information about the tasks and hosts of each detector
  * @param {Map<String, Object>} detectorCounters - DTO representing an environment
- * @param {Map<string, Array<string>>} allDetectors - map of all known detectors with their associated hosts
+ * @param {Object<String, DetectorState>} detectorsAvailability - object with all detectors state
  * @returns {vnode}
  */
-const envTasksPerDetector = (detectorCounters) => {
-
-  return h('.flex-column.flex-wrap.g2', [
+const detectorCard = (detectorCounters, detectorsAvailability) =>
+  h('.flex-column.flex-wrap.g2', [
     h('h4', `FLP Tasks by Detector(s) Summary`),
     h('.flex-row.flex-wrap.g2', [
       Object.keys(detectorCounters).map((detector) => {
         return miniCard(
-          miniCardTitle(detector, `# hosts: ${detectorCounters[detector].total}`),
-          taskCounterContent(detectorCounters[detector])
+          miniCardTitle(detector, `# tasks: ${detectorCounters[detector].total}`),
+          [
+            dcsPropertiesRow(detectorsAvailability[detector]),
+            taskCounterContent(detectorCounters[detector])
+          ]
         )
       })
     ])
   ]);
-};
