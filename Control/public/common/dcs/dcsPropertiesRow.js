@@ -25,8 +25,8 @@ import {DetectorState} from './../enums/DetectorState.enum.js';
 export const dcsPropertiesRow = (detector = {}) => {
   const {pfrAvailability, sorAvailability} = detector;
   return h('.flex-row.g2', [
-    dcsProperty(pfrAvailability, 'PFR'),
-    dcsProperty(sorAvailability, 'SOR'),
+    pfrAvailability && dcsProperty(pfrAvailability, 'PFR'),
+    sorAvailability && dcsProperty(sorAvailability, 'SOR'),
   ]);
 };
 

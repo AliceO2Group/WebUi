@@ -58,7 +58,7 @@ export default class DetectorService extends Observable {
         this.hostsByDetectorRemote, this._listRemote.payload, this
       );
       for (const detector of this._listRemote.payload) {
-        this._availability[detector] =  {
+        this._availability[detector] = {
           pfrAvailability: DetectorState.UNDEFINED,
           sorAvailability: DetectorState.UNDEFINED,
         }
@@ -278,10 +278,22 @@ export default class DetectorService extends Observable {
       }
     }
   }
+
   /**
    * Return an instance of the current detectors availability
    */
   get availability() {
     return this._availability;
+  }
+
+  /**
+   * Given a list of detectors, return if all are available for specified property (PFR/SOR)
+   * @param {Array<String>} detectors - list of detectors to check
+   * @param {String['pfrAvailability', 'sorAvailability']} property - which property to be checked
+   * @return {Boolean}
+   */
+  areDetectorsAvailable(detectors, property) {
+    const state = property === 'pfrAvailability' ? DetectorState.PFR_AVAILABLE : DetectorState.SOR_AVAILABLE;
+    return detectors.every((detector) => this._availability[detector][property] === state);
   }
 }

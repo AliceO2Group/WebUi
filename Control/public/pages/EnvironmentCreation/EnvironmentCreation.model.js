@@ -203,7 +203,6 @@ export class EnvironmentCreationModel extends Observable {
     const detectorsAvailability = this._model.services.detectors.availability;
     if (this._creationModel.variables?.dcs_enabled === 'true') {
       const detectorsSelected = this._model.workflow.flpSelection.selectedDetectors;
-      console.log(detectorsSelected)
       return detectorsSelected.every(
         (detectorName) => (
           detectorsAvailability[detectorName].pfrAvailability === DetectorState.PFR_AVAILABLE
