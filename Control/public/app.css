@@ -95,6 +95,6 @@
 .tab-content > .tab-pane { display: none; }
 .tab-content > .active { display: block; }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr)); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr)); }
 .grid-hosts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); }
 .flex-end { justify-content: flex-end; }

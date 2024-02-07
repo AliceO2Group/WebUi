@@ -12,9 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
+import {h, iconPulse} from '/js/src/index.js';
 import pageLoading from './../../../common/pageLoading.js';
 import {detectorLockButton} from './../../../lock/lockButton.js';
+import {dcsPropertiesRow} from '../../../common/dcs/dcsPropertiesRow.js';
 
 /**
  * Create a selection area for all detectors retrieved from AliECS
@@ -43,25 +44,29 @@ export default (model, onlyGlobal = false) => {
  * @return {vnode}
  */
 const detectorsSelectionArea = (model, list, onlyGlobal) => {
-  return h('.w-100.m1.text-left.shadow-level1.grid', {
+  return h('.w-100.m1.text-left.shadow-level1.grid.g2', {
     style: 'max-height: 40em;'
   }, [
     list
       .filter((name) => (name === model.detectors.selected || !model.detectors.isSingleView()))
       .filter((name) => !onlyGlobal || (onlyGlobal && name !== 'TST'))
-      .map((name) => detectorItem(model, name))
+      .map((name) => detectorSelectionPanel(model, name))
   ]);
 };
 
 /**
- * Display an item per detector and build its properties
+ * Display a panel with information and current state of a detector
+ * @param {Model} model - root model of the application
+ * @param {String} name - name of the detector to display
+ * @return {vnode}
  */
-const detectorItem = (model, name) => {
+const detectorSelectionPanel = (model, name) => {
   let className = '';
   let title = '';
-  let style = 'font-weight: 150;';
-
-  if (model.workflow.flpSelection.isDetectorActive(name)
+  let style = 'font-weight: 150;flex-grow:2';
+  const {services: {detectors: {availability = {}} = {}}} = model;
+  const isDetectorActive = model.workflow.flpSelection.isDetectorActive(name);
+  if (isDetectorActive
     || (model.lock.isLocked(name) && !model.lock.isLockedByMe(name))) {
     className = 'disabled-item warning';
     title = 'Detector is running and/or locked';
@@ -75,13 +80,21 @@ const detectorItem = (model, name) => {
     title = 'Detector is not locked';
   }
 
-  return h('.flex-row', [
-    detectorLockButton(model, name, 'small'),
-    h('a.w-90.menu-item.w-wrapped', {
-      className,
-      title,
-      style,
-      onclick: () => model.lock.isLockedByMe(name) && model.workflow.flpSelection.toggleDetectorSelection(name),
-    }, model.workflow.flpSelection.getDetectorWithIndexes(name)),
+  return h('.flex-column.justify-center.items-center.shadow-level2', {
+  }, [
+    h('.flex-row', [
+      detectorLockButton(model, name, 'small'),
+      h('a.menu-item.w-wrapped', {
+        className,
+        title,
+        style,
+        onclick: () => model.lock.isLockedByMe(name) && model.workflow.flpSelection.toggleDetectorSelection(name),
+      }, model.workflow.flpSelection.getDetectorWithIndexes(name)
+      )
+    ]),
+    h('.f6.flex-row.g2', [
+      isDetectorActive && h('.flex-row.g1', [h('.primary', iconPulse()), 'Active']),
+      dcsPropertiesRow(availability[name]),
+    ])
   ]);
 };

@@ -44,7 +44,7 @@ export const EnvironmentCreationPage = (model) => {
     detectorHeader(model),
     h('.g2.flex-column.p2', [
       h('.w-100.flex-row.g3', [
-        h('.w-40.flex-column', [
+        h('.w-50.flex-column', [
           panel(
             'Choose configuration',
             h('.flex-column', [
@@ -60,7 +60,7 @@ export const EnvironmentCreationPage = (model) => {
             workflowTemplateComponent(defaultWorkflow),
           ),
         ]),
-        h('.flex-row.text-center.w-100', [
+        h('.flex-row.text-center.w-50', [
           flpSelectionPanel(model.workflow, 43.3)
         ]),
       ]),
