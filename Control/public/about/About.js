@@ -81,6 +81,9 @@ export default class About extends Observable {
       });
     } else {
       this._addServicesToMap(key, result);
+      if (key === INTEGRATED_SERVICE_LABEL) {
+        this.model.services.detectors.availability = result?.dcs?.extras?.detectors ?? {};
+      }
     }
     this.notify();
   }
