@@ -223,8 +223,7 @@ const actionsPanel = (model) => {
       )
     );
   }
-  const isReady = isPfrAvailable
-    && model.workflow.form.isInputSelected()
+  const isReady = model.workflow.form.isInputSelected()
     && (model.workflow.flpSelection.selectedDetectors.length > 0 || model.workflow.isQcWorkflow);
 
 
