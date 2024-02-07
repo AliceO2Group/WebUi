@@ -191,7 +191,7 @@ export class EnvironmentCreationModel extends Observable {
     const areHostsSelected = this._model.workflow.form.hosts?.length > 0;
     const areEpnsCounted = !isNaN(this._creationModel.variables['odc_n_epns']);
 
-    return this.isPfrAvailable() && isWorkflowLoaded && isLabelSelected && areHostsSelected && areEpnsCounted;
+    return isWorkflowLoaded && isLabelSelected && areHostsSelected && areEpnsCounted;
   }
 
   /**
