@@ -374,7 +374,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully disable active detectors from the list', async () => {
-    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > a:nth-child(2)').classList);
+    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > div > a:nth-child(2)').classList);
     assert.ok(Object.values(detectorClass).includes('menu-item'));
     assert.ok(Object.values(detectorClass).includes('disabled-item'));
   });
@@ -385,7 +385,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should not select a detector that is not locked', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click()); // second element is for detector, first for lock
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click()); // second element is for detector, first for lock
     await page.waitForTimeout(200);
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
@@ -393,12 +393,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
-    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(1)');
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    await page.waitForSelector('.m1 > div:nth-child(1) > div > a:nth-child(1)');
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(1)').click());
     await page.waitForTimeout(200);
 
-    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(2)');
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.waitForSelector('.m1 > div:nth-child(1) > div > a:nth-child(2)');
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
     await page.waitForTimeout(200);
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
@@ -437,7 +437,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(location.search, '?page=environments');
   });
 
-  it('should display successfull environment request', async () => {
+  it('should display successful environment request', async () => {
     await page.waitForSelector('tr.primary > th:nth-child(1)');
     const detector = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)').innerText);
     const state = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(6)').innerText);
