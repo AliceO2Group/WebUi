@@ -46,6 +46,15 @@ class User {
   }
 
   /**
+   * Check if provided details of a user are the same as the current instance one;
+   * @param {User} user - to compare to
+   * @return {Boolean}
+   */
+  isSameUser(user) {
+    return this._username === user.username && this._personid === this.personid;
+  }
+
+  /**
    * Returns the username
    * @returns {string}
    */

@@ -13,11 +13,9 @@
 */
 
 /**
- * Available lock actions for users
+ * Available lock states
  */
-const LockActions = Object.freeze({
-  TAKE: 'TAKE',
-  RELEASE: 'RELEASE',
+export const LockState = Object.freeze({
+  TAKEN: 'TAKEN',
+  FREE: 'FREE',
 });
-
-exports.LockActions = LockActions;
