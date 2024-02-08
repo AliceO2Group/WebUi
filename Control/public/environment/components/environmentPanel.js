@@ -93,11 +93,14 @@ const environmentActionPanel = (environment, model) => {
 const environmentContent = (environment, model) => {
   const {state, currentRunNumber, currentTransition = undefined} = environment;
   const isDcsEnabled = environment.userVars?.['dcs_enabled'] === 'true';
+  const isStable = !currentTransition;
+
+  const isConfigured = state === 'CONFIGURED';
   const isRunning = state === 'RUNNING';
   const {flp, qc, trg, epn} = environment.hardware;
   return h('.cardGroupColumn', {
   }, [
-    isRunning && !currentTransition && environmentRunningPanels(environment),
+    isRunning && isStable && environmentRunningPanels(environment),
     h('.cardGroupColumn', [
       h('.cardGroupRow', [
         isRunning && miniCard(
@@ -139,7 +142,7 @@ const environmentContent = (environment, model) => {
     ]),
     detectorCard(
       flp.detectorCounters,
-      isDcsEnabled ? model.services.detectors.availability : {}
+      isDcsEnabled && isStable && isConfigured ? model.services.detectors.availability : {}
     ),
   ]);
 };
