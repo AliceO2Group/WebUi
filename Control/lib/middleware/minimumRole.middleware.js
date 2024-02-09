@@ -31,8 +31,9 @@ const minimumRoleMiddleware = (minimumRole) => {
    */
   return (req, res, next) => {
     try {
-      const {access} = req.session;
-      if (!isRoleSufficient(access, minimumRole)) {
+      const {access} = req.session ?? [];
+      const isAllowed = access.some((role) => isRoleSufficient(role, minimumRole));
+      if (!isAllowed) {
         updateExpressResponseFromNativeError(res,
           new UnauthorizedAccessError('Not enough permissions for this operation')
         );
