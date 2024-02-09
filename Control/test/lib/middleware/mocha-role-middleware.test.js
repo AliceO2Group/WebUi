@@ -19,14 +19,14 @@ const {Role} = require('../../../lib/common/role.enum');
 
 describe('`Role Middleware` test suite', () => {
   it('should successfully call next() from Express with minimum role condition met', () => {
-    const req = {session: {access: 'det-its'}};
+    const req = {session: {access: ['det-its']}};
     const next = sinon.stub().returns();
     minimumRoleMiddleware(Role.GUEST)(req, null, next);
     assert.ok(next.calledOnce);
   });
 
   it('should update HTTP response object with error of not authorized', () => {
-    const req = {session: {access: 'det-its'}};
+    const req = {session: {access: ['det-its']}};
     const res = {
       status: sinon.stub().returnsThis(),
       json: sinon.stub()
