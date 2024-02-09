@@ -11,14 +11,13 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-'use strict';
 
-import {LockState} from "../common/lock/lockState.enum.js";
+const {LockState} = require('./../common/lock/lockState.enum.js');
 
 /**
  * Lock representation as used for ECS GUI purposes
  */
-export class Lock {
+class Lock {
   /**
    * Initializing a lock with a free state
    * @param {String} name - name of the detector
@@ -85,3 +84,5 @@ export class Lock {
     return this._state;
   }
 }
+
+exports.Lock = Lock;

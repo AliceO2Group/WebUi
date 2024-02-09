@@ -15,7 +15,9 @@
 /**
  * Available lock actions for users
  */
-export const LockAction = Object.freeze({
+const LockAction = Object.freeze({
   TAKE: 'TAKE',
   RELEASE: 'RELEASE',
 });
+
+exports.LockAction = LockAction;

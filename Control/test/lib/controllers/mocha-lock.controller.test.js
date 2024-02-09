@@ -18,7 +18,7 @@ const sinon = require('sinon');
 
 const {LockController} = require('../../../lib/controllers/Lock.controller.js');
 const {LockService} = require('../../../lib/services/Lock.service.js');
-const {LockActions} = require('../../../lib/common/lockActions.enum.js');
+const {LockAction} = require('./../../../lib/common/lock/lockAction.enum.js');
 
 describe(`'LockController' test suite`, async () => {
   const res = {
@@ -46,7 +46,7 @@ describe(`'LockController' test suite`, async () => {
   describe(`'actionLock' test suite`, async () => {
     it('should successfully reply to a request to take lock for a specified detector', async () => {
       await lockController.actionLock({params: {
-        action: LockActions.TAKE,
+        action: LockAction.TAKE,
         detectorId: 'ABC',
       }, session: {
         personid: 0,
@@ -58,7 +58,7 @@ describe(`'LockController' test suite`, async () => {
     
     it('should reply with error when an already held lock is requested to be taken by another user', async () => {
       await lockController.actionLock({params: {
-        action: LockActions.TAKE,
+        action: LockAction.TAKE,
         detectorId: 'ABC',
       }, session: {
         personid: 1,
@@ -70,7 +70,7 @@ describe(`'LockController' test suite`, async () => {
 
     it('should reply with error when an already held lock is requested to be released by another user', async () => {
       await lockController.actionLock({params: {
-        action: LockActions.RELEASE,
+        action: LockAction.RELEASE,
         detectorId: 'ABC',
       }, session: {
         personid: 1,
@@ -82,7 +82,7 @@ describe(`'LockController' test suite`, async () => {
 
     it('should successfully reply to a request to release lock held by correct owner', async () => {
       await lockController.actionLock({params: {
-        action: LockActions.RELEASE,
+        action: LockAction.RELEASE,
         detectorId: 'ABC',
       }, session: {
         personid: 0,
@@ -94,7 +94,7 @@ describe(`'LockController' test suite`, async () => {
 
     it('should return InvalidInput error code for invalid request', async () => {
       await lockController.actionLock({params: {
-        action: LockActions.RELEASE,
+        action: LockAction.RELEASE,
       }, session: {
         personid: 0,
         name: 'Anonymous'

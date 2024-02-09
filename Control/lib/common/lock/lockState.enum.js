@@ -15,7 +15,9 @@
 /**
  * Available lock states
  */
-export const LockState = Object.freeze({
+const LockState = Object.freeze({
   TAKEN: 'TAKEN',
   FREE: 'FREE',
 });
+
+exports.LockState = LockState;
