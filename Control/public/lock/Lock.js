@@ -13,6 +13,7 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {jsonPut} from './../utilities/jsonPut.js';
 
 /**
  * Shadow model of Padlock, synchronize with the web server which contains the real one
@@ -80,7 +81,7 @@ export default class Lock extends Observable {
     this.padlockState = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/lockState`);
+    const {result, ok} = await this.model.loader.get(`/api/locks`);
     if (!ok) {
       this.padlockState = RemoteData.failure(result.message);
       this.notify();
@@ -96,27 +97,26 @@ export default class Lock extends Observable {
    * Result of this action will be an update by WS
    */
   async lock(entity) {
-    const {result, ok} = await this.model.loader.post(`/api/lock`, {name: entity});
-    if (!ok) {
-      this.model.notification.show(result.message, 'danger');
-      return;
+    try {
+      const result = await jsonPut(`/api/locks/take/${entity}`);
+      this.padlockState = RemoteData.success(result);
+      this.model.notification.show(`Lock ${entity} taken`, 'success', 1500);
+    } catch (error) {
+      this.model.notification.show(error, 'danger');
     }
-    this.padlockState = RemoteData.success(result);
-    this.model.notification.show(`Lock ${entity} taken`, 'success', 1500);
   }
 
   /**
-   * Force Control lock (eg. if someone left the lock in locked state)
-   * Other peers will be notified by WS
+   * Force Control lock (eg. if someone left the lock in locked state), an administrator can release the lock
    */
-  async forceUnlock(entity) {
-    const {result, ok} = await this.model.loader.post(`/api/forceUnlock`, {name: entity});
-    if (!ok) {
-      this.model.notification.show(result.message, 'danger');
-      return;
+  async forceRelease(entity) {
+    try {
+      const result = await jsonPut(`/api/locks/release/${entity}/true`);
+      this.padlockState = RemoteData.success(result);
+      this.model.notification.show(`Lock ${entity} forcefully released`, 'success', 1500);
+    } catch (error) {
+      this.model.notification.show(error, 'danger');
     }
-    this.padlockState = RemoteData.success(result);
-    this.model.notification.show(`Lock ${entity} forced`, 'success', 1500);
   }
 
   /**
@@ -124,13 +124,12 @@ export default class Lock extends Observable {
    * Result of this action will be an update by WS
    */
   async unlock(entity) {
-    const {result, ok} = await this.model.loader.post(`/api/unlock`, {name: entity});
-    if (!ok) {
-      this.model.notification.show(result.message, 'danger');
-      return;
+    try {
+      const result = await jsonPut(`/api/locks/release/${entity}`);
+      this.padlockState = RemoteData.success(result);
+      this.model.notification.show(`Lock ${entity} released`, 'success', 1500);
+    } catch (error) {
+      this.model.notification.show(error, 'danger');
     }
-
-    this.padlockState = RemoteData.success(result);
-    this.model.notification.show(`Lock ${entity} released`, 'success', 1500);
   }
 }

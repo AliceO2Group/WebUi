@@ -48,7 +48,7 @@ export const content = (model) => [
 ];
 
 /**
- * Table with lock status detetails, buttons to lock them, and admin actions such us "Force lock"
+ * Table with lock status details, buttons to lock them, and admin actions such us "Force release"
  * @param {Object} model
  * @param {Array} detectors List of detectors
  */
@@ -73,7 +73,7 @@ const detectorLocks = (model, detectors) =>
         h('td', model.lock.getOwner(detector) || '-'),
         model.isAllowed(ROLES.Admin)
         && h('td', model.lock.isLocked(detector)
-        && h('button.danger', {onclick: () => model.lock.forceUnlock(detector)}, 'Force lock'))
+        && h('button.danger', {onclick: () => model.lock.forceRelease(detector)}, 'Force release'))
       ])
     )])
   );

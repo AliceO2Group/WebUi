@@ -130,7 +130,7 @@ class EnvironmentController {
     let variables;
     const {detector, runType, configurationName} = req.body;
 
-    if (!this._lockService.isLockTakenByUser(detector, personid, name)) {
+    if (!this._lockService.isLockOwnedByUser(detector, personid, name)) {
       updateExpressResponseFromNativeError(res, new UnauthorizedAccessError('Lock not taken'));
       return;
     }

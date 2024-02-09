@@ -35,7 +35,6 @@ class ApricotService {
 
     this.detectors = [];
     this.hostsByDetector = new Map();
-    this.init();
   }
 
   /**
@@ -186,7 +185,8 @@ class ApricotService {
   async saveCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      data.user = new User(req.session);
+      const {username, personid, access} = req.session;
+      data.user = new User(username, personid, access);
       const envConf = CoreEnvConfig.fromJSON(data);
 
       const {payload: configurations} = await this.apricotProxy[ListRuntimeEntries]({component: COMPONENT});
@@ -215,7 +215,8 @@ class ApricotService {
   async updateCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      const user = new User(req.session);
+      const {username, personid, access} = req.session;
+      const user = new User(username, personid, access);
       data.user = user;
       const envConf = CoreEnvConfig.fromJSON(data);
 

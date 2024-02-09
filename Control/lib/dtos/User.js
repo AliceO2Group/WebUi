@@ -19,21 +19,23 @@
 class User {
   /**
    * Initializing an environment configuration
-   * @param {session} - request session as set by webui/framework server
+   * @param {String} username - username of the user
+   * @param {Number} personid - id of the user
+   * @param {Array<String>|String} access - list of access roles of the user
    */
-  constructor(session) {
+  constructor(username, personid, access) {
     /**
      * @type {String}
      */
-    this._username = session.username;
+    this._username = username;
     /**
      * @type {number}
      */
-    this._personid = session.personid;
+    this._personid = personid;
     /**
      * @type {string}
      */
-    this._access = session.access;
+    this._access = access;
   }
 
   /**
@@ -43,6 +45,15 @@ class User {
    */
   static isAdmin(user) {
     return Boolean(user?.access.includes('admin'));
+  }
+
+  /**
+   * Check if provided details of a user are the same as the current instance one;
+   * @param {User} user - to compare to
+   * @return {Boolean}
+   */
+  isSameUser(user) {
+    return this._username === user.username && this._personid === this.personid;
   }
 
   /**
@@ -70,4 +81,4 @@ class User {
   }
 }
 
-module.exports = User;
+exports.User = User;
