@@ -19,16 +19,16 @@ import { h } from '/js/src/index.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const layoutFiltersPanel = (model) => h('.p2.flex-row', {
+const layoutFiltersPanel = (model) => h('.p2.flex-row.g2', {
   onremove: () => {
     model.layout.filter = {};
   },
 }, [ // PeriodName, PassName, RunNumber, RunType
-  filter(model, 'RunNumber', 'runNumberLayoutFilter', 'number', '.w-20'),
-  filter(model, 'RunType', 'runTypeLayoutFilter', 'text', '.w-20'),
-  filter(model, 'PeriodName', 'periodNameLayoutFilter', 'text', '.w-20'),
-  filter(model, 'PassName', 'passNameLayoutFilter', 'text', '.w-20'),
   updateFiltersButton(model),
+  filter(model, 'RunNumber (e.g. 546783)', 'runNumberLayoutFilter', 'number', '.w-20'),
+  filter(model, 'RunType (e.g. 2)', 'runTypeLayoutFilter', 'text', '.w-20'),
+  filter(model, 'PeriodName (e.g. LHC23c)', 'periodNameLayoutFilter', 'text', '.w-20'),
+  filter(model, 'PassName (e.g. apass2)', 'passNameLayoutFilter', 'text', '.w-20'),
 ]);
 
 /**
@@ -65,7 +65,7 @@ const filter = (model, placeholder, key, type = 'text', width = '.w-10') =>
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const updateFiltersButton = (model) => h('.w-20.text-right', h('button.btn.btn-primary', {
+const updateFiltersButton = (model) => h('', h('button.btn.btn-primary', {
   onclick: () => {
     model.layout.selectTab(model.layout.tabIndex);
     model.layout.setFilterToURL();

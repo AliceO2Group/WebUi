@@ -55,10 +55,10 @@ export default (model) => {
 const filtersPanel = (objectViewModel) => {
   const { filter, updateFilterKeyValue } = objectViewModel;
   return h('.w-100.flex-row.p2.g2', [
-    filterInput('RunNumber', 'runNumberFilter', 'number', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
-    filterInput('RunType', 'runTypeFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
-    filterInput('PeriodName', 'periodNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
-    filterInput('PassName', 'passNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    filterInput('RunNumber (e.g. 546783)', 'runNumberFilter', 'number', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    filterInput('RunType (e.g. 2)', 'runTypeFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    filterInput('PeriodName (e.g. LHC23c)', 'periodNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
+    filterInput('PassName (e.g. apass2)', 'passNameFilter', 'text', '.w-20', filter, updateFilterKeyValue.bind(objectViewModel)),
     h('button.btn.btn-primary.w-20', {
       onclick: () => objectViewModel.updateObjectSelection({}, undefined, undefined, objectViewModel.filter),
     }, ['Search ', iconMagnifyingGlass()]),
