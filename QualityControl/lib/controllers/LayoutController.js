@@ -16,7 +16,6 @@
 
 import assert from 'assert';
 import { LayoutDto } from './../dtos/LayoutDto.js';
-import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 import {
   updateExpressResponseFromNativeError,
 } from '../errors/updateExpressResponseFromNativeError.js';
