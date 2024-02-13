@@ -98,9 +98,8 @@ export default class LayoutService {
    * @returns {RemoteData} - result within a RemoteData object
    */
   async removeLayoutById(layoutId) {
-    const request = fetchClient(`/api/layout/${layoutId}`, { method: 'DELETE' });
-    this.loader.watchPromise(request);
-    await request;
+    const result = await fetchClient(`/api/layout/${layoutId}`, { method: 'DELETE' });
+    return result;
   }
 
   /**
