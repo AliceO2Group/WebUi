@@ -365,4 +365,67 @@ export const layoutControllerTestSuite = async () => {
       assert.ok(jsonStub.createLayout.calledWith(expected), 'New layout body was not used in data connector call');
     });
   });
+
+  describe('`patchLayoutHandler()` test suite', () => {
+    let res;
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+    });
+
+    it('should successfully update the official field of a layout', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+        updateLayout: sinon.stub().resolves({ isOfficial: true, ...LAYOUT_MOCK_1 }),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+
+      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: { isOfficial: true } };
+      await layoutConnector.patchLayoutHandler(req, res);
+
+      assert.ok(res.status.calledWith(201), 'Response status was not 201');
+      assert.ok(res.json.calledWith({ isOfficial: true, ...LAYOUT_MOCK_1 }));
+      assert.ok(jsonStub.updateLayout.calledWith('mylayout', { isOfficial: true }));
+    });
+
+    it('should return error due to invalid request body containing more than expected fields', async () => {
+      const layoutConnector = new LayoutController({});
+
+      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: { isOfficial: true, missing: true } };
+      await layoutConnector.patchLayoutHandler(req, res);
+
+      assert.ok(res.status.calledWith(400), 'Response status was not 400');
+      assert.ok(res.json.calledWith({ message: 'Invalid request body to update layout' }));
+    });
+
+    it('should return error due to user not being owner of the layout to patch', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+
+      const req = { params: { id: 'mylayout' }, session: { personid: 2, name: 'two' }, body: { isOfficial: true } };
+      await layoutConnector.patchLayoutHandler(req, res);
+
+      assert.ok(res.status.calledWith(403), 'Response status was not 403');
+      assert.ok(res.json.calledWith({ message: 'Only the owner of the layout can update it' }));
+    });
+
+    it('should return error due to layout update operation failing', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+        updateLayout: sinon.stub().rejects(new Error('Does not work')),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+
+      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: { isOfficial: true } };
+      await layoutConnector.patchLayoutHandler(req, res);
+
+      assert.ok(res.status.calledWith(500), 'Response status was not 500');
+      assert.ok(res.json.calledWith({ message: 'Unable to update layout with id: mylayout' }));
+      assert.ok(jsonStub.updateLayout.calledWith('mylayout', { isOfficial: true }), 'Layout id was not used in data connector call');
+    });
+  });
 };
