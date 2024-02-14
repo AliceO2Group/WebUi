@@ -15,6 +15,8 @@
 import {
   consulService, objectController, layoutService, statusController, userService, statusService,
 } from './QCModel.js';
+import { minimumRoleMiddleware } from './middleware/minimumRole.middleware.js';
+import { UserRole } from './../common/library/userRole.enum.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -39,6 +41,11 @@ export const setup = (http, ws) => {
   http.post('/layout', layoutService.postLayoutHandler.bind(layoutService));
   http.put('/layout/:id', layoutService.putLayoutHandler.bind(layoutService));
   http.delete('/layout/:id', layoutService.deleteLayoutHandler.bind(layoutService));
+  http.patch(
+    '/layout/:id',
+    minimumRoleMiddleware(UserRole.GLOBAL),
+    layoutService.patchLayoutHandler.bind(layoutService),
+  );
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
   http.get('/status/framework', statusController.getFrameworkInfo.bind(statusController), { public: true });
