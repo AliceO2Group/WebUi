@@ -18,8 +18,9 @@ import assert from 'assert';
 import { LayoutDto } from './../dtos/LayoutDto.js';
 import {
   updateExpressResponseFromNativeError,
-} from '../errors/updateExpressResponseFromNativeError.js';
-import { InvalidInputError } from '../errors/InvalidInputError.js';
+} from './../errors/updateExpressResponseFromNativeError.js';
+import { InvalidInputError } from './../errors/InvalidInputError.js';
+import { UnauthorizedAccessError } from '../errors/UnauthorizedAccessError.js';
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -97,10 +98,19 @@ export class LayoutController {
       } else if (!req.body) {
         updateExpressResponseFromNativeError(res, new InvalidInputError('Missing body content to update layout with'));
       } else {
-        const data = await LayoutDto.validateAsync(req.body);
-        // TODO retrieve layout, check user is owner or allowed to edit
-        const layout = await this._dataService.updateLayout(id, data);
-        res.status(201).json(layout);
+        const { personid, name } = req.session;
+        const { owner_name, owner_id } = await this._dataService.readLayout(id);
+
+        if (owner_name !== name || owner_id !== personid) {
+          updateExpressResponseFromNativeError(
+            res,
+            new UnauthorizedAccessError('Only the owner of the layout can update it'),
+          );
+        } else {
+          const data = await LayoutDto.validateAsync(req.body);
+          const layout = await this._dataService.updateLayout(id, data);
+          res.status(201).json(layout);
+        }
       }
     } catch (error) {
       updateExpressResponseFromNativeError(
@@ -122,9 +132,17 @@ export class LayoutController {
       if (!id) {
         updateExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout to delete'));
       } else {
-        // TODO retrieve layout, check user is owner
-        const result = await this._dataService.deleteLayout(id);
-        res.status(200).json(result);
+        const { personid, name } = req.session;
+        const { owner_name, owner_id } = await this._dataService.readLayout(id);
+        if (owner_name !== name || owner_id !== personid) {
+          updateExpressResponseFromNativeError(
+            res,
+            new UnauthorizedAccessError('Only the owner of the layout can delete it'),
+          );
+        } else {
+          const result = await this._dataService.deleteLayout(id);
+          res.status(200).json(result);
+        }
       }
     } catch (error) {
       updateExpressResponseFromNativeError(res, new Error(`Unable to delete layout with id: ${id}`));

@@ -18,9 +18,10 @@
 import assert from 'assert';
 import { AssertionError } from 'assert';
 import sinon from 'sinon';
+import { LAYOUT_MOCK_1 } from '../../demoData/layout/layout.mock.js';
 
-import { LayoutController } from '../../../lib/controllers/LayoutController.js';
-import { JsonFileService } from '../../../lib/services/JsonFileService.js';
+import { LayoutController } from './../../../lib/controllers/LayoutController.js';
+import { JsonFileService } from './../../../lib/services/JsonFileService.js';
 
 export const layoutControllerTestSuite = async () => {
   describe('Creating a new LayoutController instance', () => {
@@ -154,11 +155,6 @@ export const layoutControllerTestSuite = async () => {
     });
 
     it('should successfully return the id of the updated layout', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileService, {
-        updateLayout: sinon.stub().resolves([{ id: 'somelayout' }]),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const mockLayout = { id: 'mylayout', name: 'something', tabs: [{ name: 'tab', id: '1' }], owner_id: 1, owner_name: 'one' };
       const expectedMockWithDefaults = {
         id: 'mylayout',
         name: 'something',
@@ -169,20 +165,25 @@ export const layoutControllerTestSuite = async () => {
         displayTimestamp: false,
         autoTabChange: 0,
       };
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        updateLayout: sinon.stub().resolves(expectedMockWithDefaults),
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
 
-      const req = { params: { id: 'mylayout' }, body: mockLayout };
+      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: LAYOUT_MOCK_1 };
       await layoutConnector.putLayoutHandler(req, res);
       assert.ok(res.status.calledWith(201), 'Response status was not 200');
-      assert.ok(res.json.calledWith([{ id: 'somelayout' }]), 'A layout id should have been sent back');
+      assert.ok(res.json.calledWith(expectedMockWithDefaults), 'A layout id should have been sent back');
       assert.ok(jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults), 'Layout id was not used in data connector call');
     });
 
     it('should return error if data connector failed to update layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
         updateLayout: sinon.stub().rejects(new Error('Could not update layout')),
       });
       const layoutConnector = new LayoutController(jsonStub);
-      const mockLayout = { id: 'mylayout', name: 'something', tabs: [{ name: 'tab', id: '1' }], owner_id: 1, owner_name: 'one' };
       const expectedMockWithDefaults = {
         id: 'mylayout',
         name: 'something',
@@ -193,11 +194,25 @@ export const layoutControllerTestSuite = async () => {
         displayTimestamp: false,
         autoTabChange: 0,
       };
-      const req = { params: { id: 'mylayout' }, body: mockLayout };
+      const req = { params: { id: LAYOUT_MOCK_1.id }, session: { personid: 1, name: 'one' }, body: LAYOUT_MOCK_1 };
       await layoutConnector.putLayoutHandler(req, res);
+
       assert.ok(res.status.calledWith(500), 'Response status was not 500');
       assert.ok(res.json.calledWith({ message: 'Failed to update layout ' }), 'DataConnector error message is incorrect');
       assert.ok(jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults), 'Layout id was not used in data connector call');
+    });
+
+    it('should return unauthorized error if user requesting update operation is not the owner', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+      const req = { params: { id: LAYOUT_MOCK_1.id }, session: { personid: 2, name: 'one' }, body: {} };
+      await layoutConnector.putLayoutHandler(req, res);
+
+      assert.ok(res.status.calledWith(403), 'Response status was not 403');
+      assert.ok(res.json.calledWith({ message: 'Only the owner of the layout can update it' }), 'DataConnector error message is incorrect');
+      assert.ok(jsonStub.readLayout.calledWith(LAYOUT_MOCK_1.id), 'Layout id was not used in data connector call');
     });
   });
 
@@ -220,10 +235,11 @@ export const layoutControllerTestSuite = async () => {
 
     it('should successfully return the id of the deleted layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
         deleteLayout: sinon.stub().resolves({ id: 'somelayout' }),
       });
       const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: 'somelayout' } };
+      const req = { params: { id: 'somelayout' }, session: { personid: 1, name: 'one' } };
       await layoutConnector.deleteLayoutHandler(req, res);
       assert.ok(res.status.calledWith(200), 'Response status was not 200');
       assert.ok(res.json.calledWith({ id: 'somelayout' }), 'A layout id should have been sent back');
@@ -232,14 +248,28 @@ export const layoutControllerTestSuite = async () => {
 
     it('should return error if data connector failed to delete', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
         deleteLayout: sinon.stub().rejects(new Error('Could not delete layout')),
       });
       const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: 'mylayout' } };
+      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' } };
       await layoutConnector.deleteLayoutHandler(req, res);
       assert.ok(res.status.calledWith(500), 'Response status was not 500');
       assert.ok(res.json.calledWith({ message: 'Unable to delete layout with id: mylayout' }), 'DataConnector error message is incorrect');
       assert.ok(jsonStub.deleteLayout.calledWith('mylayout'), 'Layout id was not used in data connector call');
+    });
+
+    it('should return unauthorized error if user requesting delete operation is not the owner', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+      const req = { params: { id: 'mylayout' }, session: { personid: 2, name: 'one' } };
+      await layoutConnector.deleteLayoutHandler(req, res);
+
+      assert.ok(res.status.calledWith(403), 'Response status was not 403');
+      assert.ok(res.json.calledWith({ message: 'Only the owner of the layout can delete it' }), 'DataConnector error message is incorrect');
+      assert.ok(jsonStub.readLayout.calledWith('mylayout'), 'Layout id was not used in data connector call');
     });
   });
 
