@@ -32,6 +32,8 @@ export default class LayoutUtils {
    */
   static fromSkeleton(skeleton) {
     const layout = clone(skeleton);
+    delete layout.isOfficial;
+
     layout.id = objectId();
     if (layout.tabs) {
       layout.tabs.map((tab) => {
