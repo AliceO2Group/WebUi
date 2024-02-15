@@ -621,7 +621,6 @@ export default class Layout extends Observable {
       return;
     }
     const itemToDuplicate = clone(this.item);
-    delete itemToDuplicate.isOfficial;
     // Create tabs for new layout
     const tabs = [];
 
