@@ -110,7 +110,7 @@ export class LayoutController {
         } else {
           const data = await LayoutDto.validateAsync(req.body);
           const layout = await this._dataService.updateLayout(id, data);
-          res.status(201).json(layout);
+          res.status(201).json({ id: layout });
         }
       }
     } catch (error) {
