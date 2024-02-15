@@ -290,6 +290,19 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Given an ID and new value for official status, update it accordingly
+   * @param {string} id - of layout to modify
+   * @param {Boolean} isOfficial - new value to set
+   * @return {void}
+   */
+  async toggleOfficial(id, isOfficial) {
+    await this.model.services.layout.patchLayout(id, { isOfficial });
+    await this.model.services.layout.getLayouts(this);
+    await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
+    this.model.notify();
+  }
+
+  /**
    * Method to allow more than 3x3 grid
    * @param {string} value - of grid resize
    * @returns {undefined}
@@ -608,7 +621,6 @@ export default class Layout extends Observable {
       return;
     }
     const itemToDuplicate = clone(this.item);
-
     // Create tabs for new layout
     const tabs = [];
 

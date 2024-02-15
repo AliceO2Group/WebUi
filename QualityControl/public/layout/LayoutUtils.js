@@ -32,6 +32,8 @@ export default class LayoutUtils {
    */
   static fromSkeleton(skeleton) {
     const layout = clone(skeleton);
+    delete layout.isOfficial;
+
     layout.id = objectId();
     if (layout.tabs) {
       layout.tabs.map((tab) => {
@@ -63,6 +65,7 @@ export default class LayoutUtils {
       const tabCopy = {
         name: tab.name,
         objects: [],
+        columns: tab.columns,
       };
       tabCopy.objects = tab.objects.map((object) => {
         const objCopy = clone(object);

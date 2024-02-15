@@ -166,7 +166,7 @@ export const layoutControllerTestSuite = async () => {
         autoTabChange: 0,
       };
       const jsonStub = sinon.createStubInstance(JsonFileService, {
-        updateLayout: sinon.stub().resolves(expectedMockWithDefaults),
+        updateLayout: sinon.stub().resolves(expectedMockWithDefaults.id),
         readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -174,7 +174,7 @@ export const layoutControllerTestSuite = async () => {
       const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: LAYOUT_MOCK_1 };
       await layoutConnector.putLayoutHandler(req, res);
       assert.ok(res.status.calledWith(201), 'Response status was not 200');
-      assert.ok(res.json.calledWith(expectedMockWithDefaults), 'A layout id should have been sent back');
+      assert.ok(res.json.calledWith({ id: expectedMockWithDefaults.id }), 'A layout id should have been sent back');
       assert.ok(jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults), 'Layout id was not used in data connector call');
     });
 
