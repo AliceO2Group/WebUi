@@ -16,6 +16,7 @@
 
 import assert from 'assert';
 import { LayoutDto } from './../dtos/LayoutDto.js';
+import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 import {
   updateExpressResponseFromNativeError,
 } from './../errors/updateExpressResponseFromNativeError.js';
@@ -171,6 +172,44 @@ export class LayoutController {
       res.status(201).json(result);
     } catch (error) {
       updateExpressResponseFromNativeError(res, new Error('Unable to create new layout'));
+    }
+  }
+
+  /**
+   * Patch a layout entity with information as per LayoutPatchDto.js
+   * @param {Request} req - HTTP request object with "params" and "body" information on layout
+   * @param {Response} res - HTTP response object to provide information on the update
+   * @returns {undefined}
+   */
+  async patchLayoutHandler(req, res) {
+    const { id } = req.params;
+    if (!id) {
+      updateExpressResponseFromNativeError(res, new InvalidInputError('Missing ID'));
+    } else {
+      let layout;
+      try {
+        layout = await LayoutPatchDto.validateAsync(req.body);
+      } catch (error) {
+        updateExpressResponseFromNativeError(res, new InvalidInputError('Invalid request body to update layout'));
+        return;
+      }
+
+      try {
+        const { personid, name } = req.session;
+        const { owner_name, owner_id } = await this._dataService.readLayout(id);
+
+        if (owner_name !== name || owner_id !== personid) {
+          updateExpressResponseFromNativeError(
+            res,
+            new UnauthorizedAccessError('Only the owner of the layout can update it'),
+          );
+        } else {
+          const layoutUpdated = await this._dataService.updateLayout(id, layout);
+          res.status(201).json(layoutUpdated);
+        }
+      } catch (error) {
+        updateExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
+      }
     }
   }
 }
