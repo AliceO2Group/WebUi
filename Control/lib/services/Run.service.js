@@ -131,7 +131,7 @@ class RunService {
    * @return {Promise<Object<String, CalibrationConfiguration.Error>} - map of calibration configurations
    *  
    * @example 
-   * { "XYZ": [ { "runType": "PEDESTAL", "configuration": "cpv-pedestal-20220412", "label": "CPV PEDESTAL", description: "To be ran second for CPV" }]}
+   * { "XYZ": [ { "runType": "PEDESTAL", "configuration": "cpv-pedestal-20220412", "label": "CPV PEDESTAL" }]}
    */
   async _retrieveCalibrationConfigurationsForDetectors() {
     try {

@@ -20,5 +20,4 @@
  * @property {String} runType 
  * @property {String} configuration - name of the configuration to be used from the existing saved ones in KV store runtime
  * @property {String} label - label to be displayed to the user for this calibration
- * @property {String} description - description to be displayed if specifics are needed for that calibration
  */
