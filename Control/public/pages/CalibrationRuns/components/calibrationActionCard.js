@@ -28,7 +28,7 @@ import {getTaskShortName} from './../../../common/utils.js';
  * @return {vnode}
  */
 export const calibrationActionCard = (calibrationConfiguration, ongoingCalibrationRun, detector, onclick) => {
-  const {runType, configuration, label} = calibrationConfiguration;
+  const {runType, configuration, label, description = ''} = calibrationConfiguration;
   if (!ongoingCalibrationRun?.kind) {
     ongoingCalibrationRun = RemoteData.success(ongoingCalibrationRun);
   }
@@ -38,16 +38,19 @@ export const calibrationActionCard = (calibrationConfiguration, ongoingCalibrati
     'A calibration run for this detector is already in progress'
     : `Start a calibration run for ${detector} with run type ${runType}`;
   return miniCard(
-    h('.flex-row.justify-between', [
-      h('.flex-row.gc1', [
-        h('button.btn.btn-sm.btn-success', {
-          disabled: inProgress,
-          onclick: () => onclick(detector, runType, configuration),
-          title,
-        }, inProgress ? pageLoading(1) : iconPlayCircle()),
-        h('strong', label),
+    h('.flex-column', [
+      h('.flex-row.justify-between', [
+        h('.flex-row.gc1', [
+          h('button.btn.btn-sm.btn-success', {
+            disabled: inProgress,
+            onclick: () => onclick(detector, runType, configuration),
+            title,
+          }, inProgress ? pageLoading(1) : iconPlayCircle()),
+          h('strong', label),
+        ]),
+        h('small', `${configuration}`)
       ]),
-      h('small', `${configuration}`)
+      h('small', h('em', description)),
     ]), [
       ongoingCalibrationRun && ongoingCalibrationRun.match({
         NotAsked: () => null,
