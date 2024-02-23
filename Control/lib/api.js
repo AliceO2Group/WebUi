@@ -88,7 +88,7 @@ module.exports.setup = (http, ws) => {
   const envCtrl = new EnvironmentController(envService, workflowService, lockService);
   const workflowController = new WorkflowTemplateController(workflowService);
 
-  const aliecsReqHandler = new AliecsRequestHandler(ctrlService);
+  const aliecsReqHandler = new AliecsRequestHandler(ctrlService, apricotService);
   aliecsReqHandler.setWs(ws);
   aliecsReqHandler.workflowService = workflowService;
 
