@@ -18,8 +18,15 @@ const {minimumRoleMiddleware} = require('../../../lib/middleware/minimumRole.mid
 const {Role} = require('../../../lib/common/role.enum');
 
 describe('`Role Middleware` test suite', () => {
-  it('should successfully call next() from Express with minimum role condition met', () => {
+  it('should successfully call next() from Express with minimum role as list condition met', () => {
     const req = {session: {access: ['det-its']}};
+    const next = sinon.stub().returns();
+    minimumRoleMiddleware(Role.GUEST)(req, null, next);
+    assert.ok(next.calledOnce);
+  });
+
+  it('should successfully call next() from Express with minimum role as string condition met', () => {
+    const req = {session: {access: 'det-its'}};
     const next = sinon.stub().returns();
     minimumRoleMiddleware(Role.GUEST)(req, null, next);
     assert.ok(next.calledOnce);
@@ -36,13 +43,13 @@ describe('`Role Middleware` test suite', () => {
     assert.ok(res.json.calledWith({message: 'Not enough permissions for this operation'}))
   });
 
-  it('should update HTTP response object with general 500 status error if missing access', () => {
+  it('should update HTTP response object with 403 status error if missing access', () => {
     const req = {};
     const res = {
       status: sinon.stub().returnsThis(),
       json: sinon.stub()
     };
     minimumRoleMiddleware(Role.ADMIN)(req, res, null);
-    assert.ok(res.status.calledWith(500));
+    assert.ok(res.status.calledWith(403));
   });
 });
