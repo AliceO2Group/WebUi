@@ -100,9 +100,8 @@ class CoreUtils {
    */
   static _removeHostsFromSelection(payload, hostsToIgnore = []) {
     try {
-      const {vars} = payload;
-      const {hosts} = vars;
-      const hostsList = JSON.parse(hosts);
+      const hostsAsString = payload?.vars?.hosts ?? '[]';
+      const hostsList = JSON.parse(hostsAsString);
       hostsToIgnore.forEach((knownHost) => {
         try {
           const index = hostsList.findIndex((host) => knownHost === host);
@@ -113,8 +112,7 @@ class CoreUtils {
           console.error(error);
         }
       });
-      vars.hosts = JSON.stringify(hostsList);
-      payload.vars = vars;
+      payload.vars.hosts = JSON.stringify(hostsList);
     } catch (error) {
       console.error(error)
     }
