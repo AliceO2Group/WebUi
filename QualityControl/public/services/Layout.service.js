@@ -103,8 +103,11 @@ export default class LayoutService {
    * @returns {RemoteData} - result within a RemoteData object
    */
   async removeLayoutById(layoutId) {
-    const { ok, result } = await jsonDelete(`/api/layout/${layoutId}`);
-    return this.parseResult(result, ok);
+    try {
+      return RemoteData.success(await jsonDelete(`/api/layout/${layoutId}`));
+    } catch (error) {
+      return RemoteData.failure(error.message);
+    }
   }
 
   /**
