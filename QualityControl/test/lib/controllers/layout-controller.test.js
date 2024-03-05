@@ -399,17 +399,17 @@ export const layoutControllerTestSuite = async () => {
       assert.ok(res.json.calledWith({ message: 'Invalid request body to update layout' }));
     });
 
-    it('should return error due to user not being owner of the layout to patch', async () => {
+    it('should return error due to layout not found to patch', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+        readLayout: sinon.stub().rejects(new Error('Unable to find layout')),
       });
       const layoutConnector = new LayoutController(jsonStub);
 
       const req = { params: { id: 'mylayout' }, session: { personid: 2 }, body: { isOfficial: true } };
       await layoutConnector.patchLayoutHandler(req, res);
 
-      assert.ok(res.status.calledWith(403), 'Response status was not 403');
-      assert.ok(res.json.calledWith({ message: 'Only the owner of the layout can update it' }));
+      assert.ok(res.status.calledWith(404), 'Response status was not 403');
+      assert.ok(res.json.calledWith({ message: 'Unable to find layout with id: mylayout' }));
     });
 
     it('should return error due to layout update operation failing', async () => {

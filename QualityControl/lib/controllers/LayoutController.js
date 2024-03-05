@@ -22,6 +22,7 @@ import {
 } from './../errors/updateExpressResponseFromNativeError.js';
 import { InvalidInputError } from './../errors/InvalidInputError.js';
 import { UnauthorizedAccessError } from '../errors/UnauthorizedAccessError.js';
+import { NotFoundError } from '../errors/NotFoundError.js';
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -195,20 +196,17 @@ export class LayoutController {
       }
 
       try {
-        const { personid } = req.session;
-        const { owner_id } = await this._dataService.readLayout(id);
-
-        if (owner_id !== personid) {
-          updateExpressResponseFromNativeError(
-            res,
-            new UnauthorizedAccessError('Only the owner of the layout can update it'),
-          );
-        } else {
-          const layoutUpdated = await this._dataService.updateLayout(id, layout);
-          res.status(201).json(layoutUpdated);
-        }
+        await this._dataService.readLayout(id);
+      } catch (error) {
+        updateExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
+        return;
+      }
+      try {
+        const layoutUpdated = await this._dataService.updateLayout(id, layout);
+        res.status(201).json(layoutUpdated);
       } catch (error) {
         updateExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
+        return;
       }
     }
   }

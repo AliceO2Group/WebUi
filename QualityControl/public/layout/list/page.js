@@ -90,11 +90,11 @@ function table(model, layouts, searchBy) {
           h(
             'tr',
             [
-              h('th', 'Official'),
+              h('th', h('.text-center', 'Official')),
               h('th', 'Name'),
               h('th', 'Owner'),
               h('th', 'Description'),
-              h('th', 'Actions'),
+              h('th', h('.text-right', 'Actions')),
             ],
           ),
         ),
@@ -124,14 +124,11 @@ function rows(model, layouts, searchBy) {
         .map((layout) => {
           const key = `key${layout.name}`;
           const { isOfficial } = layout;
-          const userName = model.session.name;
-          const userId = model.session.personid;
-          const isOwner = userId === layout.owner_id && userName === layout.owner_name;
           const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
           const isOnline = model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : '';
           return h('tr', { key: key }, [
             h('td', {
-            }, isOfficial ? h('.primary.f4', [iconBadge(), ' ']) : ' '),
+            }, isOfficial ? h('.primary.f4.text-center', [iconBadge(), ' ']) : ' '),
             h('td.w-20', [
               h('.flex-row.items-center', { class: isOnline }, [
                 h('a', {
@@ -143,7 +140,7 @@ function rows(model, layouts, searchBy) {
             h('td.w-30', layout.owner_name),
             h('td.w-30', layout.description ?? '-'),
             h('td', h('.text-right', [
-              isOwner && isMinimumGlobal && h('button.btn.btn-sm', {
+              isMinimumGlobal && h('button.btn.btn-sm', {
                 onclick: () => model.layout.toggleOfficial(layout.id, !layout.isOfficial),
               }, layout.isOfficial ? 'Un-official' : 'Official'),
             ])),
