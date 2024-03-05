@@ -260,14 +260,14 @@ export default class Layout extends Observable {
     if (!this.item) {
       throw new Error('no layout to delete');
     }
-    const { ok } = await this.model.services.layout.removeLayoutById(this.item.id);
-    if (ok) {
+    const layoutRemovalRemoteData = await this.model.services.layout.removeLayoutById(this.item.id);
+    if (layoutRemovalRemoteData.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success', 1500);
       this.model.router.go('?page=layouts');
       this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
       this.editEnabled = false;
     } else {
-      this.model.notification.show('Unauthorized action - delete layout', 'danger', 1500);
+      this.model.notification.show(layoutRemovalRemoteData.payload, 'danger', 1500);
     }
     this.notify();
   }

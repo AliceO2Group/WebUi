@@ -382,9 +382,8 @@ export const layoutControllerTestSuite = async () => {
       });
       const layoutConnector = new LayoutController(jsonStub);
 
-      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: { isOfficial: true } };
+      const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true } };
       await layoutConnector.patchLayoutHandler(req, res);
-
       assert.ok(res.status.calledWith(201), 'Response status was not 201');
       assert.ok(res.json.calledWith({ isOfficial: true, ...LAYOUT_MOCK_1 }));
       assert.ok(jsonStub.updateLayout.calledWith('mylayout', { isOfficial: true }));
@@ -393,7 +392,7 @@ export const layoutControllerTestSuite = async () => {
     it('should return error due to invalid request body containing more than expected fields', async () => {
       const layoutConnector = new LayoutController({});
 
-      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: { isOfficial: true, missing: true } };
+      const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true, missing: true } };
       await layoutConnector.patchLayoutHandler(req, res);
 
       assert.ok(res.status.calledWith(400), 'Response status was not 400');
@@ -406,7 +405,7 @@ export const layoutControllerTestSuite = async () => {
       });
       const layoutConnector = new LayoutController(jsonStub);
 
-      const req = { params: { id: 'mylayout' }, session: { personid: 2, name: 'two' }, body: { isOfficial: true } };
+      const req = { params: { id: 'mylayout' }, session: { personid: 2 }, body: { isOfficial: true } };
       await layoutConnector.patchLayoutHandler(req, res);
 
       assert.ok(res.status.calledWith(403), 'Response status was not 403');
@@ -420,7 +419,7 @@ export const layoutControllerTestSuite = async () => {
       });
       const layoutConnector = new LayoutController(jsonStub);
 
-      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: { isOfficial: true } };
+      const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true } };
       await layoutConnector.patchLayoutHandler(req, res);
 
       assert.ok(res.status.calledWith(500), 'Response status was not 500');
