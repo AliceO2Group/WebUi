@@ -20,8 +20,8 @@ import { AssertionError } from 'assert';
 import sinon from 'sinon';
 import { LAYOUT_MOCK_1 } from '../../demoData/layout/layout.mock.js';
 
-import { LayoutController } from './../../../lib/controllers/LayoutController.js';
-import { JsonFileService } from './../../../lib/services/JsonFileService.js';
+import { LayoutController } from '../../../lib/controllers/LayoutController.js';
+import { JsonFileService } from '../../../lib/services/JsonFileService.js';
 
 export const layoutControllerTestSuite = async () => {
   describe('Creating a new LayoutController instance', () => {
