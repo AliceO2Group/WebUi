@@ -240,7 +240,7 @@ export default class Layout extends Observable {
 
       const result = await this.model.services.layout.createNewLayout(layout);
       if (result.isFailure()) {
-        this.model.notification.show(result.error || 'Unable to create layout', 'danger', 2000);
+        this.model.notification.show(result.payload || 'Unable to create layout', 'danger', 2000);
         return;
       }
 

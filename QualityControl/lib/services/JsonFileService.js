@@ -180,12 +180,13 @@ export class JsonFileService {
 
   /**
    * List layouts, can be filtered
-   * @param {Object} filter - undefined or {owner_id: XXX}
-   * @returns {Array<Layout>} - list of layouts as per the filte
+   * @param {Object} filter - accepted keys [owner_id, name]
+   * @returns {Array<Layout>} - list of layouts as per the filter
    */
   async listLayouts(filter = {}) {
     return this.data.layouts.filter((layout) =>
-      filter.owner_id === undefined || layout.owner_id === filter.owner_id);
+      (filter.owner_id === undefined || layout.owner_id === filter.owner_id)
+      && (filter.name === undefined || layout.name === filter.name));
   }
 
   /**
