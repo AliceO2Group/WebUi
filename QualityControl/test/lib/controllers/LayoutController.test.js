@@ -167,6 +167,7 @@ export const layoutControllerTestSuite = async () => {
       };
       const jsonStub = sinon.createStubInstance(JsonFileService, {
         updateLayout: sinon.stub().resolves(expectedMockWithDefaults.id),
+        listLayouts: sinon.stub().resolves([]),
         readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
       });
       const layoutConnector = new LayoutController(jsonStub);
@@ -178,9 +179,23 @@ export const layoutControllerTestSuite = async () => {
       assert.ok(jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults), 'Layout id was not used in data connector call');
     });
 
+    it('should return 400 code if new provided name already exists', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        listLayouts: sinon.stub().resolves([{ name: 'something' }]),
+        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+
+      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: LAYOUT_MOCK_1 };
+      await layoutConnector.putLayoutHandler(req, res);
+      assert.ok(res.status.calledWith(400), 'Response status was not 400');
+      assert.ok(res.json.calledWith({ message: 'Proposed layout name: something already exists' }), 'Error message is not the same');
+    });
+
     it('should return error if data connector failed to update layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
+        listLayouts: sinon.stub().resolves([]),
         updateLayout: sinon.stub().rejects(new Error('Could not update layout')),
       });
       const layoutConnector = new LayoutController(jsonStub);

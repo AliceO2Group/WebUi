@@ -109,8 +109,16 @@ export class LayoutController {
             new UnauthorizedAccessError('Only the owner of the layout can update it'),
           );
         } else {
-          const data = await LayoutDto.validateAsync(req.body);
-          const layout = await this._dataService.updateLayout(id, data);
+          const layoutProposed = await LayoutDto.validateAsync(req.body);
+          const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+          if (layouts.length > 0) {
+            updateExpressResponseFromNativeError(
+              res,
+              new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
+            );
+            return;
+          }
+          const layout = await this._dataService.updateLayout(id, layoutProposed);
           res.status(201).json({ id: layout });
         }
       }
