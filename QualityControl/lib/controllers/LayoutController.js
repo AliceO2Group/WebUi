@@ -109,8 +109,16 @@ export class LayoutController {
             new UnauthorizedAccessError('Only the owner of the layout can update it'),
           );
         } else {
-          const data = await LayoutDto.validateAsync(req.body);
-          const layout = await this._dataService.updateLayout(id, data);
+          const layoutProposed = await LayoutDto.validateAsync(req.body);
+          const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+          if (layouts.length > 0) {
+            updateExpressResponseFromNativeError(
+              res,
+              new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
+            );
+            return;
+          }
+          const layout = await this._dataService.updateLayout(id, layoutProposed);
           res.status(201).json({ id: layout });
         }
       }
@@ -158,9 +166,9 @@ export class LayoutController {
    * @returns {undefined}
    */
   async postLayoutHandler(req, res) {
-    let layout;
+    let layoutProposed;
     try {
-      layout = await LayoutDto.validateAsync(req.body);
+      layoutProposed = await LayoutDto.validateAsync(req.body);
     } catch (error) {
       updateExpressResponseFromNativeError(
         res,
@@ -169,7 +177,15 @@ export class LayoutController {
       return;
     }
     try {
-      const result = await this._dataService.createLayout(layout);
+      const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+      if (layouts.length > 0) {
+        updateExpressResponseFromNativeError(
+          res,
+          new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
+        );
+        return;
+      }
+      const result = await this._dataService.createLayout(layoutProposed);
       res.status(201).json(result);
     } catch (error) {
       updateExpressResponseFromNativeError(res, new Error('Unable to create new layout'));

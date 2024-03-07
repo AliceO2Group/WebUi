@@ -152,11 +152,10 @@ export default class LayoutService {
     that.notify();
 
     const { result, ok } = await this.loader.post('/api/layout', layout, true);
-
-    this.new = ok ? RemoteData.success(result) : RemoteData.failure({ message: result.error || result.message });
+    this.new = this.parseResult(result, ok);
     that.notify();
 
-    return this.parseResult(result, ok);
+    return this.new;
   }
 
   /**
