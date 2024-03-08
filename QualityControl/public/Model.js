@@ -168,7 +168,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    * @returns {undefined}
    */
-  handleLocationChange() {
+  async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
 
@@ -184,9 +184,24 @@ export default class Model extends Observable {
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
-          this.notification.show('layoutId in URL was missing. Redirecting to layout page', 'warning', 3000);
-          this.router.go('?page=layoutList', true);
-          return;
+          const { runDefinition, pdpBeamType, detector } = params;
+          if (!runDefinition) {
+            this.notification.show('layoutId in URL was missing. Redirecting to layouts page', 'warning', 3000);
+            this.router.go('?page=layoutList', true);
+            return;
+          } else {
+            const layout = await this.services.layout.getLayoutByQuery(runDefinition, pdpBeamType);
+            if (!layout) {
+              this.notification.show(`Layout with RunDefinition ${runDefinition} could not be found`, 'warning', 3000);
+              this.router.go('?page=layoutList', true);
+            }
+            let redirectUrl = `?page=layoutShow&layoutId=${layout.id}`;
+            if (detector) {
+              redirectUrl += `&tab=${detector}`;
+            }
+            this.router.go(redirectUrl, true);
+            return;
+          }
         }
         this.layout.loadItem(this.router.params.layoutId, params?.tab ?? '')
           .then(() => {
