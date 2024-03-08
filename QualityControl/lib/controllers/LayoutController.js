@@ -99,6 +99,8 @@ export class LayoutController {
       layoutName = name;
     } else if (runDefinition && pdpBeamType) {
       layoutName = `${runDefinition}_${pdpBeamType}`;
+    } else if (runDefinition) {
+      layoutName = runDefinition;
     } else {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing query parameters'));
       return;
