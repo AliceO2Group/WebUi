@@ -129,6 +129,50 @@ export const layoutControllerTestSuite = async () => {
     });
   });
 
+  describe('`getLayoutByNameHandler` test suite', () => {
+    let res;
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+    });
+
+    it('should successfully return layout with name provided', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayoutByName: sinon.stub().resolves([{ name: 'somelayout', id: '1234' }]),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+      const req = { query: { name: 'somelayout' } };
+      await layoutConnector.getLayoutByNameHandler(req, res);
+
+      assert.ok(res.status.calledWith(200), 'Response status was not 200');
+      assert.ok(res.json.calledWith([{ name: 'somelayout', id: '1234' }]), 'A JSON defining a layout should have been sent back');
+    });
+
+    it('should successfully return layout with runDefinition and pdpBeamType provided', async () => {
+      const jsonStub = sinon.createStubInstance(JsonFileService, {
+        readLayoutByName: sinon.stub().resolves([{ name: 'calibration_pp', id: '1234' }]),
+      });
+      const layoutConnector = new LayoutController(jsonStub);
+      const req = { query: { runDefinition: 'calibration', pdpBeamType: 'pp' } };
+      await layoutConnector.getLayoutByNameHandler(req, res);
+
+      assert.ok(res.status.calledWith(200), 'Response status was not 200');
+      assert.ok(res.json.calledWith([{ name: 'calibration_pp', id: '1234' }]), 'A JSON defining a layout should have been sent back');
+      assert.ok(jsonStub.readLayoutByName.calledWith('calibration_pp'), 'Incorrect name for layout provided');
+    });
+
+    it('should return error due to missing input values', async () => {
+      const layoutConnector = new LayoutController({});
+      const req = { query: { pdpBeamType: 'pp' } };
+      await layoutConnector.getLayoutByNameHandler(req, res);
+
+      assert.ok(res.status.calledWith(400), 'Response status was not 400');
+      assert.ok(res.json.calledWith({ message: 'Missing query parameters' }), 'Error message is not as expected');
+    });
+  });
+
   describe('`putLayoutHandler()` tests', () => {
     let res;
     beforeEach(() => {
@@ -213,7 +257,7 @@ export const layoutControllerTestSuite = async () => {
       await layoutConnector.putLayoutHandler(req, res);
 
       assert.ok(res.status.calledWith(500), 'Response status was not 500');
-      assert.ok(res.json.calledWith({ message: 'Failed to update layout ' }), 'DataConnector error message is incorrect');
+      assert.ok(res.json.calledWith({ message: 'Could not update layout' }), 'DataConnector error message is incorrect');
       assert.ok(jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults), 'Layout id was not used in data connector call');
     });
 
