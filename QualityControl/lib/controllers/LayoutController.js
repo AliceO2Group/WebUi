@@ -21,8 +21,8 @@ import {
   updateExpressResponseFromNativeError,
 } from './../errors/updateExpressResponseFromNativeError.js';
 import { InvalidInputError } from './../errors/InvalidInputError.js';
-import { UnauthorizedAccessError } from '../errors/UnauthorizedAccessError.js';
-import { NotFoundError } from '../errors/NotFoundError.js';
+import { UnauthorizedAccessError } from './../errors/UnauthorizedAccessError.js';
+import { NotFoundError } from './../errors/NotFoundError.js';
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -85,6 +85,33 @@ export class LayoutController {
   }
 
   /**
+   * HTTP GET endpoint for retrieving a single layout via query parameters. Either by:
+   * * name (e.g. CALIBRATIONS)
+   * * runDefinition + pdpBeamMode
+   * @param {Request} req - HTTP request object with "params" information on layout ID
+   * @param {Response} res - HTTP response object to provide layout information
+   * @returns {undefined}
+   */
+  async getLayoutByNameHandler(req, res) {
+    const { name, runDefinition, pdpBeamType } = req.query;
+    let layoutName = '';
+    if (name) {
+      layoutName = name;
+    } else if (runDefinition && pdpBeamType) {
+      layoutName = `${runDefinition}_${pdpBeamType}`;
+    } else {
+      updateExpressResponseFromNativeError(res, new InvalidInputError('Missing query parameters'));
+      return;
+    }
+    try {
+      const layout = await this._dataService.readLayoutByName(layoutName);
+      res.status(200).json(layout);
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
    * HTTP PUT endpoint for updating a single layout specified by:
    * * query.id for identification
    * * body - for layout data to be updated
@@ -109,9 +136,20 @@ export class LayoutController {
             new UnauthorizedAccessError('Only the owner of the layout can update it'),
           );
         } else {
-          const layoutProposed = await LayoutDto.validateAsync(req.body);
+          let layoutProposed;
+          try {
+            layoutProposed = await LayoutDto.validateAsync(req.body);
+          } catch (error) {
+            updateExpressResponseFromNativeError(
+              res,
+              new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
+            );
+            return;
+          }
+
           const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
-          if (layouts.length > 0) {
+          const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
+          if (layouts.length > 0 && layoutExistsWithName) {
             updateExpressResponseFromNativeError(
               res,
               new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
@@ -123,10 +161,7 @@ export class LayoutController {
         }
       }
     } catch (error) {
-      updateExpressResponseFromNativeError(
-        res,
-        new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
-      );
+      updateExpressResponseFromNativeError(res, error);
     }
   }
 
