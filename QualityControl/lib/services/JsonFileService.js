@@ -16,6 +16,7 @@ import { Log } from '@aliceo2/web-ui';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
 import fs from 'fs';
 import path from 'path';
+import { NotFoundError } from './../errors/NotFoundError.js';
 
 /**
  * Store layouts inside JSON based file with atomic write
@@ -148,6 +149,20 @@ export class JsonFileService {
     const layout = this.data.layouts.find((layout) => layout.id === layoutId);
     if (!layout) {
       throw new Error(`layout (${layoutId}) not found`);
+    }
+    return layout;
+  }
+
+  /**
+   * Given a string, representing layout name, retrieve the layout if it exists
+   * @param {String} layoutName - name of the layout to retrieve
+   * @return {Layout} - object with layout information
+   * @throws
+   */
+  async readLayoutByName(layoutName) {
+    const layout = this.data.layouts.find((layout) => layout.name === layoutName);
+    if (!layout) {
+      throw new NotFoundError(`Layout (${layoutName}) not found`);
     }
     return layout;
   }
