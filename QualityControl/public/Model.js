@@ -26,6 +26,7 @@ import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
+import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -195,11 +196,15 @@ export default class Model extends Observable {
               this.notification.show(`Layout with RunDefinition ${runDefinition} could not be found`, 'warning', 3000);
               this.router.go('?page=layoutList', true);
             }
-            let redirectUrl = `?page=layoutShow&layoutId=${layout.id}`;
+            const paramsToAdd = { layoutId: layout.id };
+            delete params.runDefinition;
+            delete params.pdpBeamType;
             if (detector) {
-              redirectUrl += `&tab=${detector}`;
+              paramsToAdd.tab = detector;
+              delete params.detector;
             }
-            this.router.go(redirectUrl, true);
+
+            this.router.go(buildQueryParametersString(params, paramsToAdd), true);
             return;
           }
         }
