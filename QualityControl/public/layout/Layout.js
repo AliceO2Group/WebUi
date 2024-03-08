@@ -18,6 +18,9 @@ import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
+import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
+
+const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
@@ -93,9 +96,10 @@ export default class Layout extends Observable {
   /**
    * Load data about a layouts by its id
    * @param {string} layoutId - id of the layout to be loaded
+   * @param {String} [tabName] - name of the tab that should be loaded
    * @returns {Promise} - whether retrieval of layout was success
    */
-  async loadItem(layoutId) {
+  async loadItem(layoutId, tabName) {
     this.item = null;
     if (!layoutId) {
       this.model.notification.show('Unable to load layout, it might have been deleted.', 'warning');
@@ -107,7 +111,8 @@ export default class Layout extends Observable {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
         this.setFilterFromURL();
-        this.selectTab(0);
+        const tabIndex = this.item.tabs.findIndex((tab) => tab.name === tabName);
+        this.selectTab(tabIndex > -1 ? tabIndex : 0);
         this.setTabInterval(this.item.autoTabChange);
         this.notify();
       } else {
@@ -337,8 +342,17 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   selectTab(index) {
-    setBrowserTabTitle(`${this.item.name}/${this.item.tabs[index].name}`);
+    const tabName = this.item.tabs[index].name;
+    const parameters = this.model.router.params;
 
+    setBrowserTabTitle(`${this.item.name}/${tabName}`);
+    this.model.router.go(buildQueryParametersString(parameters, { tab: tabName }), true, true);
+
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
+      if (parameters[filterKey]) {
+        this.filter[filterKey] = decodeURI(parameters[filterKey]);
+      }
+    });
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }

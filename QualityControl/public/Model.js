@@ -174,7 +174,8 @@ export default class Model extends Observable {
 
     this.services.layout.getLayoutsByUserId(this.session.personid);
 
-    switch (this.router.params.page) {
+    const { params } = this.router;
+    switch (params.page) {
       case 'layoutList':
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
@@ -182,15 +183,15 @@ export default class Model extends Observable {
         break;
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');
-        if (!this.router.params.layoutId) {
+        if (!params.layoutId) {
           this.notification.show('layoutId in URL was missing. Redirecting to layout page', 'warning', 3000);
           this.router.go('?page=layoutList', true);
           return;
         }
-        this.layout.loadItem(this.router.params.layoutId)
+        this.layout.loadItem(this.router.params.layoutId, params?.tab ?? '')
           .then(() => {
             this.page = 'layoutShow';
-            if (this.router.params.edit) {
+            if (params.edit) {
               this.layout.edit();
 
               // Replace silently and immediately URL to remove 'edit' parameter after a layout creation
