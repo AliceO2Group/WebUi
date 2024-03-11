@@ -36,6 +36,6 @@ jobs:
       - name: Send codecov report for QualityControl
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: qualitycontrol
           fail_ci_if_error: true

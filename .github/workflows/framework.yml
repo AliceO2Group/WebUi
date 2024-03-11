@@ -36,7 +36,7 @@ jobs:
       - name: Send codecov report for Framework
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: framework
           fail_ci_if_error: true
   windows:
