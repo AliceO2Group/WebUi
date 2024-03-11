@@ -25,6 +25,16 @@ const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
 const WebSocketMessage = require('./websocket/message.js');
 
+const {InvalidInputError} = require('./errors/InvalidInputError.js');
+const {NotFoundError} = require('./errors/NotFoundError.js');
+const {ServiceUnavailableError} = require('./errors/ServiceUnavailableError.js');
+const {TimeoutError} = require('./errors/TimeoutError.js');
+const {UnauthorizedAccessError} = require('./errors/UnauthorizedAccessError.js');
+const {grpcErrorToNativeError} = require('./errors/grpcErrorToNativeError.js');
+const {
+  updateAndSendExpressResponseFromNativeError
+} = require('./errors/updateAndSendExpressResponseFromNativeError.js');
+
 exports.ConsulService = ConsulService;
 exports.HttpServer = HttpServer;
 exports.InfoLoggerReceiver = InfoLoggerReceiver;
@@ -36,3 +46,11 @@ exports.MySQL = MySQL;
 exports.NotificationService = NotificationService;
 exports.WebSocket = WebSocket;
 exports.WebSocketMessage = WebSocketMessage;
+
+exports.InvalidInputError = InvalidInputError;
+exports.NotFoundError = NotFoundError;
+exports.ServiceUnavailableError = ServiceUnavailableError;
+exports.TimeoutError = TimeoutError;
+exports.UnauthorizedAccessError = UnauthorizedAccessError;
+exports.grpcErrorToNativeError = grpcErrorToNativeError;
+exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;

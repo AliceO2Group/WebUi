@@ -33,33 +33,33 @@ describe(`'updateAndSendExpressResponseFromNativeError' test suite`, function() 
   });
 
   it('should successfully update response based on InvalidInputError', () => {
-    updateAndSendExpressResponseFromNativeError(response, new InvalidInputError('Bad Parameters received'))
-    assert.ok(response.status.calledWith(400))
-    assert.ok(response.json.calledWith({errors: [{status: 400, title: 'Invalid Input', detail: 'Bad Parameters received'}]}))
+    updateAndSendExpressResponseFromNativeError(response, new InvalidInputError('Bad Parameters received'));
+    assert.ok(response.status.calledWith(400));
+    assert.ok(response.json.calledWith({status: 400, title: 'Invalid Input', detail: 'Bad Parameters received'}));
   });
   it('should successfully update response based on UnauthorizedAccessError', () => {
-    updateAndSendExpressResponseFromNativeError(response, new UnauthorizedAccessError('You shall not pass'))
-    assert.ok(response.status.calledWith(403))
-    assert.ok(response.json.calledWith({errors: [{status: 403, title: 'Unauthorized Access', detail: 'You shall not pass'}]}))
+    updateAndSendExpressResponseFromNativeError(response, new UnauthorizedAccessError('You shall not pass'));
+    assert.ok(response.status.calledWith(403));
+    assert.ok(response.json.calledWith({status: 403, title: 'Unauthorized Access', detail: 'You shall not pass'}));
   });
   it('should successfully update response based on NotFoundError', () => {
-    updateAndSendExpressResponseFromNativeError(response, new NotFoundError('Entity could not be found'))
-    assert.ok(response.status.calledWith(404))
-    assert.ok(response.json.calledWith({errors: [{status: 404, title: 'Not Found', detail: 'Entity could not be found'}]}))
+    updateAndSendExpressResponseFromNativeError(response, new NotFoundError('Entity could not be found'));
+    assert.ok(response.status.calledWith(404));
+    assert.ok(response.json.calledWith({status: 404, title: 'Not Found', detail: 'Entity could not be found'}));
   });
   it('should successfully update response based on TimeoutError', () => {
-    updateAndSendExpressResponseFromNativeError(response, new TimeoutError('Ran out of time'))
-    assert.ok(response.status.calledWith(408))
-    assert.ok(response.json.calledWith({errors: [{status: 408, title: 'Timeout', detail: 'Ran out of time'}]}))
+    updateAndSendExpressResponseFromNativeError(response, new TimeoutError('Ran out of time'));
+    assert.ok(response.status.calledWith(408));
+    assert.ok(response.json.calledWith({status: 408, title: 'Timeout', detail: 'Ran out of time'}));
   });
   it('should successfully update response based on ServiceUnavailableError', () => {
-    updateAndSendExpressResponseFromNativeError(response, new ServiceUnavailableError('Service does not want to cooperate'))
-    assert.ok(response.status.calledWith(503))
-    assert.ok(response.json.calledWith({errors: [{status: 503, title: 'Service Unavailable', detail: 'Service does not want to cooperate'}]}))
+    updateAndSendExpressResponseFromNativeError(response, new ServiceUnavailableError('Service does not want to cooperate'));
+    assert.ok(response.status.calledWith(503));
+    assert.ok(response.json.calledWith({status: 503, title: 'Service Unavailable', detail: 'Service does not want to cooperate'}));
   });
   it('should successfully update response based on general Error', () => {
-    updateAndSendExpressResponseFromNativeError(response, new Error('Some Error happened'))
-    assert.ok(response.status.calledWith(500))
-    assert.ok(response.json.calledWith({errors: [{status: 500, title: 'Unknown Error', detail: 'Some Error happened'}]}))
+    updateAndSendExpressResponseFromNativeError(response, new Error('Some Error happened'));
+    assert.ok(response.status.calledWith(500));
+    assert.ok(response.json.calledWith({status: 500, title: 'Unknown Error', detail: 'Some Error happened'}));
   });
 });
