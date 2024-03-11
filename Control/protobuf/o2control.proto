@@ -73,6 +73,7 @@ service Control {
     rpc ModifyEnvironment (ModifyEnvironmentRequest) returns (ModifyEnvironmentReply) {}
     rpc DestroyEnvironment (DestroyEnvironmentRequest) returns (DestroyEnvironmentReply) {}
     rpc GetActiveDetectors (Empty) returns (GetActiveDetectorsReply) {}
+    rpc GetAvailableDetectors (Empty) returns (GetAvailableDetectorsReply) {}
 
 //    rpc SetEnvironmentProperties (SetEnvironmentPropertiesRequest) returns (SetEnvironmentPropertiesReply) {}
 //    rpc GetEnvironmentProperties (GetEnvironmentPropertiesRequest) returns (GetEnvironmentPropertiesReply) {}
@@ -277,6 +278,10 @@ message DestroyEnvironmentReply {
 }
 
 message GetActiveDetectorsReply {
+    repeated string detectors = 1;
+}
+
+message GetAvailableDetectorsReply {
     repeated string detectors = 1;
 }
 
