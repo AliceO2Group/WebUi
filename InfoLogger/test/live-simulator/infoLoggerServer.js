@@ -37,7 +37,7 @@ const createServer = () => {
     function sendNextLog() {
       const log = fakeData[currentLogIndex % fakeData.length];
       const timestamp = (new Date()).getTime() / 1000; // seconds
-      const nextLogTimeout = 500 + (Math.random() * -500); // [0 ; 500]ms
+      const nextLogTimeout = 100 - (Math.random() * 100); // [0 ; 500]ms
 
       // switch protocol after each log sent to try both protocols
       if (currentLogIndex % 2 === 1) {
