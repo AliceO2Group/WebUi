@@ -108,6 +108,7 @@ describe('Live Mode test-suite', async () => {
   });
 
   it('successfully show indicator when user double pressed the log row', async () => {
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr', {timeout: 2000});
     const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
     await tableRow.click({clickCount: 2});
     await page.waitForSelector('#inspector-sidebar', {timeout: 1000})
