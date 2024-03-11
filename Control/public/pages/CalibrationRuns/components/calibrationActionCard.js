@@ -58,7 +58,7 @@ export const calibrationActionCard = (calibrationConfiguration, ongoingCalibrati
         Success: (result) => calibrationEventsDisplay(result?.events),
         Failure: (error) => errorComponent(error),
       })
-    ], ['w-50', 'g0', 'gr1', 'p1']
+    ], ['w-40', 'g0', 'gr1', 'p1']
   );
 };
 
