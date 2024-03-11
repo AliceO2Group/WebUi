@@ -34,8 +34,8 @@ jobs:
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for Control
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: control
           fail_ci_if_error: true
