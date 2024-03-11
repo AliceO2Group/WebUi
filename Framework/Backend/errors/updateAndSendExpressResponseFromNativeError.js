@@ -51,7 +51,7 @@ const updateAndSendExpressResponseFromNativeError = (response, error) => {
       break;
   }
 
-  response.status(status).json({ errors: [{ status, title, detail: message || 'An error has occurred' }] });
+  response.status(status).json({message, status, title});
 };
 
 exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;
