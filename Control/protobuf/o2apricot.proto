@@ -46,6 +46,7 @@ service Apricot {
     // Runtime KV calls
     rpc GetRuntimeEntry(GetRuntimeEntryRequest) returns (ComponentResponse) {}
     rpc SetRuntimeEntry(SetRuntimeEntryRequest) returns (Empty) {}
+    rpc GetRuntimeEntries(GetRuntimeEntriesRequest) returns (StringMap) {}
     rpc ListRuntimeEntries(ListRuntimeEntriesRequest) returns (ComponentEntriesResponse) {}
 
     // Component configuration calls
@@ -161,6 +162,10 @@ message SetRuntimeEntryRequest {
 }
 message GetEntryRequest {
     string key = 1;
+}
+
+message GetRuntimeEntriesRequest {
+    string component = 1;
 }
 
 message ListRuntimeEntriesRequest {
