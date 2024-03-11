@@ -33,9 +33,9 @@ export const calibrationRunsContent = (calibrationRunsModel) => {
     Loading: () => pageLoading(2),
     Success: (runsGroupedByDetector) => [
       h('.flex-row.p1', [
-        h('.w-50.f4.text-center', 'Start/Ongoing calibration runs'),
-        h('.w-25.f4.text-center', 'Last calibration runs'),
-        h('.w-25.f4.text-center', 'Last SUCCESSFUL calibration runs')
+        h('.w-40.f4.text-center', 'Start/Ongoing calibration runs'),
+        h('.w-30.f4.text-center', 'Last calibration runs'),
+        h('.w-30.f4.text-center', 'Last SUCCESSFUL calibration runs')
       ]),
       groupedCalibrationRunsPanel(runsGroupedByDetector, calibrationRunsModel),
     ],
