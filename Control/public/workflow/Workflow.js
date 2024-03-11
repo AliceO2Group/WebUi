@@ -84,6 +84,7 @@ export default class Workflow extends Observable {
     this.getAndSetSavedConfigurations();
     this.flpSelection.init();
     this.selectedConfiguration = '';
+    this.selectedConfigurationRaw = '';
     this.resetErrorMessage();
   }
 
@@ -96,6 +97,10 @@ export default class Workflow extends Observable {
     this.resetRevision(repository);
     this.setTemplatesData();
     this.form.setTemplate('');
+
+    this.selectedConfiguration = '';
+    this.selectedConfigurationRaw = '';
+    this.advErrorPanel = [];
 
     this.resetErrorMessage();
 
@@ -631,7 +636,7 @@ export default class Workflow extends Observable {
       const allVariables = Object.assign({}, basicVariables, variables);
       Object.keys(allVariables)
         .filter((key) => allVariables[key])
-        .forEach((key) => allVariables[key] = allVariables[key].trim().replace(/\r?\n/g,' '))
+        .forEach((key) => allVariables[key] = allVariables[key].trim().replace(/\r?\n/g, ' '))
       return {ok: true, message: '', variables: allVariables};
     }
   }

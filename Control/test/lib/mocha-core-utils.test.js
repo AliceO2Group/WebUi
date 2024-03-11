@@ -34,35 +34,28 @@ describe('CoreUtils test suite', () => {
     });
   });
 
-  describe('Check `_removeFlpBasedOnRunType` test suite', () => {
-    it.skip('should remove flp145 for specific run_type', () => {
-      const KNOWN_RUN_TYPES = ['SYNTHETIC', 'PHYSICS', 'COSMICS', 'TECHNICAL', 'REPLAY'];
-
-      KNOWN_RUN_TYPES.forEach((runType) => {
-        const payload = {
-          vars: {
-            run_type: runType,
-            hosts: JSON.stringify(['alio2-cr1-flp145', 'alio2-cr1-flp146'])
-          }
-        };
-        const expectedPayload = {
-          vars: {
-            run_type: runType,
-            hosts: JSON.stringify(['alio2-cr1-flp146'])
-          }
-        }
-        assert.deepStrictEqual(CoreUtils._removeFlpBasedOnRunType(payload), expectedPayload);
-      });
-    });
-
-    it('should not remove flp145 for specific run_type', () => {
+  describe('Check `_removeHostsFromSelection` test suite', () => {
+    it('should remove requested hosts from payload for specific run_type', () => {
       const payload = {
         vars: {
-          run_type: 'CALIBRATION',
-          hosts: JSON.stringify(['alio2-cr1-flp145', 'alio2-cr1-flp146'])
+          hosts: JSON.stringify(['host-145', 'host-146'])
         }
       };
-      assert.deepStrictEqual(CoreUtils._removeFlpBasedOnRunType(payload), payload);
+      const expectedPayload = {
+        vars: {
+          hosts: JSON.stringify(['host-146'])
+        }
+      };
+      assert.deepStrictEqual(CoreUtils._removeHostsFromSelection(payload, ['host-145']), expectedPayload);
+    });
+
+    it('should not remove host that is not found', () => {
+      const payload = {
+        vars: {
+          hosts: JSON.stringify(['host-145', 'host-146'])
+        }
+      };
+      assert.deepStrictEqual(CoreUtils._removeHostsFromSelection(payload, ['host-222']), payload);
     })
   });
 
@@ -111,6 +104,7 @@ describe('CoreUtils test suite', () => {
           keyWithNoNewLine: 'value is good to be used',
           keyWithNewLine: 'value\nvalue-value',
           keyWithMultipleNewLines: 'value\nvaluevalue\r\nend',
+          hosts: '["host-1"]'
         }
       };
       const expectedPayload = {
@@ -119,6 +113,7 @@ describe('CoreUtils test suite', () => {
           keyWithNoNewLine: 'value is good to be used',
           keyWithNewLine: 'value value-value',
           keyWithMultipleNewLines: 'value valuevalue end',
+          hosts: '["host-1"]'
         }
       }
       assert.deepStrictEqual(CoreUtils.parseEnvironmentCreationPayload(payload), expectedPayload);

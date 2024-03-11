@@ -15,7 +15,8 @@
 import {formatTimeDuration} from '/js/src/index.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';
 import {miniCard} from './../../../common/card/miniCard.js';
-import {calibrationRunCardTitle} from './calibrationRunCardTitle.js';
+import {calibrationRunCardHeader} from './calibrationRunCardHeader.js';
+import {qcgExternalLink} from './../../../common/qcgExternalLink.js';
 
 /**
  * Builds a card with information specific to a calibration run.
@@ -25,8 +26,8 @@ import {calibrationRunCardTitle} from './calibrationRunCardTitle.js';
 export const calibrationRunCard = (run) => !run ?
   null
   : miniCard(
-    calibrationRunCardTitle(run), [
+    calibrationRunCardHeader(run), [
       rowForCard(formatTimeDuration(run.runDuration), `Start: ${new Date(run.startTime).toLocaleString()}`),
-      rowForCard(null, `End: ${new Date(run.endTime).toLocaleString()}`),
-    ], ['w-25', 'g0', 'p2']
+      rowForCard(qcgExternalLink(run), `End: ${new Date(run.endTime).toLocaleString()}`),
+    ], ['w-30', 'g0', 'p2']
   );

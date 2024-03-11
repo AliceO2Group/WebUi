@@ -12,7 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { fetchClient, RemoteData } from '/js/src/index.js';
+import { jsonDelete } from './utils/jsonDelete.js';
+import { jsonPatch } from './utils/jsonPatch.js';
+import { jsonPut } from './utils/jsonPut.js';
+import { RemoteData } from '/js/src/index.js';
 
 /**
  * Model namespace with all CRUD requests for layouts
@@ -45,8 +48,10 @@ export default class LayoutService {
 
     if (ok) {
       const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+      const officialLayouts = sortedLayouts.filter(({ isOfficial = false })=> isOfficial);
       this.list = RemoteData.success(sortedLayouts);
       this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
+      this.model.folder.map.get('Official').list = RemoteData.success(officialLayouts);
     } else {
       this.list = RemoteData.failure(result.error || result.message);
       this.model.folder.map.get('All Layouts').list = RemoteData.failure(result.error || result.message);
@@ -93,14 +98,31 @@ export default class LayoutService {
   }
 
   /**
+   * Method to retrieve a layout by specific parameters as query parameters
+   * @param {String} runDefinition - definition of the run
+   * @param {String} [pdpBeamType] - optional beam type
+   * @return {Layout} - layout identified if any
+   */
+  async getLayoutByQuery(runDefinition, pdpBeamType) {
+    let url = `/api/layout?runDefinition=${runDefinition}`;
+    if (pdpBeamType) {
+      url += `&pdpBeamType=${pdpBeamType}`;
+    }
+    const { result, ok } = await this.loader.get(url);
+    return ok ? result : null;
+  }
+
+  /**
    * Method to remove a layout by its Id
    * @param {string} layoutId - layout id to be removed by
    * @returns {RemoteData} - result within a RemoteData object
    */
   async removeLayoutById(layoutId) {
-    const request = fetchClient(`/api/layout/${layoutId}`, { method: 'DELETE' });
-    this.loader.watchPromise(request);
-    await request;
+    try {
+      return RemoteData.success(await jsonDelete(`/api/layout/${layoutId}`));
+    } catch (error) {
+      return RemoteData.failure(error.message);
+    }
   }
 
   /**
@@ -109,8 +131,28 @@ export default class LayoutService {
    * @returns {RemoteData} - result within a RemoteData object
    */
   async saveLayout(layoutItem) {
-    const { result, ok } = await this.loader.post(`/api/writeLayout?id=${layoutItem.id}`, layoutItem, true);
-    return this.parseResult(result, ok);
+    const { id } = layoutItem;
+    delete layoutItem.isOfficial;
+
+    try {
+      return RemoteData.success(await jsonPut(`/api/layout/${id}`, { body: layoutItem }));
+    } catch (error) {
+      return RemoteData.failure(error.message);
+    }
+  }
+
+  /**
+   * Service method to send a patch HTTP request with new values
+   * @param {String} id - ID of layout to patch
+   * @param {LayoutPatchDto} patch - object with accepted parameters
+   * @returns {Promise<RemoteData>} - response within a RemoteData
+   */
+  async patchLayout(id, patch) {
+    try {
+      return RemoteData(await jsonPatch(`/api/layout/${id}`, { body: { ...patch } }));
+    } catch (error) {
+      return RemoteData.failure(error.message);
+    }
   }
 
   /**
@@ -125,11 +167,10 @@ export default class LayoutService {
     that.notify();
 
     const { result, ok } = await this.loader.post('/api/layout', layout, true);
-
-    this.new = ok ? RemoteData.success(result) : RemoteData.failure({ message: result.error || result.message });
+    this.new = this.parseResult(result, ok);
     that.notify();
 
-    return this.parseResult(result, ok);
+    return this.new;
   }
 
   /**

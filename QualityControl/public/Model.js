@@ -26,6 +26,7 @@ import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
+import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -49,6 +50,9 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.folder = new Folder(this);
+    this.folder.addFolder({
+      title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
+    });
     this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.bubbleTo(this);
@@ -165,13 +169,14 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    * @returns {undefined}
    */
-  handleLocationChange() {
+  async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
 
     this.services.layout.getLayoutsByUserId(this.session.personid);
 
-    switch (this.router.params.page) {
+    const { params } = this.router;
+    switch (params.page) {
       case 'layoutList':
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
@@ -179,15 +184,34 @@ export default class Model extends Observable {
         break;
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');
-        if (!this.router.params.layoutId) {
-          this.notification.show('layoutId in URL was missing. Redirecting to layout page', 'warning', 3000);
-          this.router.go('?page=layoutList', true);
-          return;
+        if (!params.layoutId) {
+          const { runDefinition, pdpBeamType, detector } = params;
+          if (!runDefinition) {
+            this.notification.show('layoutId in URL was missing. Redirecting to layouts page', 'warning', 3000);
+            this.router.go('?page=layoutList', true);
+            return;
+          } else {
+            const layout = await this.services.layout.getLayoutByQuery(runDefinition, pdpBeamType);
+            if (!layout) {
+              this.notification.show(`Layout with RunDefinition ${runDefinition} could not be found`, 'warning', 3000);
+              this.router.go('?page=layoutList', true);
+            }
+            const paramsToAdd = { layoutId: layout.id };
+            delete params.runDefinition;
+            delete params.pdpBeamType;
+            if (detector) {
+              paramsToAdd.tab = detector;
+              delete params.detector;
+            }
+
+            this.router.go(buildQueryParametersString(params, paramsToAdd), true);
+            return;
+          }
         }
-        this.layout.loadItem(this.router.params.layoutId)
+        this.layout.loadItem(this.router.params.layoutId, params?.tab ?? '')
           .then(() => {
             this.page = 'layoutShow';
-            if (this.router.params.edit) {
+            if (params.edit) {
               this.layout.edit();
 
               // Replace silently and immediately URL to remove 'edit' parameter after a layout creation

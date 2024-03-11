@@ -80,15 +80,25 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request and parse a list of template objects', async () => {
-    const templates = await page.evaluate(() => window.model.workflow.templates);
+    const {kind, templates} = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.templates.kind,
+        templates: window.model.workflow.templates.payload
+      }
+    });
     const expectedTemplates = [{name: 'prettyreadout-1', description: 'something'}];
 
-    assert.strictEqual(templates.kind, "Success");
-    assert.deepStrictEqual(templates.payload, expectedTemplates);
+    assert.strictEqual(kind, "Success");
+    assert.deepStrictEqual(templates, expectedTemplates);
   });
 
   it('should successfully request and parse a list of repositories objects', async () => {
-    const repositories = await page.evaluate(() => window.model.workflow.repoList);
+    const repositories = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.repoList.kind,
+        payload: window.model.workflow.repoList.payload
+      }
+    });
     const expectedRepositories = {
       repos: [
         {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: ['master', 'dev']},
@@ -116,12 +126,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have `Create` button disabled due to no selected workflow', async () => {
-    await page.waitForSelector('#create-env');
+    await page.waitForSelector('#deploy-env');
     const button = await page.evaluate(() => {
-      const button = document.querySelector('#create-env');
+      const button = document.querySelector('#deploy-env');
       return {title: button.title, classList: button.classList, disabled: button.disabled};
     });
-    assert.strictEqual(button.title, 'Create environment based on selected workflow');
+    assert.strictEqual(button.title, 'Deploy environment');
     assert.ok(button.disabled);
     assert.deepStrictEqual(button.classList, {0: 'btn', 1: 'btn-primary'});
   });
@@ -138,9 +148,9 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have `Create` button disabled due to no selected detectors', async () => {
-    await page.waitForSelector('#create-env');
+    await page.waitForSelector('#deploy-env');
     const button = await page.evaluate(() => {
-      const button = document.querySelector('#create-env');
+      const button = document.querySelector('#deploy-env');
       const selected = window.model.workflow.flpSelection.selectedDetectors.length;
       return {disabled: button.disabled, noSelected: selected};
     });
@@ -358,7 +368,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   // FLP Selection
 
   it('should successfully request a list of detectors', async () => {
-    const detectors = await page.evaluate(() => window.model.workflow.flpSelection.detectors);
+    const detectors = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.flpSelection.detectors.kind,
+        payload: window.model.workflow.flpSelection.detectors.payload
+      }
+    });
     const expDetectors = ['MID', 'DCS', 'ODC'];
 
     assert.strictEqual(detectors.kind, "Success");
@@ -366,7 +381,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request a list of ACTIVE detectors', async () => {
-    const activeDetectors = await page.evaluate(() => window.model.workflow.flpSelection.activeDetectors);
+    const activeDetectors = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.flpSelection.activeDetectors.kind,
+        payload: window.model.workflow.flpSelection.activeDetectors.payload
+      }
+    });
     const expActiveDetectors = {detectors: ['DCS']};
 
     assert.strictEqual(activeDetectors.kind, 'Success');
@@ -374,18 +394,18 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully disable active detectors from the list', async () => {
-    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > a:nth-child(2)').classList);
+    const detectorClass = await page.evaluate(() => document.querySelector('.m1 > div:nth-child(2) > div > a:nth-child(2)').classList);
     assert.ok(Object.values(detectorClass).includes('menu-item'));
     assert.ok(Object.values(detectorClass).includes('disabled-item'));
   });
 
   it('should have an empty list of hosts before detector selection', async () => {
-    const flps = await page.evaluate(() => window.model.workflow.flpSelection.list);
-    assert.strictEqual(flps.kind, 'NotAsked');
+    const flpsKind = await page.evaluate(() => window.model.workflow.flpSelection.list.kind);
+    assert.strictEqual(flpsKind, 'NotAsked');
   });
 
   it('should not select a detector that is not locked', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click()); // second element is for detector, first for lock
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click()); // second element is for detector, first for lock
     await page.waitForTimeout(200);
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
@@ -393,12 +413,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
-    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(1)');
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
+    await page.waitForSelector('.m1 > div:nth-child(1) > div > a:nth-child(1)');
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(1)').click());
     await page.waitForTimeout(200);
 
-    await page.waitForSelector('.m1 > div:nth-child(1) > a:nth-child(2)');
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.waitForSelector('.m1 > div:nth-child(1) > div > a:nth-child(2)');
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
     await page.waitForTimeout(200);
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
@@ -431,13 +451,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully create a new environment', async () => {
-    await page.evaluate(() => document.querySelector('#create-env').click());
+    await page.evaluate(() => document.querySelector('#deploy-env').click());
     await page.waitForTimeout(1000);
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments');
   });
 
-  it('should display successfull environment request', async () => {
+  it('should display successful environment request', async () => {
     await page.waitForSelector('tr.primary > th:nth-child(1)');
     const detector = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)').innerText);
     const state = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(6)').innerText);

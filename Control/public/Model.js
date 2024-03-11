@@ -45,6 +45,7 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
     this.session.role = this.getRole();
+    di.session = this.session;
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
@@ -85,8 +86,6 @@ export default class Model extends Observable {
 
     this.about = new About(this);
     this.about.bubbleTo(this);
-
-
 
     this.notification = new O2Notification();
     this.notification.bubbleTo(this);
@@ -178,8 +177,11 @@ export default class Model extends Observable {
         break;
       case 'components-STATUS':
         if (message?.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]) {
-          this.about.updateComponentStatus('system', message.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY])
+          this.about.updateComponentStatus('system', message.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]);
         }
+        this.detectors.availability = message.payload['INTEG_SERVICE-DCS']?.extras?.detectors ?? {};
+        this.notify();
+
         break;
       case 'CALIBRATION_RUNS_BY_DETECTOR':
         if (message.payload) {
@@ -267,7 +269,6 @@ export default class Model extends Observable {
         this.task.getTasks();
         break;
       case 'about':
-        this.about.retrieveInfo();
         break;
       case 'configuration':
         this.configuration.init();

@@ -16,7 +16,7 @@ import {detectorHeader} from './../../common/detectorHeader.js';
 import {workflowTemplateComponent} from './components/workflowTemplate.component.js';
 import {panel} from '../../common/panel/panel.js';
 import {workflowMappingsComponent} from './components/workflowMappings.component.js';
-import {workflowCreationButtonComponent} from './components/workflowCreationButton.component.js';
+import {deployEnvironmentButton} from '../../common/deployEnvironmentButton.component.js';
 import detectorsPanel from '../../workflow/panels/flps/detectorsPanel.js';
 import flpSelectionPanel from '../../workflow/panels/flps/flpSelectionPanel.js';
 
@@ -39,12 +39,11 @@ export const EnvironmentCreationPage = (model) => {
     workflowLoaded, selectedConfigurationLabel, workflowMappings, setCreationModelConfiguration
   } = envCreationModel;
   const {deployEnvironment, defaultWorkflow, isReady, setOdcNumberOfEpns} = envCreationModel;
-
   return h('.absolute-fill.scroll-y', [
     detectorHeader(model),
     h('.g2.flex-column.p2', [
       h('.w-100.flex-row.g3', [
-        h('.w-40.flex-column', [
+        h('.w-50.flex-column', [
           panel(
             'Choose configuration',
             h('.flex-column', [
@@ -60,12 +59,15 @@ export const EnvironmentCreationPage = (model) => {
             workflowTemplateComponent(defaultWorkflow),
           ),
         ]),
-        h('.flex-row.text-center.w-100', [
+        h('.flex-row.text-center.w-50', [
           flpSelectionPanel(model.workflow, 43.3)
         ]),
       ]),
-      workflowCreationButtonComponent(isReady, deployEnvironment.bind(envCreationModel))
-
+      !envCreationModel.isPfrAvailable() && h('.w-100.text-center.danger.flex-column', [
+        h('', 'Due DCS being enabled and PFR not being available for one or more of the selected detectors -'),
+        h('', 'deployment cannot start')
+      ]),
+      deployEnvironmentButton(false, isReady, deployEnvironment.bind(envCreationModel))
     ])
   ]);
 };

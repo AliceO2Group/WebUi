@@ -14,7 +14,7 @@
 
 /* global COG */
 
-import {h} from '/js/src/index.js';
+import {h, iconX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
@@ -150,7 +150,7 @@ const environmentsTable = (model, list) => {
         return h('tr', {
           class: isGlobalRun(item.userVars) ? 'bg-global-run' : ''
         }, [
-          runColumn(item),
+          runColumn(item, model),
           h('td', {style: 'text-align: center;'},
             h('a', {
               href: `?page=environment&id=${item.id}`,
@@ -197,16 +197,26 @@ const environmentsTable = (model, list) => {
  * @param {EnvironmentDTO} item 
  * @returns {vnode}
  */
-const runColumn = (item) => {
+const runColumn = (item, model) => {
   let classes = '';
   let text = '-';
+  const isDcsOn = item.userVars?.['dcs_enabled'] === 'true';
+  const {includedDetectors} = item;
+  const isSorAvailable = model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability');
   if (item.currentRunNumber) {
     classes = 'bg-success white';
     text = item.currentRunNumber;
-  } else if (!item.currentTransition && item.state === 'CONFIGURED') {
+  } else if (
+    (!item.currentTransition && item.state === 'CONFIGURED' && isDcsOn && isSorAvailable)
+    ||
+    (!item.currentTransition && item.state === 'CONFIGURED' && !isDcsOn)
+  ) {
     classes = 'bg-primary white';
     text = 'READY';
-  } else if ( item.currentTransition && item.state === 'CONFIGURED') {
+  } else if (!item.currentTransition && item.state === 'CONFIGURED' && isDcsOn && !isSorAvailable) {
+    classes = 'danger';
+    text = h('.g2', [iconX(), 'SOR']);
+  } else if (item.currentTransition && item.state === 'CONFIGURED') {
     classes = 'bg-primary white';
     text = '...';
   }

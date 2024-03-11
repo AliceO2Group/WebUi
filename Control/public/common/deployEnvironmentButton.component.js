@@ -16,15 +16,17 @@ import {h} from '/js/src/index.js';
 /**
  * Builds a component with a set of buttons to allow users to create environments based on mapped workflow templates
  *
+ * @param {Boolean} isLoading - if the button should be displayed as loading
  * @param {Boolean} isReady - if environment creation is ready to be deployed
  * @param {void} onclick - deploying action of the environment
  * @returns {vnode}
  */
-export const workflowCreationButtonComponent = (isReady = false, onclick) =>
+export const deployEnvironmentButton = (isLoading = false, isReady = false, onclick) =>
   h('.w-100.text-center', [
-    h('button', {
-      class: 'btn btn-primary',
-      disabled: !isReady,
+    h('button.btn.btn-primary#deploy-env', {
+      class: isLoading ? 'loading' : '',
+      disabled: !isReady || isLoading,
       onclick,
-    },'Create')
+      title: 'Deploy environment'
+    },'Deploy')
   ]);

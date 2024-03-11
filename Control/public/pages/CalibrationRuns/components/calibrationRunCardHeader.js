@@ -13,8 +13,8 @@
 */
 
 import {h} from '/js/src/index.js';
-import {coloredBadge} from './../../../common/coloredBadge.js';
-import {RUN_CALIBRATION_STATUS_COLOR_MAP} from './../../../common/enums/runCalibrationStatus.enum.js';
+import {coloredBadge} from '../../../common/coloredBadge.js';
+import {RUN_CALIBRATION_STATUS_COLOR_MAP} from '../../../common/enums/runCalibrationStatus.enum.js';
 
 /* global COG */
 
@@ -22,18 +22,21 @@ import {RUN_CALIBRATION_STATUS_COLOR_MAP} from './../../../common/enums/runCalib
  * Component for building the title component of a calibrationRunCard
  * @return {vnode}
  */
-export const calibrationRunCardTitle = (run) =>
-  h('.flex-row.justify-between', [
+export const calibrationRunCardHeader = (run) => {
+  const {runNumber, environmentId, calibrationStatus} = run;
+
+  return h('.flex-row.justify-between.f5', [
     h('.flex-row.w-60', [
-      h('a.f4.actionable-row', {
-        href: `${COG.BKP_URL}?page=run-detail&id=${run.id}`,
+      h('a.actionable-row', {
+        href: `${COG.BKP_URL}?page=run-detail&runNumber=${runNumber}`,
         target: '_blank',
-      }, run.runNumber),
-      h('.f4.ph2', '/'),
-      h('a.f4.text-right.actionable-row', {
-        href: `${COG.BKP_URL}?page=env-details&environmentId=${run.environmentId}`,
+      }, runNumber),
+      h('.ph2', '/'),
+      h('a.text-right.actionable-row', {
+        href: `${COG.BKP_URL}?page=env-details&environmentId=${environmentId}`,
         target: '_blank',
-      }, run.environmentId)
+      }, environmentId),
     ]),
-    coloredBadge(run.calibrationStatus, RUN_CALIBRATION_STATUS_COLOR_MAP),
+    coloredBadge(calibrationStatus, RUN_CALIBRATION_STATUS_COLOR_MAP),
   ]);
+};

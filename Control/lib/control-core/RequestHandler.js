@@ -15,6 +15,10 @@ const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
 const {errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
+const {
+  RUNTIME_COMPONENT: {COG},
+  RUNTIME_KEY: {RUN_TYPE_TO_HOST_MAPPING}
+} = require('../common/kvStore/runtime.enum.js');
 
 /**
  * Handles AliECS create env requests
@@ -23,9 +27,11 @@ class RequestHandler {
 
   /**
    * @param {object} ctrlService - Handle to Control service
+   * @param {ApricotService} apricotService - service to use to interact with A.P.R.I.C.O.T
    */
-  constructor(ctrlService) {
+  constructor(ctrlService, apricotService) {
     this.ctrlService = ctrlService;
+    this._apricotService = apricotService;
     this.requestList = {};
 
     /**
@@ -80,8 +86,20 @@ class RequestHandler {
     }
     const deploymentRequestedAt = Date.now();
     let creationResponse = null;
+
+    let hostsToIgnoreForRunType = [];
     try {
-      const payload = CoreUtils.parseEnvironmentCreationPayload(req.body);
+      const runType = CoreUtils.getRunType(req.body);
+      const hostsToIgnoreString = await this._apricotService.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING);
+      const hostsToIgnoreMap = JSON.parse(hostsToIgnoreString);
+      if (Array.isArray(hostsToIgnoreMap[runType])) {
+        hostsToIgnoreForRunType = hostsToIgnoreMap[runType]
+      }
+    } catch (error) {
+      errorLogger(`Unable to identify FLPs to ignore due to: ${error}`);
+    }
+    try {
+      const payload = CoreUtils.parseEnvironmentCreationPayload(req.body, hostsToIgnoreForRunType);
       creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
 
       log.debug('Auto-removed request, ID: ' + index);

@@ -139,9 +139,9 @@ class EnvironmentService {
     this._broadcastService.broadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests[detector][runType]);
 
     const subscribeChannel = this._coreGrpc.client.Subscribe({id: channelIdString});
-    subscribeChannel.on('data', (data) => this._onData(data, channelIdString, detector, runType));
-    subscribeChannel.on('error', (error) => this._onError(error, channelIdString, detector, runType));
-    subscribeChannel.on('end', () => this._onEnd(channelIdString, detector, runType));
+    subscribeChannel.on('data', (data) => this._onData(data, detector, runType));
+    subscribeChannel.on('error', (error) => this._onError(error, detector, runType));
+    subscribeChannel.on('end', () => this._onEnd(detector, runType));
 
 
     this._coreGrpc.NewAutoEnvironment({
@@ -156,19 +156,19 @@ class EnvironmentService {
   /**
    * Method to parse incoming messages from stream channel
    * @param {Event} event - AliECS Event (proto)
-   * @param {Symbol} id - id of the request that was sent for a new auto environment
+   * @param {String} detector - detector name for which the event was triggered
+   * @param {String} runType - run type for which the event was triggered
    * @return {void}
    */
-  _onData(event, id, detector, runType) {
+  _onData(event, detector, runType) {
     const events = [];
-    const {taskEvent, environmentEvent} = event;
-
+    const {taskEvent, environmentEvent, timestamp = Date.now()} = event;
     if (taskEvent && (taskEvent.state === 'ERROR' || taskEvent.status === 'TASK_FAILED')) {
       events.push({
         type: 'TASK',
         payload: {
           ...taskEvent,
-          at: Date.now(),
+          at: Number(timestamp),
           message: 'Please ensure environment is killed before retrying',
         }
       });
@@ -177,7 +177,7 @@ class EnvironmentService {
         type: 'ENVIRONMENT',
         payload: {
           ...environmentEvent,
-          at: Date.now()
+          at: Number(timestamp),
         }
       });
     }
@@ -192,10 +192,11 @@ class EnvironmentService {
   /**
    * Method to be used in case of AliECS environment creation request error
    * @param {Error} error - error encountered during the creation of environment
-   * @param {String} id - id of the environment request in question
+   * @param {String} detector - detector name for which the event was triggered
+   * @param {String} runType - run type for which the event was triggered
    * @return {void}
    */
-  _onError(error, id, detector, runType) {
+  _onError(error, detector, runType) {
     const calibrationRunsRequests = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
     calibrationRunsRequests[detector][runType].events.push({
       type: 'ERROR',
@@ -217,10 +218,11 @@ class EnvironmentService {
 
   /**
    * Method to be used for when environment successfully finished transitioning
-   * @param {String} id - id of the environment request in question
+   * @param {String} detector - detector name for which the event was triggered
+   * @param {String} runType - run type for which the event was triggered
    * @return {void}
    */
-  _onEnd(id, detector, runType) {
+  _onEnd(detector, runType) {
     const calibrationRunsRequests = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
     calibrationRunsRequests[detector][runType].events.push({
       type: 'ENVIRONMENT',

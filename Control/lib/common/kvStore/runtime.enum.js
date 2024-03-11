@@ -22,6 +22,7 @@ const RUNTIME_KEY = Object.freeze({
   FLP_VERSION: 'flp_suite_version',
   PDP_VERSION: 'pdp_o2pdpsuite_version',
   CALIBRATION_MAPPING: 'calibration-mappings',
+  RUN_TYPE_TO_HOST_MAPPING: 'runType-to-host-mapping'
 });
 
 module.exports = {RUNTIME_COMPONENT, RUNTIME_KEY};

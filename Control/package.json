@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/control",
-  "version": "1.66.2",
+  "version": "1.67.1",
   "description": "ALICE O2 Control GUI",
   "author": "George Raduta",
   "contributors": [
@@ -27,8 +27,8 @@
     "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "dependencies": {
-    "@aliceo2/web-ui": "2.5.0",
-    "@grpc/grpc-js": "1.9.0",
+    "@aliceo2/web-ui": "2.6.0",
+    "@grpc/grpc-js": "1.10.1",
     "@grpc/proto-loader": "0.7.0",
     "google-protobuf": "3.21.0"
   },

@@ -44,6 +44,9 @@ export default class Folder extends Observable {
     if (!folder.list) {
       folder.list = RemoteData.notAsked();
     }
+    if (!folder.classList) {
+      folder.classList = 'bg-gray-light';
+    }
     const folderExistsAlready = this.map.get(folder.title);
     if (folderExistsAlready) {
       return false;

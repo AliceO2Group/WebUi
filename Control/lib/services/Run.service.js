@@ -70,7 +70,7 @@ class RunService {
    * Method to initialize the service with data such as runTypes and calibration mappings
    * @return {void}
    */
-  async init() {
+  async retrieveStaticConfigurations() {
     this._calibrationConfigurationPerDetectorMap = await this._retrieveCalibrationConfigurationsForDetectors();
     this._runTypes = await this._bkpService.getRunTypes();
     await this.retrieveCalibrationRunsGroupedByDetector();
@@ -131,7 +131,7 @@ class RunService {
    * @return {Promise<Object<String, CalibrationConfiguration.Error>} - map of calibration configurations
    *  
    * @example 
-   * { "XYZ": [ { "runType": "PEDESTAL", "configuration": "cpv-pedestal-20220412", "label": "CPV PEDESTAL" }]}
+   * { "XYZ": [ { "runType": "PEDESTAL", "configuration": "cpv-pedestal-20220412", "label": "CPV PEDESTAL", description: "To be ran second for CPV" }]}
    */
   async _retrieveCalibrationConfigurationsForDetectors() {
     try {
