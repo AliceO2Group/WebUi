@@ -80,15 +80,25 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request and parse a list of template objects', async () => {
-    const templates = await page.evaluate(() => window.model.workflow.templates);
+    const {kind, templates} = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.templates.kind,
+        templates: window.model.workflow.templates.payload
+      }
+    });
     const expectedTemplates = [{name: 'prettyreadout-1', description: 'something'}];
 
-    assert.strictEqual(templates.kind, "Success");
-    assert.deepStrictEqual(templates.payload, expectedTemplates);
+    assert.strictEqual(kind, "Success");
+    assert.deepStrictEqual(templates, expectedTemplates);
   });
 
   it('should successfully request and parse a list of repositories objects', async () => {
-    const repositories = await page.evaluate(() => window.model.workflow.repoList);
+    const repositories = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.repoList.kind,
+        payload: window.model.workflow.repoList.payload
+      }
+    });
     const expectedRepositories = {
       repos: [
         {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: ['master', 'dev']},
@@ -358,7 +368,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   // FLP Selection
 
   it('should successfully request a list of detectors', async () => {
-    const detectors = await page.evaluate(() => window.model.workflow.flpSelection.detectors);
+    const detectors = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.flpSelection.detectors.kind,
+        payload: window.model.workflow.flpSelection.detectors.payload
+      }
+    });
     const expDetectors = ['MID', 'DCS', 'ODC'];
 
     assert.strictEqual(detectors.kind, "Success");
@@ -366,7 +381,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request a list of ACTIVE detectors', async () => {
-    const activeDetectors = await page.evaluate(() => window.model.workflow.flpSelection.activeDetectors);
+    const activeDetectors = await page.evaluate(() => {
+      return {
+        kind: window.model.workflow.flpSelection.activeDetectors.kind,
+        payload: window.model.workflow.flpSelection.activeDetectors.payload
+      }
+    });
     const expActiveDetectors = {detectors: ['DCS']};
 
     assert.strictEqual(activeDetectors.kind, 'Success');
@@ -380,8 +400,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have an empty list of hosts before detector selection', async () => {
-    const flps = await page.evaluate(() => window.model.workflow.flpSelection.list);
-    assert.strictEqual(flps.kind, 'NotAsked');
+    const flpsKind = await page.evaluate(() => window.model.workflow.flpSelection.list.kind);
+    assert.strictEqual(flpsKind, 'NotAsked');
   });
 
   it('should not select a detector that is not locked', async () => {
