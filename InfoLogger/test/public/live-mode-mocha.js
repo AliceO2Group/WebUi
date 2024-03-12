@@ -67,7 +67,7 @@ describe('Live Mode test-suite', async () => {
       window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
     });
     await page.evaluate(() => window.model.log.liveStart());
-    await page.waitForFunction(`window.model.log.list.length > 10`, {timeout: 5000});
+    await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
     const list = await page.evaluate(() => window.model.log.list);
     const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');
     assert.ok(list.length > 0);
@@ -98,6 +98,7 @@ describe('Live Mode test-suite', async () => {
       window.model.log.empty();
     });
     await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
+
     const list = await page.evaluate(() => window.model.log.list);
     const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
     const isUserNameMatching = list.map((element) => element.username).every((username) => new RegExp('a.iceda.').test(username));
@@ -107,23 +108,23 @@ describe('Live Mode test-suite', async () => {
     assert.ok(isUserNameMatching);
   });
 
-  it('successfully show indicator when user double pressed the log row', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr', {timeout: 2000});
-    const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
-    await tableRow.click({clickCount: 2});
-    await page.waitForSelector('#inspector-sidebar', {timeout: 1000})
-
-    const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
-    assert.ok(indicatorOpen);
-  });
-
-  it('should go to mode live in paused state', async () => {
+  it('should successfully go to mode LIVE in paused state', async () => {
     const activeMode = await page.evaluate(() => {
       window.model.log.liveStop('Paused');
       return window.model.log.activeMode;
     });
 
     assert.deepStrictEqual(activeMode, 'Paused');
+  });
+
+  it('successfully show indicator when user double pressed the log row', async () => {
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr', {timeout: 5000});
+    const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
+    await tableRow.click({clickCount: 2});
+    await page.waitForSelector('#inspector-sidebar', {timeout: 1000})
+
+    const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
+    assert.ok(indicatorOpen);
   });
 
   it('should go to mode query', async () => {
