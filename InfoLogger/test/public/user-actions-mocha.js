@@ -65,7 +65,6 @@ describe('User Profile test-suite', async () => {
         document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();
         document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
       });
-      await page.waitForTimeout(200);
 
       const actionDropdownClosed = await page.evaluate(() => window.model.accountMenuEnabled);
       assert.ok(!actionDropdownClosed);
@@ -89,7 +88,6 @@ describe('User Profile test-suite', async () => {
         document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
         return window.model.userProfile.payload;
       });
-      page.waitForTimeout(200);
       assert.ok(!userProfile.content.colsHeader.date.visible);
     });
   });
