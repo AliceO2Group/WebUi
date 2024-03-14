@@ -55,7 +55,7 @@ export default class About extends Observable {
     for (const key in this.servicesPath) {
       this.retrieveServiceStatus(key, this.servicesPath[key])
     }
-    this.retrieveWsInfo();
+    // this.retrieveWsInfo();
   }
 
   /**

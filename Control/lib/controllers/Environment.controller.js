@@ -16,6 +16,7 @@ const {EnvironmentTransitionType} = require('./../common/environmentTransitionTy
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {InvalidInputError} = require('./../errors/InvalidInputError.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
+const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 /**
  * Controller for dealing with all API requests on environments from AliECS:
@@ -26,8 +27,9 @@ class EnvironmentController {
    * @param {EnvironmentService} envService - service to use to query AliECS with regards to environments
    * @param {WorkflowTemplateService} workflowService - service to use to query Apricot for workflow details
    * @param {LockService} lockService - service to use to check lock is taken
+   * @param {DetectorsService} detectorService - service to use to check on state of detectors
    */
-  constructor(envService, workflowService, lockService) {
+  constructor(envService, workflowService, lockService, detectorService) {
     this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/env-ctrl`);
 
     /**
@@ -44,6 +46,11 @@ class EnvironmentController {
      * @type {LockService}
      */
     this._lockService = lockService;
+
+    /**
+     * @type {DetectorsService}
+     */
+    this._detectorService = detectorService;
   }
 
   /**
@@ -126,8 +133,6 @@ class EnvironmentController {
    */
   async newAutoEnvironmentHandler(req, res) {
     const {personid, name} = req.session;
-    let workflowTemplatePath;
-    let variables;
     const {detector, runType, configurationName} = req.body;
 
     if (!this._lockService.isLockTakenByUser(detector, personid, name)) {
@@ -140,7 +145,19 @@ class EnvironmentController {
       return;
     }
 
+    try {
+      const areDetectorsAvailable = await this._detectorService.areDetectorsAvailable([detector]);
+      if (!areDetectorsAvailable) {
+        updateExpressResponseFromNativeError(res, new InvalidInputError(`Detector ${detector} is already active`));
+        return;
+      }
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, grpcErrorToNativeError(error));
+      return;
+    }
+
     // Retrieve latest configuration version for given name
+    let variables;
     try {
       const configuration = await this._workflowService.retrieveWorkflowSavedConfiguration(configurationName);
       if (!configuration.variables) {
@@ -155,6 +172,7 @@ class EnvironmentController {
     }
 
     // Retrieve latest default workflow to use
+    let workflowTemplatePath;
     try {
       const {template, repository, revision} = await this._workflowService.getDefaultTemplateSource();
       workflowTemplatePath = `${repository}/workflows/${template}@${revision}`;
