@@ -128,7 +128,7 @@ export default class Layout extends Observable {
    */
   setFilterFromURL() {
     const parameters = this.model.router.params;
-    ['PeriodName', 'PassName', 'RunNumber', 'RunType'].forEach((filterKey) => {
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
       if (parameters[filterKey]) {
         this.filter[filterKey] = decodeURI(parameters[filterKey]);
       }
@@ -138,19 +138,17 @@ export default class Layout extends Observable {
 
   /**
    * When the user updates the displayed Objects, the filters should be placed in the URL as well
-   * @param {string} layoutId - to be updated in URL
    * @param {boolean} isSilent - whether the route should be silent or not
    * @returns {undefined}
    */
-  setFilterToURL(layoutId, isSilent = true) {
-    const id = layoutId ? layoutId : this.model.router.params.layoutId;
-    let currentParameters = `?page=layoutShow&layoutId=${id}`;
+  setFilterToURL(isSilent = true) {
+    const parameters = this.model.router.params;
     Object.entries(this.filter)
       .filter(([_, value]) => value)
       .forEach(([key, value]) => {
-        currentParameters += `&${key}=${encodeURI(value)}`;
+        parameters[key] = encodeURI(value);
       });
-    this.model.router.go(currentParameters, true, isSilent);
+    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
   /**
