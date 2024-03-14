@@ -27,6 +27,7 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
 const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
+const {DetectorService} = require('./services/Detector.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
 const {LockService} = require('./services/Lock.service.js');
@@ -82,10 +83,11 @@ module.exports.setup = (http, ws) => {
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
 
+  const detectorService = new DetectorService(ctrlProxy);
   const envService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService);
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
 
-  const envCtrl = new EnvironmentController(envService, workflowService, lockService);
+  const envCtrl = new EnvironmentController(envService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
 
   const aliecsReqHandler = new AliecsRequestHandler(ctrlService, apricotService);
