@@ -60,8 +60,8 @@ const filter = (layoutModel, queryLabel, placeholder, key, type = 'text', width 
       },
       onkeydown: ({ keyCode }) => {
         if (keyCode === 13) {
-          layoutModel.selectTab(layoutModel.tabIndex);
           layoutModel.setFilterToURL();
+          layoutModel.selectTab(layoutModel.tabIndex);
         }
       },
     }),
@@ -74,8 +74,8 @@ const filter = (layoutModel, queryLabel, placeholder, key, type = 'text', width 
  */
 const updateFiltersButton = (layoutModel) => h('', h('button.btn.btn-primary', {
   onclick: () => {
-    layoutModel.selectTab(layoutModel.tabIndex);
     layoutModel.setFilterToURL();
+    layoutModel.selectTab(layoutModel.tabIndex);
   },
 }, 'Update'));
 
