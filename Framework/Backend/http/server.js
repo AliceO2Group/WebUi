@@ -35,6 +35,10 @@ class HttpServer {
    * @param {object} httpConfig - configuration of HTTP server
    * @param {object} [jwtConfig] - configuration of JWT
    * @param {object} [connectIdConfig] - configuration of OpenID Connect
+   * @param {object} CspAdditionalSources - additional CSP configuration
+   * @param {string[]} [CspAdditionalSources.scriptSrc] - list of sources that will be allowed
+   * @param {string[]} [CspAdditionalSources.styleSrc] - list of sources that will be allowed
+   * @param {string[]} [CspAdditionalSources.connectSrc] - list of sources that will be allowed
    */
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
     assert(httpConfig, 'Missing config');
@@ -131,8 +135,13 @@ class HttpServer {
    * @param {string} hostname whitelisted hostname for websocket connection
    * @param {list}   iframeCsp list of URLs for frame-src CSP
    * @param {number} port secure port number
+   * @param {object} CspAdditionalSources additional CSP configuration
+   * @param {string[]} [CspAdditionalSources.scriptSrc] list of sources that will be allowed
+   * @param {string[]} [CspAdditionalSources.styleSrc] list of sources that will be allowed
+   * @param {string[]} [CspAdditionalSources.connectSrc] list of sources that will be allowed
    */
-  configureHelmet({hostname, port, iframeCsp = [], allow = false}) {
+  configureHelmet({hostname, port, iframeCsp = [], allow = false, CspAdditionalSources = {}}) {
+    const { scriptSrc = [], styleSrc = [], connectSrc = [] } = CspAdditionalSources;
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({action: 'deny'}));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -152,9 +161,9 @@ class HttpServer {
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:", hostname + ':*'],
-        scriptSrc: ["'self'", ...(allow ? ["'unsafe-eval'"] : [])],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port],
+        scriptSrc: ["'self'", ...(allow ? ["'unsafe-eval'"] : []), ...scriptSrc],
+        styleSrc: ["'self'", "'unsafe-inline'", ...styleSrc],
+        connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port, ...connectSrc],
         upgradeInsecureRequests: null,
         frameSrc: iframeCsp
         /* eslint-enable */
