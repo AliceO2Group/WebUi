@@ -40,7 +40,7 @@
     "eslint-config-google": "^0.14.0",
     "mocha": "^10.3.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^22.5.0",
+    "puppeteer": "^22.6.1",
     "sinon": "^17.0.0"
   },
   "bundleDependencies": [
