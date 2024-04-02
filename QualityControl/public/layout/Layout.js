@@ -143,11 +143,14 @@ export default class Layout extends Observable {
    */
   setFilterToURL(isSilent = true) {
     const parameters = this.model.router.params;
-    Object.entries(this.filter)
-      .filter(([_, value]) => value)
-      .forEach(([key, value]) => {
-        parameters[key] = encodeURI(value);
-      });
+
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
+      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
+        delete parameters[filterKey];
+      } else {
+        parameters[filterKey] = encodeURI(this.filter[filterKey]);
+      }
+    });
     this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
