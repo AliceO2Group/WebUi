@@ -185,7 +185,7 @@ export default class Model extends Observable {
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
-          const { runDefinition, pdpBeamType, detector, runType } = params;
+          const { runDefinition, pdpBeamType, detector, runType, runNumber } = params;
           if (!runDefinition) {
             this.notification.show('layoutId in URL was missing. Redirecting to layouts page', 'warning', 3000);
             this.router.go('?page=layoutList', true);
@@ -209,6 +209,10 @@ export default class Model extends Observable {
               paramsToAdd.tab = tab;
               delete params.detector;
               delete params.runType;
+            }
+            if (runNumber !== null && runNumber !== undefined) {
+              paramsToAdd.RunNumber = runNumber;
+              delete params.runNumber;
             }
             this.router.go(buildQueryParametersString(params, paramsToAdd), true);
             return;
