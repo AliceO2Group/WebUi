@@ -185,15 +185,15 @@ export default class Model extends Observable {
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
-          const { runDefinition, pdpBeamType, detector, runType, runNumber } = params;
-          if (!runDefinition) {
+          const { definition, pdpBeamType, detector, runType, runNumber } = params;
+          if (!definition) {
             this.notification.show('layoutId in URL was missing. Redirecting to layouts page', 'warning', 3000);
             this.router.go('?page=layoutList', true);
             return;
           } else {
-            const layout = await this.services.layout.getLayoutByQuery(runDefinition, pdpBeamType);
+            const layout = await this.services.layout.getLayoutByQuery(definition, pdpBeamType);
             if (!layout) {
-              this.notification.show(`Layout with RunDefinition ${runDefinition} could not be found`, 'warning', 3000);
+              this.notification.show(`Layout with definition ${definition} could not be found`, 'warning', 3000);
               this.router.go('?page=layoutList', true);
               return;
             }
