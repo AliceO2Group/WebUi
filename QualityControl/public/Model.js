@@ -185,25 +185,35 @@ export default class Model extends Observable {
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
-          const { runDefinition, pdpBeamType, detector } = params;
-          if (!runDefinition) {
+          const { definition, pdpBeamType, detector, runType, runNumber } = params;
+          if (!definition) {
             this.notification.show('layoutId in URL was missing. Redirecting to layouts page', 'warning', 3000);
             this.router.go('?page=layoutList', true);
             return;
           } else {
-            const layout = await this.services.layout.getLayoutByQuery(runDefinition, pdpBeamType);
+            const layout = await this.services.layout.getLayoutByQuery(definition, pdpBeamType);
             if (!layout) {
-              this.notification.show(`Layout with RunDefinition ${runDefinition} could not be found`, 'warning', 3000);
+              this.notification.show(`Layout with definition ${definition} could not be found`, 'warning', 3000);
               this.router.go('?page=layoutList', true);
+              return;
             }
             const paramsToAdd = { layoutId: layout.id };
-            delete params.runDefinition;
+            delete params.definition;
             delete params.pdpBeamType;
             if (detector) {
-              paramsToAdd.tab = detector;
-              delete params.detector;
-            }
+              let tab = detector;
+              if (runType) {
+                tab += `_${runType.toLocaleLowerCase()}`;
+              }
 
+              paramsToAdd.tab = tab;
+              delete params.detector;
+              delete params.runType;
+            }
+            if (runNumber !== null && runNumber !== undefined) {
+              paramsToAdd.RunNumber = runNumber;
+              delete params.runNumber;
+            }
             this.router.go(buildQueryParametersString(params, paramsToAdd), true);
             return;
           }
