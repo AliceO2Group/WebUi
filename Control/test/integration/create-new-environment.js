@@ -111,7 +111,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       Failure: (error) => [error],
       NotAsked: () => [],
       Other: () => null,
-    }))
+    }));
     const revision = await page.evaluate(() => window.model.workflow.form.revision);
 
     assert.ok(queryResult.length === 0, `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult}`);

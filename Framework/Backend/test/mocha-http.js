@@ -32,7 +32,7 @@ const USER = {
   username: 'test',
   name: 'Test',
   access: 'admin'
-}
+};
 const token = tokenService.generateToken(0, 'test', 'Test', 'admin');
 
 describe('REST API', () => {

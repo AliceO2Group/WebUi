@@ -279,7 +279,7 @@ describe('ApricotService test suite', () => {
       const stubArgs = JSON.parse(apricotProxy.SetRuntimeEntry.getCall(0).args[0].value);
       delete stubArgs.created;
       delete stubArgs.edited;
-      assert.deepStrictEqual(stubArgs, expectedSortedVars, 'Saved configuration is not sorted alphabetically')
+      assert.deepStrictEqual(stubArgs, expectedSortedVars, 'Saved configuration is not sorted alphabetically');
     });
 
     it('should reply with error due to bad configuration object', async () => {
@@ -445,7 +445,7 @@ describe('ApricotService test suite', () => {
       delete result.value.created;
       assert.ok(result.value.edited, 'Field with edition timestamp was not added');
       delete result.value.edited;
-      assert.deepStrictEqual(result, expected, 'Configuration objects was not build successfully')
+      assert.deepStrictEqual(result, expected, 'Configuration objects was not build successfully');
 
     });
 
