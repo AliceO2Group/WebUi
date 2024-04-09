@@ -61,7 +61,7 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
             '.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
           ), ' ',
           shutdownEnvButton(environment, item, Boolean(currentTransition)),
-          killEnvButton(environment, item, Boolean(currentTransition))
+          killEnvButton(environment, item)
         ])
     ]),
     environment.itemControl.match({

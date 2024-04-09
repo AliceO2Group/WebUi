@@ -70,7 +70,7 @@ const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJ
 qcObjectService.refreshCache();
 
 export const objectController = new ObjectController(qcObjectService, consulService);
-export const intervalsService = new IntervalsService(qcObjectService);
+export const intervalsService = new IntervalsService();
 
 intervalsService.register(
   qcObjectService.refreshCache.bind(qcObjectService),
