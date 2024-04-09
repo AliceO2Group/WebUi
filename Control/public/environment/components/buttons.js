@@ -27,7 +27,6 @@ const infoLoggerButton = ({id, currentRunNumber}, label = 'InfoLogger', source =
     let href = currentRunNumber ? `${source}?q={"partition":{"match":"${id}"},"run":{"match":"${currentRunNumber}"}}`
       : `${source}?q={"partition":{"match":"${id}"}}`;
     return h('a.ph2.btn.primary.w-100', {
-      style: {display: !source ? 'none' : ''},
       title,
       href,
       target: '_blank'
