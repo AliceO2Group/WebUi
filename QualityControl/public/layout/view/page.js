@@ -61,9 +61,9 @@ function subcanvasView(model) {
 
   if (!model.layout.tab.objects.length) {
     if (model.layout.editEnabled) {
-      return emptyListEditMode(model);
+      return emptyListEditMode();
     } else {
-      return emptyListViewMode(model);
+      return emptyListViewMode();
     }
   }
 

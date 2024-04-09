@@ -63,7 +63,7 @@ export default class Model extends Observable {
 
     this.services = {
       detectors: this.detectors
-    }
+    };
 
     this.configuration = new Config(this);
     this.configuration.bubbleTo(this);
@@ -168,7 +168,7 @@ export default class Model extends Observable {
         break;
       case 'environments':
         this.environment.list = RemoteData.success(message.payload);
-        this.environment.updateItemEnvironment(message.payload.environments)
+        this.environment.updateItemEnvironment(message.payload.environments);
         this.notify();
         break;
       case 'requests':
@@ -185,7 +185,7 @@ export default class Model extends Observable {
         break;
       case 'CALIBRATION_RUNS_BY_DETECTOR':
         if (message.payload) {
-          this.calibrationRunsModel.calibrationRuns = RemoteData.success(message?.payload)
+          this.calibrationRunsModel.calibrationRuns = RemoteData.success(message?.payload);
           this.notify();
         }
         break;

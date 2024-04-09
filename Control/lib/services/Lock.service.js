@@ -74,7 +74,7 @@ class LockService {
             lockedBy: this.lockedBy,
             lockedByName: this.lockedByName
           });
-          return
+          return;
         }
         throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
       }
