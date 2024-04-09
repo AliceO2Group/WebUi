@@ -142,7 +142,7 @@ const toggleAliases = (configuration) => h('.flex-row.w-20.items-center', [
   }, `Show Aliases`),
 ]
 
-)
+);
 
 /**
  * Build a series of panels for each detector based on the current view of the user

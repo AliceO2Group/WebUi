@@ -369,7 +369,7 @@ export default class Workflow extends Observable {
       const detectorIndex = keys.indexOf('detectors');
       if (detectorIndex >= 0) {
         this.isQcWorkflow = false;
-        keys.splice(detectorIndex, 1)
+        keys.splice(detectorIndex, 1);
       } else {
         this.flpSelection.init();
         this.isQcWorkflow = true;
