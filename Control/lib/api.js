@@ -128,14 +128,14 @@ module.exports.setup = (http, ws) => {
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
 
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
-  http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController))
+  http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController));
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
   http.get('/runs/calibration/config', [
     minimumRoleMiddleware(Role.GLOBAL)
   ], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
   
-  http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController))
+  http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController));
 
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));

@@ -111,7 +111,12 @@ export default class Layout extends Observable {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
         this.setFilterFromURL();
-        const tabIndex = this.item.tabs.findIndex((tab) => tab.name === tabName);
+        let tabIndex = this.item.tabs
+          .findIndex((tab) => tab.name?.toLocaleUpperCase() === tabName?.toLocaleUpperCase());
+        if (tabIndex < 0) {
+          tabIndex = this.item.tabs
+            .findIndex((tab) => tabName?.toLocaleUpperCase().startsWith(tab.name?.toLocaleUpperCase()));
+        }
         this.selectTab(tabIndex > -1 ? tabIndex : 0);
         this.setTabInterval(this.item.autoTabChange);
         this.notify();
@@ -143,11 +148,14 @@ export default class Layout extends Observable {
    */
   setFilterToURL(isSilent = true) {
     const parameters = this.model.router.params;
-    Object.entries(this.filter)
-      .filter(([_, value]) => value)
-      .forEach(([key, value]) => {
-        parameters[key] = encodeURI(value);
-      });
+
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
+      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
+        delete parameters[filterKey];
+      } else {
+        parameters[filterKey] = encodeURI(this.filter[filterKey]);
+      }
+    });
     this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
@@ -346,11 +354,7 @@ export default class Layout extends Observable {
     setBrowserTabTitle(`${this.item.name}/${tabName}`);
     this.model.router.go(buildQueryParametersString(parameters, { tab: tabName }), true, true);
 
-    CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (parameters[filterKey]) {
-        this.filter[filterKey] = decodeURI(parameters[filterKey]);
-      }
-    });
+    this.setFilterFromURL();
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }

@@ -42,7 +42,7 @@ export default class Environment extends Observable {
       userVars: true,
       vars: false,
       defaults: false,
-    }
+    };
   }
 
   /**

@@ -93,7 +93,7 @@ class RequestHandler {
       const hostsToIgnoreString = await this._apricotService.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING);
       const hostsToIgnoreMap = JSON.parse(hostsToIgnoreString);
       if (Array.isArray(hostsToIgnoreMap[runType])) {
-        hostsToIgnoreForRunType = hostsToIgnoreMap[runType]
+        hostsToIgnoreForRunType = hostsToIgnoreMap[runType];
       }
     } catch (error) {
       errorLogger(`Unable to identify FLPs to ignore due to: ${error}`);

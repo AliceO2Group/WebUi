@@ -508,7 +508,7 @@ class HttpServer {
    */
   jwtVerify(req, res, next) {
     try {
-      this.jwtAuthenticate(req)
+      this.jwtAuthenticate(req);
     } catch ({name, message}) {
       this.log.debug(`${name} : ${message}`);
 
