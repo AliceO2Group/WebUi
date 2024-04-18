@@ -84,7 +84,6 @@ export class CcdbService {
    */
   async getVersion() {
     let serviceInfo = {};
-    let version = '-';
     try {
       const path = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
       serviceInfo = await httpGetJson(this._hostname, this._port, path, { Accept: 'application/json' });
@@ -92,11 +91,11 @@ export class CcdbService {
       throw new Error(`Unable to connect to CCDB due to: ${error}`);
     }
     try {
-      version = Object.values(serviceInfo[CCDB_MONITOR])[0][0]?.value ?? '-';
+      const version = Object.values(serviceInfo[CCDB_MONITOR])[0][0]?.value ?? '-';
+      return { version };
     } catch (error) {
       throw new Error(`Unable to read version of CCDB due to: ${error}`);
     }
-    return { version };
   }
 
   /**

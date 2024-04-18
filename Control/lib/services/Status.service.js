@@ -165,7 +165,7 @@ class StatusService {
       this._updateStatusMaps(STATUS_COMPONENTS_KEYS.ALIECS_SERVICES_KEY, status);
       integServices = {
         ALL: {status}
-      }
+      };
     }
     return integServices;
   }
