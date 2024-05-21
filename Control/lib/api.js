@@ -16,7 +16,6 @@ const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_l
 const config = require('./config/configProvider.js');
 
 // middleware
-const {roleCheckMiddleware} = require('./middleware/role.middleware.mjs');
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 
 // controllers
@@ -144,7 +143,7 @@ module.exports.setup = (http, ws) => {
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
   http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
   http.delete('/environments/:id',
-    roleCheckMiddleware({forbidden: ['guest']}),
+    coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
     envCtrl.destroyEnvironmentHandler.bind(envCtrl)
   );
