@@ -15,6 +15,10 @@
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
+// middleware
+const {lockOwnershipMiddleware} = require('./middleware/lock.middleware.mjs');
+const {roleCheckMiddleware} = require('./middleware/role.middleware.mjs');
+
 // controllers
 const {StatusController} = require('./controllers/Status.controller.js');
 const {WebSocketService} = require('./services/WebSocket.service.js');
@@ -36,6 +40,7 @@ const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const EnvCache = require('./control-core/EnvCache.js');
 
 const path = require('path');
+const {EnvironmentController} = require('./controllers/Environment.controller.js');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
@@ -84,6 +89,7 @@ module.exports.setup = (http, ws) => {
     config, ctrlService, consulService, apricotService, notificationService, wsService
   );
   const statusController = new StatusController(statusService);
+  const envController = new EnvironmentController(ctrlProxy);
 
   const intervals = new Intervals(statusService);
   intervals.initializeIntervals();
@@ -101,6 +107,11 @@ module.exports.setup = (http, ws) => {
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
 
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res));
+  http.delete('/environments/:id',
+    roleCheckMiddleware({forbidden: ['guest']}),
+    lockOwnershipMiddleware(lock),
+    envController.destroyEnvironment.bind(envController));
+
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
 
