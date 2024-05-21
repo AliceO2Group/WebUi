@@ -16,8 +16,8 @@ const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_l
 const config = require('./config/configProvider.js');
 
 // middleware
-const {lockOwnershipMiddleware} = require('./middleware/lock.middleware.mjs');
 const {roleCheckMiddleware} = require('./middleware/role.middleware.mjs');
+const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
@@ -50,12 +50,10 @@ const EnvCache = require('./control-core/EnvCache.js');
 const GrpcProxy = require('./control-core/GrpcProxy.js');
 
 const path = require('path');
-const {EnvironmentController} = require('./controllers/Environment.controller.js');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
 const {Role} = require('./common/role.enum.js');
-const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 
 if (!config.grpc) {
   throw new Error('Control gRPC Configuration is missing');
@@ -146,10 +144,9 @@ module.exports.setup = (http, ws) => {
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
   http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
-  http.delete('/environment/:id', coreMiddleware, envCtrl.destroyEnvironmentHandler.bind(envCtrl));
   http.delete('/environments/:id',
     roleCheckMiddleware({forbidden: ['guest']}),
-    lockOwnershipMiddleware(lock),
+    minimumRoleMiddleware(Role.DETECTOR),
     envController.destroyEnvironmentHandler.bind(envController)
   );
 
