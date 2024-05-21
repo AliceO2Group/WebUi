@@ -114,7 +114,6 @@ module.exports.setup = (http, ws) => {
     config, ctrlService, consulService, apricotService, notificationService, wsService
   );
   const statusController = new StatusController(statusService);
-  const envController = new EnvironmentController(ctrlProxy);
 
   const intervals = new Intervals();
   initializeIntervals(intervals, statusService, runService, bkpService);
@@ -147,7 +146,7 @@ module.exports.setup = (http, ws) => {
   http.delete('/environments/:id',
     roleCheckMiddleware({forbidden: ['guest']}),
     minimumRoleMiddleware(Role.DETECTOR),
-    envController.destroyEnvironmentHandler.bind(envController)
+    envCtrl.destroyEnvironmentHandler.bind(envCtrl)
   );
 
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
