@@ -130,6 +130,16 @@ class Lock {
       errorHandler(`Unable to give away lock to ${req.session.name}: ${error}`, res, 403, 'lockservice');
     }   
   }
+
+  /**
+   * Checks if the given user has the lock for the provided list of detectors
+   * @param {string} username - of user to check lock ownership
+   * @param {Array<string>} detectors - list of detectors to check lock is owned by the user
+   * @returns {boolean}
+   */
+  hasLocks(username, detectors) {
+    return detectors.every((detector) => this.lockedBy[detector] === username);
+  }
 }
 
 module.exports = Lock;
