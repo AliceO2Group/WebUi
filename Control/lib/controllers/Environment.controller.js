@@ -116,7 +116,7 @@ class EnvironmentController {
 
     const {username, personid, name} = req.session;
     this._log.infoMessage(
-      `${name} (${username} - ${personid}) requested => DESTORY_ENVIRONMENT ${force && 'by force (KILL)'}`,
+      `${name} (${username} - ${personid}) requested => DESTROY_ENVIRONMENT ${force && 'by force (KILL)'}`,
       {level: 1, facility: LOG_FACILITY, partition: id, run: runNumber}
     );
 

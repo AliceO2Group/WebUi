@@ -17,6 +17,7 @@ const config = require('./config/configProvider.js');
 
 // middleware
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
+const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.mjs');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
@@ -145,6 +146,7 @@ module.exports.setup = (http, ws) => {
   http.delete('/environments/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
+    lockOwnershipMiddleware (lockService),
     envCtrl.destroyEnvironmentHandler.bind(envCtrl)
   );
 
