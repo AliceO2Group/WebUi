@@ -84,6 +84,7 @@ export default class Workflow extends Observable {
     this.getAndSetSavedConfigurations();
     this.flpSelection.init();
     this.selectedConfiguration = '';
+    this.selectedConfigurationRaw = '';
     this.resetErrorMessage();
   }
 
@@ -96,6 +97,10 @@ export default class Workflow extends Observable {
     this.resetRevision(repository);
     this.setTemplatesData();
     this.form.setTemplate('');
+
+    this.selectedConfiguration = '';
+    this.selectedConfigurationRaw = '';
+    this.advErrorPanel = [];
 
     this.resetErrorMessage();
 
@@ -275,14 +280,14 @@ export default class Workflow extends Observable {
    * @param {string} key
    * @param {Object} value
    */
-  addVariable(keyToAdd, valueToAdd) {
-    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap);
+  addVariable(keyToAdd, valueToAdd, inEdit = false) {
+    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap, inEdit);
     if (ok) {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
         this.form.basicVariables[key] = value;
         this.model.notification.show(
-          'Variable has been successfully imported in the configuration panels', 'success', 3000
+          'Variable has been successfully imported in the configuration panels', 'success', 1000
         );
       } else {
         this.form.variables[key] = value;
@@ -305,15 +310,15 @@ export default class Workflow extends Observable {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
         this.form.basicVariables[key] = parsedKVJSON[key];
-        this.model.notification.show(
-          'Variables have been successfully imported in the configuration panels', 'success', 3000
-        );
       } else {
         this.form.variables[key] = parsedKVJSON[key];
       }
     });
     if (errors.length === 0) {
       this.kvPairsString = '';
+      this.model.notification.show(
+        'Variables have been successfully imported in the configuration panels', 'success', 1000
+      );
     }
     this.advErrorPanel = errors;
     this.notify();
@@ -364,7 +369,7 @@ export default class Workflow extends Observable {
       const detectorIndex = keys.indexOf('detectors');
       if (detectorIndex >= 0) {
         this.isQcWorkflow = false;
-        keys.splice(detectorIndex, 1)
+        keys.splice(detectorIndex, 1);
       } else {
         this.flpSelection.init();
         this.isQcWorkflow = true;
@@ -536,11 +541,11 @@ export default class Workflow extends Observable {
       this.model.environment.itemNew = RemoteData.notAsked();
       this.loadingConfiguration = RemoteData.loading();
       this.notify();
-      this.loadedConfiguration = await this.remoteDataPostRequest(
-        this.loadedConfiguration, '/api/GetRuntimeEntry', {component: 'COG-v1', key}
-      );
+
+      const {result: configuration, ok} = await this.model.loader.get(`/api/workflow/configuration`, {name: key});
+      this.loadedConfiguration = ok ? RemoteData.success(configuration) : RemoteData.failure(configuration.message);
+      this.notify();
       try {
-        const configuration = JSON.parse(this.loadedConfiguration.payload.payload);
         const variables = configuration.variables;
         let hosts = [];
         if (variables.hosts) {
@@ -631,7 +636,7 @@ export default class Workflow extends Observable {
       const allVariables = Object.assign({}, basicVariables, variables);
       Object.keys(allVariables)
         .filter((key) => allVariables[key])
-        .forEach((key) => allVariables[key] = allVariables[key].trim())
+        .forEach((key) => allVariables[key] = allVariables[key].trim().replace(/\r?\n/g, ' '));
       return {ok: true, message: '', variables: allVariables};
     }
   }

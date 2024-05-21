@@ -26,14 +26,22 @@ let querySource = null;
 let liveSource = null;
 
 const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
-const profileService = new ProfileService(jsonDb);
-const statusService = new StatusService(config, projPackage);
 
-module.exports.attachTo = (http, ws) => {
+const profileService = new ProfileService(jsonDb);
+
+
+module.exports.attachTo = async (http, ws) => {
+  const { QueryController } = await import('./controller/QueryController.mjs');
+  const queryController = new QueryController();
+
+  const statusService = new StatusService(config, projPackage, ws);
+
+
   http.post('/query', query);
+  http.get('/query/stats', queryController.getQueryStats.bind(queryController), {public: true});
 
   http.get('/status/gui', statusService.getILGStatus.bind(statusService), {public: true});
-  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService), {public: true});
+  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService));
 
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
@@ -92,6 +100,7 @@ module.exports.attachTo = (http, ws) => {
         .then(() => {
           ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status').setPayload({ok: true}));
           statusService.setQuerySource(querySource);
+          queryController.queryService = querySource;
         }).catch((error) => {
           log.error(`[API] Unable to instantiate data source due to ${error}`);
           ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status')

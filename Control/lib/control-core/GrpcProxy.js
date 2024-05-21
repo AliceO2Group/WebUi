@@ -16,6 +16,7 @@
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
+const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
@@ -29,9 +30,8 @@ class GrpcProxy {
    * https://grpc.io/grpc/node/grpc.Client.html
    * @param {Object} config - Contains configuration fields for gRPC client
    * @param {string} path - path to protofile location
-   * @param {boolean} wasInError - parameter to define if the connection is done following a failed attempt, thus logs are silent
    */
-  constructor(config, path, wasInError = false) {
+  constructor(config, path) {
     if (this._isConfigurationValid(config, path)) {
       const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: false, arrays: true});
       const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
@@ -41,8 +41,10 @@ class GrpcProxy {
       const options = {'grpc.max_receive_message_length': 1024 * 1024 * this._maxMessageLength}; // MB
 
       this.client = new protoService(address, credentials, options);
-      this.client.waitForReady(Date.now() + this._connectionTimeout,
-        (error) => this._logConnectionResponse(error, wasInError, address));
+      this.client.waitForReady(
+        Date.now() + this._connectionTimeout,
+        (error) => this._logConnectionResponse(error, address)
+      );
 
       // set all the available gRPC methods in object and build a separate array with names only
       this.methods = Object.keys(protoService.prototype)
@@ -77,10 +79,12 @@ class GrpcProxy {
                   }
                 });
               }
+              reject(error);
             } catch (exception) {
               log.debug('Failed new env details error' + exception);
+              reject(exception);
             }
-            reject(error);
+            reject(grpcErrorToNativeError(error));
             return;
           }
           resolve(response);
@@ -132,15 +136,12 @@ class GrpcProxy {
   /**
    * 
    * @param {Error} error - error following attempt to connect to gRPC server
-   * @param {boolean} wasInError - flag to know if connection is attempted again after a failure; If yes, logging is disabled
    * @param {string} address - address on which connection was attempted
    */
-  _logConnectionResponse(error, wasInError, address) {
+  _logConnectionResponse(error, address) {
     if (error) {
-      if (!wasInError) {
-        log.error(`Connection to ${this._label} server (${address}) timeout`);
-        log.error(error.message);
-      }
+      log.error(`Connection to ${this._label} server (${address}) timeout`);
+      log.error(error.message);
 
       this.connectionError = error;
       this.isConnectionReady = false;

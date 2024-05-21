@@ -16,6 +16,7 @@ import { Log } from '@aliceo2/web-ui';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
 import fs from 'fs';
 import path from 'path';
+import { NotFoundError } from './../errors/NotFoundError.js';
 
 /**
  * Store layouts inside JSON based file with atomic write
@@ -43,6 +44,7 @@ export class JsonFileService {
 
   /**
    * Synchronize DB file content and `this.data` property
+   * @returns {undefined}
    */
   async _syncFileAndInternalState() {
     await this._readFromFile();
@@ -51,9 +53,8 @@ export class JsonFileService {
   }
 
   /**
-   * Read
-   * @param {string} argName - blabla
-   * @return {string} blabla
+   * Method to read from file and update the data variable
+   * @returns {Promise<undefined.Error>} - rejects if unable to read file
    */
   async _readFromFile() {
     return new Promise((resolve, reject) => {
@@ -91,6 +92,7 @@ export class JsonFileService {
 
   /**
    * Write data to disk, atomically, with lock
+   * @returns {undefined}
    */
   async _writeToFile() {
     await this.lock.acquire();
@@ -117,8 +119,8 @@ export class JsonFileService {
 
   /**
    * Create a layout
-   * @param {Layout} newLayout
-   * @return {Object} Empty details
+   * @param {Layout} newLayout - layout object to be saved
+   * @returns {object} Empty details
    */
   async createLayout(newLayout) {
     if (!newLayout.id) {
@@ -140,7 +142,8 @@ export class JsonFileService {
   /**
    * Retrieve a layout or undefined
    * @param {string} layoutId - layout id
-   * @return {Layout|undefined}
+   * @returns {Layout} - layout object
+   * @throws {Error}
    */
   async readLayout(layoutId) {
     const layout = this.data.layouts.find((layout) => layout.id === layoutId);
@@ -151,10 +154,24 @@ export class JsonFileService {
   }
 
   /**
+   * Given a string, representing layout name, retrieve the layout if it exists
+   * @param {String} layoutName - name of the layout to retrieve
+   * @return {Layout} - object with layout information
+   * @throws
+   */
+  async readLayoutByName(layoutName) {
+    const layout = this.data.layouts.find((layout) => layout.name === layoutName);
+    if (!layout) {
+      throw new NotFoundError(`Layout (${layoutName}) not found`);
+    }
+    return layout;
+  }
+
+  /**
    * Update a single layout by its id
-   * @param {string} layoutId
-   * @param {Layout} data
-   * @return {Object} Empty details
+   * @param {string} layoutId - id of the layout to be updated
+   * @param {Layout} data - layout new data
+   * @returns {Object} Empty details
    */
   async updateLayout(layoutId, data) {
     const layout = await this.readLayout(layoutId);
@@ -165,8 +182,8 @@ export class JsonFileService {
 
   /**
    * Delete a single layout by its id
-   * @param {string} layoutId
-   * @return {Object} Empty details
+   * @param {string} layoutId - id of the layout to be removed
+   * @returns {Object} Empty details
    */
   async deleteLayout(layoutId) {
     const layout = await this.readLayout(layoutId);
@@ -178,23 +195,47 @@ export class JsonFileService {
 
   /**
    * List layouts, can be filtered
-   * @param {Object} filter - undefined or {owner_id: XXX}
-   * @return {Array<Layout>}
+   * @param {Object} filter - accepted keys [owner_id, name]
+   * @returns {Array<Layout>} - list of layouts as per the filter
    */
   async listLayouts(filter = {}) {
     return this.data.layouts.filter((layout) =>
-      filter.owner_id === undefined || layout.owner_id === filter.owner_id);
+      (filter.owner_id === undefined || layout.owner_id === filter.owner_id)
+      && (filter.name === undefined || layout.name === filter.name));
+  }
+
+  /**
+   * Return an object by its id that is saved within a layout
+   * @param {string} id - id of the object to retrieve
+   * @return {{object: object, layoutName: string}} - object configuration stored
+   */
+  getObjectById(id) {
+    if (!id) {
+      throw new Error('Missing mandatory parameter: id');
+    }
+    for (const layout of this.data.layouts) {
+      for (const tab of layout.tabs) {
+        for (const object of tab.objects) {
+          if (object.id === id) {
+            return { object, layoutName: layout.name };
+          }
+        }
+      }
+    }
+    throw new Error(`Object with ${id} could not be found`);
   }
 
   /* User helpers */
 
   /**
    * Check if a user is saved and if not, add it to the in-memory list and db
-   * @param {JSON} user
+   * @param {JSON} user - data of the user to be added
+   * @returns {undefined}
    */
   addUser(user) {
     this._validateUser(user);
-    const isUserPresent = this.data.users.findIndex((userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
+    const isUserPresent = this.data.users
+      .findIndex((userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
 
     if (!isUserPresent) {
       this.data.users.push(user);
@@ -204,7 +245,9 @@ export class JsonFileService {
 
   /**
    * Validate that a user JSON contains all the mandatory fields
-   * @param {JSON} user
+   * @param {JSON} user - data of the user to be added
+   * @returns {undefined}
+   * @throws {Error}
    */
   _validateUser(user) {
     if (!user) {
@@ -245,7 +288,7 @@ class Lock {
   /**
    * Acquires lock if available and returns immediately
    * otherwise wait for lock to be released
-   * @return {Promise}
+   * @returns {Promise} - result of the lock
    */
   acquire() {
     return new Promise((resolve) => {
@@ -262,6 +305,7 @@ class Lock {
 
   /**
    * Releases lock and give it to next in queue if any
+   * @returns {object|undefined} - next owner of the lock
    */
   release() {
     // Release the lock immediately

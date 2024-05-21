@@ -86,11 +86,19 @@ const getListOfTasks = (model, task) =>
  * @param {Task} task 
  * @returns {vnode}
  */
-const showContent = (model, items) =>
-  h('.text-left.ph2', [
-    h('.w-100.flex-column.items-end.pv2', searchTasks(model)),
+const showContent = (model, items) => {
+  const isAdmin =  model.detectors.selected === 'GLOBAL' && model.isAllowed(ROLES.Admin, true);
+  return h('.text-left.ph2', [
+    h('.w-100.flex-row.pv2.items-center', [
+      searchTasks(model),
+      isAdmin && h('.w-100.flex-row.flex-end.pv2.g2', [
+        cleanResourcesButton(model.task),
+        cleanTasksButton(model.task)
+      ]),
+    ]),
     h('.w-100', detectorPanels(model, items))
   ]);
+};
 
 /**
  * Adds a search bar for the user to filter tasks by name
@@ -98,7 +106,7 @@ const showContent = (model, items) =>
  * @returns 
  */
 const searchTasks = (model) =>
-  h('.w-20',
+  h('.w-50',
     h('input.form-control', {
       id: 'searchTasksInput',
       placeholder: 'Search tasks by name',
@@ -191,3 +199,35 @@ const tasksTables = (model, tasksByHost) =>
         ])
       ])
     ]);
+
+
+/**
+ * Prepares cleanup tasks button in top right corner
+ */
+const cleanTasksButton = (task) =>
+  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
+    h(`button.btn.btn-danger`, {
+      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
+      disabled: task.cleanUpTasksRequest.isLoading(),
+      onclick: () => confirm(`Are you sure you know what you are doing?`)
+      && task.cleanUpTasks(),
+    }, 'Clean tasks'),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
+      'Shutdowns or kills any task that is unlocked and not part of an active environment')
+  ]);
+
+/**
+* Prepares cleanup resources button in top right corner
+*/
+const cleanResourcesButton = (task) =>
+  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
+    h(`button.btn.btn-warning`, {
+      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
+      disabled: task.cleanUpTasksRequest.isLoading(),
+      onclick: () => task.cleanUpResources(),
+    }, 'Clean resources'),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 500px'}, [
+      h('', `It runs 'roc-cleanup' and 'fairmq-shmmonitor -c' to clean RAM and disk resources, including SHM files.`),
+      h('', `It does nothing to tasks.`)
+    ])
+  ]);

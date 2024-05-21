@@ -73,12 +73,12 @@ describe('Public Configuration Test Suite', () => {
   });
 
   it('should successfully return empty string if configuration is missing for Bookkeeping', () => {
-    assert.strictEqual(_getBookkeepingURL({}), '');
-    assert.strictEqual(_getBookkeepingURL(undefined), '');
-    assert.strictEqual(_getBookkeepingURL({bookkeepingGui: {urlWrong: 'local'}}), '');
+    assert.strictEqual(_getBookkeepingURL({}), null);
+    assert.strictEqual(_getBookkeepingURL(undefined), null);
+    assert.strictEqual(_getBookkeepingURL({bookkeeping: {urlWrong: 'local'}}), null);
   });
 
-  it('should successfully return QCG URL as string if configuration is provided', () => {
-    assert.strictEqual(_getBookkeepingURL({bookkeepingGui: {url: 'localhost:8080'}}), 'localhost:8080');
+  it('should successfully return BKP URL as string if configuration is provided', () => {
+    assert.deepStrictEqual(_getBookkeepingURL({bookkeeping: {url: 'localhost:8080'}}), new URL('localhost:8080'));
   });
 });

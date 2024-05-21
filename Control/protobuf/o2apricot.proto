@@ -26,7 +26,7 @@ syntax = "proto3";
 
 package apricot;
 option java_package = "ch.cern.alice.o2.apricot.rpcserver";
-option go_package = "protos;apricotpb";
+option go_package = "github.com/AliceO2Group/Control/apricot/protos;apricotpb";
 
 service Apricot {
     rpc NewRunNumber(Empty) returns (RunNumberResponse) {}
@@ -35,8 +35,9 @@ service Apricot {
     rpc RawGetRecursive(RawGetRecursiveRequest) returns (ComponentResponse) {}
 
     // Detectors and host inventories
-    rpc ListDetectors(Empty) returns (DetectorsResponse) {}
+    rpc ListDetectors(DetectorsRequest) returns (DetectorsResponse) {}
     rpc GetHostInventory(HostGetRequest) returns (HostEntriesResponse) {}
+    rpc GetDetectorsInventory(Empty) returns (DetectorEntriesResponse) {}
     rpc GetDetectorForHost(HostRequest) returns (DetectorResponse) {}
     rpc GetDetectorsForHosts(HostsRequest) returns (DetectorsResponse) {}
     rpc GetCRUCardsForHost(HostRequest) returns (CRUCardsResponse) {}
@@ -45,6 +46,7 @@ service Apricot {
     // Runtime KV calls
     rpc GetRuntimeEntry(GetRuntimeEntryRequest) returns (ComponentResponse) {}
     rpc SetRuntimeEntry(SetRuntimeEntryRequest) returns (Empty) {}
+    rpc GetRuntimeEntries(GetRuntimeEntriesRequest) returns (StringMap) {}
     rpc ListRuntimeEntries(ListRuntimeEntriesRequest) returns (ComponentEntriesResponse) {}
 
     // Component configuration calls
@@ -52,18 +54,40 @@ service Apricot {
     rpc ListComponentEntries(ListComponentEntriesRequest) returns (ComponentEntriesResponse) {}
     rpc ListComponentEntryHistory(ComponentQuery) returns (ComponentEntriesResponse) {}
     rpc GetComponentConfiguration(ComponentRequest) returns (ComponentResponse) {}
+    rpc GetComponentConfigurationWithLastIndex(ComponentRequest) returns (ComponentResponseWithLastIndex) {}
+    rpc ResolveComponentQuery(ComponentQuery) returns (ComponentQuery) {}
     rpc ImportComponentConfiguration(ImportComponentConfigurationRequest) returns (ImportComponentConfigurationResponse) {}
+    rpc InvalidateComponentTemplateCache(Empty) returns (Empty) {}
 }
 
+// NOTE: make sure the enum values include and match those in RunType in dcs.pb.go and runtype.go
+// NOTE: this run type list is replicated in AliceO2 repo in
+// https://github.com/AliceO2Group/AliceO2/blob/dev/DataFormats/Parameters/include/DataFormatsParameters/ECSDataAdapters.h
+// Inform Ruben when the list is updated.
+
 enum RunType {
-    NULL = 0;
-    ANY = 1;
-    PHYSICS = 2;
-    TECHNICAL = 3;
-    COSMIC = 4;
-    PEDESTAL = 5;
-    THRESHOLD_SCAN = 6;
-    CALIBRATION = 7;
+    NULL                     =   0;
+    PHYSICS                  =   1;
+    TECHNICAL                =   2;
+    PEDESTAL                 =   3;
+    PULSER                   =   4;
+    LASER                    =   5;
+    CALIBRATION_ITHR_TUNING  =   6;
+    CALIBRATION_VCASN_TUNING =   7;
+    CALIBRATION_THR_SCAN     =   8;
+    CALIBRATION_DIGITAL_SCAN =   9;
+    CALIBRATION_ANALOG_SCAN  =  10;
+    CALIBRATION_FHR          =  11;
+    CALIBRATION_ALPIDE_SCAN  =  12;
+    CALIBRATION              =  13;
+    COSMICS                  =  14;
+    SYNTHETIC                =  15;
+    NOISE                    =  16;
+    CALIBRATION_PULSE_LENGTH =  17;
+    CALIBRATION_VRESETD      =  18;
+    reserved 19 to 299;
+
+    ANY                      = 300;
 }
 
 message Empty {}
@@ -89,6 +113,11 @@ message ComponentResponse {
     string payload = 1;
 }
 
+message ComponentResponseWithLastIndex {
+    string payload = 1;
+    uint64 lastIndex = 2;
+}
+
 message HostRequest {
     string hostname = 1;
 }
@@ -99,6 +128,14 @@ message HostsRequest {
 
 message DetectorResponse {
     string payload = 1;
+}
+
+message DetectorInventoryResponse {
+    repeated string flps = 1;
+}
+
+message DetectorEntriesResponse {
+    map<string, DetectorInventoryResponse> detectorEntries = 1;
 }
 
 message RunNumberResponse {
@@ -123,6 +160,13 @@ message SetRuntimeEntryRequest {
     string key = 2;
     string value = 3;
 }
+message GetEntryRequest {
+    string key = 1;
+}
+
+message GetRuntimeEntriesRequest {
+    string component = 1;
+}
 
 message ListRuntimeEntriesRequest {
     string component = 1;
@@ -144,6 +188,10 @@ message ListComponentEntriesRequest {
 
 message ComponentEntriesResponse {
     repeated string payload = 1;
+}
+
+message DetectorsRequest {
+    bool getAll = 1; // if false(default) restricts "private" detectors (e.g. TRG)
 }
 
 message DetectorsResponse {

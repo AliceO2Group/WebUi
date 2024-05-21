@@ -1,5 +1,9 @@
 version: 2
 updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "monthly"
 - package-ecosystem: npm
   directory: "/Control"
   schedule:
@@ -7,6 +11,21 @@ updates:
     day: "tuesday"
     time: "07:00"
     timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        - "eslint"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+    grpc:
+      patterns:
+        - "@grpc/grpc-js"
+        - "@grpc/proto-loader"
+  labels:
+    - "Control"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -21,6 +40,17 @@ updates:
     day: "tuesday"
     time: "07:00"
     timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        - "eslint"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+  labels:
+    - "Quality Control"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -35,6 +65,17 @@ updates:
     day: "tuesday"
     time: "07:00"
     timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        - "eslint"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+  labels:
+    - "InfoLogger"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -49,6 +90,18 @@ updates:
     day: "tuesday"
     time: "07:00"
     timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        - "eslint"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+        - "supertest"
+  labels:
+    - "Framework"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:

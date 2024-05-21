@@ -21,9 +21,11 @@ import {environmentPanel} from './components/environmentPanel.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import showTableItem from '../common/showTableItem.js';
-import {getTasksByFlp} from './../common/utils.js';
+import {getTasksByFlp, getTasksByEpn} from './../common/utils.js';
 import {userVarsRow, defaultsRow, varsRow} from './components/expandableEnvRows.js';
 import {mesosLogButton} from './components/buttons.js';
+import {ALIECS_STATE_COLOR} from '../common/constants/stateColors.js';
+import {currentPageAndParameters} from './../utilities/currentPageAndParameters.js';
 
 /**
  * @file Page to show 1 environment (content and header)
@@ -32,10 +34,9 @@ import {mesosLogButton} from './components/buttons.js';
 /**
  * Header of page showing one environment
  * Only page title with no action
- * @param {Object} model
  * @return {vnode}
  */
-export const header = (model) => [
+export const header = () => [
   h('.w-50 text-center', [
     h('h4', 'Environment details')
   ]),
@@ -51,7 +52,7 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
     Loading: () => h('.w-100.text-center', pageLoading()),
-    Success: (data) => showContent(model, data.environment),
+    Success: (data) => showContent(model, data),
     Failure: (error) => errorPage(error),
   })
 ]);
@@ -59,36 +60,93 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 /**
  * Show all properties of environment and buttons for its actions at bottom
  * @param {Object} model
- * @param {Environment} item - environment to show on this page
+ * @param {EnvironmentDetails} item - environment to show on this page
  * @return {vnode}
  */
-const showContent = (model, item) => [
-  h('.m2', environmentPanel(model, item, false)),
-  h('.m2', [
-    h('.shadow-level1',
-      h('table.table', [
-        h('tbody', [
-          userVarsRow(item.userVars, model.environment),
-          defaultsRow(item.defaults, model.environment),
-          varsRow(item.vars, model.environment),
-        ])
-      ])
+const showContent = (model, item) => {
+  const {hardware: {flp, qc, epn, trg}} = item;
+  const panels = {
+    configuration: {
+      name: 'Configuration',
+      content: configurationTabPanel,
+    },
+    epn: {
+      name: `EPNs (${epn?.tasks?.total ?? '?'})`,
+      content: tasksPerEpnTables,
+    },
+    flp: {
+      name: `FLPs (${flp?.tasks?.total ?? '?'})`,
+      content: tasksPerFlpTables,
+    },
+    qc: {
+      name: `QC  (${qc?.tasks?.total ?? '?'})`,
+      content: tasksPerFlpTables,
+    },
+    trg: {
+      name: `TRG  (${trg?.tasks?.total ?? '?'})`,
+      content: tasksPerFlpTables,
+    },
+  };
+  const {parameters} = currentPageAndParameters();
+
+  return [
+    h('.m2', environmentPanel(model, item, false)),
+    h('ul.nav.nav-tabs', [
+      Object.entries(panels).map(([id, {name}]) => {
+        const isActive = parameters.panel === id;
+        return h('li.nav-item',
+          {
+            id: `${id}-task-source`,
+          }, h(`a.nav-link${isActive ? '.active' : ''}`, {
+            onclick: () => {
+              if (!isActive) {
+                model.router.go(`?page=environment&id=${item.id}&panel=${id}`, true, true);
+                model.environment.getEnvironment({id: item.id}, false, id);
+                model.environment.notify();
+              }
+            }
+          }, name)
+        );
+      }),
+    ]),
+    h('.tab-content.m2', Object.entries(panels)
+      .map(([id, {content}]) => {
+        const isActive = parameters.panel === id;
+        if (isActive) {
+          return h(`.tab-pane${isActive ? '.active' : ''}`, {id: `${id}-pane`}, content(model.environment, item))
+        }
+      })
     ),
-  ]),
-  h('.m2', [
-    h('h4', 'Tasks by FLP'),
-    h('.w-100', tasksPerFlpTables(model.environment, item))
-  ]),
-];
+  ];
+};
 
 /**
- * Build multiple tables of the tasks frouped by FLP
+ * Display configuration variables
+ * @returns {vnode}
+ */
+const configurationTabPanel = (envModel, item) =>
+  h('.m2', [
+    h('table.table', [
+      h('tbody', [
+        userVarsRow(item.userVars, envModel),
+        defaultsRow(item.defaults, envModel),
+        varsRow(item.vars, envModel),
+      ])
+    ])
+  ]);
+
+/**
+ * Build multiple tables of the tasks grouped by FLP
  * @param {Environment} environmentModel
  * @param {JSON} environment - GetEnvironment response.environment
  * @return {vnode}
  */
 const tasksPerFlpTables = (environmentModel, environment) => {
-  const tasksByFlp = getTasksByFlp(environment.tasks);
+  const {tasks = []} = environment;
+  if (tasks.length === 0) {
+    return h('.text-center.w-100', 'Environment is in transition');
+  }
+  const tasksByFlp = getTasksByFlp(tasks);
   return [Object.keys(tasksByFlp).map((host) =>
     h('', [
       h('.p2.flex-row.bg-primary.white', [
@@ -101,6 +159,46 @@ const tasksPerFlpTables = (environmentModel, environment) => {
       showEnvTasksTable(environmentModel, tasksByFlp[host].list)
     ])
   )];
+};
+
+/**
+ * Build multiple tables of the tasks grouped by FLP
+ * @param {JSON} environment - GetEnvironment response.environment
+ * @return {vnode}
+ */
+const tasksPerEpnTables = (envModel, environment) => {
+  const {tasks = []} = environment;
+  const tasksByHosts = getTasksByEpn(tasks);
+  return [
+    Object.keys(tasksByHosts).map((host) =>
+      h('', [
+        h('.p2.flex-row.bg-primary.white', [
+          h('h5.w-100', host),
+        ]),
+        h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
+          h('thead',
+            h('tr', [
+              ['ID', 'Path', 'Ignored', 'State'].map((header) => h('th', header))
+            ])
+          ),
+          h('tbody', [
+            tasks.map((task) => {
+              if (task.host === host) {
+                return h('tr', [
+                  h('td.w-30', task.taskId),
+                  h('td.w-50', task.path),
+                  h('td.w-10', task.ignored + ''),
+                  h('td.w-10', {
+                    class: ALIECS_STATE_COLOR[task.state],
+                    style: 'font-weight: bold;'
+                  }, task.state),
+                ]);
+              }
+            }),
+          ])
+        ])
+      ])
+    )];
 };
 
 /**

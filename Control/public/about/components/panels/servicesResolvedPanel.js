@@ -30,7 +30,9 @@ export const servicesResolvedPanel = (servicesMap, category = undefined) => {
     return h('.w-100.flex-column.p2.shadow-level1',
       h('h4', {class: classes}, label),
       h('.flex-wrap.g1', [
-        services.map(({payload}) => serviceCard(payload))
+        services
+          .sort(({payload: {name: nameA}}, {payload: {name: nameB}}) =>  nameA > nameB ? 1 : -1)
+          .map(({payload}) => serviceCard(payload))
       ])
     );
   }

@@ -74,7 +74,7 @@ class WebSocket {
     return new Promise((resolve, reject) => {
       let data;
       try {
-        data = this.http.o2TokenService.verify(req.getToken())
+        data = this.http.o2TokenService.verify(req.getToken());
       } catch (error) {
         reject(error);
         return;

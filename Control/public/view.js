@@ -25,6 +25,14 @@ import {
   header as workflowsHeader
 } from './workflow/workflowsPage.js';
 import {
+  EnvironmentCreationHeader,
+  EnvironmentCreationPage
+} from './pages/EnvironmentCreation/EnvironmentCreation.page.js';
+import {
+  CalibrationRunsHeader,
+  CalibrationRunsContent
+} from './pages/CalibrationRuns/CalibrationRuns.page.js';
+import {
   content as environmentsContent,
   header as environmentsHeader
 } from './environment/environmentsPage.js';
@@ -49,6 +57,7 @@ import {
   content as lockContent,
   header as lockHeader
 } from './lock/lockPage.js';
+import {alertPanel} from './common/alertPanel.js';
 
 /**
  * Main view layout
@@ -80,7 +89,9 @@ export default (model) => [
 const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
   switchCase(model.router.params.page, {
-    newEnvironment: workflowsHeader,
+    newEnvironmentAdvanced: workflowsHeader,
+    newEnvironment: EnvironmentCreationHeader,
+    calibrationRuns: CalibrationRunsHeader,
     environments: environmentsHeader,
     environment: environmentHeader,
     about: statusHeader,
@@ -88,7 +99,8 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     taskList: taskHeader,
     hardware: hardwareHeader,
     locks: lockHeader
-  })(model)
+  })(model),
+  alertPanel(model.about.services, model)
 ]);
 
 /**
@@ -98,7 +110,9 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
  */
 const content = (model) => [
   switchCase(model.router.params.page, {
-    newEnvironment: workflowsContent,
+    newEnvironmentAdvanced: workflowsContent,
+    newEnvironment: EnvironmentCreationPage,
+    calibrationRuns: CalibrationRunsContent,
     environments: environmentsContent,
     environment: environmentContent,
     about: statusContent,

@@ -56,11 +56,12 @@
 .auto-built-row:hover { border-radius: .25rem; background-color: var(--color-gray-light); }
 
 .template-selection { width: 33%; }
+.template-selection-large { width: 66%; }
 
 .cardGroupColumn { display: flex; flex-direction: column; flex-wrap: wrap; gap: var(--space-s); }
 .cardGroupRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--space-s); }
 
-.miniCard { min-width: 22em; }
+.miniCard { min-width: 18em; }
 .miniCard > .runNumber { display:flex; font-size:2.3em; align-items: center; justify-content: center; background-color: var(--color-success); color: var(--color-white); height: 100%}
 
 .bg-danger-less { background-color: var(--color-soft-red); }
@@ -68,8 +69,32 @@
 @media (max-width: 1000px) {
   .auto-built-panel { width: 100%; }
   .template-selection { width: 100% }
+  .template-selection-large {width: 100%}
 }
 
 @media (min-width: 2000px) {
   .auto-built-panel { width: 33.3% }
 }
+
+
+.nav { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding-left: 0; margin-bottom: 0; list-style: none;}
+
+.nav-link { display: block; padding: 0.5rem 1rem; }
+.nav-link:hover, .nav-link:focus { text-decoration: none;}
+.nav-link.disabled { color: #6c757d; pointer-events: none; cursor: default;}
+
+.nav-tabs { border-bottom: 1px solid #dee2e6; }
+.nav-tabs .nav-item { margin-bottom: -1px; }
+.nav-tabs .nav-link { border: 1px solid transparent; border-top-left-radius: 0.25rem; border-top-right-radius: 0.25rem; cursor: pointer; }
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus { border-color: #e9ecef #e9ecef #dee2e6; }
+.nav-tabs .nav-link.disabled { color: #6c757d; background-color: transparent; border-color: transparent;}
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link { color: #495057; background-color: #fff; border-color: #dee2e6 #dee2e6 #fff; }
+.nav-tabs .dropdown-menu { margin-top: -1px; border-top-left-radius: 0; border-top-right-radius: 0;}
+
+.tab-content > .tab-pane { display: none; }
+.tab-content > .active { display: block; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr)); }
+.grid-hosts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); }
+.flex-end { justify-content: flex-end; }

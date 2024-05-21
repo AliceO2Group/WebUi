@@ -10,14 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
-import {objectId, clone} from '../common/utils.js';
-import {assertTabObject, assertLayout} from '../common/Types.js';
+import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
+import { assertTabObject, assertLayout } from '../common/Types.js';
+import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
+
+const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
@@ -26,17 +29,17 @@ import {assertTabObject, assertLayout} from '../common/Types.js';
 export default class Layout extends Observable {
   /**
    * Initialize with empty values
-   * @param {Object} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
 
     this.model = model;
 
-    this.item = null; // current selected layout containing an array of tabs
+    this.item = null; // Current selected layout containing an array of tabs
 
-    this.tab = null; // pointer to a tab from `item`
-    this._tabIndex = 0; // index of the cu displayed tab
+    this.tab = null; // Pointer to a tab from `item`
+    this._tabIndex = 0; // Index of the cu displayed tab
     this.tabInterval = undefined; // JS Interval to change currently displayed tab
 
     this.newJSON = undefined;
@@ -45,28 +48,29 @@ export default class Layout extends Observable {
 
     this.searchInput = '';
 
-    this.editEnabled = false; // activate UI for adding, dragging and deleting tabObjects inside the current tab
-    this.editingTabObject = null; // pointer to a tabObject being modified
-    this.editOriginalClone = null; // contains a deep clone of item before editing
+    this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
+    this.editingTabObject = null; // Pointer to a tabObject being modified
+    this.editOriginalClone = null; // Contains a deep clone of item before editing
 
     // https://github.com/hootsuite/grid
     this.gridListSize = 3;
 
     this.gridList = new GridList([], {
       direction: 'vertical',
-      lanes: this.gridListSize
+      lanes: this.gridListSize,
     });
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
-    // gridList.grid.length: integer, number of rows
+    // GridList.grid.length: integer, number of rows
 
     this.filter = {};
   }
 
   /**
-   * Load data about a layout by its id;
+   * Load data about a layout by its id within a RemoteData object
    * Used within ObjectView page hence updating selected object as well
-   * @param {string} layoutId
+   * @param {string} layoutId - id of the layout to be loaded
+   * @returns {Promise} - whether retrieval of layout was success
    */
   async getLayoutById(layoutId) {
     this.requestedLayout = RemoteData.loading();
@@ -75,12 +79,14 @@ export default class Layout extends Observable {
     this.notify();
 
     if (!this.requestedLayout.isSuccess()) {
-      this.model.notification.show(`Unable to load requested layout.`, 'danger', Infinity);
+      this.model.notification.show('Unable to load requested layout.', 'danger', Infinity);
     } else {
       if (this.model.router.params.objectId) {
         await this.model.object.select({
-          name: this.model.object.getObjectNameByIdFromLayout(this.requestedLayout.payload,
-            this.model.router.params.objectId)
+          name: this.model.object.getObjectNameByIdFromLayout(
+            this.requestedLayout.payload,
+            this.model.router.params.objectId,
+          ),
         });
       }
     }
@@ -88,14 +94,16 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Load a single layout inside `item` and make its first tab selected
-   * @param {number} layoutId
+   * Load data about a layouts by its id
+   * @param {string} layoutId - id of the layout to be loaded
+   * @param {String} [tabName] - name of the tab that should be loaded
+   * @returns {Promise} - whether retrieval of layout was success
    */
-  async loadItem(layoutId) {
+  async loadItem(layoutId, tabName) {
     this.item = null;
     if (!layoutId) {
-      this.model.notification.show(`Unable to load layout, it might have been deleted.`, 'warning');
-      this.model.router.go(`?page=layouts`);
+      this.model.notification.show('Unable to load layout, it might have been deleted.', 'warning');
+      this.model.router.go('?page=layouts');
     } else {
       const result = await this.model.services.layout.getLayoutById(layoutId);
 
@@ -103,22 +111,29 @@ export default class Layout extends Observable {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
         this.setFilterFromURL();
-        this.selectTab(0);
+        let tabIndex = this.item.tabs
+          .findIndex((tab) => tab.name?.toLocaleUpperCase() === tabName?.toLocaleUpperCase());
+        if (tabIndex < 0) {
+          tabIndex = this.item.tabs
+            .findIndex((tab) => tabName?.toLocaleUpperCase().startsWith(tab.name?.toLocaleUpperCase()));
+        }
+        this.selectTab(tabIndex > -1 ? tabIndex : 0);
         this.setTabInterval(this.item.autoTabChange);
         this.notify();
       } else {
-        this.model.notification.show(`Unable to load layout, it might have been deleted.`, 'warning');
-        this.model.router.go(`?page=layouts`);
+        this.model.notification.show('Unable to load layout, it might have been deleted.', 'warning');
+        this.model.router.go('?page=layouts');
       }
     }
   }
 
   /**
    * Look for parameters used for filtering in URL and apply them in the layout if it exists
+   * @returns {undefined}
    */
   setFilterFromURL() {
     const parameters = this.model.router.params;
-    ['PeriodName', 'PassName', 'RunNumber', 'RunType'].forEach((filterKey) => {
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
       if (parameters[filterKey]) {
         this.filter[filterKey] = decodeURI(parameters[filterKey]);
       }
@@ -128,37 +143,43 @@ export default class Layout extends Observable {
 
   /**
    * When the user updates the displayed Objects, the filters should be placed in the URL as well
+   * @param {boolean} isSilent - whether the route should be silent or not
+   * @returns {undefined}
    */
-  setFilterToURL(layoutId, isSilent = true) {
-    const id = layoutId ? layoutId : this.model.router.params.layoutId;
-    let currentParameters = `?page=layoutShow&layoutId=${id}`;
-    Object.entries(this.filter)
-      .filter(([_, value]) => value)
-      .forEach(([key, value]) => {
-        currentParameters += `&${key}=${encodeURI(value)}`;
-      })
-    this.model.router.go(currentParameters, true, isSilent);
+  setFilterToURL(isSilent = true) {
+    const parameters = this.model.router.params;
+
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
+      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
+        delete parameters[filterKey];
+      } else {
+        parameters[filterKey] = encodeURI(this.filter[filterKey]);
+      }
+    });
+    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
   /**
    * Set layout property to given value
-   * @param {string} property
-   * @param {object} value
+   * @param {string} key - key of the property to be set
+   * @param {object} value - value of the property to be set
+   * @returns {undefined}
    */
-  setLayoutProperty(property, value) {
-    switch (property) {
+  setLayoutProperty(key, value) {
+    switch (key) {
       case 'autoTabChange':
-        this.item[property] = value >= 10 ? value : 0;
+        this.item[key] = value >= 10 ? value : 0;
         break;
       default:
-        this.item[property] = value;
+        this.item[key] = value;
     }
     this.notify();
   }
 
   /**
    * Given a user input value as String, set it as potential imported layout value as JSON
-   * @param {String} layout 
+   * @param {string} layout - JSON representation as string of a layout
+   * @returns {undefined}
    */
   setImportValue(layout) {
     try {
@@ -172,17 +193,19 @@ export default class Layout extends Observable {
 
   /**
    * Reset import layout modal if user cancels the operation
+   * @returns {undefined}
    */
   resetImport() {
     this.newJSON = undefined;
     this.model.services.layout.new = RemoteData.notAsked();
-    this.model.isImportVisible = false
+    this.model.isImportVisible = false;
   }
 
   /**
    * Create a new layout based on a given JSON skeleton through the import modal
    * If successful, go to its own page in edit mode afterward
    * @param {JSON} layout - skeleton of layout to be imported
+   * @returns {undefined}
    */
   async newFromJson(layout) {
     layout = LayoutUtils.fromSkeleton(layout);
@@ -202,29 +225,33 @@ export default class Layout extends Observable {
 
   /**
    * Creates a new empty layout with a name, go to its own page in edit mode afterward
-   * @param {string} layoutName
+   * @param {string} layoutName - name of the new layout in process to be created
+   * @returns {undefined}
    */
   async newItem(layoutName) {
     if (!layoutName) {
-      this.model.notification.show(`A new layout was not created due to invalid name`, 'warning', 2000);
+      this.model.notification.show('A new layout was not created due to invalid name', 'warning', 2000);
     } else {
       const layout = assertLayout({
         id: objectId(),
         name: layoutName,
         owner_id: this.model.session.personid,
         owner_name: this.model.session.name,
+        description: '',
         displayTimestamp: false,
         autoTabChange: 0,
-        tabs: [{
-          id: objectId(),
-          name: 'main',
-          objects: [],
-        }]
+        tabs: [
+          {
+            id: objectId(),
+            name: 'main',
+            objects: [],
+          },
+        ],
       });
 
       const result = await this.model.services.layout.createNewLayout(layout);
       if (result.isFailure()) {
-        this.model.notification.show(result.error || 'Unable to create layout', 'danger', 2000);
+        this.model.notification.show(result.payload || 'Unable to create layout', 'danger', 2000);
         return;
       }
 
@@ -238,22 +265,27 @@ export default class Layout extends Observable {
 
   /**
    * Delete current layout inside `item` from the server
+   * @returns {undefined}
    */
   async deleteItem() {
     if (!this.item) {
       throw new Error('no layout to delete');
     }
-    await this.model.services.layout.removeLayoutById(this.item.id);
-
-    this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success', 1500);
-    this.model.router.go(`?page=layouts`);
-    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
-    this.editEnabled = false;
+    const layoutRemovalRemoteData = await this.model.services.layout.removeLayoutById(this.item.id);
+    if (layoutRemovalRemoteData.isSuccess()) {
+      this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success', 1500);
+      this.model.router.go('?page=layouts');
+      this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
+      this.editEnabled = false;
+    } else {
+      this.model.notification.show(layoutRemovalRemoteData.payload, 'danger', 1500);
+    }
     this.notify();
   }
 
   /**
    * Save current `item` layout to server
+   * @returns {undefined}
    */
   async saveItem() {
     if (!this.item) {
@@ -262,19 +294,32 @@ export default class Layout extends Observable {
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
-      this.model.router.go(`?page=layoutShow&layoutId=${this.item.id}`, true, true);
-      this.notify();
     } else {
-      this.model.notification.show(`Layout "${this.item.name}" has not been saved.`, 'danger');
+      this.model.notification.show(result.payload, 'danger');
     }
+    this.notify();
+  }
+
+  /**
+   * Given an ID and new value for official status, update it accordingly
+   * @param {string} id - of layout to modify
+   * @param {Boolean} isOfficial - new value to set
+   * @return {void}
+   */
+  async toggleOfficial(id, isOfficial) {
+    await this.model.services.layout.patchLayout(id, { isOfficial });
+    await this.model.services.layout.getLayouts(this);
+    await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
+    this.model.notify();
   }
 
   /**
    * Method to allow more than 3x3 grid
-   * @param {string} value
+   * @param {string} value - of grid resize
+   * @returns {undefined}
    */
   resizeGridByXY(value) {
-    this.gridListSize = parseInt(value);
+    this.gridListSize = parseInt(value, 10);
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     this.gridList.resizeGrid(this.gridListSize);
@@ -290,6 +335,7 @@ export default class Layout extends Observable {
 
   /**
    * Compute grid positions of the current tab selected
+   * @returns {undefined}
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
@@ -299,18 +345,27 @@ export default class Layout extends Observable {
   /**
    * Select a tab of the current layout `item`
    * @param {number} index - index of array `item.tabs`
+   * @returns {undefined}
    */
   selectTab(index) {
+    const tabName = this.item.tabs[index].name;
+    const parameters = this.model.router.params;
+
+    setBrowserTabTitle(`${this.item.name}/${tabName}`);
+    this.model.router.go(buildQueryParametersString(parameters, { tab: tabName }), true, true);
+
+    this.setFilterFromURL();
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }
     this.tab = this.item.tabs[index];
+    this._tabIndex = index;
     this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filter);
-    const columns = this.item.tabs[index].columns;
+    const { columns } = this.item.tabs[index];
     if (columns > 0) {
       this.resizeGridByXY(columns);
     } else {
-      this.tab.columns = 3; // default
+      this.tab.columns = 3; // Default
       this.resizeGridByXY(3);
     }
     this.sortObjectsOfCurrentTab();
@@ -320,10 +375,11 @@ export default class Layout extends Observable {
   /**
    * Delete a tab by index from the current selected layout `item`
    * @param {number} index - index of array `item.tabs`
+   * @returns {undefined}
    */
   deleteTab(index) {
     if (this.item.tabs.length <= 1) {
-      this.model.notification.show(`Please, add another tab before deleting the last one`, 'primary');
+      this.model.notification.show('Please, add another tab before deleting the last one', 'primary');
       return;
     }
 
@@ -331,7 +387,7 @@ export default class Layout extends Observable {
       return;
     }
 
-    // impossible normally
+    // Impossible normally
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }
@@ -343,7 +399,9 @@ export default class Layout extends Observable {
   /**
    * Rename tab of the current selected layout `item`
    * @param {index} index - index of array `item.tabs`
-   * @param {string} name
+   * @param {string} name - new name for the tab to be renamed
+   * @returns {undefined}
+   * @throws {Error}
    */
   renameTab(index, name) {
     if (!this.item.tabs[index]) {
@@ -356,17 +414,19 @@ export default class Layout extends Observable {
 
   /**
    * Creates a new tab inside the current layout `item`
-   * @param {string} name
+   * @param {string} name - name of the tab to be added
+   * @returns {undefined}
+   * @throws {Error}
    */
   newTab(name) {
     if (!name) {
-      throw new Error(`tab name is required`);
+      throw new Error('tab name is required');
     }
 
     this.item.tabs.push({
       id: objectId(),
       name: name,
-      objects: []
+      objects: [],
     });
     this.notify();
   }
@@ -374,7 +434,8 @@ export default class Layout extends Observable {
   /**
    * Set user's input for search and use a fuzzy algo to filter list of layouts.
    * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
-   * @param {string} searchInput
+   * @param {string} searchInput - string input from the user to search by
+   * @returns {undefined}
    */
   search(searchInput) {
     this.searchInput = searchInput;
@@ -386,6 +447,7 @@ export default class Layout extends Observable {
 
   /**
    * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
+   * @returns {undefined}
    */
   edit() {
     this.model.services.object.listObjects();
@@ -395,7 +457,7 @@ export default class Layout extends Observable {
     }
     this.setTabInterval(0);
     this.editEnabled = true;
-    this.editOriginalClone = JSON.parse(JSON.stringify(this.item)); // deep clone
+    this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.editingTabObject = null;
     window.dispatchEvent(new Event('resize'));
 
@@ -404,6 +466,7 @@ export default class Layout extends Observable {
 
   /**
    * Ends editing and send back to server the new version of the current layout
+   * @returns {undefined}
    */
   save() {
     this.setTabInterval(this.item.autoTabChange);
@@ -416,29 +479,30 @@ export default class Layout extends Observable {
 
   /**
    * Ends editing and replaces the current layout by the original that was backed-up before editing
+   * @returns {undefined}
    */
   cancelEdit() {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.item = this.editOriginalClone;
-    this.selectTab(0);
+    this.selectTab(this._tabIndex);
     this.notify();
   }
 
   /**
    * Add a new object chart
    * @param {string} objectName - name of object like a/b/c
-   * @return {Object} the new tabObject created
+   * @returns {Object} the new tabObject created
    */
   addItem(objectName) {
     const newTabObject = assertTabObject({
       id: objectId(),
       x: 0,
-      y: 100, // place it at the end first
+      y: 100, // Place it at the end first
       h: 1,
       w: 1,
       name: objectName,
-      options: []
+      options: [],
     });
     this.tab.objects.push(newTabObject);
     this.sortObjectsOfCurrentTab();
@@ -450,6 +514,7 @@ export default class Layout extends Observable {
    * Track the item to be moved by drag&drop.
    * Also save the current order of items as the 'initial order'.
    * @param {TabObject} tabObject - the moving item
+   * @returns {undefined}
    */
   moveTabObjectStart(tabObject) {
     this.tabObjectMoving = tabObject;
@@ -459,6 +524,7 @@ export default class Layout extends Observable {
 
   /**
    * Stop to track the drag of 'moving item'
+   * @returns {undefined}
    */
   moveTabObjectStop() {
     this.tabObjectMoving = null;
@@ -469,15 +535,16 @@ export default class Layout extends Observable {
    * Set position of 'moving item' to `newX` and `newY`.
    * Items are then reordered so avoid collapses based on 'initial order',
    * this avoids to move other items twice from their initial position.
-   * @param {Number} newX - x position starting left top
-   * @param {Number} newY - y position starting left top
+   * @param {number} newX - x position starting left top
+   * @param {number} newY - y position starting left top
+   * @returns {undefined}
    */
   moveTabObjectToPosition(newX, newY) {
     if (!this.tabObjectMoving) {
       return;
     }
 
-    // restoration of positions by mutating so we keep references
+    // Restoration of positions by mutating so we keep references
     this.tab.objects.forEach((obj) => {
       const originalClone = this.originalItems.find((tabObject) => tabObject.id === obj.id);
       obj.x = originalClone.x;
@@ -486,7 +553,7 @@ export default class Layout extends Observable {
       obj.w = originalClone.w;
     });
 
-    // use GridList to move the moving item from initial position to the new one
+    // Use GridList to move the moving item from initial position to the new one
     this.gridList.moveItemToPosition(this.tabObjectMoving, [newX, newY]);
 
     this.notify();
@@ -494,19 +561,21 @@ export default class Layout extends Observable {
 
   /**
    * Set size of tabObject and compute new positions in the grid
-   * @param {Object} tabObject
+   * @param {object} tabObject - tab dto representation
    * @param {number} w - width
    * @param {number} h - height
+   * @returns {undefined}
    */
   resizeTabObject(tabObject, w, h) {
-    this.gridList.resizeItem(tabObject, {w, h});
+    this.gridList.resizeItem(tabObject, { w, h });
     this.notify();
   }
 
   /**
    * Toggle a jsroot option of a tabObject
-   * @param {Object} tabObject
-   * @param {string} option
+   * @param {Object} tabObject - tab dto representation
+   * @param {string} option - option for which to toggle
+   * @returns {undefined}
    */
   toggleTabObjectOption(tabObject, option) {
     const index = tabObject.options.indexOf(option);
@@ -521,7 +590,8 @@ export default class Layout extends Observable {
   /**
    * Method to toggle displaying default options
    * If field does not exist in tabObject, it will be added
-   * @param {Object} tabObject
+   * @param {Object} tabObject - tab dto representation
+   * @returns {undefined}
    */
   toggleDefaultOptions(tabObject) {
     if (tabObject.ignoreDefaults) {
@@ -534,7 +604,8 @@ export default class Layout extends Observable {
 
   /**
    * Edit a tabObject from current tab from current layout, sidebar will show its properties
-   * @param {Object} tabObject
+   * @param {Object} tabObject - tab dto representation
+   * @returns {undefined}
    */
   editTabObject(tabObject) {
     this.editingTabObject = tabObject;
@@ -543,7 +614,8 @@ export default class Layout extends Observable {
 
   /**
    * Delete a tabObject from current tab from current layout
-   * @param {Object} tabObject
+   * @param {Object} tabObject - tab dto representation
+   * @returns {undefined}
    */
   deleteTabObject(tabObject) {
     if (tabObject === this.editingTabObject) {
@@ -557,18 +629,18 @@ export default class Layout extends Observable {
   /**
    * Method to duplicate an existing layout
    * @param {String} layoutName - name of the new layout tha tis being created
+   * @returns {Promise} - whether duplication was successful
    */
   async duplicate(layoutName) {
     if (!layoutName) {
-      this.model.notification.show(`Layout was not duplicated due to invalid/missing new name`, 'warning', 2000);
+      this.model.notification.show('Layout was not duplicated due to invalid/missing new name', 'warning', 2000);
       return;
     }
     const itemToDuplicate = clone(this.item);
-
     // Create tabs for new layout
     const tabs = [];
 
-    itemToDuplicate.tabs.forEach(function(tab) {
+    itemToDuplicate.tabs.forEach((tab) => {
       const duplicatedTab = {
         id: objectId(),
         name: tab.name,
@@ -584,7 +656,7 @@ export default class Layout extends Observable {
       name: layoutName,
       owner_id: this.model.session.personid,
       owner_name: this.model.session.name,
-      tabs: tabs
+      tabs: tabs,
     });
 
     const result = await this.model.services.layout.createNewLayout(layout);
@@ -602,8 +674,8 @@ export default class Layout extends Observable {
 
   /**
    * Method to check if passed layout contains any objects in online mode
-   * @param {Layout} layout
-   * @return {boolean}
+   * @param {Layout} layout - layout dto representation
+   * @returns {boolean} - whether there are online objects
    */
   doesLayoutContainOnlineObjects(layout) {
     if (layout && layout.tabs && layout.tabs.length > 0) {
@@ -622,7 +694,7 @@ export default class Layout extends Observable {
 
   /**
    * Sends back the currently displayed tab index
-   * @return {Number}
+   * @returns {number} - tab index
    */
   get tabIndex() {
     return this._tabIndex;
@@ -631,8 +703,8 @@ export default class Layout extends Observable {
   /**
    * Updates the index of the currently displayed tab
    * Will default to 0 if the received index is greater than the current possibilities
-   * @param {Number} index
-   * @return {Number}
+   * @param {number} index - new value of tab index
+   * @returns {undefined}
    */
   set tabIndex(index) {
     this._tabIndex = index >= this.item.tabs.length ? 0 : index;
@@ -641,18 +713,18 @@ export default class Layout extends Observable {
   /**
    * Sets an interval to automatically change current tab selection based on the passed time in seconds
    * If time is < 10, no interval will be set
-   * @param {Number} time - seconds on how often the tab should be changed
-   * @returns {}
+   * @param {number} time - seconds on how often the tab should be changed
+   * @returns {undefined}
    */
   setTabInterval(time) {
     if (time >= 10) {
       this.tabInterval = setInterval(() => {
-        this._tabIndex = (this._tabIndex + 1 >= this.item.tabs.length) ? 0 : this._tabIndex + 1;
+        this._tabIndex = this._tabIndex + 1 >= this.item.tabs.length ? 0 : this._tabIndex + 1;
         this.selectTab(this._tabIndex);
       }, time * 1000);
     } else {
       clearInterval(this.tabInterval);
-      this.selectTab(0);
+      this.selectTab(this._tabIndex);
     }
   }
 }

@@ -13,10 +13,9 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
+import {jsonDelete} from './../utilities/jsonDelete.js';
+import {jsonPut} from './../utilities/jsonPut.js';
 import Task from './Task.js';
-import {getTaskShortName} from '../common/utils.js';
-
-const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
 
 /**
  * Model representing Environment CRUD
@@ -43,7 +42,7 @@ export default class Environment extends Observable {
       userVars: true,
       vars: false,
       defaults: false,
-    }
+    };
   }
 
   /**
@@ -99,12 +98,7 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/core/environments`);
-    if (!ok) {
-      this.list = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.list = RemoteData.success(result);
+    this.list = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
 
@@ -117,12 +111,7 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/core/removeRequest/${id}`);
-    if (!ok) {
-      this.requests = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.requests = RemoteData.success(result);
+    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
 
@@ -134,49 +123,44 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/core/requests`);
-    if (!ok) {
-      this.requests = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.requests = RemoteData.success(result);
+    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
   /**
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
-  async getEnvironment(body) {
-    this.item = RemoteData.loading();
-    this.notify();
-    const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
-    if (!ok) {
-      this.item = RemoteData.failure(result.message);
+  async getEnvironment(body, itShouldLoad = true, panel = '') {
+    if (itShouldLoad) {
+      this.item = RemoteData.loading();
       this.notify();
-      return;
     }
-    this.item = RemoteData.success(this._parseEnvResult(result));
+    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
+    this.item = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.itemControl = RemoteData.notAsked();
     this.notify();
   }
 
   /**
-   * Control a remote environment, store action result into `itemControl` as RemoteData
-   * @param {Object} body - See protobuf definition for properties
+   * Request the control of an environment to transition to a new state. 
+   * In case of success, the user will be redirected to the environment details page with the new state
+   * In case of failure, an error message which be stored in `itemControl` and displayed under the button action panel
+   * @param {String} id - environmentId that the user whishes to control
+   * @param {String} type - type of the transition that the user whishes to apply
+   * @param {Number} runNumber - current run number if the environment is in RUNNING state
+   * @return {void}
    */
-  async controlEnvironment(body) {
+  async controlEnvironment(id, type, runNumber) {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/ControlEnvironment`, body);
-    if (!ok) {
-      this.itemControl = RemoteData.failure(result.message);
-      this.notify();
-      return;
+    try {
+      const result = await jsonPut(`/api/environment/${id}`, {body: {id, type, runNumber}});
+      this.itemControl = RemoteData.success(result);
+      this.model.router.go(`?page=environment&id=${result.id}`);
+    } catch (error) {
+      this.itemControl = RemoteData.failure(error);
     }
-    this.itemControl = RemoteData.success(result);
-    this.itemNew = RemoteData.notAsked();
-    this.model.router.go(`?page=environment&id=${result.id}`);
     this.notify();
   }
 
@@ -190,32 +174,30 @@ export default class Environment extends Observable {
     this.notify();
 
     const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
-    if (!ok) {
-      this.itemNew = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.itemNew = RemoteData.notAsked();
+    this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
     this.model.router.go(`?page=environments`);
   }
 
   /**
    * Destroy a remote environment, store action result into `this.itemControl` as RemoteData
-   * @param {Object} body - See protobuf definition for properties
+   * @param {String} id - id of the environment to be destroyed
+   * @param {Number} runNumber - if environment is in running state
+   * @param {Boolean} [allowInRunningState = false] - if the environment should be allowed to stop in running state
+   * @param {Boolean} [force = false] - if the environment should be killed via force flag
    */
-  async destroyEnvironment(body) {
+  async destroyEnvironment(id, runNumber, allowInRunningState, force) {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/DestroyEnvironment`, body);
-    if (!ok) {
-      this.model.notification.show(result.message, 'danger', 5000);
-      this.itemControl = RemoteData.failure(result.message);
+    try {
+      await jsonDelete(`/api/environment/${id}`, {body: {id, runNumber, allowInRunningState, force}});
+      this.itemControl = RemoteData.notAsked();
+      this.model.router.go(`?page=environments`);
+    } catch (error) {
+      this.model.notification.show(error.message, 'danger', 5000);
+      this.itemControl = RemoteData.failure(error.message);
       this.notify();
-      return;
     }
-    this.itemControl = RemoteData.notAsked();
-    this.model.router.go(`?page=environments`);
   }
 
   /**
@@ -237,91 +219,30 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Helpers
+   * If the user has the environment page opened and there is an 
+   * @param {EnvironmentInfo} environments - partial env info from AliECS via WebSocket message
    */
-
-  /**
-   * Given a JSON containing environment information and a specific key:
-   * * check if that key maps to an existing values
-   * * remove any variables that are a detector variable but are not part of the included detector
-   * @param {JSON} dataToFilter
-   * @param {string} label
-   * @return {JSON}
-   */
-  _filterOutDetectorsVariables(dataToFilter, label) {
-    const data = JSON.parse(JSON.stringify(dataToFilter));
-    const detectors = this.model.detectors.listRemote;
-    const includedDetectors = data.includedDetectors;
-    if (data[label] && includedDetectors && includedDetectors.length !== 0 && detectors.isSuccess()) {
-      Object.keys(data[label])
-        .filter((variable) => {
-          const prefix = variable.split('_')[0];
-          const isVariableDetector =
-            detectors.payload.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
-          const isVariableIncludedDetector =
-            includedDetectors.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
-          return isVariableDetector && !isVariableIncludedDetector;
-        })
-        .forEach((variable) => delete data[label][variable])
-    }
-    return data;
-  }
-
-  /**
-   * Given an environment, group its tasks by the 3 main categories: FLP, QC Nodes and CTP Readout
-   * @param {EnvironmentInfo} environment - DTO representing an environment
-   * @returns {object{tasks: Array<TaskInfo>, hosts: Set}} - Object with groups of tasks and set of unique hosts
-   */
-  _getTasksGroupedByCategory(environment) {
-    const qc = {tasks: [], hosts: new Set()};
-    const flp = {tasks: [], hosts: new Set()};
-    const trg = {tasks: [], hosts: new Set()};
-
-    const {hostsByDetectorRemote = RemoteData.notAsked()} = this.model.detectors;
-    const {tasks = [], includedDetectors = []} = environment;
-    for (const task of tasks) {
-      const {deploymentInfo: {hostname = ''} = {}} = task;
-      if (hostname.match(QC_NODES_NAME_REGEX)) {
-        qc.tasks.push(task);
-        qc.hosts.add(hostname);
-      } else if (hostsByDetectorRemote.isSuccess()) {
-        const {userVars: {ctp_readout_enabled = 'false'} = {}} = environment;
-        const isReadoutEnabled = ctp_readout_enabled === 'true';
-
-        const hostsByDetectors = hostsByDetectorRemote.payload;
-        const keyDetector = Object.keys(hostsByDetectors)
-          .filter((detector) => hostsByDetectors[detector].includes(hostname))[0];
-        if (includedDetectors.includes(keyDetector)) {
-          flp.tasks.push(task);
-          flp.hosts.add(hostname)
-        } else if (isReadoutEnabled) {
-          trg.tasks.push(task);
-          trg.hosts.add(hostname)
+  updateItemEnvironment(environments) {
+    if (this.item.isSuccess()) {
+      const {id, currentTransition} = this.item.payload;
+      let envExists = false;
+      environments.forEach((env) => {
+        if (env.id === id) {
+          envExists = true;
+          if (!env.currentTransition) {
+            env.currentTransition = undefined;
+          }
+          Object.assign(this.item.payload, env);
+          this.notify();
+          if (currentTransition && !env.currentTransition) {
+            this.getEnvironment({id}, false);
+          }
+          return;
         }
+      });
+      if (!envExists) {
+        this.item = RemoteData.failure('Environment was destroyed');
       }
     }
-    return {qc, flp, trg};
-  }
-
-  /**
-   * Method to remove and parse fields from environment result
-   * @param {JSON} result
-   * @return {JSON}
-   */
-  _parseEnvResult(result) {
-    let task = undefined;
-    if (result.environment.tasks) {
-      task = result.environment.tasks.find((task) => task.mesosStdout);
-      result.environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
-    }
-    result.mesosStdout = (task && task.mesosStdout) ? task.mesosStdout : '';
-
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'vars');
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'userVars');
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'defaults');
-
-    const {qc, flp, trg} = this._getTasksGroupedByCategory(result.environment);
-    result.environment.hardware = {qc, trg, flp};
-    return result;
   }
 }

@@ -116,8 +116,8 @@ export default class LogFilter extends Observable {
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
         } else if (operator === 'match' || operator === 'exclude') {
-          // encode potential breaking characters
-          criterias[field][operator] = encodeURI(criterias[field][operator]);
+          // encode potential breaking characters and escape double quotes as are used by browser by default
+          criterias[field][operator] = encodeURI(criterias[field][operator].replace(/["]+/g, '\\"'));
         }
 
         // remove empty fields
@@ -126,7 +126,6 @@ export default class LogFilter extends Observable {
         }
       }
     }
-
     return criterias;
   }
 
@@ -149,7 +148,7 @@ export default class LogFilter extends Observable {
    * Output of function is boolean.
    * @return {function.<WebSocketMessage, boolean>}
    */
-  toFunction() {
+  toStringifyFunction() {
     /**
      * This function will be stringified then sent to server so it can filter logs
      * 'DATA_PLACEHOLDER' will be replaced by the stringified filters too so the function contains de data
@@ -192,25 +191,27 @@ export default class LogFilter extends Observable {
         return logValue.replace(/\r?\n|\r/g, '');
       }
 
-      // eslint-disable-next-line guard-for-in
-      for (const field in criterias) {
-        const logValue = log[field];
-
-        // eslint-disable-next-line guard-for-in
-        for (const operator in criterias[field]) {
-          let criteriaValue = criterias[field][operator];
+      /**
+       * Function that applies the criteria of one filter set by the user on each received logValue
+       * @param {Object} logValue - value of the log field that is to be checked (e.g. message, severity, etc.)
+       * @param {Object} criteria - object containing the criteria if applied by the user
+       * @param {string} [separator = ' '] - separator to be applied when filtering based on an array of values; `\n` has to be passed in case of message field
+       * @return {boolean} - result of the log matching the filter set by user
+       */
+      function isLogMatchingMessageCriteria(logValue, criteria, separator = ' ') {
+        for (const operator in criteria) {
+          let criteriaValue = criteria[operator];
           // don't apply criterias not set
           if (criteriaValue === null) {
             continue;
           }
-          const separator = field === 'message' ? '\n' : ' ';
-          // logValue is sometime required, undefined means test fails and log is rejected
           switch (operator) {
-            case '$in':
+            case '$in': {
               if (logValue === undefined || !criteriaValue.includes(logValue)) {
                 return false;
               }
               break;
+            }
             case '$match': {
               const criteriaList = criteriaValue.split(separator);
               if (criteriaList.length > 1) {
@@ -260,15 +261,29 @@ export default class LogFilter extends Observable {
               continue;
           }
         }
+        return true;
       }
-      return true;
+      /*
+       * Removes the message from the initial filtering as this puts a lot of stress on the server
+       * Filtering will be done initially on the small contained fields and only later if still needed on the message
+       */
+      const messageCriteria = criterias.message;
+      delete criterias.message;
+
+      for (const field in criterias) {
+        if (isLogMatchingMessageCriteria(log[field], criterias[field], ' ')) {
+          continue
+        } else {
+          return false;
+        }
+      }
+      return isLogMatchingMessageCriteria(log['message'], messageCriteria, '\n');
     }
 
     const criteriasJSON = JSON.stringify(this.criterias);
     const functionAsString = filterFunction.toString();
     const functionWithCriterias = functionAsString.replace('\'DATA_PLACEHOLDER\'', criteriasJSON);
-    const functionPure = eval(`(${functionWithCriterias})`);
-    return functionPure;
+    return functionWithCriterias;
   }
 
   /**

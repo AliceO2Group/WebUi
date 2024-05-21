@@ -12,56 +12,75 @@
  * or submit itself to any jurisdiction.
  */
 
+/* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 
-const assert = require('assert');
-const nock = require('nock');
+import assert from 'assert';
+import nock from 'nock';
 
-const CcdbService = require('../../../lib/services/CcdbService.js');
-const config = require('../../test-config.js');
+import { CcdbService } from '../../../lib/services/ccdb/CcdbService.js';
+import { CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/ccdb/CcdbConstants.js';
+import { testConfig as config } from '../../test-config.js';
 
-describe('CCDB Service test suite', () => {
+export const ccdbServiceTestSuite = async () => {
   before(() => nock.cleanAll());
-
   describe('Creating a new CcdbService instance', () => {
-    it('should throw an error if configuration object is not provided', () => {
-      assert.throws(() => new CcdbService(), new Error('Empty CCDB config'));
-      assert.throws(() => new CcdbService(null), new Error('Empty CCDB config'));
-      assert.throws(() => new CcdbService(undefined), new Error('Empty CCDB config'));
-    });
-
-    it('should throw an error if configuration object is missing hostname field', () => {
-      assert.throws(() => new CcdbService({}), new Error('Empty hostname in CCDB config'));
-    });
-
-    it('should throw an error if configuration object is missing port field', () => {
-      assert.throws(() => new CcdbService({ hostname: 'localhost' }), new Error('Empty port in CCDB config'));
-    });
-
     it('should successfully initialize CcdbService', () => {
-      assert.doesNotThrow(() => new CcdbService({ hostname: 'localhost', port: 8080 }));
+      const ccdbService = new CcdbService({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
+
+      assert.strictEqual(ccdbService._hostname, 'ccdb-local');
+      assert.strictEqual(ccdbService._port, 8083);
+      assert.strictEqual(ccdbService._protocol, 'https');
+      assert.strictEqual(ccdbService.PREFIX, 'qc');
+    });
+
+    it('should successfully initialize CcdbService with default values', () => {
+      const ccdbService = new CcdbService();
+
+      assert.strictEqual(ccdbService._hostname, 'localhost');
+      assert.strictEqual(ccdbService._port, 8080);
+      assert.strictEqual(ccdbService._protocol, 'http');
+      assert.strictEqual(ccdbService.PREFIX, 'qc');
+    });
+
+    it('should successfully setup CcdbService', () => {
+      const ccdbService = CcdbService.setup({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
+
+      assert.strictEqual(ccdbService._hostname, 'ccdb-local');
+      assert.strictEqual(ccdbService._port, 8083);
+      assert.strictEqual(ccdbService._protocol, 'https');
+      assert.strictEqual(ccdbService.PREFIX, 'qc');
     });
   });
 
-  describe('`isConnectionUp()` tests', () => {
+  describe('`getVersion()` tests', () => {
     let ccdb;
+    let CCDB_URL_HEALTH_POINT = '';
+    let CCDB_HOSTNAME = '';
     before(() => {
       ccdb = new CcdbService(config.ccdb);
+      CCDB_URL_HEALTH_POINT = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
+      CCDB_HOSTNAME = config.ccdb.ccdb;
     });
 
     it('should successfully test connection to CCDB', async () => {
-      nock('http://ccdb:8500')
-        .get('/browse/test')
-        .reply(200, { objects: [], subfolders: [] });
+      const response = {};
+      response[CCDB_MONITOR] = {};
+      response[CCDB_MONITOR][CCDB_HOSTNAME] = [{ param: 'ccdb_version', updated: 1690295929225, value: '1.0.27' }];
 
-      await assert.doesNotReject(ccdb.isConnectionUp());
+      nock('http://ccdb:8500')
+        .get(CCDB_URL_HEALTH_POINT)
+        .reply(200, response);
+
+      const info = await ccdb.getVersion();
+      assert.deepStrictEqual(info, { version: '1.0.27' });
     });
 
     it('should return rejected promise when attempting to test connection on CCDB', async () => {
       nock('http://ccdb:8500')
-        .get('/browse/test')
+        .get(CCDB_URL_HEALTH_POINT)
         .replyWithError('getaddrinfo ENOTFOUND ccdb ccdb:8500');
-      await assert.rejects(async () => await ccdb.isConnectionUp(), new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb:8500'));
+      await assert.rejects(async () => await ccdb.getVersion(), new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb:8500'));
     });
   });
 
@@ -70,27 +89,46 @@ describe('CCDB Service test suite', () => {
       const ccdb = new CcdbService(config.ccdb);
       await assert.rejects(
         async () => await ccdb.getObjectsLatestVersionList('/qc', 'bad-fields'),
-        new Error('List of specified fields must be of type Array'),
+        new TypeError('fields.join is not a function'),
       );
     });
 
-    it('should successfully return a list of the objects', async () => {
+    it('should successfully return a list of the objects with requested default headers', async () => {
       const ccdb = new CcdbService(config.ccdb);
       const objects = [
-        { path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id' },
-        { path: 'object/two', Created: '101', 'Last-Modified': '102', id: 'id' },
-        { path: 'object/three', Created: '101', 'Last-Modified': '102', id: 'id' },
+        { path: 'object/one', Created: '101', 'Last-Modified': '102' },
+        { path: 'object/two', Created: '101', 'Last-Modified': '102' },
+        { path: 'object/three', Created: '101', 'Last-Modified': '102' },
       ];
-      const expectedObjects = [
-        { name: 'object/one', created: 101, lastModified: 102, id: 'id' },
-        { name: 'object/two', created: 101, lastModified: 102, id: 'id' },
-        { name: 'object/three', created: 101, lastModified: 102, id: 'id' },
-      ];
-      nock('http://ccdb:8500')
+      nock('http://ccdb:8500', {
+        reqheaders: {
+          Accept: 'application/json',
+          'X-Filter-Fields': 'path,Created,Last-Modified',
+        },
+      })
         .get('/latest/test.*')
         .reply(200, { objects: objects, subfolders: [] });
       const objectsRetrieved = await ccdb.getObjectsLatestVersionList();
-      assert.deepStrictEqual(objectsRetrieved, expectedObjects, 'Received objects are not alike');
+      assert.deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
+    });
+
+    it('should successfully return a list of the objects with specified headers', async () => {
+      const ccdb = new CcdbService(config.ccdb);
+      const objects = [
+        { path: 'object/one', Created: '101', 'Last-Modified': '102', Id: 1 },
+        { path: 'object/two', Created: '101', 'Last-Modified': '102', Id: 2 },
+        { path: 'object/three', Created: '101', 'Last-Modified': '102', Id: 3 },
+      ];
+      nock('http://ccdb:8500', {
+        reqheaders: {
+          Accept: 'application/json',
+          'X-Filter-Fields': 'Id',
+        },
+      })
+        .get('/latest/.*')
+        .reply(200, { objects: objects, subfolders: [] });
+      const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', ['Id']);
+      assert.deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
     });
 
     it('should reject due to HTTP request error', async () => {
@@ -103,22 +141,21 @@ describe('CCDB Service test suite', () => {
     });
   });
 
-  describe('`getObjectTimestampList()` tests', () => {
-    it('should successfully return a list of last modified timestamps for a specific object', async () => {
+  describe('`getObjectVersions()` tests', () => {
+    it('should successfully return a list of versions for a specific object', async () => {
       const ccdb = new CcdbService(config.ccdb);
       const objects = [
-        { path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: [] },
-        { path: 'object/one', Created: '101', 'Last-Modified': '103', id: 'id', metadata: [] },
-        { path: 'object/one', Created: '101', 'Last-Modified': '104', id: 'id', metadata: [] },
+        { path: 'object/one', Created: '101', 'Valid-From': '102', ETag: 'id102', metadata: [] },
+        { path: 'object/one', Created: '101', 'Valid-From': '103', ETag: 'id103', metadata: [] },
+        { path: 'object/one', Created: '101', 'Valid-From': '104', ETag: 'id104', metadata: [] },
       ];
-      const expectedTimestamps = [102, 103, 104];
+      const expectedVersions = [{ 'Valid-From': 102, Created: 101, ETag: 'id102' }, { 'Valid-From': 103, Created: 101, ETag: 'id103' }, { 'Valid-From': 104, Created: 101, ETag: 'id104' }];
       nock('http://ccdb:8500')
         .get('/browse/object/one')
         .reply(200, { objects, subfolders: [] });
 
-      await ccdb.getObjectTimestampList('object/one').then((result) => {
-        assert.deepStrictEqual(result, expectedTimestamps);
-      });
+      const result = await ccdb.getObjectVersions({ path: 'object/one' });
+      assert.deepStrictEqual(result, expectedVersions);
     });
 
     it('should successfully return an empty list due to empty reply from CCDB', async () => {
@@ -127,9 +164,8 @@ describe('CCDB Service test suite', () => {
         .get('/browse/object/one')
         .reply(200, { objects: [], subfolders: [] });
 
-      await ccdb.getObjectTimestampList('object/one').then((result) => {
-        assert.deepStrictEqual(result, []);
-      });
+      const result = await ccdb.getObjectVersions({ path: 'object/one' });
+      assert.deepStrictEqual(result, []);
     });
   });
 
@@ -138,15 +174,20 @@ describe('CCDB Service test suite', () => {
       const ccdb = new CcdbService(config.ccdb);
       await assert.rejects(
         async () => await ccdb.getObjectLatestVersionInfo(),
-        new Error('Failed to load object due to missing path'),
+        new Error('Missing mandatory parameter: path'),
       );
       await assert.rejects(
         async () => await ccdb.getObjectLatestVersionInfo(null),
-        new Error('Failed to load object due to missing path'),
+        new Error('Missing mandatory parameter: path'),
       );
       await assert.rejects(
         async () => await ccdb.getObjectLatestVersionInfo(undefined),
-        new Error('Failed to load object due to missing path'),
+        new Error('Missing mandatory parameter: path'),
+      );
+
+      await assert.rejects(
+        async () => await ccdb.getObjectLatestVersionInfo({ path: undefined }),
+        new Error('Missing mandatory parameter: path'),
       );
     });
 
@@ -157,7 +198,7 @@ describe('CCDB Service test suite', () => {
         .reply(502, 'Unable to find object');
 
       await assert.rejects(
-        async () => await ccdb.getObjectLatestVersionInfo('object/one'),
+        async () => await ccdb.getObjectLatestVersionInfo({ path: 'object/one' }),
         new Error('Unable to retrieve object for: object/one'),
       );
     });
@@ -170,7 +211,7 @@ describe('CCDB Service test suite', () => {
         .reply(200, { objects, subfolders: [] });
 
       await assert.rejects(
-        async () => await ccdb.getObjectLatestVersionInfo('object/one'),
+        async () => await ccdb.getObjectLatestVersionInfo({ path: 'object/one' }),
         new Error('Unable to retrieve object for: object/one'),
       );
     });
@@ -179,54 +220,13 @@ describe('CCDB Service test suite', () => {
       const ccdb = new CcdbService(config.ccdb);
       const objects = [{ path: 'object/one', Created: '101', 'Last-Modified': '102', id: 'id', metadata: [] }];
       nock('http://ccdb:8500')
-        .get('/latest/object/one/')
+        .get('/latest/object/one')
         .reply(200, { objects, subfolders: [] });
 
-      const result = await ccdb.getObjectLatestVersionInfo('object/one');
+      const result = await ccdb.getObjectLatestVersionInfo({ path: 'object/one' });
       assert.deepStrictEqual(result, objects[0]);
     });
   });
-
-  /*
-   * Describe('`itemTransform()` & `isItemValid() tests', () => {
-   *   let ccdb;
-   *   before(() => ccdb = new CcdbService(config.ccdb));
-   */
-
-  /*
-   *   It('should successfully return false for an item with missing path', () => {
-   *     assert.strictEqual(ccdb.isItemValid({}), false);
-   *     assert.strictEqual(ccdb.isItemValid({path: undefined}), false);
-   *     assert.strictEqual(ccdb.isItemValid({path: false}), false);
-   *     assert.strictEqual(ccdb.isItemValid({path: ''}), false);
-   *   });
-   */
-
-  /*
-   *   It('should successfully return false for an item with a path missing a forward slash(/)', () => {
-   *     assert.strictEqual(ccdb.isItemValid({path: 'wrongPath'}), false);
-   *   });
-   */
-
-  /*
-   *   It('should successfully return true for an item that fits criteria', () => {
-   *     const item = {
-   *       path: 'correct/path', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []
-   *     };
-   *     assert.deepStrictEqual(ccdb.isItemValid(item), true);
-   *   });
-   */
-
-  /*
-   *   It('should successfully return a JSON with 3 fields if item fits criteria', () => {
-   *     const item = {
-   *       path: 'correct/path', Created: '101', 'Last-Modified': '102', id: 'id', metadata: []
-   *     };
-   *     const expectedItem = {name: 'correct/path', createTime: 101, lastModified: 102};
-   *     assert.deepStrictEqual(ccdb.itemTransform(item), expectedItem);
-   *   });
-   * });
-   */
 
   describe('`getObjectDetails()` tests', () => {
     let ccdb;
@@ -234,182 +234,136 @@ describe('CCDB Service test suite', () => {
       ccdb = new CcdbService(config.ccdb);
     });
 
-    it('should throw error due to missing parameters (name or timestamp)', async () => {
-      await assert.rejects(async () => ccdb.getObjectDetails(), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getObjectDetails(null), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getObjectDetails(undefined), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getObjectDetails('', '2'), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getObjectDetails('name'), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getObjectDetails('name', null), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getObjectDetails('name', undefined), new Error('Missing mandatory parameters: name & timestamp'));
-      await assert.rejects(async () => ccdb.getObjectDetails('name', ''), new Error('Missing mandatory parameters: name & timestamp'));
+    it('should throw error due to missing mandatory parameters (path, timestamp, id)', async () => {
+      await assert.rejects(async () => ccdb.getObjectDetails(), new Error('Missing mandatory parameters: path & validFrom'));
+      await assert.rejects(async () => ccdb.getObjectDetails(null), new Error('Missing mandatory parameters: path & validFrom'));
+      await assert.rejects(async () => ccdb.getObjectDetails(undefined), new Error('Missing mandatory parameters: path & validFrom'));
+      await assert.rejects(async () => ccdb.getObjectDetails({ path: '' }), new Error('Missing mandatory parameters: path & validFrom'));
+      await assert.rejects(async () => ccdb.getObjectDetails({ path: null, validFrom: 213 }, null), new Error('Missing mandatory parameters: path & validFrom'));
     });
 
-    it('should successfully return content-location field on status >=200 <= 299', async () => {
+    it('should successfully return content-location field on status >=200 <= 399', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({ 'content-location': '/download/123123-123123', location: '/download/some-id' })
-        .head('/qc/some/test/123455432/')
-        .reply(200);
-      const content = await ccdb.getObjectDetails('qc/some/test', 123455432);
+        .head('/qc/some/test/123455432/id1')
+        .reply(303);
+      const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
       assert.strictEqual(content.location, '/download/123123-123123');
     });
 
-    it('should successfully return content-location field if is string as array with "alien" second item on status >=200 <= 299', async () => {
+    it('should successfully return content-location field if is string as array with "alien" second item on status >=200 <= 399', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({ 'content-location': '/download/123123-123123, alien://', location: '/download/some-id' })
-        .head('/qc/some/test/123455432/')
+        .head('/qc/some/test/123455432/id1')
         .reply(200);
-      const content = await ccdb.getObjectDetails('qc/some/test', 123455432);
+      const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
       assert.strictEqual(content.location, '/download/123123-123123');
     });
 
-    it('should successfully return content-location field if is string as array with "alien" first item on status >=200 <= 299', async () => {
+    it('should successfully return content-location field if is string as array with "alien" first item and "location" second on status >=200 <= 399', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({ 'content-location': 'alien://, /download/123123-123123', location: '/download/some-id' })
-        .head('/qc/some/test/123455432/')
-        .reply(200);
-      const content = await ccdb.getObjectDetails('qc/some/test', 123455432);
+        .defaultReplyHeaders({ 'content-location': 'alien://, file/some/object, /download/123123-123123', location: '/download/some-id' })
+        .head('/qc/some/test/123455432/id1')
+        .reply(303);
+      const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
       assert.strictEqual(content.location, '/download/123123-123123');
     });
 
     it('should successfully return drawing options if present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({ 'content-location': '/download/some-id', drawOptions: 'colz' })
-        .head('/qc/some/test/123455432/')
+        .defaultReplyHeaders({ 'content-location': '/download/some-id', drawoptions: 'colz hep' })
+        .head('/qc/some/test/123455432/id1')
         .reply(200);
-      const content = await ccdb.getObjectDetails('qc/some/test', 123455432);
-      assert.strictEqual(content.drawOptions, 'colz');
+      const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
+      assert.deepStrictEqual(content.drawoptions, 'colz hep');
     });
 
     it('should successfully return displayHints if present', async () => {
       nock('http://ccdb:8500')
-        .defaultReplyHeaders({ 'content-location': '/download/some-id', displayHints: 'AP' })
-        .head('/qc/some/test/123455432/')
+        .defaultReplyHeaders({ 'content-location': '/download/some-id', displayhints: 'AP beta' })
+        .head('/qc/some/test/123455432/id1')
         .reply(200);
-      const content = await ccdb.getObjectDetails('qc/some/test', 123455432);
-      assert.strictEqual(content.displayHints, 'AP');
+      const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
+      assert.deepStrictEqual(content.displayhints, 'AP beta');
     });
 
     it('should reject with error due to invalid status', async () => {
       nock('http://ccdb:8500')
-        .head('/qc/some/test/123455432/')
+        .head('/qc/some/test/123455432/id1')
         .reply(404);
-      await assert.rejects(async () => ccdb.getObjectDetails('qc/some/test', '123455432'), new Error('Unable to retrieve object: qc/some/test'));
+      await assert.rejects(async () => ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' }), new Error('Unable to retrieve object: qc/some/test due to status: 404'));
     });
 
     it('should reject with error due no content-location without alien', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({ 'content-location': 'alien/some-id' })
-        .head('/qc/some/test/123455432/')
+        .head('/qc/some/test/123455432/id1')
         .reply(200);
-      await assert.rejects(async () => ccdb.getObjectDetails('qc/some/test', '123455432'), new Error('No location provided by CCDB for object with path: /qc/some/test/123455432/'));
+      await assert.rejects(async () => ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' }), new Error('No location provided by CCDB for object with path: qc/some/test'));
     });
 
     it('should reject with empty content-location', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({ 'content-location': '' })
-        .head('/qc/some/test/123455432/')
+        .head('/qc/some/test/123455432/id1')
         .reply(200);
-      await assert.rejects(async () => ccdb.getObjectDetails('qc/some/test', '123455432'), new Error('No location provided by CCDB for object with path: /qc/some/test/123455432/'));
+      await assert.rejects(async () => ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' }), new Error('No location provided by CCDB for object with path: qc/some/test'));
     });
 
     it('should reject with missing content-location', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({ 'content-location': '' })
-        .head('/qc/some/test/123455432/')
+        .head('/qc/some/test/123455432/id1')
         .reply(200);
-      await assert.rejects(async () => ccdb.getObjectDetails('qc/some/test', '123455432'), new Error('No location provided by CCDB for object with path: /qc/some/test/123455432/'));
+      await assert.rejects(async () => ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' }), new Error('No location provided by CCDB for object with path: qc/some/test'));
     });
   });
 
-  /*
-   * Describe('`httGetJson()` tests', () => {
-   *   let ccdb;
-   *   before(() => ccdb = new CcdbService(config.ccdb));
-   */
-
-  /*
-   *   It('should successfully return a list of the objects', async () => {
-   *     nock('http://ccdb:8500')
-   *       .get('/latest/test.*')
-   *       .reply(200, '{}');
-   */
-
-  /*
-   *     Await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*'));
-   *   });
-   */
-
-  /*
-   *   It('should successfully add default headers to request if none were provided', async () => {
-   *     nock('http://ccdb:8500', {
-   *       reqheaders: {
-   *         Accept: 'application/json',
-   *         'X-Filter-Fields': 'path,Created,Last-Modified'
-   *       }
-   *     }).get('/latest/test.*')
-   *       .reply(200, '{}');
-   */
-
-  /*
-   *     Await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*'), 'Provided headers are not matching the default ones');
-   *   });
-   */
-
-  /*
-   *   It('should successfully use provided headers to request', async () => {
-   *     const timestampHeaders = {Accept: 'application/json', 'X-Filter-Fields': 'lastModified', 'Browse-Limit': 50};
-   */
-
-  /*
-   *     nock('http://ccdb:8500', {
-   *       reqheaders: timestampHeaders
-   *     }).get('/latest/test.*')
-   *       .reply(200, '{}');
-   *     await assert.doesNotReject(ccdb.httpGetJson('/latest/test.*', timestampHeaders), 'Expected headers are not matching');
-   *   });
-   */
-
-  /*
-   *   It('should reject with error due to status code', async () => {
-   *     nock('http://ccdb:8500')
-   *       .get('/latest/test.*')
-   *       .reply(502, 'Some error');
-   */
-
-  /*
-   *     Await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Non-2xx status code: 502'));
-   *   });
-   */
-
-  /*
-   *   It('should reject with error due to bad JSON body', async () => {
-   *     nock('http://ccdb:8500')
-   *       .get('/latest/test.*')
-   *       .reply(200, 'Bad formatted JSON');
-   */
-
-  /*
-   *     Await assert.rejects(ccdb.httpGetJson('/latest/test.*'), new Error('Unable to parse JSON'));
-   *   });
-   * });
-   */
-
-  describe('`_getPrefix()` tests', () => {
+  describe('`_parsePrefix()` tests', () => {
     let ccdb;
     before(() => {
       ccdb = new CcdbService(config.ccdb);
     });
 
     it('successfully return empty string when no prefix is provided in config object', () => {
-      assert.strictEqual(ccdb._getPrefix({}), '');
-      assert.strictEqual(ccdb._getPrefix(undefined), '');
-      assert.strictEqual(ccdb._getPrefix({ prefix: '' }), '');
+      assert.strictEqual(ccdb._parsePrefix(), '');
+      assert.strictEqual(ccdb._parsePrefix(undefined), '');
+      assert.strictEqual(ccdb._parsePrefix(''), '');
     });
     it('successfully return prefix with no backslash and no forward slash', () => {
-      assert.strictEqual(ccdb._getPrefix({ prefix: '/qc' }), 'qc');
-      assert.strictEqual(ccdb._getPrefix({ prefix: 'qc/' }), 'qc');
-      assert.strictEqual(ccdb._getPrefix({ prefix: '/qc/tst/' }), 'qc/tst');
+      assert.strictEqual(ccdb._parsePrefix('/qc'), 'qc');
+      assert.strictEqual(ccdb._parsePrefix('qc/'), 'qc');
+      assert.strictEqual(ccdb._parsePrefix('/qc/tst/'), 'qc/tst');
     });
   });
-});
+
+  describe('`_buildCcdbUrlPath()` tests', () => {
+    let ccdb;
+    before(() => {
+      ccdb = new CcdbService(config.ccdb);
+    });
+
+    it('successfully build URL path with partial identification fields only', () => {
+      assert.strictEqual(ccdb._buildCcdbUrlPath({ path: 'qc/TPC/object' }), '/qc/TPC/object');
+      assert.strictEqual(ccdb._buildCcdbUrlPath({ path: 'qc/TPC/object', validFrom: 1231231231 }), '/qc/TPC/object/1231231231');
+      assert.strictEqual(ccdb._buildCcdbUrlPath({ path: 'qc/TPC/object', validUntil: 1231231231 }), '/qc/TPC/object/1231231231');
+      assert.strictEqual(ccdb._buildCcdbUrlPath({ path: 'qc/TPC/object', validFrom: 12322222, validUntil: 1231231231 }), '/qc/TPC/object/12322222/1231231231');
+      assert.strictEqual(ccdb._buildCcdbUrlPath({ path: 'qc/TPC/object', validFrom: 12322222, id: '123-ffg' }), '/qc/TPC/object/12322222/123-ffg');
+      assert.strictEqual(ccdb._buildCcdbUrlPath({ path: 'qc/TPC/object', validFrom: 12322222, validUntil: 123332323, id: '123-ffg' }), '/qc/TPC/object/12322222/123332323/123-ffg');
+    });
+
+    it('successfully build URL path with complete identification fields only', () => {
+      const identification = {
+        path: 'qc/TPC/object',
+        validFrom: 12322222,
+        validUntil: 123332323,
+        id: '123-ffg',
+        filters: {
+          RunNumber: '123456',
+          PartName: 'Pass',
+        },
+      };
+      assert.strictEqual(ccdb._buildCcdbUrlPath(identification), '/qc/TPC/object/12322222/123332323/123-ffg/RunNumber=123456/PartName=Pass');
+    });
+  });
+};

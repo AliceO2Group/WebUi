@@ -21,7 +21,8 @@ import {h} from '/js/src/index.js';
  * @param {{Array<string>, Array<string>}} [valueClasses] - list of classes as list to be used to customise the values
  * @returns {vnode}
  */
-export const rowForCard = (key, value, {keyClasses = [], valueClasses = []} = {}) => h(`.flex-row.justify-between`, [
-  h('', {classList: keyClasses.join(' ')}, key),
-  h('', {classList: valueClasses.join(' ')}, value)
-]);
+export const rowForCard = (key, value, {keyClasses = [], valueClasses = []} = {}) => 
+  h(`.flex-row.justify-between.gc4`, [
+    h('', {classList: keyClasses.join(' ')}, key),
+    h('', {classList: valueClasses.join(' ')}, value)
+  ]);

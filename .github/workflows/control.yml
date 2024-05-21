@@ -14,28 +14,28 @@ jobs:
     name: Tests on macos-latest
     runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: (cd Control; npm ci )
       - run: (cd Control; npm test )
   coverage:
     name: Tests & coverage on ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: (cd Control; npm ci )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for Control
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: control
           fail_ci_if_error: true

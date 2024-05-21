@@ -40,14 +40,49 @@ describe('`pageEnvironment` test-suite', async () => {
   it('should successfully load and request data for environment', async () => {
     await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
+    assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=configuration');
     assert.ok(calls['getEnvironment']);
   });
 
-  it('should have one button for `Shutdown` environment', async () => {
+  it('should have one button for `Shutdown` environment with lock in possession', async () => {
+    const lockInPossession = await page.evaluate(() => window.model.lock.isLockedByMe('MID'));
+    assert.ok(lockInPossession, 'User is not in possession of lock');
+
     await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
     const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').title);
     assert.strictEqual(shutdownButton, 'Shutdown environment');
+  });
+
+  it('should have one button for `Shutdown` environment without lock in possession but with user as admin', async () => {
+    await page.evaluate(() => {
+      window.model.lock.unlock('MID');
+    });
+    const isLocked = await page.evaluate(() => {
+      window.model.lock.isLocked('MID');
+    });
+    assert.ok(!isLocked, 'Detector still appears as locked');
+
+    await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').title);
+    assert.strictEqual(shutdownButton, 'Shutdown environment');
+  });
+
+  it('should not have button displayed if user is not admin or does not have the lock', async () => {
+    await page.evaluate(() => {
+      window.model.session.role = 2;
+      window.model.notify();
+    });
+    await page.waitForTimeout(200);
+    const shutdownButton = await page.$('#buttonToSHUTDOWN');
+    assert.ok(shutdownButton === null, 'button still exists');
+
+    // adds permissions and lock back
+    await page.evaluate(() => {
+      window.model.session.role = 1;
+      window.model.lock.lock('MID');
+      window.model.notify();
+    });
+    await page.waitForTimeout(200);
   });
 
   describe('Check presence of buttons in CONFIGURED state', async () => {
@@ -86,7 +121,7 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.evaluate(() => document.querySelector('#buttonToSTART').click());
       await page.waitForTimeout(200);
       const state = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
+        return window.model.environment.item.payload.state;
       });
       assert.strictEqual(state, 'RUNNING');
       assert.ok(calls['controlEnvironment']);
@@ -128,17 +163,13 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
-      await page.waitForTimeout(200);
-      const configuredState = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
-      });
+      await page.waitForTimeout(400);
+      const configuredState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
-      await page.waitForTimeout(200);
-      const standbyState = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
-      });
+      await page.waitForTimeout(400);
+      const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(standbyState, 'DEPLOYED');
     });
 
@@ -186,85 +217,5 @@ describe('`pageEnvironment` test-suite', async () => {
       assert.strictEqual(location.search, '?page=environments');
       assert.ok(calls['destroyEnvironment']);
     });
-  });
-
-  describe('Utils within Environment class', async () => {
-    it('should replace task name if regex is matched', async () => {
-      const tagModified = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
-      });
-      assert.strictEqual(tagModified, 'readout');
-    });
-    it('should not replace task name due to regex not matching the name (missing tasks/ group)', async () => {
-      const tagModified = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
-      });
-      assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
-    });
-
-    it('should not replace task name due to regex not matching the name (missing @ character)', async () => {
-      const tagModified = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
-      });
-      assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
-    });
-
-    it('should successfully add mesosStdout if available in tasks', async () => {
-      const mesosStdout = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{mesosStdout: 'location/location', name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).mesosStdout;
-      });
-      assert.strictEqual(mesosStdout, 'location/location');
-    });
-
-    it('should successfully add mesosStdout empty if not available in tasks', async () => {
-      const mesosStdout = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).mesosStdout;
-      });
-      assert.strictEqual(mesosStdout, '');
-    });
-
-    it('should filter out variables which do not belong to a detector', async () => {
-      const env = await page.evaluate(() => {
-        const result = {
-          environment: {
-            tasks: [],
-            includedDetectors: ['ODC'],
-            userVars: {
-              odc_enabled: 'true',
-              mid_enabled: 'false',
-              mid_something: 'test',
-              dd_enabled: 'true',
-              run_type: 'run'
-            },
-            vars: {
-              odc_enabled: 'true',
-              mid_enabled: 'false',
-              other_useful_var: 'very',
-              dd_enabled: 'true',
-              run_type: 'run'
-            },
-            defaults: {
-              dcs_topology: 'test',
-              dd_enabled: 'true',
-              run_type: 'run'
-            }
-          }
-        };
-        return window.model.environment._parseEnvResult(result).environment;
-      });
-      assert.deepStrictEqual(env.vars, {odc_enabled: 'true', dd_enabled: 'true', run_type: 'run', other_useful_var: 'very'});
-      assert.deepStrictEqual(env.userVars, {odc_enabled: 'true', dd_enabled: 'true', run_type: 'run'});
-      assert.deepStrictEqual(env.defaults, {dd_enabled: 'true', run_type: 'run'});
-    })
   });
 });

@@ -12,36 +12,43 @@
  * or submit itself to any jurisdiction.
  */
 
-import { config } from './config/configProvider.js';
-// Import projPackage from './../package.json';
-import { openFile, toJSON } from 'jsroot';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { readFileSync } from 'fs';
 
-import { ConsulService } from '@aliceo2/web-ui';
-import { CcdbService } from './services/CcdbService.js';
-import { UserService } from './services/UserService.js';
+import { openFile, toJSON } from 'jsroot';
+import { Log, ConsulService } from '@aliceo2/web-ui';
+
+import { CcdbService } from './services/ccdb/CcdbService.js';
+import { IntervalsService } from './services/Intervals.service.js';
+import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
+import { QcObjectService } from './services/QcObject.service.js';
+import { UserService } from './services/UserService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
 
-import { Log } from '@aliceo2/web-ui';
+import { config } from './config/configProvider.js';
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
 /*
  * --------------------------------------------------------
  * Initialization of model according to config file
  */
-const projPackage = {}; // TODO
-export const statusService = new StatusController(config, projPackage);
 
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
+
 const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
 export const userService = new UserService(jsonDb);
 export const layoutService = new LayoutController(jsonDb);
+
+export const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
+export const statusController = new StatusController(statusService);
 
 export let consulService = undefined;
 if (config.consul) {
@@ -50,28 +57,22 @@ if (config.consul) {
     .then(() => log.info('Consul Service connection was successfully tested.'))
     .catch((error) => log.error('Consul Service connection could not be established. '
       + `Please try restarting the service due to: ${error}`));
-  statusService.setLiveModeConnector(consulService);
+  statusController.setLiveModeConnector(consulService);
 } else {
   log.warn('Consul Service: No Configuration Found');
 }
 
-export let objectController = undefined;
-export let listObjects = undefined;
-export let getObjectTimestampList = undefined;
-export let queryPrefix = undefined;
+const ccdbService = CcdbService.setup(config.ccdb);
+statusService.dataService = ccdbService;
+statusService.onlineService = consulService;
 
-if (config.listingConnector === 'ccdb') {
-  log.info('Object listing: CCDB');
-  if (!config.ccdb) {
-    throw new Error('CCDB config is mandatory');
-  }
-  const ccdb = new CcdbService(config.ccdb);
-  ccdb.isConnectionUp();
-  listObjects = ccdb.getObjectsLatestVersionList.bind(ccdb);
-  getObjectTimestampList = ccdb.getObjectTimestampList.bind(ccdb);
-  queryPrefix = ccdb.PREFIX;
+const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
+qcObjectService.refreshCache();
 
-  objectController = new ObjectController(ccdb, { openFile, toJSON });
-  statusService.setDataConnector(ccdb);
-}
-// --------------------------------------------------------
+export const objectController = new ObjectController(qcObjectService, consulService);
+export const intervalsService = new IntervalsService();
+
+intervalsService.register(
+  qcObjectService.refreshCache.bind(qcObjectService),
+  qcObjectService.getCacheRefreshRate(),
+);

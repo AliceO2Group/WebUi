@@ -66,7 +66,7 @@ class CoreEnvConfig {
       };
       envConfig._created = data.created ?? Date.now();
       envConfig._edited = data.edited ?? Date.now();
-      envConfig._variables = data.variables ?? {};
+      envConfig._variables = CoreEnvConfig._getObjectSortedByKeys(data.variables);
       envConfig._detectors = data.detectors ?? [];
       envConfig._workflow = data.workflow;
       envConfig._revision = data.revision;
@@ -128,6 +128,17 @@ class CoreEnvConfig {
    */
   static _getNameAsId(name) {
     return `${name.trim().replace(/ /g, '_')}`.replace(/\//g, '_');
+  }
+
+  /**
+   * Given an object, sort it alphabetically by its keys and return a new object
+   * @param {object} pairs - (K;V) pairs that are to be sorted
+   * @returns {object} - (K;V) pairs sorted by key alphabetically
+   */
+  static _getObjectSortedByKeys(pairs = {}) {
+    const orderedPairs = {};
+    Object.keys(pairs).sort().forEach((key) => orderedPairs[key] = pairs[key]);
+    return orderedPairs;
   }
 
   /**

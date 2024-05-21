@@ -14,7 +14,7 @@
 
 /* global COG */
 
-import {h, iconPlus} from '/js/src/index.js';
+import {h, iconX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
@@ -33,12 +33,9 @@ import {ROLES} from './../workflow/constants.js';
  * @return {vnode}
  */
 export const header = (model) => [
-  h('.w-50 text-center', [
+  h('.w-100 text-center', [
     h('h4', 'Environments')
   ]),
-  h('.flex-grow text-right', [
-    h('button.btn', {onclick: () => model.router.go('?page=newEnvironment')}, iconPlus())
-  ])
 ];
 
 /**
@@ -102,7 +99,7 @@ const requestsTable = (model, requests) =>
       requests.map(item => h('tr', {style: {background: item.failed ? 'rgba(214, 38, 49, 0.2)' : ''}}, [
         h('td', {style: 'text-align: center;'}, item.envId || '-'),
         h('td', {style: 'text-align: center;'},
-          item.detectors && item.detectors.length > 0 ? item.detectors.join(' ') : '-'
+          item.detectors && item.detectors.length > 0 ? item.detectors.sort().join(' ') : '-'
         ),
         h('td', {style: 'text-align: center;'}, item.workflow.substring(
           item.workflow.lastIndexOf('/') + 1, item.workflow.indexOf('@')
@@ -137,13 +134,13 @@ const buttonRemoveRequest = (model, id, personid) =>
  */
 const environmentsTable = (model, list) => {
   const tableHeaders = [
-    'Run', 'ID', 'Detectors', 'Run Type', 'Created', 'FLPs', 'EPNs', 'DCS', 'TRG', 'CTP Readout', 'ODC',
-    'State', 'InfoLogger'
+    'Run', 'ID', 'Detectors', 'Run Type', 'Created', 'Started', 'Ended', 'FLPs', 'EPNs', 'DCS', 'TRG', 'CTP Readout',
+    'ODC', 'State', 'InfoLogger'
   ];
 
   return h('table.table', [
     h('thead', [
-      h('tr.table-primary', h('th', {colspan: 13}, 'Active Environments')),
+      h('tr.table-primary', h('th', {colspan: tableHeaders.length}, 'Active Environments')),
       h('tr', [tableHeaders.map((header) => h('th', {style: 'text-align: center;'}, header))])
     ]),
     h('tbody', [
@@ -153,7 +150,7 @@ const environmentsTable = (model, list) => {
         return h('tr', {
           class: isGlobalRun(item.userVars) ? 'bg-global-run' : ''
         }, [
-          runColumn(item),
+          runColumn(item, model),
           h('td', {style: 'text-align: center;'},
             h('a', {
               href: `?page=environment&id=${item.id}`,
@@ -163,11 +160,13 @@ const environmentsTable = (model, list) => {
           ),
           h('td', {style: 'text-align: center;'}, [
             item.includedDetectors && item.includedDetectors.length > 0 ?
-              item.includedDetectors.map((detector) => `${detector} `)
+              item.includedDetectors.sort().map((detector) => `${detector} `)
               : '-'
           ]),
           h('td', {style: 'text-align: center;'}, item.userVars.run_type ? item.userVars.run_type : '-'),
           h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars['run_start_time_ms'], 'run_start_time_ms')),
+          h('td', {style: 'text-align: center;'}, parseObject(item.userVars['run_end_time_ms'], 'run_end_time_ms')),
           h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
           h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_n_epns')),
           h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
@@ -198,20 +197,26 @@ const environmentsTable = (model, list) => {
  * @param {EnvironmentDTO} item 
  * @returns {vnode}
  */
-const runColumn = (item) => {
+const runColumn = (item, model) => {
   let classes = '';
   let text = '-';
-  const epnEnabled = Boolean(item.userVars.epn_enabled === 'true');
-  const odcState = parseOdcStatusPerEnv(item);
+  const isDcsOn = item.userVars?.['dcs_enabled'] === 'true';
+  const {includedDetectors} = item;
+  const isSorAvailable = model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability');
   if (item.currentRunNumber) {
     classes = 'bg-success white';
     text = item.currentRunNumber;
   } else if (
-    ((epnEnabled && odcState === 'READY') || !epnEnabled) && item.state === 'CONFIGURED'
+    (!item.currentTransition && item.state === 'CONFIGURED' && isDcsOn && isSorAvailable)
+    ||
+    (!item.currentTransition && item.state === 'CONFIGURED' && !isDcsOn)
   ) {
     classes = 'bg-primary white';
     text = 'READY';
-  } else if ((epnEnabled && odcState !== '-' && odcState !== 'READY') && item.state === 'CONFIGURED') {
+  } else if (!item.currentTransition && item.state === 'CONFIGURED' && isDcsOn && !isSorAvailable) {
+    classes = 'danger';
+    text = h('.g2', [iconX(), 'SOR']);
+  } else if (item.currentTransition && item.state === 'CONFIGURED') {
     classes = 'bg-primary white';
     text = '...';
   }

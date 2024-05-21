@@ -15,7 +15,7 @@
 // Design patterns
 export {default as Observable} from './Observable.js';
 export {default as EventEmitter} from './EventEmitter.js';
-export {default as RemoteData} from './RemoteData.js';
+export {RemoteData} from './RemoteData.js';
 
 // Template engine
 export {render, h, frameDebouncer, mount} from './renderer.js';
@@ -23,6 +23,9 @@ export {default as QueryRouter} from './QueryRouter.js';
 
 // Utils
 export {default as switchCase} from './switchCase.js';
+
+// Formatters
+export {formatTimeDuration} from "./formatter/formatTimeDuration.js";
 
 // Singleton retrieving session data
 export {default as sessionService} from './sessionService.js';

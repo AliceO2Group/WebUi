@@ -12,14 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
+import { getDateAsTimestamp } from './../../common/library/utils/dateTimeFormat.js';
+import { CCDB_RESPONSE_BODY_KEYS, CCDB_RESPONSE_HEADER_KEYS as HEAD } from './../services/ccdb/CcdbConstants.js';
+
+const { VALID_FROM, PATH, CREATED } = CCDB_RESPONSE_BODY_KEYS;
 
 /**
  * QC Object data type object Class
  */
 export default class QCObjectDto {
   /**
+   * Constructor to initialize QCObject fields with default values
    */
   constructor() {
     this.id = '';
@@ -38,16 +41,16 @@ export default class QCObjectDto {
   }
 
   /**
-   * Checks if passed object's path is valid
-   * @param {JSON} object
-   * @returns {Boolean}
+   * Checks if passed object's path is valid:
+   * * contains 'path' attribute
+   * * path is composed of multiple blocks separated by '/'
+   * @param {JSON} object - qc object representation
+   * @returns {boolean} - whether the path is valid or not
    */
   static isObjectPathValid(object) {
     if (!object || !object['path']) {
-      log.debug('CCDB returned an empty ROOT object path, ignoring');
       return false;
     } else if (object['path'].indexOf('/') === -1) {
-      log.debug(`CCDB returned an invalid ROOT object path "${object['path']}", ignoring`);
       return false;
     }
     return true;
@@ -58,32 +61,56 @@ export default class QCObjectDto {
    * * known keys are mapped to camelCase format
    * * timestamps (ms) are converted from string to number
    * @param {Object} item - from CCDB
-   * @return {Object} - JSON with keys in camelCase format
+   * @returns {Object} - JSON with keys in camelCase format
    */
   static toStandardObject(item) {
-    if (item['path']) {
-      item.name = item['path'];
-      delete item.path;
-    }
-    if (item['last-modified']) {
+    if (item.etag) {
       try {
-        item.lastModified = new Date(item['last-modified']).getTime();
+        item.etag = JSON.parse(item.etag);
       } catch (error) {
-        item.lastModified = item['last-modified'];
+        // nothing to do
       }
     }
-    if (item['drawoptions']) {
-      item.drawOptions = item['drawoptions'];
-      delete item['drawoptions'];
-    }
-    if (item['runnumber']) {
-      item.runNumber = item['runnumber'];
-      delete item['runnumber'];
-    }
-    if (item['displayhints']) {
-      item.displayHints = item['displayhints'];
-      delete item['displayhints'];
-    }
-    return item;
+    const object = {
+      id: item.etag,
+      path: item.path,
+      name: item.path,
+      validFrom: getDateAsTimestamp(item[HEAD.VALID_FROM]),
+      validUntil: getDateAsTimestamp(item[HEAD.VALID_UNTIL]),
+      createdAt: getDateAsTimestamp(item[HEAD.CREATED_AT]),
+      lastModified: getDateAsTimestamp(item[HEAD.LAST_MODIFIED]),
+      fileName: item?.fileName,
+      size: item?.size,
+      drawOptions: item?.drawoptions?.split(' ') ?? [],
+      displayHints: item?.displayhints?.split(' ') ?? [],
+      etag: item?.etag,
+      runNumber: item?.runnumber,
+      runType: item?.runtype ?? item?.run_type,
+      partName: item?.partname,
+      passName: item?.passname,
+      periodName: item?.periodname,
+      qcCheckName: item?.qc_check_name,
+      qcQuality: item?.qc_quality,
+      qcDetectorName: item?.qc_detector_name,
+      qcTaskName: item?.qc_task_name,
+      qcVersion: item?.qc_version,
+      objectType: item?.objecttype,
+      location: item?.location,
+    };
+    return object;
+  }
+
+  /**
+   * Given a CCDB object response from GET request, parse the fields and return the new object as of type QcObjectLeaf
+   * @param {Object} item - CCDB object from GET request
+   * @returns {QcObjectLeaf} - parsed object
+   */
+  static toQcObjectLeaf(item) {
+    return {
+      path: item[PATH],
+      name: item[PATH],
+      validFrom: getDateAsTimestamp(item[VALID_FROM]),
+      createdAt: getDateAsTimestamp(item[CREATED]),
+    };
   }
 }

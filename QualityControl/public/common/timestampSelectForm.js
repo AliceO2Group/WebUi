@@ -10,37 +10,48 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {prettyFormatDate} from './utils.js';
+import { h } from '/js/src/index.js';
+import { prettyFormatDate } from './utils.js';
 
 /**
  * Display a select form with the latest timestamps of the current selected object
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
-export default (model) => h('.w-100.flex-row',
-  !model.isOnlineModeEnabled && model.object.selected && model.object.objects
-  && model.object.objects[model.object.selected.name]
-  && model.object.objects[model.object.selected.name].kind === 'Success' &&
-  h('select.form-control.gray-darker.text-center.w-25', {
+export default ({ isOnlineModeEnabled, object: objectModel }) => {
+  const { objects, selected } = objectModel;
+  const isObjectLoaded = selected && objects?.[selected.name]?.isSuccess();
+  return h(
+    '.w-100.flex-row',
+    !isOnlineModeEnabled && isObjectLoaded &&
+  h('select.form-control.gray-darker.text-center', {
     onchange: (e) => {
-      const value = e.target.value;
-      if (model.object.selected && value !== 'Invalid Timestamp') {
-        model.object.loadObjectByName(model.object.selected.name, value);
+      const { value } = e.target;
+      if (selected && value !== 'Invalid Timestamp') {
+        const valueJson = JSON.parse(value);
+        objectModel.loadObjectByName(selected.name, valueJson.validFrom, valueJson.id);
       }
-    }
+    },
   }, [
-    model.object.getObjectTimestamps(model.object.selected.name)
-      .map((timestamp) => {
+    objectModel.getObjectVersions(selected.name)
+      .map((version) => {
+        const versionString = JSON.stringify(version);
+        const object = objects[selected.name].payload;
         return h('option.text-center', {
-          value: timestamp,
-          selected: timestamp === model.object.selected.version ? true : false
+          id: versionString,
+          key: versionString,
+          value: versionString,
+          selected: version.createdAt === object.createdAt ? true : false,
         }, [
-          prettyFormatDate(timestamp),
-          ' (', timestamp, ')'
+          'Created: ',
+          prettyFormatDate(version.createdAt),
+          ' (id: ',
+          version.id,
+          ')',
         ]);
-      })
-  ])
-);
+      }),
+  ]),
+  );
+};

@@ -15,7 +15,6 @@
 const assert = require('assert');
 const path = require('path');
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const GrpcProxy = require('./GrpcProxy.js');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
@@ -55,22 +54,16 @@ class ControlService {
    * @returns {Interval}
    */
   initiateHeartBeat() {
-    let wasInError = false;
     return setInterval(async () => {
       try {
-        await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 3500});
-        wasInError = false;
+        await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 9000});
       } catch (err) {
-        if (!wasInError) {
-          log.errorMessage('Unable to reach AliECS, attempting reconnection in silence', {
-            level: 20,
-            system: 'GUI',
-            facility: 'cog/controlservice'
-          });
-        }
-        wasInError = true;
-        this.ctrlProx.client.close()
-        this.ctrlProx = new GrpcProxy(this.coreConfig, this.O2_CONTROL_PROTO_PATH, wasInError);
+        const stateCode = this.ctrlProx.client.getChannel().getConnectivityState();
+        log.errorMessage(`Unable to reach AliECS (state: ${stateCode}), attempting reconnection`, {
+          level: 20,
+          system: 'GUI',
+          facility: 'cog/controlservice'
+        });
       }
     }, 10000);
   }
@@ -168,7 +161,7 @@ class ControlService {
    * @param {JSON} options - optional parameters that are to be set to the gRPC call (e.g deadline)
    * @return {Promise}
    */
-  executeCommandNoResponse(method, body = {}, options = {}) {
+  executeCommandNoResponse(method, body = {}, options = undefined) {
     return this.ctrlProx[method](body, options);
   }
 
@@ -223,8 +216,10 @@ class ControlService {
     const username = req?.session?.username ?? '';
     const personid = req?.session?.personid ?? '';
     if (method.startsWith('New') || method.startsWith('CleanupTasks')) {
-      const type = req.body.type ? ` (${req.body.type})` : '';
-      log.info(`${username}(${personid}) => ${method} ${type}`, 6);
+      const operation = req.body.operation ? ` (${req.body.operation})` : '';
+      log.infoMessage(`${username}(${personid}) => ${method} ${operation}`, {
+        level: 1, facility: 'cog/controlservice'
+      });
     } else if (method.startsWith('Control') || method.startsWith('Destroy')) {
       const type = req.body.type ? ` (${req.body.type})` : '';
       const partition = req.body.id;

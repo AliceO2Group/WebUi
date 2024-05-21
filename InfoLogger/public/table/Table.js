@@ -107,11 +107,11 @@ export default class Table extends Observable {
       },
       hostname: {
         size: 'cell-m',
-        visible: false,
+        visible: true,
       },
       rolename: {
         size: 'cell-m',
-        visible: true,
+        visible: false,
       },
       pid: {
         size: 'cell-s',
@@ -131,7 +131,7 @@ export default class Table extends Observable {
       },
       detector: {
         size: 'cell-s',
-        visible: false,
+        visible: true,
       },
       partition: {
         size: 'cell-m',

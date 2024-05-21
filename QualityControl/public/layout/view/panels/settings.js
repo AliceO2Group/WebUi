@@ -10,48 +10,74 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import objectTreeSidebar from './objectTreeSidebar.js';
 
 /**
  * Creates a panel used for adding settings specific to a layout only
  * * should timestamps be displayed all the time
  * * tabs auto-change interval (0 no, 10 - 600 yes)
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 export default (model) =>
   h('.br1.w-100.flex-column.ph2.f6.h-100', [
     h('.w-100.f4.text-center', 'Configure your layout'),
     h('hr.w-100'),
+    descriptionLayoutInput(
+      model.layout.item.description,
+      (e)=> model.layout.setLayoutProperty('description', e.target.value),
+    ),
     displayObjectTime(model),
     displayAutoTabTimeSelector(model),
     h('hr.w-100'),
-    objectTreeSidebar(model)
+    objectTreeSidebar(model),
   ]);
 
 /**
+ * Build an input box, allowing users to add description
+ * @param {string} description - description of the layout
+ * @param {function} oninput - function to be executed when there is input change
+ * @returns {vnode} - virtual node element
+ */
+const descriptionLayoutInput = (description, oninput) => h('.w-100.flex-row', [
+  h('.w-40', {
+    id: 'inputDescriptionLabel',
+  }, 'Description'),
+  h('input.form-control.w-60', {
+    type: 'text',
+    value: description ?? '',
+    placeholder: '100 characters max',
+    for: 'inputDescriptionLabel',
+    id: 'inputDescription',
+    oninput,
+  }),
+]);
+
+/**
  * Panel allowing users to select if object date/time info should be displayed
- * @param {Object} model
- * @returns {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 const displayObjectTime = (model) =>
   h('.w-100.flex-row', [
-    h('.w-80',
+    h(
+      '.w-80',
       h('label.form-check-label', {
         for: 'inputShowTimestamp',
         style: 'cursor: pointer',
-      }, 'Display timestamp on each plot')
+      }, 'Display timestamp on each plot'),
     ),
-    h('.w-20.text-right',
+    h(
+      '.w-20.text-right',
       h('input', {
         type: 'checkbox',
         id: 'inputShowTimestamp',
         checked: model.layout.item.displayTimestamp,
-        onchange: (e) => model.layout.setLayoutProperty('displayTimestamp', e.target.checked)
-      })
+        onchange: (e) => model.layout.setLayoutProperty('displayTimestamp', e.target.checked),
+      }),
     ),
   ]);
 
@@ -60,15 +86,17 @@ const displayObjectTime = (model) =>
  * Allowed values:
  * * 0 (OFF);
  * * 10-600 (ON);
- * @param {Object} model
- * @returns {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 const displayAutoTabTimeSelector = (model) =>
   h('.w-100.flex-row', [
-    h('.w-80.flex-row.items-center',
+    h(
+      '.w-80.flex-row.items-center',
       h('label.form-check-label', {}, 'Tab Auto-Change(sec): 0 (OFF), 10-600 (ON)'),
     ),
-    h('.w-20.text-right',
+    h(
+      '.w-20.text-right',
       h('input.form-control', {
         id: 'inputChangeTabTimer',
         type: 'number',
@@ -78,7 +106,7 @@ const displayAutoTabTimeSelector = (model) =>
         onchange: (e) => {
           const time = e.target.value >= 10 ? e.target.value : 0;
           model.layout.setLayoutProperty('autoTabChange', time);
-        }
-      })
+        },
+      }),
     ),
   ]);

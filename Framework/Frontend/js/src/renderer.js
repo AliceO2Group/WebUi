@@ -25,12 +25,12 @@ if (!window.m) {
   throw new Error('mithril must be loaded into window');
 }
 if (!window.requestAnimationFrame) {
-  throw new Error('renderer must be run inside a browser envirnnement');
+  throw new Error('renderer must be run inside a browser environment');
 }
 
 /**
  * Register a callback to be called one time at browser render time if
- * the trigger was called before. Used to push new renderings efficitly.
+ * the trigger was called before. Used to push new renderings efficiently.
  * @param {function} fn - The callback to be registered
  * @return {function} The trigger to be called
  */
@@ -121,7 +121,7 @@ function h(...args) {
  * Bind together a model and a view to render both on a DOM element.
  * When the model change and is an `Observable`, view refresh by itself (unlike `render()`)
  * @param {Element} element - The DOM element
- * @param {Function} view - The functional view which produces a vnode tree
+ * @param {function|{view: function}} view - The view which produces a vnode tree
  * @param {Observable} model - The model containing the state
  * @param {boolean} debug - Facultative. Shows the rendering time each time
  * @example
@@ -139,7 +139,7 @@ function mount(element, view, model, debug) {
       console.time('render');
     }
     try {
-      render(element, view(model));
+      render(element, (typeof view === "function" ? view : view.view)(model));
     } finally {
       if (debug) {
         // eslint-disable-next-line no-console
@@ -151,7 +151,7 @@ function mount(element, view, model, debug) {
   if (model.observe) {
     model.observe(smartRender); // redraw on changes
   }
-  render(element, view(model)); // first draw
+  render(element, (typeof view === "function" ? view : view.view)(model)); // first draw
 }
 
 export {h, render, frameDebouncer, mount};

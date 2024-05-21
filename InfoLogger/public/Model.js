@@ -19,7 +19,7 @@ import {
 } from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
-import {callRateLimiter} from './common/utils.js';
+import {callRateLimiter, setBrowserTabTitle} from './common/utils.js';
 import Table from './table/Table.js';
 import {MODE} from './constants/mode.const.js';
 
@@ -106,6 +106,12 @@ export default class Model extends Observable {
       this.frameworkInfo = RemoteData.failure(result.message);
     } else {
       this.frameworkInfo = RemoteData.success(result);
+      if (result['infoLogger-gui'].name && result['infoLogger-gui'].name.trim()) {
+        window.ILG = {
+          name: 'ILG - ' + result['infoLogger-gui'].name
+        };
+        setBrowserTabTitle(window.ILG.name)
+      }
     }
     this.notify();
     return;

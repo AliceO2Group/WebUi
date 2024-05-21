@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable} from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
 
 /**
  * This class allows to transforms objects names (A/B/C) into a tree that can have
@@ -32,20 +32,23 @@ export default class ObjectTree extends Observable {
 
   /**
    * Method to instantiate/reset the tree
-   * @param {string} name
-   * @param {string} parent
+   * @param {string} name - name of the tree to be initialized
+   * @param {string} parent - parent of the tree
+   * @returns {undefined}
    */
   initTree(name, parent) {
-    this.name = name || ''; // like 'B'
+    this.name = name || ''; // Like 'B'
     this.object = null;
     this.open = name === 'qc' ? true : false;
     this.children = []; // <Array<ObjectTree>>
     this.parent = parent || null; // <ObjectTree>
-    this.path = []; // like ['A', 'B'] for node at path 'A/B' called 'B'
+    this.path = []; // Like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
   }
+
   /**
    * Toggle this node (open/close)
+   * @returns {undefined}
    */
   toggle() {
     this.open = !this.open;
@@ -54,6 +57,7 @@ export default class ObjectTree extends Observable {
 
   /**
    * Open all or close all nodes of the tree
+   * @returns {undefined}
    */
   toggleAll() {
     this.open ? this.closeAll() : this.openAll();
@@ -61,6 +65,7 @@ export default class ObjectTree extends Observable {
 
   /**
    * Open all nodes of the tree
+   * @returns {undefined}
    */
   openAll() {
     this.open = true;
@@ -70,6 +75,7 @@ export default class ObjectTree extends Observable {
 
   /**
    * Close all nodes of the tree
+   * @returns {undefined}
    */
   closeAll() {
     this.open = false;
@@ -80,14 +86,16 @@ export default class ObjectTree extends Observable {
   /**
    * Add recursively an object inside a tree
    * @param {Object} object - The object to be inserted, property name must exist
-   * @param {Array.<string>} path - Path of the object to dig in before assigning to a tree node, if null object.name is used
+   * @param {Array.<string>} path - Path of the object to dig in before assigning to a tree node,
+   * if null object.name is used
    * @param {Array.<string>} pathParent - Path of the current tree node, if null object.name is used
    *
-   * Example of recurvive call:
+   * Example of recursive call:
    *  addChild(o) // begin insert 'A/B'
    *  addChild(o, ['A', 'B'], [])
    *  addChild(o, ['B'], ['A'])
    *  addChild(o, [], ['A', 'B']) // end inserting, affecting B
+   * @returns {undefined}
    */
   addChild(object, path, pathParent) {
     // Fill the path argument through recursive call
@@ -114,8 +122,10 @@ export default class ObjectTree extends Observable {
 
     // Subtree does not exist yet
     if (!subtree) {
-      // Create it and push as child
-      // Listen also for changes to bubble it until root
+      /*
+       * Create it and push as child
+       * Listen also for changes to bubble it until root
+       */
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
@@ -129,7 +139,8 @@ export default class ObjectTree extends Observable {
 
   /**
    * Add a list of objects by calling `addChild`
-   * @param {Array} objects
+   * @param {Array<object>} objects - children to be added
+   * @returns {undefined}
    */
   addChildren(objects) {
     objects.forEach((object) => this.addChild(object));

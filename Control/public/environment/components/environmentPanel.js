@@ -16,17 +16,18 @@
 
 import {h} from '/js/src/index.js';
 
-import {parseObject, parseOdcStatusPerEnv} from './../../common/utils.js';
-import {taskCounterContent} from './../../common/tasks/taskCounterContent.js';
-import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
-import {rowForCard} from './../../common/card/rowForCard.js';
-import {miniCard, miniCardTitle} from './../../common/card/miniCard.js';
-import {iframe} from './../../common/iframe/iframe.js';
-import {copyToClipboardButton} from './../../common/buttons/copyToClipboardButton.js';
-import {isGlobalRun} from './../environmentsPage.js';
-
-import {ROLES} from './../../workflow/constants.js';
 import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
+import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
+import {copyToClipboardButton} from './../../common/buttons/copyToClipboardButton.js';
+import {dcsPropertiesRow} from './../../common/dcs/dcsPropertiesRow.js'
+import {iframe} from './../../common/iframe/iframe.js';
+import {miniCard, miniCardTitle} from './../../common/card/miniCard.js';
+import {parseObject, parseOdcStatusPerEnv} from './../../common/utils.js';
+import {rowForCard} from './../../common/card/rowForCard.js';
+import {taskCounterContent} from './../../common/tasks/taskCounterContent.js';
+
+import {isGlobalRun} from './../environmentsPage.js';
+import {ROLES} from './../../workflow/constants.js';
 
 /**
  * Builds a panel with environment information
@@ -37,7 +38,7 @@ import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
  */
 export const environmentPanel = (model, environment, isMinified = false) => {
   return h('.w-100.shadow-level1.flex-column.g1', [
-    environmentHeader(environment, model),
+    environmentHeader(environment),
     !isMinified && [
       environmentActionPanel(environment, model),
       environmentContent(environment, model),
@@ -51,20 +52,27 @@ export const environmentPanel = (model, environment, isMinified = false) => {
  * @returns {vnode}
  */
 const environmentHeader = (environment) => {
-  const {currentRunNumber, state = 'UNKNOWN', id, createdWhen} = environment;
-  let title = (state === 'RUNNING')
-    ? `${id} - ${state} - ${currentRunNumber}`
-    : `${id} - ${state}`;
-
+  const {currentRunNumber, state = 'UNKNOWN', id, createdWhen, userVars} = environment;
+  let title = `${id} - ${state}`;
+  let transitionTime = parseObject(createdWhen, 'createdWhen');
+  let transitionLabel = 'Created At: ';
+  if (state === 'RUNNING') {
+    title = `${id} - ${state} - ${currentRunNumber}`;
+    transitionTime = parseObject(userVars['run_start_time_ms'], 'run_start_time_ms');
+    transitionLabel = 'Running since: ';
+  }
   return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
     copyToClipboardButton(id),
     h('h3.w-60', title),
-    h('.w-40.text-right', 'Created At: ' + parseObject(createdWhen, 'createdWhen'))
+    h('.w-40.text-right', transitionLabel + transitionTime)
   ]);
 };
 
 /**
  * Build a panel with multiple mini cards which contain actions allowed to the user for the environment
+ * A user should be able to control the environment if:
+ * - it is an admin as defined by CERN applications
+ * - it is part of the Detector group and has all locks of detectors part of the environment
  * @param {EnvironmentInfo} environment - DTO representing an environment
  * @param {Model} model - root object of the application
  * @returns {vnode}
@@ -72,25 +80,27 @@ const environmentHeader = (environment) => {
 const environmentActionPanel = (environment, model) => {
   const {includedDetectors = []} = environment;
   const hasLocks = includedDetectors.every((detector) => model.lock.isLockedByMe(detector));
-  const isAllowedToControl = model.isAllowed(ROLES.Detector) && hasLocks;
+  const isAllowedToControl = model.isAllowed(ROLES.Admin) || (model.isAllowed(ROLES.Detector) && hasLocks);
   return miniCard('', controlEnvironmentPanel(model.environment, environment, isAllowedToControl));
 }
 
 /**
  * Builds a component which is to contain multiple cards with environment details
  * @param {EnvironmentInfo} environment - DTO representing an environment
- * @param {Model} model - root object of the application
+ * @param {Model} model - global model of the application
  * @returns {vnode}
  */
 const environmentContent = (environment, model) => {
-  const isRunning = environment.state === 'RUNNING';
-  const allDetectors = model.detectors.hostsByDetectorRemote;
-  const {currentRunNumber} = environment;
-  const {flp, qc, trg} = environment.hardware;
-  const allHosts = flp.hosts.size + qc.hosts.size + trg.hosts.size;
+  const {state, currentRunNumber, currentTransition = undefined} = environment;
+  const isDcsEnabled = environment.userVars?.['dcs_enabled'] === 'true';
+  const isStable = !currentTransition;
+
+  const isConfigured = state === 'CONFIGURED';
+  const isRunning = state === 'RUNNING';
+  const {flp, qc, trg, epn} = environment.hardware;
   return h('.cardGroupColumn', {
   }, [
-    isRunning && environmentRunningPanels(environment),
+    isRunning && isStable && environmentRunningPanels(environment),
     h('.cardGroupColumn', [
       h('.cardGroupRow', [
         isRunning && miniCard(
@@ -104,33 +114,36 @@ const environmentContent = (environment, model) => {
           'General Information',
           environmentGeneralInfoContent(environment),
           isGlobalRun(environment.userVars)
-            ? ['bg-global-run']
-            : []
+            ? ['bg-global-run', 'p2', 'g2']
+            : ['p2', 'g2']
         ),
         miniCard(
           'Components',
           environmentComponentsContent(environment),
         ),
       ]),
-      environment.tasks.length > 0 && h('.cardGroupColumn', [
+      h('.cardGroupColumn', [
         h('h4', `Tasks Summary`),
         h('.cardGroupRow', [
           miniCard(
-            miniCardTitle('ALL', `# hosts: ${allHosts}`),
-            taskCounterContent(environment.tasks)),
-          flp.tasks.length > 0 && miniCard(
-            miniCardTitle('FLP', `# hosts: ${flp.hosts.size}`),
+            miniCardTitle('FLP', `# hosts: ${flp.hosts}`),
             taskCounterContent(flp.tasks)),
-          qc.tasks.length > 0 && miniCard(
-            miniCardTitle('QC Nodes', `# hosts: ${qc.hosts.size}`),
+          miniCard(
+            miniCardTitle('QC Nodes', `# hosts: ${qc.hosts}`),
             taskCounterContent(qc.tasks)),
-          trg.tasks.length > 0 && miniCard(
-            miniCardTitle('CTP Readout', `# hosts: ${trg.hosts.size}`),
+          miniCard(
+            miniCardTitle('CTP Readout', `# hosts: ${trg.hosts}`),
             taskCounterContent(trg.tasks)),
+          miniCard(
+            miniCardTitle('EPN', `# hosts: ${epn.hosts}`),
+            taskCounterContent(epn.tasks)),
         ])
       ]),
     ]),
-    allDetectors.isSuccess() && envTasksPerDetector(environment, allDetectors.payload),
+    detectorCard(
+      flp.detectorCounters,
+      isDcsEnabled && isStable && isConfigured ? model.services.detectors.availability : {}
+    ),
   ]);
 };
 
@@ -139,15 +152,21 @@ const environmentContent = (environment, model) => {
  * @param {EnvironmentInfo} environment - DTO representing an environment
  * @returns {vnode}
  */
-const environmentRunningPanels = ({currentRunNumber}) => {
+const environmentRunningPanels = ({currentRunNumber, userVars}) => {
   const isMonitoringConfigured = COG && COG.GRAFANA && COG.GRAFANA.status;
+  const {readoutPlot, flpStats, epnStats} = COG && COG.GRAFANA && COG.GRAFANA.plots;
+  const runStart = Number(userVars['run_start_time_ms']);
   let readoutMonitoringSource = '';
   let flpMonitoringSource = '';
   let epnMonitoringSource = '';
   if (isMonitoringConfigured) {
-    readoutMonitoringSource = COG.GRAFANA.plots.readoutPlot + '&var-run=' + currentRunNumber;
-    flpMonitoringSource = COG.GRAFANA.plots.flpStats + '&var-run=' + currentRunNumber;
-    epnMonitoringSource = COG.GRAFANA.plots.epnStats + '&var-run=' + currentRunNumber;
+    const THIRTY_MINUTES_IN_MS = 1000 * 60 * 30;
+    const runStartParam = (Number.isInteger(runStart) && (Date.now() - runStart) < THIRTY_MINUTES_IN_MS)
+      ? `&from=${runStart}&to=now`
+      : '';
+    readoutMonitoringSource = readoutPlot + '&var-run=' + currentRunNumber + runStartParam;
+    flpMonitoringSource = flpStats + '&var-run=' + currentRunNumber;
+    epnMonitoringSource = epnStats + '&var-run=' + currentRunNumber;
   }
   return isMonitoringConfigured ? h('.flex-column.w-100.g2', [
     iframe(readoutMonitoringSource, 'height: 12em; border: 0; width:100%'),
@@ -164,15 +183,15 @@ const environmentRunningPanels = ({currentRunNumber}) => {
  * @returns {vnode}
  */
 const environmentGeneralInfoContent = (environment) => {
-  const {includedDetectors = [], state, userVars = {}, createdWhen, rootRole, numberOfFlps} = environment;
-  const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
+  const {currentTransition = '-', state, userVars = {}, createdWhen, rootRole} = environment;
   return h('.flex-column', [
+    rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
+    rowForCard('Transitioning:', currentTransition),
     rowForCard('State:', state, {valueClasses: [ALIECS_STATE_COLOR[state]]}),
     rowForCard('Run Type:', userVars.run_type),
-    rowForCard('Created:', parseObject(createdWhen, 'createdWhen')),
+    rowForCard('RUN Started:', parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),
+    rowForCard('RUN Ended:', parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')),
     rowForCard('Template:', rootRole),
-    rowForCard('FLPs:', numberOfFlps),
-    rowForCard('Detectors:', detectorsAsString),
     rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-')
   ]);
 }
@@ -183,42 +202,43 @@ const environmentGeneralInfoContent = (environment) => {
  * @returns {vnode}
  */
 const environmentComponentsContent = (environment) => {
-  const {userVars} = environment;
+  const {userVars, numberOfFlps, includedDetectors = [], hardware = {epn: {}}} = environment;
+  const {epn: {info}} = hardware;
+  const detectorsAsString = includedDetectors.length > 0 ? includedDetectors.join(' ') : '-';
   const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
 
   return h('.flex-column', [
+    rowForCard('FLPs:', numberOfFlps),
+    rowForCard('Detectors:', detectorsAsString),
     rowForCard('DCS:', parseObject(userVars, 'dcs_enabled')),
     rowForCard('Data Distribution (FLP):', parseObject(userVars, 'dd_enabled')),
     rowForCard('EPNs:', parseObject(userVars, 'odc_n_epns')),
     rowForCard('TRG:', parseObject(userVars, 'trg_enabled')),
     rowForCard('CTP Readout:', parseObject(userVars, 'ctp_readout_enabled')),
-    rowForCard('ODC:', odcState, {valueClasses: [odcStyle]})
+    rowForCard('ODC:', odcState, {valueClasses: [odcStyle]}),
+    rowForCard('DDS:', info.ddsSessionStatus ? info.ddsSessionStatus : '-'),
+    info.ddsSessionStatus && rowForCard('DDS Session ID:', info.ddsSessionId ? info.ddsSessionId : '-'),
   ]);
 };
 
 /**
  * Build a series of cards containing information about the tasks and hosts of each detector
- * @param {EnvironmentInfo} environment - DTO representing an environment
- * @param {Map<string, Array<string>>} allDetectors - map of all known detectors with their associated hosts
+ * @param {Map<String, Object>} detectorCounters - DTO representing an environment
+ * @param {Object<String, DetectorState>} detectorsAvailability - object with all detectors state
  * @returns {vnode}
  */
-const envTasksPerDetector = (environment, allDetectors) => {
-  const {includedDetectors = [], userVars: {hosts = '[]'} = {}} = environment;
-  const hostList = JSON.parse(hosts)
-
-  if (includedDetectors.length > 0 && hostList.length > 0) {
-    return h('.flex-column.flex-wrap.g2', [
-      h('h4', `FLP Tasks by Detector(s) Summary`),
-      h('.flex-row.flex-wrap.g2', [
-        includedDetectors.map((detector) => {
-          const hostsUsed = hostList.filter((host) => allDetectors[detector].includes(host));
-          const tasks = environment.tasks.filter((task) => hostsUsed.includes(task.deploymentInfo.hostname));
-          return miniCard(
-            miniCardTitle(detector, `# hosts: ${hostsUsed.length}`),
-            taskCounterContent(tasks)
-          )
-        })
-      ])
-    ]);
-  }
-}
+const detectorCard = (detectorCounters, detectorsAvailability) =>
+  h('.flex-column.flex-wrap.g2', [
+    h('h4', `FLP Tasks by Detector(s) Summary`),
+    h('.flex-row.flex-wrap.g2', [
+      Object.keys(detectorCounters).map((detector) => {
+        return miniCard(
+          miniCardTitle(detector, `# tasks: ${detectorCounters[detector].total}`),
+          [
+            dcsPropertiesRow(detectorsAvailability[detector]),
+            taskCounterContent(detectorCounters[detector])
+          ]
+        )
+      })
+    ])
+  ]);

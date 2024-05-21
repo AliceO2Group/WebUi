@@ -17,9 +17,6 @@
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const {spawn} = require('child_process');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
 const port = 8085;
 
 let browser;
@@ -50,7 +47,7 @@ describe('Framework Frontend', function() {
       subprocessOutput += chunk.toString();
     });
 
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: 'new'});
     page = await browser.newPage();
     page.on('requestfailed', (request) => {
       console.error(`Navigator failed to load ${request.url()}`);
@@ -304,12 +301,6 @@ describe('Framework Frontend', function() {
   });
 
   describe('BrowserStorage class', function() {
-    it('should successfully create a BrowserStorage instance', async () => {
-      await page.evaluate(async () => {
-        const storage = new BrowserStorage();
-      });
-    });
-
     it('should successfully set (key,value) in localStorage & sessionStorage', async () => {
       const storage = await page.evaluate(async () => {
         const storage = new BrowserStorage('TEST');

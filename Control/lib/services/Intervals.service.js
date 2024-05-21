@@ -12,43 +12,44 @@
  * or submit itself to any jurisdiction.
 */
 
+const DEFAULT_INTERVAL_RATE = 60 * 1000;
+
 /**
+ * @class
  * Class which deals with setting up intervals for retrieving information constantly
  */
 class Intervals {
   /**
-   * Expected services to be used to retrieve information
+   * @constructor
+   * Constructor for initializing a list of intervals
    */
-  constructor(statusService) {
-    this._statusService = statusService;
-
-    this._intervals = [];
-
+  constructor() {
+    /**
+     * @type {Object<Intervals>}
+     */
+    this._intervals = {};
   }
 
   /**
-   * Method to initialize all intervals used by AlIECS GUI to acquire data
+   * Method to allow other services to register events that should trigger based on an interval rate
+   * @param {function} callback - function that should be called based on interval rate
+   * @param {number} intervalRate = 60 * 1000 - (ms) on how often the callback should be called
+   * @return {Symbol} - unique key for registered callback
    */
-  initializeIntervals() {
-    this._statusService && this._initializeStatusIntervals();
+  register(callback, intervalRate = DEFAULT_INTERVAL_RATE) {
+    const key = Symbol(Math.random());
+    this._intervals[key] = setInterval(callback, intervalRate);
+    return key;
   }
 
   /**
-   * Sets interval to use {StatusService} to get data about the components which interact with AliECS GUI
+   * Method to allow services to deregister and clear an interval
+   * @param {Symbol} key - key under which the interval was registered
+   * @return {void}
    */
-  _initializeStatusIntervals() {
-    this._intervals.push(
-      setInterval(() => {
-        this._statusService.retrieveConsulStatus();
-        this._statusService.retrieveAliEcsCoreInfo();
-        this._statusService.retrieveAliECSIntegratedInfo();
-        this._statusService.retrieveApricotStatus();
-        this._statusService.retrieveGrafanaStatus();
-        this._statusService.retrieveNotificationSystemStatus();
-      }, 2000)
-    );
+  deregister(key) {
+    clearInterval(this._intervals[key]);
   }
-
 }
 
 exports.Intervals = Intervals;

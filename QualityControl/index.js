@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log, HttpServer } from '@aliceo2/web-ui';
+import { Log, HttpServer, WebSocket } from '@aliceo2/web-ui';
 const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 import path from 'path';
 import { setup } from './lib/api.js';
@@ -41,6 +41,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
+http.addStaticPath(path.join(__dirname, 'common'));
 http.addStaticPath(path.join(__dirname, 'public'));
 
 import { createRequire } from 'module';
@@ -49,4 +50,5 @@ const require = createRequire(import.meta.url);
 const pathName = require.resolve('jsroot');
 http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 
-setup(http);
+const ws = new WebSocket(http);
+setup(http, ws);

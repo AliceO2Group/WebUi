@@ -10,14 +10,14 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {draw} from '../../object/objectDraw.js';
-import {iconArrowLeft, iconArrowTop} from '/js/src/icons.js';
-import {layoutFiltersPanel} from './panels/filters.js';
-import {minimalObjectInfo} from './panels/minimalObjectInfo.js';
-import {objectInfoResizePanel} from './panels/objectInfoResizePanel.js';
+import { h } from '/js/src/index.js';
+import { draw } from '../../object/objectDraw.js';
+import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
+import { layoutFiltersPanel } from './panels/filters.js';
+import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
+import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
 
 /**
  * Exposes the page that shows one layout and its tabs (one at a time), this page can be in edit mode
@@ -25,27 +25,25 @@ import {objectInfoResizePanel} from './panels/objectInfoResizePanel.js';
  * - 1 main view function (the page itself)
  * - 1 subcanvasView to bind listeners and set a fixed height of page to allow dragging inside free space
  * - N chartView, one per chart with jsroot inside
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
-export default (model) => h('.scroll-y.absolute-fill.bg-gray-light', {id: 'canvas'}, subcanvasView(model));
+export default (model) => h('.scroll-y.absolute-fill.bg-gray-light', { id: 'canvas' }, subcanvasView(model));
 
 /**
  * Simple placeholder when the layout is empty
- * @param {Object} model
- * @return {vnode}
+ * @returns {vnode} - virtual node element
  */
-const emptyListViewMode = (model) => h('.m4', [
+const emptyListViewMode = () => h('.m4', [
   h('h1', 'Empty list'),
-  h('p', 'Owner can edit this tab to add objects to see.')
+  h('p', 'Owner can edit this tab to add objects to see.'),
 ]);
 
 /**
  * Placeholder for empty layout in edit mode
- * @param {Object} model
- * @return {vnode}
+ * @returns {vnode} - virtual node element
  */
-const emptyListEditMode = (model) => h('.m4', [
+const emptyListEditMode = () => h('.m4', [
   h('h1', 'Empty list'),
   h('p', [iconArrowLeft(), ' Add new objects from the sidebar tree.']),
   h('p', ['You can also add/remove tabs or save/delete this layout on the navbar. ', iconArrowTop()]),
@@ -53,8 +51,8 @@ const emptyListEditMode = (model) => h('.m4', [
 
 /**
  * Container of the different charts, height is fixed and listeners allow dragging
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 function subcanvasView(model) {
   if (!model.layout.tab) {
@@ -63,20 +61,22 @@ function subcanvasView(model) {
 
   if (!model.layout.tab.objects.length) {
     if (model.layout.editEnabled) {
-      return emptyListEditMode(model);
+      return emptyListEditMode();
     } else {
-      return emptyListViewMode(model);
+      return emptyListViewMode();
     }
   }
 
-  // Sort the list by id to help template engine. It will only update style's positions and not DOM order
-  // which could force recreate some charts and then have an unfriendly blink. The source array can be shuffle
-  // because of the GridList algo, the sort below avoid this.
+  /*
+   * Sort the list by id to help template engine. It will only update style's positions and not DOM order
+   * which could force recreate some charts and then have an unfriendly blink. The source array can be shuffle
+   * because of the GridList algo, the sort below avoid this.
+   */
   const tabObjects = cloneSortById(model.layout.tab.objects);
 
   const subcanvasAttributes = {
     style: {
-      height: `100%`,
+      height: '100%',
       position: 'relative',
     },
     id: 'subcanvas',
@@ -84,24 +84,26 @@ function subcanvasView(model) {
     /**
      * Listens to dragover event to update model of moving chart position and compute grid state
      * @param {DragEvent} e - https://developer.mozilla.org/fr/docs/Web/Events/dragover
+     * @returns {undefined}
      */
     ondragover(e) {
-      // Warning CPU heavy function: getBoundingClientRect and offsetHeight re-compute layout
-      // it is ok to use them on user interactions like clicks or drags
+      /*
+       * Warning CPU heavy function: getBoundingClientRect and offsetHeight re-compute layout
+       * it is ok to use them on user interactions like clicks or drags
+       */
 
-      // avoid events from other draggings things (files, etc.)
+      // Avoid events from other draggings things (files, etc.)
       if (!model.layout.tabObjectMoving) {
         return;
       }
 
-      // mouse position according to the viewport (scroll has no effect)
-      const pageX = e.pageX;
-      const pageY = e.pageY;
+      // Mouse position according to the viewport (scroll has no effect)
+      const { pageX, pageY } = e;
 
-      // canvas is the div containing the subcanvas with screen dependent height (100% - navbar)
+      // Canvas is the div containing the subcanvas with screen dependent height (100% - navbar)
       const canvas = e.currentTarget.parentElement;
 
-      // subcanvas is the div contaning all graphs' divs, height is independent of the screen
+      // Subcanvas is the div contaning all graphs' divs, height is independent of the screen
       const subcanvas = e.currentTarget;
 
       const canvasDimensions = subcanvas.getBoundingClientRect();
@@ -110,20 +112,20 @@ function subcanvasView(model) {
 
       const cellWidth2 = canvasDimensions.width / model.layout.gridListSize;
 
-      // position in the gridList
+      // Position in the gridList
       const x = Math.floor(canvasX / cellWidth2);
       const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / model.layout.gridListSize));
 
-      // console.log(x, y, pageX, canvasDimensions.x);
       model.layout.moveTabObjectToPosition(x, y);
     },
 
     /**
      * Listens to dragend event to end any transparent moving chart from UI and other computing inside model
+     * @returns {undefined}
      */
     ondragend() {
       model.layout.moveTabObjectStop();
-    }
+    },
   };
 
   return h('.flex-column.absolute-fill', [
@@ -133,15 +135,15 @@ function subcanvasView(model) {
 }
 
 /**
- * Shows a jsroot plot, with an overlay on edit mode to allow dragging events instead of dragging jsroot content with the mouse.
- * Dragging to desktop is forbidden, but could be added.
+ * Shows a jsroot plot, with an overlay on edit mode to allow dragging events instead of dragging jsroot
+ * content with the mouse. Dragging to desktop is forbidden, but could be added.
  * Position of chart is absolute to allow smooth movements when arrangement changes.
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {Object} tabObject - to be drawn with jsroot
- * @return {vnode}
+ * @returns {vnode} - virtual node element
  */
 function chartView(model, tabObject) {
-  const key = 'key' + tabObject.id;
+  const key = `key${tabObject.id}`;
 
   // Position and size are produced by GridList in the model
   const style = {
@@ -149,12 +151,12 @@ function chartView(model, tabObject) {
     width: `${model.layout.cellWidth * tabObject.w}%`,
     top: `${model.layout.cellHeight * tabObject.y}%`,
     left: `${model.layout.cellWidth * tabObject.x}%`,
-    opacity: (model.layout.tabObjectMoving && tabObject.id === model.layout.tabObjectMoving.id ? '0' : '1')
+    opacity: model.layout.tabObjectMoving && tabObject.id === model.layout.tabObjectMoving.id ? '0' : '1',
   };
   // Interactions with user
   const draggable = model.layout.editEnabled;
   const ondragstart = model.layout.editEnabled ? (e) => {
-    e.dataTransfer.setData('application/qcg', null); // custom type forbids to drag on desktop
+    e.dataTransfer.setData('application/qcg', null); // Custom type forbids to drag on desktop
     e.dataTransfer.effectAllowed = 'move';
     model.layout.moveTabObjectStart(tabObject);
   } : null;
@@ -167,7 +169,7 @@ function chartView(model, tabObject) {
     draggable,
     ondragstart,
     onclick,
-    onremove: () => 1 // fix strange bug with unlimited redraws when layout contains only one chart (!!!)
+    onremove: () => 1, // Fix strange bug with unlimited redraws when layout contains only one chart (!!!)
   };
 
   let className = '';
@@ -176,46 +178,44 @@ function chartView(model, tabObject) {
     ? 'layout-selected layout-selectable '
     : 'layout-selectable ';
   const attrsInternal = {
-    class: className
+    class: className,
   };
 
   return h('.absolute.animate-dimensions-position', attrs, [
-    // super-container of jsroot data
+    // Super-container of jsroot data
     h('.bg-white.m1.absolute-fill.br3', attrsInternal, drawComponent(model, tabObject)),
 
-    // transparent layer to drag&drop in edit mode, avoid interaction with jsroot
-    model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3')
+    // Transparent layer to drag&drop in edit mode, avoid interaction with jsroot
+    model.layout.editEnabled && h('.object-edit-layer.absolute-fill.m1.br3'),
   ]);
 }
 
 /**
  * Method to generate a component containing a header with actions and a jsroot plot
- * @param {Object} model
- * @param {String} tabObject
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @param {Object} tabObject - to be drawn with jsroot
+ * @returns {vnode} - virtual node element
  */
-const drawComponent = (model, tabObject) =>
-  h('', {style: 'height:100%; display: flex; flex-direction: column'},
-    [
-      h('.jsrootdiv', {
-        style: {
-          'z-index': 90,
-          overflow: 'hidden',
-          height: '100%',
-          display: 'flex',
-          'flex-direction': 'column'
-        }
-      }, draw(model, tabObject, {}, 'layoutShow')),
-      objectInfoResizePanel(model, tabObject),
-      !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
+const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
+  h('.jsrootdiv', {
+    style: {
+      'z-index': 90,
+      overflow: 'hidden',
+      height: '100%',
+      display: 'flex',
+      'flex-direction': 'column',
+    },
+  }, draw(model, tabObject, {})),
+  objectInfoResizePanel(model, tabObject),
+  !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
       && minimalObjectInfo(model, tabObject),
-    ]);
+]);
 
 /**
  * Predicate to sort objects by id
- * @param {Object} a
- * @param {Object} b
- * @return {number}
+ * @param {Object} a - first object to compare
+ * @param {Object} b - second object to compare with
+ * @returns {number} - as to which element is in front
  */
 function compareById(a, b) {
   if (a.id < b.id) {
@@ -231,8 +231,8 @@ function compareById(a, b) {
 
 /**
  * Creates a copy of array and sort it by id's object
- * @param {Array.<Object>} array
- * @return {Array.<Object>} copy
+ * @param {Array.<Object>} array - list of elements to sort by id
+ * @returns {Array.<Object>} copy
  */
 function cloneSortById(array) {
   return array.concat().sort(compareById);

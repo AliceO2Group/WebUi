@@ -24,6 +24,9 @@ import LayoutService from './services/Layout.service.js';
 import Folder from './folder/Folder.js';
 import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
+import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
+import { setBrowserTabTitle } from './common/utils.js';
+import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -40,10 +43,16 @@ export default class Model extends Observable {
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
+    this.objectViewModel = new ObjectViewModel(this);
+    this.objectViewModel.bubbleTo(this);
+
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
 
     this.folder = new Folder(this);
+    this.folder.addFolder({
+      title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
+    });
     this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.bubbleTo(this);
@@ -85,6 +94,7 @@ export default class Model extends Observable {
   /**
    * Initialize steps in a certain order based on
    * mandatory information from server
+   * @returns {undefined}
    */
   async initModel() {
     this.services = {
@@ -117,7 +127,8 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending on incoming keyboard event
-   * @param {Event} e
+   * @param {Event} e - event for which to handle action
+   * @returns {undefined}
    */
   handleKeyboardDown(e) {
     // Console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
@@ -135,7 +146,8 @@ export default class Model extends Observable {
   }
 
   /**
-   * Handle authed event from WS when connection is ready to be used,
+   * Handle authed event from WS when connection is ready to be used
+   * @returns {undefined}
    */
   handleWSAuthed() {
     // Subscribe to all notifications from server (information service)
@@ -144,6 +156,7 @@ export default class Model extends Observable {
 
   /**
    * Handle close event from WS when connection has been lost (server restart, etc.)
+   * @returns {undefined}
    */
   handleWSClose() {
     const self = this;
@@ -154,28 +167,61 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending new location of the page
+   * @returns {undefined}
    */
-  handleLocationChange() {
+  async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
 
     this.services.layout.getLayoutsByUserId(this.session.personid);
 
-    switch (this.router.params.page) {
+    const { params } = this.router;
+    switch (params.page) {
       case 'layoutList':
         this.page = 'layoutList';
+        setBrowserTabTitle('QCG-Layouts');
         this.services.layout.getLayouts();
         break;
       case 'layoutShow':
-        if (!this.router.params.layoutId) {
-          this.notification.show('layoutId in URL was missing. Redirecting to layout page', 'warning', 3000);
-          this.router.go('?page=layoutList', true);
-          return;
+        setBrowserTabTitle('QCG-LayoutShow');
+        if (!params.layoutId) {
+          const { definition, pdpBeamType, detector, runType, runNumber } = params;
+          if (!definition) {
+            this.notification.show('layoutId in URL was missing. Redirecting to layouts page', 'warning', 3000);
+            this.router.go('?page=layoutList', true);
+            return;
+          } else {
+            const layout = await this.services.layout.getLayoutByQuery(definition, pdpBeamType);
+            if (!layout) {
+              this.notification.show(`Layout with definition ${definition} could not be found`, 'warning', 3000);
+              this.router.go('?page=layoutList', true);
+              return;
+            }
+            const paramsToAdd = { layoutId: layout.id };
+            delete params.definition;
+            delete params.pdpBeamType;
+            if (detector) {
+              let tab = detector;
+              if (runType) {
+                tab += `_${runType.toLocaleLowerCase()}`;
+              }
+
+              paramsToAdd.tab = tab;
+              delete params.detector;
+              delete params.runType;
+            }
+            if (runNumber !== null && runNumber !== undefined) {
+              paramsToAdd.RunNumber = runNumber;
+              delete params.runNumber;
+            }
+            this.router.go(buildQueryParametersString(params, paramsToAdd), true);
+            return;
+          }
         }
-        this.layout.loadItem(this.router.params.layoutId)
+        this.layout.loadItem(this.router.params.layoutId, params?.tab ?? '')
           .then(() => {
             this.page = 'layoutShow';
-            if (this.router.params.edit) {
+            if (params.edit) {
               this.layout.edit();
 
               // Replace silently and immediately URL to remove 'edit' parameter after a layout creation
@@ -187,6 +233,7 @@ export default class Model extends Observable {
         break;
       case 'objectTree':
         this.page = 'objectTree';
+        setBrowserTabTitle('QCG-Tree');
         this.object.loadList();
         // Data is already loaded at beginning
         if (this.object.selected) {
@@ -196,15 +243,15 @@ export default class Model extends Observable {
         break;
       case 'objectView': {
         this.page = 'objectView';
-        const { layoutId } = this.router.params;
-        if (layoutId) {
-          this.layout.getLayoutById(layoutId);
-        }
+        setBrowserTabTitle('QCG-View');
+        const { params } = this.router;
+        this.objectViewModel.init(params);
         this.notify();
         break;
       }
       case 'about':
         this.page = 'about';
+        setBrowserTabTitle('QCG-About');
         this.frameworkInfo.getFrameworkInfo();
         this.notify();
         break;
@@ -217,6 +264,7 @@ export default class Model extends Observable {
 
   /**
    * Show or hide sidebar
+   * @returns {undefined}
    */
   toggleSidebar() {
     this.sidebar = !this.sidebar;
@@ -225,6 +273,7 @@ export default class Model extends Observable {
 
   /**
    * Toggle account menu dropdown
+   * @returns {undefined}
    */
   toggleAccountMenu() {
     this.accountMenuEnabled = !this.accountMenuEnabled;
@@ -233,6 +282,7 @@ export default class Model extends Observable {
 
   /**
    * Toggle mode (Online/Offline)
+   * @returns {undefined}
    */
   toggleMode() {
     this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
@@ -250,7 +300,7 @@ export default class Model extends Observable {
   /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
-   * @return {boolean}
+   * @returns {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
@@ -258,6 +308,7 @@ export default class Model extends Observable {
 
   /**
    * Method to check if Online Mode is available
+   * @returns {undefined}
    */
   async checkOnlineModeAvailability() {
     const result = await this.services.object.isOnlineModeConnectionAlive();
@@ -272,6 +323,7 @@ export default class Model extends Observable {
    * Set the interval to update objects currently loaded and shown to user.
    * This will reload only data associated to them
    * @param {number} intervalSeconds - in seconds
+   * @returns {undefined}
    */
   setRefreshInterval(intervalSeconds) {
     // Stop any other timer
@@ -299,7 +351,7 @@ export default class Model extends Observable {
 
   /**
    * Returns the visibility of the import layout modal
-   * @return {boolean}
+   * @returns {boolean} - whether import modal is visible
    */
   get isImportVisible() {
     return this._isImportVisible;
@@ -307,8 +359,8 @@ export default class Model extends Observable {
 
   /**
    * Sets the visibility of the import layout modal
-   * @param {boolean} value
-   * @return {boolean}
+   * @param {boolean} value - value to be set for modal visibility
+   * @returns {boolean} - new value of modal visibility
    */
   set isImportVisible(value) {
     this._isImportVisible = value ? true : false;

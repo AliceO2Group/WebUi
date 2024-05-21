@@ -14,11 +14,11 @@ jobs:
     name: Tests on macos-latest    
     runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
       - run: (cd Framework; npm ci )
       - run: (cd Framework; npm test )
@@ -26,27 +26,27 @@ jobs:
     name: Tests & coverage on ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: (cd Framework; npm ci )
       - run: (cd Framework; npm run coverage )
       - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for Framework
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets. NEW_CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: framework
           fail_ci_if_error: true
   windows:
     name: Test on windows-latest
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: cd Framework; npm ci
       - run: cd Framework; npm test
   control-compatibility:
@@ -58,11 +58,11 @@ jobs:
     steps:
       - name: Run Control tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework";) 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: (cd Framework; npm ci)
       - run: (cd Control; npm ci)
       - run: (cd Control; npm i --save ../Framework)
@@ -78,11 +78,11 @@ jobs:
     steps:
       - name: Run QualityControl tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run QualityControl tests by using @aliceo2/web-ui from local ../Framework";) 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: (cd Framework; npm ci)
       - run: (cd QualityControl; npm ci)
       - run: (cd QualityControl; npm i --save ../Framework)
@@ -98,11 +98,11 @@ jobs:
     steps:
       - name: Run InfoLogger tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run InfoLogger tests by using @aliceo2/web-ui from local ../Framework";) 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
       - run: (cd Framework; npm ci)
       - run: (cd InfoLogger; npm ci)
       - run: (cd InfoLogger; npm i --save ../Framework)

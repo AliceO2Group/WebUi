@@ -125,6 +125,7 @@ const envTest = {
     tasks: [],
     rootRole: 'copy-push',
     numberOfFlps: 2,
+    includedDetectors: ['MID'],
     userVars: {
       odc_enabled: 'true',
       mid_enabled: 'false',
@@ -143,6 +144,8 @@ const envTest = {
       dcs_topology: 'test',
       dd_enabled: 'true',
       run_type: 'run'
+    },
+    integratedServices: {
     }
   },
   workflow: {},

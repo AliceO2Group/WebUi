@@ -41,7 +41,7 @@ describe('`Control Environment` test-suite', async () => {
   it(`should have one button for START in state CONFIGURED (workflow '${workflowToTest}')`, async () => {
     await page.waitForSelector('#buttonToSTART', {timeout: 5000});
     const startButton = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
-    const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
+    const state = await page.evaluate(() => window.model.environment.item.payload.state);
 
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
     assert.strictEqual(startButton, 'START', 'Could not find button for starting environment probably due to bad state of environment');
@@ -52,9 +52,14 @@ describe('`Control Environment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('#buttonToSTART').click());
     await waitForCoreResponse(page, reqTimeout);
 
-    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
-    const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.environment.state;
+    const controlAction = await page.evaluate(() => {
+      return {
+        kind: window.model.environment.itemControl.kind,
+        payload: window.model.environment.itemControl.payload
+      }
+    });
+    const environment = await page.evaluate(() => window.model.environment.item.payload);
+    const state = environment.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'RUNNING', 'Environment was expected to be running');
@@ -63,7 +68,7 @@ describe('`Control Environment` test-suite', async () => {
   it(`should have one button for STOP in state RUNNING (workflow '${workflowToTest}')`, async () => {
     await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
     const stopButton = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
-    const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
+    const state = await page.evaluate(() => window.model.environment.item.payload.state);
 
     assert.strictEqual(state, 'RUNNING', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
     assert.strictEqual(stopButton, 'STOP', 'Could not found button for stopping environment probably due to bad state of environment');
@@ -74,9 +79,14 @@ describe('`Control Environment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
     await waitForCoreResponse(page, reqTimeout);
 
-    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
-    const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.environment.state;
+    const controlAction = await page.evaluate(() => {
+      return {
+        kind: window.model.environment.itemControl.kind,
+        payload: window.model.environment.itemControl.payload
+      }
+    });
+    const environment = await page.evaluate(() => window.model.environment.item.payload);
+    const state = environment.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
@@ -85,7 +95,7 @@ describe('`Control Environment` test-suite', async () => {
   // it(`should have one button for RESET in state CONFIGURED (workflow '${workflowToTest}')`, async () => {
   //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
   //   const resetButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
-  //   const state = await page.evaluate(() => window.model.environment.item.payload.environment.state);
+  //   const state = await page.evaluate(() => window.model.environment.item.payload.state);
 
   //   assert.strictEqual(state, 'CONFIGURED', `WRONG state of environment based on workflow '${workflowToTest}' with revision: '${revision}'`);
   //   assert.strictEqual(resetButton, 'RESET', 'Could not found button for resetting (stand-by) environment probably due to bad state of environment');
@@ -98,7 +108,7 @@ describe('`Control Environment` test-suite', async () => {
 
   //   const controlAction = await page.evaluate(() => window.model.environment.itemControl);
   //   const environment = await page.evaluate(() => window.model.environment.item);
-  //   const state = environment.payload.environment.state;
+  //   const state = environment.payload.state;
 
   //   assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
   //   assert.strictEqual(state, 'DEPLOYED');
@@ -116,19 +126,24 @@ describe('`Control Environment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('#buttonToFORCESHUTDOWN').click());
     await waitForCoreResponse(page, reqTimeout);
 
-    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
+    const controlAction = await page.evaluate(() => {
+      return {
+        kind: window.model.environment.itemControl.kind,
+        payload: window.model.environment.itemControl.payload
+      }
+    });
     const location = await page.evaluate(() => window.location);
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.ok(location.search, '?page=environments', 'SHUTDOWN of environment was not successful');
   });
 
-  it('should release lock', async() => {
+  it('should release lock', async () => {
     await page.goto(config.url + '?page=locks');
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=locks');
     await page.waitForSelector('button.danger');
-    await page.evaluate(() =>  document.querySelector('button.danger').click());
+    await page.evaluate(() => document.querySelector('button.danger').click());
   });
 });
 
@@ -144,7 +159,7 @@ async function waitForCoreResponse(page, timeout = 90) {
   return new Promise(async (resolve) => {
     let i = 0;
     while (i++ < timeout) {
-      const isLoaderActive = await page.evaluate(() => window.model.loader.active);
+      const isLoaderActive = await page.evaluate(() => window.model.environment.itemControl.isLoading());
       if (!isLoaderActive) {
         await page.waitForTimeout(1000);
         resolve();

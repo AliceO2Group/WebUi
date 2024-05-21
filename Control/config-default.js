@@ -27,6 +27,11 @@ module.exports = {
   grafana: {
     url: 'http://localhost:3000'
   },
+  bookkeeping: {
+    url: 'http://localhost:4000',
+    token: 'some-token',
+    refreshRate: 10000,
+  },
   consul: {
     ui: 'localhost:8500',
     hostname: 'localhost',
@@ -47,9 +52,6 @@ module.exports = {
   },
   qcGui: {
     url: 'qcg.cern.ch'
-  },
-  bookkeepingGui: {
-    url: 'ali-bookkeeping.cern.ch'
   },
   utils: {
     refreshTask: 10000, // how often should task list page should refresh its content

@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model representing FrameworkInfo
@@ -20,7 +20,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class FrameworkInfo extends Observable {
   /**
    * Initialize `item` to NotAsked
-   * @param {Object} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
@@ -31,15 +31,16 @@ export default class FrameworkInfo extends Observable {
 
   /**
    * Load FrameworkInfo into `item`
+   * @returns {undefined}
    */
   async getFrameworkInfo() {
     this.item = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get('/api/getFrameworkInfo');
+    const { result, ok } = await this.model.loader.get('/api/status/framework');
     if (!ok) {
       this.item = RemoteData.failure(result.message);
-      this.model.notification.show(`Unable to retrieve framework information`, 'danger', 2000);
+      this.model.notification.show('Unable to retrieve framework information', 'danger', 2000);
     } else {
       this.item = RemoteData.success(result);
     }

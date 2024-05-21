@@ -20,6 +20,23 @@ export class DI {
    */
   constructor() {
     this._notification = null;
+    this._session = null;
+  }
+
+  /**
+   * Return the instance of the session service
+   * @returns {Session}
+   */
+  get session() {
+    return this._session;
+  }
+
+  /**
+   * Set the session service
+   * @param {Session}
+   */
+  set session(sessionService) {
+    this._session = sessionService;
   }
 
   /**

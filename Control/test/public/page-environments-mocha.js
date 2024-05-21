@@ -43,9 +43,9 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('should have a button in Action column for InfoLogger', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(13) > div > a', {timeout: 2000});
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(15) > div > a', {timeout: 2000});
       const detailsButton = await page.evaluate(() => {
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(13) > div > a').innerText;
+        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(15) > div > a').innerText;
         return {label};
       });
       assert.strictEqual(detailsButton.label, 'FLP');
@@ -56,7 +56,7 @@ describe('`pageEnvironments` test-suite', () => {
       await page.waitForTimeout(200);
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
+      assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=configuration');
     });
   });
 
@@ -70,9 +70,9 @@ describe('`pageEnvironments` test-suite', () => {
 
   describe('Test new environment request', async () => {
     it('create failed environment request', async () => {
-      await page.goto(url + '?page=newEnvironment');
+      await page.goto(url + '?page=newEnvironmentAdvanced');
       const location = await page.evaluate(() => window.location);
-      assert.ok(location.search === '?page=newEnvironment');
+      assert.ok(location.search === '?page=newEnvironmentAdvanced');
       
       // select workflow from list of templates
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
@@ -80,10 +80,10 @@ describe('`pageEnvironments` test-suite', () => {
       
       // first detector is already locked (should be MID)
       // select earlier locked detector which will automatically select all available hosts
-      await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+      await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
       
       await page.waitForTimeout(200);
-      await page.evaluate(() => document.querySelector('#create-env').click());
+      await page.evaluate(() => document.querySelector('#deploy-env').click());
     });
 
     it('verify request fields', async () => {

@@ -26,6 +26,11 @@ import {PREFIX, ROLES} from './../workflow/constants.js';
 import {SERVICE_STATES} from './common/constants/serviceStates.js';
 import {di} from './utilities/di.js';
 
+import {EnvironmentCreationModel} from './pages/EnvironmentCreation/EnvironmentCreation.model.js';
+import {CalibrationRunsModel} from './pages/CalibrationRuns/CalibrationRuns.model.js';
+
+import {STATUS_COMPONENTS_KEYS} from './common/constants/statusComponents.enum.js';
+
 /**
  * Root of model tree
  * Handle global events: keyboard, websocket and router location change
@@ -40,6 +45,7 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
     this.session.role = this.getRole();
+    di.session = this.session;
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
@@ -47,28 +53,39 @@ export default class Model extends Observable {
     this.lock = new Lock(this);
     this.lock.bubbleTo(this);
 
+    // Setup router
+    this.router = new QueryRouter();
+    this.router.observe(this.handleLocationChange.bind(this));
+    this.router.bubbleTo(this);
+
+    // Services
+    this.detectors = new DetectorService(this);
+
+    this.services = {
+      detectors: this.detectors
+    };
+
     this.configuration = new Config(this);
     this.configuration.bubbleTo(this);
 
+    // Pages Models
     this.environment = new Environment(this);
     this.environment.bubbleTo(this);
 
     this.workflow = new Workflow(this);
     this.workflow.bubbleTo(this);
 
+    this.envCreationModel = new EnvironmentCreationModel(this);
+    this.envCreationModel.bubbleTo(this);
+
+    this.calibrationRunsModel = new CalibrationRunsModel(this);
+    this.calibrationRunsModel.bubbleTo(this);
+
     this.task = new Task(this);
     this.task.bubbleTo(this);
 
     this.about = new About(this);
     this.about.bubbleTo(this);
-
-    // Setup router
-    this.router = new QueryRouter();
-    this.router.observe(this.handleLocationChange.bind(this));
-    this.router.bubbleTo(this);
-
-    // services
-    this.detectors = new DetectorService(this);
 
     this.notification = new O2Notification();
     this.notification.bubbleTo(this);
@@ -151,11 +168,34 @@ export default class Model extends Observable {
         break;
       case 'environments':
         this.environment.list = RemoteData.success(message.payload);
+        this.environment.updateItemEnvironment(message.payload.environments);
         this.notify();
         break;
       case 'requests':
         this.environment.requests = RemoteData.success(message.payload);
         this.notify();
+        break;
+      case 'components-STATUS':
+        if (message?.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]) {
+          this.about.updateComponentStatus('system', message.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]);
+        }
+        this.detectors.availability = message.payload['INTEG_SERVICE-DCS']?.extras?.detectors ?? {};
+        this.notify();
+
+        break;
+      case 'CALIBRATION_RUNS_BY_DETECTOR':
+        if (message.payload) {
+          this.calibrationRunsModel.calibrationRuns = RemoteData.success(message?.payload);
+          this.notify();
+        }
+        break;
+      case 'CALIBRATION_RUNS_REQUESTS':
+        if (message.payload && this.calibrationRunsModel.calibrationRuns.isSuccess()) {
+          const {detector, runType} = message.payload;
+          this.calibrationRunsModel.calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
+            RemoteData.success(message.payload);
+          this.calibrationRunsModel.notify();
+        }
         break;
     }
   }
@@ -199,6 +239,7 @@ export default class Model extends Observable {
    */
   handleLocationChange() {
     clearInterval(this.task.refreshInterval);
+    this.about.retrieveInfo();
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
@@ -210,16 +251,24 @@ export default class Model extends Observable {
           this.router.go('?page=environments');
           return;
         }
-        this.environment.getEnvironment({id: this.router.params.id});
+        if (!this.router.params.panel) {
+          this.router.go(`?page=environment&id=${this.router.params.id}&panel=configuration`, true, true);
+        }
+        this.environment.getEnvironment({id: this.router.params.id}, true, this.router.params.panel);
+        break;
+      case 'newEnvironmentAdvanced':
+        this.workflow.initWorkflowPage();
         break;
       case 'newEnvironment':
-        this.workflow.initWorkflowPage();
+        this.envCreationModel.initPage();
+        break;
+      case 'calibrationRuns':
+        this.calibrationRunsModel.initPage();
         break;
       case 'taskList':
         this.task.getTasks();
         break;
       case 'about':
-        this.about.retrieveInfo();
         break;
       case 'configuration':
         this.configuration.init();

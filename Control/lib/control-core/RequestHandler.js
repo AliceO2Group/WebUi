@@ -14,6 +14,11 @@
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
 const {errorLogger} = require('./../utils.js');
+const CoreUtils = require('./CoreUtils.js');
+const {
+  RUNTIME_COMPONENT: {COG},
+  RUNTIME_KEY: {RUN_TYPE_TO_HOST_MAPPING}
+} = require('../common/kvStore/runtime.enum.js');
 
 /**
  * Handles AliECS create env requests
@@ -22,10 +27,17 @@ class RequestHandler {
 
   /**
    * @param {object} ctrlService - Handle to Control service
+   * @param {ApricotService} apricotService - service to use to interact with A.P.R.I.C.O.T
    */
-  constructor(ctrlService) {
+  constructor(ctrlService, apricotService) {
     this.ctrlService = ctrlService;
+    this._apricotService = apricotService;
     this.requestList = {};
+
+    /**
+     * @type {WorkflowService}
+     */
+    this._workflowService = undefined;
   }
 
   /**
@@ -56,18 +68,54 @@ class RequestHandler {
     this.broadcast();
     log.debug('Added request to cache, ID: ' + index);
 
+    const {selectedConfiguration} = req.body;
+    if (selectedConfiguration) {
+      // workaround for reloading configuration before deployment from global page
+      try {
+        const {variables} = await this._workflowService.retrieveWorkflowSavedConfiguration(selectedConfiguration);
+        variables.hosts = req.body.vars.hosts;
+
+        const {epn_enabled, odc_n_epns} = req.body.vars;
+        if (epn_enabled === 'true') {
+          variables.odc_n_epns = odc_n_epns;
+        }
+        req.body.vars = variables;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    const deploymentRequestedAt = Date.now();
+    let creationResponse = null;
+
+    let hostsToIgnoreForRunType = [];
     try {
-      await this.ctrlService.executeCommandNoResponse('NewEnvironment', req.body);
+      const runType = CoreUtils.getRunType(req.body);
+      const hostsToIgnoreString = await this._apricotService.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING);
+      const hostsToIgnoreMap = JSON.parse(hostsToIgnoreString);
+      if (Array.isArray(hostsToIgnoreMap[runType])) {
+        hostsToIgnoreForRunType = hostsToIgnoreMap[runType];
+      }
+    } catch (error) {
+      errorLogger(`Unable to identify FLPs to ignore due to: ${error}`);
+    }
+    try {
+      const payload = CoreUtils.parseEnvironmentCreationPayload(req.body, hostsToIgnoreForRunType);
+      creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
+
       log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
-    } catch(error) {
+    } catch (error) {
       errorLogger('Request failed, ID: ' + index);
+      errorLogger(error);
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
       if (error.envId) {
         this.requestList[index].envId = error.envId;
       }
     }
+    const id = creationResponse ? creationResponse.environment.id : '';
+    log.debug(`NEW_ENVIRONMENT,${id},,${deploymentRequestedAt},${Date.now()}`);
+
     this.broadcast();
   }
 
@@ -111,6 +159,19 @@ class RequestHandler {
    */
   getAll(req, res) {
     return res.json(this._getAll());
+  }
+
+  /**
+   * Getters & Setters
+   */
+
+  /**
+   * Setter for updating workflowService to use
+   * @param {WorkflowService} - service to be used for retrieving workflow configuration
+   * @return {void}
+   */
+  set workflowService(service) {
+    this._workflowService = service;
   }
 }
 module.exports = RequestHandler;

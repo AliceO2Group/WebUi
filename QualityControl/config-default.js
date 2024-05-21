@@ -27,18 +27,16 @@ export const config = {
     tls: false,
   },
 
-  mysql: {
-    host: 'localhost',
-    user: 'qc_user',
-    password: 'qc_user',
-    database: 'quality_control',
-  },
-
   ccdb: {
     protocol: 'http',
     hostname: 'localhost',
     port: 8080,
     prefix: 'qc',
+    cachePrefix: 'qc',
+    cacheRefreshRate: 120 * 1000,
+  },
+  qc: {
+    enabled: false,
   },
 
   /*

@@ -28,8 +28,8 @@ const ObjectDto = Joi.object({
 
 const TabsDto = Joi.object({
   id: Joi.string().required(),
-  name: Joi.string().min(1).max(10).required(),
-  columns: Joi.number().min(2).max(5).default(2),
+  name: Joi.string().min(1).max(20).required(),
+  columns: Joi.number().min(1).max(5).default(2),
   objects: Joi.array().max(30).items(ObjectDto).default([]),
 });
 
@@ -44,6 +44,7 @@ export const LayoutDto = Joi.object({
   tabs: Joi.array().min(1).max(45).items(TabsDto).required(),
   owner_id: Joi.number().min(0).required(),
   owner_name: Joi.string().required(),
+  description: Joi.string().min(0).max(100).optional(),
   collaborators: Joi.array().items(UserDto).default([]),
   displayTimestamp: Joi.boolean().default(false),
   autoTabChange: Joi.number().min(0).max(600).default(0),

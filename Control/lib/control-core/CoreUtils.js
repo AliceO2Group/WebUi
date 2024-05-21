@@ -13,7 +13,7 @@
 */
 
 /**
- * Shared methods used within Core Services/Controlers
+ * Shared methods used within Core Services/Controllers
  */
 class CoreUtils {
   /**
@@ -64,6 +64,60 @@ class CoreUtils {
       version += ' (revision ' + versionJSON.build + ')';
     }
     return version;
+  }
+
+  /**
+   * Given a payload with properties, extract the runType one
+   * @param {EnvironmentCreation} environmentPayload - object with properties required to create an environment
+   * @return {String} runType of the environment creation.
+   */
+  static getRunType(environmentPayload) {
+    const {vars} = environmentPayload;
+    return  vars['run_type'] ?? null;
+  }
+
+  /**
+   * Checks for mandatory fields and parses variables to:
+   * - replace new lines with spaces
+   * @param {EnvironmentCreation} payload -  configuration for creating an environment in raw format
+   * @param {Array<String>} hostsToIgnore - list of hosts that should be removed from payload
+   * @return {EnvironmentCreation} - validated and parsed configuration 
+   */
+  static parseEnvironmentCreationPayload(payload, hostsToIgnore = []) {
+    const {workflowTemplate, vars} = payload;
+    if (!workflowTemplate || !vars) {
+      throw new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`)
+    }
+    payload = CoreUtils._removeHostsFromSelection(payload, hostsToIgnore);
+    Object.keys(vars).forEach((key) => vars[key] = vars[key].trim().replace(/\r?\n/g, ' '));
+    return payload;
+  }
+
+  /**
+   * Temporal removal of bad FLP host if run_type is as per specified
+   * @param {EnvironmentCreation} payload -  configuration for creating an environment in raw format
+   * @returns {EnvironmentCreation} - validated and parsed configuration 
+   */
+  static _removeHostsFromSelection(payload, hostsToIgnore = []) {
+    try {
+      const hostsAsString = payload?.vars?.hosts ?? '[]';
+      const hostsList = JSON.parse(hostsAsString);
+      hostsToIgnore.forEach((knownHost) => {
+        try {
+          const index = hostsList.findIndex((host) => knownHost === host);
+          if (index >= 0) {
+            hostsList.splice(index, 1);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      });
+      payload.vars.hosts = JSON.stringify(hostsList);
+    } catch (error) {
+      console.error(error)
+    }
+
+    return payload;
   }
 }
 

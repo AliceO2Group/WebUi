@@ -19,6 +19,7 @@ const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
 const User = require('./../dtos/User.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
+const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
 
 /**
  * Gateway for all Apricot - Core calls
@@ -34,6 +35,52 @@ class ApricotService {
 
     this.detectors = [];
     this.hostsByDetector = new Map();
+    this.init();
+  }
+
+  /**
+   * Initialize service with static data from AliECS
+   */
+  async init() {
+    try {
+      this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+      await Promise.allSettled(
+        this.detectors.map(async (detector) => {
+          try {
+            const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
+            this.hostsByDetector.set(detector, hosts);
+          } catch (error) {
+            log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+          }
+        })
+      );
+    } catch (error) {
+      log.error('Unable to list detectors');
+    }
+  }
+
+  /**
+   * Use Apricot defined `o2apricot.proto` `GetRuntimeEntry` to retrieve the value stored in a specified key
+   * 
+   * Corner cases for Apricot returns:
+   * * if key(component) does not exist, Apricot wrongly returns code 2 instead of 5 in the gRPC error;
+   * * if key exists but there is no content, Apricot returns '{}'
+   * * if key exists and there is content, Apricot returns content within payload attribute '{payload}'
+   * @param {String} component - component for which it should query
+   * @param {String} key - key for which value should be retrieved
+   * @returns {Promise<String>} - value stored by apricot
+   */
+  async getRuntimeEntryByComponent(component, key) {
+    try {
+      const {payload = '{}'} = await this.apricotProxy[GetRuntimeEntry]({component, key});
+      return payload;
+    } catch (error) {
+      const {code, details = ''} = error;
+      if (code === 2 && details.includes('nil')) {
+        error.code = 5;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -142,7 +189,7 @@ class ApricotService {
       data.user = new User(req.session);
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const {payload: configurations} = await this.apricotProxy['ListRuntimeEntries']({component: COMPONENT});
+      const {payload: configurations} = await this.apricotProxy[ListRuntimeEntries]({component: COMPONENT});
       if (configurations.includes(envConf.id)) {
         errorHandler(`A configuration with name '${envConf.id}' already exists. `
           + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
@@ -211,7 +258,7 @@ class ApricotService {
       errorLogger(error, 'apricotservice');
       throw new Error(`Unable to find any existing configuration named: ${envConfig.id}`);
     }
-    
+
     if (!existingConfig.isUpdatableBy(user)) {
       throw new Error(`Configuration '${envConfig.id}' exists already and you do NOT have permissions to update it!`);
     }

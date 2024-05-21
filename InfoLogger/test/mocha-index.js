@@ -18,6 +18,7 @@ const assert = require('assert');
 const {spawn} = require('child_process');
 
 const config = require('./test-config.js');
+const {createServer, closeServer} = require('./live-simulator/infoLoggerServer.js');
 
 // APIs:
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
@@ -32,6 +33,7 @@ describe('InfoLogger', function() {
   let page;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
+  let ilgServer;
   
   this.timeout(30000);
   this.slow(1000);
@@ -39,6 +41,9 @@ describe('InfoLogger', function() {
   const baseUrl = `http://${config.http.hostname}:${config.http.port}/`;
 
   before(async () => {
+    // Start infologger server simulator
+    ilgServer = createServer();
+
     // Start web-server in background
     subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => subprocessOutput += chunk.toString());
@@ -46,7 +51,7 @@ describe('InfoLogger', function() {
     subprocess.on('error', (error) => console.error(`Server failed due to: ${error}`))
 
     // Start browser to test UI
-    browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
 
     // Export page and configurations for the other mocha files
@@ -91,6 +96,8 @@ describe('InfoLogger', function() {
     console.log(subprocessOutput);
     console.log('---------------------------------------------');
     subprocess.kill();
+    closeServer(ilgServer);
+
   });
 });
 

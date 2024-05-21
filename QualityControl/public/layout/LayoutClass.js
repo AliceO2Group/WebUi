@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {objectId, clone} from '../common/utils.js';
+import { objectId, clone } from '../common/utils.js';
 
 /**
  * Class with a layout type
@@ -29,15 +29,15 @@ export class LayoutClass {
     };
     this.contributors = [];
     this.tabs = [];
-    this.shouldDisplayInfo = false; // displayTimestamp
+    this.shouldDisplayInfo = false; // DisplayTimestamp
     this.autoTabChange = 0;
   }
 
   /**
    * Given a layout skeleton, parse its structure and add ids to the layout, tabs and objects
    * Return a format expected to be accepted by the API - create layout route
-   * @param {JSON} skeleton
-   * @return {JSON} 
+   * @param {JSON} skeleton - layout as given by the user
+   * @returns {JSON} newly validated layout
    */
   static fromSkeleton(skeleton) {
     const layout = clone(skeleton);
@@ -46,7 +46,9 @@ export class LayoutClass {
       layout.tabs.map((tab) => {
         tab.id = objectId();
         if (tab.objects) {
-          tab.objects.map((object) => object.id = objectId())
+          tab.objects.map((object) => {
+            object.id = objectId();
+          });
         }
         return tab;
       });
@@ -56,8 +58,8 @@ export class LayoutClass {
 
   /**
    * Given a layout, send back a stringified version of it stripped of IDs
-   * @param {JSON} layout
-   * @returns {String}
+   * @param {JSON} layout - layout dto representation
+   * @returns {string} - string version of the provided layout
    */
   static toSkeleton(layout) {
     const layoutCopy = {
@@ -69,7 +71,7 @@ export class LayoutClass {
     layoutCopy.tabs = layout.tabs.map((tab) => {
       const tabCopy = {
         name: tab.name,
-        objects: []
+        objects: [],
       };
       tabCopy.objects = tab.objects.map((object) => {
         const objCopy = clone(object);

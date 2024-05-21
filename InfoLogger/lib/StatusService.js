@@ -23,13 +23,19 @@ class StatusService {
    * Setup StatusService
    * @param {JSON} config - of the framework
    * @param {JSON} projPackage - package json file
+   * @param {WebSocket} webSocketServer - instance of the web socket server used by the application
    */
-  constructor(config, projPackage) {
+  constructor(config, projPackage, webSocketServer) {
     if (!config) {
       throw new Error('Empty Framework configuration');
     }
     this.config = config;
     this.projPackage = projPackage;
+
+    /**
+     * @type {WebSocket}
+     */
+    this._ws = webSocketServer;
   }
 
   /**
@@ -59,9 +65,10 @@ class StatusService {
       result.version = this.projPackage.version;
     }
     if (this.config.http) {
-      const ilg = {hostname: this.config.http.hostname, port: this.config.http.port, status: {ok: true}};
+      const ilg = {status: {ok: true}};
       result = Object.assign(result, ilg);
     }
+    result.clients = this._ws?.server?.clients?.size ?? -1;
     res.status(200).json(result);
   }
 
@@ -94,9 +101,11 @@ class StatusService {
       info.version = this.projPackage.version;
     }
     if (this.config.http) {
-      const ilg = {hostname: this.config.http.hostname, port: this.config.http.port, status: {ok: true}};
+      const {http} = this.config;
+      const ilg = {hostname: http.hostname, port: http.port, status: {ok: true}, name: http.name ?? '' };
       info = Object.assign(info, ilg);
     }
+    info.clients = this._ws?.server?.clients?.size ?? -1;
     return info;
   }
 

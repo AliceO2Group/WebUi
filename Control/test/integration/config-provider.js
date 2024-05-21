@@ -26,6 +26,6 @@ const workflow = (testConfig && testConfig.workflow) ? testConfig.workflow : 're
 const timeout = (testConfig && testConfig.timeout) ? testConfig.timeout : 200000;
 const requestTimeout = (testConfig && testConfig.requestTimeout) ? testConfig.requestTimeout : 90;
 const url = (testConfig && testConfig.hostname && testConfig.port) ? `http://${testConfig.hostname}:${testConfig.port}/` : 'http://localhost:8080/';
-const vars = (testConfig && testConfig.vars) ? testConfig.vars : {};
+const vars = (testConfig && testConfig.vars) ? testConfig.vars : {dd_enabled: 'false'};
 
 module.exports = {url, workflow, timeout, requestTimeout, vars};

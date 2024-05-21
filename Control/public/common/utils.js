@@ -36,7 +36,11 @@ const parseObject = (item, key) => {
     case 'version':
       return `${item.productName} v${item.versionStr}(revision ${item.build})`;
     case 'createdWhen':
-      return new Date(Number.parseInt(item)).toLocaleString();
+    case 'run_start_time_ms':
+    case 'run_end_time_ms':
+      return item
+        ? new Date(Number.parseInt(item)).toLocaleString()
+        : '-';
     case 'odc_n_epns':
       return (item['epn_enabled'] && item['epn_enabled'] == 'true') ? item['odc_n_epns'] : 'OFF';
     default:
@@ -59,6 +63,23 @@ const getTasksByFlp = (tasks) => {
     task.name = getTaskShortName(task.name);
     taskMap[hostname].list.push(task);
     taskMap[hostname].stdout = task.sandboxStdout;
+  });
+  return taskMap;
+}
+
+/**
+  * Create a map of tasks grouped by their EPN host
+  * @param {object} tasks - raw data
+  * @return {JSON} {<string>:{list: <array>, stdout: <string>}}
+  */
+const getTasksByEpn = (tasks) => {
+  var taskMap = {};
+  tasks.forEach((task) => {
+    const hostname = task.host;
+    if (!taskMap.hasOwnProperty(hostname)) {
+      taskMap[hostname] = {list: []};
+    }
+    taskMap[hostname].list.push(task);
   });
   return taskMap;
 }
@@ -89,7 +110,7 @@ const getTaskShortName = (taskName) => {
 const parseOdcStatusPerEnv = (environment) => {
   try {
     if (environment.integratedServicesData && environment.integratedServicesData['odc']) {
-      const {State: state} = JSON.parse(environment.integratedServicesData['odc']);
+      const {state} = JSON.parse(environment.integratedServicesData['odc']);
       const styleClass = ODC_STATE_COLOR[state] ?? '';
       return {state, styleClass};
     }
@@ -131,4 +152,4 @@ const _parseTopology = (item) => {
   }
   return '-';
 }
-export {getTasksByFlp, parseObject, getTaskShortName, parseOdcStatusPerEnv};
+export {getTasksByFlp, getTasksByEpn, parseObject, getTaskShortName, parseOdcStatusPerEnv};

@@ -10,7 +10,10 @@
         "mocha": true
     },
     "ignorePatterns": [
-        "node_modules/"
+        "node_modules/",
+        "public/config.js",
+        "docs",
+        "test/demoData"
     ],
     "globals": {
         "Promise": true
@@ -51,10 +54,6 @@
             {
                 "allowSingleLine": false
             }
-        ],
-        "capitalized-comments": [
-            "error",
-            "always"
         ],
         "comma-dangle": [
             "error",
@@ -117,10 +116,6 @@
             {
                 "code": 120
             }
-        ],
-        "multiline-comment-style": [
-            "error",
-            "starred-block"
         ],
         "no-console": "error",
         "no-extra-parens": "error",
