@@ -52,9 +52,14 @@ describe('`Control Environment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('#buttonToSTART').click());
     await waitForCoreResponse(page, reqTimeout);
 
-    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
-    const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.state;
+    const controlAction = await page.evaluate(() => {
+      return {
+        kind: window.model.environment.itemControl.kind,
+        payload: window.model.environment.itemControl.payload
+      }
+    });
+    const environment = await page.evaluate(() => window.model.environment.item.payload);
+    const state = environment.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'RUNNING', 'Environment was expected to be running');
@@ -74,9 +79,14 @@ describe('`Control Environment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
     await waitForCoreResponse(page, reqTimeout);
 
-    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
-    const environment = await page.evaluate(() => window.model.environment.item);
-    const state = environment.payload.state;
+    const controlAction = await page.evaluate(() => {
+      return {
+        kind: window.model.environment.itemControl.kind,
+        payload: window.model.environment.itemControl.payload
+      }
+    });
+    const environment = await page.evaluate(() => window.model.environment.item.payload);
+    const state = environment.state;
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);
     assert.strictEqual(state, 'CONFIGURED', 'WRONG state of environment');
@@ -116,7 +126,12 @@ describe('`Control Environment` test-suite', async () => {
     await page.evaluate(() => document.querySelector('#buttonToFORCESHUTDOWN').click());
     await waitForCoreResponse(page, reqTimeout);
 
-    const controlAction = await page.evaluate(() => window.model.environment.itemControl);
+    const controlAction = await page.evaluate(() => {
+      return {
+        kind: window.model.environment.itemControl.kind,
+        payload: window.model.environment.itemControl.payload
+      }
+    });
     const location = await page.evaluate(() => window.location);
 
     assert.ok(controlAction.kind !== 'Failure', `Transition of workflow '${workflowToTest}' with revision: '${revision}' was not successful due to: ${controlAction.payload}`);

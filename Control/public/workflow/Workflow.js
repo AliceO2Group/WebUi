@@ -369,7 +369,7 @@ export default class Workflow extends Observable {
       const detectorIndex = keys.indexOf('detectors');
       if (detectorIndex >= 0) {
         this.isQcWorkflow = false;
-        keys.splice(detectorIndex, 1)
+        keys.splice(detectorIndex, 1);
       } else {
         this.flpSelection.init();
         this.isQcWorkflow = true;
@@ -636,7 +636,7 @@ export default class Workflow extends Observable {
       const allVariables = Object.assign({}, basicVariables, variables);
       Object.keys(allVariables)
         .filter((key) => allVariables[key])
-        .forEach((key) => allVariables[key] = allVariables[key].trim().replace(/\r?\n/g, ' '))
+        .forEach((key) => allVariables[key] = allVariables[key].trim().replace(/\r?\n/g, ' '));
       return {ok: true, message: '', variables: allVariables};
     }
   }

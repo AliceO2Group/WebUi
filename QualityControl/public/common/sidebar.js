@@ -132,7 +132,8 @@ const statusMenu = (model) =>
  */
 const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
   title: layout.name,
-  onclick: () => model.layout.setFilterToURL(layout.id, false),
+  href: `?page=layoutShow&layoutId=${layout.id}`,
+  onclick: (e) => model.router.handleLinkEvent(e),
   class: model.router.params.layoutId === layout.id ? 'selected' : '',
 }, [h('span', iconLayers()), model.sidebar && itemMenuText(layout.name)]);
 

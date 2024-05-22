@@ -18,6 +18,9 @@ import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
+import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
+
+const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
@@ -93,9 +96,10 @@ export default class Layout extends Observable {
   /**
    * Load data about a layouts by its id
    * @param {string} layoutId - id of the layout to be loaded
+   * @param {String} [tabName] - name of the tab that should be loaded
    * @returns {Promise} - whether retrieval of layout was success
    */
-  async loadItem(layoutId) {
+  async loadItem(layoutId, tabName) {
     this.item = null;
     if (!layoutId) {
       this.model.notification.show('Unable to load layout, it might have been deleted.', 'warning');
@@ -107,7 +111,13 @@ export default class Layout extends Observable {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
         this.setFilterFromURL();
-        this.selectTab(0);
+        let tabIndex = this.item.tabs
+          .findIndex((tab) => tab.name?.toLocaleUpperCase() === tabName?.toLocaleUpperCase());
+        if (tabIndex < 0) {
+          tabIndex = this.item.tabs
+            .findIndex((tab) => tabName?.toLocaleUpperCase().startsWith(tab.name?.toLocaleUpperCase()));
+        }
+        this.selectTab(tabIndex > -1 ? tabIndex : 0);
         this.setTabInterval(this.item.autoTabChange);
         this.notify();
       } else {
@@ -123,7 +133,7 @@ export default class Layout extends Observable {
    */
   setFilterFromURL() {
     const parameters = this.model.router.params;
-    ['PeriodName', 'PassName', 'RunNumber', 'RunType'].forEach((filterKey) => {
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
       if (parameters[filterKey]) {
         this.filter[filterKey] = decodeURI(parameters[filterKey]);
       }
@@ -133,19 +143,20 @@ export default class Layout extends Observable {
 
   /**
    * When the user updates the displayed Objects, the filters should be placed in the URL as well
-   * @param {string} layoutId - to be updated in URL
    * @param {boolean} isSilent - whether the route should be silent or not
    * @returns {undefined}
    */
-  setFilterToURL(layoutId, isSilent = true) {
-    const id = layoutId ? layoutId : this.model.router.params.layoutId;
-    let currentParameters = `?page=layoutShow&layoutId=${id}`;
-    Object.entries(this.filter)
-      .filter(([_, value]) => value)
-      .forEach(([key, value]) => {
-        currentParameters += `&${key}=${encodeURI(value)}`;
-      });
-    this.model.router.go(currentParameters, true, isSilent);
+  setFilterToURL(isSilent = true) {
+    const parameters = this.model.router.params;
+
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
+      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
+        delete parameters[filterKey];
+      } else {
+        parameters[filterKey] = encodeURI(this.filter[filterKey]);
+      }
+    });
+    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
   /**
@@ -240,7 +251,7 @@ export default class Layout extends Observable {
 
       const result = await this.model.services.layout.createNewLayout(layout);
       if (result.isFailure()) {
-        this.model.notification.show(result.error || 'Unable to create layout', 'danger', 2000);
+        this.model.notification.show(result.payload || 'Unable to create layout', 'danger', 2000);
         return;
       }
 
@@ -260,14 +271,14 @@ export default class Layout extends Observable {
     if (!this.item) {
       throw new Error('no layout to delete');
     }
-    const result = await this.model.services.layout.removeLayoutById(this.item.id);
-    if (result.isSuccess()) {
+    const layoutRemovalRemoteData = await this.model.services.layout.removeLayoutById(this.item.id);
+    if (layoutRemovalRemoteData.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been deleted.`, 'success', 1500);
       this.model.router.go('?page=layouts');
       this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
       this.editEnabled = false;
     } else {
-      this.model.notification.show('Unauthorized action - delete layout', 'danger', 1500);
+      this.model.notification.show(layoutRemovalRemoteData.payload, 'danger', 1500);
     }
     this.notify();
   }
@@ -337,8 +348,13 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   selectTab(index) {
-    setBrowserTabTitle(`${this.item.name}/${this.item.tabs[index].name}`);
+    const tabName = this.item.tabs[index].name;
+    const parameters = this.model.router.params;
 
+    setBrowserTabTitle(`${this.item.name}/${tabName}`);
+    this.model.router.go(buildQueryParametersString(parameters, { tab: tabName }), true, true);
+
+    this.setFilterFromURL();
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }

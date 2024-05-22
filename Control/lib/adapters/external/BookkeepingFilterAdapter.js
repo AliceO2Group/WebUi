@@ -56,7 +56,7 @@ class BookkeepingFilterAdapter {
     if (runTypesString) {
       filter += `&filter[runTypes]=${runTypesString}`;
     }
-    const definitionsString = BookkeepingFilterAdapter._parseValueIntoString(definitions)
+    const definitionsString = BookkeepingFilterAdapter._parseValueIntoString(definitions);
     if (definitionsString) {
       filter += `&filter[definitions]=${definitionsString}`;
     }

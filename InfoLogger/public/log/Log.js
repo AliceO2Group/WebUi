@@ -70,7 +70,7 @@ export default class Log extends Observable {
 
     this.dom = {
       table: ''
-    }
+    };
   }
 
   /**

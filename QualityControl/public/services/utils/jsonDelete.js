@@ -21,7 +21,7 @@ import { jsonFetch } from './jsonFetch.js';
  *
  * @rejects {Error<{message: String}>}
  */
-export const jsonDelete = async (endpoint, options) => {
+export const jsonDelete = async (endpoint, options = {}) => {
   if (options?.body && typeof options?.body === 'object') {
     options.body = JSON.stringify(options.body);
   }

@@ -350,5 +350,5 @@ describe('StatusService test suite', () => {
     });
   });
 
-  after(nock.cleanAll)
+  after(nock.cleanAll);
 });

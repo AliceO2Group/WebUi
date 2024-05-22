@@ -98,6 +98,21 @@ export default class LayoutService {
   }
 
   /**
+   * Method to retrieve a layout by specific parameters as query parameters
+   * @param {String} runDefinition - definition of the run
+   * @param {String} [pdpBeamType] - optional beam type
+   * @return {Layout} - layout identified if any
+   */
+  async getLayoutByQuery(runDefinition, pdpBeamType) {
+    let url = `/api/layout?runDefinition=${runDefinition}`;
+    if (pdpBeamType) {
+      url += `&pdpBeamType=${pdpBeamType}`;
+    }
+    const { result, ok } = await this.loader.get(url);
+    return ok ? result : null;
+  }
+
+  /**
    * Method to remove a layout by its Id
    * @param {string} layoutId - layout id to be removed by
    * @returns {RemoteData} - result within a RemoteData object
@@ -152,11 +167,10 @@ export default class LayoutService {
     that.notify();
 
     const { result, ok } = await this.loader.post('/api/layout', layout, true);
-
-    this.new = ok ? RemoteData.success(result) : RemoteData.failure({ message: result.error || result.message });
+    this.new = this.parseResult(result, ok);
     that.notify();
 
-    return this.parseResult(result, ok);
+    return this.new;
   }
 
   /**

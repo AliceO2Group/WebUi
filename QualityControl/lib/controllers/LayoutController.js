@@ -21,7 +21,8 @@ import {
   updateExpressResponseFromNativeError,
 } from './../errors/updateExpressResponseFromNativeError.js';
 import { InvalidInputError } from './../errors/InvalidInputError.js';
-import { UnauthorizedAccessError } from '../errors/UnauthorizedAccessError.js';
+import { UnauthorizedAccessError } from './../errors/UnauthorizedAccessError.js';
+import { NotFoundError } from './../errors/NotFoundError.js';
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -84,6 +85,35 @@ export class LayoutController {
   }
 
   /**
+   * HTTP GET endpoint for retrieving a single layout via query parameters. Either by:
+   * * name (e.g. CALIBRATIONS)
+   * * runDefinition + pdpBeamMode
+   * @param {Request} req - HTTP request object with "params" information on layout ID
+   * @param {Response} res - HTTP response object to provide layout information
+   * @returns {undefined}
+   */
+  async getLayoutByNameHandler(req, res) {
+    const { name, runDefinition, pdpBeamType } = req.query;
+    let layoutName = '';
+    if (name) {
+      layoutName = name;
+    } else if (runDefinition && pdpBeamType) {
+      layoutName = `${runDefinition}_${pdpBeamType}`;
+    } else if (runDefinition) {
+      layoutName = runDefinition;
+    } else {
+      updateExpressResponseFromNativeError(res, new InvalidInputError('Missing query parameters'));
+      return;
+    }
+    try {
+      const layout = await this._dataService.readLayoutByName(layoutName);
+      res.status(200).json(layout);
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
    * HTTP PUT endpoint for updating a single layout specified by:
    * * query.id for identification
    * * body - for layout data to be updated
@@ -99,8 +129,8 @@ export class LayoutController {
       } else if (!req.body) {
         updateExpressResponseFromNativeError(res, new InvalidInputError('Missing body content to update layout with'));
       } else {
-        const { personid, name } = req.session;
-        const { owner_name, owner_id } = await this._dataService.readLayout(id);
+        const { personid } = req.session;
+        const { owner_id } = await this._dataService.readLayout(id);
 
         if (Number(owner_id) !== Number(personid)) {
           updateExpressResponseFromNativeError(
@@ -108,16 +138,32 @@ export class LayoutController {
             new UnauthorizedAccessError('Only the owner of the layout can update it'),
           );
         } else {
-          const data = await LayoutDto.validateAsync(req.body);
-          const layout = await this._dataService.updateLayout(id, data);
+          let layoutProposed;
+          try {
+            layoutProposed = await LayoutDto.validateAsync(req.body);
+          } catch (error) {
+            updateExpressResponseFromNativeError(
+              res,
+              new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
+            );
+            return;
+          }
+
+          const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+          const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
+          if (layouts.length > 0 && layoutExistsWithName) {
+            updateExpressResponseFromNativeError(
+              res,
+              new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
+            );
+            return;
+          }
+          const layout = await this._dataService.updateLayout(id, layoutProposed);
           res.status(201).json({ id: layout });
         }
       }
     } catch (error) {
-      updateExpressResponseFromNativeError(
-        res,
-        new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
-      );
+      updateExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -157,9 +203,9 @@ export class LayoutController {
    * @returns {undefined}
    */
   async postLayoutHandler(req, res) {
-    let layout;
+    let layoutProposed;
     try {
-      layout = await LayoutDto.validateAsync(req.body);
+      layoutProposed = await LayoutDto.validateAsync(req.body);
     } catch (error) {
       updateExpressResponseFromNativeError(
         res,
@@ -168,7 +214,15 @@ export class LayoutController {
       return;
     }
     try {
-      const result = await this._dataService.createLayout(layout);
+      const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+      if (layouts.length > 0) {
+        updateExpressResponseFromNativeError(
+          res,
+          new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
+        );
+        return;
+      }
+      const result = await this._dataService.createLayout(layoutProposed);
       res.status(201).json(result);
     } catch (error) {
       updateExpressResponseFromNativeError(res, new Error('Unable to create new layout'));
@@ -195,20 +249,17 @@ export class LayoutController {
       }
 
       try {
-        const { personid, name } = req.session;
-        const { owner_name, owner_id } = await this._dataService.readLayout(id);
-
-        if (owner_name !== name || owner_id !== personid) {
-          updateExpressResponseFromNativeError(
-            res,
-            new UnauthorizedAccessError('Only the owner of the layout can update it'),
-          );
-        } else {
-          const layoutUpdated = await this._dataService.updateLayout(id, layout);
-          res.status(201).json(layoutUpdated);
-        }
+        await this._dataService.readLayout(id);
+      } catch (error) {
+        updateExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
+        return;
+      }
+      try {
+        const layoutUpdated = await this._dataService.updateLayout(id, layout);
+        res.status(201).json(layoutUpdated);
       } catch (error) {
         updateExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
+        return;
       }
     }
   }

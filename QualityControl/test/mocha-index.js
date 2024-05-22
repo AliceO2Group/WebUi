@@ -18,7 +18,7 @@ import configurationTestSuite from './lib/config/public-config.test.js';
 /**
  * Controllers
  */
-import { layoutControllerTestSuite } from './lib/controllers/layout-controller.test.js';
+import { layoutControllerTestSuite } from './lib/controllers/LayoutController.test.js';
 import { statusControllerTestSuite } from './lib/controllers/status-controller.test.js';
 
 /**
