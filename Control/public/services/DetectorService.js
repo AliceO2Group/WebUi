@@ -294,6 +294,6 @@ export default class DetectorService extends Observable {
    */
   areDetectorsAvailable(detectors, property) {
     const state = property === 'pfrAvailability' ? DetectorState.PFR_AVAILABLE : DetectorState.SOR_AVAILABLE;
-    return detectors.every((detector) => this._availability[detector][property] === state);
+    return detectors.every((detector) => this._availability?.[detector]?.[property] === state);
   }
 }
