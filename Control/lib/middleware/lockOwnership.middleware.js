@@ -15,17 +15,25 @@
  * Middleware function to check that the user has ownership of the locks for the given detectors
  *
  * @param {LockService} lockService - service to be used to check ownership of locks
- * @returns {(function(*, *, *): void)}
+ * @return {function(req, res, next): void} - middleware function
  */
-export function lockOwnershipMiddleware(lockService) {
+const lockOwnershipMiddleware = (lockService) => {
+  /**
+   * Middleware function to check that the user has ownership of the locks for the given detectors
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @param {Next} next - HTTP Next object to use if checks pass
+   * @return {void} continue if checks pass, 403 if checks fail
+   */
   return (req, res, next) => {
     const {username} = req.session;
-    const {detectors = []} = req.body;
-
-    if (!lockService.hasLocks(username, detectors)) {
+    const {detectors = []} = req.body ?? {};
+    if (detectors.length <= 0 || !lockService.hasLocks(username, detectors)) {
       res.status(403).json({message: `Action not allowed for user ${username} due to missing ownership of lock(s)`});
+    } else {
+      next();
     }
-
-    next();
   };
-}
+};
+
+exports.lockOwnershipMiddleware = lockOwnershipMiddleware
