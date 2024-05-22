@@ -167,6 +167,17 @@ class LockService {
   isLockTakenByUser(detector, userId, userName) {
     return this.lockedBy[detector] === userId && this.lockedByName[detector] === userName;
   }
+
+  /**
+   * Checks if the given user has the lock for the provided list of detectors
+   * @param {String} userName - of user to check lock ownership
+   * @param {Number} userId - person id of the user
+   * @param {Array<string>} detectors - list of detectors to check lock is owned by the user
+   * @returns {boolean}
+   */
+  hasLocks(userName, userId, detectors) {
+    return detectors.every((detector) => this.isLockTakenByUser(detector, userId, userName));
+  }
 }
 
 module.exports = {LockService};

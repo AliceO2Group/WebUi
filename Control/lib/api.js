@@ -15,6 +15,10 @@
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
+// middleware
+const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
+const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
+
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
@@ -50,7 +54,6 @@ const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.prot
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
 const {Role} = require('./common/role.enum.js');
-const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 
 if (!config.grpc) {
   throw new Error('Control gRPC Configuration is missing');
@@ -134,13 +137,18 @@ module.exports.setup = (http, ws) => {
   http.get('/runs/calibration/config', [
     minimumRoleMiddleware(Role.GLOBAL)
   ], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
-  
+
   http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController));
 
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
   http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
-  http.delete('/environment/:id', coreMiddleware, envCtrl.destroyEnvironmentHandler.bind(envCtrl));
+  http.delete('/environment/:id',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    lockOwnershipMiddleware(lockService, envService),
+    envCtrl.destroyEnvironmentHandler.bind(envCtrl)
+  );
 
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));

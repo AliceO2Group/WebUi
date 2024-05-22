@@ -111,6 +111,7 @@ class EnvironmentController {
   async destroyEnvironmentHandler(req, res) {
     const {id} = req.params ?? {};
     const {runNumber = '', keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
+
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
     } else {
