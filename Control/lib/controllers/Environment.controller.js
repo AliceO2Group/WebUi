@@ -18,8 +18,6 @@ const {InvalidInputError} = require('./../errors/InvalidInputError.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
-const LOG_FACILITY = 'cog/env-ctrl';
-
 /**
  * Controller for dealing with all API requests on environments from AliECS:
  */
@@ -113,12 +111,6 @@ class EnvironmentController {
   async destroyEnvironmentHandler(req, res) {
     const {id} = req.params ?? {};
     const {runNumber = '', keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
-
-    const {name} = req.session;
-    this._log.infoMessage(
-      `${name} requested => DESTROY_ENVIRONMENT ${force && 'by force (KILL)'}`,
-      {level: 1, facility: LOG_FACILITY, partition: id, run: runNumber}
-    );
 
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));

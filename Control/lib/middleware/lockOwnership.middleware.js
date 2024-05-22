@@ -11,13 +11,17 @@
  *  or submit itself to any jurisdiction.
  */
 
+const {grpcErrorToNativeError} = require("../errors/grpcErrorToNativeError");
+const {updateExpressResponseFromNativeError} = require("../errors/updateExpressResponseFromNativeError");
+
 /**
  * Middleware function to check that the user has ownership of the locks for the given detectors
  *
  * @param {LockService} lockService - service to be used to check ownership of locks
+ * @param {EnvironmentService} environmentService - service to be used to retrieve environment information
  * @return {function(req, res, next): void} - middleware function
  */
-const lockOwnershipMiddleware = (lockService) => {
+const lockOwnershipMiddleware = (lockService, environmentService) => {
   /**
    * Middleware function to check that the user has ownership of the locks for the given detectors
    * @param {Request} req - HTTP Request object
@@ -25,13 +29,19 @@ const lockOwnershipMiddleware = (lockService) => {
    * @param {Next} next - HTTP Next object to use if checks pass
    * @return {void} continue if checks pass, 403 if checks fail
    */
-  return (req, res, next) => {
-    const {username} = req.session;
-    const {detectors = []} = req.body ?? {};
-    if (detectors.length <= 0 || !lockService.hasLocks(username, detectors)) {
-      res.status(403).json({message: `Action not allowed for user ${username} due to missing ownership of lock(s)`});
-    } else {
-      next();
+  return async (req, res, next) => {
+    const {name, personid} = req.session;
+    const {id = ''} = req.body ?? {};
+
+    try {
+      const {includedDetectors = []} = await environmentService.getEnvironment(id);
+      if (!lockService.hasLocks(name, personid, includedDetectors)) {
+        res.status(403).json({message: `Action not allowed for user ${name} due to missing ownership of lock(s)`});
+      } else {
+        next();
+      }
+    } catch (error) {
+      updateExpressResponseFromNativeError(res, grpcErrorToNativeError(error));
     }
   };
 };

@@ -17,7 +17,7 @@ const config = require('./config/configProvider.js');
 
 // middleware
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
-const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.mjs');
+const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
@@ -137,16 +137,16 @@ module.exports.setup = (http, ws) => {
   http.get('/runs/calibration/config', [
     minimumRoleMiddleware(Role.GLOBAL)
   ], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
-  
+
   http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController));
 
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
   http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
-  http.delete('/environments/:id',
+  http.delete('/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
-    lockOwnershipMiddleware (lockService),
+    lockOwnershipMiddleware(lockService, envService),
     envCtrl.destroyEnvironmentHandler.bind(envCtrl)
   );
 
