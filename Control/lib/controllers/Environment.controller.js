@@ -114,9 +114,9 @@ class EnvironmentController {
     const {id} = req.params ?? {};
     const {runNumber = '', keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
 
-    const {username, personid, name} = req.session;
+    const {name} = req.session;
     this._log.infoMessage(
-      `${name} (${username} - ${personid}) requested => DESTROY_ENVIRONMENT ${force && 'by force (KILL)'}`,
+      `${name} requested => DESTROY_ENVIRONMENT ${force && 'by force (KILL)'}`,
       {level: 1, facility: LOG_FACILITY, partition: id, run: runNumber}
     );
 
