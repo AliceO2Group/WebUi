@@ -52,7 +52,6 @@ service Apricot {
     // Component configuration calls
     rpc ListComponents(Empty) returns (ComponentEntriesResponse) {}
     rpc ListComponentEntries(ListComponentEntriesRequest) returns (ComponentEntriesResponse) {}
-    rpc ListComponentEntryHistory(ComponentQuery) returns (ComponentEntriesResponse) {}
     rpc GetComponentConfiguration(ComponentRequest) returns (ComponentResponse) {}
     rpc GetComponentConfigurationWithLastIndex(ComponentRequest) returns (ComponentResponseWithLastIndex) {}
     rpc ResolveComponentQuery(ComponentQuery) returns (ComponentQuery) {}
@@ -97,7 +96,6 @@ message ComponentQuery {
     RunType runType = 2;
     string machineRole = 3;
     string entry = 4;
-    string timestamp = 5;
 }
 
 message ComponentRequest {
@@ -183,7 +181,6 @@ message ListComponentEntriesRequest {
         string path = 1;
         ComponentEntriesQuery query = 2;
     }
-    bool includeTimestamps = 3;
 }
 
 message ComponentEntriesResponse {
@@ -210,13 +207,11 @@ message ImportComponentConfigurationRequest {
     ComponentQuery query = 1;
     string payload = 2;
     bool newComponent = 3;
-    bool useVersioning = 4;
 }
 
 message ImportComponentConfigurationResponse {
     bool existingComponentUpdated = 1;
     bool existingEntryUpdated = 2;
-    int64 newTimestamp = 3;
 }
 
 message CRUCardsResponse {
