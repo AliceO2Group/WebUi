@@ -18,7 +18,6 @@ const sinon = require('sinon');
 
 const {LockController} = require('./../../../lib/controllers/Lock.controller.js');
 const {LockService} = require('./../../../lib/services/Lock.service.js');
-const {User} = require('./../../../lib/dtos/User.js');
 
 describe(`'LockController' test suite`, () => {
   const res = {
@@ -163,6 +162,20 @@ describe(`'LockController' test suite`, () => {
       }, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: 'Invalid action to apply on lock for detector: ABC'}));
+    });
+
+    it('should return 404 and not found error message for a detector that does not exist', () => {
+      lockController.actionLockHandler({
+        params: {
+          action: 'RELEASE',
+          detectorId: 'NONEXISTENT'
+        }, session: {
+          personid: 0,
+          name: 'Anonymous'
+        }
+      }, res);
+      assert.ok(res.status.calledWith(404));
+      assert.ok(res.json.calledWith({message: 'Detector NONEXISTENT not found in the list of detectors'}));
     });
   });
 

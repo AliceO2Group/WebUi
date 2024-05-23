@@ -13,7 +13,7 @@
 */
 
 const {DetectorLock} = require('./../dtos/DetectorLock.js');
-const {User} = require('./../dtos/User.js');
+const {NotFoundError} = require('../errors/NotFoundError.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError');
 
 const PADLOCK_UPDATE = 'padlock-update';
@@ -61,6 +61,17 @@ class LockService {
     return this._locksByDetector;
   }
 
+  /**
+   * Return the states of all detector locks currently used by the system grouped by the detector name as JSONs for HTTP responses
+   * @return {JSON{Object<String, DetectorLock>}}
+   */
+  locksByDetectorToJSON() {
+    const locksJson = {};
+    Object.entries(this._locksByDetector)
+      .forEach(([detector, lock]) => locksJson[detector] = lock.toJSON());
+    return locksJson;
+  }
+
   /** 
    * Method to try to acquire lock for a specified detector by a user
    * @param {String} detectorName - detector as defined by AliECS
@@ -73,10 +84,12 @@ class LockService {
   takeLock(detectorName, user, shouldForce = false) {
     const lock = this._locksByDetector[detectorName];
 
-    if (lock.isTaken()) {
+    if (!lock) {
+      throw new NotFoundError(`Detector ${detectorName} not found in the list of detectors`);
+    } else if (lock.isTaken()) {
       if (!lock.isOwnedBy(user) && !shouldForce) {
         throw new UnauthorizedAccessError(
-          `Unauthorized TAKE action for lock of detector ${detectorName} by user ${lock.owner.username}`
+          `Unauthorized TAKE action for lock of detector ${detectorName} by user ${user.username}`
         );
       }
       if (lock.isOwnedBy(user)) {
@@ -100,12 +113,13 @@ class LockService {
    */
   releaseLock(detectorName, user, shouldForce = false) {
     const lock = this._locksByDetector[detectorName]
-    if (lock.isFree()) {
+    if (!lock) {
+      throw new NotFoundError(`Detector ${detectorName} not found in the list of detectors`);
+    } else if (lock.isFree()) {
       return this._locksByDetector;
-    }
-    if (!lock.isOwnedBy(user) && !shouldForce) {
+    } else if (!lock.isOwnedBy(user) && !shouldForce) {
       throw new UnauthorizedAccessError(
-        `Unauthorized RELEASE action for lock of detector ${detectorName} by user ${lock.owner.username}`
+        `Unauthorized RELEASE action for lock of detector ${detectorName} by user ${user.username}`
       );
     }
     this._locksByDetector[detectorName].release();
@@ -123,8 +137,8 @@ class LockService {
    * @param {Array<string>} detectors - list of detectors to check lock is owned by the user
    * @returns {boolean}
    */
-  hasLocks(userName, userId, detectors) {
-    return detectors.every((detector) => this._locksByDetector[detector].isOwnedBy(new User(userName, userId)));
+  hasLocks(user, detectors) {
+    return detectors.every((detector) => this._locksByDetector[detector].isOwnedBy(user));
   }
 }
 
