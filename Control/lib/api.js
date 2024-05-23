@@ -117,8 +117,9 @@ module.exports.setup = (http, ws) => {
   );
   const statusController = new StatusController(statusService);
 
-  initializeData(apricotService, lockService);
   const intervals = new Intervals();
+
+  initializeData(apricotService, lockService);
   initializeIntervals(intervals, statusService, runService, bkpService);
 
   const coreMiddleware = [
@@ -169,7 +170,9 @@ module.exports.setup = (http, ws) => {
   // Lock Service
   http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
   http.put('/locks/:action/:detectorId/', lockController.actionLockHandler.bind(lockController));
-  http.put('/locks/force/:action/:detectorId', lockController.actionLockHandler.bind(lockController));
+  http.put('/locks/force/:action/:detectorId', 
+    minimumRoleMiddleware(Role.GLOBAL),
+    lockController.actionForceLockHandler.bind(lockController));
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
@@ -229,5 +232,4 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
 async function initializeData(apricotService, lockService) {
   await apricotService.init();
   lockService.setLockStatesForDetectors(apricotService.detectors);
-
 }

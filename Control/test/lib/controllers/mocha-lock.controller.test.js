@@ -16,13 +16,11 @@
 const assert = require('assert');
 const sinon = require('sinon');
 
-const {LockController} = require('../../../lib/controllers/Lock.controller.js');
-const {LockService} = require('../../../lib/services/Lock.service.js');
-const {LockAction} = require('./../../../lib/common/lock/lockAction.enum.js');
-const {Lock} = require('./../../../lib/dtos/Lock.js');
+const {LockController} = require('./../../../lib/controllers/Lock.controller.js');
+const {LockService} = require('./../../../lib/services/Lock.service.js');
 const {User} = require('./../../../lib/dtos/User.js');
 
-describe(`'LockController' test suite`, async () => {
+describe(`'LockController' test suite`, () => {
   const res = {
     status: sinon.stub().returnsThis(),
     json: sinon.stub()
@@ -30,120 +28,200 @@ describe(`'LockController' test suite`, async () => {
   const fakeBroadcastService = {
     broadcast: () => null
   };
-  const userA = new User('A', 0, ['global']);
   const lockService = new LockService(fakeBroadcastService);
   const lockController = new LockController(lockService);
 
-  describe(`'getLocksStateHandler' test suite`, async () => {
-    it('should successfully return the state of locks if service is enabled even if no detectors', async () => {
-      await lockController.getLocksStateHandler({}, res);
+  describe(`'getLocksStateHandler' test suite`, () => {
+    it('should successfully return the state of locks if service is enabled even if no detectors', () => {
+      lockController.getLocksStateHandler({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({}));
     });
 
-    it('should successfully return the state of locks if service is enabled and with detectors', async () => {
+    it('should successfully return the state of locks if service is enabled and with detectors', () => {
       lockService.setLockStatesForDetectors(['ABC', 'XYZ'])
-      await lockController.getLocksStateHandler({}, res);
-
+      lockController.getLocksStateHandler({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
-        ABC: new Lock('ABC'),
-        XYZ: new Lock('XYZ')
+        ABC: {
+          name: 'ABC',
+          state: 'FREE',
+          owner: undefined,
+        },
+        XYZ:  {
+          name: 'XYZ',
+          state: 'FREE',
+          owner: undefined,
+        },
       }));
     });
   });
 
-  describe(`'actionLockHandler' test suite`, async () => {
-    it('should successfully reply to a request to take lock for a specified detector', async () => {
-      await lockController.actionLockHandler({
+  describe(`'actionLockHandler' test suite`, () => {
+    it('should successfully respond to a request to take lock for a specified detector', () => {
+      lockController.actionLockHandler({
         params: {
-          action: LockAction.TAKE,
+          action: 'TAKE',
           detectorId: 'ABC',
         }, session: {
           personid: 0,
-          name: 'A',
+          name: 'Anonymous',
           access: ['global']
         }
       }, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         ABC: {
-          _name: "ABC",
-          _state: "TAKEN",
-          _user: {
-            _access: 'global',
-            _personid: 2,
-            _username: userA,
+          name: 'ABC',
+          state: 'TAKEN',
+          owner: {
+            personid: 0,
+            username: 'Anonymous',
           }
-        }
+        },
+        XYZ:  {
+          name: 'XYZ',
+          state: 'FREE',
+          owner: undefined,
+        },
       }));
     });
 
-    // it('should reply with error when an already held lock is requested to be taken by another user', async () => {
-    //   await lockController.actionLockHandler({
-    //     params: {
-    //       action: LockAction.TAKE,
-    //       detectorId: 'ABC',
-    //     }, session: {
-    //       personid: 1,
-    //       name: 'OneTime'
-    //     }
-    //   }, res);
-    //   assert.ok(res.status.calledWith(403));
-    //   assert.ok(res.json.calledWith({message: `Lock ABC is already held by Anonymous (id 0)`}));
-    // });
+    it('should return error when an already owned lock is requested to be taken by another user', () => {
+      lockController.actionLockHandler({
+        params: {
+          action: 'TAKE',
+          detectorId: 'ABC',
+        }, session: {
+          personid: 1,
+          name: 'NotAnonymous',
+        }
+      }, res);
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.json.calledWith({message: `Unauthorized TAKE action for lock of detector ABC by user NotAnonymous`}));
+    });
 
-    // it('should reply with error when an already held lock is requested to be released by another user', async () => {
-    //   await lockController.actionLockHandler({
-    //     params: {
-    //       action: LockAction.RELEASE,
-    //       detectorId: 'ABC',
-    //     }, session: {
-    //       personid: 1,
-    //       name: 'OneTime'
-    //     }
-    //   }, res);
-    //   assert.ok(res.status.calledWith(403));
-    //   assert.ok(res.json.calledWith({message: `Owner for ABC lock is Anonymous (id 0)`}));
-    // });
+    it('should reply with error when an already held lock is requested to be released by another user without force', () => {
+      lockController.actionLockHandler({
+        params: {
+          action: 'RELEASE',
+          detectorId: 'ABC',
+        }, session: {
+          personid: 1,
+          name: 'NotAnonymous',
+        }
+      }, res);
+      assert.ok(res.status.calledWith(403));
+      assert.ok(res.json.calledWith({message: `Unauthorized RELEASE action for lock of detector ABC by user NotAnonymous`}));
+    });
 
-    // it('should successfully reply to a request to release lock held by correct owner', async () => {
-    //   await lockController.actionLockHandler({
-    //     params: {
-    //       action: LockAction.RELEASE,
-    //       detectorId: 'ABC',
-    //     }, session: {
-    //       personid: 0,
-    //       name: 'Anonymous'
-    //     }
-    //   }, res);
-    //   assert.ok(res.status.calledWith(200));
-    //   assert.ok(res.json.calledWith({lockedBy: {}, lockedByName: {}}));
-    // });
+    it('should successfully reply to a request to release lock held by correct owner', () => {
+      lockController.actionLockHandler({
+        params: {
+          action: 'RELEASE',
+          detectorId: 'ABC',
+        }, session: {
+          personid: 0,
+          name: 'Anonymous'
+        }
+      }, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({
+        ABC: {
+          name: 'ABC',
+          state: 'FREE',
+          owner: undefined,
+        },
+        XYZ:  {
+          name: 'XYZ',
+          state: 'FREE',
+          owner: undefined,
+        },
+      }));
+    });
 
-    // it('should return InvalidInput error code for invalid request', async () => {
-    //   await lockController.actionLockHandler({
-    //     params: {
-    //       action: LockAction.RELEASE,
-    //     }, session: {
-    //       personid: 0,
-    //       name: 'Anonymous'
-    //     }
-    //   }, res);
-    //   assert.ok(res.status.calledWith(400));
-    //   assert.ok(res.json.calledWith({message: 'Missing detectorId'}));
+    it('should return InvalidInput error code for invalid request', () => {
+      lockController.actionLockHandler({
+        params: {
+          action: 'RELEASE',
+        }, session: {
+          personid: 0,
+          name: 'Anonymous'
+        }
+      }, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({message: 'Missing detectorId'}));
 
-    //   await lockController.actionLockHandler({
-    //     params: {
-    //       action: 'RELEASE-FORCE',
-    //       detectorId: 'ABC'
-    //     }, session: {
-    //       personid: 0,
-    //       name: 'Anonymous'
-    //     }
-    //   }, res);
-    //   assert.ok(res.status.calledWith(400));
-    //   assert.ok(res.json.calledWith({message: 'Invalid action to apply on lock for detector: ABC'}));
-    // });
+      lockController.actionLockHandler({
+        params: {
+          action: 'RELEASE-FORCE',
+          detectorId: 'ABC'
+        }, session: {
+          personid: 0,
+          name: 'Anonymous'
+        }
+      }, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({message: 'Invalid action to apply on lock for detector: ABC'}));
+    });
+  });
+
+  describe(`'actionForceLockHandler' test suite`, () => {
+    it('should successfully respond to a request to take lock by force for a specified detector', () => {
+      lockController.actionLockHandler({
+        params: {
+          action: 'TAKE',
+          detectorId: 'ABC',
+        }, session: {
+          personid: 0,
+          name: 'Anonymous',
+          access: ['global']
+        }
+      }, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({
+        ABC: {
+          name: 'ABC',
+          state: 'TAKEN',
+          owner: {
+            personid: 0,
+            username: 'Anonymous',
+          }
+        },
+        XYZ:  {
+          name: 'XYZ',
+          state: 'FREE',
+          owner: undefined,
+        },
+      }));
+      res.status.resetHistory()
+      res.json.resetHistory();
+      lockController.actionForceLockHandler({
+        params: {
+          action: 'TAKE',
+          detectorId: 'ABC',
+        }, session: {
+          personid: 1,
+          name: 'NotAnonymous',
+          access: ['global']
+        }
+      }, res);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({
+        ABC: {
+          name: 'ABC',
+          state: 'TAKEN',
+          owner: {
+            personid: 1,
+            username: 'NotAnonymous',
+          }
+        },
+        XYZ:  {
+          name: 'XYZ',
+          state: 'FREE',
+          owner: undefined,
+        },
+      }));
+    });
   });
 });

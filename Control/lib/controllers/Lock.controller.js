@@ -12,10 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
+const {InvalidInputError} = require('./../errors/InvalidInputError.js');
+const {DetectorLockAction} = require('./../common/lock/detectorLockAction.enum.js');
 const {Log} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
-const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {LockAction} = require('./../common/lock/lockAction.enum.js');
 const {User} = require('./../dtos/User.js');
 
 const ERROR_LOG_LEVEL = 99;
@@ -46,9 +46,8 @@ class LockController {
    */
   async getLocksStateHandler(_, res) {
     try {
-      res.status(200).json(this._lockService.locksByDetector);
+      res.status(200).json(this._lockService.locksByDetectorToJSON());
     } catch (error) {
-      this._logger.debug(error);
       updateExpressResponseFromNativeError(res, error);
     }
   }
@@ -66,24 +65,32 @@ class LockController {
       if (!detectorId) {
         throw new InvalidInputError('Missing detectorId');
       }
-      if (!action || !LockAction[action.toLocaleUpperCase()]) {
+      if (!action || !DetectorLockAction[action.toLocaleUpperCase()]) {
         throw new InvalidInputError(`Invalid action to apply on lock for detector: ${detectorId}`);
       }
       const user = new User(name, personid, access);
-      // TODO Name or username (apricot check as well)
-
-      if (action.toLocaleUpperCase() === LockAction.TAKE) {
-        const state = this._lockService.takeLock(detectorId, user, shouldForce);
-        console.log(state)
-        res.status(200).json(state);
-      } else if (action.toLocaleUpperCase() === LockAction.RELEASE) {
-        const state = this._lockService.releaseLock(detectorId, user, shouldForce);
-        res.status(200).json(state);
+      if (action.toLocaleUpperCase() === DetectorLockAction.TAKE) {
+        this._lockService.takeLock(detectorId, user, shouldForce);
+        res.status(200).json(this._lockService.locksByDetectorToJSON());
+      } else if (action.toLocaleUpperCase() === DetectorLockAction.RELEASE) {
+        this._lockService.releaseLock(detectorId, user, shouldForce);
+        res.status(200).json(this._lockService.locksByDetectorToJSON());
       }
     } catch (error) {
       this._logger.errorMessage(error, {level: ERROR_LOG_LEVEL, facility: LOG_FACILITY});
       updateExpressResponseFromNativeError(res, error);
     }
+  }
+
+  /**
+   * API - PUT endpoint for updating the state of a detector lock with force option
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @returns {void}
+   */
+  async actionForceLockHandler(req, res) {
+    req.params.shouldForce = true;
+    this.actionLockHandler(req, res);
   }
 }
 
