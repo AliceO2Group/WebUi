@@ -14,6 +14,7 @@
 const {Log} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
+const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 
 /**
  * Controller for dealing with all API requests on retrieving information on runs
@@ -58,6 +59,23 @@ class RunController {
       res.status(200).json(calibrationRuns);
     } catch (error) {
       this._logger.debug(error);
+      updateExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
+   * API - GET endpoint to request a re-init of the run service which will update calibration configurations
+   * The handler also must check that the user making the request is allowed for such operation
+   * @param {Request} _ - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @returns {void}
+   */
+  async refreshCalibrationRunsConfigurationHandler(_, res) {
+    try {
+      await this._runService.retrieveStaticConfigurations();
+      res.status(200).json({ok: true});
+    } catch (error) {
+      this._logger.errorMessage(error, {level: LOG_LEVEL.OPERATIONS, facility: 'cog/run-ctrl'})
       updateExpressResponseFromNativeError(res, error);
     }
   }

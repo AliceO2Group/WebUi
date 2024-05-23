@@ -22,7 +22,7 @@ import {h} from '/js/src/index.js';
  */
 export const coloredBadge = (value = '', colorMap = {}) => {
   const valueAsKey = value.split(' ').join('_');
-  return h('.badge.white', {
+  return h('.badge.white.f6', {
     class: `bg-${colorMap[valueAsKey] ?? 'gray'}`,
   }, value);
 };

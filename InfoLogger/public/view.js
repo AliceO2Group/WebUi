@@ -74,7 +74,7 @@ const logsTable = (model) =>
 */
 const inspectorSide = (model) =>
   h('aside.sidebar', {style: {width: model.inspectorEnabled ? '' : '0rem'}}, [
-    h('.sidebar-content.scroll-y', [
+    h('.sidebar-content.scroll-y#inspector-sidebar', [
       inspector(model)
     ])
   ]);

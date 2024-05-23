@@ -163,17 +163,13 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
-      await page.waitForTimeout(200);
-      const configuredState = await page.evaluate(() => {
-        return window.model.environment.item.payload.state;
-      });
+      await page.waitForTimeout(400);
+      const configuredState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
-      await page.waitForTimeout(200);
-      const standbyState = await page.evaluate(() => {
-        return window.model.environment.item.payload.state;
-      });
+      await page.waitForTimeout(400);
+      const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(standbyState, 'DEPLOYED');
     });
 

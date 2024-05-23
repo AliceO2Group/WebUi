@@ -57,6 +57,132 @@ class LockService {
     }
   }
 
+  setWs(ws) {
+    this.webSocket = ws;
+  }
+
+  /**
+   * Provides state of all locks
+   * @returns {object}
+   */
+  state() {
+    return {
+      lockedBy: this.lockedBy,
+      lockedByName: this.lockedByName
+    }
+  }
+
+  /** 
+   * Send to all users state of Pad via Websocket
+   */
+  broadcastLockState() {
+    this.webSocket.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state()));
+  }
+
+  /** 
+   * Method to try to acquire lock with given name
+   * @param {Request} req - expects lock name under req.body.name
+   * @param {Response} res
+   */
+  lockDetector(req, res) {
+    try {
+      const entity = req.body?.name;
+      const {personid, name} = req.session;
+      if (!entity) {
+        throw new Error('Unspecified lock entity');
+      }
+      if (entity in this.lockedBy) {
+        const lockUser = this.lockedBy[entity];
+        const lockUsername = this.lockedByName[entity];
+        if (lockUser === personid && name === lockUsername) {
+          res.status(200).json({
+            lockedBy: this.lockedBy,
+            lockedByName: this.lockedByName
+          });
+          return;
+        }
+        throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
+      }
+      this.lockedBy[entity] = req.session.personid;
+      this.lockedByName[entity] = req.session.name;
+      this._logger.info(`Lock ${entity} taken by ${req.session.name}`);
+      this.broadcastLockState();
+      res.status(201).json({
+        lockedBy: this.lockedBy,
+        lockedByName: this.lockedByName
+      });
+    } catch (error) {
+      errorHandler(`Unable to lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
+    }
+  }
+
+  /** 
+   * Method to try to release lock with given name
+   * @param {Request} req - expects lock name under req.body.name
+   * @param {Response} res
+  */
+  forceUnlock(req, res) {
+    try {
+      const entity = req.body?.name;
+      if (!entity) {
+        throw new Error('Unspecified lock entity');
+      }
+      if (!(entity in this.lockedBy)) {
+        res.status(200).json({
+          lockedBy: this.lockedBy,
+          lockedByName: this.lockedByName
+        });
+      }
+      if (!req.session.access.includes('admin')) {
+        throw new Error(`Insufficient permission`);
+      }
+      delete this.lockedBy[entity];
+      delete this.lockedByName[entity];
+      this._logger.info(`Lock ${entity} forced by ${req.session.name}`);
+      this.broadcastLockState();
+      res.status(200).json({
+        lockedBy: this.lockedBy,
+        lockedByName: this.lockedByName
+      });
+    } catch (error) {
+      errorHandler(`Unable to force lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
+    }
+  }
+
+  /** 
+   * Method to try to release lock with given name
+   * @param {Request} req - expects lock name under req.body.name
+   * @param {Response} res
+   */
+  unlockDetector(req, res) {
+    try {
+      const entity = req.body?.name;
+      if (!entity) {
+        throw new Error('Unspecified lock entity');
+      }
+      if (!(entity in this.lockedBy)) {
+        res.status(200).json({
+          lockedBy: this.lockedBy,
+          lockedByName: this.lockedByName
+        });
+        return;
+      }
+      if (this.lockedBy[entity] !== req.session.personid) {
+        throw new Error(`${entity} owner is ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
+      }
+      delete this.lockedBy[entity];
+      delete this.lockedByName[entity];
+      this._logger.info(`Lock ${entity} released by ${req.session.name}`);
+      this.broadcastLockState();
+      res.status(200).json({
+        lockedBy: this.lockedBy,
+        lockedByName: this.lockedByName
+      });
+    } catch (error) {
+      errorHandler(`Unable to give away lock to ${req.session.name}: ${error}`, res, 403, 'lockservice');
+    }
+  }
+
   /**
    * Return the states of all locks currently used by the system grouped by the detector name
    * @returns {Object<String, Lock>}
@@ -112,6 +238,17 @@ class LockService {
 
     this._broadcastService.broadcast(PADLOCK_UPDATE, this._locksByDetector);
     return this._locksByDetector;
+  }
+
+  /**
+   * Checks if the given user has the lock for the provided list of detectors
+   * @param {String} userName - of user to check lock ownership
+   * @param {Number} userId - person id of the user
+   * @param {Array<string>} detectors - list of detectors to check lock is owned by the user
+   * @returns {boolean}
+   */
+  hasLocks(userName, userId, detectors) {
+    return detectors.every((detector) => this.isLockTakenByUser(detector, userId, userName));
   }
 }
 

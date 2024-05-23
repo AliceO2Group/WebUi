@@ -14,6 +14,7 @@
 
 import {Observable, RemoteData, BrowserStorage} from '/js/src/index.js';
 import {STORAGE, PREFIX, ROLES} from './../workflow/constants.js';
+import {DetectorState} from './../common/enums/DetectorState.enum.js';
 
 /**
  * Model representing API Calls regarding Detectors
@@ -34,6 +35,11 @@ export default class DetectorService extends Observable {
     this._listRemote = RemoteData.notAsked();
     this.hostsByDetectorRemote = RemoteData.notAsked();
     this._selected = '';
+
+    /**
+     * @type {Object<String, Detector>}
+     */
+    this._availability = {};
   }
 
   /**
@@ -51,6 +57,12 @@ export default class DetectorService extends Observable {
       this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(
         this.hostsByDetectorRemote, this._listRemote.payload, this
       );
+      for (const detector of this._listRemote.payload) {
+        this._availability[detector] = {
+          pfrAvailability: DetectorState.UNDEFINED,
+          sorAvailability: DetectorState.UNDEFINED,
+        }
+      }
     }
     this.notify();
   }
@@ -250,5 +262,38 @@ export default class DetectorService extends Observable {
    */
   set selected(detector) {
     this._selected = detector;
+  }
+
+  /**
+   * Set the new values for DCS's properties availability which are updated via refresh page
+   * or websocket messages
+   * @param {Object<String, Object>} availability - json with detectors availability
+   * @return {void}
+   */
+  set availability(availability) {
+    for (const detector of Object.keys(availability)) {
+      this._availability[detector] = {
+        pfrAvailability: DetectorState[availability[detector].PfrAvailability] ?? DetectorState.UNDEFINED,
+        sorAvailability: DetectorState[availability[detector].SorAvailability] ?? DetectorState.UNDEFINED,
+      }
+    }
+  }
+
+  /**
+   * Return an instance of the current detectors availability
+   */
+  get availability() {
+    return this._availability;
+  }
+
+  /**
+   * Given a list of detectors, return if all are available for specified property (PFR/SOR)
+   * @param {Array<String>} detectors - list of detectors to check
+   * @param {String['pfrAvailability', 'sorAvailability']} property - which property to be checked
+   * @return {Boolean}
+   */
+  areDetectorsAvailable(detectors, property) {
+    const state = property === 'pfrAvailability' ? DetectorState.PFR_AVAILABLE : DetectorState.SOR_AVAILABLE;
+    return detectors.every((detector) => this._availability?.[detector]?.[property] === state);
   }
 }

@@ -46,7 +46,7 @@ const headerSpecific = (model) => {
     case 'layoutList': return layoutListHeader(model);
     case 'layoutShow': return layoutViewHeader(model);
     case 'objectTree': return objectTreeHeader(model);
-    case 'about': return frameworkInfoHeader(model);
+    case 'about': return frameworkInfoHeader();
     default: return null;
   }
 };

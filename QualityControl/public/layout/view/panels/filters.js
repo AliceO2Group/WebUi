@@ -19,28 +19,29 @@ import { h } from '/js/src/index.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const layoutFiltersPanel = (model) => h('.p2.flex-row', {
+const layoutFiltersPanel = ({ layout: layoutModel }) => h('.p2.flex-row.g2', {
   onremove: () => {
-    model.layout.filter = {};
+    layoutModel.filter = {};
   },
 }, [ // PeriodName, PassName, RunNumber, RunType
-  filter(model, 'RunNumber', 'runNumberLayoutFilter', 'number', '.w-20'),
-  filter(model, 'RunType', 'runTypeLayoutFilter', 'text', '.w-20'),
-  filter(model, 'PeriodName', 'periodNameLayoutFilter', 'text', '.w-20'),
-  filter(model, 'PassName', 'passNameLayoutFilter', 'text', '.w-20'),
-  updateFiltersButton(model),
+  updateFiltersButton(layoutModel),
+  filter(layoutModel, 'RunNumber', 'RunNumber (e.g. 546783)', 'runNumberLayoutFilter', 'number', '.w-20'),
+  filter(layoutModel, 'RunType', 'RunType (e.g. 2)', 'runTypeLayoutFilter', 'text', '.w-20'),
+  filter(layoutModel, 'PeriodName', 'PeriodName (e.g. LHC23c)', 'periodNameLayoutFilter', 'text', '.w-20'),
+  filter(layoutModel, 'PassName', 'PassName (e.g. apass2)', 'passNameLayoutFilter', 'text', '.w-20'),
 ]);
 
 /**
  * Builds a filter element that will allow the user to specify a field that should be applied when querying objects
- * @param {Model} model - root model of the application
+ * @param {LayoutModel} layoutModel - root model of the application
+ * @param {string} queryLabel - label to be used when querying storage service
  * @param {string} placeholder - value to be placed as holder for input
  * @param {string} key - string to be used as unique id
  * @param {string} type - type of the filter
  * @param {string} width - size of the filter
  * @returns {vnode} - virtual node element
  */
-const filter = (model, placeholder, key, type = 'text', width = '.w-10') =>
+const filter = (layoutModel, queryLabel, placeholder, key, type = 'text', width = '.w-10') =>
   h(`${width}`, [
     h('input.form-control', {
       type,
@@ -48,27 +49,33 @@ const filter = (model, placeholder, key, type = 'text', width = '.w-10') =>
       id: key,
       name: key,
       min: 0,
-      value: model.layout.filter[placeholder],
+      value: layoutModel.filter[queryLabel],
       oninput: (e) => {
         if (e.target.value) {
-          model.layout.filter[placeholder] = e.target.value;
+          layoutModel.filter[queryLabel] = e.target.value;
         } else {
-          delete model.layout.filter[placeholder];
+          delete layoutModel.filter[queryLabel];
         }
-        model.layout.notify();
+        layoutModel.notify();
+      },
+      onkeydown: ({ keyCode }) => {
+        if (keyCode === 13) {
+          layoutModel.setFilterToURL();
+          layoutModel.selectTab(layoutModel.tabIndex);
+        }
       },
     }),
   ]);
 
 /**
  * Button which will allow the user to update filter parameters after the input
- * @param {Model} model - root model of the application
+ * @param {LayoutModel} layoutModel - root model of the application
  * @returns {vnode} - virtual node element
  */
-const updateFiltersButton = (model) => h('.w-20.text-right', h('button.btn.btn-primary', {
+const updateFiltersButton = (layoutModel) => h('', h('button.btn.btn-primary', {
   onclick: () => {
-    model.layout.selectTab(model.layout.tabIndex);
-    model.layout.setFilterToURL();
+    layoutModel.setFilterToURL();
+    layoutModel.selectTab(layoutModel.tabIndex);
   },
 }, 'Update'));
 

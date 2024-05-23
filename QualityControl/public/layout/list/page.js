@@ -13,7 +13,8 @@
  */
 
 import { h } from '/js/src/index.js';
-import { iconBarChart, iconChevronBottom, iconChevronTop } from '/js/src/icons.js';
+import { iconChevronBottom, iconChevronTop, iconBadge } from '/js/src/icons.js';
+import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum.js';
 
 /**
  * Shows a list of layouts grouped by user and more
@@ -39,8 +40,7 @@ function createFolder(model, folder) {
   const layouts = folder.list;
   const searchBy = folder.searchInput;
   return h(
-    '.m2.shadow-level3.br3',
-    { style: 'display:flex; flex-direction:column;' },
+    '.m2.shadow-level3.br3.flex-column',
     [
       createHeaderOfFolder(model, folder),
       ' ',
@@ -57,9 +57,10 @@ function createFolder(model, folder) {
  */
 function createHeaderOfFolder(model, folder) {
   return h(
-    '.bg-gray-light.p2.object-selectable',
+    '.p2.object-selectable',
     {
       style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row',
+      class: folder.classList,
       onclick: () => model.folder.toggleFolder(folder.title),
     },
     [
@@ -82,16 +83,18 @@ function createHeaderOfFolder(model, folder) {
 function table(model, layouts, searchBy) {
   return [
     h(
-      'table.table',
+      'table.table.table-sm',
       [
         h(
           'thead',
           h(
             'tr',
             [
+              h('th', h('.text-center', 'Official')),
               h('th', 'Name'),
               h('th', 'Owner'),
               h('th', 'Description'),
+              h('th', h('.text-right', 'Actions')),
             ],
           ),
         ),
@@ -120,19 +123,27 @@ function rows(model, layouts, searchBy) {
       return list.filter((item) => item.name.match(searchBy))
         .map((layout) => {
           const key = `key${layout.name}`;
+          const { isOfficial } = layout;
+          const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+          const isOnline = model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : '';
           return h('tr', { key: key }, [
-            h('td.w-40', [
-              h('', { class: model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : '' }, [
-                iconBarChart(),
-                ' ',
+            h('td', {
+            }, isOfficial ? h('.primary.f4.text-center', [iconBadge(), ' ']) : ' '),
+            h('td.w-20', [
+              h('.flex-row.items-center', { class: isOnline }, [
                 h('a', {
                   href: `?page=layoutShow&layoutId=${layout.id}`,
                   onclick: (e) => model.router.handleLinkEvent(e),
                 }, layout.name),
               ]),
             ]),
-            h('td.w-20', layout.owner_name),
-            h('td.w-40', layout.description ?? '-'),
+            h('td.w-30', layout.owner_name),
+            h('td.w-30', layout.description ?? '-'),
+            h('td', h('.text-right', [
+              isMinimumGlobal && h('button.btn.btn-sm', {
+                onclick: () => model.layout.toggleOfficial(layout.id, !layout.isOfficial),
+              }, layout.isOfficial ? 'Un-official' : 'Official'),
+            ])),
           ]);
         });
     },

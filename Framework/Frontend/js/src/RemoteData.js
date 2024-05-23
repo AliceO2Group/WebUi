@@ -10,40 +10,59 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
+
+/**
+ * @template T
+ * @template P
+ * @template E
+ * @typedef ExhaustiveMatchClauses
+ *
+ * @property {() => T} NotAsked function called when applying `match` on not asked remote data
+ * @property {() => T} Loading function called when applying `match` on loading remote data
+ * @property {(payload: P) => T} Success function called when applying `match` on success remote data
+ * @property {(error: E) => T} Failure function called when applying `match` on failure remote data
+ */
+
+/**
+ * @template T, P, E
+ * @typedef {ExhaustiveMatchClauses<T, P, E>|(Partial<ExhaustiveMatchClauses<T, P, E>>&{Other: () => T})} MatchClauses
+ */
 
 /**
  * RemoteData is tagged union type representing remote data loaded via network.
  * http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html
+ *
+ * @template P
+ * @template E
+ *
  * @example
  * import {RemoteData} from '/js/src/index.js';
- * var item = RemoteData.NotAsked();
- * item.isNotAsked() === true
- * item.isLoading() === false
+ * var item = RemoteData.notAsked();
+ *
+ * // Using all branches explicitly
  * item.match({
  *   NotAsked: () => 1,
  *   Loading: () => 2,
  *   Success: (data) => 3,
  *   Failure: (error) => 4,
- * }) === 1
+ * }) === 1 // => true
+ *
+ * // Or using
+ * items.match({
+ *   Success: (data) => data,
+ *   Other: () => [] // NotAsked is included in here
+ * }).length > 0 // => true
  */
-class RemoteData {
+export class RemoteData {
   /**
-   * Private constructor, use factories.
-   * @param {string} kind
-   * @param {Any} payload
-   */
-  constructor(kind, payload) {
-    this.kind = kind;
-    this.payload = payload;
-  }
-
-  /**
-   * Find the matching kind in the keys of `clauses` and returns
-   * the computed value of the corresponding function.
+   * Find the matching kind in the keys of `clauses` and returns the computed value of the corresponding function.
    * An error is thrown if all clauses are not listed.
-   * @param {Object.<string,function>} clauses
-   * @return {Any} result of the function associated to clause
+   *
+   * @template T return type of the callbacks
+   *
+   * @param {MatchClauses} clauses the match clauses to apply
+   * @return {T} result of the function associated to clause
    * @example
    * import {RemoteData} from '/js/src/index.js';
    * var item = RemoteData.NotAsked();
@@ -54,7 +73,40 @@ class RemoteData {
    *   Failure: (error) => 4,
    * }) === 1
    */
-  match(clauses) {
+  match(clauses) { // eslint-disable-line no-unused-vars
+    throw new Error('Abstract function call');
+  }
+
+  /**
+   * Return a new remote data (shallow copy) build from transformation on the current data or error
+   *
+   * @template NP the type of the transformed success data
+   * @template NE the type of the transformed error
+   *
+   * @param {Partial<{Success: (payload: P) => NP, Failure: (error: E) => NE}>} transformation the transformation to apply to
+   *     concrete data transform from the current remote data to the new one
+   * @return {RemoteData<NP, NE>} the resulting remote data
+   */
+  apply(transformation) {
+    return this.match({
+      NotAsked: () => RemoteData.notAsked(),
+      Loading: () => RemoteData.loading(),
+      Success: (payload) => RemoteData.success(transformation.Success ? transformation.Success(payload) : payload),
+      Failure: (error) => RemoteData.failure(transformation.Failure ? transformation.Failure(error) : error),
+    });
+  }
+
+  /**
+   * Verify that the provided match clauses is exhaustive
+   *
+   * @param {MatchClauses} clauses the match clauses to validate
+   * @protected
+   */
+  _validateMatchClauses(clauses) {
+    if (clauses.Other) {
+      return;
+    }
+
     if (!clauses.NotAsked) {
       throw new Error('Missing clause `NotAsked`');
     }
@@ -67,93 +119,307 @@ class RemoteData {
     if (!clauses.Failure) {
       throw new Error('Missing clause `Failure`');
     }
-
-    return clauses[this.kind].call(undefined, this.payload);
   }
 
   /**
-   * Test is current kind is a `NotAsked`
+   * Returns the remote data payload if it applies
+   *
+   * @return {P|E|undefined} the remote data payload or error
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply}
+   */
+  get payload() {
+    return undefined;
+  }
+
+  /**
+   * Returns the kind of the remote data
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply}
+   */
+  get kind() {
+    throw new Error('Abstract function call');
+  }
+
+  /**
+   * Test if current kind is a `NotAsked`
    * @return {boolean}
-   * @example
-   * import {RemoteData} from '/js/src/index.js';
-   * var item = RemoteData.NotAsked();
-   * item.isNotAsked() === true
-   * item.isLoading() === false
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
   isNotAsked() {
-    return this.kind === 'NotAsked';
+    return false;
   }
 
   /**
    * Test is current kind is a `Loading`
    * @return {boolean}
    * @example
-   * import {RemoteData} from '/js/src/index.js';
-   * var item = RemoteData.NotAsked();
-   * item.isNotAsked() === true
-   * item.isLoading() === false
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
   isLoading() {
-    return this.kind === 'Loading';
+    return false;
   }
 
   /**
    * Test is current kind is a `Success`
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    * @return {boolean}
    */
   isSuccess() {
-    return this.kind === 'Success';
+    return false;
   }
 
   /**
-   * Test is current kind is a `Failure`
+   * States if current kind is a `Failure`
+   * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    * @return {boolean}
    */
   isFailure() {
-    return this.kind === 'Failure';
+    return false;
+  }
+
+  /**
+   * Factory to create new 'NotAsked' RemoteData kind
+   *
+   * @template P
+   * @template E
+   *
+   * @return {RemoteData<P, E>}
+   * @static
+   */
+  static notAsked() {
+    return new NotAskedRemoteData();
+  }
+
+  /**
+   * @deprecated use {@see RemoteData#notAsked}
+   */
+  static NotAsked() {
+    return RemoteData.notAsked();
+  }
+
+  /**
+   * Factory to create new 'Loading' RemoteData kind
+   *
+   * @template P
+   * @template E
+   *
+   * @return {RemoteData<P, E>}
+   * @static
+   */
+  static loading() {
+    return new LoadingRemoteData();
+  }
+
+  /**
+   * @deprecated use {@see RemoteData#loading}
+   * @static
+   */
+  static Loading() {
+    return RemoteData.loading();
+  }
+
+  /**
+   * Factory to create new 'Success' RemoteData kind
+   *
+   * @template P
+   * @template E
+   *
+   * @param {P} payload
+   * @return {RemoteData<P, E>}
+   * @static
+   */
+  static success(payload) {
+    return new SuccessRemoteData(payload);
+  }
+
+  /**
+   * @deprecated use {@see RemoteData#success}
+   * @static
+   */
+  static Success(payload) {
+    return RemoteData.success(payload);
+  }
+
+  /**
+   * Factory to create new 'Failure' RemoteData kind
+   *
+   * @template P
+   * @template E
+   *
+   * @param {E} error
+   * @return {RemoteData<P, E>}
+   * @static
+   */
+  static failure(error) {
+    return new FailureRemoteData(error);
+  }
+
+  /**
+   * @deprecated use {@see RemoteData#failure}
+   * @static
+   */
+  static Failure(payload) {
+    return RemoteData.failure(payload);
   }
 }
 
 /**
- * Factory to create new 'NotAsked' RemoteData kind
- * (NotAsked is not eslint compatible and deprecated, use notAsked)
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
+ * Remote data wrapper around a value that has not been asked yet
+ *
+ * @template P
+ * @template E
+ * @extends RemoteData<P, E>
  */
-RemoteData.notAsked = RemoteData.NotAsked = () => new RemoteData('NotAsked');
+export class NotAskedRemoteData extends RemoteData {
+  // eslint-disable-next-line require-jsdoc
+  /**
+   * @inheritDoc
+   */
+  match(clauses) {
+    super._validateMatchClauses(clauses);
+    return clauses.NotAsked ? clauses.NotAsked() : clauses.Other();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  isNotAsked() {
+    return true;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "NotAsked";
+  }
+}
 
 /**
- * Factory to create new 'Loading' RemoteData kind
- * (Loading is not eslint compatible and deprecated, use loading)
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
+ * Remote data wrapper around a value that is currently loading
+ *
+ * @template P
+ * @template E
+ * @extends RemoteData<P, E>
  */
-RemoteData.loading = RemoteData.Loading = () => new RemoteData('Loading');
+export class LoadingRemoteData extends RemoteData {
+  // eslint-disable-next-line require-jsdoc
+  /**
+   * @inheritDoc
+   */
+  match(clauses) {
+    super._validateMatchClauses(clauses);
+    return clauses.Loading ? clauses.Loading() : clauses.Other();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  isLoading() {
+    return true;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "Loading";
+  }
+}
 
 /**
- * Factory to create new 'Success' RemoteData kind
- * (Success is not eslint compatible and deprecated, use success)
- * @param {Any} payload
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
+ * Remote data wrapped around a value that has been successfully fetched
+ *
+ * @template P
+ * @template E
+ * @extends RemoteData<P, E>
  */
-RemoteData.success = RemoteData.Success = (payload) => new RemoteData('Success', payload);
+export class SuccessRemoteData extends RemoteData {
+  /**
+   * Constructor
+   * @param {P} payload the actual data
+   */
+  constructor(payload) {
+    super();
+    this._payload = payload;
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  /**
+   * @inheritDoc
+   */
+  match(clauses) {
+    super._validateMatchClauses(clauses);
+    return clauses.Success ? clauses.Success(this._payload) : clauses.Other();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  isSuccess() {
+    return true;
+  }
+
+  /**
+   * @inheritDoc
+   * @return {P} the payload
+   */
+  get payload() {
+    return this._payload;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "Success";
+  }
+}
 
 /**
- * Factory to create new 'Failure' RemoteData kind
- * (Failure is not eslint compatible and deprecated, use failure)
- * @param {Any} payload
- * @return {RemoteData}
- * @function
- * @memberof RemoteData
- * @static
+ * Remote data wrapper around the error received when trying to fetch data
+ *
+ * @template P
+ * @template E
+ * @extends RemoteData<P, E>
  */
-RemoteData.failure = RemoteData.Failure = (payload) => new RemoteData('Failure', payload);
+export class FailureRemoteData extends RemoteData {
+  /**
+   * The errors encountered while fetching data
+   * @param {E} error the error encountered while fetching data
+   */
+  constructor(error) {
+    super();
+    this._error = error;
+  }
 
-export default RemoteData;
+  // eslint-disable-next-line require-jsdoc
+  /**
+   * @inheritDoc
+   */
+  match(clauses) {
+    super._validateMatchClauses(clauses);
+    return clauses.Failure ? clauses.Failure(this._error) : clauses.Other();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  isFailure() {
+    return true;
+  }
+
+  /**
+   * @inheritDoc
+   * @return {E} the error
+   */
+  get payload() {
+    return this._error;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  get kind() {
+    return "Failure";
+  }
+}

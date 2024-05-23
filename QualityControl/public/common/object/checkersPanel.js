@@ -24,10 +24,10 @@ export default (checker) => h('.relative.p2.flex-column.scroll-y.g4', {
 }, [
   checkerValue('Checker:', checker.mCheckName),
   checkerValue('Detector:', checker.mDetectorName),
-  checkerValue('Quality Name:', checker.mQuality.mName),
-  checkerValue('Quality Lv.:', checker.mQuality.mLevel),
+  checkerValue('Quality Name:', checker.mQuality?.mName),
+  checkerValue('Quality Lv.:', checker.mQuality?.mLevel),
   checkerValue('Inputs:', checker.mInputs),
-  checkerValue('User Metadata:', checker.mUserMetadata),
+  checkerValue('User Metadata:', checker.mQuality?.mUserMetadata),
 ]);
 
 /**
@@ -37,6 +37,9 @@ export default (checker) => h('.relative.p2.flex-column.scroll-y.g4', {
  * @returns {vnode} - virtual node element
  */
 const checkerValue = (label, value) => {
+  if (value === null || value === undefined) {
+    value = {};
+  }
   switch (typeof value) {
     case 'string':
       value = value && value.trim() !== '' ? value : '-';

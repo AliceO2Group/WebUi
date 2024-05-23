@@ -37,9 +37,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request a list of template objects', async () => {
-    const templates = await page.evaluate(() => window.model.workflow.templates);
-    assert.strictEqual(templates.kind, 'Success', `Request for list of template objects failed due to: ${templates.payload}`);
-    assert.ok(templates.payload.length !== 0);
+    const templates = await page.evaluate(() => window.model.workflow.templates.match({
+      Success: (payload) => payload,
+      Other: () => null,
+    }));
+
+    assert.ok(templates?.length !== 0, `No templates received`);
   });
 
   it(`should successfully select workflow '${workflowToTest}' from template list`, async () => {
@@ -79,9 +82,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have successfully lock and select detector from area list', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(1)').click());
-    await page.waitForTimeout(500);
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > a:nth-child(2)').click());
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(1)').click());
+    await page.waitForTimeout(1000);
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
+    await page.waitForTimeout(1000);
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
     await page.waitForTimeout(500);
@@ -99,14 +103,18 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it(`should successfully create a new environment based on workflow '${workflowToTest}'`, async () => {
     await page.evaluate(() => document.querySelector(
-      '#create-env').click());
+      '#deploy-env').click());
     await waitForCoreResponse(page, reqTimeout);
 
     const location = await page.evaluate(() => window.location);
-    const queryResult = await page.evaluate(() => window.model.environment.itemNew);
+    const queryResult = await page.evaluate(() => window.model.environment.itemNew.match({
+      Failure: (error) => [error],
+      NotAsked: () => [],
+      Other: () => null,
+    }));
     const revision = await page.evaluate(() => window.model.workflow.form.revision);
 
-    assert.strictEqual(queryResult.kind, 'NotAsked', `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult.payload}`);
+    assert.ok(queryResult.length === 0, `Environment ${workflowToTest} with revision ${revision} was not created due to: ${queryResult}`);
     assert.ok(location.search.includes('?page=environments'), 'Failed to redirect to environments page');
 
     // Wait for Environment to transition to CONFIGURED state

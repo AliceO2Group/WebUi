@@ -78,11 +78,8 @@ describe('InfoLogger - FLP CI Suite Tests ', function() {
 
   it('should successfully click on Query button and retrieve results', async () => {
     await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > header > div > div:nth-child(2) > button').click());
-    await page.waitForTimeout(config.queryTime);
+    await page.waitForFunction(`window.model.log.queryResult !== 'Loading'`, {timeout: 1000})
     const result = await page.evaluate(() => window.model.log.queryResult);
-    if (result.kind === 'Loading') {
-      await page.waitForTimeout(config.queryTime);
-    } 
     assert.strictEqual(result.kind, 'Success', `Query action failed due to ${result.payload}`);
   });
 

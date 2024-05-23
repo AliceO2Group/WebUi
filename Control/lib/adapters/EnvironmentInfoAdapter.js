@@ -187,18 +187,18 @@ class EnvironmentInfoAdapter {
               total: 0,
               states: {},
               statuses: {},
-            }
+            };
           }
           flpDetectors[keyDetector].total++;
           flpDetectors[keyDetector].states[state] = (flpDetectors[keyDetector].states[state] + 1) || 1;
           flpDetectors[keyDetector].statuses[status] = (flpDetectors[keyDetector].statuses[status] + 1) || 1;
 
-          flpHosts.add(hostname)
+          flpHosts.add(hostname);
         } else if (isReadoutEnabled) {
           trgTasksTotal++;
           trgStates[state] = (trgStates[state] + 1) || 1;
           trgStatuses[status] = (trgStatuses[status] + 1) || 1;
-          trgHosts.add(hostname)
+          trgHosts.add(hostname);
         }
       }
     }

@@ -119,7 +119,7 @@ class StatusService {
         status = {ok: false, configured: true, isCritical: true, message: error.toString()};
       }
     }
-    const aliecs = Object.assign({status, name: 'AliECS Core'}, Service.fromObjectAsJson(configuration))
+    const aliecs = Object.assign({status, name: 'AliECS Core'}, Service.fromObjectAsJson(configuration));
     this._updateStatusMaps(STATUS_COMPONENTS_KEYS.ALIECS_CORE_KEY, status);
     return aliecs;
   }
@@ -165,7 +165,7 @@ class StatusService {
       this._updateStatusMaps(STATUS_COMPONENTS_KEYS.ALIECS_SERVICES_KEY, status);
       integServices = {
         ALL: {status}
-      }
+      };
     }
     return integServices;
   }
@@ -332,7 +332,7 @@ class StatusService {
     return {
       status,
       extras: {flpVersion, pdpVersion}
-    }
+    };
   }
 
   /**

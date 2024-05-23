@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "2.5.0",
+  "version": "2.6.1",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "contributors": [
@@ -31,22 +31,22 @@
     ]
   },
   "dependencies": {
-    "express": "^4.18.0",
+    "express": "^4.19.2",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.0",
     "kafkajs": "^2.2.0",
     "mithril": "1.1.7",
     "mysql": "^2.18.1",
     "openid-client": "^5.6.0",
-    "winston": "3.11.0",
-    "ws": "^8.14.2"
+    "winston": "3.13.0",
+    "ws": "^8.17.0"
   },
   "devDependencies": {
-    "eslint": "^8.55.0",
-    "mocha": "^10.2.0",
-    "nock": "13.4.0",
+    "eslint": "^8.57.0",
+    "mocha": "^10.4.0",
+    "nock": "13.5.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^21.5.0",
+    "puppeteer": "^22.6.2",
     "sinon": "17.0.0",
     "supertest": "^6.3.0"
   },

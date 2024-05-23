@@ -30,17 +30,17 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.5.0"
+    "@aliceo2/web-ui": "2.6.0"
   },
   "bundledDependencies": [
     "@aliceo2/web-ui"
   ],
   "devDependencies": {
-    "eslint": "^8.54.0",
+    "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0",
-    "mocha": "^10.2.0",
+    "mocha": "^10.4.0",
     "nyc": "^15.1.0",
-    "puppeteer": "^21.5.0",
+    "puppeteer": "^22.6.2",
     "sinon": "^17.0.0"
   },
   "bundleDependencies": [

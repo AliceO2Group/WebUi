@@ -25,12 +25,12 @@ if (!window.m) {
   throw new Error('mithril must be loaded into window');
 }
 if (!window.requestAnimationFrame) {
-  throw new Error('renderer must be run inside a browser envirnnement');
+  throw new Error('renderer must be run inside a browser environment');
 }
 
 /**
  * Register a callback to be called one time at browser render time if
- * the trigger was called before. Used to push new renderings efficitly.
+ * the trigger was called before. Used to push new renderings efficiently.
  * @param {function} fn - The callback to be registered
  * @return {function} The trigger to be called
  */

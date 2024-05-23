@@ -15,7 +15,7 @@
 // Design patterns
 export {default as Observable} from './Observable.js';
 export {default as EventEmitter} from './EventEmitter.js';
-export {default as RemoteData} from './RemoteData.js';
+export {RemoteData} from './RemoteData.js';
 
 // Template engine
 export {render, h, frameDebouncer, mount} from './renderer.js';

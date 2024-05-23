@@ -28,8 +28,16 @@ import {ROLES} from './../../workflow/constants.js';
  * @param {boolean} isAllowedToControl - value stipulating if user has enough permissions to control environment
  * @returns {vnode}
  */
-export const controlEnvironmentPanel = (environment, item, isAllowedToControl = false) =>  {
-  const {currentTransition} = item;
+export const controlEnvironmentPanel = (environment, item, isAllowedToControl = false) => {
+  const {currentTransition, includedDetectors, state} = item;
+  const {model} = environment;
+  const isSorAvailable =
+    item.userVars?.['dcs_enabled'] === 'true' ?
+      model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability')
+      :
+      true;
+  const isStable = !currentTransition;
+  const isConfigured = state === 'CONFIGURED';
   return h('', [
     h('.flex-row', [
       h('.w-30.flex-row.g2', {
@@ -39,8 +47,11 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
       ]),
       isAllowedToControl && h('.w-70.g4', {style: 'display: flex; justify-content: flex-end;'},
         [
+          isStable && isConfigured &&
+          !isSorAvailable && h('.danger', 'SOR Unavailable for one or more included detectors'),
           controlButton(
-            '.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED', Boolean(currentTransition)
+            '.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
+            Boolean(currentTransition)
           ), ' ',
           controlButton(
             '.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
@@ -49,9 +60,8 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
           controlButton(
             '.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
           ), ' ',
-
           shutdownEnvButton(environment, item, Boolean(currentTransition)),
-          killEnvButton(environment, item, Boolean(currentTransition))
+          killEnvButton(environment, item)
         ])
     ]),
     environment.itemControl.match({
@@ -74,13 +84,13 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
  * @param {boolean} isInTransition - if environment is currently transitioning
  * @return {vnode}
  */
-const controlButton = (buttonType, environment, item, label, type, stateToHide, isInTransition) =>  {
+const controlButton = (buttonType, environment, item, label, type, stateToHide, isInTransition) => {
   let title = label;
   if (isInTransition) {
     title = 'Environment is currently transitioning, please wait';
   } else if (item.state !== stateToHide) {
     title = `'${label}' cannot be used in state '${item.state}'`;
-  } 
+  }
 
   return h(`button.btn${buttonType}`,
     {

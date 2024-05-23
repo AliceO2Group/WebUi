@@ -55,7 +55,7 @@ export default class About extends Observable {
     for (const key in this.servicesPath) {
       this.retrieveServiceStatus(key, this.servicesPath[key])
     }
-    this.retrieveWsInfo();
+    // this.retrieveWsInfo();
   }
 
   /**
@@ -81,6 +81,9 @@ export default class About extends Observable {
       });
     } else {
       this._addServicesToMap(key, result);
+      if (key === INTEGRATED_SERVICE_LABEL) {
+        this.model.services.detectors.availability = result?.dcs?.extras?.detectors ?? {};
+      }
     }
     this.notify();
   }
