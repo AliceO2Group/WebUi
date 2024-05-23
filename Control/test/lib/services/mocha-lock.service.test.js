@@ -13,11 +13,11 @@
 */
 
 const assert = require('assert');
+const {DetectorLock} = require('./../../../lib/dtos/DetectorLock.js');
+const {DetectorLockState} = require('./../../../lib/common/lock/detectorLockState.enum.js');
 const {LockService} = require('./../../../lib/services/Lock.service.js');
 const {UnauthorizedAccessError} = require('../../../lib/errors/UnauthorizedAccessError.js');
-const {Lock} = require('./../../../lib/dtos/Lock.js');
 const {User} = require('./../../../lib/dtos/User.js');
-const {LockState} = require('./../../../lib/common/lock/lockState.enum.js');
 
 describe(`'LockService' test suite`, () => {
   let fakeBroadcast;
@@ -26,8 +26,8 @@ describe(`'LockService' test suite`, () => {
   let userA;
   let userB;
 
-  let lockAbc = new Lock('ABC');
-  let lockXyz = new Lock('XYZ')
+  let lockAbc = new DetectorLock('ABC');
+  let lockXyz = new DetectorLock('XYZ')
 
   before(() => {
     fakeBroadcast = {
@@ -49,73 +49,62 @@ describe(`'LockService' test suite`, () => {
       ABC: lockAbc,
       XYZ: lockXyz
     });
-    assert.strictEqual(lockService.locksByDetector['ABC'].state, LockState.FREE);
-    assert.strictEqual(lockService.locksByDetector['XYZ'].state, LockState.FREE);
+    assert.ok(lockService.locksByDetector['ABC'].isFree());
+    assert.ok(lockService.locksByDetector['XYZ'].isFree());
   });
 
-  it('should successfully take a lock for provided credentials user', () => {
-    lockAbc.assignUser(userA);
-    assert.deepStrictEqual(lockService.takeLock('ABC', userA), {
-      ABC: lockAbc,
-      XYZ: lockXyz
-    });
-
-    lockXyz.assignUser(userB);
-    assert.deepStrictEqual(lockService.takeLock('XYZ', userB), {
-      ABC: lockAbc,
-      XYZ: lockXyz
-    });
+  it('should successfully register lock to user that requests it', () => {
+    assert.ok(lockService.locksByDetector['ABC'].isFree());
+    lockService.takeLock('ABC', userA);
+    assert.ok(lockService.locksByDetector['ABC'].isTaken());
+    assert.ok(lockService.locksByDetector['ABC'].isOwnedBy(userA)); 
   });
 
   it('should successfully keep lock of user when they try to take the same lock', () => {
-    assert.deepStrictEqual(lockService.takeLock('XYZ', userB), {
-      ABC: lockAbc,
-      XYZ: lockXyz
-    });
+    assert.ok(lockService.locksByDetector['ABC'].isTaken());
+    lockService.takeLock('ABC', userA);
+    assert.ok(lockService.locksByDetector['ABC'].isTaken());
+    assert.ok(lockService.locksByDetector['ABC'].isOwnedBy(userA)); 
   });
 
   it('should throw error when a user attempts to take a lock that is already held by another user', () => {
     assert.throws(
       () => lockService.takeLock('ABC', userB),
-      new UnauthorizedAccessError(`Unauthorized TAKE action for lock of detector ABC`)
+      new UnauthorizedAccessError(`Unauthorized TAKE action for lock of detector ABC by user userA`)
     );
   });
 
   it('should successfully take a lock by force from another user', () => {
-    lockAbc.assignUser(userB);
-    assert.deepStrictEqual(lockService.takeLock('ABC', userB, true), {
-      ABC: lockAbc,
-      XYZ: lockXyz
-    });
+    assert.ok(lockService.locksByDetector['ABC'].isTaken());
+    assert.ok(!lockService.locksByDetector['ABC'].isOwnedBy(userB)); 
+    lockService.takeLock('ABC', userB, true);
+    assert.ok(lockService.locksByDetector['ABC'].isTaken());
+    assert.ok(lockService.locksByDetector['ABC'].isOwnedBy(userB)); 
   });
 
   it('should successfully release a lock for provided credentials user if user is currently owner', () => {
-    lockAbc.removeUser();
-    assert.deepStrictEqual(lockService.releaseLock('ABC', userB), {
-      ABC: lockAbc,
-      XYZ: lockXyz
-    });
+    assert.ok(lockService.locksByDetector['ABC'].isTaken());
+    lockService.releaseLock('ABC', userB);
+    assert.ok(lockService.locksByDetector['ABC'].isFree());
   });
 
   it('should successfully keep lock released when user tries to release a lock that is not owned', () => {
-    assert.deepStrictEqual(lockService.releaseLock('ABC', userB), {
-      ABC: lockAbc,
-      XYZ: lockXyz
-    });
+    assert.ok(lockService.locksByDetector['ABC'].isFree());
+    lockService.releaseLock('ABC', userB);
+    assert.ok(lockService.locksByDetector['ABC'].isFree());
   });
 
   it('should throw error when a user attempts to release a lock that is held by another user', () => {
+    lockService.takeLock('ABC', userA);
     assert.throws(
-      () => lockService.releaseLock('XYZ', userA),
-      new UnauthorizedAccessError(`Unauthorized RELEASE action for lock of detector XYZ`)
+      () => lockService.releaseLock('ABC', userB),
+      new UnauthorizedAccessError(`Unauthorized RELEASE action for lock of detector ABC by user userA`)
     );
   });
 
   it('should successfully release a lock by force from another user', () => {
-    lockXyz.removeUser();
-    assert.deepStrictEqual(lockService.releaseLock('XYZ', userA, true), {
-      ABC: lockAbc,
-      XYZ: lockXyz
-    });
+    assert.ok(lockService.locksByDetector['ABC'].isTaken());
+    lockService.releaseLock('ABC', userB, true);
+    assert.ok(lockService.locksByDetector['ABC'].isFree());
   });
 });
