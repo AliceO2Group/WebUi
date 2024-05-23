@@ -39,11 +39,6 @@ class DetectorLock {
      * @type {User}
      */
     this._owner = undefined;
-
-    /**
-     * @type {Date}
-     */
-    this._updatedAt = undefined;
   }
 
   /**
@@ -54,7 +49,6 @@ class DetectorLock {
   assignOwner(user) {
     this._state = DetectorLockState.TAKEN
     this._owner = user;
-    this._updatedAt = Date.now();
   }
 
   /**
@@ -64,7 +58,6 @@ class DetectorLock {
   release() {
     this._state = DetectorLockState.FREE;
     this._owner = undefined;
-    this._updatedAt = Date.now();
   }
 
   /**
@@ -72,7 +65,7 @@ class DetectorLock {
    * @param {User} user - to check ownership of
    * @return {Boolean}
    */
-  isOwner(user) {
+  isOwnedBy(user) {
     return this._owner.isSameUser(user);
   }
 
@@ -98,6 +91,18 @@ class DetectorLock {
    */
   get owner() {
     return this._owner;
+  }
+
+  /**
+   * Return a JSON representation of the lock that is to be passed via HTTP
+   * @return {JSON{DetectorLock}}
+   */
+  toJSON() {
+    return {
+      name: this._name,
+      state: this._state,
+      owner: this._owner?.toJSON(),
+    }
   }
 }
 

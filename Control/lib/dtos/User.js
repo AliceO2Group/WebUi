@@ -79,6 +79,17 @@ class User {
   get access() {
     return this._access;
   }
+
+  /**
+   * Returns the JSON representation of the user that is to be sent via HTTP
+   * @return {JSON{User}}
+   */
+  toJSON() {
+    return {
+      username: this._username,
+      personid: this._personid,
+    };
+  }
 }
 
 exports.User = User;
