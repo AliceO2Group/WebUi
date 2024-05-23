@@ -65,6 +65,7 @@ describe(`'LockController' test suite`, () => {
         }, session: {
           personid: 0,
           name: 'Anonymous',
+          username: 'anonymous',
           access: ['global']
         }
       }, res);
@@ -75,7 +76,8 @@ describe(`'LockController' test suite`, () => {
           state: 'TAKEN',
           owner: {
             personid: 0,
-            username: 'Anonymous',
+            fullName: 'Anonymous',
+            username: 'anonymous',
           }
         },
         XYZ:  {
@@ -94,6 +96,7 @@ describe(`'LockController' test suite`, () => {
         }, session: {
           personid: 1,
           name: 'NotAnonymous',
+          username: 'notanonymous',
         }
       }, res);
       assert.ok(res.status.calledWith(403));
@@ -108,6 +111,7 @@ describe(`'LockController' test suite`, () => {
         }, session: {
           personid: 1,
           name: 'NotAnonymous',
+          username: 'notanonymous',
         }
       }, res);
       assert.ok(res.status.calledWith(403));
@@ -121,7 +125,8 @@ describe(`'LockController' test suite`, () => {
           detectorId: 'ABC',
         }, session: {
           personid: 0,
-          name: 'Anonymous'
+          name: 'Anonymous',
+          username: 'anonymous',
         }
       }, res);
       assert.ok(res.status.calledWith(200));
@@ -145,7 +150,8 @@ describe(`'LockController' test suite`, () => {
           action: 'RELEASE',
         }, session: {
           personid: 0,
-          name: 'Anonymous'
+          name: 'Anonymous',
+          username: 'anonymous',
         }
       }, res);
       assert.ok(res.status.calledWith(400));
@@ -157,7 +163,8 @@ describe(`'LockController' test suite`, () => {
           detectorId: 'ABC'
         }, session: {
           personid: 0,
-          name: 'Anonymous'
+          fullName: 'Anonymous',
+          username: 'anonymous',
         }
       }, res);
       assert.ok(res.status.calledWith(400));
@@ -171,7 +178,8 @@ describe(`'LockController' test suite`, () => {
           detectorId: 'NONEXISTENT'
         }, session: {
           personid: 0,
-          name: 'Anonymous'
+          fullName: 'Anonymous',
+          username: 'anonymous',
         }
       }, res);
       assert.ok(res.status.calledWith(404));
@@ -187,7 +195,8 @@ describe(`'LockController' test suite`, () => {
           detectorId: 'ABC',
         }, session: {
           personid: 0,
-          name: 'Anonymous',
+          username: 'anonymous',
+          fullName: 'Anonymous',
           access: ['global']
         }
       }, res);
@@ -198,7 +207,8 @@ describe(`'LockController' test suite`, () => {
           state: 'TAKEN',
           owner: {
             personid: 0,
-            username: 'Anonymous',
+            fullName: 'Anonymous',
+            username: 'anonymous',
           }
         },
         XYZ:  {
@@ -216,6 +226,7 @@ describe(`'LockController' test suite`, () => {
         }, session: {
           personid: 1,
           name: 'NotAnonymous',
+          username: 'notanonymous',
           access: ['global']
         }
       }, res);
@@ -226,7 +237,8 @@ describe(`'LockController' test suite`, () => {
           state: 'TAKEN',
           owner: {
             personid: 1,
-            username: 'NotAnonymous',
+            fullName: 'NotAnonymous',
+            username: 'notanonymous',
           }
         },
         XYZ:  {

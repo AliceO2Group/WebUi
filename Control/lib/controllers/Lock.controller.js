@@ -60,7 +60,7 @@ class LockController {
    */
   async actionLockHandler(req, res) {
     const {action, detectorId, shouldForce = false} = req.params;
-    const {personid, name, access} = req.session;
+    const {personid, name, username, access} = req.session;
     try {
       if (!detectorId) {
         throw new InvalidInputError('Missing detectorId');
@@ -68,7 +68,7 @@ class LockController {
       if (!action || !DetectorLockAction[action.toLocaleUpperCase()]) {
         throw new InvalidInputError(`Invalid action to apply on lock for detector: ${detectorId}`);
       }
-      const user = new User(name, personid, access);
+      const user = new User(username, name, personid, access);
       if (action.toLocaleUpperCase() === DetectorLockAction.TAKE) {
         this._lockService.takeLock(detectorId, user, shouldForce);
         res.status(200).json(this._lockService.locksByDetectorToJSON());

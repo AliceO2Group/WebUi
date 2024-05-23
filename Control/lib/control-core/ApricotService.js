@@ -16,7 +16,6 @@ const assert = require('assert');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
-const User = require('./../dtos/User.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
 const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
@@ -215,7 +214,7 @@ class ApricotService {
   async updateCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      const {username, personid, access} = req.session;
+      const {username, personid} = req.session;
       data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 

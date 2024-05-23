@@ -34,8 +34,8 @@ describe(`'LockService' test suite`, () => {
       broadcast: () => null
     };
     lockService = new LockService(fakeBroadcast);
-    userA = new User('userA', 1, 'admin');
-    userB = new User('userB', 2, 'global');
+    userA = new User('usera', 'userA', 1, 'admin');
+    userB = new User('userB', 'userB', 2, 'global');
   });
 
   it('should successfully return an empty state of locks initially as there are no detectors', () => {

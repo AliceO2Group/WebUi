@@ -20,31 +20,50 @@ class User {
   /**
    * Initializing an environment configuration
    * @param {String} username - username of the user
+   * @param {String} fullName - full name to be displayed for the user
    * @param {Number} personid - id of the user
    * @param {Array<String>|String} access - list of access roles of the user
    */
-  constructor(username, personid, access) {
+  constructor(username, fullName, personid, access) {
     /**
      * @type {String}
      */
     this._username = username;
+
     /**
-     * @type {number}
+     * @type {String}
+     */
+    this._fullName = fullName;
+
+    /**
+     * @type {Number}
      */
     this._personid = personid;
+    
     /**
-     * @type {string}
+     * @type {Arrat<String>}
      */
-    this._access = access;
+    this._accessList = [];
+    if (typeof access === 'string') {
+      this._accessList = access.split(',');
+    } else if (Array.isArray(access)) {
+      this._accessList = access;
+    }
   }
 
   /**
    * Checks if the given user is considered admin
    * @param {User} user - user type object as defined by webui/framework
-   * @returns {boolean}
+   * @returns {Boolean}
    */
-  static isAdmin(user) {
-    return Boolean(user?.access.includes('admin'));
+  static isAdmin({access = ''}) {
+    let accessList = [];
+    if (typeof access === 'string') {
+      accessList = access.split(',');
+    } else if (Array.isArray(access)) {
+      accessList = access;
+    }
+    return Boolean(accessList.includes('admin'));
   }
 
   /**
@@ -58,15 +77,23 @@ class User {
 
   /**
    * Returns the username
-   * @returns {string}
+   * @returns {String}
    */
   get username() {
     return this._username;
   }
 
   /**
+   * Returns the full name of the user
+   * @returns {String}
+   */
+  get fullName() {
+    return this._fullName;
+  }
+
+  /**
    * Returns the personid of the user
-   * @returns {number}
+   * @returns {Number}
    */
   get personid() {
     return this._personid;
@@ -74,7 +101,7 @@ class User {
 
   /**
    * Returns the access granted to this user
-   * @returns {string}
+   * @returns {String}
    */
   get access() {
     return this._access;
@@ -87,6 +114,7 @@ class User {
   toJSON() {
     return {
       username: this._username,
+      fullName: this._fullName,
       personid: this._personid,
     };
   }

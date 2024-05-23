@@ -31,12 +31,12 @@ const lockOwnershipMiddleware = (lockService, environmentService) => {
    * @return {void} continue if checks pass, 403 if checks fail
    */
   return async (req, res, next) => {
-    const {name, personid, access} = req.session;
+    const {name, username, personid, access} = req.session;
     const {id = ''} = req.body ?? {};
 
     try {
       const {includedDetectors = []} = await environmentService.getEnvironment(id);
-      if (!lockService.hasLocks(new User(name, personid, access), includedDetectors)) {
+      if (!lockService.hasLocks(new User(username, name, personid, access), includedDetectors)) {
         res.status(403).json({message: `Action not allowed for user ${name} due to missing ownership of lock(s)`});
       } else {
         next();

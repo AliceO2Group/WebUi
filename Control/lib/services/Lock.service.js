@@ -89,7 +89,7 @@ class LockService {
     } else if (lock.isTaken()) {
       if (!lock.isOwnedBy(user) && !shouldForce) {
         throw new UnauthorizedAccessError(
-          `Unauthorized TAKE action for lock of detector ${detectorName} by user ${user.username}`
+          `Unauthorized TAKE action for lock of detector ${detectorName} by user ${user.fullName}`
         );
       }
       if (lock.isOwnedBy(user)) {
@@ -119,7 +119,7 @@ class LockService {
       return this._locksByDetector;
     } else if (!lock.isOwnedBy(user) && !shouldForce) {
       throw new UnauthorizedAccessError(
-        `Unauthorized RELEASE action for lock of detector ${detectorName} by user ${user.username}`
+        `Unauthorized RELEASE action for lock of detector ${detectorName} by user ${user.fullName}`
       );
     }
     this._locksByDetector[detectorName].release();
@@ -139,6 +139,16 @@ class LockService {
    */
   hasLocks(user, detectors) {
     return detectors.every((detector) => this._locksByDetector[detector].isOwnedBy(user));
+  }
+
+  /**
+   * Method to check if lock is taken by specific user
+   * @param {String} detector - detector for which check should be done
+   * @param {User} user - user to check if owns the lock
+   */
+  isLockOwnedByUser(detector, user) {
+    const lock = this.locksByDetector[detector];
+    return Boolean(lock?.isOwnedBy(user));
   }
 }
 
