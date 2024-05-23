@@ -185,8 +185,8 @@ class ApricotService {
   async saveCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      const {username, personid, access} = req.session;
-      data.user = new User(username, personid, access);
+      const {username, personid} = req.session;
+      data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 
       const {payload: configurations} = await this.apricotProxy[ListRuntimeEntries]({component: COMPONENT});
@@ -216,11 +216,10 @@ class ApricotService {
     try {
       const data = req.body;
       const {username, personid, access} = req.session;
-      const user = new User(username, personid, access);
-      data.user = user;
+      data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
+      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, data.user);
       await this.apricotProxy['SetRuntimeEntry']({
         component: COMPONENT,
         key: envConfigToSave.id,
