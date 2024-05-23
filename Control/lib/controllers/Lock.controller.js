@@ -15,7 +15,8 @@
 const {Log} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {LockActions} = require('./../common/lockActions.enum.js');
+const {LockAction} = require('./../common/lock/lockAction.enum.js');
+const {User} = require('./../dtos/User.js');
 
 const ERROR_LOG_LEVEL = 99;
 const LOG_FACILITY = 'cog/log-ctrl';
@@ -29,7 +30,7 @@ class LockController {
    * @param {LockService} lockService - service to use to build information on runs
    */
   constructor(lockService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lock-ctrl`);
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/${LOG_FACILITY}`);
 
     /**
      * @type {LockService}
@@ -43,9 +44,9 @@ class LockController {
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
-  async getLocksState(_, res) {
+  async getLocksStateHandler(_, res) {
     try {
-      res.status(200).json(this._lockService.state());
+      res.status(200).json(this._lockService.locksByDetector);
     } catch (error) {
       this._logger.debug(error);
       updateExpressResponseFromNativeError(res, error);
@@ -58,22 +59,25 @@ class LockController {
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
-  async actionLock(req, res) {
+  async actionLockHandler(req, res) {
     const {action, detectorId, shouldForce = false} = req.params;
-    const {personid, name} = req.session;
+    const {personid, name, access} = req.session;
     try {
       if (!detectorId) {
         throw new InvalidInputError('Missing detectorId');
       }
-      if (!action || !LockActions[action.toLocaleUpperCase()]) {
+      if (!action || !LockAction[action.toLocaleUpperCase()]) {
         throw new InvalidInputError(`Invalid action to apply on lock for detector: ${detectorId}`);
       }
+      const user = new User(name, personid, access);
+      // TODO Name or username (apricot check as well)
 
-      if (action.toLocaleUpperCase() === LockActions.TAKE) {
-        const state = this._lockService.takeLock(detectorId, personid, name, shouldForce);
+      if (action.toLocaleUpperCase() === LockAction.TAKE) {
+        const state = this._lockService.takeLock(detectorId, user, shouldForce);
+        console.log(state)
         res.status(200).json(state);
-      } else if (action.toLocaleUpperCase() === LockActions.RELEASE) {
-        const state = this._lockService.releaseLock(detectorId, personid, name, shouldForce);
+      } else if (action.toLocaleUpperCase() === LockAction.RELEASE) {
+        const state = this._lockService.releaseLock(detectorId, user, shouldForce);
         res.status(200).json(state);
       }
     } catch (error) {
@@ -83,4 +87,4 @@ class LockController {
   }
 }
 
-module.exports = {LockController};
+exports.LockController = LockController;

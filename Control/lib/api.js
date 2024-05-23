@@ -69,9 +69,6 @@ module.exports.setup = (http, ws) => {
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
 
-  const lockService = new LockService(ws);
-  const lockController = new LockController(lockService);
-
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
 
@@ -80,6 +77,9 @@ module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
+
+  const lockService = new LockService(ws);
+  const lockController = new LockController(lockService);
 
   const envService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService);
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
@@ -109,6 +109,7 @@ module.exports.setup = (http, ws) => {
   );
   const statusController = new StatusController(statusService);
 
+  initializeData(apricotService, lockService);
   const intervals = new Intervals();
   initializeIntervals(intervals, statusService, runService, bkpService);
 
@@ -149,8 +150,9 @@ module.exports.setup = (http, ws) => {
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
-  http.get('/locks', lockController.getLocksState.bind(lockController));
-  http.put('/locks/:action/:detectorId/:shouldForce?', lockController.actionLock.bind(lockController));
+  http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
+  http.put('/locks/:action/:detectorId/', lockController.actionLockHandler.bind(lockController));
+  http.put('/locks/force/:action/:detectorId', lockController.actionLockHandler.bind(lockController));
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
@@ -200,4 +202,15 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
       CALIBRATION_RUNS_REFRESH_RATE
     );
   }
+}
+
+/**
+ * Function to initialize in order dependent services
+ * @param {ApricotService} apricotService - request initial set of data from AliECS/Apricot
+ * @param {LockService} lockService - initialize service with data from Apricot
+ */
+async function initializeData(apricotService, lockService) {
+  await apricotService.init();
+  lockService.setLockStatesForDetectors(apricotService.detectors);
+
 }
