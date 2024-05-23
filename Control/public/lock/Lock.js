@@ -35,11 +35,9 @@ export default class Lock extends Observable {
    * @param {string} name Lock name/entity
    * @returns {string} Name and surname as provided from SSO
    */
-  getOwner(name) {
-    if (this.padlockState.kind === 'Success' &&
-      this.padlockState.payload.lockedBy &&
-      name in this.padlockState.payload.lockedByName) {
-      return this.padlockState.payload.lockedByName[name];
+  getOwner(detector) {
+    if (this.isLocked(detector)) {
+      return this.padlockState.payload.lockedByName[detector];
     } else {
       return '';
     }
@@ -47,13 +45,12 @@ export default class Lock extends Observable {
 
   /**
    * State whether given lock is in locked state
-   * @param {string} name Lock name/entity
+   * @param {string} detector - detector name
    * @returns {bool}
    */
-  isLocked(name) {
+  isLocked(detector) {
     return this.padlockState.kind === 'Success' &&
-      this.padlockState.payload.lockedBy &&
-      name in this.padlockState.payload.lockedBy;
+      this.padlockState.payload.lockedBy?.[detector] !== undefined;
   }
 
   /**
@@ -61,9 +58,9 @@ export default class Lock extends Observable {
    * @param {string} name Lock name/entity
    * @returns {bool}
    */
-  isLockedByMe(name) {
-    return this.isLocked(name) &&
-      this.model.session.personid === this.padlockState.payload.lockedBy[name];
+  isLockedByMe(detector) {
+    return this.isLocked(detector) &&
+      this.model.session.personid === this.padlockState.payload.lockedBy[detector];
   }
   /**
    * Set padlock state from ajax or websocket as a RemoteData
