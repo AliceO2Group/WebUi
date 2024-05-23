@@ -13,11 +13,11 @@
 */
 
 /**
- * Available lock actions for users
+ * Available lock states
  */
-const LockAction = Object.freeze({
-  TAKE: 'TAKE',
-  RELEASE: 'RELEASE',
+const DetectorLockState = Object.freeze({
+  TAKEN: 'TAKEN',
+  FREE: 'FREE',
 });
 
-exports.LockAction = LockAction;
+exports.DetectorLockState = DetectorLockState;
