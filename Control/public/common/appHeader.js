@@ -19,7 +19,7 @@ import {h, iconPerson} from '/js/src/index.js';
  * @param {Object} model
  * @return {vnode}
  */
-export default (model) => h('.flex-grow text-left',
+export default (model) => h('.text-left',
   {
     style: 'width: 15em'
   },
