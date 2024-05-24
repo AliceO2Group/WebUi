@@ -112,10 +112,20 @@ message Ev_IntegratedServiceEvent {
   string payload = 8;                 // any additional payload, depending on the integrated service; there is no schema, it can even be the raw return structure of a remote API call
 }
 
+message Ev_RunEvent {
+  string environmentId = 1;
+  uint32 runNumber = 2;
+  string state = 3;
+  string error = 4;
+  string transition = 5;
+  OpStatus transitionStatus = 6;
+  map<string, string> vars = 7;
+}
+
 message Event {
   int64 timestamp = 1;
   reserved 2 to 10;
-  reserved 16 to 100;
+  reserved 17 to 100;
 
   oneof Payload {
     Ev_EnvironmentEvent environmentEvent                 = 11;
@@ -123,6 +133,7 @@ message Event {
     Ev_RoleEvent roleEvent                               = 13;
     Ev_CallEvent callEvent                               = 14;
     Ev_IntegratedServiceEvent integratedServiceEvent     = 15;
+    Ev_RunEvent runEvent                                 = 16;
 
     Ev_MetaEvent_FrameworkEvent frameworkEvent           = 101;
     Ev_MetaEvent_MesosHeartbeat mesosHeartbeatEvent      = 102;
