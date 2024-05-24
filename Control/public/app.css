@@ -99,3 +99,13 @@
 .flex-end { justify-content: flex-end; }
 .flex-grow-1 { flex-grow: 1; }
 .break-space-cell { white-space: break-spaces; text-align: center !important; }
+
+.table-ecs { border-collapse: collapse; width: 100%; border-radius: 0; }
+.table-ecs thead { background-color: var(--color-gray-light); color: var(--color-black); }
+.table-ecs thead { border-bottom: 1px solid var(--color-gray); }
+.table-ecs th, .table-ecs td { padding: 0.625em; }
+.table-ecs th { font-weight: bold; }
+.table-ecs tbody tr:nth-child(odd) { background-color: var(--color-white); }
+.table-ecs tbody tr:nth-child(even) { background-color: var(--color-gray-lighter); }
+.table-ecs-sm th, .table-ecs-sm td { padding: 0.3em; }
+.table-ecs-primary>th, .table-ecs-primary>td { background-color: var(--color-primary); color: var(--color-white); }

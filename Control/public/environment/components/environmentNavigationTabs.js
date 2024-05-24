@@ -69,7 +69,7 @@ export const environmentNavigationTabs = (model, item) => {
   };
   const {parameters} = currentPageAndParameters();
   return [
-    h('ul.nav.nav-tabs', [
+    h('ul.nav.nav-tabs.m0', [
       Object.entries(panels).map(([id, {name}]) => {
         const isActive = parameters.panel === id;
         return h('li.nav-item',
@@ -264,7 +264,7 @@ const addTaskDetailsTable = (environment, task) => h('tr', environment.task.list
  * @returns {vnode}
  */
 const environmentGeneralInfoContent = (environmentModel, environment) => {
-  const {userVars = {}, rootRole, hardware = {epn: {}}} = environment;
+  const {currentTransition = '-', userVars = {}, createdWhen, rootRole, hardware = {epn: {}}} = environment;
   const {epn: {info}} = hardware;
   const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
 
@@ -272,9 +272,13 @@ const environmentGeneralInfoContent = (environmentModel, environment) => {
     '',
     [
       h('.flex-column.', [
+        rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-'),
+        rowForCard('Transitioning:', currentTransition),
+        rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
+        rowForCard('RUN Started:', parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),
+        rowForCard('RUN Ended:', parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')),
         rowForCard('Run Type:', userVars.run_type),
         rowForCard('Template:', rootRole),
-        rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-'),
         rowForCard('DCS:', parseObject(userVars, 'dcs_enabled')),
         rowForCard('Data Distribution (FLP):', parseObject(userVars, 'dd_enabled')),
         rowForCard('ODC:', odcState, {valueClasses: [odcStyle]}),
