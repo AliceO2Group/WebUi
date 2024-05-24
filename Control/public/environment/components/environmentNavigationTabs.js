@@ -69,7 +69,7 @@ export const environmentNavigationTabs = (model, item) => {
   };
   const {parameters} = currentPageAndParameters();
   return [
-    h('ul.nav.nav-tabs', [
+    h('ul.nav.nav-tabs.m0', [
       Object.entries(panels).map(([id, {name}]) => {
         const isActive = parameters.panel === id;
         return h('li.nav-item',
