@@ -15,6 +15,7 @@
 import {h} from '/js/src/index.js';
 import {environmentActionPanel} from './components/environmentActionPanel.js';
 import {environmentNavigationTabs} from './components/environmentNavigationTabs.js';
+import {environmentTasksSummaryTable} from './components/environmentTasksSummaryTable.js';
 import {monitoringRunningPlotsPanel} from './components/monitoringRunningPlotsPanel.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -52,13 +53,13 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
  */
 const showEnvironmentPage = (model, environmentInfo) => {
   const {state, currentTransition = undefined} = environmentInfo;
-  const isStable = !currentTransition;
-  const isRunning = state === 'RUNNING';
+  const isRunningStable = !currentTransition && state === 'RUNNING';
 
-  return h('.w-100.m2.flex-column', [
+  return h('.w-100.p1.g2.flex-column', [
     environmentHeader(environmentInfo),
     environmentActionPanel(model, environmentInfo),
-    isRunning && isStable && monitoringRunningPlotsPanel(environmentInfo),
+    isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
+    environmentTasksSummaryTable(environmentInfo),
     environmentNavigationTabs(model, environmentInfo),
   ]);
 };
