@@ -32,7 +32,7 @@ const alertPanel = (servicesByCategory, model) => {
   }
   if (numberOfCriticalErrors > 0) {
 
-    return h('a.w-20.mh2.flex-row.flex-end', {
+    return h('a.mh2.flex-row.flex-end', {
       href: '?page=about',
       onclick: (e) => model.router.handleLinkEvent(e)
     },
