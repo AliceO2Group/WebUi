@@ -13,16 +13,16 @@
 */
 
 import {h, iconClipboard} from '/js/src/index.js';
-import {di} from '../../utilities/di.js';
+import {di} from './../../utilities/di.js';
 
 /**
  * Copy passed value to the user's clipboard
  * @param {string} value - value to be copied to user's clipboard
  * @returns {vnode}
  */
-export const copyToClipboardButton = (value) => {
+export const copyToClipboardIcon = (value) => {
   if (isContextSecure()) {
-    return h('button.btn.btn-sm', {
+    return h('span.actionable-icon.items-center.flex-row', {
       title: 'Copy value to clipboard',
       onclick: () => {
         navigator.clipboard.writeText(value);
