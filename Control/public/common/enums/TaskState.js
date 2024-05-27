@@ -28,17 +28,21 @@ export const FlpTaskState = Object.freeze({
  */
 export const FLP_TASK_STATES = Object.values(FlpTaskState)
   .sort((a, b) => {
-    if (a === 'ERROR') {
+    if (a === FlpTaskState.ERROR) {
       return -1;
-    } else if (b === 'ERROR') {
+    } else if (b === FlpTaskState.ERROR) {
       return 1;
-    } else if (a === 'RUNNING') {
+    } else if (a === FlpTaskState.RUNNING) {
       return -1;
-    } else if (b === 'RUNNING') {
+    } else if (b === FlpTaskState.RUNNING) {
       return 1;
-    } else if (a === 'CONFIGURED') {
+    } else if (a === FlpTaskState.CONFIGURED) {
       return -1;
-    } else if (b === 'CONFIGURED') {
+    } else if (b === FlpTaskState.CONFIGURED) {
+      return 1;
+    } else if (a === FlpTaskState.STANDBY) {
+      return -1;
+    } else if (b === FlpTaskState.STANDBY) {
       return 1;
     } else {
       return a.localeCompare(b);
@@ -69,17 +73,21 @@ export const EpnTaskState = Object.freeze({
  */
 export const EPN_TASK_STATES = Object.values(EpnTaskState)
   .sort((a, b) => {
-    if (a === 'ERROR') {
+    if (a === EpnTaskState.ERROR) {
       return -1;
-    } else if (b === 'ERROR') {
+    } else if (b === EpnTaskState.ERROR) {
       return 1;
-    } else if (a === 'RUNNING') {
+    } else if (a === EpnTaskState.RUNNING) {
       return -1;
-    } else if (b === 'RUNNING') {
+    } else if (b === EpnTaskState.RUNNING) {
       return 1;
-    } else if (a === 'READY') {
+    } else if (a === EpnTaskState.READY) {
       return -1;
-    } else if (b === 'READY') {
+    } else if (b === EpnTaskState.READY) {
+      return 1;
+    } else if (a === EpnTaskState.IDLE) {
+      return -1;
+    } else if (b === EpnTaskState.IDLE) {
       return 1;
     } else {
       return a.localeCompare(b);
