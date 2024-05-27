@@ -53,7 +53,7 @@ class EnvironmentService {
    * Parses the environment and prepares the information for GUI purposes
    * @param {string} id - environment id as defined by AliECS Core
    * @param {string} taskSource - Source of where to request tasks from: FLP, EPN, QC, TRG
-   * @return {EnvironmentDetails}
+   * @return {EnvironmentInfo}
    * @throws {Error}
    */
   async getEnvironment(id, taskSource) {
