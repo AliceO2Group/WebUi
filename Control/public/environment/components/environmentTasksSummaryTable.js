@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
-import {HARDWARE_COMPONENTS, HardwareComponent} from '../../common/enums/HardwareComponent.js';
-import {TASK_STATES, TaskStateClassAssociation} from './../../common/enums/TaskState.js';
+import {HARDWARE_COMPONENTS_WITHOUT_EPN, HardwareComponent} from '../../common/enums/HardwareComponent.js';
+import {FLP_TASK_STATES, getTaskStateClassAssociation} from './../../common/enums/TaskState.js';
 import {h} from '/js/src/index.js';
 
 /**
@@ -29,7 +29,7 @@ export const environmentTasksSummaryTable = (environment) => {
       detectorsTableHeaderRow(hardware),
     ]),
     h('tbody', [
-      TASK_STATES.map((state) => rowForTaskSate(state, hardware)),
+      FLP_TASK_STATES.map((state) => rowForTaskSate(state, hardware)),
     ])
   ]);
 };
@@ -41,7 +41,8 @@ export const environmentTasksSummaryTable = (environment) => {
  */
 const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
   h('th', 'Tasks Summary'),
-  HARDWARE_COMPONENTS
+  HARDWARE_COMPONENTS_WITHOUT_EPN
+    .filter(component => component !== 'EPN')
     .map((component) => {
       const componentInLowerCase = component.toLocaleLowerCase();
       const colspan = hardware[componentInLowerCase]?.detectorCounters
@@ -61,7 +62,7 @@ const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
 const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}) => h('tr', [
   h('th', 'States\\Detectors'),
   Object.keys(detectorCounters).map((detector) => h('th.text-center', detector)),
-  h('th.text-center', {colspan: HARDWARE_COMPONENTS.length - 1}, ''), // empty cell to align with the rest of the table
+  h('th.text-center', {colspan: HARDWARE_COMPONENTS_WITHOUT_EPN.length - 1}, ''), // empty cell to align with the rest of the table
 ]);
 
 /**
@@ -71,10 +72,10 @@ const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}) => h('tr',
  * @return {vnode} - component with an HTML table row
  */
 const rowForTaskSate = (state, hardware) => {
-  const taskClass = TaskStateClassAssociation[state];
+  const taskClass = getTaskStateClassAssociation(state);
   return h('tr', [
     h(`td${taskClass}`, state),
-    HARDWARE_COMPONENTS
+    HARDWARE_COMPONENTS_WITHOUT_EPN
       .map((component) => {
         const componentInLowerCase = component.toLocaleLowerCase();
         if (componentInLowerCase === 'flp') {

@@ -16,6 +16,7 @@ import {h} from '/js/src/index.js';
 import {environmentActionPanel} from './components/environmentActionPanel.js';
 import {environmentNavigationTabs} from './components/environmentNavigationTabs.js';
 import {environmentTasksSummaryTable} from './components/environmentTasksSummaryTable.js';
+import {environmentEpnTasksSummaryTable} from './components/environmentEpnTasksSummaryTable.js';
 import {monitoringRunningPlotsPanel} from './components/monitoringRunningPlotsPanel.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -59,7 +60,10 @@ const showEnvironmentPage = (model, environmentInfo) => {
     environmentHeader(environmentInfo),
     environmentActionPanel(model, environmentInfo),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
-    environmentTasksSummaryTable(environmentInfo),
+    h('.flex-row.g2', [
+      environmentTasksSummaryTable(environmentInfo),
+      environmentEpnTasksSummaryTable(environmentInfo),
+    ]),
     environmentNavigationTabs(model, environmentInfo),
   ]);
 };
