@@ -11,7 +11,7 @@
  *  or submit itself to any jurisdiction.
  */
 
-export const TaskState = Object.freeze({
+export const FlpTaskState = Object.freeze({
   ERROR: 'ERROR',
   RUNNING: 'RUNNING',
   STANDBY: 'STANDBY',
@@ -26,7 +26,7 @@ export const TaskState = Object.freeze({
  * List of possible states for a task sorted alphabetically with ERROR first and RUNNING second and CONFIGURED third
  * @return {Array<String>} list of task states
  */
-export const TASK_STATES = Object.values(TaskState)
+export const FLP_TASK_STATES = Object.values(FlpTaskState)
   .sort((a, b) => {
     if (a === 'ERROR') {
       return -1;
@@ -45,13 +45,64 @@ export const TASK_STATES = Object.values(TaskState)
     }
   });
 
-export const TaskStateClassAssociation = Object.freeze({
-  ERROR: '.danger',
-  RUNNING: '.success',
-  CONFIGURED: '.primary',
-  STANDBY: '',
-  DONE: '',
-  MIXED: '',
-  UNKNOWN: '',
-  INVARIANT: '',
+export const EpnTaskState = Object.freeze({
+  IDLE: 'IDLE',
+  EXITING: 'EXITING',
+  RESETTING_DEVICE: 'RESETTING DEVICE',
+  INITIALIZING_DEVICE: 'INITIALIZING DEVICE',
+  INITIALIZED: 'INITIALIZED',
+  BINDING: 'BINDING',
+  BOUND: 'BOUND',
+  CONNECTING: 'CONNECTING',
+  DEVICE_READY: 'DEVICE READY',
+  INITIALIZING_TASK: 'INITIALIZING TASK',
+  READY: 'READY',
+  RUNNING: 'RUNNING',
+  RESETTING_TASK: 'RESETTING TASK',
+  OK: 'OK',
+  ERROR: 'ERROR',
 });
+
+/**
+ * List of possible states for a task sorted alphabetically with ERROR first and RUNNING second and CONFIGURED third
+ * @return {Array<String>} list of task states
+ */
+export const EPN_TASK_STATES = Object.values(EpnTaskState)
+  .sort((a, b) => {
+    if (a === 'ERROR') {
+      return -1;
+    } else if (b === 'ERROR') {
+      return 1;
+    } else if (a === 'RUNNING') {
+      return -1;
+    } else if (b === 'RUNNING') {
+      return 1;
+    } else if (a === 'READY') {
+      return -1;
+    } else if (b === 'READY') {
+      return 1;
+    } else {
+      return a.localeCompare(b);
+    }
+  });
+
+/**
+ * Given a hardware component task state, return the class associated with the state
+ * @param {FlpTaskState|EpnTaskState} state - task state  to get the class for
+ * @return {String} - CSS class to be used in the HTML
+ */
+export function getTaskStateClassAssociation(state) {
+  switch (state) {
+    case FlpTaskState.ERROR:
+    case EpnTaskState.ERROR:
+      return '.danger';
+    case FlpTaskState.RUNNING:
+    case EpnTaskState.RUNNING:
+      return '.success';
+    case FlpTaskState.CONFIGURED:
+    case EpnTaskState.READY:
+      return '.primary';
+    default:
+      return '';
+  }
+}

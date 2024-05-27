@@ -32,3 +32,19 @@ export const HARDWARE_COMPONENTS = Object.keys(HardwareComponent)
       return a.localeCompare(b);
     }
   });
+
+/**
+ * List of possible hardware components sorted alphabetically with FLP first
+ * @return {Array<String>} list of hardware components
+ */
+export const HARDWARE_COMPONENTS_WITHOUT_EPN = Object.keys(HardwareComponent)
+  .filter((component) => component !== HardwareComponent.EPN)
+  .sort((a, b) => {
+    if (a === 'FLP') {
+      return -1;
+    } else if (b === 'FLP') {
+      return 1;
+    } else {
+      return a.localeCompare(b);
+    }
+  });
