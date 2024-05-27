@@ -23,7 +23,7 @@ export const TaskState = Object.freeze({
 });
 
 /**
- * List of possible states for a task sorted alphabetically with ERROR first and RUNNING second
+ * List of possible states for a task sorted alphabetically with ERROR first and RUNNING second and CONFIGURED third
  * @return {Array<String>} list of task states
  */
 export const TASK_STATES = Object.values(TaskState)
@@ -36,6 +36,10 @@ export const TASK_STATES = Object.values(TaskState)
       return -1;
     } else if (b === 'RUNNING') {
       return 1;
+    } else if (a === 'CONFIGURED') {
+      return -1;
+    } else if (b === 'CONFIGURED') {
+      return 1;
     } else {
       return a.localeCompare(b);
     }
@@ -44,7 +48,7 @@ export const TASK_STATES = Object.values(TaskState)
 export const TaskStateClassAssociation = Object.freeze({
   ERROR: '.danger',
   RUNNING: '.success',
-  CONFIGURED: '.warning',
+  CONFIGURED: '.primary',
   STANDBY: '',
   DONE: '',
   MIXED: '',

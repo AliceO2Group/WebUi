@@ -97,7 +97,7 @@ module.exports.setup = (http, ws) => {
   aliecsReqHandler.setWs(ws);
   aliecsReqHandler.workflowService = workflowService;
 
-  const envCache = new EnvCache(ctrlService);
+  const envCache = new EnvCache(ctrlService, envService);
   envCache.setWs(ws);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
