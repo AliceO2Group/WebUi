@@ -60,7 +60,7 @@ const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
  * @return {vnode} - component with an HTML table row
  */
 const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}) => h('tr', [
-  h('th', 'States\\Detectors'),
+  h('th', 'States'),
   Object.keys(detectorCounters).map((detector) => h('th.text-center', detector)),
   h('th.text-center', {colspan: HARDWARE_COMPONENTS_WITHOUT_EPN.length - 1}, ''), // empty cell to align with the rest of the table
 ]);
