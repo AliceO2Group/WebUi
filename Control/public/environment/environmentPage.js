@@ -55,13 +55,14 @@ export const content = (model) => h('.scroll-y.absolute-fill', [
 const showEnvironmentPage = (model, environmentInfo) => {
   const {state, currentTransition = undefined} = environmentInfo;
   const isRunningStable = !currentTransition && state === 'RUNNING';
+  const {services: {detectors: {availability = {}} = {}}} = model;
 
   return h('.w-100.p1.g2.flex-column', [
     environmentHeader(environmentInfo),
     environmentActionPanel(model, environmentInfo),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
     h('.flex-row.g2', [
-      environmentTasksSummaryTable(environmentInfo),
+      environmentTasksSummaryTable(environmentInfo, availability),
       environmentEpnTasksSummaryTable(environmentInfo),
     ]),
     environmentNavigationTabs(model, environmentInfo),
