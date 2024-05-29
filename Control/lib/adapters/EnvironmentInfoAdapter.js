@@ -246,7 +246,7 @@ class EnvironmentInfoAdapter {
       /**
        * @type {Array<DeviceInfo>} devices
        */
-      const {devices = [], ddsSessionId = '', ddsSessionStatus = ''} = JSON.parse(odc);
+      const {devices = [], ddsSessionId = '', ddsSessionStatus = '', state = ''} = JSON.parse(odc);
       const states = {};
       const hosts = new Set();
       for (const device of devices) {
@@ -260,7 +260,7 @@ class EnvironmentInfoAdapter {
           states
         },
         hosts: hosts.size,
-        info: {ddsSessionId, ddsSessionStatus}
+        info: {ddsSessionId, ddsSessionStatus, state}
       };
     } catch (error) {
       return {
@@ -269,7 +269,7 @@ class EnvironmentInfoAdapter {
           states: {},
         },
         hosts: 0,
-        info: {ddsSessionId: '-', ddsSessionStatus: '-'}
+        info: {ddsSessionId: '-', ddsSessionStatus: '-', state: '-'}
       };
     }
   }
