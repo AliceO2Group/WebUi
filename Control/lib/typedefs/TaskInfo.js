@@ -26,4 +26,5 @@
  * @property {String} pid
  * @property {String} sandboxStdout
  * @property {boolean} claimable 
+ * @property {boolean} critical
  */
