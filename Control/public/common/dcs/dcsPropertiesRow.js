@@ -36,7 +36,7 @@ export const dcsPropertiesRow = (detector = {}) => {
  * @param {String['PFR', 'SOR']} name - dcs component that we display availability for
  * @return {vnode}
  */
-const dcsProperty = (state = '', name) => {
+export const dcsProperty = (state = '', name) => {
   let stateClass = '';
   let icon = '';
 
