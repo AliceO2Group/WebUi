@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
+const {FlpTaskState} = require('./../common/taskState.enum.js');
 const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
 
 /**
@@ -165,7 +166,12 @@ class EnvironmentInfoAdapter {
     const {tasks = [], includedDetectors = []} = environment;
 
     for (const task of tasks) {
-      const {state = 'NOT-KNOWN', status = 'NOT-KNOWN', deploymentInfo: {hostname = ''} = {}} = task;
+      const {critical = false, status = 'NOT-KNOWN', deploymentInfo: {hostname = ''} = {}} = task;
+      let {state = FlpTaskState.UNKNOWN} = task;
+
+      if (state === FlpTaskState.ERROR && critical) {
+        state = FlpTaskState.ERROR_CRITICAL;
+      }
 
       if (hostname.match(QC_NODES_NAME_REGEX)) {
         qcTasksTotal++;

@@ -13,6 +13,7 @@
 
 export const FlpTaskState = Object.freeze({
   ERROR: 'ERROR',
+  ERROR_CRITICAL: 'ERROR_CRITICAL', // GUI specific state to distinguish errors
   RUNNING: 'RUNNING',
   STANDBY: 'STANDBY',
   CONFIGURED: 'CONFIGURED',
@@ -28,7 +29,12 @@ export const FlpTaskState = Object.freeze({
  */
 export const FLP_TASK_STATES = Object.values(FlpTaskState)
   .sort((a, b) => {
-    if (a === FlpTaskState.ERROR) {
+    
+    if (a === FlpTaskState.ERROR_CRITICAL) {
+      return -1;
+    } else if (b === FlpTaskState.ERROR_CRITICAL) {
+      return 1;
+    } else if (a === FlpTaskState.ERROR) {
       return -1;
     } else if (b === FlpTaskState.ERROR) {
       return 1;
@@ -102,6 +108,7 @@ export const EPN_TASK_STATES = Object.values(EpnTaskState)
 export function getTaskStateClassAssociation(state) {
   switch (state) {
     case FlpTaskState.ERROR:
+    case FlpTaskState.ERROR_CRITICAL:
     case EpnTaskState.ERROR:
       return '.danger';
     case FlpTaskState.RUNNING:

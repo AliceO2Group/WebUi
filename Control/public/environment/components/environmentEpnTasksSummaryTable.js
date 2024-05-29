@@ -50,7 +50,6 @@ const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
  */
 const rowForTaskSate = (state, hardware) => {
   const taskClass = getTaskStateClassAssociation(state);
-  console.log(state, taskClass)
   return h('tr', [
     h(`td${taskClass}`, state), h(`td.text-center${taskClass}`, hardware?.epn?.tasks?.states[state] ?? '-'),
   ]);
