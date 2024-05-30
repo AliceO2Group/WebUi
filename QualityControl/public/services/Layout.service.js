@@ -48,7 +48,7 @@ export default class LayoutService {
 
     if (ok) {
       const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
-      const officialLayouts = sortedLayouts.filter(({ isOfficial = false })=> isOfficial);
+      const officialLayouts = sortedLayouts.filter(({ isOfficial = false }) => isOfficial);
       this.list = RemoteData.success(sortedLayouts);
       this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
       this.model.folder.map.get('Official').list = RemoteData.success(officialLayouts);

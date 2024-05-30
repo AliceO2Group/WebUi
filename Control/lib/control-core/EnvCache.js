@@ -23,14 +23,17 @@ class EnvCache {
 
   /**
    * @param {object} ctrlService - Handle to Control service
+   * @param {EnvironmentService} environmentService - service to be used to retrieve information on environments
    */
-  constructor(ctrlService) {
+  constructor(ctrlService, environmentService) {
     this.ctrlService = ctrlService;
     this.cache = {};
     this.timeout = 9000;
     this.cacheEvictionTimeout = 5 * 60 * 1000;
     this.cacheEvictionLast = new Date();
-    this.refreshInterval = setInterval(() => this.refresh(), this.timeout);
+    this._cacheRefreshRate = 6000;
+    this.refreshInterval = setInterval(() => this.refresh(), this._cacheRefreshRate);
+    this._environmentService = environmentService;
   }
 
   /**
@@ -81,16 +84,35 @@ class EnvCache {
     try {
       const deadline = Date.now() + this.timeout;
       const envs = await this.ctrlService.executeCommandNoResponse('GetEnvironments', {}, {deadline});
-      if (!this._cacheInSync(envs)) {
-        this.cache = envs;
-        this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
-        log.debug('Updated cache');
+
+      for (let [index, currentEnv] of envs.environments.entries()) {
+        try {
+          const environment = await this._environmentService.getEnvironment(currentEnv.id);
+          envs.environments[index] = environment;
+          this._updateCache(envs);
+        } catch (error) {
+          console.error(error);
+        }
       }
-      this.cacheEvictionLast = new Date();
+      this._updateCache(envs);
     } catch (error) {
       log.debug(error);
     }
     this.evictCache();
+  }
+
+  /**
+   * Method to update cache if there are any changes
+   * @param {Object{Environments}} - environments' data that is to be stored in cache
+   * @return {void}
+   */
+  _updateCache(envs) {
+    if (!this._cacheInSync(envs)) {
+      this.cache = envs;
+      this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
+      log.debug('Updated cache');
+    }
+    this.cacheEvictionLast = new Date();
   }
 }
 module.exports = EnvCache;

@@ -23,7 +23,7 @@ import {h} from '/js/src/index.js';
  */
 export const miniCard = (title, children = [], classes = ['p2', 'g2']) => {
   return h(`.miniCard.flex-column.shadow-level1.br2`, {
-    class: classes.join(' ')
+    class: classes.join(' '),
   }, [
     typeof title === 'string'
       ? miniCardTitle(title)

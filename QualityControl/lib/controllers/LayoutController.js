@@ -132,7 +132,7 @@ export class LayoutController {
         const { personid } = req.session;
         const { owner_id } = await this._dataService.readLayout(id);
 
-        if (owner_id !== personid) {
+        if (Number(owner_id) !== Number(personid)) {
           updateExpressResponseFromNativeError(
             res,
             new UnauthorizedAccessError('Only the owner of the layout can update it'),

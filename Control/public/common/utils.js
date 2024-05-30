@@ -109,8 +109,8 @@ const getTaskShortName = (taskName) => {
  */
 const parseOdcStatusPerEnv = (environment) => {
   try {
-    if (environment.integratedServicesData && environment.integratedServicesData['odc']) {
-      const {state} = JSON.parse(environment.integratedServicesData['odc']);
+    if (environment?.hardware?.epn?.info) {
+      const {state} = environment.hardware.epn.info;
       const styleClass = ODC_STATE_COLOR[state] ?? '';
       return {state, styleClass};
     }

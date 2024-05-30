@@ -144,6 +144,7 @@ message NewEnvironmentRequest {
     string workflowTemplate = 1;
     map<string, string> vars = 2;
     bool public = 3;
+    bool autoTransition = 4;
 }
 message NewEnvironmentReply {
     EnvironmentInfo environment = 1;
@@ -267,6 +268,7 @@ message ShortTaskInfo {
     string pid = 8;
     string sandboxStdout = 9;
     bool claimable = 10;
+    bool critical = 11;
 }
 message TaskDeploymentInfo {
     string hostname = 1;
@@ -286,10 +288,6 @@ message GetTaskReply {
     TaskInfo task = 1;
 }
 
-message TaskClassInfo {
-    string name = 1;
-    string controlMode = 2;
-}
 message CommandInfo {
     repeated string env = 1;
     bool shell = 2;
@@ -304,7 +302,7 @@ message ChannelInfo {
 }
 message TaskInfo {
     ShortTaskInfo shortInfo = 1;
-    TaskClassInfo classInfo = 2;
+    reserved 2;
     repeated ChannelInfo inboundChannels = 3;
     repeated ChannelInfo outboundChannels = 4;
     CommandInfo commandInfo = 5;

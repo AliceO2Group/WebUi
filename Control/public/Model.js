@@ -252,7 +252,7 @@ export default class Model extends Observable {
           return;
         }
         if (!this.router.params.panel) {
-          this.router.go(`?page=environment&id=${this.router.params.id}&panel=configuration`, true, true);
+          this.router.go(`?page=environment&id=${this.router.params.id}&panel=general`, true, true);
         }
         this.environment.getEnvironment({id: this.router.params.id}, true, this.router.params.panel);
         break;
