@@ -47,4 +47,4 @@ class BroadcastService {
   }
 }
 
-module.exports = {BroadcastService};
+exports.BroadcastService = BroadcastService;

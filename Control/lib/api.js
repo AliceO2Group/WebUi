@@ -22,6 +22,7 @@ const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
+const {LockController} = require('./controllers/Lock.controller.js');
 const {RunController} = require('./controllers/Run.controller.js');
 const {StatusController} = require('./controllers/Status.controller.js');
 const {WebSocketService} = require('./services/WebSocket.service.js');
@@ -66,8 +67,6 @@ if (!config.grafana) {
 }
 
 module.exports.setup = (http, ws) => {
-  const lockService = new LockService();
-  lockService.setWs(ws);
 
   let consulService;
   if (config.consul) {
@@ -85,6 +84,9 @@ module.exports.setup = (http, ws) => {
   ctrlService.setWS(ws);
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
+
+  const lockService = new LockService(broadcastService);
+  const lockController = new LockController(lockService);
 
   const detectorService = new DetectorService(ctrlProxy);
   const envService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService);
@@ -116,6 +118,8 @@ module.exports.setup = (http, ws) => {
   const statusController = new StatusController(statusService);
 
   const intervals = new Intervals();
+
+  initializeData(apricotService, lockService);
   initializeIntervals(intervals, statusService, runService, bkpService);
 
   const coreMiddleware = [
@@ -164,10 +168,11 @@ module.exports.setup = (http, ws) => {
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
-  http.post('/lockState', (req, res) => res.json(lockService.state(req.body.name)));
-  http.post('/lock', (req, res) => lockService.lockDetector(req, res));
-  http.post('/unlock', (req, res) => lockService.unlockDetector(req, res));
-  http.post('/forceUnlock', (req, res) => lockService.forceUnlock(req, res));
+  http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
+  http.put('/locks/:action/:detectorId', lockController.actionLockHandler.bind(lockController));
+  http.put('/locks/force/:action/:detectorId',
+    minimumRoleMiddleware(Role.GLOBAL),
+    lockController.actionForceLockHandler.bind(lockController));
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
@@ -217,4 +222,14 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
       CALIBRATION_RUNS_REFRESH_RATE
     );
   }
+}
+
+/**
+ * Function to initialize in order dependent services
+ * @param {ApricotService} apricotService - request initial set of data from AliECS/Apricot
+ * @param {LockService} lockService - initialize service with data from Apricot
+ */
+async function initializeData(apricotService, lockService) {
+  await apricotService.init();
+  lockService.setLockStatesForDetectors(apricotService.detectors);
 }

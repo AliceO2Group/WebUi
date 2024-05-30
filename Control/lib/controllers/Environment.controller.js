@@ -13,10 +13,11 @@
 */
 const {Log} = require('@aliceo2/web-ui');
 const {EnvironmentTransitionType} = require('./../common/environmentTransitionType.enum.js');
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {InvalidInputError} = require('./../errors/InvalidInputError.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
+const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+const {User} = require('./../dtos/User.js');
 
 /**
  * Controller for dealing with all API requests on environments from AliECS:
@@ -133,10 +134,11 @@ class EnvironmentController {
    * @returns {void}
    */
   async newAutoEnvironmentHandler(req, res) {
-    const {personid, name} = req.session;
+    const {personid, name, username} = req.session;
+    const user = new User(username, name, personid);
     const {detector, runType, configurationName} = req.body;
 
-    if (!this._lockService.isLockTakenByUser(detector, personid, name)) {
+    if (!this._lockService.isLockOwnedByUser(detector, user)) {
       updateExpressResponseFromNativeError(res, new UnauthorizedAccessError('Lock not taken'));
       return;
     }

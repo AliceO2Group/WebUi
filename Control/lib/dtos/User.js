@@ -19,43 +19,81 @@
 class User {
   /**
    * Initializing an environment configuration
-   * @param {session} - request session as set by webui/framework server
+   * @param {String} username - username of the user
+   * @param {String} fullName - full name to be displayed for the user
+   * @param {Number} personid - id of the user
+   * @param {Array<String>|String} access - list of access roles of the user
    */
-  constructor(session) {
+  constructor(username, fullName, personid, access) {
     /**
      * @type {String}
      */
-    this._username = session.username;
+    this._username = username;
+
     /**
-     * @type {number}
+     * @type {String}
      */
-    this._personid = session.personid;
+    this._fullName = fullName;
+
     /**
-     * @type {string}
+     * @type {Number}
      */
-    this._access = session.access;
+    this._personid = personid;
+    
+    /**
+     * @type {Arrat<String>}
+     */
+    this._accessList = [];
+    if (typeof access === 'string') {
+      this._accessList = access.split(',');
+    } else if (Array.isArray(access)) {
+      this._accessList = access;
+    }
   }
 
   /**
    * Checks if the given user is considered admin
    * @param {User} user - user type object as defined by webui/framework
-   * @returns {boolean}
+   * @returns {Boolean}
    */
-  static isAdmin(user) {
-    return Boolean(user?.access.includes('admin'));
+  static isAdmin({access = ''}) {
+    let accessList = [];
+    if (typeof access === 'string') {
+      accessList = access.split(',');
+    } else if (Array.isArray(access)) {
+      accessList = access;
+    }
+    return Boolean(accessList.includes('admin'));
+  }
+
+  /**
+   * Check if provided details of a user are the same as the current instance one;
+   * @param {User} user - to compare to
+   * @return {Boolean}
+   */
+  isSameUser(user) {
+    return this._username === user.username && this._personid === this.personid;
   }
 
   /**
    * Returns the username
-   * @returns {string}
+   * @returns {String}
    */
   get username() {
     return this._username;
   }
 
   /**
+   * Returns the full name of the user
+   * @returns {String}
+   */
+  get fullName() {
+    return this._fullName;
+  }
+
+  /**
    * Returns the personid of the user
-   * @returns {number}
+   * @returns {Number}
    */
   get personid() {
     return this._personid;
@@ -63,11 +101,23 @@ class User {
 
   /**
    * Returns the access granted to this user
-   * @returns {string}
+   * @returns {String}
    */
   get access() {
     return this._access;
   }
+
+  /**
+   * Returns the JSON representation of the user that is to be sent via HTTP
+   * @return {JSON{User}}
+   */
+  toJSON() {
+    return {
+      username: this._username,
+      fullName: this._fullName,
+      personid: this._personid,
+    };
+  }
 }
 
-module.exports = User;
+exports.User = User;

@@ -11,173 +11,145 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const {errorHandler} = require('../utils.js');
+
+const {DetectorLock} = require('./../dtos/DetectorLock.js');
+const {NotFoundError} = require('../errors/NotFoundError.js');
+const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError');
+
+const PADLOCK_UPDATE = 'padlock-update';
 
 /**
- * Model representing the lock of the UI, one owner at a time
+ * @class
+ * LockService class to be used for retrieving and updating state of detector locks to control hardware components via AliECS:
+ * * take/release lock/all-locks as normal role
+ * * force take/release lock/all-locks as administrator
  */
 class LockService {
   /**
-   * Initialize lock as free / unlocked.
+   * @constructor
+   * Constructor for configuring the initial state of stored information
+   * @param {BroadcastService} broadcastService - service to use to broadcast lock state changes
    */
-  constructor() {
-    this.lockedBy = {};
-    this.lockedByName = {};
+  constructor(broadcastService) {
+    /**
+     * @type {BroadcastService}
+     */
+    this._broadcastService = broadcastService;
 
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/lockservice`);
+    /**
+     * @type {Object<String, DetectorLock>}
+     */
+    this._locksByDetector = {};
   }
 
   /**
-   *  Sets WebSocket instance
-   *  @param {object} ws
+   * Initialize Lock service based on the provided list of detectors
+   * @param {Array<String>} detectors = [] - list of detectors to be used for the lock mechanism
+   * @return {void}
    */
-  setWs(ws) {
-    this.webSocket = ws;
-  }
-
-  /**
-   * Provides state of all locks
-   * @returns {object}
-   */
-  state() {
-    return {
-      lockedBy: this.lockedBy,
-      lockedByName: this.lockedByName
-    }
-  }
-
-  /** 
-   * Send to all users state of Pad via Websocket
-   */
-  broadcastLockState() {
-    this.webSocket.broadcast(new WebSocketMessage().setCommand('padlock-update').setPayload(this.state()));
-  }
-
-  /** 
-   * Method to try to acquire lock with given name
-   * @param {Request} req - expects lock name under req.body.name
-   * @param {Response} res
-   */
-  lockDetector(req, res) {
-    try {
-      const entity = req.body?.name;
-      const {personid, name} = req.session;
-      if (!entity) {
-        throw new Error('Unspecified lock entity');
-      }
-      if (entity in this.lockedBy) {
-        const lockUser = this.lockedBy[entity];
-        const lockUsername = this.lockedByName[entity];
-        if (lockUser === personid && name === lockUsername) {
-          res.status(200).json({
-            lockedBy: this.lockedBy,
-            lockedByName: this.lockedByName
-          });
-          return;
-        }
-        throw new Error(`Lock ${entity} is already hold by ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
-      }
-      this.lockedBy[entity] = req.session.personid;
-      this.lockedByName[entity] = req.session.name;
-      this._logger.info(`Lock ${entity} taken by ${req.session.name}`);
-      this.broadcastLockState();
-      res.status(201).json({
-        lockedBy: this.lockedBy,
-        lockedByName: this.lockedByName
-      });
-    } catch (error) {
-      errorHandler(`Unable to lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
-    }
-  }
-
-  /** 
-   * Method to try to release lock with given name
-   * @param {Request} req - expects lock name under req.body.name
-   * @param {Response} res
-  */
-  forceUnlock(req, res) {
-    try {
-      const entity = req.body?.name;
-      if (!entity) {
-        throw new Error('Unspecified lock entity');
-      }
-      if (!(entity in this.lockedBy)) {
-        res.status(200).json({
-          lockedBy: this.lockedBy,
-          lockedByName: this.lockedByName
-        });
-      }
-      if (!req.session.access.includes('admin')) {
-        throw new Error(`Insufficient permission`);
-      }
-      delete this.lockedBy[entity];
-      delete this.lockedByName[entity];
-      this._logger.info(`Lock ${entity} forced by ${req.session.name}`);
-      this.broadcastLockState();
-      res.status(200).json({
-        lockedBy: this.lockedBy,
-        lockedByName: this.lockedByName
-      });
-    } catch (error) {
-      errorHandler(`Unable to force lock by ${req.session.name}: ${error}`, res, 403, 'lockservice');
-    }
-  }
-
-  /** 
-   * Method to try to release lock with given name
-   * @param {Request} req - expects lock name under req.body.name
-   * @param {Response} res
-   */
-  unlockDetector(req, res) {
-    try {
-      const entity = req.body?.name;
-      if (!entity) {
-        throw new Error('Unspecified lock entity');
-      }
-      if (!(entity in this.lockedBy)) {
-        res.status(200).json({
-          lockedBy: this.lockedBy,
-          lockedByName: this.lockedByName
-        });
-        return;
-      }
-      if (this.lockedBy[entity] !== req.session.personid) {
-        throw new Error(`${entity} owner is ${this.lockedByName[entity]} (id ${this.lockedBy[entity]})`);
-      }
-      delete this.lockedBy[entity];
-      delete this.lockedByName[entity];
-      this._logger.info(`Lock ${entity} released by ${req.session.name}`);
-      this.broadcastLockState();
-      res.status(200).json({
-        lockedBy: this.lockedBy,
-        lockedByName: this.lockedByName
-      });
-    } catch (error) {
-      errorHandler(`Unable to give away lock to ${req.session.name}: ${error}`, res, 403, 'lockservice');
+  setLockStatesForDetectors(detectors = []) {
+    for (const detectorName of detectors) {
+      this._locksByDetector[detectorName] = new DetectorLock(detectorName);
     }
   }
 
   /**
-   * Method to check if lock is taken by specific user
-   * @param {String} detector - detector for which check should be done
-   * @param {Number} userId - id of the user that should be checked against
-   * @param {String} userName - username of the user that should be checked against
+   * Return the states of all detector locks currently used by the system grouped by the detector name
+   * @returns {Object<String, DetectorLock>}
    */
-  isLockTakenByUser(detector, userId, userName) {
-    return this.lockedBy[detector] === userId && this.lockedByName[detector] === userName;
+  get locksByDetector() {
+    return this._locksByDetector;
   }
 
   /**
+   * Return the states of all detector locks currently used by the system grouped by the detector name as JSONs for HTTP responses
+   * @return {JSON{Object<String, DetectorLock>}}
+   */
+  locksByDetectorToJSON() {
+    const locksJson = {};
+    Object.entries(this._locksByDetector)
+      .forEach(([detector, lock]) => locksJson[detector] = lock.toJSON());
+    return locksJson;
+  }
+
+  /** 
+   * Method to try to acquire lock for a specified detector by a user
+   * @param {String} detectorName - detector as defined by AliECS
+   * @param {User} user - user trying to acquiring the lock
+   * @param {Boolean} shouldForce - specified if lock should be taken even if held by another user
+   * 
+   * @return {Object<String, DetectorLock>} - updated state of all detector locks
+   * @throws {UnauthorizedAccessError}
+   */
+  takeLock(detectorName, user, shouldForce = false) {
+    const lock = this._locksByDetector[detectorName];
+
+    if (!lock) {
+      throw new NotFoundError(`Detector ${detectorName} not found in the list of detectors`);
+    } else if (lock.isTaken()) {
+      if (!lock.isOwnedBy(user) && !shouldForce) {
+        throw new UnauthorizedAccessError(
+          `Unauthorized TAKE action for lock of detector ${detectorName} by user ${user.fullName}`
+        );
+      }
+      if (lock.isOwnedBy(user)) {
+        return this._locksByDetector;
+      }
+    }
+    this._locksByDetector[detectorName].assignOwner(user);
+
+    this._broadcastService.broadcast(PADLOCK_UPDATE, this._locksByDetector);
+    return this._locksByDetector;
+  }
+
+  /** 
+   * Method to try to release lock for a specified detector by a user
+   * @param {String} detectorName - detector name as defined by AliECS
+   * @param {User} user - user that wishes to release the lock
+   * @param {Boolean} shouldForce - lock should be taken even if held by another user
+   * 
+   * @return {Object<String, DetectorLock>}
+   * @throws {UnauthorizedAccessError}
+   */
+  releaseLock(detectorName, user, shouldForce = false) {
+    const lock = this._locksByDetector[detectorName]
+    if (!lock) {
+      throw new NotFoundError(`Detector ${detectorName} not found in the list of detectors`);
+    } else if (lock.isFree()) {
+      return this._locksByDetector;
+    } else if (!lock.isOwnedBy(user) && !shouldForce) {
+      throw new UnauthorizedAccessError(
+        `Unauthorized RELEASE action for lock of detector ${detectorName} by user ${user.fullName}`
+      );
+    }
+    this._locksByDetector[detectorName].release();
+
+    this._broadcastService.broadcast(PADLOCK_UPDATE, this._locksByDetector);
+    return this._locksByDetector;
+  }
+
+  /**
+   * 
+   * TODO
    * Checks if the given user has the lock for the provided list of detectors
    * @param {String} userName - of user to check lock ownership
    * @param {Number} userId - person id of the user
    * @param {Array<string>} detectors - list of detectors to check lock is owned by the user
    * @returns {boolean}
    */
-  hasLocks(userName, userId, detectors) {
-    return detectors.every((detector) => this.isLockTakenByUser(detector, userId, userName));
+  hasLocks(user, detectors) {
+    return detectors.every((detector) => this._locksByDetector[detector].isOwnedBy(user));
+  }
+
+  /**
+   * Method to check if lock is taken by specific user
+   * @param {String} detector - detector for which check should be done
+   * @param {User} user - user to check if owns the lock
+   */
+  isLockOwnedByUser(detector, user) {
+    const lock = this.locksByDetector[detector];
+    return Boolean(lock?.isOwnedBy(user));
   }
 }
 
-module.exports = {LockService};
+exports.LockService = LockService;

@@ -19,7 +19,7 @@ import {jsonFetch} from './jsonFetch.js';
  * @param {RequestInit} options - the request options, see {@see fetch } native function
  * @return {Promise<Resolve<Object>.Error<{message: String}>>} resolve with the result of the request or reject with the error message
  */
-export const jsonPut = async (endpoint, options) => {
+export const jsonPut = async (endpoint, options = {}) => {
   if (options.body && typeof options.body === 'object') {
     options.body = JSON.stringify(options.body);
   }

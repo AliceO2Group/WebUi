@@ -16,7 +16,6 @@ const assert = require('assert');
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
-const User = require('./../dtos/User.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
 const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
@@ -35,7 +34,6 @@ class ApricotService {
 
     this.detectors = [];
     this.hostsByDetector = new Map();
-    this.init();
   }
 
   /**
@@ -186,7 +184,8 @@ class ApricotService {
   async saveCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      data.user = new User(req.session);
+      const {username, personid} = req.session;
+      data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 
       const {payload: configurations} = await this.apricotProxy[ListRuntimeEntries]({component: COMPONENT});
@@ -215,11 +214,11 @@ class ApricotService {
   async updateCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      const user = new User(req.session);
-      data.user = user;
+      const {username, personid} = req.session;
+      data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
+      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, data.user);
       await this.apricotProxy['SetRuntimeEntry']({
         component: COMPONENT,
         key: envConfigToSave.id,
