@@ -67,7 +67,7 @@ if (!config.grafana) {
 }
 
 module.exports.setup = (http, ws) => {
-  
+
   let consulService;
   if (config.consul) {
     consulService = new ConsulService(config.consul);
@@ -85,7 +85,7 @@ module.exports.setup = (http, ws) => {
   const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
 
-  const lockService = new LockService(ws);
+  const lockService = new LockService(broadcastService);
   const lockController = new LockController(lockService);
 
   const detectorService = new DetectorService(ctrlProxy);
@@ -169,8 +169,8 @@ module.exports.setup = (http, ws) => {
 
   // Lock Service
   http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
-  http.put('/locks/:action/:detectorId/', lockController.actionLockHandler.bind(lockController));
-  http.put('/locks/force/:action/:detectorId', 
+  http.put('/locks/:action/:detectorId', lockController.actionLockHandler.bind(lockController));
+  http.put('/locks/force/:action/:detectorId',
     minimumRoleMiddleware(Role.GLOBAL),
     lockController.actionForceLockHandler.bind(lockController));
 
