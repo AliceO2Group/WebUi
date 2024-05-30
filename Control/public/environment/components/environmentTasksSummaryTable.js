@@ -24,11 +24,14 @@ import {h} from '/js/src/index.js';
  * @return {vnode} - component with an HTML table
  */
 export const environmentTasksSummaryTable = (environment, detectorsAvailability) => {
-  const {state, hardware} = environment;
+  const {state, hardware, userVars, currentTransition = undefined} = environment;
+  const isDcsEnabled = userVars?.dcs_enabled === 'true';
+  const shouldDisplaySorAvailability = isDcsEnabled && state === 'CONFIGURED' && !currentTransition;
+  
   return h('table.table-ecs.table-ecs-sm.shadow-level1', [
     h('thead', [
       hardwareComponentsTableHeaderRow(hardware),
-      detectorsTableHeaderRow(hardware, detectorsAvailability, state),
+      detectorsTableHeaderRow(hardware, detectorsAvailability, shouldDisplaySorAvailability)
     ]),
     h('tbody', [
       FLP_TASK_STATES.map((state) => rowForTaskSate(state, hardware)),
@@ -59,18 +62,19 @@ const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
 /**
  * Build the HTML header row of the table with the detectors present in the environment
  * @param {Object<String, Object>} detectorCounters - object with the detectors counters of tasks
- * @param {Object<String, {pfrAvailability, sorAvailability}} detectorsAvailability - object with the availability of the detectors
- * @param {String} state - state of the environment 
+ * @param {Object<String, {pfrAvailability, sorAvailability}} availability - object with the availability of the detectors
+ * @param {Boolean} shouldDisplaySorAvailability - flag to display the SOR availability
  * @return {vnode} - component with an HTML table row
  */
-const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}, detectorsAvailability, state) => h('tr', [
-  h('th', 'States'),
-  Object.keys(detectorCounters).map((detector) => h('th.text-center', [
-    detector,
-    state === 'CONFIGURED' && h('.f6', dcsProperty(detectorsAvailability[detector].sorAvailability, 'SOR'))
-  ])),
-  h('th.text-center', {colspan: HARDWARE_COMPONENTS_WITHOUT_EPN.length - 1}, ''), // empty cell to align with the rest of the table
-]);
+const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}, availability, shouldDisplaySorAvailability) =>
+  h('tr', [
+    h('th', 'States'),
+    Object.keys(detectorCounters).map((detector) => h('th.text-center', [
+      detector,
+      shouldDisplaySorAvailability && h('.f6', dcsProperty(availability[detector].sorAvailability, 'SOR'))
+    ])),
+    h('th.text-center', {colspan: HARDWARE_COMPONENTS_WITHOUT_EPN.length - 1}, ''), // empty cell to align with the rest of the table
+  ]);
 
 /**
  * Build a row of the table with the summary of the tasks for specified state for the environment
