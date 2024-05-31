@@ -55,7 +55,7 @@ describe('`pageEnvironment` test-suite', async () => {
 
   it('should have one button for `Shutdown` environment without lock in possession but with user as admin', async () => {
     await page.evaluate(() => {
-      window.model.lock.releaseLock('MID');
+      window.model.lock.actionOnLock('MID', 'RELEASE', false);
     });
     const isLocked = await page.evaluate(() => {
       window.model.lock.isLocked('MID');
@@ -79,7 +79,7 @@ describe('`pageEnvironment` test-suite', async () => {
     // adds permissions and lock back
     await page.evaluate(() => {
       window.model.session.role = 1;
-      window.model.lock.takeLock('MID');
+      window.model.lock.actionOnLock('MID', 'TAKE', false);
       window.model.notify();
     });
     await page.waitForTimeout(200);

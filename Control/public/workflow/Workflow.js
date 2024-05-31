@@ -568,7 +568,7 @@ export default class Workflow extends Observable {
           if (unavailableDetectors.length <= 0 || (unavailableDetectors.length > 0 && confirm(
             `The following detectors are not available: ${unavailableDetectors.join(',')}\nDo you want to continue?`)
           )) {
-            detectors.forEach(detector => this.model.lock.takeLock(detector));
+            detectors.forEach(detector => this.model.lock.actionOnLock(detector, 'TAKE', false));
             await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
             this.addVariableJSON(JSON.stringify(variables));
           }

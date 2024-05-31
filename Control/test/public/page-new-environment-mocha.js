@@ -413,8 +413,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
-    await page.waitForSelector('.m1 > div:nth-child(1) > div > a:nth-child(1)');
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(1)').click());
+    await page.waitForSelector('.m1 > div:nth-child(1) > div > div:nth-child(1)');
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > div:nth-child(1)').click());
     await page.waitForTimeout(200);
 
     await page.waitForSelector('.m1 > div:nth-child(1) > div > a:nth-child(2)');
