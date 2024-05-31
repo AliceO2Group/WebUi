@@ -41,7 +41,7 @@ describe('`pageLock` test-suite', async () => {
     await page.evaluate(() => document.querySelector('.table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)').click());
     await page.waitForTimeout(500);
 
-    const isLocked = await page.evaluate(() => window.model.lock.isLockedByMe('ODC'));
+    const isLocked = await page.evaluate(() => window.model.lock.isLockedByCurrentUser('ODC'));
     assert.ok(isLocked);
 
     const owner = await page.evaluate(() => document.querySelector('.table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(3)').innerText);
@@ -54,7 +54,7 @@ describe('`pageLock` test-suite', async () => {
     await page.evaluate(() =>  document.querySelector('.table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)').click());
     await page.waitForTimeout(500);
 
-    const isLocked = await page.evaluate(() => window.model.lock.isLockedByMe('ODC'));
+    const isLocked = await page.evaluate(() => window.model.lock.isLockedByCurrentUser('ODC'));
     assert.ok(!isLocked);
   });
 });

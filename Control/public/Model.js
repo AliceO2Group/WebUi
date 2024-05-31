@@ -155,7 +155,7 @@ export default class Model extends Observable {
   handleWSCommand(message) {
     switch (message.command) {
       case 'padlock-update':
-        this.lock.setPadlockState(message.payload);
+        this.lock.padlockState = message.payload;
         break;
       case 'notification':
         this.showNativeNotification(JSON.parse(message.payload));
@@ -210,7 +210,7 @@ export default class Model extends Observable {
     clearInterval(this.task.refreshInterval);
 
     // Release client-side
-    this.lock.setPadlockState({lockedBy: null, lockedByName: null});
+    this.lock.padlockState = {};
 
     this.notification.show(`Connection to server has been lost. Retrying to connect in 10 seconds...`, 'danger', 10000);
     this.about.setWsInfo(SERVICE_STATES.IN_ERROR, {

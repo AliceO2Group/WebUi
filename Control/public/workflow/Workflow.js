@@ -563,12 +563,12 @@ export default class Workflow extends Observable {
         } else {
           const unavailableDetectors = detectors.filter(name =>
             this.flpSelection.isDetectorActive(name)
-            || !(!this.model.lock.isLocked(name) || this.model.lock.isLockedByMe(name))
+            || !(!this.model.lock.isLocked(name) || this.model.lock.isLockedByCurrentUser(name))
           );
           if (unavailableDetectors.length <= 0 || (unavailableDetectors.length > 0 && confirm(
             `The following detectors are not available: ${unavailableDetectors.join(',')}\nDo you want to continue?`)
           )) {
-            detectors.forEach(detector => this.model.lock.lock(detector));
+            detectors.forEach(detector => this.model.lock.takeLock(detector));
             await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
             this.addVariableJSON(JSON.stringify(variables));
           }
