@@ -20,6 +20,7 @@ const {User} = require('./../dtos/User.js');
 
 const ERROR_LOG_LEVEL = 99;
 const LOG_FACILITY = 'cog/log-ctrl';
+const DETECTOR_ALL = 'ALL';
 
 /**
  * Controller for dealing with all API requests on actions and state of the locks used for detectors
@@ -70,10 +71,30 @@ class LockController {
       }
       const user = new User(username, name, personid, access);
       if (action.toLocaleUpperCase() === DetectorLockAction.TAKE) {
-        this._lockService.takeLock(detectorId, user, shouldForce);
+        if (detectorId === DETECTOR_ALL) {
+          Object.keys(this._lockService.locksByDetector).forEach((detector) => {
+            try {
+              this._lockService.takeLock(detector, user, shouldForce);
+            } catch (error) {
+              console.error(error);
+            }
+          });
+        } else {
+          this._lockService.takeLock(detectorId, user, shouldForce);
+        }
         res.status(200).json(this._lockService.locksByDetectorToJSON());
       } else if (action.toLocaleUpperCase() === DetectorLockAction.RELEASE) {
-        this._lockService.releaseLock(detectorId, user, shouldForce);
+        if (detectorId === DETECTOR_ALL) {
+          Object.keys(this._lockService.locksByDetector).forEach((detector) => {
+            try {
+              this._lockService.releaseLock(detector, user, shouldForce);
+            } catch (error) {
+              console.error(error);
+            }
+          });
+        } else {
+          this._lockService.releaseLock(detectorId, user, shouldForce);
+        }
         res.status(200).json(this._lockService.locksByDetectorToJSON());
       }
     } catch (error) {
