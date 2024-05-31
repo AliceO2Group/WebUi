@@ -22,6 +22,7 @@ import loading from './../common/loading.js';
 import {DetectorLockAction} from '../common/enums/DetectorLockAction.enum.js';
 
 const LOCK_TABLE_HEADER_KEYS = ['Detector', 'Owner'];
+const DETECTOR_ALL = 'ALL';
 
 /**
  * @file Page that displays detector lock details, states and allows users to take / release one or multiple locks
@@ -48,6 +49,7 @@ export const header = (model) => [
  */
 export const content = (model) => {
   const padlockState = model.lock.padlockState;
+  const lock = model.lock;
   return [
     detectorHeader(model),
     h('.text-center.scroll-y.absolute-fill', {style: 'top: 40px'}, [
@@ -55,7 +57,18 @@ export const content = (model) => {
         NotAsked: () => null,
         Loading: () => loading(3),
         Failure: (error) => errorPage(error),
-        Success: (detectorsLocksState) => h('.flex-column',[
+        Success: (detectorsLocksState) => h('.flex-column', [
+          h('.flex-row.g2.pv2', [
+            model.isAllowed(ROLES.Admin) && [
+              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'),
+              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'),
+            ],
+            detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'),
+            detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'),
+          ]),
+          h('small.text-left.ph2',
+            'Note: Release/Take all will only affect the detectors you have access to and detectors that are available.'
+          ),
           detectorLocksTable(model, detectorsLocksState)
         ])
       })
@@ -112,8 +125,8 @@ const detectorLockRow = (model, detector, lockState) => {
     ),
     h('td', ownerName),
     model.isAllowed(ROLES.Admin) && h('td', [
-      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.RELEASE, 'Force Release'),
-      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.TAKE, 'Force Take')
+      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.RELEASE, true, 'Force Release'),
+      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.TAKE, true, 'Force Take')
     ])
   ]);
 };

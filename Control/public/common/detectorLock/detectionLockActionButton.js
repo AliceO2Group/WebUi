@@ -24,9 +24,11 @@ import {DetectorLockState} from './../enums/DetectorLockState.enum.js';
  * @param {String} label - button label to be displayed to the user
  * @return {vnode}
  */
-export const detectorLockActionButton = (lockModel, detector, lockState, action, label = `Force ${action}`) => {
+export const detectorLockActionButton = (
+  lockModel, detector, lockState, action, shouldForce = false, label = `${action}`
+) => {
   return h('button.btn.btn-sm.btn-danger', {
     disabled: lockState?.state === DetectorLockState.FREE,
-    onclick: () => lockModel.actionOnLock(detector, action, true)
+    onclick: () => lockModel.actionOnLock(detector, action, shouldForce)
   }, label);
 };
