@@ -24,13 +24,14 @@ import {dcsPropertiesRow} from '../../../common/dcs/dcsPropertiesRow.js';
  * @return {vnode}
  */
 export default (model, onlyGlobal = false) => {
-  const {detectors, activeDetectors} = model.workflow.flpSelection;
+  const {activeDetectors} = model.workflow.flpSelection;
+  const detectors = model.lock.padlockState;
   const areDetectorsReady = activeDetectors.isSuccess() && detectors.isSuccess();
   return h('.w-100', [
     h('.w-100.flex-row.panel-title.p2', h('h5.w-100.bg-gray-light', 'Detectors Selection')),
     h('.w-100.p2.panel',
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
-      (areDetectorsReady) && detectorsSelectionArea(model, detectors.payload, onlyGlobal),
+      (areDetectorsReady) && detectorsSelectionArea(model, Object.keys(detectors.payload), onlyGlobal),
       (activeDetectors.isFailure() || detectors.isFailure()) && h('.f7.flex-column', 'Unavailable to load detectors'),
     )
   ]);
@@ -64,13 +65,14 @@ const detectorSelectionPanel = (model, name) => {
   let className = '';
   let title = '';
   let style = 'font-weight: 150;flex-grow:2';
-  const {services: {detectors: {availability = {}} = {}}} = model;
+  const {lock, services: {detectors: {availability = {}} = {}}} = model;
+  const lockState = lock.padlockState.payload?.[name];
   const isDetectorActive = model.workflow.flpSelection.isDetectorActive(name);
   if (isDetectorActive
-    || (model.lock.isLocked(name) && !model.lock.isLockedByMe(name))) {
+    || (model.lock.isLocked(name) && !model.lock.isLockedByCurrentUser(name))) {
     className = 'disabled-item warning';
     title = 'Detector is running and/or locked';
-  } else if (model.lock.isLockedByMe(name)) {
+  } else if (model.lock.isLockedByCurrentUser(name)) {
     if (model.workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {
       className += 'selected ';
       title = 'Detector is locked and selected';
@@ -81,14 +83,19 @@ const detectorSelectionPanel = (model, name) => {
   }
 
   return h('.flex-column.justify-center.items-center.shadow-level2', {
+    id: `detector-selection-panel-${name}'`,
   }, [
     h('.flex-row', [
-      detectorLockButton(model, name, 'small'),
+      detectorLockButton(model, name, lockState, true),
       h('a.menu-item.w-wrapped', {
         className,
         title,
         style,
-        onclick: () => model.lock.isLockedByMe(name) && model.workflow.flpSelection.toggleDetectorSelection(name),
+        onclick: () => {
+          if (model.lock.isLockedByCurrentUser(name)) {
+            model.workflow.flpSelection.toggleDetectorSelection(name);
+          }
+        }
       }, model.workflow.flpSelection.getDetectorWithIndexes(name)
       )
     ]),

@@ -12,13 +12,16 @@
  * or submit itself to any jurisdiction.
 */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import {DetectorLockState} from './../common/enums/DetectorLockState.enum.js';
+import {di} from './../utilities/di.js';
 import {jsonPut} from './../utilities/jsonPut.js';
+import {Observable, RemoteData} from '/js/src/index.js';
 
 /**
- * Shadow model of Padlock, synchronize with the web server which contains the real one
+ * Model for the detector locks that control which user is allowed to control environments for AliECS
  */
 export default class Lock extends Observable {
+
   /**
    * Initialize lock state to NotAsked
    * @param {Observable} model
@@ -27,30 +30,35 @@ export default class Lock extends Observable {
     super();
 
     this.model = model;
-    this.padlockState = RemoteData.notAsked(); // {lockedBy, lockedByName}
+
+    /**
+     * RemoteData object to maintain a state of the detector locks
+     * @type {Object<String, DetectorLock>
+     */
+    this._padlockState = RemoteData.notAsked();
   }
 
   /**
-   * Provides name and surname of lock holder
-   * @param {string} name Lock name/entity
-   * @returns {string} Name and surname as provided from SSO
+   * Get the full name of the current lock owner or null if the lock is not taken
+   * @param {String} detector - detector for which to get the owner
+   * @return {String} - name and surname of the owner
    */
-  getOwner(detector) {
+  getOwnerFullName(detector) {
     if (this.isLocked(detector)) {
-      return this.padlockState.payload.lockedByName[detector];
+      return this._padlockState.payload?.[detector]?.owner?.fullName;
     } else {
       return '';
     }
   }
 
   /**
-   * State whether given lock is in locked state
-   * @param {string} detector - detector name
+   * Return a boolean indicating whether the lock is taken or not
+   * @param {String} detector - detector name for which to check state
    * @returns {bool}
    */
   isLocked(detector) {
-    return this.padlockState.kind === 'Success' &&
-      this.padlockState.payload.lockedBy?.[detector] !== undefined;
+    return this._padlockState.isSuccess() &&
+      this._padlockState.payload?.[detector]?.state === DetectorLockState.TAKEN;
   }
 
   /**
@@ -58,75 +66,65 @@ export default class Lock extends Observable {
    * @param {string} name Lock name/entity
    * @returns {bool}
    */
-  isLockedByMe(detector) {
+  isLockedByCurrentUser(detector) {
     return this.isLocked(detector) &&
-      this.model.session.personid === this.padlockState.payload.lockedBy[detector];
-  }
-  /**
-   * Set padlock state from ajax or websocket as a RemoteData
-   * @param {string} padlockState - object representing PadLock from server
-   */
-  setPadlockState(padlockState) {
-    this.padlockState = RemoteData.success(padlockState);
-    this.notify();
+      di.session.personid === this._padlockState.payload?.[detector]?.owner?.personid;
   }
 
   /**
    * Load Padlock state from server
    */
   async synchronizeState() {
-    this.padlockState = RemoteData.loading();
+    this._padlockState = RemoteData.loading();
     this.notify();
 
     const {result, ok} = await this.model.loader.get(`/api/locks`);
     if (!ok) {
-      this.padlockState = RemoteData.failure(result.message);
+      this._padlockState = RemoteData.failure(result.message);
       this.notify();
-      this.model.notification.show('Fatal error while loading LOCK, please reload the page', 'danger', Infinity);
+      this.model.notification.show('Fatal error while loading LOCK, please try to reload the page', 'danger', Infinity);
       return;
     }
-    this.padlockState = RemoteData.success(result);
+    this._padlockState = RemoteData.success(result);
     this.notify();
   }
 
   /**
-   * Ask server to get the lock of Control
-   * Result of this action will be an update by WS
+   * Service method to request an action on a lock for a given detector.
+   * @param {String} detector - name of the lock to act on
+   * @param {DetectorLockAction} action - action to take on the lock
+   * @param {Boolean} [shouldForce = false] - whether to force the action
+   * @return {Promise<void>}
    */
-  async lock(entity) {
+  async actionOnLock(detector, action, shouldForce = false) {
+    const path = shouldForce ? `/api/locks/force/${action}/${detector}` : `/api/locks/${action}/${detector}`;
     try {
-      const result = await jsonPut(`/api/locks/take/${entity}`);
-      this.padlockState = RemoteData.success(result);
-      this.model.notification.show(`Lock ${entity} taken`, 'success', 1500);
+      const result = await jsonPut(path);
+      this._padlockState = RemoteData.success(result);
+      this.notify();
     } catch (error) {
-      this.model.notification.show(error, 'danger');
+      this.model.notification.show(error.message, 'danger');
     }
   }
 
   /**
-   * Force Control lock (eg. if someone left the lock in locked state), an administrator can release the lock
+   * Getters & Setters
    */
-  async forceRelease(entity) {
-    try {
-      const result = await jsonPut(`/api/locks/release/${entity}/true`);
-      this.padlockState = RemoteData.success(result);
-      this.model.notification.show(`Lock ${entity} forcefully released`, 'success', 1500);
-    } catch (error) {
-      this.model.notification.show(error, 'danger');
-    }
+
+  /**
+   * Set padlock state from ajax or websocket as a RemoteData
+   * @param {Object<String, DetectorLock>} detectorsLocksState - object representing PadLock from server
+   */
+  set padlockState(detectorsLocksState) {
+    this._padlockState = RemoteData.success(detectorsLocksState);
+    this.notify();
   }
 
   /**
-   * Ask server to release the lock of Control
-   * Result of this action will be an update by WS
+   * Get the padlock state
+   * @return {RemoteData<Object<String, DetectorLock>>}
    */
-  async unlock(entity) {
-    try {
-      const result = await jsonPut(`/api/locks/release/${entity}`);
-      this.padlockState = RemoteData.success(result);
-      this.model.notification.show(`Lock ${entity} released`, 'success', 1500);
-    } catch (error) {
-      this.model.notification.show(error, 'danger');
-    }
+  get padlockState() {
+    return this._padlockState;
   }
 }
