@@ -90,48 +90,20 @@ export default class Lock extends Observable {
   }
 
   /**
-   * Method to send request to take lock for given detector to the current user
-   * @param {String} detector - name of the lock to take
+   * Service method to request an action on a lock for a given detector.
+   * @param {String} detector - name of the lock to act on
+   * @param {String['TAKE', 'RELEASE']} action - action to take on the lock
+   * @param {Boolean} [shouldForce = false] - whether to force the action
    * @return {Promise<void>}
    */
-  async takeLock(detector) {
+  async actionOnLock(detector, action, shouldForce = false) {
+    const path = shouldForce ? `/api/locks/force/${action}/${detector}` : `/api/locks/${action}/${detector}`;
     try {
-      const result = await jsonPut(`/api/locks/take/${detector}`);
+      const result = await jsonPut(path);
       this._padlockState = RemoteData.success(result);
       this.notify();
     } catch (error) {
-      this.model.notification.show(error, 'danger');
-    }
-  }
-
-  /**
-   * Method to send request to release lock for given detector
-   * @param {String} detector - for which to release the lock
-   * @return {Promise<void>}
-   */
-  async releaseLock(detector) {
-    try {
-      const result = await jsonPut(`/api/locks/release/${detector}`);
-      this._padlockState = RemoteData.success(result);
-      this.notify();
-    } catch (error) {
-      this.model.notification.show(error, 'danger');
-    }
-  }
-
-  /**
-   * Method to request the release by force of a lock for a given detector.
-   * This is an admin action and double checked on the server side.
-   * @param {String} detector - name of the lock to release by force
-   * @return {Promise<void>}
-   */
-  async forceReleaseLock(detector) {
-    try {
-      const result = await jsonPut(`/api/locks/force/release/${detector}`);
-      this._padlockState = RemoteData.success(result);
-      this.notify();
-    } catch (error) {
-      this.model.notification.show(error, 'danger');
+      this.model.notification.show(error.message, 'danger');
     }
   }
 
