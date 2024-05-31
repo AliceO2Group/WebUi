@@ -112,8 +112,8 @@ const detectorLockRow = (model, detector, lockState) => {
     ),
     h('td', ownerName),
     model.isAllowed(ROLES.Admin) && h('td', [
-      detectorLockActionButton(model, detector, lockState, DetectorLockAction.RELEASE, 'Force Release'),
-      detectorLockActionButton(model, detector, lockState, DetectorLockAction.TAKE, 'Force Take')
+      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.RELEASE, 'Force Release'),
+      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.TAKE, 'Force Take')
     ])
   ]);
 };

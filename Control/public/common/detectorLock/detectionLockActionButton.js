@@ -17,16 +17,16 @@ import {DetectorLockState} from './../enums/DetectorLockState.enum.js';
 
 /**
  * Button with action to force take/release lock for a detector
- * @param {Model} model - root model of the application
+ * @param {Lock} lockModel - model of the lock service 
+ * @param {String} detector - detector name
+ * @param {DetectorLockState} lockState - lock state of the detector
  * @param {DetectorLockAction} action - action to be performed
- * @param {String} label - button label
+ * @param {String} label - button label to be displayed to the user
  * @return {vnode}
  */
-export const detectorLockActionButton = (model, detector, lockState, action, label = `Force ${action}`) => {
+export const detectorLockActionButton = (lockModel, detector, lockState, action, label = `Force ${action}`) => {
   return h('button.btn.btn-sm.btn-danger', {
-    disabled: lockState.state === DetectorLockState.FREE,
-    onclick: () => model.lock.actionOnLock(detector, action, true)
+    disabled: lockState?.state === DetectorLockState.FREE,
+    onclick: () => lockModel.actionOnLock(detector, action, true)
   }, label);
 };
-
-
