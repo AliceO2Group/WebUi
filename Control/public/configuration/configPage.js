@@ -421,5 +421,5 @@ Are you sure you would like to continue?`)
         && model.configuration.saveAndConfigureCRUs()
     },
     disabled: model.configuration.configurationRequest.isLoading()
-    || (model.workflow.model.detectors.isSingleView() && !model.lock.isLockedByMe(model.detectors.selected)),
+    || (model.workflow.model.detectors.isSingleView() && !model.lock.isLockedByCurrentUser(model.detectors.selected)),
   }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Save & Configure');

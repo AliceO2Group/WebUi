@@ -67,10 +67,10 @@ const detectorSelectionPanel = (model, name) => {
   const {services: {detectors: {availability = {}} = {}}} = model;
   const isDetectorActive = model.workflow.flpSelection.isDetectorActive(name);
   if (isDetectorActive
-    || (model.lock.isLocked(name) && !model.lock.isLockedByMe(name))) {
+    || (model.lock.isLocked(name) && !model.lock.isLockedByCurrentUser(name))) {
     className = 'disabled-item warning';
     title = 'Detector is running and/or locked';
-  } else if (model.lock.isLockedByMe(name)) {
+  } else if (model.lock.isLockedByCurrentUser(name)) {
     if (model.workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {
       className += 'selected ';
       title = 'Detector is locked and selected';
@@ -88,7 +88,11 @@ const detectorSelectionPanel = (model, name) => {
         className,
         title,
         style,
-        onclick: () => model.lock.isLockedByMe(name) && model.workflow.flpSelection.toggleDetectorSelection(name),
+        onclick: () => {
+          if (model.lock.isLockedByCurrentUser(name)) {
+            model.workflow.flpSelection.toggleDetectorSelection(name);
+          }
+        }
       }, model.workflow.flpSelection.getDetectorWithIndexes(name)
       )
     ]),
