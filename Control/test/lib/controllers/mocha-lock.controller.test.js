@@ -18,6 +18,7 @@ const sinon = require('sinon');
 
 const {LockController} = require('./../../../lib/controllers/Lock.controller.js');
 const {LockService} = require('./../../../lib/services/Lock.service.js');
+const {DetectorLockAction} = require('../../../lib/common/lock/detectorLockAction.enum.js');
 
 describe(`'LockController' test suite`, () => {
   const res = {
@@ -60,7 +61,7 @@ describe(`'LockController' test suite`, () => {
     it('should successfully respond to a request to take lock for a specified detector', () => {
       lockController.actionLockHandler({
         params: {
-          action: 'TAKE',
+          action: DetectorLockAction.TAKE,
           detectorId: 'ABC',
         }, session: {
           personid: 0,
@@ -91,7 +92,7 @@ describe(`'LockController' test suite`, () => {
     it('should return error when an already owned lock is requested to be taken by another user', () => {
       lockController.actionLockHandler({
         params: {
-          action: 'TAKE',
+          action: DetectorLockAction.TAKE,
           detectorId: 'ABC',
         }, session: {
           personid: 1,
@@ -191,7 +192,7 @@ describe(`'LockController' test suite`, () => {
     it('should successfully respond to a request to take lock by force for a specified detector', () => {
       lockController.actionLockHandler({
         params: {
-          action: 'TAKE',
+          action: DetectorLockAction.TAKE,
           detectorId: 'ABC',
         }, session: {
           personid: 0,
@@ -221,7 +222,7 @@ describe(`'LockController' test suite`, () => {
       res.json.resetHistory();
       lockController.actionForceLockHandler({
         params: {
-          action: 'TAKE',
+          action: DetectorLockAction.TAKE,
           detectorId: 'ABC',
         }, session: {
           personid: 1,

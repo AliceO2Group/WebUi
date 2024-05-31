@@ -92,7 +92,7 @@ export default class Lock extends Observable {
   /**
    * Service method to request an action on a lock for a given detector.
    * @param {String} detector - name of the lock to act on
-   * @param {String['TAKE', 'RELEASE']} action - action to take on the lock
+   * @param {DetectorLockAction} action - action to take on the lock
    * @param {Boolean} [shouldForce = false] - whether to force the action
    * @return {Promise<void>}
    */

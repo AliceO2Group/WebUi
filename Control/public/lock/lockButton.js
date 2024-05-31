@@ -14,6 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
+import {DetectorLockAction} from './../common/enums/DetectorLockAction.enum.js';
 
 /**
  * Button build with builtin logic of detector lock state which allows users to:
@@ -36,14 +37,14 @@ export const detectorLockButton = (model, detector, lockState, isIcon = false) =
     if (lockModel.isLockedByCurrentUser(detector)) {
       detectorLockButtonClass = '.success';
       detectorLockHandler = () => {
-        lockModel.actionOnLock(detector, 'RELEASE', false);
+        lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
         model.workflow.flpSelection.unselectDetector(detector);
       };
     } else {
       detectorLockButtonClass = '.warning.disabled.disabled-item';
     }
   } else {
-    detectorLockHandler = () => lockModel.actionOnLock(detector, 'TAKE', false);
+    detectorLockHandler = () => lockModel.actionOnLock(detector, DetectorLockAction.TAKE, false);
   }
   const element = isIcon ? '.flex-row.items-center.actionable-icon' : 'button.btn';
 
@@ -51,5 +52,5 @@ export const detectorLockButton = (model, detector, lockState, isIcon = false) =
     title: isDetectorLockTaken ? `Lock is taken by ${lockState.owner.fullName}` : 'Lock is free',
     disabled: isDetectorLockTaken && !lockModel.isLockedByCurrentUser(detector),
     onclick: detectorLockHandler,
-  }, isDetectorLockTaken ? iconLockLocked() : iconLockUnlocked())
+  }, isDetectorLockTaken ? iconLockLocked() : iconLockUnlocked());
 };

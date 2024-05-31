@@ -66,7 +66,7 @@ const detectorSelectionPanel = (model, name) => {
   let title = '';
   let style = 'font-weight: 150;flex-grow:2';
   const {lock, services: {detectors: {availability = {}} = {}}} = model;
-  const lockState = lock.padlockState.payload?.[name]
+  const lockState = lock.padlockState.payload?.[name];
   const isDetectorActive = model.workflow.flpSelection.isDetectorActive(name);
   if (isDetectorActive
     || (model.lock.isLocked(name) && !model.lock.isLockedByCurrentUser(name))) {

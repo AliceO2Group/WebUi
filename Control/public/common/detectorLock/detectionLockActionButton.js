@@ -18,7 +18,7 @@ import {DetectorLockState} from './../enums/DetectorLockState.enum.js';
 /**
  * Button with action to force take/release lock for a detector
  * @param {Model} model - root model of the application
- * @param {String['TAKE', 'RELEASE']} action - action to be performed
+ * @param {DetectorLockAction} action - action to be performed
  * @param {String} label - button label
  * @return {vnode}
  */

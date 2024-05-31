@@ -19,6 +19,7 @@ import {detectorLockButton} from './lockButton.js';
 import {ROLES} from './../workflow/constants.js';
 import errorPage from './../common/errorPage.js';
 import loading from './../common/loading.js';
+import {DetectorLockAction} from '../common/enums/DetectorLockAction.enum.js';
 
 const LOCK_TABLE_HEADER_KEYS = ['Detector', 'Owner'];
 
@@ -111,8 +112,8 @@ const detectorLockRow = (model, detector, lockState) => {
     ),
     h('td', ownerName),
     model.isAllowed(ROLES.Admin) && h('td', [
-      detectorLockActionButton(model, detector, lockState, 'RELEASE', 'Force Release'),
-      detectorLockActionButton(model, detector, lockState, 'TAKE', 'Force Take')
+      detectorLockActionButton(model, detector, lockState, DetectorLockAction.RELEASE, 'Force Release'),
+      detectorLockActionButton(model, detector, lockState, DetectorLockAction.TAKE, 'Force Take')
     ])
   ]);
 };
