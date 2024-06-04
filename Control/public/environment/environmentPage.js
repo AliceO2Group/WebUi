@@ -61,7 +61,7 @@ const showEnvironmentPage = (model, environmentInfo) => {
     environmentHeader(environmentInfo),
     environmentActionPanel(model, environmentInfo),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
-    h('.flex-row.g2', [
+    h('.flex-row.g2.z-index-one', [
       environmentTasksSummaryTable(environmentInfo, availability),
       environmentEpnTasksSummaryTable(environmentInfo),
     ]),
