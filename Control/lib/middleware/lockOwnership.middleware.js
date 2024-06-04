@@ -34,15 +34,24 @@ const lockOwnershipMiddleware = (lockService, environmentService) => {
     const {name, username, personid, access} = req.session;
     const {id = ''} = req.body ?? {};
 
+    let detectors = [];
     try {
-      const {includedDetectors = []} = await environmentService.getEnvironment(id);
-      if (!lockService.hasLocks(new User(username, name, personid, access), includedDetectors)) {
+      const environment = await environmentService.getEnvironment(id);
+      detectors = environment.includedDetectors;
+    } catch (error) {
+      console.error(error);
+      updateExpressResponseFromNativeError(res, grpcErrorToNativeError(error));
+      return;
+    }
+    try {
+      if (!lockService.hasLocks(new User(username, name, personid, access), detectors)) {
         res.status(403).json({message: `Action not allowed for user ${name} due to missing ownership of lock(s)`});
       } else {
         next();
       }
     } catch (error) {
-      updateExpressResponseFromNativeError(res, grpcErrorToNativeError(error));
+      console.error(error);
+      updateExpressResponseFromNativeError(res, error);
     }
   };
 };
