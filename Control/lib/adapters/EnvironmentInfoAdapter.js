@@ -254,7 +254,7 @@ class EnvironmentInfoAdapter {
       const {devices = [], ddsSessionId = '', ddsSessionStatus = '', state = ''} = JSON.parse(odc);
       const states = {};
       const hosts = new Set();
-      
+
       Object.values(devices).forEach((device) => {
         const {ecsState, host} = device;
         hosts.add(host);
