@@ -48,6 +48,7 @@ const minimumRoleMiddleware = (minimumRole) => {
       }
       next();
     } catch (error) {
+      console.error(error);
       updateExpressResponseFromNativeError(res, error);
     }
   }
