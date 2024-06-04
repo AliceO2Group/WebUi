@@ -104,7 +104,12 @@ class EnvironmentInfoAdapter {
     if (taskSource === TASKS_SOURCE.EPN) {
       const {integratedServicesData: {odc = '{}'}} = environment;
       const odcParsed = JSON.parse(odc);
-      environmentInfo.tasks = odcParsed.devices;
+      environmentInfo.tasks = Array.from(Object.values(odcParsed.devices).map((device) => {
+        device.epnState = device.state;
+        device.state = device.ecsState;
+        delete device.ecsState;
+        return device;
+      }));
     } else if (taskSource === TASKS_SOURCE.FLP) {
       const {tasks = [], includedDetectors} = environment;
       environmentInfo.tasks = [];
@@ -249,14 +254,15 @@ class EnvironmentInfoAdapter {
       const {devices = [], ddsSessionId = '', ddsSessionStatus = '', state = ''} = JSON.parse(odc);
       const states = {};
       const hosts = new Set();
-      for (const device of devices) {
-        const {state, host} = device;
+      
+      Object.values(devices).forEach((device) => {
+        const {ecsState, host} = device;
         hosts.add(host);
-        states[state] = (states[state] + 1) || 1;
-      }
+        states[ecsState] = (states[ecsState] + 1) || 1;
+      });
       return {
         tasks: {
-          total: devices.length,
+          total: Object.keys(devices).length,
           states
         },
         hosts: hosts.size,
@@ -273,7 +279,6 @@ class EnvironmentInfoAdapter {
       };
     }
   }
-
 
   /**
    * Given a JSON containing environment information and a specific key:
