@@ -16,6 +16,7 @@ import {h, iconPulse} from '/js/src/index.js';
 import pageLoading from './../../../common/pageLoading.js';
 import {detectorLockButton} from './../../../lock/lockButton.js';
 import {dcsPropertiesRow} from '../../../common/dcs/dcsPropertiesRow.js';
+import {DetectorLockAction} from '../../../common/enums/DetectorLockAction.enum.js';
 
 /**
  * Create a selection area for all detectors retrieved from AliECS
@@ -28,7 +29,15 @@ export default (model, onlyGlobal = false) => {
   const detectors = model.lock.padlockState;
   const areDetectorsReady = activeDetectors.isSuccess() && detectors.isSuccess();
   return h('.w-100', [
-    h('.w-100.flex-row.panel-title.p2', h('h5.w-100.bg-gray-light', 'Detectors Selection')),
+    h('.w-100.flex-row.panel-title.p2', [
+      h('h5.w-100.bg-gray-light.flex-grow.items-center.flex-row.justify-center', 'Detectors Selection'),
+      h('button.btn.btn-primary.f6.ml1', {
+        onclick: async () => {
+          await model.lock.actionOnLock('ALL', DetectorLockAction.TAKE, false);
+          model.workflow.flpSelection.selectAllAvailableDetectors();
+        }
+      }, 'Select All')
+    ]),
     h('.w-100.p2.panel',
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
       (areDetectorsReady) && detectorsSelectionArea(model, Object.keys(detectors.payload), onlyGlobal),
