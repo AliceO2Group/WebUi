@@ -37,10 +37,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully request a list of template objects', async () => {
-    const templates = await page.evaluate(() => window.model.workflow.templates.match({
-      Success: (payload) => payload,
-      Other: () => null,
-    }));
+    await page.waitForTimeout(500);
+    const templates = await page.evaluate(() => window.model.workflow.templates.payload);
 
     assert.ok(templates?.length !== 0, `No templates received`);
   });
@@ -82,7 +80,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have successfully lock and select detector from area list', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(1)').click());
+    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > div').click());
     await page.waitForTimeout(1000);
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
     await page.waitForTimeout(1000);
@@ -110,7 +108,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
     const queryResult = await page.evaluate(() => window.model.environment.itemNew.match({
       Failure: (error) => [error],
       NotAsked: () => [],
-      Other: () => null,
+      Loading: () => [],
+      Success: () => null,
     }));
     const revision = await page.evaluate(() => window.model.workflow.form.revision);
 

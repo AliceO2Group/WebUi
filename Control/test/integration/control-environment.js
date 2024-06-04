@@ -142,8 +142,8 @@ describe('`Control Environment` test-suite', async () => {
     await page.goto(config.url + '?page=locks');
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=locks');
-    await page.waitForSelector('button.danger');
-    await page.evaluate(() => document.querySelector('button.danger').click());
+    await page.waitForSelector('button.btn.btn-danger', {timeout: 5000});
+    await page.evaluate(() => document.querySelector('button.btn.btn-danger').click());
   });
 });
 
