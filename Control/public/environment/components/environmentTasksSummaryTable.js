@@ -13,7 +13,7 @@
 */
 
 import {dcsProperty} from '../../common/dcs/dcsPropertiesRow.js';
-import {HARDWARE_COMPONENTS_WITHOUT_EPN, HardwareComponent} from '../../common/enums/HardwareComponent.js';
+import {HARDWARE_COMPONENTS, HardwareComponent} from '../../common/enums/HardwareComponent.js';
 import {FLP_TASK_STATES, getTaskStateClassAssociation} from './../../common/enums/TaskState.js';
 import {h} from '/js/src/index.js';
 
@@ -46,8 +46,7 @@ export const environmentTasksSummaryTable = (environment, detectorsAvailability)
  */
 const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
   h('th', 'Tasks Summary'),
-  HARDWARE_COMPONENTS_WITHOUT_EPN
-    .filter(component => component !== 'EPN')
+  HARDWARE_COMPONENTS
     .map((component) => {
       const componentInLowerCase = component.toLocaleLowerCase();
       const colspan = hardware[componentInLowerCase]?.detectorCounters
@@ -73,7 +72,7 @@ const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}, availabili
       detector,
       shouldDisplaySorAvailability && h('.f6', dcsProperty(availability[detector].sorAvailability, 'SOR'))
     ])),
-    h('th.text-center', {colspan: HARDWARE_COMPONENTS_WITHOUT_EPN.length - 1}, ''), // empty cell to align with the rest of the table
+    h('th.text-center', {colspan: HARDWARE_COMPONENTS.length - 1}, ''), // empty cell to align with the rest of the table
   ]);
 
 /**
@@ -86,7 +85,7 @@ const rowForTaskSate = (state, hardware) => {
   const taskClass = getTaskStateClassAssociation(state);
   return h('tr', [
     h(`td${taskClass}`, state),
-    HARDWARE_COMPONENTS_WITHOUT_EPN
+    HARDWARE_COMPONENTS
       .map((component) => {
         const componentInLowerCase = component.toLocaleLowerCase();
         if (componentInLowerCase === 'flp') {
