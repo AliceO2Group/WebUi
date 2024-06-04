@@ -66,7 +66,7 @@ class DetectorLock {
    * @return {Boolean}
    */
   isOwnedBy(user) {
-    return this._owner.isSameUser(user);
+    return this._owner && this._owner.isSameUser(user);
   }
 
   /**
