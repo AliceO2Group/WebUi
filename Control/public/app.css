@@ -109,3 +109,4 @@
 .table-ecs tbody tr:nth-child(even) { background-color: var(--color-gray-lighter); }
 .table-ecs-sm th, .table-ecs-sm td { padding: 0.3em; }
 .table-ecs-primary>th, .table-ecs-primary>td { background-color: var(--color-primary); color: var(--color-white); }
+.z-index-one { z-index: 1; }
