@@ -118,6 +118,9 @@ export default class Model extends Observable {
     JSROOT.settings.ApproxTextSize = true;
     JSROOT.settings.fFrameLineColor = 16;
     JSROOT.settings.PreferSavedPoints = true;
+    JSROOT.settings.SmallPad = {
+      height: 10,
+    };
 
     /*
      * Init first page
