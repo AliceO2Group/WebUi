@@ -49,6 +49,7 @@ export const detectorLockButton = (model, detector, lockState, isIcon = false) =
   const element = isIcon ? '.flex-row.items-center.actionable-icon' : 'button.btn';
 
   return h(`${element}.${detectorLockButtonClass}`, {
+    id: `detectorLockButtonFor${detector}`,
     title: isDetectorLockTaken ? `Lock is taken by ${lockState.owner.fullName}` : 'Lock is free',
     disabled: isDetectorLockTaken && !lockModel.isLockedByCurrentUser(detector),
     onclick: detectorLockHandler,

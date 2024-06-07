@@ -77,12 +77,18 @@ describe('`pageNewEnvironment` test-suite', async () => {
       }
     }
     await page.evaluate(() => window.model.workflow.form.variables);
+    await page.waitForTimeout(2000);
   });
 
   it('should have successfully lock and select detector from area list', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > div').click());
+    await page.screenshot({
+      path: 'lock-selection.png',
+    });
+    await page.waitForSelector('#detectorLockButtonForTST', {timeout: 2000});
+    await page.evaluate(() => document.querySelector('#detectorLockButtonForTST').click());
     await page.waitForTimeout(1000);
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
+    await page.waitForSelector('#detectorSelectionButtonForTST', {timeout: 2000});
+    await page.evaluate(() => document.querySelector('#detectorSelectionButtonForTST').click());
     await page.waitForTimeout(1000);
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['TST'], 'Missing detector selection');
