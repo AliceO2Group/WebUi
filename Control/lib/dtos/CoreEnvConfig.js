@@ -13,7 +13,7 @@
 */
 'use strict';
 
-const User = require('./User.js');
+const {User} = require('./User.js');
 
 /**
  * CoreEnvConfig DTO
