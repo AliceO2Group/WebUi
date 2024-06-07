@@ -29,14 +29,18 @@ export default (model, onlyGlobal = false) => {
   const detectors = model.lock.padlockState;
   const areDetectorsReady = activeDetectors.isSuccess() && detectors.isSuccess();
   return h('.w-100', [
-    h('.w-100.flex-row.panel-title.p2', [
-      h('h5.w-100.bg-gray-light.flex-grow.items-center.flex-row.justify-center', 'Detectors Selection'),
-      h('button.btn.btn-primary.f6.ml1', {
+    h('.w-100.flex-row.panel-title.p2.f6', [
+      h('button.btn.btn-sm', {
         onclick: async () => {
           await model.lock.actionOnLock('ALL', DetectorLockAction.TAKE, false);
+        }
+      }, 'Lock Available'),
+      h('h5.w-100.bg-gray-light.flex-grow.items-center.flex-row.justify-center', 'Detectors Selection'),
+      h('button.btn.btn-primary.btn-sm', {
+        onclick: async () => {
           model.workflow.flpSelection.selectAllAvailableDetectors();
         }
-      }, 'Select All')
+      }, 'Select Available')
     ]),
     h('.w-100.p2.panel',
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
