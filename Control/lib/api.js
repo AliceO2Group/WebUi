@@ -231,5 +231,10 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
  */
 async function initializeData(apricotService, lockService) {
   await apricotService.init();
+  log.infoMessage(`Initial data retrieved from AliECS/Apricot: ${apricotService.detectors} detectors`, {
+    level: 99,
+    system: 'GUI',
+    facility: 'cog/api'
+  });
   lockService.setLockStatesForDetectors(apricotService.detectors);
 }
