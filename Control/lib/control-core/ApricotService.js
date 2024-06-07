@@ -18,6 +18,7 @@ const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
+const  {User} = require('./../dtos/User.js');
 const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
 
 /**
@@ -214,11 +215,12 @@ class ApricotService {
   async updateCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      const {username, personid} = req.session;
+      const {username, name, personid, access} = req.session;
+      const user = new User(username, name, personid, access);
       data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, data.user);
+      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
       await this.apricotProxy['SetRuntimeEntry']({
         component: COMPONENT,
         key: envConfigToSave.id,
