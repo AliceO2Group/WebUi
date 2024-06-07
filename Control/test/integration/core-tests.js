@@ -28,7 +28,7 @@ describe('Control', function() {
 
   before(async () => {
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: 'new'});
     page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 770});
     exports.page = page;
@@ -70,6 +70,7 @@ describe('Control', function() {
   it('should have redirected to default page "/?page=environments"', async () => {
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments', 'Could not load home page of AliECS GUI');
+    await page.waitForTimeout(4000);
   });
 
   require('./create-new-environment');

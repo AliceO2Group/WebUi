@@ -27,20 +27,39 @@ import {DetectorLockAction} from '../../../common/enums/DetectorLockAction.enum.
 export default (model, onlyGlobal = false) => {
   const {activeDetectors} = model.workflow.flpSelection;
   const detectors = model.lock.padlockState;
+  let allowedDetectors = [];
+
   const areDetectorsReady = activeDetectors.isSuccess() && detectors.isSuccess();
+  if (areDetectorsReady) {
+    allowedDetectors = JSON.parse(JSON.stringify(detectors.payload));
+    if (onlyGlobal) {
+      delete allowedDetectors.TST;
+    }
+    allowedDetectors = Object.keys(allowedDetectors);
+  }
+
   return h('.w-100', [
-    h('.w-100.flex-row.panel-title.p2', [
-      h('h5.w-100.bg-gray-light.flex-grow.items-center.flex-row.justify-center', 'Detectors Selection'),
-      h('button.btn.btn-primary.f6.ml1', {
+    h('.w-100.flex-row.panel-title.p2.f6', [
+      areDetectorsReady && h('button.btn.btn-sm', {
         onclick: async () => {
           await model.lock.actionOnLock('ALL', DetectorLockAction.TAKE, false);
-          model.workflow.flpSelection.selectAllAvailableDetectors();
+          if (onlyGlobal) {
+            await model.lock.actionOnLock('TST', DetectorLockAction.RELEASE, false);
+          }
         }
-      }, 'Select All')
+      }, 'Lock Available'),
+      h('h5.w-100.bg-gray-light.flex-grow.items-center.flex-row.justify-center', 'Detectors Selection'),
+      areDetectorsReady && h('button.btn.btn-primary.btn-sm', {
+        onclick: async () => {
+          model.workflow.flpSelection.selectAllAvailableDetectors(allowedDetectors);
+        }
+      }, 'Select Available')
     ]),
     h('.w-100.p2.panel',
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
-      (areDetectorsReady) && detectorsSelectionArea(model, Object.keys(detectors.payload), onlyGlobal),
+      (!areDetectorsReady) && h('.f7.flex-column',
+        `Loading detectors...active: ${activeDetectors.kind} and all: ${detectors.kind}`),
+      (areDetectorsReady) && detectorsSelectionArea(model, allowedDetectors),
       (activeDetectors.isFailure() || detectors.isFailure()) && h('.f7.flex-column', 'Unavailable to load detectors'),
     )
   ]);
@@ -48,18 +67,16 @@ export default (model, onlyGlobal = false) => {
 
 /**
  * Display an area with selectable elements representing detectors
- * @param {Object} model
- * @param {Array<string>} list
- * @param {boolean} onlyGlobal - if only global detectors should be displayed
+ * @param {Model} model - root model of the application
+ * @param {Array<string>} detectors - list of detectors to allow selection of
  * @return {vnode}
  */
-const detectorsSelectionArea = (model, list, onlyGlobal) => {
+const detectorsSelectionArea = (model, detectors) => {
   return h('.w-100.m1.text-left.shadow-level1.grid.g2', {
     style: 'max-height: 40em;'
   }, [
-    list
+    detectors
       .filter((name) => (name === model.detectors.selected || !model.detectors.isSingleView()))
-      .filter((name) => !onlyGlobal || (onlyGlobal && name !== 'TST'))
       .map((name) => detectorSelectionPanel(model, name))
   ]);
 };
