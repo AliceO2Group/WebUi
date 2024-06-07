@@ -129,8 +129,6 @@ class LockService {
   }
 
   /**
-   * 
-   * TODO
    * Checks if the given user has the lock for the provided list of detectors
    * @param {String} userName - of user to check lock ownership
    * @param {Number} userId - person id of the user
@@ -138,7 +136,7 @@ class LockService {
    * @returns {boolean}
    */
   hasLocks(user, detectors) {
-    return detectors.every((detector) => this._locksByDetector[detector].isOwnedBy(user));
+    return detectors.every((detector) => this._locksByDetector[detector]?.isOwnedBy(user));
   }
 
   /**

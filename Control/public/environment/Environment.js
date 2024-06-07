@@ -232,6 +232,7 @@ export default class Environment extends Observable {
           if (!env.currentTransition) {
             env.currentTransition = undefined;
           }
+          delete env.tasks;
           Object.assign(this.item.payload, env);
           this.notify();
           if (currentTransition && !env.currentTransition) {

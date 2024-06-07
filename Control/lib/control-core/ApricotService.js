@@ -43,6 +43,11 @@ class ApricotService {
   async init() {
     try {
       this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+      log.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
+        level: 99,
+        system: 'GUI',
+        facility: 'cog/api'
+      });
       await Promise.allSettled(
         this.detectors.map(async (detector) => {
           try {
