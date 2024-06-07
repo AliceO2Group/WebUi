@@ -56,7 +56,7 @@ export default class Task extends Observable {
       this.list[body.taskId] = RemoteData.failure(result.message);
     } else {
       const commandInfo = this.parseTaskCommandInfo(result.task.commandInfo, body.taskId);
-      commandInfo.className = result.task.classInfo.name;
+      commandInfo.className = result.task.shortInfo.className;
       commandInfo.mesosLog = result.task.shortInfo.sandboxStdout;
       this.list[body.taskId] = RemoteData.success(commandInfo);
     }
