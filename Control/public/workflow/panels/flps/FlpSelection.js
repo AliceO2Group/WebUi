@@ -137,19 +137,20 @@ export default class FlpSelection extends Observable {
   /**
    * Method which checks if a detector is available and current user has the lock for it. 
    * If so, it will select the detector and all its associated FLPs
+   * @param {Array<String>} detectorsToSelect - list of detectors to select
    * @returns {Promise<void>}
    */
-  selectAllAvailableDetectors() {
+  selectAllAvailableDetectors(detectorsToSelect) {
+    this.selectedDetectors = [];
     const activeDetectors = this.activeDetectors.isSuccess() ? this.activeDetectors.payload.detectors : [];
-    const detectors = this.detectors.isSuccess() ? this.detectors.payload : [];
-    const availableDetectors = detectors.filter((detector) =>
+    detectorsToSelect.filter((detector) =>
       !activeDetectors.includes(detector) && this.workflow.model.lock.isLockedByCurrentUser(detector)
-    );
+    )
+      .forEach((detector) => {
+        this.selectedDetectors.push(detector);
+        this.setHostsForDetector(detector, true);
 
-    this.selectedDetectors.push(...availableDetectors);
-    for (const detector of availableDetectors) {
-      this.setHostsForDetector(detector, true);
-    }
+      });
     this.notify();
   }
 

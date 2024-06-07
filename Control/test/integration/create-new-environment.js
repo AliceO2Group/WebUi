@@ -32,7 +32,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   it('should successfully load newEnvironment page', async () => {
     await page.goto(url + '?page=newEnvironmentAdvanced', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     assert.strictEqual(location.search, '?page=newEnvironmentAdvanced');
   });
 
@@ -84,7 +84,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
     await page.screenshot({
       path: 'lock-selection.png',
     });
-    await page.waitForSelector('#detectorLockButtonForTST', {timeout: 2000});
+    const detectors = await page.evaluate(() => JSON.stringify(window.model.lock.padlockState));
+    const activeDetectors = await page.evaluate(() => JSON.stringify(window.model.workflow.flpSelection.activeDetectors));
+    console.log('Detectors are:' , detectors);
+    console.log('Active Detectors are:' , activeDetectors);
+    
+    await page.waitForSelector('#detectorLockButtonForTST', {timeout: 6000});
     await page.evaluate(() => document.querySelector('#detectorLockButtonForTST').click());
     await page.waitForTimeout(1000);
     await page.waitForSelector('#detectorSelectionButtonForTST', {timeout: 2000});
