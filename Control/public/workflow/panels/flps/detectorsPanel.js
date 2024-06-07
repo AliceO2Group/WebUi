@@ -59,7 +59,7 @@ export default (model, onlyGlobal = false) => {
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
       (!areDetectorsReady) && h('.f7.flex-column',
         `Loading detectors...active: ${activeDetectors.kind} and all: ${detectors.kind}`),
-      (areDetectorsReady) && detectorsSelectionArea(model, allowedDetectors, onlyGlobal),
+      (areDetectorsReady) && detectorsSelectionArea(model, allowedDetectors),
       (activeDetectors.isFailure() || detectors.isFailure()) && h('.f7.flex-column', 'Unavailable to load detectors'),
     )
   ]);
