@@ -98,6 +98,7 @@ const detectorSelectionPanel = (model, name) => {
       detectorLockButton(model, name, lockState, true),
       h('a.menu-item.w-wrapped', {
         className,
+        id: `detectorSelectionButtonFor${name}`,
         title,
         style,
         onclick: () => {

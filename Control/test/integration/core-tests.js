@@ -28,7 +28,7 @@ describe('Control', function() {
 
   before(async () => {
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: 'new'});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 770});
     exports.page = page;
