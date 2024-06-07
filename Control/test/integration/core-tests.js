@@ -70,6 +70,7 @@ describe('Control', function() {
   it('should have redirected to default page "/?page=environments"', async () => {
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments', 'Could not load home page of AliECS GUI');
+    await page.waitForTimeout(4000);
   });
 
   require('./create-new-environment');
