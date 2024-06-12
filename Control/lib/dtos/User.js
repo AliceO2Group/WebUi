@@ -41,7 +41,7 @@ class User {
     this._personid = personid;
 
     /**
-     * @type {Arrat<String>}
+     * @type {Array<String>}
      */
     this._accessList = [];
     if (typeof access === 'string') {
