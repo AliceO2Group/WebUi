@@ -39,7 +39,7 @@ class User {
      * @type {Number}
      */
     this._personid = personid;
-    
+
     /**
      * @type {Arrat<String>}
      */
@@ -101,10 +101,10 @@ class User {
 
   /**
    * Returns the access granted to this user
-   * @returns {String}
+   * @returns {Array<String>}
    */
   get access() {
-    return this._access;
+    return this._accessList;
   }
 
   /**
