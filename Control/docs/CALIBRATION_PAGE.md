@@ -1,6 +1,6 @@
 # Calibration Page
 
-ALICE detectors need to have successfully run certain configurations before start data taking during Stable Beams. These are so called "Calibration Runs" which contain a specific configuration. Thus, to reduce the error risk of selecting a wrong configuration or inputing wrong parameters, AliECS GUI provides a dedicated Calibration Page. 
+ALICE detectors need to have successfully run certain configurations before starting data taking operations. These are so called "Calibration Runs" which contain a specific configuration. Thus, to reduce the error risk of selecting a wrong configuration or inputing wrong parameters, AliECS GUI provides a dedicated Calibration Page. 
 
 This page allows admins to define in a JSON object what configurations need to be run by each detector and the GUI builds the page dynamically based on the configuration retrieved from the used KV Store.
 
