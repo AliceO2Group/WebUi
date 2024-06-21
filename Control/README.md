@@ -21,6 +21,8 @@
     - [Utils](#utils)
   - [Features](#features)
     - [Calibration Page](#calibration-page)
+    - [Global Runs Page](#global-runs-page)
+    - [Ignore FLPs by Run Type](#ignore-flps-by-run-type)
     - [GUI](#gui)
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
       - [Clean Resources/Tasks](#clean-resourcestasks)
@@ -119,6 +121,9 @@ Use of utils field is optional. Here, a user can specify configuration fields fo
 ## Features
 
 ### [Calibration Page](./docs/CALIBRATION_PAGE.md)
+### [Global Runs Page](./docs/GLOBAL_RUNS_PAGE.md)
+### [Ignore FLPs by Run Type](./docs/IGNORE_FLPS_BY_RUN_TYPE.md)
+
 
 ### GUI
 1. Lock interface - single user is allowed to execute commands, others act as spectators
