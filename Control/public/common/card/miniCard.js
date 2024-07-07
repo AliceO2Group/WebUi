@@ -25,9 +25,11 @@ export const miniCard = (title, children = [], classes = ['p2', 'g2']) => {
   return h(`.miniCard.flex-column.shadow-level1.br2`, {
     class: classes.join(' '),
   }, [
-    typeof title === 'string'
-      ? miniCardTitle(title)
-      : title,
+    !title
+      ? undefined
+      : typeof title === 'string'
+        ? miniCardTitle(title)
+        : title,
     children,
   ]);
 }
