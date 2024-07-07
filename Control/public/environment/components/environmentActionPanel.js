@@ -28,6 +28,6 @@ import {ROLES} from './../../workflow/constants.js';
 export const environmentActionPanel = (model, environmentInfo) => {
   const {includedDetectors = []} = environmentInfo;
   const hasLocks = includedDetectors.every((detector) => model.lock.isLockedByCurrentUser(detector));
-  const isAllowedToControl = model.isAllowed(ROLES.Admin) || (model.isAllowed(ROLES.Detector) && hasLocks);
+  const isAllowedToControl = (model.isAllowed(ROLES.Detector) && hasLocks);
   return miniCard('', controlEnvironmentPanel(model.environment, environmentInfo, isAllowedToControl));
 };
