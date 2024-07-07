@@ -40,29 +40,46 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
   const isConfigured = state === 'CONFIGURED';
   return h('', [
     h('.flex-row', [
-      h('.w-30.flex-row.g2', {
-      }, [
+      h('', {
+        style: 'flex-grow: 1;'
+      }, h('.g2.flex-row',[
         infoLoggerButton(item, 'InfoLogger FLP', COG.ILG_URL),
         infoLoggerButton(item, 'InfoLogger EPN', COG.ILG_EPN_URL),
       ]),
-      isAllowedToControl && h('.w-70.g4', {style: 'display: flex; justify-content: flex-end;'},
-        [
-          isStable && isConfigured &&
-          !isSorAvailable && h('.danger', 'SOR Unavailable for one or more included detectors'),
+      ),
+      h('.flex-column.justify-center', {
+        style: 'flex-grow: 3;'
+      }, [
+        h('.flex-column', [
+          !isAllowedToControl &&
+          h('span.warning.flex-end.flex-row.g1', [
+            'You do not own the necessary ',
+            h('a',{
+              href: '?page=locks',
+              onclick: (e) => model.router.handleLinkEvent(e),
+            }, 'locks'),
+            ' to control this environment.'
+          ]),
+          isStable && isConfigured && !isSorAvailable
+          && h('.danger.flex-end.flex-row', 'SOR is unavailable for one or more of the included detectors.'),
+
+        ]),
+        isAllowedToControl && h('.flex-row.flex-end.g2', [
           controlButton(
             '.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
             Boolean(currentTransition)
-          ), ' ',
+          ),
           controlButton(
             '.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
-          ), ' ', // button will not be displayed in any state due to OCTRL-628
+          ), // button will not be displayed in any state due to OCTRL-628
           controlButton('', environment, item, 'RESET', 'RESET', '', Boolean(currentTransition)), ' ',
           controlButton(
             '.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
-          ), ' ',
+          ),
           shutdownEnvButton(environment, item, Boolean(currentTransition)),
           killEnvButton(environment, item)
         ])
+      ])
     ]),
     environment.itemControl.match({
       NotAsked: () => null,
