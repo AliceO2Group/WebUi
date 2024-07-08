@@ -53,7 +53,7 @@ describe('`pageEnvironment` test-suite', async () => {
     assert.strictEqual(shutdownButton, 'Shutdown environment');
   });
 
-  it('should have one button for `Shutdown` environment without lock in possession but with user as admin', async () => {
+  it('should have informative message when user without lock in possession even as admin', async () => {
     await page.evaluate(() => {
       window.model.lock.actionOnLock('MID', 'RELEASE', false);
     });
@@ -62,9 +62,9 @@ describe('`pageEnvironment` test-suite', async () => {
     });
     assert.ok(!isLocked, 'Detector still appears as locked');
 
-    await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').title);
-    assert.strictEqual(shutdownButton, 'Shutdown environment');
+    await page.waitForSelector('#missing_lock_ownership_to_control_message', {timeout: 5000});
+    const informationMessage = await page.evaluate(() => document.querySelector('#missing_lock_ownership_to_control_message').innerText);
+    assert.strictEqual(informationMessage, 'You do not own the necessary\nlocks\nto control this environment.');
   });
 
   it('should not have button displayed if user is not admin or does not have the lock', async () => {
