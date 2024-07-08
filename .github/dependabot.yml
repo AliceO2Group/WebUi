@@ -14,7 +14,7 @@ updates:
   groups:
     dev-dependencies:
       patterns:
-        - "eslint"
+        # - "eslint"
         - "mocha"
         - "nock"
         - "nyc"
@@ -43,7 +43,7 @@ updates:
   groups:
     dev-dependencies:
       patterns:
-        - "eslint"
+        # - "eslint"
         - "mocha"
         - "nock"
         - "nyc"
@@ -68,7 +68,7 @@ updates:
   groups:
     dev-dependencies:
       patterns:
-        - "eslint"
+        # - "eslint"
         - "mocha"
         - "nock"
         - "nyc"
@@ -93,7 +93,7 @@ updates:
   groups:
     dev-dependencies:
       patterns:
-        - "eslint"
+        # - "eslint"
         - "mocha"
         - "nock"
         - "nyc"
