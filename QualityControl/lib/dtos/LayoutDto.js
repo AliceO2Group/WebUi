@@ -28,7 +28,7 @@ const ObjectDto = Joi.object({
 
 const TabsDto = Joi.object({
   id: Joi.string().required(),
-  name: Joi.string().min(1).max(20).required(),
+  name: Joi.string().min(1).max(50).required(),
   columns: Joi.number().min(1).max(5).default(2),
   objects: Joi.array().max(30).items(ObjectDto).default([]),
 });
