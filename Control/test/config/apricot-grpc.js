@@ -55,10 +55,7 @@ const apricotGRPCServer = (config) => {
     if (error) {
       console.error(error);
       throw error;
-    } else {
-      server.start();
     }
-
   };
   server.bindAsync(address, credentials, bindCallback);
   return {server, calls};
