@@ -115,16 +115,16 @@ class RequestHandler {
       creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
       delete this.requestList[index];
     } catch (error) {
-      let logMessage = `Creation of environment by user(${req.session.username}) with: `;
+      let logMessage = `Creation of environment failed with: ${error.details}.`;
+      logMessage += ` User: ${req.session.username}, `;
       if (req.body.workflowTemplate) {
         logMessage += `workflow: ${req.body.workflowTemplate}, `;
       }
       if (req.body.detectors) {
         logMessage += `and detectors: ${req.body.detectors}, `;
       }
-      logMessage += `failed due to: ${error}`;
       this._logger.errorMessage(logMessage, {
-        level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY
+        level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId ?? ''
       });
 
       this.requestList[index].failed = true;
