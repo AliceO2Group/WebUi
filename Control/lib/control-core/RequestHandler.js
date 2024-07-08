@@ -115,17 +115,33 @@ class RequestHandler {
       creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
       delete this.requestList[index];
     } catch (error) {
-      let logMessage = `Creation of environment failed with: ${error.details}.`;
-      logMessage += ` User: ${req.session.username}, `;
-      if (req.body.workflowTemplate) {
-        logMessage += `workflow: ${req.body.workflowTemplate}, `;
+      if (error.envId) {
+        this._logger.errorMessage(`Creation of environment failed with: ${error.details}.`, {
+          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
+        });
+        let logMessage = `Environment was requested by user: ${req.session.username} with`;
+        if (req.body.workflowTemplate) {
+          logMessage += `workflow: ${req.body.workflowTemplate}, `;
+        }
+        if (req.body.detectors) {
+          logMessage += `and detectors: ${req.body.detectors}, `;
+        }
+        this._logger.errorMessage(logMessage, {
+          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
+        });
+      } else {
+        let logMessage = `Creation of environment failed with: ${error.details}. `
+        logMessage += `User: ${req.session.username}, `;
+        if (req.body.workflowTemplate) {
+          logMessage += `workflow: ${req.body.workflowTemplate}, `;
+        }
+        if (req.body.detectors) {
+          logMessage += `and detectors: ${req.body.detectors}, `;
+        }
+        this._logger.errorMessage(logMessage, {
+          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY,
+        });
       }
-      if (req.body.detectors) {
-        logMessage += `and detectors: ${req.body.detectors}, `;
-      }
-      this._logger.errorMessage(logMessage, {
-        level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId ?? ''
-      });
 
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
