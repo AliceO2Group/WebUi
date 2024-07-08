@@ -124,7 +124,7 @@ class RequestHandler {
           logMessage += `workflow: ${req.body.workflowTemplate}, `;
         }
         if (req.body.detectors) {
-          logMessage += `and detectors: ${req.body.detectors}, `;
+          logMessage += `and detectors: ${req.body.detectors}.`;
         }
         this._logger.errorMessage(logMessage, {
           level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
@@ -136,7 +136,7 @@ class RequestHandler {
           logMessage += `workflow: ${req.body.workflowTemplate}, `;
         }
         if (req.body.detectors) {
-          logMessage += `and detectors: ${req.body.detectors}, `;
+          logMessage += `and detectors: ${req.body.detectors}.`;
         }
         this._logger.errorMessage(logMessage, {
           level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY,
