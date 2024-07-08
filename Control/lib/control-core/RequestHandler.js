@@ -12,13 +12,14 @@
  * or submit itself to any jurisdiction.
 */
 const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
 const {errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
 const {
   RUNTIME_COMPONENT: {COG},
   RUNTIME_KEY: {RUN_TYPE_TO_HOST_MAPPING}
 } = require('../common/kvStore/runtime.enum.js');
+const {LOG_LEVEL} = require('../common/logLevel.enum.js');
+const LOG_FACILITY = 'cog/controlrequests';
 
 /**
  * Handles AliECS create env requests
@@ -30,6 +31,7 @@ class RequestHandler {
    * @param {ApricotService} apricotService - service to use to interact with A.P.R.I.C.O.T
    */
   constructor(ctrlService, apricotService) {
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/${LOG_FACILITY}`);
     this.ctrlService = ctrlService;
     this._apricotService = apricotService;
     this.requestList = {};
@@ -55,6 +57,17 @@ class RequestHandler {
    */
   async add(req, res) {
     const index = parseInt(Object.keys(this.requestList).pop()) + 1 || 0;
+
+    let logMessage = `Creating environment by user(${req.session.username}) with: `;
+    if (req.body.workflowTemplate) {
+      logMessage += `workflow: ${req.body.workflowTemplate}, `;
+    }
+    if (req.body.detectors) {
+      logMessage += `and detectors: ${req.body.detectors}`;
+    }
+
+    this._logger.infoMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
+
     this.requestList[index] = {
       id: index,
       detectors: req.body.detectors,
@@ -66,7 +79,6 @@ class RequestHandler {
     };
     res.json({ok: 1});
     this.broadcast();
-    log.debug('Added request to cache, ID: ' + index);
 
     const {selectedConfiguration} = req.body;
     if (selectedConfiguration) {
@@ -81,7 +93,7 @@ class RequestHandler {
         }
         req.body.vars = variables;
       } catch (error) {
-        console.error(error);
+        errorLogger(`Unable to reload configuration due to: ${error}`, LOG_FACILITY);
       }
     }
     const deploymentRequestedAt = Date.now();
@@ -96,17 +108,25 @@ class RequestHandler {
         hostsToIgnoreForRunType = hostsToIgnoreMap[runType];
       }
     } catch (error) {
-      errorLogger(`Unable to identify FLPs to ignore due to: ${error}`);
+      errorLogger(`Unable to identify FLPs to ignore due to: ${error}`, LOG_FACILITY);
     }
     try {
       const payload = CoreUtils.parseEnvironmentCreationPayload(req.body, hostsToIgnoreForRunType);
       creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
-
-      log.debug('Auto-removed request, ID: ' + index);
       delete this.requestList[index];
     } catch (error) {
-      errorLogger('Request failed, ID: ' + index);
-      errorLogger(error);
+      let logMessage = `Creation of environment by user(${req.session.username}) with: `;
+      if (req.body.workflowTemplate) {
+        logMessage += `workflow: ${req.body.workflowTemplate}, `;
+      }
+      if (req.body.detectors) {
+        logMessage += `and detectors: ${req.body.detectors}, `;
+      }
+      logMessage += `failed due to: ${error}`;
+      this._logger.errorMessage(logMessage, {
+        level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY
+      });
+
       this.requestList[index].failed = true;
       this.requestList[index].message = error.details;
       if (error.envId) {
@@ -114,7 +134,7 @@ class RequestHandler {
       }
     }
     const id = creationResponse ? creationResponse.environment.id : '';
-    log.debug(`NEW_ENVIRONMENT,${id},,${deploymentRequestedAt},${Date.now()}`);
+    this._logger.debug(`NEW_ENVIRONMENT,${id},,${deploymentRequestedAt},${Date.now()}`);
 
     this.broadcast();
   }
@@ -127,7 +147,9 @@ class RequestHandler {
    */
   remove(req, res) {
     const index = req.params.id;
-    log.debug('User removed request, ID: ' + index);
+    this._logger.infoMessage(`User ${req.session.username} acknowledged and removed failed request`, {
+      level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY
+    });
     delete this.requestList[index];
     return this.getAll(req, res);
   }
