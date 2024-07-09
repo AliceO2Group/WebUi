@@ -93,7 +93,6 @@ const detectorLocksTable = (model, detectorLocksState) => {
         detectors.selected === 'GLOBAL' || detectors.selected === detector
       );
       const isUserAllowedDetector = detectors.authed.includes(detector);
-      console.log(isUserGlobal, isSelectedDetectorViewGlobalOrCurrent, isUserAllowedDetector)
       return (isUserGlobal && isSelectedDetectorViewGlobalOrCurrent) || isUserAllowedDetector;
     })
     .map((detector) => detectorLockRow(model, detector, detectorLocksState[detector]))
