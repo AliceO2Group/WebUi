@@ -15,6 +15,7 @@
 import {miniCard} from './../../common/card/miniCard.js';
 import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
 import {ROLES} from './../../workflow/constants.js';
+import {isUserAllowedRole} from './../../common/userRole.js';
 
 /**
  * Build a panel with multiple mini cards which contain actions allowed to the user for the environment
@@ -28,6 +29,6 @@ import {ROLES} from './../../workflow/constants.js';
 export const environmentActionPanel = (model, environmentInfo) => {
   const {includedDetectors = []} = environmentInfo;
   const hasLocks = includedDetectors.every((detector) => model.lock.isLockedByCurrentUser(detector));
-  const isAllowedToControl = (model.isAllowed(ROLES.Detector) && hasLocks);
+  const isAllowedToControl = (isUserAllowedRole(ROLES.Detector) && hasLocks);
   return miniCard('', controlEnvironmentPanel(model.environment, environmentInfo, isAllowedToControl));
 };

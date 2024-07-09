@@ -15,6 +15,7 @@
 import {h, iconCircleX} from '/js/src/index.js';
 import loading from './loading.js';
 import {ROLES} from './../workflow/constants.js';
+import {isUserAllowedRole} from './userRole.js';
 
 /**
  * Component which will display a modal allowing the users to select their detector view
@@ -23,7 +24,7 @@ import {ROLES} from './../workflow/constants.js';
  * @return {vnode}
  */
 const detectorsModal = (model) =>
-  !model.detectors.selected && model.isAllowed(ROLES.Detector) && h('.o2-modal',
+  !model.detectors.selected && isUserAllowedRole(ROLES.Detector) && h('.o2-modal',
     h('.o2-modal-content', [
       h('.p2.text-center', [
         h('h4', 'Select your detector view'),
@@ -41,7 +42,7 @@ const detectorsModal = (model) =>
       ]),
       h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
         h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-          model.isAllowed(ROLES.Global) &&
+          isUserAllowedRole(ROLES.Global) &&
             h(`button.btn.btn-default.w-100`, {
               id: `GLOBALViewButton`,
               onclick: () => model.setDetectorView('GLOBAL'),
@@ -59,7 +60,7 @@ const detectorsModal = (model) =>
  */
 const detectorsList = (model, list) =>
   list
-    .filter(detector => model.detectors.authed.includes(detector) || model.isAllowed(ROLES.Global))
+    .filter(detector => model.detectors.authed.includes(detector) || isUserAllowedRole(ROLES.Global))
     .map((detector) => h('.w-25.pv3.text-center.f3',
       h('button.btn.btn-default.w-70', {
         id: `${detector}ViewButton`,

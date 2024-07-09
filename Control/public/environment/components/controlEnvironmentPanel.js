@@ -18,6 +18,7 @@ import {h} from '/js/src/index.js';
 
 import {infoLoggerButton} from './buttons.js';
 import {ROLES} from './../../workflow/constants.js';
+import {isUserAllowedRole} from './../../common/userRole.js';
 
 /**
  * List of buttons for:
@@ -172,5 +173,5 @@ const killEnvButton = (environment, item) =>
  * * admins at any point
  */
 function _isKillActionAllowed(item, model) {
-  return item.state === 'ERROR' || model.isAllowed(ROLES.Admin);
+  return item.state === 'ERROR' || isUserAllowedRole(ROLES.Admin);
 }

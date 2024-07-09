@@ -14,6 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {ROLES} from './../../../workflow/constants.js';
+import {isUserAllowedRole} from './../../../common/userRole.js';
 
 /**
  * Build a panel allowing the user to select a stored configuration and load it within
@@ -176,7 +177,7 @@ const btnUpdateEnvConfiguration = (model) => {
     Boolean(model.workflow.selectedConfiguration) && model.workflow.loadingConfiguration.isNotAsked();
   const name = model.workflow.selectedConfiguration;
 
-  let isUserAllowedToUpdate = model.isAllowed(ROLES.Admin, true);
+  let isUserAllowedToUpdate = isUserAllowedRole(ROLES.Admin, true);
 
   if (isConfigurationSelected) {
     try {

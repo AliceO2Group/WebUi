@@ -15,6 +15,7 @@
 import {Observable, RemoteData, BrowserStorage} from '/js/src/index.js';
 import {STORAGE, PREFIX, ROLES} from './../workflow/constants.js';
 import {DetectorState} from './../common/enums/DetectorState.enum.js';
+import {isUserAllowedRole} from './../common/userRole.js';
 
 /**
  * Model representing API Calls regarding Detectors
@@ -49,7 +50,7 @@ export default class DetectorService extends Observable {
   async init() {
     const stored = this.storage.getLocalItem(STORAGE.DETECTOR);
     this._selected = (stored && stored.SELECTED &&
-      (this.model.isAllowed(ROLES.Global) || this.authed.includes(stored.SELECTED))) ? stored.SELECTED : '';
+      (isUserAllowedRole(ROLES.Global) || this.authed.includes(stored.SELECTED))) ? stored.SELECTED : '';
     this.notify();
     this._listRemote = await this.getDetectorsAsRemoteData(this._listRemote, this);
     this.notify();
