@@ -15,6 +15,7 @@
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
 const {errorHandler, errorLogger} = require('../utils.js');
 const {getConsulConfig} = require('../config/publicConfigProvider.js');
+const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 
 /**
  * Gateway for all Consul Consumer calls
@@ -209,8 +210,10 @@ class ConsulController {
     const crusByHost = req.body;
     const keyValues = this._mapToKVPairs(crusByHost, latestCrusWithConfigByHost);
     try {
+      log.infoMessage(`Request of user: ${req.session.username} to update CRU configuration`, {
+        level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/consul'
+      });
       await this.consulService.putListOfKeyValues(keyValues);
-      log.info('Successfully saved configuration links');
       res.status(200).json({info: {message: 'CRUs Configuration saved'}});
     } catch (error) {
       errorHandler(error, res, 502);

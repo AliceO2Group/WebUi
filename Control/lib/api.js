@@ -124,7 +124,6 @@ module.exports.setup = (http, ws) => {
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
-    ctrlService.logAction.bind(ctrlService),
   ];
 
   ctrlProxy.methods.forEach(
