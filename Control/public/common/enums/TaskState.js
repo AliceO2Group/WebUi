@@ -11,7 +11,7 @@
  *  or submit itself to any jurisdiction.
  */
 
-export const FlpTaskState = Object.freeze({
+export const TaskState = Object.freeze({
   ERROR: 'ERROR',
   ERROR_CRITICAL: 'ERROR_CRITICAL', // GUI specific state to distinguish errors
   RUNNING: 'RUNNING',
@@ -27,73 +27,28 @@ export const FlpTaskState = Object.freeze({
  * List of possible states for a task sorted alphabetically with ERROR first and RUNNING second and CONFIGURED third
  * @return {Array<String>} list of task states
  */
-export const FLP_TASK_STATES = Object.values(FlpTaskState)
+export const TASK_STATES = Object.values(TaskState)
   .sort((a, b) => {
     
-    if (a === FlpTaskState.ERROR_CRITICAL) {
+    if (a === TaskState.ERROR_CRITICAL) {
       return -1;
-    } else if (b === FlpTaskState.ERROR_CRITICAL) {
+    } else if (b === TaskState.ERROR_CRITICAL) {
       return 1;
-    } else if (a === FlpTaskState.ERROR) {
+    } else if (a === TaskState.ERROR) {
       return -1;
-    } else if (b === FlpTaskState.ERROR) {
+    } else if (b === TaskState.ERROR) {
       return 1;
-    } else if (a === FlpTaskState.RUNNING) {
+    } else if (a === TaskState.RUNNING) {
       return -1;
-    } else if (b === FlpTaskState.RUNNING) {
+    } else if (b === TaskState.RUNNING) {
       return 1;
-    } else if (a === FlpTaskState.CONFIGURED) {
+    } else if (a === TaskState.CONFIGURED) {
       return -1;
-    } else if (b === FlpTaskState.CONFIGURED) {
+    } else if (b === TaskState.CONFIGURED) {
       return 1;
-    } else if (a === FlpTaskState.STANDBY) {
+    } else if (a === TaskState.STANDBY) {
       return -1;
-    } else if (b === FlpTaskState.STANDBY) {
-      return 1;
-    } else {
-      return a.localeCompare(b);
-    }
-  });
-
-export const EpnTaskState = Object.freeze({
-  IDLE: 'IDLE',
-  EXITING: 'EXITING',
-  RESETTING_DEVICE: 'RESETTING DEVICE',
-  INITIALIZING_DEVICE: 'INITIALIZING DEVICE',
-  INITIALIZED: 'INITIALIZED',
-  BINDING: 'BINDING',
-  BOUND: 'BOUND',
-  CONNECTING: 'CONNECTING',
-  DEVICE_READY: 'DEVICE READY',
-  INITIALIZING_TASK: 'INITIALIZING TASK',
-  READY: 'READY',
-  RUNNING: 'RUNNING',
-  RESETTING_TASK: 'RESETTING TASK',
-  OK: 'OK',
-  ERROR: 'ERROR',
-});
-
-/**
- * List of possible states for a task sorted alphabetically with ERROR first and RUNNING second and CONFIGURED third
- * @return {Array<String>} list of task states
- */
-export const EPN_TASK_STATES = Object.values(EpnTaskState)
-  .sort((a, b) => {
-    if (a === EpnTaskState.ERROR) {
-      return -1;
-    } else if (b === EpnTaskState.ERROR) {
-      return 1;
-    } else if (a === EpnTaskState.RUNNING) {
-      return -1;
-    } else if (b === EpnTaskState.RUNNING) {
-      return 1;
-    } else if (a === EpnTaskState.READY) {
-      return -1;
-    } else if (b === EpnTaskState.READY) {
-      return 1;
-    } else if (a === EpnTaskState.IDLE) {
-      return -1;
-    } else if (b === EpnTaskState.IDLE) {
+    } else if (b === TaskState.STANDBY) {
       return 1;
     } else {
       return a.localeCompare(b);
@@ -102,20 +57,17 @@ export const EPN_TASK_STATES = Object.values(EpnTaskState)
 
 /**
  * Given a hardware component task state, return the class associated with the state
- * @param {FlpTaskState|EpnTaskState} state - task state  to get the class for
+ * @param {TaskState} state - task state  to get the class for
  * @return {String} - CSS class to be used in the HTML
  */
 export function getTaskStateClassAssociation(state) {
   switch (state) {
-    case FlpTaskState.ERROR:
-    case FlpTaskState.ERROR_CRITICAL:
-    case EpnTaskState.ERROR:
+    case TaskState.ERROR:
+    case TaskState.ERROR_CRITICAL:
       return '.danger';
-    case FlpTaskState.RUNNING:
-    case EpnTaskState.RUNNING:
+    case TaskState.RUNNING:
       return '.success';
-    case FlpTaskState.CONFIGURED:
-    case EpnTaskState.READY:
+    case TaskState.CONFIGURED:
       return '.primary';
     default:
       return '';

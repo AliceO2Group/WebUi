@@ -11,7 +11,7 @@
  *  or submit itself to any jurisdiction.
  */
 
-module.exports.FlpTaskState = Object.freeze({
+module.exports.TaskState = Object.freeze({
   ERROR: 'ERROR',
   ERROR_CRITICAL: 'ERROR_CRITICAL', // GUI specific state to distinguish errors
   RUNNING: 'RUNNING',
@@ -21,22 +21,4 @@ module.exports.FlpTaskState = Object.freeze({
   MIXED: 'MIXED',
   UNKNOWN: 'UNKNOWN',
   INVARIANT: 'INVARIANT',
-});
-
-module.exports.EpnTaskState = Object.freeze({
-  IDLE: 'IDLE',
-  EXITING: 'EXITING',
-  RESETTING_DEVICE: 'RESETTING DEVICE',
-  INITIALIZING_DEVICE: 'INITIALIZING DEVICE',
-  INITIALIZED: 'INITIALIZED',
-  BINDING: 'BINDING',
-  BOUND: 'BOUND',
-  CONNECTING: 'CONNECTING',
-  DEVICE_READY: 'DEVICE READY',
-  INITIALIZING_TASK: 'INITIALIZING TASK',
-  READY: 'READY',
-  RUNNING: 'RUNNING',
-  RESETTING_TASK: 'RESETTING TASK',
-  OK: 'OK',
-  ERROR: 'ERROR',
 });
