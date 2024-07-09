@@ -14,7 +14,7 @@
 
 import {dcsProperty} from '../../common/dcs/dcsPropertiesRow.js';
 import {HARDWARE_COMPONENTS, HardwareComponent} from '../../common/enums/HardwareComponent.js';
-import {FLP_TASK_STATES, getTaskStateClassAssociation} from './../../common/enums/TaskState.js';
+import {TASK_STATES, getTaskStateClassAssociation} from './../../common/enums/TaskState.js';
 import {h} from '/js/src/index.js';
 
 /**
@@ -34,7 +34,7 @@ export const environmentTasksSummaryTable = (environment, detectorsAvailability)
       detectorsTableHeaderRow(hardware, detectorsAvailability, shouldDisplaySorAvailability)
     ]),
     h('tbody', [
-      FLP_TASK_STATES.map((state) => rowForTaskSate(state, hardware)),
+      TASK_STATES.map((state) => rowForTaskSate(state, hardware)),
     ])
   ]);
 };

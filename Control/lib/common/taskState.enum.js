@@ -11,7 +11,7 @@
  *  or submit itself to any jurisdiction.
  */
 
-module.exports.FlpTaskState = Object.freeze({
+module.exports.TaskState = Object.freeze({
   ERROR: 'ERROR',
   ERROR_CRITICAL: 'ERROR_CRITICAL', // GUI specific state to distinguish errors
   RUNNING: 'RUNNING',
