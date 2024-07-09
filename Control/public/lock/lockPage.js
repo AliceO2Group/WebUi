@@ -20,6 +20,7 @@ import {ROLES} from './../workflow/constants.js';
 import errorPage from './../common/errorPage.js';
 import loading from './../common/loading.js';
 import {DetectorLockAction} from '../common/enums/DetectorLockAction.enum.js';
+import {isUserAllowedRole} from './../common/userRole.js';
 
 const LOCK_TABLE_HEADER_KEYS = ['Detector', 'Owner'];
 const DETECTOR_ALL = 'ALL';
@@ -59,7 +60,7 @@ export const content = (model) => {
         Failure: (error) => errorPage(error),
         Success: (detectorsLocksState) => h('.flex-column', [
           h('.flex-row.g2.pv2', [
-            model.isAllowed(ROLES.Admin) && [
+            isUserAllowedRole(ROLES.Admin) && [
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'),
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'),
             ],
@@ -83,24 +84,36 @@ export const content = (model) => {
  * @return {vnode}
  */
 const detectorLocksTable = (model, detectorLocksState) => {
+  const {detectors} = model;
+  const isUserGlobal = isUserAllowedRole(ROLES.Global);
+
+  const detectorRows = Object.keys(detectorLocksState)
+    .filter((detector) => {
+      const isSelectedDetectorViewGlobalOrCurrent = (
+        detectors.selected === 'GLOBAL' || detectors.selected === detector
+      );
+      const isUserAllowedDetector = detectors.authed.includes(detector);
+      console.log(isUserGlobal, isSelectedDetectorViewGlobalOrCurrent, isUserAllowedDetector)
+      return (isUserGlobal && isSelectedDetectorViewGlobalOrCurrent) || isUserAllowedDetector;
+    })
+    .map((detector) => detectorLockRow(model, detector, detectorLocksState[detector]))
   return h('table.table.table-sm',
     h('thead',
       h('tr',
         LOCK_TABLE_HEADER_KEYS.map((header) => h('th', header)),
-        model.isAllowed(ROLES.Admin) && h('th', 'Admin actions')
+        isUserAllowedRole(ROLES.Admin) && h('th', 'Admin actions')
       )
     ),
     h('tbody', [
-      Object.keys(detectorLocksState).map((detector) => {
-        const isDetectorAvailableToCurrentUser = (
-          (model.isAllowed(ROLES.Global) &&
-            (model.detectors.selected === 'GLOBAL' || model.detectors.selected === detector)
-          ) || model.detectors.authed.includes(detector));
-        if (isDetectorAvailableToCurrentUser) {
-          return detectorLockRow(model, detector, detectorLocksState[detector]);
-        }
-        return;
-      }),
+      detectorRows.length > 0
+        ? detectorRows
+        : h('tr',
+          h('td.ph2.warning', {colspan: 3}, [
+            'Missing Role permissions needed for being allowed to own locks',
+            ' If you have just started your shift, please allow a few minutes for the system ',
+            'to update before trying again or calling an FLP expert.'
+          ])
+        )
     ])
   );
 };
@@ -124,7 +137,7 @@ const detectorLockRow = (model, detector, lockState) => {
       ])
     ),
     h('td', ownerName),
-    model.isAllowed(ROLES.Admin) && h('td', [
+    isUserAllowedRole(ROLES.Admin) && h('td', [
       detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.RELEASE, true, 'Force Release'),
       detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.TAKE, true, 'Force Take')
     ])
