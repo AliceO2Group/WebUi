@@ -21,6 +21,7 @@ import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
 import {infoLoggerButton} from './components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
+import {isUserAllowedRole} from './../common/userRole.js';
 
 /**
  * @file Page to show a list of environments (content and header)
@@ -120,7 +121,7 @@ const requestsTable = (model, requests) =>
  * @param {Number} personid Person ID
  */
 const buttonRemoveRequest = (model, id, personid) =>
-  (model.isAllowed(ROLES.Admin) || model.session.personid == personid) &&
+  (isUserAllowedRole(ROLES.Admin) || model.session.personid == personid) &&
   h('button.btn.btn-danger', {
     title: 'Clear failed environemnt from the list',
     onclick: () => model.environment.removeEnvironmentRequest(id)

@@ -18,6 +18,7 @@ import errorPage from '../common/errorPage.js';
 import {detectorHeader} from '../common/detectorHeader.js';
 import {iconLockLocked, iconLockUnlocked, iconCloudDownload, iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 import {ROLES} from './../workflow/constants.js';
+import {isUserAllowedRole} from './../common/userRole.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
@@ -87,7 +88,7 @@ const getListOfTasks = (model, task) =>
  * @returns {vnode}
  */
 const showContent = (model, items) => {
-  const isAdmin =  model.detectors.selected === 'GLOBAL' && model.isAllowed(ROLES.Admin, true);
+  const isAdmin =  model.detectors.selected === 'GLOBAL' && isUserAllowedRole(ROLES.Admin, true);
   return h('.text-left.ph2', [
     h('.w-100.flex-row.pv2.items-center', [
       searchTasks(model),
@@ -125,7 +126,7 @@ const detectorPanels = (model, detectors) => [
     .filter((detector) => (
       detector === model.detectors.selected ||
       model.detectors.selected === 'GLOBAL' ||
-      model.isAllowed(ROLES.Guest, true)))
+      isUserAllowedRole(ROLES.Guest, true)))
     .map((detector) => h('.w-100', [
       h('.panel-title.flex-row.p2', [
         h('h4.w-20', detector),
