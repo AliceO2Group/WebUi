@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 const {Log} = require('@aliceo2/web-ui');
+const LOG_FACILITY = 'run-ctrl';
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
@@ -70,12 +71,17 @@ class RunController {
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
-  async refreshCalibrationRunsConfigurationHandler(_, res) {
+  async refreshCalibrationRunsConfigurationHandler(req, res) {
     try {
+      let logMessage = `Refresh calibration configuration requested by user(${req.session.username})`;
+      this._logger.infoMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
+
       await this._runService.retrieveStaticConfigurations();
       res.status(200).json({ok: true});
     } catch (error) {
-      this._logger.errorMessage(error, {level: LOG_LEVEL.OPERATIONS, facility: 'cog/run-ctrl'})
+      const logMessage = `Error refreshing calibration configuration by ${req.session.username} due to: ${error}`;
+      this._logger.errorMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, facility: LOG_FACILITY})
+
       updateExpressResponseFromNativeError(res, error);
     }
   }

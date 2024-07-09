@@ -31,7 +31,7 @@ class RequestHandler {
    * @param {ApricotService} apricotService - service to use to interact with A.P.R.I.C.O.T
    */
   constructor(ctrlService, apricotService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/${LOG_FACILITY}`);
+    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
     this.ctrlService = ctrlService;
     this._apricotService = apricotService;
     this.requestList = {};

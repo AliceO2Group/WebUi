@@ -114,13 +114,13 @@ describe('EnvironmentController test suite', () => {
     });
 
     it('should return error due to transition environment issue', async () => {
-      await envCtrl.transitionEnvironmentHandler({params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {type: 'START_ACTIVITY'}}, res);
+      await envCtrl.transitionEnvironmentHandler({session: {username: 'test'}, params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {type: 'START_ACTIVITY'}}, res);
       assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: `Cannot transition environment`}));
     });
 
     it('should successfully return environment in transition state', async () => {
-      await envCtrl.transitionEnvironmentHandler({params: {id: ENVIRONMENT_VALID}, body: {type: 'START_ACTIVITY'}}, res);
+      await envCtrl.transitionEnvironmentHandler({session: {username: 'test'}, params: {id: ENVIRONMENT_VALID}, body: {type: 'START_ACTIVITY'}}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1}));
     });
@@ -135,19 +135,19 @@ describe('EnvironmentController test suite', () => {
     });
 
     it('should return error due to missing id when attempting to destroy environment', async () => {
-      await envCtrl.destroyEnvironmentHandler({params: {id: null}, body: {type: null}}, res);
+      await envCtrl.destroyEnvironmentHandler({session: {username: 'test'}, params: {id: null}, body: {type: null}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
     });
 
     it('should return error due to destroy environment issue', async () => {
-      await envCtrl.destroyEnvironmentHandler({params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {}}, res);
+      await envCtrl.destroyEnvironmentHandler({session: {username: 'test'}, params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {}}, res);
       assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: `Cannot destroy environment`}));
     });
 
     it('should successfully return environment following destroy action', async () => {
-      await envCtrl.destroyEnvironmentHandler({params: {id: ENVIRONMENT_VALID}, body: {}}, res);
+      await envCtrl.destroyEnvironmentHandler({session: {username: 'test'}, params: {id: ENVIRONMENT_VALID}, body: {}}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({id: ENVIRONMENT_VALID}));
     });

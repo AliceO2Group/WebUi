@@ -18,6 +18,7 @@ const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
+const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -125,6 +126,9 @@ class ControlService {
           vars,
           workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
         };
+        log.infoMessage(`Request of user: ${req.session.username} to "${operation}" for ${channelId}`, {
+          level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/controlservice'
+        });
         await this.ctrlProx[method](coreConf);
         res.status(200).json({
           ended: false, success: true, id: channelId,

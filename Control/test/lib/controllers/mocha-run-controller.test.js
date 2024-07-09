@@ -90,7 +90,7 @@ describe(`'RunController' test suite`, () => {
           retrieveStaticConfigurations: sinon.stub().resolves()
         }
       );
-      await runController.refreshCalibrationRunsConfigurationHandler({}, res);
+      await runController.refreshCalibrationRunsConfigurationHandler({session: {username: 'test'}}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({ok: true}));
     });
@@ -100,7 +100,7 @@ describe(`'RunController' test suite`, () => {
           retrieveStaticConfigurations: sinon.stub().throws(new TimeoutError('Request Expired'))
         }
       );
-      await runController.refreshCalibrationRunsConfigurationHandler({}, res);
+      await runController.refreshCalibrationRunsConfigurationHandler({session: {username: 'test'}}, res);
       assert.ok(res.status.calledWith(408));
       assert.ok(res.json.calledWith({message: 'Request Expired'}));
     });
