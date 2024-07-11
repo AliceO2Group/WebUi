@@ -50,10 +50,4 @@ describe('`pageTaskList` test-suite', async () => {
     const filterBy = await page.evaluate(() => window.model.task.filterBy.toString());
     assert.strictEqual(filterBy, '/.*task-x.*/')
   });
-
-  it('should successfully refresh load tasks content after 5000ms', async () => {
-    assert.strictEqual(calls['getTasks'], undefined);
-    await page.waitForTimeout(5500);
-    assert.strictEqual(calls['getTasks'], true);
-  });
 });

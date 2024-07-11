@@ -36,9 +36,7 @@ describe('`pageEnvironments` test-suite', () => {
     it('should successfully load page', async () => {
       await page.goto(url + '?page=environments', {waitUntil: 'networkidle0'});
 
-      await page.waitForTimeout(2000);
       const location = await page.evaluate(() => window.location);
-
       assert.strictEqual(location.search, '?page=environments');
     });
 
@@ -53,7 +51,6 @@ describe('`pageEnvironments` test-suite', () => {
 
     it('should successfully navigate to environment page when clicking on environment ID', async () => {
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(2) > a').click());
-      await page.waitForTimeout(200);
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=general');
@@ -73,22 +70,25 @@ describe('`pageEnvironments` test-suite', () => {
       await page.goto(url + '?page=newEnvironmentAdvanced');
       const location = await page.evaluate(() => window.location);
       assert.ok(location.search === '?page=newEnvironmentAdvanced');
-      
+
       // select workflow from list of templates
       await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
       await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
-      
+
       // first detector is already locked (should be MID)
       // select earlier locked detector which will automatically select all available hosts
-      await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
-      
-      await page.waitForTimeout(200);
-      await page.evaluate(() => document.querySelector('#deploy-env').click());
+      await page.locator('.m1 > div:nth-child(1) > div > a:nth-child(2)')
+        .setTimeout(500)
+        .click();
+
+      await page.locator('#deploy-env')
+        .setTimeout(500)
+        .click();
     });
 
     it('verify request fields', async () => {
-      
-      await waitForEnvRequest(page);
+
+      await waitForEnvRequest(page, 100);
       const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(2)').innerText);
       const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(6)').innerText);
       assert.strictEqual(detector, 'MID');
@@ -100,19 +100,19 @@ describe('`pageEnvironments` test-suite', () => {
 /**
  * Wait for response create env request to fail
  * @param {Object} page
- * @param {number} timeout
+ * @param {number} iterations - number of times to wait for default timeout
  * @return {Promise}
  */
-async function waitForEnvRequest(page, timeout = 90) {
+async function waitForEnvRequest(page, iterations = 10, timeout = 1000) {
   return new Promise(async (resolve) => {
     let i = 0;
-    while (i++ < timeout) {
+    while (i++ < iterations) {
       const requestFailed = await page.evaluate(() => window.model?.environment?.requests?.payload?.requests[0]?.failed);
       if (requestFailed) {
-        await page.waitForTimeout(1000);
+        await new Promise((r) => setTimeout((r), timeout))
         resolve();
       } else {
-        await page.waitForTimeout(1000);
+        await new Promise((r) => setTimeout((r), timeout))
       }
     }
   });
