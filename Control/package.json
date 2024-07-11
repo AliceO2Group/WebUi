@@ -39,11 +39,11 @@
   ],
   "devDependencies": {
     "eslint": "^8.56.0",
-    "mocha": "^10.2.0",
+    "mocha": "^10.6.0",
     "nock": "^13.5.0",
-    "nyc": "^15.1.0",
-    "puppeteer": "^21.7.0",
-    "sinon": "17.0.0"
+    "nyc": "^17.0.0",
+    "puppeteer": "^22.13.0",
+    "sinon": "18.0.0"
   },
   "main": "index.js",
   "bundleDependencies": [
