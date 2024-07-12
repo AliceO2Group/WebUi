@@ -33,6 +33,7 @@ const coreGRPCServer = (config) => {
   const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
   const credentials = grpcLibrary.ServerCredentials.createInsecure();
   const address = `${config.grpc.hostname}:${config.grpc.port}`;
+
   server.addService(octlProto.o2control.Control.service, {
     getFrameworkInfo(call, callback) {
       calls['getFrameworkInfo'] = true;
@@ -109,6 +110,7 @@ const coreGRPCServer = (config) => {
       throw error;
     }
   };
+
   server.bindAsync(address, credentials, bindCallback);
   return {server, calls};
 };

@@ -33,7 +33,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   after(async () => {
     await page.setRequestInterception(false);
-    await page.removeListener('request', getFLPList);
   });
 
   beforeEach(() => {
@@ -68,9 +67,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
       window.model.session.role = 4;
       window.model.notify();
     });
-    await page.waitForTimeout(100);
 
-    const text = await page.evaluate(() => document.querySelector('.m4').innerText);
+    const text = await page.locator('.m4')
+      .setTimeout(500)
+      .map((div) => div.innerText)
+      .wait();
     assert.strictEqual(text, 'You are not allowed to create environments.');
 
     await page.evaluate(() => {
@@ -137,14 +138,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully select a workflow from template list initially', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
-    await page.waitForTimeout(200);
-    const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
-      return {classList: element.classList};
-    });
+    const selector = 'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a';
+    await page.locator(selector)
+      .setTimeout(500)
+      .click();
 
-    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
+    const isElementSelected = await page.waitForFunction((selector) => {
+      const element = document.querySelector(selector);
+      return element.classList.contains('selected');
+    }, {timeout: 500}, selector);
+    assert.ok(isElementSelected, 'Element is not displayed as selected');
   });
 
   it('should have `Create` button disabled due to no selected detectors', async () => {
@@ -166,106 +169,90 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully select second repository from dropdown', async () => {
     const selectedRepository = await page.select('select', 'git.com/alice-user/alice-repo/');
-    await page.waitForTimeout(200);
     assert.deepStrictEqual(selectedRepository, ['git.com/alice-user/alice-repo/']);
   });
 
   it('should have error of missing revisions for this repository', async () => {
-    const errorMessage = await page.evaluate(() => {
-      const errorElement = document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div > div');
-      return {text: errorElement.innerText};
-    });
-    assert.strictEqual(errorMessage.text.trim(), 'No revisions found for the selected repository');
+    const errorMessage = await page.locator('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div > div')
+      .setTimeout(500)
+      .map((element) => element.innerText)
+      .wait();
+    assert.strictEqual(errorMessage.trim(), 'No revisions found for the selected repository');
   });
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
     await page.evaluate(() => document.querySelector(
       'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div > div > div > button').click());
-    await page.waitForTimeout(1000);
+    await page.waitForNetworkIdle();
     assert.ok(calls['refreshRepos']);
     assert.ok(calls['getWorkflowTemplates']);
     assert.ok(calls['listRepos']);
   });
 
   it('should successfully select a workflow from template list', async () => {
-    await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
-    await page.waitForTimeout(200);
-    const selectedWorkflow = await page.evaluate(() => {
-      const element = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
-      return {classList: element.classList};
-    });
-    assert.deepStrictEqual(selectedWorkflow.classList, {0: 'w-90', 1: 'menu-item', 2: 'w-wrapped', 3: 'selected'});
+    const selector = 'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a';
+    await page.locator(selector)
+      .setTimeout(500)
+      .click();
+    
+    const isWorkflowSelected = await page.waitForFunction((selector) => {
+      const element = document.querySelector(selector);
+      return element.classList.contains('selected');
+    }, {timeout: 500}, selector);
+    assert.ok(isWorkflowSelected, 'Element is not displayed as selected');
   });
 
   it('should successfully select EPN ON from GeneralConfiguration and automatically set DD & DD Sched to ON', async () => {
-    const [label] = await page.$x(`//div/input[@id="epnOn"]`);
-    if (label) {
-      await label.click();
-    } else {
-      assert.ok(false, `EPN ON label could not be found in list of labels`);
-    }
+    await page.locator(`xpath///div/input[@id="epnOn"]`)
+      .setTimeout(500)
+      .click();
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
     assert.deepStrictEqual(basicVars, {odc_enabled: 'true', dd_enabled: 'true', ddsched_enabled: 'true'}, 'odc_enabled, dd_enabled or ddsched_enabled could not be found in basic variables selection set to true');
   });
 
   it('should successfully select DD OFF from GeneralConfiguration and automatically set EPN, DD, DDSCHED, QC to OFF', async () => {
-    const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
-    if (label) {
-      await label.click();
-    } else {
-      assert.ok(false, `Data Distribution OFF label could not be found in list of labels`);
-    }
+    await page.locator(`xpath///div/input[@id="dataDistributionOff"]`)
+      .setTimeout(500)
+      .click();
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', ddsched_enabled: 'false', dd_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
   it('should successfully select QC ON from GeneralConfiguration and automatically set DD to ON', async () => {
-    const [label] = await page.$x(`//div/input[@id="qcddOn"]`);
-    if (label) {
-      await label.click();
-    } else {
-      assert.ok(false, `Quality Control ON label could not be found in list of labels`);
-    }
+    await page.locator(`xpath///div/input[@id="qcddOn"]`)
+      .setTimeout(500)
+      .click();
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', ddsched_enabled: 'false', qcdd_enabled: 'true', minimal_dpl_enabled: 'false'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
   it('should successfully select DPL Minimal ON from GeneralConfiguration and automatically set QC to OFF and keep DD set to ON', async () => {
-    const [label] = await page.$x(`//div/input[@id="dplMwOn"]`);
-    if (label) {
-      await label.click();
-    } else {
-      assert.ok(false, `DPL Minimal ON label could not be found in list of labels`);
-    }
+    await page.locator(`xpath///div/input[@id="dplMwOn"]`)
+      .setTimeout(500)
+      .click();
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'true', ddsched_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'true'}, 'odc_enabled or dd_enabled could not be found in basic variables selection set to false');
   });
 
   it('should successfully select DD OFF from GeneralConfiguration and automatically set QC, dpl, dd_sched to OFF', async () => {
-    const [label] = await page.$x(`//div/input[@id="dataDistributionOff"]`);
-    if (label) {
-      await label.click();
-    } else {
-      assert.ok(false, `DD OFF label could not be found in list of labels`);
-    }
+    await page.locator(`xpath///div/input[@id="dataDistributionOff"]`)
+      .setTimeout(500)
+      .click();
     const basicVars = await page.evaluate(() => window.model.workflow.form.basicVariables);
     assert.deepStrictEqual(basicVars, {odc_enabled: 'false', dd_enabled: 'false', ddsched_enabled: 'false', qcdd_enabled: 'false', minimal_dpl_enabled: 'false'});
   });
 
   it('should successfully select option file:// from dropdown and input box should appear', async () => {
     await page.select('select#readoutURISelection', 'file://');
-    await page.waitForTimeout(200);
     const readoutUriPrefix = await page.evaluate(() => window.model.workflow.form.basicVariables.readout_cfg_uri_pre);
     assert.strictEqual(readoutUriPrefix, 'file://');
   });
 
   it('should successfully fill in readout uri from typed text', async () => {
-    await page.focus('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(6) > div > div:nth-child(2) > div:nth-child(2) > input');
-    await page.keyboard.type('file-readout');
-    await page.waitForTimeout(200);
-    const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
+    await page.locator('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div:nth-child(2) > div > div > div:nth-child(6) > div > div:nth-child(2) > div:nth-child(2) > input')
+      .fill('file-readout')
 
+    const variables = await page.evaluate(() => window.model.workflow.form.basicVariables);
     assert.strictEqual(variables.readout_cfg_uri, 'file-readout');
   });
 
@@ -276,16 +263,13 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully add trimmed pair (K;V) to variables by pressing enter key', async () => {
-    await page.focus('#keyInputField');
-    await page.keyboard.type('TestKey   ');
-    await page.waitForTimeout(200);
+    await page.locator('#keyInputField')
+      .fill('TestKey   ');
 
-    await page.focus('#valueTextAreaField');
-    await page.keyboard.type(' TestValue  ');
-    await page.waitForTimeout(200);
+    await page.locator('#valueTextAreaField')
+      .fill(' TestValue  ');
 
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(200);
     const variables = await page.evaluate(() => {
       return window.model.workflow.form.variables;
     });
@@ -298,13 +282,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully add second pair (K;V) to variables by pressing iconPlus', async () => {
-    await page.focus('#keyInputField');
-    await page.keyboard.type('TestKey2');
-    await page.waitForTimeout(200);
+    await page.locator('#keyInputField')
+      .fill('TestKey2');
 
-    await page.focus('#valueTextAreaField');
-    await page.keyboard.type('TestValue2');
-    await page.waitForTimeout(200);
+    await page.locator('#valueTextAreaField')
+      .fill('TestValue2');
 
     const variables = await page.evaluate(() => {
       document.querySelector('#addKVPairButton').click();
@@ -320,37 +302,38 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully remove first pair (K;V) from variables by pressing red iconTrash', async () => {
-    await page.evaluate(() => {
-      document.querySelector('#removeKeyTestKey').click();
-    });
-    await page.waitForTimeout(200);
+    await page.locator('#removeKeyTestKey')
+      .setTimeout(500)
+      .click();
     const variables = await page.evaluate(() => window.model.workflow.form.variables);
 
     const expectedVars = {TestKey2: 'TestValue2'};
     assert.deepStrictEqual(variables, expectedVars);
-    const classList = await page.evaluate(() => document.querySelector('#removeKeyTestKey2').classList);
+
+    const classList = await page.locator('#removeKeyTestKey2')
+      .setTimeout(500)
+      .map((element) => element.classList)
+      .wait();
     assert.deepStrictEqual({0: 'ph2', 1: 'danger', 2: 'actionable-icon'}, classList);
   });
 
   it('should successfully add a JSON with (K;V) pairs in advanced configuration panel', async () => {
-    await page.focus('#kvTextArea');
-    await page.keyboard.type('{"testJson": "JsonValue"}');
-    await page.waitForTimeout(2000);
+    await page.locator('#kvTextArea')
+      .fill('{"testJson": "JsonValue"}');
+
     const variables = await page.evaluate(() => {
       document.querySelector('#addKVListButton').click();
       return window.model.workflow.form.variables;
     });
-    await page.waitForTimeout(200);
     const expectedVariables = {TestKey2: 'TestValue2', testJson: 'JsonValue'};
     assert.strictEqual(JSON.stringify(variables), JSON.stringify(expectedVariables));
   });
 
   it('should not add a JSON with (K;V) pairs if it is not JSON formatted and text area should keep the wrong JSON to allow user to edit', async () => {
-    const currentVariables = await page.evaluate(() => window.model.workflow.form.variables);
-    await page.focus('#kvTextArea');
     const toBeTyped = '{"testJson": "JsonValue", somtest: test}';
-    await page.keyboard.type('{"testJson": "JsonValue", somtest: test}');
-    await page.waitForTimeout(200);
+    const currentVariables = await page.evaluate(() => window.model.workflow.form.variables);
+    await page.locator('#kvTextArea')
+      .fill(toBeTyped);
 
     await page.evaluate(() => document.querySelector('#addKVListButton').click())
     const {variables, areaString} = await page.evaluate(() => {
@@ -406,24 +389,22 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should not select a detector that is not locked', async () => {
     await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click()); // second element is for detector, first for lock
-    await page.waitForTimeout(200);
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.ok(selectedDet.length == 0, 'Detector selected without lock');
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
-    await page.waitForSelector('.m1 > div:nth-child(1) > div > div:nth-child(1)');
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > div:nth-child(1)').click());
-    await page.waitForTimeout(200);
+    await page.locator('.m1 > div:nth-child(1) > div > div:nth-child(1)')
+      .setTimeout(500)
+      .click();
 
-    await page.waitForSelector('.m1 > div:nth-child(1) > div > a:nth-child(2)');
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click());
-    await page.waitForTimeout(200);
+    await page.locator('.m1 > div:nth-child(1) > div > a:nth-child(2)')
+      .setTimeout(500)
+      .click();
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
-    await page.waitForTimeout(500);
   });
 
   it('should successfully have a list of FLPs after detector selection', async () => {
@@ -442,7 +423,6 @@ describe('`pageNewEnvironment` test-suite', async () => {
       await dialog.accept('My Config');
     });
     await page.evaluate(() => document.querySelector('#save-core-env-config').click());
-    await page.waitForTimeout(200)
 
     const message = await page.evaluate(() => window.model.environment.itemNew.payload);
     assert.ok(apricotCalls['setRuntimeEntry']);
@@ -451,8 +431,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should successfully create a new environment', async () => {
-    await page.evaluate(() => document.querySelector('#deploy-env').click());
-    await page.waitForTimeout(1000);
+    await page.locator('#deploy-env')
+      .setTimeout(500)
+      .click();
+    await page.waitForNavigation({
+      waitUntil: 'networkidle0',
+    });
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments');
   });

@@ -26,7 +26,6 @@ describe('`pageLock` test-suite', async () => {
 
   it('should load locks page', async () => {
     await page.goto(url + '?page=locks', {waitUntil: 'networkidle0'});
-    await page.waitForTimeout(500);
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=locks');
   });
@@ -37,23 +36,23 @@ describe('`pageLock` test-suite', async () => {
     assert.strictEqual(mid, 'MID');
   });
 
-  it('lock detector', async () => {
-    await page.evaluate(() => document.querySelector('.table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(1) > div > button').click());
-    await page.waitForTimeout(500);
+  it('take ownership of lock by pressing lock icon button', async () => {
+    await page.locator('button#detectorLockButtonForODC')
+      .setTimeout(500)
+      .click();
 
-    const isLocked = await page.evaluate(() => window.model.lock.isLockedByCurrentUser('ODC'));
-    assert.ok(isLocked);
+    await page.waitForFunction(() => window.model.lock.isLockedByCurrentUser('ODC'), {timeout: 5000});
 
-    const owner = await page.evaluate(() => document.querySelector('.table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2)').innerText);
+    const owner = await page.locator('#detector-row-ODC > td:nth-child(2)')
+      .setTimeout(500)
+      .map((element) => element.innerText)
+      .wait();
     assert.strictEqual(owner, 'Anonymous');
   });
 
   // it('force unlock detector', async () => {
-  //   await page.waitForTimeout(500);
   //   await page.waitForSelector('table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)'); 
   //   await page.evaluate(() =>  document.querySelector('.table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)').click());
-  //   await page.waitForTimeout(500);
-
   //   const isLocked = await page.evaluate(() => window.model.lock.isLockedByCurrentUser('ODC'));
   //   assert.ok(!isLocked);
   // });

@@ -59,7 +59,7 @@ describe('Control', function() {
     this.ok = true;
 
     // Start browser to test UI
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: 'new'});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
     page = await browser.newPage();
 
     // Listen to browser
@@ -99,15 +99,11 @@ describe('Control', function() {
   });
 
   it('should select detector view GLOBAL and redirect to environments page', async () => {
-    const [label] = await page.$x(`//div/button[@id="GLOBALViewButton"]`);
-    if (label) {
-      await label.click();
-      await page.waitForTimeout(200);
-      const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=environments');
-    } else {
-      assert.ok(false, `Unable to click GLOBAL View`);
-    }
+    await page.locator('xpath///button[@id="GLOBALViewButton"]')
+      .setTimeout(3000)
+      .click();
+    const location = await page.evaluate(() => window.location);
+    assert.strictEqual(location.search, '?page=environments');
   });
 
   it('should successfully set selected detector', async () => {
@@ -116,10 +112,11 @@ describe('Control', function() {
   });
 
   it('should successfully display detector view header', async () => {
-    const detectorViewLabel = await page.evaluate(() => {
-      return document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > h4').innerText;
-    });
+    const detectorViewLabel = await page.locator('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > h4')
+      .setTimeout(1000)
+      .map((header) => header.innerText)
+      .wait();
+
     assert.strictEqual(detectorViewLabel, 'Detector View: GLOBAL')
   });
 

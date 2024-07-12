@@ -40,7 +40,7 @@ describe('`pageAbout` test-suite', async () => {
 
   it('should load about page', async () => {
     await page.goto(url + '?page=about', {waitUntil: 'networkidle0'});
-    await page.waitForTimeout(500);
+
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(calls['getFrameworkInfo'], true);
     assert.strictEqual(location.search, '?page=about');

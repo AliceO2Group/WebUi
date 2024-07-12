@@ -72,7 +72,6 @@ describe('`pageEnvironment` test-suite', async () => {
       window.model.session.role = 2;
       window.model.notify();
     });
-    await page.waitForTimeout(200);
     const shutdownButton = await page.$('#buttonToSHUTDOWN');
     assert.ok(shutdownButton === null, 'button still exists');
 
@@ -82,7 +81,6 @@ describe('`pageEnvironment` test-suite', async () => {
       window.model.lock.actionOnLock('MID', 'TAKE', false);
       window.model.notify();
     });
-    await page.waitForTimeout(200);
   });
 
   describe('Check presence of buttons in CONFIGURED state', async () => {
@@ -117,12 +115,12 @@ describe('`pageEnvironment` test-suite', async () => {
 
   describe('Check transition from CONFIGURED to RUNNING and presence of buttons in RUNNING state', async () => {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
-      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('#buttonToSTART').click());
-      await page.waitForTimeout(200);
-      const state = await page.evaluate(() => {
-        return window.model.environment.item.payload.state;
-      });
+      await page.locator('#buttonToSTART')
+        .setTimeout(1000)
+        .click();
+      await page.waitForNetworkIdle();
+
+      const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
       assert.ok(calls['controlEnvironment']);
     });
@@ -163,12 +161,12 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
-      await page.waitForTimeout(400);
+      await page.waitForNetworkIdle();
       const configuredState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
-      await page.waitForTimeout(400);
+      await page.waitForNetworkIdle();
       const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(standbyState, 'DEPLOYED');
     });
@@ -212,7 +210,7 @@ describe('`pageEnvironment` test-suite', async () => {
       });
       await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
       await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').click());
-      await page.waitForTimeout(200);
+      await page.waitForNetworkIdle();
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
       assert.ok(calls['destroyEnvironment']);
