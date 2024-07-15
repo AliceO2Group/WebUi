@@ -145,6 +145,7 @@ message NewEnvironmentRequest {
     map<string, string> vars = 2;
     bool public = 3;
     bool autoTransition = 4;
+    common.User requestUser = 5;
 }
 message NewEnvironmentReply {
     EnvironmentInfo environment = 1;
@@ -154,6 +155,7 @@ message NewAutoEnvironmentRequest {
     string workflowTemplate = 1;
     map<string, string> vars = 2;
     string id = 3;
+    common.User requestUser = 4;
 }
 message NewAutoEnvironmentReply {
 
@@ -181,6 +183,7 @@ message ControlEnvironmentRequest {
         DEPLOY = 6;
     }
     Optype type = 2;
+    common.User requestUser = 3;
 }
 message ControlEnvironmentReply {
     string id = 1;
@@ -217,6 +220,7 @@ message DestroyEnvironmentRequest {
     bool keepTasks = 2;
     bool allowInRunningState = 3;
     bool force = 4;
+    common.User requestUser = 5;
 }
 message DestroyEnvironmentReply {
     CleanupTasksReply cleanupTasksReply = 1;
