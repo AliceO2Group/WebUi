@@ -26,7 +26,6 @@ const LOG_FACILITY = 'qcg/obj-service';
 export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
-   * @constructor
    * @param {CcdbService} dbService - CCDB service to retrieve raw information about the QC objects
    * @param {JsonFileService} dataService - service to be used for retrieving configurations on saved layouts
    * @param {RootService} rootService - root library to be used for interacting with ROOT Objects

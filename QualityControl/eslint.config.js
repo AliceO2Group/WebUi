@@ -7,6 +7,7 @@ export default [
   jsdoc.configs['flat/recommended'],
   pluginJs.configs.recommended,
   {
+    ignores: ['config-default.js', 'public/config.js', 'config.js', 'jsconfig.json'],
     plugins: {
       jsdoc,
       '@stylistic/js': stylisticJs,

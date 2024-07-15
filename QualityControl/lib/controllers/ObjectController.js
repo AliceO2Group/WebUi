@@ -23,7 +23,6 @@ export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
-   * @constructor
    * @param {QCObjectService} objService - objService to be used for retrieval of information
    * @param {ConsulService} onlineService - retrieve information on which objects are currently generated
    */

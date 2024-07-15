@@ -235,8 +235,8 @@ export class CcdbService {
         throw new Error(`No object found for: ${path}`);
       }
       return objects[0];
-    } catch (error) {
-      throw new Error(`Unable to retrieve object for: ${path} due to error: ${error}`);
+    } catch {
+      throw new Error(`Unable to retrieve object for: ${path}`);
     }
   }
 
