@@ -96,7 +96,7 @@ export default class Layout extends Observable {
   /**
    * Load data about a layouts by its id
    * @param {string} layoutId - id of the layout to be loaded
-   * @param {String} [tabName] - name of the tab that should be loaded
+   * @param {string} [tabName] - name of the tab that should be loaded
    * @returns {Promise} - whether retrieval of layout was success
    */
   async loadItem(layoutId, tabName) {
@@ -303,8 +303,8 @@ export default class Layout extends Observable {
   /**
    * Given an ID and new value for official status, update it accordingly
    * @param {string} id - of layout to modify
-   * @param {Boolean} isOfficial - new value to set
-   * @return {void}
+   * @param {boolean} isOfficial - new value to set
+   * @returns {void}
    */
   async toggleOfficial(id, isOfficial) {
     await this.model.services.layout.patchLayout(id, { isOfficial });
@@ -492,7 +492,7 @@ export default class Layout extends Observable {
   /**
    * Add a new object chart
    * @param {string} objectName - name of object like a/b/c
-   * @returns {Object} the new tabObject created
+   * @returns {object} the new tabObject created
    */
   addItem(objectName) {
     const newTabObject = assertTabObject({
@@ -573,7 +573,7 @@ export default class Layout extends Observable {
 
   /**
    * Toggle a jsroot option of a tabObject
-   * @param {Object} tabObject - tab dto representation
+   * @param {object} tabObject - tab dto representation
    * @param {string} option - option for which to toggle
    * @returns {undefined}
    */
@@ -590,7 +590,7 @@ export default class Layout extends Observable {
   /**
    * Method to toggle displaying default options
    * If field does not exist in tabObject, it will be added
-   * @param {Object} tabObject - tab dto representation
+   * @param {object} tabObject - tab dto representation
    * @returns {undefined}
    */
   toggleDefaultOptions(tabObject) {
@@ -604,7 +604,7 @@ export default class Layout extends Observable {
 
   /**
    * Edit a tabObject from current tab from current layout, sidebar will show its properties
-   * @param {Object} tabObject - tab dto representation
+   * @param {object} tabObject - tab dto representation
    * @returns {undefined}
    */
   editTabObject(tabObject) {
@@ -614,7 +614,7 @@ export default class Layout extends Observable {
 
   /**
    * Delete a tabObject from current tab from current layout
-   * @param {Object} tabObject - tab dto representation
+   * @param {object} tabObject - tab dto representation
    * @returns {undefined}
    */
   deleteTabObject(tabObject) {
@@ -628,7 +628,7 @@ export default class Layout extends Observable {
 
   /**
    * Method to duplicate an existing layout
-   * @param {String} layoutName - name of the new layout tha tis being created
+   * @param {string} layoutName - name of the new layout tha tis being created
    * @returns {Promise} - whether duplication was successful
    */
   async duplicate(layoutName) {

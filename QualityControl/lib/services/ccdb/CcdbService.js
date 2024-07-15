@@ -33,14 +33,12 @@ const {
  *
  * The service also accepts filtering parameters such as Metadata fields. For QCDB some of them are:
  * - PassName, RunNumber, PartName, etc.
- *
  * @class
  */
 export class CcdbService {
   /**
    * Setup CCDB Service based on given configuration or using default values if configuration options are missing
-   * @constructor
-   * @param {Object} config - {hostname, port, protocol, cachePrefix, cacheRefreshRate, prefix}
+   * @param {object} config - {hostname, port, protocol, cachePrefix, cacheRefreshRate, prefix}
    */
   constructor(config = {}) {
     this._hostname = config.hostname ?? 'localhost';
@@ -53,7 +51,7 @@ export class CcdbService {
 
   /**
    * Given an object configuration, attempt to create, configure and return a CCDB service instance
-   * @param {Object} [config = {hostname, port}] - configuration with needed parameters for per the constructor
+   * @param {object} [config = {hostname, port}] - configuration with needed parameters for per the constructor
    * @returns {CcdbService} - an instance of the newly created service
    */
   static setup(config = {}) {
@@ -79,7 +77,7 @@ export class CcdbService {
    *     ]
    *    }
    * }
-   * @returns {Promise.<Object>} - promise with results of the query to ccdb
+   * @returns {Promise.<object>} - promise with results of the query to ccdb
    * @throws {Error}
    */
   async getVersion() {
@@ -108,9 +106,8 @@ export class CcdbService {
    * Attributes of objects wished to be requested for each object can be passed through the fields parameter;
    * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
    * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
-   *
-   * @param {String} [prefix] - Prefix for which CCDB should search for objects
-   * @param {Array<String>} [fields] - List of fields that should be requested for each object
+   * @param {string} [prefix] - Prefix for which CCDB should search for objects
+   * @param {Array<string>} [fields] - List of fields that should be requested for each object
    * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
    * @rejects {Error}
    */
@@ -128,7 +125,7 @@ export class CcdbService {
    * Number of versions defaults to a limit but it can be changed by passing a value
    * @example Equivalent of URL request: `/browse/qc/TPC/object/14324234234234234/id-id-id-id-id/RunNumber=554345`
    * @param {CcdbObjectIdentification} [identification = {}] - properties of an object
-   * @param {number} [limit = 1000] - how many versions should retrieve
+   * @param {number} [limit] - how many versions should retrieve
    * @returns {Promise.<Array<{validFrom, id}>>} - results with identifications objects {validFrom, id}
    * @rejects {Error}
    */
@@ -238,7 +235,7 @@ export class CcdbService {
         throw new Error(`No object found for: ${path}`);
       }
       return objects[0];
-    } catch (error) {
+    } catch {
       throw new Error(`Unable to retrieve object for: ${path}`);
     }
   }

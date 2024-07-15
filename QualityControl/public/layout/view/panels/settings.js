@@ -39,7 +39,7 @@ export default (model) =>
 /**
  * Build an input box, allowing users to add description
  * @param {string} description - description of the layout
- * @param {function} oninput - function to be executed when there is input change
+ * @param {Function} oninput - function to be executed when there is input change
  * @returns {vnode} - virtual node element
  */
 const descriptionLayoutInput = (description, oninput) => h('.w-100.flex-row', [

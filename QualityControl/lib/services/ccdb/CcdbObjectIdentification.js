@@ -13,7 +13,6 @@
 
 /**
  * @typedef CcdbObjectIdentification
- *
  * @property {string|regex} path - full name of the object or regex form
  * @property {number} [validFrom] - timestamp with starting point of validity
  * @property {number} [validUntil] - timestamp with ending point of validity

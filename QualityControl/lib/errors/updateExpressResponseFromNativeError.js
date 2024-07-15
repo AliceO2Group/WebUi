@@ -18,7 +18,6 @@ import { NotFoundError } from './NotFoundError.js';
 /**
  * Update (in place) the given Express response considering a given error
  * If the error is specific, the response status may be set to a specific error code
- *
  * @param {Response} response - express response to be used
  * @param {Error} error - the error instance to handle
  * @returns {void}

@@ -52,7 +52,7 @@ const emptyListEditMode = () => h('.m4', [
 /**
  * Container of the different charts, height is fixed and listeners allow dragging
  * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
+ * @returns {undefined} - virtual node element
  */
 function subcanvasView(model) {
   if (!model.layout.tab) {
@@ -139,7 +139,7 @@ function subcanvasView(model) {
  * content with the mouse. Dragging to desktop is forbidden, but could be added.
  * Position of chart is absolute to allow smooth movements when arrangement changes.
  * @param {Model} model - root model of the application
- * @param {Object} tabObject - to be drawn with jsroot
+ * @param {object} tabObject - to be drawn with jsroot
  * @returns {vnode} - virtual node element
  */
 function chartView(model, tabObject) {
@@ -193,7 +193,7 @@ function chartView(model, tabObject) {
 /**
  * Method to generate a component containing a header with actions and a jsroot plot
  * @param {Model} model - root model of the application
- * @param {Object} tabObject - to be drawn with jsroot
+ * @param {object} tabObject - to be drawn with jsroot
  * @returns {vnode} - virtual node element
  */
 const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
@@ -213,8 +213,8 @@ const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display
 
 /**
  * Predicate to sort objects by id
- * @param {Object} a - first object to compare
- * @param {Object} b - second object to compare with
+ * @param {object} a - first object to compare
+ * @param {object} b - second object to compare with
  * @returns {number} - as to which element is in front
  */
 function compareById(a, b) {
@@ -231,8 +231,8 @@ function compareById(a, b) {
 
 /**
  * Creates a copy of array and sort it by id's object
- * @param {Array.<Object>} array - list of elements to sort by id
- * @returns {Array.<Object>} copy
+ * @param {Array.<object>} array - list of elements to sort by id
+ * @returns {Array.<object>} copy
  */
 function cloneSortById(array) {
   return array.concat().sort(compareById);

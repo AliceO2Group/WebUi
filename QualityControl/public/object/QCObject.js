@@ -167,7 +167,7 @@ export default class QCObject extends Observable {
    * @param {string} title - title of the tree to be sorted
    * @param {string} field - field by which the sort operation should happen
    * @param {number} order {-1; 1}
-   * @param {function} icon - icon to be displayed based on sort order
+   * @param {Function} icon - icon to be displayed based on sort order
    * @returns {undefined}
    */
   sortTree(title, field, order, icon) {
@@ -479,7 +479,7 @@ export default class QCObject extends Observable {
 
   /**
    * Method to parse through tabs and objects of a layout to return one object by ID
-   * @param {Object} layout - layout dto representation
+   * @param {object} layout - layout dto representation
    * @param {string} objectId - id of the object within the layout
    * @returns {string} - object name queried by id
    */

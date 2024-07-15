@@ -13,12 +13,12 @@
  */
 
 /**
+ * @class
  * Class which deals with setting up intervals for repeated actions
  */
 export class IntervalsService {
   /**
    * Constructor for initializing an object which is to register intervals
-   * @constructor
    */
   constructor() {
     this._intervals = {};
@@ -26,9 +26,9 @@ export class IntervalsService {
 
   /**
    * Method to allow other services to register events that should trigger based on an interval rate
-   * @param {function} callback - function that should be called based on interval rate
+   * @param {Function} callback - function that should be called based on interval rate
    * @param {number} intervalRate = 60 * 1000 - (ms) on how often the callback should be called
-   * @returns {Symbol} - unique key for registered callback
+   * @returns {symbol} - unique key for registered callback
    */
   register(callback, intervalRate = 60 * 1000) {
     const key = Symbol(Math.random());
@@ -38,7 +38,7 @@ export class IntervalsService {
 
   /**
    * Method to allow services to deregister and clear an interval
-   * @param {Symbol} key - key under which the interval was registered
+   * @param {symbol} key - key under which the interval was registered
    * @returns {void}
    */
   deregister(key) {

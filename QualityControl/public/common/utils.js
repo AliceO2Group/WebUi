@@ -33,12 +33,12 @@ export function clone(obj) {
 /**
  * Produces a lambda function waiting `time` ms before calling fn.
  * No matter how many calls are done to lambda, the last call is the waiting starting point.
- * @param {function} fn - function to be called after `time` ms
+ * @param {Function} fn - function to be called after `time` ms
  * @param {number} time - ms
- * @returns {function} the lambda function produced
+ * @returns {Function} the lambda function produced
  */
 export function timerDebouncer(fn, time) {
-  let timer;
+  let timer = {};
   return function (...args) {
     if (timer) {
       clearTimeout(timer);
@@ -94,7 +94,7 @@ export function prettyFormatDate(date) {
     } else {
       return '-';
     }
-  } catch (error) {
+  } catch {
     return 'Invalid Date';
   }
 }

@@ -99,9 +99,9 @@ export default class LayoutService {
 
   /**
    * Method to retrieve a layout by specific parameters as query parameters
-   * @param {String} runDefinition - definition of the run
-   * @param {String} [pdpBeamType] - optional beam type
-   * @return {Layout} - layout identified if any
+   * @param {string} runDefinition - definition of the run
+   * @param {string} [pdpBeamType] - optional beam type
+   * @returns {Layout} - layout identified if any
    */
   async getLayoutByQuery(runDefinition, pdpBeamType) {
     let url = `/api/layout?runDefinition=${runDefinition}`;
@@ -143,7 +143,7 @@ export default class LayoutService {
 
   /**
    * Service method to send a patch HTTP request with new values
-   * @param {String} id - ID of layout to patch
+   * @param {string} id - ID of layout to patch
    * @param {LayoutPatchDto} patch - object with accepted parameters
    * @returns {Promise<RemoteData>} - response within a RemoteData
    */
@@ -175,7 +175,7 @@ export default class LayoutService {
 
   /**
    * Method which will return RemoteData object based on the status of the request
-   * @param {Object} result - value to be added in RemoteData object
+   * @param {object} result - value to be added in RemoteData object
    * @param {boolean} ok - whether result was ok or not
    * @returns {RemoteData} - passed result in a RemoteData object
    */

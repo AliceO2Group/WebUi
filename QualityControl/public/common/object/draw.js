@@ -22,7 +22,6 @@ import checkersPanel from './checkersPanel.js';
  * Draws a QC Object depending on its type:
  * * uses JSROOT for standard ROOT objects
  * * builds a checkers panel for QC unique checkers
- *
  * @param {QCObjectDto} object - JSON representation of a QC object
  * @param {object} [options] - optional options of presentation
  * @param {object} [drawingOptions] - optional drawing options to be used

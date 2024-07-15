@@ -85,7 +85,7 @@ export default class ObjectTree extends Observable {
 
   /**
    * Add recursively an object inside a tree
-   * @param {Object} object - The object to be inserted, property name must exist
+   * @param {object} object - The object to be inserted, property name must exist
    * @param {Array.<string>} path - Path of the object to dig in before assigning to a tree node,
    * if null object.name is used
    * @param {Array.<string>} pathParent - Path of the current tree node, if null object.name is used

@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { isUserRoleSufficient } from './../../common/library/userRole.enum.js';
 import { UnauthorizedAccessError } from './../errors/UnauthorizedAccessError.js';
@@ -21,16 +21,16 @@ import {
 /**
  * Method to receive a minimum role that needs to be met by owner of request and to return a middleware function
  * @param {UserRole} minimumRole - minimum role that should be fulfilled by the requestor
- * @return {function(req, res, next): void} - middleware function
+ * @returns {function(req, res, next): void} - middleware function
  */
 export const minimumRoleMiddleware = (minimumRole) =>
 
   /**
    * Returned middleware method
-   * @param {Request} req - HTTP Request object
-   * @param {Next} next - HTTP Next object to use if checks pass
-   * @param {Response} res - HTTP Response object
-   * @return {void}
+   * @param {Express.Request} req - HTTP Request object
+   * @param {Express.Response} res - HTTP Response object
+   * @param {Express.Next} next - HTTP Next object to use if checks pass
+   * @returns {void}
    */
   (req, res, next) => {
     try {
