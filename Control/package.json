@@ -21,7 +21,9 @@
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
+    "eslint-front-end": "./node_modules/.bin/eslint --config eslint.config.mjs  public/",
+    "eslint-back-end": "./node_modules/.bin/eslint --config eslint.config.mjs *.js lib/ test/",
+    "eslint": "npm run eslint-frontend && npm eslint-backend",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
@@ -38,11 +40,6 @@
     "@grpc/proto-loader": "0.7.0",
     "google-protobuf": "3.21.0"
   },
-  "bundledDependencies": [
-    "@aliceo2/web-ui",
-    "@grpc/grpc-js",
-    "@grpc/proto-loader"
-  ],
   "devDependencies": {
     "eslint": "^8.56.0",
     "mocha": "^10.7.0",
