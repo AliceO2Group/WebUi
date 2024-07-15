@@ -59,7 +59,6 @@ export default function virtualTable(model, location = 'main') {
  * @param {JSON} item - contains fields: <name>, [creatTime], [lastModified]
  * @param {string} location - location of the object
  * @returns {vnode} - virtual node element
- *
  */
 const objectFullRow = (model, item, location) =>
   h('tr.object-selectable', {
@@ -105,7 +104,7 @@ const tableHeader = () =>
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder
  * @param {Model} model - root model of the application
- * @returns {Object} properties of floating table
+ * @returns {object} properties of floating table
  */
 const scrollStyling = (model) => ({
   style: {

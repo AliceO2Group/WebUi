@@ -30,7 +30,6 @@ import { generateDrawingOptionList } from '../../library/qcObject/utils.js';
  * clean-redraw element on options changed
  * see fingerprint functions at bottom
  * fingerprints are stored in DOM datasets to keep view internal state
- *
  * @param {object} model - root model object
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
  * @param {object} options - optional options of presentation

@@ -75,8 +75,8 @@ const filtersPanel = (objectViewModel) => {
  * @param {string} key - string to be used as unique id
  * @param {string} type - type of the filter
  * @param {string} value - value of the input text field
- * @param {function} callback - callback for oninput event
- * @param {function} onEnterCallback - callback for pressing enter on filter input
+ * @param {Function} callback - callback for oninput event
+ * @param {Function} onEnterCallback - callback for pressing enter on filter input
  * @returns {vnode} - virtual node element
  */
 const filterInput = (queryLabel, placeholder, key, type = 'text', value, callback, onEnterCallback) =>

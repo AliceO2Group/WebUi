@@ -16,7 +16,6 @@ import { h } from '/js/src/index.js';
 
 /**
  * Shows header of Framework Information
- * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
 export default () => [

@@ -65,6 +65,7 @@ export default [
       'jsdoc/no-multi-asterisks': ['off'],
       'jsdoc/no-undefined-types': ['off'],
       'jsdoc/check-tag-names': ['warn', { definedTags: ['rejects'] }],
+      'jsdoc/no-defaults': ['off'],
       '@stylistic/js/array-bracket-newline': [
         'error',
         {

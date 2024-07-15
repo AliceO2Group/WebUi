@@ -83,7 +83,7 @@ export class JsonFileService {
           }
           this.data = dataFromFile;
           resolve();
-        } catch (e) {
+        } catch {
           return reject(new Error(`Unable to parse DB file ${this.pathname}`));
         }
       });
@@ -155,8 +155,8 @@ export class JsonFileService {
 
   /**
    * Given a string, representing layout name, retrieve the layout if it exists
-   * @param {String} layoutName - name of the layout to retrieve
-   * @return {Layout} - object with layout information
+   * @param {string} layoutName - name of the layout to retrieve
+   * @returns {Layout} - object with layout information
    * @throws
    */
   async readLayoutByName(layoutName) {
@@ -171,7 +171,7 @@ export class JsonFileService {
    * Update a single layout by its id
    * @param {string} layoutId - id of the layout to be updated
    * @param {Layout} data - layout new data
-   * @returns {Object} Empty details
+   * @returns {object} Empty details
    */
   async updateLayout(layoutId, data) {
     const layout = await this.readLayout(layoutId);
@@ -183,7 +183,7 @@ export class JsonFileService {
   /**
    * Delete a single layout by its id
    * @param {string} layoutId - id of the layout to be removed
-   * @returns {Object} Empty details
+   * @returns {object} Empty details
    */
   async deleteLayout(layoutId) {
     const layout = await this.readLayout(layoutId);
@@ -195,7 +195,7 @@ export class JsonFileService {
 
   /**
    * List layouts, can be filtered
-   * @param {Object} filter - accepted keys [owner_id, name]
+   * @param {object} filter - accepted keys [owner_id, name]
    * @returns {Array<Layout>} - list of layouts as per the filter
    */
   async listLayouts(filter = {}) {
@@ -207,7 +207,7 @@ export class JsonFileService {
   /**
    * Return an object by its id that is saved within a layout
    * @param {string} id - id of the object to retrieve
-   * @return {{object: object, layoutName: string}} - object configuration stored
+   * @returns {{object: object, layoutName: string}} - object configuration stored
    */
   getObjectById(id) {
     if (!id) {

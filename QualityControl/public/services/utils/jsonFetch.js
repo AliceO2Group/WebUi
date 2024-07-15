@@ -15,17 +15,16 @@ import { fetchClient } from '/js/src/index.js';
 
 /**
  * Build and send a PUT request to a remote endpoint, and extract the response.
- * @param {String} endpoint - the remote endpoint to send request to
+ * @param {string} endpoint - the remote endpoint to send request to
  * @param {RequestInit} options - the request options, see {@see fetch } native function
- * @return {Promise<Resolve<Object>>} resolve with the result of the request
- *
- * @rejects {Error<{message: String}>}
+ * @returns {Promise<Resolve<object>>} resolve with the result of the request
+ * @rejects {Error<{message: string}>}
  */
 export const jsonFetch = async (endpoint, options) => {
-  let response;
+  let response = {};
   try {
     response = await fetchClient(endpoint, options);
-  } catch (error) {
+  } catch {
     return Promise.reject({ message: 'Connection to server failed, please try again' });
   }
   try {
@@ -35,7 +34,7 @@ export const jsonFetch = async (endpoint, options) => {
     return response.ok
       ? result
       : Promise.reject({ message: result.message || 'Unknown error received' });
-  } catch (error) {
+  } catch {
     return Promise.reject({ message: 'Parsing result from server failed' });
   }
 };

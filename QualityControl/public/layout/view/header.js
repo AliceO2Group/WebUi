@@ -78,8 +78,8 @@ const toolbarViewMode = (model) => {
 /**
  * Single tab button in view mode to change tab of current layout
  * @param {Model} model - root model of the application
- * @param {Object} tab - tab dto representation
- * @param {Object} i - index of tab in the model array of tabs
+ * @param {object} tab - tab dto representation
+ * @param {object} i - index of tab in the model array of tabs
  * @returns {vnode} - virtual node element
  */
 const toolbarViewModeTab = (model, tab, i) => {
@@ -144,8 +144,8 @@ const toolbarEditMode = (model) => [
 /**
  * Single tab button in edit mode (with rename and trash buttons when selected)
  * @param {Model} model - root model of the application
- * @param {Object} tab - tab dto representation
- * @param {Object} i - index of tab in array of model
+ * @param {object} tab - tab dto representation
+ * @param {object} i - index of tab in array of model
  * @returns {vnode} - virtual node element
  */
 const toolbarEditModeTab = (model, tab, i) => {
@@ -193,7 +193,7 @@ const toolbarEditModeTab = (model, tab, i) => {
 /**
  * Dropdown for resizing the tab of a layout
  * @param {Model} model - root model of the application
- * @param {Object} tab - tab dto representation
+ * @param {object} tab - tab dto representation
  * @returns {vnode} - virtual node element
  */
 const resizeGridTabDropDown = (model, tab) =>
@@ -211,7 +211,7 @@ const resizeGridTabDropDown = (model, tab) =>
 
 /**
  * Single tab button
- * @param {Object} args - arguments to be passed to button
+ * @param {object} args - arguments to be passed to button
  * @returns {vnode} - virtual node element
  */
 const tabBtn = (...args) => h('button.br-pill.ph2.btn', ...args);

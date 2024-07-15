@@ -58,7 +58,7 @@ export class LayoutController {
       }
       const layouts = await this._dataService.listLayouts(filter);
       res.status(200).json(layouts);
-    } catch (error) {
+    } catch {
       updateExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
@@ -79,7 +79,7 @@ export class LayoutController {
         const layout = await this._dataService.readLayout(id);
         res.status(200).json(layout);
       }
-    } catch (error) {
+    } catch {
       updateExpressResponseFromNativeError(res, new Error(`Unable to retrieve layout with id: ${id}`));
     }
   }
@@ -138,7 +138,7 @@ export class LayoutController {
             new UnauthorizedAccessError('Only the owner of the layout can update it'),
           );
         } else {
-          let layoutProposed;
+          let layoutProposed = {};
           try {
             layoutProposed = await LayoutDto.validateAsync(req.body);
           } catch (error) {
@@ -191,7 +191,7 @@ export class LayoutController {
           res.status(200).json(result);
         }
       }
-    } catch (error) {
+    } catch {
       updateExpressResponseFromNativeError(res, new Error(`Unable to delete layout with id: ${id}`));
     }
   }
@@ -203,7 +203,7 @@ export class LayoutController {
    * @returns {undefined}
    */
   async postLayoutHandler(req, res) {
-    let layoutProposed;
+    let layoutProposed = {};
     try {
       layoutProposed = await LayoutDto.validateAsync(req.body);
     } catch (error) {
@@ -224,7 +224,7 @@ export class LayoutController {
       }
       const result = await this._dataService.createLayout(layoutProposed);
       res.status(201).json(result);
-    } catch (error) {
+    } catch {
       updateExpressResponseFromNativeError(res, new Error('Unable to create new layout'));
     }
   }
@@ -240,24 +240,24 @@ export class LayoutController {
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing ID'));
     } else {
-      let layout;
+      let layout = {};
       try {
         layout = await LayoutPatchDto.validateAsync(req.body);
-      } catch (error) {
+      } catch {
         updateExpressResponseFromNativeError(res, new InvalidInputError('Invalid request body to update layout'));
         return;
       }
 
       try {
         await this._dataService.readLayout(id);
-      } catch (error) {
+      } catch {
         updateExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
         return;
       }
       try {
         const layoutUpdated = await this._dataService.updateLayout(id, layout);
         res.status(201).json(layoutUpdated);
-      } catch (error) {
+      } catch {
         updateExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
         return;
       }

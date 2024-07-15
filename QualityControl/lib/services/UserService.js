@@ -23,13 +23,13 @@ const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 export class UserService {
   /**
    * Setup User Service constructor and initialize needed dataConnector
-   * @param {JSONFileConnector/SQLDataConnector} dataConnector - dataconnector to be used for local/prod development
+   * @param {JSONFileConnector} dataConnector - dataconnector to be used for local/prod development
    */
   constructor(dataConnector) {
     assert(dataConnector, 'Missing Data Connector');
 
     /**
-     *  @type {JSONFileConnector/SQLDataConnector}
+     *  @type {JSONFileConnector}
      */
     this.dataConnector = dataConnector;
   }

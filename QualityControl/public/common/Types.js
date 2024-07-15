@@ -109,7 +109,7 @@ export function assertString(value) {
 
 /**
  * Checks type of passed argument
- * @param {array} value - to be asserted as array
+ * @param {Array} value - to be asserted as array
  * @returns {boolean} true is correct
  */
 export function assertArray(value) {

@@ -228,7 +228,7 @@ export default class Model extends Observable {
               this.layout.edit();
 
               // Replace silently and immediately URL to remove 'edit' parameter after a layout creation
-              // eslint-disable-next-line
+
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}`, true, true);
             }
             this.notify();
@@ -363,7 +363,7 @@ export default class Model extends Observable {
   /**
    * Sets the visibility of the import layout modal
    * @param {boolean} value - value to be set for modal visibility
-   * @returns {boolean} - new value of modal visibility
+   * @returns {undefined}
    */
   set isImportVisible(value) {
     this._isImportVisible = value ? true : false;

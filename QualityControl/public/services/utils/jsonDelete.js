@@ -15,11 +15,10 @@ import { jsonFetch } from './jsonFetch.js';
 
 /**
  * Build and send a DELETE request to a remote endpoint, and extract the response.
- * @param {String} endpoint - the remote endpoint to send request to
+ * @param {string} endpoint - the remote endpoint to send request to
  * @param {RequestInit} options - the request options, see {@see fetch } native function
- * @return {Promise<Resolve<Object>>} resolve with the result of the request or reject with the error message
- *
- * @rejects {Error<{message: String}>}
+ * @returns {Promise<Resolve<object>>} resolve with the result of the request or reject with the error message
+ * @rejects {Error<{message: string}>}
  */
 export const jsonDelete = async (endpoint, options = {}) => {
   if (options?.body && typeof options?.body === 'object') {
