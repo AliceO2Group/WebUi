@@ -114,7 +114,7 @@ class ControlService {
         }
 
         // Setup Stream Channel
-        const streamChannel = this.ctrlProx.client['Subscribe']({id: channelId})
+        const streamChannel = this.ctrlProx.client['Subscribe']({id: channelId});
         streamChannel.on('data', (data) => this.onData(channelId, operation, data));
         streamChannel.on('error', (err) => this.onError(channelId, operation, err));
         // onEnd gets called no matter what
@@ -133,7 +133,7 @@ class ControlService {
         res.status(200).json({
           ended: false, success: true, id: channelId,
           info: {message: `Request for "${operation}" was successfully sent and is now in progress`}
-        })
+        });
       } catch (error) {
         // Failed to getFLPs, ListRepos or NewAutoEnvironment
         errorLogger(error);

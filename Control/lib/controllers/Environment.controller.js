@@ -84,6 +84,8 @@ class EnvironmentController {
    * @returns {void}
    */
   async transitionEnvironmentHandler(req, res) {
+    const {personid, username, name} = req.session;
+    const user = new User(username, name, personid);
     const {id} = req.params;
     const {type: transitionType, runNumber = ''} = req.body;
     if (!id) {
@@ -97,7 +99,7 @@ class EnvironmentController {
         {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
       );
       try {
-        response = await this._envService.transitionEnvironment(id, transitionType);
+        response = await this._envService.transitionEnvironment(id, transitionType, user);
         res.status(200).json(response);
       } catch (error) {
         this._logger.errorMessage(

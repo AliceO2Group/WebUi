@@ -32,8 +32,8 @@ describe('EnvironmentService test suite', () => {
   GetEnvironmentStub.withArgs({id: ENVIRONMENT_VALID}).resolves({environment: {id: ENVIRONMENT_VALID, description: 'Some description'}});
 
   const ControlEnvironmentStub = sinon.stub();
-  ControlEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE, type: 'START_ACTIVITY'}).rejects({code: 5, details: 'Environment not found'});
-  ControlEnvironmentStub.withArgs({id: ENVIRONMENT_VALID, type: 'START_ACTIVITY'}).resolves({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1});
+  ControlEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE, type: 'START_ACTIVITY', requestUser: { name: 'unknown', externalId: 0 }}).rejects({code: 5, details: 'Environment not found'});
+  ControlEnvironmentStub.withArgs({id: ENVIRONMENT_VALID, type: 'START_ACTIVITY', requestUser: { name: 'unknown', externalId: 0 }}).resolves({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1});
 
   const DestroyEnvironmentStub = sinon.stub();
   DestroyEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE, keepTasks: false, allowInRunningState: false, force: false}).rejects({code: 5, details: 'Environment not found'});

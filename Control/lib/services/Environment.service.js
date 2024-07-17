@@ -76,11 +76,16 @@ class EnvironmentService {
    * Given an environment ID and a transition type, use the gRPC client to perform the transition
    * @param {String} id - environment id as defined by AliECS Core
    * @param {EnvironmentTransitionType} transitionType - allowed transitions for an environment
+   * @param {User} requestUser - user that requested the transition
    * @return {EnvironmentTransitionResult} - result of the environment transition
    */
-  async transitionEnvironment(id, transitionType) {
+  async transitionEnvironment(id, transitionType, user = {}) {
     try {
-      const transitionedEnvironment = await this._coreGrpc.ControlEnvironment({id, type: transitionType});
+      const requestUser = {
+        name: user.username ?? 'unknown',
+        externalId: user.personId ?? 0,
+      };
+      const transitionedEnvironment = await this._coreGrpc.ControlEnvironment({id, type: transitionType, requestUser});
       return EnvironmentTransitionResultAdapter.toEntity(transitionedEnvironment);
     } catch (error) {
       throw grpcErrorToNativeError(error);

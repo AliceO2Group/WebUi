@@ -96,25 +96,25 @@ describe('EnvironmentController test suite', () => {
     });
 
     it('should return error due to missing id', async () => {
-      await envCtrl.transitionEnvironmentHandler({params: {id: null}, body: {type: null}}, res);
+      await envCtrl.transitionEnvironmentHandler({params: {id: null}, body: {type: null}, session: {username: '', personId: 0}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Missing environment ID parameter`}));
     });
 
     it('should return error due to missing transition type', async () => {
-      await envCtrl.transitionEnvironmentHandler({params: {id: 'ABC123'}, body: {type: null}}, res);
+      await envCtrl.transitionEnvironmentHandler({params: {id: 'ABC123'}, body: {type: null}, session: {username: '', personId: 0}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Invalid environment transition to perform`}));
     });
 
     it('should return error due to invalid transition type', async () => {
-      await envCtrl.transitionEnvironmentHandler({params: {id: 'ABC123'}, body: {type: 'NON_EXISTENT'}}, res);
+      await envCtrl.transitionEnvironmentHandler({params: {id: 'ABC123'}, body: {type: 'NON_EXISTENT'}, session: {username: '', personId: 0}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({message: `Invalid environment transition to perform`}));
     });
 
     it('should return error due to transition environment issue', async () => {
-      await envCtrl.transitionEnvironmentHandler({session: {username: 'test'}, params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {type: 'START_ACTIVITY'}}, res);
+      await envCtrl.transitionEnvironmentHandler({session: {username: 'test', personId: 0}, params: {id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE}, body: {type: 'START_ACTIVITY'}}, res);
       assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({message: `Cannot transition environment`}));
     });
