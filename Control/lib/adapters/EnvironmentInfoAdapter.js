@@ -103,13 +103,16 @@ class EnvironmentInfoAdapter {
     const environmentInfo = EnvironmentInfoAdapter.toOverviewEntity(environment, detectorsAll, hostsByDetectors);
     if (taskSource === TASKS_SOURCE.EPN) {
       const {integratedServicesData: {odc = '{}'}} = environment;
-      const odcParsed = JSON.parse(odc);
-      environmentInfo.tasks = Array.from(Object.values(odcParsed.devices).map((device) => {
-        device.epnState = device.state;
-        device.state = device.ecsState;
-        delete device.ecsState;
-        return device;
-      }));
+      const {devices = []} = JSON.parse(odc);
+
+      environmentInfo.tasks = Array.from(
+        Object.values(devices).map((device) => {
+          device.epnState = device.state;
+          device.state = device.ecsState;
+          delete device.ecsState;
+          return device;
+        })
+      );
     } else if (taskSource === TASKS_SOURCE.FLP) {
       const {tasks = [], includedDetectors} = environment;
       environmentInfo.tasks = [];

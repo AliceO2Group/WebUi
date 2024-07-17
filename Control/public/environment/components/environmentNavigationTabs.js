@@ -121,9 +121,9 @@ const configurationTabPanel = (envModel, item) =>
  * @return {vnode}
  */
 const tasksPerFlpTables = (environmentModel, environment) => {
-  const {tasks = []} = environment;
-  if (tasks.length === 0) {
-    return h('.text-center.w-100', 'Environment is in transition');
+  const {tasks = [], currentTransition = ''} = environment;
+  if (tasks.length === 0 && !currentTransition) {
+    return h('.text-center.w-100', 'No tasks found');
   }
   const tasksByFlp = getTasksByFlp(tasks);
   return [Object.keys(tasksByFlp).map((host) =>
@@ -146,8 +146,11 @@ const tasksPerFlpTables = (environmentModel, environment) => {
  * @return {vnode}
  */
 const tasksPerEpnTables = (envModel, environment) => {
-  const {tasks = []} = environment;
+  const {tasks = [], currentTransition = ''} = environment;
   const tasksByHosts = getTasksByEpn(tasks);
+  if (tasks.length === 0 && !currentTransition) {
+    return h('.text-center.w-100', 'No tasks found');
+  }
   return [
     Object.keys(tasksByHosts).map((host) =>
       h('', [
