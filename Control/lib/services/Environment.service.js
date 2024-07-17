@@ -69,7 +69,6 @@ class EnvironmentService {
     }
     const detectorsAll = this._apricotGrpc.detectors ?? [];
     const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-    console.log(EnvironmentInfoAdapter.toEntity(grpcPayload.environment, taskSource, detectorsAll, hostsByDetector))
     return EnvironmentInfoAdapter.toEntity(grpcPayload.environment, taskSource, detectorsAll, hostsByDetector);
   }
 
