@@ -308,19 +308,25 @@ const checkBox = (variable, model) => {
     variableLabel(variable,
       () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true')
     ),
-    h('', {class: 'w-50 flex-row flex-wrap text-left'}, [
+    h('', {
+      class: 'w-50 flex-row flex-wrap text-left',
+      onclick: (e) => {
+        e.stopPropagation();
+        model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true');
+      }
+    }, [
       h('label.form-check.switch', [
         h('input.form-check-input', {
+          onclick: (e) => e.stopPropagation(),
           type: 'checkbox',
           name: `${variable.id}`,
           id: `${variable.id}Id`,
           checked: value === 'true',
           value: value,
-          onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
         }),
         h('span.slider.round')
       ]
-      )
+      ),
     ])
   ]);
 }
