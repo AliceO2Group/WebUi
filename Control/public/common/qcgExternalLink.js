@@ -22,17 +22,20 @@ import {h, iconExternalLink} from '/js/src/index.js';
  * @return {vnode}
  */
 export const qcgExternalLink = (run) => {
-  const {runNumber, detectors, definition} = run;
+  const {runNumber, detectors, definition, runType} = run;
 
   const qcgLinkQueryParameters = ['page=layoutShow'];
   if (definition) {
     qcgLinkQueryParameters.push(`definition=${definition}`);
   }
+  if (runType) {
+    qcgLinkQueryParameters.push(`runType=${runType}`);
+  }
   if (detectors?.length === 1) {
     qcgLinkQueryParameters.push(`detector=${detectors[0]}`);
   }
   if (runNumber) {
-    qcgLinkQueryParameters.push(`RunNumber=${runNumber}`);
+    qcgLinkQueryParameters.push(`runNumber=${runNumber}`);
   }
   const qcgRedirectLink = `${COG.QCG_URL}?${qcgLinkQueryParameters.join('&')}`;
 
