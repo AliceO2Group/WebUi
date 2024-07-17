@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
+const {NotFoundError} = require('@aliceo2/web-ui');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
 const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentTransitionResultAdapter.js');
@@ -57,14 +58,18 @@ class EnvironmentService {
    * @throws {Error}
    */
   async getEnvironment(id, taskSource) {
+    let grpcPayload = {};
     try {
-      const {environment} = await this._coreGrpc.GetEnvironment({id});
-      const detectorsAll = this._apricotGrpc.detectors ?? [];
-      const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-      return EnvironmentInfoAdapter.toEntity(environment, taskSource, detectorsAll, hostsByDetector);
+      grpcPayload = await this._coreGrpc.GetEnvironment({id});
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
+    if (!grpcPayload.environment) { 
+      throw new NotFoundError(`Environment (id: ${id}) not found`);
+    }
+    const detectorsAll = this._apricotGrpc.detectors ?? [];
+    const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+    return EnvironmentInfoAdapter.toEntity(grpcPayload.environment, taskSource, detectorsAll, hostsByDetector);
   }
 
   /**
