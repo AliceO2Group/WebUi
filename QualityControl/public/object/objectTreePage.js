@@ -111,7 +111,7 @@ const drawPlot = (model, object) => {
  * @returns {vnode} - virtual node element
  */
 function statusBarLeft(model) {
-  let itemsInfo;
+  let itemsInfo = '';
   if (!model.object.currentList) {
     itemsInfo = 'Loading objects...';
   } else if (model.object.searchInput) {

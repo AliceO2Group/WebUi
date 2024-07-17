@@ -44,8 +44,8 @@ export default (model) =>
   });
 
 /**
- * * An input which allows users to search though objects;
- * * A checkbox to switch to displaying only objects in Online Mode (displayed only if online mode is available)
+ * An input which allows users to search though objects;
+ * A checkbox to switch to displaying only objects in Online Mode (displayed only if online mode is available)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
@@ -200,4 +200,5 @@ const objectPreview = (model) => {
     const objName = model.object.selected.name;
     return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model, objName, {}));
   }
+  return;
 };

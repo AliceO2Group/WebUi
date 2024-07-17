@@ -58,7 +58,7 @@ export const setup = (http, ws) => {
  * Method to check if consulService is configured and used
  * @param {Request} _ - HTTP request object with information on owner_id
  * @param {Response} res - HTTP response object to provide layouts information
- * @param {function} next - HTTP object for continuing chain of operations
+ * @param {Function} next - HTTP object for continuing chain of operations
  * @returns {undefined}
  */
 const onlineMiddleware = (_, res, next) => {

@@ -98,7 +98,7 @@ export default function objectPropertiesSidebar(model) {
 /**
  * Shows a button to change size width and height e.g.: "1x3"
  * @param {Model} model - root model of the application
- * @param {Object} tabObject - the tabObject to be changed
+ * @param {object} tabObject - the tabObject to be changed
  * @param {number} width - size the button will handle
  * @param {number} height - size the button will handle
  * @returns {vnode} - virtual node element
@@ -116,7 +116,7 @@ const btnSize = (model, tabObject, width, height) => h('.form-check.w-33', [
 /**
  * Shows a button to toggle a jsroot option like grid or scale
  * @param {Model} model - root model of the application
- * @param {Object} tabObject - the tabOject to be changed
+ * @param {object} tabObject - the tabOject to be changed
  * @param {string} option - jsroot option
  * @returns {vnode} - virtual node element
  */
@@ -133,7 +133,7 @@ const btnOption = (model, tabObject, option) => h('.form-check.w-33', [
 /**
  * Button to ignore all C++ default histogram options
  * @param {Model} model - root model of the application
- * @param {Object} tabObject - the tabOject to be changed
+ * @param {object} tabObject - the tabOject to be changed
  * @returns {vnode} - virtual node element
  */
 const btnIgnoreOptions = (model, tabObject) =>

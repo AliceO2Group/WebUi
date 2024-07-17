@@ -22,7 +22,7 @@
     "test": "npm run eslint && npm run mocha",
     "integration-test": "mocha --exit --bail ./test/integration/qcg-test.cjs -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config .eslintrc *.js lib/ public/",
+    "eslint": "./node_modules/.bin/eslint --config eslint.config.js *.js lib/ public/",
     "coverage": "nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
     "mocha": "mocha --exit test/mocha-index.js"
@@ -35,20 +35,24 @@
   ],
   "dependencies": {
     "@aliceo2/web-ui": "2.6.0",
-    "jsroot": "7.5.5",
-    "joi": "17.13.1"
+    "joi": "17.13.1",
+    "jsroot": "7.5.5"
   },
-  "bundledDependencies": [
-    "@aliceo2/web-ui",
-    "jsroot",
-    "joi"
-  ],
   "devDependencies": {
-    "eslint": "8.57.0",
+    "@eslint/js": "^9.7.0",
+    "@stylistic/eslint-plugin-js": "^2.3.0",
+    "eslint": "^9.7.0",
+    "eslint-plugin-jsdoc": "^48.7.0",
+    "globals": "^15.8.0",
     "mocha": "^10.6.0",
     "nock": "^13.5.0",
     "nyc": "^17.0.0",
     "puppeteer": "^22.12.1",
     "sinon": "^18.0.0"
-  }
+  },
+  "bundleDependencies": [
+    "@aliceo2/web-ui",
+    "jsroot",
+    "joi"
+  ]
 }

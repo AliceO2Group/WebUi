@@ -19,7 +19,7 @@ import { prettyFormatDate } from './../utils.js';
  * Display a select form with a given list of timestamps and optional callback
  * @param {{validFrom: number, id: string}} selected - element that should be displayed as selected
  * @param {Array<{validFrom: number, id: string}>} versions - list of versions available for an object in ms
- * @param {function} callback - onchange callback function
+ * @param {Function} callback - onchange callback function
  * @returns {vnode} - select form with passed values
  */
 export const dateSelector = (selected, versions, callback) => h(

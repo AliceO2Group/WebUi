@@ -14,8 +14,8 @@
 
 /**
  * Given an existing object of used parameters and new ones to add/update, return a string with desired URL format
- * @param {Object<String, String>} currentParameters - current parameters in the URL
- * @param {Object<String, String>} parameters - object containing what parameters should be added or updated
+ * @param {object} currentParameters - current parameters in the URL
+ * @param {object} parameters - object containing what parameters should be added or updated
  * @returns {string} - updated URL
  */
 export function buildQueryParametersString(currentParameters, parameters) {

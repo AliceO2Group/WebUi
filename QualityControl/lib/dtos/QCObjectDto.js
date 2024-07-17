@@ -60,14 +60,14 @@ export default class QCObjectDto {
    * Transforms an object from CCDB structure to a QCG normalized one;
    * * known keys are mapped to camelCase format
    * * timestamps (ms) are converted from string to number
-   * @param {Object} item - from CCDB
-   * @returns {Object} - JSON with keys in camelCase format
+   * @param {object} item - from CCDB
+   * @returns {object} - JSON with keys in camelCase format
    */
   static toStandardObject(item) {
     if (item.etag) {
       try {
         item.etag = JSON.parse(item.etag);
-      } catch (error) {
+      } catch {
         // nothing to do
       }
     }
@@ -102,7 +102,7 @@ export default class QCObjectDto {
 
   /**
    * Given a CCDB object response from GET request, parse the fields and return the new object as of type QcObjectLeaf
-   * @param {Object} item - CCDB object from GET request
+   * @param {object} item - CCDB object from GET request
    * @returns {QcObjectLeaf} - parsed object
    */
   static toQcObjectLeaf(item) {

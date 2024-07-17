@@ -50,7 +50,7 @@ export function errorLogger(err, facility = 'utils') {
  * @param {number} port - port of the server to where request will be made
  * @param {string} path - path of the server request to where request will be made
  * @param {JSON} headers - configurable headers for the request
- * @returns {Promise.<Object, Error>} JSON response
+ * @returns {Promise.<object, Error>} JSON response
  */
 export function httpGetJson(hostname, port, path, headers = { Accept: 'application/json' }) {
   return new Promise((resolve, reject) => {
@@ -60,7 +60,7 @@ export function httpGetJson(hostname, port, path, headers = { Accept: 'applicati
      * Generic handler for client http requests,
      * buffers response, checks status code and parses JSON
      * @param {Response} response - response object to be used for building the JSON response
-     * @returns {Promise.<Object, Error>} - JSON response
+     * @returns {undefined}
      */
     const requestHandler = (response) => {
       if (response.statusCode < 200 || response.statusCode > 299) {
@@ -74,7 +74,7 @@ export function httpGetJson(hostname, port, path, headers = { Accept: 'applicati
         try {
           const body = JSON.parse(bodyChunks.join(''));
           resolve(body);
-        } catch (e) {
+        } catch {
           reject(new Error('Unable to parse JSON'));
         }
       });

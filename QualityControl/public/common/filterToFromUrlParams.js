@@ -16,8 +16,8 @@
  * Given an object with K;V pairs, build a URL component and return it as string
  * @example
  * { RunNumber: 42, PassName: 1 } -> '&RunUmber=42&PassName=1'
- * @param {Object<String, String>} filter - filters as KV pairs
- * @returns {String} - partial URL
+ * @param {object} filter - filters as KV pairs
+ * @returns {string} - partial URL
  */
 export const getUrlPathFromObject = (filter) => {
   let urlPath = '';

@@ -127,7 +127,7 @@ const statusMenu = (model) =>
 /**
  * Shows one link to a layout
  * @param {Model} model - root model of the application
- * @param {Object} layout - layout dto representation
+ * @param {object} layout - layout dto representation
  * @returns {vnode} - virtual node element
  */
 const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {

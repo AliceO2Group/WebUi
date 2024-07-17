@@ -39,8 +39,8 @@ export default class QcObjectIdentificationDto {
    * * timestamps (ms) are converted from string to number
    * * etag is converted from double strings to string
    * Returned identification can be partial only if received HEAD request is not complete
-   * @param {Object} item - from CCDB
-   * @return {CcdbObjectIdentification} - JSON with keys in camelCase format
+   * @param {object} item - from CCDB
+   * @returns {CcdbObjectIdentification} - JSON with keys in camelCase format
    */
   static fromGetFormat(item) {
     const identification = {};
@@ -54,7 +54,7 @@ export default class QcObjectIdentificationDto {
       try {
         const id = JSON.parse(item[ID]);
         identification.id = id;
-      } catch (error) {
+      } catch {
         identification.id = item[ID];
       }
     }
