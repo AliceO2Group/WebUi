@@ -97,6 +97,7 @@
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr)); }
 .grid-hosts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); }
 .flex-end { justify-content: flex-end; }
+.flex-center { justify-content: center; }
 .flex-grow-1 { flex-grow: 1; }
 .break-space-cell { white-space: break-spaces; text-align: center !important; }
 
