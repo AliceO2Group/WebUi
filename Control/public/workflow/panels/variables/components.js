@@ -207,7 +207,6 @@ const comboBox = (variable, model) => {
     return h('.flex-row.pv1', [
       variableLabel(variable),
       h('.w-50.dropdown', {
-        style: 'flex-grow: 1;',
         class: variable.other.comboBox.visible ? 'dropdown-open' : ''
       }, [
         h('input.form-control', {
@@ -308,19 +307,19 @@ const checkBox = (variable, model) => {
     variableLabel(variable,
       () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true')
     ),
-    h('', {class: 'w-50 flex-row flex-wrap text-left'}, [
-      h('label.form-check.switch', [
+    h('label.w-50.flex-column.flex-center.actionable-row.m0', [
+      h('.form-check.switch', [
         h('input.form-check-input', {
           type: 'checkbox',
-          name: `${variable.id}`,
-          id: `${variable.id}Id`,
+          name: `${variable.id ?? variable.key}`,
+          id: `${variable.id ?? variable.key}Id`,
           checked: value === 'true',
           value: value,
           onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
         }),
         h('span.slider.round')
       ]
-      )
+      ),
     ])
   ]);
 }
