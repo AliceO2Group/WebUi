@@ -24,7 +24,7 @@ class User {
    * @param {Number} personid - id of the user
    * @param {Array<String>|String} access - list of access roles of the user
    */
-  constructor(username, fullName, personid, access) {
+  constructor(username, fullName, personid, access = []) {
     /**
      * @type {String}
      */
