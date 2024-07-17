@@ -28,6 +28,8 @@ package events;
 option java_package = "ch.cern.alice.o2.control.events";
 option go_package = "github.com/AliceO2Group/Control/common/protos;pb";
 
+import public "protos/common.proto";
+
 //////////////// Common event messages ///////////////
 
 enum OpStatus {
@@ -61,6 +63,7 @@ message Ev_EnvironmentEvent {
   string transitionStep = 7;
   OpStatus transitionStatus = 8;
   map<string, string> vars = 9; // consolidated environment variables at the root role of the environment
+  common.User lastRequestUser = 10;
 }
 
 message Traits {
@@ -120,6 +123,7 @@ message Ev_RunEvent {
   string transition = 5;
   OpStatus transitionStatus = 6;
   map<string, string> vars = 7;
+  common.User lastRequestUser = 8;
 }
 
 message Event {
