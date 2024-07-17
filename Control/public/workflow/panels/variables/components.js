@@ -319,8 +319,8 @@ const checkBox = (variable, model) => {
         h('input.form-check-input', {
           onclick: (e) => e.stopPropagation(),
           type: 'checkbox',
-          name: `${variable.id}`,
-          id: `${variable.id}Id`,
+          name: `${variable.id ?? variable.key}`,
+          id: `${variable.id ?? variable.key}Id`,
           checked: value === 'true',
           value: value,
         }),
