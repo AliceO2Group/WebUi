@@ -35,7 +35,7 @@ export const qcgExternalLink = (run) => {
     qcgLinkQueryParameters.push(`detector=${detectors[0]}`);
   }
   if (runNumber) {
-    qcgLinkQueryParameters.push(`RunNumber=${runNumber}`);
+    qcgLinkQueryParameters.push(`runNumber=${runNumber}`);
   }
   const qcgRedirectLink = `${COG.QCG_URL}?${qcgLinkQueryParameters.join('&')}`;
 
