@@ -85,7 +85,6 @@ class EnvironmentService {
         name: user.username ?? 'unknown',
         externalId: user.personId ?? 0,
       };
-      console.log(requestUser)
       const transitionedEnvironment = await this._coreGrpc.ControlEnvironment({id, type: transitionType, requestUser});
       return EnvironmentTransitionResultAdapter.toEntity(transitionedEnvironment);
     } catch (error) {
