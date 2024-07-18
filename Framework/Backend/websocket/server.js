@@ -15,7 +15,7 @@
 const WebSocketServer = require('ws').Server;
 const url = require('url');
 const WebSocketMessage = require('./message.js');
-const {Logger} = require("../log/Logger");
+const {Logger} = require('../log/Logger');
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -158,10 +158,11 @@ class WebSocket {
       }, (failed) => {
         // 7. If parsing message fails
         client.send(JSON.stringify(failed.json));
-      }).catch((error) => {
-      this.log.warn(`ID ${client.id} ${error.name} : ${error.message}`);
-      client.close(1008);
-    });
+      })
+      .catch((error) => {
+        this.log.warn(`ID ${client.id} ${error.name} : ${error.message}`);
+        client.close(1008);
+      });
   }
 
   /**
