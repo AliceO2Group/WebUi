@@ -34,8 +34,8 @@
     "index.js"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.6.0",
-    "joi": "17.13.1",
+    "@aliceo2/web-ui": "2.6.2",
+    "joi": "17.13.3",
     "jsroot": "7.5.5"
   },
   "devDependencies": {
