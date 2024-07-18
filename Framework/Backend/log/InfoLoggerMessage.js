@@ -12,6 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
+const {LogLevel} = require("./LogLevel");
+const {LOG_SEVERITIES, LogSeverity} = require("./LogSeverity");
+
 /**
  * TypeDefinition for InfoLoggerMessage Object
  * @docs https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md
@@ -24,8 +27,8 @@ class InfoLoggerMessage {
   constructor() {
     this._message = '';
 
-    this._severity = 'Info'; // Info (default), Error, Fatal, Warning, Debug
-    this._level = 11;
+    this._severity = LogLevel.Info;
+    this._level = LogLevel.Developer;
     this._system = 'GUI';
     this._facility = 'gui'
     this._partition = undefined;
@@ -35,14 +38,13 @@ class InfoLoggerMessage {
 
   /**
    * Given a JSON object, parse through its values and return an InfoLoggerMessage with default values for missing ones
-   * @param {JSON} logJson - object with all or partial InfoLoggerMessage fields
+   * @param {object} logJson - object with all or partial InfoLoggerMessage fields
    * @returns {InfoLoggerMessage}
    */
   static fromJSON(logJson) {
     const log = new InfoLoggerMessage();
-    log._severity = logJson.severity && ['Info', 'Error', 'Fatal', 'Warning', 'Debug'].includes(logJson.severity) ?
-      logJson.severity : 'Info';
-    log._level = Number.isInteger(logJson?.level) ? logJson.level : 11;
+    log._severity = logJson.severity && LOG_SEVERITIES.includes(logJson.severity) ? logJson.severity : LogSeverity.Info;
+    log._level = Number.isInteger(logJson?.level) ? logJson.level : LogLevel.Developer;
     log._system = logJson.system ?? 'GUI';
     log._facility = logJson.facility ?? 'gui';
     log._partition = logJson.partition;
@@ -53,7 +55,7 @@ class InfoLoggerMessage {
   }
 
   /**
-   * The current InfoLoggerMessage, returns an array of components with their associated labels that can be sent 
+   * The current InfoLoggerMessage, returns an array of components with their associated labels that can be sent
    * to InfoLoggerServer
    * @returns {Array<string>}
    */

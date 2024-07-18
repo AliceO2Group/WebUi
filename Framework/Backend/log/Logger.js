@@ -34,7 +34,6 @@ class Logger {
    * Sets the label and constructs default winston instance
    * @constructor
    * @param {string} label - the name of the module/library injecting the message
-   * @param {JSON} config - JSON object containing optional configurations for WinstonWrapper and InfoLoggerSender
    */
   constructor(label = '') {
     this.label = label;
@@ -48,14 +47,14 @@ class Logger {
    * Method to allow clients to configure Log instance to make use:
    * * WinstonWrapper together with a file
    * * InfoLoggerSender
-   * @param {JSON} config - object expected to contain winston and infoLoggerSender configurations
+   * @param {object} [config] - object expected to contain winston and infoLoggerSender configurations
    */
   static configure(config) {
     if (config?.winston) {
       winston = new WinstonWrapper(config.winston);
     }
     if (config?.infologger) {
-      infologger = new InfoLoggerSender(winston.instance, this.label);
+      infologger = new InfoLoggerSender(winston.instance);
     }
   }
 

@@ -19,6 +19,8 @@ const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
 const InfoLoggerSender = require('./log/InfoLoggerSender.js');
 const Jira = require('./services/jira.js');
 const O2TokenService = require('./services/O2TokenService.js');
+const {LogLevel} = require("./log/LogLevel");
+const {LogSeverity} = require("./log/LogSeverity");
 const {Logger} = require('./log/Logger.js');
 /**
  * @deprecated use {Logger} instead
@@ -47,6 +49,8 @@ exports.InfoLoggerSender = InfoLoggerSender;
 exports.Jira = Jira;
 exports.O2TokenService = O2TokenService;
 exports.Logger = Logger;
+exports.LogLevel = LogLevel;
+exports.LogSeverity = LogSeverity;
 exports.Log = Log;
 exports.MySQL = MySQL;
 exports.NotificationService = NotificationService;
