@@ -194,7 +194,12 @@ export default class Model extends Observable {
             this.router.go('?page=layoutList', true);
             return;
           } else {
-            const layout = await this.services.layout.getLayoutByQuery(definition, pdpBeamType);
+            let pdpTemp = undefined;
+            delete params.pdpBeamType;
+            if (definition === 'PHYSICS') {
+              pdpTemp = pdpBeamType;
+            }
+            const layout = await this.services.layout.getLayoutByQuery(definition, pdpTemp);
             if (!layout) {
               this.notification.show(`Layout with definition ${definition} could not be found`, 'warning', 3000);
               this.router.go('?page=layoutList', true);
@@ -202,7 +207,7 @@ export default class Model extends Observable {
             }
             const paramsToAdd = { layoutId: layout.id };
             delete params.definition;
-            delete params.pdpBeamType;
+
             if (detector) {
               let tab = detector;
               if (runType) {
