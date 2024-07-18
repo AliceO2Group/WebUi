@@ -18,7 +18,7 @@ const http = require('http');
 const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
-const Log = require('./../log/Log.js');
+const {Logger} = require("../log/Logger");
 const O2TokenService = require('./../services/O2TokenService.js');
 const OpenId = require('./openid.js');
 const path = require('path');
@@ -76,7 +76,7 @@ class HttpServer {
       this.listen();
     }
 
-    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/server`);
+    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/server`);
   }
 
   /**

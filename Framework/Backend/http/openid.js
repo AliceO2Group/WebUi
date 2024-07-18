@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const {Issuer, generators, custom} = require('openid-client');
 const assert = require('assert');
-const Log =require('./../log/Log.js');
+const {Logger} = require('./../log/Logger.js');
 
 /**
  * Authenticates and authorises users via OpenID Connect (new CERN SSO).
@@ -22,9 +22,9 @@ const Log =require('./../log/Log.js');
  */
 class OpenId {
   /**
-  * Sets up OpenID Connect based on passed config
-  * @param {object} config - id, secret, well_known, redirect_uri
-  */
+   * Sets up OpenID Connect based on passed config
+   * @param {object} config - id, secret, well_known, redirect_uri
+   */
   constructor(config) {
     assert(config.id, 'Missing config value: id');
     assert(config.secret, 'Missing config value: secret');
@@ -34,10 +34,10 @@ class OpenId {
     this.config = config;
     this.code_verifier = generators.codeVerifier();
     custom.setHttpOptionsDefaults({
-      timeout: config.timeout
+      timeout: config.timeout,
     });
 
-    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
+    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
   }
 
   /**
@@ -54,7 +54,7 @@ class OpenId {
             redirect_uris: [this.config.redirect_uri],
             response_types: ['code'],
             id_token_signed_response_alg: 'RS256',
-            token_endpoint_auth_method: 'client_secret_basic'
+            token_endpoint_auth_method: 'client_secret_basic',
           });
           this.log.info('Client initialised');
           resolve();
@@ -76,7 +76,7 @@ class OpenId {
       scope: 'openid',
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
-      state: state
+      state: state,
     });
   }
 
@@ -89,9 +89,10 @@ class OpenId {
     const params = this.client.callbackParams(req);
     delete params.state;
     const checks = {
-      code_verifier: this.code_verifier
+      code_verifier: this.code_verifier,
     };
     return this.client.callback(this.config.redirect_uri, params, checks);
   }
 }
+
 module.exports = OpenId;

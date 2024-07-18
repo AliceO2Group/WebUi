@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const WinstonWrapper = require('./WinstonWrapper.js');
 const InfoLoggerSender = require('./InfoLoggerSender.js');
@@ -29,7 +29,7 @@ let infologger = null;
  * Handles logging, prints out in console, saves to file or sends to central InfoLogger instance
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
-class Log {
+class Logger {
   /**
    * Sets the label and constructs default winston instance
    * @constructor
@@ -47,7 +47,7 @@ class Log {
   /**
    * Method to allow clients to configure Log instance to make use:
    * * WinstonWrapper together with a file
-   * * InfoLoggerSender 
+   * * InfoLoggerSender
    * @param {JSON} config - object expected to contain winston and infoLoggerSender configurations
    */
   static configure(config) {
@@ -76,11 +76,12 @@ class Log {
     winston.instance.info({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
-      severity: 'Info', 
-      message, level, system, facility, partition, run, errorSource
+      severity: 'Info',
+      message, level, system, facility, partition, run, errorSource,
     });
     infologger?.sendMessage(log);
   }
+
   /**
    * @deprecated
    * Information severity log
@@ -102,8 +103,8 @@ class Log {
     winston.instance.warn({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
-      severity: 'Warning', 
-      message, level, system, facility, partition, run, errorSource
+      severity: 'Warning',
+      message, level, system, facility, partition, run, errorSource,
     });
     infologger?.sendMessage(log);
   }
@@ -129,8 +130,8 @@ class Log {
     winston.instance.error({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
-      severity: 'Error', 
-      message, level, system, facility, partition, run, errorSource
+      severity: 'Error',
+      message, level, system, facility, partition, run, errorSource,
     });
     infologger?.sendMessage(log);
   }
@@ -156,4 +157,4 @@ class Log {
   }
 }
 
-module.exports = Log;
+module.exports.Logger = Logger;

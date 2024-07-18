@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const mysql = require('mysql');
 const assert = require('assert');
-const Log =require('./../log/Log.js');
+const {Logger} = require('./../log/Logger.js');
 
 /**
  * MySQL pool wrapper
@@ -39,7 +39,7 @@ class MySQL {
     config.timeout = (!config.timeout) ? 30000 : config.timeout;
 
     this.config = config;
-    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
+    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
     this.pool = mysql.createPool(config);
   }
 
@@ -72,7 +72,7 @@ class MySQL {
       this.pool.query({
         sql: query,
         timeout: this.config.timeout,
-        values: parameters
+        values: parameters,
       }, (error, results) => {
         if (error) {
           reject(new Error(this.errorHandler(error)));

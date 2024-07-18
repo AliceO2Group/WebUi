@@ -20,14 +20,14 @@ const fs = require('fs');
 
 const config = require('../config.js');
 
-const Log = require('../../log/Log.js');
 const InfoLoggerReceiver = require('../../log/InfoLoggerReceiver.js');
+const {Logger} = require("../../log/Logger");
 
 describe('Logging via WinstonWrapper', () => {
   it('should successfully instantiate Log class and generate error file (winston)', (done) => {
-    Log.configure(config.log);
-    
-    const logger = new Log('test/winston');
+    Logger.configure(config.log);
+
+    const logger = new Logger('test/winston');
     logger.error('Test error winston');
     setTimeout(() => {
       assert.ok(fs.existsSync('./Backend/test/log/error.log'));
