@@ -13,7 +13,7 @@
 */
 
 const assert = require('assert');
-const {Role, isRoleSufficient} = require("../../../lib/common/role.enum");
+const {Role, isRoleSufficient} = require('../../../lib/common/role.enum');
 
 describe('`Role Enum` test suite, needed to ensure no change in Roles hierarchy', () => {
   it('should successfully return the hierarchy of roles', () => {

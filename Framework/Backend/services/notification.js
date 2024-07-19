@@ -14,7 +14,7 @@
 
 const { Kafka, logLevel } = require('kafkajs')
 const WebSocketMessage = require('../websocket/message.js');
-const {Logger} = require("../log/Logger");
+const {Logger} = require('../log/Logger');
 
 /**
  * Gateway for all Kafka notification service

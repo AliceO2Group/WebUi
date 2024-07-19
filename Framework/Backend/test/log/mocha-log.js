@@ -21,7 +21,7 @@ const fs = require('fs');
 const config = require('../config.js');
 
 const InfoLoggerReceiver = require('../../log/InfoLoggerReceiver.js');
-const {Logger} = require("../../log/Logger");
+const {Logger} = require('../../log/Logger');
 
 describe('Logging via WinstonWrapper', () => {
   it('should successfully instantiate Log class and generate error file (winston)', (done) => {

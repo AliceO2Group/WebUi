@@ -14,7 +14,7 @@
 
 const net = require('net');
 const EventEmitter = require('events');
-const {Logger} = require("./Logger");
+const {Logger} = require('./Logger');
 
 const protocols = require('./infologger-protocols.js');
 

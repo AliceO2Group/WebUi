@@ -13,7 +13,7 @@
 */
 
 const https = require('https');
-const {Logger} = require("../log/Logger");
+const {Logger} = require('../log/Logger');
 
 /**
  * Handles creating JIRA issues
