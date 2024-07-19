@@ -19,7 +19,12 @@ const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
 const InfoLoggerSender = require('./log/InfoLoggerSender.js');
 const Jira = require('./services/jira.js');
 const O2TokenService = require('./services/O2TokenService.js');
-const Log = require('./log/Log.js');
+const {Logger} = require('./log/Logger.js');
+/**
+ * @deprecated use {Logger} instead
+ * @type {Logger}
+ */
+const Log = Logger;
 const MySQL = require('./db/mysql.js');
 const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
@@ -41,6 +46,7 @@ exports.InfoLoggerReceiver = InfoLoggerReceiver;
 exports.InfoLoggerSender = InfoLoggerSender;
 exports.Jira = Jira;
 exports.O2TokenService = O2TokenService;
+exports.Logger = Logger;
 exports.Log = Log;
 exports.MySQL = MySQL;
 exports.NotificationService = NotificationService;

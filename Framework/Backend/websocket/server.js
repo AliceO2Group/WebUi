@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const WebSocketServer = require('ws').Server;
 const url = require('url');
-const Log = require('./../log/Log.js');
 const WebSocketMessage = require('./message.js');
+const {Logger} = require('../log/Logger');
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -33,7 +33,7 @@ class WebSocket {
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
-    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
+    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
     this.log.info('Server started');
 
     this.callbackArray = [];
@@ -79,7 +79,7 @@ class WebSocket {
         reject(error);
         return;
       }
-      
+
       // Transfer decoded JWT data to request
       Object.assign(req, data);
       this.log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
@@ -158,7 +158,8 @@ class WebSocket {
       }, (failed) => {
         // 7. If parsing message fails
         client.send(JSON.stringify(failed.json));
-      }).catch((error) => {
+      })
+      .catch((error) => {
         this.log.warn(`ID ${client.id} ${error.name} : ${error.message}`);
         client.close(1008);
       });
@@ -226,4 +227,5 @@ class WebSocket {
     this.log.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
+
 module.exports = WebSocket;

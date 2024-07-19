@@ -14,7 +14,7 @@
 
 const { Kafka, logLevel } = require('kafkajs')
 const WebSocketMessage = require('../websocket/message.js');
-const Log = require('./../log/Log.js');
+const {Logger} = require('../log/Logger');
 
 /**
  * Gateway for all Kafka notification service
@@ -25,7 +25,7 @@ class NotificationService {
    * @param {object} config Config with list of Kafka brokers
    */
   constructor(config) {
-    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
+    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
     if (!config) {
       this.log.warn('Missing configuration');
       return;
