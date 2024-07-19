@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const {access, constants: {X_OK}} = require('fs');
 const {execFile} = require('child_process');
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
-const {LogLevel} = require("./LogLevel");
-const {LogSeverity} = require("./LogSeverity");
+const {LogLevel} = require('./LogLevel');
+const {LogSeverity} = require('./LogSeverity');
 
 /**
  * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
@@ -53,13 +53,13 @@ class InfoLoggerSender {
         if (error) {
           this.winston.debug({
             message: `Impossible to write a log to InfoLogger due to: ${error}`,
-            label: log._facility
+            label: log._facility,
           });
         }
         if (stderr) {
           this.winston.debug({
             message: `Impossible to write a log to InfoLogger due to: ${stderr}`,
-            label: log._facility
+            label: log._facility,
           });
         }
       });
@@ -78,7 +78,7 @@ class InfoLoggerSender {
     if (this._isConfigured) {
       log = InfoLoggerMessage._removeNewLinesAndTabs(log);
       execFile(this._PATH, [
-        `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
+        `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`,
       ], (error, _, stderr) => {
         if (error) {
           this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});

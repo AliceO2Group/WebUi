@@ -15,8 +15,8 @@
 const WinstonWrapper = require('./WinstonWrapper.js');
 const InfoLoggerSender = require('./InfoLoggerSender.js');
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
-const {LogSeverity} = require("../index");
-const {LogLevel} = require("./LogLevel");
+const {LogSeverity} = require('../index');
+const {LogLevel} = require('./LogLevel');
 
 /**
  * @type {WinstonWrapper}

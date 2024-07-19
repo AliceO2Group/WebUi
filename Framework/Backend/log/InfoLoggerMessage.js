@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {LogLevel} = require("./LogLevel");
-const {LOG_SEVERITIES, LogSeverity} = require("./LogSeverity");
+const {LogLevel} = require('./LogLevel');
+const {LOG_SEVERITIES, LogSeverity} = require('./LogSeverity');
 
 /**
  * TypeDefinition for InfoLoggerMessage Object
@@ -30,7 +30,7 @@ class InfoLoggerMessage {
     this._severity = LogSeverity.Info;
     this._level = LogLevel.Developer;
     this._system = 'GUI';
-    this._facility = 'gui'
+    this._facility = 'gui';
     this._partition = undefined;
     this._run = undefined;
     this._errorSource = undefined;
@@ -62,7 +62,7 @@ class InfoLoggerMessage {
   getComponentsOfMessage() {
     const components = [
       `-oSeverity=${this._severity}`, `-oLevel=${this._level}`,
-      `-oSystem=${this._system}`, `-oFacility=${this._facility}`
+      `-oSystem=${this._system}`, `-oFacility=${this._facility}`,
     ];
     if (this._partition) {
       components.push(`-oPartition=${this._partition}`);
