@@ -29,7 +29,7 @@ class InfoLoggerSender {
   constructor(winston) {
     this._isConfigured = false;
     this.winston = winston;
-    const label = 'infologger';
+    const label = 'gui/infologger';
 
     // for security reasons this path is hardcoded
     this._PATH = '/opt/o2-InfoLogger/bin/o2-infologger-log';
