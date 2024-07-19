@@ -33,6 +33,12 @@ let infologger = null;
  */
 class Logger {
   /**
+   * Level after which one messages will not be sent to InfoLogger
+   * @type {number}
+   */
+  static maximumInfoLoggerLevel = LogLevel.Developer;
+
+  /**
    * Sets the label and constructs default winston instance
    * @constructor
    * @param {string} label - the name of the module/library injecting the message
@@ -148,11 +154,11 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} options - log options
    */
   _sendToInfoLogger(message, options) {
-    if (infologger) {
+    if (infologger && options.level < Logger.maximumInfoLoggerLevel) {
       const log = InfoLoggerMessage.fromObject({message, options});
       infologger.sendMessage(log);
     }
   }
 }
 
-module.exports.Logger = Logger;
+exports.Logger = Logger;
