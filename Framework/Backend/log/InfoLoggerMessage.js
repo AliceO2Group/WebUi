@@ -15,8 +15,8 @@
 const {LogLevel} = require('./LogLevel.js');
 const {LOG_SEVERITIES, LogSeverity} = require('./LogSeverity.js');
 
-const DEFAULT_SEVERITY = LogSeverity.Info;
-const DEFAULT_LEVEL = LogLevel.Developer;
+const DEFAULT_SEVERITY = LogSeverity.INFO;
+const DEFAULT_LEVEL = LogLevel.DEVELOPER;
 const DEFAULT_SYSTEM = 'GUI';
 const DEFAULT_FACILITY = 'gui';
 
@@ -63,8 +63,8 @@ class InfoLoggerMessage {
     const log = new InfoLoggerMessage();
     log._severity = logObject.severity && LOG_SEVERITIES.includes(logObject.severity)
       ? logObject.severity
-      : LogSeverity.Info;
-    log._level = parseInt(logObject?.level) || LogLevel.Developer;
+      : LogSeverity.INFO;
+    log._level = parseInt(logObject?.level) || LogLevel.DEVELOPER;
     log._system = logObject.system ?? DEFAULT_SYSTEM;
     log._facility = logObject.facility ?? DEFAULT_FACILITY;
     log._partition = logObject.partition;

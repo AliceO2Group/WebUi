@@ -18,9 +18,9 @@
  * @see https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md#api-for-developers
  */
 exports.LogLevel = Object.freeze({
-  Operations: 1,
-  Support: 6,
-  Developer: 11,
-  Trace: 21,
-  Max: 21,
+  OPERATIONS: 1,
+  SUPPORT: 6,
+  DEVELOPER: 11,
+  TRACE: 21,
+  MAX: 21,
 });

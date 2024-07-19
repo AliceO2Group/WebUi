@@ -74,7 +74,7 @@ class InfoLoggerSender {
    * @param {string} facility - the name of the module/library injecting the message
    * @param {number} level - visibility of the message {@see LogLevel}
    */
-  send(log, severity = LogSeverity.Info, facility = '', level = LogLevel.Max) {
+  send(log, severity = LogSeverity.INFO, facility = '', level = LogLevel.MAX) {
     if (this._isConfigured) {
       log = InfoLoggerMessage._removeNewLinesAndTabs(log);
       execFile(this._PATH, [
