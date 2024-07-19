@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const {LogLevel} = require('./LogLevel');
-const {LOG_SEVERITIES, LogSeverity} = require('./LogSeverity');
+const {LogLevel} = require('./LogLevel.js');
+const {LOG_SEVERITIES, LogSeverity} = require('./LogSeverity.js');
 
 /**
  * TypeDefinition for InfoLoggerMessage Object

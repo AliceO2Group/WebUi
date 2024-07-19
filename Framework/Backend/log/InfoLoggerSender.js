@@ -15,8 +15,8 @@
 const {access, constants: {X_OK}} = require('fs');
 const {execFile} = require('child_process');
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
-const {LogLevel} = require('./LogLevel');
-const {LogSeverity} = require('./LogSeverity');
+const {LogLevel} = require('./LogLevel.js');
+const {LogSeverity} = require('./LogSeverity.js');
 
 /**
  * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
