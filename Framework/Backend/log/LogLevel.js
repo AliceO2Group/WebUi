@@ -15,7 +15,7 @@
 /**
  * Enumeration of Log levels defining the audience
  *
- * @type {Object<string, number>}
+ * @see https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md#api-for-developers
  */
 exports.LogLevel = Object.freeze({
   Operations: 1,

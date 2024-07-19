@@ -14,11 +14,13 @@
 
 /**
  * Enumeration of Log severities (kind of message being sent)
+ *
+ * @see https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md#api-for-developers
  */
 const LogSeverity = Object.freeze({
   Debug: 'Debug',
   Info: 'Info',
-  Warn: 'Warn',
+  Warning: 'Warning',
   Error: 'Error',
   Fatal: 'Fatal',
 });
