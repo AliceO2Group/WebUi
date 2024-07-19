@@ -36,7 +36,7 @@ class Logger {
    * Level from which one messages will not be sent to InfoLogger
    * @type {number}
    */
-  static maximumInfoLoggerLevel = LogLevel.Developer;
+  static maximumInfoLoggerLevel = LogLevel.DEVELOPER;
 
   /**
    * Sets the label and constructs default winston instance
@@ -83,17 +83,17 @@ class Logger {
   infoMessage(message, options) {
     winston.instance.info({message, label: this.label});
 
-    this._sendToInfoLogger(message, {...options, severity: LogSeverity.Info});
+    this._sendToInfoLogger(message, {...options, severity: LogSeverity.INFO});
   }
 
   /**
    * Information severity log
    * @param {string} log - log message
-   * @param {number} [level=LogLevel.Developer] - log level
+   * @param {number} [level=LogLevel.DEVELOPER] - log level
    *
    * @deprecated use {@link Logger.infoMessage}
    */
-  info(log, level = LogLevel.Developer) {
+  info(log, level = LogLevel.DEVELOPER) {
     this.infoMessage(log, {level});
   }
 
@@ -105,17 +105,17 @@ class Logger {
   warnMessage(message, options) {
     winston.instance.warn({message, label: this.label});
 
-    this._sendToInfoLogger(message, {...options, severity: LogSeverity.Warning});
+    this._sendToInfoLogger(message, {...options, severity: LogSeverity.WARNING});
   }
 
   /**
    * Warning severity log
    * @param {string} log - log message
-   * @param {number} [level=LogLevel.Developer] - log level
+   * @param {number} [level=LogLevel.DEVELOPER] - log level
    *
    * @deprecated use {@link Logger.warnMessage}
    */
-  warn(log, level = LogLevel.Developer) {
+  warn(log, level = LogLevel.DEVELOPER) {
     this.warnMessage(log, {level});
   }
 
@@ -127,17 +127,17 @@ class Logger {
   errorMessage(message, options) {
     winston.instance.error({message, label: this.label});
 
-    this._sendToInfoLogger(message, {...options, severity: LogSeverity.Error});
+    this._sendToInfoLogger(message, {...options, severity: LogSeverity.ERROR});
   }
 
   /**
    * Error severity log
    * @param {string} log - log message
-   * @param {number} [level=LogLevel.Developer] - log level
+   * @param {number} [level=LogLevel.DEVELOPER] - log level
    *
    * @deprecated use {@link Logger.errorMessage}
    */
-  error(log, level = LogLevel.Developer) {
+  error(log, level = LogLevel.DEVELOPER) {
     this.errorMessage(log, {level});
   }
 

@@ -18,11 +18,11 @@
  * @see https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md#api-for-developers
  */
 const LogSeverity = Object.freeze({
-  Debug: 'Debug',
-  Info: 'Info',
-  Warning: 'Warning',
-  Error: 'Error',
-  Fatal: 'Fatal',
+  DEBUG: 'Debug',
+  INFO: 'Info',
+  WARNING: 'Warning',
+  ERROR: 'Error',
+  FATAL: 'Fatal',
 });
 
 const LOG_SEVERITIES = Object.values(LogSeverity);
