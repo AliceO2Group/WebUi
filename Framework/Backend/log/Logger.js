@@ -55,7 +55,7 @@ class Logger {
    * Method to allow clients to configure Log instance to make use:
    * * WinstonWrapper together with a file
    * * InfoLoggerSender
-   * @param {object} [config] - object expected to contain winston and infoLoggerSender configurations
+   * @param {object} config - object expected to contain winston and infoLoggerSender configurations
    */
   static configure(config) {
     if (config?.winston) {
@@ -76,8 +76,9 @@ class Logger {
 
   /**
    * Information severity log sent as InfoLoggerMessage
+   *
    * @param {string} message - log message
-   * @param {Partial<InfoLoggerMessageOptions>} options - log options
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   infoMessage(message, options) {
     winston.instance.info({message, label: this.label});
@@ -99,7 +100,7 @@ class Logger {
   /**
    * Warning severity log sent as InfoLoggerMessage
    * @param {string} message - log message
-   * @param {Partial<InfoLoggerMessageOptions>} options - log options
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   warnMessage(message, options) {
     winston.instance.warn({message, label: this.label});
@@ -121,7 +122,7 @@ class Logger {
   /**
    * Error severity log sent as InfoLoggerMessage
    * @param {string} message - log message
-   * @param {Partial<InfoLoggerMessageOptions>} options - log options
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   errorMessage(message, options) {
     winston.instance.error({message, label: this.label});
@@ -151,10 +152,10 @@ class Logger {
   /**
    * Send a log message to InfoLogger
    * @param {string} message - log message
-   * @param {Partial<InfoLoggerMessageOptions>} options - log options
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options
    */
   _sendToInfoLogger(message, options) {
-    if (infologger && options.level < Logger.maximumInfoLoggerLevel) {
+    if (infologger && options && options.level < Logger.maximumInfoLoggerLevel) {
       const log = InfoLoggerMessage.fromObject({
         message,
         ...options
