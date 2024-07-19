@@ -19,9 +19,9 @@ const {createLogger, format, transports: {Console, File}} = require('winston');
  * It allows the usage of two transports console and file (if properly configured)
  */
 class WinstonWrapper {
-  /** 
+  /**
    * Constructor for the ALICEO2 WinstonWrapper which allows custom formatting and transport
-   * @param {JSON} config configuration for console and file transports
+   * @param {object} [config] configuration for console and file transports
    */
   constructor(config) {
     this._instance = createLogger({
@@ -55,7 +55,7 @@ class WinstonWrapper {
       const prefix = console.systemd ? systemdPr[log.level] : log.timestamp;
       const label = log.label ? `[${log.label}]` : '[gui/log]';
       const output = `${log.level}: ${log.message}`;
-      
+
       return `${prefix} ${label} ${output}`;
     });
 

@@ -10,7 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
+
+const {LogLevel} = require('./LogLevel.js');
+const {LOG_SEVERITIES, LogSeverity} = require('./LogSeverity.js');
 
 /**
  * TypeDefinition for InfoLoggerMessage Object
@@ -24,10 +27,10 @@ class InfoLoggerMessage {
   constructor() {
     this._message = '';
 
-    this._severity = 'Info'; // Info (default), Error, Fatal, Warning, Debug
-    this._level = 11;
+    this._severity = LogSeverity.Info;
+    this._level = LogLevel.Developer;
     this._system = 'GUI';
-    this._facility = 'gui'
+    this._facility = 'gui';
     this._partition = undefined;
     this._run = undefined;
     this._errorSource = undefined;
@@ -35,14 +38,13 @@ class InfoLoggerMessage {
 
   /**
    * Given a JSON object, parse through its values and return an InfoLoggerMessage with default values for missing ones
-   * @param {JSON} logJson - object with all or partial InfoLoggerMessage fields
+   * @param {object} logJson - object with all or partial InfoLoggerMessage fields
    * @returns {InfoLoggerMessage}
    */
   static fromJSON(logJson) {
     const log = new InfoLoggerMessage();
-    log._severity = logJson.severity && ['Info', 'Error', 'Fatal', 'Warning', 'Debug'].includes(logJson.severity) ?
-      logJson.severity : 'Info';
-    log._level = Number.isInteger(logJson?.level) ? logJson.level : 11;
+    log._severity = logJson.severity && LOG_SEVERITIES.includes(logJson.severity) ? logJson.severity : LogSeverity.Info;
+    log._level = Number.isInteger(logJson?.level) ? logJson.level : LogLevel.Developer;
     log._system = logJson.system ?? 'GUI';
     log._facility = logJson.facility ?? 'gui';
     log._partition = logJson.partition;
@@ -53,14 +55,14 @@ class InfoLoggerMessage {
   }
 
   /**
-   * The current InfoLoggerMessage, returns an array of components with their associated labels that can be sent 
+   * The current InfoLoggerMessage, returns an array of components with their associated labels that can be sent
    * to InfoLoggerServer
    * @returns {Array<string>}
    */
   getComponentsOfMessage() {
     const components = [
       `-oSeverity=${this._severity}`, `-oLevel=${this._level}`,
-      `-oSystem=${this._system}`, `-oFacility=${this._facility}`
+      `-oSystem=${this._system}`, `-oFacility=${this._facility}`,
     ];
     if (this._partition) {
       components.push(`-oPartition=${this._partition}`);

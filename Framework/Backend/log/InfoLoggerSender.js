@@ -10,11 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const {access, constants: {X_OK}} = require('fs');
 const {execFile} = require('child_process');
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
+const {LogLevel} = require('./LogLevel.js');
+const {LogSeverity} = require('./LogSeverity.js');
 
 /**
  * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
@@ -22,12 +24,12 @@ const InfoLoggerMessage = require('./InfoLoggerMessage.js');
  */
 class InfoLoggerSender {
   /**
-   * @param {winston.instance} winston - local winston instance object
+   * @param {Logger} winston - local winston instance object
    */
-  constructor(winston, label = '') {
+  constructor(winston) {
     this._isConfigured = false;
     this.winston = winston;
-    this.label = label;
+    const label = 'gui/infologger';
 
     // for security reasons this path is hardcoded
     this._PATH = '/opt/o2-InfoLogger/bin/o2-infologger-log';
@@ -50,14 +52,14 @@ class InfoLoggerSender {
       execFile(this._PATH, log.getComponentsOfMessage(), (error, _, stderr) => {
         if (error) {
           this.winston.debug({
-            message: `Impossible to write a log to InfoLogger due to: ${error}`, 
-            label: log._facility
+            message: `Impossible to write a log to InfoLogger due to: ${error}`,
+            label: log._facility,
           });
         }
         if (stderr) {
           this.winston.debug({
             message: `Impossible to write a log to InfoLogger due to: ${stderr}`,
-            label: log._facility
+            label: log._facility,
           });
         }
       });
@@ -68,15 +70,15 @@ class InfoLoggerSender {
    * @deprecated
    * Send a message to InfoLogger with certain fields filled.
    * @param {string} log - log message
-   * @param {string} severity - one of InfoLogger supported severities: 'Info'(default), 'Error', 'Fatal', 'Warning', 'Debug'
+   * @param {string} severity - one of InfoLogger supported severities {@see LogSeverity}
    * @param {string} facility - the name of the module/library injecting the message
-   * @param {number} level - visibility of the message
+   * @param {number} level - visibility of the message {@see LogLevel}
    */
-  send(log, severity = 'Info', facility = '', level = 99) {
+  send(log, severity = LogSeverity.Info, facility = '', level = LogLevel.Max) {
     if (this._isConfigured) {
       log = InfoLoggerMessage._removeNewLinesAndTabs(log);
       execFile(this._PATH, [
-        `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
+        `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`,
       ], (error, _, stderr) => {
         if (error) {
           this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});

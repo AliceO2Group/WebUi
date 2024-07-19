@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 'use strict';
 const ConsulService = require('./services/consul.service.js');
@@ -19,6 +19,8 @@ const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
 const InfoLoggerSender = require('./log/InfoLoggerSender.js');
 const Jira = require('./services/jira.js');
 const O2TokenService = require('./services/O2TokenService.js');
+const {LogLevel} = require('./log/LogLevel.js');
+const {LogSeverity} = require('./log/LogSeverity.js');
 const {Logger} = require('./log/Logger.js');
 /**
  * @deprecated use {Logger} instead
@@ -37,7 +39,7 @@ const {TimeoutError} = require('./errors/TimeoutError.js');
 const {UnauthorizedAccessError} = require('./errors/UnauthorizedAccessError.js');
 const {grpcErrorToNativeError} = require('./errors/grpcErrorToNativeError.js');
 const {
-  updateAndSendExpressResponseFromNativeError
+  updateAndSendExpressResponseFromNativeError,
 } = require('./errors/updateAndSendExpressResponseFromNativeError.js');
 
 exports.ConsulService = ConsulService;
@@ -47,6 +49,8 @@ exports.InfoLoggerSender = InfoLoggerSender;
 exports.Jira = Jira;
 exports.O2TokenService = O2TokenService;
 exports.Logger = Logger;
+exports.LogLevel = LogLevel;
+exports.LogSeverity = LogSeverity;
 exports.Log = Log;
 exports.MySQL = MySQL;
 exports.NotificationService = NotificationService;

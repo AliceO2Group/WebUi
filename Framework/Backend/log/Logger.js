@@ -15,6 +15,8 @@
 const WinstonWrapper = require('./WinstonWrapper.js');
 const InfoLoggerSender = require('./InfoLoggerSender.js');
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
+const {LogLevel} = require('./LogLevel.js');
+const {LogSeverity} = require('./LogSeverity.js');
 
 /**
  * @type {WinstonWrapper}
@@ -34,7 +36,6 @@ class Logger {
    * Sets the label and constructs default winston instance
    * @constructor
    * @param {string} label - the name of the module/library injecting the message
-   * @param {JSON} config - JSON object containing optional configurations for WinstonWrapper and InfoLoggerSender
    */
   constructor(label = '') {
     this.label = label;
@@ -48,14 +49,14 @@ class Logger {
    * Method to allow clients to configure Log instance to make use:
    * * WinstonWrapper together with a file
    * * InfoLoggerSender
-   * @param {JSON} config - object expected to contain winston and infoLoggerSender configurations
+   * @param {object} [config] - object expected to contain winston and infoLoggerSender configurations
    */
   static configure(config) {
     if (config?.winston) {
       winston = new WinstonWrapper(config.winston);
     }
     if (config?.infologger) {
-      infologger = new InfoLoggerSender(winston.instance, this.label);
+      infologger = new InfoLoggerSender(winston.instance);
     }
   }
 
@@ -76,7 +77,7 @@ class Logger {
     winston.instance.info({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
-      severity: 'Info',
+      severity: LogSeverity.Info,
       message, level, system, facility, partition, run, errorSource,
     });
     infologger?.sendMessage(log);
@@ -86,12 +87,12 @@ class Logger {
    * @deprecated
    * Information severity log
    * @param {string} log - log message
-   * @param {number} level - defaults to 11 for "developer"
+   * @param {number} [level=LogLevel.Developer] - log level
    */
-  info(log, level = 11) {
+  info(log, level = LogLevel.Developer) {
     winston.instance.info({message: log, label: this.label});
 
-    infologger?.send(log, 'Info', this.label, level);
+    infologger?.send(log, LogSeverity.Info, this.label, level);
   }
 
   /**
@@ -103,7 +104,7 @@ class Logger {
     winston.instance.warn({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
-      severity: 'Warning',
+      severity: LogSeverity.Warning,
       message, level, system, facility, partition, run, errorSource,
     });
     infologger?.sendMessage(log);
@@ -113,12 +114,12 @@ class Logger {
    * @deprecated
    * Warning severity log
    * @param {string} log - log message
-   * @param {number} level - defaults to 11 for "developer"
+   * @param {number} [level=LogLevel.Developer] - log level
    */
-  warn(log, level = 11) {
+  warn(log, level = LogLevel.Developer) {
     winston.instance.warn({message: log, label: this.label});
 
-    infologger?.send(log, 'Warning', this.label, level);
+    infologger?.send(log, LogSeverity.Warning, this.label, level);
   }
 
   /**
@@ -130,7 +131,7 @@ class Logger {
     winston.instance.error({message, label: this.label});
 
     const log = InfoLoggerMessage.fromJSON({
-      severity: 'Error',
+      severity: LogSeverity.Error,
       message, level, system, facility, partition, run, errorSource,
     });
     infologger?.sendMessage(log);
@@ -140,12 +141,12 @@ class Logger {
    * @deprecated
    * Error severity log
    * @param {string} log - log message
-   * @param {number} level - defaults to 11 for "developer"
+   * @param {number} [level=LogLevel.Developer] - log level
    */
-  error(log, level = 11) {
+  error(log, level = LogLevel.Developer) {
     winston.instance.error({message: log, label: this.label});
 
-    infologger?.send(log, 'Error', this.label, level);
+    infologger?.send(log, LogSeverity.Error, this.label, level);
   }
 
   /**
