@@ -158,6 +158,7 @@ class Logger {
     if (infologger && options && options.level < Logger.maximumInfoLoggerLevel) {
       const log = InfoLoggerMessage.fromObject({
         message,
+        facility: this.label, // Use label as default facility, it might be overridden in options
         ...options
       });
       infologger.sendMessage(log);
