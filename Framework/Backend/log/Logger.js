@@ -33,6 +33,12 @@ let infologger = null;
  */
 class Logger {
   /**
+   * Level from which one messages will not be sent to InfoLogger
+   * @type {number}
+   */
+  static maximumInfoLoggerLevel = LogLevel.Developer;
+
+  /**
    * Sets the label and constructs default winston instance
    * @constructor
    * @param {string} label - the name of the module/library injecting the message
@@ -49,7 +55,7 @@ class Logger {
    * Method to allow clients to configure Log instance to make use:
    * * WinstonWrapper together with a file
    * * InfoLoggerSender
-   * @param {object} [config] - object expected to contain winston and infoLoggerSender configurations
+   * @param {object} config - object expected to contain winston and infoLoggerSender configurations
    */
   static configure(config) {
     if (config?.winston) {
@@ -70,83 +76,69 @@ class Logger {
 
   /**
    * Information severity log sent as InfoLoggerMessage
+   *
    * @param {string} message - log message
-   * @param {JSON} log - fields require for building InfoLoggerMessage
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
-  infoMessage(message, {level, system, facility, partition, run, errorSource}) {
+  infoMessage(message, options) {
     winston.instance.info({message, label: this.label});
 
-    const log = InfoLoggerMessage.fromJSON({
-      severity: LogSeverity.Info,
-      message, level, system, facility, partition, run, errorSource,
-    });
-    infologger?.sendMessage(log);
+    this._sendToInfoLogger(message, {...options, severity: LogSeverity.Info});
   }
 
   /**
-   * @deprecated
    * Information severity log
    * @param {string} log - log message
    * @param {number} [level=LogLevel.Developer] - log level
+   *
+   * @deprecated use {@link Logger.infoMessage}
    */
   info(log, level = LogLevel.Developer) {
-    winston.instance.info({message: log, label: this.label});
-
-    infologger?.send(log, LogSeverity.Info, this.label, level);
+    this.infoMessage(log, {level});
   }
 
   /**
    * Warning severity log sent as InfoLoggerMessage
    * @param {string} message - log message
-   * @param {JSON} log - fields require for building InfoLoggerMessage
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
-  warnMessage(message, {level, system, facility, partition, run, errorSource}) {
+  warnMessage(message, options) {
     winston.instance.warn({message, label: this.label});
 
-    const log = InfoLoggerMessage.fromJSON({
-      severity: LogSeverity.Warning,
-      message, level, system, facility, partition, run, errorSource,
-    });
-    infologger?.sendMessage(log);
+    this._sendToInfoLogger(message, {...options, severity: LogSeverity.Warning});
   }
 
   /**
-   * @deprecated
    * Warning severity log
    * @param {string} log - log message
    * @param {number} [level=LogLevel.Developer] - log level
+   *
+   * @deprecated use {@link Logger.warnMessage}
    */
   warn(log, level = LogLevel.Developer) {
-    winston.instance.warn({message: log, label: this.label});
-
-    infologger?.send(log, LogSeverity.Warning, this.label, level);
+    this.warnMessage(log, {level});
   }
 
   /**
    * Error severity log sent as InfoLoggerMessage
    * @param {string} message - log message
-   * @param {JSON} log - fields require for building InfoLoggerMessage
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
-  errorMessage(message, {level, system, facility, partition, run, errorSource}) {
+  errorMessage(message, options) {
     winston.instance.error({message, label: this.label});
 
-    const log = InfoLoggerMessage.fromJSON({
-      severity: LogSeverity.Error,
-      message, level, system, facility, partition, run, errorSource,
-    });
-    infologger?.sendMessage(log);
+    this._sendToInfoLogger(message, {...options, severity: LogSeverity.Error});
   }
 
   /**
-   * @deprecated
    * Error severity log
    * @param {string} log - log message
    * @param {number} [level=LogLevel.Developer] - log level
+   *
+   * @deprecated use {@link Logger.errorMessage}
    */
   error(log, level = LogLevel.Developer) {
-    winston.instance.error({message: log, label: this.label});
-
-    infologger?.send(log, LogSeverity.Error, this.label, level);
+    this.errorMessage(log, {level});
   }
 
   /**
@@ -156,6 +148,21 @@ class Logger {
   trace(error) {
     winston.instance.verbose({message: error.stack, label: this.label});
   }
+
+  /**
+   * Send a log message to InfoLogger
+   * @param {string} message - log message
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options
+   */
+  _sendToInfoLogger(message, options) {
+    if (infologger && options && options.level < Logger.maximumInfoLoggerLevel) {
+      const log = InfoLoggerMessage.fromObject({
+        message,
+        ...options
+      });
+      infologger.sendMessage(log);
+    }
+  }
 }
 
-module.exports.Logger = Logger;
+exports.Logger = Logger;

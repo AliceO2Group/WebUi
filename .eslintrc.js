@@ -12,7 +12,7 @@ module.exports = {
     "Promise": true
   },
   "parserOptions": {
-    "ecmaVersion": 11,
+    "ecmaVersion": 2022,
     "sourceType": "module"
   },
   "rules": {

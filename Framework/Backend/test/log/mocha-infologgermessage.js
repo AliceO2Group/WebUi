@@ -55,7 +55,7 @@ describe('Logging: InfoLoggerMessage', () => {
     });
 
     it('should successfully return correct values for log message from JSON', () => {
-      const log = InfoLoggerMessage.fromJSON({
+      const log = InfoLoggerMessage.fromObject({
         severity: 'Error',
         system: 'tests',
         run: 12345,
