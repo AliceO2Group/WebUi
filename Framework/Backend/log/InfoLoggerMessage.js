@@ -27,7 +27,7 @@ class InfoLoggerMessage {
   constructor() {
     this._message = '';
 
-    this._severity = LogLevel.Info;
+    this._severity = LogSeverity.Info;
     this._level = LogLevel.Developer;
     this._system = 'GUI';
     this._facility = 'gui'
