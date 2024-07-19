@@ -15,7 +15,7 @@
 /**
  * Enumeration of Log severities (kind of message being sent)
  */
-export const LogSeverity = Object.freeze({
+const LogSeverity = Object.freeze({
   Debug: 'Debug',
   Info: 'Info',
   Warn: 'Warn',
@@ -23,4 +23,8 @@ export const LogSeverity = Object.freeze({
   Fatal: 'Fatal',
 });
 
-export const LOG_SEVERITIES = Object.values(LogSeverity);
+const LOG_SEVERITIES = Object.values(LogSeverity);
+
+exports.LogSeverity = LogSeverity;
+
+exports.LOG_SEVERITIES = LOG_SEVERITIES;

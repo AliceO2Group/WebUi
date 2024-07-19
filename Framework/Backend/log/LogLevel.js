@@ -17,7 +17,7 @@
  *
  * @type {Object<string, number>}
  */
-export const LogLevel = Object.freeze({
+exports.LogLevel = Object.freeze({
   Operations: 1,
   Support: 6,
   Developer: 11,
