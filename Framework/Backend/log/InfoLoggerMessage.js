@@ -15,6 +15,23 @@
 const {LogLevel} = require('./LogLevel.js');
 const {LOG_SEVERITIES, LogSeverity} = require('./LogSeverity.js');
 
+const DEFAULT_SEVERITY = LogSeverity.Info;
+const DEFAULT_LEVEL = LogLevel.Developer;
+const DEFAULT_SYSTEM = 'GUI';
+const DEFAULT_FACILITY = 'gui';
+
+/**
+ * @typedef InfoLoggerMessageOptions
+ *
+ * @property {string} [severity] - one of InfoLogger supported severities {@see LogSeverity}
+ * @property {number|string} [level] - one of InfoLogger supported levels {@see LogLevel}
+ * @property {string} [system] - the name of the system running the process
+ * @property {string} [facility] - the name of the module/library injecting the message
+ * @property {string} [partition] - the id of the environment the log relates to (if it applies)
+ * @property {number} [run] - the run number run the log relates to (if it applies)
+ * @property {string} [errorSource] - the name of the file from which the message is injected
+ */
+
 /**
  * TypeDefinition for InfoLoggerMessage Object
  * @docs https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md
@@ -27,10 +44,10 @@ class InfoLoggerMessage {
   constructor() {
     this._message = '';
 
-    this._severity = LogSeverity.Info;
-    this._level = LogLevel.Developer;
-    this._system = 'GUI';
-    this._facility = 'gui';
+    this._severity = DEFAULT_SEVERITY;
+    this._level = DEFAULT_LEVEL;
+    this._system = DEFAULT_SYSTEM;
+    this._facility = DEFAULT_FACILITY;
     this._partition = undefined;
     this._run = undefined;
     this._errorSource = undefined;
@@ -38,19 +55,22 @@ class InfoLoggerMessage {
 
   /**
    * Given a JSON object, parse through its values and return an InfoLoggerMessage with default values for missing ones
-   * @param {object} logJson - object with all or partial InfoLoggerMessage fields
+   * @param {Partial<InfoLoggerMessageOptions>&object} logObject - object with all or partial InfoLoggerMessage fields
+   * @param {string} [logObject.message] the message content itself
    * @returns {InfoLoggerMessage}
    */
-  static fromJSON(logJson) {
+  static fromObject(logObject) {
     const log = new InfoLoggerMessage();
-    log._severity = logJson.severity && LOG_SEVERITIES.includes(logJson.severity) ? logJson.severity : LogSeverity.Info;
-    log._level = Number.isInteger(logJson?.level) ? logJson.level : LogLevel.Developer;
-    log._system = logJson.system ?? 'GUI';
-    log._facility = logJson.facility ?? 'gui';
-    log._partition = logJson.partition;
-    log._run = logJson.run;
-    log._errorSource = logJson.errorSource;
-    log._message = logJson.message ?? '';
+    log._severity = logObject.severity && LOG_SEVERITIES.includes(logObject.severity)
+      ? logObject.severity
+      : LogSeverity.Info;
+    log._level = parseInt(logObject?.level) || LogLevel.Developer;
+    log._system = logObject.system ?? DEFAULT_SYSTEM;
+    log._facility = logObject.facility ?? DEFAULT_FACILITY;
+    log._partition = logObject.partition;
+    log._run = logObject.run;
+    log._errorSource = logObject.errorSource;
+    log._message = logObject.message ?? '';
     return log;
   }
 
