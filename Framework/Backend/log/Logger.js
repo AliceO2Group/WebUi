@@ -33,7 +33,7 @@ let infologger = null;
  */
 class Logger {
   /**
-   * Level after which one messages will not be sent to InfoLogger
+   * Level from which one messages will not be sent to InfoLogger
    * @type {number}
    */
   static maximumInfoLoggerLevel = LogLevel.Developer;
