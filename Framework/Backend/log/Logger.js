@@ -155,7 +155,10 @@ class Logger {
    */
   _sendToInfoLogger(message, options) {
     if (infologger && options.level < Logger.maximumInfoLoggerLevel) {
-      const log = InfoLoggerMessage.fromObject({message, options});
+      const log = InfoLoggerMessage.fromObject({
+        message,
+        ...options
+      });
       infologger.sendMessage(log);
     }
   }
