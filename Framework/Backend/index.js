@@ -36,6 +36,7 @@ const {grpcErrorToNativeError} = require('./errors/grpcErrorToNativeError.js');
 const {
   updateAndSendExpressResponseFromNativeError,
 } = require('./errors/updateAndSendExpressResponseFromNativeError.js');
+const {Logger} = require('./log/Logger');
 
 exports.ConsulService = ConsulService;
 exports.HttpServer = HttpServer;
@@ -45,6 +46,8 @@ exports.Jira = Jira;
 exports.O2TokenService = O2TokenService;
 exports.Log = Log;
 exports.LogManager = LogManager;
+// Use only as type, use LogManager to create loggers
+exports.Logger = Logger;
 exports.LogLevel = LogLevel;
 exports.LogSeverity = LogSeverity;
 exports.MySQL = MySQL;
