@@ -14,7 +14,7 @@
 
 const mysql = require('mysql');
 const assert = require('assert');
-const {Logger} = require('./../log/Logger.js');
+const {LogManager} = require('../log/LogManager');
 
 /**
  * MySQL pool wrapper
@@ -39,7 +39,7 @@ class MySQL {
     config.timeout = (!config.timeout) ? 30000 : config.timeout;
 
     this.config = config;
-    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
+    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
     this.pool = mysql.createPool(config);
   }
 

@@ -28,7 +28,7 @@ Configuring logger is optional and required only when non default behavior of lo
 
 ```js
 const {Log} = require('@aliceo2/web-ui');
-Log.configure({
+LogManager.configure({
   winston: {
     file: {
       name: FILE_NAME, 
@@ -41,7 +41,7 @@ Log.configure({
   },
   infologger: true
 });
-new Log(LABEL);
+LogManager.getLogger(LABEL);
 ```
 
 Where:

@@ -24,7 +24,7 @@ const {LogSeverity} = require('./LogSeverity.js');
  */
 class InfoLoggerSender {
   /**
-   * @param {Logger} winston - local winston instance object
+   * @param {import('winston').Logger} winston - local winston instance object
    */
   constructor(winston) {
     this._isConfigured = false;

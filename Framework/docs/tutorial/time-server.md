@@ -82,7 +82,7 @@ wsServer.bind('stream-date', (body) => {
     return;
   }
 
-  Log.info('start timer');
+  LogManager.getLogger('APPLICATION').info('start timer');
 
   streamTimer = setInterval(() => {
     wsServer.broadcast(

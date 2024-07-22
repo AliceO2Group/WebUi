@@ -14,7 +14,7 @@
 
 const {Issuer, generators, custom} = require('openid-client');
 const assert = require('assert');
-const {Logger} = require('./../log/Logger.js');
+const {LogManager} = require('../log/LogManager');
 
 /**
  * Authenticates and authorises users via OpenID Connect (new CERN SSO).
@@ -37,7 +37,7 @@ class OpenId {
       timeout: config.timeout,
     });
 
-    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
+    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
   }
 
   /**

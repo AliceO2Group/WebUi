@@ -21,12 +21,8 @@ const Jira = require('./services/jira.js');
 const O2TokenService = require('./services/O2TokenService.js');
 const {LogLevel} = require('./log/LogLevel.js');
 const {LogSeverity} = require('./log/LogSeverity.js');
+const {LogManager} = require('./log/LogManager.js');
 const {Logger} = require('./log/Logger.js');
-/**
- * @deprecated use {Logger} instead
- * @type {Logger}
- */
-const Log = Logger;
 const MySQL = require('./db/mysql.js');
 const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
@@ -48,10 +44,10 @@ exports.InfoLoggerReceiver = InfoLoggerReceiver;
 exports.InfoLoggerSender = InfoLoggerSender;
 exports.Jira = Jira;
 exports.O2TokenService = O2TokenService;
+exports.LogManager = LogManager;
 exports.Logger = Logger;
 exports.LogLevel = LogLevel;
 exports.LogSeverity = LogSeverity;
-exports.Log = Log;
 exports.MySQL = MySQL;
 exports.NotificationService = NotificationService;
 exports.WebSocket = WebSocket;

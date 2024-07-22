@@ -88,7 +88,7 @@ class WinstonWrapper {
 
   /**
    * Returns an instance of AliceO2 Winston Wrapper
-   * @return {Logger}
+   * @return {import('winston').Logger}
    */
   get instance() {
     return this._instance;
