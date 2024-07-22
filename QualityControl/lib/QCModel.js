@@ -17,7 +17,7 @@ import { dirname } from 'path';
 import { readFileSync } from 'fs';
 
 import { openFile, toJSON } from 'jsroot';
-import { Log, ConsulService } from '@aliceo2/web-ui';
+import { LogManager, ConsulService } from '@aliceo2/web-ui';
 
 import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
@@ -32,7 +32,7 @@ import { ObjectController } from './controllers/ObjectController.js';
 
 import { config } from './config/configProvider.js';
 
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
 /*
  * --------------------------------------------------------
@@ -54,12 +54,12 @@ export let consulService = undefined;
 if (config.consul) {
   consulService = new ConsulService(config.consul);
   consulService.getConsulLeaderStatus()
-    .then(() => log.info('Consul Service connection was successfully tested.'))
-    .catch((error) => log.error('Consul Service connection could not be established. '
+    .then(() => logger.info('Consul Service connection was successfully tested.'))
+    .catch((error) => logger.error('Consul Service connection could not be established. '
       + `Please try restarting the service due to: ${error}`));
   statusController.setLiveModeConnector(consulService);
 } else {
-  log.warn('Consul Service: No Configuration Found');
+  logger.warn('Consul Service: No Configuration Found');
 }
 
 const ccdbService = CcdbService.setup(config.ccdb);

@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/envcache`);
+const {WebSocketMessage, LogManager} = require('@aliceo2/web-ui');
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/envcache`);
 const assert = require('assert');
 
 /**
@@ -43,7 +43,7 @@ class EnvCache {
     if (new Date() - this.cacheEvictionLast > this.cacheEvictionTimeout) {
       this.cache = {};
       this.cacheEvictionLast = new Date();
-      log.info('Cache evicted');
+      logger.info('Cache evicted');
     }
   }
 
@@ -96,7 +96,7 @@ class EnvCache {
       }
       this._updateCache(envs);
     } catch (error) {
-      log.debug(error);
+      logger.debug(error);
     }
     this.evictCache();
   }
@@ -110,7 +110,7 @@ class EnvCache {
     if (!this._cacheInSync(envs)) {
       this.cache = envs;
       this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
-      log.debug('Updated cache');
+      logger.debug('Updated cache');
     }
     this.cacheEvictionLast = new Date();
   }

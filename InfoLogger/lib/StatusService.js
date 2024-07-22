@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/status`);
+const logger = new (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/status`);
 
 /**
  * Gateway for all calls with regards to the status
@@ -138,14 +139,14 @@ class StatusService {
         await this.querySource.isConnectionUpAndRunning();
         mysql.status = { ok: true };
       } catch (error) {
-        log.error(error.message || error);
+        logger.error(error.message || error);
         if (error.stack) {
-          log.trace(error);
+          logger.trace(error);
         }
         mysql.status = { ok: false, message: error.message || error };
       }
     } else {
-      log.error('There was no data source set up');
+      logger.error('There was no data source set up');
       mysql.status = { ok: false, message: 'There was no data source set up' };
     }
     return mysql;

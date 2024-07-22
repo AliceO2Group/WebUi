@@ -25,9 +25,9 @@ class NotificationService {
    * @param {object} config Config with list of Kafka brokers
    */
   constructor(config) {
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/kafka`);
     if (!config) {
-      this.log.warn('Missing configuration');
+      this.logger.warn('Missing configuration');
       return;
     }
     if (!config.brokers || config.brokers.length < 1) {
@@ -44,7 +44,7 @@ class NotificationService {
     this.admin = this.kafka.admin();
     this.consumer = null;
     this.webSocket = null;
-    this.log.info('Kafka connector configured');
+    this.logger.info('Kafka connector configured');
   }
 
   /**
@@ -84,11 +84,11 @@ class NotificationService {
   async proxyWebNotificationToWs(webSocket) {
     this.webSocket = webSocket;
     this.consumer = this.kafka.consumer({groupId: 'webnotification-group'});
-    this.log.info('Listening for notifications');
+    this.logger.info('Listening for notifications');
     await this.consumer.connect();
     await this.consumer.subscribe({topic: 'webnotification', fromBeginning: false});
     await this.consumer.run({eachMessage: async ({topic, partition, message}) => {
-      this.log.debug(`Received message on ${topic} topic from ${partition} partition`);
+      this.logger.debug(`Received message on ${topic} topic from ${partition} partition`);
       this.webSocket.broadcast(
         new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
       );

@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/sql`);
+const logger = new (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/sql`);
 
 module.exports = class SQLDataSource {
   /**
@@ -36,10 +37,10 @@ module.exports = class SQLDataSource {
       .query('select timestamp from messages LIMIT 1000;')
       .then(() => {
         const url = `${this.configMySql.host}:${this.configMySql.port}/${this.configMySql.database}`;
-        log.info(`Connected to infoLogger database ${url}`);
+        logger.info(`Connected to infoLogger database ${url}`);
       })
       .catch((error) => {
-        log.error(error);
+        logger.error(error);
         throw error;
       });
   }
@@ -158,7 +159,7 @@ module.exports = class SQLDataSource {
             criteria.push(`\`${field}\` IN (?)`);
             break;
           default:
-            log.warn(`unknown operator ${operator}`);
+            logger.warn(`unknown operator ${operator}`);
             break;
         }
       }
@@ -190,12 +191,12 @@ module.exports = class SQLDataSource {
 
     const rows = await this._queryMessagesOnOptions(criteriaString, options, values)
       .catch((error) => {
-        log.error(error);
+        logger.error(error);
         throw error;
       });
 
     const totalTime = Date.now() - startTime; // ms
-    log.debug(`Query done in ${totalTime}ms`);
+    logger.debug(`Query done in ${totalTime}ms`);
     return {
       rows,
       count: rows.length,

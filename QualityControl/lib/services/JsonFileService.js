@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
+import { LogManager } from '@aliceo2/web-ui';
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
 import fs from 'fs';
 import path from 'path';
 import { NotFoundError } from './../errors/NotFoundError.js';
@@ -49,7 +49,7 @@ export class JsonFileService {
   async _syncFileAndInternalState() {
     await this._readFromFile();
     await this._writeToFile();
-    log.info(`Preferences will be saved in ${this.pathname}`);
+    logger.info(`Preferences will be saved in ${this.pathname}`);
   }
 
   /**
@@ -62,7 +62,7 @@ export class JsonFileService {
         if (err) {
           // File does not exist, it's ok, we will create it
           if (err.code === 'ENOENT') {
-            log.info('DB file does not exist, will create one');
+            logger.info('DB file does not exist, will create one');
             return resolve();
           }
 
@@ -108,7 +108,7 @@ export class JsonFileService {
           if (err) {
             return reject(err);
           }
-          log.info('DB file updated');
+          logger.info('DB file updated');
           resolve();
         });
       });

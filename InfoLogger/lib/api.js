@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const { Log, WebSocketMessage, InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
+const { LogManager, WebSocketMessage, InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
 const SQLDataSource = require('./SQLDataSource.js');
 const ProfileService = require('./ProfileService.js');
 const JsonFileConnector = require('./JSONFileConnector.js');
@@ -20,7 +20,7 @@ const StatusService = require('./StatusService.js');
 
 const projPackage = require('../package.json');
 
-const log = new Log(`${process.env.npm_config_log_label ?? 'ilg'}/api`);
+const logger = new LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/api`);
 const config = require('./configProvider.js');
 
 let querySource = null;
@@ -47,7 +47,7 @@ module.exports.attachTo = async (http, ws) => {
   http.post('/saveUserProfile', (req, res) => profileService.saveUserProfile(req, res));
 
   if (config.mysql) {
-    log.info('[API] Detected InfoLogger database configuration');
+    logger.info('[API] Detected InfoLogger database configuration');
     setupMySQLConnectors();
     setInterval(() => {
       if (!querySource) {
@@ -55,16 +55,16 @@ module.exports.attachTo = async (http, ws) => {
       }
     }, config.mysql.retryMs || 5000);
   } else {
-    log.warn('[API] InfoLogger database config not found, Query mode not available');
+    logger.warn('[API] InfoLogger database config not found, Query mode not available');
   }
 
   if (config.infoLoggerServer) {
-    log.info('[API] InfoLogger server config found');
+    logger.info('[API] InfoLogger server config found');
     liveSource = new InfoLoggerReceiver();
     liveSource.connect(config.infoLoggerServer);
     statusService.setLiveSource(liveSource);
   } else {
-    log.warn('[API] InfoLogger server config not found, Live mode not available');
+    logger.warn('[API] InfoLogger server config not found, Live mode not available');
   }
 
   if (liveSource) {
@@ -101,14 +101,14 @@ module.exports.attachTo = async (http, ws) => {
           statusService.setQuerySource(querySource);
           queryController.queryService = querySource;
         }).catch((error) => {
-          log.error(`[API] Unable to instantiate data source due to ${error}`);
+          logger.error(`[API] Unable to instantiate data source due to ${error}`);
           ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status')
             .setPayload({ ok: false, message: 'Query service is unavailable' }));
           querySource = null;
           statusService.setQuerySource(querySource);
         });
     }).catch((error) => {
-      log.error(`[API] Unable to connect to mysql due to ${error}`);
+      logger.error(`[API] Unable to connect to mysql due to ${error}`);
       querySource = null;
       ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status')
         .setPayload({ ok: false, message: 'Query service is unavailable' }));
@@ -142,7 +142,7 @@ module.exports.attachTo = async (http, ws) => {
    * @param {number} status - HTTP status code to send
    */
   function handleError(res, error, status = 500) {
-    log.trace(error);
+    logger.trace(error);
     res.status(status).json({ message: error.message });
   }
 };

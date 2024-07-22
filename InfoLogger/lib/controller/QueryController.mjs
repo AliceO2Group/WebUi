@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all calls that are to query InfoLogger database
@@ -27,7 +27,7 @@ export class QueryController {
      * @type {SQLDataSource}
      */
     this._queryService = queryService;
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'ilg'}/query-ctrl`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/query-ctrl`);
   }
 
   /**

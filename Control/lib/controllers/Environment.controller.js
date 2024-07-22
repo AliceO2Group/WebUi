@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager} = require('@aliceo2/web-ui');
 const LOG_FACILITY = 'cog/env-ctrl';
 const {EnvironmentTransitionType} = require('./../common/environmentTransitionType.enum.js');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
@@ -33,7 +33,7 @@ class EnvironmentController {
    * @param {DetectorsService} detectorService - service to use to check on state of detectors
    */
   constructor(envService, workflowService, lockService, detectorService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/env-ctrl`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/env-ctrl`);
 
     /**
      * @type {EnvironmentService}

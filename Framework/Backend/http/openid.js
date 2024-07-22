@@ -37,7 +37,7 @@ class OpenId {
       timeout: config.timeout,
     });
 
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
   }
 
   /**
@@ -56,10 +56,10 @@ class OpenId {
             id_token_signed_response_alg: 'RS256',
             token_endpoint_auth_method: 'client_secret_basic',
           });
-          this.log.info('Client initialised');
+          this.logger.info('Client initialised');
           resolve();
         }).catch((error) => {
-          this.log.error('Initialisation failed: ' + error);
+          this.logger.error('Initialisation failed: ' + error);
           reject(error);
         });
     });

@@ -13,7 +13,8 @@
 */
 
 const assert = require('assert');
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
+const logger = new (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
 const CoreUtils = require('./CoreUtils.js');
@@ -45,7 +46,7 @@ class ApricotService {
   async init() {
     try {
       this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
-      log.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
+      logger.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
         level: 99,
         system: 'GUI',
         facility: 'cog/api'
@@ -56,18 +57,18 @@ class ApricotService {
             const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
             this.hostsByDetector.set(detector, hosts);
           } catch (error) {
-            log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+            logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
           }
         })
       );
     } catch (error) {
-      log.error('Unable to list detectors');
+      logger.error('Unable to list detectors');
     }
   }
 
   /**
    * Use Apricot defined `o2apricot.proto` `GetRuntimeEntry` to retrieve the value stored in a specified key
-   * 
+   *
    * Corner cases for Apricot returns:
    * * if key(component) does not exist, Apricot wrongly returns code 2 instead of 5 in the gRPC error;
    * * if key exists but there is no content, Apricot returns '{}'
@@ -124,8 +125,8 @@ class ApricotService {
               const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
               this.hostsByDetector.set(detector, hosts);
             } catch (error) {
-              log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
-              log.error(error);
+              logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+              logger.error(error);
             }
           })
         );
@@ -138,7 +139,7 @@ class ApricotService {
   }
 
   /**
-   * Request a list of detectors from Apricot to confirm 
+   * Request a list of detectors from Apricot to confirm
    * connection and O2Apricot are up
    * @return {Promise}
    */
@@ -150,7 +151,7 @@ class ApricotService {
         throw new Error('Unable to check status of Apricot')
       }
     } catch (error) {
-      log.error(error);
+      logger.error(error);
       throw error;
     }
   }
@@ -165,7 +166,7 @@ class ApricotService {
     if (this.apricotProxy?.isConnectionReady && method) {
       if (!method.startsWith('Get')) {
         const type = req.body.type ? ` (${req.body.type})` : '';
-        log.info(`${req.session.personid} => ${method} ${type}`, 6);
+        logger.info(`${req.session.personid} => ${method} ${type}`, 6);
       }
       this.apricotProxy[method](req.body)
         .then((response) => res.json(response))
@@ -198,7 +199,7 @@ class ApricotService {
         errorHandler(`A configuration with name '${envConf.id}' already exists. `
           + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
       } else {
-        log.infoMessage(
+        logger.infoMessage(
           `${req.session.username} request to save new core environment configuration "${envConf.id}"`,
           {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
         );
@@ -228,7 +229,7 @@ class ApricotService {
       const envConf = CoreEnvConfig.fromJSON(data);
 
       const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
-      log.infoMessage(
+      logger.infoMessage(
         `${req.session.username} requested to update new core environment configuration "${envConf.id}"`,
         {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager} = require('@aliceo2/web-ui');
 const {httpGetJson} = require('./../utils.js');
 const RunSummaryAdapter = require('./../adapters/RunSummaryAdapter.js');
 const {BookkeepingFilterAdapter} = require('./../adapters/external/BookkeepingFilterAdapter.js');
@@ -37,7 +37,7 @@ class BookkeepingService {
     this._token = token ?? '';
     this._refreshRate = refreshRate ?? DEFAULT_REFRESH_RATE;
 
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/bkp-service`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/bkp-service`);
   }
 
   /**
