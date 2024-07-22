@@ -13,13 +13,13 @@
 */
 
 // Import the backend classes
-const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
+const {HttpServer, LogManager, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 
 // Define configuration for JWT tokens and HTTP server
 const config = require('./config.js');
 
 // Get logger instance
-const log = new Log('Tutorial');
+const log = LogManager.getLogger('Tutorial');
 
 // HTTP server
 // -----------
