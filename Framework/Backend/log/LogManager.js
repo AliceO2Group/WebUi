@@ -78,6 +78,14 @@ exports.LogManager = LogManager;
  */
 function Log(label) {
   this.label = label;
+
+  /**
+   * Method to allow clients to configure Log instance to make use:
+   * * WinstonWrapper together with a file
+   * * InfoLoggerSender
+   * @param {object} config - object expected to contain winston and infoLoggerSender configurations
+   */
+  this.configure = (config) => LogManager.configure(config);
 }
 Log.prototype = LogManager.getLogger('');
 
