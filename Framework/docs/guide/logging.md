@@ -24,7 +24,7 @@ Which will result in:
 Configuring logger is optional and required only when non default behavior of logger is desired such as:
 - displaying to the console only logs from a certain level above;
 - saving the logs to a file;
-- send logs to [InfoLogger Server](https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md)
+- send logs to [InfoLogger Server](https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md) if log level above developer (11)
 
 ```js
 const {LogManager} = require('@aliceo2/web-ui');
