@@ -87,6 +87,6 @@ Log.prototype = LogManager.getLogger('');
  * * InfoLoggerSender
  * @param {object} config - object expected to contain winston and infoLoggerSender configurations
  */
-Log.prototype.configure = (config) => LogManager.configure(config);
+Log.configure = (config) => LogManager.configure(config);
 
 exports.Log = Log;
