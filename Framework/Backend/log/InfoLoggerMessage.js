@@ -27,8 +27,10 @@ const DEFAULT_FACILITY = 'gui';
  * @property {number|string} [level] - one of InfoLogger supported levels {@see LogLevel}
  * @property {string} [system] - the name of the system running the process
  * @property {string} [facility] - the name of the module/library injecting the message
- * @property {string} [partition] - the id of the environment the log relates to (if it applies)
- * @property {number} [run] - the run number run the log relates to (if it applies)
+ * @property {string} [environmentId] - the id of the environment the log relates to (if it applies)
+ * @property {string} [partition] - deprecated: use `environmentId`
+ * @property {number} [runNumber] - the run number run the log relates to (if it applies)
+ * @property {number} [run] - deprecated: use `runNumber`
  * @property {string} [errorSource] - the name of the file from which the message is injected
  */
 
@@ -48,8 +50,8 @@ class InfoLoggerMessage {
     this._level = DEFAULT_LEVEL;
     this._system = DEFAULT_SYSTEM;
     this._facility = DEFAULT_FACILITY;
-    this._partition = undefined;
-    this._run = undefined;
+    this._environmentId = undefined;
+    this._runNumber = undefined;
     this._errorSource = undefined;
   }
 
@@ -67,8 +69,8 @@ class InfoLoggerMessage {
     log._level = parseInt(logObject?.level) || LogLevel.DEVELOPER;
     log._system = logObject.system ?? DEFAULT_SYSTEM;
     log._facility = logObject.facility ?? DEFAULT_FACILITY;
-    log._partition = logObject.partition;
-    log._run = logObject.run;
+    log._environmentId = logObject.environmentId ?? logObject.partition;
+    log._runNumber = logObject.runNumber ?? logObject.run;
     log._errorSource = logObject.errorSource;
     log._message = logObject.message ?? '';
     return log;
@@ -84,11 +86,11 @@ class InfoLoggerMessage {
       `-oSeverity=${this._severity}`, `-oLevel=${this._level}`,
       `-oSystem=${this._system}`, `-oFacility=${this._facility}`,
     ];
-    if (this._partition) {
-      components.push(`-oPartition=${this._partition}`);
+    if (this._environmentId) {
+      components.push(`-oPartition=${this._environmentId}`);
     }
-    if (this._run) {
-      components.push(`-oRun=${this._run}`);
+    if (this._runNumber) {
+      components.push(`-oRun=${this._runNumber}`);
     }
     if (this._errorSource) {
       components.push(`-oErrorSource=${this._errorSource}`);
