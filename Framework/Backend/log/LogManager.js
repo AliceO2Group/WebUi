@@ -70,3 +70,15 @@ class LogManager {
 }
 
 exports.LogManager = LogManager;
+
+/**
+ * @deprecated use {@link LogManager.getLogger}
+ * @param label the logger's label
+ * @constructor
+ */
+function Log(label) {
+  this.label = label;
+}
+Log.prototype = LogManager.getLogger('');
+
+exports.Log = Log;
