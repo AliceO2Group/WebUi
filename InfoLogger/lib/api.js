@@ -10,25 +10,25 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log, WebSocketMessage, InfoLoggerReceiver, MySQL} = require('@aliceo2/web-ui');
+const { Log, WebSocketMessage, InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
 const SQLDataSource = require('./SQLDataSource.js');
 const ProfileService = require('./ProfileService.js');
 const JsonFileConnector = require('./JSONFileConnector.js');
 const StatusService = require('./StatusService.js');
 
 const projPackage = require('../package.json');
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'ilg'}/api`);
 const config = require('./configProvider.js');
 
 let querySource = null;
 let liveSource = null;
 
-const jsonDb = new JsonFileConnector(config.dbFile || __dirname + '/../db.json');
+const jsonDb = new JsonFileConnector(config.dbFile || `${__dirname}/../db.json`);
 
 const profileService = new ProfileService(jsonDb);
-
 
 module.exports.attachTo = async (http, ws) => {
   const { QueryController } = await import('./controller/QueryController.mjs');
@@ -36,11 +36,10 @@ module.exports.attachTo = async (http, ws) => {
 
   const statusService = new StatusService(config, projPackage, ws);
 
-
   http.post('/query', query);
-  http.get('/query/stats', queryController.getQueryStats.bind(queryController), {public: true});
+  http.get('/query/stats', queryController.getQueryStats.bind(queryController), { public: true });
 
-  http.get('/status/gui', statusService.getILGStatus.bind(statusService), {public: true});
+  http.get('/status/gui', statusService.getILGStatus.bind(statusService), { public: true });
   http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService));
 
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
@@ -48,7 +47,7 @@ module.exports.attachTo = async (http, ws) => {
   http.post('/saveUserProfile', (req, res) => profileService.saveUserProfile(req, res));
 
   if (config.mysql) {
-    log.info(`[API] Detected InfoLogger database configuration`);
+    log.info('[API] Detected InfoLogger database configuration');
     setupMySQLConnectors();
     setInterval(() => {
       if (!querySource) {
@@ -56,16 +55,16 @@ module.exports.attachTo = async (http, ws) => {
       }
     }, config.mysql.retryMs || 5000);
   } else {
-    log.warn(`[API] InfoLogger database config not found, Query mode not available`);
+    log.warn('[API] InfoLogger database config not found, Query mode not available');
   }
 
   if (config.infoLoggerServer) {
-    log.info(`[API] InfoLogger server config found`);
+    log.info('[API] InfoLogger server config found');
     liveSource = new InfoLoggerReceiver();
     liveSource.connect(config.infoLoggerServer);
     statusService.setLiveSource(liveSource);
   } else {
-    log.warn(`[API] InfoLogger server config not found, Live mode not available`);
+    log.warn('[API] InfoLogger server config not found, Live mode not available');
   }
 
   if (liveSource) {
@@ -98,13 +97,13 @@ module.exports.attachTo = async (http, ws) => {
       querySource = new SQLDataSource(connector, config.mysql);
       querySource.isConnectionUpAndRunning()
         .then(() => {
-          ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status').setPayload({ok: true}));
+          ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status').setPayload({ ok: true }));
           statusService.setQuerySource(querySource);
           queryController.queryService = querySource;
         }).catch((error) => {
           log.error(`[API] Unable to instantiate data source due to ${error}`);
           ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status')
-            .setPayload({ok: false, message: 'Query service is unavailable'}));
+            .setPayload({ ok: false, message: 'Query service is unavailable' }));
           querySource = null;
           statusService.setQuerySource(querySource);
         });
@@ -112,15 +111,16 @@ module.exports.attachTo = async (http, ws) => {
       log.error(`[API] Unable to connect to mysql due to ${error}`);
       querySource = null;
       ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-sql-server-status')
-        .setPayload({ok: false, message: 'Query service is unavailable'}));
+        .setPayload({ ok: false, message: 'Query service is unavailable' }));
       statusService.setQuerySource(querySource);
     });
   }
 
   /**
    * Method to perform a query on the SQL Data Source
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @returns {void}
    */
   function query(req, res) {
     if (querySource) {
@@ -137,12 +137,12 @@ module.exports.attachTo = async (http, ws) => {
 
   /**
    * Catch all HTTP errors
-   * @param {Object} res
-   * @param {Error} error
-   * @param {number} status
+   * @param {Response} res - HTTP Response object
+   * @param {Error} error - Error object to handle and send
+   * @param {number} status - HTTP status code to send
    */
   function handleError(res, error, status = 500) {
     log.trace(error);
-    res.status(status).json({message: error.message});
+    res.status(status).json({ message: error.message });
   }
 };

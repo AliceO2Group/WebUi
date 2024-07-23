@@ -10,20 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
  * some application messages and some basic options like auto-scroll checkbox.
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the bottom bar
  */
 export default (model) => [
   h('.flex-row', [
-    h('', {style: 'width:50%'}, statusLogs(model)),
-    h('', {style: 'text-align: center; width:30%'}, sqlQuery(model)),
+    h('', { style: 'width:50%' }, statusLogs(model)),
+    h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h('.flex-grow.text-right', applicationMessage(model), applicationOptions(model)),
   ]),
 ];
@@ -33,8 +33,8 @@ export default (model) => [
  * - source (query or live)
  * - how many are loaded, how many in database
  * - timing, hostname, stats, etc.
- * @param {object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the log's list status
  */
 const statusLogs = (model) => model.frameworkInfo.match({
   NotAsked: () => 'Loading services...',
@@ -48,8 +48,8 @@ const statusLogs = (model) => model.frameworkInfo.match({
 
 /**
  * Component displaying the SQL query built with the user's filters
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the SQL query
  */
 const sqlQuery = (model) => model.log.queryResult.match({
   NotAsked: () => null,
@@ -60,18 +60,20 @@ const sqlQuery = (model) => model.log.queryResult.match({
     h('.query-item.w-wrapped.ph1', {
       title: 'Toggle to view full SQL query',
       style: 'min-width: 0%;',
-      onclick: () => model.log.toggleStatusDropdown()
+      onclick: () => model.log.toggleStatusDropdown(),
     }, data.queryAsString),
     h('.dropup-menu.p2.gray-darker.text-center.w-100', [
-      h('', {style: 'font-weight: bold'}, 'SQL QUERY'), data.queryAsString])]),
+      h('', { style: 'font-weight: bold' }, 'SQL QUERY'),
+      data.queryAsString,
+    ]),
+  ]),
   Failure: () => null,
 });
 
-
 /**
  * Application message, could be deprecated when notification is implemented
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the application message
  */
 const applicationMessage = (model) => model.log.list.length > model.log.applicationLimit
   ? h('span.danger', `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `)
@@ -80,45 +82,44 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
 /**
  * Show some application preferences: auto-scroll and inspector checkboxes
  * (could be evolve into a preference panel in the future if more options are added)
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the application options
  */
 const applicationOptions = (model) => [
-  h('label.d-inline', {title: 'Scroll down in live mode on new log incoming'}, h('input', {
+  h('label.d-inline', { title: 'Scroll down in live mode on new log incoming' }, h('input', {
     type: 'checkbox',
     checked: model.log.autoScrollLive,
-    onchange: () => model.log.toggleAutoScroll()
+    onchange: () => model.log.toggleAutoScroll(),
   }), ' Autoscroll'),
   h('span.mh1'),
-  h('label.d-inline', {title: 'Show details of selected log'}, h('input', {
+  h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
     type: 'checkbox',
     checked: model.inspectorEnabled,
-    onchange: () => model.toggleInspector()
+    onchange: () => model.toggleInspector(),
   }), ' Inspector'),
 ];
 
 /**
  * Status for query mode, showing how many logs are really in DB and how much time it took to load it
- * @param {Object} model
- * @param {Object} result - raw query result from server with its meta data
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @param {object} result - raw query result from server with its meta data
+ * @returns {vnode} - the view of the query status
  */
 const statusQuery = (model, result) => `in ${(result.time / 1000).toFixed(2)} second(s)`;
 
 /**
  * Status of live mode with hostname of streaming source and date it started
- * @param {Object} model
- * @param {Object} frameworkInfo - service discovery information of what is enabled in this ILG instance
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @param {object} frameworkInfo - service discovery information of what is enabled in this ILG instance
+ * @returns {vnode} - the view of the live status
  */
-const statusLive = (model, frameworkInfo) => [
-  `(Connected to ${frameworkInfo.mysql.host} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`
-];
+const statusLive = (model, frameworkInfo) =>
+  [`(Connected to ${frameworkInfo.mysql.host} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`];
 
 /**
  * Status of the log's list (independent of mode): how many global and how many per severity
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the log's list status
  */
 const statusStats = (model) => [
   h('span.ph1', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
@@ -132,5 +133,5 @@ const statusStats = (model) => [
   h('span.ph1.severity-i', `${model.log.stats.info} info`),
   h('span.ph1.severity-w', `${model.log.stats.warning} warn`),
   h('span.ph1.severity-e', `${model.log.stats.error} error`),
-  h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`)
+  h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`),
 ];

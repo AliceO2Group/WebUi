@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable} from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
 
 /**
  * Model Table, encapsulate all changes of the table based on the user profile
@@ -20,7 +20,7 @@ import {Observable} from '/js/src/index.js';
 export default class Table extends Observable {
   /**
    * Instantiate Log class and its internal LogFilter
-   * @param {Object} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
@@ -30,21 +30,9 @@ export default class Table extends Observable {
   }
 
   /**
-   * Sets the size of an already defined column
-   * @param {string} size
-   * @param {string} column
-   */
-  setSizeOfColumn(size, column) {
-    if (this.colsHeader[column]) {
-      this.colsHeader[column].size = size;
-      this.notify();
-    }
-  }
-
-  /**
    * Increase cell size by one position. If at max, reduce to minimum
-   * @param {string} currentSize
-   * @param {string} column
+   * @param {string} currentSize - current size of the column
+   * @param {string} column - column to be resized
    */
   setNextSizeOfColumn(currentSize, column) {
     switch (currentSize) {
@@ -71,7 +59,7 @@ export default class Table extends Observable {
 
   /**
    * Toggle the visibility of the column
-   * @param {stirng} column
+   * @param {string} column - column for which visibility is to be toggled
    */
   toggleColumn(column) {
     if (this.colsHeader[column]) {
@@ -93,13 +81,13 @@ export default class Table extends Observable {
 
   /**
    * Method to reset what columns are displayed and their sizes
-   * @return {JSON}
+   * @returns {object} - object with the default columns and their sizes
    */
   resetColumnsHeaderToDefault() {
     return {
       date: {
         size: 'cell-m',
-        visible: false
+        visible: false,
       },
       time: {
         size: 'cell-m',
@@ -156,7 +144,7 @@ export default class Table extends Observable {
       message: {
         size: 'cell-xl', // remaining
         visible: true,
-      }
+      },
     };
   }
 }

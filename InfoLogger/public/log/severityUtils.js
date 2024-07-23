@@ -10,32 +10,32 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {switchCase} from '/js/src/index.js';
+import { switchCase } from '/js/src/index.js';
 
 /**
  * Returns background CSS class corresponding to a severity char
- * @param {string} severity
- * @return {string} CSS class
+ * @param {string} severity - severity char
+ * @returns {string} CSS class
  */
 export const severityClass = (severity) => switchCase(severity, {
   I: 'severity-i',
   W: 'severity-w-bg',
   E: 'severity-e-bg',
   F: 'severity-f-bg',
-  D: 'severity-d'
+  D: 'severity-d',
 });
 
 /**
  * Returns font color CSS class corresponding to a severity char
- * @param {string} severity
- * @return {string} CSS class
+ * @param {string} severity - severity char
+ * @returns {string} CSS class
  */
 export const severityLabel = (severity) => switchCase(severity, {
   I: 'info',
   W: 'warning',
   E: 'error',
   F: 'fatal',
-  D: 'debug'
+  D: 'debug',
 });

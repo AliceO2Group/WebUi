@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Limit the number of calls to `fn` to 1 per `time` maximum.
@@ -18,7 +18,7 @@
  * All other calls before end of `time` window will lead to 1 exececution at the end of window.
  * @param {string} fn - function to be called
  * @param {string} time - ms
- * @return {function} lambda function to be called to call `fn`
+ * @returns {Function} lambda function to be called to call `fn`
  * @example
  * let f = callRateLimiter((arg) => console.log('called', arg), 1000);
  * 00:00:00 f(1);f(2);f(3);f(4);
@@ -26,11 +26,11 @@
  * 00:00:01 called 4
  */
 export function callRateLimiter(fn, time) {
-  let timer;
-  let lastCall;
+  let timer = undefined;
+  let lastCall = undefined;
   return (...args) => {
     // first call or last call was far in the past: let's exec
-    if (!lastCall || (Date.now() - lastCall) > time) {
+    if (!lastCall || Date.now() - lastCall > time) {
       lastCall = Date.now();
       fn.call(null, ...args);
       return;
@@ -42,7 +42,7 @@ export function callRateLimiter(fn, time) {
     }
 
     // plan an exec for near future
-    timer = setTimeout(function() {
+    timer = setTimeout(() => {
       lastCall = Date.now();
       fn.call(null, ...args);
       timer = null;
@@ -60,4 +60,3 @@ export function setBrowserTabTitle(title = undefined) {
     document.title = title;
   }
 }
-

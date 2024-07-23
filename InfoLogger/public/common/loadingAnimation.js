@@ -10,24 +10,29 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Generic page loading placeholder
- * @return {vnode}
+ * @returns {vnode} - the loading animation
  */
-export default () => h('span.pageLoading',
-  h('.atom-spinner',
-    h('.spinner-inner',
+export default () => h(
+  'span.pageLoading',
+  h(
+    '.atom-spinner',
+    h(
+      '.spinner-inner',
       [
         h('.spinner-line'),
         h('.spinner-line'),
         h('.spinner-line'),
-        h('.spinner-circle',
-          h('div', '●')
-        )
-      ]
-    )
-  ));
+        h(
+          '.spinner-circle',
+          h('div', '●'),
+        ),
+      ],
+    ),
+  ),
+);

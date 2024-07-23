@@ -10,18 +10,19 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* global moment */
 
-import {Observable} from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
 
 export const TIME_MS = 'time-ms';
 export const TIME_S = 'time-s';
+
 /**
  * Parses inputs from user and format datetimes to timzeone selected
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode}
  */
 export default class Timezone extends Observable {
   /**
@@ -67,7 +68,7 @@ export default class Timezone extends Observable {
    * 5m => five minutes ago
    * @param {string} humanString - Eg: "-5m" means five minutes ago
    * @param {string} tz - optional timezone
-   * @return {date} the parsed date or null if empty
+   * @returns {Date} the parsed date or null if empty
    */
   parse(humanString, tz) {
     if (!humanString) {
@@ -89,23 +90,23 @@ export default class Timezone extends Observable {
       {
         reg: /([-+])([0-9]*)\s?s/i,
         setter: 'seconds',
-        getter: 'seconds'
+        getter: 'seconds',
       },
       {
         reg: /([-+])([0-9]*)\s?m/i,
         setter: 'minutes',
-        getter: 'minutes'
+        getter: 'minutes',
       },
       {
         reg: /([-+])([0-9]*)\s?h/i,
         setter: 'hours',
-        getter: 'hours'
+        getter: 'hours',
       },
       {
         reg: /([-+])([0-9]*)\s?d/i,
         setter: 'date',
-        getter: 'date'
-      }
+        getter: 'date',
+      },
     ];
 
     // Absolute: [DD/[MM[/YYYY]]] and set hour to midnight
@@ -115,8 +116,8 @@ export default class Timezone extends Observable {
     if (regDateResult) {
       /*
        * Start from year to day because js will limit days in the month automatically
-       * Then, if running this script the 1st of November and parsing the 31st of October, we first need to define the month to October to
-       * avoid js to consider 31 out of bounds
+       * Then, if running this script the 1st of November and parsing the 31st of October.
+       * We first need to define the month to October to avoid js to consider 31 out of bounds
        */
       if (regDateResult[5]) { // optional year
         let newYear = parseInt(regDateResult[5], 10); // zero-based
@@ -150,10 +151,11 @@ export default class Timezone extends Observable {
 
     // Apply relative changes (eg: +- 5 minutes)
 
-    for (let i = 0, relative; relative = relatives[i]; i++) {
+    for (let i = 0; i < relatives.length; i++) {
+      const relative = relatives[i];
       const regResult = relative.reg.exec(humanString);
       if (regResult) {
-        const sign = regResult[1]; // sign is mandatory
+        const [, sign] = regResult; // sign is mandatory
         const number = parseInt(regResult[2] || 1, 10); // empty means one in human language
 
         // Change the date by the amount given by user
@@ -172,10 +174,10 @@ export default class Timezone extends Observable {
 
   /**
    * Generate a datetime representation string (compatible with parser)
-   * @param {number|string|date} timestamp - 1456135200002.017
+   * @param {number | string | Date} timestamp - 1456135200002.017
    * @param {string} format - 'datetime' or 'date' or 'time'
    * @param {string} tz - optional timezone normalized like 'Europe/Zurich'
-   * @return {string} dd/mm/yyyy HH:MM:SS.mmm
+   * @returns {string} dd/mm/yyyy HH:MM:SS.mmm
    */
   format(timestamp, format, tz) {
     if (typeof timestamp === 'string') {
@@ -202,30 +204,30 @@ export default class Timezone extends Observable {
 
   /**
    * Compute how much time since the date passed in argument
-   * @param {Date} startingDate
-   * @return {string} example: 1:12:45
+   * @param {Date} startingDate - the date to compare with now
+   * @returns {string} example: 1:12:45
    */
   formatDuration(startingDate) {
-    const elapsedSeconds = ((new Date()) - startingDate) / 1000;
+    const elapsedSeconds = (new Date() - startingDate) / 1000;
     const hours = Math.floor(elapsedSeconds / 3600);
     const minutes = Math.floor(elapsedSeconds % 3600 / 60);
     const seconds = Math.floor(elapsedSeconds % 3600 % 60);
     let output = '';
 
     if (hours) {
-      output = hours + ':';
+      output = `${hours}:`;
     }
 
     if (minutes > 9) {
-      output += minutes + ':';
+      output += `${minutes}:`;
     } else {
-      output += '0' + minutes + ':';
+      output += `0${minutes}:`;
     }
 
     if (seconds > 9) {
       output += seconds;
     } else {
-      output += '0' + seconds;
+      output += `0${seconds}`;
     }
 
     return output;

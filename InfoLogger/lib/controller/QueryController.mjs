@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Log} from '@aliceo2/web-ui';
+import { Log } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all calls that are to query InfoLogger database
@@ -37,16 +37,16 @@ export class QueryController {
    * @returns {void}
    */
   async getQueryStats(req, res) {
-    const {runNumber} = req.query;
+    const { runNumber } = req.query;
     if (!runNumber || isNaN(runNumber)) {
-      res.status(400).json({error: 'Invalid runNumber provided'});
+      res.status(400).json({ error: 'Invalid runNumber provided' });
     } else {
       try {
         const stats = await this._queryService.queryGroupCountLogsBySeverity(runNumber);
         res.status(200).json(stats);
       } catch (error) {
-        this._logger.errorMessage(error.toString(), {level: 99, facility: 'ilg/query-ctrl', run: runNumber});
-        res.status(502).json({error: `Unable to serve query on stats for runNumber: ${runNumber}`})
+        this._logger.errorMessage(error.toString(), { level: 99, facility: 'ilg/query-ctrl', run: runNumber });
+        res.status(502).json({ error: `Unable to serve query on stats for runNumber: ${runNumber}` });
       }
     }
   }

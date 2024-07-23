@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 module.exports = {
   // mandatory
@@ -22,7 +22,7 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false,
     allow: true,
-    name: 'ILG'
+    name: 'ILG',
   },
 
   // optional data source, comment object if not used
@@ -34,14 +34,14 @@ module.exports = {
     database: 'INFOLOGGER',
     port: 3306,
     timeout: 60000,
-    retryMs: 5000
+    retryMs: 5000,
   },
 
   // optional data source, comment object if not used
   // all options: https://nodejs.org/api/net.html#net_socket_connect_options_connectlistener
   infoLoggerServer: {
     host: 'localhost',
-    port: 6102
+    port: 6102,
   },
   logging: {
     infologger: false,

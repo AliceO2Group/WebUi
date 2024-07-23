@@ -10,9 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log} = require('@aliceo2/web-ui');
+const { Log } = require('@aliceo2/web-ui');
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'ilg'}/config`);
 const fs = require('fs');
 const path = require('path');
@@ -27,7 +28,7 @@ let configFile = path.join(__dirname, '../config.js');
 
 // Replace if provided by command line
 if (process.argv.length >= 3 && /\.js$/.test(process.argv[2])) {
-  configFile = process.argv[2];
+  [,, configFile] = process.argv;
 }
 
 try {
@@ -38,6 +39,7 @@ try {
 }
 
 const config = require(configFile);
+
 Log.configure(config);
 log.info(`Read config file "${configFile}"`);
 

@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Filtering main options, in toolbar, top-right.
@@ -20,17 +20,18 @@ import {h} from '/js/src/index.js';
  * - level
  * - limit
  * - reset
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of filters panel
  */
 export default (model) => [
-  h('',
+  h(
+    '',
     h('.btn-group', [
       buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
       buttonSeverity(model, 'Info', 'Match severity info', 'I'),
       buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
       buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
-      buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F')
+      buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F'),
     ]),
     h('span.mh3'),
     h('.btn-group', [
@@ -46,16 +47,17 @@ export default (model) => [
       buttonLogLimit(model, '1M', 1000000),
     ]),
     h('span.mh3'),
-    buttonReset(model))
+    buttonReset(model),
+  ),
 ];
 
 /**
  * Makes a button to toggle severity
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {string} label - button's label
  * @param {string} title - button's title on mouse over
  * @param {string} value - a char to represent severity: W E F or I, can be many with spaces like 'W E'
- * @return {vnode}
+ * @returns {vnode} - the button to toggle severity
  */
 const buttonSeverity = (model, label, title, value) => h('button.btn', {
   className: model.log.filter.criterias.severity.in.includes(value) ? 'active' : '',
@@ -63,41 +65,41 @@ const buttonSeverity = (model, label, title, value) => h('button.btn', {
     model.log.setCriteria('severity', 'in', value);
     e.target.blur(); // remove focus so user can 'enter' without actually toggle again the button
   },
-  title: title
+  title: title,
 }, label);
 
 /**
  * Makes a button to set filtering level (shifter, debug, etc) with number
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {string} label - button's label
  * @param {number} value - maximum level of filtering, from 1 to 21
- * @return {vnode}
+ * @returns {vnode} - component representing the creation of a button for filtering
  */
 const buttonFilterLevel = (model, label, value) => h('button.btn', {
   className: model.log.filter.criterias.level.max === value ? 'active' : '',
   onclick: () => model.log.setCriteria('level', 'max', value),
-  title: `Filter level ≤ ${value}`
+  title: `Filter level ≤ ${value}`,
 }, label);
 
 /**
  * Makes a button to set log limit, maximum logs in memory
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {string} label - button's label
  * @param {number} limit - how much logs to keep in memory
- * @return {vnode}
+ * @returns {vnode} - component representing the creation of a button for log limit
  */
 const buttonLogLimit = (model, label, limit) => h('button.btn', {
   className: model.log.limit === limit ? 'active' : '',
   onclick: () => model.log.setLimit(limit),
-  title: `Keep only ${label} logs in the view`
+  title: `Keep only ${label} logs in the view`,
 }, label);
 
 /**
  * Makes a button to reset filters
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - component representing the creation of a button to reset filters
  */
 const buttonReset = (model) => h('button.btn', {
   onclick: () => model.log.filter.resetCriteria(),
-  title: 'Reset date, time, matches, excludes, log levels'
+  title: 'Reset date, time, matches, excludes, log levels',
 }, 'Reset filters');

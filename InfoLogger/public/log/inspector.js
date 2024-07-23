@@ -10,14 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconX} from '/js/src/index.js';
+import { h, iconX } from '/js/src/index.js';
 
-import {severityClass, severityLabel} from './severityUtils.js';
+import { severityClass, severityLabel } from './severityUtils.js';
 
 export default (model) => model.log.item ? h('', [
-  h('table.table.f7.table-sm',
+  h(
+    'table.table.f7.table-sm',
     h('colgroup', [
       h('col.cell-m'),
       h('col.cell-m'), // last column fills space
@@ -25,21 +26,23 @@ export default (model) => model.log.item ? h('', [
     h('tbody', [
       h('tr', [
         h('td.cell-bordered', ''),
-        h('td.cell.text-ellipsis.cell-xl',
-          h('.f7.w-100.flex-column.items-end',
+        h(
+          'td.cell.text-ellipsis.cell-xl',
+          h(
+            '.f7.w-100.flex-column.items-end',
             h('.w-10.actionable-icon', {
-              onclick: () => model.toggleInspector()
-            }, iconX())
-          )
-        )
+              onclick: () => model.toggleInspector(),
+            }, iconX()),
+          ),
+        ),
       ]),
       h('tr', [
-        h('td', {className: severityClass(model.log.item.severity)}, 'Severity'),
-        h('td', {className: severityClass(model.log.item.severity)}, severityLabel(model.log.item.severity))
+        h('td', { className: severityClass(model.log.item.severity) }, 'Severity'),
+        h('td', { className: severityClass(model.log.item.severity) }, severityLabel(model.log.item.severity)),
       ]),
       h('tr', h('td', 'Level'), h('td', model.log.item.level)),
-      h('tr', h('td', 'Date'), h('td', (model.timezone.format(model.log.item.timestamp, 'date')))),
-      h('tr', h('td', 'Time'), h('td', (model.timezone.format(model.log.item.timestamp, 'time')))),
+      h('tr', h('td', 'Date'), h('td', model.timezone.format(model.log.item.timestamp, 'date'))),
+      h('tr', h('td', 'Time'), h('td', model.timezone.format(model.log.item.timestamp, 'time'))),
       h('tr', h('td', 'Hostname'), h('td', model.log.item.hostname)),
       h('tr', h('td', 'Rolename'), h('td', model.log.item.rolename)),
       h('tr', h('td', 'PID'), h('td', model.log.item.pid)),
@@ -52,7 +55,7 @@ export default (model) => model.log.item ? h('', [
       h('tr', h('td', 'ErrCode'), h('td', model.log.item.errcode)),
       h('tr', h('td', 'ErrLine'), h('td', model.log.item.errline)),
       h('tr', h('td', 'ErrSource'), h('td', model.log.item.errsource)),
-    ])
+    ]),
   ),
-  h('.p2.f7', {style: 'word-break: break-word'}, model.log.item.message)
-]) : h('', {className: 'f6 text-center p3'}, 'Click on a log to show its properties');
+  h('.p2.f7', { style: 'word-break: break-word' }, model.log.item.message),
+]) : h('', { className: 'f6 text-center p3' }, 'Click on a log to show its properties');

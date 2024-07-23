@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/json`);
 const fs = require('fs');
@@ -29,10 +29,10 @@ class JsonFileConnector {
     this.pathname = path.join(pathname);
 
     // Path for writing file
-    this.pathnameTmp = this.pathname + '~tmp';
+    this.pathnameTmp = `${this.pathname}~tmp`;
 
     // Mirror data from content of JSON file
-    this.data = {profiles: []};
+    this.data = { profiles: [] };
 
     // Write lock access
     this.lock = new Lock();
@@ -50,9 +50,8 @@ class JsonFileConnector {
   }
 
   /**
-   * Read
-   * @param {string} argName - blabla
-   * @return {string} blabla
+   * Read from file private method
+   * @returns {Promise} - content of the file
    */
   async _readFromFile() {
     return new Promise((resolve, reject) => {
@@ -78,7 +77,7 @@ class JsonFileConnector {
 
           this.data = dataFromFile;
           resolve();
-        } catch (e) {
+        } catch {
           return reject(new Error(`Unable to parse DB file ${this.pathname}`));
         }
       });
@@ -102,7 +101,7 @@ class JsonFileConnector {
           if (err) {
             return reject(err);
           }
-          log.info(`DB file updated`);
+          log.info('DB file updated');
           resolve();
         });
       });
@@ -114,13 +113,13 @@ class JsonFileConnector {
   /**
    * Create a new profile for a user with provided content
    * Adds created & lastModified timestamps
-   * @param {string} username
-   * @param {JSON} content
-   * @return {boolean}
+   * @param {string} username - username of the profile
+   * @param {JSON} content - content of the profile
+   * @returns {boolean} - true if profile was created, false if it already exists
    */
   async createNewProfile(username, content) {
     if (username == undefined) {
-      throw new Error(`username for profile is mandatory`);
+      throw new Error('username for profile is mandatory');
     }
 
     const profile = this.data.profiles.find((profile) => profile.username === username);
@@ -132,7 +131,7 @@ class JsonFileConnector {
       username: username,
       createdTimestamp: dateNow,
       lastModifiedTimestamp: dateNow,
-      content: content
+      content: content,
     };
 
     this.data.profiles.push(profileEntry);
@@ -142,8 +141,8 @@ class JsonFileConnector {
 
   /**
    * Retrieve a profile or undefined if it does not exist
-   * @param {string} username
-   * @return {JSON}
+   * @param {string} username - username of the profile
+   * @returns {JSON} - profile content or undefined if it does not exist
    */
   async getProfileByUsername(username) {
     const profile = this.data.profiles.find((profile) => profile.username === username);
@@ -156,9 +155,9 @@ class JsonFileConnector {
   /**
    * Update a single profile by its username with the provided content
    * Updates lastModified timestamp
-   * @param {string} username
-   * @param {JSON} content
-   * @return {Object} updatedProfile
+   * @param {string} username - username of the profile
+   * @param {JSON} content - content of the profile
+   * @returns {object} updatedProfile
    */
   async updateProfile(username, content) {
     const profile = await this.getProfileByUsername(username);
@@ -168,8 +167,8 @@ class JsonFileConnector {
       this._writeToFile();
       return profile;
     } else {
-      throw new Error('Profile with this username ('
-        + username + ') cannot be updated as it does not exist');
+      throw new Error(`Profile with this username (${
+        username}) cannot be updated as it does not exist`);
     }
   }
 }
@@ -194,7 +193,7 @@ class Lock {
   /**
    * acquires lock if available and returns immediately
    * otherwise wait for lock to be released
-   * @return {Promise}
+   * @returns {Promise} - resolves when lock is acquired
    */
   acquire() {
     return new Promise((resolve) => {

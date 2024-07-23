@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
-import {MODE} from '../constants/mode.const.js';
-import {TIME_MS} from '../common/Timezone.js';
-import {ROW_HEIGHT} from '../constants/visual.const.js';
+import { MODE } from '../constants/mode.const.js';
+import { TIME_MS } from '../common/Timezone.js';
+import { ROW_HEIGHT } from '../constants/visual.const.js';
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -24,7 +24,7 @@ import {ROW_HEIGHT} from '../constants/visual.const.js';
 export default class Log extends Observable {
   /**
    * Instantiate Log class and its internal LogFilter
-   * @param {Object} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
@@ -47,7 +47,6 @@ export default class Log extends Observable {
 
     this.queryResult = RemoteData.notAsked();
 
-
     this.list = [];
     this.item = null;
     this.autoScrollToItem = false; // go to an item
@@ -65,17 +64,17 @@ export default class Log extends Observable {
     this.download = {
       fullContent: '',
       visibleOnlyContent: '',
-      isVisible: false
+      isVisible: false,
     };
 
     this.dom = {
-      table: ''
+      table: '',
     };
   }
 
   /**
    * Method to return if the current mode is Query
-   * @return {boolean}
+   * @returns {boolean} - is it query mode
    */
   isActiveModeQuery() {
     return this.activeMode === MODE.QUERY;
@@ -98,13 +97,14 @@ export default class Log extends Observable {
       info: 0,
       warning: 0,
       error: 0,
-      fatal: 0
+      fatal: 0,
     };
   }
 
   /**
    * Increments stats of the severity of the log passed
-   * @param {Log} log
+   * @param {Log} log - log to be added to stats
+   * @param {number} increment - value to increment the stat by
    */
   addStats(log, increment = 1) {
     switch (log.severity) {
@@ -125,7 +125,6 @@ export default class Log extends Observable {
     }
   }
 
-
   /**
    * Show/Hide dropdown for time(s/ms) selection
    */
@@ -136,8 +135,8 @@ export default class Log extends Observable {
 
   /**
    * Used to display of not timestamp input panel
-   * @param {string} property
-   * @param {boolean} value
+   * @param {string} property - timestampSince or timestampUntil
+   * @param {boolean} value - true or false
    */
   setFocus(property, value) {
     this.focus[property] = value;
@@ -146,7 +145,7 @@ export default class Log extends Observable {
 
   /**
    * Set "level" filter (shift, oncall, etc.)
-   * @param {number} level
+   * @param {number} level - level to be set
    */
   setLevel(level) {
     this.level = level;
@@ -156,7 +155,7 @@ export default class Log extends Observable {
   /**
    * Set current `item`, if the reference is contained
    * in `list`, it is also considered as selected in the list.
-   * @param {object} item
+   * @param {object} item - log to be set as current item
    */
   setItem(item) {
     this.item = item;
@@ -169,7 +168,7 @@ export default class Log extends Observable {
    * If the limit is being decreased:
    * * Splices the current log list to the passed limit
    * * Updates stat box at the bottom if the limit is being decreased
-   * @param {number} limit
+   * @param {number} limit - limit to be set
    */
   setLimit(limit) {
     if (limit < this.limit) {
@@ -187,7 +186,7 @@ export default class Log extends Observable {
    */
   firstError() {
     if (!this.stats.error && !this.stats.fatal) {
-      this.model.notification.show(`No error or fatal found.`, 'primary');
+      this.model.notification.show('No error or fatal found.', 'primary');
       return;
     }
 
@@ -206,7 +205,7 @@ export default class Log extends Observable {
    */
   previousError() {
     if (!this.stats.error && !this.stats.fatal) {
-      this.model.notification.show(`No error or fatal found.`, 'primary');
+      this.model.notification.show('No error or fatal found.', 'primary');
       return;
     }
 
@@ -236,7 +235,7 @@ export default class Log extends Observable {
    */
   nextError() {
     if (!this.stats.error && !this.stats.fatal) {
-      this.model.notification.show(`No error or fatal found.`, 'primary');
+      this.model.notification.show('No error or fatal found.', 'primary');
       return;
     }
 
@@ -264,7 +263,7 @@ export default class Log extends Observable {
    */
   lastError() {
     if (!this.stats.error && !this.stats.fatal) {
-      this.model.notification.show(`No error or fatal found.`, 'primary');
+      this.model.notification.show('No error or fatal found.', 'primary');
       return;
     }
 
@@ -296,15 +295,15 @@ export default class Log extends Observable {
   }
 
   /**
- * Select last `item` from the `list`
- */
+   * Select last `item` from the `list`
+   */
   goToLastItem() {
     this.goToItem(this.list.length - 1);
   }
 
   /**
    * Go to the `item` in the `list` with the corresponding index
-   * @param {Number} index
+   * @param {number} index - index of the item to go to
    */
   goToItem(index) {
     if (!this.list.length || index >= this.list.length) {
@@ -337,11 +336,11 @@ export default class Log extends Observable {
 
     const queryArguments = {
       criterias: this.filter.criterias,
-      options: {limit: this.limit}
+      options: { limit: this.limit },
     };
-    const {result, ok} = await this.model.loader.post(`/api/query`, queryArguments);
+    const { result, ok } = await this.model.loader.post('/api/query', queryArguments);
     if (!ok) {
-      this.model.notification.show(`Server error, unable to query logs`, 'danger');
+      this.model.notification.show('Server error, unable to query logs', 'danger');
       this.queryResult = RemoteData.failure(result.message);
       this.notify();
       return;
@@ -360,9 +359,9 @@ export default class Log extends Observable {
    * Forward call to `this.filter.setCriteria`. If live mode is enabled,
    * alert user that filtering will be affected.
    * See LogFilter#setCriteria doc
-   * @param {string} field
-   * @param {string} operator
-   * @param {string} value
+   * @param {string} field - field to filter on
+   * @param {string} operator - operator to use
+   * @param {string} value - value to filter on
    */
   setCriteria(field, operator, value) {
     if (operator === 'in' && this.filter.criterias.severity.$in) {
@@ -379,9 +378,12 @@ export default class Log extends Observable {
       if (this.isLiveModeRunning()) {
         this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
         this.model.notification.show(
-          `The current live session has been adapted to the new filter configuration.`, 'primary', 2000);
+          'The current live session has been adapted to the new filter configuration.',
+          'primary',
+          2000,
+        );
       } else if (this.isActiveModeQuery()) {
-        this.model.notification.show(`Filters have changed. Query again for updated results`, 'primary', 2000);
+        this.model.notification.show('Filters have changed. Query again for updated results', 'primary', 2000);
       }
     }
   }
@@ -399,7 +401,7 @@ export default class Log extends Observable {
       throw new Error('WS is not yet ready');
     }
     if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.infoLoggerServer.status.ok) {
-      throw new Error(`Live service is not available`);
+      throw new Error('Live service is not available');
     }
     if (this.isLiveModeRunning()) {
       return;
@@ -436,7 +438,7 @@ export default class Log extends Observable {
 
   /**
    * Method to check if current mode is Live (Running/Paused)
-   * @return {boolean} is it live mode
+   * @returns {boolean} is it live mode
    */
   isLiveModeEnabled() {
     return this.activeMode === MODE.LIVE.RUNNING || this.activeMode === MODE.LIVE.PAUSED;
@@ -444,7 +446,7 @@ export default class Log extends Observable {
 
   /**
    * Method to check if current selected mode is live and is running
-   * @return {boolean} is live mode running
+   * @returns {boolean} is live mode running
    */
   isLiveModeRunning() {
     return this.activeMode === MODE.LIVE.RUNNING;
@@ -476,7 +478,7 @@ export default class Log extends Observable {
   /**
    * Add a log to the list to be shown on screen
    * Keep only `limit` logs
-   * @param {object} log
+   * @param {object} log - log to be added
    */
   addLog(log) {
     this.addStats(log);
@@ -496,6 +498,7 @@ export default class Log extends Observable {
     this.dom.table.focus();
     this.notify();
   }
+
   /**
    * Enables auto-scroll, this is used when entering Live mode
    */
@@ -516,20 +519,20 @@ export default class Log extends Observable {
    * Given a log as a JSON object, returns a string with the JSON attributes value separated by '|'
    * If the attribute has no value, an empty space will be placed
    * If the attribute contains the `timestamp` option, a special format will be used
-   * @param {JSON} log
-   * @return {String}
+   * @param {Log} log - log to be converted to string
+   * @returns {string} - log as string
    */
   getLogAsTableRowString(log) {
     let logAsString = '';
     Object.keys(log).forEach((column) => {
       if (column === 'timestamp') {
-        const timestamp = log['timestamp'];
+        const { timestamp } = log;
         logAsString += `${this.model.timezone.format(timestamp, this.timeFormat)}, `;
         logAsString += `${this.model.timezone.format(timestamp, 'date')}, `;
       } else if (log[column]) {
         logAsString += `${log[column]}, `;
       } else {
-        logAsString += `, `;
+        logAsString += ', ';
       }
     });
     return `${logAsString}`;
@@ -537,7 +540,7 @@ export default class Log extends Observable {
 
   /**
    * Method which will create a table alike string with the elements displayed in the table of the current item
-   * @return {string}
+   * @returns {string} - string with the elements of the current item
    */
   displayedItemFieldsToString() {
     const message = this.getLogAsTableRowString(this.item);
@@ -552,15 +555,16 @@ export default class Log extends Observable {
    */
   generateLogDownloadContent() {
     if (this.list.length > 0) {
-
       let fullContent = '';
-      this.list.forEach((item) => fullContent += `${this.getLogAsTableRowString(item)}\n`);
+      this.list.forEach((item) => {
+        fullContent += `${this.getLogAsTableRowString(item)}\n`;
+      });
 
       let visibleOnlyContent = '';
       this.listLogsInViewportOnly().forEach((item) => {
-        visibleOnlyContent += `${this.getLogAsTableRowString(item)}\n`
+        visibleOnlyContent += `${this.getLogAsTableRowString(item)}\n`;
       });
-      this.download = {fullContent, visibleOnlyContent, isVisible: true};
+      this.download = { fullContent, visibleOnlyContent, isVisible: true };
     } else {
       this.model.notification.show('No logs present to be downloaded', 'warning', 3000);
     }
@@ -572,7 +576,7 @@ export default class Log extends Observable {
    * Content can be generated by calling `generateLogDownloadContent`
    */
   removeLogDownloadContent() {
-    this.download = {fullContent: '', visibleOnlyContent: '', isVisible: false};
+    this.download = { fullContent: '', visibleOnlyContent: '', isVisible: false };
     this.notify();
   }
 
@@ -580,13 +584,12 @@ export default class Log extends Observable {
    * Returns an array of logs that are indeed visible to user, hidden top and hidden bottom logs
    * are not present in this array output
    * ceil() and + 1 ensure we see top and bottom logs coming
-   * @param {Object} model
-   * @return {Array.<Log>}
+   * @returns {Array.<Log>} - logs in the viewport
    */
   listLogsInViewportOnly() {
     return this.list.slice(
       Math.floor(this.scrollTop / ROW_HEIGHT),
-      Math.floor(this.scrollTop / ROW_HEIGHT) + Math.ceil(this.scrollHeight / ROW_HEIGHT) + 1
+      Math.floor(this.scrollTop / ROW_HEIGHT) + Math.ceil(this.scrollHeight / ROW_HEIGHT) + 1,
     );
   }
 }
