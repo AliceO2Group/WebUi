@@ -12,20 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-const WinstonWrapper = require('./WinstonWrapper.js');
-const InfoLoggerSender = require('./InfoLoggerSender.js');
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
 const {LogLevel} = require('./LogLevel.js');
 const {LogSeverity} = require('./LogSeverity.js');
-
-/**
- * @type {WinstonWrapper}
- */
-let winston = null;
-/**
- * @type {InfoLoggerSender}
- */
-let infologger = null;
 
 /**
  * Handles logging, prints out in console, saves to file or sends to central InfoLogger instance
@@ -39,39 +28,40 @@ class Logger {
   static maximumInfoLoggerLevel = LogLevel.DEVELOPER;
 
   /**
-   * Sets the label and constructs default winston instance
    * @constructor
-   * @param {string} label - the name of the module/library injecting the message
+   * @param {string} [label=''] - the logger's label
+   * @param {object} [delegates] - delegates logger
+   * @param {WinstonWrapper} [delegates.winstonWrapper] - winston wrapper
+   * @param {InfoLoggerSender} [delegates.infologger] - infologger sender
    */
-  constructor(label = '') {
-    this.label = label;
-    if (!winston) {
-      winston = new WinstonWrapper();
-      winston.instance.info({message: 'Default console logger instantiated', label});
-    }
+  constructor(label, delegates) {
+    this.label = label ?? '';
+
+    const {winston, infologger} = delegates ?? {};
+    this._winston = winston;
+    this._infologger = infologger;
   }
 
   /**
-   * Method to allow clients to configure Log instance to make use:
-   * * WinstonWrapper together with a file
-   * * InfoLoggerSender
-   * @param {object} config - object expected to contain winston and infoLoggerSender configurations
+   * Debug severity log sent as InfoLoggerMessage
+   *
+   * @param {string} message - log message
+   * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
-  static configure(config) {
-    if (config?.winston) {
-      winston = new WinstonWrapper(config.winston);
-    }
-    if (config?.infologger) {
-      infologger = new InfoLoggerSender(winston.instance);
-    }
+  debugMessage(message, options) {
+    this._winston.instance.debug({message, label: this.label});
+
+    this._sendToInfoLogger(message, {...options, severity: LogSeverity.DEBUG});
   }
 
   /**
    * Debug severity log
    * @param {string} log - log message
+   *
+   * @deprecated use {@link Logger.debugMessage}
    */
   debug(log) {
-    winston.instance.debug({message: log, label: this.label});
+    this.debugMessage(log);
   }
 
   /**
@@ -81,7 +71,7 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   infoMessage(message, options) {
-    winston.instance.info({message, label: this.label});
+    this._winston.instance.info({message, label: this.label});
 
     this._sendToInfoLogger(message, {...options, severity: LogSeverity.INFO});
   }
@@ -103,7 +93,7 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   warnMessage(message, options) {
-    winston.instance.warn({message, label: this.label});
+    this._winston.instance.warn({message, label: this.label});
 
     this._sendToInfoLogger(message, {...options, severity: LogSeverity.WARNING});
   }
@@ -125,7 +115,7 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   errorMessage(message, options) {
-    winston.instance.error({message, label: this.label});
+    this._winston.instance.error({message, label: this.label});
 
     this._sendToInfoLogger(message, {...options, severity: LogSeverity.ERROR});
   }
@@ -146,7 +136,7 @@ class Logger {
    * @param {Error} error - error with stack field
    */
   trace(error) {
-    winston.instance.verbose({message: error.stack, label: this.label});
+    this._winston.instance.verbose({message: error.stack, label: this.label});
   }
 
   /**
@@ -155,13 +145,13 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options
    */
   _sendToInfoLogger(message, options) {
-    if (infologger && options && options.level < Logger.maximumInfoLoggerLevel) {
+    if (this._infologger && options && options.level < Logger.maximumInfoLoggerLevel) {
       const log = InfoLoggerMessage.fromObject({
         message,
         facility: this.label, // Use label as default facility, it might be overridden in options
-        ...options
+        ...options,
       });
-      infologger.sendMessage(log);
+      this._infologger.sendMessage(log);
     }
   }
 }

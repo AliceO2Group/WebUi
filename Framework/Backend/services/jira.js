@@ -13,7 +13,7 @@
 */
 
 const https = require('https');
-const {Logger} = require('../log/Logger.js');
+const {LogManager} = require('../log/LogManager');
 
 /**
  * Handles creating JIRA issues
@@ -44,7 +44,7 @@ class Jira {
       bug: 1
     };
 
-    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/jira`);
+    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/jira`);
   }
 
   /**

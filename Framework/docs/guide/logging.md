@@ -2,7 +2,7 @@
 
 The `@aliceo2/web-ui` framework offers 2 independent modules:
 
-## `Log` module:
+## `Logger` module:
  Which features:
  * Colored logs printed to the console;
  * Option to save logs in a file in JSON format;
@@ -11,9 +11,9 @@ The `@aliceo2/web-ui` framework offers 2 independent modules:
 ### Import module and use default instance
 The default instance will be printing logs to the console colored based on their level; Moreover, it will prefix all logs with timestamp and label provided to the constructor
 ```js
-const {Log} = require('@aliceo2/web-ui');
-const log = new Log('my-app');
-log.debug('Created default instance of console logger');
+const {LogManager} = require('@aliceo2/web-ui');
+const logger = LogManager.getLogger('my-app');
+logger.debug('Created default instance of console logger');
 ```
 Which will result in:
 ```js
@@ -24,11 +24,11 @@ Which will result in:
 Configuring logger is optional and required only when non default behavior of logger is desired such as:
 - displaying to the console only logs from a certain level above;
 - saving the logs to a file;
-- send logs to [InfoLogger Server](https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md)
+- send logs to [InfoLogger Server](https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md) if log level above developer (11)
 
 ```js
-const {Log} = require('@aliceo2/web-ui');
-Log.configure({
+const {LogManager} = require('@aliceo2/web-ui');
+LogManager.configure({
   winston: {
     file: {
       name: FILE_NAME, 
@@ -41,7 +41,7 @@ Log.configure({
   },
   infologger: true
 });
-new Log(LABEL);
+LogManager.getLogger(LABEL);
 ```
 
 Where:
@@ -51,32 +51,6 @@ Where:
   * [`CONSOLE_SYSTEMD`] - flags, console logs will be converted to a format more convenient for `journalctl` (where logs are stored from `systemd` services);
   * [`LABEL`] - label to use as prefix for all log messages (default empty);
 
-
-#### Public methods
-
-```js
-static configure
-```
-
-```js
-trace
-```
-
-```js
-debug
-```
-
-```js
-info
-```
-
-```js
-warn
-```
-
-```js
-error
-```
 
 ## InfoLogger Receiver
 Module to be used to receive logs from [InfoLogger Server](https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md) endpoint

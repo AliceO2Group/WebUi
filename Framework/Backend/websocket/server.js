@@ -15,7 +15,7 @@
 const WebSocketServer = require('ws').Server;
 const url = require('url');
 const WebSocketMessage = require('./message.js');
-const {Logger} = require('../log/Logger');
+const {LogManager} = require('../log/LogManager');
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -33,7 +33,7 @@ class WebSocket {
     this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
-    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
+    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
     this.log.info('Server started');
 
     this.callbackArray = [];

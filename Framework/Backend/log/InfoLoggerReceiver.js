@@ -14,9 +14,9 @@
 
 const net = require('net');
 const EventEmitter = require('events');
-const {Logger} = require('./Logger');
 
 const protocols = require('./infologger-protocols.js');
+const {LogManager} = require('./LogManager');
 
 /**
  * @class InfoLoggerReceiver
@@ -38,7 +38,7 @@ class InfoLoggerReceiver extends EventEmitter {
 
     this.isConnected = false;
 
-    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/ilreceiver`);
+    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ilreceiver`);
   }
 
   /**

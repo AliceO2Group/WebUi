@@ -18,11 +18,11 @@ const http = require('http');
 const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
-const {Logger} = require('../log/Logger');
 const O2TokenService = require('./../services/O2TokenService.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
+const {LogManager} = require('../log/LogManager');
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
@@ -76,7 +76,7 @@ class HttpServer {
       this.listen();
     }
 
-    this.log = new Logger(`${process.env.npm_config_log_label ?? 'framework'}/server`);
+    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/server`);
   }
 
   /**
