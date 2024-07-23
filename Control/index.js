@@ -10,20 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const path = require('path');
-const {HttpServer, WebSocket} = require('@aliceo2/web-ui');
+const { HttpServer, WebSocket } = require('@aliceo2/web-ui');
 
 const config = require('./lib/config/configProvider.js');
-const {buildPublicConfig} = require('./lib/config/publicConfigProvider.js');
+const { buildPublicConfig } = require('./lib/config/publicConfigProvider.js');
 const api = require('./lib/api.js');
 
 // -------------------------------------------------------
 
 buildPublicConfig(config);
 
-config.http.iframeCsp = (config?.grafana?.url) ? [ config.grafana.url ] : [];
+config.http.iframeCsp = config?.grafana?.url ? [config.grafana.url] : [];
 const http = new HttpServer(config.http, config.jwt, config.openId);
 const ws = new WebSocket(http);
 http.addStaticPath(path.join(__dirname, 'public'));

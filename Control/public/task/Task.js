@@ -10,18 +10,18 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 /* global COG */
-import {Observable, RemoteData} from '/js/src/index.js';
-import {getTasksByFlp} from './../common/utils.js';
+import { Observable, RemoteData } from '/js/src/index.js';
+import { getTasksByFlp } from './../common/utils.js';
 
 /**
  * Model representing Tasks
  */
 export default class Task extends Observable {
-  /** 
+  /**
    * Initialize remoteData items to NotAsked
-   * @param {Object} model
+   * @param {object} model
    */
   constructor(model) {
     super();
@@ -52,7 +52,7 @@ export default class Task extends Observable {
         const hosts = detectors[detector];
         const hostsMap = {};
         hosts.forEach((host) => hostsMap[host] = {}); // initialize to empty for future tasks to be added
-        hostsByDetectorMap[detector] = {isOpened: false, list: RemoteData.success(hostsMap)};
+        hostsByDetectorMap[detector] = { isOpened: false, list: RemoteData.success(hostsMap) };
       });
       this.detectorPanels = RemoteData.success(hostsByDetectorMap);
       this.notify();
@@ -63,12 +63,12 @@ export default class Task extends Observable {
     this.initTasks();
   }
 
-  /** 
+  /**
    * Loads list of running tasks from AliECS Core
    * In global view close all detector panels while in single view open that respective panel
    */
   async initTasks() {
-    const {result, ok} = await this.model.loader.post('/api/GetTasks');
+    const { result, ok } = await this.model.loader.post('/api/GetTasks');
     if (!ok) {
       this.detectorPanels = RemoteData.failure(result.message);
     } else if (this.detectorPanels.isSuccess()) {
@@ -78,11 +78,11 @@ export default class Task extends Observable {
         const detectorJSON = detectorsMap[detector];
         if (detectorJSON.list.isSuccess()) {
           Object.keys(detectorJSON.list.payload).forEach((host) => {
-            detectorJSON.list.payload[host] = tasksByFlpMap[host]
+            detectorJSON.list.payload[host] = tasksByFlpMap[host];
           });
         }
       });
-      this.detectorPanels = RemoteData.success(detectorsMap)
+      this.detectorPanels = RemoteData.success(detectorsMap);
     }
     this.notify();
   }
@@ -94,13 +94,13 @@ export default class Task extends Observable {
     this.cleanUpTasksRequest = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post('/api/CleanupTasks');
+    const { result, ok } = await this.model.loader.post('/api/CleanupTasks');
     if (!ok) {
       this.cleanUpTasksRequest = RemoteData.failure(result.message);
       this.model.notification.show(`Unable to clean up tasks: ${result.message}`, 'danger', 2000);
     } else {
       this.cleanUpTasksRequest = RemoteData.success();
-      this.model.notification.show(`Tasks have been cleaned`, 'success');
+      this.model.notification.show('Tasks have been cleaned', 'success');
       this.model.router.go('?page=taskList');
     }
     this.notify();
@@ -113,9 +113,9 @@ export default class Task extends Observable {
     this.cleanUpResourcesRequest = RemoteData.loading();
     this.notify();
 
-    this.cleanUpResourcesID = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
-    const {result, ok} = await this.model.loader
-      .post(`/api/execute/resources-cleanup`, {channelId: this.cleanUpResourcesID, operation: 'resources-cleanup'});
+    this.cleanUpResourcesID = Math.floor(Math.random() * (999999 - 100000) + 100000).toString();
+    const { result, ok } = await this.model.loader
+      .post('/api/execute/resources-cleanup', { channelId: this.cleanUpResourcesID, operation: 'resources-cleanup' });
     if (!ok) {
       this.cleanUpResourcesRequest = RemoteData.failure(result.message);
     } else {
@@ -140,7 +140,8 @@ export default class Task extends Observable {
   /**
    * Method to update the message with regards to the `CleanResources` command
    * If message id will match the user's it will be displayed
-   * @param {WebSocketMessagePayload} req 
+   * @param {WebSocketMessagePayload} req
+   * @param message
    */
   setResourcesRequest(message) {
     const messageId = message.id || '';
@@ -157,7 +158,7 @@ export default class Task extends Observable {
   /**
    * Check that for a given map of hosts there is at least one host
    * containing at least 1 task
-   * @param {JSON} data 
+   * @param {JSON} data
    */
   areTasksInDetector(data) {
     return Object.keys(data)
@@ -166,12 +167,12 @@ export default class Task extends Observable {
 
   /**
    * Given a string, create a regex which will be used Muto filter tasks by their name
-   * @param {String} filterBy
+   * @param {string} filterBy
    */
   set filterBy(filterBy) {
     this._filterBy = new RegExp(`.*${filterBy}.*`);
     this.notify();
-  }  
+  }
 
   /**
    * Return a built regex for filtering tasks by their name

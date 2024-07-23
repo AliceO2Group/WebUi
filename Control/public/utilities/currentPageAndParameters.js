@@ -14,7 +14,7 @@
 /**
  * Returns the current url parameters as an object
  * @source {AliceO2/Bookkeeping}
- * @return {Object} the current URL parameters
+ * @returns {object} the current URL parameters
  */
 export const currentPageAndParameters = () => {
   const parameters = Object.fromEntries(new URLSearchParams(window.location.search).entries());

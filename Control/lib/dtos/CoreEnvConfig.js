@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 'use strict';
 
-const {User} = require('./User.js');
+const { User } = require('./User.js');
 
 /**
  * CoreEnvConfig DTO
@@ -62,7 +62,7 @@ class CoreEnvConfig {
       const envConfig = new CoreEnvConfig();
       envConfig._user = {
         username: data?.user?.username ?? 'anonymous',
-        personid: data?.user?.personid ?? 0
+        personid: data?.user?.personid ?? 0,
       };
       envConfig._created = data.created ?? Date.now();
       envConfig._edited = data.edited ?? Date.now();
@@ -80,7 +80,7 @@ class CoreEnvConfig {
   /**
    * Method to parse a string into a JSON and attempt to create an environment configuration with it;
    * If successful, it will written an CoreEnvConfig
-   * @param {String} data - string version of a JSON
+   * @param {string} data - string version of a JSON
    * @returns {CoreEnvConfig}
    */
   static fromString(data) {
@@ -90,7 +90,7 @@ class CoreEnvConfig {
 
   /**
    * Returns a string version of the current CoreEnvConfig with new lines and spaces (2)
-   * @returns {String}
+   * @returns {string}
    */
   toString() {
     const envConfig = {
@@ -101,11 +101,11 @@ class CoreEnvConfig {
       edited: this._edited,
       workflow: this._workflow,
       revision: this._revision,
-      repository: this._repository,      
+      repository: this._repository,
       variables: this._variables,
       detectors: this._detectors,
-    }
-    return JSON.stringify(envConfig, null, 2)
+    };
+    return JSON.stringify(envConfig, null, 2);
   }
 
   /**
@@ -123,8 +123,8 @@ class CoreEnvConfig {
    * Build the ID of the configuration to be saved from the name:
    * * Replace any existing `/` from it with `_` so that Apricot is able to understand Consul storage
    * * Replace any spaces from it with `_`
-   * @param {String} name 
-   * @returns {String}
+   * @param {string} name
+   * @returns {string}
    */
   static _getNameAsId(name) {
     return `${name.trim().replace(/ /g, '_')}`.replace(/\//g, '_');
@@ -147,7 +147,7 @@ class CoreEnvConfig {
 
   /**
    * Return the id of an environment configuration
-   * @returns {String}
+   * @returns {string}
    */
   get id() {
     return this._id;
@@ -155,7 +155,7 @@ class CoreEnvConfig {
 
   /**
    * Return the person id that has created the configuration
-   * @returns {String}
+   * @returns {string}
    */
   get personId() {
     return this._user.personid;

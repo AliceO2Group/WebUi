@@ -10,30 +10,27 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconPencil} from '/js/src/index.js';
+import { h, iconPencil } from '/js/src/index.js';
 
 /**
  * Component which will display selected detectors to filter data based on
  * To be used in most of the pages to display the selection
- * @param {Object} model
- * @return {vnode}
+ * @param {object} model
+ * @returns {vnode}
  */
 const detectorHeader = (model) => {
-  const selected = model.detectors.selected;
+  const { selected } = model.detectors;
   if (selected) {
     return h('.w-100.bg-gray-light.pv2', {
-      style: 'height: 40px'
-    },[
-      h('h4.f5.flex-row', {style: 'justify-content: center;'},
-        h('.ph2', `Detector View: ${selected}`),
-        h('a.f6.actionable-icon.ph2', {
-          onclick: () => model.resetDetectorView('')
-        }, iconPencil()),
-      )
-    ])
+      style: 'height: 40px',
+    }, [
+      h('h4.f5.flex-row', { style: 'justify-content: center;' }, h('.ph2', `Detector View: ${selected}`), h('a.f6.actionable-icon.ph2', {
+        onclick: () => model.resetDetectorView(''),
+      }, iconPencil())),
+    ]);
   }
 };
 
-export {detectorHeader};
+export { detectorHeader };

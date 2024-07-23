@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconClipboard} from '/js/src/index.js';
-import {di} from './../../utilities/di.js';
+import { h, iconClipboard } from '/js/src/index.js';
+import { di } from './../../utilities/di.js';
 
 /**
  * Copy passed value to the user's clipboard
@@ -27,8 +27,8 @@ export const copyToClipboardIcon = (value) => {
       onclick: () => {
         navigator.clipboard.writeText(value);
         di.notification.show('Successfully copied to clipboard', 'success', 1500);
-      }
-    }, iconClipboard())
+      },
+    }, iconClipboard());
   }
   return;
 };
@@ -36,8 +36,6 @@ export const copyToClipboardIcon = (value) => {
 /**
  * Method to check if connection is secure to enable certain improvements
  * e.g navigator.clipboard, notifications, service workers
- * @return {boolean}
+ * @returns {boolean}
  */
-const isContextSecure = () => {
-  return window.isSecureContext;
-}
+const isContextSecure = () => window.isSecureContext;

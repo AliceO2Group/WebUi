@@ -10,15 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import { copyToClipboardIcon } from './copyToClipboardIcon.js';
 
 /**
  * Build a component which displays some text and provides a copy to clipboard actionable icon
- * @param {String|vnode} text - text to be displayed
- * @return {vnode}
+ * @param {string | vnode} text - text to be displayed
+ * @param type
+ * @returns {vnode}
  */
 export const textWithCopyClipboard = (text, type) =>
   h('.flex-row.gc2', [

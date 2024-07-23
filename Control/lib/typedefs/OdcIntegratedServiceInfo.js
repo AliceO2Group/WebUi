@@ -4,8 +4,9 @@
   'ddsSessionId',
   'ddsSessionStatus',
   'devices',
-  'hosts'
-]
+  'hosts',
+];
+
 /**
  * @license
  * Copyright CERN and copyright holders of ALICE O2. This software is
@@ -24,11 +25,10 @@
  *
  * OdcIntegratedServiceInfo type definition as parsed and sent to the client by the GUI server
  * The parsing is done based on the object received from ECS in integratedServicesData object
- *
- * @property {Number} currentRunNumber
- * @property {String} state
- * @property {String} ddsSessionId
- * @property {String} ddsSessionStatus
+ * @property {number} currentRunNumber
+ * @property {string} state
+ * @property {string} ddsSessionId
+ * @property {string} ddsSessionStatus
  * @property {Array<DeviceInfo>} devices
- * @property {Array<String>} hosts
+ * @property {Array<string>} hosts
  */

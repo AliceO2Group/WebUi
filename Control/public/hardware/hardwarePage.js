@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
-import {detectorHeader} from '../common/detectorHeader.js';
-import {ROLES} from './../workflow/constants.js';
+import { detectorHeader } from '../common/detectorHeader.js';
+import { ROLES } from './../workflow/constants.js';
 
 /**
  * @file Page to Hardware (content and header)
@@ -24,35 +24,33 @@ import {ROLES} from './../workflow/constants.js';
 
 /**
  * Header of the hardware page
- * @param {Object} model
- * @return {vnode}
+ * @param {object} model
+ * @returns {vnode}
  */
 export const header = (model) => [
   h('.w-50 text-center', h('h4', 'FLPs by Detector')),
-  h('.flex-grow text-right', [])
+  h('.flex-grow text-right', []),
 ];
 
 /**
  * Content of the hardware page
  * Displays a list of FLPs grouped by their detector
- * @param {Object} model
- * @return {vnode}
+ * @param {object} model
+ * @returns {vnode}
  */
 export const content = (model) => h('.scroll-y.absolute-fill.flex-column', [
   detectorHeader(model),
-  h('.scroll-y.absolute-fill.p2', {style: 'top: 40px'},
-    model.detectors.hostsByDetectorRemote.match({
-      NotAsked: () => errorPage('Unable to load detectors and FLPs'),
-      Loading: () => pageLoading(),
-      Success: (data) => detectorPanels(model, data),
-      Failure: (error) => errorPage(error),
-    })
-  )
+  h('.scroll-y.absolute-fill.p2', { style: 'top: 40px' }, model.detectors.hostsByDetectorRemote.match({
+    NotAsked: () => errorPage('Unable to load detectors and FLPs'),
+    Loading: () => pageLoading(),
+    Success: (data) => detectorPanels(model, data),
+    Failure: (error) => errorPage(error),
+  })),
 ]);
 
 /**
  * Build a list of panels per detector with hosts
- * @param {Object} model
+ * @param {object} model
  * @param {Map<String, JSON} detectors
  * @returns {vnode}
  */
@@ -66,14 +64,10 @@ const detectorPanels = (model, detectors) => [
     .map((detector) => {
       const flps = detectors[detector];
       return h('.w-100', [
-        h('.panel-title.flex-row.p2', [
-          h('h4.w-20', `${detector} (${flps.length})`),
-        ]),
-        h('.panel.w-100.flex-row',{
-          style: 'flex-wrap: wrap'
-        }, [
-          flps.map((flp) => h('label.ph2.w-25', flp))
-        ])
-      ])
-    })
+        h('.panel-title.flex-row.p2', [h('h4.w-20', `${detector} (${flps.length})`)]),
+        h('.panel.w-100.flex-row', {
+          style: 'flex-wrap: wrap',
+        }, [flps.map((flp) => h('label.ph2.w-25', flp))]),
+      ]);
+    }),
 ];

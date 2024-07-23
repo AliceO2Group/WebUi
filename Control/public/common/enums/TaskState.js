@@ -25,11 +25,10 @@ export const TaskState = Object.freeze({
 
 /**
  * List of possible states for a task sorted alphabetically with ERROR first and RUNNING second and CONFIGURED third
- * @return {Array<String>} list of task states
+ * @returns {Array<string>} list of task states
  */
 export const TASK_STATES = Object.values(TaskState)
   .sort((a, b) => {
-    
     if (a === TaskState.ERROR_CRITICAL) {
       return -1;
     } else if (b === TaskState.ERROR_CRITICAL) {
@@ -58,7 +57,7 @@ export const TASK_STATES = Object.values(TaskState)
 /**
  * Given a hardware component task state, return the class associated with the state
  * @param {TaskState} state - task state  to get the class for
- * @return {String} - CSS class to be used in the HTML
+ * @returns {string} - CSS class to be used in the HTML
  */
 export function getTaskStateClassAssociation(state) {
   switch (state) {

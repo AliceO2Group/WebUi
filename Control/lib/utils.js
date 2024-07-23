@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
 const http = require('http');
@@ -21,16 +21,18 @@ const https = require('https');
  * @param {string} err - Message error
  * @param {Response} res - Response object to send to
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
+ * @param facility
  */
 function errorHandler(err, res, status = 500, facility = 'utils') {
   errorLogger(err, facility);
   res.status(status);
-  res.send({message: err.message || err});
+  res.send({ message: err.message || err });
 }
 
 /**
  * Global Error Logger for AliECS GUI
- * @param {Error} err 
+ * @param {Error} err
+ * @param facility
  */
 function errorLogger(err, facility = 'utils') {
   log.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
@@ -41,13 +43,14 @@ function errorLogger(err, facility = 'utils') {
 }
 
 /**
-  * Util to get JSON data (parsed) following a GET request
-  * @param {string} host - hostname of the server
-  * @param {number} port - port of the server
-  * @param {string} path - path of the server request
-  * @param {JSON} options - specific request options (e.g range of accepted status code)
-  * @return {Promise.<Object, Error>} JSON response
-  */
+ * Util to get JSON data (parsed) following a GET request
+ * @param {string} host - hostname of the server
+ * @param hostname
+ * @param {number} port - port of the server
+ * @param {string} path - path of the server request
+ * @param {JSON} options - specific request options (e.g range of accepted status code)
+ * @returns {Promise.<object, Error>} JSON response
+ */
 function httpGetJson(hostname, port, path, options = undefined) {
   options = {
     statusCodeMin: 200,
@@ -55,7 +58,7 @@ function httpGetJson(hostname, port, path, options = undefined) {
     rejectMessage: 'Non-2xx status code: ',
     protocol: 'http:',
     rejectUnauthorized: true,
-    ...options ?? {}
+    ...options ?? {},
   };
   return new Promise((resolve, reject) => {
     const requestOptions = {
@@ -65,9 +68,10 @@ function httpGetJson(hostname, port, path, options = undefined) {
       method: 'GET',
       rejectUnauthorized: Boolean(options.rejectUnauthorized),
       headers: {
-        Accept: 'application/json'
-      }
+        Accept: 'application/json',
+      },
     };
+
     /**
      * Generic handler for GET HTTP requests, buffers response, checks status code and parses JSON
      * @param {Response} response
@@ -100,5 +104,4 @@ function httpGetJson(hostname, port, path, options = undefined) {
   });
 }
 
-
-module.exports = {errorHandler, errorLogger, httpGetJson};
+module.exports = { errorHandler, errorLogger, httpGetJson };

@@ -10,30 +10,30 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconActionRedo} from '/js/src/index.js';
+import { h, iconActionRedo } from '/js/src/index.js';
 import errorComponent from './../../../common/errorComponent.js';
 
 /**
-* Method to create the revision input-dropdown panel
-* @param {RemoteData} workflow
-* @return {vnode}
-*/
+ * Method to create the revision input-dropdown panel
+ * @param {RemoteData} workflow
+ * @returns {vnode}
+ */
 export default (workflow) =>
   h('.pv1.text-left.w-100', [
     h('h5', 'Revision:'),
     workflow.revisions.length === 0 ?
       h('.text-center', errorComponent('No revisions found for the selected repository')) :
-      h('', {style: 'display:flex; flex-direction: row;'}, [
+      h('', { style: 'display:flex; flex-direction: row;' }, [
         h('.dropdown', {
           style: 'flex-grow: 1;',
-          class: workflow.revision.isSelectionOpen ? 'dropdown-open' : ''
+          class: workflow.revision.isSelectionOpen ? 'dropdown-open' : '',
         }, [
           revisionInputField(workflow),
-          revisionDropdownArea(workflow)
+          revisionDropdownArea(workflow),
         ]),
-        workflow.isInputCommitFormat(workflow.revision.rawValue) && buttonCommitFormat(workflow)
+        workflow.isInputCommitFormat(workflow.revision.rawValue) && buttonCommitFormat(workflow),
       ]),
   ]);
 
@@ -41,8 +41,8 @@ export default (workflow) =>
  * Create an input field for revision input:
  * * string of branch from repository
  * * commit sha which enables commit button
- * @param {Object} workflow
- * @return {vnode}
+ * @param {object} workflow
+ * @returns {vnode}
  */
 const revisionInputField = (workflow) =>
   h('input.form-control', {
@@ -60,34 +60,31 @@ const revisionInputField = (workflow) =>
       workflow.setRevisionInputDropdownVisibility(true);
       workflow.updateInputSearch('revision', '');
       e.stopPropagation();
-    }
+    },
   });
 
 /**
  * Create dropdown area based on user input on revision field
- * @param {Object} workflow
+ * @param {object} workflow
  * @param {string} repository
- * @return {vnode}
+ * @returns {vnode}
  */
 const revisionDropdownArea = (workflow) =>
-  h('.dropdown-menu.w-100.scroll-y', {style: 'max-height: 25em;'},
-    workflow.revisions
-      .filter((name) => name.match(workflow.revision.regex))
-      .map((revision) =>
-        h('a.menu-item.w-wrapped', {
-          class: revision === workflow.form.revision ? 'selected' : '',
-          onmousedown: () => workflow.updateInputSelection('revision', revision),
-        }, revision)
-      )
-  );
+  h('.dropdown-menu.w-100.scroll-y', { style: 'max-height: 25em;' }, workflow.revisions
+    .filter((name) => name.match(workflow.revision.regex))
+    .map((revision) =>
+      h('a.menu-item.w-wrapped', {
+        class: revision === workflow.form.revision ? 'selected' : '',
+        onmousedown: () => workflow.updateInputSelection('revision', revision),
+      }, revision)));
 
 /**
-* Button to be displayed if revision input is a commit format
-* @param {Object} workflow
-* @return {vnode}
-*/
+ * Button to be displayed if revision input is a commit format
+ * @param {object} workflow
+ * @returns {vnode}
+ */
 const buttonCommitFormat = (workflow) =>
   h('button.btn.mh2', {
     title: 'Retrieve workflow templates for this commit',
-    onclick: () => workflow.updateInputSelection('revision', workflow.revision.rawValue)
+    onclick: () => workflow.updateInputSelection('revision', workflow.revision.rawValue),
   }, iconActionRedo());

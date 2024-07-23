@@ -15,7 +15,6 @@
  * @typedef Service
  *
  * Service DTO representation as used in About Page
- *
  * @property {string} name
  * @property {string} endpoint
  * @property {string} [version]

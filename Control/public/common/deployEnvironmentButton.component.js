@@ -11,13 +11,12 @@
  *  or submit itself to any jurisdiction.
  */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Builds a component with a set of buttons to allow users to create environments based on mapped workflow templates
- *
- * @param {Boolean} isLoading - if the button should be displayed as loading
- * @param {Boolean} isReady - if environment creation is ready to be deployed
+ * @param {boolean} isLoading - if the button should be displayed as loading
+ * @param {boolean} isReady - if environment creation is ready to be deployed
  * @param {void} onclick - deploying action of the environment
  * @returns {vnode}
  */
@@ -27,6 +26,6 @@ export const deployEnvironmentButton = (isLoading = false, isReady = false, oncl
       class: isLoading ? 'loading' : '',
       disabled: !isReady || isLoading,
       onclick,
-      title: 'Deploy environment'
-    },'Deploy')
+      title: 'Deploy environment',
+    }, 'Deploy'),
   ]);

@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * @file which contains multiple reuseable components for the configuration page
@@ -21,14 +21,14 @@ import {h} from '/js/src/index.js';
 /**
  * User Logic Checkbox with corresponding label
  * It supports 3 types: detector, host
- * @param {Object} model
- * @param {String} componentId - refers to the component(detector/host) name
- * @param {String} type - refers to the component being used for detector or host panels
- * @param {String} width - expects a class with regards to width (e.g .w-50)
- * @return {vnode}
+ * @param {object} model
+ * @param {string} componentId - refers to the component(detector/host) name
+ * @param {string} type - refers to the component being used for detector or host panels
+ * @param {string} width - expects a class with regards to width (e.g .w-50)
+ * @returns {vnode}
  */
 const userLogicCheckBox = (model, componentId, type, width) => {
-  const id = componentId + type + 'Checkbox';
+  const id = `${componentId + type}Checkbox`;
   let checked = false;
   let onchange = undefined;
   switch (type) {
@@ -42,7 +42,7 @@ const userLogicCheckBox = (model, componentId, type, width) => {
       break;
   }
   return h(`${width}.flex-row`, {
-    style: 'display: flex; align-items: center;'
+    style: 'display: flex; align-items: center;',
   }, [
     h('input', {
       type: 'checkbox',
@@ -53,21 +53,22 @@ const userLogicCheckBox = (model, componentId, type, width) => {
     }),
     h('label.f6.ph2', {
       for: id,
-      style: `font-weight: bold; margin-bottom:0;cursor:pointer`,
-      title: `Toggle selection of UserLogic for ${componentId}`
+      style: 'font-weight: bold; margin-bottom:0;cursor:pointer',
+      title: `Toggle selection of UserLogic for ${componentId}`,
     }, 'User Logic'),
   ]);
 };
 
 /**
  * Add a checkbox for the user to enable/disable the user logic for a serial:endpoint cru card
- * @param {Object} model
+ * @param {object} model
  * @param {JSON} cru
+ * @param width
  * @returns {vnode}
  */
 const userLogicCheckBoxForEndpoint = (model, cru, width) =>
   h(`${width}.flex-row`, {
-    style: 'align-items: center;'
+    style: 'align-items: center;',
   }, [
     h('input', {
       id: `${cru.info.serial}-${cru.info.endpoint}-checkbox`,
@@ -77,53 +78,51 @@ const userLogicCheckBoxForEndpoint = (model, cru, width) =>
       onchange: () => {
         cru.config.cru.userLogicEnabled = cru.config.cru.userLogicEnabled === 'true' ? 'false' : 'true';
         model.configuration.notify();
-      }
+      },
     }),
     h('label.f6.ph2', {
       for: `${cru.info.serial}-${cru.info.endpoint}-checkbox`,
-      style: `font-weight: bold; margin-bottom:0;cursor:pointer`,
-      title: `Toggle selection of User Logic`
-    }, 'User Logic')
+      style: 'font-weight: bold; margin-bottom:0;cursor:pointer',
+      title: 'Toggle selection of User Logic',
+    }, 'User Logic'),
   ]);
 
 /**
  * Given a string detector, check if UserLogic is enabled for all hosts CRUs serial:endpoint for that detector
- * @param {Object} model
- * @param {String} detector
+ * @param {object} model
+ * @param {string} detector
  * @returns {boolean}
  */
 const _isUserLogicEnabledForDetector = (model, detector) => {
   try {
     const hostsWithCru = model.configuration._getHostsWithCRUForDetector(detector);
-    return hostsWithCru.every((host) => _isUserLogicEnabledForHost(model, host))
+    return hostsWithCru.every((host) => _isUserLogicEnabledForHost(model, host));
   } catch (error) {
     console.error(error);
   }
   return false;
-}
-
+};
 
 /**
  * Given a string host, check if UserLogic is enabled for all CRUs serial:endpoint for that host
- * @param {Object} model
- * @param {String} host
+ * @param {object} model
+ * @param {string} host
  * @returns {boolean}
  */
 const _isUserLogicEnabledForHost = (model, host) => {
   const config = model.configuration;
   try {
-    return Object.keys(config.cruMapByHost.payload[host]).every((cru) => {
-      return config.cruMapByHost.payload[host][cru].config.cru.userLogicEnabled === 'true';
-    });
+    return Object.keys(config.cruMapByHost.payload[host]).every((cru) => config.cruMapByHost.payload[host][cru].config.cru.userLogicEnabled === 'true');
   } catch (error) {
     console.error(error);
   }
   return false;
-}
+};
 
 /**
  * Given a string detector, toggle the userLogic for all of its hosts CRUs serial:endpoint for that detector
- * @param {String} detector
+ * @param model
+ * @param {string} detector
  */
 const _toggleUserLogicByDetector = (model, detector) => {
   const config = model.configuration;
@@ -135,13 +134,13 @@ const _toggleUserLogicByDetector = (model, detector) => {
     console.error(error);
   }
   config.notify();
-}
-
+};
 
 /**
  * Given a string host, toggle the userLogic for all of its CRUs serial:endpoint
- * @param {String} host
- * @param {String} value - value that should be set for the whole set. If undefined, method will decide based on existing selection
+ * @param model
+ * @param {string} host
+ * @param {string} value - value that should be set for the whole set. If undefined, method will decide based on existing selection
  */
 const _toggleUserLogicByHost = (model, host, value = undefined) => {
   const config = model.configuration;
@@ -155,6 +154,6 @@ const _toggleUserLogicByHost = (model, host, value = undefined) => {
     console.error(error);
   }
   config.notify();
-}
+};
 
-export {userLogicCheckBox, userLogicCheckBoxForEndpoint};
+export { userLogicCheckBox, userLogicCheckBoxForEndpoint };

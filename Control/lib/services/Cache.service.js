@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log} = require('@aliceo2/web-ui');
-const {deepStrictEqual, AssertionError} = require('assert');
+const { Log } = require('@aliceo2/web-ui');
+const { deepStrictEqual, AssertionError } = require('assert');
 
 /**
  * @class
@@ -21,16 +21,15 @@ const {deepStrictEqual, AssertionError} = require('assert');
  */
 class CacheService {
   /**
-   * @constructor
+   * @class
    * Constructor for initializing the service with:
    * - empty maps for needed information
    * - optional service for broadcasting information
    * @param {BroadcastService} broadcastService - which is to be used for broadcasting
    */
   constructor(broadcastService) {
-
     /**
-     * @type {Object<String, Object>}
+     * @type {Object<string, Object>}
      */
     this._memory = {};
 
@@ -43,13 +42,14 @@ class CacheService {
   }
 
   /**
-   * Method to receive a function for retrieval of information and a key under which the information should be updated 
-   * @param {String} key - key under which the information should be stored
-   * @param {String} value - command to be used for broadcasting message
-   * @param {Object} broadcastConfig - object containing broadcast information; if present information will be broadcasted
-   * @return {void}
+   * Method to receive a function for retrieval of information and a key under which the information should be updated
+   * @param {string} key - key under which the information should be stored
+   * @param {string} value - command to be used for broadcasting message
+   * @param {object} broadcastConfig - object containing broadcast information; if present information will be broadcasted
+   * @param broadcastConfig.command
+   * @returns {void}
    */
-  async updateByKeyAndBroadcast(key, value, {command} = {}) {
+  async updateByKeyAndBroadcast(key, value, { command } = {}) {
     if (value) {
       try {
         deepStrictEqual(value, this._memory[key]);
@@ -69,7 +69,8 @@ class CacheService {
   /**
    * Getter for retrieving a copy of the information stored in-memory under a certain key
    * @param {key} - key under which information is stored
-   * @return {Object}
+   * @param key
+   * @returns {object}
    */
   getByKey(key) {
     if (this._memory[key]) {
@@ -79,4 +80,4 @@ class CacheService {
   }
 }
 
-module.exports = {CacheService};
+module.exports = { CacheService };

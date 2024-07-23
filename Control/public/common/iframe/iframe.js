@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Builds an iframe with specified source and no borders
@@ -20,4 +20,4 @@ import {h} from '/js/src/index.js';
  * @param {string} [style] - optional style parameters
  * @returns {vnode}
  */
-export const iframe = (src, style = 'border:0;') => h('iframe', {src, style});
+export const iframe = (src, style = 'border:0;') => h('iframe', { src, style });

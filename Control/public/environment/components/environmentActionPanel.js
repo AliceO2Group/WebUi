@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -11,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-import {miniCard} from './../../common/card/miniCard.js';
-import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
-import {ROLES} from './../../workflow/constants.js';
-import {isUserAllowedRole} from './../../common/userRole.js';
+ */
+import { miniCard } from './../../common/card/miniCard.js';
+import { controlEnvironmentPanel } from './controlEnvironmentPanel.js';
+import { ROLES } from './../../workflow/constants.js';
+import { isUserAllowedRole } from './../../common/userRole.js';
 
 /**
  * Build a panel with multiple mini cards which contain actions allowed to the user for the environment
@@ -24,11 +23,12 @@ import {isUserAllowedRole} from './../../common/userRole.js';
  * - it is part of the Detector group and has all locks of detectors part of the environment
  * @param {Model} model - root object of the application
  * @param {EnvironmentInfo} environment - DTO representing an environment
+ * @param environmentInfo
  * @returns {vnode}
  */
 export const environmentActionPanel = (model, environmentInfo) => {
-  const {includedDetectors = []} = environmentInfo;
+  const { includedDetectors = [] } = environmentInfo;
   const hasLocks = includedDetectors.every((detector) => model.lock.isLockedByCurrentUser(detector));
-  const isAllowedToControl = (isUserAllowedRole(ROLES.Detector) && hasLocks);
+  const isAllowedToControl = isUserAllowedRole(ROLES.Detector) && hasLocks;
   return miniCard('', controlEnvironmentPanel(model.environment, environmentInfo, isAllowedToControl));
 };

@@ -15,7 +15,6 @@
  * @typedef EnvironmentCreation
  *
  * EnvironmentCreation type definition as being received from UI
- *
  * @property {string} workflowTemplate
  * @property {object} vars
  * @property {Array<string>} [detectors]

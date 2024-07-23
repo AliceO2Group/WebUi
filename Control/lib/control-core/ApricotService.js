@@ -10,17 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const assert = require('assert');
+
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
-const {errorHandler, errorLogger} = require('./../utils.js');
+const { errorHandler, errorLogger } = require('./../utils.js');
 const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
 const CoreUtils = require('./CoreUtils.js');
+
 const COMPONENT = 'COG-v1';
-const {User} = require('./../dtos/User.js');
-const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
+const { User } = require('./../dtos/User.js');
+const { APRICOT_COMMANDS: { ListRuntimeEntries, GetRuntimeEntry } } = require('./ApricotCommands.js');
+const { LOG_LEVEL } = require('../common/logLevel.enum.js');
+
 const LOG_FACILITY = 'cog/apricotservice';
 
 /**
@@ -48,18 +51,16 @@ class ApricotService {
       log.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
         level: 99,
         system: 'GUI',
-        facility: 'cog/api'
+        facility: 'cog/api',
       });
-      await Promise.allSettled(
-        this.detectors.map(async (detector) => {
-          try {
-            const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
-            this.hostsByDetector.set(detector, hosts);
-          } catch (error) {
-            log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
-          }
-        })
-      );
+      await Promise.allSettled(this.detectors.map(async (detector) => {
+        try {
+          const { hosts } = await this.apricotProxy['GetHostInventory']({ detector });
+          this.hostsByDetector.set(detector, hosts);
+        } catch (error) {
+          log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+        }
+      }));
     } catch (error) {
       log.error('Unable to list detectors');
     }
@@ -67,21 +68,21 @@ class ApricotService {
 
   /**
    * Use Apricot defined `o2apricot.proto` `GetRuntimeEntry` to retrieve the value stored in a specified key
-   * 
+   *
    * Corner cases for Apricot returns:
    * * if key(component) does not exist, Apricot wrongly returns code 2 instead of 5 in the gRPC error;
    * * if key exists but there is no content, Apricot returns '{}'
    * * if key exists and there is content, Apricot returns content within payload attribute '{payload}'
-   * @param {String} component - component for which it should query
-   * @param {String} key - key for which value should be retrieved
-   * @returns {Promise<String>} - value stored by apricot
+   * @param {string} component - component for which it should query
+   * @param {string} key - key for which value should be retrieved
+   * @returns {Promise<string>} - value stored by apricot
    */
   async getRuntimeEntryByComponent(component, key) {
     try {
-      const {payload = '{}'} = await this.apricotProxy[GetRuntimeEntry]({component, key});
+      const { payload = '{}' } = await this.apricotProxy[GetRuntimeEntry]({ component, key });
       return payload;
     } catch (error) {
-      const {code, details = ''} = error;
+      const { code, details = '' } = error;
       if (code === 2 && details.includes('nil')) {
         error.code = 5;
       }
@@ -93,6 +94,7 @@ class ApricotService {
    * Retrieve an in-memory detectors list
    * If list does not exist, make a request to Apricot
    * @param {Request} req
+   * @param _
    * @param {Response} res
    */
   async getDetectorList(_, res) {
@@ -104,13 +106,14 @@ class ApricotService {
         return;
       }
     }
-    res.status(200).json({detectors: this.detectors});
+    res.status(200).json({ detectors: this.detectors });
   }
 
   /**
    * Return an in-memory map of hosts grouped by their detector
    * If map is empty, make a request to Apricot
    * @param {Request} req
+   * @param _
    * @param {Response} res
    */
   async getHostsByDetectorList(_, res) {
@@ -118,36 +121,34 @@ class ApricotService {
       try {
         this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
 
-        await Promise.allSettled(
-          this.detectors.map(async (detector) => {
-            try {
-              const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
-              this.hostsByDetector.set(detector, hosts);
-            } catch (error) {
-              log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
-              log.error(error);
-            }
-          })
-        );
+        await Promise.allSettled(this.detectors.map(async (detector) => {
+          try {
+            const { hosts } = await this.apricotProxy['GetHostInventory']({ detector });
+            this.hostsByDetector.set(detector, hosts);
+          } catch (error) {
+            log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+            log.error(error);
+          }
+        }));
       } catch (error) {
         errorHandler(error, res, 503, 'apricotservice');
         return;
       }
     }
-    res.status(200).json({hosts: Object.fromEntries(this.hostsByDetector)});
+    res.status(200).json({ hosts: Object.fromEntries(this.hostsByDetector) });
   }
 
   /**
-   * Request a list of detectors from Apricot to confirm 
+   * Request a list of detectors from Apricot to confirm
    * connection and O2Apricot are up
-   * @return {Promise}
+   * @returns {Promise}
    */
   async getStatus() {
     try {
       if (this.apricotProxy?.isConnectionReady) {
         await this.apricotProxy['ListDetectors']();
       } else {
-        throw new Error('Unable to check status of Apricot')
+        throw new Error('Unable to check status of Apricot');
       }
     } catch (error) {
       log.error(error);
@@ -189,21 +190,21 @@ class ApricotService {
   async saveCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      const {username, personid} = req.session;
-      data.user = {username, personid};
+      const { username, personid } = req.session;
+      data.user = { username, personid };
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const {payload: configurations} = await this.apricotProxy[ListRuntimeEntries]({component: COMPONENT});
+      const { payload: configurations } = await this.apricotProxy[ListRuntimeEntries]({ component: COMPONENT });
       if (configurations.includes(envConf.id)) {
         errorHandler(`A configuration with name '${envConf.id}' already exists. `
           + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
       } else {
         log.infoMessage(
           `${req.session.username} request to save new core environment configuration "${envConf.id}"`,
-          {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+          { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY },
         );
-        await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key: envConf.id, value: envConf.toString()});
-        res.status(201).json({message: `Configuration successfully saved as ${envConf.id}`});
+        await this.apricotProxy['SetRuntimeEntry']({ component: COMPONENT, key: envConf.id, value: envConf.toString() });
+        res.status(201).json({ message: `Configuration successfully saved as ${envConf.id}` });
       }
     } catch (error) {
       errorHandler(error, res, 503, 'apricotservice');
@@ -222,22 +223,22 @@ class ApricotService {
   async updateCoreEnvConfig(req, res) {
     try {
       const data = req.body;
-      const {username, name, personid, access} = req.session;
+      const { username, name, personid, access } = req.session;
       const user = new User(username, name, personid, access);
-      data.user = {username, personid};
+      data.user = { username, personid };
       const envConf = CoreEnvConfig.fromJSON(data);
 
       const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
       log.infoMessage(
         `${req.session.username} requested to update new core environment configuration "${envConf.id}"`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+        { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY },
       );
       await this.apricotProxy['SetRuntimeEntry']({
         component: COMPONENT,
         key: envConfigToSave.id,
-        value: envConfigToSave.toString()
+        value: envConfigToSave.toString(),
       });
-      res.status(200).json({message: `Successfully updated configuration: ${envConf.id}`});
+      res.status(200).json({ message: `Successfully updated configuration: ${envConf.id}` });
     } catch (error) {
       errorHandler(error, res, 503, 'apricotservice');
     }
@@ -260,7 +261,7 @@ class ApricotService {
   async _getUpdatedConfigIfExists(envConfig, user) {
     let existingConfig = '';
     try {
-      const {payload: envConfigAsString} = await this.apricotProxy['GetRuntimeEntry']({
+      const { payload: envConfigAsString } = await this.apricotProxy['GetRuntimeEntry']({
         component: COMPONENT,
         key: envConfig.id,
       });

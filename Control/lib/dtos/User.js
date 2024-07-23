@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 'use strict';
 
 /**
@@ -19,29 +19,29 @@
 class User {
   /**
    * Initializing an environment configuration
-   * @param {String} username - username of the user
-   * @param {String} fullName - full name to be displayed for the user
-   * @param {Number} personid - id of the user
-   * @param {Array<String>|String} access - list of access roles of the user
+   * @param {string} username - username of the user
+   * @param {string} fullName - full name to be displayed for the user
+   * @param {number} personid - id of the user
+   * @param {Array<string> | string} access - list of access roles of the user
    */
   constructor(username, fullName, personid, access = []) {
     /**
-     * @type {String}
+     * @type {string}
      */
     this._username = username;
 
     /**
-     * @type {String}
+     * @type {string}
      */
     this._fullName = fullName;
 
     /**
-     * @type {Number}
+     * @type {number}
      */
     this._personid = personid;
 
     /**
-     * @type {Array<String>}
+     * @type {Array<string>}
      */
     this._accessList = [];
     if (typeof access === 'string') {
@@ -54,9 +54,9 @@ class User {
   /**
    * Checks if the given user is considered admin
    * @param {User} user - user type object as defined by webui/framework
-   * @returns {Boolean}
+   * @returns {boolean}
    */
-  static isAdmin({access = ''}) {
+  static isAdmin({ access = '' }) {
     let accessList = [];
     if (typeof access === 'string') {
       accessList = access.split(',');
@@ -69,7 +69,7 @@ class User {
   /**
    * Check if provided details of a user are the same as the current instance one;
    * @param {User} user - to compare to
-   * @return {Boolean}
+   * @returns {boolean}
    */
   isSameUser(user) {
     return this._username === user.username && this._personid === this.personid;
@@ -77,7 +77,7 @@ class User {
 
   /**
    * Returns the username
-   * @returns {String}
+   * @returns {string}
    */
   get username() {
     return this._username;
@@ -85,7 +85,7 @@ class User {
 
   /**
    * Returns the full name of the user
-   * @returns {String}
+   * @returns {string}
    */
   get fullName() {
     return this._fullName;
@@ -93,7 +93,7 @@ class User {
 
   /**
    * Returns the personid of the user
-   * @returns {Number}
+   * @returns {number}
    */
   get personid() {
     return this._personid;
@@ -101,7 +101,7 @@ class User {
 
   /**
    * Returns the access granted to this user
-   * @returns {Array<String>}
+   * @returns {Array<string>}
    */
   get access() {
     return this._accessList;
@@ -109,7 +109,7 @@ class User {
 
   /**
    * Returns the JSON representation of the user that is to be sent via HTTP
-   * @return {JSON{User}}
+   * @returns {JSON{User}}
    */
   toJSON() {
     return {

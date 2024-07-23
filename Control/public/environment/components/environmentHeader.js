@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
-import {textWithCopyClipboard} from '../../common/buttons/textWithCopyClipboard.js';
-import {parseObject} from './../../common/utils.js';
+import { h } from '/js/src/index.js';
+import { ALIECS_STATE_COLOR } from './../../common/constants/stateColors.js';
+import { textWithCopyClipboard } from '../../common/buttons/textWithCopyClipboard.js';
+import { parseObject } from './../../common/utils.js';
 
 /**
  * Build a component which represents a header with the environment id, state and creation time
@@ -23,11 +23,11 @@ import {parseObject} from './../../common/utils.js';
  * @returns {vnode}
  */
 export const environmentHeader = (environment) => {
-  const {currentRunNumber, state = 'UNKNOWN', id, createdWhen, userVars} = environment;
+  const { currentRunNumber, state = 'UNKNOWN', id, createdWhen, userVars } = environment;
   let transitionTime = parseObject(createdWhen, 'createdWhen');
 
   let transitionLabel = 'Created At: ';
-  let title = ` - ${state}`;
+  const title = ` - ${state}`;
   if (state === 'RUNNING') {
     transitionTime = parseObject(userVars['run_start_time_ms'], 'run_start_time_ms');
     transitionLabel = 'Running since: ';
@@ -37,6 +37,6 @@ export const environmentHeader = (environment) => {
     textWithCopyClipboard(id, 'h3'),
     h('h3', title),
     state === 'RUNNING' && textWithCopyClipboard(currentRunNumber, 'h3'),
-    h('.ph1.flex-grow.text-right', transitionLabel + transitionTime)
+    h('.ph1.flex-grow.text-right', transitionLabel + transitionTime),
   ]);
 };

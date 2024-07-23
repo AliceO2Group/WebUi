@@ -22,7 +22,6 @@ class TaskInfoAdapter {
 
   /**
    * Converts the given proto object (o2control.proto) to an entity object.
-   *
    * @param {TaskInfoProto} task - object to convert
    * @returns {TaskInfo} entity of a task with needed information
    */
@@ -62,7 +61,7 @@ class TaskInfoAdapter {
    * @returns {string} short name of the task
    */
   static getShortName(taskName) {
-    const regex = new RegExp(`tasks/.*@`);
+    const regex = new RegExp('tasks/.*@');
     const matchedTaskName = taskName.match(regex);
     if (matchedTaskName) {
       taskName = matchedTaskName[0].replace('tasks/', '').replace('@', '');

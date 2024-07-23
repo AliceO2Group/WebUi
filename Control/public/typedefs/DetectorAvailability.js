@@ -15,8 +15,7 @@
  * @typedef DetectorAvailability
  *
  * DetectorAvailability DTO representation as used in displaying detectors information
- *
- * @property {String} name
- * @property {String} isLockedBy
+ * @property {string} name
+ * @property {string} isLockedBy
  * @property {string} isActive - if a detector is currently being used
  */

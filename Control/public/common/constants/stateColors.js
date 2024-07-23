@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 export const ALIECS_STATE_COLOR = {
   RUNNING: 'success',
@@ -22,7 +22,7 @@ export const ALIECS_STATE_COLOR = {
   STANDBY: 'gray-darker',
   DEPLOYED: 'gray-darker',
   PENDING: 'gray-darker',
-  DONE: 'primary'
+  DONE: 'primary',
 };
 
 export const ODC_STATE_COLOR = {

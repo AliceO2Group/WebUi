@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {BrowserStorage, Observable, RemoteData} from '/js/src/index.js';
+import { BrowserStorage, Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model representing Task CRUD
@@ -34,12 +34,12 @@ export default class Task extends Observable {
   /**
    * Toggle the view of a task by its id
    * @param {string} taskId
-  */
+   */
   async toggleTaskView(taskId) {
     this.openedTasks[taskId] = !this.openedTasks[taskId];
     this.notify();
     if (this.openedTasks[taskId]) {
-      this.getTaskById({taskId: taskId});
+      this.getTaskById({ taskId: taskId });
     }
   }
 
@@ -51,7 +51,7 @@ export default class Task extends Observable {
     this.list[body.taskId] = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/GetTask`, body);
+    const { result, ok } = await this.model.loader.post('/api/GetTask', body);
     if (!ok) {
       this.list[body.taskId] = RemoteData.failure(result.message);
     } else {
@@ -67,7 +67,7 @@ export default class Task extends Observable {
    * Method to add & remove fields regarding the task
    * @param {JSON} commandInfo
    * @param {string} taskId
-   * @return {JSON}
+   * @returns {JSON}
    */
   parseTaskCommandInfo(commandInfo, taskId) {
     delete commandInfo.shell;

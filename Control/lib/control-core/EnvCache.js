@@ -10,9 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
+const { WebSocketMessage, Log } = require('@aliceo2/web-ui');
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/envcache`);
 const assert = require('assert');
 
@@ -20,7 +21,6 @@ const assert = require('assert');
  * Caches AliECS core GetEnvironments response
  */
 class EnvCache {
-
   /**
    * @param {object} ctrlService - Handle to Control service
    * @param {EnvironmentService} environmentService - service to be used to retrieve information on environments
@@ -65,8 +65,8 @@ class EnvCache {
   }
 
   /**
-   * @param {Object} obj Object to compare cache with
-   * @return {bool} Whether object and cache are deep equal
+   * @param {object} obj Object to compare cache with
+   * @returns {bool} Whether object and cache are deep equal
    */
   _cacheInSync(obj) {
     try {
@@ -83,9 +83,9 @@ class EnvCache {
   async refresh() {
     try {
       const deadline = Date.now() + this.timeout;
-      const envs = await this.ctrlService.executeCommandNoResponse('GetEnvironments', {}, {deadline});
+      const envs = await this.ctrlService.executeCommandNoResponse('GetEnvironments', {}, { deadline });
 
-      for (let [index, currentEnv] of envs.environments.entries()) {
+      for (const [index, currentEnv] of envs.environments.entries()) {
         try {
           const environment = await this._environmentService.getEnvironment(currentEnv.id);
           envs.environments[index] = environment;
@@ -104,7 +104,8 @@ class EnvCache {
   /**
    * Method to update cache if there are any changes
    * @param {Object{Environments}} - environments' data that is to be stored in cache
-   * @return {void}
+   * @param envs
+   * @returns {void}
    */
   _updateCache(envs) {
     if (!this._cacheInSync(envs)) {
@@ -115,4 +116,5 @@ class EnvCache {
     this.cacheEvictionLast = new Date();
   }
 }
+
 module.exports = EnvCache;

@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model representing Workflow
@@ -20,7 +20,7 @@ import {Observable, RemoteData} from '/js/src/index.js';
 export default class FlpSelection extends Observable {
   /**
    * Initialize FLPs Selection Component
-   * @param {Object} workflow
+   * @param {object} workflow
    */
   constructor(workflow) {
     super();
@@ -54,6 +54,7 @@ export default class FlpSelection extends Observable {
     this.notify();
 
     await this.getAndSetDetectors();
+
     /*if (this.workflow.model.detectors.isSingleView()
            && this.activeDetectors.isSuccess()
       && !this.activeDetectors.payload.detectors.includes(this.workflow.model.detectors.selected)
@@ -71,7 +72,7 @@ export default class FlpSelection extends Observable {
 
     this.activeDetectors = RemoteData.loading();
     this.notify();
-    const {result, ok} = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
+    const { result, ok } = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
     this.activeDetectors = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
 
     this.notify();
@@ -83,8 +84,8 @@ export default class FlpSelection extends Observable {
    * * make the selection of the detectors based on passed values
    * * make the selection of the hosts based on passed values
    * * inform the user if some are unavailable anymore
-   * @param {Array<String>} detectors 
-   * @param {Array<String>} hosts 
+   * @param {Array<string>} detectors
+   * @param {Array<string>} hosts
    */
   async setDetectorsAndHosts(detectors, hosts) {
     this.init();
@@ -115,10 +116,10 @@ export default class FlpSelection extends Observable {
    * * active
    * * available
    * * unavailable
-   * @param {String} name
+   * @param {string} name
    */
   toggleDetectorSelection(name) {
-    const indexUnavailable = this.unavailableDetectors.indexOf(name)
+    const indexUnavailable = this.unavailableDetectors.indexOf(name);
     if (indexUnavailable >= 0) {
       this.unavailableDetectors.splice(indexUnavailable, 1);
     } else {
@@ -135,33 +136,32 @@ export default class FlpSelection extends Observable {
   }
 
   /**
-   * Method which checks if a detector is available and current user has the lock for it. 
+   * Method which checks if a detector is available and current user has the lock for it.
    * If so, it will select the detector and all its associated FLPs
-   * @param {Array<String>} detectorsToSelect - list of detectors to select
+   * @param {Array<string>} detectorsToSelect - list of detectors to select
    * @returns {Promise<void>}
    */
   selectAllAvailableDetectors(detectorsToSelect) {
     this.selectedDetectors = [];
     const activeDetectors = this.activeDetectors.isSuccess() ? this.activeDetectors.payload.detectors : [];
     detectorsToSelect.filter((detector) =>
-      !activeDetectors.includes(detector) && this.workflow.model.lock.isLockedByCurrentUser(detector)
-    )
+      !activeDetectors.includes(detector) && this.workflow.model.lock.isLockedByCurrentUser(detector))
       .forEach((detector) => {
         this.selectedDetectors.push(detector);
         this.setHostsForDetector(detector, true);
-
       });
     this.notify();
   }
 
   /**
    * Given a name of a detector, it checks if it is part of the active list
-   * @param {String} name 
+   * @param {string} name
    * @returns {boolean}
    */
   isDetectorActive(name) {
-    return this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(name)
+    return this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(name);
   }
+
   /**
    * Unselects given detector and its FLPs
    * @param {string} name
@@ -171,6 +171,7 @@ export default class FlpSelection extends Observable {
       this.toggleDetectorSelection(name);
     }
   }
+
   /**
    * Toggle the selection of an FLP from the form host
    * The user can also use SHIFT key to select between 2 FLP machines, thus
@@ -219,7 +220,7 @@ export default class FlpSelection extends Observable {
 
   /**
    * Check if all FLPs are selected
-   * @return {boolean}
+   * @returns {boolean}
    */
   areAllFLPsSelected() {
     return this.list.isSuccess() && this.workflow.form.hosts.length === this.list.payload.length;
@@ -227,7 +228,7 @@ export default class FlpSelection extends Observable {
 
   /**
    * Remove a detector and its corresponding hosts
-   * @param {String} detector
+   * @param {string} detector
    */
   removeHostsByDetector(detector) {
     if (this.hostsByDetectors[detector]) {
@@ -237,12 +238,12 @@ export default class FlpSelection extends Observable {
         if (index >= 0) {
           this.workflow.form.hosts.splice(index, 1);
         }
-      })
+      });
       delete this.hostsByDetectors[detector];
 
-      let temp = []
+      let temp = [];
       // update list of displayed hosts with remaining ones
-      Object.keys(this.hostsByDetectors).forEach((detector) => temp = temp.concat(this.hostsByDetectors[detector]))
+      Object.keys(this.hostsByDetectors).forEach((detector) => temp = temp.concat(this.hostsByDetectors[detector]));
       this.list = RemoteData.success(temp);
       this.notify();
     }
@@ -250,7 +251,7 @@ export default class FlpSelection extends Observable {
 
   /**
    * Method to return the name of the detector to which a given host name belongs to
-   * @param {String} host 
+   * @param {string} host
    */
   getDetectorForHost(host) {
     let detectorForHost = '';
@@ -266,17 +267,17 @@ export default class FlpSelection extends Observable {
   /**
    * Given a detector name, build a string containing the name and number of selected hosts
    * and available hosts for that detector
-   * @param {String} detector
-   * @returns {String}
+   * @param {string} detector
+   * @returns {string}
    */
   getDetectorWithIndexes(detector) {
-    const hostsByDetectorRemote = this.workflow.model.detectors.hostsByDetectorRemote;
+    const { hostsByDetectorRemote } = this.workflow.model.detectors;
     if (hostsByDetectorRemote.isSuccess() && hostsByDetectorRemote.payload[detector]) {
       const hosts = hostsByDetectorRemote.payload[detector];
       const selectedHosts = this.workflow.form.hosts;
       const totalSelected = selectedHosts.filter((host) => hosts.includes(host)).length;
 
-      return detector + ' (' + totalSelected + '/' + hosts.length + ')'
+      return `${detector} (${totalSelected}/${hosts.length})`;
     }
     return detector;
   }
@@ -286,10 +287,11 @@ export default class FlpSelection extends Observable {
    * update the list of hosts by adding the ones for the given detector
    * If specified via shouldSelect, it will also add the hosts to the form so that they appeared
    * as selected for the user
-   * @param {String} detector
+   * @param {string} detector
+   * @param shouldSelect
    */
   setHostsForDetector(detector, shouldSelect = false) {
-    const hostsByDetectorRemote = this.workflow.model.detectors.hostsByDetectorRemote;
+    const { hostsByDetectorRemote } = this.workflow.model.detectors;
     if (!hostsByDetectorRemote.isSuccess()) {
       this.list = RemoteData.failure(hostsByDetectorRemote.message);
     } else {

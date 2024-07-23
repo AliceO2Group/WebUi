@@ -10,8 +10,8 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+ */
+const { updateExpressResponseFromNativeError } = require('./../errors/updateExpressResponseFromNativeError.js');
 
 /**
  * Controller for dealing with all API requests on workflow templates from AliECS:
@@ -22,7 +22,6 @@ class WorkflowTemplateController {
    * @param {WorkflowTemplateService} workflowService - service to use to query AliECS with regards to workflow templates
    */
   constructor(workflowService) {
-
     /**
      * @type {WorkflowTemplateService}
      */
@@ -32,6 +31,7 @@ class WorkflowTemplateController {
   /**
    * API - GET endpoint for retrieving source of the default workflow template used by AliECS
    * @param {Request} req - HTTP Request object
+   * @param _
    * @param {Response} res - HTTP Response object with EnvironmentDetails
    * @returns {void}
    */
@@ -67,9 +67,9 @@ class WorkflowTemplateController {
    */
   async getWorkflowConfiguration(req, res) {
     try {
-      const {name} = req.query;
+      const { name } = req.query;
       if (!name) {
-        res.status(400).json({message: 'No name for the configuration provided'});
+        res.status(400).json({ message: 'No name for the configuration provided' });
         return;
       }
       const mappings = await this._workflowService.retrieveWorkflowSavedConfiguration(name);
@@ -80,4 +80,4 @@ class WorkflowTemplateController {
   }
 }
 
-module.exports = {WorkflowTemplateController};
+module.exports = { WorkflowTemplateController };

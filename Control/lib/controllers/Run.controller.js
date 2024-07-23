@@ -10,12 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-const {Log} = require('@aliceo2/web-ui');
+ */
+const { Log } = require('@aliceo2/web-ui');
+
 const LOG_FACILITY = 'run-ctrl';
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
-const {CacheKeys} = require('./../common/cacheKeys.enum.js');
-const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
+const { updateExpressResponseFromNativeError } = require('./../errors/updateExpressResponseFromNativeError.js');
+const { CacheKeys } = require('./../common/cacheKeys.enum.js');
+const { LOG_LEVEL } = require('./../common/logLevel.enum.js');
 
 /**
  * Controller for dealing with all API requests on retrieving information on runs
@@ -43,6 +44,7 @@ class RunController {
   /**
    * API - GET endpoint for retrieving calibration runs
    * @param {Request} req - HTTP Request object
+   * @param _
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
@@ -68,23 +70,24 @@ class RunController {
    * API - GET endpoint to request a re-init of the run service which will update calibration configurations
    * The handler also must check that the user making the request is allowed for such operation
    * @param {Request} _ - HTTP Request object
+   * @param req
    * @param {Response} res - HTTP Response object
    * @returns {void}
    */
   async refreshCalibrationRunsConfigurationHandler(req, res) {
     try {
-      let logMessage = `Refresh calibration configuration requested by user(${req.session.username})`;
-      this._logger.infoMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
+      const logMessage = `Refresh calibration configuration requested by user(${req.session.username})`;
+      this._logger.infoMessage(logMessage, { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY });
 
       await this._runService.retrieveStaticConfigurations();
-      res.status(200).json({ok: true});
+      res.status(200).json({ ok: true });
     } catch (error) {
       const logMessage = `Error refreshing calibration configuration by ${req.session.username} due to: ${error}`;
-      this._logger.errorMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, facility: LOG_FACILITY})
+      this._logger.errorMessage(logMessage, { level: LOG_LEVEL.OPERATIONS, facility: LOG_FACILITY });
 
       updateExpressResponseFromNativeError(res, error);
     }
   }
 }
 
-module.exports = {RunController};
+module.exports = { RunController };

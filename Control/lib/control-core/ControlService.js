@@ -10,15 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const assert = require('assert');
 const path = require('path');
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
+const { WebSocketMessage, Log } = require('@aliceo2/web-ui');
+
 const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
-const {errorHandler, errorLogger} = require('./../utils.js');
+const { errorHandler, errorLogger } = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
+const { LOG_LEVEL } = require('../common/logLevel.enum.js');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -30,6 +31,8 @@ class ControlService {
    * @param {WebSocket} webSocket
    * @param {ConsulController} consulController
    * * @param {JSON} coreConfig
+   * @param coreConfig
+   * @param O2_CONTROL_PROTO_PATH
    */
   constructor(ctrlProx, consulController, coreConfig, O2_CONTROL_PROTO_PATH) {
     assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
@@ -43,7 +46,7 @@ class ControlService {
 
   /**
    * Set websocket after server initialization
-   * @param {WebSocket} webSocket 
+   * @param {WebSocket} webSocket
    */
   setWS(webSocket) {
     this.webSocket = webSocket;
@@ -57,13 +60,13 @@ class ControlService {
   initiateHeartBeat() {
     return setInterval(async () => {
       try {
-        await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 9000});
+        await this.ctrlProx['GetEnvironments']({}, { deadline: Date.now() + 9000 });
       } catch (err) {
         const stateCode = this.ctrlProx.client.getChannel().getConnectivityState();
         log.errorMessage(`Unable to reach AliECS (state: ${stateCode}), attempting reconnection`, {
           level: 20,
           system: 'GUI',
-          facility: 'cog/controlservice'
+          facility: 'cog/controlservice',
         });
       }
     }, 10000);
@@ -78,27 +81,33 @@ class ControlService {
    * Current supported auto environments:
    * * resources-cleanup: will execute for all existing hosts
    * * o2-roc-config: will execute only for passed hosts
-   * * 
+   * *
    * @param {Request} req
    * @param {Response} res
    */
   async createAutoEnvironment(req, res) {
-    let {channelId, vars, operation} = req.body;
+    let { channelId, vars, operation } = req.body;
     const method = 'NewAutoEnvironment';
     if (!channelId) {
       res.status(502).json({
-        ended: true, success: false, id: channelId,
-        message: 'Channel ID should be provided'
+        ended: true,
+        success: false,
+        id: channelId,
+        message: 'Channel ID should be provided',
       });
     } else if (vars?.hosts?.length === 0) {
       res.status(502).json({
-        ended: true, success: false, id: channelId,
-        message: 'List of Hosts should be provided'
+        ended: true,
+        success: false,
+        id: channelId,
+        message: 'List of Hosts should be provided',
       });
     } else if (!operation) {
       res.status(502).json({
-        ended: true, success: false, id: channelId,
-        message: 'Operation should be provided'
+        ended: true,
+        success: false,
+        id: channelId,
+        message: 'Operation should be provided',
       });
     } else {
       try {
@@ -107,14 +116,14 @@ class ControlService {
           vars.hosts = await this.consulController.getFLPsList();
         }
         vars.hosts = JSON.stringify(vars.hosts);
-        const {repos: repositories} = await this.ctrlProx['ListRepos']();
-        const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
+        const { repos: repositories } = await this.ctrlProx['ListRepos']();
+        const { name: repositoryName, defaultRevision } = repositories.find((repository) => repository.default);
         if (!defaultRevision) {
           throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
         }
 
         // Setup Stream Channel
-        const streamChannel = this.ctrlProx.client['Subscribe']({id: channelId});
+        const streamChannel = this.ctrlProx.client['Subscribe']({ id: channelId });
         streamChannel.on('data', (data) => this.onData(channelId, operation, data));
         streamChannel.on('error', (err) => this.onError(channelId, operation, err));
         // onEnd gets called no matter what
@@ -127,20 +136,24 @@ class ControlService {
           workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
         };
         log.infoMessage(`Request of user: ${req.session.username} to "${operation}" for ${channelId}`, {
-          level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/controlservice'
+          level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/controlservice',
         });
         await this.ctrlProx[method](coreConf);
         res.status(200).json({
-          ended: false, success: true, id: channelId,
-          info: {message: `Request for "${operation}" was successfully sent and is now in progress`}
+          ended: false,
+          success: true,
+          id: channelId,
+          info: { message: `Request for "${operation}" was successfully sent and is now in progress` },
         });
       } catch (error) {
         // Failed to getFLPs, ListRepos or NewAutoEnvironment
         errorLogger(error);
         res.status(502).json({
-          ended: true, success: false, id: channelId,
+          ended: true,
+          success: false,
+          id: channelId,
           message: error.message || error || `Error while attempting to run ${operation} ...`,
-          info: {message: error.message || error || `Error while attempting to run ${operation} ...`}
+          info: { message: error.message || error || `Error while attempting to run ${operation} ...` },
         });
       }
     }
@@ -163,7 +176,7 @@ class ControlService {
    * @param {string} method - AliECS method name
    * @param {object} body - request body
    * @param {JSON} options - optional parameters that are to be set to the gRPC call (e.g deadline)
-   * @return {Promise}
+   * @returns {Promise}
    */
   executeCommandNoResponse(method, body = {}, options = undefined) {
     return this.ctrlProx[method](body, options);
@@ -171,7 +184,7 @@ class ControlService {
 
   /**
    * Method to execute specified command return results
-   * @return {Promise}
+   * @returns {Promise}
    */
   async getAliECSInfo() {
     const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
@@ -182,7 +195,7 @@ class ControlService {
 
   /**
    * Request information about the integrated services from AliECS Core
-   * @return {Promise}
+   * @returns {Promise}
    */
   async getIntegratedServicesInfo() {
     const method = CoreUtils.parseMethodNameString('GetIntegratedServices');
@@ -193,9 +206,10 @@ class ControlService {
   /**
    * Middleware method to check if AliECS connection is up and running
    * @param {Request} req
+   * @param _
    * @param {Response} res
    * @param {Next} next
-   * @return {boolean}
+   * @returns {boolean}
    */
   isConnectionReady(_, res, next) {
     if (!this.ctrlProx?.isConnectionReady) {
@@ -213,6 +227,7 @@ class ControlService {
    * Middleware method to log the action and id of the user
    * @param {Request} req
    * @param {Response} res
+   * @param _
    * @param {Next} next
    */
   logAction(req, _, next) {
@@ -222,7 +237,7 @@ class ControlService {
     if (method.startsWith('New') || method.startsWith('CleanupTasks')) {
       const operation = req.body.operation ? ` (${req.body.operation})` : '';
       log.infoMessage(`${username}(${personid}) => ${method} ${operation}`, {
-        level: 1, facility: 'cog/controlservice'
+        level: 1, facility: 'cog/controlservice',
       });
     } else if (method.startsWith('Control') || method.startsWith('Destroy')) {
       const type = req.body.type ? ` (${req.body.type})` : '';
@@ -231,7 +246,7 @@ class ControlService {
       delete req.body.runNumber;
 
       log.infoMessage(`${username}(${personid}) => ${method} ${type}`, {
-        level: 1, facility: 'cog/controlservice', partition, run
+        level: 1, facility: 'cog/controlservice', partition, run,
       });
     }
     next();
@@ -253,8 +268,11 @@ class ControlService {
       const msg = new WebSocketMessage();
       msg.command = command;
       msg.payload = {
-        ended: false, success: false, id: channelId, type: 'TASK',
-        info: {host: data.taskEvent.hostname, id: data.taskEvent.taskid},
+        ended: false,
+        success: false,
+        id: channelId,
+        type: 'TASK',
+        info: { host: data.taskEvent.hostname, id: data.taskEvent.taskid },
       };
       this.webSocket.broadcast(msg);
     }
@@ -265,13 +283,18 @@ class ControlService {
       if (!data.environmentEvent.error) {
         msg.payload = {
           ended: data.environmentEvent.state === 'DONE' ? true : false,
-          success: true, id: channelId, type: 'ENV',
-          info: {message: data.environmentEvent.message || 'Executing ...'}
+          success: true,
+          id: channelId,
+          type: 'ENV',
+          info: { message: data.environmentEvent.message || 'Executing ...' },
         };
       } else {
         msg.payload = {
-          ended: true, success: false, id: channelId, type: 'ENV',
-          info: {message: data.environmentEvent.error || `Failed operation: ${command} ...`}
+          ended: true,
+          success: false,
+          id: channelId,
+          type: 'ENV',
+          info: { message: data.environmentEvent.error || `Failed operation: ${command} ...` },
         };
       }
       this.webSocket.broadcast(msg);
@@ -281,13 +304,17 @@ class ControlService {
   /**
    * Deal with incoming error message from AliECS Core Stream
    * @param {string} channelId - to distinguish to which client should this message be sent
+   * @param command
+   * @param error
    */
   onError(channelId, command, error) {
     const msg = new WebSocketMessage();
     msg.command = command;
     msg.payload = {
-      ended: true, success: false, id: channelId,
-      info: {message: `"${command}" action failed due to ${error.toString()}`}
+      ended: true,
+      success: false,
+      id: channelId,
+      info: { message: `"${command}" action failed due to ${error.toString()}` },
     };
     errorLogger(error);
     this.webSocket.broadcast(msg);

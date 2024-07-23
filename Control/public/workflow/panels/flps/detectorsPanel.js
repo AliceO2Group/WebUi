@@ -10,22 +10,22 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconPulse} from '/js/src/index.js';
+import { h, iconPulse } from '/js/src/index.js';
 import pageLoading from './../../../common/pageLoading.js';
-import {detectorLockButton} from './../../../lock/lockButton.js';
-import {dcsPropertiesRow} from '../../../common/dcs/dcsPropertiesRow.js';
-import {DetectorLockAction} from '../../../common/enums/DetectorLockAction.enum.js';
+import { detectorLockButton } from './../../../lock/lockButton.js';
+import { dcsPropertiesRow } from '../../../common/dcs/dcsPropertiesRow.js';
+import { DetectorLockAction } from '../../../common/enums/DetectorLockAction.enum.js';
 
 /**
  * Create a selection area for all detectors retrieved from AliECS
- * @param {Object} model
+ * @param {object} model
  * @param {boolean} onlyGlobal - if it should display global detectors only
- * @return {vnode}
+ * @returns {vnode}
  */
 export default (model, onlyGlobal = false) => {
-  const {activeDetectors} = model.workflow.flpSelection;
+  const { activeDetectors } = model.workflow.flpSelection;
   const detectors = model.lock.padlockState;
   let allowedDetectors = [];
 
@@ -46,22 +46,25 @@ export default (model, onlyGlobal = false) => {
           if (onlyGlobal) {
             await model.lock.actionOnLock('TST', DetectorLockAction.RELEASE, false);
           }
-        }
+        },
       }, 'Lock Available'),
       h('h5.w-100.bg-gray-light.flex-grow.items-center.flex-row.justify-center', 'Detectors Selection'),
       areDetectorsReady && h('button.btn.btn-primary.btn-sm', {
         onclick: async () => {
           model.workflow.flpSelection.selectAllAvailableDetectors(allowedDetectors);
-        }
-      }, 'Select Available')
+        },
+      }, 'Select Available'),
     ]),
-    h('.w-100.p2.panel',
+    h(
+      '.w-100.p2.panel',
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
-      (!areDetectorsReady) && h('.f7.flex-column',
-        `Loading detectors...active: ${activeDetectors.kind} and all: ${detectors.kind}`),
-      (areDetectorsReady) && detectorsSelectionArea(model, allowedDetectors),
+      !areDetectorsReady && h(
+        '.f7.flex-column',
+        `Loading detectors...active: ${activeDetectors.kind} and all: ${detectors.kind}`,
+      ),
+      areDetectorsReady && detectorsSelectionArea(model, allowedDetectors),
       (activeDetectors.isFailure() || detectors.isFailure()) && h('.f7.flex-column', 'Unavailable to load detectors'),
-    )
+    ),
   ]);
 };
 
@@ -69,33 +72,31 @@ export default (model, onlyGlobal = false) => {
  * Display an area with selectable elements representing detectors
  * @param {Model} model - root model of the application
  * @param {Array<string>} detectors - list of detectors to allow selection of
- * @return {vnode}
+ * @returns {vnode}
  */
-const detectorsSelectionArea = (model, detectors) => {
-  return h('.w-100.m1.text-left.shadow-level1.grid.g2', {
-    style: 'max-height: 40em;'
-  }, [
-    detectors
-      .filter((name) => (name === model.detectors.selected || !model.detectors.isSingleView()))
-      .map((name) => detectorSelectionPanel(model, name))
-  ]);
-};
+const detectorsSelectionArea = (model, detectors) => h('.w-100.m1.text-left.shadow-level1.grid.g2', {
+  style: 'max-height: 40em;',
+}, [
+  detectors
+    .filter((name) => name === model.detectors.selected || !model.detectors.isSingleView())
+    .map((name) => detectorSelectionPanel(model, name)),
+]);
 
 /**
  * Display a panel with information and current state of a detector
  * @param {Model} model - root model of the application
- * @param {String} name - name of the detector to display
- * @return {vnode}
+ * @param {string} name - name of the detector to display
+ * @returns {vnode}
  */
 const detectorSelectionPanel = (model, name) => {
   let className = '';
   let title = '';
-  let style = 'font-weight: 150;flex-grow:2';
-  const {lock, services: {detectors: {availability = {}} = {}}} = model;
+  const style = 'font-weight: 150;flex-grow:2';
+  const { lock, services: { detectors: { availability = {} } = {} } } = model;
   const lockState = lock.padlockState.payload?.[name];
   const isDetectorActive = model.workflow.flpSelection.isDetectorActive(name);
   if (isDetectorActive
-    || (model.lock.isLocked(name) && !model.lock.isLockedByCurrentUser(name))) {
+    || model.lock.isLocked(name) && !model.lock.isLockedByCurrentUser(name)) {
     className = 'disabled-item warning';
     title = 'Detector is running and/or locked';
   } else if (model.lock.isLockedByCurrentUser(name)) {
@@ -122,13 +123,12 @@ const detectorSelectionPanel = (model, name) => {
           if (model.lock.isLockedByCurrentUser(name)) {
             model.workflow.flpSelection.toggleDetectorSelection(name);
           }
-        }
-      }, model.workflow.flpSelection.getDetectorWithIndexes(name)
-      )
+        },
+      }, model.workflow.flpSelection.getDetectorWithIndexes(name)),
     ]),
     h('.f6.flex-row.g2', [
       isDetectorActive && h('.flex-row.g1', [h('.primary', iconPulse()), 'Active']),
       dcsPropertiesRow(availability[name]),
-    ])
+    ]),
   ]);
 };

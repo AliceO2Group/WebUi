@@ -10,25 +10,22 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {DetectorLockState} from './../enums/DetectorLockState.enum.js';
+import { h } from '/js/src/index.js';
+import { DetectorLockState } from './../enums/DetectorLockState.enum.js';
 
 /**
  * Button with action to force take/release lock for a detector
- * @param {Lock} lockModel - model of the lock service 
- * @param {String} detector - detector name
+ * @param {Lock} lockModel - model of the lock service
+ * @param {string} detector - detector name
  * @param {DetectorLockState} lockState - lock state of the detector
  * @param {DetectorLockAction} action - action to be performed
- * @param {String} label - button label to be displayed to the user
- * @return {vnode}
+ * @param shouldForce
+ * @param {string} label - button label to be displayed to the user
+ * @returns {vnode}
  */
-export const detectorLockActionButton = (
-  lockModel, detector, lockState, action, shouldForce = false, label = `${action}`
-) => {
-  return h('button.btn.btn-sm.btn-danger', {
-    disabled: lockState?.state === DetectorLockState.FREE,
-    onclick: () => lockModel.actionOnLock(detector, action, shouldForce)
-  }, label);
-};
+export const detectorLockActionButton = (lockModel, detector, lockState, action, shouldForce = false, label = `${action}`) => h('button.btn.btn-sm.btn-danger', {
+  disabled: lockState?.state === DetectorLockState.FREE,
+  onclick: () => lockModel.actionOnLock(detector, action, shouldForce),
+}, label);

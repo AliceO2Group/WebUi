@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -18,7 +18,7 @@ const path = require('path');
 /**
  * Removes (if exists) and creates a new config file which is to be sent to the client side for fixed configurations
  * The configuration file is based on `config.js` file
- * @param {JSON} config 
+ * @param {JSON} config
  */
 function buildPublicConfig(config) {
   const publicConfigPath = path.join(__dirname, './../../public/config.js');
@@ -35,7 +35,7 @@ function buildPublicConfig(config) {
     CONSUL: getConsulConfig(config),
     REFRESH_TASK: config?.utils?.refreshTask || 10000,
   };
-  let codeStr = `/* eslint-disable quote-props */\n`
+  const codeStr = '/* eslint-disable quote-props */\n'
     + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as COG};\n`;
   fs.writeFileSync(publicConfigPath, codeStr);
 }
@@ -69,7 +69,7 @@ function getConsulConfig(config) {
 /**
  * Create a JSON containing static grafana information
  * @param {JSON} config - server configuration
- * @return {JSON}
+ * @returns {JSON}
  */
 function _getGrafanaConfig(config) {
   if (config?.grafana?.url) {
@@ -82,10 +82,10 @@ function _getGrafanaConfig(config) {
         flpStats: `${hostPort}/${ecsDashboard}?panelId=16${theme}`,
         epnStats: `${hostPort}/${ecsDashboard}?panelId=22${theme}`,
         readoutPlot: `${hostPort}/${ecsDashboard}?panelId=20${theme}`,
-      }
+      },
     };
   } else {
-    return {status: false};
+    return { status: false };
   }
 }
 
@@ -97,7 +97,7 @@ function _getGrafanaConfig(config) {
  */
 function _getInfoLoggerURL(config) {
   const ilg = config?.infoLoggerGui;
-  return (ilg?.url) ? `${ilg.url}` : '';
+  return ilg?.url ? `${ilg.url}` : '';
 }
 
 /**
@@ -106,7 +106,7 @@ function _getInfoLoggerURL(config) {
  */
 function _getInfoLoggerEpnUrl(config) {
   const ilg = config?.infoLoggerEpnGui;
-  return (ilg?.url) ? `${ilg.url}` : '';
+  return ilg?.url ? `${ilg.url}` : '';
 }
 
 /**
@@ -117,7 +117,7 @@ function _getInfoLoggerEpnUrl(config) {
  */
 function _getQcgURL(config) {
   const qcg = config?.qcGui;
-  return (qcg?.url) ? `${qcg.url}` : '';
+  return qcg?.url ? `${qcg.url}` : '';
 }
 
 /**
@@ -127,10 +127,10 @@ function _getQcgURL(config) {
  * @returns {string}
  */
 function _getBookkeepingURL(config = {}) {
-  const {bookkeeping = {}} = config;
-  return bookkeeping.url ? new URL(bookkeeping.url) : null
+  const { bookkeeping = {} } = config;
+  return bookkeeping.url ? new URL(bookkeeping.url) : null;
 }
 
 module.exports = {
-  buildPublicConfig, _getGrafanaConfig, _getInfoLoggerURL, _getQcgURL, _getBookkeepingURL, getConsulConfig
+  buildPublicConfig, _getGrafanaConfig, _getInfoLoggerURL, _getQcgURL, _getBookkeepingURL, getConsulConfig,
 };

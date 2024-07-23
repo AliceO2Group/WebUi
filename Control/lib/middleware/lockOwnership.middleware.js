@@ -11,28 +11,28 @@
  *  or submit itself to any jurisdiction.
  */
 
-const {User} = require('../dtos/User');
-const {grpcErrorToNativeError} = require('../errors/grpcErrorToNativeError');
-const {updateExpressResponseFromNativeError} = require('../errors/updateExpressResponseFromNativeError');
+const { User } = require('../dtos/User');
+const { grpcErrorToNativeError } = require('../errors/grpcErrorToNativeError');
+const { updateExpressResponseFromNativeError } = require('../errors/updateExpressResponseFromNativeError');
 
 /**
  * Middleware function to check that the user has ownership of the locks for the given detectors
- *
  * @param {LockService} lockService - service to be used to check ownership of locks
  * @param {EnvironmentService} environmentService - service to be used to retrieve environment information
- * @return {function(req, res, next): void} - middleware function
+ * @returns {function(req, res, next): void} - middleware function
  */
-const lockOwnershipMiddleware = (lockService, environmentService) => {
+const lockOwnershipMiddleware = (lockService, environmentService) =>
+
   /**
    * Middleware function to check that the user has ownership of the locks for the given detectors
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
    * @param {Next} next - HTTP Next object to use if checks pass
-   * @return {void} continue if checks pass, 403 if checks fail
+   * @returns {void} continue if checks pass, 403 if checks fail
    */
-  return async (req, res, next) => {
-    const {name, username, personid, access} = req.session;
-    const {id = ''} = req.body ?? {};
+  async (req, res, next) => {
+    const { name, username, personid, access } = req.session;
+    const { id = '' } = req.body ?? {};
 
     let detectors = [];
     try {
@@ -45,7 +45,7 @@ const lockOwnershipMiddleware = (lockService, environmentService) => {
     }
     try {
       if (!lockService.hasLocks(new User(username, name, personid, access), detectors)) {
-        res.status(403).json({message: `Action not allowed for user ${name} due to missing ownership of lock(s)`});
+        res.status(403).json({ message: `Action not allowed for user ${name} due to missing ownership of lock(s)` });
       } else {
         next();
       }
@@ -54,6 +54,5 @@ const lockOwnershipMiddleware = (lockService, environmentService) => {
       updateExpressResponseFromNativeError(res, error);
     }
   };
-};
 
-exports.lockOwnershipMiddleware = lockOwnershipMiddleware
+exports.lockOwnershipMiddleware = lockOwnershipMiddleware;

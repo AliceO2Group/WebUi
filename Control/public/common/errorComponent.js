@@ -10,15 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {iconCircleX} from '/js/src/icons.js';
+import { h } from '/js/src/index.js';
+import { iconCircleX } from '/js/src/icons.js';
 
 /**
  * Display an iconCircleX and a red error message
  * @param {string} message
- * @return {vnode}
+ * @returns {vnode}
  */
 export default (message) =>
   h('.danger', iconCircleX(), ' ', message);

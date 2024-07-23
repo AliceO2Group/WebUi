@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {DetectorLockState} = require('../common/lock/detectorLockState.enum.js');
+const { DetectorLockState } = require('../common/lock/detectorLockState.enum.js');
 
 /**
  * DetectorLock representation as used for ECS GUI purposes
@@ -20,13 +20,12 @@ const {DetectorLockState} = require('../common/lock/detectorLockState.enum.js');
 class DetectorLock {
   /**
    * Initializing a lock with a free state
-   * @param {String} name - name of the detector
+   * @param {string} name - name of the detector
    */
   constructor(name) {
-
     /**
      * Name of the detector the lock represents
-     * @type {String}
+     * @type {string}
      */
     this._name = name;
 
@@ -44,16 +43,17 @@ class DetectorLock {
   /**
    * Method to assign a user to a lock
    * @param {User} - user that is to own the lock
-   * @return {void}
+   * @param user
+   * @returns {void}
    */
   assignOwner(user) {
-    this._state = DetectorLockState.TAKEN
+    this._state = DetectorLockState.TAKEN;
     this._owner = user;
   }
 
   /**
    * Method to allow the removal of a user of a lock
-   * @return {void}
+   * @returns {void}
    */
   release() {
     this._state = DetectorLockState.FREE;
@@ -63,7 +63,7 @@ class DetectorLock {
   /**
    * Given a user, check if the lock is currently assigned by the respective user
    * @param {User} user - to check ownership of
-   * @return {Boolean}
+   * @returns {boolean}
    */
   isOwnedBy(user) {
     return this._owner && this._owner.isSameUser(user);
@@ -71,7 +71,7 @@ class DetectorLock {
 
   /**
    * Method to return if the lock is currently taken
-   * @return {Boolean} - if state of detector lock is taken
+   * @returns {boolean} - if state of detector lock is taken
    */
   isTaken() {
     return this._state === DetectorLockState.TAKEN;
@@ -79,7 +79,7 @@ class DetectorLock {
 
   /**
    * Method to return if the lock is currently free
-   * @return {Boolean} - if state of detector lock is free
+   * @returns {boolean} - if state of detector lock is free
    */
   isFree() {
     return this._state === DetectorLockState.FREE;
@@ -87,7 +87,7 @@ class DetectorLock {
 
   /**
    * Return a user object currently owning the lock
-   * @return {User}
+   * @returns {User}
    */
   get owner() {
     return this._owner;
@@ -95,14 +95,14 @@ class DetectorLock {
 
   /**
    * Return a JSON representation of the lock that is to be passed via HTTP
-   * @return {JSON{DetectorLock}}
+   * @returns {JSON{DetectorLock}}
    */
   toJSON() {
     return {
       name: this._name,
       state: this._state,
       owner: this._owner?.toJSON(),
-    }
+    };
   }
 }
 

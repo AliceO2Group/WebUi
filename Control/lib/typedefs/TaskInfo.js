@@ -16,15 +16,14 @@
  *
  * TaskInfo type definition as parsed and sent to the client by the GUI server
  * The parsing is done based on the object received from ECS in `o2control.proto` definition
- *
- * @property {String} taskId 
- * @property {String} name
+ * @property {string} taskId
+ * @property {string} name
  * @property {boolean} locked
- * @property {String} status
- * @property {String} state
- * @property {String} className
- * @property {String} pid
- * @property {String} sandboxStdout
- * @property {boolean} claimable 
+ * @property {string} status
+ * @property {string} state
+ * @property {string} className
+ * @property {string} pid
+ * @property {string} sandboxStdout
+ * @property {boolean} claimable
  * @property {boolean} critical
  */

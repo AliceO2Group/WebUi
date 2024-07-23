@@ -10,20 +10,21 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {coloredBadge} from '../../../common/coloredBadge.js';
-import {RUN_CALIBRATION_STATUS_COLOR_MAP} from '../../../common/enums/runCalibrationStatus.enum.js';
+import { h } from '/js/src/index.js';
+import { coloredBadge } from '../../../common/coloredBadge.js';
+import { RUN_CALIBRATION_STATUS_COLOR_MAP } from '../../../common/enums/runCalibrationStatus.enum.js';
 
 /* global COG */
 
 /**
  * Component for building the title component of a calibrationRunCard
- * @return {vnode}
+ * @param run
+ * @returns {vnode}
  */
 export const calibrationRunCardHeader = (run) => {
-  const {runNumber, environmentId, calibrationStatus} = run;
+  const { runNumber, environmentId, calibrationStatus } = run;
 
   return h('.flex-row.justify-between.f5', [
     h('.flex-row.w-60', [

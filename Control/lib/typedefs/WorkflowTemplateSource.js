@@ -15,8 +15,7 @@
  * @typedef WorkflowTemplateSource
  *
  * WorkflowTemplate type definition as parsed and sent to the client by the GUI server
- *
- * @property {String} template
- * @property {String} repository
- * @property {String} revision
+ * @property {string} template
+ * @property {string} repository
+ * @property {string} revision
  */

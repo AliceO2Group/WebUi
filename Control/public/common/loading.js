@@ -10,28 +10,33 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Generic page loading placeholder
  * @param {number} size
- * @return {vnode}
+ * @returns {vnode}
  */
-export default (size) => h('span',
+export default (size) => h(
+  'span',
   {
-    style: size ? `font-size: ${size}em` : 'font-size: 10em'
+    style: size ? `font-size: ${size}em` : 'font-size: 10em',
   },
-  h('.atom-spinner',
-    h('.spinner-inner',
+  h(
+    '.atom-spinner',
+    h(
+      '.spinner-inner',
       [
         h('.spinner-line'),
         h('.spinner-line'),
         h('.spinner-line'),
-        h('.spinner-circle',
-          h('div', '●')
-        )
-      ]
-    )
-  ));
+        h(
+          '.spinner-circle',
+          h('div', '●'),
+        ),
+      ],
+    ),
+  ),
+);

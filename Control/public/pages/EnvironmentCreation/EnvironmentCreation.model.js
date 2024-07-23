@@ -11,9 +11,9 @@
  *  or submit itself to any jurisdiction.
  */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 import WorkflowForm from '../../workflow/WorkflowForm.js';
-import {DetectorState} from '../../common/enums/DetectorState.enum.js';
+import { DetectorState } from '../../common/enums/DetectorState.enum.js';
 
 /**
  * Model to store the state of the simplified environment creation page
@@ -63,11 +63,11 @@ export class EnvironmentCreationModel extends Observable {
     this._workflowMappings = RemoteData.loading();
     this.notify();
 
-    const {result: mappingResult, ok: isMappingOk} = await this._model.loader.get('/api/workflow/template/mappings');
+    const { result: mappingResult, ok: isMappingOk } = await this._model.loader.get('/api/workflow/template/mappings');
     this._workflowMappings = isMappingOk
       ? RemoteData.success(mappingResult) : RemoteData.failure(mappingResult.message);
 
-    const {result: workflowResult, ok} = await this._model.loader.get('/api/workflow/template/default/source');
+    const { result: workflowResult, ok } = await this._model.loader.get('/api/workflow/template/default/source');
     if (ok) {
       this._defaultWorkflow = RemoteData.success(workflowResult);
       this._creationModel.setTemplateInfo(workflowResult);
@@ -85,26 +85,26 @@ export class EnvironmentCreationModel extends Observable {
    */
   async deployEnvironment() {
     this._creationModel.variables.hosts = JSON.stringify(this._model.workflow.form.hosts);
-    const path = this.parseRepository(this._creationModel.repository)
-      + `/workflows/${this._creationModel.template}@${this._creationModel.revision}`;
+    const path = `${this.parseRepository(this._creationModel.repository)
+    }/workflows/${this._creationModel.template}@${this._creationModel.revision}`;
 
     this._model.environment.newEnvironment({
       workflowTemplate: path,
       selectedConfiguration: this._selectedConfigurationLabel,
       vars: this._creationModel.variables,
-      detectors: this._model.workflow.flpSelection.selectedDetectors
+      detectors: this._model.workflow.flpSelection.selectedDetectors,
     });
   }
 
   /**
    * Ensure there is no slash at the end of the workflow URL
-   * @param {String} url
-   * @return {String}
+   * @param {string} url
+   * @returns {string}
    */
   parseRepository(url) {
     const copy = url.slice();
     if (copy[copy.length - 1] === '/') {
-      return copy.slice(0, -1)
+      return copy.slice(0, -1);
     } else {
       return copy;
     }
@@ -113,12 +113,13 @@ export class EnvironmentCreationModel extends Observable {
   /**
    * Attempts to retrieve configuration for selected workflow template.
    * If unable to load it, the Workflow form variables are reset
+   * @param configuration
    */
   async setCreationModelConfiguration(configuration) {
     this._workflowLoaded = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this._model.loader.get('/api/workflow/configuration', {name: configuration});
+    const { result, ok } = await this._model.loader.get('/api/workflow/configuration', { name: configuration });
     if (ok) {
       this._workflowLoaded = RemoteData.success(result);
       this._selectedConfigurationLabel = configuration;
@@ -133,7 +134,8 @@ export class EnvironmentCreationModel extends Observable {
 
   /**
    * Set the number of EPNs that are to be used
-   * @param {Number} nEpns
+   * @param {number} nEpns
+   * @param numberOfEpns
    */
   setOdcNumberOfEpns(numberOfEpns) {
     if (!isNaN(numberOfEpns)) {
@@ -143,15 +145,15 @@ export class EnvironmentCreationModel extends Observable {
 
   /**
    * Returns the creation model that is to be passed to AliECS for deployment
-   *
-   * @return {WorkflowForm} the creation model
+   * @returns {WorkflowForm} the creation model
    */
   get creationModel() {
     return this._creationModel;
   }
+
   /**
    * Getter for returning an instance of the current workflow remote data object
-   * @return {RemoteData}
+   * @returns {RemoteData}
    */
   get defaultWorkflow() {
     return this._defaultWorkflow;
@@ -159,7 +161,7 @@ export class EnvironmentCreationModel extends Observable {
 
   /**
    * Getter for returning a list of environment creation mappings if they exist
-   * @return {<Array<{label:String, configuration:String}>}
+   * @returns {<Array<{label:String, configuration:String}>}
    */
   get workflowMappings() {
     return this._workflowMappings;
@@ -167,7 +169,7 @@ export class EnvironmentCreationModel extends Observable {
 
   /**
    * Return the loaded configuration RemoteData object
-   * @return {RemoteData}
+   * @returns {RemoteData}
    */
   get workflowLoaded() {
     return this._workflowLoaded;
@@ -175,7 +177,7 @@ export class EnvironmentCreationModel extends Observable {
 
   /**
    * Return the label of the configuration selected by the user
-   * @return {String} - selected configuration label
+   * @returns {string} - selected configuration label
    */
   get selectedConfigurationLabel() {
     return this._selectedConfigurationLabel;
@@ -183,7 +185,7 @@ export class EnvironmentCreationModel extends Observable {
 
   /**
    * Check if the environment configuration is ready to be deployed
-   * @return {boolean}
+   * @returns {boolean}
    */
   get isReady() {
     const isWorkflowLoaded = this._defaultWorkflow.isSuccess();
@@ -195,20 +197,17 @@ export class EnvironmentCreationModel extends Observable {
   }
 
   /**
-   * Check if all selected detectors are PFR ready. 
-   * @return {Boolean}
+   * Check if all selected detectors are PFR ready.
+   * @returns {boolean}
    */
   isPfrAvailable() {
-    let isPfrAvailable = true;
+    const isPfrAvailable = true;
     const detectorsAvailability = this._model.services.detectors.availability;
     if (this._creationModel.variables?.dcs_enabled === 'true') {
       const detectorsSelected = this._model.workflow.flpSelection.selectedDetectors;
-      return detectorsSelected.every(
-        (detectorName) => (
-          detectorsAvailability[detectorName].pfrAvailability === DetectorState.PFR_AVAILABLE
-          || detectorsAvailability[detectorName].pfrAvailability === DetectorState.UNDEFINED
-        )
-      );
+      return detectorsSelected.every((detectorName) =>
+        detectorsAvailability[detectorName].pfrAvailability === DetectorState.PFR_AVAILABLE
+          || detectorsAvailability[detectorName].pfrAvailability === DetectorState.UNDEFINED);
     }
     return isPfrAvailable;
   }

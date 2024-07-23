@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * @class
@@ -18,7 +18,7 @@
  */
 class DetectorService {
   /**
-   * @constructor
+   * @class
    * Constructor for initializing the service with gRPC core service
    * @param {CoreProxy} coreGrpc - interface to interact with gRPC AliECS core service
    */
@@ -31,15 +31,15 @@ class DetectorService {
 
   /**
    * Method to retrieve which detectors are currently active and compare to received input
-   * @param {Array<String>} detectors - list of strings with detector name
-   * @return {boolean}
+   * @param {Array<string>} detectors - list of strings with detector name
+   * @returns {boolean}
    * @throws {gRPCError}
    */
   async areDetectorsAvailable(detectors) {
-    const {detectors: activeDetectors} = await this._coreGrpc['GetActiveDetectors']();
+    const { detectors: activeDetectors } = await this._coreGrpc['GetActiveDetectors']();
     const areDetectorsNonActive = detectors.every((detector) => !activeDetectors.includes(detector));
     return areDetectorsNonActive;
   }
 }
 
-module.exports = {DetectorService};
+module.exports = { DetectorService };

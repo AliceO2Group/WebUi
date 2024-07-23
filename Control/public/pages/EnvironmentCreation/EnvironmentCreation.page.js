@@ -11,12 +11,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import {h} from '/js/src/index.js';
-import {detectorHeader} from './../../common/detectorHeader.js';
-import {workflowTemplateComponent} from './components/workflowTemplate.component.js';
-import {panel} from '../../common/panel/panel.js';
-import {workflowMappingsComponent} from './components/workflowMappings.component.js';
-import {deployEnvironmentButton} from '../../common/deployEnvironmentButton.component.js';
+import { h } from '/js/src/index.js';
+import { detectorHeader } from './../../common/detectorHeader.js';
+import { workflowTemplateComponent } from './components/workflowTemplate.component.js';
+import { panel } from '../../common/panel/panel.js';
+import { workflowMappingsComponent } from './components/workflowMappings.component.js';
+import { deployEnvironmentButton } from '../../common/deployEnvironmentButton.component.js';
 import detectorsPanel from '../../workflow/panels/flps/detectorsPanel.js';
 import flpSelectionPanel from '../../workflow/panels/flps/flpSelectionPanel.js';
 
@@ -29,16 +29,15 @@ export const EnvironmentCreationHeader = (model) => h('h4.w-100 text-center', 'N
 
 /**
  * Simplified environment creation page
- *
  * @param {Model} model - the global model
- * @return {vnode} - main component for the creation page of an environment
+ * @returns {vnode} - main component for the creation page of an environment
  */
 export const EnvironmentCreationPage = (model) => {
-  const {envCreationModel} = model;
+  const { envCreationModel } = model;
   const {
-    workflowLoaded, selectedConfigurationLabel, workflowMappings, setCreationModelConfiguration
+    workflowLoaded, selectedConfigurationLabel, workflowMappings, setCreationModelConfiguration,
   } = envCreationModel;
-  const {deployEnvironment, defaultWorkflow, isReady, setOdcNumberOfEpns} = envCreationModel;
+  const { deployEnvironment, defaultWorkflow, isReady, setOdcNumberOfEpns } = envCreationModel;
   return h('.absolute-fill.scroll-y', [
     detectorHeader(model),
     h('.g2.flex-column.p2', [
@@ -46,12 +45,7 @@ export const EnvironmentCreationPage = (model) => {
         h('.w-50.flex-column', [
           panel(
             'Choose configuration',
-            h('.flex-column', [
-              workflowMappingsComponent(
-                workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel),
-                workflowLoaded, setOdcNumberOfEpns.bind(envCreationModel)
-              ),
-            ])
+            h('.flex-column', [workflowMappingsComponent(workflowMappings, selectedConfigurationLabel, setCreationModelConfiguration.bind(envCreationModel), workflowLoaded, setOdcNumberOfEpns.bind(envCreationModel))]),
           ),
           h('.w-100.text-center', detectorsPanel(model, true)),
           panel(
@@ -59,15 +53,13 @@ export const EnvironmentCreationPage = (model) => {
             workflowTemplateComponent(defaultWorkflow),
           ),
         ]),
-        h('.flex-row.text-center.w-50', [
-          flpSelectionPanel(model.workflow, 43.3)
-        ]),
+        h('.flex-row.text-center.w-50', [flpSelectionPanel(model.workflow, 43.3)]),
       ]),
       !envCreationModel.isPfrAvailable() && h('.w-100.text-center.danger.flex-column', [
         h('', 'Due DCS being enabled and PFR not being available for one or more of the selected detectors -'),
-        h('', 'deployment cannot start')
+        h('', 'deployment cannot start'),
       ]),
-      deployEnvironmentButton(false, isReady, deployEnvironment.bind(envCreationModel))
-    ])
+      deployEnvironmentButton(false, isReady, deployEnvironment.bind(envCreationModel)),
+    ]),
   ]);
 };

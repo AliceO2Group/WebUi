@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model representing Configuration CRUD
@@ -31,7 +31,7 @@ export default class Configuration extends Observable {
       command: 'CONFIG',
       runButtonDisabled: false,
       expertMode: false,
-      expertOptions: this.getDefaultExpertOptions()
+      expertOptions: this.getDefaultExpertOptions(),
     };
     this.rocStatus = RemoteData.notAsked();
     this.readoutCardList = RemoteData.notAsked();
@@ -79,7 +79,7 @@ export default class Configuration extends Observable {
   /**
    * Check if all ReadoutCards under a host are selected
    * @param {string} hostName
-   * @return {boolean}
+   * @returns {boolean}
    */
   areAllReadoutCardsForHostSelected(hostName) {
     const hosts = this.readoutCardList.payload[hostName].objects;
@@ -107,7 +107,7 @@ export default class Configuration extends Observable {
 
   /**
    * Method to check if all host rows are opened
-   * @return {param}
+   * @returns {param}
    */
   areAllHostRowsOpened() {
     return Object.keys(this.readoutCardList.payload).every((hostName) => this.readoutCardList.payload[hostName].open);
@@ -115,7 +115,7 @@ export default class Configuration extends Observable {
 
   /**
    * Method to check if all readout cards are selected
-   * @return {boolean}
+   * @returns {boolean}
    */
   areAllReadoutCardsSelected() {
     return Object.keys(this.readoutCardList.payload)
@@ -138,7 +138,7 @@ export default class Configuration extends Observable {
   /**
    * Method to reset all CRUs to an unselected state and their hosts to an opened state
    * @param {Map<string, Map<string, string>>} readoutCardsByHost
-   * @return {Map<string, Map<string, string>>}
+   * @returns {Map<string, Map<string, string>>}
    */
   deselectAllReadoutCards(readoutCardsByHost) {
     Object.keys(readoutCardsByHost)
@@ -159,17 +159,17 @@ export default class Configuration extends Observable {
 
   /**
    * Method to set the value of a field within the expert panel
-   * @param {String} field
-   * @param {String} value
+   * @param {string} field
+   * @param {string} value
    */
   setExpertOptionByField(field, value) {
     if (this.isFieldOfTypeBoolean(field)) {
-      this.actionPanel.expertOptions[field] = (value === '-') ? null : (value === 'TRUE' ? true : false);
+      this.actionPanel.expertOptions[field] = value === '-' ? null : value === 'TRUE' ? true : false;
     } else if (['onu-address', 'trigger-window-size', 'cru-id'].includes(field)) {
       // type number
       const valueNumber = parseInt(value);
       if (!isNaN(valueNumber)) {
-        if (valueNumber >= 0 && valueNumber <= (Math.pow(2, 31) - 1)) {
+        if (valueNumber >= 0 && valueNumber <= Math.pow(2, 31) - 1) {
           this.actionPanel.expertOptions[field] = valueNumber;
         } else {
           this.actionPanel.expertOptions[field] = null;
@@ -194,7 +194,7 @@ export default class Configuration extends Observable {
 
   /**
    * Method to check if all links are selected
-   * @return {boolean}
+   * @returns {boolean}
    */
   areAllLinksSelected() {
     return this.actionPanel.expertOptions.links.every((linkEnabled) => linkEnabled);
@@ -207,6 +207,7 @@ export default class Configuration extends Observable {
     this.actionPanel.expertOptions.links.fill(!this.areAllLinksSelected());
     this.notify();
   }
+
   /**
    * Method to build the request for AliECS - core and send it
    * * Build ROC Options
@@ -223,13 +224,14 @@ export default class Configuration extends Observable {
       this.model.notification.show('Please select at least one `Readout Card` from the table below', 'danger', 3000);
     }
   }
+
   /*
    * Helpers
    */
 
   /**
    * Method to retrieve only selected links
-   * @return {Array<number>}
+   * @returns {Array<number>}
    */
   getSelectedLinks() {
     return Object.keys(this.actionPanel.expertOptions.links)
@@ -239,7 +241,7 @@ export default class Configuration extends Observable {
   /**
    * Method to return a string containing the selected options and their values
    * Format: --<option> <value>
-   * @return {string}
+   * @returns {string}
    */
   getModifiedOptionsAsString() {
     return Object.keys(this.actionPanel.expertOptions)
@@ -254,7 +256,7 @@ export default class Configuration extends Observable {
 
   /**
    * Method to build a JSON with ROC Options only with changed options
-   * @return {JSONƒ}
+   * @returns {JSONƒ}
    */
   getSelectedRocOptions() {
     const rocOptions = {};
@@ -294,7 +296,7 @@ export default class Configuration extends Observable {
 
   /**
    * Method to initialize with defaults all expert options
-   * @return {JSON}
+   * @returns {JSON}
    */
   getDefaultExpertOptions() {
     return {
@@ -311,14 +313,14 @@ export default class Configuration extends Observable {
       'dyn-offset': null, // bool
       'force-config': null, // bool
       'onu-address': null, // [0, 2^32 - 1]
-      'trigger-window-size': null // [0, 2^32 - 1]
+      'trigger-window-size': null, // [0, 2^32 - 1]
     };
   }
 
   /**
    * Confirm field is valid and exist in the list of roc-config options
-   * @param {String} field
-   * @return {boolean}
+   * @param {string} field
+   * @returns {boolean}
    */
   filedIsValid(field) {
     return Object.keys(this.getDefaultExpertOptions()).includes(field);
@@ -327,7 +329,7 @@ export default class Configuration extends Observable {
   /**
    * Method to check if values are in expected format and ca be assigned to a boolean type
    * @param {string} field
-   * @return {boolean}
+   * @returns {boolean}
    */
   isFieldOfTypeBoolean(field) {
     return ['allow-rejection', 'loopback', 'pon-upstream', 'dyn-offset', 'force-config'].includes(field);
@@ -336,7 +338,7 @@ export default class Configuration extends Observable {
   /**
    * Method to check if provided field is part of the ones accepting a string value
    * @param {string} field
-   * @return {boolean}
+   * @returns {boolean}
    */
   isFieldOfTypeString(field) {
     return ['cru-id', 'clock', 'datapathmode', 'downstreamdata', 'gbtmode', 'gbtmux'].includes(field);
@@ -353,7 +355,7 @@ export default class Configuration extends Observable {
     this.readoutCardList = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/consul/crus`);
+    const { result, ok } = await this.model.loader.get('/api/consul/crus');
     if (!ok) {
       this.readoutCardList = RemoteData.failure(result.message);
       this.notify();
@@ -367,7 +369,7 @@ export default class Configuration extends Observable {
    * Method to execute a ROC command through AliECS - Core
    * @param {JSON} rocOptions
    * @param {string} command
-   * @param {Array<String>} readoutCards
+   * @param {Array<string>} readoutCards
    */
   async executeCommand(rocOptions, command, readoutCards) {
     this.rocStatus = RemoteData.loading();
@@ -377,10 +379,10 @@ export default class Configuration extends Observable {
     const body = {
       options: rocOptions,
       command: command,
-      readoutCards: readoutCards
+      readoutCards: readoutCards,
     };
 
-    const {result, ok} = await this.model.loader.post(`/api/executeRocCommand`, body);
+    const { result, ok } = await this.model.loader.post('/api/executeRocCommand', body);
     this.actionPanel.runButtonDisabled = false;
 
     if (!ok) {

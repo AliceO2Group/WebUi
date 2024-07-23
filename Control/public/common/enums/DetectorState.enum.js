@@ -14,7 +14,7 @@
 /**
  * States of a detector as considered by DCS
  * @link https://github.com/AliceO2Group/Control/blob/c5fdca8e25f6f724231d15e34bb1bde7b2c267ab/core/integration/dcs/protos/dcs.proto#L251
- * @return {Object}
+ * @returns {object}
  */
 export const DetectorState = Object.freeze({
   UNDEFINED: 'UNDEFINED', // GUI initial set state

@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData, BrowserStorage} from '/js/src/index.js';
-import {STORAGE, PREFIX, ROLES} from './../workflow/constants.js';
-import {DetectorState} from './../common/enums/DetectorState.enum.js';
-import {isUserAllowedRole} from './../common/userRole.js';
+import { Observable, RemoteData, BrowserStorage } from '/js/src/index.js';
+import { STORAGE, PREFIX, ROLES } from './../workflow/constants.js';
+import { DetectorState } from './../common/enums/DetectorState.enum.js';
+import { isUserAllowedRole } from './../common/userRole.js';
 
 /**
  * Model representing API Calls regarding Detectors
@@ -38,7 +38,7 @@ export default class DetectorService extends Observable {
     this._selected = '';
 
     /**
-     * @type {Object<String, Detector>}
+     * @type {Object<string, Detector>}
      */
     this._availability = {};
   }
@@ -49,20 +49,18 @@ export default class DetectorService extends Observable {
    */
   async init() {
     const stored = this.storage.getLocalItem(STORAGE.DETECTOR);
-    this._selected = (stored && stored.SELECTED &&
-      (isUserAllowedRole(ROLES.Global) || this.authed.includes(stored.SELECTED))) ? stored.SELECTED : '';
+    this._selected = stored && stored.SELECTED &&
+      (isUserAllowedRole(ROLES.Global) || this.authed.includes(stored.SELECTED)) ? stored.SELECTED : '';
     this.notify();
     this._listRemote = await this.getDetectorsAsRemoteData(this._listRemote, this);
     this.notify();
     if (this._listRemote.isSuccess()) {
-      this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(
-        this.hostsByDetectorRemote, this._listRemote.payload, this
-      );
+      this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(this.hostsByDetectorRemote, this._listRemote.payload, this);
       for (const detector of this._listRemote.payload) {
         this._availability[detector] = {
           pfrAvailability: DetectorState.UNDEFINED,
           sorAvailability: DetectorState.UNDEFINED,
-        }
+        };
       }
     }
     this.notify();
@@ -79,11 +77,11 @@ export default class DetectorService extends Observable {
   /**
    * Update selection for detector view in LocalStorage
    * Format: {SELECTED: <string>}
-   * @param {Array<String>} detector
+   * @param {Array<string>} detector
    */
   saveSelection(detector) {
     this._selected = detector;
-    this.storage.setLocalItem(STORAGE.DETECTOR, {SELECTED: detector});
+    this.storage.setLocalItem(STORAGE.DETECTOR, { SELECTED: detector });
     this.notify();
   }
 
@@ -96,15 +94,16 @@ export default class DetectorService extends Observable {
    * belonging to each detector;
    * Returns a RemoteData which if successful contains a map<String,JSON>
    * @param {RemoteData} item
-   * @param {Object} that
+   * @param detectors
+   * @param {object} that
    * @returns {RemoteData}
    */
   async getHostsByDetectorsAsRemoteData(item, detectors, that) {
     item = RemoteData.loading();
     that.notify();
-    const {ok, result} = await this.model.loader.get(`/api/core/hostsByDetectors`);
+    const { ok, result } = await this.model.loader.get('/api/core/hostsByDetectors');
     item = ok ?
-      RemoteData.success(result.hosts) : RemoteData.failure({message: 'Unable to load list of hosts by detectors'});
+      RemoteData.success(result.hosts) : RemoteData.failure({ message: 'Unable to load list of hosts by detectors' });
     that.notify();
     return item;
   }
@@ -112,12 +111,13 @@ export default class DetectorService extends Observable {
   /**
    * Fetch detectors and return it as a remoteData object
    * @param {RemoteData} item
+   * @param that
    */
   async getDetectorsAsRemoteData(item, that) {
     item = RemoteData.loading();
     that.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/core/detectors`);
+    const { result, ok } = await this.model.loader.get('/api/core/detectors');
     if (!ok) {
       item = RemoteData.failure(result.message);
     } else {
@@ -135,7 +135,7 @@ export default class DetectorService extends Observable {
     this._listRemote = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/core/detectors`);
+    const { result, ok } = await this.model.loader.get('/api/core/detectors');
     if (!ok) {
       this._listRemote = RemoteData.failure(result.message);
     } else {
@@ -152,7 +152,7 @@ export default class DetectorService extends Observable {
     item = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/GetActiveDetectors`);
+    const { result, ok } = await this.model.loader.post('/api/GetActiveDetectors');
     if (!ok) {
       item = RemoteData.failure(result.message);
     } else {
@@ -164,13 +164,15 @@ export default class DetectorService extends Observable {
 
   /**
    * Given a detector, it will return a RemoteData objects containing the result of query 'GetHostInventory'
-   * @param {String} detector 
-   * @return {RemoteData}
+   * @param {string} detector
+   * @param item
+   * @param that
+   * @returns {RemoteData}
    */
   async getHostsForDetector(detector, item, that) {
     item = RemoteData.loading();
     that.notify();
-    const {result, ok} = await this.model.loader.post(`/api/GetHostInventory`, {detector});
+    const { result, ok } = await this.model.loader.post('/api/GetHostInventory', { detector });
     if (!ok) {
       item = RemoteData.failure(result.message);
     } else {
@@ -187,7 +189,7 @@ export default class DetectorService extends Observable {
   /**
    * Method to return a RemoteData object containing list of detectors fetched from AliECS
    * @param {boolean} [restrictToUser = true] - if the list should be restricted to user permissions only
-   * @returns {RemoteData<Array<String>>}
+   * @returns {RemoteData<Array<string>>}
    */
   getDetectorsAsRemote(restrictToUser = true) {
     if (this._listRemote.isSuccess() && restrictToUser) {
@@ -210,11 +212,11 @@ export default class DetectorService extends Observable {
     item = RemoteData.loading();
     that.notify();
 
-    let {result: {detectors}, ok: detectorsOk} = await this.model.loader.get(`/api/core/detectors`);
+    let { result: { detectors }, ok: detectorsOk } = await this.model.loader.get('/api/core/detectors');
     const {
-      result: {detectors: activeDetectors},
-      ok: detectorsActivityOk
-    } = await this.model.loader.post(`/api/GetActiveDetectors`);
+      result: { detectors: activeDetectors },
+      ok: detectorsActivityOk,
+    } = await this.model.loader.post('/api/GetActiveDetectors');
     const isLockDataOk = this.model.lock.padlockState.isSuccess();
 
     if (detectorsOk && detectorsActivityOk && isLockDataOk) {
@@ -222,6 +224,7 @@ export default class DetectorService extends Observable {
       if (restrictToUser && this.isSingleView()) {
         detectors = detectors.filter((detector) => detector === this._selected);
       }
+
       /**
        * @type {Array<DetectorAvailability>}
        */
@@ -243,7 +246,7 @@ export default class DetectorService extends Observable {
   /**
    * Method to return a RemoteData object containing list of detectors fetched from AliECS
    * @deprecated as it should be using `getDetectorsAsRemote` instead
-   * @returns {RemoteData<Array<String>>}
+   * @returns {RemoteData<Array<string>>}
    */
   get listRemote() {
     return this._listRemote;
@@ -251,7 +254,7 @@ export default class DetectorService extends Observable {
 
   /**
    * Return selected detectors
-   * @return {String}
+   * @returns {string}
    */
   get selected() {
     return this._selected;
@@ -259,7 +262,7 @@ export default class DetectorService extends Observable {
 
   /**
    * Set the selected detectors
-   * @param {String}
+   * @param {string}
    */
   set selected(detector) {
     this._selected = detector;
@@ -268,15 +271,15 @@ export default class DetectorService extends Observable {
   /**
    * Set the new values for DCS's properties availability which are updated via refresh page
    * or websocket messages
-   * @param {Object<String, Object>} availability - json with detectors availability
-   * @return {void}
+   * @param {Object<string, Object>} availability - json with detectors availability
+   * @returns {void}
    */
   set availability(availability) {
     for (const detector of Object.keys(availability)) {
       this._availability[detector] = {
         pfrAvailability: DetectorState[availability[detector].PfrAvailability] ?? DetectorState.UNDEFINED,
         sorAvailability: DetectorState[availability[detector].SorAvailability] ?? DetectorState.UNDEFINED,
-      }
+      };
     }
   }
 
@@ -289,9 +292,9 @@ export default class DetectorService extends Observable {
 
   /**
    * Given a list of detectors, return if all are available for specified property (PFR/SOR)
-   * @param {Array<String>} detectors - list of detectors to check
+   * @param {Array<string>} detectors - list of detectors to check
    * @param {String['pfrAvailability', 'sorAvailability']} property - which property to be checked
-   * @return {Boolean}
+   * @returns {boolean}
    */
   areDetectorsAvailable(detectors, property) {
     const state = property === 'pfrAvailability' ? DetectorState.PFR_AVAILABLE : DetectorState.SOR_AVAILABLE;

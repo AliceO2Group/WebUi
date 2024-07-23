@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Builds a miniCard frame and adds inside the passed children
@@ -21,18 +21,16 @@ import {h} from '/js/src/index.js';
  * @param {Array<string>} [classes] - object containing style parameters
  * @returns {vnode}
  */
-export const miniCard = (title, children = [], classes = ['p2', 'g2']) => {
-  return h(`.miniCard.flex-column.shadow-level1.br2`, {
-    class: classes.join(' '),
-  }, [
-    !title
-      ? undefined
-      : typeof title === 'string'
-        ? miniCardTitle(title)
-        : title,
-    children,
-  ]);
-}
+export const miniCard = (title, children = [], classes = ['p2', 'g2']) => h('.miniCard.flex-column.shadow-level1.br2', {
+  class: classes.join(' '),
+}, [
+  !title
+    ? undefined
+    : typeof title === 'string'
+      ? miniCardTitle(title)
+      : title,
+  children,
+]);
 
 /**
  * Builds a title group for a mini-card
@@ -40,13 +38,11 @@ export const miniCard = (title, children = [], classes = ['p2', 'g2']) => {
  * @param {string} [sub] - optional sub-title to be added at the end of the title group
  * @returns {vnode}
  */
-export const miniCardTitle = (main, sub = '') => {
-  return h(`.w-100.flex-row`, [
-    h(`h4`, {
-      style: 'text-decoration: underline; flex-grow: 6;'
-    }, main),
-    sub && h('.text-right', {
-      style: 'font-style: italic; flex-grow: 4;'
-    }, sub)
-  ]);
-}
+export const miniCardTitle = (main, sub = '') => h('.w-100.flex-row', [
+  h('h4', {
+    style: 'text-decoration: underline; flex-grow: 6;',
+  }, main),
+  sub && h('.text-right', {
+    style: 'font-style: italic; flex-grow: 4;',
+  }, sub),
+]);

@@ -11,7 +11,7 @@
  *  or submit itself to any jurisdiction.
  */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model to store the state of the page representing calibration runs and associated actions
@@ -53,25 +53,24 @@ export class CalibrationRunsModel extends Observable {
     this._calibrationRuns = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this._model.loader.get('/api/runs/calibration', true);
+    const { result, ok } = await this._model.loader.get('/api/runs/calibration', true);
     this._calibrationRuns = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
 
     this.notify();
   }
 
-
   /**
    * Request a reset of the calibration page including the calibration configurations and reload
    * the calibration runs if the reset was successful
-   * @return {void}
+   * @returns {void}
    */
   async refreshCalibrationConfigurations() {
     this._calibrationRuns = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this._model.loader.get('/api/runs/calibration/config', true);
+    const { result, ok } = await this._model.loader.get('/api/runs/calibration/config', true);
     if (ok) {
-      const {result, ok} = await this._model.loader.get('/api/runs/calibration', true);
+      const { result, ok } = await this._model.loader.get('/api/runs/calibration', true);
       this._calibrationRuns = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
     } else {
       this._calibrationRuns = RemoteData.failure(result.message);
@@ -81,10 +80,10 @@ export class CalibrationRunsModel extends Observable {
 
   /**
    * Send an HTTP POST request to trigger a new auto transitioning environment
-   * @param {String} detector - for which the environment should be created
-   * @param {String} runType - of the type of environment
-   * @param {String} configurationName - name of the saved configuration to use
-   * @return {void}
+   * @param {string} detector - for which the environment should be created
+   * @param {string} runType - of the type of environment
+   * @param {string} configurationName - name of the saved configuration to use
+   * @returns {void}
    */
   async newCalibrationRun(detector, runType, configurationName) {
     try {
@@ -92,15 +91,15 @@ export class CalibrationRunsModel extends Observable {
       this.notify();
 
       const payload = {
-        detector, runType, configurationName
+        detector, runType, configurationName,
       };
-      const {result, ok} = await this._model.loader.post('/api/environment/auto', payload, true);
+      const { result, ok } = await this._model.loader.post('/api/environment/auto', payload, true);
 
       this._calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
         ok ? RemoteData.success(result) : RemoteData.failure(result.message);
       this.notify();
     } catch (error) {
-      console.error('Unable to deploy environment due to ', error)
+      console.error('Unable to deploy environment due to ', error);
     }
   }
 
@@ -112,7 +111,7 @@ export class CalibrationRunsModel extends Observable {
    * Returns a RemoteData Object which wraps the reply of the server:
    * - a list of calibration runs grouped by detector
    * - an error message
-   * @return {RemoteData<Object|Error>}
+   * @returns {RemoteData<object | Error>}
    */
   get calibrationRuns() {
     return this._calibrationRuns;
@@ -121,7 +120,7 @@ export class CalibrationRunsModel extends Observable {
   /**
    * Setter for updating the calibration runs object with a new RemoteData object
    * @param {RemoteData} remoteDataRuns - updated information
-   * @return {void}
+   * @returns {void}
    */
   set calibrationRuns(remoteDataRuns) {
     this._calibrationRuns = remoteDataRuns;

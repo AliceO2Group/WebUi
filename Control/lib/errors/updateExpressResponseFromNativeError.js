@@ -11,22 +11,21 @@
  * or submit itself to any jurisdiction.
  */
 
-const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
-const {InvalidInputError} = require('./InvalidInputError.js');
-const {NotFoundError} = require('./NotFoundError.js');
-const {TimeoutError} = require('./TimeoutError.js');
+const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
+const { InvalidInputError } = require('./InvalidInputError.js');
+const { NotFoundError } = require('./NotFoundError.js');
+const { TimeoutError } = require('./TimeoutError.js');
 
 /**
  * Update (in place) the given Express response considering a given error
  * If the error is specific, the response status may be set to a specific error code
- *
  * @param {Response} response - express response to be used
  * @param {Error} error - the error instance to handle
  * @returns {void}
  */
 const updateExpressResponseFromNativeError = (response, error) => {
   let status = 500;
-  const {message, constructor} = error;
+  const { message, constructor } = error;
   switch (constructor) {
     case InvalidInputError:
       status = 400;
@@ -41,7 +40,7 @@ const updateExpressResponseFromNativeError = (response, error) => {
       status = 408;
       break;
   }
-  response.status(status).json({message});
+  response.status(status).json({ message });
 };
 
 exports.updateExpressResponseFromNativeError = updateExpressResponseFromNativeError;
