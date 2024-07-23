@@ -10,18 +10,18 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Import frontend framework
 import {
   Observable, WebSocketClient, QueryRouter,
-  Loader, RemoteData, sessionService, Notification
+  Loader, RemoteData, sessionService, Notification,
 } from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
-import {callRateLimiter, setBrowserTabTitle} from './common/utils.js';
+import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
 import Table from './table/Table.js';
-import {MODE} from './constants/mode.const.js';
+import { MODE } from './constants/mode.const.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -91,7 +91,7 @@ export default class Model extends Observable {
    * Handle websocket close event
    */
   handleWSClose() {
-    this.notification.show(`Connection to server has been lost, please reload the page.`, 'danger', Infinity);
+    this.notification.show('Connection to server has been lost, please reload the page.', 'danger', Infinity);
   }
 
   /**
@@ -101,16 +101,16 @@ export default class Model extends Observable {
     this.frameworkInfo = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.loader.get(`/api/getFrameworkInfo`);
+    const { result, ok } = await this.loader.get('/api/getFrameworkInfo');
     if (!ok) {
       this.frameworkInfo = RemoteData.failure(result.message);
     } else {
       this.frameworkInfo = RemoteData.success(result);
       if (result['infoLogger-gui'].name && result['infoLogger-gui'].name.trim()) {
         window.ILG = {
-          name: 'ILG - ' + result['infoLogger-gui'].name
+          name: `ILG - ${result['infoLogger-gui'].name}`,
         };
-        setBrowserTabTitle(window.ILG.name)
+        setBrowserTabTitle(window.ILG.name);
       }
     }
     this.notify();
@@ -124,7 +124,7 @@ export default class Model extends Observable {
     if (this.session.personid !== 0) {
       this.userProfile = RemoteData.loading();
       this.notify();
-      const {result, ok} = await this.loader.get(`/api/getUserProfile?user=${this.session.personid}`);
+      const { result, ok } = await this.loader.get(`/api/getUserProfile?user=${this.session.personid}`);
       if (!ok) {
         this.userProfile = RemoteData.failure(result.message);
         this.notification.show('Unable to load your profile. Default profile will be used instead', 'danger', 2000);
@@ -146,9 +146,9 @@ export default class Model extends Observable {
   async saveUserProfile() {
     const body = {
       user: this.session.personid,
-      content: {colsHeader: this.table.colsHeader}
+      content: { colsHeader: this.table.colsHeader },
     };
-    const {result, ok} = await this.loader.post(`/api/saveUserProfile`, body);
+    const { result, ok } = await this.loader.post('/api/saveUserProfile', body);
     if (!ok) {
       this.notification.show('Profile could not be saved', 'danger', 2000);
     } else {
@@ -161,12 +161,12 @@ export default class Model extends Observable {
 
   /**
    * Request data about the profile passed in the URL and set column headers and criteria
-   * @param {string} profile
+   * @param {string} profile - profile to load
    */
   async getProfile(profile) {
     this.userProfile = RemoteData.loading();
     this.notify();
-    const {result, ok} = await this.loader.get(`/api/getProfile?profile=${profile}`);
+    const { result, ok } = await this.loader.get(`/api/getProfile?profile=${profile}`);
     if (!ok) {
       this.userProfile = RemoteData.failure(result.message);
       this.notification.show('Unable to load profile. Default profile will be used instead', 'danger', 2000);
@@ -181,8 +181,11 @@ export default class Model extends Observable {
       if (result.user === profile) {
         this.notification.show(`The profile ${profile.toUpperCase()} was loaded successfully`, 'success', 2000);
       } else {
-        this.notification.show(`Cannot find profile ${profile.toUpperCase()}, default profile used instead`,
-          'warning', 4000);
+        this.notification.show(
+          `Cannot find profile ${profile.toUpperCase()}, default profile used instead`,
+          'warning',
+          4000,
+        );
       }
     }
     this.notify();
@@ -191,19 +194,19 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending on incoming keyboard event
-   * @param {Event} e
+   * @param {Event} e - keyboard event
    */
   handleKeyboardDown(e) {
-    // console.log(`e.code=${e.code}, e.key=${e.key},e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
+    // console.log(
+    // e.code, e.key,e.keyCode, e.metaKey, e.ctrlKey, e.altKey`
+    // );
     const code = e.keyCode;
 
-
     // Enter
-    if (((code === 13 && !this.messageFocused) || (code === 13 && e.metaKey)) && !this.log.isLiveModeEnabled()) {
+    if ((code === 13 && !this.messageFocused || code === 13 && e.metaKey) && !this.log.isLiveModeEnabled()) {
       this.log.query();
     }
     if (!this.messageFocused) {
-
       // don't listen to keys when it comes from an input (they transform into letters)
       // except spacial ones which are not chars
       // http://www.foreui.com/articles/Key_Code_Table.htm
@@ -265,34 +268,37 @@ export default class Model extends Observable {
         && this.log.activeMode !== MODE.QUERY) {
         if (this.frameworkInfo.isSuccess()) {
           this.frameworkInfo.payload.infoLoggerServer.status =
-            {ok: false, message: 'Live Mode is currently unavailable. Retrying...'};
+            { ok: false, message: 'Live Mode is currently unavailable. Retrying...' };
         }
         this.notification.show(
-          `Connection to InfoLogger server is unavailable. Retrying in 5 seconds`, 'warning', 2000);
+          'Connection to InfoLogger server is unavailable. Retrying in 5 seconds',
+          'warning',
+          2000,
+        );
       } else if (message.command === 'il-server-close') {
         if (this.frameworkInfo.isSuccess()) {
           this.frameworkInfo.payload.infoLoggerServer.status =
-            {ok: false, message: 'Live Mode is currently unavailable. Retrying...'};
+            { ok: false, message: 'Live Mode is currently unavailable. Retrying...' };
         }
-        this.notification.show(
-          `Connection between backend and InfoLogger server has been lost`, 'warning', 2000);
+        this.notification.show('Connection between backend and InfoLogger server has been lost', 'warning', 2000);
       } else if (message.command === 'il-server-connected') {
         if (this.frameworkInfo.isSuccess()) {
-          this.frameworkInfo.payload.infoLoggerServer.status = {ok: true};
+          this.frameworkInfo.payload.infoLoggerServer.status = { ok: true };
         }
         this.notification.show(
-          `Connection between backend and InfoLogger server has been established`, 'success', 2000);
+          'Connection between backend and InfoLogger server has been established',
+          'success',
+          2000,
+        );
       } else if (message.command === 'il-sql-server-status') {
         if (this.frameworkInfo.isSuccess()) {
           this.frameworkInfo.payload.mysql.status = message.payload;
         }
         this.notify();
         if (!message.payload.ok && this.log.activeMode === MODE.QUERY) {
-          this.notification.show(
-            `SQL QUERY System is unavailable. Retrying in 5 seconds`, 'warning', 2000);
+          this.notification.show('SQL QUERY System is unavailable. Retrying in 5 seconds', 'warning', 2000);
         } else if (message.payload.ok && this.log.activeMode === MODE.QUERY) {
-          this.notification.show(
-            `Connection to SQL QUERY System has been restored`, 'success', 2000);
+          this.notification.show('Connection to SQL QUERY System has been restored', 'success', 2000);
         }
       }
     }
@@ -303,7 +309,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
-    const params = this.router.params;
+    const { params } = this.router;
     if (params) {
       this.parseLocation(params);
     }
@@ -311,12 +317,12 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending if location is filters or profile
-   * @param {Object} params
+   * @param {object} params - URL parameters
    */
   parseLocation(params) {
     if (params.profile && params.q) {
       this.log.filter.resetCriteria();
-      this.notification.show(`URL can contain only filters or profile, not both`, 'warning');
+      this.notification.show('URL can contain only filters or profile, not both', 'warning');
       return;
     } else if (params.profile) {
       this.getProfile(params.profile);
@@ -368,7 +374,7 @@ export default class Model extends Observable {
   /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
-   * @return {boolean}
+   * @returns {boolean} - true if connection is secure
    */
   isSecureContext() {
     return window.isSecureContext;

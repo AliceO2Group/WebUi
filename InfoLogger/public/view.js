@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, notification} from '/js/src/index.js';
+import { h, notification } from '/js/src/index.js';
 
 import tableFilters from './logFilter/tableFilters.js';
 import commandFilters from './logFilter/commandFilters.js';
@@ -24,39 +24,44 @@ import tableLogsContent from './log/tableLogsContent.js';
 import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 import aboutComponent from './about/about.component.js';
 
-// The view
+/**
+ * Main view of the application
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the application
+ */
 export default (model) => [
   notification(model.notification),
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
       h('header.p1.flex-row.f7', [
         h('', commandLogs(model)),
-        h('.flex-grow',
+        h(
+          '.flex-grow',
           {
-            style: 'display: flex; flex-direction:row-reverse;'
-          }, commandFilters(model)),
+            style: 'display: flex; flex-direction:row-reverse;',
+          },
+          commandFilters(model),
+        ),
       ]),
       h('header.f7', tableFilters(model)),
     ]),
     h('div.flex-grow.flex-row.shadow-level0.logs-container', [
       aboutComponent(model),
       logsTable(model),
-      inspectorSide(model)
+      inspectorSide(model),
     ]),
-    h('footer.f7.ph1', [
-      statusBar(model)
-    ]),
+    h('footer.f7.ph1', [statusBar(model)]),
   ]),
 ];
 
 /**
  * Component which will display a virtual table containing the logs filtered by the user
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the virtual table containing the logs
  */
 const logsTable = (model) =>
   h('main.flex-grow.flex-column.transition-background-color', {
-    className: (model.log.queryResult.isLoading()) ? 'bg-gray' : ''
+    className: model.log.queryResult.isLoading() ? 'bg-gray' : '',
   }, [
     // table fixed header
     tableLogsHeader(model),
@@ -64,17 +69,14 @@ const logsTable = (model) =>
     h('.flex-row.flex-grow.logs-content', [
       tableLogsContent(model),
       tableLogsScrollMap(model),
-    ])
+    ]),
   ]);
 
 /**
-* Component which will display information about the log selected by the user
-* @param {Object} model
-* @return {vnode}
-*/
-const inspectorSide = (model) =>
-  h('aside.sidebar', {style: {width: model.inspectorEnabled ? '' : '0rem'}}, [
-    h('.sidebar-content.scroll-y#inspector-sidebar', [
-      inspector(model)
-    ])
-  ]);
+ * Component which will display information about the log selected by the user
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the inspector component
+ */
+const inspectorSide = (model) => h('aside.sidebar', {
+  style: { width: model.inspectorEnabled ? '' : '0rem' },
+}, [h('.sidebar-content.scroll-y#inspector-sidebar', [inspector(model)])]);

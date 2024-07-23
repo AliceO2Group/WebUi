@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
-import {severityClass} from './severityUtils.js';
+import { severityClass } from './severityUtils.js';
 import tableColGroup from './tableColGroup.js';
-import {ROW_HEIGHT} from './../constants/visual.const.js';
+import { ROW_HEIGHT } from './../constants/visual.const.js';
 
 /**
  * Main content of ILG - simulates a big table scrolling.
@@ -25,42 +25,45 @@ import {ROW_HEIGHT} from './../constants/visual.const.js';
  * .table-logs-content is the actual floating content, part of all logs, always on sight of user
  * Only some logs are displayed so user think he is scrolling on all logs, but in fact
  * he is only viewing ~30 logs window moving with scrolling. This allow good performance.
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the table content
  */
-export default (model) => h('.tableLogsContent.scroll-y.flex-grow', tableContainerHooks(model),
-  h('div.tableLogsContentPlaceholder', {
-    style: {
-      height: model.log.list.length * ROW_HEIGHT + 'px',
-      position: 'relative'
-    }
-  }, [
-    h('table.table-logs-content', scrollStyling(model),
-      tableColGroup(model),
-      h('tbody', [
-        model.log.listLogsInViewportOnly(model).map((row) => tableLogLine(model, row))
-      ]),
-    )
-  ]),
-);
+export default (model) =>
+  h(
+    '.tableLogsContent.scroll-y.flex-grow',
+    tableContainerHooks(model),
+    h('div.tableLogsContentPlaceholder', {
+      style: {
+        height: `${model.log.list.length * ROW_HEIGHT}px`,
+        position: 'relative',
+      },
+    }, [
+      h(
+        'table.table-logs-content',
+        scrollStyling(model),
+        tableColGroup(model),
+        h('tbody', [model.log.listLogsInViewportOnly(model).map((row) => tableLogLine(model, row))]),
+      ),
+    ]),
+  );
 
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder
- * @param {Object} model
- * @return {Object} properties of floating table
+ * @param {Model} model - root model of the application
+ * @returns {object} properties of floating table
  */
 const scrollStyling = (model) => ({
   style: {
     position: 'absolute',
-    top: model.log.scrollTop - (model.log.scrollTop % ROW_HEIGHT) + 'px'
-  }
+    top: `${model.log.scrollTop - model.log.scrollTop % ROW_HEIGHT}px`,
+  },
 });
 
 /**
  * Creates a line of log with tag <tr> and its columns <td> if enabled.
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {Log} row - a row of this table is a raw log
- * @return {vnode}
+ * @returns {vnode} - the log build as a table row
  */
 const tableLogLine = (model, row) => h('tr.row-hover', {
   className: model.log.item === row ? 'row-selected' : '',
@@ -70,14 +73,14 @@ const tableLogLine = (model, row) => h('tr.row-hover', {
 
 /**
  * Array of table rows
- * @param {Object} model
- * @param {JSON} colsHeader
- * @param {object} row
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @param {object} colsHeader - columns header configuration and state
+ * @param {object} row - values for each cell of the row
+ * @returns {vnode} - the row of the table
  */
 const tableRows = (model, colsHeader, row) =>
   [
-    h('td.cell.text-center', {className: model.log.item === row ? null : severityClass(row.severity)}, row.severity),
+    h('td.cell.text-center', { className: model.log.item === row ? null : severityClass(row.severity) }, row.severity),
     h('td.cell.text-center.cell-bordered', row.level),
     colsHeader.date.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
     colsHeader.time.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, model.log.timeFormat)),
@@ -93,31 +96,31 @@ const tableRows = (model, colsHeader, row) =>
     colsHeader.errcode.visible && h('td.cell.cell-bordered', linkToWikiErrors(row.errcode)),
     colsHeader.errline.visible && h('td.cell.cell-bordered', row.errline),
     colsHeader.errsource.visible && h('td.cell.cell-bordered', row.errsource),
-    colsHeader.message.visible && h('td.cell.cell-bordered', {title: row.message}, row.message),
+    colsHeader.message.visible && h('td.cell.cell-bordered', { title: row.message }, row.message),
   ];
-
 
 /**
  * Creates link of error code to open in a new tab the wiki page associated
- * @param {number} errcode
- * @return {vnode}
+ * @param {number} errcode - error code to link
+ * @returns {vnode} - the link to the wiki page
  */
 const linkToWikiErrors = (errcode) => h('a', {
   href: `https://alice-daq.web.cern.ch/error_codes/${errcode}?from=ILG`,
-  target: '_blank'
+  target: '_blank',
 }, errcode);
 
 /**
  * Hooks of .tableLogsContent for "smart scrolling"
  * This notifies model of its size and scrolling position to compute logs to draw
- * @param {Object} model
- * @return {Object} object containing hooks
+ * @param {Model} model - root model of the application
+ * @returns {object} object containing hooks
  */
 const tableContainerHooks = (model) => ({
+
   /**
    * Hook. Listen to events needed for handling scrolling like window size change
    * And set scroll change handler to internal state of dom element
-   * @param {vnode} vnode
+   * @param {vnode} vnode - the vnode of the element
    */
   oncreate(vnode) {
     /**
@@ -125,7 +128,7 @@ const tableContainerHooks = (model) => ({
      */
     const onTableScroll = () => {
       const container = vnode.dom;
-      const height = container.getBoundingClientRect().height;
+      const { height } = container.getBoundingClientRect();
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
       model.log.setScrollTop(scrollTop, height);
     };
@@ -145,7 +148,7 @@ const tableContainerHooks = (model) => ({
 
   /**
    * Hook. Update scrolling strategy on model change
-   * @param {vnode} vnode
+   * @param {vnode} vnode - the vnode of the element
    */
   onupdate(vnode) {
     autoscrollManager(model, vnode);
@@ -153,19 +156,19 @@ const tableContainerHooks = (model) => ({
 
   /**
    * Hook. Remove listeners when element is destroyed
-   * @param {vnode} vnode
+   * @param {vnode} vnode - the vnode of the element
    */
   ondestroy(vnode) {
     vnode.dom.removeEventListener('scroll', vnode.dom.onTableScroll);
     window.removeEventListener('resize', vnode.dom.onTableScroll);
-  }
+  },
 });
 
 /**
  * Handle scrolling to selected item or auto-scroll to bottom
  * 'Autoscroll' is higher priority over 'scroll to selected item'
- * @param {Object} model
- * @param {vnode} vnode
+ * @param {Model} model - root model of the application
+ * @param {vnode} vnode - the vnode of the element
  */
 const autoscrollManager = (model, vnode) => {
   // Autoscroll to bottom in live mode
@@ -213,7 +216,7 @@ let currentAddress = 0;
  * Two calls with the same object will provide the same number.
  * Uses a WeekMap so no memory leak.
  * @param {object} obj - the object that needs to be identified
- * @return {number} a unique pointer number
+ * @returns {number} a unique pointer number
  */
 function pointerId(obj) {
   let ptr = pointers.get(obj);

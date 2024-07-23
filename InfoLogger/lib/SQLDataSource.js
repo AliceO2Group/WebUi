@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/sql`);
 
@@ -19,8 +19,8 @@ module.exports = class SQLDataSource {
    * Instantiate SQL data source and connect to database
    * MySQL options: https://github.com/mysqljs/mysql#connection-options
    * Limit option
-   * @param {Object} connection - mysql connection
-   * @param {Object} configMySql - mysql config
+   * @param {object} connection - mysql connection
+   * @param {object} configMySql - mysql config
    */
   constructor(connection, configMySql) {
     this.configMySql = configMySql;
@@ -29,7 +29,7 @@ module.exports = class SQLDataSource {
 
   /**
    * Method to check if mysql driver connection is up
-   * @return {Promise} with the results
+   * @returns {Promise} with the results
    */
   async isConnectionUpAndRunning() {
     return await this.connection
@@ -44,39 +44,37 @@ module.exports = class SQLDataSource {
       });
   }
 
-
   /**
    * Translates `filters` from client side to SQL condition to put on WHERE clause
    *
    * filters = {
-   *   timestamp: {
-   *     $since: '2016-02-21T05:00:00.000Z'
-   *   },
-   *   level: {
-   *     $max: 6
-   *   },
-   *   severity: {
-   *     $in: ['W', 'E']
-   *   },
-   *    hostname: {
-   *     $match: 'host'
-   *   },
-   *   username: {
-   *     $exclude: ['name']
-   *   }
+   * timestamp: {
+   * $since: '2016-02-21T05:00:00.000Z'
+   * },
+   * level: {
+   * $max: 6
+   * },
+   * severity: {
+   * $in: ['W', 'E']
+   * },
+   * hostname: {
+   * $match: 'host'
+   * },
+   * username: {
+   * $exclude: ['name']
+   * }
    * }
    *
    * values = ['Sun Jan 01 1989 00:00:00 GMT+0100 (CET)', 6, 'W', 'E', ...]
    * criteria = ['timestamp >= ?', 'level <= ?', 'severity in (?,?)', ...]
-   *
-   * @param {Object} filters - {...}
-   * @return {Object} {values, criteria}
+   * @param {object} filters - {...}
+   * @returns {object} {values, criteria}
    */
   _filtersToSqlConditions(filters) {
     const values = [];
     const criteria = [];
     for (const field in filters) {
-      if (!filters.hasOwnProperty(field)) {
+      if (!filters[field]) {
         continue;
       }
       for (const operator in filters[field]) {
@@ -86,7 +84,7 @@ module.exports = class SQLDataSource {
 
         if (operator === '$since' || operator === '$until') {
           // read date, both input and output are GMT, no timezone to consider here
-          values.push((new Date(filters[field][operator])).getTime() / 1000);
+          values.push(new Date(filters[field][operator]).getTime() / 1000);
         } else {
           const separator = field === 'message' ? '\n' : ' ';
           if ((operator === '$match' || operator === '$exclude') && filters[field][operator].split(separator).length > 1
@@ -165,7 +163,7 @@ module.exports = class SQLDataSource {
         }
       }
     }
-    return {values, criteria};
+    return { values, criteria };
   }
 
   /**
@@ -178,16 +176,16 @@ module.exports = class SQLDataSource {
    * - time: how much did it take, in ms
    * @param {object} filters - criteria like MongoDB
    * @param {object} options - limit, etc.
-   * @return {Promise.<Object>}
+   * @returns {Promise.<object>} - {total, more, limit, rows, count, time}
    */
   async queryFromFilters(filters, options) {
     if (!filters) {
       throw new Error('filters parameter is mandatory');
     }
-    options = Object.assign({}, {limit: 100000}, options);
+    options = { limit: 100000, ...options };
 
     const startTime = Date.now(); // ms
-    const {criteria, values} = this._filtersToSqlConditions(filters);
+    const { criteria, values } = this._filtersToSqlConditions(filters);
     const criteriaString = this._getCriteriaAsString(criteria);
 
     const rows = await this._queryMessagesOnOptions(criteriaString, options, values)
@@ -203,14 +201,14 @@ module.exports = class SQLDataSource {
       count: rows.length,
       limit: options.limit,
       time: totalTime, // ms
-      queryAsString: this._getSQLQueryAsString(criteriaString, options.limit)
+      queryAsString: this._getSQLQueryAsString(criteriaString, options.limit),
     };
   }
 
   /**
    * Given a runNumber, query logs for it and return a count of the logs grouped by severity
    * @param {number|string} runNumber - number of the run for which the query should be performed
-   * @returns 
+   * @returns {Promise.<object>} - object containing the count of logs grouped by severity
    */
   async queryGroupCountLogsBySeverity(runNumber) {
     const groupByStatement =
@@ -224,13 +222,16 @@ module.exports = class SQLDataSource {
         E: 0,
         F: 0,
       };
+
       /**
        * data is of structure:
        * [
        *  RowDataPacket { severity: 'E', 'COUNT(*)': 102 }
        * ]
        */
-      data.forEach((group) => result[group['severity']] = group['COUNT(*)']);
+      data.forEach((group) => {
+        result[group['severity']] = group['COUNT(*)'];
+      });
       return result;
     });
   }
@@ -238,17 +239,17 @@ module.exports = class SQLDataSource {
   /**
    * Method to fill criteria and return it as string
    * @param {Array} criteria Array of criteria set by the user
-   * @return {string}
+   * @returns {string} - criteria as string in SQL format
    */
   _getCriteriaAsString(criteria) {
-    return (criteria && criteria.length) ? `WHERE ${criteria.join(' AND ')}` : '';
+    return criteria && criteria.length ? `WHERE ${criteria.join(' AND ')}` : '';
   }
 
   /**
    * Get the SQL Query used as a string
-   * @param {string} criteriaVerbose
-   * @param {JSON} limit
-   * @return {string}
+   * @param {string} criteriaVerbose - criteria as string in SQL format
+   * @param {number} limit - limit of number of messages
+   * @returns {string} - SQL Query as string
    */
   _getSQLQueryAsString(criteriaVerbose, limit) {
     return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` LIMIT ${limit}`;
@@ -257,16 +258,15 @@ module.exports = class SQLDataSource {
   /**
    * Method to retrieve the messages based on passed Options
    * @param {string} criteriaString as a string
-   * @param {Object} options containing limit on messages
+   * @param {object} options containing limit on messages
    * @param {Array} values of filter parameters
-   * @return {Promise} rows
+   * @returns {Promise} rows
    */
   _queryMessagesOnOptions(criteriaString, options, values) {
-    /* eslint-disable max-len */
     // The rows asked with a limit
     const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
-    /* eslint-enable max-len */
+
     return this.connection.query(requestRows, values)
       .then((data) => data);
   }
-}
+};

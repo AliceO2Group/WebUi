@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
@@ -19,7 +19,7 @@ sessionService.loadAndHideParameters();
 window.sessionService = sessionService;
 
 // Import MVC
-import {mount} from '/js/src/index.js';
+import { mount } from '/js/src/index.js';
 import view from './view.js';
 import Model from './Model.js';
 
@@ -30,4 +30,4 @@ mount(document.body, view, model, debug);
 
 // Expose model to interact with it the browser's console
 window.model = model;
-window.ILG = {name: 'ILG - '};
+window.ILG = { name: 'ILG - ' };

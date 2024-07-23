@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 module.exports = {
   http: {
@@ -21,17 +21,17 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false,
     allow: true,
-    name: 'TST'
+    name: 'TST',
   },
   infoLoggerServer: {
     host: 'localhost',
-    port: 6102
+    port: 6102,
   },
   jwt: {
     secret: '<secret>',
     issuer: 'alice-o2-gui',
     expiration: '60s',
-    maxAge: '2'
+    maxAge: '2',
   },
-  dbFile: './test/testdb.json'
+  dbFile: './test/testdb.json',
 };

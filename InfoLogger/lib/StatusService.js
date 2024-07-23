@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/status`);
 
@@ -40,7 +40,7 @@ class StatusService {
 
   /**
    * Set source of data once enabled
-   * @param {SQLDataSource} querySource 
+   * @param {SQLDataSource} querySource - source of data
    */
   setQuerySource(querySource) {
     this.querySource = querySource;
@@ -48,7 +48,7 @@ class StatusService {
 
   /**
    * Set source of live mode once enabled
-   * @param {InfoLoggerReceiver} liveSource
+   * @param {InfoLoggerReceiver} liveSource - source of live mode
    */
   setLiveSource(liveSource) {
     this.liveSource = liveSource;
@@ -56,8 +56,8 @@ class StatusService {
 
   /**
    * Method which handles the request for returning infologger gui information and status of it
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} _ - HTTP Request object
+   * @param {Response} res - HTTP Response object
    */
   async getILGStatus(_, res) {
     let result = {};
@@ -65,7 +65,7 @@ class StatusService {
       result.version = this.projPackage.version;
     }
     if (this.config.http) {
-      const ilg = {status: {ok: true}};
+      const ilg = { status: { ok: true } };
       result = Object.assign(result, ilg);
     }
     result.clients = this._ws?.server?.clients?.size ?? -1;
@@ -73,12 +73,12 @@ class StatusService {
   }
 
   /**
-   * Method which handles the request for returning 
+   * Method which handles the request for returning
    * framework information and status of its components
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} _ - HTTP Request object
+   * @param {Response} res - HTTP Response object
    */
-  async frameworkInfo(req, res) {
+  async frameworkInfo(_, res) {
     const result = {};
     result['infoLogger-gui'] = this.getProjectInfo();
 
@@ -92,17 +92,17 @@ class StatusService {
   }
 
   /**
-   * Build a JSON containing InfoLogger GUI's information
-   * @return {JSON}
+   * Build an object containing InfoLogger GUI's information
+   * @returns {object} - information about the application
    */
   getProjectInfo() {
-    let info = {}
+    let info = {};
     if (this.projPackage && this.projPackage.version) {
       info.version = this.projPackage.version;
     }
     if (this.config.http) {
-      const {http} = this.config;
-      const ilg = {hostname: http.hostname, port: http.port, status: {ok: true}, name: http.name ?? '' };
+      const { http } = this.config;
+      const ilg = { hostname: http.hostname, port: http.port, status: { ok: true }, name: http.name ?? '' };
       info = Object.assign(info, ilg);
     }
     info.clients = this._ws?.server?.clients?.size ?? -1;
@@ -110,43 +110,43 @@ class StatusService {
   }
 
   /**
-   * Build JSON with information and status about live source
-   * @param {JSON} config used for retrieving data from live source
-   * @return {JSON}
+   * Build an object with information and status about live source
+   * @param {object} config used for retrieving data from live source
+   * @returns {object} - information on status of the live source
    */
   getLiveSourceStatus(config) {
-    const ils = {host: config.host, port: config.port};
+    const ils = { host: config.host, port: config.port };
     ils.status = this.liveSource && this.liveSource.isConnected ?
-      {ok: true}
-      : {ok: false, message: 'Unable to connect to InfoLogger Server'}
+      { ok: true }
+      : { ok: false, message: 'Unable to connect to InfoLogger Server' };
     return ils;
   }
 
   /**
-   * Build JSON with information and status about data source
-   * @param {JSON} config used for retrieving data form data source
-   * @return {JSON}
+   * Build object with information and status about data source
+   * @param {object} config used for retrieving data form data source
+   * @returns {object} - information on statue of the data source
    */
   async getDataSourceStatus(config) {
     const mysql = {
       host: config.host,
       port: config.port,
       database: config.database,
-    }
+    };
     if (this.querySource) {
       try {
         await this.querySource.isConnectionUpAndRunning();
-        mysql.status = {ok: true};
+        mysql.status = { ok: true };
       } catch (error) {
         log.error(error.message || error);
         if (error.stack) {
           log.trace(error);
         }
-        mysql.status = {ok: false, message: error.message || error};
+        mysql.status = { ok: false, message: error.message || error };
       }
     } else {
-      log.error('There was no data source set up')
-      mysql.status = {ok: false, message: 'There was no data source set up'}
+      log.error('There was no data source set up');
+      mysql.status = { ok: false, message: 'There was no data source set up' };
     }
     return mysql;
   }

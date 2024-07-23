@@ -10,19 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, frameDebouncer} from '/js/src/index.js';
-import {callRateLimiter} from '../common/utils.js';
+import { h, frameDebouncer } from '/js/src/index.js';
+import { callRateLimiter } from '../common/utils.js';
 
 /**
  * Returns a canvas vnode, severities are drawn on it and
  * adapts its height according to model
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the canvas vnode
  */
 export default (model) =>
-  h('',
+  h(
+    '',
     h('canvas', {
       width: '10',
       height: model.log.scrollHeight,
@@ -31,7 +32,7 @@ export default (model) =>
        * Hook when DOM element is created according to vnode
        * registers a redraw function to be called on model changes
        * draw content
-       * @param {vnode} vnode
+       * @param {vnode} vnode - the vnode of the canvas
        */
       oncreate(vnode) {
         // canvas consumes a lot of CPU
@@ -48,7 +49,7 @@ export default (model) =>
        * Hook when model has changed
        * check if height has changed since last time between DOM internal state
        * draw content
-       * @param {vnode} vnode
+       * @param {vnode} vnode - the vnode of the canvas
        */
       onupdate(vnode) {
         // height change blanks canvas, draw now to avoid white canvas
@@ -59,13 +60,13 @@ export default (model) =>
         }
 
         vnode.dom.redraw();
-      }
-    })
+      },
+    }),
   );
 
 /**
  * Draw the ScrollMap inside the canvas `dom` element provided in argument
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {DOMElement} dom - canvas element to draw in
  */
 const draw = (model, dom) => {

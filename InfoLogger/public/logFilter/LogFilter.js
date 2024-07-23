@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable} from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
 
 /**
  * @typedef Criteria
@@ -35,7 +35,7 @@ import {Observable} from '/js/src/index.js';
 export default class LogFilter extends Observable {
   /**
    * Instantiate a LogFilter with criteria reset to empty or minimal value
-   * @param {Observable} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
@@ -46,12 +46,12 @@ export default class LogFilter extends Observable {
   }
 
   /**
-   * Set a filter criteria for a field with an operator and value only if the new value is different than the current one.
+   * Set a filter criteria to a field with an operator and value only if the new value is different than the current.
    * For each field+operator a parsed property in criterias is made with associated cast (Date, number, Array).
-   * @param {string} field
-   * @param {string} operator
-   * @param {string} value
-   * @return {boolean}
+   * @param {string} field - field name like pid, username, timestamp
+   * @param {string} operator - $match, $exclude, $since, $until, $min, $max, $in
+   * @param {string} value - value to be set
+   * @returns {boolean} - true if value was set, false if value was the same as before
    * @example
    * setCriteria('severity', 'in', 'W E F')
    * // severity is W or E or F
@@ -96,16 +96,15 @@ export default class LogFilter extends Observable {
 
   /**
    * Exports all filled filters inputs
-   * @return {Object} minimal filter object
+   * @returns {object} minimal filter object
    */
   toObject() {
     // copy everything
     const criterias = JSON.parse(JSON.stringify(this.criterias));
 
     // clean-up the whole structure
-    // eslint-disable-next-line guard-for-in
+
     for (const field in criterias) {
-      // eslint-disable-next-line guard-for-in
       for (const operator in criterias[field]) {
         // remote parsed properties (generated with fromJSON)
         if (operator.includes('$')) {
@@ -131,14 +130,14 @@ export default class LogFilter extends Observable {
 
   /**
    * Set criterias according to object passed as argument
-   * @param {Criterias} criterias
+   * @param {object} criterias - object with criterias to be set
    */
   fromObject(criterias) {
     this.resetCriteria();
     Object.keys(criterias).forEach((field) => {
       Object.keys(criterias[field])
         .filter((operator) => criterias[field][operator])
-        .forEach((operator) => this.setCriteria(field, operator, criterias[field][operator]))
+        .forEach((operator) => this.setCriteria(field, operator, criterias[field][operator]));
     });
     this.notify();
   }
@@ -146,14 +145,14 @@ export default class LogFilter extends Observable {
   /**
    * Generates a function to filter a log passed as argument to it
    * Output of function is boolean.
-   * @return {function.<WebSocketMessage, boolean>}
+   * @returns {Function.<WebSocketMessage, boolean>} - function to filter logs
    */
   toStringifyFunction() {
     /**
      * This function will be stringified then sent to server so it can filter logs
      * 'DATA_PLACEHOLDER' will be replaced by the stringified filters too so the function contains de data
-     * @param {Object} message
-     * @return {boolean} true if message passes criterias
+     * @param {WebSocketMessage} message - message to be filtered
+     * @returns {boolean} true if message passes criterias
      */
     function filterFunction(message) {
       const log = message.payload;
@@ -161,8 +160,8 @@ export default class LogFilter extends Observable {
 
       /**
        * Transform timestamp of infologger into javascript Date object
-       * @param {number} timestamp
-       * @return {Date}
+       * @param {number} timestamp - timestamp from infologger
+       * @returns {Date} - javascript Date object
        */
       function parseInfoLoggerDate(timestamp) {
         return new Date(timestamp * 1000);
@@ -171,18 +170,18 @@ export default class LogFilter extends Observable {
       /**
        * Method to generate criteria value as Regex
        * @param {string} criteria Criteria passed in by user
-       * @return {RegExp}
+       * @returns {RegExp} - regex criteria value
        */
       function generateRegexCriteriaValue(criteria) {
         criteria = criteria.replace(new RegExp('%', 'g'), '.*');
         criteria = criteria.replace(new RegExp('_', 'g'), '.');
-        return new RegExp('^' + criteria + '$');
+        return new RegExp(`^${criteria}$`);
       }
 
       /**
        * Method to replace all new lines from a log value
-       * @param {string} logValue
-       * @return {string}
+       * @param {string} logValue - value of the log field that is to be checked (e.g. message, severity, etc.)
+       * @returns {string} - log value without new lines
        */
       function removeNewLinesFrom(logValue) {
         if (typeof logValue !== 'string') {
@@ -193,10 +192,10 @@ export default class LogFilter extends Observable {
 
       /**
        * Function that applies the criteria of one filter set by the user on each received logValue
-       * @param {Object} logValue - value of the log field that is to be checked (e.g. message, severity, etc.)
-       * @param {Object} criteria - object containing the criteria if applied by the user
-       * @param {string} [separator = ' '] - separator to be applied when filtering based on an array of values; `\n` has to be passed in case of message field
-       * @return {boolean} - result of the log matching the filter set by user
+       * @param {object} logValue - value of the log field that is to be checked (e.g. message, severity, etc.)
+       * @param {object} criteria - object containing the criteria if applied by the user
+       * @param {string} [separator = ' '] - (' ', 'n') to be applied when filtering based on an array of values;
+       * @returns {boolean} - result of the log matching the filter set by user
        */
       function isLogMatchingMessageCriteria(logValue, criteria, separator = ' ') {
         for (const operator in criteria) {
@@ -263,6 +262,7 @@ export default class LogFilter extends Observable {
         }
         return true;
       }
+
       /*
        * Removes the message from the initial filtering as this puts a lot of stress on the server
        * Filtering will be done initially on the small contained fields and only later if still needed on the message
@@ -272,7 +272,7 @@ export default class LogFilter extends Observable {
 
       for (const field in criterias) {
         if (isLogMatchingMessageCriteria(log[field], criterias[field], ' ')) {
-          continue
+          continue;
         } else {
           return false;
         }
@@ -308,73 +308,73 @@ export default class LogFilter extends Observable {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       pid: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       username: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       system: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       facility: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       detector: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       partition: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       run: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       errcode: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       errline: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       errsource: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       message: {
         match: '',
         exclude: '',
         $match: null,
-        $exclude: null
+        $exclude: null,
       },
       severity: {
         in: 'I W E F',
