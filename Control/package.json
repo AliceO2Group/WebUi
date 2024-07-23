@@ -21,7 +21,7 @@
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
+    "eslint": "./node_modules/.bin/eslint  *.js lib/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha"
@@ -44,7 +44,11 @@
     "@grpc/proto-loader"
   ],
   "devDependencies": {
+    "@eslint/js": "^9.7.0",
+    "@stylistic/eslint-plugin-js": "^2.3.0",
     "eslint": "^9.7.0",
+    "eslint-plugin-jsdoc": "^48.7.0",
+    "globals": "^15.8.0",
     "mocha": "^10.7.0",
     "nock": "^13.5.0",
     "nyc": "^17.0.0",
