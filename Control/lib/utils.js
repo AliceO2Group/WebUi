@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
-const logger = new (require('@aliceo2/web-ui').LogManager).getLogger(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
+const logger = new (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
 const http = require('http');
 const https = require('https');
 
