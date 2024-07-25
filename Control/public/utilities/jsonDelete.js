@@ -11,13 +11,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import {jsonFetch} from './jsonFetch.js';
+import { jsonFetch } from './jsonFetch.js';
 
 /**
  * Build and send a DELETE request to a remote endpoint, and extract the response.
- * @param {String} endpoint - the remote endpoint to send request to
+ * @param {string} endpoint - the remote endpoint to send request to
  * @param {RequestInit} options - the request options, see {@see fetch } native function
- * @return {Promise<Resolve<Object>.Error<{message: String}>>} resolve with the result of the request or reject with the error message
+ * @returns {Promise<Resolve<object>.Error<{message: string}>>} resolve with the result of the request or reject with the error message
  */
 export const jsonDelete = async (endpoint, options) => {
   if (options.body && typeof options.body === 'object') {
@@ -28,12 +28,12 @@ export const jsonDelete = async (endpoint, options) => {
       method: 'DELETE',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      ...options
+      ...options,
     });
     return result;
   } catch (error) {
-    return Promise.reject({message: error.message || error});
+    return Promise.reject({ message: error.message || error });
   }
-}
+};

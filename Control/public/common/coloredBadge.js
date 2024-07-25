@@ -11,14 +11,13 @@
  *  or submit itself to any jurisdiction.
  */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Return a colored cell based on a given value and mapping associated
- *
- * @param {String} value - the value to be displayed in the cell
- * @param {Object<String, String>} colorMap - map storing color based on value 
- * @return {vnode} - the colored cell
+ * @param {string} value - the value to be displayed in the cell
+ * @param {Object<string, string>} colorMap - map storing color based on value
+ * @returns {vnode} - the colored cell
  */
 export const coloredBadge = (value = '', colorMap = {}) => {
   const valueAsKey = value.split(' ').join('_');

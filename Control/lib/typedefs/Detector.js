@@ -15,11 +15,10 @@
  * @typedef Detector
  *
  * Detector definition as received from ECS directly from DCS
- *
- * @property {String} [name] - optional name of the detector
+ * @property {string} [name] - optional name of the detector
  * @property {DetectorState} state - state of detector
- * @property {Number} timestamp - timestamp of the last updated state
+ * @property {number} timestamp - timestamp of the last updated state
  * @property {Array[String]} allowedRunTypes
- * @property {String} pfrAvailability - no enum provided but usually a string in the form of DetectorState
- * @property {String} sorAvailability - no enum provided but usually a string in the form of DetectorState
+ * @property {string} pfrAvailability - no enum provided but usually a string in the form of DetectorState
+ * @property {string} sorAvailability - no enum provided but usually a string in the form of DetectorState
  */

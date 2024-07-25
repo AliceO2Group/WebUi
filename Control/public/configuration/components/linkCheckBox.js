@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * @file which contains multiple reuseable components for the configuration page
@@ -20,24 +20,22 @@ import {h} from '/js/src/index.js';
 
 /**
  * Generate a checkbox based on title and field to change
- * @param {Object} model
+ * @param {object} model
  * @param {string} key - format link0
  * @param {JSON} config - reference to the configuration in CRUsMapByHost
  * @param {string} label - name of link
- * @return {vnode}
+ * @returns {vnode}
  */
-const cruLinkCheckBox = (model, key, config, label) => {
-  return h('label.d-inline.f6.ph2', {
-    style: 'white-space: nowrap',
-    title: `Toggle selection of ${key}`
-  }, h('input', {
-    type: 'checkbox',
-    checked: config[key].enabled === 'true',
-    onchange: () => {
-      config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';
-      model.configuration.notify();
-    }
-  }), label);
-};
+const cruLinkCheckBox = (model, key, config, label) => h('label.d-inline.f6.ph2', {
+  style: 'white-space: nowrap',
+  title: `Toggle selection of ${key}`,
+}, h('input', {
+  type: 'checkbox',
+  checked: config[key].enabled === 'true',
+  onchange: () => {
+    config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';
+    model.configuration.notify();
+  },
+}), label);
 
-export {cruLinkCheckBox};
+export { cruLinkCheckBox };

@@ -25,7 +25,7 @@ class EnvironmentTransitionResultAdapter {
    * Converts the given object to an entity object.
    * @static
    * @param {ControlEnvironmentReply} transitionResult - as from AliECS
-   * @return {EnvironmentTransitionResult} information on the transition result of the environment
+   * @returns {EnvironmentTransitionResult} information on the transition result of the environment
    */
   static toEntity(transitionResult) {
     const {

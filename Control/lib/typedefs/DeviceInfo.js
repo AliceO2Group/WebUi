@@ -16,10 +16,9 @@
  *
  * DeviceInfo type definition as parsed and sent to the client by the GUI server
  * The parsing is done based on the object received from ECS in `o2control.proto` in integratedServicesData from EPN
- *
- * @property {String} taskId 
- * @property {String} state
- * @property {String} path
- * @property {String} host
- * @property {boolean} ignored 
+ * @property {string} taskId
+ * @property {string} state
+ * @property {string} path
+ * @property {string} host
+ * @property {boolean} ignored
  */

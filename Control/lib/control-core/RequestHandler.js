@@ -10,22 +10,22 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const {errorLogger} = require('./../utils.js');
+ */
+const { WebSocketMessage, Log } = require('@aliceo2/web-ui');
+const { errorLogger } = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
 const {
-  RUNTIME_COMPONENT: {COG},
-  RUNTIME_KEY: {RUN_TYPE_TO_HOST_MAPPING}
+  RUNTIME_COMPONENT: { COG },
+  RUNTIME_KEY: { RUN_TYPE_TO_HOST_MAPPING },
 } = require('../common/kvStore/runtime.enum.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
+const { LOG_LEVEL } = require('../common/logLevel.enum.js');
+
 const LOG_FACILITY = 'cog/controlrequests';
 
 /**
  * Handles AliECS create env requests
  */
 class RequestHandler {
-
   /**
    * @param {object} ctrlService - Handle to Control service
    * @param {ApricotService} apricotService - service to use to interact with A.P.R.I.C.O.T
@@ -66,7 +66,7 @@ class RequestHandler {
       logMessage += `and detectors: ${req.body.detectors}`;
     }
 
-    this._logger.infoMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
+    this._logger.infoMessage(logMessage, { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY });
 
     this.requestList[index] = {
       id: index,
@@ -75,19 +75,19 @@ class RequestHandler {
       date: new Date(),
       owner: req.session.name,
       personid: req.session.personid,
-      failed: false
+      failed: false,
     };
-    res.json({ok: 1});
+    res.json({ ok: 1 });
     this.broadcast();
 
-    const {selectedConfiguration} = req.body;
+    const { selectedConfiguration } = req.body;
     if (selectedConfiguration) {
       // workaround for reloading configuration before deployment from global page
       try {
-        const {variables} = await this._workflowService.retrieveWorkflowSavedConfiguration(selectedConfiguration);
+        const { variables } = await this._workflowService.retrieveWorkflowSavedConfiguration(selectedConfiguration);
         variables.hosts = req.body.vars.hosts;
 
-        const {epn_enabled, odc_n_epns} = req.body.vars;
+        const { epn_enabled, odc_n_epns } = req.body.vars;
         if (epn_enabled === 'true') {
           variables.odc_n_epns = odc_n_epns;
         }
@@ -121,7 +121,7 @@ class RequestHandler {
     } catch (error) {
       if (error.envId) {
         this._logger.errorMessage(`Creation of environment failed with: ${error.details}.`, {
-          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
+          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId,
         });
         let logMessage = `Environment was requested by user: ${req.session.username} with`;
         if (req.body.workflowTemplate) {
@@ -131,7 +131,7 @@ class RequestHandler {
           logMessage += `and detectors: ${req.body.detectors}.`;
         }
         this._logger.errorMessage(logMessage, {
-          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
+          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId,
         });
       } else {
         let logMessage = `Creation of environment failed with: ${error.details}. `;
@@ -163,12 +163,12 @@ class RequestHandler {
    * Remove request from "cache".
    * @param {Request} req
    * @param {Response} res
-   * @returns {Object}
+   * @returns {object}
    */
   remove(req, res) {
     const index = req.params.id;
     this._logger.infoMessage(`User ${req.session.username} acknowledged and removed failed request`, {
-      level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY
+      level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY,
     });
     delete this.requestList[index];
     return this.getAll(req, res);
@@ -178,26 +178,24 @@ class RequestHandler {
    * Broadcast list of request
    */
   broadcast() {
-    this.webSocket?.broadcast(new WebSocketMessage().setCommand('requests').setPayload(
-      this._getAll()
-    ));
+    this.webSocket?.broadcast(new WebSocketMessage().setCommand('requests').setPayload(this._getAll()));
   }
 
   /**
-   * @returns {Object} Returns request as array and current date
+   * @returns {object} Returns request as array and current date
    */
   _getAll() {
     return {
       now: new Date(),
-      requests: Object.values(this.requestList)
-    }
+      requests: Object.values(this.requestList),
+    };
   }
 
   /**
    * Get all the requests from the "cache"
    * @param {Request} req
    * @param {Response} res
-   * @returns {Object}
+   * @returns {object}
    */
   getAll(req, res) {
     return res.json(this._getAll());
@@ -210,10 +208,11 @@ class RequestHandler {
   /**
    * Setter for updating workflowService to use
    * @param {WorkflowService} - service to be used for retrieving workflow configuration
-   * @return {void}
+   * @returns {void}
    */
   set workflowService(service) {
     this._workflowService = service;
   }
 }
+
 module.exports = RequestHandler;

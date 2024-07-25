@@ -10,15 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Doc: https://grpc.io/docs/languages/node/
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
-const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
-const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
+const { grpcErrorToNativeError } = require('./../errors/grpcErrorToNativeError.js');
+const { Status } = require(path.join(__dirname, './../../protobuf/status_pb.js'));
+const { EnvironmentInfo } = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
+
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
 
 /**
@@ -28,22 +29,22 @@ class GrpcProxy {
   /**
    * Create gRPC client and sets the methods identified in the provided path of protofile
    * https://grpc.io/grpc/node/grpc.Client.html
-   * @param {Object} config - Contains configuration fields for gRPC client
+   * @param {object} config - Contains configuration fields for gRPC client
    * @param {string} path - path to protofile location
    */
   constructor(config, path) {
     if (this._isConfigurationValid(config, path)) {
-      const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: false, arrays: true});
+      const packageDefinition = protoLoader.loadSync(path, { longs: String, keepCase: false, arrays: true });
       const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
       const protoService = octlProto[this._package][this._label];
       const address = `${config.hostname}:${config.port}`;
       const credentials = grpcLibrary.credentials.createInsecure();
-      const options = {'grpc.max_receive_message_length': 1024 * 1024 * this._maxMessageLength}; // MB
+      const options = { 'grpc.max_receive_message_length': 1024 * 1024 * this._maxMessageLength }; // MB
 
       this.client = new protoService(address, credentials, options);
       this.client.waitForReady(
         Date.now() + this._connectionTimeout,
-        (error) => this._logConnectionResponse(error, address)
+        (error) => this._logConnectionResponse(error, address),
       );
 
       // set all the available gRPC methods in object and build a separate array with names only
@@ -63,41 +64,39 @@ class GrpcProxy {
      * Definition of each call that can be made based on the proto file definition
      * @param {JSON} args - arguments to be passed to gRPC Server
      * @param {JSON} options - metadata for gRPC call such as deadline
-     * @returns 
+     * @returns
      */
-    this[methodName] = (args = {}, options = {deadline: Date.now() + this._timeout}) => {
-      return new Promise((resolve, reject) => {
-        this.client[methodName](args, options, (error, response) => {
-          if (error) {
-            try {
-              if (methodName === 'NewEnvironment' && error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
-                const buffer = error.metadata.get('grpc-status-details-bin')[0];
-                Status.deserializeBinary(buffer).getDetailsList().map((detail) => {
-                  if (detail.getTypeName() == 'o2control.EnvironmentInfo') {
-                    const deserialized = detail.unpack(EnvironmentInfo.deserializeBinary, detail.getTypeName());
-                    error.envId = deserialized.array[0];
-                  }
-                });
-              }
-              reject(error);
-            } catch (exception) {
-              log.debug('Failed new env details error' + exception);
-              reject(exception);
+    this[methodName] = (args = {}, options = { deadline: Date.now() + this._timeout }) => new Promise((resolve, reject) => {
+      this.client[methodName](args, options, (error, response) => {
+        if (error) {
+          try {
+            if (methodName === 'NewEnvironment' && error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
+              const buffer = error.metadata.get('grpc-status-details-bin')[0];
+              Status.deserializeBinary(buffer).getDetailsList().map((detail) => {
+                if (detail.getTypeName() == 'o2control.EnvironmentInfo') {
+                  const deserialized = detail.unpack(EnvironmentInfo.deserializeBinary, detail.getTypeName());
+                  error.envId = deserialized.array[0];
+                }
+              });
             }
-            reject(grpcErrorToNativeError(error));
-            return;
+            reject(error);
+          } catch (exception) {
+            log.debug(`Failed new env details error${exception}`);
+            reject(exception);
           }
-          resolve(response);
-        });
+          reject(grpcErrorToNativeError(error));
+          return;
+        }
+        resolve(response);
       });
-    };
+    });
     return methodName;
   }
 
   /**
    * Checks if configuration provided for gRPC Connection is valid
    * @param {JSON} config
-   * @param {String} path - location of gRPC file containing API
+   * @param {string} path - location of gRPC file containing API
    */
   _isConfigurationValid(config, path) {
     let isValid = true;
@@ -134,7 +133,7 @@ class GrpcProxy {
   }
 
   /**
-   * 
+   *
    * @param {Error} error - error following attempt to connect to gRPC server
    * @param {string} address - address on which connection was attempted
    */
@@ -158,7 +157,7 @@ class GrpcProxy {
 
   /**
    * Get the status of the connection to gRPC
-   * @return {boolean}
+   * @returns {boolean}
    */
   get isConnectionReady() {
     return this._isConnectionReady;
@@ -174,7 +173,7 @@ class GrpcProxy {
 
   /**
    * Get the error of the connection if present.
-   * @return {Error}
+   * @returns {Error}
    */
   get connectionError() {
     return this._connectionError;

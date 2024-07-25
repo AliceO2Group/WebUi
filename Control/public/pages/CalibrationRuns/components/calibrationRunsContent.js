@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import errorPage from './../../../common/errorPage.js';
 import pageLoading from './../../../common/pageLoading.js';
-import {groupedCalibrationRunsPanel} from './calibrationRunGroups.js';
+import { groupedCalibrationRunsPanel } from './calibrationRunGroups.js';
 
 /**
  * @file component which builds a panel for displaying actions and information on calibration runs
@@ -24,10 +24,10 @@ import {groupedCalibrationRunsPanel} from './calibrationRunGroups.js';
 /**
  * Main content panel of CalibrationRunPage containing multiple widgets grouped by their detector
  * @param {CalibrationRunsModel} calibrationRunsModel - model for the calibration runs page
- * @return {vnode}
+ * @returns {vnode}
  */
 export const calibrationRunsContent = (calibrationRunsModel) => {
-  const {calibrationRuns} = calibrationRunsModel;
+  const { calibrationRuns } = calibrationRunsModel;
   return calibrationRuns.match({
     NotAsked: () => h('.f7.flex-column', 'Calibration Runs data not asked'),
     Loading: () => pageLoading(2),
@@ -35,7 +35,7 @@ export const calibrationRunsContent = (calibrationRunsModel) => {
       h('.flex-row.p1', [
         h('.w-40.f4.text-center', 'Start/Ongoing calibration runs'),
         h('.w-30.f4.text-center', 'Last calibration runs'),
-        h('.w-30.f4.text-center', 'Last SUCCESSFUL calibration runs')
+        h('.w-30.f4.text-center', 'Last SUCCESSFUL calibration runs'),
       ]),
       groupedCalibrationRunsPanel(runsGroupedByDetector, calibrationRunsModel),
     ],

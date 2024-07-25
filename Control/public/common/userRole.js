@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {di} from './../utilities/di.js';
+import { di } from './../utilities/di.js';
 
 /**
  * @file User role helper functions
@@ -22,11 +22,11 @@ import {di} from './../utilities/di.js';
  * Check if the user has needed role
  * @param {Role} role - role to check that user has
  * @param {boolean} strict - if true, the role must be exactly the same, otherwise it can be lower
- * @return {boolean} - true if user has the role
+ * @returns {boolean} - true if user has the role
  */
 export const isUserAllowedRole = (role, strict = false) => {
   if (strict) {
-    return di.session.role === role
+    return di.session.role === role;
   } else {
     return di.session.role <= role;
   }

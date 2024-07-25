@@ -11,14 +11,13 @@
  * or submit itself to any jurisdiction.
  */
 
-const {NotFoundError} = require('./NotFoundError.js');
-const {InvalidInputError} = require('./InvalidInputError.js');
-const {TimeoutError} = require('./TimeoutError.js');
+const { NotFoundError } = require('./NotFoundError.js');
+const { InvalidInputError } = require('./InvalidInputError.js');
+const { TimeoutError } = require('./TimeoutError.js');
 
 /**
  * Convert a gRPC error to native error
  * Code List source: https://grpc.github.io/grpc/core/md_doc_statuscodes.html
- *
  * @param {gRPCError} error - error object from gRPC Client library
  * @returns {Error}
  */

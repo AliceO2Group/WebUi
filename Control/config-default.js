@@ -6,7 +6,7 @@ module.exports = {
     // key: './cert/key.pem',
     // cert: './cert/cert.pem',
     tls: false,
-    limit: '1Mb'
+    limit: '1Mb',
   },
   grpc: {
     hostname: 'localhost',
@@ -14,7 +14,7 @@ module.exports = {
     timeout: 20000, // ms, gRPC deadline for service calls
     maxMessageLength: 50, // MB, gRPC receive message limit
     label: 'Control',
-    package: 'o2control'
+    package: 'o2control',
   },
   apricot: {
     hostname: 'localhost',
@@ -22,10 +22,10 @@ module.exports = {
     timeout: 20000, // ms, gRPC deadline for service calls
     maxMessageLength: 50, // MB, gRPC receive message limit
     label: 'Apricot',
-    package: 'apricot'
+    package: 'apricot',
   },
   grafana: {
-    url: 'http://localhost:3000'
+    url: 'http://localhost:3000',
   },
   bookkeeping: {
     url: 'http://localhost:4000',
@@ -51,7 +51,7 @@ module.exports = {
     url: 'localhost:8083',
   },
   qcGui: {
-    url: 'qcg.cern.ch'
+    url: 'qcg.cern.ch',
   },
   utils: {
     refreshTask: 10000, // how often should task list page should refresh its content

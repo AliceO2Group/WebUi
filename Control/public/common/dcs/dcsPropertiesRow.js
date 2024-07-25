@@ -10,20 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconCheck, iconX} from '/js/src/index.js';
-import {DetectorState} from './../enums/DetectorState.enum.js';
+import { h, iconCheck, iconX } from '/js/src/index.js';
+import { DetectorState } from './../enums/DetectorState.enum.js';
 
 /**
  * Construct a visual element under the form of a row that displays the state of properties of a detector as per DCS
  * - PFR - Prepare For Run
  * - SOR - Start Of Run
  * @param {Detector} detector - information of a detector from DCS
- * @return {vnode} 
+ * @returns {vnode}
  */
 export const dcsPropertiesRow = (detector = {}) => {
-  const {pfrAvailability, sorAvailability} = detector;
+  const { pfrAvailability, sorAvailability } = detector;
   return h('.flex-row.g2', [
     pfrAvailability && dcsProperty(pfrAvailability, 'PFR'),
     sorAvailability && dcsProperty(sorAvailability, 'SOR'),
@@ -34,7 +34,7 @@ export const dcsPropertiesRow = (detector = {}) => {
  * Construct a visual element that it will help the user in understanding the property of DCS and what actions can be taken
  * @param {DetectorState} state - state of the DCS property that we wish to display
  * @param {String['PFR', 'SOR']} name - dcs component that we display availability for
- * @return {vnode}
+ * @returns {vnode}
  */
 export const dcsProperty = (state = '', name) => {
   let stateClass = '';
@@ -49,8 +49,8 @@ export const dcsProperty = (state = '', name) => {
   }
   if (state !== DetectorState.UNDEFINED) {
     return h('.flex-row.g1', [
-      h(``, {class: stateClass}, icon),
-      name
+      h('', { class: stateClass }, icon),
+      name,
     ]);
   }
   return '';

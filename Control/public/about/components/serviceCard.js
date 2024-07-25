@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {serviceRow as itemRow} from './serviceRow.js';
+import { h } from '/js/src/index.js';
+import { serviceRow as itemRow } from './serviceRow.js';
 
 /**
  * Builds a panel corresponding to the information of Service in AliECS GUI
@@ -22,28 +22,28 @@ import {serviceRow as itemRow} from './serviceRow.js';
  */
 export const serviceCard = (service) => {
   const {
-    status: {ok, configured, message} = {}, endpoint, version, extras = {}, name = 'UNDEFINED', connectionState
+    status: { ok, configured, message } = {}, endpoint, version, extras = {}, name = 'UNDEFINED', connectionState,
   } = service;
   const isDown = configured && !ok;
-  
+
   const showExtras = extras?.showExtras && Object.keys(extras).length > 0;
   const extrasToDisplay = JSON.parse(JSON.stringify(extras));
   delete extrasToDisplay.showExtras;
 
-  const titleClass = (configured && ok) ? 'success' : (configured && !ok) ? 'bg-danger white' : '';
+  const titleClass = configured && ok ? 'success' : configured && !ok ? 'bg-danger white' : '';
 
-  return h('.w-33.flex-column', {id: name}, [
-    h('.panel-title.p2.flex-row', {class: titleClass}, [
+  return h('.w-33.flex-column', { id: name }, [
+    h('.panel-title.p2.flex-row', { class: titleClass }, [
       h('h4', name),
-      version && h('i.text-right.flex-grow', {style: 'justify-content: flex-end'}, version)
+      version && h('i.text-right.flex-grow', { style: 'justify-content: flex-end' }, version),
     ]),
     configured && h('.panel.flex-column.g2', [
       [
         isDown && itemRow('Error', message),
         itemRow('Endpoint', endpoint),
         itemRow('Connection State', connectionState),
-        showExtras && h('pre', {style: 'max-height: 10em'}, JSON.stringify(extrasToDisplay, null, 2))
-      ]
-    ])
+        showExtras && h('pre', { style: 'max-height: 10em' }, JSON.stringify(extrasToDisplay, null, 2)),
+      ],
+    ]),
   ]);
 };

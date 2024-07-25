@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log} = require('@aliceo2/web-ui');
-const {httpGetJson} = require('./../utils.js');
+const { Log } = require('@aliceo2/web-ui');
+const { httpGetJson } = require('./../utils.js');
 const RunSummaryAdapter = require('./../adapters/RunSummaryAdapter.js');
-const {BookkeepingFilterAdapter} = require('./../adapters/external/BookkeepingFilterAdapter.js');
+const { BookkeepingFilterAdapter } = require('./../adapters/external/BookkeepingFilterAdapter.js');
 
 const DEFAULT_REFRESH_RATE = 30000;
 
@@ -25,11 +25,14 @@ const DEFAULT_REFRESH_RATE = 30000;
 class BookkeepingService {
   /**
    * Constructor for configuring the service to retrieve data via Bookkeeping HTTP API
-   * @param {Object} config = {url: string, token: string} - configuration for using BKP service
+   * @param {object} config = {url: string, token: string} - configuration for using BKP service
+   * @param config.url
+   * @param config.token
+   * @param config.refreshRate
    */
-  constructor({url, token, refreshRate}) {
+  constructor({ url, token, refreshRate }) {
     this._url = url ?? null;
-    const {protocol, hostname, port} = url ? new URL(this._url) : {};
+    const { protocol, hostname, port } = url ? new URL(this._url) : {};
     this._hostname = hostname;
     this._port = port;
     this._protocol = protocol;
@@ -42,13 +45,13 @@ class BookkeepingService {
 
   /**
    * Given a definition, a type of a run and a detector, fetch from Bookkeeping the last RUN matching the parameters
-   * @param {Object<String, Object>} filter - definition of the run to query
-   * @return {RunSummary|{}} - run object from Bookkeeping
+   * @param {Object<string, Object>} filter - definition of the run to query
+   * @returns {RunSummary|{}} - run object from Bookkeeping
    */
   async getRun(filter) {
     const filterAsString = BookkeepingFilterAdapter.toString(filter);
     try {
-      const {data} = await httpGetJson(this._hostname, this._port, `/api/runs?${filterAsString}&token=${this._token}`, {
+      const { data } = await httpGetJson(this._hostname, this._port, `/api/runs?${filterAsString}&token=${this._token}`, {
         protocol: this._protocol,
         rejectUnauthorized: false,
       });
@@ -63,12 +66,12 @@ class BookkeepingService {
 
   /**
    * Method to fetch run types from Bookkeeping and build a map of types to IDs as needed for filtering in RUNs API
-   * @returns {Object<String, Number>} - map of runtypes to their ID
+   * @returns {Object<string, number>} - map of runtypes to their ID
    */
   async getRunTypes() {
     try {
       const runTypesMap = {};
-      const {data} = await httpGetJson(this._hostname, this._port, `/api/runTypes?token=${this._token}`, {
+      const { data } = await httpGetJson(this._hostname, this._port, `/api/runTypes?token=${this._token}`, {
         protocol: this._protocol,
         rejectUnauthorized: false,
       });
@@ -88,11 +91,11 @@ class BookkeepingService {
 
   /**
    * Getter for retrieving the rate of refreshing data from Bookkeeping
-   * @return {Number}
+   * @returns {number}
    */
   get refreshRate() {
     return this._refreshRate;
   }
 }
 
-module.exports = {BookkeepingService};
+module.exports = { BookkeepingService };

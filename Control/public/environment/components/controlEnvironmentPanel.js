@@ -10,15 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* global COG */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
-import {infoLoggerButton} from './buttons.js';
-import {ROLES} from './../../workflow/constants.js';
-import {isUserAllowedRole} from './../../common/userRole.js';
+import { infoLoggerButton } from './buttons.js';
+import { ROLES } from './../../workflow/constants.js';
+import { isUserAllowedRole } from './../../common/userRole.js';
 
 /**
  * List of buttons for:
@@ -30,8 +30,8 @@ import {isUserAllowedRole} from './../../common/userRole.js';
  * @returns {vnode}
  */
 export const controlEnvironmentPanel = (environment, item, isAllowedToControl = false) => {
-  const {currentTransition, includedDetectors, state} = item;
-  const {model} = environment;
+  const { currentTransition, includedDetectors, state } = item;
+  const { model } = environment;
   const isSorAvailable =
     item.userVars?.['dcs_enabled'] === 'true' ?
       model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability')
@@ -42,65 +42,58 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
   return h('', [
     h('.flex-row', [
       h('', {
-        style: 'flex-grow: 1;'
-      }, h('.g2.flex-row',[
+        style: 'flex-grow: 1;',
+      }, h('.g2.flex-row', [
         infoLoggerButton(item, 'InfoLogger FLP', COG.ILG_URL),
         infoLoggerButton(item, 'InfoLogger EPN', COG.ILG_EPN_URL),
-      ]),
-      ),
+      ])),
       h('.flex-column.justify-center', {
-        style: 'flex-grow: 3;'
+        style: 'flex-grow: 3;',
       }, [
         h('.flex-column', [
           !isAllowedToControl &&
           h('span.warning.flex-end.flex-row.g1#missing_lock_ownership_to_control_message', [
             'You do not own the necessary ',
-            h('a',{
+            h('a', {
               href: '?page=locks',
               onclick: (e) => model.router.handleLinkEvent(e),
             }, 'locks'),
-            ' to control this environment.'
+            ' to control this environment.',
           ]),
           isStable && isConfigured && !isSorAvailable
           && h('.danger.flex-end.flex-row', 'SOR is unavailable for one or more of the included detectors.'),
 
         ]),
         isAllowedToControl && h('.flex-row.flex-end.g2', [
-          controlButton(
-            '.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
-            Boolean(currentTransition)
-          ),
-          controlButton(
-            '.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
-          ), // button will not be displayed in any state due to OCTRL-628
-          controlButton('', environment, item, 'RESET', 'RESET', '', Boolean(currentTransition)), ' ',
-          controlButton(
-            '.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
-          ),
+          controlButton('.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED', Boolean(currentTransition)),
+          controlButton('.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)), // button will not be displayed in any state due to OCTRL-628
+          controlButton('', environment, item, 'RESET', 'RESET', '', Boolean(currentTransition)),
+          ' ',
+          controlButton('.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)),
           shutdownEnvButton(environment, item, Boolean(currentTransition)),
-          killEnvButton(environment, item)
-        ])
-      ])
+          killEnvButton(environment, item),
+        ]),
+      ]),
     ]),
     environment.itemControl.match({
       NotAsked: () => null,
       Loading: () => null,
       Success: (_data) => null,
-      Failure: ({message}) => h('p.danger.text-right', message),
-    })
+      Failure: ({ message }) => h('p.danger.text-right', message),
+    }),
   ]);
 };
 
 /**
  * Makes a button to toggle severity
  * @param {string} buttonType
- * @param {Object} environment
- * @param {Object} item
+ * @param {object} environment
+ * @param {object} item
  * @param {string} label - button's label
  * @param {string} type - action
  * @param {string} stateToHide - state in which button should not be displayed
  * @param {boolean} isInTransition - if environment is currently transitioning
- * @return {vnode}
+ * @returns {vnode}
  */
 const controlButton = (buttonType, environment, item, label, type, stateToHide, isInTransition) => {
   let title = label;
@@ -110,7 +103,8 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide, 
     title = `'${label}' cannot be used in state '${item.state}'`;
   }
 
-  return h(`button.btn${buttonType}`,
+  return h(
+    `button.btn${buttonType}`,
     {
       id: `buttonTo${label}`,
       class: environment.itemControl.isLoading() ? 'loading' : '',
@@ -120,57 +114,60 @@ const controlButton = (buttonType, environment, item, label, type, stateToHide, 
         confirm(`Are you sure you want to ${label} this ${item.state} environment?`)
           && environment.controlEnvironment(item.id, type, item.currentRunNumber);
       },
-      title
+      title,
     },
-    label);
-}
+    label,
+  );
+};
 
 /**
  * Create a button to shutdown env
- * @param {Object} environment
+ * @param {object} environment
  * @param {JSON} item
  * @param {boolean} isInTransition - if environment is currently transitioning
- * @return {vnode}
+ * @returns {vnode}
  */
 const shutdownEnvButton = (environment, item, isInTransition) =>
-  h(`button.btn.btn-danger`, {
+  h('button.btn.btn-danger', {
     id: 'buttonToSHUTDOWN',
     class: environment.itemControl.isLoading() ? 'loading' : '',
     disabled: isInTransition || environment.itemControl.isLoading(),
-    style: {display: (item.state === 'CONFIGURED' || item.state == 'DEPLOYED') ? '' : 'none'},
+    style: { display: item.state === 'CONFIGURED' || item.state == 'DEPLOYED' ? '' : 'none' },
     onclick: () => confirm(`Are you sure you want to SHUTDOWN this ${item.state} environment?`)
       && environment.destroyEnvironment(item.id, item.currentRunNumber),
-    title: isInTransition ? 'Environment is currently transitioning, please wait' : 'Shutdown environment'
+    title: isInTransition ? 'Environment is currently transitioning, please wait' : 'Shutdown environment',
   }, 'SHUTDOWN');
 
 /**
  * Create a button to kill env
- * @param {Object} environment
+ * @param {object} environment
  * @param {JSON} item
- * @return {vnode}
+ * @returns {vnode}
  */
 const killEnvButton = (environment, item) =>
-  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
-    h(`button.btn.btn-danger active`, {
+  h('.flex-column.dropdown#flp_selection_info_icon', { style: 'display: flex' }, [
+    h('button.btn.btn-danger active', {
       id: 'buttonToFORCESHUTDOWN',
       class: environment.itemControl.isLoading() ? 'loading' : '',
       style: 'margin-left: .3em',
       disabled: environment.itemControl.isLoading() || !_isKillActionAllowed(item, environment.model),
       onclick: () => confirm(`Are you sure you want to KILL this ${item.state} environment?`)
         && environment.destroyEnvironment(item.id, item.currentRunNumber, true, true),
-      title: 'Kill environment'
+      title: 'Kill environment',
     }, 'KILL'),
-    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 400px'}, [
-      h('', `Environments can only be killed:`),
-      h('', `- by the shifter if it is in ERROR state`),
-      h('', `- by admins in any other state`)
-    ])
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', { style: 'width: 400px' }, [
+      h('', 'Environments can only be killed:'),
+      h('', '- by the shifter if it is in ERROR state'),
+      h('', '- by admins in any other state'),
+    ]),
   ]);
 
 /**
  * Logic behind enabling the kill button of the environment. It can be used by:
  * * any user if environment is in ERROR state
  * * admins at any point
+ * @param item
+ * @param model
  */
 function _isKillActionAllowed(item, model) {
   return item.state === 'ERROR' || isUserAllowedRole(ROLES.Admin);

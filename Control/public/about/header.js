@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * @file Header for About Page
@@ -23,6 +23,4 @@ import {h} from '/js/src/index.js';
  * @param {Model} model - root object of the framework
  * @returns {vnode}
  */
-export const header = (model) => [
-  h('.w-100 text-center', h('h4', 'About')),
-];
+export const header = (model) => [h('.w-100 text-center', h('h4', 'About'))];

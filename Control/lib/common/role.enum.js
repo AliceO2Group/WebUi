@@ -10,21 +10,21 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const Role = Object.freeze({
   ADMIN: 1,
   GLOBAL: 10,
   DETECTOR: 30, // roles for this level will be in format of `det-<name>` e.g. `det-its`
   DEFAULT_ROLE: 50,
-  GUEST: 100
+  GUEST: 100,
 });
 
 /**
  * Method to check if the provided access as per WebUI server is stronger than the minimum required role
- * @param {String} roleName - admin, global, det-, guest
+ * @param {string} roleName - admin, global, det-, guest
  * @param {Role} minimumRole - minimum role that user should have
- * @return {Boolean}
+ * @returns {boolean}
  */
 const isRoleSufficient = (roleName, minimumRole) => {
   const roleInUpperCase = roleName.toLocaleUpperCase();
@@ -40,7 +40,8 @@ const isRoleSufficient = (roleName, minimumRole) => {
     role = Role[roleInUpperCase];
   }
   return role <= minimumRole;
-}
+};
 
 exports.Role = Role;
+
 exports.isRoleSufficient = isRoleSufficient;

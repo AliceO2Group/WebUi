@@ -10,24 +10,23 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import loading from '../../../common/loading.js';
 
 /**
  * Build a reusable panel which displays a list of names of service that are currently waiting for their status
  * @param {Array<Service>} names
+ * @param services
  * @returns {vnode}
  */
 export const servicesInLoadingPanel = (services) => {
   if (Object.keys(services).length > 0) {
-
     const namesAsString = Object.keys(services).join(', ');
     return h('.w-100.flex-row.items-center.p2.shadow-level1', [
       loading(2),
       h('.ph2', `Loading status for: ${namesAsString}`),
     ]);
   }
-
-}
+};

@@ -10,10 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {grpcErrorToNativeError} = require('../errors/grpcErrorToNativeError.js');
-const {NotFoundError} = require('./../errors/NotFoundError.js');
+const { grpcErrorToNativeError } = require('../errors/grpcErrorToNativeError.js');
+const { NotFoundError } = require('./../errors/NotFoundError.js');
+
 const RUNTIME_COMPONENT = 'COG';
 const RUNTIME_CONFIGURATION = 'COG-v1';
 const RUNTIME_KEY = 'workflow-mappings';
@@ -38,34 +39,34 @@ class WorkflowTemplateService {
    * @throws
    */
   async getDefaultTemplateSource() {
-    const {repos: repositories} = await this._coreGrpc['ListRepos']();
+    const { repos: repositories } = await this._coreGrpc['ListRepos']();
     const defaultRepository = repositories.find((repository) => repository.default);
 
     if (!defaultRepository) {
-      throw new NotFoundError(`Unable to find a default repository`);
+      throw new NotFoundError('Unable to find a default repository');
     }
-    const {name: repository, defaultRevision: revision} = defaultRepository;
+    const { name: repository, defaultRevision: revision } = defaultRepository;
 
     if (!revision) {
-      throw new NotFoundError(`Unable to find a default revision`);
+      throw new NotFoundError('Unable to find a default revision');
     }
     return {
       repository,
       revision,
-      template: 'readout-dataflow'
+      template: 'readout-dataflow',
     };
   }
 
   /**
    * Retrieve a list of mappings for simplified creation of environments based on workflow saved configurations
-   * @return {Array<{label: String, configuration: String}>} - list of mappings to be displayed
+   * @returns {Array<{label: string, configuration: string}>} - list of mappings to be displayed
    */
   async retrieveWorkflowMappings() {
     try {
       const mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_COMPONENT, RUNTIME_KEY);
       const mappings = JSON.parse(mappingsString);
       if (Array.isArray(mappings)) {
-        return mappings.sort(({label: labelA}, {label: labelB}) => labelA < labelB ? -1 : 1);
+        return mappings.sort(({ label: labelA }, { label: labelB }) => labelA < labelB ? -1 : 1);
       }
 
       return [];
@@ -76,18 +77,18 @@ class WorkflowTemplateService {
 
   /**
    * Using apricot service, retrieve the content of a saved configuration by name
-   * @param {String} name - configuration that needs to be retrieved
-   * @return {Object} - object with saved configuration
+   * @param {string} name - configuration that needs to be retrieved
+   * @returns {object} - object with saved configuration
    */
   async retrieveWorkflowSavedConfiguration(name) {
     try {
       const configurationString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_CONFIGURATION, name);
       const configuration = JSON.parse(configurationString);
-      return configuration
+      return configuration;
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
   }
 }
 
-module.exports = {WorkflowTemplateService};
+module.exports = { WorkflowTemplateService };

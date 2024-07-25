@@ -23,8 +23,7 @@ class RunSummaryAdapter {
 
   /**
    * Converts the given object to an entity object.
-   *
-   * @param {Object} run - Run Entity as per Bookkeeping https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js
+   * @param {object} run - Run Entity as per Bookkeeping https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/domain/entities/Run.js
    * @returns {RunSummary} entity of a task with needed information
    */
   static toEntity(run) {
@@ -40,7 +39,7 @@ class RunSummaryAdapter {
       endTime,
     } = run;
 
-    let {detectors = []} = run;
+    let { detectors = [] } = run;
     if (typeof detectors === 'string') {
       detectors = detectors.split(',');
     }

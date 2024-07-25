@@ -10,16 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-const {Log} = require('@aliceo2/web-ui');
+ */
+const { Log } = require('@aliceo2/web-ui');
+
 const LOG_FACILITY = 'cog/env-ctrl';
-const {EnvironmentTransitionType} = require('./../common/environmentTransitionType.enum.js');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
-const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
-const {User} = require('./../dtos/User.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
+const { EnvironmentTransitionType } = require('./../common/environmentTransitionType.enum.js');
+const { grpcErrorToNativeError } = require('./../errors/grpcErrorToNativeError.js');
+const { InvalidInputError } = require('./../errors/InvalidInputError.js');
+const { UnauthorizedAccessError } = require('./../errors/UnauthorizedAccessError.js');
+const { updateExpressResponseFromNativeError } = require('./../errors/updateExpressResponseFromNativeError.js');
+const { User } = require('./../dtos/User.js');
+const { LOG_LEVEL } = require('../common/logLevel.enum.js');
 
 /**
  * Controller for dealing with all API requests on environments from AliECS:
@@ -63,7 +64,7 @@ class EnvironmentController {
    * @returns {void}
    */
   async getEnvironmentHandler(req, res) {
-    const {id, source} = req.params;
+    const { id, source } = req.params;
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
       return;
@@ -84,10 +85,10 @@ class EnvironmentController {
    * @returns {void}
    */
   async transitionEnvironmentHandler(req, res) {
-    const {personid, username, name} = req.session;
+    const { personid, username, name } = req.session;
     const user = new User(username, name, personid);
-    const {id} = req.params;
-    const {type: transitionType, runNumber = ''} = req.body;
+    const { id } = req.params;
+    const { type: transitionType, runNumber = '' } = req.body;
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
     } else if (!(transitionType in EnvironmentTransitionType)) {
@@ -95,8 +96,9 @@ class EnvironmentController {
     } else {
       const transitionRequestedAt = Date.now();
       let response = null;
-      this._logger.infoMessage(`Request to transition environment by ${req.session.username} to ${transitionType}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+      this._logger.infoMessage(
+        `Request to transition environment by ${req.session.username} to ${transitionType}`,
+        { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber },
       );
       try {
         response = await this._envService.transitionEnvironment(id, transitionType, user);
@@ -104,7 +106,7 @@ class EnvironmentController {
       } catch (error) {
         this._logger.errorMessage(
           `Request to transition environment by ${req.session.username} to ${transitionType} failed due to ${error}`,
-          {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+          { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber },
         );
         updateExpressResponseFromNativeError(res, error);
       }
@@ -120,23 +122,24 @@ class EnvironmentController {
    * @returns {void}
    */
   async destroyEnvironmentHandler(req, res) {
-    const {id} = req.params ?? {};
-    const {runNumber = '', keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
+    const { id } = req.params ?? {};
+    const { runNumber = '', keepTasks = false, allowInRunningState = false, force = false } = req.body ?? {};
 
     if (!id) {
       updateExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
     } else {
       const destroyRequestedAt = Date.now();
-      this._logger.infoMessage(`Request to destroy environment by ${req.session.username} by force: ${force}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+      this._logger.infoMessage(
+        `Request to destroy environment by ${req.session.username} by force: ${force}`,
+        { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber },
       );
       try {
-        const response = await this._envService.destroyEnvironment(id, {keepTasks, allowInRunningState, force});
+        const response = await this._envService.destroyEnvironment(id, { keepTasks, allowInRunningState, force });
         res.status(200).json(response);
       } catch (error) {
         this._logger.errorMessage(
           `Request to destroy environment by ${req.session.username} failed due to ${error}`,
-          {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+          { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber },
         );
         updateExpressResponseFromNativeError(res, error);
       }
@@ -151,9 +154,9 @@ class EnvironmentController {
    * @returns {void}
    */
   async newAutoEnvironmentHandler(req, res) {
-    const {personid, name, username} = req.session;
+    const { personid, name, username } = req.session;
     const user = new User(username, name, personid);
-    const {detector, runType, configurationName} = req.body;
+    const { detector, runType, configurationName } = req.body;
 
     if (!this._lockService.isLockOwnedByUser(detector, user)) {
       updateExpressResponseFromNativeError(res, new UnauthorizedAccessError('Lock not taken'));
@@ -194,7 +197,7 @@ class EnvironmentController {
     // Retrieve latest default workflow to use
     let workflowTemplatePath;
     try {
-      const {template, repository, revision} = await this._workflowService.getDefaultTemplateSource();
+      const { template, repository, revision } = await this._workflowService.getDefaultTemplateSource();
       workflowTemplatePath = `${repository}/workflows/${template}@${revision}`;
     } catch (error) {
       this._logger.debug(`Unable to retrieve default workflow template due to ${error}`);
@@ -203,19 +206,20 @@ class EnvironmentController {
     }
     // Attempt to deploy environment
     try {
-      this._logger.infoMessage(`Request by username(${username}) to deploy configuration ${configurationName}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+      this._logger.infoMessage(
+        `Request by username(${username}) to deploy configuration ${configurationName}`,
+        { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY },
       );
       const environment = await this._envService.newAutoEnvironment(workflowTemplatePath, variables, detector, runType);
       res.status(200).json(environment);
     } catch (error) {
       this._logger.errorMessage(
         `Unable to deploy request by username(${username}) for ${configurationName} due to error`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+        { level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY },
       );
       updateExpressResponseFromNativeError(res, error);
     }
   }
 }
 
-module.exports = {EnvironmentController};
+module.exports = { EnvironmentController };

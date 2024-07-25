@@ -10,16 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconTrash, iconPlus, info} from '/js/src/index.js';
-import {readoutPanel, qcUriPanel} from './../../panels/variables/basicPanel.js';
+import { h, iconTrash, iconPlus, info } from '/js/src/index.js';
+import { readoutPanel, qcUriPanel } from './../../panels/variables/basicPanel.js';
 
 /**
  * Panel for adding (K;V) configurations for the environment
  * to be created
- * @param {Object} workflow
- * @return {vnode}
+ * @param {object} workflow
+ * @returns {vnode}
  */
 export default (workflow) =>
   h('.w-100', [
@@ -28,8 +28,8 @@ export default (workflow) =>
       h('a.ph1.actionable-icon', {
         href: 'https://github.com/AliceO2Group/ControlWorkflows',
         target: '_blank',
-        title: 'Open Environment Variables Documentation'
-      }, info())
+        title: 'Open Environment Variables Documentation',
+      }, info()),
     ]),
     h('.panel', [
       addKVInputList(workflow),
@@ -40,13 +40,13 @@ export default (workflow) =>
         addListOfKvPairs(workflow),
         importErrorPanel(workflow),
       ]),
-    ])
+    ]),
   ]);
 
 /**
  * Method to add a list of KV pairs added by the user
- * @param {Object} workflow
- * @return {vnode}
+ * @param {object} workflow
+ * @returns {vnode}
  */
 const addKVInputList = (workflow) =>
   // TODO filter our the ones in varSpecMap
@@ -64,18 +64,19 @@ const addKVInputList = (workflow) =>
         }, h('input.form-control', {
           type: 'text',
           value: workflow.form.variables[key],
-          onchange: (e) => workflow.addVariable(key, e.target.value, true)
+          onchange: (e) => workflow.addVariable(key, e.target.value, true),
         })),
         h('.ph2.danger.actionable-icon', {
           id: `removeKey${key}`,
-          onclick: () => workflow.removeVariableByKey(key)
-        }, iconTrash())
-      ])
-    )]);
+          onclick: () => workflow.removeVariableByKey(key),
+        }, iconTrash()),
+      ])),
+  ]);
+
 /**
  * Add 2 input fields and a button for adding a new KV Pair
- * @param {Object} workflow
- * @return {vnode}
+ * @param {object} workflow
+ * @returns {vnode}
  */
 const addKVInputPair = (workflow) => {
   let keyString = '';
@@ -87,8 +88,8 @@ const addKVInputPair = (workflow) => {
       id: 'keyInputField',
       placeholder: 'key',
       value: keyString,
-      oncreate: ({dom}) => workflow.dom.keyInput = dom,
-      oninput: (e) => keyString = e.target.value
+      oncreate: ({ dom }) => workflow.dom.keyInput = dom,
+      oninput: (e) => keyString = e.target.value,
     })),
     h('.ph1', {
       style: 'width:60%;',
@@ -104,7 +105,7 @@ const addKVInputPair = (workflow) => {
           workflow.addVariable(keyString, valueString.slice(0, -1));
           workflow.dom.keyInput.focus();
         }
-      }
+      },
     })),
     h('.ph2.actionable-icon', {
       title: 'Add (key,value) variable',
@@ -112,41 +113,38 @@ const addKVInputPair = (workflow) => {
       onclick: () => {
         workflow.addVariable(keyString, valueString);
         workflow.dom.keyInput.focus();
-      }
-    }, iconPlus())
-  ])
+      },
+    }, iconPlus()),
+  ]);
 };
 
 /**
  * Displays a textarea which allows the user to copy paste a JSON of KV pairs
  * to be added in the advanced configuration panel
- * @param {Object} workflow
+ * @param {object} workflow
  * @returns {vnode}
  */
-const addListOfKvPairs = (workflow) => {
-  return h('.pv2.flex-row', [
-    h('.ph1', {
-      style: 'width: 93%'
-    }, h('textarea.form-control', {
-      id: 'kvTextArea',
-      rows: 7,
-      style: 'resize: vertical',
-      value: workflow.kvPairsString,
-      placeholder: 'e.g.\n{\n\t"key1": "value1",\n\t"key2": "value2"\n}',
-      oncreate: ({dom}) => workflow.dom.keyValueArea = dom,
-      oninput: (e) => workflow.kvPairsString = e.target.value
-    })
-    ),
-    h('.ph2.actionable-icon', {
-      title: 'Add list of (key,value) variables',
-      id: 'addKVListButton',
-      onclick: () => {
-        workflow.addVariableJSON(workflow.kvPairsString);
-        workflow.dom.keyValueArea.focus();
-      }
-    }, iconPlus())
-  ]);
-};
+const addListOfKvPairs = (workflow) => h('.pv2.flex-row', [
+  h('.ph1', {
+    style: 'width: 93%',
+  }, h('textarea.form-control', {
+    id: 'kvTextArea',
+    rows: 7,
+    style: 'resize: vertical',
+    value: workflow.kvPairsString,
+    placeholder: 'e.g.\n{\n\t"key1": "value1",\n\t"key2": "value2"\n}',
+    oncreate: ({ dom }) => workflow.dom.keyValueArea = dom,
+    oninput: (e) => workflow.kvPairsString = e.target.value,
+  })),
+  h('.ph2.actionable-icon', {
+    title: 'Add list of (key,value) variables',
+    id: 'addKVListButton',
+    onclick: () => {
+      workflow.addVariableJSON(workflow.kvPairsString);
+      workflow.dom.keyValueArea.focus();
+    },
+  }, iconPlus()),
+]);
 
 /**
  * Displays errors that may appear while importing a configuration via
@@ -159,5 +157,5 @@ const importErrorPanel = (workflow) =>
   workflow.advErrorPanel.length > 0 &&
   h('.w-100.flex-column.ph2', [
     h('.danger', 'The following KV pairs encountered an issue:'),
-    workflow.advErrorPanel.map((error) => h('.danger', `- ${error}`))
+    workflow.advErrorPanel.map((error) => h('.danger', `- ${error}`)),
   ]);

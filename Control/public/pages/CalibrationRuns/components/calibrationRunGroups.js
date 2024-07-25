@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {calibrationRunCard} from './calibrationRunCard.js';
-import {calibrationActionCard} from './calibrationActionCard.js';
+import { h } from '/js/src/index.js';
+import { calibrationRunCard } from './calibrationRunCard.js';
+import { calibrationActionCard } from './calibrationActionCard.js';
 
 /**
  * @file contains grouped needed for displaying actions and information on calibration runs that are grouped
@@ -29,7 +29,7 @@ import {calibrationActionCard} from './calibrationActionCard.js';
  * If there are not any runs for at least a detector, an informative message will be displayed.
  * @param {Object<String, Array<RunSummary>} calibrationsRunsByDetector - object with calibration runs information grouped by their detector
  * @param {CalibrationRunsModel} calibrationRunsModel - model to use for actions on calibration runs
- * @return {vnode}
+ * @returns {vnode}
  */
 export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector, calibrationRunsModel) => {
   const detectorsGroupPanel = [];
@@ -42,32 +42,32 @@ export const groupedCalibrationRunsPanel = (calibrationsRunsByDetector, calibrat
   if (detectorsGroupPanel.length === 0) {
     return h('.text-center', [
       h('p', 'No Calibration Runs were found for provided configuration.'),
-      h('p', 'If such information should be present, please contact an administrator.')
+      h('p', 'If such information should be present, please contact an administrator.'),
     ]);
   }
-  return detectorsGroupPanel
+  return detectorsGroupPanel;
 };
 
 /**
  * Component for mapping each detector to its group of calibration runs
- * @param {String} detector - to which the run group belongs to
- * @param {Object<String, RunSummary|CalibrationConfiguration|RemoteData>} runGroups - list of runs for which to build the components
+ * @param {string} detector - to which the run group belongs to
+ * @param {Object<string, RunSummary | CalibrationConfiguration | RemoteData>} runGroups - list of runs for which to build the components
  * @param {CalibrationRunsModel} calibrationRunsModel - model of the component
- * @return {vnode}
+ * @returns {vnode}
  */
 const calibrationRunsPerDetectorCard = (detector, runGroups, calibrationRunsModel) => {
-  const {newCalibrationRun} = calibrationRunsModel;
+  const { newCalibrationRun } = calibrationRunsModel;
   return [
     Object.values(runGroups).map((runGroup) => {
-      const {configuration, lastCalibrationRun, lastSuccessfulCalibrationRun, ongoingCalibrationRun} = runGroup;
-      return h('.p1.flex-row.g2',
+      const { configuration, lastCalibrationRun, lastSuccessfulCalibrationRun, ongoingCalibrationRun } = runGroup;
+      return h(
+        '.p1.flex-row.g2',
         [
-          calibrationActionCard(
-            configuration, ongoingCalibrationRun, detector, newCalibrationRun.bind(calibrationRunsModel)
-          ),
+          calibrationActionCard(configuration, ongoingCalibrationRun, detector, newCalibrationRun.bind(calibrationRunsModel)),
           calibrationRunCard(lastCalibrationRun),
           calibrationRunCard(lastSuccessfulCalibrationRun),
-        ])
-    })
+        ],
+      );
+    }),
   ];
 };

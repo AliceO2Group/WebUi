@@ -10,16 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {VAR_TYPE, WIDGET_VAR} from './../../constants.js';
+import { h } from '/js/src/index.js';
+import { VAR_TYPE, WIDGET_VAR } from './../../constants.js';
 
 /**
- * Build a variable component based on the information provided 
- * @param {WorkflowVariable} variable 
- * @param {Object} model 
- * @return {vnode}
+ * Build a variable component based on the information provided
+ * @param {WorkflowVariable} variable
+ * @param {object} model
+ * @returns {vnode}
  */
 const autoBuiltBox = (variable, model) => {
   switch (variable.widget) {
@@ -45,13 +45,13 @@ const autoBuiltBox = (variable, model) => {
  * The type will be number / text based on the passed variable's type and will allow the user to input their own values;
  * If of type STRING, the editbox will be defined as `textarea` rather than `input` to allow for easy editing of long values
  * @param {WorkflowVariable} variable
- * @param {Object} model
+ * @param {object} model
  * @returns {vnode}
  */
 const editBox = (variable, model) => {
   let box = 'input';
-  let options = {
-    type: 'text'
+  const options = {
+    type: 'text',
   };
   let style = {};
   if (variable.type === VAR_TYPE.NUMBER) {
@@ -59,20 +59,18 @@ const editBox = (variable, model) => {
   } else if (variable.type === VAR_TYPE.STRING) {
     box = 'textarea';
     delete options.type;
-    style = {style: 'resize: vertical; height: 2em;'};
+    style = { style: 'resize: vertical; height: 2em;' };
   }
 
   return h('.flex-row', [
     variableLabel(variable),
-    h('', {class: 'w-50'},
-      h(`${box}.form-control`, {
-        ...options,
-        ...style,
-        value: model.workflow.form.basicVariables[variable.key] !== undefined ?
-          model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
-        oninput: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
-      })
-    ),
+    h('', { class: 'w-50' }, h(`${box}.form-control`, {
+      ...options,
+      ...style,
+      value: model.workflow.form.basicVariables[variable.key] !== undefined ?
+        model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
+      oninput: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
+    })),
   ]);
 };
 
@@ -81,7 +79,7 @@ const editBox = (variable, model) => {
  * The range of the slider will be defined by the first 2 values within the `allowedValues` field
  * If the 2 values are missing or they are not a number, a simple EDIT_BOX will be generated instead
  * @param {WorkflowVariable} variable
- * @param {Object} model
+ * @param {object} model
  * @returns {vnode}
  */
 const sliderBox = (variable, model) => {
@@ -89,25 +87,25 @@ const sliderBox = (variable, model) => {
     const min = parseInt(variable.allowedValues[0]);
     const max = parseInt(variable.allowedValues[1]);
     if (isNaN(min) || isNaN(max)) {
-      throw new Error('Range values not a number')
+      throw new Error('Range values not a number');
     }
     return h('.flex-row.pv1', [
       variableLabel(variable),
-      h('', {class: 'w-50 flex-row'},
-        h('.w-10.flex-row.items-center',
-          model.workflow.form.basicVariables[variable.key] ?
-            model.workflow.form.basicVariables[variable.key] : variable.defaultValue),
-        h('.w-90',
-          h('input.form-control', {
-            type: 'range',
-            min: min,
-            max: max,
-            value: model.workflow.form.basicVariables[variable.key] ?
-              model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
-            oninput: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
-          })
-        )
-      )
+      h('', { class: 'w-50 flex-row' }, h(
+        '.w-10.flex-row.items-center',
+        model.workflow.form.basicVariables[variable.key] ?
+          model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
+      ), h(
+        '.w-90',
+        h('input.form-control', {
+          type: 'range',
+          min: min,
+          max: max,
+          value: model.workflow.form.basicVariables[variable.key] ?
+            model.workflow.form.basicVariables[variable.key] : variable.defaultValue,
+          oninput: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
+        }),
+      )),
     ]);
   } catch (error) {
     return editBox(variable, model);
@@ -118,24 +116,22 @@ const sliderBox = (variable, model) => {
  * Builds a component of type DROPDOWN_BOX to be used within the Variables Panel
  * Provides a single selection list of elements for the user to choose
  * @param {WorkflowVariable} variable
- * @param {Object} model
+ * @param {object} model
  * @returns {vnode}
  */
 const dropdownBox = (variable, model) =>
   h('.flex-row.pv1', [
     variableLabel(variable),
-    h('', {class: 'w-50'},
-      h('select.form-control', {
-        style: 'cursor: pointer',
-        onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
-      }, [
-        variable.allowedValues.map((value) =>
-          h('option', {
-            style: 'cursor: pointer',
-            selected: model.workflow.form.basicVariables[variable.key] === value
-          }, value))
-      ])
-    ),
+    h('', { class: 'w-50' }, h('select.form-control', {
+      style: 'cursor: pointer',
+      onchange: (e) => model.workflow.updateBasicVariableByKey(variable.key, e.target.value),
+    }, [
+      variable.allowedValues.map((value) =>
+        h('option', {
+          style: 'cursor: pointer',
+          selected: model.workflow.form.basicVariables[variable.key] === value,
+        }, value)),
+    ])),
   ]);
 
 /**
@@ -146,27 +142,27 @@ const dropdownBox = (variable, model) =>
  * * list - multiple selection and send to AliECS a JSON formatted list (e.g. FLP selection panel)
  * If `allowedValues` does not contain any elements, an EDIT_BOX will be built instead
  * @param {WorkflowVariable} variable
- * @param {Object} model
+ * @param {object} model
  * @returns {vnode}
  */
 const listBox = (variable, model) => {
   if (!variable.allowedValues || variable.allowedValues.length === 0) {
     return editBox(variable, model);
   } {
-    const type = variable.type;
+    const { type } = variable;
     const list = variable.allowedValues;
     return h('.flex-row.pv1', [
       variableLabel(variable),
       h('', {
         class: 'w-50 text-left shadow-level1 scroll-y',
-        style: 'max-height: 10em;'
+        style: 'max-height: 10em;',
       }, [
         list.map((name) =>
           h('a.menu-item', {
-            className: (type === VAR_TYPE.STRING || type === VAR_TYPE.NUMBER) ?
-              (model.workflow.form.basicVariables[variable.key] === name ? 'selected' : null)
-              : ((model.workflow.form.basicVariables[variable.key] &&
-                model.workflow.form.basicVariables[variable.key].includes(name)) ? 'selected' : null),
+            className: type === VAR_TYPE.STRING || type === VAR_TYPE.NUMBER ?
+              model.workflow.form.basicVariables[variable.key] === name ? 'selected' : null
+              : model.workflow.form.basicVariables[variable.key] &&
+                model.workflow.form.basicVariables[variable.key].includes(name) ? 'selected' : null,
             onclick: () => {
               if (type === VAR_TYPE.STRING || type === VAR_TYPE.NUMBER) {
                 model.workflow.updateBasicVariableByKey(variable.key, name);
@@ -183,10 +179,9 @@ const listBox = (variable, model) => {
                 }
               }
               model.workflow.notify();
-            }
-          }, name)
-        ),
-      ])
+            },
+          }, name)),
+      ]),
     ]);
   }
 };
@@ -196,18 +191,18 @@ const listBox = (variable, model) => {
  * Similar to Revision input search + dropdown list
  * The user will be able to input their own text and it is not mandatory to select from the list
  * @param {WorkflowVariable} variable
- * @param {Object} model
+ * @param {object} model
  * @returns {vnode}
-*/
+ */
 const comboBox = (variable, model) => {
   if (!variable.allowedValues || variable.allowedValues.length === 0) {
     return editBox(variable, model);
   } else {
-    const workflow = model.workflow;
+    const { workflow } = model;
     return h('.flex-row.pv1', [
       variableLabel(variable),
       h('.w-50.dropdown', {
-        class: variable.other.comboBox.visible ? 'dropdown-open' : ''
+        class: variable.other.comboBox.visible ? 'dropdown-open' : '',
       }, [
         h('input.form-control', {
           type: 'text',
@@ -225,17 +220,17 @@ const comboBox = (variable, model) => {
             } else if (e.keyCode === 13) { // code for enter
               model.workflow.updateBasicVariableByKey(variable.key, e.target.value);
               variable.other.comboBox.visible = false;
-              e.target.blur()
+              e.target.blur();
             }
             workflow.notify();
           },
           onclick: () => {
             variable.other.comboBox.visible = true;
             workflow.notify();
-          }
+          },
         }),
         // dropdown area with users-options
-        h('.dropdown-menu.w-100.scroll-y', {style: 'max-height: 15em;'}, [
+        h('.dropdown-menu.w-100.scroll-y', { style: 'max-height: 15em;' }, [
           // add typed text by the user to the list of options as well to suggest selection
           workflow.form.basicVariables[variable.key]
           && !variable.allowedValues.includes(workflow.form.basicVariables[variable.key])
@@ -248,7 +243,7 @@ const comboBox = (variable, model) => {
                 return true;
               }
               if (workflow.form.basicVariables[variable.key]) {
-                return value.match(workflow.form.basicVariables[variable.key])
+                return value.match(workflow.form.basicVariables[variable.key]);
               } else {
                 return true;
               }
@@ -259,24 +254,23 @@ const comboBox = (variable, model) => {
                 onmousedown: () => {
                   workflow.updateBasicVariableByKey(variable.key, value);
                 },
-              }, value)
-            ),
-        ])
+              }, value)),
+        ]),
       ]),
     ]);
   }
-}
+};
 
 /**
  * Build a panel containing multiple radio buttons with single selection allowed
  * @param {WorkflowVariable} variable
- * @param {Object} model
- * @returns 
+ * @param {object} model
+ * @returns
  */
 const radioButtonBox = (variable, model) =>
   h('.flex-row.pv1', [
     variableLabel(variable),
-    h('', {class: 'flex-row w-50 flex-wrap text-left'}, [
+    h('', { class: 'flex-row w-50 flex-wrap text-left' }, [
       variable.allowedValues.map((value) =>
         h('.w-33.form-check', [
           h('input.form-check-input', {
@@ -286,10 +280,9 @@ const radioButtonBox = (variable, model) =>
             checked: model.workflow.form.basicVariables[variable.key] === value,
             onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value),
           }),
-          h('label.w-wrapped', {for: `${value}id`, title: value, style: 'cursor: pointer'}, value)
-        ])
-      )
-    ])
+          h('label.w-wrapped', { for: `${value}id`, title: value, style: 'cursor: pointer' }, value),
+        ])),
+    ]),
   ]);
 
 /**
@@ -297,15 +290,16 @@ const radioButtonBox = (variable, model) =>
  * To be used for true/false selections
  * Clicking on the label will change the value of the checkbox as well
  * @param {WorkflowVariable} variable
- * @param {Object} model
- * @returns 
+ * @param {object} model
+ * @returns
  */
 const checkBox = (variable, model) => {
   const value = model.workflow.form.basicVariables[variable.key] ?
     model.workflow.form.basicVariables[variable.key] : variable.default;
   return h('.flex-row.pv1', [
-    variableLabel(variable,
-      () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true')
+    variableLabel(
+      variable,
+      () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
     ),
     h('label.w-50.flex-column.flex-center.actionable-row.m0', [
       h('.form-check.switch', [
@@ -317,30 +311,30 @@ const checkBox = (variable, model) => {
           value: value,
           onchange: () => model.workflow.updateBasicVariableByKey(variable.key, value === 'true' ? 'false' : 'true'),
         }),
-        h('span.slider.round')
-      ]
-      ),
-    ])
+        h('span.slider.round'),
+      ]),
+    ]),
   ]);
-}
+};
 
 /**
  * Builds a label block which will display the variable description (if present) on hover
- * @param {WorkflowVariable} variable 
+ * @param {WorkflowVariable} variable
+ * @param action
  * @returns {vnode}
  */
 const variableLabel = (variable, action = undefined) => {
   const style = {
-    style: `cursor: ${action ? 'pointer' : (variable.description ? 'help' : '')}`,
+    style: `cursor: ${action ? 'pointer' : variable.description ? 'help' : ''}`,
     onclick: action,
   };
   return variable.description !== '' ?
-    h('.w-50.flex-column.dropdown', {style: 'padding: .35em 0 .35em'}, [
+    h('.w-50.flex-column.dropdown', { style: 'padding: .35em 0 .35em' }, [
       h('#workflow-variable-info-label', style, variable.label),
-      h('.p2.dropdown-menu-left.gray-darker#workflow-variable-info', variable.description)
+      h('.p2.dropdown-menu-left.gray-darker#workflow-variable-info', variable.description),
     ])
     :
     h('label.w-50', style, variable.label);
 };
 
-export {autoBuiltBox};
+export { autoBuiltBox };

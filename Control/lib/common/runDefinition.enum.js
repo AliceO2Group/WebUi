@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
- * Run Definitions as per Bookkeeping's implementation: https://github.com/AliceO2Group/Bookkeeping/blob/main/docs/RUN_DEFINITIONS.md 
+ * Run Definitions as per Bookkeeping's implementation: https://github.com/AliceO2Group/Bookkeeping/blob/main/docs/RUN_DEFINITIONS.md
  */
 const RunDefinitions = Object.freeze({
-  CALIBRATION: 'CALIBRATION'
+  CALIBRATION: 'CALIBRATION',
 });
 
 exports.RunDefinitions = RunDefinitions;

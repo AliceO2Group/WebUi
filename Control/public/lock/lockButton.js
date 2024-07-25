@@ -10,21 +10,22 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
-import {DetectorLockAction} from './../common/enums/DetectorLockAction.enum.js';
+import { h } from '/js/src/index.js';
+import { iconLockLocked, iconLockUnlocked } from '/js/src/icons.js';
+import { DetectorLockAction } from './../common/enums/DetectorLockAction.enum.js';
 
 /**
  * Button build with builtin logic of detector lock state which allows users to:
  * - take/release lock with/without force as admins
  * - see who owns the lock
- * 
+ *
  * When the user releases a lock, the detector also has to be unselected from the workflow.
  * @param {Model} model - root model of the application
- * @param {String} detector - detector name
- * @param {Object} lockState - lock state of the detector
+ * @param {string} detector - detector name
+ * @param {object} lockState - lock state of the detector
+ * @param isIcon
  */
 export const detectorLockButton = (model, detector, lockState, isIcon = false) => {
   const lockModel = model.lock;

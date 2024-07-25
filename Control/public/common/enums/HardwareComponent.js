@@ -20,7 +20,7 @@ export const HardwareComponent = Object.freeze({
 
 /**
  * List of possible hardware components sorted alphabetically with FLP first
- * @return {Array<String>} list of hardware components
+ * @returns {Array<string>} list of hardware components
  */
 export const HARDWARE_COMPONENTS = Object.keys(HardwareComponent)
   .sort((a, b) => {

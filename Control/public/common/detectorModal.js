@@ -10,62 +10,60 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconCircleX} from '/js/src/index.js';
+import { h, iconCircleX } from '/js/src/index.js';
 import loading from './loading.js';
-import {ROLES} from './../workflow/constants.js';
-import {isUserAllowedRole} from './userRole.js';
+import { ROLES } from './../workflow/constants.js';
+import { isUserAllowedRole } from './userRole.js';
 
 /**
  * Component which will display a modal allowing the users to select their detector view
  * No matter the page location, modal will be displayed if user did not make a selection
- * @param {Object} model
- * @return {vnode}
+ * @param {object} model
+ * @returns {vnode}
  */
 const detectorsModal = (model) =>
-  !model.detectors.selected && isUserAllowedRole(ROLES.Detector) && h('.o2-modal',
+  !model.detectors.selected && isUserAllowedRole(ROLES.Detector) && h(
+    '.o2-modal',
     h('.o2-modal-content', [
       h('.p2.text-center', [
         h('h4', 'Select your detector view'),
-        h('label', {style: 'font-style: italic;'}, 'Displayed data will be filtered based on your selection')
+        h('label', { style: 'font-style: italic;' }, 'Displayed data will be filtered based on your selection'),
       ]),
-      h('.w-100.flex-row', {style: 'flex-wrap: wrap; justify-content:center'}, [
+      h('.w-100.flex-row', { style: 'flex-wrap: wrap; justify-content:center' }, [
         model.detectors.listRemote.match({
           NotAsked: () => null,
           Loading: () => h('.w-100.text-center', loading(2)),
           Success: (data) => detectorsList(model, data),
-          Failure: (_) => h('.w-100.text-center.danger', [
-            iconCircleX(), ' Unable to load list of detectors.'
-          ])
-        })
+          Failure: (_) => h('.w-100.text-center.danger', [iconCircleX(), ' Unable to load list of detectors.']),
+        }),
       ]),
-      h('.w-100.pv3.f3.flex-row', {style: 'justify-content:center;'},
-        h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
-          isUserAllowedRole(ROLES.Global) &&
-            h(`button.btn.btn-default.w-100`, {
-              id: `GLOBALViewButton`,
+      h('.w-100.pv3.f3.flex-row', { style: 'justify-content:center;' }, h('.w-50.flex-column.dropdown#flp_selection_info_icon', [
+        isUserAllowedRole(ROLES.Global) &&
+            h('button.btn.btn-default.w-100', {
+              id: 'GLOBALViewButton',
               onclick: () => model.setDetectorView('GLOBAL'),
-            }, 'GLOBAL')
-        ])
-      )
-    ])
+            }, 'GLOBAL'),
+      ])),
+    ]),
   );
 
 /**
  * Build a wrapped list of detector buttons
- * @param {Object} model
- * @param {List<String>} list
+ * @param {object} model
+ * @param {List<string>} list
  * @returns {vnode}
  */
 const detectorsList = (model, list) =>
   list
-    .filter(detector => model.detectors.authed.includes(detector) || isUserAllowedRole(ROLES.Global))
-    .map((detector) => h('.w-25.pv3.text-center.f3',
+    .filter((detector) => model.detectors.authed.includes(detector) || isUserAllowedRole(ROLES.Global))
+    .map((detector) => h(
+      '.w-25.pv3.text-center.f3',
       h('button.btn.btn-default.w-70', {
         id: `${detector}ViewButton`,
-        onclick: () => model.setDetectorView(detector)
-      }, detector)
+        onclick: () => model.setDetectorView(detector),
+      }, detector),
     ));
 
-export {detectorsModal};
+export { detectorsModal };

@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * Returns a row to be used for panels
@@ -21,8 +21,8 @@ import {h} from '/js/src/index.js';
  * @param {{Array<string>, Array<string>}} [valueClasses] - list of classes as list to be used to customise the values
  * @returns {vnode}
  */
-export const rowForCard = (key, value, {keyClasses = [], valueClasses = []} = {}) => 
-  h(`.flex-row.justify-between.gc4`, [
-    h('', {classList: keyClasses.join(' ')}, key),
-    h('', {classList: valueClasses.join(' ')}, value)
+export const rowForCard = (key, value, { keyClasses = [], valueClasses = [] } = {}) =>
+  h('.flex-row.justify-between.gc4', [
+    h('', { classList: keyClasses.join(' ') }, key),
+    h('', { classList: valueClasses.join(' ') }, value),
   ]);

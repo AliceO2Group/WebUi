@@ -10,20 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const PREFIX = {
   QC: {
     NONE: '-',
     JSON: 'json://',
-    CONSUL: 'consul-json://'
+    CONSUL: 'consul-json://',
   },
   READOUT: {
     NONE: '-',
     FILE: 'file://',
-    CONSUL: 'consul-ini://'
+    CONSUL: 'consul-ini://',
   },
-  SSO_DET_ROLE: 'det-'
+  SSO_DET_ROLE: 'det-',
 };
 
 const WIDGET_VAR = {
@@ -33,7 +33,7 @@ const WIDGET_VAR = {
   DROPDOWN_BOX: 'DROPDOWN_BOX',
   COMBO_BOX: 'COMBO_BOX',
   RADIO_BUTTON_BOX: 'RADIO_BUTTON_BOX',
-  CHECKBOX_BOX: 'CHECKBOX_BOX'
+  CHECKBOX_BOX: 'CHECKBOX_BOX',
 };
 
 const VAR_TYPE = {
@@ -42,17 +42,17 @@ const VAR_TYPE = {
   BOOL: 'BOOL',
   ARRAY: 'ARRAY',
   JSON: 'JSON',
-}
+};
 
 const STORAGE = {
-  DETECTOR: 'DETECTOR'
-}
+  DETECTOR: 'DETECTOR',
+};
 
 const ROLES = Object.freeze({
   Admin: 1,
   Global: 2,
   Detector: 3,
-  Guest: 4
+  Guest: 4,
 });
 
-export {PREFIX, WIDGET_VAR, VAR_TYPE, STORAGE, ROLES};
+export { PREFIX, WIDGET_VAR, VAR_TYPE, STORAGE, ROLES };

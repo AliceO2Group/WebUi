@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 export const SERVICE_STATES = {
   IN_ERROR: 'IN_ERROR',
   IN_SUCCESS: 'IN_SUCCESS',
   IN_LOADING: 'IN_LOADING',
-  NOT_ENABLED: 'NOT_ENABLED'
+  NOT_ENABLED: 'NOT_ENABLED',
 };

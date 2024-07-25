@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 /**
  * @file which contains multiple reuseable components for the configuration page
@@ -21,14 +21,14 @@ import {h} from '/js/src/index.js';
 /**
  * User Logic Checkbox with corresponding label
  * It supports 3 types: detector, host
- * @param {Object} model
- * @param {String} componentId - refers to the component(detector/host) name
- * @param {String} type - refers to the component being used for detector or host panels
- * @param {String} width - expects a class with regards to width (e.g .w-50)
- * @return {vnode}
+ * @param {object} model
+ * @param {string} componentId - refers to the component(detector/host) name
+ * @param {string} type - refers to the component being used for detector or host panels
+ * @param {string} width - expects a class with regards to width (e.g .w-50)
+ * @returns {vnode}
  */
 const toggleAllLinksCheckBox = (model, componentId, type, width) => {
-  const id = componentId + type + '-checkbox';
+  const id = `${componentId + type}-checkbox`;
   let checked = false;
   let onchange = undefined;
   switch (type) {
@@ -42,7 +42,7 @@ const toggleAllLinksCheckBox = (model, componentId, type, width) => {
       break;
   }
   return h(`${width}.flex-row`, {
-    style: 'display: flex; align-items: center;'
+    style: 'display: flex; align-items: center;',
   }, [
     h('input', {
       type: 'checkbox',
@@ -53,23 +53,24 @@ const toggleAllLinksCheckBox = (model, componentId, type, width) => {
     }),
     h('label.f6.ph2', {
       for: id,
-      style: `font-weight: bold; margin-bottom:0;cursor:pointer`,
-      title: `Toggle selection of All Links for ${componentId}`
+      style: 'font-weight: bold; margin-bottom:0;cursor:pointer',
+      title: `Toggle selection of All Links for ${componentId}`,
     }, 'All Links'),
   ]);
 };
 
 /**
  * A checkbox which will either select or unselect all checkboxes for links 0 - 11 for a given CRU
- * @param {Object} model
+ * @param {object} model
  * @param {JSON} cru - reference to the currently displayed cru
- * @param {Array<String>} linksList
- * @param {String} - width 
- * @return {vnode}
+ * @param {Array<string>} linksList
+ * @param {string} - width
+ * @param width
+ * @returns {vnode}
  */
 const toggleAllLinksCRUCheckBox = (model, cru, linksList, width) =>
   h(`${width}.flex-row`, {
-    style: 'display: flex; align-items: center;'
+    style: 'display: flex; align-items: center;',
   }, [
     h('input', {
       id: `${cru.info.serial}-${cru.info.endpoint}-all-checkbox`,
@@ -80,54 +81,54 @@ const toggleAllLinksCRUCheckBox = (model, cru, linksList, width) =>
         const areAllChecked = linksList.filter((key) => cru.config[key].enabled === 'true').length === linksList.length;
         linksList.forEach((key) => cru.config[key].enabled = !areAllChecked ? 'true' : 'false');
         model.configuration.notify();
-      }
+      },
     }),
     h('label.f6.ph2', {
       for: `${cru.info.serial}-${cru.info.endpoint}-all-checkbox`,
-      style: `font-weight: bold; margin-bottom:0;cursor:pointer`,
-      title: `Toggle selection of all links`
-    }, 'All Links')
+      style: 'font-weight: bold; margin-bottom:0;cursor:pointer',
+      title: 'Toggle selection of all links',
+    }, 'All Links'),
   ]);
 
 /**
  * Given a string detector, check if links[0-11] are all enabled for all hosts and CRUs serial:endpoint for that detector
- * @param {Object} model
- * @param {String} host
+ * @param {object} model
+ * @param {string} host
+ * @param detector
  * @returns {boolean}
  */
 const _areAllLinksEnabledForDetector = (model, detector) => {
   try {
     const hostsWithCru = model.configuration._getHostsWithCRUForDetector(detector);
-    return hostsWithCru.every((host) => _areAllLinksEnabledForHost(model, host))
+    return hostsWithCru.every((host) => _areAllLinksEnabledForHost(model, host));
   } catch (error) {
     console.error(error);
   }
   return false;
-}
+};
 
 /**
  * Given a string host, check if links[0-11] are all enabled for all CRUs serial:endpoint for that host
- * @param {String} host
+ * @param model
+ * @param {string} host
  * @returns {boolean}
  */
 const _areAllLinksEnabledForHost = (model, host) => {
   const config = model.configuration;
   try {
-    return Object.keys(config.cruMapByHost.payload[host]).every((cru) => {
-      return Object.keys(config.cruMapByHost.payload[host][cru].config)
-        .filter((key) => key.match('link[0-9]{1,2}')) // select only fields from links0 to links11
-        .every((key) => config.cruMapByHost.payload[host][cru].config[key].enabled === 'true');
-    });
+    return Object.keys(config.cruMapByHost.payload[host]).every((cru) => Object.keys(config.cruMapByHost.payload[host][cru].config)
+      .filter((key) => key.match('link[0-9]{1,2}')) // select only fields from links0 to links11
+      .every((key) => config.cruMapByHost.payload[host][cru].config[key].enabled === 'true'));
   } catch (error) {
     console.error(error);
   }
   return false;
-}
+};
 
 /**
  * Given a string detector, toggle all links for all of its hosts CRUs serial:endpoint for that detector
- * @param {Object} model
- * @param {String} detector
+ * @param {object} model
+ * @param {string} detector
  */
 const _toggleAllLinksByDetector = (model, detector) => {
   const config = model.configuration;
@@ -139,13 +140,13 @@ const _toggleAllLinksByDetector = (model, detector) => {
     console.error(error);
   }
   config.notify();
-}
+};
 
 /**
  * Given a string host, toggle the links[0-11] selection for all of its CRUs serial:endpoint
- * @param {Object} model
- * @param {String} host
- * @param {String} value - value that should be set for the whole set. If undefined, method will decide based on existing selection
+ * @param {object} model
+ * @param {string} host
+ * @param {string} value - value that should be set for the whole set. If undefined, method will decide based on existing selection
  */
 const _toggleAllLinksByHost = (model, host, value = undefined) => {
   const config = model.configuration;
@@ -163,6 +164,6 @@ const _toggleAllLinksByHost = (model, host, value = undefined) => {
     console.error(error);
   }
   config.notify();
-}
+};
 
-export {toggleAllLinksCRUCheckBox, toggleAllLinksCheckBox};
+export { toggleAllLinksCRUCheckBox, toggleAllLinksCheckBox };

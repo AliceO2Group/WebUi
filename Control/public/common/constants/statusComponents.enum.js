@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const STATUS_COMPONENTS_KEYS = Object.freeze({
   CONSUL_KEY: 'CONSUL',
@@ -23,4 +23,4 @@ const STATUS_COMPONENTS_KEYS = Object.freeze({
   APRICOT_KEY: 'APRICOT',
 });
 
-export {STATUS_COMPONENTS_KEYS};
+export { STATUS_COMPONENTS_KEYS };

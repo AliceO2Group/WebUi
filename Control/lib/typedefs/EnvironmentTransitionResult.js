@@ -13,10 +13,9 @@
 
 /**
  * @type {EnvironmentTransitionResult}
- * 
+ *
  * Object describing the reply from AliECS Core with regards to the state of an environment following a transition
- * 
- * @param {String} id - environment id on which the transition was performed
- * @param {String} state - current state of environment
- * @param {Number} [currentRunNumber] - run number if the environment is in RUNNING state
+ * @param {string} id - environment id on which the transition was performed
+ * @param {string} state - current state of environment
+ * @param {number} [currentRunNumber] - run number if the environment is in RUNNING state
  */

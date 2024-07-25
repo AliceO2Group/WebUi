@@ -10,8 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-const {Log} = require('@aliceo2/web-ui');
+ */
+const { Log } = require('@aliceo2/web-ui');
+
 const LOG_LEVEL = 99;
 const LOG_FACILITY = 'cog/status-ctrl';
 
@@ -50,8 +51,8 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of CONSUL';
-      this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
-      res.status(502).json({message});
+      this.log.errorMessage(message, { level: LOG_LEVEL, facility: LOG_FACILITY });
+      res.status(502).json({ message });
     }
   }
 
@@ -67,8 +68,8 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of GRAFANA';
-      this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
-      res.status(502).json({message});
+      this.log.errorMessage(message, { level: LOG_LEVEL, facility: LOG_FACILITY });
+      res.status(502).json({ message });
     }
   }
 
@@ -83,8 +84,8 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of NOTIFICATION SYSTEM';
-      this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
-      res.status(502).json({message});
+      this.log.errorMessage(message, { level: LOG_LEVEL, facility: LOG_FACILITY });
+      res.status(502).json({ message });
     }
   }
 
@@ -98,8 +99,8 @@ class StatusController {
       res.status(200).json(this._statusService.getGuiStatus());
     } catch (error) {
       const message = 'Unable to retrieve status of AliECS GUI';
-      this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
-      res.status(502).json({message});
+      this.log.errorMessage(message, { level: LOG_LEVEL, facility: LOG_FACILITY });
+      res.status(502).json({ message });
     }
   }
 
@@ -114,8 +115,8 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of AliECS CORE';
-      this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
-      res.status(502).json({message});
+      this.log.errorMessage(message, { level: LOG_LEVEL, facility: LOG_FACILITY });
+      res.status(502).json({ message });
     }
   }
 
@@ -130,8 +131,8 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of APRICOT';
-      this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
-      res.status(502).json({message});
+      this.log.errorMessage(message, { level: LOG_LEVEL, facility: LOG_FACILITY });
+      res.status(502).json({ message });
     }
   }
 
@@ -146,8 +147,8 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of AliECS Integrated Services';
-      this.log.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
-      res.status(502).json({message});
+      this.log.errorMessage(message, { level: LOG_LEVEL, facility: LOG_FACILITY });
+      res.status(502).json({ message });
     }
   }
 
@@ -163,7 +164,7 @@ class StatusController {
     } catch (error) {
       console.error(error);
       const message = 'Unable to retrieve FLP and PDP versions';
-      res.status(502).json({message});
+      res.status(502).json({ message });
     }
   }
 }

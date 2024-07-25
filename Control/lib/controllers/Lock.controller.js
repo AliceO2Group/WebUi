@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {DetectorLockAction} = require('./../common/lock/detectorLockAction.enum.js');
-const {Log} = require('@aliceo2/web-ui');
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
-const {User} = require('./../dtos/User.js');
+const { InvalidInputError } = require('./../errors/InvalidInputError.js');
+const { DetectorLockAction } = require('./../common/lock/detectorLockAction.enum.js');
+const { Log } = require('@aliceo2/web-ui');
+const { updateExpressResponseFromNativeError } = require('./../errors/updateExpressResponseFromNativeError.js');
+const { User } = require('./../dtos/User.js');
 
 const ERROR_LOG_LEVEL = 99;
 const LOG_FACILITY = 'cog/log-ctrl';
@@ -60,8 +60,8 @@ class LockController {
    * @returns {void}
    */
   async actionLockHandler(req, res) {
-    const {action, detectorId, shouldForce = false} = req.params;
-    const {personid, name, username, access} = req.session;
+    const { action, detectorId, shouldForce = false } = req.params;
+    const { personid, name, username, access } = req.session;
     try {
       if (!detectorId) {
         throw new InvalidInputError('Missing detectorId');
@@ -98,7 +98,7 @@ class LockController {
         res.status(200).json(this._lockService.locksByDetectorToJSON());
       }
     } catch (error) {
-      this._logger.errorMessage(error, {level: ERROR_LOG_LEVEL, facility: LOG_FACILITY});
+      this._logger.errorMessage(error, { level: ERROR_LOG_LEVEL, facility: LOG_FACILITY });
       updateExpressResponseFromNativeError(res, error);
     }
   }

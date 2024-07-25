@@ -16,9 +16,8 @@
  * BookkeepingFilterAdapter - Class that allows adapting given objects to string filters as accepted by Bookkeeping HTTP API
  */
 class BookkeepingFilterAdapter {
-
   /**
-   * @constructor
+   * @class
    * BookkeepingFilterAdapter
    */
   constructor() { }
@@ -32,7 +31,7 @@ class BookkeepingFilterAdapter {
    * @return {String} - as understood by Bookkeeping HTTP API
    */
   static toString(filterMap) {
-    const {detectors, runTypes, definitions, calibrationStatuses, limit = 1} = filterMap;
+    const { detectors, runTypes, definitions, calibrationStatuses, limit = 1 } = filterMap;
     let filter = `page[limit]=${limit}`;
 
     if (detectors) {
@@ -80,7 +79,7 @@ class BookkeepingFilterAdapter {
     } else if (Array.isArray(value) && value.length > 0) {
       return value.join(',');
     } else if (typeof value === 'number') {
-      return new String(value)
+      return new String(value);
     }
     return null;
   }

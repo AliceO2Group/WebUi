@@ -10,25 +10,25 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconPlayCircle, RemoteData} from '/js/src/index.js';
-import {miniCard} from './../../../common/card/miniCard.js';
+import { h, iconPlayCircle, RemoteData } from '/js/src/index.js';
+import { miniCard } from './../../../common/card/miniCard.js';
 import pageLoading from './../../../common/pageLoading.js';
 import errorComponent from './../../../common/errorComponent.js';
-import {ALIECS_STATE_COLOR} from './../../../common/constants/stateColors.js';
-import {getTaskShortName} from './../../../common/utils.js';
+import { ALIECS_STATE_COLOR } from './../../../common/constants/stateColors.js';
+import { getTaskShortName } from './../../../common/utils.js';
 
 /**
  * Builds a card with information and actions allowed on that type of run calibration for that detector
  * @param {CalibrationConfiguration} calibrationConfiguration - information about the run
  * @param {RemoteData<RunSummary.Error>} ongoingCalibrationRun - information on ongoing calibration run
- * @param {String} detector - to which the run belongs to
+ * @param {string} detector - to which the run belongs to
  * @param {Function} onclick - action to trigger when clicking on button
- * @return {vnode}
+ * @returns {vnode}
  */
 export const calibrationActionCard = (calibrationConfiguration, ongoingCalibrationRun, detector, onclick) => {
-  const {runType, configuration, label, description = ''} = calibrationConfiguration;
+  const { runType, configuration, label, description = '' } = calibrationConfiguration;
   if (!ongoingCalibrationRun?.kind) {
     ongoingCalibrationRun = RemoteData.success(ongoingCalibrationRun);
   }
@@ -37,60 +37,58 @@ export const calibrationActionCard = (calibrationConfiguration, ongoingCalibrati
   const title = inProgress ?
     'A calibration run for this detector is already in progress'
     : `Start a calibration run for ${detector} with run type ${runType}`;
-  return miniCard(
-    h('.flex-column', [
-      h('.flex-row.justify-between', [
-        h('.flex-row.gc1', [
-          h('button.btn.btn-sm.btn-success', {
-            disabled: inProgress,
-            onclick: () => onclick(detector, runType, configuration),
-            title,
-          }, inProgress ? pageLoading(1) : iconPlayCircle()),
-          h('strong', label),
-        ]),
-        h('small', `${configuration}`)
+  return miniCard(h('.flex-column', [
+    h('.flex-row.justify-between', [
+      h('.flex-row.gc1', [
+        h('button.btn.btn-sm.btn-success', {
+          disabled: inProgress,
+          onclick: () => onclick(detector, runType, configuration),
+          title,
+        }, inProgress ? pageLoading(1) : iconPlayCircle()),
+        h('strong', label),
       ]),
-      h('small', h('em', description)),
-    ]), [
-      ongoingCalibrationRun && ongoingCalibrationRun.match({
-        NotAsked: () => null,
-        Loading: () => null,
-        Success: (result) => calibrationEventsDisplay(result?.events),
-        Failure: (error) => errorComponent(error),
-      })
-    ], ['w-40', 'g0', 'gr1', 'p1']
-  );
+      h('small', `${configuration}`),
+    ]),
+    h('small', h('em', description)),
+  ]), [
+    ongoingCalibrationRun && ongoingCalibrationRun.match({
+      NotAsked: () => null,
+      Loading: () => null,
+      Success: (result) => calibrationEventsDisplay(result?.events),
+      Failure: (error) => errorComponent(error),
+    }),
+  ], ['w-40', 'g0', 'gr1', 'p1']);
 };
 
 /**
  * Build a panel for displaying events in reverse order that took place during the deployment of the environment
  * @param {Array<AutoEnvironmentDeployment.Event>} events - that took place during the deployment
- * @return {vnode}
+ * @returns {vnode}
  */
 const calibrationEventsDisplay = (events = []) => {
   const eventsReversed = JSON.parse(JSON.stringify(events)).reverse();
   return h('.flex-column.scroll-y', {
     style: 'max-height: 7em',
   }, [
-    eventsReversed?.map(({type, payload}) => {
+    eventsReversed?.map(({ type, payload }) => {
       if (type === 'ENVIRONMENT') {
         return environmentEventDisplay(payload);
       } else if (type === 'TASK') {
-        return taskEventDisplay(payload)
+        return taskEventDisplay(payload);
       } else {
-        return h('', JSON.stringify(payload))
+        return h('', JSON.stringify(payload));
       }
-    })
-  ])
+    }),
+  ]);
 };
 
 /**
  * Given an event of type ENVIRONMENT, build a line with user readable information
  * @param {AutoEnvironmentDeployment.EnvironmentEvent} event
- * @return {vnode}
+ * @returns {vnode}
  */
 const environmentEventDisplay = (event) => {
-  const {at, environmentId, state, currentRunNumber, error, message} = event;
+  const { at, environmentId, state, currentRunNumber, error, message } = event;
   const classList = [];
 
   let lineMessage = `[${at ? new Date(at).toLocaleString() : '-'}] `;
@@ -108,13 +106,13 @@ const environmentEventDisplay = (event) => {
     lineMessage += ` with run ${currentRunNumber}`;
   }
   if (error) {
-    lineMessage += ` due to ${error}`
-    classList.push('danger')
+    lineMessage += ` due to ${error}`;
+    classList.push('danger');
   }
   if (message) {
     lineMessage += `: ${message}`;
   }
-  return h('small', {classList: classList.join(' ')}, lineMessage);
+  return h('small', { classList: classList.join(' ') }, lineMessage);
 };
 
 /**
@@ -122,7 +120,7 @@ const environmentEventDisplay = (event) => {
  * @param {AutoEnvironmentDeployment.EnvironmentEvent} event
  */
 const taskEventDisplay = (event) => {
-  const {at, name, taskId, state, status, hostname, message} = event;
+  const { at, name, taskId, state, status, hostname, message } = event;
   const classList = [];
 
   let lineMessage = `[${at ? new Date(at).toLocaleString() : '-'}] `;
@@ -147,5 +145,5 @@ const taskEventDisplay = (event) => {
   if (message) {
     lineMessage += `: ${message}`;
   }
-  return h('small', {classList: classList.join(' ')}, lineMessage);
+  return h('small', { classList: classList.join(' ') }, lineMessage);
 };

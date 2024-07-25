@@ -10,38 +10,38 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
 // middleware
-const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
-const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
+const { minimumRoleMiddleware } = require('./middleware/minimumRole.middleware.js');
+const { lockOwnershipMiddleware } = require('./middleware/lockOwnership.middleware.js');
 
 // controllers
-const {ConsulController} = require('./controllers/Consul.controller.js');
-const {EnvironmentController} = require('./controllers/Environment.controller.js');
-const {LockController} = require('./controllers/Lock.controller.js');
-const {RunController} = require('./controllers/Run.controller.js');
-const {StatusController} = require('./controllers/Status.controller.js');
-const {WebSocketService} = require('./services/WebSocket.service.js');
-const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.controller.js');
+const { ConsulController } = require('./controllers/Consul.controller.js');
+const { EnvironmentController } = require('./controllers/Environment.controller.js');
+const { LockController } = require('./controllers/Lock.controller.js');
+const { RunController } = require('./controllers/Run.controller.js');
+const { StatusController } = require('./controllers/Status.controller.js');
+const { WebSocketService } = require('./services/WebSocket.service.js');
+const { WorkflowTemplateController } = require('./controllers/WorkflowTemplate.controller.js');
 
 // local services
-const {BookkeepingService} = require('./services/Bookkeeping.service.js');
-const {BroadcastService} = require('./services/Broadcast.service.js');
-const {CacheService} = require('./services/Cache.service.js');
-const {DetectorService} = require('./services/Detector.service.js');
-const {EnvironmentService} = require('./services/Environment.service.js');
-const {Intervals} = require('./services/Intervals.service.js');
-const {LockService} = require('./services/Lock.service.js');
-const {RunService} = require('./services/Run.service.js');
-const {StatusService} = require('./services/Status.service.js');
-const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
+const { BookkeepingService } = require('./services/Bookkeeping.service.js');
+const { BroadcastService } = require('./services/Broadcast.service.js');
+const { CacheService } = require('./services/Cache.service.js');
+const { DetectorService } = require('./services/Detector.service.js');
+const { EnvironmentService } = require('./services/Environment.service.js');
+const { Intervals } = require('./services/Intervals.service.js');
+const { LockService } = require('./services/Lock.service.js');
+const { RunService } = require('./services/Run.service.js');
+const { StatusService } = require('./services/Status.service.js');
+const { WorkflowTemplateService } = require('./services/WorkflowTemplate.service.js');
 
 // web-ui services
-const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
+const { NotificationService, ConsulService } = require('@aliceo2/web-ui');
 
 // AliECS Core
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
@@ -51,10 +51,11 @@ const EnvCache = require('./control-core/EnvCache.js');
 const GrpcProxy = require('./control-core/GrpcProxy.js');
 
 const path = require('path');
+
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
 const O2_APRICOT_PROTO_PATH = path.join(__dirname, './../protobuf/o2apricot.proto');
 
-const {Role} = require('./common/role.enum.js');
+const { Role } = require('./common/role.enum.js');
 
 if (!config.grpc) {
   throw new Error('Control gRPC Configuration is missing');
@@ -67,7 +68,6 @@ if (!config.grafana) {
 }
 
 module.exports.setup = (http, ws) => {
-
   let consulService;
   if (config.consul) {
     consulService = new ConsulService(config.consul);
@@ -112,9 +112,7 @@ module.exports.setup = (http, ws) => {
     notificationService.proxyWebNotificationToWs(ws);
   }
 
-  const statusService = new StatusService(
-    config, ctrlService, consulService, apricotService, notificationService, wsService
-  );
+  const statusService = new StatusService(config, ctrlService, consulService, apricotService, notificationService, wsService);
   const statusController = new StatusController(statusService);
 
   const intervals = new Intervals();
@@ -122,13 +120,9 @@ module.exports.setup = (http, ws) => {
   initializeData(apricotService, lockService);
   initializeIntervals(intervals, statusService, runService, bkpService);
 
-  const coreMiddleware = [
-    ctrlService.isConnectionReady.bind(ctrlService),
-  ];
+  const coreMiddleware = [ctrlService.isConnectionReady.bind(ctrlService)];
 
-  ctrlProxy.methods.forEach(
-    (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
-  );
+  ctrlProxy.methods.forEach((method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)));
   http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
   http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
   http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
@@ -137,29 +131,26 @@ module.exports.setup = (http, ws) => {
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController));
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
-  http.get('/runs/calibration/config', [
-    minimumRoleMiddleware(Role.GLOBAL)
-  ], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
+  http.get('/runs/calibration/config', [minimumRoleMiddleware(Role.GLOBAL)], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
 
   http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController));
 
-  http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
+  http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), { public: true });
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
   http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
-  http.delete('/environment/:id',
+  http.delete(
+    '/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
     lockOwnershipMiddleware(lockService, envService),
-    envCtrl.destroyEnvironmentHandler.bind(envCtrl)
+    envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 
-  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
+  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), { public: true });
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
 
-  apricotProxy.methods.forEach(
-    (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
-  );
+  apricotProxy.methods.forEach((method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res)));
   http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
   http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
 
@@ -169,21 +160,21 @@ module.exports.setup = (http, ws) => {
   // Lock Service
   http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
   http.put('/locks/:action/:detectorId', lockController.actionLockHandler.bind(lockController));
-  http.put('/locks/force/:action/:detectorId',
+  http.put(
+    '/locks/force/:action/:detectorId',
     minimumRoleMiddleware(Role.GLOBAL),
-    lockController.actionForceLockHandler.bind(lockController));
+    lockController.actionForceLockHandler.bind(lockController),
+  );
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
   http.get('/status/grafana', statusController.getGrafanaStatus.bind(statusController));
   http.get('/status/notification', statusController.getNotificationSystemStatus.bind(statusController));
-  http.get('/status/gui', statusController.getGuiStatus.bind(statusController), {public: true});
+  http.get('/status/gui', statusController.getGuiStatus.bind(statusController), { public: true });
   http.get('/status/apricot', statusController.getApricotStatus.bind(statusController));
   http.get('/status/core', coreMiddleware[0], statusController.getAliECSStatus.bind(statusController));
   http.get('/status/system', statusController.getSystemCompatibility.bind(statusController));
-  http.get('/status/core/services', coreMiddleware[0],
-    statusController.getAliECSIntegratedServicesStatus.bind(statusController)
-  );
+  http.get('/status/core/services', coreMiddleware[0], statusController.getAliECSIntegratedServicesStatus.bind(statusController));
 
   // Consul
   const validateService = consulController.validateService.bind(consulController);
@@ -200,7 +191,7 @@ module.exports.setup = (http, ws) => {
  * @param {StatusService} statusService - service used for retrieving status on dependent services
  * @param {RunService} runService - service for retrieving and building information on runs
  * @param {BookkeepingService} bkpService - service for retrieving information on runs from Bookkeeping
- * @return {void}
+ * @returns {void}
  */
 function initializeIntervals(intervalsService, statusService, runService, bkpService) {
   const SERVICES_REFRESH_RATE = 10000;
@@ -214,11 +205,10 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
   intervalsService.register(statusService.retrieveNotificationSystemStatus.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
 
-
   if (config.bookkeeping) {
     intervalsService.register(
       runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
-      CALIBRATION_RUNS_REFRESH_RATE
+      CALIBRATION_RUNS_REFRESH_RATE,
     );
   }
 }

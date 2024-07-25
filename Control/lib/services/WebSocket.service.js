@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-const {WebSocketMessage} = require('@aliceo2/web-ui');
-const {deepStrictEqual} = require('assert');
-const {SERVICES} = require('../common/constants.js');
+ */
+const { WebSocketMessage } = require('@aliceo2/web-ui');
+const { deepStrictEqual } = require('assert');
+const { SERVICES } = require('../common/constants.js');
 
 /**
  * Service for dealing with broadcasting information about the on framework such as:
@@ -40,7 +40,7 @@ class WebSocketService {
    * Method to receive updates with regards to the AliECS GUI services; If the update is different than the one sent last time,
    * then a broadcast message will be sent
    * @param {SERVICES} serviceKey - refers to service which is updating data
-   * @param {string} key - component from service that receives an update 
+   * @param {string} key - component from service that receives an update
    * @param {Map<string, object>} value - JSON representation of the status
    */
   updateData(serviceKey, key, value) {

@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* global COG */
 
-import {Observable, RemoteData} from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model representing Configuration CRUD
@@ -52,13 +52,13 @@ export default class Config extends Observable {
     this.failedTasks = [];
     if (this.model.detectors.listRemote.isSuccess()) {
       const isOpen = this.model.detectors.selected !== 'GLOBAL';
-      this.model.detectors.listRemote.payload.forEach((detector) => this.detectorPanel[detector] = {isOpen});
+      this.model.detectors.listRemote.payload.forEach((detector) => this.detectorPanel[detector] = { isOpen });
     }
   }
 
   /**
    * Select/Deselect passed host
-   * @param {String} host
+   * @param {string} host
    */
   toggleHostSelection(host) {
     const index = this.selectedHosts.findIndex((element) => host === element);
@@ -72,7 +72,8 @@ export default class Config extends Observable {
 
   /**
    * Given a detector, toggle the selection of all of its hosts
-   * @param {String}
+   * @param {string}
+   * @param detector
    */
   toggleHostsByDetectorSelection(detector) {
     const hostsWithCru = this._getHostsWithCRUForDetector(detector);
@@ -86,7 +87,7 @@ export default class Config extends Observable {
 
   /**
    * Give a detector name, use the hosts of the detector and check if all of them are present in selected hosts
-   * @param {String} detector
+   * @param {string} detector
    * @returns {boolean}
    */
   areAllHostsForDetectorSelected(detector) {
@@ -106,7 +107,7 @@ export default class Config extends Observable {
     this.cruMapByHost = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/consul/crus/config`);
+    const { result, ok } = await this.model.loader.get('/api/consul/crus/config');
     if (!ok) {
       this.cruMapByHost = RemoteData.failure(result.message);
       this.notify();
@@ -118,12 +119,12 @@ export default class Config extends Observable {
   }
 
   /**
-   * Retrieve a JSON object of aliases for FLPs, card:endpoint and links which 
+   * Retrieve a JSON object of aliases for FLPs, card:endpoint and links which
    * are to be used for labeling
    * @example
    * {
    *   "flp": {
-   *      "alias": "mini-flp", 
+   *      "alias": "mini-flp",
    *   },
    *   "cards:" {
    *     "1106:0": {
@@ -141,7 +142,7 @@ export default class Config extends Observable {
     this.crusAliases = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/consul/crus/aliases`);
+    const { result, ok } = await this.model.loader.get('/api/consul/crus/aliases');
     if (!ok) {
       this.crusAliases = RemoteData.failure(result.message);
       this.notify();
@@ -164,7 +165,7 @@ export default class Config extends Observable {
   }
 
   /**
-   * Method to send the new configuration to 
+   * Method to send the new configuration to
    * the server to save it in consul
    */
   async saveConfiguration() {
@@ -176,7 +177,7 @@ export default class Config extends Observable {
       this.notify();
       const copy = {};
       this.selectedHosts.forEach((host) => copy[host] = this._getMinifiedHostInfo(host));
-      const {result, ok} = await this.model.loader.post(`/api/consul/crus/config/save`, copy);
+      const { result, ok } = await this.model.loader.post('/api/consul/crus/config/save', copy);
       if (!ok) {
         result.ended = true;
         result.success = false;
@@ -203,13 +204,16 @@ export default class Config extends Observable {
       this.notify();
 
       const hosts = this.selectedHosts;
-      this.channelId = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
-      const {result, ok} = await this.model.loader.post(`/api/execute/o2-roc-config`,
+      this.channelId = Math.floor(Math.random() * (999999 - 100000) + 100000).toString();
+      const { result, ok } = await this.model.loader.post(
+        '/api/execute/o2-roc-config',
         {
-          channelId: this.channelId, vars: {
-            hosts, rocConfigForceConfig: this.isForceEnabled ? 'true' : 'false'
-          }, operation: 'o2-roc-config'
-        }
+          channelId: this.channelId,
+          vars: {
+            hosts, rocConfigForceConfig: this.isForceEnabled ? 'true' : 'false',
+          },
+          operation: 'o2-roc-config',
+        },
       );
       this.configurationRequest = ok ? RemoteData.success(result) : RemoteData.failure(result);
     }
@@ -219,7 +223,7 @@ export default class Config extends Observable {
   /**
    * Method to update the message with regards to the `o2-roc-config` command
    * If message id will match the client's it will be displayed
-   * @param {WebSocketMessagePayload} message 
+   * @param {WebSocketMessagePayload} message
    */
   setConfigurationRequest(message) {
     const messageId = message.id || '';
@@ -230,7 +234,7 @@ export default class Config extends Observable {
         if (message.success) {
           this.configurationRequest = RemoteData.success(message);
         } else {
-          this.failedTasks.push(message.info)
+          this.failedTasks.push(message.info);
           this.configurationRequest = RemoteData.success(message);
         }
       }
@@ -270,14 +274,14 @@ export default class Config extends Observable {
    * Given a host, take it by cru by endpoint and build a json containing only
    * data that can be modified via the GUI
    * Currently we only set links0-12 and user logic
-   * @param {String} host
+   * @param {string} host
    * @returns {JSON}
    */
   _getMinifiedHostInfo(host) {
     const hostCopy = {};
     Object.keys(this.cruMapByHost.payload[host]).forEach((cruEndpointKey) => {
       const cruEndpointCopy = {
-        cru: {userLogicEnabled: this.cruMapByHost.payload[host][cruEndpointKey].config.cru.userLogicEnabled},
+        cru: { userLogicEnabled: this.cruMapByHost.payload[host][cruEndpointKey].config.cru.userLogicEnabled },
       };
       Object.keys(this.cruMapByHost.payload[host][cruEndpointKey].config)
         .filter((key) => key.match('link[0-9]{1,2}')) // select only fields from links0 to links11
@@ -285,19 +289,19 @@ export default class Config extends Observable {
           const cruConfig = this.cruMapByHost.payload[host][cruEndpointKey].config;
           cruEndpointCopy[key] = {};
           if (cruConfig[key] && cruConfig[key].enabled) {
-            cruEndpointCopy[key].enabled = cruConfig[key].enabled
+            cruEndpointCopy[key].enabled = cruConfig[key].enabled;
           }
         });
-      hostCopy[cruEndpointKey] = {config: cruEndpointCopy};
-    })
+      hostCopy[cruEndpointKey] = { config: cruEndpointCopy };
+    });
     return JSON.parse(JSON.stringify(hostCopy));
   }
 
   /**
    * Given a detector name, use the hosts per detector and the cry map by host to build a list of hosts
    * that belong to a detector and contain a CRU
-   * @param {String} detector 
-   * @returns {Array<String>}
+   * @param {string} detector
+   * @returns {Array<string>}
    */
   _getHostsWithCRUForDetector(detector) {
     const hostsForDetector = this.model.detectors.hostsByDetectorRemote.payload[detector];

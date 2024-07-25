@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Shared methods used within Core Services/Controllers
@@ -24,7 +24,7 @@ class CoreUtils {
   /**
    * Given a core response with framework info, filter out
    * data which should not be displayed to the user
-   * @param {JSON} info 
+   * @param {JSON} info
    */
   static parseFrameworkInfo(info) {
     delete info.detectorsInInstance;
@@ -36,11 +36,11 @@ class CoreUtils {
   /**
    * Method to remove `/` if exists from method name
    * @param {string} method
-   * @return {string}
+   * @returns {string}
    */
   static parseMethodNameString(method) {
     if (method === '/core/request') {
-      return 'NewEnvironment'
+      return 'NewEnvironment';
     } else if (method?.startsWith('/execute/')) {
       return 'NewAutoEnvironment';
     }
@@ -50,7 +50,7 @@ class CoreUtils {
   /**
    * Parse the JSON of the version and return it as a string
    * @param {JSON} versionJSON
-   * @return {string}
+   * @returns {string}
    */
   static parseAliEcsVersion(versionJSON) {
     let version = '';
@@ -58,10 +58,10 @@ class CoreUtils {
       version += versionJSON.productName;
     }
     if (versionJSON.versionStr) {
-      version += ' ' + versionJSON.versionStr;
+      version += ` ${versionJSON.versionStr}`;
     }
     if (versionJSON.build) {
-      version += ' (revision ' + versionJSON.build + ')';
+      version += ` (revision ${versionJSON.build})`;
     }
     return version;
   }
@@ -69,24 +69,24 @@ class CoreUtils {
   /**
    * Given a payload with properties, extract the runType one
    * @param {EnvironmentCreation} environmentPayload - object with properties required to create an environment
-   * @return {String} runType of the environment creation.
+   * @returns {string} runType of the environment creation.
    */
   static getRunType(environmentPayload) {
-    const {vars} = environmentPayload;
-    return  vars['run_type'] ?? null;
+    const { vars } = environmentPayload;
+    return vars['run_type'] ?? null;
   }
 
   /**
    * Checks for mandatory fields and parses variables to:
    * - replace new lines with spaces
    * @param {EnvironmentCreation} payload -  configuration for creating an environment in raw format
-   * @param {Array<String>} hostsToIgnore - list of hosts that should be removed from payload
-   * @return {EnvironmentCreation} - validated and parsed configuration 
+   * @param {Array<string>} hostsToIgnore - list of hosts that should be removed from payload
+   * @returns {EnvironmentCreation} - validated and parsed configuration
    */
   static parseEnvironmentCreationPayload(payload, hostsToIgnore = []) {
-    const {workflowTemplate, vars} = payload;
+    const { workflowTemplate, vars } = payload;
     if (!workflowTemplate || !vars) {
-      throw new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`)
+      throw new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`);
     }
     payload = CoreUtils._removeHostsFromSelection(payload, hostsToIgnore);
     Object.keys(vars).forEach((key) => vars[key] = vars[key].trim().replace(/\r?\n/g, ' '));
@@ -96,7 +96,8 @@ class CoreUtils {
   /**
    * Temporal removal of bad FLP host if run_type is as per specified
    * @param {EnvironmentCreation} payload -  configuration for creating an environment in raw format
-   * @returns {EnvironmentCreation} - validated and parsed configuration 
+   * @param hostsToIgnore
+   * @returns {EnvironmentCreation} - validated and parsed configuration
    */
   static _removeHostsFromSelection(payload, hostsToIgnore = []) {
     try {
@@ -114,7 +115,7 @@ class CoreUtils {
       });
       payload.vars.hosts = JSON.stringify(hostsList);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
 
     return payload;

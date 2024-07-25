@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {WebSocketMessage} = require('@aliceo2/web-ui');
+const { WebSocketMessage } = require('@aliceo2/web-ui');
 
 /**
  * @class
@@ -20,7 +20,7 @@ const {WebSocketMessage} = require('@aliceo2/web-ui');
  */
 class BroadcastService {
   /**
-   * @constructor
+   * @class
    * Constructor for initializing the service with AliceO2/websocket service instance to use
    * @param {WebSocket} wsService - which is to be used for broadcasting
    */
@@ -33,9 +33,9 @@ class BroadcastService {
 
   /**
    * Method to receive command and payload to build a WebSocket message and broadcast it to all listening clients
-   * @param {String} command - command to be added to websocket message
-   * @param {Object} payload - payload to be sent to the clients
-   * @return {void}
+   * @param {string} command - command to be added to websocket message
+   * @param {object} payload - payload to be sent to the clients
+   * @returns {void}
    */
   broadcast(command, payload) {
     if (payload) {

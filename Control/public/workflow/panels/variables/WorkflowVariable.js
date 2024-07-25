@@ -10,16 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {WIDGET_VAR, VAR_TYPE} from './../../constants.js';
+import { WIDGET_VAR, VAR_TYPE } from './../../constants.js';
+
 /**
  * Model representing a WorfklowVariable following gRPC model of VarSpecMessage
  */
 export default class WorkflowVariable {
-
   /**
-   * Given a VarSpecMessage JSON object, initialize the worfklow variable 
+   * Given a VarSpecMessage JSON object, initialize the worfklow variable
    * based on provided information and fill in for missing fields
    * @param {JSON} variable
    */
@@ -39,7 +39,7 @@ export default class WorkflowVariable {
 
   /**
    * Set the type of the variable UI Widget
-   * @param {JSON} variable 
+   * @param {JSON} variable
    */
   getWidgetTypeFromVariable(variable) {
     switch (variable.widget) {
@@ -52,7 +52,7 @@ export default class WorkflowVariable {
       case 3:
         return WIDGET_VAR.DROPDOWN_BOX;
       case 4:
-        this.other.comboBox = {visible: false};
+        this.other.comboBox = { visible: false };
         return WIDGET_VAR.COMBO_BOX;
       case 5:
         return WIDGET_VAR.RADIO_BUTTON_BOX;
@@ -65,8 +65,8 @@ export default class WorkflowVariable {
 
   /**
    * Set the type of the variable UI Widget
-   * @param {JSON} variable 
-  */
+   * @param {JSON} variable
+   */
   getTypeFromVariable(variable) {
     switch (variable.type) {
       case 0:
@@ -86,8 +86,8 @@ export default class WorkflowVariable {
 
   /**
    * Set the default value of the variable UI Widget
-   * @param {JSON} variable 
-   * @returns 
+   * @param {JSON} variable
+   * @returns
    */
   getDefaultValueFromVariable(variable) {
     if (variable.defaultValue) {
@@ -117,7 +117,7 @@ export default class WorkflowVariable {
    * At run time, the function will be evaluated to decide if variable
    * should be displayed or not
    * @param {JSON} variable
-   * @return {String}
+   * @returns {string}
    */
   parseIsVisibleEval(variable) {
     if (variable.visibleIf) {
@@ -131,38 +131,39 @@ export default class WorkflowVariable {
    * Given a KV Pair it will check if:
    * * key is valid after being trimmed
    * * value is valid by checking it's existence in the provided varSpecMap and it is not empty unless in EDIT mode
-   * @param {String} key
-   * @param {Object} value
-   * @param {Map<String, JSON>} varSpecMap
-   * @return {key:string, value:object, ok: boolean, error: string}
+   * @param {string} key
+   * @param {object} value
+   * @param {Map<string, JSON>} varSpecMap
+   * @param inEdit
+   * @returns {key:string, value:object, ok: boolean, error: string}
    */
   static parseKVPair(key, value, varSpecMap = {}, inEdit = false) {
     const isKeyValid = key && key.trim() !== '';
-    const isValueValid = (value && value.trim() !== '') || inEdit;
+    const isValueValid = value && value.trim() !== '' || inEdit;
     if (!isKeyValid) {
-      return {ok: false, error: `Invalid key '${key}' provided`};
+      return { ok: false, error: `Invalid key '${key}' provided` };
     } if (!isValueValid) {
-      return {ok: false, error: `Invalid value '${value}' provided for key: '${key}'`};
+      return { ok: false, error: `Invalid value '${value}' provided for key: '${key}'` };
     } else {
       key = key.trim();
       value = value.trim();
       if (Object.keys(varSpecMap).length === 0 || !varSpecMap[key]) {
         // template does not support dynamic workflows or template does not contain provided key
-        return {ok: true, key, value};
+        return { ok: true, key, value };
       } else if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
-        return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
+        return { ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'` };
       } else if (varSpecMap[key].widget === WIDGET_VAR.DROPDOWN_BOX && !varSpecMap[key].allowedValues.includes(value)) {
-        return {ok: false, error: `Allowed values for key '${key}' are ${varSpecMap[key].allowedValues.toString()}`};
+        return { ok: false, error: `Allowed values for key '${key}' are ${varSpecMap[key].allowedValues.toString()}` };
       } else if (varSpecMap[key].type === VAR_TYPE.STRING && typeof value !== 'string') {
-        return {ok: false, error: `Allowed values for key '${key}' are have to be of type string`};
+        return { ok: false, error: `Allowed values for key '${key}' are have to be of type string` };
       } else if (varSpecMap[key].type === VAR_TYPE.NUMBER && Number.isNaN(Number(value))) {
-        return {ok: false, error: `Allowed values for key '${key}' need to be of type number`};
+        return { ok: false, error: `Allowed values for key '${key}' need to be of type number` };
       } else if (varSpecMap[key].type === VAR_TYPE.ARRAY && !Array.isArray(value)) {
-        return {ok: false, error: `Allowed values for key '${key}' need to be of type Array`};
+        return { ok: false, error: `Allowed values for key '${key}' need to be of type Array` };
       } else if (varSpecMap[key].type === VAR_TYPE.JSON && typeof value !== 'object') {
-        return {ok: false, error: `Allowed values for key '${key}' need to be of type a JSON`};
+        return { ok: false, error: `Allowed values for key '${key}' need to be of type a JSON` };
       }
-      return {ok: true, key, value};
+      return { ok: true, key, value };
     }
   }
 
@@ -171,9 +172,9 @@ export default class WorkflowVariable {
    * * provided string is a valid JSON
    * * key is valid after being trimmed
    * * value is valid by checking it's existence in the provided varSpecMap
-   * @param {String} kvPairsString
-   * @param {Map<String, Object>} varSpecMap
-   * @return {kvMpa: Map<string, Object>, errors: Array<String>}
+   * @param {string} kvPairsString
+   * @param {Map<string, object>} varSpecMap
+   * @returns {kvMpa: Map<string, Object>, errors: Array<String>}
    */
   static parseKVPairMap(kvPairsString, varSpecMap) {
     const parsedKVJSON = {};
@@ -181,16 +182,16 @@ export default class WorkflowVariable {
     try {
       const kvJSON = JSON.parse(kvPairsString);
       Object.keys(kvJSON).forEach((keyToAdd) => {
-        const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, kvJSON[keyToAdd], varSpecMap);
+        const { key, value, ok, error } = WorkflowVariable.parseKVPair(keyToAdd, kvJSON[keyToAdd], varSpecMap);
         if (ok) {
           parsedKVJSON[key] = value;
         } else {
           errors.push(error);
         }
       });
-      return {parsedKVJSON, errors}
+      return { parsedKVJSON, errors };
     } catch (error) {
-      return {parsedKVJSON, errors: ['Provided JSON is not valid']}
+      return { parsedKVJSON, errors: ['Provided JSON is not valid'] };
     }
   }
 }

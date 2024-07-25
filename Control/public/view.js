@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Framework
-import {h, switchCase, notification} from '/js/src/index.js';
+import { h, switchCase, notification } from '/js/src/index.js';
 
 // Common app helpers
 import appHeader from './common/appHeader.js';
@@ -22,47 +22,47 @@ import sidebar from './common/sidebar.js';
 // Page specific views (contents and headers)
 import {
   content as workflowsContent,
-  header as workflowsHeader
+  header as workflowsHeader,
 } from './workflow/workflowsPage.js';
 import {
   EnvironmentCreationHeader,
-  EnvironmentCreationPage
+  EnvironmentCreationPage,
 } from './pages/EnvironmentCreation/EnvironmentCreation.page.js';
 import {
   CalibrationRunsHeader,
-  CalibrationRunsContent
+  CalibrationRunsContent,
 } from './pages/CalibrationRuns/CalibrationRuns.page.js';
 import {
   content as environmentsContent,
-  header as environmentsHeader
+  header as environmentsHeader,
 } from './environment/environmentsPage.js';
 import {
   content as environmentContent,
-  header as environmentHeader
+  header as environmentHeader,
 } from './environment/environmentPage.js';
-import {header as statusHeader} from './about/header.js';
-import {content as statusContent} from './about/content.js';
+import { header as statusHeader } from './about/header.js';
+import { content as statusContent } from './about/content.js';
 import {
   content as configurationContent,
-  header as configurationHeader
+  header as configurationHeader,
 } from './configuration/configPage.js';
-import {header as taskHeader} from './task/header.js';
-import {content as taskContent} from './task/content.js';
+import { header as taskHeader } from './task/header.js';
+import { content as taskContent } from './task/content.js';
 import {
   content as hardwareContent,
-  header as hardwareHeader
+  header as hardwareHeader,
 } from './hardware/hardwarePage.js';
-import {detectorsModal} from './common/detectorModal.js';
+import { detectorsModal } from './common/detectorModal.js';
 import {
   content as lockContent,
-  header as lockHeader
+  header as lockHeader,
 } from './lock/lockPage.js';
-import {alertPanel} from './common/alertPanel.js';
+import { alertPanel } from './common/alertPanel.js';
 
 /**
  * Main view layout
  * @param {object} model - representing current application state
- * @return {vnode} application view to be drawn according to model
+ * @returns {vnode} application view to be drawn according to model
  */
 export default (model) => [
   notification(model.notification),
@@ -71,20 +71,17 @@ export default (model) => [
     header(model),
     h('.flex-grow flex-row', [
       h('.sidebar.sidebar-content.relative', {
-        class: model.sideBarMenu ? '' : 'sidebar-minimal'
-      }, sidebar(model)
-      ),
-      h('.flex-grow.relative', [
-        content(model)
-      ])
+        class: model.sideBarMenu ? '' : 'sidebar-minimal',
+      }, sidebar(model)),
+      h('.flex-grow.relative', [content(model)]),
     ]),
-  ])
+  ]),
 ];
 
 /**
  * Top header with app menu on the left and page menu for the rest
  * @param {object} model
- * @return {vnode}
+ * @returns {vnode}
  */
 const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
@@ -98,15 +95,15 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     configuration: configurationHeader,
     taskList: taskHeader,
     hardware: hardwareHeader,
-    locks: lockHeader
+    locks: lockHeader,
   })(model),
-  alertPanel(model.about.services, model)
+  alertPanel(model.about.services, model),
 ]);
 
 /**
  * Page content depending on the query string handler by router model
  * @param {object} model
- * @return {vnode}
+ * @returns {vnode}
  */
 const content = (model) => [
   switchCase(model.router.params.page, {
@@ -119,6 +116,6 @@ const content = (model) => [
     configuration: configurationContent,
     taskList: taskContent,
     hardware: hardwareContent,
-    locks: lockContent
-  })(model)
+    locks: lockContent,
+  })(model),
 ];

@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Keys that are used to set/get information to/from the CacheService
  */
-const CacheKeys =  Object.freeze({
+const CacheKeys = Object.freeze({
   CALIBRATION_RUNS_BY_DETECTOR: 'CALIBRATION_RUNS_BY_DETECTOR',
   CALIBRATION_RUNS_REQUESTS: 'CALIBRATION_RUNS_REQUESTS',
 });

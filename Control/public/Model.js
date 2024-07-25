@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData} from '/js/src/index.js';
-import {Notification as O2Notification} from '/js/src/index.js';
+import { Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData } from '/js/src/index.js';
+import { Notification as O2Notification } from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import About from './about/About.js';
@@ -22,14 +22,14 @@ import Workflow from './workflow/Workflow.js';
 import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
-import {PREFIX, ROLES} from './../workflow/constants.js';
-import {SERVICE_STATES} from './common/constants/serviceStates.js';
-import {di} from './utilities/di.js';
+import { PREFIX, ROLES } from './../workflow/constants.js';
+import { SERVICE_STATES } from './common/constants/serviceStates.js';
+import { di } from './utilities/di.js';
 
-import {EnvironmentCreationModel} from './pages/EnvironmentCreation/EnvironmentCreation.model.js';
-import {CalibrationRunsModel} from './pages/CalibrationRuns/CalibrationRuns.model.js';
+import { EnvironmentCreationModel } from './pages/EnvironmentCreation/EnvironmentCreation.model.js';
+import { CalibrationRunsModel } from './pages/CalibrationRuns/CalibrationRuns.model.js';
 
-import {STATUS_COMPONENTS_KEYS} from './common/constants/statusComponents.enum.js';
+import { STATUS_COMPONENTS_KEYS } from './common/constants/statusComponents.enum.js';
 
 /**
  * Root of model tree
@@ -62,7 +62,7 @@ export default class Model extends Observable {
     this.detectors = new DetectorService(this);
 
     this.services = {
-      detectors: this.detectors
+      detectors: this.detectors,
     };
 
     this.configuration = new Config(this);
@@ -106,9 +106,9 @@ export default class Model extends Observable {
     this.init();
   }
 
-  /** 
+  /**
    * Returns user role
-   * @returns {object} User's role 
+   * @returns {object} User's role
    */
   getRole() {
     if (this.session.access.includes('admin')) {
@@ -121,7 +121,7 @@ export default class Model extends Observable {
     return ROLES.Guest;
   }
 
-  /** 
+  /**
    * Evaluate whether action is allowed for given role
    * @param {ROLES} role - target role
    * @param {bool} [strict=false] - The target role must equal current role
@@ -191,7 +191,7 @@ export default class Model extends Observable {
         break;
       case 'CALIBRATION_RUNS_REQUESTS':
         if (message.payload && this.calibrationRunsModel.calibrationRuns.isSuccess()) {
-          const {detector, runType} = message.payload;
+          const { detector, runType } = message.payload;
           this.calibrationRunsModel.calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
             RemoteData.success(message.payload);
           this.calibrationRunsModel.notify();
@@ -212,9 +212,9 @@ export default class Model extends Observable {
     // Release client-side
     this.lock.padlockState = {};
 
-    this.notification.show(`Connection to server has been lost. Retrying to connect in 10 seconds...`, 'danger', 10000);
+    this.notification.show('Connection to server has been lost. Retrying to connect in 10 seconds...', 'danger', 10000);
     this.about.setWsInfo(SERVICE_STATES.IN_ERROR, {
-      status: {ok: false, configured: true, message: 'Cannot establish connection to server'}
+      status: { ok: false, configured: true, message: 'Cannot establish connection to server' },
     });
 
     const wsReconnectInterval = setInterval(() => {
@@ -225,9 +225,9 @@ export default class Model extends Observable {
         this.ws.addListener('close', this.handleWSClose.bind(this));
         clearInterval(wsReconnectInterval);
         this.about.setWsInfo(SERVICE_STATES.IN_SUCCESS, {
-          status: {ok: true, configured: true}, message: 'WebSocket connection is alive'
+          status: { ok: true, configured: true }, message: 'WebSocket connection is alive',
         });
-        this.notification.show(`Connection to server has been restored`, 'success', 3000);
+        this.notification.show('Connection to server has been restored', 'success', 3000);
       } catch (error) {
         console.error(error);
       }
@@ -254,7 +254,7 @@ export default class Model extends Observable {
         if (!this.router.params.panel) {
           this.router.go(`?page=environment&id=${this.router.params.id}&panel=general`, true, true);
         }
-        this.environment.getEnvironment({id: this.router.params.id}, true, this.router.params.panel);
+        this.environment.getEnvironment({ id: this.router.params.id }, true, this.router.params.panel);
         break;
       case 'newEnvironmentAdvanced':
         this.workflow.initWorkflowPage();
@@ -305,7 +305,7 @@ export default class Model extends Observable {
 
   /**
    * Update detector selection view
-   * @param {String} detector
+   * @param {string} detector
    * @returns {vnode}
    */
   setDetectorView(detector) {
@@ -331,14 +331,14 @@ export default class Model extends Observable {
 
   /**
    * Display a browser notification(Notification - Web API)
-   * @param {String} message
+   * @param {string} message
    */
   showNativeNotification(message) {
-    const notification = new Notification(message.title, {body: message.body, icon: '/o2_icon.png'});
-    notification.onclick = function(event) {
+    const notification = new Notification(message.title, { body: message.body, icon: '/o2_icon.png' });
+    notification.onclick = function (event) {
       event.preventDefault();
       window.open(message.url, '_blank');
-    }
+    };
   }
 
   /**
@@ -358,6 +358,6 @@ export default class Model extends Observable {
   checkBrowserNotificationPermissions() {
     return (Notification.permission === 'denied' ||
       Notification.permission === 'default') &&
-      window.location.protocol === "https:";
+      window.location.protocol === 'https:';
   }
 }

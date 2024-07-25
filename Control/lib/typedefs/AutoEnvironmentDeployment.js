@@ -15,37 +15,34 @@
  * @typedef AutoEnvironmentDeployment
  *
  * AutoEnvironmentDeployment type definition for auto transitioning environments which send updates to the GUI via streams
- *
- * @property {String} channelIdString - id of the channel on which updates are sent by AliECS
- * @property {String} detector
- * @property {String} runType
- * @property {Boolean} inProgress - whether the deployment is still in progress
+ * @property {string} channelIdString - id of the channel on which updates are sent by AliECS
+ * @property {string} detector
+ * @property {string} runType
+ * @property {boolean} inProgress - whether the deployment is still in progress
  * @property {Array<TaskEvent|EnvironmentEvent>} events
  */
 
 /**
  * @typedef TaskEvent
- * 
+ *
  * Event as sent by AliECS which describes the latest state of a task
- * 
- * @property {String} name
- * @property {String} taskid
- * @property {String} state
- * @property {String} status
- * @property {String} hostname
- * @property {String} className
- * @property {Number} at - date and time at which the event took place
+ * @property {string} name
+ * @property {string} taskid
+ * @property {string} state
+ * @property {string} status
+ * @property {string} hostname
+ * @property {string} className
+ * @property {number} at - date and time at which the event took place
  */
 
 /**
  * @typedef EnvironmentEvent
- * 
+ *
  * Event as sent by AliECS which describes the latest state of an environment
- * 
- * @property {String} environmentId
+ * @property {string} environmentId
  * @property {'DEPLOYED'|'STANDBY'|'CONFIGURED'|'RUNNING'|'ERROR'|'MIXED'|'SHUTDOWN'} state
- * @property {Number} currentRunNumber
- * @property {String} [error] - only in case of ERROR state
- * @property {String} [message]
- * @property {Number} at - date and time at which the event took place 
+ * @property {number} currentRunNumber
+ * @property {string} [error] - only in case of ERROR state
+ * @property {string} [message]
+ * @property {number} at - date and time at which the event took place
  */

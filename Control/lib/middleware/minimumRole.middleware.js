@@ -10,26 +10,27 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {isRoleSufficient} = require('../common/role.enum.js');
-const {UnauthorizedAccessError} = require('../errors/UnauthorizedAccessError.js');
-const {updateExpressResponseFromNativeError} = require('../errors/updateExpressResponseFromNativeError.js');
+const { isRoleSufficient } = require('../common/role.enum.js');
+const { UnauthorizedAccessError } = require('../errors/UnauthorizedAccessError.js');
+const { updateExpressResponseFromNativeError } = require('../errors/updateExpressResponseFromNativeError.js');
 
 /**
  * Method to receive a minimum role that needs to be met by owner of request and to return a middleware function
  * @param {Role} minimumRole - minimum role that should be fulfilled by the requestor
- * @return {function(req, res, next): void} - middleware function
+ * @returns {function(req, res, next): void} - middleware function
  */
-const minimumRoleMiddleware = (minimumRole) => {
+const minimumRoleMiddleware = (minimumRole) =>
+
   /**
    * Returned middleware method
    * @param {Request} req - HTTP Request object
    * @param {Next} next - HTTP Next object to use if checks pass
    * @param {Response} res - HTTP Response object
-   * @return {void}
+   * @returns {void}
    */
-  return (req, res, next) => {
+  (req, res, next) => {
     try {
       const { access } = req?.session ?? '';
 
@@ -41,8 +42,9 @@ const minimumRoleMiddleware = (minimumRole) => {
       }
       const isAllowed = accessList.some((role) => isRoleSufficient(role, minimumRole));
       if (!isAllowed) {
-        updateExpressResponseFromNativeError(res,
-          new UnauthorizedAccessError('Not enough permissions for this operation')
+        updateExpressResponseFromNativeError(
+          res,
+          new UnauthorizedAccessError('Not enough permissions for this operation'),
         );
         return;
       }
@@ -51,7 +53,6 @@ const minimumRoleMiddleware = (minimumRole) => {
       console.error(error);
       updateExpressResponseFromNativeError(res, error);
     }
-  }
-};
+  };
 
 exports.minimumRoleMiddleware = minimumRoleMiddleware;

@@ -10,16 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconCircleX} from '/js/src/index.js';
+import { h, iconCircleX } from '/js/src/index.js';
 
 /**
  * Generic page error with label, used on page load failed or access denied
  * @param {string} error
- * @return {vnode}
+ * @returns {vnode}
  */
 export default (error) => h('.flex-column items-center justify-center', [
   h('span.errorPage', iconCircleX()),
-  h('span.text-center.danger.measure-narrow', {style: 'white-space: pre-line'},error)
+  h('span.text-center.danger.measure-narrow', { style: 'white-space: pre-line' }, error),
 ]);

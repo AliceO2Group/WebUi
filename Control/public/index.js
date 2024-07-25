@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -11,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
@@ -20,11 +19,11 @@ sessionService.loadAndHideParameters();
 window.sessionService = sessionService;
 
 // Import COG Public Configuration
-import {COG} from './config.js';
+import { COG } from './config.js';
 window.COG = COG;
 
 // Import MVC
-import {mount} from '/js/src/index.js';
+import { mount } from '/js/src/index.js';
 import view from './view.js';
 import Model from './Model.js';
 

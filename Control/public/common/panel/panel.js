@@ -10,14 +10,14 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {panelTitle} from './panelTitle.js';
+import { h } from '/js/src/index.js';
+import { panelTitle } from './panelTitle.js';
 
 /**
  * Returns a div element with properties for a panel title
- * @param {String|vnode} title - title to be placed for panel
+ * @param {string | vnode} title - title to be placed for panel
  * @param {vnode} content - content to be placed within the panel
  * @returns {vnode}
  */
@@ -25,4 +25,4 @@ export const panel = (title, content) =>
   h('.w-100.panel', [
     panelTitle(title),
     content,
-  ])
+  ]);

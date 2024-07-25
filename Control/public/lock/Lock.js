@@ -10,18 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {DetectorLockState} from './../common/enums/DetectorLockState.enum.js';
-import {di} from './../utilities/di.js';
-import {jsonPut} from './../utilities/jsonPut.js';
-import {Observable, RemoteData} from '/js/src/index.js';
+import { DetectorLockState } from './../common/enums/DetectorLockState.enum.js';
+import { di } from './../utilities/di.js';
+import { jsonPut } from './../utilities/jsonPut.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Model for the detector locks that control which user is allowed to control environments for AliECS
  */
 export default class Lock extends Observable {
-
   /**
    * Initialize lock state to NotAsked
    * @param {Observable} model
@@ -40,8 +39,8 @@ export default class Lock extends Observable {
 
   /**
    * Get the full name of the current lock owner or null if the lock is not taken
-   * @param {String} detector - detector for which to get the owner
-   * @return {String} - name and surname of the owner
+   * @param {string} detector - detector for which to get the owner
+   * @returns {string} - name and surname of the owner
    */
   getOwnerFullName(detector) {
     if (this.isLocked(detector)) {
@@ -53,7 +52,7 @@ export default class Lock extends Observable {
 
   /**
    * Return a boolean indicating whether the lock is taken or not
-   * @param {String} detector - detector name for which to check state
+   * @param {string} detector - detector name for which to check state
    * @returns {bool}
    */
   isLocked(detector) {
@@ -64,6 +63,7 @@ export default class Lock extends Observable {
   /**
    * States whether given lock is locked by current user
    * @param {string} name Lock name/entity
+   * @param detector
    * @returns {bool}
    */
   isLockedByCurrentUser(detector) {
@@ -78,7 +78,7 @@ export default class Lock extends Observable {
     this._padlockState = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/locks`);
+    const { result, ok } = await this.model.loader.get('/api/locks');
     if (!ok) {
       this._padlockState = RemoteData.failure(result.message);
       this.notify();
@@ -91,10 +91,10 @@ export default class Lock extends Observable {
 
   /**
    * Service method to request an action on a lock for a given detector.
-   * @param {String} detector - name of the lock to act on
+   * @param {string} detector - name of the lock to act on
    * @param {DetectorLockAction} action - action to take on the lock
-   * @param {Boolean} [shouldForce = false] - whether to force the action
-   * @return {Promise<void>}
+   * @param {boolean} [shouldForce = false] - whether to force the action
+   * @returns {Promise<void>}
    */
   async actionOnLock(detector, action, shouldForce = false) {
     const path = shouldForce ? `/api/locks/force/${action}/${detector}` : `/api/locks/${action}/${detector}`;
@@ -113,7 +113,7 @@ export default class Lock extends Observable {
 
   /**
    * Set padlock state from ajax or websocket as a RemoteData
-   * @param {Object<String, DetectorLock>} detectorsLocksState - object representing PadLock from server
+   * @param {Object<string, DetectorLock>} detectorsLocksState - object representing PadLock from server
    */
   set padlockState(detectorsLocksState) {
     this._padlockState = RemoteData.success(detectorsLocksState);
@@ -122,7 +122,7 @@ export default class Lock extends Observable {
 
   /**
    * Get the padlock state
-   * @return {RemoteData<Object<String, DetectorLock>>}
+   * @returns {RemoteData<Object<string, DetectorLock>>}
    */
   get padlockState() {
     return this._padlockState;

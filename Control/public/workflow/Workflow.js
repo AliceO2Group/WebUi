@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData} from '/js/src/index.js';
-import {PREFIX, VAR_TYPE} from './constants.js';
-import {DetectorLockAction} from '../common/enums/DetectorLockAction.enum.js';
+import { Observable, RemoteData } from '/js/src/index.js';
+import { PREFIX, VAR_TYPE } from './constants.js';
+import { DetectorLockAction } from '../common/enums/DetectorLockAction.enum.js';
 import FlpSelection from './panels/flps/FlpSelection.js';
 import WorkflowVariable from './panels/variables/WorkflowVariable.js';
 import WorkflowForm from './WorkflowForm.js';
@@ -27,7 +27,7 @@ import WorkflowForm from './WorkflowForm.js';
 export default class Workflow extends Observable {
   /**
    * Initialize `list` to NotAsked
-   * @param {Object} model
+   * @param {object} model
    */
   constructor(model) {
     super();
@@ -54,7 +54,7 @@ export default class Workflow extends Observable {
     this.revision = {
       isSelectionOpen: false,
       regex: new RegExp('master'),
-      rawValue: 'master'
+      rawValue: 'master',
     };
 
     this.templatesVarsMap = {};
@@ -68,7 +68,7 @@ export default class Workflow extends Observable {
 
     this.dom = {
       keyInput: '',
-      keyValueArea: ''
+      keyValueArea: '',
     };
 
     this.advErrorPanel = [];
@@ -121,7 +121,7 @@ export default class Workflow extends Observable {
    * @param {string} repository
    */
   resetRevision(repository) {
-    let defaultRevision = this.repoList.payload.repos.filter((obj) => obj.name === repository)[0].defaultRevision;
+    let { defaultRevision } = this.repoList.payload.repos.filter((obj) => obj.name === repository)[0];
     const globalDefault = this.repoList.payload.globalDefaultRevision;
 
     if (!defaultRevision && globalDefault) {
@@ -132,7 +132,7 @@ export default class Workflow extends Observable {
     this.revision = {
       isSelectionOpen: false,
       regex: new RegExp(`^${defaultRevision}`),
-      rawValue: defaultRevision
+      rawValue: defaultRevision,
     };
     this.form.revision = defaultRevision;
     this.revisions = this.repoList.payload.repos.filter((obj) => obj.name === repository)[0].revisions;
@@ -178,6 +178,7 @@ export default class Workflow extends Observable {
    * if the user did not select a new revision from the dropdown area
    * and it does not matches a commit string format,
    * to reset the value to the current selected revision
+   * @param value
    */
   closeRevisionInputDropdown(value = undefined) {
     if (value && this.isInputCommitFormat(value)) {
@@ -190,7 +191,8 @@ export default class Workflow extends Observable {
 
   /**
    * Match regex to see if revision is in a commit format
-   * @return {boolean}
+   * @param value
+   * @returns {boolean}
    */
   isInputCommitFormat(value) {
     const reg = new RegExp('^[a-f0-9]{40}$');
@@ -200,10 +202,11 @@ export default class Workflow extends Observable {
   /**
    * Check and prepare data for saving currently displayed configuration
    * Make API call to be saved
-   * @param {String} name
+   * @param {string} name
+   * @param action
    */
   saveEnvConfiguration(name, action = 'save') {
-    const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
+    const { ok, message, variables } = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
       // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
@@ -218,10 +221,10 @@ export default class Workflow extends Observable {
           RemoteData.failure('Please select repository, revision and workflow in order to create an environment');
       } else {
         const detectors = this.flpSelection.selectedDetectors;
-        const repository = this.form.repository;
-        const revision = this.form.revision;
+        const { repository } = this.form;
+        const { revision } = this.form;
         const workflow = this.form.template;
-        const data = {name, detectors, repository, revision, workflow, variables};
+        const data = { name, detectors, repository, revision, workflow, variables };
         this.model.environment.saveEnvConfiguration(data, action);
       }
     }
@@ -232,7 +235,7 @@ export default class Workflow extends Observable {
    * Method to check user's input and create a new environment
    */
   async createNewEnvironment() {
-    const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
+    const { ok, message, variables } = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
       // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
@@ -250,13 +253,13 @@ export default class Workflow extends Observable {
           RemoteData.failure('Please select repository, revision and workflow in order to create an environment');
       } else {
         let path = '';
-        path = this.parseRepository(this.form.repository) + `/workflows/${this.form.template}@${this.form.revision}`;
+        path = `${this.parseRepository(this.form.repository)}/workflows/${this.form.template}@${this.form.revision}`;
 
         // Combine Readout URI if it was used
         this.model.environment.newEnvironment({
           workflowTemplate: path,
           vars: variables,
-          detectors: this.flpSelection.selectedDetectors
+          detectors: this.flpSelection.selectedDetectors,
         });
       }
     }
@@ -271,7 +274,7 @@ export default class Workflow extends Observable {
       repoPattern: this.form.repository,
       revisionPattern: this.form.revision,
       allBranches: false,
-      allTags: false
+      allTags: false,
     };
     this.setTemplatesData(options);
   }
@@ -279,17 +282,18 @@ export default class Workflow extends Observable {
   /**
    * Method to add a new KV Pair to the variables form for creating a new environment
    * @param {string} key
-   * @param {Object} value
+   * @param {object} value
+   * @param keyToAdd
+   * @param valueToAdd
+   * @param inEdit
    */
   addVariable(keyToAdd, valueToAdd, inEdit = false) {
-    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap, inEdit);
+    const { key, value, ok, error } = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap, inEdit);
     if (ok) {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
         this.form.basicVariables[key] = value;
-        this.model.notification.show(
-          'Variable has been successfully imported in the configuration panels', 'success', 1000
-        );
+        this.model.notification.show('Variable has been successfully imported in the configuration panels', 'success', 1000);
       } else {
         this.form.variables[key] = value;
       }
@@ -303,10 +307,10 @@ export default class Workflow extends Observable {
   /**
    * Given a KV Pairs as a String, attempt to add
    * each key and value to the panel of KV pairs configuration
-   * @param {String} kvPairs
+   * @param {string} kvPairs
    */
   addVariableJSON(kvPairs) {
-    const {parsedKVJSON, errors} = WorkflowVariable.parseKVPairMap(kvPairs, this.selectedVarsMap);
+    const { parsedKVJSON, errors } = WorkflowVariable.parseKVPairMap(kvPairs, this.selectedVarsMap);
     Object.keys(parsedKVJSON).forEach((key) => {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
@@ -317,9 +321,7 @@ export default class Workflow extends Observable {
     });
     if (errors.length === 0) {
       this.kvPairsString = '';
-      this.model.notification.show(
-        'Variables have been successfully imported in the configuration panels', 'success', 1000
-      );
+      this.model.notification.show('Variables have been successfully imported in the configuration panels', 'success', 1000);
     }
     this.advErrorPanel = errors;
     this.notify();
@@ -344,7 +346,7 @@ export default class Workflow extends Observable {
    * Method to remove one of the variables by key from the
    * advance configuration panel
    * @param {string} key
-   * @return {boolean}
+   * @returns {boolean}
    */
   removeVariableByKey(key) {
     if (this.form.variables[key] !== null && this.form.variables[key] !== undefined) {
@@ -359,7 +361,7 @@ export default class Workflow extends Observable {
   /**
    * Generate the variables from spec map object if it exists
    * Filter our variables belonging to other detectors selection
-   * @param {String} template
+   * @param {string} template
    */
   generateVariablesSpec(template) {
     this.selectedVarsMap = {};
@@ -381,7 +383,7 @@ export default class Workflow extends Observable {
         const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
         if (!this.groupedPanels[panelBelongingTo]) {
           this.groupedPanels[panelBelongingTo] = [];
-          this.panelsUtils[panelBelongingTo] = {isVisible: false};
+          this.panelsUtils[panelBelongingTo] = { isVisible: false };
         }
         variable.key = key;
         const workVariable = new WorkflowVariable(variable);
@@ -399,13 +401,13 @@ export default class Workflow extends Observable {
       });
       Object.keys(this.groupedPanels).forEach((key) => {
         // sort variables within each panel based on index and label
-        let sortedVars = this.groupedPanels[key].sort((varA, varB) => {
+        const sortedVars = this.groupedPanels[key].sort((varA, varB) => {
           if (varA.index < varB.index) {
             return -1;
           } else if (varA.index > varB.index) {
             return 1;
           }
-          return varA.label.toLocaleUpperCase() > varB.label.toLocaleUpperCase() ? 1 : -1
+          return varA.label.toLocaleUpperCase() > varB.label.toLocaleUpperCase() ? 1 : -1;
         });
         this.groupedPanels[key] = sortedVars;
       });
@@ -417,14 +419,15 @@ export default class Workflow extends Observable {
   /**
    * Checks that a given variable key is visible:
    * * based on detectors selection
-   * @param {JSON} variables 
-   * @return {JSON}
+   * @param {JSON} variables
+   * @param key
+   * @returns {JSON}
    */
   isVariableVisible(key) {
     if (this.flpSelection.selectedDetectors.length > 0) {
       const prefix = key.split('_')[0];
       const isVariableDetector = this.flpSelection.detectors.payload
-        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
       const isVariableIncludedDetector = this.flpSelection.selectedDetectors
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
       return !isVariableDetector || isVariableIncludedDetector;
@@ -432,7 +435,7 @@ export default class Workflow extends Observable {
     if (this.model.detectors.selected && this.model.detectors.selected !== 'GLOBAL') {
       const prefix = key.split('_')[0];
       const isVariableDetector = this.flpSelection.detectors.payload
-        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
       return !isVariableDetector || this.model.detectors.selected.toLocaleUpperCase() === prefix.toLocaleUpperCase();
     }
     return true;
@@ -460,9 +463,7 @@ export default class Workflow extends Observable {
    * Afterwards, request the public templates for the new updated (repository,revision)
    */
   async refreshRepositories() {
-    this.refreshedRepositories = await this.remoteDataPostRequest(
-      this.refreshedRepositories, `/api/RefreshRepos`, {index: -1}
-    );
+    this.refreshedRepositories = await this.remoteDataPostRequest(this.refreshedRepositories, '/api/RefreshRepos', { index: -1 });
     if (this.refreshedRepositories.isSuccess()) {
       this.reloadDataForm();
     } else {
@@ -476,7 +477,7 @@ export default class Workflow extends Observable {
    * Set the revisions for the selected repository
    */
   async requestRepositoryList() {
-    this.repoList = await this.remoteDataPostRequest(this.repoList, `/api/ListRepos`, {getRevisions: true});
+    this.repoList = await this.remoteDataPostRequest(this.repoList, '/api/ListRepos', { getRevisions: true });
     if (this.repoList.isSuccess()) {
       // Set first repository the default one or first from the list if default does not exist
       const repository = this.repoList.payload.repos.find((repository) => repository.default);
@@ -491,9 +492,9 @@ export default class Workflow extends Observable {
   }
 
   /**
-  * Load public templates for the selected repository and revision into RemoteData
-  * @param {JSON} options
-  */
+   * Load public templates for the selected repository and revision into RemoteData
+   * @param {JSON} options
+   */
   async setTemplatesData(options) {
     this.templates = RemoteData.loading();
     this.notify();
@@ -503,21 +504,21 @@ export default class Workflow extends Observable {
         repoPattern: this.form.repository,
         revisionPattern: this.form.revision,
         allBranches: false,
-        allTags: false
+        allTags: false,
       };
     }
-    const {result, ok} = await this.model.loader.post(`/api/GetWorkflowTemplates`, options);
+    const { result, ok } = await this.model.loader.post('/api/GetWorkflowTemplates', options);
     if (!ok) {
       this.templates = RemoteData.failure(result.message);
     } else {
       const templateList = [];
       result.workflowTemplates.map((templateObject) => {
         const description = templateObject.description ? templateObject.description : '';
-        templateList.push({name: templateObject.template, description});
+        templateList.push({ name: templateObject.template, description });
         if (templateObject.varSpecMap && Object.keys(templateObject.varSpecMap).length > 0) {
           this.templatesVarsMap[templateObject.template] = templateObject.varSpecMap;
         }
-      })
+      });
       this.templates = RemoteData.success(templateList);
     }
     this.notify();
@@ -528,14 +529,13 @@ export default class Workflow extends Observable {
    * Set it in a RemoteData object
    */
   async getAndSetSavedConfigurations() {
-    this.savedConfigurations = await this.remoteDataPostRequest(
-      this.savedConfigurations, '/api/ListRuntimeEntries', {component: 'COG-v1'}
-    );
+    this.savedConfigurations = await this.remoteDataPostRequest(this.savedConfigurations, '/api/ListRuntimeEntries', { component: 'COG-v1' });
   }
 
   /**
    * Given a configuration name, request its data from apricot and fill in new environment page
-   * @param {String} name 
+   * @param {string} name
+   * @param key
    */
   async getAndSetNamedConfiguration(key) {
     if (key !== '-') {
@@ -543,33 +543,31 @@ export default class Workflow extends Observable {
       this.loadingConfiguration = RemoteData.loading();
       this.notify();
 
-      const {result: configuration, ok} = await this.model.loader.get(`/api/workflow/configuration`, {name: key});
+      const { result: configuration, ok } = await this.model.loader.get('/api/workflow/configuration', { name: key });
       this.loadedConfiguration = ok ? RemoteData.success(configuration) : RemoteData.failure(configuration.message);
       this.notify();
       try {
-        const variables = configuration.variables;
+        const { variables } = configuration;
         let hosts = [];
         if (variables.hosts) {
           hosts = JSON.parse(variables.hosts);
           delete variables.hosts;
         }
-        const detectors = configuration.detectors;
+        const { detectors } = configuration;
         if (this.model.detectors.isSingleView() &&
           (
-            (detectors.length === 1 && this.model.detectors.selected !== detectors[0])
+            detectors.length === 1 && this.model.detectors.selected !== detectors[0]
             || detectors.length > 1
           )
         ) {
           this.flpSelection.detectorViewConfigurationError = true;
         } else {
-          const unavailableDetectors = detectors.filter(name =>
+          const unavailableDetectors = detectors.filter((name) =>
             this.flpSelection.isDetectorActive(name)
-            || !(!this.model.lock.isLocked(name) || this.model.lock.isLockedByCurrentUser(name))
-          );
-          if (unavailableDetectors.length <= 0 || (unavailableDetectors.length > 0 && confirm(
-            `The following detectors are not available: ${unavailableDetectors.join(',')}\nDo you want to continue?`)
-          )) {
-            detectors.forEach(detector => this.model.lock.actionOnLock(detector, DetectorLockAction.TAKE, false));
+            || !(!this.model.lock.isLocked(name) || this.model.lock.isLockedByCurrentUser(name)));
+          if (unavailableDetectors.length <= 0 || unavailableDetectors.length > 0 && confirm(`The following detectors are not available: ${unavailableDetectors.join(',')}\nDo you want to continue?`)
+          ) {
+            detectors.forEach((detector) => this.model.lock.actionOnLock(detector, DetectorLockAction.TAKE, false));
             await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
             this.addVariableJSON(JSON.stringify(variables));
           }
@@ -595,7 +593,7 @@ export default class Workflow extends Observable {
     remoteDataItem = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(callString, options);
+    const { result, ok } = await this.model.loader.post(callString, options);
 
     remoteDataItem = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
     this.notify();
@@ -607,11 +605,11 @@ export default class Workflow extends Observable {
    */
 
   /**
-   * Check that variables are not duplicated in basic and advanced 
+   * Check that variables are not duplicated in basic and advanced
    * configuration panel and merge them together
    * @param {JSON} vars
    * @param {JSON} basicVars
-   * @return {boolean, string, JSON}
+   * @returns {boolean, string, JSON}
    */
   _checkAndMergeVariables(vars, basicVars) {
     const variables = JSON.parse(JSON.stringify(vars));
@@ -620,43 +618,46 @@ export default class Workflow extends Observable {
 
     if (sameKeys.length > 0) {
       return {
-        variables: {}, ok: false,
-        message: `Due to General Configuration selection, you cannot use the following keys: ${sameKeys}`
+        variables: {},
+        ok: false,
+        message: `Due to General Configuration selection, you cannot use the following keys: ${sameKeys}`,
       };
     } else {
       const readoutResult = this.parseReadoutURI(basicVariables);
       if (!readoutResult.ok) {
-        return {ok: false, message: readoutResult.message, variables: {}};
+        return { ok: false, message: readoutResult.message, variables: {} };
       }
       basicVariables = readoutResult.variables;
       const qcResult = this.parseQcURI(basicVariables);
       if (!qcResult.ok) {
-        return {ok: false, message: qcResult.message, variables: {}};
+        return { ok: false, message: qcResult.message, variables: {} };
       }
       basicVariables = qcResult.variables;
-      const allVariables = Object.assign({}, basicVariables, variables);
+      const allVariables = { ...basicVariables, ...variables };
       Object.keys(allVariables)
         .filter((key) => allVariables[key])
         .forEach((key) => allVariables[key] = allVariables[key].trim().replace(/\r?\n/g, ' '));
-      return {ok: true, message: '', variables: allVariables};
+      return { ok: true, message: '', variables: allVariables };
     }
   }
 
   /**
    * Build the string for readout configuration URI
    * @param {JSON} vars
-   * @return {JSON}
+   * @returns {JSON}
    */
   parseReadoutURI(vars) {
     if (vars['readout_cfg_uri'] && !vars['readout_cfg_uri_pre']) {
       return {
-        variables: {}, ok: false,
-        message: `Missing 'Readout URI' type selection`
+        variables: {},
+        ok: false,
+        message: `Missing 'Readout URI' type selection`,
       };
     } else if (!vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
       return {
-        variables: {}, ok: false,
-        message: `Missing 'Readout URI' path. Either remove the type of the file or enter configuration path.`
+        variables: {},
+        ok: false,
+        message: `Missing 'Readout URI' path. Either remove the type of the file or enter configuration path.`,
       };
     } else if (vars['readout_cfg_uri'] && vars['readout_cfg_uri_pre']) {
       if (vars['readout_cfg_uri_pre'] === this.READOUT_PREFIX.CONSUL) {
@@ -665,18 +666,18 @@ export default class Workflow extends Observable {
       vars['readout_cfg_uri'] = vars['readout_cfg_uri_pre'] + vars['readout_cfg_uri'];
       delete vars['readout_cfg_uri_pre'];
     }
-    return {variables: vars, ok: true, message: ''};
+    return { variables: vars, ok: true, message: '' };
   }
 
   /**
    * Ensure there is no slash at the end of the workflow URL
-   * @param {String} url
-   * @return {String}
+   * @param {string} url
+   * @returns {string}
    */
   parseRepository(url) {
     const copy = url.slice();
     if (copy[copy.length - 1] === '/') {
-      return copy.slice(0, -1)
+      return copy.slice(0, -1);
     } else {
       return copy;
     }
@@ -685,18 +686,20 @@ export default class Workflow extends Observable {
   /**
    * Build the string for quality control configuration URI
    * @param {JSON} vars
-   * @return {JSON}
+   * @returns {JSON}
    */
   parseQcURI(vars) {
     if (vars['qc_config_uri'] && !vars['qc_config_uri_pre']) {
       return {
-        variables: {}, ok: false,
-        message: `Missing 'QC URI' type selection`
+        variables: {},
+        ok: false,
+        message: `Missing 'QC URI' type selection`,
       };
     } else if (!vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
       return {
-        variables: {}, ok: false,
-        message: `Missing 'QC URI' path. Either remove the type of the file or enter configuration path.`
+        variables: {},
+        ok: false,
+        message: `Missing 'QC URI' path. Either remove the type of the file or enter configuration path.`,
       };
     } else if (vars['qc_config_uri'] && vars['qc_config_uri_pre']) {
       if (vars['qc_config_uri_pre'] === this.QC_PREFIX.CONSUL) {
@@ -705,6 +708,6 @@ export default class Workflow extends Observable {
       vars['qc_config_uri'] = vars['qc_config_uri_pre'] + vars['qc_config_uri'];
       delete vars['qc_config_uri_pre'];
     }
-    return {variables: vars, ok: true, message: ''};
+    return { variables: vars, ok: true, message: '' };
   }
 }

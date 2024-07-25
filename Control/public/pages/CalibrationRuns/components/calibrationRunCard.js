@@ -10,24 +10,22 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {formatTimeDuration} from '/js/src/index.js';
-import {rowForCard} from '../../../common/card/rowForCard.js';
-import {miniCard} from './../../../common/card/miniCard.js';
-import {calibrationRunCardHeader} from './calibrationRunCardHeader.js';
-import {qcgExternalLink} from './../../../common/qcgExternalLink.js';
+import { formatTimeDuration } from '/js/src/index.js';
+import { rowForCard } from '../../../common/card/rowForCard.js';
+import { miniCard } from './../../../common/card/miniCard.js';
+import { calibrationRunCardHeader } from './calibrationRunCardHeader.js';
+import { qcgExternalLink } from './../../../common/qcgExternalLink.js';
 
 /**
  * Builds a card with information specific to a calibration run.
  * @param {RunSummary} run - information about the run
- * @return {vnode}
+ * @returns {vnode}
  */
 export const calibrationRunCard = (run) => !run ?
   null
-  : miniCard(
-    calibrationRunCardHeader(run), [
-      rowForCard(formatTimeDuration(run.runDuration), `Start: ${new Date(run.startTime).toLocaleString()}`),
-      rowForCard(qcgExternalLink(run), `End: ${new Date(run.endTime).toLocaleString()}`),
-    ], ['w-30', 'g0', 'p2']
-  );
+  : miniCard(calibrationRunCardHeader(run), [
+    rowForCard(formatTimeDuration(run.runDuration), `Start: ${new Date(run.startTime).toLocaleString()}`),
+    rowForCard(qcgExternalLink(run), `End: ${new Date(run.endTime).toLocaleString()}`),
+  ], ['w-30', 'g0', 'p2']);

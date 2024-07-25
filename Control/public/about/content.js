@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
-import {servicesResolvedPanel} from './components/panels/servicesResolvedPanel.js';
-import {servicesInLoadingPanel} from './components/panels/servicesInLoadingPanel.js';
+import { h } from '/js/src/index.js';
+import { servicesResolvedPanel } from './components/panels/servicesResolvedPanel.js';
+import { servicesInLoadingPanel } from './components/panels/servicesInLoadingPanel.js';
 import { SERVICE_STATES } from '../common/constants/serviceStates.js';
-const {IN_ERROR, IN_LOADING, IN_SUCCESS, NOT_ENABLED} = SERVICE_STATES;
+const { IN_ERROR, IN_LOADING, IN_SUCCESS, NOT_ENABLED } = SERVICE_STATES;
 
 /**
  * @file Content for About Page
@@ -28,7 +28,8 @@ const {IN_ERROR, IN_LOADING, IN_SUCCESS, NOT_ENABLED} = SERVICE_STATES;
  * @param {Model} model
  * @returns {vnode}
  */
-export const content = ({about: {services} = {}}) => h('.scroll-y.absolute-fill.flex-column.p2.g2',
+export const content = ({ about: { services } = {} }) => h(
+  '.scroll-y.absolute-fill.flex-column.p2.g2',
   servicesInLoadingPanel(services[IN_LOADING]),
   servicesResolvedPanel(services[IN_ERROR], 'error'),
   servicesResolvedPanel(services[IN_SUCCESS], 'success'),

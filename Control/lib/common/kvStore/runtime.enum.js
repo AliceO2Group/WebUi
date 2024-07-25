@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const RUNTIME_COMPONENT = Object.freeze({
   PDP_VERSION: 'aliecs/defaults',
@@ -22,7 +22,7 @@ const RUNTIME_KEY = Object.freeze({
   FLP_VERSION: 'flp_suite_version',
   PDP_VERSION: 'pdp_o2pdpsuite_version',
   CALIBRATION_MAPPING: 'calibration-mappings',
-  RUN_TYPE_TO_HOST_MAPPING: 'runType-to-host-mapping'
+  RUN_TYPE_TO_HOST_MAPPING: 'runType-to-host-mapping',
 });
 
-module.exports = {RUNTIME_COMPONENT, RUNTIME_KEY};
+module.exports = { RUNTIME_COMPONENT, RUNTIME_KEY };

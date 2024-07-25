@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
-const {errorHandler, errorLogger} = require('../utils.js');
-const {getConsulConfig} = require('../config/publicConfigProvider.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
+const { errorHandler, errorLogger } = require('../utils.js');
+const { getConsulConfig } = require('../config/publicConfigProvider.js');
+const { LOG_LEVEL } = require('../common/logLevel.enum.js');
 
 /**
  * Gateway for all Consul Consumer calls
@@ -29,7 +29,7 @@ class ConsulController {
    */
   constructor(consulService, config) {
     this.consulService = consulService;
-    this.config = getConsulConfig({consul: config});
+    this.config = getConsulConfig({ consul: config });
     this.flpHardwarePath = this.config.flpHardwarePath;
     this.detHardwarePath = this.config.detHardwarePath;
     this.readoutCardPath = this.config.readoutCardPath;
@@ -43,8 +43,8 @@ class ConsulController {
    * * If yes, allow request to continue
    * * If not, send response accordingly
    * @param {Request} req
-   * @param {Response} res 
-   * @param {Next} next 
+   * @param {Response} res
+   * @param {Next} next
    */
   validateService(req, res, next) {
     if (this.consulService) {
@@ -64,13 +64,13 @@ class ConsulController {
   }
 
   /**
-  * Method to request all CRUs available in consul KV store under the 
-  * hardware key
-  * @param {Request} req
-  * @param {Response} res
-  */
+   * Method to request all CRUs available in consul KV store under the
+   * hardware key
+   * @param {Request} req
+   * @param {Response} res
+   */
   async getCRUs(req, res) {
-    const regex = new RegExp(`.*/.*/cards`);
+    const regex = new RegExp('.*/.*/cards');
     this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath).then((data) => {
       const crusByHost = {};
       Object.keys(data)
@@ -107,7 +107,7 @@ class ConsulController {
         const flpList = data.filter((key) => key.match(regex))
           .map((key) => key.split('/')[3]);
         res.status(200);
-        res.json({flps: [...new Set(flpList)]});
+        res.json({ flps: [...new Set(flpList)] });
       })
       .catch((error) => {
         if (error.message.includes('404')) {
@@ -128,7 +128,7 @@ class ConsulController {
    */
   async getCRUsWithConfiguration(req, res) {
     try {
-      let cardsByHost = await this._getCardsByHost();
+      const cardsByHost = await this._getCardsByHost();
       const crusByHost = this._mapCrusWithId(cardsByHost);
       const crusWithConfigByHost = await this._getCrusConfigById(crusByHost);
       res.status(200).json(crusWithConfigByHost);
@@ -167,26 +167,24 @@ class ConsulController {
   async getCRUsAlias(req, res) {
     try {
       const aliases = {};
-      let detectorsKey = await this.consulService.getKeysByPrefix(this.detHardwarePath);
-      await Promise.all(
-        detectorsKey.filter((key) => key.includes('aliases'))
-          .map(async (key) => {
-            try {
-              let alias = await this.consulService.getOnlyRawValuesByKeyPrefix(key);
-              alias = JSON.parse(alias[key]);
+      const detectorsKey = await this.consulService.getKeysByPrefix(this.detHardwarePath);
+      await Promise.all(detectorsKey.filter((key) => key.includes('aliases'))
+        .map(async (key) => {
+          try {
+            let alias = await this.consulService.getOnlyRawValuesByKeyPrefix(key);
+            alias = JSON.parse(alias[key]);
 
-              const host = key.split('/')[5];
-              aliases[host] = {
-                alias: alias.flp.alias,
-                cards: alias.cards,
-              };
-            } catch (error) {
-              errorLogger(`Bad format to get aliases for key: ${key}`, 'consul');
-              errorLogger(error, 'consul')
-            }
-            return;
-          })
-      );
+            const host = key.split('/')[5];
+            aliases[host] = {
+              alias: alias.flp.alias,
+              cards: alias.cards,
+            };
+          } catch (error) {
+            errorLogger(`Bad format to get aliases for key: ${key}`, 'consul');
+            errorLogger(error, 'consul');
+          }
+          return;
+        }));
       res.json(aliases);
     } catch (error) {
       errorHandler(error, res, 502);
@@ -211,10 +209,10 @@ class ConsulController {
     const keyValues = this._mapToKVPairs(crusByHost, latestCrusWithConfigByHost);
     try {
       log.infoMessage(`Request of user: ${req.session.username} to update CRU configuration`, {
-        level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/consul'
+        level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/consul',
       });
       await this.consulService.putListOfKeyValues(keyValues);
-      res.status(200).json({info: {message: 'CRUs Configuration saved'}});
+      res.status(200).json({ info: { message: 'CRUs Configuration saved' } });
     } catch (error) {
       errorHandler(error, res, 502);
     }
@@ -222,7 +220,7 @@ class ConsulController {
 
   /**
    * Get a list of FLPs loaded from Consul
-   * @return {Array<String>}
+   * @returns {Array<string>}
    */
   async getFLPsList() {
     if (this.consulService) {
@@ -249,7 +247,7 @@ class ConsulController {
    * on the readoutPath prefix and group them in a JSON
    * by host and cruid (cru_<serial>_<endpoint>)
    * @param {JSON} crus
-   * @return {Promise.<JSON, Error>}
+   * @returns {Promise.<JSON, Error>}
    */
   async _getCrusConfigById(crus) {
     const crusByEndpoint = await this.consulService.getOnlyRawValuesByKeyPrefix(this.readoutCardPath);
@@ -274,7 +272,7 @@ class ConsulController {
   /**
    * Get a JSON of cards grouped by their host by querying Consul through the flpHardwarePath
    * @example
-   * { 
+   * {
    *  "host_one": {
    *    "0": {
    *      "key": "value"
@@ -284,10 +282,10 @@ class ConsulController {
    *    }
    *  }
    * }
-   * @return {Promise.<JSON, Error>}
+   * @returns {Promise.<JSON, Error>}
    */
   async _getCardsByHost() {
-    const regex = new RegExp(`.*cards`);
+    const regex = new RegExp('.*cards');
     const data = await this.consulService.getOnlyRawValuesByKeyPrefix(this.flpHardwarePath);
     const cardsByHost = {};
     Object.keys(data)
@@ -306,7 +304,8 @@ class ConsulController {
    * * cru.userLogicEnabled
    * * link0 - link11
    * @param {JSON} crusByHost
-   * @return {Array<KV>}
+   * @param latestCrusByHost
+   * @returns {Array<KV>}
    */
   _mapToKVPairs(crusByHost, latestCrusByHost) {
     const kvPairs = [];
@@ -322,15 +321,15 @@ class ConsulController {
           .filter((key) => key.match('link[0-9]{1,2}')) // select only fields from links0 to links11
           .forEach((key) => {
             if (cruConfig[key] && cruConfig[key].enabled) {
-              latestConfig[key].enabled = cruConfig[key].enabled
+              latestConfig[key].enabled = cruConfig[key].enabled;
             }
           });
         const serial = cruId.split('_')[1];
         const endpoint = cruId.split('_')[2];
-        const pair = {}
+        const pair = {};
         pair[`${this.readoutCardPath}/${host}/cru/${serial}/${endpoint}`] = JSON.stringify(latestConfig, null, 2);
         kvPairs.push(pair);
-      })
+      });
     });
     return kvPairs;
   }
@@ -339,10 +338,10 @@ class ConsulController {
    * Filter out any cards with type != CRU and replace the incremental index on each CRU
    * by their unique ID used in CRUs configuration
    * @param {JSON} cards
-   * @return {JSON}
+   * @returns {JSON}
    */
   _mapCrusWithId(cards) {
-    const crusWithIdByHost = {}
+    const crusWithIdByHost = {};
     Object.keys(cards).forEach((hostName) => {
       const hostCru = {};
       Object.keys(cards[hostName])
@@ -350,7 +349,7 @@ class ConsulController {
         .sort((a, b) => this._sortCRUsBySerialEndpoint(cards[hostName][a], cards[hostName][b]))
         .forEach((cruIndex) => {
           const cruInfo = cards[hostName][cruIndex];
-          hostCru[`cru_${cruInfo.serial}_${cruInfo.endpoint}`] = {info: cruInfo, config: {}};
+          hostCru[`cru_${cruInfo.serial}_${cruInfo.endpoint}`] = { info: cruInfo, config: {} };
           crusWithIdByHost[hostName] = hostCru;
         });
     });
@@ -363,7 +362,9 @@ class ConsulController {
    * @param {JSON} cards
    * @param {number} a
    * @param {number} b
-   * @return {number} 1 / -1
+   * @param cruA
+   * @param cruB
+   * @returns {number} 1 / -1
    */
   _sortCRUsBySerialEndpoint(cruA, cruB) {
     const cruIdA = `cru_${cruA.serial}_${cruA.endpoint}`;

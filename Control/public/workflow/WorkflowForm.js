@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable} from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
 
 /**
  * Model representing Workflow Template configuration that is to be potentially used for deploying an environment
@@ -38,9 +38,12 @@ export default class WorkflowForm extends Observable {
   /**
    * Set template metadata information
    * @param {object} - information retrieved for the default configuration template
-   * @return {void}
+   * @param -.repository
+   * @param -.revision
+   * @param -.template
+   * @returns {void}
    */
-  setTemplateInfo({repository = '', revision = '', template = ''}) {
+  setTemplateInfo({ repository = '', revision = '', template = '' }) {
     this.repository = repository;
     this.revision = revision;
     this.template = template;
@@ -48,7 +51,7 @@ export default class WorkflowForm extends Observable {
 
   /**
    * Method to check that all mandatory fields were filled
-   * @return {boolean}
+   * @returns {boolean}
    */
   isInputSelected() {
     return this.repository.trim() !== ''
@@ -67,7 +70,7 @@ export default class WorkflowForm extends Observable {
 
   /**
    * Set the hosts selected by the user
-   * @param {Array<String>} hosts
+   * @param {Array<string>} hosts
    */
   setHosts(hosts) {
     this.hosts = JSON.parse(JSON.stringify(hosts));
@@ -76,7 +79,7 @@ export default class WorkflowForm extends Observable {
 
   /**
    * Retrieve a list of hosts selected by the user
-   * @return {Array<string>}
+   * @returns {Array<string>}
    */
   getHosts() {
     return JSON.parse(JSON.stringify(this.hosts));
@@ -84,7 +87,7 @@ export default class WorkflowForm extends Observable {
 
   /**
    * Add a host to the list of selected ones if it is not included already
-   * @param {String} host
+   * @param {string} host
    */
   addHost(host) {
     if (!this.hosts.includes(host)) {
@@ -95,7 +98,7 @@ export default class WorkflowForm extends Observable {
 
   /**
    * Remove a selected host by its index
-   * @param {Number} index
+   * @param {number} index
    */
   removeHostByIndex(index) {
     this.hosts.splice(index, 1);

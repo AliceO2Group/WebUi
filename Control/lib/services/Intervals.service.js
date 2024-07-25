@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const DEFAULT_INTERVAL_RATE = 60 * 1000;
 
@@ -20,7 +20,7 @@ const DEFAULT_INTERVAL_RATE = 60 * 1000;
  */
 class Intervals {
   /**
-   * @constructor
+   * @class
    * Constructor for initializing a list of intervals
    */
   constructor() {
@@ -32,9 +32,9 @@ class Intervals {
 
   /**
    * Method to allow other services to register events that should trigger based on an interval rate
-   * @param {function} callback - function that should be called based on interval rate
+   * @param {Function} callback - function that should be called based on interval rate
    * @param {number} intervalRate = 60 * 1000 - (ms) on how often the callback should be called
-   * @return {Symbol} - unique key for registered callback
+   * @returns {symbol} - unique key for registered callback
    */
   register(callback, intervalRate = DEFAULT_INTERVAL_RATE) {
     const key = Symbol(Math.random());
@@ -44,8 +44,8 @@ class Intervals {
 
   /**
    * Method to allow services to deregister and clear an interval
-   * @param {Symbol} key - key under which the interval was registered
-   * @return {void}
+   * @param {symbol} key - key under which the interval was registered
+   * @returns {void}
    */
   deregister(key) {
     clearInterval(this._intervals[key]);

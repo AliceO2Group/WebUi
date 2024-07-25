@@ -10,19 +10,19 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconExternalLink} from '/js/src/index.js';
+import { h, iconExternalLink } from '/js/src/index.js';
 
 /* global COG */
 
 /**
  * Component for building an external link in a new tab to QCG component based on a given run object
  * @param {Run} run - object with run information needed for building a link
- * @return {vnode}
+ * @returns {vnode}
  */
 export const qcgExternalLink = (run) => {
-  const {runNumber, detectors, definition, runType} = run;
+  const { runNumber, detectors, definition, runType } = run;
 
   const qcgLinkQueryParameters = ['page=layoutShow'];
   if (definition) {
@@ -46,8 +46,7 @@ export const qcgExternalLink = (run) => {
     }, h('.flex-row.gc1', [
       'QCG',
       h('span.f6', iconExternalLink()),
-    ])
-    );
+    ]));
   }
   return;
-}
+};
