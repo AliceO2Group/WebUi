@@ -20,7 +20,7 @@ const StatusService = require('./StatusService.js');
 
 const projPackage = require('../package.json');
 
-const logger = new LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/api`);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/api`);
 const config = require('./configProvider.js');
 
 let querySource = null;

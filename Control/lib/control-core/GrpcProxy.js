@@ -19,7 +19,7 @@ const path = require('path');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
-const logger = new (require('@aliceo2/web-ui').LogManager)
+const logger = (require('@aliceo2/web-ui').LogManager)
   .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
 
 /**

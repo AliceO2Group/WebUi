@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const logger = new (require('@aliceo2/web-ui').LogManager)
+const logger = (require('@aliceo2/web-ui').LogManager)
   .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
 const {errorHandler, errorLogger} = require('../utils.js');
 const {getConsulConfig} = require('../config/publicConfigProvider.js');
