@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
@@ -22,6 +22,11 @@ const config = require('../config.js');
 
 const InfoLoggerReceiver = require('../../log/InfoLoggerReceiver.js');
 const {LogManager} = require('../../log/LogManager');
+const {Logger} = require('../../log/Logger.js');
+const {InfoLoggerSender} = require('../../index.js');
+const sinon = require('sinon');
+const {LogLevel} = require('../../log/LogLevel.js');
+const WinstonWrapper = require('../../log/WinstonWrapper.js');
 
 describe('Logging via WinstonWrapper', () => {
   it('should successfully instantiate Log class and generate error file (winston)', (done) => {
@@ -165,5 +170,25 @@ describe('Logging: InfoLogger protocol', () => {
     receiver.onData(messages);
     receiver.onData(messages2);
     /* eslint-enable max-len */
+  });
+
+  it('should successfully send to winston only logs with level starting from Developer', () => {
+    const fakeIfologgerSendMessage = sinon.fake();
+
+    class DummyInfologgerSender extends InfoLoggerSender {
+      sendMessage(log) {
+        fakeIfologgerSendMessage(log);
+      }
+    }
+
+    const winston = new WinstonWrapper().instance;
+
+    const logger = new Logger('dummy-label', {
+      infologger: new DummyInfologgerSender(winston),
+    });
+
+    logger._sendToInfoLogger('will be sent ', {level: LogLevel.OPERATIONS});
+    logger._sendToInfoLogger('will not be sent', {level: LogLevel.DEVELOPER});
+    assert.equal(fakeIfologgerSendMessage.calledOnce, true);
   });
 });
