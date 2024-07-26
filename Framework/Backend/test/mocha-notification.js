@@ -41,7 +41,7 @@ describe('Kafka Connector test suite', () => {
     });
   });
 
-  describe('Check notification params', function {
+  describe('Check notification params', function() {
     this.timeout(5000);
 
     it('Notification without tag should fail', async () => {
