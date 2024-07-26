@@ -16,7 +16,9 @@ const NotificationService = require('./../services/notification.js');
 const config = require('./../config-default.json');
 const assert = require('assert');
 
-describe('Kafka Connector test suite', () => {
+describe('Kafka Connector test suite', function () {
+  this.timeout(5000);
+
   describe('Check Initialization of NotificationService', () => {
     it('should not throw error if entire notification configuration is missing', () => {
       assert.doesNotThrow(() => {
