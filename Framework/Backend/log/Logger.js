@@ -31,7 +31,7 @@ class Logger {
    * @constructor
    * @param {string} [label=''] - the logger's label
    * @param {object} [delegates] - delegates logger
-   * @param {WinstonWrapper} [delegates.winstonWrapper] - winston wrapper
+   * @param {WinstonWrapper} [delegates.winston] - winston wrapper
    * @param {InfoLoggerSender} [delegates.infologger] - infologger sender
    */
   constructor(label, delegates) {
