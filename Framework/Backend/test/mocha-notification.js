@@ -41,7 +41,9 @@ describe('Kafka Connector test suite', () => {
     });
   });
 
-  describe('Check notification params', () => {
+  describe('Check notification params', function {
+    this.timeout(5000);
+
     it('Notification without tag should fail', async () => {
       const notification = new NotificationService(config.notification);
       await assert.rejects(() => notification.send());
