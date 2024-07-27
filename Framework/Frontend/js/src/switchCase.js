@@ -30,6 +30,6 @@
  * ]);
  */
 const switchCase = (caseName, cases, defaultCaseValue) =>
-  cases[caseName] ? cases[caseName] : defaultCaseValue;
+  Object.prototype.hasOwnProperty.call(cases, caseName) ? cases[caseName] : defaultCaseValue;
 
 export default switchCase;

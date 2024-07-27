@@ -104,7 +104,7 @@ class WebSocketMessage {
    * @return {string} Object property
    */
   getProperty(name) {
-    if (this._payload[name]) {
+    if (Object.prototype.hasOwnProperty.call(this._payload, name)) {
       return this._payload[name];
     }
     return;

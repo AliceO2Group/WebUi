@@ -57,7 +57,7 @@ class WebSocket {
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
-    if (this.callbackArray[name]) {
+    if (Object.prototype.hasOwnProperty.call(this.callbackArray, name)) {
       throw Error('Callback already exists.');
     }
     this.callbackArray[name] = callback;
@@ -82,7 +82,7 @@ class WebSocket {
       Object.assign(req, data);
       this.log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
       // Check whether callback exists
-      if (this.callbackArray[req.getCommand()]) {
+      if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
         const res = this.callbackArray[req.getCommand()](req);
         // Verify that response is type of WebSocketMessage
         if (res && res.constructor.name === 'WebSocketMessage') {

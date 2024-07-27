@@ -72,7 +72,8 @@ class HttpServer {
     }
 
     const autoListenFlag = 'autoListen';
-    if (!httpConfig[autoListenFlag] || httpConfig[autoListenFlag]) {
+
+    if (!Object.prototype.hasOwnProperty.call(httpConfig, autoListenFlag) || httpConfig[autoListenFlag]) {
       this.listen();
     }
 
