@@ -33,8 +33,8 @@ class WebSocket {
     this.server = new WebSocketServer({ server: httpsServer.getServer, clientTracking: true });
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
-    this.log.info('Server started');
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
+    this.logger.info('Server started');
 
     this.callbackArray = [];
     this.bind('filter', (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
@@ -80,7 +80,7 @@ class WebSocket {
 
       // Transfer decoded JWT data to request
       Object.assign(req, data);
-      this.log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
+      this.logger.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
       // Check whether callback exists
       if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
         const res = this.callbackArray[req.getCommand()](req);
@@ -112,7 +112,7 @@ class WebSocket {
     try {
       decoded = this.http.o2TokenService.verify(token);
     } catch (error) {
-      this.log.debug(`${error.name} : ${error.message}`);
+      this.logger.debug(`${error.name} : ${error.message}`);
       client.close(1008);
       return;
     }
@@ -123,7 +123,7 @@ class WebSocket {
     client.on('pong', () => {
       client.isAlive = true;
     });
-    client.on('error', (err) => this.log.error(`Connection ${err.code}`));
+    client.on('error', (err) => this.logger.error(`Connection ${err.code}`));
   }
 
   /**
@@ -147,7 +147,7 @@ class WebSocket {
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              this.log.debug(`ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
+              this.logger.debug(`ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
               // 5. Send back to a client
               client.send(JSON.stringify(response.json));
             }
@@ -160,7 +160,7 @@ class WebSocket {
         client.send(JSON.stringify(failed.json));
       })
       .catch((error) => {
-        this.log.warn(`ID ${client.id} ${error.name} : ${error.message}`);
+        this.logger.warn(`ID ${client.id} ${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -177,9 +177,9 @@ class WebSocket {
         client.isAlive = false;
         client.ping('', false, (err) => {
           if (err) {
-            this.log.error(err);
+            this.logger.error(err);
             if (err.stack) {
-              this.log.trace(err);
+              this.logger.trace(err);
             }
           }
         });
@@ -192,7 +192,7 @@ class WebSocket {
    * @param {object} client - disconnected client
    */
   onclose(client) {
-    this.log.info(`ID ${client.id} Client disconnected`);
+    this.logger.info(`ID ${client.id} Client disconnected`);
   }
 
   /**
@@ -209,12 +209,12 @@ class WebSocket {
             return; // Don't send
           }
         } catch (error) {
-          this.log.error(`Client's filter corrupted, skipping broadcast: ${error}`);
+          this.logger.error(`Client's filter corrupted, skipping broadcast: ${error}`);
           return; // Don't send
         }
       }
       client.send(JSON.stringify(message.json));
-      this.log.debug(`ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
+      this.logger.debug(`ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
     });
   }
 
@@ -224,7 +224,7 @@ class WebSocket {
    */
   unfilteredBroadcast(message) {
     this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));
-    this.log.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
+    this.logger.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
 

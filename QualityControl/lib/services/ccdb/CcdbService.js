@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
@@ -55,7 +55,7 @@ export class CcdbService {
    * @returns {CcdbService} - an instance of the newly created service
    */
   static setup(config = {}) {
-    const logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
+    const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
 
     const { hostname, port } = config;
     if (!hostname || !port) {

@@ -10,9 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/api`);
+const logger = (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
 // middleware
@@ -63,7 +64,7 @@ if (!config.apricot) {
   throw new Error('Apricot gRPC Configuration is missing');
 }
 if (!config.grafana) {
-  log.error('Grafana Configuration is missing');
+  logger.error('Grafana Configuration is missing');
 }
 
 module.exports.setup = (http, ws) => {
@@ -113,7 +114,7 @@ module.exports.setup = (http, ws) => {
   }
 
   const statusService = new StatusService(
-    config, ctrlService, consulService, apricotService, notificationService, wsService
+    config, ctrlService, consulService, apricotService, notificationService, wsService,
   );
   const statusController = new StatusController(statusService);
 
@@ -127,7 +128,7 @@ module.exports.setup = (http, ws) => {
   ];
 
   ctrlProxy.methods.forEach(
-    (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res))
+    (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
   );
   http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
   http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
@@ -138,7 +139,7 @@ module.exports.setup = (http, ws) => {
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
 
   http.get('/runs/calibration/config', [
-    minimumRoleMiddleware(Role.GLOBAL)
+    minimumRoleMiddleware(Role.GLOBAL),
   ], runController.refreshCalibrationRunsConfigurationHandler.bind(runController));
 
   http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController));
@@ -150,7 +151,7 @@ module.exports.setup = (http, ws) => {
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
     lockOwnershipMiddleware(lockService, envService),
-    envCtrl.destroyEnvironmentHandler.bind(envCtrl)
+    envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 
   http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
@@ -158,7 +159,7 @@ module.exports.setup = (http, ws) => {
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
 
   apricotProxy.methods.forEach(
-    (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res))
+    (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res)),
   );
   http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
   http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
@@ -182,7 +183,7 @@ module.exports.setup = (http, ws) => {
   http.get('/status/core', coreMiddleware[0], statusController.getAliECSStatus.bind(statusController));
   http.get('/status/system', statusController.getSystemCompatibility.bind(statusController));
   http.get('/status/core/services', coreMiddleware[0],
-    statusController.getAliECSIntegratedServicesStatus.bind(statusController)
+    statusController.getAliECSIntegratedServicesStatus.bind(statusController),
   );
 
   // Consul
@@ -218,7 +219,7 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
   if (config.bookkeeping) {
     intervalsService.register(
       runService.retrieveCalibrationRunsGroupedByDetector.bind(runService),
-      CALIBRATION_RUNS_REFRESH_RATE
+      CALIBRATION_RUNS_REFRESH_RATE,
     );
   }
 }

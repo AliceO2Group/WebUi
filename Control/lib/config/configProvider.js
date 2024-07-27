@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Log} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/config`);
+const {LogManager} = require('@aliceo2/web-ui');
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/config`);
 
 const fs = require('fs');
 const path = require('path');
@@ -34,12 +34,12 @@ if (process.argv.length >= 3 && /\.js$/.test(process.argv[2])) {
 try {
   configFile = fs.realpathSync(configFile);
 } catch (err) {
-  log.error(`Unable to read config file: ${err.message}`);
+  logger.errorMessage(`Unable to read config file: ${err.message}`);
   process.exit(1);
 }
 
 const config = require(configFile);
-Log.configure(config.logging);
-log.info(`Read config file "${configFile}"`);
+LogManager.configure(config.logging);
+logger.infoMessage(`Read config file "${configFile}"`);
 
 module.exports = config;

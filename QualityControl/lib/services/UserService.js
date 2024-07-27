@@ -13,9 +13,9 @@
  */
 
 import assert from 'assert';
-import { Log } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
  * Gateway for all User data calls
@@ -49,9 +49,9 @@ export class UserService {
       res.status(200).json({ ok: true });
     } catch (err) {
       if (err.stack) {
-        log.trace(err);
+        logger.trace(err);
       }
-      log.error('Unable to add user to memory');
+      logger.error('Unable to add user to memory');
       res.status(502).json({ ok: false, message: 'Unable to add user to memory' });
     }
   }

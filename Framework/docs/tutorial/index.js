@@ -19,7 +19,7 @@ const { HttpServer, LogManager, WebSocket, WebSocketMessage } = require('@aliceo
 const config = require('./config.js');
 
 // Get logger instance
-const log = LogManager.getLogger('Tutorial');
+const logger = LogManager.getLogger('Tutorial');
 
 /*
  * HTTP server
@@ -58,7 +58,7 @@ wsServer.bind('stream-date', () => {
   }
 
   // Use internal logging
-  log.info('start timer');
+  logger.info('start timer');
 
   // Broadcase the time to all clients every 100ms
   streamTimer = setInterval(() => {

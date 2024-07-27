@@ -38,7 +38,7 @@ class InfoLoggerReceiver extends EventEmitter {
 
     this.isConnected = false;
 
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ilreceiver`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ilreceiver`);
   }
 
   /**
@@ -60,25 +60,25 @@ class InfoLoggerReceiver extends EventEmitter {
     this.client.on('connect', () => {
       this.isConnected = true;
       this.emit('connected');
-      this.log.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
+      this.logger.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
     });
 
     this.client.on('end', () => {
-      this.log.error('Connection to infoLoggerServer ended (FIN)');
+      this.logger.error('Connection to infoLoggerServer ended (FIN)');
       this.isConnected = false;
       this.emit('close');
       setTimeout(() => {
-        this.log.info('Quickly reconnecting infoLoggerServer socket...');
+        this.logger.info('Quickly reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       }, 5000);
     });
 
     this.client.on('error', (error) => {
       this.isConnected = false;
-      this.log.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
+      this.logger.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
       setTimeout(() => {
         this.emit('connection-issue', 'Unable to connect to InfoLogger Server. Retrying in 5 seconds...');
-        this.log.info('Reconnecting infoLoggerServer socket...');
+        this.logger.info('Reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       }, 5000);
     });
@@ -141,12 +141,12 @@ class InfoLoggerReceiver extends EventEmitter {
   parse(frame) {
     // Check frame integrity (header and footer)
     if (frame[0] !== '*') {
-      this.log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must begins with *`);
+      this.logger.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must begins with *`);
       return;
     }
 
     if (frame[frame.length - 1] !== '\n') {
-      this.log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must ends with \\n`);
+      this.logger.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must ends with \\n`);
       return;
     }
 
@@ -155,7 +155,7 @@ class InfoLoggerReceiver extends EventEmitter {
     const frameProtocol = protocols.find((protocol) => protocol.version === frameVersion);
     if (!frameProtocol) {
       const protocolsVersions = protocols.map((protocol) => protocol.version);
-      this.log.warn(`Parsing: unreconized protocol, found "${frameVersion}",
+      this.logger.warn(`Parsing: unreconized protocol, found "${frameVersion}",
         support ${protocolsVersions.join(', ')}`);
       return;
     }
@@ -166,7 +166,7 @@ class InfoLoggerReceiver extends EventEmitter {
 
     // Check frame integrity (number of fields)
     if (fields.length !== frameProtocol.fields.length) {
-      this.log.warn(`Parsing: expected ${frameProtocol.fields.length} fields for
+      this.logger.warn(`Parsing: expected ${frameProtocol.fields.length} fields for
         protocol version ${frameProtocol.version}, found ${fields.length}`);
       return;
     }

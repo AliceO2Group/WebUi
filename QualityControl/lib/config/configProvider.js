@@ -13,12 +13,12 @@
  */
 'use strict';
 
-import { Log } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 import { realpath } from 'node:fs/promises';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/config`);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/config`);
 
 const DEFAULT_CONF_LOCATION = './../../config.js';
 
@@ -29,9 +29,9 @@ try {
   configFilePath = await realpath(configFilePath);
   ({ config } = await import(configFilePath));
 
-  log.info(`Configuration file successfully read from: "${configFilePath}"`);
+  logger.info(`Configuration file successfully read from: "${configFilePath}"`);
 } catch (err) {
-  log.error(`Unable to read configuration file (${configFilePath}) due to: ${err.message}`);
+  logger.error(`Unable to read configuration file (${configFilePath}) due to: ${err.message}`);
   process.exit(1);
 }
 

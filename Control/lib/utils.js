@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
+const logger = (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
 const http = require('http');
 const https = require('https');
 
@@ -30,14 +31,14 @@ function errorHandler(err, res, status = 500, facility = 'utils') {
 
 /**
  * Global Error Logger for AliECS GUI
- * @param {Error} err 
+ * @param {Error} err
  */
 function errorLogger(err, facility = 'utils') {
-  log.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
+  logger.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
   if (err.stack) {
-    log.trace(err);
+    logger.trace(err);
   }
-  log.error(err.message || err);
+  logger.error(err.message || err);
 }
 
 /**

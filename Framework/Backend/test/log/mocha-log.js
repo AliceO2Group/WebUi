@@ -21,6 +21,11 @@ const config = require('../config.js');
 
 const InfoLoggerReceiver = require('../../log/InfoLoggerReceiver.js');
 const { LogManager } = require('../../log/LogManager');
+const { Logger } = require('../../log/Logger.js');
+const { InfoLoggerSender } = require('../../index.js');
+const sinon = require('sinon');
+const { LogLevel } = require('../../log/LogLevel.js');
+const WinstonWrapper = require('../../log/WinstonWrapper.js');
 
 describe('Logging via WinstonWrapper', () => {
   it('should successfully instantiate Log class and generate error file (winston)', (done) => {
@@ -160,5 +165,32 @@ describe('Logging: InfoLogger protocol', () => {
     const messages2 = 'daq#DAQ#pauseAndResetRun#TPC#PHYSICS_1##289724##91#pauseAndResetRun.c#POST_PAR completed\n';
     receiver.onData(messages);
     receiver.onData(messages2);
+  });
+
+  it('should successfully send to winston only logs with level starting from Developer', () => {
+    const fakeIfologgerSendMessage = sinon.fake();
+
+    /**
+     *
+     */
+    class DummyInfologgerSender extends InfoLoggerSender {
+      /**
+       * Method to overwrite for testing purposes
+       * @param {Log} log - log to be sent
+       */
+      sendMessage(log) {
+        fakeIfologgerSendMessage(log);
+      }
+    }
+
+    const winston = new WinstonWrapper().instance;
+
+    const logger = new Logger('dummy-label', {
+      infologger: new DummyInfologgerSender(winston),
+    });
+
+    logger._sendToInfoLogger('will be sent ', { level: LogLevel.OPERATIONS });
+    logger._sendToInfoLogger('will not be sent', { level: LogLevel.DEVELOPER });
+    assert.equal(fakeIfologgerSendMessage.calledOnce, true);
   });
 });

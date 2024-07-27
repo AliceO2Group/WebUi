@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/json`);
+const logger = (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/json`);
 const fs = require('fs');
 const path = require('path');
 
@@ -46,7 +47,7 @@ class JsonFileConnector {
   async _syncFileAndInternalState() {
     await this._readFromFile();
     await this._writeToFile();
-    log.info(`Preferences will be saved in ${this.pathname}`);
+    logger.info(`Preferences will be saved in ${this.pathname}`);
   }
 
   /**
@@ -59,7 +60,7 @@ class JsonFileConnector {
         if (err) {
           // file does not exist, it's ok, we will create it
           if (err.code === 'ENOENT') {
-            log.info('DB file does not exist, will create one');
+            logger.info('DB file does not exist, will create one');
             return resolve();
           }
 
@@ -101,7 +102,7 @@ class JsonFileConnector {
           if (err) {
             return reject(err);
           }
-          log.info('DB file updated');
+          logger.info('DB file updated');
           resolve();
         });
       });

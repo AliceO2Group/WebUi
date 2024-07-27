@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
+const {WebSocketMessage, LogManager} = require('@aliceo2/web-ui');
 const {errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
 const {
@@ -31,7 +31,7 @@ class RequestHandler {
    * @param {ApricotService} apricotService - service to use to interact with A.P.R.I.C.O.T
    */
   constructor(ctrlService, apricotService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/controlrequests`);
     this.ctrlService = ctrlService;
     this._apricotService = apricotService;
     this.requestList = {};

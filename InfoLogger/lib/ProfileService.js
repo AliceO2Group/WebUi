@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'ilg'}/profile`);
+const logger = (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/profile`);
 
 /**
  * Gateway for all Infologger profile calls
@@ -70,12 +71,12 @@ class ProfileService {
   async getProfile(req, res) {
     const { profile } = req.query;
     if (profile.trim()) {
-      log.info(`User profile ${profile} fetched successfully`);
+      logger.info(`User profile ${profile} fetched successfully`);
       res.status(200).json({ user: profile,
         content:
-         { colsHeader: this.defaultUserConfig, criterias: this.defaultCriterias } });
+        { colsHeader: this.defaultUserConfig, criterias: this.defaultCriterias } });
     } else {
-      log.warn(`User profile ${profile} not found, sending default instead`);
+      logger.warn(`User profile ${profile} not found, sending default instead`);
       res.status(200).json({ user: 'default',
         content:
         { colsHeader: this.defaultUserConfig, criterias: this.defaultCriterias } });
@@ -133,7 +134,7 @@ class ProfileService {
    * @param {number} status - HTTP status code
    */
   handleError(res, error, status = 500) {
-    log.trace(error);
+    logger.trace(error);
     res.status(status).json({ message: error.message });
   }
 }

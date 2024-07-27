@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
@@ -56,7 +56,7 @@ export class QcObjectService {
       objects: undefined,
       lastUpdate: undefined,
     };
-    this._logger = new Log(LOG_FACILITY);
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**

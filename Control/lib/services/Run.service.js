@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager} = require('@aliceo2/web-ui');
 
 const {CacheKeys} = require('../common/cacheKeys.enum.js');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
@@ -63,7 +63,7 @@ class RunService {
      */
     this._calibrationConfigurationPerDetectorMap = {};
 
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
   }
 
   /**
@@ -129,8 +129,8 @@ class RunService {
   /**
    * Load calibration mapping for each detector as per the KV store
    * @return {Promise<Object<String, CalibrationConfiguration.Error>} - map of calibration configurations
-   *  
-   * @example 
+   *
+   * @example
    * { "XYZ": [ { "runType": "PEDESTAL", "configuration": "cpv-pedestal-20220412", "label": "CPV PEDESTAL", description: "To be ran second for CPV" }]}
    */
   async _retrieveCalibrationConfigurationsForDetectors() {

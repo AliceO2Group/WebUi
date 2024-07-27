@@ -39,7 +39,7 @@ class MySQL {
     config.timeout = !config.timeout ? 30000 : config.timeout;
 
     this.config = config;
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
     this.pool = mysql.createPool(config);
   }
 
@@ -77,7 +77,7 @@ class MySQL {
         if (error) {
           reject(new Error(this.errorHandler(error)));
         }
-        this.log.debug(mysql.format(query, parameters));
+        this.logger.debug(mysql.format(query, parameters));
         resolve(results);
       });
     });
@@ -109,7 +109,7 @@ class MySQL {
     } else {
       message = `MySQL error: ${err.code}, ${err.message}`;
     }
-    this.log.error(message);
+    this.logger.error(message);
     return message;
   }
 }
