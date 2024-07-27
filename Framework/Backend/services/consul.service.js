@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const http = require('http');
 
@@ -65,7 +65,7 @@ class ConsulService {
    * @return {Promise.<Array<string>, Error>}
    */
   async getKeys() {
-    return this.httpJson(this.kvPath + '?keys=true');
+    return this.httpJson(`${this.kvPath}?keys=true`);
   }
 
   /**
@@ -76,7 +76,7 @@ class ConsulService {
    */
   async getKeysByPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
-    const getPath = this.kvPath + keyPrefix + '/?keys=true';
+    const getPath = `${this.kvPath + keyPrefix}/?keys=true`;
     return this.httpJson(getPath);
   }
 
@@ -100,7 +100,7 @@ class ConsulService {
    */
   async getOnlyRawValueByKey(key) {
     key = this.parseKey(key);
-    const getPath = this.kvPath + key + '?raw=true';
+    const getPath = `${this.kvPath + key}?raw=true`;
     return this.httpJson(getPath);
   }
 
@@ -112,7 +112,7 @@ class ConsulService {
    */
   async getValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
-    const getPath = this.kvPath + keyPrefix + '?recurse=true';
+    const getPath = `${this.kvPath + keyPrefix}?recurse=true`;
     return this.httpJson(getPath);
   }
 
@@ -125,7 +125,7 @@ class ConsulService {
    */
   async getOnlyRawValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
-    const getPath = this.kvPath + keyPrefix + '?recurse=true';
+    const getPath = `${this.kvPath + keyPrefix}?recurse=true`;
     return this.httpJson(getPath).then((data) => {
       const response = {};
       data.forEach((object) => {
@@ -155,18 +155,18 @@ class ConsulService {
       try {
         const requestOptions = this._getRequestOptionsPUT(this.txnPath, list);
         await this.httpJson(this.txnPath, requestOptions, list);
-      } catch (error) {
+      } catch {
         allPut = false;
       }
     }));
-    return {allPut: allPut};
+    return { allPut: allPut };
   }
 
   /**
    * Util to get/put JSON data (parsed) from Consul server
    * @param {string} path - path to Consul server
-   * @param {JSON} requestOptions
-   * @param {JSON} data
+   * @param {object} requestOptions - http request options
+   * @param {object} data - data to send in GET.PUT request
    * @return {Promise.<Object, Error>} JSON response
    */
   async httpJson(path, requestOptions, data) {
@@ -175,20 +175,20 @@ class ConsulService {
         hostname: this.hostname,
         port: this.port,
         path: path,
-        qs: {keys: true},
+        qs: { keys: true },
         method: 'GET',
-        headers: {Accept: 'application/json'}
+        headers: { Accept: 'application/json' },
       };
 
       /**
        * Generic handler for client http requests,
        * buffers response, checks status code and parses JSON
-       * @param {Response} response
-       * @return {Promise.<JSON, Error>}
+       * @param {Response} response - HTTP express response object
+       * @return {void}
        */
       const requestHandler = (response) => {
         if (response.statusCode < 200 || response.statusCode > 299) {
-          reject(new Error('Non-2xx status code: ' + response.statusCode));
+          reject(new Error(`Non-2xx status code: ${response.statusCode}`));
         }
         const bodyChunks = [];
         response.on('data', (chunk) => bodyChunks.push(chunk));
@@ -196,11 +196,11 @@ class ConsulService {
           try {
             const body = JSON.parse(bodyChunks.join(''));
             resolve(body);
-          } catch (e) {
+          } catch {
             reject(new Error('Unable to parse JSON'));
           }
         });
-      }
+      };
 
       const request = http.request(reqOptions, requestHandler);
       request.on('error', (err) => reject(err));
@@ -217,8 +217,9 @@ class ConsulService {
 
   /**
    * Build a JSON with request options needed for PUT request
-   * @param {JSON} data 
-   * @return {JSON}
+   * @param {string} path - path to for request to Consul Server
+   * @param {object} data - data to send
+   * @return {object} - request options
    */
   _getRequestOptionsPUT(path, data) {
     if (typeof data !== 'string') {
@@ -227,19 +228,19 @@ class ConsulService {
     return {
       hostname: this.hostname,
       port: this.port,
-      path: path,
+      path,
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': data.length
-      }
+        'Content-Length': data.length,
+      },
     };
   }
 
   /**
    * Method to check for and remove any `/` from the start and end of a key/keyPrefix
    * @param {string} key - key or keyPrefix to check
-   * @return {string}
+   * @return {string} - key or keyPrefix without `/` at the start and end
    */
   parseKey(key) {
     if (key.charAt(0) === '/') {
@@ -256,20 +257,20 @@ class ConsulService {
    * These pairs will than be placed in batches due to the fact that a transaction
    * accepts maximum 64 elements
    * https://www.consul.io/api/txn
-   * @param {Array<<String,String>>} list 
-   * @return {Array<Array<ConsulTransaction>>}
+   * @param {Array<object>} list - list of KV pairs
+   * @return {Array<Array<ConsulTransaction>>} - list of transactions
    */
   _mapToConsulKVObjectsLists(list) {
     const consulList = [];
     let transactionList = [];
     list.forEach((kvPair) => {
-      const key = Object.keys(kvPair)[0];
+      const [key] = Object.keys(kvPair);
       const consulObj = {
         KV: {
           Verb: 'set',
           Key: key,
-          Value: Buffer.from(kvPair[key]).toString('base64')
-        }
+          Value: Buffer.from(kvPair[key]).toString('base64'),
+        },
       };
       transactionList.push(consulObj);
       if (transactionList.length >= 64) {

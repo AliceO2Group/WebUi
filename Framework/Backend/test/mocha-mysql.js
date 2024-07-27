@@ -10,12 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const MySQL = require('../db/mysql.js');
 const sinon = require('sinon');
 const assert = require('assert');
-const AssertionError = require('assert').AssertionError;
+const { AssertionError } = require('assert');
 
 let db = null;
 
@@ -27,25 +27,25 @@ describe('MySQL Data Connector', () => {
     it('should throw error due to missing configuration', () => {
       assert.throws(() => {
         new MySQL();
-      }, new AssertionError({message: 'Missing config', expected: true, operator: '=='}));
+      }, new AssertionError({ message: 'Missing config', expected: true, operator: '==' }));
     });
 
     it('should throw error due to missing configuration parameter: host', () => {
       assert.throws(() => {
         new MySQL({});
-      }, new AssertionError({message: 'Missing config value: mysql.host', expected: true, operator: '=='}));
+      }, new AssertionError({ message: 'Missing config value: mysql.host', expected: true, operator: '==' }));
     });
 
     it('should throw error due to missing configuration parameter: user', () => {
       assert.throws(() => {
-        new MySQL({host: 'test'});
-      }, new AssertionError({message: 'Missing config value: mysql.user', expected: true, operator: '=='}));
+        new MySQL({ host: 'test' });
+      }, new AssertionError({ message: 'Missing config value: mysql.user', expected: true, operator: '==' }));
     });
 
     it('should throw error due to missing configuration parameter: database', () => {
       assert.throws(() => {
-        new MySQL({host: 'test', user: 'test'});
-      }, new AssertionError({message: 'Missing config value: mysql.database', expected: true, operator: '=='}));
+        new MySQL({ host: 'test', user: 'test' });
+      }, new AssertionError({ message: 'Missing config value: mysql.database', expected: true, operator: '==' }));
     });
 
     it('should successfully initialize mysql connector with all parameters', () => {
@@ -55,7 +55,7 @@ describe('MySQL Data Connector', () => {
         database: 'db',
         port: 8080,
         password: 'admin',
-        timeout: 2020
+        timeout: 2020,
       };
       db = new MySQL(config);
     });
@@ -75,13 +75,13 @@ describe('MySQL Data Connector', () => {
       const config = {
         host: 'localhost',
         user: 'test',
-        database: 'db'
+        database: 'db',
       };
       db = new MySQL(config);
     });
 
     it('should successfully test connection to the pool created', () => {
-      const connection = {release: sinon.fake.returns(true)};
+      const connection = { release: sinon.fake.returns(true) };
       const callback = sinon.fake.yields(null, connection);
 
       sinon.replace(db.pool, 'getConnection', callback);
@@ -144,13 +144,13 @@ describe('MySQL Data Connector', () => {
       const config = {
         host: 'localhost',
         user: 'test',
-        database: 'db'
+        database: 'db',
       };
       db = new MySQL(config);
     });
 
     it('should successfully query', () => {
-      const connection = {release: sinon.fake.returns(true)};
+      const connection = { release: sinon.fake.returns(true) };
       const callback = sinon.fake.yields(null, connection);
 
       sinon.replace(db.pool, 'query', ({}, callback));

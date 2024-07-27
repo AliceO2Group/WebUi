@@ -11,16 +11,16 @@
  * or submit itself to any jurisdiction.
  */
 
-const {InvalidInputError} = require('./InvalidInputError.js');
-const {NotFoundError} = require('./NotFoundError.js');
-const {ServiceUnavailableError} = require('./ServiceUnavailableError.js');
-const {TimeoutError} = require('./TimeoutError.js');
-const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
+const { InvalidInputError } = require('./InvalidInputError.js');
+const { NotFoundError } = require('./NotFoundError.js');
+const { ServiceUnavailableError } = require('./ServiceUnavailableError.js');
+const { TimeoutError } = require('./TimeoutError.js');
+const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
 
 /**
  * @typedef GrpcError
  * also known as gRPC Status Object
- * 
+ *
  * @property {number} code - code of the gRPC Status object
  * @property {string} message - message of the gRPC Status object
  */

@@ -10,15 +10,19 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Template engine functions using vnode and DOM diff algo
  * @module renderer
  */
 
-// mithril function 'm' will be injected into window
-// it is used by renderer as an abstracted engine
+/* eslint-disable @stylistic/js/max-len */
+
+/*
+ * Mithril function 'm' will be injected into window
+ * it is used by renderer as an abstracted engine
+ */
 import '/mithril/mithril.min.js';
 
 if (!window.m) {
@@ -36,11 +40,11 @@ if (!window.requestAnimationFrame) {
  */
 function frameDebouncer(fn) {
   let requestFrame;
-  return function(...args) {
+  return function (...args) {
     if (requestFrame) {
       window.cancelAnimationFrame(requestFrame);
     }
-    requestFrame = window.requestAnimationFrame(function() {
+    requestFrame = window.requestAnimationFrame(() => {
       fn(...args);
     });
   };
@@ -56,7 +60,7 @@ function frameDebouncer(fn) {
  * render(document.body, virtualNode);
  */
 function render(element, vnode) {
-  // encapsulate mithril engine so we can change if needed
+  // Encapsulate mithril engine so we can change if needed
   window.m.render(element, vnode);
 }
 
@@ -90,6 +94,7 @@ function render(element, vnode) {
  * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
  * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
  * @param {Array.<vnode|string>|string} children - Children inside this tag
+ * @param {...any} args
  * @return {vnode} the vnode representation
  * @example <caption>Simple tag declaration</caption>
  * import {h, render} from '/js/src/index.js';
@@ -113,7 +118,7 @@ function render(element, vnode) {
  * render(document.body, containerNode);
  */
 function h(...args) {
-  // encapsulate mithril engine so we can change if needed
+  // Encapsulate mithril engine so we can change if needed
   return window.m(...args);
 }
 
@@ -139,7 +144,7 @@ function mount(element, view, model, debug) {
       console.time('render');
     }
     try {
-      render(element, (typeof view === "function" ? view : view.view)(model));
+      render(element, (typeof view === 'function' ? view : view.view)(model));
     } finally {
       if (debug) {
         // eslint-disable-next-line no-console
@@ -149,9 +154,9 @@ function mount(element, view, model, debug) {
   });
 
   if (model.observe) {
-    model.observe(smartRender); // redraw on changes
+    model.observe(smartRender); // Redraw on changes
   }
-  render(element, (typeof view === "function" ? view : view.view)(model)); // first draw
+  render(element, (typeof view === 'function' ? view : view.view)(model)); // First draw
 }
 
-export {h, render, frameDebouncer, mount};
+export { h, render, frameDebouncer, mount };

@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const {LogLevel} = require('./LogLevel.js');
-const {LOG_SEVERITIES, LogSeverity} = require('./LogSeverity.js');
+const { LogLevel } = require('./LogLevel.js');
+const { LOG_SEVERITIES, LogSeverity } = require('./LogSeverity.js');
 
 const DEFAULT_SEVERITY = LogSeverity.INFO;
 const DEFAULT_LEVEL = LogLevel.DEVELOPER;
@@ -39,7 +39,6 @@ const DEFAULT_FACILITY = 'gui';
  * @docs https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md
  */
 class InfoLoggerMessage {
-
   /**
    * Construct a default InfoLoggerMessage
    */
@@ -66,7 +65,7 @@ class InfoLoggerMessage {
     log._severity = logObject.severity && LOG_SEVERITIES.includes(logObject.severity)
       ? logObject.severity
       : LogSeverity.INFO;
-    log._level = parseInt(logObject?.level) || LogLevel.DEVELOPER;
+    log._level = parseInt(logObject?.level, 10) || LogLevel.DEVELOPER;
     log._system = logObject.system ?? DEFAULT_SYSTEM;
     log._facility = logObject.facility ?? DEFAULT_FACILITY;
     log._environmentId = logObject.environmentId ?? logObject.partition;
@@ -83,8 +82,10 @@ class InfoLoggerMessage {
    */
   getComponentsOfMessage() {
     const components = [
-      `-oSeverity=${this._severity}`, `-oLevel=${this._level}`,
-      `-oSystem=${this._system}`, `-oFacility=${this._facility}`,
+      `-oSeverity=${this._severity}`,
+      `-oLevel=${this._level}`,
+      `-oSystem=${this._system}`,
+      `-oFacility=${this._facility}`,
     ];
     if (this._environmentId) {
       components.push(`-oPartition=${this._environmentId}`);
@@ -112,7 +113,7 @@ class InfoLoggerMessage {
         return JSON.stringify(log).replace(/ {4}|[\t\n\r]/gm, ' ');
       }
       return log.replace(/ {4}|[\t\n\r]/gm, ' ');
-    } catch (error) {
+    } catch {
       return '';
     }
   }

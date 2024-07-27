@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Import the backend classes
-const {HttpServer, LogManager, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
+const { HttpServer, LogManager, WebSocket, WebSocketMessage } = require('@aliceo2/web-ui');
 
 // Define configuration for JWT tokens and HTTP server
 const config = require('./config.js');
@@ -21,10 +21,12 @@ const config = require('./config.js');
 // Get logger instance
 const log = LogManager.getLogger('Tutorial');
 
-// HTTP server
-// -----------
-//
-// Instanciate the HTTP server
+/*
+ * HTTP server
+ * -----------
+ *
+ * Instantiate the HTTP server
+ */
 const httpServer = new HttpServer(config.http, config.jwt);
 
 // Server static content in public directory
@@ -32,14 +34,15 @@ httpServer.addStaticPath('./public');
 
 // Declare HTTP POST route availabe under "/api/getDate" path
 httpServer.post('/getDate', (req, res) => {
-  res.json({date: new Date()});
+  res.json({ date: new Date() });
 });
 
-
-// WebSocket server
-// ----------------
-//
-// Instanciate the WebSocket server
+/*
+ * WebSocket server
+ * ----------------
+ *
+ * Instantiate the WebSocket server
+ */
 const wsServer = new WebSocket(httpServer);
 
 // Define gloval variable
@@ -48,7 +51,7 @@ let streamTimer = null;
 // Declare WebSocket callback for 'stream-date' messages
 wsServer.bind('stream-date', () => {
   if (streamTimer) {
-    // already started, kill it
+    // Already started, kill it
     clearInterval(streamTimer);
     streamTimer = null;
     return;
@@ -59,9 +62,7 @@ wsServer.bind('stream-date', () => {
 
   // Broadcase the time to all clients every 100ms
   streamTimer = setInterval(() => {
-    wsServer.broadcast(
-      new WebSocketMessage().setCommand('server-date').setPayload({date: new Date()})
-    );
+    wsServer.broadcast(new WebSocketMessage().setCommand('server-date').setPayload({ date: new Date() }));
   }, 100);
   return new WebSocketMessage().setCommand('stream-date');
 });

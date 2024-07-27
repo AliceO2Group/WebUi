@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const { Kafka, logLevel } = require('kafkajs')
+const { Kafka, logLevel } = require('kafkajs');
 const WebSocketMessage = require('../websocket/message.js');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * Gateway for all Kafka notification service
@@ -37,8 +37,8 @@ class NotificationService {
     this.kafka = new Kafka({
       clientId: 'webui',
       brokers: config.brokers,
-      retry: {retries: 3},
-      logLevel: logLevel.NOTHING
+      retry: { retries: 3 },
+      logLevel: logLevel.NOTHING,
     });
 
     this.admin = this.kafka.admin();
@@ -49,14 +49,14 @@ class NotificationService {
 
   /**
    * Check if Kafka was correctly configured
-   * @return {boolean} States wheather service is correctly configured
+   * @return {boolean} States whether service is correctly configured
    */
   isConfigured() {
-    return (this.kafka !== undefined && this.admin !== undefined);
+    return this.kafka !== undefined && this.admin !== undefined;
   }
 
   /**
-   * Provides healthstatus of Kafka cluster
+   * Provides health status of Kafka cluster
    * @returns {Promise}
    */
   async health() {
@@ -72,7 +72,7 @@ class NotificationService {
   async send(message = undefined) {
     const producer = this.kafka.producer();
     await producer.connect();
-    await producer.send({topic: this.topic, messages: [{value: JSON.stringify(message)}]});
+    await producer.send({ topic: this.topic, messages: [{ value: JSON.stringify(message) }] });
     await producer.disconnect();
   }
 
@@ -83,16 +83,14 @@ class NotificationService {
    */
   async proxyWebNotificationToWs(webSocket) {
     this.webSocket = webSocket;
-    this.consumer = this.kafka.consumer({groupId: 'webnotification-group'});
+    this.consumer = this.kafka.consumer({ groupId: 'webnotification-group' });
     this.log.info('Listening for notifications');
     await this.consumer.connect();
-    await this.consumer.subscribe({topic: 'webnotification', fromBeginning: false});
-    await this.consumer.run({eachMessage: async ({topic, partition, message}) => {
+    await this.consumer.subscribe({ topic: 'webnotification', fromBeginning: false });
+    await this.consumer.run({ eachMessage: async ({ topic, partition, message }) => {
       this.log.debug(`Received message on ${topic} topic from ${partition} partition`);
-      this.webSocket.broadcast(
-        new WebSocketMessage().setCommand('notification').setPayload(message.value.toString())
-      );
-    }});
+      this.webSocket.broadcast(new WebSocketMessage().setCommand('notification').setPayload(message.value.toString()));
+    } });
   }
 
   /**

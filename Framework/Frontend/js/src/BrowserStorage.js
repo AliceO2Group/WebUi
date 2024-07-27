@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* global: window */
+/* Global: window */
 
 /**
  * Interface to be used for local & session storage
@@ -54,8 +54,8 @@ export default class BrowserStorage {
   }
 
   /**
-  * Method to clear `localStorage`
-  */
+   * Method to clear `localStorage`
+   */
   clearLocalStorage() {
     this.localStorage.clear();
   }

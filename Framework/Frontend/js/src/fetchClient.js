@@ -10,19 +10,19 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* global: window */
+/* Global: window */
 
 import sessionService from './sessionService.js';
 
-const location = window.location;
+const { location } = window;
 
 /**
  * Extends the fetch() function by adding the session token in the request
  * by taking it from sessionService transparently for developer.
  * See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
- * @param {string} URL
+ * @param {...any} args - arguments to pass to fetch
  * @return {object} options - method, etc.
  * @example
  * import {fetchClient} from '/js/src/index.js';
@@ -43,8 +43,10 @@ function fetchClient(...args) {
 
   const session = sessionService.get();
 
-  // Parse the URI provided
-  // location brings the base if first arg is relative
+  /*
+   * Parse the URI provided
+   * Location brings the base if first arg is relative
+   */
   const url = new URL(args[0], location);
 
   // Inject the token in the query string

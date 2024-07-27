@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const jwt = require('jsonwebtoken');
-const {randomBytes} = require('crypto');
+const { randomBytes } = require('crypto');
 
 /**
  * Provides JSON Web Token functionality such as token generation and verification with `jsonwebtoken` library
@@ -42,9 +42,9 @@ class O2TokenService {
    * @return {string} generated token
    */
   generateToken(personid, username, name, access = '') {
-    return jwt.sign({id: personid, username, name, access}, this._secret, {
+    return jwt.sign({ id: personid, username, name, access }, this._secret, {
       expiresIn: this._expiration,
-      issuer: this._issuer
+      issuer: this._issuer,
     });
   }
 
@@ -56,7 +56,7 @@ class O2TokenService {
    * @throws {Error} - if token, secret or issuer are invalid
    */
   verify(token) {
-    return jwt.verify(token, this._secret, {issuer: this._issuer})
+    return jwt.verify(token, this._secret, { issuer: this._issuer });
   }
 }
 

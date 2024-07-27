@@ -10,7 +10,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import {splitDuration} from '../utilities/durationUtils.js';
+import { splitDuration } from '../utilities/durationUtils.js';
 
 /**
  * Format a given duration (in milliseconds) in the format HH:MM:SS
@@ -24,9 +24,7 @@ export const formatTimeDuration = (duration) => {
     return '-';
   }
 
-  const {hours, minutes, seconds} = splitDuration(duration);
-
-  // eslint-disable-next-line require-jsdoc
+  const { hours, minutes, seconds } = splitDuration(duration);
   const formatNumber = (number) => `${number}`.padStart(2, '0');
 
   return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`;

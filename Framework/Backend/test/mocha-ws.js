@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const config = require('./../config-default.json');
 const WebSocketClient = require('ws');
@@ -21,7 +21,6 @@ const O2TokenService = require('./../services/O2TokenService.js');
 const WebSocketMessage = require('./../websocket/message.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 
 let http, ws, tokenService, token; // eslint-disable-line
 
@@ -37,9 +36,7 @@ describe('websocket', () => {
       return res;
     });
 
-    ws.bind('fail', () => {
-      return {test: 'test'};
-    });
+    ws.bind('fail', () => ({ test: 'test' }));
 
     ws.bind('broadcast', (message) => {
       const res = new WebSocketMessage().setCommand(message.getCommand()).setBroadcast();
@@ -48,9 +45,7 @@ describe('websocket', () => {
   });
 
   it('Drop connection due to invalid JWT token', (done) => {
-    const connection = new WebSocketClient(
-      'ws://localhost:' + config.http.port
-    );
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}`);
     connection.on('close', () => {
       connection.terminate();
       done();
@@ -58,12 +53,10 @@ describe('websocket', () => {
   });
 
   it('Connect send, and receive a message', (done) => {
-    const connection = new WebSocketClient(
-      'ws://localhost:' + config.http.port + '/?token=' + token
-    );
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
 
     connection.on('open', () => {
-      const message = {command: 'test', token: token};
+      const message = { command: 'test', token: token };
       connection.send(JSON.stringify(message));
     });
     connection.on('message', (message) => {
@@ -78,12 +71,10 @@ describe('websocket', () => {
   });
 
   it('Reject message with misformatted fields', (done) => {
-    const connection = new WebSocketClient(
-      'ws://localhost:' + config.http.port + '/?token=' + token
-    );
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
 
     connection.on('open', () => {
-      const message = {command: '', token: token};
+      const message = { command: '', token: token };
       connection.send(JSON.stringify(message));
     });
     connection.on('message', (message) => {
@@ -98,12 +89,10 @@ describe('websocket', () => {
   });
 
   it('Reject message with 500', (done) => {
-    const connection = new WebSocketClient(
-      'ws://localhost:' + config.http.port + '/?token=' + token
-    );
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
 
     connection.on('open', () => {
-      const message = {command: 'fail', token: token};
+      const message = { command: 'fail', token: token };
       connection.send(JSON.stringify(message));
     });
     connection.on('message', (message) => {
@@ -118,15 +107,14 @@ describe('websocket', () => {
   });
 
   it('Accept filter with 200', (done) => {
-    const connection = new WebSocketClient(
-      'ws://localhost:' + config.http.port + '/?token=' + token
-    );
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
 
     connection.on('open', () => {
-      const message = {command: 'filter', token: token,
-        filter: (function() {
+      const message = { command: 'filter',
+        token: token,
+        filter: function () {
           return false;
-        }).toString()};
+        }.toString() };
       connection.send(JSON.stringify(message));
     });
 
@@ -143,12 +131,10 @@ describe('websocket', () => {
   });
 
   it('Request message broadcast with 200', (done) => {
-    const connection = new WebSocketClient(
-      'ws://localhost:' + config.http.port + '/?token=' + token
-    );
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
 
     connection.on('open', () => {
-      const message = {command: 'broadcast', token: token};
+      const message = { command: 'broadcast', token: token };
       connection.send(JSON.stringify(message));
     });
 

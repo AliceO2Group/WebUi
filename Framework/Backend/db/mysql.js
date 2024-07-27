@@ -14,7 +14,7 @@
 
 const mysql = require('mysql');
 const assert = require('assert');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * MySQL pool wrapper
@@ -32,11 +32,11 @@ class MySQL {
     assert(config.host, 'Missing config value: mysql.host');
     assert(config.user, 'Missing config value: mysql.user');
     assert(config.database, 'Missing config value: mysql.database');
-    config.port = (!config.port) ? 3306 : config.port;
-    config.connectionLimit = (!config.connectionLimit) ? 25 : config.connectionLimit;
-    config.queueLimit = (!config.queueLimit) ? 50 : config.queueLimit;
-    config.password = (!config.password) ? '' : config.password;
-    config.timeout = (!config.timeout) ? 30000 : config.timeout;
+    config.port = !config.port ? 3306 : config.port;
+    config.connectionLimit = !config.connectionLimit ? 25 : config.connectionLimit;
+    config.queueLimit = !config.queueLimit ? 50 : config.queueLimit;
+    config.password = !config.password ? '' : config.password;
+    config.timeout = !config.timeout ? 30000 : config.timeout;
 
     this.config = config;
     this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
@@ -113,4 +113,5 @@ class MySQL {
     return message;
   }
 }
+
 module.exports = MySQL;

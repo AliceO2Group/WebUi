@@ -10,15 +10,16 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
+ */
 
 const HttpServer = require('../../Backend/http/server.js');
 const path = require('path');
 
-// Reading config file
-// Start servers
-const http = new HttpServer({hostname: 'localhost', port: 8085}, {});
+/*
+ * Reading config file
+ * Start servers
+ */
+const http = new HttpServer({ hostname: 'localhost', port: 8085 }, {});
 http.addStaticPath(path.join(__dirname, 'public'));
 
 http.post('/ok.json', replyWithOk);
@@ -31,7 +32,7 @@ http.get('/ok.json', replyWithOk);
  */
 function replyWithOk(req, res) {
   res.set({
-    'Content-type': 'application/json'
+    'Content-type': 'application/json',
   });
-  res.status(200).json({ok: req.method});
+  res.status(200).json({ ok: req.method });
 }
