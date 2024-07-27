@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log, HttpServer, WebSocket } from '@aliceo2/web-ui';
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
+import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 import path from 'path';
 import { setup } from './lib/api.js';
 
@@ -24,11 +24,11 @@ import { buildPublicConfig } from './lib/config/publicConfigProvider.js';
 // Quick check config at start
 
 if (config.http.tls) {
-  log.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
+  logger.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
 }
-log.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
+logger.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
 if (typeof config.demoData != 'undefined' && config.demoData) {
-  log.info('Using demo data');
+  logger.info('Using demo data');
 } else {
   config.demoData = false;
 }

@@ -15,7 +15,7 @@
 import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 
-import { Log } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 const execPromise = promisify(exec);
@@ -30,7 +30,7 @@ export class StatusService {
    * @param {object} config - partial configuration of QCG setup
    */
   constructor(packageInfo, config = {}) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/status-service`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/status-service`);
 
     /**
      * @type {CcdbService}

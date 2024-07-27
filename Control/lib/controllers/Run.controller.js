@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager} = require('@aliceo2/web-ui');
 const LOG_FACILITY = 'run-ctrl';
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
@@ -27,7 +27,7 @@ class RunController {
    * @param {CacheService} cacheService - service to use for retrieving information stored in-memory
    */
   constructor(runService, cacheService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-ctrl`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/run-ctrl`);
 
     /**
      * @type {RunService}

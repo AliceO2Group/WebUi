@@ -44,7 +44,7 @@ class Jira {
       bug: 1
     };
 
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/jira`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/jira`);
   }
 
   /**
@@ -96,7 +96,7 @@ class Jira {
    */
   async createBugIssue(reporter, assignee, summary, description = '') {
     if (!reporter || !assignee || !summary) {
-      this.log.warn('Creating bug issue failed: undefined arguments');
+      this.logger.warn('Creating bug issue failed: undefined arguments');
       return Promise.reject(new Error('Invalid parameters passed'));
     }
     const issue = JSON.stringify(

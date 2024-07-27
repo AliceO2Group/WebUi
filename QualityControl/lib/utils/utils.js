@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
+import { LogManager } from '@aliceo2/web-ui';
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
 import http from 'http';
 
 /**
@@ -37,11 +37,11 @@ export function errorHandler(errToLog, errToSend, res, status = 500, facility = 
  * @returns {void}
  */
 export function errorLogger(err, facility = 'utils') {
-  log.facility = `${process.env.npm_config_log_label ?? 'qcg'}/${facility}`;
+  logger.facility = `${process.env.npm_config_log_label ?? 'qcg'}/${facility}`;
   if (err.stack) {
-    log.trace(err);
+    logger.trace(err);
   }
-  log.error(err.message || err);
+  logger.error(err.message || err);
 }
 
 /**

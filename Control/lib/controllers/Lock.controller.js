@@ -14,7 +14,7 @@
 
 const {InvalidInputError} = require('./../errors/InvalidInputError.js');
 const {DetectorLockAction} = require('./../common/lock/detectorLockAction.enum.js');
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {User} = require('./../dtos/User.js');
 
@@ -31,7 +31,7 @@ class LockController {
    * @param {LockService} lockService - service to use to build information on runs
    */
   constructor(lockService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/${LOG_FACILITY}`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/${LOG_FACILITY}`);
 
     /**
      * @type {LockService}
