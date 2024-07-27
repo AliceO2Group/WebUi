@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const net = require('net');
 const EventEmitter = require('events');
 
 const protocols = require('./infologger-protocols.js');
-const {LogManager} = require('./LogManager');
+const { LogManager } = require('./LogManager');
 
 /**
  * @class InfoLoggerReceiver
@@ -93,7 +93,7 @@ class InfoLoggerReceiver extends EventEmitter {
     }
     this.isConnected = false;
     this.client.end();
-    this.client = null; // gc
+    this.client = null; // Gc
   }
 
   /**
@@ -104,7 +104,7 @@ class InfoLoggerReceiver extends EventEmitter {
   onData(data) {
     let dataString = this.buffer + data.toString();
     this.buffer = '';
-    // detect whether the last log is chopped in the middle
+    // Detect whether the last log is chopped in the middle
     if (dataString[dataString.length - 1] !== '\n') {
       const indexLast = dataString.lastIndexOf('\n');
       this.buffer = dataString.substring(indexLast);
@@ -116,16 +116,18 @@ class InfoLoggerReceiver extends EventEmitter {
       if (!message) {
         continue;
       }
+
       /**
-      * Message event containing log properties
-      *
-      * @event LiveDataSource#message
-      * @type {object}
-      */
-      this.emit('message', this.parse(message + '\n'));
+       * Message event containing log properties
+       *
+       * @event LiveDataSource#message
+       * @type {object}
+       */
+      this.emit('message', this.parse(`${message}\n`));
     }
   }
 
+  // eslint-disable-next-line jsdoc/require-returns-check
   /**
    * Parse an input string frame to corresponding object
    * Empty fields are ignored.
@@ -133,8 +135,8 @@ class InfoLoggerReceiver extends EventEmitter {
    * *1.4#I##1505140368.399439#aido2db##143388#root#########test Mon Sep 11 16:32:48 CEST 2017
    * Example of output:
    * {severity: 'I', hostname: 'aido2db', ...}
-   * @param {string} frame
-   * @return {Object}
+   * @param {string} frame - frame that is to be parsed
+   * @return {object} - parsed object
    */
   parse(frame) {
     // Check frame integrity (header and footer)

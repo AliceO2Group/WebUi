@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import Observable from './Observable.js';
-import {h} from './renderer.js';
+import { h } from './renderer.js';
 import switchCase from './switchCase.js';
 
 /**
@@ -47,8 +47,8 @@ export class Notification extends Observable {
 
     this.message = '';
     this.type = 'primary';
-    this.state = 'hidden'; // shown, hidden
-    this.timerId = 0; // timer to auto-hide notification
+    this.state = 'hidden'; // Shown, hidden
+    this.timerId = 0; // Timer to auto-hide notification
   }
 
   /**
@@ -70,14 +70,14 @@ export class Notification extends Observable {
 
     duration = duration || 5000;
 
-    // clear previous message countdown
+    // Clear previous message countdown
     clearTimeout(this.timerId);
 
     this.message = message;
     this.type = type;
     this.state = 'shown';
 
-    // auto-hide after duration
+    // Auto-hide after duration
     if (duration !== Infinity) {
       this.timerId = setTimeout(() => {
         this.hide();
@@ -102,8 +102,8 @@ export class Notification extends Observable {
 /**
  * Shows notification according to `notificationInstance`. Because of its absolute position it should
  * be placed as first element inside body.
- * @param {Notification} notificationInstance
- * @return {vnode}
+ * @param {Notification} notificationInstance - instance of Notification
+ * @return {vnode} - virtual node to render notification
  * @example
  * import {mount, h, Notification, notification} from '../../Frontend/js/src/index.js';
  *
@@ -125,12 +125,12 @@ export class Notification extends Observable {
 export const notification = (notificationInstance) => h('.notification.text-no-select.level4.text-light', {
 
 }, h('span.notification-content.br2.p2.shadow-level4', {
-  // className: notificationInstance.message && (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'),
+  // ClassName: notificationInstance.message && (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'),
   onclick: () => notificationInstance.hide(),
-  className: switchCase(notificationInstance.type, {
+  className: `${switchCase(notificationInstance.type, {
     primary: 'white bg-primary',
     success: 'white bg-success',
     warning: 'white bg-warning',
     danger: 'white bg-danger',
-  }) + ' ' + (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close')
+  })} ${notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'}`,
 }, notificationInstance.message));

@@ -10,26 +10,28 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* eslint-disable max-len */
-const {grpcErrorToNativeError} = require('../../errors/grpcErrorToNativeError.js');
-const {InvalidInputError} = require('../../errors/InvalidInputError.js');
-const {NotFoundError} = require('../../errors/NotFoundError.js');
-const {ServiceUnavailableError} = require('../../errors/ServiceUnavailableError.js');
-const {TimeoutError} = require('../../errors/TimeoutError.js');
-const {UnauthorizedAccessError} = require('../../errors/UnauthorizedAccessError.js');
+const { grpcErrorToNativeError } = require('../../errors/grpcErrorToNativeError.js');
+const { InvalidInputError } = require('../../errors/InvalidInputError.js');
+const { NotFoundError } = require('../../errors/NotFoundError.js');
+const { ServiceUnavailableError } = require('../../errors/ServiceUnavailableError.js');
+const { TimeoutError } = require('../../errors/TimeoutError.js');
+const { UnauthorizedAccessError } = require('../../errors/UnauthorizedAccessError.js');
 
 const assert = require('assert');
 
-describe(`'grpcErrorToNativeError' test suite`, function() {
+describe(`'grpcErrorToNativeError' test suite`, () => {
   it('should successfully convert gRPC errors to native errors', () => {
-    assert.deepStrictEqual(grpcErrorToNativeError({code: 3, message: 'invalid'}), new InvalidInputError('invalid'));
-    assert.deepStrictEqual(grpcErrorToNativeError({code: 4, message: 'timeout'}), new TimeoutError('timeout'));
-    assert.deepStrictEqual(grpcErrorToNativeError({code: 5, message: 'not-found'}), new NotFoundError('not-found'));
-    assert.deepStrictEqual(grpcErrorToNativeError({code: 7, message: 'unauthorized'}), new UnauthorizedAccessError('unauthorized'));
-    assert.deepStrictEqual(grpcErrorToNativeError({code: 14, message: 'service-unavailable'}), new ServiceUnavailableError('service-unavailable'));
-    assert.deepStrictEqual(grpcErrorToNativeError({code: 100, message: 'standard-error'}), new Error('standard-error'));
-    assert.deepStrictEqual(grpcErrorToNativeError({message: 'standard-error'}), new Error('standard-error'));
-  })
+    assert.deepStrictEqual(grpcErrorToNativeError({ code: 3, message: 'invalid' }), new InvalidInputError('invalid'));
+    assert.deepStrictEqual(grpcErrorToNativeError({ code: 4, message: 'timeout' }), new TimeoutError('timeout'));
+    assert.deepStrictEqual(grpcErrorToNativeError({ code: 5, message: 'not-found' }), new NotFoundError('not-found'));
+    assert.deepStrictEqual(grpcErrorToNativeError({ code: 7, message: 'unauthorized' }), new UnauthorizedAccessError('unauthorized'));
+    assert.deepStrictEqual(
+      grpcErrorToNativeError({ code: 14, message: 'service-unavailable' }),
+      new ServiceUnavailableError('service-unavailable'),
+    );
+    assert.deepStrictEqual(grpcErrorToNativeError({ code: 100, message: 'standard-error' }), new Error('standard-error'));
+    assert.deepStrictEqual(grpcErrorToNativeError({ message: 'standard-error' }), new Error('standard-error'));
+  });
 });

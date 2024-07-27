@@ -12,13 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global: window */
+/* Global: window */
 
-const location = window.location;
-const history = window.history;
+const { location } = window;
+const { history } = window;
 
-// These are the parameters coming from the server only and represent
-// the current session
+/*
+ * These are the parameters coming from the server only and represent
+ * the current session
+ */
 const parametersNames = ['personid', 'name', 'token', 'username', 'access'];
 
 /**
@@ -67,8 +69,7 @@ export class SessionService {
   _hideParameters() {
     const url = new URL(location);
     parametersNames.forEach((parameterName) =>
-      url.searchParams.delete(parameterName),
-    );
+      url.searchParams.delete(parameterName));
     history.replaceState({}, '', url);
   }
 
@@ -91,7 +92,7 @@ export class SessionService {
    * @return {boolean} true if the user has one of the given roles, else false
    */
   hasAccess(roles) {
-    const {access} = this.get();
+    const { access } = this.get();
 
     return access.some((userRole) => roles.includes(userRole));
   }

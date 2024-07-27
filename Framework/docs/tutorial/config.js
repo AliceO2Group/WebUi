@@ -10,19 +10,21 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-// This is quick start configuration
-// See the Backend documentation for more details
-//
+/*
+ * This is quick start configuration
+ * See the Backend documentation for more details
+ *
+ */
 module.exports = {
   jwt: {
     secret: 'supersecret',
-    expiration: '10m'
+    expiration: '10m',
   },
   http: {
     port: 8080,
     hostname: 'localhost',
-    tls: false
-  }
+    tls: false,
+  },
 };

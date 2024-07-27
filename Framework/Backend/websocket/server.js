@@ -15,7 +15,7 @@
 const WebSocketServer = require('ws').Server;
 const url = require('url');
 const WebSocketMessage = require('./message.js');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -30,16 +30,14 @@ class WebSocket {
    */
   constructor(httpsServer) {
     this.http = httpsServer;
-    this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
+    this.server = new WebSocketServer({ server: httpsServer.getServer, clientTracking: true });
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
     this.logger.info('Server started');
 
     this.callbackArray = [];
-    this.bind('filter', (message) => {
-      return new WebSocketMessage(200).setCommand(message.getCommand());
-    });
+    this.bind('filter', (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
     this.ping();
   }
 
@@ -59,7 +57,7 @@ class WebSocket {
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
-    if (this.callbackArray.hasOwnProperty(name)) {
+    if (Object.prototype.hasOwnProperty.call(this.callbackArray, name)) {
       throw Error('Callback already exists.');
     }
     this.callbackArray[name] = callback;
@@ -67,7 +65,7 @@ class WebSocket {
 
   /**
    * Handles incoming text messages: verifies token and processes request/command.
-   * @param {object} req
+   * @param {object} req - HTTP Req object
    * @return {object} message to be send back to the user
    */
   processRequest(req) {
@@ -84,7 +82,7 @@ class WebSocket {
       Object.assign(req, data);
       this.logger.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
       // Check whether callback exists
-      if (this.callbackArray.hasOwnProperty(req.getCommand())) {
+      if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
         const res = this.callbackArray[req.getCommand()](req);
         // Verify that response is type of WebSocketMessage
         if (res && res.constructor.name === 'WebSocketMessage') {
@@ -109,7 +107,7 @@ class WebSocket {
    * @param {object} request - connection request
    */
   onconnection(client, request) {
-    const token = url.parse(request.url, true).query.token;
+    const { token } = url.parse(request.url, true).query;
     let decoded;
     try {
       decoded = this.http.o2TokenService.verify(token);
@@ -119,10 +117,12 @@ class WebSocket {
       return;
     }
     client.id = decoded.id;
-    client.send(JSON.stringify({command: 'authed', id: client.id}));
+    client.send(JSON.stringify({ command: 'authed', id: client.id }));
     client.on('message', (message) => this.onmessage(message, client));
     client.on('close', () => this.onclose(client));
-    client.on('pong', () => client.isAlive = true);
+    client.on('pong', () => {
+      client.isAlive = true;
+    });
     client.on('error', (err) => this.logger.error(`Connection ${err.code}`));
   }
 
@@ -138,7 +138,7 @@ class WebSocket {
       .then((parsed) => {
         // 2. Check if its message filter (no auth required)
         if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
-          client.filter = new Function('return ' + parsed.getPayload())();
+          client.filter = new Function(`return ${parsed.getPayload()}`)();
         }
         // 3. Get reply if callback exists
         this.processRequest(parsed)
@@ -198,7 +198,7 @@ class WebSocket {
   /**
    * Broadcasts the message to all connected clients
    * The message must match client's filter (if filter is set)
-   * @param {WebSocketMessage} message
+   * @param {WebSocketMessage} message - message to be broadcasted
    */
   broadcast(message) {
     this.server.clients.forEach((client) => {
@@ -206,11 +206,11 @@ class WebSocket {
         // Handle function execution error, filter comes from WS
         try {
           if (!client.filter(message)) {
-            return; // don't send
+            return; // Don't send
           }
         } catch (error) {
           this.logger.error(`Client's filter corrupted, skipping broadcast: ${error}`);
-          return; // don't send
+          return; // Don't send
         }
       }
       client.send(JSON.stringify(message.json));
@@ -220,7 +220,7 @@ class WebSocket {
 
   /**
    * Broadcasts messages to all connected clients.
-   * @param {WebSocketMessage} message
+   * @param {WebSocketMessage} message - message to be broadcasted
    */
   unfilteredBroadcast(message) {
     this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));

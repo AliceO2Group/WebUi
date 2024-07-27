@@ -10,13 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Functional switch case
- * @param {string} caseName
- * @param {Object.<string,Any>} cases
- * @param {Any} defaultCaseValue
+ * @param {string} caseName - the caseName to be compared
+ * @param {Object.<string,Any>} cases - the cases to be compared
+ * @param {Any} defaultCaseValue - the default caseValue
  * @return {Any} the corresponding caseValue of the caseName
  * @example
  * import {h, switchCase} from '/js/src/index.js';
@@ -30,6 +30,6 @@
  * ]);
  */
 const switchCase = (caseName, cases, defaultCaseValue) =>
-  cases.hasOwnProperty(caseName) ? cases[caseName] : defaultCaseValue;
+  Object.prototype.hasOwnProperty.call(cases, caseName) ? cases[caseName] : defaultCaseValue;
 
 export default switchCase;

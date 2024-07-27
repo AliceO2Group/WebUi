@@ -10,16 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const https = require('https');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * Handles creating JIRA issues
  */
 class Jira {
   /**
+   * Constructor for Jira Service
    * @param {object} config - JIRA configuration including URL, service account and project ID
    */
   constructor(config) {
@@ -41,7 +42,7 @@ class Jira {
     this.accountPass = config.serviceAccount.pass;
     this.projectId = config.projectId;
     this.issueTypes = {
-      bug: 1
+      bug: 1,
     };
 
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/jira`);
@@ -54,17 +55,17 @@ class Jira {
   async createIssue(postData) {
     const requestOptions = {
       method: 'POST',
-      auth: this.accountUser + ':' + this.accountPass,
+      auth: `${this.accountUser}:${this.accountPass}`,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      }
+        'Content-Length': Buffer.byteLength(postData),
+      },
     };
     return new Promise((resolve, reject) => {
-      const requestHandler = (response) => { // eslint-disable-line require-jsdoc
+      const requestHandler = (response) => {
         if (response.statusCode < 200 || response.statusCode > 299) {
-          reject(new Error('Non-2xx status code: ' + response.statusCode));
+          reject(new Error(`Non-2xx status code: ${response.statusCode}`));
           return;
         }
         const bodyChunks = [];
@@ -73,7 +74,7 @@ class Jira {
           try {
             const body = JSON.parse(bodyChunks.join(''));
             resolve(body);
-          } catch (e) {
+          } catch {
             reject(new Error('Unable to parse JSON'));
           }
         });
@@ -99,26 +100,26 @@ class Jira {
       this.logger.warn('Creating bug issue failed: undefined arguments');
       return Promise.reject(new Error('Invalid parameters passed'));
     }
-    const issue = JSON.stringify(
-      {
-        fields: {
-          issuetype: {
-            id: this.issueTypes.bug
-          },
-          project: {
-            id: this.projectId
-          },
-          summary: summary,
-          description: description,
-          reporter: {
-            name: reporter
-          },
-          assignee: {
-            name: assignee
-          }
-        }
-      });
+    const issue = JSON.stringify({
+      fields: {
+        issuetype: {
+          id: this.issueTypes.bug,
+        },
+        project: {
+          id: this.projectId,
+        },
+        summary: summary,
+        description: description,
+        reporter: {
+          name: reporter,
+        },
+        assignee: {
+          name: assignee,
+        },
+      },
+    });
     return this.createIssue(issue);
   }
 }
+
 module.exports = Jira;

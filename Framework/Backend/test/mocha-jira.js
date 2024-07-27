@@ -10,61 +10,59 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-/* eslint-disable max-len */
+ */
 
 const Jira = require('./../services/jira.js');
 const assert = require('assert');
 const nock = require('nock');
 
-describe('JIRA service test suite', function() {
+describe('JIRA service test suite', () => {
   before(nock.activate);
-  describe('Check Initialization of JIRA Service', function() {
-    it('should throw error due to no config being passed', function() {
+  describe('Check Initialization of JIRA Service', () => {
+    it('should throw error due to no config being passed', () => {
       assert.throws(() => {
         new Jira();
       }, new Error('Configuration object cannot be empty'));
     });
 
-    it('should throw error due to empty JIRA URL', function() {
+    it('should throw error due to empty JIRA URL', () => {
       assert.throws(() => {
         new Jira({});
       }, new Error('URL must be defined'));
     });
 
-    it('should throw error due to empty service account', function() {
+    it('should throw error due to empty service account', () => {
       assert.throws(() => {
-        new Jira({url: 'https://localhost', serviceAccount: {}});
+        new Jira({ url: 'https://localhost', serviceAccount: {} });
       }, new Error('Service account must be defined'));
     });
 
-    it('should throw error due to missing password of service account', function() {
+    it('should throw error due to missing password of service account', () => {
       assert.throws(() => {
-        new Jira({url: 'https://localhost', serviceAccount: {user: 'test'}});
+        new Jira({ url: 'https://localhost', serviceAccount: { user: 'test' } });
       }, new Error('Service account must be defined'));
     });
 
-    it('should throw error due to missing project ID', function() {
+    it('should throw error due to missing project ID', () => {
       assert.throws(() => {
-        new Jira({url: 'https://localhost', serviceAccount: {user: 'test', pass: 'test'}});
+        new Jira({ url: 'https://localhost', serviceAccount: { user: 'test', pass: 'test' } });
       }, new Error('Project ID must be defined'));
     });
 
-    it('should successfully create a JIRA service', function() {
-      const jira = new Jira({url: 'https://localhost:8443', serviceAccount: {user: 'test', pass: 'test'}, projectId: 1});
+    it('should successfully create a JIRA service', () => {
+      const jira = new Jira({ url: 'https://localhost:8443', serviceAccount: { user: 'test', pass: 'test' }, projectId: 1 });
       assert.strictEqual(jira.url, 'https://localhost:8443');
       assert.deepStrictEqual(jira.projectId, 1);
     });
   });
 
-  describe('Check creating bug issue', function() {
-    const jira = new Jira({url: 'https://localhost:8443/jira/rest/api/2/issue', serviceAccount: {user: 'test', pass: 'test'}, projectId: 1});
+  describe('Check creating bug issue', () => {
+    const jira = new Jira({ url: 'https://localhost:8443/jira/rest/api/2/issue', serviceAccount: { user: 'test', pass: 'test' }, projectId: 1 });
 
     it('should successfully create a ticket', () => {
       nock('https://localhost:8443')
         .post('/jira/rest/api/2/issue')
-        .basicAuth({user: 'test', pass: 'test'})
+        .basicAuth({ user: 'test', pass: 'test' })
         .reply(200, '{"key":"OPRO-123", "self":"https://localhost:8443/jira/OPRO-123", "id":1234}');
       return jira.createBugIssue('alice', 'bob', 'Run fails').then((res) => {
         assert.deepStrictEqual(res.key, 'OPRO-123');

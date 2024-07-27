@@ -12,11 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-const {access, constants: {X_OK}} = require('fs');
-const {execFile} = require('child_process');
+const { access, constants: { X_OK } } = require('fs');
+const { execFile } = require('child_process');
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
-const {LogLevel} = require('./LogLevel.js');
-const {LogSeverity} = require('./LogSeverity.js');
+const { LogLevel } = require('./LogLevel.js');
+const { LogSeverity } = require('./LogSeverity.js');
 
 /**
  * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
@@ -24,6 +24,7 @@ const {LogSeverity} = require('./LogSeverity.js');
  */
 class InfoLoggerSender {
   /**
+   * Constructor for InfoLoggerSender expecting a winston instance
    * @param {import('winston').Logger} winston - local winston instance object
    */
   constructor(winston) {
@@ -31,13 +32,13 @@ class InfoLoggerSender {
     this.winston = winston;
     const label = 'gui/infologger';
 
-    // for security reasons this path is hardcoded
+    // For security reasons this path is hardcoded
     this._PATH = '/opt/o2-InfoLogger/bin/o2-infologger-log';
     access(this._PATH, X_OK, (err) => {
       if (err) {
-        this.winston.debug({message: 'InfoLogger executable not found', label});
+        this.winston.debug({ message: 'InfoLogger executable not found', label });
       } else {
-        this.winston.debug({message: 'Created instance of InfoLogger sender', label});
+        this.winston.debug({ message: 'Created instance of InfoLogger sender', label });
         this._isConfigured = true;
       }
     });
@@ -67,24 +68,28 @@ class InfoLoggerSender {
   }
 
   /**
-   * @deprecated
    * Send a message to InfoLogger with certain fields filled.
    * @param {string} log - log message
-   * @param {string} severity - one of InfoLogger supported severities {@see LogSeverity}
+   * @param {LogSeverity} severity - one of InfoLogger supported severities {@see LogSeverity}
    * @param {string} facility - the name of the module/library injecting the message
    * @param {number} level - visibility of the message {@see LogLevel}
+   * @deprecated
    */
   send(log, severity = LogSeverity.INFO, facility = '', level = LogLevel.MAX) {
     if (this._isConfigured) {
       log = InfoLoggerMessage._removeNewLinesAndTabs(log);
       execFile(this._PATH, [
-        `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`,
+        `-oSeverity=${severity}`,
+        `-oFacility=${facility}`,
+        '-oSystem=GUI',
+        `-oLevel=${level}`,
+        `${log}`,
       ], (error, _, stderr) => {
         if (error) {
-          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility});
+          this.winston.debug({ message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility });
         }
         if (stderr) {
-          this.winston.debug({message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility});
+          this.winston.debug({ message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility });
         }
       });
     }

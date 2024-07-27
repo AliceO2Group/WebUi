@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* Global: window */
 
@@ -119,7 +119,8 @@ class QueryRouter extends Observable {
     const entries = url.searchParams.entries();
     this.params = {};
     for (const pair of entries) {
-      this.params[pair[0]] = pair[1];
+      const [, secondPair] = pair;
+      this.params[pair[0]] = secondPair;
     }
     this.notify();
   }
@@ -129,24 +130,24 @@ class QueryRouter extends Observable {
    * @param {object} e - DOM event
    */
   handleLinkEvent(e) {
-    // the element to which the handler is attached, not the one firing
+    // The element to which the handler is attached, not the one firing
     const target = e.currentTarget;
 
-    // user asked download, new tab, new window
+    // User asked download, new tab, new window
     const specialOpening = e.altKey || e.metaKey || e.ctrlKey || e.shiftKey;
 
     const forceNewTab = target.target === '_blank';
     const differentOrigin = target.origin !== window.location.origin;
 
     if (specialOpening || forceNewTab || differentOrigin) {
-      // let the browser handle the event
+      // Let the browser handle the event
       return;
     }
 
-    // stop other listeners to handle the event bubbling in the DOM tree
+    // Stop other listeners to handle the event bubbling in the DOM tree
     e.preventDefault();
 
-    // push new url on the bar address
+    // Push new url on the bar address
     this.history.pushState({}, '', target.href);
 
     this._handleLocationChange();
@@ -154,7 +155,7 @@ class QueryRouter extends Observable {
 
   /**
    * Get the current URL object containing searchParams, pathname, etc.
-   * @return {URL}
+   * @return {URL} - URL object
    */
   getUrl() {
     return new URL(this.location);
@@ -176,7 +177,7 @@ class QueryRouter extends Observable {
     }
 
     if (!silent) {
-      // replaceState and pushState cannot be listen so we trigger manually that location changed
+      // ReplaceState and pushState cannot be listen so we trigger manually that location changed
       this._handleLocationChange();
     }
   }

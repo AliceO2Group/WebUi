@@ -10,31 +10,31 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Design patterns
-export {default as Observable} from './Observable.js';
-export {default as EventEmitter} from './EventEmitter.js';
-export {RemoteData} from './RemoteData.js';
+export { default as Observable } from './Observable.js';
+export { default as EventEmitter } from './EventEmitter.js';
+export { RemoteData } from './RemoteData.js';
 
 // Template engine
-export {render, h, frameDebouncer, mount} from './renderer.js';
-export {default as QueryRouter} from './QueryRouter.js';
+export { render, h, frameDebouncer, mount } from './renderer.js';
+export { default as QueryRouter } from './QueryRouter.js';
 
 // Utils
-export {default as switchCase} from './switchCase.js';
+export { default as switchCase } from './switchCase.js';
 
 // Formatters
-export {formatTimeDuration} from "./formatter/formatTimeDuration.js";
+export { formatTimeDuration } from './formatter/formatTimeDuration.js';
 
 // Singleton retrieving session data
-export {default as sessionService} from './sessionService.js';
+export { default as sessionService } from './sessionService.js';
 
 // Data sources
-export {default as fetchClient} from './fetchClient.js';
-export {default as WebSocketClient} from './WebSocketClient.js';
-export {default as Loader} from './Loader.js';
-export {default as BrowserStorage} from './BrowserStorage.js';
+export { default as fetchClient } from './fetchClient.js';
+export { default as WebSocketClient } from './WebSocketClient.js';
+export { default as Loader } from './Loader.js';
+export { default as BrowserStorage } from './BrowserStorage.js';
 
 // All icons helpers, namespaced with prefix 'icon*'
 export * from './icons.js';

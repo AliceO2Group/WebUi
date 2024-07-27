@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Class EventEmitter for event-driven architecture
@@ -48,7 +48,7 @@ class EventEmitter {
    */
   removeListener(eventName, listener) {
     if (!this.listeners.has(eventName)) {
-      // eventName not found
+      // EventName not found
       return this;
     }
 
@@ -56,7 +56,7 @@ class EventEmitter {
     const index = listeners.indexOf(listener);
 
     if (index === -1) {
-      // listener not found
+      // Listener not found
       return this;
     }
 
@@ -68,13 +68,13 @@ class EventEmitter {
   /**
    * Synchronously calls each of the listeners registered for the event named eventName,
    * in the order they were registered, passing the supplied arguments to each
-   * @param {string} eventName
-   * @param {any} ...args - arguments to be passed to the listeners
+   * @param {string} eventName - the name of the event
+   * @param {object} args - arguments to be passed to the listeners
    * @return {boolean} - Returns true if the event had listeners, false otherwise.
    */
   emit(eventName, ...args) {
     if (!this.listeners.has(eventName)) {
-      // eventName not found
+      // EventName not found
       return false;
     }
 
