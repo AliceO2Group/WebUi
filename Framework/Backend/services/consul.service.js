@@ -20,7 +20,7 @@ const http = require('http');
 class ConsulService {
   /**
    * Setup Consul configuration
-   * @param {JSON} config
+   * @param {object} config - configuration for Consul
    */
   constructor(config) {
     if (!config) {
@@ -43,7 +43,7 @@ class ConsulService {
 
   /**
    * Returns a promise with regards to the status of the consul leader
-   * @return {Promise}
+   * @return {Promise} - a JSON object containing the leader status
    */
   async getConsulLeaderStatus() {
     return this.httpJson(this.leaderPath);
@@ -53,7 +53,7 @@ class ConsulService {
    * Method to return a promise containing all services stored in Consul
    * * a JSON of Objects representing all services with their metadata
    * * an error if request was not successful
-   * @return {Promise}
+   * @return {Promise} - a JSON object containing all services
    */
   async getServices() {
     return this.httpJson(this.servicesPath);
@@ -62,7 +62,7 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * an array of strings representing all keys in Consul store if request is successful
-   * @return {Promise.<Array<string>, Error>}
+   * @return {Promise.<Array<string>, Error>} - an array of strings representing all keys in Consul store
    */
   async getKeys() {
     return this.httpJson(`${this.kvPath}?keys=true`);
@@ -72,7 +72,7 @@ class ConsulService {
    * Method to return a Promise containing:
    * * an array of strings representing all keys that starts with the provided `keyPrefix`
    * @param {string} keyPrefix - containing the prefix of the keys requested
-   * @return {Promise.<Array<string>, Error>}
+   * @return {Promise.<Array<string>, Error>} - an array of strings representing all keys that starts with the provided `keyPrefix`
    */
   async getKeysByPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
@@ -83,8 +83,8 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * a JSON object containing the Value and metadata stored for the specified key; If key is not found 404 is returned
-   * @param {string} key
-   * @return {Promise.<JSON, Error>}
+   * @param {string} key - key to search for
+   * @return {Promise.<JSON, Error>} - a JSON object containing the Value and metadata stored for the specified key
    */
   async getValueObjectByKey(key) {
     key = this.parseKey(key);
@@ -95,8 +95,8 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * the raw value stored for the requested key; If key is not found 404 is returned
-   * @param {string} key
-   * @return {Promise.<string, Error>}
+   * @param {string} key - key to search for
+   * @return {Promise.<string, Error>} - the raw value stored for the requested key
    */
   async getOnlyRawValueByKey(key) {
     key = this.parseKey(key);
@@ -107,8 +107,8 @@ class ConsulService {
   /**
    * Method to return a Promise containing:
    * * * an `Array<JSON>` containing the value and metadata stored for the objects with the requested keyPrefix;
-   * @param {string} keyPrefix
-   * @return {Promise.<Array<JSON>, Error>}
+   * @param {string} keyPrefix - keyPrefix to search for
+   * @return {Promise.<Array<JSON>, Error>} - an `Array<JSON>` containing the value and metadata stored for the objects with keyPrefix
    */
   async getValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
@@ -120,8 +120,8 @@ class ConsulService {
    * Method to return a Promise containing:
    * * * an `Array<string>` containing the raw value stored for the objects with the requested keyPrefix;
    * * an error if request was not successful
-   * @param {string} keyPrefix
-   * @return {Promise.<KV<string, string>, Error>}
+   * @param {string} keyPrefix - keyPrefix to search for
+   * @return {Promise.<KV<string, string>, Error>} - an `Array<string>` containing the raw value stored for the objects with keyPrefix
    */
   async getOnlyRawValuesByKeyPrefix(keyPrefix) {
     keyPrefix = this.parseKey(keyPrefix);
@@ -145,8 +145,8 @@ class ConsulService {
    * and use transactions to update or set new keys in Consul KV Store
    * Will return Promise.Resolve() with ok if all transaction was done
    * or false if at least one failed
-   * @param {Array<KV>} list
-   * @return {Promise.<JSON, Error>}
+   * @param {Array<KV>} list - list of key value pairs
+   * @return {Promise.<JSON, Error>} - JSON object with the status of the transaction
    */
   async putListOfKeyValues(list) {
     const consulBuiltList = this._mapToConsulKVObjectsLists(list);

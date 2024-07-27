@@ -33,7 +33,7 @@ class WebSocketMessage {
 
   /**
    * Parses JSON-encoded websocket string into WebSocketMessage object
-   * @param {string} json
+   * @param {string} json - JSON-encoded message
    * @return {object} promise to parsed message
    */
   parse(json) {

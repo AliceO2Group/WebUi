@@ -45,7 +45,7 @@ class MySQL {
 
   /**
    * Method to test connection of mysql connector once initialized
-   * @return {Promise}
+   * @return {Promise} - a promise that resolves if connection is successful
    */
   testConnection() {
     return new Promise((resolve, reject) => {

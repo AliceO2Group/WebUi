@@ -25,7 +25,7 @@
 export default class BrowserStorage {
   /**
    * Creates a BrowserStorage instance which uses `label` as a prefix for all keys
-   * @param {string} label
+   * @param {string} label - prefix for all keys
    */
   constructor(label) {
     this.label = label;
@@ -35,7 +35,7 @@ export default class BrowserStorage {
 
   /**
    * Method to remove item by key from `localStorage`
-   * @param {string} key
+   * @param {string} key - key to remove
    */
   removeLocalItem(key) {
     if (this._isParameterValid(key)) {
@@ -45,7 +45,7 @@ export default class BrowserStorage {
 
   /**
    * Method to remove item by key from `sessionStorage`
-   * @param {string} key
+   * @param {string} key - key to remove
    */
   removeSessionItem(key) {
     if (this._isParameterValid(key)) {
@@ -70,8 +70,8 @@ export default class BrowserStorage {
   /**
    * Method to return the value as JSON from `localStorage` based on key
    * Returns `null` if not found
-   * @param {string} key
-   * @return {boolean}
+   * @param {string} key - key to search for
+   * @return {object} - value as JSON
    */
   getLocalItem(key) {
     return this._getItemAsJSON(key, 'localStorage');
@@ -80,8 +80,8 @@ export default class BrowserStorage {
   /**
    * Method to return the value as JSON from `sessionStorage` based on key
    * Returns `null` if not found
-   * @param {string} key
-   * @return {boolean}
+   * @param {string} key - key to search for
+   * @return {object} - value as JSON
    */
   getSessionItem(key) {
     return this._getItemAsJSON(key, 'sessionStorage');
@@ -90,9 +90,9 @@ export default class BrowserStorage {
   /**
    * Method to return the value as JSON from storage based on key
    * Returns `null` if not found
-   * @param {string} key
-   * @param {string} locationLabel
-   * @return {boolean}
+   * @param {string} key - key to search for
+   * @param {string} locationLabel - 'localStorage' or 'sessionStorage'
+   * @return {boolean} - value as JSON
    */
   _getItemAsJSON(key, locationLabel) {
     if (this._isParameterValid(key)) {
@@ -110,9 +110,9 @@ export default class BrowserStorage {
   /**
    * Method to set (key, value) in `sessionStorage`.
    * Returns boolean if successful or not
-   * @param {string} key
-   * @param {object} value
-   * @return {boolean}
+   * @param {string} key - key to set
+   * @param {object} value - value to set
+   * @return {boolean} - true if successful, false otherwise
    */
   setSessionItem(key, value) {
     return this._setItem(key, value, 'sessionStorage');
@@ -121,9 +121,9 @@ export default class BrowserStorage {
   /**
    * Method to set (key, value) in `localStorage`.
    * Returns boolean if successful or not
-   * @param {string} key
-   * @param {object} value
-   * @return {boolean}
+   * @param {string} key - key to set
+   * @param {object} value - value to set
+   * @return {boolean} - true if successful, false otherwise
    */
   setLocalItem(key, value) {
     return this._setItem(key, value, 'localStorage');
@@ -132,10 +132,10 @@ export default class BrowserStorage {
   /**
    * Method to set item in browser storage.
    * Returns boolean if successful or not
-   * @param {string} key
-   * @param {Object} value
-   * @param {string} locationLabel
-   * @return {boolean}
+   * @param {string} key - key to set
+   * @param {Object} value - value to set
+   * @param {string} locationLabel - 'localStorage' or 'sessionStorage'
+   * @return {boolean} - true if successful, false otherwise
    */
   _setItem(key, value, locationLabel) {
     const valueAsString = JSON.stringify(value);
@@ -156,8 +156,8 @@ export default class BrowserStorage {
 
   /**
    * Method to check if a passed value is of type string and contains non-white characters.
-   * @param {string} parameter
-   * @return {boolean}
+   * @param {string} parameter - value to check
+   * @return {boolean} - true if valid, false otherwise
    */
   _isParameterValid(parameter) {
     if (!parameter || typeof parameter !== 'string' || parameter.trim().length === 0) {

@@ -102,8 +102,8 @@ export class Notification extends Observable {
 /**
  * Shows notification according to `notificationInstance`. Because of its absolute position it should
  * be placed as first element inside body.
- * @param {Notification} notificationInstance
- * @return {vnode}
+ * @param {Notification} notificationInstance - instance of Notification
+ * @return {vnode} - virtual node to render notification
  * @example
  * import {mount, h, Notification, notification} from '../../Frontend/js/src/index.js';
  *

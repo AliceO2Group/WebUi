@@ -65,7 +65,7 @@ class WebSocket {
 
   /**
    * Handles incoming text messages: verifies token and processes request/command.
-   * @param {object} req
+   * @param {object} req - HTTP Req object
    * @return {object} message to be send back to the user
    */
   processRequest(req) {
@@ -198,7 +198,7 @@ class WebSocket {
   /**
    * Broadcasts the message to all connected clients
    * The message must match client's filter (if filter is set)
-   * @param {WebSocketMessage} message
+   * @param {WebSocketMessage} message - message to be broadcasted
    */
   broadcast(message) {
     this.server.clients.forEach((client) => {
@@ -220,7 +220,7 @@ class WebSocket {
 
   /**
    * Broadcasts messages to all connected clients.
-   * @param {WebSocketMessage} message
+   * @param {WebSocketMessage} message - message to be broadcasted
    */
   unfilteredBroadcast(message) {
     this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));

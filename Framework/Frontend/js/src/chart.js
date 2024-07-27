@@ -19,15 +19,15 @@ import { h } from './renderer.js';
  * with a sliding window. Time scale (x) must be specified and
  * value scale (y) is automatic to fill height.
  * Value: {value:number, timestamp:number:ms}
- * @param {Object} userOptions - all options to draw the chart
- * @param {number} width - size of canvas
- * @param {number} height - size of canvas
- * @param {Array<Values>} series - timestamp in ms
- * @param {string} title - to be printed on corner bottom left
- * @param {number} timeWindow - ms/div for x axis, div is half height
- * @param {string} colorPrimary - color of curve
- * @param {string} colorSecondary - color of axis and labels
- * @param {string} background - color of background
+ * @param {object} userOptions - all options to draw the chart
+ * @param {number} userOptions.width - size of canvas
+ * @param {number} userOptions.height - size of canvas
+ * @param {Array<Values>} userOptions.series - timestamp in ms
+ * @param {string} userOptions.title - to be printed on corner bottom left
+ * @param {number} userOptions.timeWindow - ms/div for x axis, div is half height
+ * @param {string} userOptions.colorPrimary - color of curve
+ * @param {string} userOptions.colorSecondary - color of axis and labels
+ * @param {string} userOptions.background - color of background
  * @return {vnode} canvas element as a virtual node
  * @example
  * chartTimeSeries({
@@ -68,7 +68,7 @@ export function chartTimeSeries(userOptions) {
 
 /**
  * Draw chartTimeSeries to the specified dom element with options
- * @param {DOMElement} dom
+ * @param {DOMElement} dom - canvas element
  * @param {Object} options - See chartTimeSeries options
  */
 function draw(dom, options) {
@@ -97,7 +97,7 @@ function draw(dom, options) {
 
 /**
  * Part of chartTimeSeries, draw the title and scaling
- * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasRenderingContext2D} ctx - canvas context
  * @param {string} titleText - title at bottom left
  * @param {string} legendText - legend at bottom right
  * @param {number} left - position of legend
@@ -121,7 +121,7 @@ function drawLegend(ctx, titleText, legendText, left, top, width, height, color)
 
 /**
  * Part of chartTimeSeries, draw the axis
- * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasRenderingContext2D} ctx - canvas context
  * @param {number} width - width of the available area
  * @param {number} height - height of the available area
  * @param {string} color - color of axis
@@ -158,7 +158,7 @@ function drawGrid(ctx, width, height, color) {
 
 /**
  * Part of chartTimeSeries, draw the curve
- * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasRenderingContext2D} ctx - canvas context
  * @param {Array} series - data
  * @param {number} max - max value of series
  * @param {number} min - min value of series
@@ -222,14 +222,14 @@ function drawCurve(ctx, series, max, min, width, height, color, timeWindow) {
  * Comparaison function to sort points by `timestamp` field
  * @param {Object} pointA - {value:number, timestamp:number:ms}
  * @param {Object} pointB - {value:number, timestamp:number:ms}
- * @return {number}
+ * @return {number} - difference between timestamps
  */
 const sortByTimestamp = (pointA, pointB) => pointA.timestamp - pointB.timestamp;
 
 /**
  * Find the maximum '.value' of array of points
- * @param {Array.<Point>} points
- * @return {number}
+ * @param {Array.<Point>} points - {value:number, timestamp:number:ms}
+ * @return {number} - maximum value
  */
 const maxOf = (points) => points.reduce(
   (max, point) => point.value > max ? point.value : max,
@@ -238,8 +238,8 @@ const maxOf = (points) => points.reduce(
 
 /**
  * Find the minimum '.value' of array of points
- * @param {Array.<Point>} points
- * @return {number}
+ * @param {Array.<Point>} points - {value:number, timestamp:number:ms}
+ * @return {number} - minimum value
  */
 const minOf = (points) => points.reduce(
   (min, point) => point.value < min ? point.value : min,

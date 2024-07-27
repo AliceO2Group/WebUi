@@ -54,7 +54,7 @@ class Loader extends Observable {
   /**
    * Register a promise and increase `activePromises` by 1,
    * on promise ends, decrease by 1.
-   * @param {Promise} promise
+   * @param {Promise} promise - promise that is to be watched
    */
   watchPromise(promise) {
     this.activePromises++;

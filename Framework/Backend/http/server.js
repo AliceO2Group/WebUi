@@ -22,7 +22,7 @@ const O2TokenService = require('./../services/O2TokenService.js');
 const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
@@ -39,9 +39,9 @@ class HttpServer {
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
     assert(httpConfig, 'Missing config');
     assert(httpConfig.port, 'Missing config value: port');
-    httpConfig.tls = (!httpConfig.tls) ? false : httpConfig.tls;
-    httpConfig.hostname = (!httpConfig.hostname) ? 'localhost' : httpConfig.hostname;
-    this.limit = (!httpConfig.limit) ? '100kb' : httpConfig.limit;
+    httpConfig.tls = !httpConfig.tls ? false : httpConfig.tls;
+    httpConfig.hostname = !httpConfig.hostname ? 'localhost' : httpConfig.hostname;
+    this.limit = !httpConfig.limit ? '100kb' : httpConfig.limit;
 
     this.app = express();
 
@@ -51,8 +51,8 @@ class HttpServer {
     if (connectIdConfig) {
       this.openid = new OpenId(connectIdConfig);
       this.openid.createIssuer().catch(() => process.exit(1));
-      this.ipAddressWhitelist = (!connectIdConfig.sa_whitelist) ? '127.0.0.1' : connectIdConfig.sa_whitelist;
-      this.serviceAccountRole = (!connectIdConfig.sa_role) ? 'service-account' : connectIdConfig.sa_role;
+      this.ipAddressWhitelist = !connectIdConfig.sa_whitelist ? '127.0.0.1' : connectIdConfig.sa_whitelist;
+      this.serviceAccountRole = !connectIdConfig.sa_role ? 'service-account' : connectIdConfig.sa_role;
     }
     this.specifyRoutes();
 
@@ -61,7 +61,7 @@ class HttpServer {
       assert(httpConfig.cert, 'Missing HTTP config value: cert');
       const credentials = {
         key: fs.readFileSync(httpConfig.key),
-        cert: fs.readFileSync(httpConfig.cert)
+        cert: fs.readFileSync(httpConfig.cert),
       };
       this.server = https.createServer(credentials, this.app);
       this.enableHttpRedirect();
@@ -72,7 +72,7 @@ class HttpServer {
     }
 
     const autoListenFlag = 'autoListen';
-    if (!httpConfig.hasOwnProperty(autoListenFlag) || httpConfig[autoListenFlag]) {
+    if (!httpConfig[autoListenFlag] || httpConfig[autoListenFlag]) {
       this.listen();
     }
 
@@ -81,7 +81,7 @@ class HttpServer {
 
   /**
    * Starts the server listening for connections.
-   * @return {Promise}
+   * @return {Promise} - resolves when server is listening
    */
   listen() {
     return new Promise((resolve, reject) => {
@@ -112,7 +112,7 @@ class HttpServer {
    * Stops the server from accepting new connections and keeps existing connections.
    * This function is asynchronous, the server is finally closed when all connections
    * are ended and the server emits a 'close' event.
-   * @return {Promise}
+   * @return {Promise} - resolves when server is closed
    */
   close() {
     return new Promise((resolve, reject) => {
@@ -128,19 +128,21 @@ class HttpServer {
 
   /**
    * Configures Helmet rules to increase web app security
-   * @param {string} hostname whitelisted hostname for websocket connection
-   * @param {list}   iframeCsp list of URLs for frame-src CSP
-   * @param {number} port secure port number
+   * @param {object} config - configuration of HTTP server
+   * @param {string} config.hostname whitelisted hostname for websocket connection
+   * @param {number} config.port secure port number
+   * @param {list} config.iframeCsp list of URLs for frame-src CSP
+   * @param {boolean} config.allow allow unsafe-eval in CSP
    */
-  configureHelmet({hostname, port, iframeCsp = [], allow = false}) {
+  configureHelmet({ hostname, port, iframeCsp = [], allow = false }) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
-    this.app.use(helmet.frameguard({action: 'deny'}));
+    this.app.use(helmet.frameguard({ action: 'deny' }));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
     this.app.use(helmet.hsts({
-      maxAge: 5184000
+      maxAge: 5184000,
     }));
     // Sets "Referrer-Policy: same-origin"
-    this.app.use(helmet.referrerPolicy({policy: 'same-origin'}));
+    this.app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
     // Sets "X-XSS-Protection: 1; mode=block"
     this.app.use(helmet.xssFilter());
     // Removes X-Powered-By header
@@ -158,7 +160,7 @@ class HttpServer {
         upgradeInsecureRequests: null,
         frameSrc: iframeCsp
         /* eslint-enable */
-      }
+      },
     }));
   }
 
@@ -175,31 +177,31 @@ class HttpServer {
     }
 
     // Router for static files (can grow with addStaticPath)
-    // eslint-disable-next-line
+
     this.routerStatics = express.Router();
     this.addStaticPath(path.join(__dirname, '../../Frontend'));
     this.addStaticPath(path.join(require.resolve('mithril'), '..'), 'mithril');
     this.app.use(this.routerStatics);
 
     // Router for public API (can grow with get, post and delete)
-    // eslint-disable-next-line
+
     this.routerPublic = express.Router();
     this.routerPublic.use(async (req, _res, next) => {
       try {
         this.jwtAuthenticate(req);
-      } catch (_e) {
+      } catch {
         // User is simply not authenticated
       }
       next();
     });
-    this.routerPublic.use(express.json({limit: this.limit})); // parse json body for API calls
+    this.routerPublic.use(express.json({ limit: this.limit })); // Parse json body for API calls
     this.app.use('/api', this.routerPublic);
 
     // Router for secure API (can grow with get, post and delete)
-    // eslint-disable-next-line
+
     this.router = express.Router();
     this.router.use(this.jwtVerify.bind(this));
-    this.router.use(express.json({limit: this.limit})); // parse json body for API calls
+    this.router.use(express.json({ limit: this.limit })); // Parse json body for API calls
     this.app.use('/api', this.router);
 
     // Catch-all if no controller handled request
@@ -207,7 +209,7 @@ class HttpServer {
       this.log.debug(`Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).json({
         error: '404 - Page not found',
-        message: 'The requested URL was not found on this server.'
+        message: 'The requested URL was not found on this server.',
       });
     });
 
@@ -228,7 +230,7 @@ class HttpServer {
       } else {
         res.status(500).json({
           error: '500 - Server error',
-          message: 'Something went wrong, please try again or contact an administrator.'
+          message: 'Something went wrong, please try again or contact an administrator.',
         });
       }
     });
@@ -243,21 +245,21 @@ class HttpServer {
 
   /**
    * Adds default user details when skipping OAuth flow
-   * @param {object} req
-   * @param {object} res
+   * @param {Request} req - Express Request object
+   * @param {Response} res - Express Response object
    * @param {object} next - serves static paths
    * @return {object} redirection
    */
   addDefaultUserData(req, res, next) {
-    const query = req.query;
+    const { query } = req;
     if (!query.token) {
       query.personid = 0;
       query.username = 'anonymous';
       query.name = 'Anonymous';
-      query.access = 'admin'
+      query.access = 'admin';
       query.token = this.o2TokenService.generateToken(query.personid, query.username, query.name, query.access);
 
-      const homeUrlAuthentified = url.format({pathname: '/', query: query});
+      const homeUrlAuthentified = url.format({ pathname: '/', query: query });
       return res.redirect(homeUrlAuthentified);
     }
     return this.ident(req, res, next);
@@ -283,12 +285,12 @@ class HttpServer {
    * Adds GET route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callback   - method that handles request and response: function(req, res);
+   * @param {object} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
-   * @param {object} [options={}] - additional options
-   * @param {boolean} [options.public] - true to remove token verification
+   * @param {object} [callbacks.options={}] - additional options
+   * @param {boolean} [callbacks.options.public] - true to remove token verification
    */
   get(path, ...callbacks) {
     this._all('get', path, ...callbacks);
@@ -298,12 +300,12 @@ class HttpServer {
    * Adds POST route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callback   - method that handles request and response: function(req, res);
+   * @param {function} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
-   * @param {object} [options={}] - additional options
-   * @param {boolean} [options.public] - true to remove token verification
+   * @param {object} [callbacks.options={}] - additional options
+   * @param {boolean} [callbacks.options.public] - true to remove token verification
    */
   post(path, ...callbacks) {
     this._all('post', path, ...callbacks);
@@ -313,12 +315,12 @@ class HttpServer {
    * Adds PUT route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callback   - method that handles request and response: function(req, res);
+   * @param {function} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
-   * @param {object} [options={}] - additional options
-   * @param {boolean} [options.public] - true to remove token verification
+   * @param {object} [callbacks.options={}] - additional options
+   * @param {boolean} [callbacks.options.public] - true to remove token verification
    */
   put(path, ...callbacks) {
     this._all('put', path, ...callbacks);
@@ -328,12 +330,12 @@ class HttpServer {
    * Adds PATCH route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callback   - method that handles request and response: function(req, res);
+   * @param {function} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
-   * @param {object} [options={}] - additional options
-   * @param {boolean} [options.public] - true to remove token verification
+   * @param {object} [callbacks.options={}] - additional options
+   * @param {boolean} [callbacks.options.public] - true to remove token verification
    */
   patch(path, ...callbacks) {
     this._all('patch', path, ...callbacks);
@@ -343,12 +345,12 @@ class HttpServer {
    * Adds DELETE route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callback   - method that handles request and response: function(req, res);
+   * @param {function} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
-   * @param {object} [options={}] - additional options
-   * @param {boolean} [options.public] - true to remove token verification
+   * @param {object} [callbacks.options={}] - additional options
+   * @param {boolean} [callbacks.options.public] - true to remove token verification
    */
   delete(path, ...callbacks) {
     this._all('delete', path, ...callbacks);
@@ -359,13 +361,13 @@ class HttpServer {
    * By default verifies JWT token unless public options is provided
    * @param {string} method       - http method to use
    * @param {string} path         - path that the callback will be bound to
-   * @param {function[]} callback - method or array of methods that handles request
+   * @param {function[]} callbacks - method or array of methods that handles request
    *                                and response: function(req, res); token should
    *                                be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
-   * @param {object} [options={}] - additional options
-   * @param {boolean} [options.public] - true to remove token verification
+   * @param {object} [callbacks.options={}] - additional options
+   * @param {boolean} [callbacks.options.public] - true to remove token verification
    */
   _all(method, path, ...callbacks) {
     let options = {};
@@ -385,9 +387,9 @@ class HttpServer {
    * Redirects HTTP to HTTPS.
    */
   enableHttpRedirect() {
-    this.app.use(function (req, res, next) {
+    this.app.use((req, res, next) => {
       if (!req.secure) {
-        return res.redirect('https://' + req.headers.host + req.url);
+        return res.redirect(`https://${req.headers.host}${req.url}`);
       }
       next();
     });
@@ -400,30 +402,30 @@ class HttpServer {
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
    * @param {object} next - serves static paths when OpenId succeeds
-   * @return {object} redirects to OpenID  flow or displays the page if JWT token is valid
    */
   ident(req, res, next) {
-    const query = req.query; // User's arguments
-    const token = req.query.token;
+    const { query } = req; // User's arguments
+    const { token } = req.query;
 
     if (token) {
       try {
         this.o2TokenService.verify(req.query.token);
         next();
+        return;
       } catch (error) {
         this.log.debug(`${error.name} : ${error.message}`);
-        res.status(403).json({message: error.name});
+        res.status(403).json({ message: error.name });
+        return;
       }
-    } else {
-      // Redirects to the OpenID flow
-      const state = Buffer.from(JSON.stringify(query)).toString('base64');
-      return res.redirect(this.openid.getAuthUrl(state));
     }
+    // Redirects to the OpenID flow
+    const state = Buffer.from(JSON.stringify(query)).toString('base64');
+    return res.redirect(this.openid.getAuthUrl(state));
   }
 
   /**
    * Permit service accounts that holds given role and access from restricted IP address rage
-   * @param {object} details Account details from unserinfo endpoint
+   * @param {object} details Account details from unser info endpoint
    * @param {string} headers HTTP headers including 'X-Forwarded-For' that is actual client IP address set by nginx
    * @throws {Error} When service account is not allowed to access
    * @returns true if service account has permission to access the app, false when this is normal account
@@ -456,7 +458,7 @@ class HttpServer {
         details.cern_person_id = 0;
       }
 
-      const {cern_person_id, cern_upn, name} = details;
+      const { cern_person_id, cern_upn, name } = details;
       const access = this.authorise(details);
       // Set token and user details in the query
       const query = {
@@ -473,9 +475,9 @@ class HttpServer {
       // Concatenates with user query
       Object.assign(query, userQuery);
 
-      res.redirect(url.format({pathname: '/', query: query}));
+      res.redirect(url.format({ pathname: '/', query: query }));
     }).catch((reason) => {
-      this.log.info('OpenId failed: ' + reason);
+      this.log.info(`OpenId failed: ${reason}`);
       res.status(401).send('OpenId failed');
     });
   }
@@ -509,10 +511,10 @@ class HttpServer {
   jwtVerify(req, res, next) {
     try {
       this.jwtAuthenticate(req);
-    } catch ({name, message}) {
+    } catch ({ name, message }) {
       this.log.debug(`${name} : ${message}`);
 
-      const response = {error: '403 - Json Web Token Error'};
+      const response = { error: '403 - Json Web Token Error' };
 
       // Allow for a custom message for known error messages
       switch (message) {
@@ -534,7 +536,7 @@ class HttpServer {
   /**
    * Parse the jwt from request and fill request's session and decoded fields accordingly
    *
-   * @param req the request
+   * @param {Request} req - Express Request object
    * @return {void} resolves once the request is filled with authentication, and reject if jwt verification failed
    */
   jwtAuthenticate(req) {
@@ -542,23 +544,24 @@ class HttpServer {
 
     req.decoded = data.decoded;
     req.session = {
-      personid: parseInt(data.id),
+      personid: parseInt(data.id, 10),
       username: data.username,
       name: data.name,
-      access: data.access
+      access: data.access,
     };
   }
 
   /**
    * Given a Request object, returns a new one
    * with the query parameter, token, removed
-   * @param {Request} req
+   * @param {Request} req - Express Request object
+   * @return {string} the original URL without the token
    */
   _parseOriginalUrl(req) {
     try {
       return req.originalUrl.replace(`token=${req.query.token}`, '');
-    } catch (error) {
-      return req.originalUrl
+    } catch {
+      return req.originalUrl;
     }
   }
 }

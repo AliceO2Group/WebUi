@@ -27,8 +27,8 @@ http.get('/ok.json', replyWithOk);
 
 /**
  * Reply for API calls
- * @param {Request} req
- * @param {Response} res
+ * @param {Request} req - HTTP request object
+ * @param {Response} res - HTTP response object
  */
 function replyWithOk(req, res) {
   res.set({

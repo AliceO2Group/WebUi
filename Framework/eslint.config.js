@@ -175,7 +175,7 @@ module.exports = [
             ],
             '@stylistic/js/indent': [
                 'error',
-                4,
+                2,
                 {
                     SwitchCase: 1,
                 },

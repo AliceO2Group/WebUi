@@ -81,20 +81,20 @@ function render(element, vnode) {
  * Hyperscript function to represente a DOM element
  * it produces a vnode usable by render function.
  *
- * @param {String} selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
- * @param {Object} attributes - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
- * @param {string} attributes.className - Additional class names
- * @param {function} attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
- * @param {function} attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
- * @param {string|Object} attributes.style - `style: "background:red;"` or `style: {background: "red"}`
- * @param {string} attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
- * @param {string} attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
- * @param {string} attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
- * @param {Hook} attributes.oncreate - Hook called after a DOM element is created and attached to the document
- * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
- * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
- * @param {Array.<vnode|string>|string} children - Children inside this tag
- * @param {...any} args
+ * @param {...any} args - arguments to be passes as below
+ * @param {String} args.selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
+ * @param {Object} args.attributes - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
+ * @param {string} args.attributes.className - Additional class names
+ * @param {function} args.attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
+ * @param {function} args.attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
+ * @param {string|Object} args.attributes.style - `style: "background:red;"` or `style: {background: "red"}`
+ * @param {string} args.attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
+ * @param {string} args.attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {string} args.attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {Hook} args.attributes.oncreate - Hook called after a DOM element is created and attached to the document
+ * @param {Hook} args.attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
+ * @param {Hook} args.attributes.onremove - Hook is called before a DOM element is removed from the document
+ * @param {Array.<vnode|string>|string} args.children - Children inside this tag
  * @return {vnode} the vnode representation
  * @example <caption>Simple tag declaration</caption>
  * import {h, render} from '/js/src/index.js';

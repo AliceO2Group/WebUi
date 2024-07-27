@@ -140,7 +140,7 @@ export class RemoteData {
 
   /**
    * Test if current kind is a `NotAsked`
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `NotAsked`
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
   isNotAsked() {
@@ -149,7 +149,7 @@ export class RemoteData {
 
   /**
    * Test is current kind is a `Loading`
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `Loading`
    * @example
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
@@ -160,7 +160,7 @@ export class RemoteData {
   /**
    * Test is current kind is a `Success`
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `Success`
    */
   isSuccess() {
     return false;
@@ -169,7 +169,7 @@ export class RemoteData {
   /**
    * States if current kind is a `Failure`
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `Failure`
    */
   isFailure() {
     return false;
@@ -181,7 +181,7 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @return {RemoteData<P, E>}
+   * @return {RemoteData<P, E>} - not asked remote data object
    * @static
    */
   static notAsked() {
@@ -224,8 +224,8 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @param {P} payload
-   * @return {RemoteData<P, E>}
+   * @param {P} payload - to be set as payload
+   * @return {RemoteData<P, E>} - success remote data with payload
    * @static
    */
   static success(payload) {
@@ -272,7 +272,7 @@ export class RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class NotAskedRemoteData extends RemoteData {
   /**
@@ -303,7 +303,7 @@ export class NotAskedRemoteData extends RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class LoadingRemoteData extends RemoteData {
   /**
@@ -334,7 +334,7 @@ export class LoadingRemoteData extends RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class SuccessRemoteData extends RemoteData {
   /**
@@ -382,7 +382,7 @@ export class SuccessRemoteData extends RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class FailureRemoteData extends RemoteData {
   /**

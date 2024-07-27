@@ -102,8 +102,8 @@ class InfoLoggerMessage {
 
   /**
    * Replace all occurrences of new lines, tabs or groups of 4 spaces with an empty space
-   * @param {Object|Error|String} log
-   * @return {String}
+   * @param {Object|Error|String} log - the log to be cleaned
+   * @return {string} - the cleaned log
    */
   static _removeNewLinesAndTabs(log) {
     try {

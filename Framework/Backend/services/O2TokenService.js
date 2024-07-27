@@ -52,7 +52,7 @@ class O2TokenService {
    * Attempts to decrypt passed token to verify its validity.
    * If token is valid, decode data from it will be returned, else an error is thrown
    * @param {string} token - token to be verified
-   * @return {Object>} whether operation was successful, if so decoded data are passed as well
+   * @return {object} whether operation was successful, if so decoded data are passed as well
    * @throws {Error} - if token, secret or issuer are invalid
    */
   verify(token) {
