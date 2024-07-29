@@ -24,7 +24,7 @@ import { infoLoggerButton } from './buttons.js';
  */
 export const informationRedirectActionPanel = (environmentInfo) => {
   return h('.flex-row.flex-grow-1.g2', [
-      infoLoggerButton(environmentInfo, 'InfoLogger FLP', COG.ILG_URL),
-      infoLoggerButton(environmentInfo, 'InfoLogger EPN', COG.ILG_EPN_URL),
+    infoLoggerButton(environmentInfo, 'InfoLogger FLP', COG.ILG_URL),
+    infoLoggerButton(environmentInfo, 'InfoLogger EPN', COG.ILG_EPN_URL),
   ]);
 };

@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global COG */
-
 import {h} from '/js/src/index.js';
 
 import {ROLES} from '../../../workflow/constants.js';
@@ -70,9 +68,8 @@ export const controlEnvironmentPanel = (environmentModel, item, isAllowedToContr
       shutdownEnvButton(environmentModel, item, Boolean(currentTransition)),
       killEnvButton(environmentModel, item)
     ])
-  ]
-  );
-  };
+  ]);
+};
 
 /**
  * Makes a button to toggle severity
