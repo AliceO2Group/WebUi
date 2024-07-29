@@ -19,9 +19,9 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {infoLoggerButton} from '../pages/Environment/components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
+import {informationRedirectActionPanel} from '../pages/Environment/components/informationRedirectActionPanel.js';
 
 /**
  * @file Page to show a list of environments (content and header)
@@ -181,7 +181,7 @@ const environmentsTable = (model, list) => {
             style: 'font-weight: bold; text-align: center;'
           }, item.state
           ),
-          h('td', {style: 'text-align: center;'}, actionsCell(item))
+          h('td', {style: 'text-align: center;'}, informationRedirectActionPanel(item, true))
         ]);
       }),
     ]),

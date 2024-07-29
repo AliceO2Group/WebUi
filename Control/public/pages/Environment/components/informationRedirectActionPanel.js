@@ -15,16 +15,17 @@
 /* global COG */
 
 import { h } from '/js/src/index.js';
-import { infoLoggerButton } from './buttons.js';
+import { infoLoggerButtonLink } from './../../../common/buttons/infoLoggerRedirectButton.js';
 
 /**
  * Panel with buttons that redirect the user to other GUIs based on the environment information provided
  * @param {EnvironmentInfo} environmentInfo - DTO representing an environment
  * @returns {vnode} - panel with buttons that redirect the user to other GUIs
  */
-export const informationRedirectActionPanel = (environmentInfo) => {
-  return h('.flex-row.flex-grow-1.g2', [
-    infoLoggerButton(environmentInfo, 'InfoLogger FLP', COG.ILG_URL),
-    infoLoggerButton(environmentInfo, 'InfoLogger EPN', COG.ILG_EPN_URL),
+export const informationRedirectActionPanel = (environmentInfo, useShortLabel = true) => {
+  const { currentRunNumber: run, id: partition } = environmentInfo;
+  return h('.btn-group.flex-row.flex-grow-1', [
+    infoLoggerButtonLink({partition, run}, useShortLabel ? 'FLP' : 'InfoLogger FLP', COG.ILG_URL),
+    infoLoggerButtonLink({partition, run}, useShortLabel ? 'EPN' : 'InfoLogger EPN', COG.ILG_EPN_URL),
   ]);
 };

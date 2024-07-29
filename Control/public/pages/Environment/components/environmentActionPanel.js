@@ -38,7 +38,7 @@ export const environmentActionPanel = (model, environmentInfo) => {
   
   return miniCard('', [
     h('.flex-row', [
-      informationRedirectActionPanel(environmentInfo),
+      informationRedirectActionPanel(environmentInfo, false),
       controlEnvironmentPanel(environmentModel, environmentInfo, isAllowedToControl)
     ]),
     environmentModel.itemControl.match({
