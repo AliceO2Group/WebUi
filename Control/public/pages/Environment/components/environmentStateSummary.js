@@ -16,22 +16,19 @@ import {h} from '/js/src/index.js';
 import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
 import {textWithCopyClipboard} from '../../../common/buttons/textWithCopyClipboard.js';
 import {parseObject} from '../../../common/utils.js';
-
-const RUNNING = 'RUNNING';
-const UNKNOWN = 'UNKNOWN';
-
+import {EnvironmentState} from '../../../common/enums/environmentState.enum.js';
 /**
  * Build a component which represents a summary of the state of the environment with the environment id, state and creation time
  * @param {EnvironmentInfo} environment - DTO representing an environment
  * @returns {vnode}
  */
 export const environmentStateSummary = (environment) => {
-  const {currentRunNumber, state = UNKNOWN, id, createdWhen, userVars} = environment;
+  const {currentRunNumber, state = EnvironmentState.UNKNOWN, id, createdWhen, userVars} = environment;
   let transitionTime = parseObject(createdWhen, 'createdWhen');
 
   let transitionLabel = 'Created At: ';
   let title = ` - ${state}`;
-  if (state === RUNNING) {
+  if (state === EnvironmentState.RUNNING) {
     transitionTime = parseObject(userVars['run_start_time_ms'], 'run_start_time_ms');
     transitionLabel = 'Running since: ';
   }
@@ -39,7 +36,7 @@ export const environmentStateSummary = (environment) => {
   return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
     textWithCopyClipboard(id, 'h3'),
     h('h3', title),
-    state === RUNNING && textWithCopyClipboard(currentRunNumber, 'h3'),
+    state === EnvironmentState.RUNNING && textWithCopyClipboard(currentRunNumber, 'h3'),
     h('.ph1.flex-grow.flex-column.flex-center.text-right', transitionLabel + transitionTime)
   ]);
 };
