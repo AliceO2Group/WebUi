@@ -19,7 +19,7 @@ import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {infoLoggerButton} from './components/buttons.js';
+import {infoLoggerButton} from '../pages/Environment/components/buttons.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
 
