@@ -16,7 +16,7 @@ import {h} from '/js/src/index.js';
 import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
 import {textWithCopyClipboard} from '../../../common/buttons/textWithCopyClipboard.js';
 import {parseObject} from '../../../common/utils.js';
-import {EnvironmentState} from '../../../common/enums/environmentState.enum.js';
+import {EnvironmentState} from '../../../common/enums/EnvironmentState.enum.js';
 /**
  * Build a component which represents a summary of the state of the environment with the environment id, state and creation time
  * @param {EnvironmentInfo} environment - DTO representing an environment

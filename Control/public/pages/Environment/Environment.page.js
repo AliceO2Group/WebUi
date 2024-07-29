@@ -20,7 +20,7 @@ import {monitoringRunningPlotsPanel} from './components/monitoringRunningPlotsPa
 import pageLoading from './../../common/pageLoading.js';
 import errorPage from './../../common/errorPage.js';
 import {environmentStateSummary} from './components/environmentStateSummary.js';
-import {EnvironmentState} from './../../common/enums/environmentState.enum.js';
+import {EnvironmentState} from './../../common/enums/EnvironmentState.enum.js';
 
 /**
  * @file Page to show information about all information of one environment (header + content)
