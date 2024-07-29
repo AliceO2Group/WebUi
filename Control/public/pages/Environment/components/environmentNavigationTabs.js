@@ -12,23 +12,16 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global COG */
-
-import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX
-} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
+import {tasksPerFlpTable} from '../../../common/task/taskPerFlpTable.js';
 import {currentPageAndParameters} from '../../../utilities/currentPageAndParameters.js';
-import {getTasksByFlp, getTasksByEpn} from '../../../common/utils.js';
+import {getTasksByEpn} from '../../../common/utils.js';
 import {isGlobalRun} from '../../../environment/environmentsPage.js';
 import {miniCard} from '../../../common/card/miniCard.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';
-import {userVarsRow, defaultsRow, varsRow} from './expandableEnvRows.js';
-import pageLoading from '../../../common/pageLoading.js';
-import showTableItem from '../../../common/showTableItem.js';
-import { infoLoggerButtonLink } from '../../../common/buttons/infoLoggerRedirectButton.js';
-import { redirectButtonLink } from '../../../common/buttons/redirectButtonLink.js';
+import {environmentConfigurationTable} from './environmentConfigurationTable.js';
 
 
 /**
@@ -55,7 +48,7 @@ export const environmentNavigationTabs = (model, item) => {
     },
     configuration: {
       name: 'Configuration',
-      content: configurationTabPanel,
+      content: environmentConfigurationTable,
     },
     epn: {
       name: `EPNs (${epn?.tasks?.total ?? '?'})`,
@@ -63,87 +56,41 @@ export const environmentNavigationTabs = (model, item) => {
     },
     flp: {
       name: `FLPs (${flp?.tasks?.total ?? '?'})`,
-      content: tasksPerFlpTables,
+      content: tasksPerFlpTable,
     },
     qc: {
       name: `QC  (${qc?.tasks?.total ?? '?'})`,
-      content: tasksPerFlpTables,
+      content: tasksPerFlpTable,
     },
     trg: {
       name: `TRG  (${trg?.tasks?.total ?? '?'})`,
-      content: tasksPerFlpTables,
+      content: tasksPerFlpTable,
     },
   };
   const {parameters} = currentPageAndParameters();
   return [
     h('ul.nav.nav-tabs.m0', [
-      Object.entries(panels).map(([id, {name}]) => {
-        const isActive = parameters.panel === id;
-        return h('li.nav-item',
-          {
-            id: `${id}-task-source`,
-          }, h(`a.nav-link${isActive ? '.active' : ''}`, {
-            onclick: () => {
-              if (!isActive) {
+      Object.entries(panels)
+        .map(([id, { name }]) => {
+          const isActive = parameters.panel === id;
+          return h(
+            'li.nav-item',
+            {id: `${id}-task-source`},
+            h(`a.nav-link${isActive ? '.active' : ''}`, {
+              onclick: () => {
                 model.router.go(`?page=environment&id=${item.id}&panel=${id}`, true, true);
                 model.environment.getEnvironment({id: item.id}, false, id);
                 model.environment.notify();
               }
-            }
-          }, name)
-        );
-      }),
+            }, name)
+          );
+        }),
     ]),
     h('.tab-content', Object.entries(panels)
-      .map(([id, {content}]) => {
-        const isActive = parameters.panel === id;
-        if (isActive) {
-          return h(`.tab-pane${isActive ? '.active' : ''}`, {id: `${id}-pane`}, content(model.environment, item))
-        }
-      })
+      .filter(([id]) => parameters.panel === id)
+      .map(([id, {content}]) =>  h(`.tab-panel.active`, {id: `${id}-pane`}, content(model.environment, item)))
     )
   ];
-};
-
-/**
- * Display configuration variables
- * @returns {vnode}
- */
-const configurationTabPanel = (envModel, item) =>
-  h('.m2', [
-    h('table.table', [
-      h('tbody', [
-        userVarsRow(item.userVars, envModel),
-        defaultsRow(item.defaults, envModel),
-        varsRow(item.vars, envModel),
-      ])
-    ])
-  ]);
-
-/**
- * Build multiple tables of the tasks grouped by FLP
- * @param {Environment} environmentModel
- * @param {JSON} environment - GetEnvironment response.environment
- * @return {vnode}
- */
-const tasksPerFlpTables = (environmentModel, environment) => {
-  const {tasks = [], currentTransition = ''} = environment;
-  if (tasks.length === 0 && !currentTransition) {
-    return h('.text-center.w-100', 'No tasks found');
-  }
-  const tasksByFlp = getTasksByFlp(tasks);
-  return [Object.keys(tasksByFlp).map((host) =>
-    h('', [
-      h('.p2.flex-row.bg-primary.white', [
-        h('h5.flex-grow-3', host),
-        h('.flex-row.flex-grow-1.g2', [
-          infoLoggerButtonLink({ run: environment.currentRunNumber, hostname: host }, 'InfoLogger FLP', COG.ILG_URL),
-          redirectButtonLink(tasksByFlp[host].stdout, 'Mesos', 'Download Mesos logs', true),
-        ]),
-      ]),
-      showEnvTasksTable(environmentModel, tasksByFlp[host].list)
-    ])
-  )];
 };
 
 /**
@@ -188,67 +135,6 @@ const tasksPerEpnTables = (envModel, environment) => {
       ])
     )];
 };
-
-/**
- * Method to create and display a table with tasks details
- * @param {Object} environment
- * @param {Array<Object>} tasks
- * @return {vnode}
- */
-const showEnvTasksTable = (environment, tasks) => {
-  return h('.scroll-auto.panel', [
-    h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
-      h('thead',
-        h('tr', [
-          ['Name', 'PID', 'Locked', 'Status', 'State', 'Host Name', 'More']
-            .map((header) => h('th', header))
-        ])
-      ),
-      h('tbody', [
-        tasks.map((task) => [h('tr', [
-          h('td.w-30', task.name),
-          h('td.w-10', task.pid),
-          h('td.w-10',
-            h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())
-          ),
-          h('td.w-10', task.status),
-          h('td.w-10', {
-            class: (task.state === 'RUNNING' ? 'success' :
-              (task.state === 'CONFIGURED' ? 'primary' :
-                ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
-            style: 'font-weight: bold;'
-          }, task.state),
-          h('td.w-20', task.deploymentInfo.hostname),
-          h('td.w-10',
-            h('button.btn-sm.btn-default', {
-              title: 'More Details',
-              onclick: () => environment.task.toggleTaskView(task.taskId),
-            }, environment.task.openedTasks[task.taskId] ? iconChevronTop() : iconChevronBottom())
-          ),
-        ]),
-        environment.task.openedTasks[task.taskId] && environment.task.list[task.taskId] &&
-        addTaskDetailsTable(environment, task),
-        ]),
-      ])
-    ])
-  ]);
-};
-
-/**
- *  Method to display an expandable table with details about a selected task if request was successful
- *  Otherwise display loading or error message
- * @param {Object} environment
- * @param {JSON} task
- * @return {vnode}
- */
-const addTaskDetailsTable = (environment, task) => h('tr', environment.task.list[task.taskId].match({
-  NotAsked: () => null,
-  Loading: () => h('td.shadow-level3.m5', {style: 'font-size: 0.25em; text-align: center;', colspan: 7}, pageLoading()),
-  Success: (data) => h('td', {colspan: 7}, showTableItem(data)),
-  Failure: (_error) => h('td.shadow-level3.m5',
-    {style: 'text-align: center;', colspan: 7, title: 'Could not load arguments'},
-    [iconCircleX(), ' ', _error]),
-}));
 
 /**
  * Returns content for a mini card containing specific environment general details
