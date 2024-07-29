@@ -17,47 +17,48 @@ import {environmentActionPanel} from './components/environmentActionPanel.js';
 import {environmentNavigationTabs} from './components/environmentNavigationTabs.js';
 import {environmentTasksSummaryTable} from './components/environmentTasksSummaryTable.js';
 import {monitoringRunningPlotsPanel} from './components/monitoringRunningPlotsPanel.js';
-import pageLoading from '../common/pageLoading.js';
-import errorPage from '../common/errorPage.js';
-import {environmentHeader} from './components/environmentHeader.js';
+import pageLoading from './../../common/pageLoading.js';
+import errorPage from './../../common/errorPage.js';
+import {environmentStateSummary} from './components/environmentStateSummary.js';
+import {EnvironmentState} from './../../common/enums/EnvironmentState.enum.js';
 
 /**
- * @file Page to show one environment with full details (content and header)
+ * @file Page to show information about all information of one environment (header + content)
  */
 
 /**
  * Header of the environment details page showing one environment
- * @return {vnode}
+ * @return {vnode} - header of the page
  */
-export const header = () => h('h4.flex-grow.text-center', 'Environment details');
+export const EnvironmentPageHeader = () => h('h4.flex-grow.text-center', 'Environment details');
 
 /**
  * Content of the environment details page showing one environment based on the state of the request
  * @param {Model} model - root model of the application
- * @return {vnode}
+ * @return {vnode} - content of the page
  */
-export const content = (model) => h('.scroll-y.absolute-fill', [
+export const EnvironmentPageContent = (model) => h('.scroll-y.absolute-fill', [
   model.environment.item.match({
     NotAsked: () => null,
     Loading: () => h('.w-100.text-center', pageLoading()),
-    Success: (data) => showEnvironmentPage(model, data),
+    Success: (environmentInfo) => showEnvironmentPage(model, environmentInfo),
     Failure: (error) => errorPage(error),
   })
 ]);
 
 /**
- * Show all properties of environment and buttons for its actions at bottom
+ * Show all properties of environment and action panels for its actions at bottom
  * @param {Model} model - root model of the application
  * @param {EnvironmentInfo} environmentInfo - object with information of the environment
- * @return {vnode}
+ * @return {vnode} - content of environment info
  */
 const showEnvironmentPage = (model, environmentInfo) => {
   const {state, currentTransition = undefined} = environmentInfo;
-  const isRunningStable = !currentTransition && state === 'RUNNING';
+  const isRunningStable = !currentTransition && state === EnvironmentState.RUNNING;
   const {services: {detectors: {availability = {}} = {}}} = model;
 
   return h('.w-100.p1.g2.flex-column', [
-    environmentHeader(environmentInfo),
+    environmentStateSummary(environmentInfo),
     environmentActionPanel(model, environmentInfo),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
     h('.flex-row.g2.z-index-one', [

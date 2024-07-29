@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-import {dcsProperty} from '../../common/dcs/dcsPropertiesRow.js';
-import {HARDWARE_COMPONENTS, HardwareComponent} from '../../common/enums/HardwareComponent.js';
-import {TASK_STATES, getTaskStateClassAssociation} from './../../common/enums/TaskState.js';
+import {dcsProperty} from '../../../common/dcs/dcsPropertiesRow.js';
+import {HARDWARE_COMPONENTS, HardwareComponent} from '../../../common/enums/HardwareComponent.js';
+import {TASK_STATES, getTaskStateClassAssociation} from '../../../common/enums/TaskState.js';
 import {h} from '/js/src/index.js';
 
 /**

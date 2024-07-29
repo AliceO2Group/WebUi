@@ -15,23 +15,30 @@
 /* global COG */
 
 import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX
 } from '/js/src/index.js';
-import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
-import {currentPageAndParameters} from './../../utilities/currentPageAndParameters.js';
-import {getTasksByFlp, getTasksByEpn} from './../../common/utils.js';
-import {isGlobalRun} from './../environmentsPage.js';
-import {mesosLogButton} from './buttons.js';
-import {miniCard} from './../../common/card/miniCard.js';
-import {parseObject, parseOdcStatusPerEnv} from './../../common/utils.js';
-import {rowForCard} from './../../common/card/rowForCard.js';
+import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
+import {currentPageAndParameters} from '../../../utilities/currentPageAndParameters.js';
+import {getTasksByFlp, getTasksByEpn} from '../../../common/utils.js';
+import {isGlobalRun} from '../../../environment/environmentsPage.js';
+import {miniCard} from '../../../common/card/miniCard.js';
+import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
+import {rowForCard} from '../../../common/card/rowForCard.js';
 import {userVarsRow, defaultsRow, varsRow} from './expandableEnvRows.js';
-import pageLoading from './../../common/pageLoading.js';
-import showTableItem from './../../common/showTableItem.js';
+import pageLoading from '../../../common/pageLoading.js';
+import showTableItem from '../../../common/showTableItem.js';
+import { infoLoggerButtonLink } from '../../../common/buttons/infoLoggerRedirectButton.js';
+import { redirectButtonLink } from '../../../common/buttons/redirectButtonLink.js';
 
 
 /**
- * @file Builds the navigation tabs that are to be displayed on the environment details page
+ * @file Builds the navigation tabs that are to be displayed on the environment details page which contains the following tabs:
+ * - General - contains most used information of an environment presented in a user-friendly way
+ * - Configuration - contains the configuration variables
+ * - EPN - contains the tasks grouped by EPN
+ * - FLP - contains the tasks grouped by FLP
+ * - QC - contains the tasks grouped by QC
+ * - TRG - contains the tasks grouped by TRG
  */
 
 /**
@@ -98,7 +105,6 @@ export const environmentNavigationTabs = (model, item) => {
   ];
 };
 
-
 /**
  * Display configuration variables
  * @returns {vnode}
@@ -129,10 +135,10 @@ const tasksPerFlpTables = (environmentModel, environment) => {
   return [Object.keys(tasksByFlp).map((host) =>
     h('', [
       h('.p2.flex-row.bg-primary.white', [
-        h('h5.w-100', host),
-        h('.flex-row', [
-          infoLoggerPerFlpButton(environment, environmentModel, host),
-          mesosLogButton(tasksByFlp[host].stdout)
+        h('h5.flex-grow-3', host),
+        h('.flex-row.flex-grow-1.g2', [
+          infoLoggerButtonLink({ run: environment.currentRunNumber, hostname: host }, 'InfoLogger FLP', COG.ILG_URL),
+          redirectButtonLink(tasksByFlp[host].stdout, 'Mesos', 'Download Mesos logs', true),
         ]),
       ]),
       showEnvTasksTable(environmentModel, tasksByFlp[host].list)
@@ -182,22 +188,6 @@ const tasksPerEpnTables = (envModel, environment) => {
       ])
     )];
 };
-
-/**
- * Button to open InfoLogger with run and hostname pre-set
- * @param {string} href - location of the mesos log
- * @return {vnode}
- */
-const infoLoggerPerFlpButton = (environment, model, host) =>
-  h('a', {
-    style: {display: !(COG || COG.ILG_URL) ? 'none' : ''},
-    title: 'Open InfoLogger for this hostname',
-    href: environment.currentRunNumber ?
-      `${COG.ILG_URL}?q={"run":{"match":"${environment.currentRunNumber}"},"hostname":{"match":"${host}"}}`
-      : `${COG.ILG_URL}?q={"hostname":{"match":"${host}"}}`,
-    target: '_blank'
-  }, h('button.btn-sm.primary', iconList())
-  );
 
 /**
  * Method to create and display a table with tasks details

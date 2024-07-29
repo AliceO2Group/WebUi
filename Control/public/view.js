@@ -29,6 +29,10 @@ import {
   EnvironmentCreationPage
 } from './pages/EnvironmentCreation/EnvironmentCreation.page.js';
 import {
+  EnvironmentPageHeader,
+  EnvironmentPageContent,
+} from './pages/Environment/Environment.page.js';
+import {
   CalibrationRunsHeader,
   CalibrationRunsContent
 } from './pages/CalibrationRuns/CalibrationRuns.page.js';
@@ -36,10 +40,6 @@ import {
   content as environmentsContent,
   header as environmentsHeader
 } from './environment/environmentsPage.js';
-import {
-  content as environmentContent,
-  header as environmentHeader
-} from './environment/environmentPage.js';
 import {header as statusHeader} from './about/header.js';
 import {content as statusContent} from './about/content.js';
 import {
@@ -93,7 +93,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     newEnvironment: EnvironmentCreationHeader,
     calibrationRuns: CalibrationRunsHeader,
     environments: environmentsHeader,
-    environment: environmentHeader,
+    environment: EnvironmentPageHeader,
     about: statusHeader,
     configuration: configurationHeader,
     taskList: taskHeader,
@@ -114,7 +114,7 @@ const content = (model) => [
     newEnvironment: EnvironmentCreationPage,
     calibrationRuns: CalibrationRunsContent,
     environments: environmentsContent,
-    environment: environmentContent,
+    environment: EnvironmentPageContent,
     about: statusContent,
     configuration: configurationContent,
     taskList: taskContent,

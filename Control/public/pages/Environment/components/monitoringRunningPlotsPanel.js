@@ -15,7 +15,7 @@
 /* global COG */
 
 import {h} from '/js/src/index.js';
-import {iframe} from './../../common/iframe/iframe.js';
+import {iframe} from '../../../common/iframe/iframe.js';
 
 /**
  * Build a panel with iframe components to display monitoring plots for the environment if grafana is configured

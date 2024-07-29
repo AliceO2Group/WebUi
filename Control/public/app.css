@@ -99,6 +99,7 @@
 .flex-end { justify-content: flex-end; }
 .flex-center { justify-content: center; }
 .flex-grow-1 { flex-grow: 1; }
+.flex-grow-3 { flex-grow: 3; }
 .break-space-cell { white-space: break-spaces; text-align: center !important; }
 
 .table-ecs { border-collapse: collapse; width: 100%; border-radius: 0; }

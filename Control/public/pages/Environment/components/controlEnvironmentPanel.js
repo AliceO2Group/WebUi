@@ -12,26 +12,23 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global COG */
-
 import {h} from '/js/src/index.js';
 
-import {infoLoggerButton} from './buttons.js';
-import {ROLES} from './../../workflow/constants.js';
-import {isUserAllowedRole} from './../../common/userRole.js';
+import {ROLES} from '../../../workflow/constants.js';
+import {isUserAllowedRole} from '../../../common/userRole.js';
 
 /**
  * List of buttons for:
  * * controlling the currently displayed environment (in need of permissions to be operated)
  * * open ILG sessions with parameters preset
- * @param {Environment} environment - model of the environment class
+ * @param {EnvironmentModel} environmentModel - model of the environment class
  * @param {EnvironmentInfo} item - DTO representing an environment
  * @param {boolean} isAllowedToControl - value stipulating if user has enough permissions to control environment
- * @returns {vnode}
+ * @returns {vnode} - panel with actions allowed for the user to apply on the environment
  */
-export const controlEnvironmentPanel = (environment, item, isAllowedToControl = false) => {
+export const controlEnvironmentPanel = (environmentModel, item, isAllowedToControl = false) => {
   const {currentTransition, includedDetectors, state} = item;
-  const {model} = environment;
+  const {model} = environmentModel;
   const isSorAvailable =
     item.userVars?.['dcs_enabled'] === 'true' ?
       model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability')
@@ -39,55 +36,38 @@ export const controlEnvironmentPanel = (environment, item, isAllowedToControl = 
       true;
   const isStable = !currentTransition;
   const isConfigured = state === 'CONFIGURED';
-  return h('', [
-    h('.flex-row', [
-      h('', {
-        style: 'flex-grow: 1;'
-      }, h('.g2.flex-row',[
-        infoLoggerButton(item, 'InfoLogger FLP', COG.ILG_URL),
-        infoLoggerButton(item, 'InfoLogger EPN', COG.ILG_EPN_URL),
+  return h('.flex-column.justify-center', {
+    style: 'flex-grow: 3;'
+  }, [
+    h('.flex-column', [
+      !isAllowedToControl &&
+      h('span.warning.flex-end.flex-row.g1#missing_lock_ownership_to_control_message', [
+        'You do not own the necessary ',
+        h('a', {
+          href: '?page=locks',
+          onclick: (e) => model.router.handleLinkEvent(e),
+        }, 'locks'),
+        ' to control this environment.'
       ]),
-      ),
-      h('.flex-column.justify-center', {
-        style: 'flex-grow: 3;'
-      }, [
-        h('.flex-column', [
-          !isAllowedToControl &&
-          h('span.warning.flex-end.flex-row.g1#missing_lock_ownership_to_control_message', [
-            'You do not own the necessary ',
-            h('a',{
-              href: '?page=locks',
-              onclick: (e) => model.router.handleLinkEvent(e),
-            }, 'locks'),
-            ' to control this environment.'
-          ]),
-          isStable && isConfigured && !isSorAvailable
-          && h('.danger.flex-end.flex-row', 'SOR is unavailable for one or more of the included detectors.'),
+      isStable && isConfigured && !isSorAvailable
+      && h('.danger.flex-end.flex-row', 'SOR is unavailable for one or more of the included detectors.'),
 
-        ]),
-        isAllowedToControl && h('.flex-row.flex-end.g2', [
-          controlButton(
-            '.btn-success.w-25', environment, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
-            Boolean(currentTransition)
-          ),
-          controlButton(
-            '.btn-primary', environment, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
-          ), // button will not be displayed in any state due to OCTRL-628
-          controlButton('', environment, item, 'RESET', 'RESET', '', Boolean(currentTransition)), ' ',
-          controlButton(
-            '.btn-danger.w-25', environment, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
-          ),
-          shutdownEnvButton(environment, item, Boolean(currentTransition)),
-          killEnvButton(environment, item)
-        ])
-      ])
     ]),
-    environment.itemControl.match({
-      NotAsked: () => null,
-      Loading: () => null,
-      Success: (_data) => null,
-      Failure: ({message}) => h('p.danger.text-right', message),
-    })
+    isAllowedToControl && h('.flex-row.flex-end.g2', [
+      controlButton(
+        '.btn-success.w-25', environmentModel, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
+        Boolean(currentTransition)
+      ),
+      controlButton(
+        '.btn-primary', environmentModel, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
+      ), // button will not be displayed in any state due to OCTRL-628
+      controlButton('', environmentModel, item, 'RESET', 'RESET', '', Boolean(currentTransition)), ' ',
+      controlButton(
+        '.btn-danger.w-25', environmentModel, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
+      ),
+      shutdownEnvButton(environmentModel, item, Boolean(currentTransition)),
+      killEnvButton(environmentModel, item)
+    ])
   ]);
 };
 
@@ -172,6 +152,6 @@ const killEnvButton = (environment, item) =>
  * * any user if environment is in ERROR state
  * * admins at any point
  */
-function _isKillActionAllowed(item, model) {
+function _isKillActionAllowed(item) {
   return item.state === 'ERROR' || isUserAllowedRole(ROLES.Admin);
 }
