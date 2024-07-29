@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global COG */
-
 import {h, iconX} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
@@ -224,18 +222,6 @@ const runColumn = (item, model) => {
   return h('td', {style: 'text-align: center;'},
     h('.badge.f4', {class: classes}, text)
   );
-}
-
-/**
- * Returns a  group of buttons which allows the user to open ILG with pre-set parameters
- * @param {EnvironmentInfo} environment
- * @returns {vnode}
- */
-const actionsCell = (environment) => {
-  return h('.btn-group', [
-    infoLoggerButton(environment, 'FLP', COG.ILG_URL),
-    infoLoggerButton(environment, 'EPN', COG.ILG_EPN_URL)
-  ]);
 }
 
 /**

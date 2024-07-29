@@ -15,7 +15,7 @@
 /* global COG */
 
 import {
-  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList
+  h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX
 } from '/js/src/index.js';
 import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
 import {currentPageAndParameters} from '../../../utilities/currentPageAndParameters.js';
