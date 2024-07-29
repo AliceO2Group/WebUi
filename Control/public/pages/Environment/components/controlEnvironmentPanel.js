@@ -16,7 +16,6 @@
 
 import {h} from '/js/src/index.js';
 
-import {infoLoggerButton} from './buttons.js';
 import {ROLES} from '../../../workflow/constants.js';
 import {isUserAllowedRole} from '../../../common/userRole.js';
 
@@ -39,57 +38,41 @@ export const controlEnvironmentPanel = (environmentModel, item, isAllowedToContr
       true;
   const isStable = !currentTransition;
   const isConfigured = state === 'CONFIGURED';
-  return h('', [
-    h('.flex-row', [
-      h('', {
-        style: 'flex-grow: 1;'
-      }, h('.g2.flex-row',[
-        infoLoggerButton(item, 'InfoLogger FLP', COG.ILG_URL),
-        infoLoggerButton(item, 'InfoLogger EPN', COG.ILG_EPN_URL),
+  return h('.flex-column.justify-center', {
+    style: 'flex-grow: 3;'
+  }, [
+    h('.flex-column', [
+      !isAllowedToControl &&
+      h('span.warning.flex-end.flex-row.g1#missing_lock_ownership_to_control_message', [
+        'You do not own the necessary ',
+        h('a', {
+          href: '?page=locks',
+          onclick: (e) => model.router.handleLinkEvent(e),
+        }, 'locks'),
+        ' to control this environment.'
       ]),
-      ),
-      h('.flex-column.justify-center', {
-        style: 'flex-grow: 3;'
-      }, [
-        h('.flex-column', [
-          !isAllowedToControl &&
-          h('span.warning.flex-end.flex-row.g1#missing_lock_ownership_to_control_message', [
-            'You do not own the necessary ',
-            h('a',{
-              href: '?page=locks',
-              onclick: (e) => model.router.handleLinkEvent(e),
-            }, 'locks'),
-            ' to control this environment.'
-          ]),
-          isStable && isConfigured && !isSorAvailable
-          && h('.danger.flex-end.flex-row', 'SOR is unavailable for one or more of the included detectors.'),
+      isStable && isConfigured && !isSorAvailable
+      && h('.danger.flex-end.flex-row', 'SOR is unavailable for one or more of the included detectors.'),
 
-        ]),
-        isAllowedToControl && h('.flex-row.flex-end.g2', [
-          controlButton(
-            '.btn-success.w-25', environmentModel, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
-            Boolean(currentTransition)
-          ),
-          controlButton(
-            '.btn-primary', environmentModel, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
-          ), // button will not be displayed in any state due to OCTRL-628
-          controlButton('', environmentModel, item, 'RESET', 'RESET', '', Boolean(currentTransition)), ' ',
-          controlButton(
-            '.btn-danger.w-25', environmentModel, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
-          ),
-          shutdownEnvButton(environmentModel, item, Boolean(currentTransition)),
-          killEnvButton(environmentModel, item)
-        ])
-      ])
     ]),
-    environmentModel.itemControl.match({
-      NotAsked: () => null,
-      Loading: () => null,
-      Success: (_data) => null,
-      Failure: ({message}) => h('p.danger.text-right', message),
-    })
-  ]);
-};
+    isAllowedToControl && h('.flex-row.flex-end.g2', [
+      controlButton(
+        '.btn-success.w-25', environmentModel, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
+        Boolean(currentTransition)
+      ),
+      controlButton(
+        '.btn-primary', environmentModel, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
+      ), // button will not be displayed in any state due to OCTRL-628
+      controlButton('', environmentModel, item, 'RESET', 'RESET', '', Boolean(currentTransition)), ' ',
+      controlButton(
+        '.btn-danger.w-25', environmentModel, item, 'STOP', 'STOP_ACTIVITY', 'RUNNING', Boolean(currentTransition)
+      ),
+      shutdownEnvButton(environmentModel, item, Boolean(currentTransition)),
+      killEnvButton(environmentModel, item)
+    ])
+  ]
+  );
+  };
 
 /**
  * Makes a button to toggle severity
