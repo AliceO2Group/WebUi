@@ -86,7 +86,7 @@ const showTasksTable = (taskModel, tasks) => {
           ),
         ]),
         taskModel.openedTasks[task.taskId] && taskModel.list[task.taskId]
-        && showTaskDetailsTable(taskModel.list[task.taskId], task),
+        && showTaskDetailsTable(taskModel.list[task.taskId]),
         ]),
       ])
     ])
