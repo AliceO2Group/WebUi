@@ -16,9 +16,11 @@ import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {iconLockLocked, iconLockUnlocked, iconCloudDownload, iconCircleX, iconCircleCheck} from '/js/src/icons.js';
+import {iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
+import Task from './Task.js';
+import { tasksPerFlpTable } from '../common/task/tasksPerFlpTable.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
@@ -133,7 +135,7 @@ const detectorPanels = (model, detectors) => [
         h('.w-80.text-right', toggleDetectorPanel(model, detectors[detector])),
       ]),
       detectors[detector].isOpened && h('.panel', [
-        tasksTables(model, detectors[detector].list.payload)
+        tasksTables(model.task.taskTableModel, detectors[detector].list.payload)
       ])
     ]))
 ];
@@ -154,53 +156,16 @@ const toggleDetectorPanel = (model, taskPanel) =>
     }, taskPanel.isOpened ? iconChevronTop() : iconChevronBottom());
 
 /**
- * Display all running task grouped by hosts
- * @param {Object} model
- * @param {Map<String, JSON>} tasks
- * @returns {vnode}
+ * Display all known task grouped by hosts
+ * @param {TaskTableModel} taskTableModel - task table model
+ * @param {Map<String, JSON>} tasksByHost - tasks grouped by host
+ * @return {vnode} - table with tasks details
  */
-const tasksTables = (model, tasksByHost) =>
-  Object.keys(tasksByHost)
+const tasksTables = (taskTableModel, tasksByHost) => {
+  return Object.keys(tasksByHost)
     .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
-    .map((hostname) => [
-      h('.shadow-level1', [
-        h('table.table', {
-          style: 'white-space: pre-wrap;'
-        }, [
-          h('thead',
-            h('tr.table-primary',
-              h('th', {colspan: 3}, hostname),
-              h('th.flex-row', {style: {'justify-content': 'flex-end'}, colspan: 1},
-                h('a', {
-                  title: 'Download Mesos Environment Logs',
-                  href: tasksByHost[hostname].stdout,
-                  target: '_blank'
-                }, h('button.btn-sm.primary', iconCloudDownload())
-                )
-              )
-            ),
-            h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
-          ),
-          h('tbody', tasksByHost[hostname].list
-            .filter((task) => model.task.filterBy.test(task.name))
-            .map((task) => [
-              h('tr', [
-                h('td.w-50', task.name),
-                h('td.w-10', task.pid),
-                h('td.w-10', {
-                  class: (task.state === 'RUNNING' ? 'success'
-                    : (task.state === 'CONFIGURED' ? 'primary'
-                      : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
-                  style: 'font-weight: bold;'
-                }, task.state),
-                h('td.w-10', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
-              ])
-            ])
-          )
-        ])
-      ])
-    ]);
-
+    .map((hostname) => tasksPerFlpTable({ taskTableModel }, { tasks: tasksByHost[hostname].list }));
+};
 
 /**
  * Prepares cleanup tasks button in top right corner

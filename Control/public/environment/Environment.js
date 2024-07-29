@@ -15,7 +15,7 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import {jsonDelete} from './../utilities/jsonDelete.js';
 import {jsonPut} from './../utilities/jsonPut.js';
-import Task from './Task.js';
+import { TaskTableModel } from './../common/task/TaskTableModel.js';
 
 /**
  * Model representing Environment CRUD
@@ -28,8 +28,8 @@ export default class Environment extends Observable {
   constructor(model) {
     super();
 
-    this.task = new Task(model);
-    this.task.bubbleTo(model);
+    this.taskTableModel = new TaskTableModel(model);
+    this.taskTableModel.bubbleTo(model);
 
     this.model = model;
     this.requests = RemoteData.notAsked();

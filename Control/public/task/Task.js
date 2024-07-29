@@ -11,9 +11,12 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+
 /* global COG */
+
 import {Observable, RemoteData} from '/js/src/index.js';
-import {getTasksByFlp} from './../common/utils.js';
+import { getTasksByFlp } from './../common/utils.js';
+import { TaskTableModel } from './../common/task/TaskTableModel.js';
 
 /**
  * Model representing Tasks
@@ -35,6 +38,9 @@ export default class Task extends Observable {
     this.detectorPanels = RemoteData.notAsked(); // JSON containing information on detectors panels; isOpened, list of hosts
 
     this._filterBy = new RegExp();
+
+    this.taskTableModel = new TaskTableModel(model);
+    this.taskTableModel.bubbleTo(this);
   }
 
   /**

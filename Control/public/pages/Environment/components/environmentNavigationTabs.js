@@ -14,7 +14,7 @@
 
 import {h} from '/js/src/index.js';
 import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
-import {tasksPerFlpTable} from '../../../common/task/taskPerFlpTable.js';
+import {tasksPerFlpTable} from '../../../common/task/tasksPerFlpTable.js';
 import {currentPageAndParameters} from '../../../utilities/currentPageAndParameters.js';
 import {getTasksByEpn} from '../../../common/utils.js';
 import {isGlobalRun} from '../../../environment/environmentsPage.js';
