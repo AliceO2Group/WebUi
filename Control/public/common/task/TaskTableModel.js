@@ -52,7 +52,7 @@ export class TaskTableModel extends Observable {
    * @param {string} taskId
   */
   async toggleTaskView(taskId) {
-    if (Boolean(this._openedTaskViews[taskId])) {
+    if (this._openedTaskViews[taskId]) {
       delete this._openedTaskViews[taskId];
       this.notify();
       return;

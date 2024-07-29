@@ -51,8 +51,7 @@ export const tasksPerFlpTable = ({ taskTableModel }, { tasks = [], currentTransi
           ]),
         ]),
         showTasksTable(taskTableModel, tasksByFlp[hostname].list)
-      ]),
-    ),
+      ])),
   ];
 };
 
@@ -108,8 +107,8 @@ const showTaskDetailsTable = (taskRemoteData) => h('tr',
   taskRemoteData.match({
     NotAsked: () => null,
     Loading: () => h('td.shadow-level3.m5', {
-        style: 'font-size: 0.25em; text-align: center;', colspan: 7
-      }, pageLoading()),
+      style: 'font-size: 0.25em; text-align: center;', colspan: 7
+    }, pageLoading()),
     Success: (data) => h('td', {colspan: 7}, showTableItem(data)),
     Failure: (_error) => h('td.shadow-level3.m5',
       {style: 'text-align: center;', colspan: 7, title: 'Could not load arguments'},

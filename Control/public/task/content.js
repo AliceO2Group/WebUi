@@ -19,7 +19,6 @@ import {detectorHeader} from '../common/detectorHeader.js';
 import {iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
-import Task from './Task.js';
 import { tasksPerFlpTable } from '../common/task/tasksPerFlpTable.js';
 
 /**
