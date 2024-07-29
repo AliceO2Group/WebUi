@@ -17,17 +17,17 @@
 import {
   h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX, iconList
 } from '/js/src/index.js';
-import {ALIECS_STATE_COLOR} from './../../common/constants/stateColors.js';
-import {currentPageAndParameters} from './../../utilities/currentPageAndParameters.js';
-import {getTasksByFlp, getTasksByEpn} from './../../common/utils.js';
-import {isGlobalRun} from './../environmentsPage.js';
+import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
+import {currentPageAndParameters} from '../../../utilities/currentPageAndParameters.js';
+import {getTasksByFlp, getTasksByEpn} from '../../../common/utils.js';
+import {isGlobalRun} from '../../../environment/environmentsPage.js';
 import {mesosLogButton} from './buttons.js';
-import {miniCard} from './../../common/card/miniCard.js';
-import {parseObject, parseOdcStatusPerEnv} from './../../common/utils.js';
-import {rowForCard} from './../../common/card/rowForCard.js';
+import {miniCard} from '../../../common/card/miniCard.js';
+import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
+import {rowForCard} from '../../../common/card/rowForCard.js';
 import {userVarsRow, defaultsRow, varsRow} from './expandableEnvRows.js';
-import pageLoading from './../../common/pageLoading.js';
-import showTableItem from './../../common/showTableItem.js';
+import pageLoading from '../../../common/pageLoading.js';
+import showTableItem from '../../../common/showTableItem.js';
 
 
 /**
