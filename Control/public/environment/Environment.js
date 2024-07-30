@@ -89,6 +89,9 @@ export default class Environment extends Observable {
     if (itShouldLoad) {
       this.item = RemoteData.loading();
       this.notify();
+    } else if (this.item.isSuccess()) {
+      // Clear tasks to avoid flickering or bad display when switching from EPN to FLP
+      this.item.payload.tasks = [];
     }
     const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
     this.item = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);

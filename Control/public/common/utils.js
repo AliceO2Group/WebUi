@@ -56,7 +56,7 @@ const parseObject = (item, key) => {
 const getTasksByFlp = (tasks) => {
   var taskMap = {};
   tasks.forEach((task) => {
-    const hostname = task.deploymentInfo.hostname;
+    const hostname = task.deploymentInfo?.hostname ?? 'Unknown';
     if (!taskMap.hasOwnProperty(hostname)) {
       taskMap[hostname] = {list: [], stdout: ''};
     }
