@@ -13,16 +13,14 @@
 */
 
 import {h} from '/js/src/index.js';
-import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
-import {tasksPerFlpTable} from '../../../common/task/tasksPerFlpTable.js';
 import {currentPageAndParameters} from '../../../utilities/currentPageAndParameters.js';
-import {getTasksByEpn} from '../../../common/utils.js';
+import {environmentConfigurationTable} from './environmentConfigurationTable.js';
 import {isGlobalRun} from '../../../environment/environmentsPage.js';
 import {miniCard} from '../../../common/card/miniCard.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';
-import {environmentConfigurationTable} from './environmentConfigurationTable.js';
-
+import {tasksPerFlpTable} from '../../../common/task/tasksPerFlpTable.js';
+import { tasksPerEpnTable } from '../../../common/task/tasksPerEpnTable.js';
 
 /**
  * @file Builds the navigation tabs that are to be displayed on the environment details page which contains the following tabs:
@@ -52,7 +50,7 @@ export const environmentNavigationTabs = (model, item) => {
     },
     epn: {
       name: `EPNs (${epn?.tasks?.total ?? '?'})`,
-      content: tasksPerEpnTables,
+      content: tasksPerEpnTable,
     },
     flp: {
       name: `FLPs (${flp?.tasks?.total ?? '?'})`,
@@ -91,49 +89,6 @@ export const environmentNavigationTabs = (model, item) => {
       .map(([id, {content}]) =>  h(`.tab-panel.active`, {id: `${id}-pane`}, content(model.environment, item)))
     )
   ];
-};
-
-/**
- * Build multiple tables of the tasks grouped by FLP
- * @param {JSON} environment - GetEnvironment response.environment
- * @return {vnode}
- */
-const tasksPerEpnTables = (envModel, environment) => {
-  const {tasks = [], currentTransition = ''} = environment;
-  const tasksByHosts = getTasksByEpn(tasks);
-  if (tasks.length === 0 && !currentTransition) {
-    return h('.text-center.w-100', 'No tasks found');
-  }
-  return [
-    Object.keys(tasksByHosts).map((host) =>
-      h('', [
-        h('.p2.flex-row.bg-primary.white', [
-          h('h5.w-100', host),
-        ]),
-        h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
-          h('thead',
-            h('tr', [
-              ['ID', 'Path', 'Ignored', 'State'].map((header) => h('th', header))
-            ])
-          ),
-          h('tbody', [
-            tasks.map((task) => {
-              if (task.host === host) {
-                return h('tr', [
-                  h('td.w-30', task.taskId),
-                  h('td.w-50', task.path),
-                  h('td.w-10', task.ignored + ''),
-                  h('td.w-10', {
-                    class: ALIECS_STATE_COLOR[task.state],
-                    style: 'font-weight: bold;'
-                  }, task.state),
-                ]);
-              }
-            }),
-          ])
-        ])
-      ])
-    )];
 };
 
 /**
