@@ -55,14 +55,22 @@ export const EnvironmentPageContent = (model) => h('.scroll-y.absolute-fill', [
 const showEnvironmentPage = (model, environmentInfo) => {
   const {state, currentTransition = undefined} = environmentInfo;
   const isRunningStable = !currentTransition && state === EnvironmentState.RUNNING;
-  const {services: {detectors: {availability = {}} = {}}} = model;
+  const { services: { detectors: { availability = {} } = {} } } = model;
+
+  const onRowClick = async (component, state) => {
+    model.router.go(`?page=environment&id=${environmentInfo.id}&panel=${component}`, true, true);
+    model.environment.taskTableModel.setFilterState(state);
+    
+    document.getElementById('environment-tabs-navigation-header').scrollIntoView({ behavior: 'auto', block: 'center' });
+    await model.environment.getEnvironment({ id: environmentInfo.id }, false, component);
+  }
 
   return h('.w-100.p1.g2.flex-column', [
     environmentStateSummary(environmentInfo),
     environmentActionPanel(model, environmentInfo),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
     h('.flex-row.g2.z-index-one', [
-      environmentTasksSummaryTable(environmentInfo, availability),
+      environmentTasksSummaryTable(environmentInfo, availability, onRowClick),
     ]),
     environmentNavigationTabs(model, environmentInfo),
   ]);

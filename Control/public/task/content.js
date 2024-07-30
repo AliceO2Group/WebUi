@@ -147,7 +147,6 @@ const toggleDetectorPanel = (model, taskPanel) =>
  * @return {vnode} - table with tasks details
  */
 const tasksTables = (taskTableModel, tasksByHost) => {
-  console.log(tasksByHost)
   return Object.keys(tasksByHost)
     .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
     .map((hostname) => tasksPerHostPanel(

@@ -92,7 +92,7 @@ const getTasksByEpn = (tasks) => {
  */
 const getTaskShortName = (taskName) => {
   const regex = new RegExp(`tasks/.*@`);
-  const matchedTaskName = taskName.match(regex);
+  const matchedTaskName = taskName?.match(regex);
   if (matchedTaskName) {
     taskName = matchedTaskName[0].replace('tasks/', '').replace('@', '');
   }

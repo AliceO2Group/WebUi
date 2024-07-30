@@ -21,9 +21,10 @@ import {h} from '/js/src/index.js';
  * Build a table with the summary of the tasks states for the environment grouped by component (FLP, EPN, QC, CTP Readout) and detector
  * @param {EnvironmentInfo} environment
  * @param {Object<String, {pfrAvailability, sorAvailability}} detectorsAvailability - object with the availability of the detectors
+ * @param {function} onRowClick - function to be called when a row is clicked
  * @return {vnode} - component with an HTML table
  */
-export const environmentTasksSummaryTable = (environment, detectorsAvailability) => {
+export const environmentTasksSummaryTable = (environment, detectorsAvailability, onRowClick) => {
   const {state, hardware, userVars, currentTransition = undefined} = environment;
   const isDcsEnabled = userVars?.dcs_enabled === 'true';
   const shouldDisplaySorAvailability = isDcsEnabled && state === 'CONFIGURED' && !currentTransition;
@@ -34,7 +35,7 @@ export const environmentTasksSummaryTable = (environment, detectorsAvailability)
       detectorsTableHeaderRow(hardware, detectorsAvailability, shouldDisplaySorAvailability)
     ]),
     h('tbody', [
-      TASK_STATES.map((state) => rowForTaskSate(state, hardware)),
+      TASK_STATES.map((state) => rowForTaskSate(state, hardware, onRowClick)),
     ])
   ]);
 };
@@ -78,24 +79,30 @@ const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}, availabili
 /**
  * Build a row of the table with the summary of the tasks for specified state for the environment
  * @param {String} state - task state
- * @param {Object<['flp', 'qc', 'epn', 'trg'], Object>} hardware - object with the hardware components and details
+ * @param {object<component: HardwareComponent, object>} hardware - object with the hardware components and details
+ * @param {function} onRowClick - function to be called when a row is clicked
  * @return {vnode} - component with an HTML table row
  */
-const rowForTaskSate = (state, hardware) => {
+const rowForTaskSate = (state, hardware, onRowClick) => {
   const taskClass = getTaskStateClassAssociation(state);
   return h('tr', [
     h(`td${taskClass}`, state),
     HARDWARE_COMPONENTS
       .map((component) => {
         const componentInLowerCase = component.toLocaleLowerCase();
-        if (componentInLowerCase === 'flp') {
+        if (component.toLocaleUpperCase() === HardwareComponent.FLP) {
           const {flp: {detectorCounters}} = hardware;
           return Object.keys(detectorCounters)
             .map((detector) =>
-              h(`td.text-center${taskClass}`, detectorCounters[detector].states[state] || '-')
+              h(`td.text-center${taskClass}.actionable-icon`, {
+                onclick: () => onRowClick && onRowClick(componentInLowerCase, state),
+              }, detectorCounters[detector].states[state] || '-')
             );
         } else {
-          return h(`td.text-center${taskClass}`, hardware[componentInLowerCase].tasks.states[state] ?? '-');
+          return h(`td.text-center${taskClass}.actionable-icon`, {
+              onclick: () => onRowClick && onRowClick(componentInLowerCase, state),
+            },
+            hardware[componentInLowerCase].tasks.states[state] ?? '-');
         }
       })
   ]);
