@@ -14,6 +14,7 @@
 
 import { Observable, RemoteData } from '/js/src/index.js';
 import { jsonPost } from './../../utilities/jsonPost.js';
+import { TASK_STATES } from '../enums/TaskState.js';
 
 /**
  * Model representing tasks within a table
@@ -29,6 +30,63 @@ export class TaskTableModel extends Observable {
     this._model = model;
     this._openedTaskViews = {}; // map of the view states of the tasks. If present, task view is open
     this._tasksAsRemoteDataById = {}; // map of (taskId, RemoteData) fetched for in-depth details of the task
+
+    this._filterBy = {
+      state: [],
+      name: new RegExp()
+    };
+  }
+
+  /**
+   * Checks whether the filter for a specified state is enabled
+   * @param {string} state - state to check
+   * @return {boolean} - true if the filter is enabled, false otherwise
+   */
+  isFilterStateEnabled(state) {
+    return this._filterBy.state.includes(state);
+  }
+
+  /**
+   * Toggles the filter state for a specified state
+   * @param {TaskState} state - state to toggle
+   */
+  toggleFilterState(state) {
+    if (TASK_STATES.includes(state)) {
+      if (this._filterBy.state.includes(state)) {
+        this._filterBy.state = this._filterBy.state.filter((filterState) => filterState !== state);
+      } else {
+        this._filterBy.state.push(state);
+      }
+      this.notify();
+    }
+  }
+
+  /**
+   * Given a user input value, filters the tasks by name
+   * @param {string} name - name to filter by
+   */
+  setFilterByName(name) {
+    this._filterBy.name = new RegExp(`.*${name}.*`);
+    this.notify();
+  }
+
+  /**
+   * Checks whether a task matches the current filter
+   * @param {TaskInfo} task - task to check
+   * @return {boolean} - true if the task matches the filter, false otherwise
+   */
+  doesTaskMatchFilter(task) {
+    let doesStateMatch = true;
+    if (this._filterBy.state.length !== 0) {
+      doesStateMatch = this._filterBy.state.includes(task.state);
+    }
+
+    let doesNameMatch = true;
+    if (this._filterBy.name) {
+      const nameToMatch = task.name ?? task.path;
+      doesNameMatch = this._filterBy.name.test(nameToMatch);
+    }
+    return doesStateMatch && doesNameMatch;
   }
 
   /**

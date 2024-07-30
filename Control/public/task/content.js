@@ -20,6 +20,7 @@ import {iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
 import {tasksPerHostPanel} from '../common/task/tasksPerHostPanel.js';
+import { HardwareComponent } from '../common/enums/HardwareComponent.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
@@ -161,9 +162,14 @@ const toggleDetectorPanel = (model, taskPanel) =>
  * @return {vnode} - table with tasks details
  */
 const tasksTables = (taskTableModel, tasksByHost) => {
+  console.log(tasksByHost)
   return Object.keys(tasksByHost)
     .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
-    .map((hostname) => tasksPerHostPanel({ taskTableModel }, { tasks: tasksByHost[hostname].list }, 'FLP'));
+    .map((hostname) => tasksPerHostPanel(
+      { taskTableModel },
+      { tasks: tasksByHost[hostname].list },
+      HardwareComponent.FLP)
+    );
 };
 
 /**
