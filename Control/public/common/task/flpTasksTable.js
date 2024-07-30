@@ -12,56 +12,20 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global COG */
-
 import {
   h, iconChevronBottom, iconLockLocked, iconLockUnlocked, iconChevronTop, iconCircleX
 } from '/js/src/index.js';
-import { getTasksByFlp } from '../utils.js';
-import { infoLoggerButtonLink } from '../buttons/infoLoggerRedirectButton.js';
-import { redirectButtonLink } from '../buttons/redirectButtonLink.js';
 import pageLoading from '../pageLoading.js';
 import showTableItem from '../showTableItem.js';
 import { getTaskStateClassAssociation } from '../enums/TaskState.js';
 
 /**
- * Build multiple tables of the tasks grouped by FLP
- * @param {EnvironmentModel} environmentModel - environment model from which to extract what is needed
- * @param {TaskTableModel} environmentModel.taskTableModel - task model
- * @param {PartialEnvironmentInfo} environmentInfo - environment information DTO object
- * @param {Array<Task>} [environmentInfo.tasks] - list of tasks to build table for
- * @param {string} [environmentInfo.currentTransition] - current transition if any
- * @param {number} [environmentInfo.currentRunNumber] - current run number
- * @return {vnode} - multiple tables of the tasks grouped by their FLP/host
+ * For a given list of FLP tasks, build a table with tasks details and buttons to allow for retrieving more details per task
+ * @param {Array<Task>} [tasks = []] - list of tasks to build table for
+ * @param {TaskTableModel} taskTableModel - task table model to use for features such as filtering and retrieving more details of task
+ * @return {vnode} - table of the FLP tasks
  */
-export const tasksPerFlpTable = ({ taskTableModel }, { tasks = [], currentTransition = '', currentRunNumber: run }) => {
-  if (tasks.length === 0 && !currentTransition) {
-    return h('.text-center.w-100', 'No tasks found');
-  }
-
-  const tasksByFlp = getTasksByFlp(tasks);
-  return [
-    Object.keys(tasksByFlp)
-      .map((hostname) => h('', [
-        h('.p2.flex-row.bg-primary.white', [
-          h('h5.flex-grow-3', hostname),
-          h('.flex-row.flex-grow-1.g2', [
-            infoLoggerButtonLink({ run, hostname }, 'InfoLogger FLP', COG.ILG_URL),
-            redirectButtonLink(tasksByFlp[hostname].stdout, 'Mesos', 'Download Mesos logs', true),
-          ]),
-        ]),
-        showTasksTable(taskTableModel, tasksByFlp[hostname].list)
-      ])),
-  ];
-};
-
-/**
- * Method to create and display a table with tasks details
- * @param {TaskTableModel} taskTableModel - task table model
- * @param {Array<object>} tasks - list of tasks that is to be displayed
- * @return {vnode} - table with tasks details
- */
-export const showTasksTable = (taskTableModel, tasks) => {
+export const flpTasksTable = (tasks, taskTableModel) => {
   const tableColumns = ['Name', 'PID', 'Locked', 'Status', 'State', 'Host Name', 'More'];
 
   return h('.scroll-auto.panel', [
@@ -81,7 +45,7 @@ export const showTasksTable = (taskTableModel, tasks) => {
             ),
             h('td.w-10', task.status),
             h(`td.w-10${getTaskStateClassAssociation(task.state)}`, task.state),
-            h('td.w-20', task.deploymentInfo?.hostname),
+            h('td.w-20', task?.deploymentInfo?.hostname),
             h('td.w-10',
               h('button.btn-sm.btn-default', {
                 title: 'More Details',
