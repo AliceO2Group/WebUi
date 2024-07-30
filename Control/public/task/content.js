@@ -93,7 +93,6 @@ const showContent = (model, items) => {
   const isAdmin =  model.detectors.selected === 'GLOBAL' && isUserAllowedRole(ROLES.Admin, true);
   return h('.text-left.ph2', [
     h('.w-100.flex-row.pv2.items-center', [
-      searchTasks(model),
       isAdmin && h('.w-100.flex-row.flex-end.pv2.g2', [
         cleanResourcesButton(model.task),
         cleanTasksButton(model.task)
