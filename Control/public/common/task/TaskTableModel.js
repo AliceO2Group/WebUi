@@ -62,6 +62,17 @@ export class TaskTableModel extends Observable {
   }
 
   /**
+   * Sets the filter state to a specified state
+   * @param {TaskState} state - state to set the filter to
+   */
+  setFilterState(state) {
+    if (TASK_STATES.includes(state)) {
+      this._filterBy.state = [state];
+      this.notify();
+    }
+  }
+
+  /**
    * Given a user input value, filters the tasks by name
    * @param {string} name - name to filter by
    */

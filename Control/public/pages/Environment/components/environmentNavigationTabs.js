@@ -83,7 +83,9 @@ export const environmentNavigationTabs = (model, item) => {
           );
         }),
     ]),
-    h('.tab-content', Object.entries(panels)
+    h('.tab-content', {
+      id: 'environment-tabs-navigation-header'
+    }, Object.entries(panels)
       .filter(([id]) => parameters.panel === id)
       .map(([id, {content}]) =>  h(`.tab-panel.active`, {id: `${id}-pane`}, content(model.environment, item, id)))
     )
