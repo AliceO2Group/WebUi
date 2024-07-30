@@ -19,8 +19,7 @@ import {isGlobalRun} from '../../../environment/environmentsPage.js';
 import {miniCard} from '../../../common/card/miniCard.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';
-import {tasksPerFlpTable} from '../../../common/task/tasksPerFlpTable.js';
-import { tasksPerEpnTable } from '../../../common/task/tasksPerEpnTable.js';
+import { tasksPerHostPanel } from '../../../common/task/tasksPerHostPanel.js';
 
 /**
  * @file Builds the navigation tabs that are to be displayed on the environment details page which contains the following tabs:
@@ -50,19 +49,19 @@ export const environmentNavigationTabs = (model, item) => {
     },
     epn: {
       name: `EPNs (${epn?.tasks?.total ?? '?'})`,
-      content: tasksPerEpnTable,
+      content: tasksPerHostPanel,
     },
     flp: {
       name: `FLPs (${flp?.tasks?.total ?? '?'})`,
-      content: tasksPerFlpTable,
+      content: tasksPerHostPanel,
     },
     qc: {
       name: `QC  (${qc?.tasks?.total ?? '?'})`,
-      content: tasksPerFlpTable,
+      content: tasksPerHostPanel,
     },
     trg: {
       name: `TRG  (${trg?.tasks?.total ?? '?'})`,
-      content: tasksPerFlpTable,
+      content: tasksPerHostPanel,
     },
   };
   const {parameters} = currentPageAndParameters();
@@ -86,7 +85,7 @@ export const environmentNavigationTabs = (model, item) => {
     ]),
     h('.tab-content', Object.entries(panels)
       .filter(([id]) => parameters.panel === id)
-      .map(([id, {content}]) =>  h(`.tab-panel.active`, {id: `${id}-pane`}, content(model.environment, item)))
+      .map(([id, {content}]) =>  h(`.tab-panel.active`, {id: `${id}-pane`}, content(model.environment, item, id)))
     )
   ];
 };

@@ -19,7 +19,7 @@ import {detectorHeader} from '../common/detectorHeader.js';
 import {iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
-import { tasksPerFlpTable } from '../common/task/tasksPerFlpTable.js';
+import {tasksPerHostPanel} from '../common/task/tasksPerHostPanel.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
@@ -163,7 +163,7 @@ const toggleDetectorPanel = (model, taskPanel) =>
 const tasksTables = (taskTableModel, tasksByHost) => {
   return Object.keys(tasksByHost)
     .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
-    .map((hostname) => tasksPerFlpTable({ taskTableModel }, { tasks: tasksByHost[hostname].list }));
+    .map((hostname) => tasksPerHostPanel({ taskTableModel }, { tasks: tasksByHost[hostname].list }, 'FLP'));
 };
 
 /**
