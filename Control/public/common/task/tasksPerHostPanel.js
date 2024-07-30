@@ -45,7 +45,9 @@ export const tasksPerHostPanel = (
   source = (source.toLocaleUpperCase() === EPN) ? EPN : FLP;
 
   if (tasks.isLoading()) {
-    return h('.m5.text-center', pageLoading(2));
+    return h('.m5.text-center', {
+      style: 'min-height: 25em;',
+    }, pageLoading(2));
   } else if (tasks.isFailure()) {
     return h('.m5.text-center', 'Failed to load tasks');
   }
@@ -60,19 +62,22 @@ export const tasksPerHostPanel = (
     h('.flex-row.g1', [
       h('.flex-row.g1', [
         h('h4', 'Filter by:'),
-        h('',
+        h('.flex-row.flex-grow-1',
           h('input.form-control', {
-            placeholder: 'Search by name',
+            style: 'width: unset;',
+            placeholder: 'name/path',
             id: 'taskNameFilter',
             oninput: (e) => taskTableModel.setFilterByName(e.target.value),
           })
         ),
-        TASK_STATES.map((state) =>
-          h(`button.btn${getTaskStateClassAssociation(state)}`, {
-            onclick: () => taskTableModel.toggleFilterState(state),
-            class: taskTableModel.isFilterStateEnabled(state) ? 'active' : '',
-          }, state)
-        ),
+        h('.flex-row.g1.flex-wrap.flex-grow-3', [
+          TASK_STATES.map((state) =>
+            h(`button.btn${getTaskStateClassAssociation(state)}`, {
+              onclick: () => taskTableModel.toggleFilterState(state),
+              class: taskTableModel.isFilterStateEnabled(state) ? 'active' : '',
+            }, state)
+          ),
+        ]),
       ]),
     ]),
     tasks.length === 0 && !currentTransition 
