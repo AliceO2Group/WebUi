@@ -13,13 +13,14 @@
 */
 
 import {h} from '/js/src/index.js';
-import { infoLoggerButtonLink } from '../buttons/infoLoggerRedirectButton.js';
-import { redirectButtonLink } from '../buttons/redirectButtonLink.js';
-import { getTasksByEpn } from '../../../common/utils.js';
-import { getTasksByFlp } from '../utils.js';
 import { epnTasksTable } from './epnTasksTable.js';
 import { flpTasksTable } from './flpTasksTable.js';
+import { getTasksByEpn } from '../../../common/utils.js';
+import { getTasksByFlp } from '../utils.js';
 import { HardwareComponent } from '../enums/HardwareComponent.js';
+import { infoLoggerButtonLink } from '../buttons/infoLoggerRedirectButton.js';
+import { redirectButtonLink } from '../buttons/redirectButtonLink.js';
+import pageLoading from '../pageLoading.js';
 import { getTaskStateClassAssociation, TASK_STATES } from '../enums/TaskState.js';
 const { FLP, EPN } = HardwareComponent;
 
@@ -30,7 +31,7 @@ const { FLP, EPN } = HardwareComponent;
  * @param {object} models - object with potential models to extract the tasks from
  * @param {TaskTableModel} models.taskTableModel - task table model to use for features such as filtering
  * @param {PartialEnvironmentInfo} environmentInfo - object from which to extract tasks data
- * @param {Array<Task>} [environmentInfo.tasks] - list of tasks to build table for
+ * @param {RemoteData<Task[]>} [environmentInfo.tasks] - list of tasks to build table for
  * @param {string} [environmentInfo.currentTransition] - current transition if any
  * @param {number} [environmentInfo.currentRunNumber] - current run number
  * @param {string} source - source of the tasks (FLP/EPN/QC/TRG) as defined in @see environmentNavigationTabs.js
@@ -43,6 +44,12 @@ export const tasksPerHostPanel = (
 ) => {
   source = (source.toLocaleUpperCase() === EPN) ? EPN : FLP;
 
+  if (tasks.isLoading()) {
+    return h('.m5.text-center', pageLoading(2));
+  } else if (tasks.isFailure()) {
+    return h('.m5.text-center', 'Failed to load tasks');
+  }
+  tasks = tasks.payload;
   tasks = tasks.filter(taskTableModel.doesTaskMatchFilter.bind(taskTableModel));
   const tasksByHosts = source === FLP ? getTasksByFlp(tasks) : getTasksByEpn(tasks);
   
