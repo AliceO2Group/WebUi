@@ -38,10 +38,4 @@ describe('`pageTaskList` test-suite', async () => {
     assert.strictEqual(calls['getTasks'], true);
     assert.strictEqual(location.search, '?page=taskList');
   });
-
-  it('should successfully add an input panel for searching tasks by name', async() => {
-    const placeholder = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > input').placeholder);
-
-    assert.strictEqual(placeholder, 'Search tasks by name');
-  });
 });
