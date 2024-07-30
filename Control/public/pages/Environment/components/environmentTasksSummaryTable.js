@@ -93,15 +93,19 @@ const rowForTaskSate = (state, hardware, onRowClick) => {
         if (component.toLocaleUpperCase() === HardwareComponent.FLP) {
           const {flp: {detectorCounters}} = hardware;
           return Object.keys(detectorCounters)
-            .map((detector) =>
-              h(`td.text-center${taskClass}.actionable-icon`, {
-                onclick: () => onRowClick && onRowClick(componentInLowerCase, state),
-              }, detectorCounters[detector].states[state] || '-')
-            );
+            .map((detector) => {
+              const tasksCounter = detectorCounters[detector].states[state];
+              return h(`td.text-center${taskClass}`, {
+                class: tasksCounter ? 'actionable-icon' : '',
+                onclick: () => tasksCounter && onRowClick && onRowClick(componentInLowerCase, state),
+              }, tasksCounter || '-');
+            });
         } else {
-          return h(`td.text-center${taskClass}.actionable-icon`, {
-            onclick: () => onRowClick && onRowClick(componentInLowerCase, state),
-          }, hardware[componentInLowerCase].tasks.states[state] ?? '-');
+          const tasksCounter = hardware[componentInLowerCase].tasks.states[state];
+          return h(`td.text-center${taskClass}`, {
+            class: tasksCounter ? 'actionable-icon' : '',
+            onclick: () => tasksCounter && onRowClick && onRowClick(componentInLowerCase, state),
+          }, tasksCounter ?? '-');
         }
       })
   ]);

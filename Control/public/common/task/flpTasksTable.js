@@ -62,8 +62,8 @@ export const flpTasksTable = (tasks, taskTableModel) => {
 };
 
 /**
- *  Method to display a vertical column based table with in-depth task details
- *  If request to fetch task details is not successful, display loading or error message
+ * Method to display a vertical column based table with in-depth task details
+ * If request to fetch task details is not successful, display loading or error message
  * @param {RemoteData} taskRemoteData - remote data object with task details
  * @return {vnode} - table with task details
  */

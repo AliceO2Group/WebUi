@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronTop, RemoteData} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {detectorHeader} from '../common/detectorHeader.js';
@@ -151,7 +151,7 @@ const tasksTables = (taskTableModel, tasksByHost) => {
     .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
     .map((hostname) => tasksPerHostPanel(
       { taskTableModel },
-      { tasks: tasksByHost[hostname].list },
+      { tasks: RemoteData.success(tasksByHost[hostname].list) },
       HardwareComponent.FLP)
     );
 };

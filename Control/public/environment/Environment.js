@@ -88,13 +88,19 @@ export default class Environment extends Observable {
   async getEnvironment(body, itShouldLoad = true, panel = '') {
     if (itShouldLoad) {
       this.item = RemoteData.loading();
-      this.notify();
     } else if (this.item.isSuccess()) {
       // Clear tasks to avoid flickering or bad display when switching from EPN to FLP
-      this.item.payload.tasks = [];
+      this.item.payload.tasks = RemoteData.loading();
     }
-    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
-    this.item = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
+    this.notify();
+
+    const { result, ok } = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
+    if (!ok) {
+      this.item = RemoteData.failure(result.message);
+    } else {
+      result.tasks = RemoteData.success(result.tasks);
+      this.item = RemoteData.success(result);
+    }
     this.itemControl = RemoteData.notAsked();
     this.notify();
   }
