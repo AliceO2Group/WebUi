@@ -21,13 +21,18 @@ import { getTaskStateClassAssociation } from '../enums/TaskState.js';
 
 /**
  * For each unique host (EPN) within the tasks list, create a table with EPN task details
+ * @param {TaskTableModel} taskTableModel - task table model to use for features such as filtering
  * @param {PartialEnvironmentInfo} environmentInfo - environmentInfo information DTO object
  * @param {Array<Task>} [environmentInfo.tasks = []] - list of tasks to build table for
  * @param {string} [environmentInfo.currentTransition = undefined] - current transition if any
  * @param {number} [environmentInfo.currentRunNumber] - current run number
  * @return {vnode}
  */
-export const tasksPerEpnTable = ({ taskTableModel }, {tasks = [], currentTransition = undefined, currentRunNumber: run}) => {
+export const tasksPerEpnTable = (
+  // eslint-disable-next-line no-unused-vars
+  { taskTableModel },
+  { tasks = [], currentTransition = undefined, currentRunNumber: run }
+) => {
   const tableColumns = ['ID', 'Path', 'Ignored', 'State'];
   const tasksByHosts = getTasksByEpn(tasks);
   if (tasks.length === 0 && !currentTransition) {
@@ -47,7 +52,7 @@ export const tasksPerEpnTable = ({ taskTableModel }, {tasks = [], currentTransit
           h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
             h('thead',
               h('tr', [
-               tableColumns.map((header) => h('th', header))
+                tableColumns.map((header) => h('th', header)),
               ])
             ),
             h('tbody', [
@@ -61,6 +66,7 @@ export const tasksPerEpnTable = ({ taskTableModel }, {tasks = [], currentTransit
               ),
             ])
           ])
-      ])
-    )];
+        ])
+      )
+  ];
 };
