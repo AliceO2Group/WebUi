@@ -68,7 +68,11 @@ updates:
   groups:
     dev-dependencies:
       patterns:
-        # - "eslint"
+        - "eslint"
+        - "@eslint/js"
+        - "@stylistic/eslint-plugin-js"
+        - "eslint-plugin-jsdoc"
+        - "globals"
         - "mocha"
         - "nock"
         - "nyc"
@@ -93,7 +97,11 @@ updates:
   groups:
     dev-dependencies:
       patterns:
-        # - "eslint"
+        - "eslint"
+        - "@eslint/js"
+        - "@stylistic/eslint-plugin-js"
+        - "eslint-plugin-jsdoc"
+        - "globals"
         - "mocha"
         - "nock"
         - "nyc"
