@@ -20,6 +20,7 @@ import {iconCircleX, iconCircleCheck} from '/js/src/icons.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
 import {tasksPerHostPanel} from '../common/task/tasksPerHostPanel.js';
+import { HardwareComponent } from '../common/enums/HardwareComponent.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
@@ -92,7 +93,6 @@ const showContent = (model, items) => {
   const isAdmin =  model.detectors.selected === 'GLOBAL' && isUserAllowedRole(ROLES.Admin, true);
   return h('.text-left.ph2', [
     h('.w-100.flex-row.pv2.items-center', [
-      searchTasks(model),
       isAdmin && h('.w-100.flex-row.flex-end.pv2.g2', [
         cleanResourcesButton(model.task),
         cleanTasksButton(model.task)
@@ -101,20 +101,6 @@ const showContent = (model, items) => {
     h('.w-100', detectorPanels(model, items))
   ]);
 };
-
-/**
- * Adds a search bar for the user to filter tasks by name
- * @param {Object} model 
- * @returns 
- */
-const searchTasks = (model) =>
-  h('.w-50',
-    h('input.form-control', {
-      id: 'searchTasksInput',
-      placeholder: 'Search tasks by name',
-      oninput: (e) => model.task.filterBy = e.target.value
-    })
-  );
 
 /**
  * Build a list of panels per detector with hosts and their respective tasks
@@ -161,9 +147,14 @@ const toggleDetectorPanel = (model, taskPanel) =>
  * @return {vnode} - table with tasks details
  */
 const tasksTables = (taskTableModel, tasksByHost) => {
+  console.log(tasksByHost)
   return Object.keys(tasksByHost)
     .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
-    .map((hostname) => tasksPerHostPanel({ taskTableModel }, { tasks: tasksByHost[hostname].list }, 'FLP'));
+    .map((hostname) => tasksPerHostPanel(
+      { taskTableModel },
+      { tasks: tasksByHost[hostname].list },
+      HardwareComponent.FLP)
+    );
 };
 
 /**
