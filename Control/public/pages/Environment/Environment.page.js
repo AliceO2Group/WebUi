@@ -57,6 +57,12 @@ const showEnvironmentPage = (model, environmentInfo) => {
   const isRunningStable = !currentTransition && state === EnvironmentState.RUNNING;
   const { services: { detectors: { availability = {} } = {} } } = model;
 
+  /**
+   * Given a component and a state, navigate silently to the environment page with the component as the panel
+   * @param {HardwareComponent} component - component to navigate to
+   * @param {TaskState} state - state to filter by
+   * @return {Promise<void>} - promise to navigate to the page
+   */
   const onRowClick = async (component, state) => {
     model.router.go(`?page=environment&id=${environmentInfo.id}&panel=${component}`, true, true);
     model.environment.taskTableModel.setFilterState(state);

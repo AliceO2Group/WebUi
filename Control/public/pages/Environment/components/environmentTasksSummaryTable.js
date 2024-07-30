@@ -100,9 +100,8 @@ const rowForTaskSate = (state, hardware, onRowClick) => {
             );
         } else {
           return h(`td.text-center${taskClass}.actionable-icon`, {
-              onclick: () => onRowClick && onRowClick(componentInLowerCase, state),
-            },
-            hardware[componentInLowerCase].tasks.states[state] ?? '-');
+            onclick: () => onRowClick && onRowClick(componentInLowerCase, state),
+          }, hardware[componentInLowerCase].tasks.states[state] ?? '-');
         }
       })
   ]);
