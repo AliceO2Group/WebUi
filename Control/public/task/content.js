@@ -104,20 +104,6 @@ const showContent = (model, items) => {
 };
 
 /**
- * Adds a search bar for the user to filter tasks by name
- * @param {Object} model 
- * @returns 
- */
-const searchTasks = (model) =>
-  h('.w-50',
-    h('input.form-control', {
-      id: 'searchTasksInput',
-      placeholder: 'Search tasks by name',
-      oninput: (e) => model.task.filterBy = e.target.value
-    })
-  );
-
-/**
  * Build a list of panels per detector with hosts and their respective tasks
  * @param {Object} model
  * @param {Map<String, JSON} detectors

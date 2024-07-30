@@ -44,10 +44,4 @@ describe('`pageTaskList` test-suite', async () => {
 
     assert.strictEqual(placeholder, 'Search tasks by name');
   });
-
-  it('should successfully update filter regex based on user\'s input', async() => {
-    await page.type('input[id=searchTasksInput]', 'task-x', {delay: 20})
-    const filterBy = await page.evaluate(() => window.model.task.filterBy.toString());
-    assert.strictEqual(filterBy, '/.*task-x.*/')
-  });
 });
