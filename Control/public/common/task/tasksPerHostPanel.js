@@ -92,8 +92,17 @@ export const tasksPerHostPanel = (
             h('.p2.flex-row.bg-primary.white', [
               h('h5.flex-grow-3', hostname),
               h('.flex-row.flex-grow-1.g2', [
-                infoLoggerButtonLink({ run, hostname: hostnameToIlg, partition }, infoLoggerButtonTitle, infoLoggerButtonUrl),
-                source === FLP && redirectButtonLink(tasksByHosts[hostname].stdout, 'Mesos', 'Download Mesos logs', true),
+                infoLoggerButtonLink(
+                  { run, hostname: hostnameToIlg, partition },
+                  infoLoggerButtonTitle,
+                  infoLoggerButtonUrl
+                ),
+                source === FLP && redirectButtonLink(
+                  tasksByHosts[hostname].stdout,
+                  'Mesos',
+                  'Download Mesos logs',
+                  true
+                ),
               ]),
             ]),
             source === FLP
