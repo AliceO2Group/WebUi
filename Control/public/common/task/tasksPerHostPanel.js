@@ -39,7 +39,7 @@ const { FLP, EPN } = HardwareComponent;
  */
 export const tasksPerHostPanel = (
   { taskTableModel },
-  { tasks = [], currentTransition = undefined, currentRunNumber: run },
+  { tasks = [], currentTransition = undefined, currentRunNumber: run, id: partition },
   source
 ) => {
   source = (source.toLocaleUpperCase() === EPN) ? EPN : FLP;
@@ -83,19 +83,32 @@ export const tasksPerHostPanel = (
     tasks.length === 0 && !currentTransition 
       ? h('.text-center.w-100', 'No tasks found')
       : Object.keys(tasksByHosts)
-        .map((host) =>
-          h('', [
+        .map((hostname) => {
+          let hostnameToIlg = hostname;
+          if (source === EPN) {
+            [hostnameToIlg] = hostname.split('.');
+          }
+          return h('', [
             h('.p2.flex-row.bg-primary.white', [
-              h('h5.flex-grow-3', host),
+              h('h5.flex-grow-3', hostname),
               h('.flex-row.flex-grow-1.g2', [
-                infoLoggerButtonLink({ run, host }, infoLoggerButtonTitle, infoLoggerButtonUrl),
-                source === FLP && redirectButtonLink(tasksByHosts[host].stdout, 'Mesos', 'Download Mesos logs', true),
+                infoLoggerButtonLink(
+                  { run, hostname: hostnameToIlg, partition },
+                  infoLoggerButtonTitle,
+                  infoLoggerButtonUrl
+                ),
+                source === FLP && redirectButtonLink(
+                  tasksByHosts[hostname].stdout,
+                  'Mesos',
+                  'Download Mesos logs',
+                  true
+                ),
               ]),
             ]),
             source === FLP
-              ? flpTasksTable(tasksByHosts[host].list, taskTableModel)
-              : epnTasksTable(tasksByHosts[host].list),
-          ])
-        )
+              ? flpTasksTable(tasksByHosts[hostname].list, taskTableModel)
+              : epnTasksTable(tasksByHosts[hostname].list),
+          ]);
+        })
   ]);
 };
