@@ -39,15 +39,15 @@
     "jsroot": "7.7.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.8.0",
+    "@eslint/js": "^9.9.0",
     "@stylistic/eslint-plugin-js": "^2.6.1",
-    "eslint": "^9.8.0",
-    "eslint-plugin-jsdoc": "^48.11.0",
+    "eslint": "^9.9.0",
+    "eslint-plugin-jsdoc": "^50.0.1",
     "globals": "^15.9.0",
     "mocha": "^10.7.0",
     "nock": "^13.5.0",
     "nyc": "^17.0.0",
-    "puppeteer": "^22.15.0",
+    "puppeteer": "^23.0.2",
     "sinon": "^18.0.0"
   },
   "bundleDependencies": [
