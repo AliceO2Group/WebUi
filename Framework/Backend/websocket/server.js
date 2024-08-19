@@ -100,10 +100,10 @@ class WebSocket {
         }
       } else {
         // When callback does not exist return 404
-          const message = new WebSocketMessage(404);
-          message.payload = 'Callback does not exist';
-          this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
-          resolve(message);
+        const message = new WebSocketMessage(404);
+        message.payload = 'Callback does not exist';
+        this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+        resolve(message);
       }
     });
   }
