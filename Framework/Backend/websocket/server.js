@@ -74,13 +74,14 @@ class WebSocket {
       try {
         data = this.http.o2TokenService.verify(req.getToken());
       } catch (error) {
-        reject(error);
+        const message = new WebSocketMessage(401);
+        message.payload = error.message;
+        reject(message);
         return;
       }
 
       // Transfer decoded JWT data to request
       Object.assign(req, data);
-      this.logger.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
       // Check whether callback exists
       if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
         const res = this.callbackArray[req.getCommand()](req);
@@ -92,11 +93,17 @@ class WebSocket {
           resolve(res);
         } else {
           // 500 when callback does not return WebSocketMessage
-          resolve(new WebSocketMessage(500));
+          const message = new WebSocketMessage(500);
+          message.payload = 'Internal server error - no websocket message returned';
+          this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+          resolve(message);
         }
       } else {
         // When callback does not exist return 404
-        resolve(new WebSocketMessage(404));
+          const message = new WebSocketMessage(404);
+          message.payload = 'Callback does not exist';
+          this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+          resolve(message);
       }
     });
   }
@@ -147,13 +154,14 @@ class WebSocket {
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              this.logger.debug(`ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
               // 5. Send back to a client
               client.send(JSON.stringify(response.json));
             }
           }, (response) => {
             // 6. If generating response fails
-            throw new Error(`ID ${client.id} Processing request failed: ${response.message}`);
+            client.send(JSON.stringify(response.json));
+            this.log.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
+            client.close(1008);
           });
       }, (failed) => {
         // 7. If parsing message fails
@@ -214,7 +222,6 @@ class WebSocket {
         }
       }
       client.send(JSON.stringify(message.json));
-      this.logger.debug(`ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
     });
   }
 
@@ -224,7 +231,6 @@ class WebSocket {
    */
   unfilteredBroadcast(message) {
     this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));
-    this.logger.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
 
