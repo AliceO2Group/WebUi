@@ -90,7 +90,7 @@ class HttpServer {
         if (err) {
           reject(err);
         } else {
-          this.logger.info(`Server listening on port ${this.port}`);
+          this.logger.infoMessage(`Server listening on port ${this.port}`);
           resolve();
         }
       });
@@ -207,7 +207,7 @@ class HttpServer {
 
     // Catch-all if no controller handled request
     this.app.use('/api', (req, res, next) => {
-      this.logger.debug(`Page was not found: ${this._parseOriginalUrl(req)}`);
+      this.logger.warnMessage(`Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).json({
         error: '404 - Page not found',
         message: 'The requested URL was not found on this server.',
@@ -215,13 +215,13 @@ class HttpServer {
     });
 
     this.app.use((req, res, next) => {
-      this.logger.debug(`Page was not found: ${this._parseOriginalUrl(req)}`);
+      this.logger.warnMessage(`Page was not found: ${this._parseOriginalUrl(req)}`);
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
     });
 
     // Error handler when an API controller crashes
     this.app.use('/api', (err, req, res, next) => {
-      this.logger.error(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
+      this.logger.errorMessage(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
       this.logger.trace(err);
 
       if (process.env.NODE_ENV === 'development') {
@@ -238,7 +238,7 @@ class HttpServer {
 
     // Error handler when a controller crashes
     this.app.use((err, req, res, next) => {
-      this.logger.error(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
+      this.logger.errorMessage(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
       this.logger.trace(err);
       res.status(500).sendFile(path.join(__dirname, '../../Frontend/500.html'));
     });
@@ -414,7 +414,7 @@ class HttpServer {
         next();
         return;
       } catch (error) {
-        this.logger.debug(`${error.name} : ${error.message}`);
+        this.logger.debugMessage(`${error.name} : ${error.message}`);
         res.status(403).json({ message: error.name });
         return;
       }
@@ -438,7 +438,7 @@ class HttpServer {
     if ('x-forwarded-for' in headers) {
       const forwarded = headers['x-forwarded-for'];
       if (details.cern_roles.includes(this.serviceAccountRole) && forwarded.includes(this.ipAddressWhitelist)) {
-        this.logger.info(`Authorized service account ${details.cern_upn} from IP address: ${forwarded}`);
+        this.logger.infoMessage(`Authorized service account ${details.cern_upn} from IP address: ${forwarded}`);
         return true;
       }
     }
@@ -478,7 +478,7 @@ class HttpServer {
 
       res.redirect(url.format({ pathname: '/', query: query }));
     }).catch((reason) => {
-      this.logger.info(`OpenId failed: ${reason}`);
+      this.logger.errorMessage(`OpenId failed: ${reason}`);
       res.status(401).send('OpenId failed');
     });
   }
@@ -490,7 +490,6 @@ class HttpServer {
    */
   authorise(details) {
     const scope = details?.cern_roles ? details.cern_roles : [];
-    this.logger.debug(`User Roles: ${scope.join(',')}`);
     return scope.join(',');
   }
 
@@ -513,7 +512,7 @@ class HttpServer {
     try {
       this.jwtAuthenticate(req);
     } catch ({ name, message }) {
-      this.logger.debug(`${name} : ${message}`);
+      this.logger.errorMessage(`${name} : ${message}`);
 
       const response = { error: '403 - Json Web Token Error' };
 
