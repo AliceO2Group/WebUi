@@ -70,6 +70,9 @@ class NotificationService {
    * @returns {Promise}
    */
   async send(message = undefined) {
+    if (!message || typeof message !== 'object') {
+      throw new Error('Message to send is missing or invalid');
+    }
     const producer = this.kafka.producer();
     await producer.connect();
     await producer.send({ topic: this.topic, messages: [{ value: JSON.stringify(message) }] });
