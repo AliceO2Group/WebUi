@@ -44,10 +44,10 @@ describe('Kafka Connector test suite', () => {
   describe('Check notification params', function () {
     this.timeout();
 
-    it('Notification without tag should fail', async () => {
+    it('should reject sending notification without proper valid message', async () => {
       const notification = new NotificationService(config.notification);
-      await assert.rejects(() => notification.send());
-      await assert.rejects(() => notification.send('tag'));
+      await assert.rejects(() => notification.send(), new Error('Message to send is missing or invalid'));
+      await assert.rejects(() => notification.send('tag'), new Error('Message to send is missing or invalid'));
     });
   });
 
