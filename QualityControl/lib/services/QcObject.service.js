@@ -178,7 +178,7 @@ export class QcObjectService {
    * @returns {Promise<JSON.Error>} - JSON version of the object
    */
   async _getJsRootFormat(url) {
-    const file = await this._rootService.openFile(url);
+    const file = await this._rootService.openFile(`${url}+`);
     const root = await file.readObject('ccdb_object');
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
 
