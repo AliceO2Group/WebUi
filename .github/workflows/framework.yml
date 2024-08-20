@@ -74,7 +74,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-latest]
+        # os: [macOS-latest, ubuntu-latest] do not run on macos-latest due to known bug
+        os: [ubuntu-latest]
     steps:
       - name: Run QualityControl tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run QualityControl tests by using @aliceo2/web-ui from local ../Framework";) 
