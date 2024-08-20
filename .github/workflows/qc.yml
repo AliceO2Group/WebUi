@@ -20,17 +20,6 @@ jobs:
         with:
           node-version: '20.x'
       - run: (cd QualityControl; npm ci )
-      - run: (cd QualityControl; npm test )
-  coverage:
-    name: Tests & coverage on macOS-latest
-    runs-on: macOS-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-      - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run coverage )
       - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for QualityControl
@@ -39,3 +28,14 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: qualitycontrol
           fail_ci_if_error: true
+  #coverage:  Job is currently disabled due to known issue with node-gyp on GH runners
+  #  name: Tests & coverage on macOS-latest
+  #  runs-on: macOS-latest
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    - name: Setup node
+  #      uses: actions/setup-node@v4
+  #      with:
+  #        node-version: '20.x'
+  #    - run: (cd QualityControl; npm ci )
+  #    - run: (cd QualityControl; npm run test)
