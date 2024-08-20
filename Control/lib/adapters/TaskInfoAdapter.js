@@ -11,6 +11,8 @@
  * or submit itself to any jurisdiction.
  */
 
+const { TaskState } = require("../common/taskState.enum");
+
 /**
  * TaskInfoAdapter - Given an AliECS Task, construct a TaskInfo object for GUI purposes
  */
@@ -31,13 +33,18 @@ class TaskInfoAdapter {
       taskId,
       name,
       locked,
-      status,
-      state,
+      status = 'NOT-KNOWN',
       className,
       pid,
       sandboxStdout,
+      deploymentInfo,
+      critical,
     } = task;
+    let { state = TaskState.UNKNOWN } = task;
 
+    if (state === TaskState.ERROR && Boolean(critical)) {
+      state = TaskState.ERROR_CRITICAL;
+    }
     /**
      * @type {TaskInfo}
      */
@@ -51,6 +58,8 @@ class TaskInfoAdapter {
       className,
       pid,
       sandboxStdout,
+      deploymentInfo,
+      critical,
     };
 
     return taskInfo;
