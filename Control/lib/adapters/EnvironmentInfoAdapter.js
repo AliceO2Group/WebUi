@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const {TaskState} = require('./../common/taskState.enum.js');
+const TaskInfoAdapter = require('./TaskInfoAdapter.js');
 const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
 
 /**
@@ -121,7 +121,7 @@ class EnvironmentInfoAdapter {
         const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
           .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
         if (!hostname.match(QC_NODES_NAME_REGEX) && includedDetectors.includes(keyDetector)) {
-          environmentInfo.tasks.push(task);
+          environmentInfo.tasks.push(TaskInfoAdapter.toEntity(task));
         }
       }
     } else if (taskSource === TASKS_SOURCE.QC) {
@@ -130,7 +130,7 @@ class EnvironmentInfoAdapter {
       for (const task of tasks) {
         const {deploymentInfo: {hostname = ''} = {}} = task;
         if (hostname.match(QC_NODES_NAME_REGEX)) {
-          environmentInfo.tasks.push(task);
+          environmentInfo.tasks.push(TaskInfoAdapter.toEntity(task));
         }
       }
     } else if (taskSource === TASKS_SOURCE.TRG) {
@@ -141,7 +141,7 @@ class EnvironmentInfoAdapter {
         const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
           .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
         if (!hostname.match(QC_NODES_NAME_REGEX) && !includedDetectors.includes(keyDetector)) {
-          environmentInfo.tasks.push(task);
+          environmentInfo.tasks.push(TaskInfoAdapter.toEntity(task));
         }
       }
     }
@@ -173,13 +173,9 @@ class EnvironmentInfoAdapter {
 
     const {tasks = [], includedDetectors = []} = environment;
 
-    for (const task of tasks) {
-      const {critical = false, status = 'NOT-KNOWN', deploymentInfo: {hostname = ''} = {}} = task;
-      let {state = TaskState.UNKNOWN} = task;
-
-      if (state === TaskState.ERROR && critical) {
-        state = TaskState.ERROR_CRITICAL;
-      }
+    for (let task of tasks) {
+      task = TaskInfoAdapter.toEntity(task);
+      const {state, status, deploymentInfo: {hostname = ''} = {}} = task;
 
       if (hostname.match(QC_NODES_NAME_REGEX)) {
         qcTasksTotal++;
