@@ -56,7 +56,7 @@ describe('InfoLogger - FLP CI Suite Tests ', function () {
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(
       location.search,
-      '?q = {% 22severity % 22: {% 22in% 22:% 22I % 20W % 20E % 20F % 22}}',
+      '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}',
       'Could not load home page of ILG GUI',
     );
   });
