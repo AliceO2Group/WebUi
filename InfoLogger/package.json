@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.13.1",
+  "version": "1.13.2",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -22,7 +22,7 @@
     "test": "npm run eslint && npm run mocha",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "simul": "node test/live-simulator/infoLoggerServer.js",
-    "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib/ public/ --fix",
+    "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
