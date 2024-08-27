@@ -41,7 +41,7 @@ export const controlEnvironmentPanel = (environmentModel, item, isAllowedToContr
   }, [
     h('.flex-column', [
       !isAllowedToControl &&
-      h('span.warning.flex-end.flex-row.g1#missing_lock_ownership_to_control_message', [
+      h('span.warning#missing_lock_ownership_to_control_message', [
         'You do not own the necessary ',
         h('a', {
           href: '?page=locks',

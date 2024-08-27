@@ -64,7 +64,7 @@ describe('`pageEnvironment` test-suite', async () => {
 
     await page.waitForSelector('#missing_lock_ownership_to_control_message', {timeout: 5000});
     const informationMessage = await page.evaluate(() => document.querySelector('#missing_lock_ownership_to_control_message').innerText);
-    assert.strictEqual(informationMessage, 'You do not own the necessary\nlocks\nto control this environment.');
+    assert.strictEqual(informationMessage, 'You do not own the necessary locks to control this environment.');
   });
 
   it('should not have button displayed if user is not admin or does not have the lock', async () => {
