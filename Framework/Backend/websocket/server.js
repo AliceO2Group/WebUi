@@ -160,7 +160,7 @@ class WebSocket {
           }, (response) => {
             // 6. If generating response fails
             client.send(JSON.stringify(response.json));
-            this.log.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
+            this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
             client.close(1008);
           });
       }, (failed) => {
