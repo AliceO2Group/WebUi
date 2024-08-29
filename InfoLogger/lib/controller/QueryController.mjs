@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all calls that are to query InfoLogger database
@@ -31,14 +31,37 @@ export class QueryController {
   }
 
   /**
+   * Given InfoLogger parameters, use the query service to retrieve logs requested
+   * @param {Request} req - HTTP request object with "query" information on object
+   * @param {Response} res - HTTP response object to provide information on request
+   * @returns {void}
+   */
+  async getLogs(req, res) {
+    if (this._queryService) {
+      try {
+        const { body: { criterias, options } } = req;
+        const logs = await this._queryService.queryFromFilters(criterias, options);
+        res.status(200).json(logs);
+      } catch (error) {
+        updateAndSendExpressResponseFromNativeError(res, error);
+      }
+    } else {
+      res.status(503).json({ message: 'Query Service was not configured' });
+    }
+  }
+
+  /**
    * API endpoint for retrieving total number of logs grouped by severity for a given runNumber
+   * (Used within FLP)
    * @param {Request} req - HTTP request object with "query" information on object
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {void}
    */
   async getQueryStats(req, res) {
     const { runNumber } = req.query;
-    if (!runNumber || isNaN(runNumber)) {
+    if (this._queryService) {
+      res.status(503).json({ message: 'Query Service was not configured' });
+    } else if (!runNumber || isNaN(runNumber)) {
       res.status(400).json({ error: 'Invalid runNumber provided' });
     } else {
       try {
@@ -49,21 +72,5 @@ export class QueryController {
         res.status(502).json({ error: `Unable to serve query on stats for runNumber: ${runNumber}` });
       }
     }
-  }
-
-  /**
-   * Setter for updating the queryService
-   * @param {SQLDataSource} queryService - service to be used to query information on the logs
-   */
-  set queryService(queryService) {
-    this._queryService = queryService;
-  }
-
-  /**
-   * Getter for the queryService instance currently being used
-   * @returns {SQLDataSource} - instance of queryService
-   */
-  get queryService() {
-    return this._queryService;
   }
 }

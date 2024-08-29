@@ -15,12 +15,10 @@
 const logger = require('@aliceo2/web-ui').LogManager
   .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/sql`);
 
-module.exports = class SQLDataSource {
+class QueryService {
   /**
-   * Instantiate SQL data source and connect to database
-   * MySQL options: https://github.com/mysqljs/mysql#connection-options
-   * Limit option
-   * @param {object} connection - mysql connection
+   * Query service that is to be used to map the InfoLogger parameters to SQL query and retrieve data
+   * @param {MySql} connection - mysql connection
    * @param {object} configMySql - mysql config
    */
   constructor(connection, configMySql) {
@@ -30,19 +28,12 @@ module.exports = class SQLDataSource {
 
   /**
    * Method to check if mysql driver connection is up
-   * @returns {Promise} with the results
+   * @returns {Promise} - resolves/rejects
    */
   async isConnectionUpAndRunning() {
-    return await this.connection
-      .query('select timestamp from messages LIMIT 1000;')
-      .then(() => {
-        const url = `${this.configMySql.host}:${this.configMySql.port}/${this.configMySql.database}`;
-        logger.info(`Connected to infoLogger database ${url}`);
-      })
-      .catch((error) => {
-        logger.error(error);
-        throw error;
-      });
+    await this.connection.query('select timestamp from messages LIMIT 1000;');
+    const url = `${this.configMySql.host}:${this.configMySql.port}/${this.configMySql.database}`;
+    logger.infoMessage(`Connected to infoLogger database ${url}`);
   }
 
   /**
@@ -271,3 +262,5 @@ module.exports = class SQLDataSource {
       .then((data) => data);
   }
 };
+
+module.exports.QueryService = QueryService;
