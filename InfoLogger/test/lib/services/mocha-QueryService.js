@@ -10,23 +10,21 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-/* eslint-disable max-len */
+ */
 
 const assert = require('assert');
 const sinon = require('sinon');
-const config = require('../../config-default.js');
-const SQLDataSource = require('../../lib/SQLDataSource.js');
-const {MySQL} = require('@aliceo2/web-ui');
+const config = require('../../../config-default.js');
+const { QueryService } = require('./../../../lib/services/QueryService.js');
+const { MySQL } = require('@aliceo2/web-ui');
 
-
-describe('SQLDataSource', () => {
+describe('QueryService', () => {
   const filters = {
     timestamp: {
       since: -5,
       until: -1,
       $since: '2019-07-22T11:23:21.351Z',
-      $until: '2019-07-22T11:24:21.354Z'
+      $until: '2019-07-22T11:24:21.354Z',
     },
     hostname: {
       match: 'test',
@@ -43,12 +41,12 @@ describe('SQLDataSource', () => {
       $max: 21, // 0, 1, 6, 11, 21
     },
     pid: {
-      $maxWrong: 22
+      $maxWrong: 22,
     },
     userId: {
       min: 10,
-      $min: 10
-    }
+      $min: 10,
+    },
   };
 
   const realFilters = {
@@ -56,7 +54,7 @@ describe('SQLDataSource', () => {
       since: -5,
       until: -1,
       $since: '2019-07-22T11:23:21.351Z',
-      $until: '2019-07-22T11:24:21.354Z'
+      $until: '2019-07-22T11:24:21.354Z',
     },
     hostname: {
       match: 'test',
@@ -71,30 +69,33 @@ describe('SQLDataSource', () => {
     level: {
       max: null, // 0, 1, 6, 11, 21
       $max: null, // 0, 1, 6, 11, 21
-    }
+    },
   };
-  const emptySqlDataSource = new SQLDataSource(undefined, {});
+  const emptySqlDataSource = new QueryService(undefined, {});
 
   describe('Should check connection to mysql driver', () => {
-    it('should throw error when checking connection with mysql driver and driver returns rejected Promise', async () => {
-      const stub = sinon.createStubInstance(MySQL,
+    it('should reject with error when connection with mysql driver fails', async () => {
+      const stub = sinon.createStubInstance(
+        MySQL,
         {
-          query: sinon.stub().rejects(new Error('Unable to connect'))
-        }
+          query: sinon.stub().rejects(new Error('Unable to connect')),
+        },
       );
-      const sqlDataSource = new SQLDataSource(stub, config.mysql);
+      const sqlDataSource = new QueryService(stub, config.mysql);
 
       await assert.rejects(async () => {
         await sqlDataSource.isConnectionUpAndRunning();
       }, new Error('Unable to connect'));
     });
+
     it('should do nothing when checking connection with mysql driver and driver returns resolved Promise', async () => {
-      const stub = sinon.createStubInstance(MySQL,
+      const stub = sinon.createStubInstance(
+        MySQL,
         {
-          query: sinon.stub().resolves('Connection is fine')
-        }
+          query: sinon.stub().resolves('Connection is fine'),
+        },
       );
-      const sqlDataSource = new SQLDataSource(stub, config.mysql);
+      const sqlDataSource = new QueryService(stub, config.mysql);
 
       await assert.doesNotReject(async () => {
         await sqlDataSource.isConnectionUpAndRunning();
@@ -104,36 +105,59 @@ describe('SQLDataSource', () => {
 
   describe('Filter to SQL Conditions', () => {
     it('should successfully return empty values & criteria when translating empty filters from client', () => {
-      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions({}), {values: [], criteria: []});
+      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions({}), { values: [], criteria: [] });
     });
 
     it('should successfully return values & criteria when translating filters from client', () => {
       const expectedValues = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W'], 21, 22, 10];
-      const expectedCriteria = ['`timestamp`>=?', '`timestamp`<=?',
-        '`hostname` = ?', 'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
-        '`severity` IN (?)', '`level`<=?', '`userId`>=?'];
-      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(filters),
-        {values: expectedValues, criteria: expectedCriteria});
+      const expectedCriteria = [
+        '`timestamp`>=?',
+        '`timestamp`<=?',
+        '`hostname` = ?',
+        'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
+        '`severity` IN (?)',
+        '`level`<=?',
+        '`userId`>=?',
+      ];
+      assert.deepStrictEqual(
+        emptySqlDataSource._filtersToSqlConditions(filters),
+        { values: expectedValues, criteria: expectedCriteria },
+      );
     });
     it('should successfully return values & criteria when translating filters from client (2)', () => {
-      let likeFilters = filters;
-      likeFilters.hostname = {match: 'test%', exclude: 'testEx', $match: 'test%', $exclude: 'testEx'};
+      const likeFilters = filters;
+      likeFilters.hostname = { match: 'test%', exclude: 'testEx', $match: 'test%', $exclude: 'testEx' };
       const expectedValues = [1563794601.351, 1563794661.354, 'test%', 'testEx', ['D', 'W'], 21, 22, 10];
-      const expectedCriteria = ['`timestamp`>=?', '`timestamp`<=?',
-        '`hostname` LIKE (?)', 'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
-        '`severity` IN (?)', '`level`<=?', '`userId`>=?'];
-      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(likeFilters),
-        {values: expectedValues, criteria: expectedCriteria});
+      const expectedCriteria = [
+        '`timestamp`>=?',
+        '`timestamp`<=?',
+        '`hostname` LIKE (?)',
+        'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
+        '`severity` IN (?)',
+        '`level`<=?',
+        '`userId`>=?',
+      ];
+      assert.deepStrictEqual(
+        emptySqlDataSource._filtersToSqlConditions(likeFilters),
+        { values: expectedValues, criteria: expectedCriteria },
+      );
     });
     it('should successfully build query when excluding multiple hostnames', () => {
-      let likeFilters = filters;
-      likeFilters.hostname = {$exclude: 'test testEx', exclude: 'test testEx'};
+      const likeFilters = filters;
+      likeFilters.hostname = { $exclude: 'test testEx', exclude: 'test testEx' };
       const expectedValues = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W'], 21, 22, 10];
-      const expectedCriteria = ['`timestamp`>=?', '`timestamp`<=?',
+      const expectedCriteria = [
+        '`timestamp`>=?',
+        '`timestamp`<=?',
         'NOT(`hostname` = ? AND `hostname` IS NOT NULL OR `hostname` = ? AND `hostname` IS NOT NULL)',
-        '`severity` IN (?)', '`level`<=?', '`userId`>=?'];
-      assert.deepStrictEqual(emptySqlDataSource._filtersToSqlConditions(likeFilters),
-        {values: expectedValues, criteria: expectedCriteria});
+        '`severity` IN (?)',
+        '`level`<=?',
+        '`userId`>=?',
+      ];
+      assert.deepStrictEqual(
+        emptySqlDataSource._filtersToSqlConditions(likeFilters),
+        { values: expectedValues, criteria: expectedCriteria },
+      );
     });
   });
 
@@ -151,9 +175,13 @@ describe('SQLDataSource', () => {
     });
 
     it('should successfully return SQL format criteria if array contains values', () => {
-      const criteria = ['`timestamp`>=?', '`timestamp`<=?',
-        '`hostname` = ?', 'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
-        '`severity` IN (?)'];
+      const criteria = [
+        '`timestamp`>=?',
+        '`timestamp`<=?',
+        '`hostname` = ?',
+        'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
+        '`severity` IN (?)',
+      ];
       const expectedCriteriaString = 'WHERE `timestamp`>=? AND `timestamp`<=? AND ' +
         '`hostname` = ? AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?)';
       assert.deepStrictEqual(emptySqlDataSource._getCriteriaAsString(criteria), expectedCriteriaString);
@@ -161,25 +189,30 @@ describe('SQLDataSource', () => {
   });
 
   it('should successfully return messages when querying mysql driver', async () => {
-    const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().resolves([{severity: 'W'}, {severity: 'I'}])});
-    const sqlDataSource = new SQLDataSource(stub, config.mysql);
+    const stub = sinon.createStubInstance(
+      MySQL,
+      {
+        query: sinon.stub().resolves([{ severity: 'W' }, { severity: 'I' }]),
+      },
+    );
+    const sqlDataSource = new QueryService(stub, config.mysql);
     const queryResult = await sqlDataSource._queryMessagesOnOptions('criteriaString', []);
-    assert.deepStrictEqual(queryResult, [{severity: 'W'}, {severity: 'I'}]);
+    assert.deepStrictEqual(queryResult, [{ severity: 'W' }, { severity: 'I' }]);
   });
 
   it('should throw an error when unable to query within private method due to rejected promise', async () => {
-    const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().rejects()});
-    const sqlDataSource = new SQLDataSource(stub, config.mysql);
+    const stub = sinon.createStubInstance(MySQL, { query: sinon.stub().rejects() });
+    const sqlDataSource = new QueryService(stub, config.mysql);
     return assert.rejects(async () => {
       await sqlDataSource._queryMessagesOnOptions('criteriaString', []);
     }, new Error('Error'));
   });
 
   it('should throw an error when unable to query(API) due to rejected promise', async () => {
-    const stub = sinon.createStubInstance(MySQL, {query: sinon.stub().rejects()});
-    const sqlDataSource = new SQLDataSource(stub, config.mysql);
+    const stub = sinon.createStubInstance(MySQL, { query: sinon.stub().rejects() });
+    const sqlDataSource = new QueryService(stub, config.mysql);
     return assert.rejects(async () => {
-      await sqlDataSource.queryFromFilters(realFilters, {limit: 10});
+      await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
     }, new Error('Error'));
   });
 
@@ -197,16 +230,16 @@ describe('SQLDataSource', () => {
     const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
     const queryStub = sinon.stub();
     queryStub.withArgs(requestRows, values).resolves([]);
-    const stub = sinon.createStubInstance(MySQL, {query: queryStub});
+    const stub = sinon.createStubInstance(MySQL, { query: queryStub });
 
-    const sqlDataSource = new SQLDataSource(stub, config.mysql);
-    const result = await sqlDataSource.queryFromFilters(realFilters, {limit: 10});
+    const sqlDataSource = new QueryService(stub, config.mysql);
+    const result = await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
 
     const expectedResult = {
       rows: [],
       count: 0,
       limit: 10,
-      queryAsString: query
+      queryAsString: query,
     };
     delete result.time;
     assert.deepStrictEqual(result, expectedResult);
@@ -218,9 +251,9 @@ describe('SQLDataSource', () => {
         query: sinon.stub().resolves([
           { severity: 'E', 'COUNT(*)': 102 },
           { severity: 'F', 'COUNT(*)': 1 },
-        ])
-      }
-      const dataService = new SQLDataSource(sqlStub, config.mysql);
+        ]),
+      };
+      const dataService = new QueryService(sqlStub, config.mysql);
       const data = await dataService.queryGroupCountLogsBySeverity(51234);
       assert.deepStrictEqual(data, {
         D: 0,
@@ -228,26 +261,25 @@ describe('SQLDataSource', () => {
         W: 0,
         E: 102,
         F: 1,
-      })
+      });
     });
 
     it('should throw error if data service throws error', async () => {
       const sqlStub = {
-        query: sinon.stub().rejects(new Error('Data Service went bad'))
-      }
-      const dataService = new SQLDataSource(sqlStub, config.mysql);
-      
-      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'))
+        query: sinon.stub().rejects(new Error('Data Service went bad')),
+      };
+      const dataService = new QueryService(sqlStub, config.mysql);
+
+      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'));
     });
 
     it('should throw error if data service throws error', async () => {
       const sqlStub = {
-        query: sinon.stub().throws(new Error('Data Service went bad'))
-      }
-      const dataService = new SQLDataSource(sqlStub, config.mysql);
-      
-      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'))
-    });
+        query: sinon.stub().throws(new Error('Data Service went bad')),
+      };
+      const dataService = new QueryService(sqlStub, config.mysql);
 
+      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'));
+    });
   });
 });
