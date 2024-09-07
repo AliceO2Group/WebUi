@@ -21,17 +21,17 @@ const logger = require('@aliceo2/web-ui').LogManager
  */
 class StatusService {
   /**
-   * Setup StatusService
-   * @param {JSON} config - of the framework
-   * @param {JSON} projPackage - package json file
+   * Setup StatusService for the application which is to provide status of used services
+   * @param {object} config - of the framework
+   * @param {object} projPackage - package json file
    * @param {WebSocket} webSocketServer - instance of the web socket server used by the application
    */
   constructor(config, projPackage, webSocketServer) {
     if (!config) {
       throw new Error('Empty Framework configuration');
     }
-    this.config = config;
-    this.projPackage = projPackage;
+    this._config = config;
+    this._projPackage = projPackage;
 
     /**
      * @type {WebSocket}
@@ -44,7 +44,7 @@ class StatusService {
    * @param {SQLDataSource} querySource - source of data
    */
   setQuerySource(querySource) {
-    this.querySource = querySource;
+    this._querySource = querySource;
   }
 
   /**
@@ -62,10 +62,10 @@ class StatusService {
    */
   async getILGStatus(_, res) {
     let result = {};
-    if (this.projPackage && this.projPackage.version) {
-      result.version = this.projPackage.version;
+    if (this._projPackage && this._projPackage.version) {
+      result.version = this._projPackage.version;
     }
-    if (this.config.http) {
+    if (this._config.http) {
       const ilg = { status: { ok: true } };
       result = Object.assign(result, ilg);
     }
@@ -83,11 +83,11 @@ class StatusService {
     const result = {};
     result['infoLogger-gui'] = this.getProjectInfo();
 
-    if (this.config.infoLoggerServer) {
-      result.infoLoggerServer = this._getLiveSourceStatus(this.config.infoLoggerServer);
+    if (this._config.infoLoggerServer) {
+      result.infoLoggerServer = this._getLiveSourceStatus(this._config.infoLoggerServer);
     }
-    if (this.config.mysql) {
-      result.mysql = await this.getDataSourceStatus(this.config.mysql);
+    if (this._config.mysql) {
+      result.mysql = await this.getDataSourceStatus(this._config.mysql);
     }
     res.status(200).json(result);
   }
@@ -98,11 +98,11 @@ class StatusService {
    */
   getProjectInfo() {
     let info = {};
-    if (this.projPackage && this.projPackage.version) {
-      info.version = this.projPackage.version;
+    if (this._projPackage && this._projPackage.version) {
+      info.version = this._projPackage.version;
     }
-    if (this.config.http) {
-      const { http } = this.config;
+    if (this._config.http) {
+      const { http } = this._config;
       const ilg = { hostname: http.hostname, port: http.port, status: { ok: true }, name: http.name ?? '' };
       info = Object.assign(info, ilg);
     }
@@ -138,9 +138,9 @@ class StatusService {
       port: config.port,
       database: config.database,
     };
-    if (this.querySource) {
+    if (this._querySource) {
       try {
-        await this.querySource.isConnectionUpAndRunning();
+        await this._querySource.isConnectionUpAndRunning();
         mysql.status = { ok: true };
       } catch (error) {
         logger.error(error.message || error);
