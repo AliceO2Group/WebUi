@@ -51,8 +51,8 @@ class StatusService {
    * Set source of live mode once enabled
    * @param {InfoLoggerReceiver} liveSource - source of live mode
    */
-  setLiveSource(liveSource) {
-    this.liveSource = liveSource;
+  set liveSource(liveSource) {
+    this._liveSource = liveSource;
   }
 
   /**
@@ -84,7 +84,7 @@ class StatusService {
     result['infoLogger-gui'] = this.getProjectInfo();
 
     if (this.config.infoLoggerServer) {
-      result.infoLoggerServer = this.getLiveSourceStatus(this.config.infoLoggerServer);
+      result.infoLoggerServer = this._getLiveSourceStatus(this.config.infoLoggerServer);
     }
     if (this.config.mysql) {
       result.mysql = await this.getDataSourceStatus(this.config.mysql);
@@ -113,14 +113,18 @@ class StatusService {
   /**
    * Build an object with information and status about live source
    * @param {object} config used for retrieving data from live source
+   * @param {string} config.host - host of the live source
+   * @param {number} config.port - port of the live source
    * @returns {object} - information on status of the live source
    */
-  getLiveSourceStatus(config) {
-    const ils = { host: config.host, port: config.port };
-    ils.status = this.liveSource && this.liveSource.isConnected ?
-      { ok: true }
-      : { ok: false, message: 'Unable to connect to InfoLogger Server' };
-    return ils;
+  _getLiveSourceStatus({ host, port }) {
+    return {
+      host,
+      port,
+      status: this?._liveSource?.isAvailable
+        ? { ok: true }
+        : { ok: false, message: 'Unable to connect to InfoLogger Server' },
+    };
   }
 
   /**

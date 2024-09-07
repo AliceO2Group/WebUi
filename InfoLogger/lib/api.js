@@ -12,7 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-const { LogManager, WebSocketMessage, InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
+const { InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
+
+const { LiveService } = require('./services/LiveService.js');
 const { QueryService } = require('./services/QueryService.js');
 const ProfileService = require('./ProfileService.js');
 const JsonFileConnector = require('./JSONFileConnector.js');
@@ -23,14 +25,18 @@ const { serviceAvailabilityCheck } = require('./middleware/serviceAvailabilityCh
 const projPackage = require('./../package.json');
 const config = require('./configProvider.js');
 
-let liveSource = null;
+let liveService = null;
 let sqlService = null;
 let queryService = null;
 
 module.exports.attachTo = async (http, ws) => {
-  const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/api`);
-
   const { QueryController } = await import('./controller/QueryController.mjs');
+
+  if (config.infoLoggerServer) {
+    const infoLoggerReceiver = new InfoLoggerReceiver();
+    liveService = new LiveService(ws, config.infoLoggerServer, infoLoggerReceiver);
+    liveService.initialize();
+  }
 
   if (config.mysql) {
     sqlService = new MySQL(config.mysql);
@@ -40,6 +46,7 @@ module.exports.attachTo = async (http, ws) => {
 
   const statusService = new StatusService(config, projPackage, ws);
   statusService.setQuerySource(queryService);
+  statusService.liveSource = liveService;
 
   const jsonDb = new JsonFileConnector(config.dbFile || `${__dirname}/../db.json`);
   const profileService = new ProfileService(jsonDb);
@@ -49,6 +56,7 @@ module.exports.attachTo = async (http, ws) => {
     serviceAvailabilityCheck(queryService),
     queryController.getLogs.bind(queryController),
   );
+
   http.get(
     '/query/stats',
     serviceAvailabilityCheck(queryService),
@@ -62,34 +70,4 @@ module.exports.attachTo = async (http, ws) => {
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
   http.post('/saveUserProfile', (req, res) => profileService.saveUserProfile(req, res));
-
-  if (config.infoLoggerServer) {
-    logger.info('[API] InfoLogger server config found');
-    liveSource = new InfoLoggerReceiver();
-    liveSource.connect(config.infoLoggerServer);
-    statusService.setLiveSource(liveSource);
-  } else {
-    logger.warn('[API] InfoLogger server config not found, Live mode not available');
-  }
-
-  if (liveSource) {
-    liveSource.on('message', (message) => {
-      const msg = new WebSocketMessage();
-      msg.command = 'live-log';
-      msg.payload = message;
-      ws.broadcast(msg);
-    });
-
-    liveSource.on('connected', () => {
-      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-connected'));
-    });
-
-    liveSource.on('connection-issue', () => {
-      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-connection-issue'));
-    });
-
-    liveSource.on('close', () => {
-      ws.unfilteredBroadcast(new WebSocketMessage().setCommand('il-server-close'));
-    });
-  }
 };

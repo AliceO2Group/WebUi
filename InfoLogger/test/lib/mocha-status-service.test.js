@@ -61,15 +61,15 @@ describe('Status Service test suite', () => {
     it('should successfully return InfoLogger Server info with status ok false if live source is missing', () => {
       const statusService = new StatusService(config, undefined);
       const info = {host: 'localhost', port: 6102, status: {ok: false, message: 'Unable to connect to InfoLogger Server'}};
-      assert.deepStrictEqual(statusService.getLiveSourceStatus(config.infoLoggerServer), info);
+      assert.deepStrictEqual(statusService._getLiveSourceStatus(config.infoLoggerServer), info);
     });
 
     it('should successfully return InfoLogger Server info with status ok when live source is present', () => {
       const statusService = new StatusService(config, undefined);
-      statusService.setLiveSource({isConnected: true, onconnect: () => true});
+      statusService.liveSource = {isAvailable: true, onconnect: () => true};
 
       const info = {host: 'localhost', port: 6102, status: {ok: true}};
-      assert.deepStrictEqual(statusService.getLiveSourceStatus(config.infoLoggerServer), info);
+      assert.deepStrictEqual(statusService._getLiveSourceStatus(config.infoLoggerServer), info);
     });
   });
 
