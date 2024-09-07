@@ -14,11 +14,11 @@
 
 const { InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
 
+const { StatusController } = require('./controllers/StatusController.js');
 const { LiveService } = require('./services/LiveService.js');
 const { QueryService } = require('./services/QueryService.js');
 const ProfileService = require('./ProfileService.js');
 const JsonFileConnector = require('./JSONFileConnector.js');
-const StatusService = require('./StatusService.js');
 
 const { serviceAvailabilityCheck } = require('./middleware/serviceAvailabilityCheck.middleware.js');
 
@@ -44,9 +44,9 @@ module.exports.attachTo = async (http, ws) => {
   }
   const queryController = new QueryController(queryService);
 
-  const statusService = new StatusService(config, projPackage, ws);
-  statusService.querySource = queryService;
-  statusService.liveSource = liveService;
+  const statusController = new StatusController(config, projPackage, ws);
+  statusController.querySource = queryService;
+  statusController.liveSource = liveService;
 
   const jsonDb = new JsonFileConnector(config.dbFile || `${__dirname}/../db.json`);
   const profileService = new ProfileService(jsonDb);
@@ -64,8 +64,8 @@ module.exports.attachTo = async (http, ws) => {
     { public: true },
   );
 
-  http.get('/status/gui', statusService.getILGStatus.bind(statusService), { public: true });
-  http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService));
+  http.get('/status/gui', statusController.getILGStatus.bind(statusController), { public: true });
+  http.get('/getFrameworkInfo', statusController.frameworkInfo.bind(statusController));
 
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));

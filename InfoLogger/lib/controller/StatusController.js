@@ -18,9 +18,9 @@ const { LogManager } = require('@aliceo2/web-ui');
  * Gateway for all calls with regards to the status
  * of the framework and its dependencies
  */
-class StatusService {
+class StatusController {
   /**
-   * Setup StatusService for the application which is to provide status of used services
+   * Setup StatusController for the application which is to provide status of used services
    * @param {object} config - of the framework
    * @param {object} projPackage - package json file
    * @param {WebSocket} webSocketServer - instance of the web socket server used by the application
@@ -155,4 +155,4 @@ class StatusService {
   }
 }
 
-module.exports = StatusService;
+module.exports.StatusController = StatusController;
