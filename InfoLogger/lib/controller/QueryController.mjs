@@ -37,16 +37,12 @@ export class QueryController {
    * @returns {void}
    */
   async getLogs(req, res) {
-    if (this._queryService) {
-      try {
-        const { body: { criterias, options } } = req;
-        const logs = await this._queryService.queryFromFilters(criterias, options);
-        res.status(200).json(logs);
-      } catch (error) {
-        updateAndSendExpressResponseFromNativeError(res, error);
-      }
-    } else {
-      res.status(503).json({ message: 'Query Service was not configured' });
+    try {
+      const { body: { criterias, options } } = req;
+      const logs = await this._queryService.queryFromFilters(criterias, options);
+      res.status(200).json(logs);
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -59,9 +55,7 @@ export class QueryController {
    */
   async getQueryStats(req, res) {
     const { runNumber } = req.query;
-    if (this._queryService) {
-      res.status(503).json({ message: 'Query Service was not configured' });
-    } else if (!runNumber || isNaN(runNumber)) {
+    if (!runNumber || isNaN(runNumber)) {
       res.status(400).json({ error: 'Invalid runNumber provided' });
     } else {
       try {
