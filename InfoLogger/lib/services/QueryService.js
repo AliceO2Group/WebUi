@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const logger = require('@aliceo2/web-ui').LogManager
-  .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/sql`);
+const { LogManager } = require('@aliceo2/web-ui');
 
 class QueryService {
   /**
@@ -22,6 +21,7 @@ class QueryService {
    * @param {object} configMySql - mysql config
    */
   constructor(connection, configMySql) {
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/query-service`);
     this.configMySql = configMySql;
     this.connection = connection;
   }
@@ -33,7 +33,7 @@ class QueryService {
   async isConnectionUpAndRunning() {
     await this.connection.query('select timestamp from messages LIMIT 1000;');
     const url = `${this.configMySql.host}:${this.configMySql.port}/${this.configMySql.database}`;
-    logger.infoMessage(`Connected to infoLogger database ${url}`);
+    this._logger.infoMessage(`Connected to infoLogger database ${url}`);
   }
 
   /**
@@ -150,7 +150,7 @@ class QueryService {
             criteria.push(`\`${field}\` IN (?)`);
             break;
           default:
-            logger.warn(`unknown operator ${operator}`);
+            this._logger.warn(`unknown operator ${operator}`);
             break;
         }
       }
@@ -180,14 +180,10 @@ class QueryService {
     const { criteria, values } = this._filtersToSqlConditions(filters);
     const criteriaString = this._getCriteriaAsString(criteria);
 
-    const rows = await this._queryMessagesOnOptions(criteriaString, options, values)
-      .catch((error) => {
-        logger.error(error);
-        throw error;
-      });
+    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
+    const rows = await this.connection.query(requestRows, values);
 
     const totalTime = Date.now() - startTime; // ms
-    logger.debug(`Query done in ${totalTime}ms`);
     return {
       rows,
       count: rows.length,
@@ -245,21 +241,6 @@ class QueryService {
    */
   _getSQLQueryAsString(criteriaVerbose, limit) {
     return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` LIMIT ${limit}`;
-  }
-
-  /**
-   * Method to retrieve the messages based on passed Options
-   * @param {string} criteriaString as a string
-   * @param {object} options containing limit on messages
-   * @param {Array} values of filter parameters
-   * @returns {Promise} rows
-   */
-  _queryMessagesOnOptions(criteriaString, options, values) {
-    // The rows asked with a limit
-    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
-
-    return this.connection.query(requestRows, values)
-      .then((data) => data);
   }
 };
 
