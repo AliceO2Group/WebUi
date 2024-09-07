@@ -41,7 +41,7 @@ class StatusService {
    * Set source of data once enabled
    * @param {SQLDataSource} querySource - source of data
    */
-  setQuerySource(querySource) {
+  set querySource(querySource) {
     this._querySource = querySource;
   }
 

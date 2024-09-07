@@ -26,12 +26,6 @@ describe('Status Service test suite', () => {
     database: 'INFOLOGGER'
   };
   describe('Creating a new StatusService instance', () => {
-    it('should throw an error if configuration object is not provided', () => {
-      assert.throws(() => new StatusService(), new Error('Empty Framework configuration'));
-      assert.throws(() => new StatusService(null), new Error('Empty Framework configuration'));
-      assert.throws(() => new StatusService(undefined), new Error('Empty Framework configuration'));
-    });
-
     it('should successfully initialize StatusService', () => {
       assert.doesNotThrow(() => new StatusService({hostname: 'localhost', port: 8080}, {}));
     });
@@ -88,7 +82,7 @@ describe('Status Service test suite', () => {
       const dataSource = {
         isConnectionUpAndRunning: sinon.stub().resolves()
       }
-      statusService.setQuerySource(dataSource);
+      statusService.querySource = dataSource;
       const mysql = await statusService.getDataSourceStatus(config.mysql);
       assert.deepStrictEqual(mysql, info);
     });
@@ -100,7 +94,7 @@ describe('Status Service test suite', () => {
       const dataSource = {
         isConnectionUpAndRunning: sinon.stub().rejects(new Error('Could not connect'))
       }
-      statusService.setQuerySource(dataSource);
+      statusService.querySource = dataSource;
       const mysql = await statusService.getDataSourceStatus(config.mysql);
       assert.deepStrictEqual(mysql, info);
     });

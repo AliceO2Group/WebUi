@@ -45,7 +45,7 @@ module.exports.attachTo = async (http, ws) => {
   const queryController = new QueryController(queryService);
 
   const statusService = new StatusService(config, projPackage, ws);
-  statusService.setQuerySource(queryService);
+  statusService.querySource = queryService;
   statusService.liveSource = liveService;
 
   const jsonDb = new JsonFileConnector(config.dbFile || `${__dirname}/../db.json`);
