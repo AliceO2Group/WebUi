@@ -33,7 +33,14 @@ describe('Status Service test suite', () => {
   describe('`_getProjectInfo()` tests', () => {
     it('should successfully return ilg info even if version is missing', () => {
       const statusController = new StatusController(config, undefined);
-      const info = { hostname: 'localhost', port: 8080, status: { ok: true }, name: 'TST', clients: -1 };
+      const info = {
+        hostname: 'localhost',
+        port: 8080,
+        status: { ok: true },
+        name: 'TST',
+        clients: -1,
+        version: 'unknown',
+      };
       assert.deepStrictEqual(statusController._getProjectInfo(), info);
     });
 
@@ -133,7 +140,14 @@ describe('Status Service test suite', () => {
       await statusController.frameworkInfo(undefined, res);
 
       const info = {
-        'infoLogger-gui': { hostname: 'localhost', port: 8080, status: { ok: true }, name: 'TST', clients: -1 },
+        'infoLogger-gui': {
+          hostname: 'localhost',
+          port: 8080,
+          status: { ok: true },
+          name: 'TST',
+          clients: -1,
+          version: 'unknown',
+        },
         mysql: {
           host: 'localhost',
           port: 6103,
@@ -161,7 +175,7 @@ describe('Status Service test suite', () => {
       };
       await statusController.getILGStatus(undefined, res);
 
-      const info = { status: { ok: true }, clients: -1 };
+      const info = { status: { ok: true }, clients: -1, version: 'unknown' };
 
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(info));
