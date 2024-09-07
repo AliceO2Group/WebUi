@@ -15,7 +15,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const config = require('../../../config-default.js');
-const { QueryService } = require('./../../../lib/services/QueryService.js');
+const { QueryService } = require('../../../lib/services/QueryService.js');
 const { MySQL } = require('@aliceo2/web-ui');
 
 describe('QueryService', () => {
@@ -84,7 +84,7 @@ describe('QueryService', () => {
       const sqlDataSource = new QueryService(stub, config.mysql);
 
       await assert.rejects(async () => {
-        await sqlDataSource.isConnectionUpAndRunning();
+        await sqlDataSource.checkConnection();
       }, new Error('Unable to connect'));
     });
 
@@ -98,7 +98,7 @@ describe('QueryService', () => {
       const sqlDataSource = new QueryService(stub, config.mysql);
 
       await assert.doesNotReject(async () => {
-        await sqlDataSource.isConnectionUpAndRunning();
+        await sqlDataSource.checkConnection();
       });
     });
   });
