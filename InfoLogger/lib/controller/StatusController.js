@@ -81,7 +81,7 @@ class StatusController {
     const result = {
       'infoLogger-gui': this._getProjectInfo(),
       infoLoggerServer: this._getLiveSourceStatus(ilgServerConfig ?? {}),
-      mysql: await this._getDataSourceStatus(dataSourceConfig ?? {}),
+      mysql: this._getDataSourceStatus(dataSourceConfig ?? {}),
     };
 
     res.status(200).json(result);
@@ -122,30 +122,22 @@ class StatusController {
   }
 
   /**
-   * Build object with information and status about data source
+   * Build object with information and latest known status about data source
    * @param {object} config used for retrieving data form data source
    * @param {string} config.host - host of the data source
    * @param {number} config.port - port of the data source
    * @param {string} config.database - database name
    * @returns {object} - information on statue of the data source
    */
-  async _getDataSourceStatus({ host, port, database }) {
-    const dataSourceStatus = {
+  _getDataSourceStatus({ host, port, database }) {
+    return {
       host,
       port,
       database,
+      status: this?._querySource?.isAvailable
+        ? { ok: true }
+        : { ok: false, message: 'Data source is not available' },
     };
-    if (this._querySource) {
-      try {
-        await this._querySource.isConnectionUpAndRunning();
-        dataSourceStatus.status = { ok: true };
-      } catch (error) {
-        dataSourceStatus.status = { ok: false, message: error.message || error };
-      }
-    } else {
-      dataSourceStatus.status = { ok: false, message: 'There was no data source set up' };
-    }
-    return dataSourceStatus;
   }
 }
 
