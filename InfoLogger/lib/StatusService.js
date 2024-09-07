@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const logger = require('@aliceo2/web-ui').LogManager
-  .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/status`);
+const { LogManager } = require('@aliceo2/web-ui');
 
 /**
  * Gateway for all calls with regards to the status
@@ -27,9 +26,8 @@ class StatusService {
    * @param {WebSocket} webSocketServer - instance of the web socket server used by the application
    */
   constructor(config, projPackage, webSocketServer) {
-    if (!config) {
-      throw new Error('Empty Framework configuration');
-    }
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/status`);
+
     this._config = config;
     this._projPackage = projPackage;
 
@@ -143,14 +141,14 @@ class StatusService {
         await this._querySource.isConnectionUpAndRunning();
         mysql.status = { ok: true };
       } catch (error) {
-        logger.error(error.message || error);
+        this._logger.errorMessage(error.message || error);
         if (error.stack) {
-          logger.trace(error);
+          this._logger.trace(error);
         }
         mysql.status = { ok: false, message: error.message || error };
       }
     } else {
-      logger.error('There was no data source set up');
+      this._logger.errorMessage('There was no data source set up');
       mysql.status = { ok: false, message: 'There was no data source set up' };
     }
     return mysql;
