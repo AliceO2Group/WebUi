@@ -30,17 +30,17 @@ describe('Status Service test suite', () => {
     });
   });
 
-  describe('`getProjectInfo()` tests', () => {
+  describe('`_getProjectInfo()` tests', () => {
     it('should successfully return ilg info even if version is missing', () => {
       const statusController = new StatusController(config, undefined);
       const info = { hostname: 'localhost', port: 8080, status: { ok: true }, name: 'TST', clients: -1 };
-      assert.deepStrictEqual(statusController.getProjectInfo(), info);
+      assert.deepStrictEqual(statusController._getProjectInfo(), info);
     });
 
     it('should successfully return ilg version even if http configuration is missing', () => {
       const statusController = new StatusController({}, { version: '1.9.2' });
       const info = { version: '1.9.2', clients: -1 };
-      assert.deepStrictEqual(statusController.getProjectInfo(), info);
+      assert.deepStrictEqual(statusController._getProjectInfo(), info);
     });
 
     it('should successfully add project version if package.json was provided', () => {
@@ -48,11 +48,11 @@ describe('Status Service test suite', () => {
       const info = {
         hostname: 'localhost', port: 8080, status: { ok: true }, version: '1.9.2', name: 'TST', clients: -1,
       };
-      assert.deepStrictEqual(statusController.getProjectInfo(), info);
+      assert.deepStrictEqual(statusController._getProjectInfo(), info);
     });
   });
 
-  describe('`getLiveSourceStatus()` tests', () => {
+  describe('`_getLiveSourceStatus()` tests', () => {
     it('should successfully return InfoLogger Server info with status ok false if live source is missing', () => {
       const statusController = new StatusController(config, undefined);
       const info = {
@@ -70,7 +70,7 @@ describe('Status Service test suite', () => {
     });
   });
 
-  describe('`getDataSourceStatus()` tests', () => {
+  describe('`_getDataSourceStatus()` tests', () => {
     it('should successfully return mysql info with status ok false if data source is missing', async () => {
       const statusController = new StatusController(config, undefined);
       const info = {
@@ -81,7 +81,7 @@ describe('Status Service test suite', () => {
           ok: false, message: 'There was no data source set up',
         },
       };
-      const mysql = await statusController.getDataSourceStatus(config.mysql);
+      const mysql = await statusController._getDataSourceStatus(config.mysql);
       assert.deepStrictEqual(mysql, info);
     });
 
@@ -95,7 +95,7 @@ describe('Status Service test suite', () => {
           isConnectionUpAndRunning: sinon.stub().resolves(),
         };
         statusController.querySource = dataSource;
-        const mysql = await statusController.getDataSourceStatus(config.mysql);
+        const mysql = await statusController._getDataSourceStatus(config.mysql);
         assert.deepStrictEqual(mysql, info);
       },
     );
@@ -117,7 +117,7 @@ describe('Status Service test suite', () => {
           isConnectionUpAndRunning: sinon.stub().rejects(new Error('Could not connect')),
         };
         statusController.querySource = dataSource;
-        const mysql = await statusController.getDataSourceStatus(config.mysql);
+        const mysql = await statusController._getDataSourceStatus(config.mysql);
         assert.deepStrictEqual(mysql, info);
       },
     );

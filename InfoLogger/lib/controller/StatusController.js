@@ -59,10 +59,9 @@ class StatusController {
    * @param {Response} res - HTTP Response object
    */
   async getILGStatus(_, res) {
-    let result = {};
-    if (this._projPackage && this._projPackage.version) {
-      result.version = this._projPackage.version;
-    }
+    let result = {
+      version: this?._projPackage?.version ?? 'unknown',
+    };
     if (this._config.http) {
       const ilg = { status: { ok: true } };
       result = Object.assign(result, ilg);
@@ -78,15 +77,13 @@ class StatusController {
    * @param {Response} res - HTTP Response object
    */
   async frameworkInfo(_, res) {
-    const result = {};
-    result['infoLogger-gui'] = this.getProjectInfo();
+    const { infoLoggerServer: ilgServerConfig, mysql: dataSourceConfig } = this._config;
+    const result = {
+      'infoLogger-gui': this._getProjectInfo(),
+      infoLoggerServer: this._getLiveSourceStatus(ilgServerConfig ?? {}),
+      mysql: await this._getDataSourceStatus(dataSourceConfig ?? {}),
+    };
 
-    if (this._config.infoLoggerServer) {
-      result.infoLoggerServer = this._getLiveSourceStatus(this._config.infoLoggerServer);
-    }
-    if (this._config.mysql) {
-      result.mysql = await this.getDataSourceStatus(this._config.mysql);
-    }
     res.status(200).json(result);
   }
 
@@ -94,11 +91,10 @@ class StatusController {
    * Build an object containing InfoLogger GUI's information
    * @returns {object} - information about the application
    */
-  getProjectInfo() {
-    let info = {};
-    if (this._projPackage && this._projPackage.version) {
-      info.version = this._projPackage.version;
-    }
+  _getProjectInfo() {
+    let info = {
+      version: this?._projPackage?.version ?? 'unknown',
+    };
     if (this._config.http) {
       const { http } = this._config;
       const ilg = { hostname: http.hostname, port: http.port, status: { ok: true }, name: http.name ?? '' };
@@ -128,30 +124,28 @@ class StatusController {
   /**
    * Build object with information and status about data source
    * @param {object} config used for retrieving data form data source
+   * @param {string} config.host - host of the data source
+   * @param {number} config.port - port of the data source
+   * @param {string} config.database - database name
    * @returns {object} - information on statue of the data source
    */
-  async getDataSourceStatus(config) {
-    const mysql = {
-      host: config.host,
-      port: config.port,
-      database: config.database,
+  async _getDataSourceStatus({ host, port, database }) {
+    const dataSourceStatus = {
+      host,
+      port,
+      database,
     };
     if (this._querySource) {
       try {
         await this._querySource.isConnectionUpAndRunning();
-        mysql.status = { ok: true };
+        dataSourceStatus.status = { ok: true };
       } catch (error) {
-        this._logger.errorMessage(error.message || error);
-        if (error.stack) {
-          this._logger.trace(error);
-        }
-        mysql.status = { ok: false, message: error.message || error };
+        dataSourceStatus.status = { ok: false, message: error.message || error };
       }
     } else {
-      this._logger.errorMessage('There was no data source set up');
-      mysql.status = { ok: false, message: 'There was no data source set up' };
+      dataSourceStatus.status = { ok: false, message: 'There was no data source set up' };
     }
-    return mysql;
+    return dataSourceStatus;
   }
 }
 
