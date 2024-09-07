@@ -14,7 +14,7 @@
 
 const { InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
 
-const { StatusController } = require('./controllers/StatusController.js');
+const { StatusController } = require('./controller/StatusController.js');
 const { LiveService } = require('./services/LiveService.js');
 const { QueryService } = require('./services/QueryService.js');
 const ProfileService = require('./ProfileService.js');
