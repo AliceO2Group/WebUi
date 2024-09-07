@@ -18,6 +18,8 @@ const ProfileService = require('./ProfileService.js');
 const JsonFileConnector = require('./JSONFileConnector.js');
 const StatusService = require('./StatusService.js');
 
+const { serviceAvailabilityCheck } = require('./middleware/serviceAvailabilityCheck.middleware.js');
+
 const projPackage = require('./../package.json');
 const config = require('./configProvider.js');
 
@@ -42,8 +44,17 @@ module.exports.attachTo = async (http, ws) => {
   const jsonDb = new JsonFileConnector(config.dbFile || `${__dirname}/../db.json`);
   const profileService = new ProfileService(jsonDb);
 
-  http.post('/query', queryController.getLogs.bind(queryController));
-  http.get('/query/stats', queryController.getQueryStats.bind(queryController), { public: true });
+  http.post(
+    '/query',
+    serviceAvailabilityCheck(queryService),
+    queryController.getLogs.bind(queryController),
+  );
+  http.get(
+    '/query/stats',
+    serviceAvailabilityCheck(queryService),
+    queryController.getQueryStats.bind(queryController),
+    { public: true },
+  );
 
   http.get('/status/gui', statusService.getILGStatus.bind(statusService), { public: true });
   http.get('/getFrameworkInfo', statusService.frameworkInfo.bind(statusService));

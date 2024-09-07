@@ -41,6 +41,14 @@ try {
 const config = require(configFile);
 
 LogManager.configure(config);
-logger.info(`Read config file "${configFile}"`);
+logger.infoMessage(`Loaded configuration file: "${configFile}"`);
+
+if (!config.mysql) {
+  logger.warnMessage('MySQL configuration not found. Database querying is not be available');
+}
+
+if (!config.infoLoggerServer) {
+  logger.warnMessage('InfoLogger server configuration not found. Live monitoring is not available');
+}
 
 module.exports = config;
