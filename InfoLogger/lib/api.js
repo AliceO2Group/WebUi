@@ -12,11 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-const { InfoLoggerReceiver, MySQL } = require('@aliceo2/web-ui');
+const { InfoLoggerReceiver } = require('@aliceo2/web-ui');
 
 const { StatusController } = require('./controller/StatusController.js');
+const { QueryController } = require('./controller/QueryController.js');
 const { LiveService } = require('./services/LiveService.js');
 const { QueryService } = require('./services/QueryService.js');
+
 const ProfileService = require('./ProfileService.js');
 const JsonFileConnector = require('./JSONFileConnector.js');
 
@@ -26,12 +28,9 @@ const projPackage = require('./../package.json');
 const config = require('./configProvider.js');
 
 let liveService = null;
-let sqlService = null;
 let queryService = null;
 
 module.exports.attachTo = async (http, ws) => {
-  const { QueryController } = await import('./controller/QueryController.mjs');
-
   if (config.infoLoggerServer) {
     const infoLoggerReceiver = new InfoLoggerReceiver();
     liveService = new LiveService(ws, config.infoLoggerServer, infoLoggerReceiver);
@@ -39,8 +38,7 @@ module.exports.attachTo = async (http, ws) => {
   }
 
   if (config.mysql) {
-    sqlService = new MySQL(config.mysql);
-    queryService = new QueryService(sqlService, config.mysql);
+    queryService = new QueryService(config.mysql);
   }
   const queryController = new QueryController(queryService);
 

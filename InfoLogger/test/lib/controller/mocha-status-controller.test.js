@@ -85,7 +85,7 @@ describe('Status Service test suite', () => {
         port: 6103,
         database: 'INFOLOGGER',
         status: {
-          ok: false, message: 'There was no data source set up',
+          ok: false, message: 'Data source is not available',
         },
       };
       const mysql = await statusController._getDataSourceStatus(config.mysql);
@@ -99,7 +99,7 @@ describe('Status Service test suite', () => {
         const info = { host: 'localhost', port: 6103, database: 'INFOLOGGER', status: { ok: true } };
 
         const dataSource = {
-          isConnectionUpAndRunning: sinon.stub().resolves(),
+          isAvailable: true,
         };
         statusController.querySource = dataSource;
         const mysql = await statusController._getDataSourceStatus(config.mysql);
@@ -116,12 +116,12 @@ describe('Status Service test suite', () => {
           port: 6103,
           database: 'INFOLOGGER',
           status: {
-            ok: false, message: 'Could not connect',
+            ok: false, message: 'Data source is not available',
           },
         };
 
         const dataSource = {
-          isConnectionUpAndRunning: sinon.stub().rejects(new Error('Could not connect')),
+          isAvailable: false,
         };
         statusController.querySource = dataSource;
         const mysql = await statusController._getDataSourceStatus(config.mysql);
@@ -153,7 +153,7 @@ describe('Status Service test suite', () => {
           port: 6103,
           database: 'INFOLOGGER',
           status: {
-            ok: false, message: 'There was no data source set up',
+            ok: false, message: 'Data source is not available',
           },
         },
         infoLoggerServer: {

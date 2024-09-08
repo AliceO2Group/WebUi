@@ -12,28 +12,134 @@
  * or submit itself to any jurisdiction.
  */
 
-const logger = require('@aliceo2/web-ui').LogManager
-  .getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/sql`);
+const mariadb = require('mariadb');
+const { LogManager } = require('@aliceo2/web-ui');
+const { fromSqlToNativeError } = require('../utils/fromSqlToNativeError');
 
 class QueryService {
   /**
    * Query service that is to be used to map the InfoLogger parameters to SQL query and retrieve data
-   * @param {MySql} connection - mysql connection
    * @param {object} configMySql - mysql config
    */
-  constructor(connection, configMySql) {
-    this.configMySql = configMySql;
-    this.connection = connection;
+  constructor(configMySql = {}) {
+    configMySql._user = configMySql?.user ?? 'gui';
+    configMySql._password = configMySql?.password ?? '';
+    configMySql._host = configMySql?.host ?? 'localhost';
+    configMySql._port = configMySql?.port ?? 3306;
+    configMySql._database = configMySql?.database ?? 'info_logger';
+    configMySql._connectionLimit = configMySql?.connectionLimit ?? 25;
+    this._timeout = configMySql?.timeout ?? 10000;
+
+    this._pool = mariadb.createPool(configMySql);
+    this._isAvailable = false;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/query-service`);
   }
 
   /**
-   * Method to check if mysql driver connection is up
-   * @returns {Promise} - resolves/rejects
+   * Method to test connection of mysql connector once initialized
+   * @param {number} timeout - timeout for the connection test
+   * @returns {Promise} - a promise that resolves if connection is successful
    */
-  async isConnectionUpAndRunning() {
-    await this.connection.query('select timestamp from messages LIMIT 1000;');
-    const url = `${this.configMySql.host}:${this.configMySql.port}/${this.configMySql.database}`;
-    logger.infoMessage(`Connected to infoLogger database ${url}`);
+  async checkConnection(timeout = this._timeout) {
+    try {
+      await this._pool.query({
+        sql: 'SELECT 1',
+        timeout,
+      });
+      this._isAvailable = true;
+    } catch (error) {
+      this._isAvailable = false;
+      fromSqlToNativeError(error);
+    }
+  }
+
+  /**
+   * Ask DB for a part of rows and the total count
+   * - total: how many rows available (limited to 1M)
+   * - more: true if has more than 1M rows
+   * - limit: options.limit or 100k
+   * - rows: the first `limit` rows
+   * - count: how many rows inside `rows`
+   * - time: how much did it take, in ms
+   * @param {object} filters - criteria like MongoDB
+   * @param {object} options - specific options for the query
+   * @param {number} options.limit - how many rows to get
+   * @returns {Promise.<object>} - {total, more, limit, rows, count, time}
+   */
+  async queryFromFilters(filters, options) {
+    const { limit = 100000 } = options;
+    const { criteria, values } = this._filtersToSqlConditions(filters);
+    const criteriaString = this._getCriteriaAsString(criteria);
+
+    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ?;`;
+    const startTime = Date.now(); // ms
+
+    let rows = [];
+    try {
+      rows = await this._pool.query(
+        {
+          sql: requestRows,
+          timeout: this._timeout,
+        },
+        [...values, limit],
+      );
+    } catch (error) {
+      fromSqlToNativeError(error);
+    }
+
+    const totalTime = Date.now() - startTime; // ms
+    return {
+      rows,
+      count: rows.length,
+      limit: limit,
+      time: totalTime, // ms
+      queryAsString: this._getSQLQueryAsString(criteriaString, limit),
+    };
+  }
+
+  /**
+   * Given a runNumber, query logs for it and return a count of the logs grouped by severity
+   * @param {number|string} runNumber - number of the run for which the query should be performed
+   * @returns {Promise.<object>} - object containing the count of logs grouped by severity
+   */
+  async queryGroupCountLogsBySeverity(runNumber) {
+    const groupByStatement =
+      'SELECT severity, COUNT(*) FROM messages WHERE run=? and severity '
+      + `in ('D', 'I', 'W', 'E', 'F') GROUP BY severity;`;
+    let data = [];
+    try {
+      data = await this._pool.query({
+        sql: groupByStatement,
+        timeout: this._timeout,
+      }, [runNumber]);
+    } catch (error) {
+      fromSqlToNativeError(error);
+    }
+    const result = { D: 0, I: 0, W: 0, E: 0, F: 0 };
+
+    data.forEach((group) => {
+      result[group['severity']] = group['COUNT(*)'];
+    });
+    return result;
+  }
+
+  /**
+   * Method to fill criteria and return it as string
+   * @param {Array} criteria Array of criteria set by the user
+   * @returns {string} - criteria as string in SQL format
+   */
+  _getCriteriaAsString(criteria) {
+    return criteria && criteria.length ? `WHERE ${criteria.join(' AND ')}` : '';
+  }
+
+  /**
+   * Get the SQL Query used as a string
+   * @param {string} criteriaVerbose - criteria as string in SQL format
+   * @param {number} limit - limit of number of messages
+   * @returns {string} - SQL Query as string
+   */
+  _getSQLQueryAsString(criteriaVerbose, limit) {
+    return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` LIMIT ${limit}`;
   }
 
   /**
@@ -150,7 +256,7 @@ class QueryService {
             criteria.push(`\`${field}\` IN (?)`);
             break;
           default:
-            logger.warn(`unknown operator ${operator}`);
+            this._logger.warn(`unknown operator ${operator}`);
             break;
         }
       }
@@ -159,107 +265,11 @@ class QueryService {
   }
 
   /**
-   * Ask DB for a part of rows and the total count
-   * - total: how many rows available (limited to 1M)
-   * - more: true if has more than 1M rows
-   * - limit: options.limit or 100k
-   * - rows: the first `limit` rows
-   * - count: how many rows inside `rows`
-   * - time: how much did it take, in ms
-   * @param {object} filters - criteria like MongoDB
-   * @param {object} options - limit, etc.
-   * @returns {Promise.<object>} - {total, more, limit, rows, count, time}
+   * Getter for the availability of the service
+   * @returns {boolean} - true if service is available, false otherwise
    */
-  async queryFromFilters(filters, options) {
-    if (!filters) {
-      throw new Error('filters parameter is mandatory');
-    }
-    options = { limit: 100000, ...options };
-
-    const startTime = Date.now(); // ms
-    const { criteria, values } = this._filtersToSqlConditions(filters);
-    const criteriaString = this._getCriteriaAsString(criteria);
-
-    const rows = await this._queryMessagesOnOptions(criteriaString, options, values)
-      .catch((error) => {
-        logger.error(error);
-        throw error;
-      });
-
-    const totalTime = Date.now() - startTime; // ms
-    logger.debug(`Query done in ${totalTime}ms`);
-    return {
-      rows,
-      count: rows.length,
-      limit: options.limit,
-      time: totalTime, // ms
-      queryAsString: this._getSQLQueryAsString(criteriaString, options.limit),
-    };
-  }
-
-  /**
-   * Given a runNumber, query logs for it and return a count of the logs grouped by severity
-   * @param {number|string} runNumber - number of the run for which the query should be performed
-   * @returns {Promise.<object>} - object containing the count of logs grouped by severity
-   */
-  async queryGroupCountLogsBySeverity(runNumber) {
-    const groupByStatement =
-      'SELECT severity, COUNT(*) FROM messages WHERE run=? and severity '
-       + `in ('D', 'I', 'W', 'E', 'F') GROUP BY severity;`;
-    return this.connection.query(groupByStatement, [runNumber]).then((data) => {
-      const result = {
-        D: 0,
-        I: 0,
-        W: 0,
-        E: 0,
-        F: 0,
-      };
-
-      /**
-       * data is of structure:
-       * [
-       *  RowDataPacket { severity: 'E', 'COUNT(*)': 102 }
-       * ]
-       */
-      data.forEach((group) => {
-        result[group['severity']] = group['COUNT(*)'];
-      });
-      return result;
-    });
-  }
-
-  /**
-   * Method to fill criteria and return it as string
-   * @param {Array} criteria Array of criteria set by the user
-   * @returns {string} - criteria as string in SQL format
-   */
-  _getCriteriaAsString(criteria) {
-    return criteria && criteria.length ? `WHERE ${criteria.join(' AND ')}` : '';
-  }
-
-  /**
-   * Get the SQL Query used as a string
-   * @param {string} criteriaVerbose - criteria as string in SQL format
-   * @param {number} limit - limit of number of messages
-   * @returns {string} - SQL Query as string
-   */
-  _getSQLQueryAsString(criteriaVerbose, limit) {
-    return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` LIMIT ${limit}`;
-  }
-
-  /**
-   * Method to retrieve the messages based on passed Options
-   * @param {string} criteriaString as a string
-   * @param {object} options containing limit on messages
-   * @param {Array} values of filter parameters
-   * @returns {Promise} rows
-   */
-  _queryMessagesOnOptions(criteriaString, options, values) {
-    // The rows asked with a limit
-    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ${options.limit}`;
-
-    return this.connection.query(requestRows, values)
-      .then((data) => data);
+  get isAvailable() {
+    return this._isAvailable;
   }
 };
 

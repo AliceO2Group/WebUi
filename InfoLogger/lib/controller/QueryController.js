@@ -12,12 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+const { LogManager, updateAndSendExpressResponseFromNativeError } = require('@aliceo2/web-ui');
 
 /**
  * Gateway for all calls that are to query InfoLogger database
  */
-export class QueryController {
+class QueryController {
   /**
    * Setup QueryController to be used in the API router
    * @param {SQLDataSource} queryService - service to be used to query information on the logs
@@ -39,9 +39,14 @@ export class QueryController {
   async getLogs(req, res) {
     try {
       const { body: { criterias, options } } = req;
+      if (!criterias || Object.keys(criterias).length === 0) {
+        res.status(400).json({ error: 'Invalid query parameters provided' });
+        return;
+      }
       const logs = await this._queryService.queryFromFilters(criterias, options);
       res.status(200).json(logs);
     } catch (error) {
+      this._logger.errorMessage(error.toString());
       updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
@@ -62,9 +67,11 @@ export class QueryController {
         const stats = await this._queryService.queryGroupCountLogsBySeverity(runNumber);
         res.status(200).json(stats);
       } catch (error) {
-        this._logger.errorMessage(error.toString(), { level: 99, facility: 'ilg/query-ctrl', run: runNumber });
-        res.status(502).json({ error: `Unable to serve query on stats for runNumber: ${runNumber}` });
+        this._logger.errorMessage(error.toString());
+        updateAndSendExpressResponseFromNativeError(res, error);
       }
     }
   }
 }
+
+exports.QueryController = QueryController;
