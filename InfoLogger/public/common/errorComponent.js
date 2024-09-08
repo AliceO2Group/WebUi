@@ -21,6 +21,6 @@ import { iconCircleX } from '/js/src/icons.js';
  * @returns {vnode} - component to display
  */
 export default (error) => h('.flex-column items-center justify-center', [
-  h('span.pageError', iconCircleX()),
+  h('span.danger', iconCircleX()),
   h('p.text-center.danger.measure-narrow', error),
 ]);
