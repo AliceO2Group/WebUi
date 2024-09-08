@@ -95,7 +95,7 @@ describe('User Profile test-suite', async () => {
           .click();
         return window.model.userProfile.payload;
       });
-      assert.ok(!userProfile.content.colsHeader.date.visible);
+      assert.ok(userProfile.content.colsHeader.date.visible);
     });
   });
 });
