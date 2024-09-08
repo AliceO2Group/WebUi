@@ -22,13 +22,15 @@ class QueryService {
    * @param {object} configMySql - mysql config
    */
   constructor(configMySql = {}) {
-    configMySql._user = configMySql?.user ?? 'gui';
-    configMySql._password = configMySql?.password ?? '';
-    configMySql._host = configMySql?.host ?? 'localhost';
-    configMySql._port = configMySql?.port ?? 3306;
-    configMySql._database = configMySql?.database ?? 'info_logger';
-    configMySql._connectionLimit = configMySql?.connectionLimit ?? 25;
+    configMySql.user = configMySql?.user ?? 'gui';
+    configMySql.password = configMySql?.password ?? '';
+    configMySql.host = configMySql?.host ?? 'localhost';
+    configMySql.port = configMySql?.port ?? 3306;
+    configMySql.database = configMySql?.database ?? 'info_logger';
+    configMySql.connectionLimit = configMySql?.connectionLimit ?? 25;
     this._timeout = configMySql?.timeout ?? 10000;
+    this._host = configMySql.host;
+    this._port = configMySql.port;
 
     this._pool = mariadb.createPool(configMySql);
     this._isAvailable = false;
@@ -38,18 +40,24 @@ class QueryService {
   /**
    * Method to test connection of mysql connector once initialized
    * @param {number} timeout - timeout for the connection test
+   * @param {boolean} shouldThrow - whether an error should be thrown on failure
    * @returns {Promise} - a promise that resolves if connection is successful
    */
-  async checkConnection(timeout = this._timeout) {
+  async checkConnection(timeout = this._timeout, shouldThrow = true) {
     try {
       await this._pool.query({
         sql: 'SELECT 1',
         timeout,
       });
       this._isAvailable = true;
+      this._logger.infoMessage(`Connection to DB successfully established: ${this._host}:${this._port}`);
     } catch (error) {
       this._isAvailable = false;
-      fromSqlToNativeError(error);
+      if (shouldThrow) {
+        fromSqlToNativeError(error);
+      } else {
+        this._logger.errorMessage(error);
+      }
     }
   }
 

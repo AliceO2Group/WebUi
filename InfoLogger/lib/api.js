@@ -39,6 +39,7 @@ module.exports.attachTo = async (http, ws) => {
 
   if (config.mysql) {
     queryService = new QueryService(config.mysql);
+    queryService.checkConnection(1, false);
   }
   const queryController = new QueryController(queryService);
 
