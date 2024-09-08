@@ -338,18 +338,17 @@ export default class Log extends Observable {
       criterias: this.filter.criterias,
       options: { limit: this.limit },
     };
-    const { result, ok } = await this.model.loader.post('/api/query', queryArguments);
+    const { result, ok } = await this.model.loader.post('/api/query', queryArguments, true);
     if (!ok) {
-      this.model.notification.show('Server error, unable to query logs', 'danger');
       this.queryResult = RemoteData.failure(result.message);
-      this.notify();
-      return;
+      this.list = [];
+    } else {
+      this.queryResult = RemoteData.success(result);
+      this.list = result.rows;
     }
-    this.queryResult = RemoteData.success(result);
-    this.list = result.rows;
 
     this.resetStats();
-    result.rows.forEach((log) => this.addStats(log));
+    this.list.forEach((log) => this.addStats(log));
 
     this.goToLastItem();
     this.notify();
