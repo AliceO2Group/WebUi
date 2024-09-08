@@ -16,9 +16,9 @@ const assert = require('assert');
 const sinon = require('sinon');
 const config = require('../../../config-default.js');
 const { QueryService } = require('../../../lib/services/QueryService.js');
-const { MySQL } = require('@aliceo2/web-ui');
+const { UnauthorizedAccessError, TimeoutError } = require('@aliceo2/web-ui');
 
-describe('QueryService', () => {
+describe(`'QueryService' test suite`, () => {
   const filters = {
     timestamp: {
       since: -5,
@@ -73,33 +73,34 @@ describe('QueryService', () => {
   };
   const emptySqlDataSource = new QueryService(undefined, {});
 
-  describe('Should check connection to mysql driver', () => {
-    it('should reject with error when connection with mysql driver fails', async () => {
-      const stub = sinon.createStubInstance(
-        MySQL,
-        {
-          query: sinon.stub().rejects(new Error('Unable to connect')),
-        },
-      );
-      const sqlDataSource = new QueryService(stub, config.mysql);
+  describe(`'checkConnection()' - test suite`, () => {
+    it('should reject with error when simple query fails', async () => {
+      const sqlDataSource = new QueryService(config.mysql);
+      sqlDataSource._isAvailable = true;
+      sqlDataSource._pool = {
+        query: sinon.stub().rejects({
+          code: 'ER_ACCESS_DENIED_ERROR',
+          errno: 1045,
+          sqlMessage: 'Access denied',
+        }),
+      };
 
-      await assert.rejects(async () => {
-        await sqlDataSource.checkConnection();
-      }, new Error('Unable to connect'));
+      await assert.rejects(
+        sqlDataSource.checkConnection(),
+        new UnauthorizedAccessError('SQL: [ER_ACCESS_DENIED_ERROR, 1045] Access denied'),
+      );
+      assert.ok(sqlDataSource.isAvailable === false);
     });
 
     it('should do nothing when checking connection with mysql driver and driver returns resolved Promise', async () => {
-      const stub = sinon.createStubInstance(
-        MySQL,
-        {
-          query: sinon.stub().resolves('Connection is fine'),
-        },
-      );
-      const sqlDataSource = new QueryService(stub, config.mysql);
+      const sqlDataSource = new QueryService(config.mysql);
+      sqlDataSource._isAvailable = false;
+      sqlDataSource._pool = {
+        query: sinon.stub().resolves(),
+      };
 
-      await assert.doesNotReject(async () => {
-        await sqlDataSource.checkConnection();
-      });
+      await assert.doesNotReject(sqlDataSource.checkConnection());
+      assert.ok(sqlDataSource.isAvailable);
     });
   });
 
@@ -188,72 +189,59 @@ describe('QueryService', () => {
     });
   });
 
-  it('should successfully return messages when querying mysql driver', async () => {
-    const stub = sinon.createStubInstance(
-      MySQL,
-      {
-        query: sinon.stub().resolves([{ severity: 'W' }, { severity: 'I' }]),
-      },
-    );
-    const sqlDataSource = new QueryService(stub, config.mysql);
-    const queryResult = await sqlDataSource._queryMessagesOnOptions('criteriaString', []);
-    assert.deepStrictEqual(queryResult, [{ severity: 'W' }, { severity: 'I' }]);
-  });
+  describe('queryFromFilters() - test suite', () => {
+    it('should throw an error when unable to query(API) due to rejected promise', async () => {
+      const sqlDataSource = new QueryService(config.mysql);
+      sqlDataSource._pool = {
+        query: sinon.stub().rejects({
+          code: 'ER_ACCESS_DENIED_ERROR',
+          errno: 1045,
+          sqlMessage: 'Access denied',
+        }),
+      };
+      await assert.rejects(
+        sqlDataSource.queryFromFilters(realFilters, { limit: 10 }),
+        new UnauthorizedAccessError('SQL: [ER_ACCESS_DENIED_ERROR, 1045] Access denied'),
+      );
+    });
 
-  it('should throw an error when unable to query within private method due to rejected promise', async () => {
-    const stub = sinon.createStubInstance(MySQL, { query: sinon.stub().rejects() });
-    const sqlDataSource = new QueryService(stub, config.mysql);
-    return assert.rejects(async () => {
-      await sqlDataSource._queryMessagesOnOptions('criteriaString', []);
-    }, new Error('Error'));
-  });
+    it('should successfully return result when filters are provided for querying', async () => {
+      const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? '
+        + 'AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
 
-  it('should throw an error when unable to query(API) due to rejected promise', async () => {
-    const stub = sinon.createStubInstance(MySQL, { query: sinon.stub().rejects() });
-    const sqlDataSource = new QueryService(stub, config.mysql);
-    return assert.rejects(async () => {
-      await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
-    }, new Error('Error'));
-  });
+      const sqlDataSource = new QueryService(config.mysql);
+      sqlDataSource._pool = {
+        query: sinon.stub().resolves([
+          { hostname: 'test', severity: 'W' },
+          { hostname: 'test', severity: 'I' },
+        ]),
+      };
+      const result = await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
+      delete result.time;
 
-  it('should throw an error if no filters are provided for querying', async () => {
-    await assert.rejects(async () => {
-      await emptySqlDataSource.queryFromFilters(undefined, undefined);
-    }, new Error('filters parameter is mandatory'));
-  });
-
-  it('should successfully return result when filters are provided for querying', async () => {
-    const criteriaString = 'WHERE `timestamp`>=? AND `timestamp`<=? AND ' +
-      '`hostname` = ? AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?)';
-    const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT 10`;
-    const values = [1563794601.351, 1563794661.354, 'test', 'testEx', ['D', 'W']];
-    const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
-    const queryStub = sinon.stub();
-    queryStub.withArgs(requestRows, values).resolves([]);
-    const stub = sinon.createStubInstance(MySQL, { query: queryStub });
-
-    const sqlDataSource = new QueryService(stub, config.mysql);
-    const result = await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
-
-    const expectedResult = {
-      rows: [],
-      count: 0,
-      limit: 10,
-      queryAsString: query,
-    };
-    delete result.time;
-    assert.deepStrictEqual(result, expectedResult);
+      const expectedResult = {
+        rows: [
+          { hostname: 'test', severity: 'W' },
+          { hostname: 'test', severity: 'I' },
+        ],
+        count: 2,
+        limit: 10,
+        queryAsString: query,
+      };
+      assert.deepStrictEqual(result, expectedResult);
+    });
   });
 
   describe('queryGroupCountLogsBySeverity() - test suite', ()=> {
-    it('should successfully return stats when queried for all known severities even if none is returned by data service', async () => {
-      const sqlStub = {
+    it(`should successfully return stats when queried for all known severities
+      even if none is some are not returned by data service`, async () => {
+      const dataService = new QueryService(config.mysql);
+      dataService._pool = {
         query: sinon.stub().resolves([
           { severity: 'E', 'COUNT(*)': 102 },
           { severity: 'F', 'COUNT(*)': 1 },
         ]),
       };
-      const dataService = new QueryService(sqlStub, config.mysql);
       const data = await dataService.queryGroupCountLogsBySeverity(51234);
       assert.deepStrictEqual(data, {
         D: 0,
@@ -264,22 +252,33 @@ describe('QueryService', () => {
       });
     });
 
-    it('should throw error if data service throws error', async () => {
-      const sqlStub = {
-        query: sinon.stub().rejects(new Error('Data Service went bad')),
+    it('should throw error if data service throws SQL', async () => {
+      const dataService = new QueryService(config.mysql);
+      dataService._pool =
+        {
+          query: sinon.stub().rejects({
+            code: 'ER_ACCESS_DENIED_ERROR',
+            errno: 1045,
+            sqlMessage: 'Access denied',
+          }),
+        };
+
+      await assert.rejects(
+        dataService.queryGroupCountLogsBySeverity(51234),
+        new UnauthorizedAccessError('SQL: [ER_ACCESS_DENIED_ERROR, 1045] Access denied'),
+      );
+
+      dataService._pool = {
+        query: sinon.stub().rejects({
+          code: 'ER_STATEMENT_TIMEOUT',
+          errno: 1045,
+          sqlMessage: 'query timed out',
+        }),
       };
-      const dataService = new QueryService(sqlStub, config.mysql);
-
-      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'));
-    });
-
-    it('should throw error if data service throws error', async () => {
-      const sqlStub = {
-        query: sinon.stub().throws(new Error('Data Service went bad')),
-      };
-      const dataService = new QueryService(sqlStub, config.mysql);
-
-      await assert.rejects(dataService.queryGroupCountLogsBySeverity(51234), new Error('Data Service went bad'));
+      await assert.rejects(
+        dataService.queryGroupCountLogsBySeverity(51234),
+        new TimeoutError('SQL: [ER_STATEMENT_TIMEOUT, 1045] query timed out'),
+      );
     });
   });
 });
