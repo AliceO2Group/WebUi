@@ -17,9 +17,11 @@ const assert = require('assert');
 const sinon = require('sinon');
 
 const {EnvironmentService} = require('./../../../lib/services/Environment.service.js');
-const {NotFoundError} = require('./../../../lib/errors/NotFoundError.js');
+const { NotFoundError } = require('./../../../lib/errors/NotFoundError.js');
+const { User } = require('./../../../lib/dtos/User.js');
 
 describe('EnvironmentService test suite', () => {
+  const user = new User('unknown', 'unknown', 0);
   const ENVIRONMENT_NOT_FOUND_ID = '2432ENV404';
   const ENVIRONMENT_NOT_FOUND_ID_BUT_CALL_SUCCESS = '2432ENV404SUCCESS';
   const ENVIRONMENT_VALID = '1234ENV';
@@ -36,8 +38,26 @@ describe('EnvironmentService test suite', () => {
   ControlEnvironmentStub.withArgs({id: ENVIRONMENT_VALID, type: 'START_ACTIVITY', requestUser: { name: 'unknown', externalId: 0 }}).resolves({id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1});
 
   const DestroyEnvironmentStub = sinon.stub();
-  DestroyEnvironmentStub.withArgs({id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE, keepTasks: false, allowInRunningState: false, force: false}).rejects({code: 5, details: 'Environment not found'});
-  DestroyEnvironmentStub.withArgs({id: ENVIRONMENT_VALID, keepTasks: true, allowInRunningState: false, force: false}).resolves({id: ENVIRONMENT_VALID});
+  DestroyEnvironmentStub.withArgs({
+    id: ENVIRONMENT_ID_FAILED_TO_RETRIEVE,
+    keepTasks: false,
+    allowInRunningState: false,
+    force: false,
+    requestUser: {
+      name: 'unknown',
+      externalId: 0
+    }
+  }).rejects({ code: 5, details: 'Environment not found' });
+  DestroyEnvironmentStub.withArgs({
+    id: ENVIRONMENT_VALID,
+    keepTasks: true,
+    allowInRunningState: false,
+    force: false,
+    requestUser: {
+      name: 'unknown',
+      externalId: 0
+    }
+  }).resolves({ id: ENVIRONMENT_VALID });
   DestroyEnvironmentStub.rejects({code: 1, details: 'Wrong arguments, using default stub reject'});
 
   const envService = new EnvironmentService(
@@ -70,22 +90,22 @@ describe('EnvironmentService test suite', () => {
 
   describe(`'transitionEnvironment' test suite`, async () => {
     it('should throw gRPC type of error due to issue', async () => {
-      await assert.rejects(envService.transitionEnvironment(ENVIRONMENT_ID_FAILED_TO_RETRIEVE, 'START_ACTIVITY'), new NotFoundError('Environment not found'));
+      await assert.rejects(envService.transitionEnvironment(ENVIRONMENT_ID_FAILED_TO_RETRIEVE, 'START_ACTIVITY', user), new NotFoundError('Environment not found'));
     });
 
     it('should successfully return environment transition results', async () => {
-      const environmentTransitioned = await envService.transitionEnvironment(ENVIRONMENT_VALID, 'START_ACTIVITY');
+      const environmentTransitioned = await envService.transitionEnvironment(ENVIRONMENT_VALID, 'START_ACTIVITY', user);
       assert.deepStrictEqual(environmentTransitioned, {id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1})
     });
   });
 
   describe(`'destroyEnvironment' test suite`, async () => {
     it('should throw gRPC type of error due to issue encountered when trying to destroy environment and have default values set', async () => {
-      await assert.rejects(envService.destroyEnvironment(ENVIRONMENT_ID_FAILED_TO_RETRIEVE), new NotFoundError('Environment not found'));
+      await assert.rejects(envService.destroyEnvironment(ENVIRONMENT_ID_FAILED_TO_RETRIEVE, {}, user), new NotFoundError('Environment not found'));
     });
 
     it('should successfully return environment id if successfully destroyed', async () => {
-      const environmentTransitioned = await envService.destroyEnvironment(ENVIRONMENT_VALID, {keepTasks: true});
+      const environmentTransitioned = await envService.destroyEnvironment(ENVIRONMENT_VALID, { keepTasks: true }, user);
       assert.deepStrictEqual(environmentTransitioned, {id: ENVIRONMENT_VALID})
     });
   });

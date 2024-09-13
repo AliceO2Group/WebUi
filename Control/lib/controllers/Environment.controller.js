@@ -120,6 +120,8 @@ class EnvironmentController {
    * @returns {void}
    */
   async destroyEnvironmentHandler(req, res) {
+    const {personid, name, username} = req.session;
+    const user = new User(username, name, personid);
     const {id} = req.params ?? {};
     const {runNumber = '', keepTasks = false, allowInRunningState = false, force = false} = req.body ?? {};
 
@@ -131,7 +133,7 @@ class EnvironmentController {
         {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
       );
       try {
-        const response = await this._envService.destroyEnvironment(id, {keepTasks, allowInRunningState, force});
+        const response = await this._envService.destroyEnvironment(id, {keepTasks, allowInRunningState, force}, user);
         res.status(200).json(response);
       } catch (error) {
         this._logger.errorMessage(
@@ -206,7 +208,9 @@ class EnvironmentController {
       this._logger.infoMessage(`Request by username(${username}) to deploy configuration ${configurationName}`,
         {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
-      const environment = await this._envService.newAutoEnvironment(workflowTemplatePath, variables, detector, runType);
+      const environment = await this._envService.newAutoEnvironment(
+        workflowTemplatePath, variables, detector, runType, user
+      );
       res.status(200).json(environment);
     } catch (error) {
       this._logger.errorMessage(
