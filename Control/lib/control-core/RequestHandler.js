@@ -18,6 +18,7 @@ const {
   RUNTIME_COMPONENT: {COG},
   RUNTIME_KEY: {RUN_TYPE_TO_HOST_MAPPING}
 } = require('../common/kvStore/runtime.enum.js');
+const { User } = require('../dtos/User.js');
 const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 const LOG_FACILITY = 'cog/controlrequests';
 
@@ -57,8 +58,9 @@ class RequestHandler {
    */
   async add(req, res) {
     const index = parseInt(Object.keys(this.requestList).pop()) + 1 || 0;
-
-    let logMessage = `Creating environment by user(${req.session.username}) with: `;
+    const {personid, name, username} = req.session;
+    const user = new User(username, name, personid);
+    let logMessage = `Creating environment by user(${username}) with: `;
     if (req.body.workflowTemplate) {
       logMessage += `workflow: ${req.body.workflowTemplate}, `;
     }
@@ -73,8 +75,8 @@ class RequestHandler {
       detectors: req.body.detectors,
       workflow: req.body.workflowTemplate,
       date: new Date(),
-      owner: req.session.name,
-      personid: req.session.personid,
+      owner: name,
+      personid,
       failed: false
     };
     res.json({ok: 1});
@@ -112,10 +114,7 @@ class RequestHandler {
     }
     try {
       const payload = CoreUtils.parseEnvironmentCreationPayload(req.body, hostsToIgnoreForRunType);
-      payload.requestUser = {
-        externalId: req.session.personid ?? 0,
-        name: req.session.username ?? 'unknown',
-      };
+      payload.requestUser = user.toEcsFormat();
       creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
       delete this.requestList[index];
     } catch (error) {
@@ -123,7 +122,7 @@ class RequestHandler {
         this._logger.errorMessage(`Creation of environment failed with: ${error.details}.`, {
           level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
         });
-        let logMessage = `Environment was requested by user: ${req.session.username} with`;
+        let logMessage = `Environment was requested by user: ${username} with`;
         if (req.body.workflowTemplate) {
           logMessage += `workflow: ${req.body.workflowTemplate}, `;
         }
@@ -135,7 +134,7 @@ class RequestHandler {
         });
       } else {
         let logMessage = `Creation of environment failed with: ${error.details}. `;
-        logMessage += `User: ${req.session.username}, `;
+        logMessage += `User: ${username}, `;
         if (req.body.workflowTemplate) {
           logMessage += `workflow: ${req.body.workflowTemplate}, `;
         }

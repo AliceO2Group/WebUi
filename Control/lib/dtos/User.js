@@ -118,6 +118,18 @@ class User {
       personid: this._personid,
     };
   }
+
+  /**
+   * Returns the ECS representation of the user
+   * @see ./../protobuf/protos/protos/common.proto
+   * @return {object}
+   */
+  toEcsFormat() {
+    return {
+      name: this._username ?? 'unknown',
+      externalId: this._personid ?? 0,
+    };
+  }
 }
 
 exports.User = User;
