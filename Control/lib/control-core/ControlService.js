@@ -14,11 +14,9 @@
 
 const assert = require('assert');
 const path = require('path');
-const {WebSocketMessage, LogManager} = require('@aliceo2/web-ui');
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
+const {WebSocketMessage, LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 
 /**
  * Gateway for all AliECS - Core calls
@@ -37,6 +35,7 @@ class ControlService {
     this.consulController = consulController;
     this.coreConfig = coreConfig;
     this.O2_CONTROL_PROTO_PATH = O2_CONTROL_PROTO_PATH;
+    this._logger =  LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
 
     this.intervalHeartBeat = this.initiateHeartBeat();
   }
@@ -60,7 +59,7 @@ class ControlService {
         await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 9000});
       } catch (err) {
         const stateCode = this.ctrlProx.client.getChannel().getConnectivityState();
-        logger.errorMessage(`Unable to reach AliECS (state: ${stateCode}), attempting reconnection`, {
+        this._logger.errorMessage(`Unable to reach AliECS (state: ${stateCode}), attempting reconnection`, {
           level: 20,
           system: 'GUI',
           facility: 'cog/controlservice'
@@ -126,8 +125,8 @@ class ControlService {
           vars,
           workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
         };
-        logger.infoMessage(`Request of user: ${req.session.username} to "${operation}" for ${channelId}`, {
-          level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/controlservice'
+        this._logger.infoMessage(`Request of user: ${req.session.username} to "${operation}" for ${channelId}`, {
+          level: LogLevel.OPERATIONS, system: 'GUI', facility: 'cog/controlservice'
         });
         await this.ctrlProx[method](coreConf);
         res.status(200).json({
@@ -221,7 +220,7 @@ class ControlService {
     const personid = req?.session?.personid ?? '';
     if (method.startsWith('New') || method.startsWith('CleanupTasks')) {
       const operation = req.body.operation ? ` (${req.body.operation})` : '';
-      logger.infoMessage(`${username}(${personid}) => ${method} ${operation}`, {
+      this._logger.infoMessage(`${username}(${personid}) => ${method} ${operation}`, {
         level: 1, facility: 'cog/controlservice'
       });
     } else if (method.startsWith('Control') || method.startsWith('Destroy')) {
@@ -230,7 +229,7 @@ class ControlService {
       const run = req.body.runNumber;
       delete req.body.runNumber;
 
-      logger.infoMessage(`${username}(${personid}) => ${method} ${type}`, {
+      this._logger.infoMessage(`${username}(${personid}) => ${method} ${type}`, {
         level: 1, facility: 'cog/controlservice', partition, run
       });
     }

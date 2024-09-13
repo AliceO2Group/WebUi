@@ -11,8 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {LogManager} = require('@aliceo2/web-ui');
-const LOG_LEVEL = 99;
+const {LogManager, LogLevel} = require('@aliceo2/web-ui');
 const LOG_FACILITY = 'cog/status-ctrl';
 
 /**
@@ -50,7 +49,7 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of CONSUL';
-      this.logger.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      this.logger.errorMessage(message, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       res.status(502).json({message});
     }
   }
@@ -67,7 +66,7 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of GRAFANA';
-      this.logger.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      this.logger.errorMessage(message, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       res.status(502).json({message});
     }
   }
@@ -83,7 +82,7 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of NOTIFICATION SYSTEM';
-      this.logger.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      this.logger.errorMessage(message, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       res.status(502).json({message});
     }
   }
@@ -98,7 +97,7 @@ class StatusController {
       res.status(200).json(this._statusService.getGuiStatus());
     } catch (error) {
       const message = 'Unable to retrieve status of AliECS GUI';
-      this.logger.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      this.logger.errorMessage(message, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       res.status(502).json({message});
     }
   }
@@ -114,7 +113,7 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of AliECS CORE';
-      this.logger.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      this.logger.errorMessage(message, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       res.status(502).json({message});
     }
   }
@@ -130,7 +129,7 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of APRICOT';
-      this.logger.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      this.logger.errorMessage(message, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       res.status(502).json({message});
     }
   }
@@ -146,7 +145,7 @@ class StatusController {
       res.status(200).json(componentStatus);
     } catch (error) {
       const message = 'Unable to retrieve status of AliECS Integrated Services';
-      this.logger.errorMessage(message, {level: LOG_LEVEL, facility: LOG_FACILITY});
+      this.logger.errorMessage(message, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       res.status(502).json({message});
     }
   }

@@ -14,11 +14,10 @@
 
 const {InvalidInputError} = require('./../errors/InvalidInputError.js');
 const {DetectorLockAction} = require('./../common/lock/detectorLockAction.enum.js');
-const {LogManager} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {User} = require('./../dtos/User.js');
 
-const ERROR_LOG_LEVEL = 99;
 const LOG_FACILITY = 'cog/log-ctrl';
 const DETECTOR_ALL = 'ALL';
 
@@ -98,7 +97,7 @@ class LockController {
         res.status(200).json(this._lockService.locksByDetectorToJSON());
       }
     } catch (error) {
-      this._logger.errorMessage(error, {level: ERROR_LOG_LEVEL, facility: LOG_FACILITY});
+      this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
       updateExpressResponseFromNativeError(res, error);
     }
   }
