@@ -113,8 +113,8 @@ class RequestHandler {
     try {
       const payload = CoreUtils.parseEnvironmentCreationPayload(req.body, hostsToIgnoreForRunType);
       payload.requestUser = {
-        externalId: req.session.personid,
-        name: req.session.username,
+        externalId: req.session.personid ?? 0,
+        name: req.session.username ?? 'unknown',
       };
       creationResponse = await this.ctrlService.executeCommandNoResponse('NewEnvironment', payload);
       delete this.requestList[index];

@@ -82,8 +82,8 @@ class EnvironmentService {
   async transitionEnvironment(id, transitionType, user = {}) {
     try {
       const requestUser = {
-        name: user.username ?? 'unknown',
-        externalId: user.personId ?? 0,
+        name: user?.username ?? 'unknown',
+        externalId: user?.personid ?? 0,
       };
       const transitionedEnvironment = await this._coreGrpc.ControlEnvironment({id, type: transitionType, requestUser});
       return EnvironmentTransitionResultAdapter.toEntity(transitionedEnvironment);
@@ -98,9 +98,13 @@ class EnvironmentService {
    * @param {{keepTasks: Boolean, allowInRunningState: Boolean, force: Boolean}} - options for destroying the environment
    * @return {Promise.<{String}, Error>} - if operation was a success or not
    */
-  async destroyEnvironment(id, {keepTasks = false, allowInRunningState = false, force = false} = {}) {
+  async destroyEnvironment(id, {keepTasks = false, allowInRunningState = false, force = false} = {}, user = {}) {
     try {
-      await this._coreGrpc.DestroyEnvironment({id, keepTasks, allowInRunningState, force});
+      const requestUser = {
+        name: user?.username ?? 'unknown',
+        externalId: user?.personid ?? 0,
+      };
+      await this._coreGrpc.DestroyEnvironment({id, keepTasks, allowInRunningState, force, requestUser});
       return {id};
     } catch (grpcError) {
       throw grpcErrorToNativeError(grpcError);
@@ -116,7 +120,11 @@ class EnvironmentService {
    * @param {String} runType - for which the environment is deployed
    * @return {AutoEnvironmentDeployment} - if environment request was successfully sent
    */
-  async newAutoEnvironment(workflowTemplate, vars, detector, runType) {
+  async newAutoEnvironment(workflowTemplate, vars, detector, runType, user = {}) {
+    const requestUser = {
+      name: user?.username ?? 'unknown',
+      externalId: user?.personid ?? 0,
+    };
     const channelIdString = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
     const autoEnvironment = {
       channelIdString,
@@ -157,7 +165,8 @@ class EnvironmentService {
     this._coreGrpc.NewAutoEnvironment({
       vars,
       workflowTemplate,
-      id: channelIdString
+      id: channelIdString,
+      requestUser
     });
 
     return autoEnvironment;
