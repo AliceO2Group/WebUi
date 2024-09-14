@@ -13,15 +13,13 @@
 */
 
 const assert = require('assert');
-const logger = (require('@aliceo2/web-ui').LogManager)
-  .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
+const {LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
 const {User} = require('./../dtos/User.js');
 const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 const LOG_FACILITY = 'cog/apricotservice';
 
 /**
@@ -35,6 +33,7 @@ class ApricotService {
   constructor(apricotProxy) {
     assert(apricotProxy, 'Missing GrpcProxy dependency for Apricot');
     this.apricotProxy = apricotProxy;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
 
     this.detectors = [];
     this.hostsByDetector = new Map();
@@ -46,7 +45,7 @@ class ApricotService {
   async init() {
     try {
       this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
-      logger.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
+      this._logger.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
         level: 99,
         system: 'GUI',
         facility: 'cog/api'
@@ -57,12 +56,12 @@ class ApricotService {
             const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
             this.hostsByDetector.set(detector, hosts);
           } catch (error) {
-            logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+            this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
           }
         })
       );
     } catch (error) {
-      logger.error('Unable to list detectors');
+      this._logger.error('Unable to list detectors');
     }
   }
 
@@ -125,8 +124,8 @@ class ApricotService {
               const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
               this.hostsByDetector.set(detector, hosts);
             } catch (error) {
-              logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
-              logger.error(error);
+              this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+              this._logger.error(error);
             }
           })
         );
@@ -151,7 +150,7 @@ class ApricotService {
         throw new Error('Unable to check status of Apricot')
       }
     } catch (error) {
-      logger.error(error);
+      this._logger.error(error);
       throw error;
     }
   }
@@ -164,10 +163,6 @@ class ApricotService {
   executeCommand(req, res) {
     const method = CoreUtils.parseMethodNameString(req.path);
     if (this.apricotProxy?.isConnectionReady && method) {
-      if (!method.startsWith('Get')) {
-        const type = req.body.type ? ` (${req.body.type})` : '';
-        logger.info(`${req.session.personid} => ${method} ${type}`, 6);
-      }
       this.apricotProxy[method](req.body)
         .then((response) => res.json(response))
         .catch((error) => errorHandler(error, res, 504, 'apricotservice'));
@@ -199,9 +194,9 @@ class ApricotService {
         errorHandler(`A configuration with name '${envConf.id}' already exists. `
           + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
       } else {
-        logger.infoMessage(
+        this._logger.infoMessage(
           `${req.session.username} request to save new core environment configuration "${envConf.id}"`,
-          {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+          {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
         );
         await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key: envConf.id, value: envConf.toString()});
         res.status(201).json({message: `Configuration successfully saved as ${envConf.id}`});
@@ -229,9 +224,9 @@ class ApricotService {
       const envConf = CoreEnvConfig.fromJSON(data);
 
       const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
-      logger.infoMessage(
+      this._logger.infoMessage(
         `${req.session.username} requested to update new core environment configuration "${envConf.id}"`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
       await this.apricotProxy['SetRuntimeEntry']({
         component: COMPONENT,

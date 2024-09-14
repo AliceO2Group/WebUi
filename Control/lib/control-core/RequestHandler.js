@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {WebSocketMessage, LogManager} = require('@aliceo2/web-ui');
+const {WebSocketMessage, LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
 const {
@@ -19,7 +19,6 @@ const {
   RUNTIME_KEY: {RUN_TYPE_TO_HOST_MAPPING}
 } = require('../common/kvStore/runtime.enum.js');
 const { User } = require('../dtos/User.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 const LOG_FACILITY = 'cog/controlrequests';
 
 /**
@@ -68,7 +67,7 @@ class RequestHandler {
       logMessage += `and detectors: ${req.body.detectors}`;
     }
 
-    this._logger.infoMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
+    this._logger.infoMessage(logMessage, {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
 
     this.requestList[index] = {
       id: index,
@@ -120,7 +119,7 @@ class RequestHandler {
     } catch (error) {
       if (error.envId) {
         this._logger.errorMessage(`Creation of environment failed with: ${error.details}.`, {
-          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
+          level: LogLevel.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
         });
         let logMessage = `Environment was requested by user: ${username} with`;
         if (req.body.workflowTemplate) {
@@ -130,7 +129,7 @@ class RequestHandler {
           logMessage += `and detectors: ${req.body.detectors}.`;
         }
         this._logger.errorMessage(logMessage, {
-          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
+          level: LogLevel.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
         });
       } else {
         let logMessage = `Creation of environment failed with: ${error.details}. `;
@@ -142,7 +141,7 @@ class RequestHandler {
           logMessage += `and detectors: ${req.body.detectors}.`;
         }
         this._logger.errorMessage(logMessage, {
-          level: LOG_LEVEL.ERROR, system: 'GUI', facility: LOG_FACILITY,
+          level: LogLevel.ERROR, system: 'GUI', facility: LOG_FACILITY,
         });
       }
 
@@ -167,7 +166,7 @@ class RequestHandler {
   remove(req, res) {
     const index = req.params.id;
     this._logger.infoMessage(`User ${req.session.username} acknowledged and removed failed request`, {
-      level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY
+      level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY
     });
     delete this.requestList[index];
     return this.getAll(req, res);

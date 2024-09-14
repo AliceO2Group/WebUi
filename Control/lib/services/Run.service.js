@@ -12,11 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-const {LogManager} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel} = require('@aliceo2/web-ui');
 
 const {CacheKeys} = require('../common/cacheKeys.enum.js');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
-const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 const {RunCalibrationStatus} = require('./../common/runCalibrationStatus.enum.js');
 const {RunDefinitions} = require('./../common/runDefinition.enum.js')
 const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
@@ -140,7 +139,7 @@ class RunService {
     } catch (error) {
       const err = grpcErrorToNativeError(error);
       this._logger.errorMessage(`Unable to load calibration mapping due to: ${err}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'calibration-service'}
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: 'calibration-service'}
       )
     }
     return {};

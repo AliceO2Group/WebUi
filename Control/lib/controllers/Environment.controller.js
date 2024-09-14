@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {LogManager} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel} = require('@aliceo2/web-ui');
 const LOG_FACILITY = 'cog/env-ctrl';
 const {EnvironmentTransitionType} = require('./../common/environmentTransitionType.enum.js');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
@@ -19,7 +19,6 @@ const {InvalidInputError} = require('./../errors/InvalidInputError.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {User} = require('./../dtos/User.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 
 /**
  * Controller for dealing with all API requests on environments from AliECS:
@@ -96,7 +95,7 @@ class EnvironmentController {
       const transitionRequestedAt = Date.now();
       let response = null;
       this._logger.infoMessage(`Request to transition environment by ${req.session.username} to ${transitionType}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
       );
       try {
         response = await this._envService.transitionEnvironment(id, transitionType, user);
@@ -104,7 +103,7 @@ class EnvironmentController {
       } catch (error) {
         this._logger.errorMessage(
           `Request to transition environment by ${req.session.username} to ${transitionType} failed due to ${error}`,
-          {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+          {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
         );
         updateExpressResponseFromNativeError(res, error);
       }
@@ -130,7 +129,7 @@ class EnvironmentController {
     } else {
       const destroyRequestedAt = Date.now();
       this._logger.infoMessage(`Request to destroy environment by ${req.session.username} by force: ${force}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
       );
       try {
         const response = await this._envService.destroyEnvironment(id, {keepTasks, allowInRunningState, force}, user);
@@ -138,7 +137,7 @@ class EnvironmentController {
       } catch (error) {
         this._logger.errorMessage(
           `Request to destroy environment by ${req.session.username} failed due to ${error}`,
-          {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+          {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
         );
         updateExpressResponseFromNativeError(res, error);
       }
@@ -206,7 +205,7 @@ class EnvironmentController {
     // Attempt to deploy environment
     try {
       this._logger.infoMessage(`Request by username(${username}) to deploy configuration ${configurationName}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
       const environment = await this._envService.newAutoEnvironment(
         workflowTemplatePath, variables, detector, runType, user
@@ -215,7 +214,7 @@ class EnvironmentController {
     } catch (error) {
       this._logger.errorMessage(
         `Unable to deploy request by username(${username}) for ${configurationName} due to error`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
       updateExpressResponseFromNativeError(res, error);
     }
