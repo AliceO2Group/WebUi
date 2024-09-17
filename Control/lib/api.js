@@ -124,7 +124,7 @@ module.exports.setup = (http, ws) => {
       logLevel: logLevel.NOTHING,
     });
 
-    aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, envService, cacheService);
+    aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
     aliEcsSynchronizer.start();
   }
 
