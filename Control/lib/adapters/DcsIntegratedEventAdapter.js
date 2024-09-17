@@ -36,8 +36,9 @@ class DcsIntegratedEventAdapter {
     const { operationName, operationStatus, operationStep, operationStepStatus } = event;
 
     const payloadJSON = JSON.parse(payload);
-    const { runNumber, detectors, detector = null } = payloadJSON;
-
+    const { runNumber, detector = null } = payloadJSON;
+    let { detectors } = payloadJSON;
+    
     if (detector) {
       // event comes with information also from DCS and it comes per detector for SOR so we override detectors
       detectors = [detector];
