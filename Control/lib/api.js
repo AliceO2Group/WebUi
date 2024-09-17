@@ -14,6 +14,7 @@
 
 const logger = (require('@aliceo2/web-ui').LogManager)
   .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/api`);
+const { Kafka, logLevel } = require('kafkajs');
 const config = require('./config/configProvider.js');
 
 // middleware
@@ -46,6 +47,7 @@ const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
+const { AliEcsSynchronizer } = require('./control-core/AliEcsSyncronizer.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
 const EnvCache = require('./control-core/EnvCache.js');
@@ -111,6 +113,19 @@ module.exports.setup = (http, ws) => {
   const notificationService = new NotificationService(config.kafka);
   if (notificationService.isConfigured()) {
     notificationService.proxyWebNotificationToWs(ws);
+  }
+
+  let aliEcsSynchronizer = undefined;
+  if (config.kafka && config.kafka?.enable) {
+    const kafkaClient = new Kafka({
+      clientId: 'control-gui',
+      brokers: config.kafka.brokers,
+      retry: { retries: 3 },
+      logLevel: logLevel.NOTHING,
+    });
+
+    aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, envService, cacheService);
+    aliEcsSynchronizer.start();
   }
 
   const statusService = new StatusService(
