@@ -42,7 +42,7 @@
     "mocha": "^10.6.0",
     "nyc": "^17.0.0",
     "puppeteer": "^23.3.0",
-    "sinon": "^18.0.0"
+    "sinon": "^19.0.2"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui"
