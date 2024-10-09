@@ -1,18 +1,4 @@
-/**
- * @license
- * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
- * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
- * All rights not expressly granted are reserved.
- *
- * This software is distributed under the terms of the GNU General Public
- * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
- *
- * In applying this license CERN does not waive the privileges and immunities
- * granted to it by virtue of its status as an Intergovernmental Organization
- * or submit itself to any jurisdiction.
- */
-
-const { LogManager } = require('../log/LogManager.js');
+const { LogManager } = require('@aliceo2/web-ui');
 
 /**
  * Generic Kafka Message consumer extracting objects according to a protobuf definition
@@ -91,9 +77,11 @@ class KafkaMessagesConsumer {
    */
   async _handleEvent(message) {
     for (const listener of this._listeners) {
-      listener(message).catch((error) => {
+      try {
+        await listener(message);
+      } catch (error) {
         this._logger.errorMessage(`An error occurred when handling event: ${error.message}\n${error.stack}`);
-      });
+      }
     }
   }
 

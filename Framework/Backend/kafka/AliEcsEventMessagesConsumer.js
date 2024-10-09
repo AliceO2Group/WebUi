@@ -10,23 +10,12 @@
  *  granted to it by virtue of its status as an Intergovernmental Organization
  *  or submit itself to any jurisdiction.
  */
-
 const protobuf = require('protobufjs');
 const path = require('node:path');
 const { KafkaMessagesConsumer } = require('./KafkaMessagesConsumer.js');
-const { getWebUiProtoIncludeDir } = require('../protobuf/getWebUiProtoIncludeDir.js');
 
-// Customize protobuf loader to set the import directory, protobuf do not allow to do so...
-const root = new protobuf.Root();
-root.resolvePath = (origin, target) => {
-  if (path.isAbsolute(target)) {
-    return target;
-  }
-
-  return path.join(getWebUiProtoIncludeDir(), target);
-};
-
-root.loadSync(path.resolve(__dirname, '../protobuf/protos/events.proto'));
+const protoDir = path.resolve(__dirname, '../protos');
+const root = protobuf.loadSync(path.resolve(protoDir, 'events.proto'));
 const EventMessage = root.lookupType('events.Event');
 
 /**
@@ -59,5 +48,3 @@ class AliEcsEventMessagesConsumer extends KafkaMessagesConsumer {
 }
 
 exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
-
-exports.EventMessage = EventMessage;

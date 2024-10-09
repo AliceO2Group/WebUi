@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 /* eslint-disable require-jsdoc */
 
 const path = require('path');
@@ -18,6 +18,7 @@ const path = require('path');
 // Doc: https://grpc.io/grpc/node/grpc.html
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
+const {getWebUiProtoIncludeDir} = require('@aliceo2/web-ui');
 
 const PROTO_PATH = path.join(__dirname, './../../protobuf/o2control.proto');
 
@@ -29,7 +30,10 @@ const coreGRPCServer = (config) => {
   let calls = {};
 
   const server = new grpcLibrary.Server();
-  const packageDefinition = protoLoader.loadSync(PROTO_PATH, {keepCase: false});// change to camel case
+  const packageDefinition = protoLoader.loadSync(
+    PROTO_PATH,
+    {keepCase: false, includeDirs: [getWebUiProtoIncludeDir()]},
+  );// change to camel case
   const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
   const credentials = grpcLibrary.ServerCredentials.createInsecure();
   const address = `${config.grpc.hostname}:${config.grpc.port}`;
@@ -43,7 +47,7 @@ const coreGRPCServer = (config) => {
       calls['getEnvironments'] = true;
       const responseData = {
         frameworkId: '74917838-27cb-414d-bfcd-7e74f85d4926-0000',
-        environments: [envTest.environment]
+        environments: [envTest.environment],
       };
       callback(null, responseData);
     },
@@ -130,37 +134,36 @@ const envTest = {
       mid_enabled: 'false',
       mid_something: 'test',
       dd_enabled: 'true',
-      run_type: 'run'
+      run_type: 'run',
     },
     vars: {
       odc_enabled: 'true',
       mid_enabled: 'false',
       mid_something: 'test',
       dd_enabled: 'true',
-      run_type: 'run'
+      run_type: 'run',
     },
     defaults: {
       dcs_topology: 'test',
       dd_enabled: 'true',
-      run_type: 'run'
+      run_type: 'run',
     },
-    integratedServices: {
-    }
+    integratedServices: {},
   },
   workflow: {},
   workflowTemplates: {
     workflowTemplates: [
       {
         repo: 'git.cern.ch/some-user/some-repo/',
-        template: 'prettyreadout-1', revision: 'master', description: 'something'
+        template: 'prettyreadout-1', revision: 'master', description: 'something',
       },
-    ]
+    ],
   },
   listRepos: {
     repos: [
       {name: 'git.cern.ch/some-user/some-repo/', default: true, defaultRevision: 'dev', revisions: ['master', 'dev']},
-      {name: 'git.com/alice-user/alice-repo/'}]
-  }
+      {name: 'git.com/alice-user/alice-repo/'}],
+  },
 };
 
 module.exports = {coreGRPCServer};

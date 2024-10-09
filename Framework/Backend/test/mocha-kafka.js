@@ -26,7 +26,7 @@ const dummyKafkaClient = {
 
       /**
        * Dummy run implementation
-       * @param configuration
+       * @param {object} configuration configuration for dummy consumer
        */
       run(configuration) {
         client.eachMessage = configuration.eachMessage;
@@ -36,7 +36,7 @@ const dummyKafkaClient = {
 
   /**
    * Send a dummy message
-   * @param message
+   * @param {object} message the dummy message
    */
   sendDummyMessage(message) {
     this.eachMessage({ message: { value: message }, topic: 'dummy-topic' });

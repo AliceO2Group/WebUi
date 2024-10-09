@@ -10,6 +10,7 @@
  *  granted to it by virtue of its status as an Intergovernmental Organization
  *  or submit itself to any jurisdiction.
  */
+
 const protobuf = require('protobufjs');
 const path = require('node:path');
 const { LogManager } = require('@aliceo2/web-ui');
@@ -28,7 +29,7 @@ const EventMessage = root.lookupType('events.Event');
  * Consumer that consume ECS event messages and pass them to previously-registered listeners
  * @author Martin Boulais <mboulais@cern.ch>
  * Until consumer is added in the common library, consumer was extracted from:
- * - https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/server/kafka/AliEcsEventMessagesConsumer.js 
+ * - https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/server/kafka/AliEcsEventMessagesConsumer.js
  */
 class AliEcsEventMessagesConsumer {
   /**
