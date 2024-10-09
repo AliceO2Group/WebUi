@@ -17,8 +17,8 @@
 import { h } from '/js/src/index.js';
 import { di } from './../../../../utilities/di.js';
 import { DetectorStateStyle } from './../../../../common/enums/DetectorState.enum.js';
+import { O2Systems, O2Facilities } from './../../../../common/enums/InfoLoggerEnums.js';
 import { infoLoggerButtonLink } from './../../../../common/buttons/infoLoggerRedirectButton.js';
-import { O2Facilities, O2Systems } from '../../../../common/enums/infoLoggerEnums.js';
 
 /**
  * Panel that will display DCS last states during the SOR activity at the start of run
