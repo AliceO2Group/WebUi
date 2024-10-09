@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 import { h } from '/js/src/index.js';
 import { di } from './../../../../utilities/di.js';
 import { DetectorStateStyle } from './../../../../common/enums/DetectorState.enum.js';
@@ -38,14 +40,16 @@ export const dcsSorPanel = (id, detectors) => {
       h('.text-right', [
         infoLoggerButtonLink(
           { partition: id, system: O2Systems.ECS, facility: O2Facilities.CORE_DCS_CLIENT},
-          'More in ILG for DCS',
+          'InfoLogger DCS',
           COG?.ILG_URL ?? ''
         ),
       ]),
     ]),
     h('.grid-container.g2', [
       detectors.map((detector) => {
-        const lastStateOfGroupOperations = groupedOperations[detector] ? groupedOperations[detector][groupedOperations[detector].length - 1].state : 'N/A';
+        const lastStateOfGroupOperations = groupedOperations[detector]
+          ? groupedOperations[detector][groupedOperations[detector].length - 1].state
+          : 'N/A';
         return h('.p1', {
           style: 'flex-grow:1;',
           class: DetectorStateStyle[lastStateOfGroupOperations],
@@ -53,9 +57,11 @@ export const dcsSorPanel = (id, detectors) => {
           h('.f4', {
             style: 'text-decoration-line: underline; font-weight: bold; text-align:center'
           }, detector),
-          h('', groupedOperations[detector] ? detectorLastState(groupedOperations[detector]) : 'No operations for this detector')
+          h('', groupedOperations[detector]
+            ? detectorLastState(groupedOperations[detector])
+            : 'No operations for this detector')
         ])
-    }),
+      }),
     ])
   ]);
 }

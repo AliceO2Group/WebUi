@@ -34,7 +34,11 @@ class AliEcsSynchronizer {
     this._cacheService = cacheService;  
     this._logger = LogManager.getLogger('cog/ali-ecs-synchronizer');
 
-    this._ecsIntegratedServiceConsumer = new AliEcsEventMessagesConsumer(kafkaClient, INTEGRATED_SERVICES_CONSUMER_GROUP, INTEGRATED_SERVICES_TOPICS);
+    this._ecsIntegratedServiceConsumer = new AliEcsEventMessagesConsumer(
+      kafkaClient,
+      INTEGRATED_SERVICES_CONSUMER_GROUP,
+      INTEGRATED_SERVICES_TOPICS
+    );
     this._ecsIntegratedServiceConsumer.onMessageReceived(async (eventMessage) => {
       const { timestamp, integratedServiceEvent } = eventMessage;
       try {
@@ -74,7 +78,11 @@ class AliEcsSynchronizer {
     this._logger.infoMessage('Starting to consume AliECS messages for integrated services');
     this._ecsIntegratedServiceConsumer
       .start()
-      .catch((error) => this._logger.errorMessage(`Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`));
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
+        )
+      );
   }
 }
 

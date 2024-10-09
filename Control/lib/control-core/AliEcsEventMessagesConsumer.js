@@ -76,14 +76,14 @@ class AliEcsEventMessagesConsumer {
       eachMessage: async ({ message, topic }) => {
         const error = EventMessage.verify(message.value);
         if (error) {
-            this._logger.errorMessage(`Received an invalid message on "${topic}" ${error}`);
-            return;
+          this._logger.errorMessage(`Received an invalid message on "${topic}" ${error}`);
+          return;
         }
         await this._handleEvent(
-            EventMessage.toObject(
-                EventMessage.decode(message.value),
-                { enums: String },
-            )
+          EventMessage.toObject(
+            EventMessage.decode(message.value),
+            { enums: String },
+          )
         );
       },
     });
