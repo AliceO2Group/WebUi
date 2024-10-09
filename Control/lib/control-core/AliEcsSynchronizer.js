@@ -13,7 +13,7 @@
 
 const { AliEcsEventMessagesConsumer } = require('./AliEcsEventMessagesConsumer.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
-const { CacheKeys } = require('./../common/cacheKeys.enum.js'); 
+const { CacheKeys } = require('../common/cacheKeys.enum.js'); 
 const { LogManager } = require('@aliceo2/web-ui');
 
 const INTEGRATED_SERVICES_CONSUMER_GROUP = 'cog-integrated-services';
@@ -40,6 +40,8 @@ class AliEcsSynchronizer {
             try {
                 if (integratedServiceEvent.name === SOR_EVENT_NAME) {
                     const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
+                    console.log(dcsSorEvent)
+                    if (!dcsSorEvent) return;
                     const { environmentId } = dcsSorEvent;
                     let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
                     if (!cachedDcsSteps) {
