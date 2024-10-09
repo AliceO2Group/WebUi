@@ -15,7 +15,7 @@
 /**
  * Known values for certain fields in the InfoLogger to be matched against
  */
-export const O2Systems = Object.freeze({
+const O2Systems = Object.freeze({
   ECS: 'ECS',
   FLP: 'FLP',
   GUI: 'GUI',
@@ -24,6 +24,8 @@ export const O2Systems = Object.freeze({
 /**
  * Known values for certain fields in the InfoLogger to be matched against
  */
-export const O2Facilities = Object.freeze({
+const O2Facilities = Object.freeze({
   CORE_DCS_CLIENT: 'core/dcsclient',
 });
+
+export { O2Systems, O2Facilities };
