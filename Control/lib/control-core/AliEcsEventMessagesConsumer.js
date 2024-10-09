@@ -31,79 +31,79 @@ const EventMessage = root.lookupType('events.Event');
  * - https://github.com/AliceO2Group/Bookkeeping/blob/main/lib/server/kafka/AliEcsEventMessagesConsumer.js 
  */
 class AliEcsEventMessagesConsumer {
-    /**
-     * Constructor
-     *
-     * @param {import('kafkajs').Kafka} kafkaClient configured kafka client
-     * @param {string} groupId the group id to use for the kafka consumer
-     * @param {string[]} topics the list of topics to consume
-     */
-    constructor(kafkaClient, groupId, topics) {
-        this.consumer = kafkaClient.consumer({ groupId });
-        this._topics = topics;
-
-        /**
-         * @type {MessageReceivedCallback[]}
-         * @private
-         */
-        this._listeners = [];
-
-        this._logger = LogManager.getLogger('cog/ecs-event-consumer');
-    }
+  /**
+   * Constructor
+   *
+   * @param {import('kafkajs').Kafka} kafkaClient configured kafka client
+   * @param {string} groupId the group id to use for the kafka consumer
+   * @param {string[]} topics the list of topics to consume
+   */
+  constructor(kafkaClient, groupId, topics) {
+    this.consumer = kafkaClient.consumer({ groupId });
+    this._topics = topics;
 
     /**
-     * Register a listener to listen on event message being received
-     *
-     * Listeners are called all at once, not waiting for completion before calling the next ones, only errors are caught and logged
-     *
-     * @param {MessageReceivedCallback} listener the listener to register
-     * @return {void}
+     * @type {MessageReceivedCallback[]}
+     * @private
      */
-    onMessageReceived(listener) {
-        this._listeners.push(listener);
-    }
+    this._listeners = [];
 
-    /**
-     * Start the kafka consumer
-     *
-     * @return {Promise<void>} Resolves once the consumer started to consume messages
-     */
-    async start() {
-        this._logger.infoMessage(`Started to listen on kafka topic ${this._topics}`);
-        await this.consumer.connect();
-        await this.consumer.subscribe({ topics: this._topics });
-        await this.consumer.run({
-            eachMessage: async ({ message, topic }) => {
-                const error = EventMessage.verify(message.value);
-                if (error) {
-                    this._logger.errorMessage(`Received an invalid message on "${topic}" ${error}`);
-                    return;
-                }
-                await this._handleEvent(
-                    EventMessage.toObject(
-                        EventMessage.decode(message.value),
-                        { enums: String },
-                    )
-                );
-            },
-        });
-    }
+    this._logger = LogManager.getLogger('cog/ecs-event-consumer');
+  }
 
-    /**
-     * Call every registered listeners by passing the given message to it
-     *
-     * @param {EventMessage} message the message to pass to listeners
-     * @return {void}
-     */
-    async _handleEvent(message) {
-        for (const listener of this._listeners) {
-            try {
-                await listener(message);
-            } catch (error) {
-                this._logger.errorMessage(`An error occurred when handling event: ${error.message}\n${error.stack}`);
-            }
+  /**
+   * Register a listener to listen on event message being received
+   *
+   * Listeners are called all at once, not waiting for completion before calling the next ones, only errors are caught and logged
+   *
+   * @param {MessageReceivedCallback} listener the listener to register
+   * @return {void}
+   */
+  onMessageReceived(listener) {
+    this._listeners.push(listener);
+  }
+
+  /**
+   * Start the kafka consumer
+   *
+   * @return {Promise<void>} Resolves once the consumer started to consume messages
+   */
+  async start() {
+    this._logger.infoMessage(`Started to listen on kafka topic ${this._topics}`);
+    await this.consumer.connect();
+    await this.consumer.subscribe({ topics: this._topics });
+    await this.consumer.run({
+      eachMessage: async ({ message, topic }) => {
+        const error = EventMessage.verify(message.value);
+        if (error) {
+            this._logger.errorMessage(`Received an invalid message on "${topic}" ${error}`);
+            return;
         }
+        await this._handleEvent(
+            EventMessage.toObject(
+                EventMessage.decode(message.value),
+                { enums: String },
+            )
+        );
+      },
+    });
+  }
+
+  /**
+   * Call every registered listeners by passing the given message to it
+   *
+   * @param {EventMessage} message the message to pass to listeners
+   * @return {void}
+   */
+  async _handleEvent(message) {
+    for (const listener of this._listeners) {
+      try {
+        await listener(message);
+      } catch (error) {
+        this._logger.errorMessage(`An error occurred when handling event: ${error.message}\n${error.stack}`);
+      }
     }
+  }
 }
 
 exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
