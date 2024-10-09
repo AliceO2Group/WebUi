@@ -1,0 +1,1 @@
+exports.getWebUiProtoIncludeDir = () => __dirname;
