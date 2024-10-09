@@ -36,7 +36,10 @@ class DcsIntegratedEventAdapter {
     const { operationName, operationStatus, operationStep, operationStepStatus } = event;
 
     const payloadJSON = JSON.parse(payload);
-    const { runNumber, detector = null } = payloadJSON;
+    const { dcsEvent, runNumber, detector = null, state } = payloadJSON;
+    if (!dcsEvent) {
+      return null;
+    }
     let { detectors } = payloadJSON;
     
     if (detector) {
@@ -50,6 +53,7 @@ class DcsIntegratedEventAdapter {
       error,
       environmentId,
       runNumber,
+      state,
       operationName,
       operationStatus,
       operationStep,

@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+const { Kafka, logLevel } = require('kafkajs');
 const logger = (require('@aliceo2/web-ui').LogManager)
   .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/api`);
-const { Kafka, logLevel } = require('kafkajs');
 const config = require('./config/configProvider.js');
 
 // middleware
@@ -46,8 +46,8 @@ const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.j
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
+const { AliEcsSynchronizer } = require('./control-core/AliEcsSynchronizer.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
-const { AliEcsSynchronizer } = require('./control-core/AliEcsSyncronizer.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
 const EnvCache = require('./control-core/EnvCache.js');
@@ -110,7 +110,7 @@ module.exports.setup = (http, ws) => {
   runService.retrieveStaticConfigurations();
   const runController = new RunController(runService, cacheService);
 
-  const notificationService = new NotificationService(config.kafka);
+  const notificationService = new NotificationService();
   if (notificationService.isConfigured()) {
     notificationService.proxyWebNotificationToWs(ws);
   }
