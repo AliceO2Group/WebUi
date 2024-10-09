@@ -19,8 +19,8 @@ jobs:
       run: |
         git clone https://github.com/AliceO2Group/Control.git aliecs
         cp aliecs/core/protos/o2control.proto Control/protobuf
-        cp aliecs/common/protos/events.proto Control/protobuf/protos
-        cp aliecs/common/protos/common.proto Control/protobuf/protos/protos
+        cp aliecs/common/protos/events.proto Framework/Backend/protos
+        cp aliecs/common/protos/common.proto Framework/Backend/protos/protos
         cp aliecs/apricot/protos/apricot.proto Control/protobuf/o2apricot.proto
         rm -rf aliecs
     - name: Check if there are any differences and create PR

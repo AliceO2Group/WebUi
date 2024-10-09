@@ -37,6 +37,7 @@ const {
   updateAndSendExpressResponseFromNativeError,
 } = require('./errors/updateAndSendExpressResponseFromNativeError.js');
 const { Logger } = require('./log/Logger');
+const {getWebUiProtoIncludeDir} = require('./protobuf/getWebUiProtoIncludeDir');
 
 exports.ConsulService = ConsulService;
 
@@ -82,3 +83,5 @@ exports.UnauthorizedAccessError = UnauthorizedAccessError;
 exports.grpcErrorToNativeError = grpcErrorToNativeError;
 
 exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;
+
+exports.getWebUiProtoIncludeDir = getWebUiProtoIncludeDir;
