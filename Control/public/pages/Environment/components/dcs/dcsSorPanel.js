@@ -13,10 +13,13 @@
 */
 
 import { h } from '/js/src/index.js';
-import {di} from './../../../../utilities/di.js';
+import { di } from './../../../../utilities/di.js';
+import { DetectorStateStyle } from './../../../../common/enums/DetectorState.enum.js';
+import { infoLoggerButtonLink } from './../../../../common/buttons/infoLoggerRedirectButton.js';
+import { O2Facilities, O2Systems } from '../../../../common/enums/infoLoggerEnums.js';
 
 /**
- * Panel that will display DCS SOR operations at the start of run
+ * Panel that will display DCS last states during the SOR activity at the start of run
  * @param {string} id - environment id
  * @param {array<string>} detectors - list of detectors
  * @return {vnode}
@@ -30,16 +33,29 @@ export const dcsSorPanel = (id, detectors) => {
   const groupedOperations = groupOperationsByDetector(dcsForEnvironment.dcsOperations);
 
   return h('.w-100.p1.g2.flex-column', [
-    h('h4.text-center', 'DCS SOR Operations'),
-      h('.flex-wrap.g2', [
+    h('.flex-row', [
+      h('h4.text-center.flex-grow-1', 'DCS SOR Operations'),
+      h('.text-right', [
+        infoLoggerButtonLink(
+          { partition: id, system: O2Systems.ECS, facility: O2Facilities.CORE_DCS_CLIENT},
+          'More in ILG for DCS',
+          COG?.ILG_URL ?? ''
+        ),
+      ]),
+    ]),
+    h('.grid-container.g2', [
       detectors.map((detector) => {
-        return h('', {
-          style: 'flex-grow:1'
+        const lastStateOfGroupOperations = groupedOperations[detector] ? groupedOperations[detector][groupedOperations[detector].length - 1].state : 'N/A';
+        return h('.p1', {
+          style: 'flex-grow:1;',
+          class: DetectorStateStyle[lastStateOfGroupOperations],
         },[
-          h('label', detector),
-          h('pre', groupedOperations[detector] ? detectorOperations(groupedOperations[detector]) : 'No operations for this detector')
+          h('.f4', {
+            style: 'text-decoration-line: underline; font-weight: bold; text-align:center'
+          }, detector),
+          h('', groupedOperations[detector] ? detectorLastState(groupedOperations[detector]) : 'No operations for this detector')
         ])
-      }),
+    }),
     ])
   ]);
 }
@@ -63,22 +79,11 @@ const groupOperationsByDetector = (operations) => {
 };
 
 /**
- * Display operations for a detector with timestamp, name and status
+ * Display latest state of DCS for a detector
  * @param {array<object>} operations - list of operations for a detector
  * @return {vnode}
  */
-const detectorOperations = (operations) => {
-  return h('', [
-    operations.map((operation) => {
-      if (operation.error) {
-        return [
-          h('.f6.danger', `[${new Date(operation.timestamp).toISOString()}]$${operation.operationStatus}/${operation.operationStep}/${operation.operationStepStatus}`),
-          h('.f6.danger', `${operation.error}`),
-        ];
-      }
-      return [
-        h('.f6', `[${new Date(operation.timestamp).toISOString()}]$${operation.operationStatus}/${operation.operationStep}/${operation.operationStepStatus}`),
-      ];
-    })
-  ]);
+const detectorLastState = (operations) => {
+  const lastOperation = operations[operations.length - 1];
+  return h('.f6.flex-grow-1.text-center', `${lastOperation.state}`);
 };

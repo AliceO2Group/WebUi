@@ -28,7 +28,7 @@ import { redirectButtonLink } from './redirectButtonLink.js';
  * @param {string} label - string representation of the type of infologger to be opened (FLP/EPN)
  * @returns {vnode} - button as link allowing user to open InfoLogger in a new tab
  */
-export const infoLoggerButtonLink = ({ partition, run, hostname }, label = 'InfoLogger', source = '') => {
+export const infoLoggerButtonLink = ({ partition, run, hostname, system, facility }, label = 'InfoLogger', source = '') => {
   if (source) {
     let href = `${source}?q={`;
     if (run) {
@@ -39,6 +39,12 @@ export const infoLoggerButtonLink = ({ partition, run, hostname }, label = 'Info
     }
     if (hostname) {
       href += `"hostname":{"match":"${hostname}"},`;
+    }
+    if (system) {
+      href += `"system":{"match":"${system}"},`;
+    }
+    if (facility) {
+      href += `"facility":{"match":"${facility}"},`;
     }
     if (href.slice(-1) === ',') { // remove trailing comma
       href = href.slice(0, -1);
