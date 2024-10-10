@@ -58,3 +58,5 @@ class AliEcsEventMessagesConsumer extends KafkaMessagesConsumer {
 }
 
 exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
+
+exports.EventMessage = EventMessage;
