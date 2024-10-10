@@ -18,6 +18,7 @@ const path = require('path');
 // Doc: https://grpc.io/grpc/node/grpc.html
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
+const {getWebUiProtoIncludeDir} = require('@aliceo2/web-ui');
 
 const PROTO_PATH = path.join(__dirname, './../../protobuf/o2apricot.proto');
 
@@ -28,7 +29,7 @@ const apricotGRPCServer = (config) => {
   let calls = {};
 
   const server = new grpcLibrary.Server();
-  const packageDefinition = protoLoader.loadSync(PROTO_PATH, {keepCase: false}); // change to camel case
+  const packageDefinition = protoLoader.loadSync(PROTO_PATH, {keepCase: false, includeDirs: [getWebUiProtoIncludeDir()]}); // change to camel case
   const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
   const credentials = grpcLibrary.ServerCredentials.createInsecure();
   const address = `${config.apricot.hostname}:${config.apricot.port}`;

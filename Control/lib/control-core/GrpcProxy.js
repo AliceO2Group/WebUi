@@ -10,11 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Doc: https://grpc.io/docs/languages/node/
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
+const {getWebUiProtoIncludeDir} = require('@aliceo2/web-ui');
 const path = require('path');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
@@ -34,7 +35,10 @@ class GrpcProxy {
    */
   constructor(config, path) {
     if (this._isConfigurationValid(config, path)) {
-      const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: false, arrays: true});
+      const packageDefinition = protoLoader.loadSync(
+        path,
+        {longs: String, keepCase: false, arrays: true, includeDirs: [getWebUiProtoIncludeDir()]},
+      );
       const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
       const protoService = octlProto[this._package][this._label];
       const address = `${config.hostname}:${config.port}`;
