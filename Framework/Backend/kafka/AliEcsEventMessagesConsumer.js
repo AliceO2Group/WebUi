@@ -13,8 +13,19 @@
 const protobuf = require('protobufjs');
 const path = require('node:path');
 const { KafkaMessagesConsumer } = require('./KafkaMessagesConsumer.js');
+const { getWebUiProtoIncludeDir } = require('../protobuf/getWebUiProtoIncludeDir.js');
 
-const root = protobuf.loadSync(path.resolve(__dirname, '../protobuf/protos/events.proto'));
+// Customize protobuf loader to set the import directory, protobuf do not allow to do so...
+const root = new protobuf.Root();
+root.resolvePath = (origin, target) => {
+  if (path.isAbsolute(target)) {
+    return target;
+  }
+
+  return path.join(getWebUiProtoIncludeDir(), target);
+};
+
+root.loadSync(path.resolve(__dirname, '../protobuf/protos/events.proto'));
 const EventMessage = root.lookupType('events.Event');
 
 /**
