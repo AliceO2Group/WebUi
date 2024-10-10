@@ -1,4 +1,4 @@
-const { LogManager } = require('@aliceo2/web-ui');
+const { LogManager } = require('../log/LogManager.js');
 
 /**
  * Generic Kafka Message consumer extracting objects according to a protobuf definition
