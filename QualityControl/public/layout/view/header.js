@@ -61,10 +61,24 @@ const toolbarViewMode = (model) => {
           download: `layout-${layoutItem.name}-skeleton.json`,
         }, iconShareBoxed()),
         model.session.personid == layoutItem.owner_id && [
-          h('button.btn.btn-primary', {
-            onclick: () => model.layout.edit(),
+          h('.dropdown', {
             title: 'Edit layout',
-          }, iconPencil()),
+            class: model.layout.editMenuOpen ? 'dropdown-open' : '',
+          }, [
+            h('button.btn.btn-primary', { onclick: () => model.layout.toggleEditMenu() }, iconPencil()),
+            h('.dropdown-menu', { style: {
+              right: '0',
+              left: 'auto',
+            } }, [
+              h('p.m3.mv2.text-ellipsis', [
+                h('a.menu-item', { title: 'Edit via GUI', onclick: () => model.layout.edit() }, 'Edit via GUI'),
+                h('a.menu-item', {
+                  title: 'Edit via JSON',
+                  onclick: () => openJSONEditModal(model),
+                }, 'Edit via JSON'),
+              ]),
+            ]),
+          ]),
           h('button.btn.btn-danger', {
             onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
             title: 'Delete layout',
@@ -73,6 +87,10 @@ const toolbarViewMode = (model) => {
       ]),
     ]),
   ];
+};
+
+const openJSONEditModal = (model) => {
+  model.isUpdateVisible = true;
 };
 
 /**
