@@ -5,7 +5,7 @@
  * All rights not expressly granted are reserved.
  *
  * This software is distributed under the terms of the GNU General Public
- * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ * License v3 (GPL Version 3), copied verbatim in the file 'COPYING'.
  *
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
@@ -27,27 +27,83 @@ import { statusControllerTestSuite } from './lib/controllers/status-controller.t
 import { ccdbServiceTestSuite } from './lib/services/ccdb-service.test.js';
 import { statusServiceTestSuite } from './lib/services/status-service.test.js';
 
-import { commonLibraryQcObjectUtilsTestSuite as objectUtilityTestSuite } from './common/library/qcObject/utils.test.js';
+/**
+ * Views
+ */
 import {
-  commonLibraryUtilsDateTimeTestSuite as dateTimeUtilityTestSuite,
-} from './common/library/utils/dateTimeFormat.test.js';
+  setupServerForIntegrationTests,
+  terminateSessionAndLog,
+} from './public/serverSetup.js';
+import { initialPageSetupTests } from './public/index.js';
+import { layoutViewTestSuite } from './public/pages/layout-view.test.js';
+
+import { commonLibraryQcObjectUtilsTestSuite as objectUtilityTestSuite } from './common/library/qcObject/utils.test.js';
+import { commonLibraryUtilsDateTimeTestSuite as dateTimeUtilityTestSuite }
+  from './common/library/utils/dateTimeFormat.test.js';
 
 describe('Lib - Test Suite', async () => {
   describe('Utility methods test suite', async () => await utilsTestSuite());
-  describe('Configuration File Parser test suite', async () => await configurationTestSuite());
+  describe('Configuration File Parser test suite', async () =>
+    await configurationTestSuite());
 });
 
 describe('Common Library - Test Suite', () => {
-  describe('CL - Object Utility methods test suite', () => objectUtilityTestSuite());
-  describe('CL - DateTime Utility methods test suite', () => dateTimeUtilityTestSuite());
+  describe('CL - Object Utility methods test suite', () =>
+    objectUtilityTestSuite());
+  describe('CL - DateTime Utility methods test suite', () =>
+    dateTimeUtilityTestSuite());
 });
 
 describe('Services - Test Suite', async () => {
-  describe('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
-  describe('StatusService - Test Suite', async () => await statusServiceTestSuite());
+  describe('CcdbService - Test Suite', async () =>
+    await ccdbServiceTestSuite());
+  describe('StatusService - Test Suite', async () =>
+    await statusServiceTestSuite());
 });
 
 describe('Controllers - Test Suite', async () => {
-  describe('LayoutController test suite', async () => await layoutControllerTestSuite());
-  describe('StatusController test suite', async () => await statusControllerTestSuite());
+  describe('LayoutController test suite', async () =>
+    await layoutControllerTestSuite());
+  describe('StatusController test suite', async () =>
+    await statusControllerTestSuite());
+});
+
+let url = undefined;
+let page = undefined;
+let browser = undefined;
+let subprocess = undefined;
+let subprocessOutput = undefined;
+
+describe('Views - Test Suite', () => {
+  before(async () => {
+    const {
+      url: serverUrl,
+      page: serverPage,
+      browser: serverBrowser,
+      subprocess: serverSubprocess,
+      subprocessOutput: serverSubprocessOutput,
+    } = await setupServerForIntegrationTests();
+
+    url = serverUrl;
+    page = serverPage;
+    browser = serverBrowser;
+    subprocess = serverSubprocess;
+    subprocessOutput = serverSubprocessOutput;
+  });
+
+  describe('Initial page setup test', () => {
+    it('should perform initial page setup tests', async () => {
+      await initialPageSetupTests(url, page);
+    });
+  });
+
+  describe('LayoutView - Test Suite', () => {
+    it('should run layout view tests', async () => {
+      await layoutViewTestSuite(url, page);
+    });
+  });
+
+  after(async () => {
+    await terminateSessionAndLog(browser, subprocessOutput, subprocess);
+  });
 });

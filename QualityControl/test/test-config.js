@@ -29,10 +29,10 @@ export const testConfig = {
     host: 'localhost',
     port: 7777,
   },
-  consul: {
-    hostname: 'localhost',
-    port: 8500,
-  },
+  // consul: {
+  //   hostname: 'localhost',
+  //   port: 8500,
+  // },
   ccdb: {
     hostname: 'ccdb',
     port: 8500,
