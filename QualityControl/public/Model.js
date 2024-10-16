@@ -75,6 +75,7 @@ export default class Model extends Observable {
     this.accountMenuEnabled = false;
     this.page = null;
     this._isImportVisible = false; // Visibility of modal allowing user to import a layout as JSON
+    this._isUpdateVisible = false; // Visibility of modal allowing user to edit JSON of an existing layout
 
     // Setup router
     this.router = new QueryRouter();
@@ -372,6 +373,24 @@ export default class Model extends Observable {
    */
   set isImportVisible(value) {
     this._isImportVisible = value ? true : false;
+    this.notify();
+  }
+
+  /**
+   * Returns the visibility of the edit JSON layout modal
+   * @returns {boolean} - whether import modal is visible
+   */
+  get isUpdateVisible() {
+    return this._isUpdateVisible;
+  }
+
+  /**
+   * Sets the visibility of the edit JSON layout modal
+   * @param {boolean} value - value to be set for modal visibility
+   * @returns {undefined}
+   */
+  set isUpdateVisible(value) {
+    this._isUpdateVisible = value ? true : false;
     this.notify();
   }
 }

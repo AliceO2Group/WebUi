@@ -30,6 +30,7 @@ export default class LayoutService {
     this.loader = model.loader;
 
     this.new = RemoteData.notAsked(); // RemoteData for creating a new layout via modal of import or prompt
+    this.update = RemoteData.notAsked(); // RemoteData for updating the JSON file that builds the layout
 
     this.list = RemoteData.notAsked(); // List of all existing layouts in QCG;
     this.userList = RemoteData.notAsked(); // List of layouts owned by current user;

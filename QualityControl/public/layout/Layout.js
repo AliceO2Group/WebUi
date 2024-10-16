@@ -43,6 +43,7 @@ export default class Layout extends Observable {
     this.tabInterval = undefined; // JS Interval to change currently displayed tab
 
     this.newJSON = undefined;
+    this.updatedJSON = undefined;
 
     this.requestedLayout = RemoteData.notAsked();
 
@@ -51,6 +52,8 @@ export default class Layout extends Observable {
     this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // Pointer to a tabObject being modified
     this.editOriginalClone = null; // Contains a deep clone of item before editing
+
+    this.editMenuOpen = false;
 
     // https://github.com/hootsuite/grid
     this.gridListSize = 3;
@@ -310,6 +313,15 @@ export default class Layout extends Observable {
     await this.model.services.layout.patchLayout(id, { isOfficial });
     await this.model.services.layout.getLayouts(this);
     await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
+    this.model.notify();
+  }
+
+  /**
+   * Toggle edit menu dropdown
+   * @returns {undefined}
+   */
+  async toggleEditMenu() {
+    this.editMenuOpen = !this.editMenuOpen;
     this.model.notify();
   }
 
@@ -726,5 +738,99 @@ export default class Layout extends Observable {
       clearInterval(this.tabInterval);
       this.selectTab(this._tabIndex);
     }
+  }
+
+  /**
+   * Returns the updated layout in a formatted JSON string.
+   *
+   * @returns {string} The updated JSON string representing the layout.
+   */
+  getUpdatedLayout() {
+    if (!this.updatedJSON) {
+      this.updatedJSON = LayoutUtils.toSkeleton(this.item);
+    }
+    return this.updatedJSON;
+  }
+
+  /**
+   * Validates the provided layout and updates the layout state accordingly.
+   * @param {string} newLayout - The layout to check.
+   */
+  checkLayoutToUpdate(newLayout) {
+    try {
+      const newJSON = JSON.parse(newLayout);
+      this.checkForManualIdEntry(newJSON);
+      this.model.services.layout.update = RemoteData.notAsked();
+    } catch (error) {
+      this.model.services.layout.update = RemoteData.failure(error.message || error);
+    }
+    this.updatedJSON = newLayout;
+    this.notify();
+  }
+
+  /**
+   * Checks that user don't enter the ID
+   * @param {object} layoutJSON layout entered by the user in the box
+   */
+  checkForManualIdEntry(layoutJSON) {
+    if (Object.keys(layoutJSON).includes('id')) {
+      throw new Error('Error: Manual entry of an ID is not allowed, as it is automatically assigned by the system.');
+    }
+  }
+
+  /**
+   * Updates the layout by parsing the updated JSON and saving the layout state.
+   */
+  updateLayout() {
+    try {
+      this.item = this.getUpdatedItem();
+      this.saveUpdatedItem();
+    } catch (error) {
+      this.changeUpdateStatus(RemoteData.failure(error.message || error));
+    }
+    this.notify();
+  }
+
+  /**
+   * Merges skeleton to the layout
+   *
+   * @returns {object} item updated with user changes
+   */
+  getUpdatedItem() {
+    const updatedLayout = LayoutUtils.fromSkeleton({
+      ...this.item,
+      ...JSON.parse(this.updatedJSON),
+    });
+    return {
+      ...updatedLayout,
+      id: this.item.id,
+    };
+  }
+
+  /**
+   * Saves the updated item and manages the update status.
+   */
+  saveUpdatedItem() {
+    this.changeUpdateStatus(RemoteData.Loading());
+    this.save();
+    this.updatedJSON = undefined;
+    this.changeUpdateStatus(RemoteData.Success());
+    this.toggleUpdatePanel();
+  }
+
+  /**
+   * Sets the status of the layout update
+   *
+   * @param {RemoteData} status new layout update status
+   */
+  changeUpdateStatus(status) {
+    this.model.services.update = status;
+  }
+
+  /**
+   * Toggles whether the layout update panel should be displayed or not
+   */
+  toggleUpdatePanel() {
+    this.model.isUpdateVisible = !this.model.isUpdateVisible;
   }
 }
