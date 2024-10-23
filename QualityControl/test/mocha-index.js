@@ -12,42 +12,53 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import utilsTestSuite from './lib/utils/utils.test.js';
-import configurationTestSuite from './lib/config/public-config.test.js';
+
+import { suite } from 'node:test';
+
+import { utilsTestSuite } from './lib/utils/utils.test.js';
+import { publicConfigProviderTest } from './lib/config/publicConfig.test.js';
 
 /**
  * Controllers
  */
 import { layoutControllerTestSuite } from './lib/controllers/LayoutController.test.js';
-import { statusControllerTestSuite } from './lib/controllers/status-controller.test.js';
+import { statusControllerTestSuite } from './lib/controllers/StatusController.test.js';
 
 /**
  * Services
  */
-import { ccdbServiceTestSuite } from './lib/services/ccdb-service.test.js';
-import { statusServiceTestSuite } from './lib/services/status-service.test.js';
+import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
+import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 
-import { commonLibraryQcObjectUtilsTestSuite as objectUtilityTestSuite } from './common/library/qcObject/utils.test.js';
-import {
-  commonLibraryUtilsDateTimeTestSuite as dateTimeUtilityTestSuite,
-} from './common/library/utils/dateTimeFormat.test.js';
+import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
+import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
 
-describe('Lib - Test Suite', async () => {
-  describe('Utility methods test suite', async () => await utilsTestSuite());
-  describe('Configuration File Parser test suite', async () => await configurationTestSuite());
+suite('Lib - Test Suite', async () => {
+  suite('Utility methods test suite', async () => await utilsTestSuite());
+  suite('Configuration File Parser test suite', async () => await publicConfigProviderTest());
 });
 
-describe('Common Library - Test Suite', () => {
-  describe('CL - Object Utility methods test suite', () => objectUtilityTestSuite());
-  describe('CL - DateTime Utility methods test suite', () => dateTimeUtilityTestSuite());
+suite('Common Library - Test Suite', () => {
+  suite('CL - Object Utility methods test suite', () => commonLibraryQcObjectUtilsTestSuite());
+  suite('CL - DateTime Utility methods test suite', () => commonLibraryUtilsDateTimeTestSuite());
 });
 
-describe('Services - Test Suite', async () => {
-  describe('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
-  describe('StatusService - Test Suite', async () => await statusServiceTestSuite());
+suite('Services - Test Suite', async () => {
+  suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
+  suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
+  suite('JsonServiceTest test suite', async () => {
+    // TODO - bring inline with current tests
+  });
+  suite('UserServiceTest test suite', async () => {
+    // TODO - bring inline with current tests
+  });
 });
 
-describe('Controllers - Test Suite', async () => {
-  describe('LayoutController test suite', async () => await layoutControllerTestSuite());
-  describe('StatusController test suite', async () => await statusControllerTestSuite());
+suite('Controllers - Test Suite', async () => {
+  suite('LayoutController test suite', async () => await layoutControllerTestSuite());
+  suite('StatusController test suite', async () => await statusControllerTestSuite());
+
+  suite('ObjectController test suite', async () => {
+    // TODO - bring inline with current tests
+  });
 });
