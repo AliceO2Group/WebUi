@@ -15,7 +15,7 @@
 import LayoutController from '../lib/controllers/LayoutController';
 import UserService from '../lib/services/UserService';
 import StatusController from '../lib/controllers/StatusController.js';
-import config from './test-config.js';
+import { config } from './config.js';
 import projPackage from './../package.json';
 import ObjectController from '../lib/controllers/ObjectController';
 

@@ -16,7 +16,7 @@ import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { doesNotThrow, ok } from 'assert';
-import { testConfig as config } from './../../test-config.js';
+import { config } from '../../config.js';
 
 import { buildPublicConfig } from './../../../lib/config/publicConfigProvider.js';
 

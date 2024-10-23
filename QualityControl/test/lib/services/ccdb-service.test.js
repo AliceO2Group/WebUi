@@ -20,7 +20,7 @@ import nock from 'nock';
 
 import { CcdbService } from '../../../lib/services/ccdb/CcdbService.js';
 import { CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/ccdb/CcdbConstants.js';
-import { testConfig as config } from '../../test-config.js';
+import { config } from '../../config.js';
 
 export const ccdbServiceTestSuite = async () => {
   before(() => nock.cleanAll());
