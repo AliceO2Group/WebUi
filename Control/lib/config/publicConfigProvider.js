@@ -35,7 +35,8 @@ function buildPublicConfig(config) {
     CONSUL: getConsulConfig(config),
     REFRESH_TASK: config?.utils?.refreshTask || 10000,
   };
-  let codeStr = `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as COG};\n`;
+  let codeStr = `/* eslint-disable quote-props */\n`
+    + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as COG};\n`;
   fs.writeFileSync(publicConfigPath, codeStr);
 }
 
