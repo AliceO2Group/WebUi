@@ -23,14 +23,6 @@ export default [
         vnode: 'readonly',
         Express: 'readonly',
         setImmediate: 'readonly',
-        describe: 'readonly',
-        suite: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        before: 'readonly',
-        beforeEach: 'readonly',
-        after: 'readonly',
-        afterEach: 'readonly'
       },
     },
     rules: {

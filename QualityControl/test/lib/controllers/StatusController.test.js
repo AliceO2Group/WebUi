@@ -14,9 +14,9 @@
 
 import { stub } from 'sinon';
 import { ok } from 'node:assert';
-import { suite, test, beforeEach } from 'node:test';
+import { suite, test } from 'node:test';
 
-import { StatusController } from './../../../lib/controllers/StatusController.js';
+import {  StatusController } from './../../../lib/controllers/StatusController.js';
 
 export const statusControllerTestSuite = async () => {
   suite('`getFrameworkInfo()` tests', () => {
