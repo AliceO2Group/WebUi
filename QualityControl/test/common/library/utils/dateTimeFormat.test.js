@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ok } from 'assert';
+import { suite, test } from 'node:test';
+import { ok } from 'node:assert';
 import { getDateAsTimestamp } from './../../../../common/library/utils/dateTimeFormat.js';
 
 /**
@@ -20,23 +21,23 @@ import { getDateAsTimestamp } from './../../../../common/library/utils/dateTimeF
  * @returns {undefined}
  */
 export const commonLibraryUtilsDateTimeTestSuite = async () => {
-  describe('getDateAsTimestamp - test suite', () => {
-    it('should successfully return a number from a string timestamp', () => {
+  suite('getDateAsTimestamp - test suite', () => {
+    test('should successfully return a number from a string timestamp', () => {
       const dateInMs = 1680263291130;
       ok(getDateAsTimestamp(`${dateInMs}`), dateInMs);
     });
 
-    it('should successfully return a number from a string timestamp', () => {
+    test('should successfully return a number from a string timestamp', () => {
       const dateInMs = 1680263291130;
       ok(getDateAsTimestamp(dateInMs), dateInMs);
     });
 
-    it('should successfully return a number from a string date', () => {
+    test('should successfully return a number from a string date', () => {
       const dateStringInMs = '2023-03-31T11:49:33.048Z';
       ok(getDateAsTimestamp(dateStringInMs), 1680263373049);
     });
 
-    it('should successfully return same value if it is a wrong one', () => {
+    test('should successfully return same value if it is a wrong one', () => {
       const notADateString = '2023-03-OL-definitely-not-date';
       ok(getDateAsTimestamp(notADateString), notADateString);
     });
