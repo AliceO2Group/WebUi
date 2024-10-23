@@ -1,7 +1,6 @@
 public/config.js
-config.js
+/config.js
 public/config.cjs
-config.cjs
 *~
 .DS_Store
 cert/*

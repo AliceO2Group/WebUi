@@ -28,7 +28,6 @@ const RELATIVE_CONF_LOCATION = '../../../public/config.js';
  */
 export const publicConfigProviderTest = async () => {
   suite('Public configuration provider - test suite', () => {
-
     test('should successfully create JS module with public configuration as export', () => {
       doesNotThrow(() => buildPublicConfig(config));
     });
