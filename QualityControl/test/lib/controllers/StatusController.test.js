@@ -12,17 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-/* eslint-disable require-jsdoc */
-/* eslint-disable max-len */
-
 import { stub } from 'sinon';
-import assert from 'assert';
+import { ok } from 'node:assert';
+import { suite, test, beforeEach } from 'node:test';
 
 import { StatusController } from './../../../lib/controllers/StatusController.js';
 
 export const statusControllerTestSuite = async () => {
-  describe('`getFrameworkInfo()` tests', () => {
-    it('should successfully respond with framework information', async () => {
+  suite('`getFrameworkInfo()` tests', () => {
+    test('should successfully respond with framework information', async () => {
       const statusService = {
         retrieveFrameworkInfo: stub().resolves({
           qcg: {
@@ -45,10 +43,10 @@ export const statusControllerTestSuite = async () => {
         qcg: { status: { ok: true }, version: '0.0.1' },
         ccdb: { status: { ok: false, message: 'Something went wrong here' } },
       };
-      assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith(result));
+      ok(res.status.calledWith(200));
+      ok(res.json.calledWith(result));
     });
-    it('should respond with error if service failed to retrieve information', async () => {
+    test('should respond with error if service failed to retrieve information', async () => {
       const statusService = {
         retrieveFrameworkInfo: stub().throws(new Error('Service could not retrieve status')),
       };
@@ -59,13 +57,13 @@ export const statusControllerTestSuite = async () => {
       };
       await statusController.getFrameworkInfo({}, res);
 
-      assert.ok(res.status.calledWith(503));
-      assert.ok(res.json.calledWith({ message: 'Service could not retrieve status' }));
+      ok(res.status.calledWith(503));
+      ok(res.json.calledWith({ message: 'Service could not retrieve status' }));
     });
   });
 
-  describe('`getQCGStatus()` tests', () => {
-    it('should successfully respond with result JSON with its status and specified version', () => {
+  suite('`getQCGStatus()` tests', () => {
+    test('should successfully respond with result JSON with its status and specified version', () => {
       const statusService = {
         retrieveOwnStatus: stub().returns({
           status: { ok: true },
@@ -80,8 +78,8 @@ export const statusControllerTestSuite = async () => {
       statusController.getQCGStatus({}, res);
 
       const result = { status: { ok: true }, version: '0.0.1' };
-      assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledWith(result));
+      ok(res.status.calledWith(200));
+      ok(res.json.calledWith(result));
     });
   });
 };
