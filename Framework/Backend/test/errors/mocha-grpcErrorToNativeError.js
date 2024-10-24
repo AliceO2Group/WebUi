@@ -21,7 +21,7 @@ const { UnauthorizedAccessError } = require('../../errors/UnauthorizedAccessErro
 
 const assert = require('assert');
 
-describe(`'grpcErrorToNativeError' test suite`, () => {
+describe('\'grpcErrorToNativeError\' test suite', () => {
   it('should successfully convert gRPC errors to native errors', () => {
     assert.deepStrictEqual(grpcErrorToNativeError({ code: 3, message: 'invalid' }), new InvalidInputError('invalid'));
     assert.deepStrictEqual(grpcErrorToNativeError({ code: 4, message: 'timeout' }), new TimeoutError('timeout'));

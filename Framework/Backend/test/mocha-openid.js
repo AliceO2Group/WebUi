@@ -12,12 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
+const assert = require('assert');
 const config = require('./../config-default.json');
 const OpenId = require('./../http/openid.js');
 
 describe('OpenID Connect client', () => {
-  it('should fail to create instance', (done) => {
+  it('should fail to create instance', async () => {
     const openid = new OpenId(config.openId);
-    openid.createIssuer().catch(() => done());
-  }).timeout(5000);
+    await assert.rejects(async () => await openid.createIssuer());
+  }).timeout(5500);
 });
