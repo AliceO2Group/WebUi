@@ -18,30 +18,19 @@
 export const config = {
   demoData: true,
   http: {
-    port: 8181,
+    port: 8080,
     hostname: 'localhost',
     tls: false,
   },
-  mysql: {
-    host: 'aaaa',
-    user: 'aaaa',
-    password: 'aaaa',
-    database: 'quality_control',
-  },
-  tobject2json: {
-    host: 'localhost',
-    port: 7777,
-  },
-  consul: {
-    hostname: 'localhost',
-    port: 8500,
-  },
   ccdb: {
-    hostname: 'ccdb',
-    port: 8500,
-    prefix: 'test',
+    protocol: 'http',
+    hostname: 'localhost',
+    port: 8081,
+    prefix: 'qc/test',
+    cachePrefix: 'qc/test',
+    cacheRefreshRate: 120 * 1000,
   },
-  quality_control: {
-    version: '0.19.5-1',
+  qc: {
+    enabled: false,
   },
 };
