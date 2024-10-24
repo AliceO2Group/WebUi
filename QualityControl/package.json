@@ -19,13 +19,11 @@
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "start": "node index.js",
-    "test": "npm run eslint && npm run mocha",
-    "integration-test": "mocha --exit --bail ./test/integration/qcg-test.cjs -R min",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "eslint": "./node_modules/.bin/eslint --config eslint.config.js *.js lib/ public/",
-    "coverage": "nyc npm run mocha",
-    "coverage-local": "nyc --reporter=lcov npm run mocha",
-    "mocha": "mocha --exit test/mocha-index.js"
+    "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib public",
+    "coverage": "npm run test && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage.lcov test/test-index.js",
+    "node-test": "node --test test/test-index.js",
+    "test": "npm run eslint && npm run node-test"
   },
   "files": [
     "common/",
@@ -44,9 +42,7 @@
     "eslint": "^9.12.0",
     "eslint-plugin-jsdoc": "^50.3.1",
     "globals": "^15.10.0",
-    "mocha": "^10.7.0",
     "nock": "^13.5.0",
-    "nyc": "^17.1.0",
     "puppeteer": "^23.5.1",
     "sinon": "^19.0.2"
   },

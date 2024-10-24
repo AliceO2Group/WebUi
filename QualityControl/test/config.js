@@ -12,7 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-export const testConfig = {
+/**
+ * Configuration object to be used in TST environment
+ */
+export const config = {
   demoData: true,
   http: {
     port: 8181,
