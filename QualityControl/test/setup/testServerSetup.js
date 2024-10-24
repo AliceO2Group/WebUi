@@ -40,7 +40,7 @@ export async function setupServerForIntegrationTests() {
   // Start browser to test UI
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: false,
+    headless: true,
   });
   const page = await browser.newPage();
 
