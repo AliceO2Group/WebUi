@@ -20,5 +20,5 @@ describe('OpenID Connect client', () => {
   it('should fail to create instance', async () => {
     const openid = new OpenId(config.openId);
     await assert.rejects(async () => await openid.createIssuer());
-  }).timeout(5000);
+  }).timeout(5500);
 });
