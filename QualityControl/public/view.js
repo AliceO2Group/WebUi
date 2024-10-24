@@ -20,6 +20,8 @@ import header from './common/header.js';
 import layoutListPage from './layout/list/page.js';
 import layoutViewPage from './layout/view/page.js';
 import layoutImportModal from './layout/panels/importModal.js';
+import layoutEditModal from './layout/panels/editModal.js';
+
 import objectTreePage from './object/objectTreePage.js';
 import ObjectViewPage from './pages/objectView/ObjectViewPage.js';
 import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
@@ -30,6 +32,7 @@ import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => [
+  model.isUpdateVisible && layoutEditModal(model),
   model.isImportVisible && layoutImportModal(model),
   model.page === 'objectView' ? ObjectViewPage(model) :
     h('.absolute-fill.flex-column', [
