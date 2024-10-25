@@ -10,49 +10,90 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-/* eslint-disable max-len */
 
-const assert = require('assert');
-const test = require('../index');
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 
-describe('layoutList page test suite', async () => {
-  let page; let url;
+const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
 
-  before(async () => {
-    ({ page, url } = test);
-    await page.goto(`${url}?page=layoutList`, { waitUntil: 'networkidle0' });
+/**
+ * Initial page setup tests
+ * @param {string} url - URL needed to open page for testing
+ * @param {object} page - Puppeteer page object
+ * @param {timeout} timeout - Timeout PER test; default 100
+ * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
+ */
+export const layoutListPageTests = async (url, page, timeout = 5000, testParent) => {
+  await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
+    await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=layoutList');
+    strictEqual(location.search, '?page=layoutList');
   });
 
-  it('should have a button for online mode in the header', async () => {
-    await page.waitForSelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)', { timeout: 5000 });
-    const onlineButton = await page.evaluate(() =>
-      document.querySelector('header > div:nth-child(1) > div:nth-child(1) > button:nth-child(2)').title);
-    assert.strictEqual(onlineButton, 'Toggle Mode (Online/Offline)');
+  await testParent.test('should have a table with rows for Official Layouts', async () => {
+    const label = await page.evaluate(() => document.querySelector('section > div > div > div > b').innerText);
+    strictEqual(label?.trim(), 'Official');
+
+    const noContentTable = await page.evaluate(() =>
+      document.querySelector('section > div > div > table > tbody > tr > td').innerText);
+    strictEqual(noContentTable?.trim(), 'No layouts found');
   });
 
-  it('should have a table with rows', async () => {
-    const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-    assert.ok(rowsCount > 1);
+  await testParent.test('should have a table with rows for users layouts', async () => {
+    const label = await page.evaluate(() =>
+      document.querySelector('section > div > div:nth-child(2) > div > b').innerText);
+    strictEqual(label?.trim(), 'My Layouts');
+
+    const tableContentLength = await page.evaluate(() =>
+      document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
+    ok(tableContentLength >= 1);
   });
 
-  it('should display layouts sorted alphabetically', async () => {
-    const firstLayout = await page.evaluate(() => document.querySelector('section table tbody tr a').innerText);
-    assert.strictEqual(firstLayout, 'AliRoot');
+  await testParent.test('should display layouts sorted alphabetically in users layouts', async () => {
+    const numberOfLayoutsOfUser = await page.evaluate(() =>
+      document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
+
+    const layoutNames = [];
+    for (let i = 0; i < numberOfLayoutsOfUser; i++) {
+      const layoutName = await page.evaluate(
+        (i) => {
+          const pathToNameOfLayout =
+            `section > div > div:nth-child(2) > table > tbody > tr:nth-child(${i + 1}) > td:nth-child(2)`;
+          return document.querySelector(pathToNameOfLayout).innerText;
+        },
+        i,
+      );
+      layoutNames.push(layoutName);
+    }
+    const sortedLayoutsName = layoutNames.slice().sort();
+    deepStrictEqual(layoutNames, sortedLayoutsName);
   });
 
-  it('should have a table with one row after filtering', async () => {
-    await page.type('header input', 'AliRoot');
-    await page.waitForTimeout(200);
-    const rowsCount = await page.evaluate(() => document.querySelectorAll('section table tbody tr').length);
-    assert.ok(rowsCount === 1);
+  await testParent.test('should have a table with one row after filtering', async () => {
+    await page.type('header > div > div:nth-child(3) > input', 'a');
+    const numberOfFilteredLayoutsOfUser = await page.evaluate(() =>
+      document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
+    ok(numberOfFilteredLayoutsOfUser === 1);
   });
 
-  it('should have a link to show a layout', async () => {
-    await page.evaluate(() => document.querySelector('section table tbody tr a').click());
+  await testParent.test('should have a link to show a layout from users layout', async () => {
+    // remove input value for filtering via the layout model rather than the puppeteer page
+    await page.evaluate(() => window.model.layout.search(''));
+    const pathToLayoutToClick =
+      'section > div > div:nth-child(2) > table > tbody > tr:nth-child(2) > td:nth-child(2) > div > a';
+
+    await page.waitForSelector(pathToLayoutToClick, { timeout: 2000 });
+    const hrefOfLayoutToClick = await page.evaluate(
+      (pathToLayoutToClick) =>
+        document.querySelector(pathToLayoutToClick).href,
+      pathToLayoutToClick,
+    );
+    strictEqual(hrefOfLayoutToClick, 'http://localhost:8080/?page=layoutShow&layoutId=671b8c22402408122e2f20dd');
+
+    await page.click(pathToLayoutToClick);
+    await page.waitForNetworkIdle();
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=layoutShow&layoutId=5aba4a059b755d517e76ea10');
-    // Id 5aba4a059b755d517e76ea10 is set in QCModelDemo
+
+    // test clicks on the second layout with ID defined in qcg-mock-data.json
+    strictEqual(location.search, '?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main');
   });
-});
+};
