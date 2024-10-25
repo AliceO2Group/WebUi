@@ -33,4 +33,5 @@ export const config = {
   qc: {
     enabled: false,
   },
+  dbFile: './test/setup/seeders/qcg-mock-data.json',
 };
