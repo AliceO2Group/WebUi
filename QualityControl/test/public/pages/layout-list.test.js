@@ -72,7 +72,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     await page.locator('header > div > div:nth-child(3) > input').fill('a');
     const numberOfFilteredLayoutsOfUser = await page.evaluate(() =>
       document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
-    ok(numberOfFilteredLayoutsOfUser === 1);
+    strictEqual(numberOfFilteredLayoutsOfUser, 1);
   });
 
   await testParent.test('should have a link to show a layout from users layout', async () => {
