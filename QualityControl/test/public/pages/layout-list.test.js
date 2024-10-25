@@ -69,7 +69,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a table with one row after filtering', async () => {
-    await page.type('header > div > div:nth-child(3) > input', 'a');
+    await page.locator('header > div > div:nth-child(3) > input').fill('a');
     const numberOfFilteredLayoutsOfUser = await page.evaluate(() =>
       document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
     ok(numberOfFilteredLayoutsOfUser === 1);
