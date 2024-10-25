@@ -13,6 +13,7 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 
+const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
 
 /**
@@ -70,6 +71,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should have a table with one row after filtering', async () => {
     await page.locator('header > div > div:nth-child(3) > input').fill('a');
+    await delay(200);
     const numberOfFilteredLayoutsOfUser = await page.evaluate(() =>
       document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
     strictEqual(numberOfFilteredLayoutsOfUser, 1);
