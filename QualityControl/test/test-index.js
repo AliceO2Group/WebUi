@@ -30,6 +30,7 @@ import {
 
 import { initialPageSetupTests } from './public/initialPageSetup.test.js';
 import { qcDrawingOptionsTests } from './public/components/qcDrawingOptions.test.js';
+import { layoutListPageTests } from './public/pages/layout-list.test.js';
 
 /**
  * Backend tests imports
@@ -52,8 +53,18 @@ import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
 
-const FRONT_END_TIMEOUT = 20000; // front-end test suite timeout
-const BACK_END_TIMEOUT = 1000; // back-end test suite timeout
+const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
+// remaining tests are based on the number of individual tests in each suite
+
+const INITIAL_PAGE_SETUP_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
+const QC_DRAWING_OPTIONS_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 13;
+const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
+
+const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
+  + QC_DRAWING_OPTIONS_TIMEOUT
+  + LAYOUT_LIST_PAGE_TIMEOUT; // front-end test suite timeout
+
+const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 
 suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, async () => {
   suite('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
@@ -73,24 +84,22 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     test(
       'should successfully import and run the tests for page setup',
-      async (testParent) => await initialPageSetupTests(url, page, 3000, testParent),
+      async (testParent) => await initialPageSetupTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
     test.skip(
       'should successfully import and run tests for QC drawing options',
-      async (testParent) => await qcDrawingOptionsTests(url, page, 1000, testParent),
+      async (testParent) => await qcDrawingOptionsTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    test.skip(
-      'pages tests to add',
-      async () => {
-        // TODO
-        // require('./layout-list.test');
-        // require('./object-tree.test');
-        // require('./layout-view.test');
-        // require('./object-view.test');
-        // require('./about-page.test');
-      },
+    test(
+      'should successfully run layoutList page tests',
+      { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
+      async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
+    // require('./object-tree.test');
+    // require('./layout-view.test');
+    // require('./object-view.test');
+    // require('./about-page.test');
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {

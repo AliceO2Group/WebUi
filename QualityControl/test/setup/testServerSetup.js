@@ -43,7 +43,7 @@ export async function setupServerForIntegrationTests() {
     headless: true,
   });
   const page = await browser.newPage();
-
+  await page.setViewport({ width: 1366, height: 768 });
   // Listen to browser
   page.on('error', (pageerror) => {
     console.error('        ', pageerror);
