@@ -16,11 +16,16 @@ import nock from 'nock';
 import { CCDB_FILTER_FIELDS } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
 import { objects } from './seeders/ccdbObjects.js';
+import { MOCK_OBJECT_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE }
+  from './seeders/object-view/mock-object-view.js';
 
 const CCDB_URL = `${config.ccdb.protocol}://${config.ccdb.hostname}:${config.ccdb.port}`;
 const CCDB_API_PATH_LATEST = `/latest/${config.ccdb.prefix}`;
+const CCDB_API_PATH_OBJECT_IDENTIFICATION = '/latest/qc/test/object/1';
+const CCDB_API_PATH_OBJECT_DETAILS =
+'/qc/test/object/1/1656072357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
 
-const { PATH, CREATED, LAST_MODIFIED } = CCDB_FILTER_FIELDS;
+const { PATH, CREATED, LAST_MODIFIED, ID, VALID_FROM, VALID_UNTIL } = CCDB_FILTER_FIELDS;
 
 /**
  * Setup nock environment for ccdb which is to intercept all CCDB requests used in the Frontend test suites
@@ -37,4 +42,37 @@ export const initializeNockForCcdb = () => {
     .reply(200, {
       objects,
     });
+
+  nock(CCDB_URL, {
+    reqheaders: {
+      Accept: 'application/json',
+      'X-Filter-Fields': `${PATH},${ID},${VALID_FROM},${VALID_UNTIL}`,
+    },
+  }).persist()
+    .get(CCDB_API_PATH_OBJECT_IDENTIFICATION)
+    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
+    .get(`${CCDB_API_PATH_LATEST}/object/1`)
+    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE);
+
+  nock(CCDB_URL, {
+    reqheaders: {
+      Accept: 'application/json',
+    },
+  }).persist()
+    .head(CCDB_API_PATH_OBJECT_DETAILS)
+    .reply(200, null, MOCK_OBJECT_DETAILS_RESPONSE.headers)
+    .head('/qc/test/object/1/1656072357492/1971432357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c')
+    .reply(200, null, MOCK_OBJECT_DETAILS_RESPONSE.headers);
+
+  nock(CCDB_URL, {
+    reqheaders: {
+      Accept: 'application/json',
+      'X-Filter-Fields': `${VALID_FROM},${ID},${CREATED}`,
+    },
+  })
+    .persist()
+    // .get('/browse/qc/EMC/MO/Pedestals/mPedestalChannelFECHG')
+    // .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE)
+    .get('/browse/qc/test/object/1')
+    .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE);
 };
