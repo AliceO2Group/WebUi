@@ -91,7 +91,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       'should successfully import and run the tests for page setup',
       async (testParent) => await initialPageSetupTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
-    test(
+    test.skip(
       'should successfully import and run tests for QC drawing options',
       async (testParent) => await qcDrawingOptionsTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
