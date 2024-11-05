@@ -27,7 +27,11 @@ const CCDB_API_PATH_LATEST = `/latest/${config.ccdb.prefix}`;
 const CCDB_API_PATH_OBJECT_IDENTIFICATION = '/latest/qc/test/object/1';
 const CCDB_API_PATH_OBJECT_DETAILS =
 '/qc/test/object/1/1656072357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
-
+const CCDB_API_DOWNLOAD_ROOT_OBJECT = {
+  id: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  path: '/download',
+  objectPath: 'test/setup/seeders/object-view/mock-object.root',
+}
 const { PATH, CREATED, LAST_MODIFIED, ID, VALID_FROM, VALID_UNTIL } = CCDB_FILTER_FIELDS;
 
 /**
@@ -79,12 +83,12 @@ export const initializeNockForCcdb = () => {
     .get('/browse/qc/test/object/1')
     .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE);
 
-  nock('http://localhost:8081')
+  nock(CCDB_URL)
     .persist()
-    .get('/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c')
+    .get(`${CCDB_API_DOWNLOAD_ROOT_OBJECT.path}/${CCDB_API_DOWNLOAD_ROOT_OBJECT.id}`)
     .reply(200, async () => {
       // Define the file path
-      const filePath = path.resolve('test/setup/seeders/object-view/mock-object.root');
+      const filePath = path.resolve(CCDB_API_DOWNLOAD_ROOT_OBJECT.objectPath);
       // Read the content of the file
       const fileContent = await fs.readFile(filePath);
       return fileContent;
