@@ -50,7 +50,7 @@ export class QcObjectService {
      * @constant
      * @type {string}
      */
-    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}/`;
+    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}`;
 
     this._cache = {
       objects: undefined,
@@ -178,13 +178,7 @@ export class QcObjectService {
    * @returns {Promise<JSON.Error>} - JSON version of the object
    */
   async _getJsRootFormat(url) {
-    let file = undefined;
-    if (process.env.NODE_ENV === 'test') {
-      const filePath = 'test/setup/seeders/object-view/mock-object.root';
-      file = await this._rootService.openFile(filePath);
-    } else {
-      file = await this._rootService.openFile(`${url}+`);
-    }
+    const file = await this._rootService.openFile(`${url}+`);
     const root = await file.readObject('ccdb_object');
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
 

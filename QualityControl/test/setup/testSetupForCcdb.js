@@ -13,6 +13,9 @@
  */
 
 import nock from 'nock';
+import fs from 'fs/promises';
+import path from 'path';
+
 import { CCDB_FILTER_FIELDS } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
 import { objects } from './seeders/ccdbObjects.js';
@@ -75,4 +78,15 @@ export const initializeNockForCcdb = () => {
     // .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE)
     .get('/browse/qc/test/object/1')
     .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE);
+
+  nock('http://localhost:8081')
+    .persist()
+    .get('/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c')
+    .reply(200, async () => {
+      // Define the file path
+      const filePath = path.resolve('test/setup/seeders/object-view/mock-object.root');
+      // Read the content of the file
+      const fileContent = await fs.readFile(filePath);
+      return fileContent;
+    });
 };
