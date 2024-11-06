@@ -12,8 +12,8 @@
  */
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { delay } from './../../testUtils/delay.js';
 
-const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
 
 /**

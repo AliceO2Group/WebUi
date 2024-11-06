@@ -32,6 +32,8 @@ import { initialPageSetupTests } from './public/initialPageSetup.test.js';
 import { qcDrawingOptionsTests } from './public/components/qcDrawingOptions.test.js';
 import { layoutListPageTests } from './public/pages/layout-list.test.js';
 import { objectTreePageTests } from './public/pages/object-tree.test.js';
+import { objectViewFromObjectTreeTests } from './public/pages/object-view-from-object-tree.test.js';
+import { objectViewFromLayoutShowTests } from './public/pages/object-view-from-layout-show.test.js';
 
 /**
  * Backend tests imports
@@ -106,9 +108,19 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       async (testParent) => await objectTreePageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    // require('./object-tree.test');
+    test(
+      'should successfully run objectView page tests from object tree with CCDB mocked with nock',
+      { timeout: OBJECT_TREE_PAGE_TIMEOUT },
+      async (testParent) => await objectViewFromObjectTreeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
+    test(
+      'should successfully run objectView page from layout show tests with CCDB mocked with nock',
+      { timeout: OBJECT_TREE_PAGE_TIMEOUT },
+      async (testParent) => await objectViewFromLayoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
     // require('./layout-view.test');
-    // require('./object-view.test');
     // require('./about-page.test');
   });
 

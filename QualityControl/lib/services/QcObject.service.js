@@ -50,7 +50,7 @@ export class QcObjectService {
      * @constant
      * @type {string}
      */
-    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}/`;
+    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}`;
 
     this._cache = {
       objects: undefined,

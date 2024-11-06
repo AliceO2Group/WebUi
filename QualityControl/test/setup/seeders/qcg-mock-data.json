@@ -93,7 +93,19 @@
     {
      "id": "671b95884312f03458f1d9ca",
      "name": "main",
-     "objects": [],
+     "objects": [
+      {
+       "id": "6724a6bd1b2bad3d713cc4ee",
+       "x": 0,
+       "y": 0,
+       "h": 1,
+       "w": 1,
+       "name": "qc/test/object/1",
+       "options": [],
+       "autoSize": false,
+       "ignoreDefaults": false
+      }
+     ],
      "columns": 2
     },
     {
