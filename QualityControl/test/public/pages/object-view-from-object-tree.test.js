@@ -77,14 +77,13 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
         const title = document.querySelector('div div b').innerText;
         const rootPlotClassList =
                 document.querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div').classList;
-        return { title, rootPlotClassList };
+        return { title, rootPlotClassList, selectedObjectPath: window.model.objectViewModel.selected.payload.path };
       });
-      deepStrictEqual(result.title, path);
-      deepStrictEqual(result.rootPlotClassList[0], 'relative');
-      deepStrictEqual(result.rootPlotClassList[1], 'jsroot-container');
+      strictEqual(result.title, path);
+      strictEqual(result.rootPlotClassList[0], 'relative');
+      strictEqual(result.rootPlotClassList[1], 'jsroot-container');
 
-      // const objectSelected = window.model.object.selected;
-      // assert.deepStrictEqual(result.objectSelected, { name: objectName, createTime: 3, lastModified: 100 });
+      strictEqual(result.selectedObjectPath, path);
     },
   );
 

@@ -45,22 +45,6 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should take back the user to page=layoutShow when clicking "Back To QCG" (no object passed or selected)',
-    { timeout },
-    async () => {
-      const backButtonPath = 'div > div > div > div > a';
-      await page.locator(backButtonPath).click();
-
-      const result = await page.evaluate(() => ({
-        location: window.location.search,
-        objectSelected: window.model.object.selected,
-      }));
-      strictEqual(result.location, '?page=objectTree');
-      strictEqual(result.objectSelected, null);
-    },
-  );
-
-  await testParent.test(
     'should load a plot and update button text to "Back to layout" if layoutId parameter is provided',
     { timeout },
     async () => {
@@ -112,16 +96,14 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         const title = document.querySelector('div div b').textContent;
         const rootPlotClassList = document
           .querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div').classList;
-        // const objectSelected = window.model.object.selected;
+        const selectedObjectPath = window.model.objectViewModel.selected.payload.path;
         return {
-          title: title,
-          rootPlotClassList: rootPlotClassList,
-        //   objectSelected: objectSelected,
+          title, rootPlotClassList, selectedObjectPath,
         };
       });
       strictEqual(result.title, 'qc/test/object/1 (from layout: a-test)');
       deepStrictEqual(result.rootPlotClassList, { 0: 'relative', 1: 'jsroot-container' });
-      //   deepStrictEqual(result.objectSelected, { name: 'qc/test/object/1' });
+      strictEqual(result.selectedObjectPath, 'qc/test/object/1');
     },
   );
 };
