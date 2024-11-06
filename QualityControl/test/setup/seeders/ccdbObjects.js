@@ -13,22 +13,31 @@
  */
 
 import { CCDB_FILTER_FIELDS } from '../../../lib/services/ccdb/CcdbConstants.js';
-const { PATH, CREATED, LAST_MODIFIED } = CCDB_FILTER_FIELDS;
+const { PATH, CREATED, LAST_MODIFIED, ID, VALID_FROM, VALID_UNTIL } = CCDB_FILTER_FIELDS;
 
 export const objects = [
   {
     [PATH]: 'qc/test/object/1',
     [LAST_MODIFIED]: new Date('2023-12-01').valueOf(),
     [CREATED]: new Date('2023-12-01').valueOf(),
+    [ID]: '',
+    [VALID_FROM]: new Date('2023-12-01').valueOf(),
+    [VALID_UNTIL]: new Date('2023-12-02').valueOf(),
   },
   {
     [PATH]: 'qc/test/object/2',
     [LAST_MODIFIED]: new Date('2023-12-02').valueOf(),
     [CREATED]: new Date('2023-12-01').valueOf(),
+    [ID]: '',
+    [VALID_FROM]: new Date('2023-12-01').valueOf(),
+    [VALID_UNTIL]: new Date('2023-12-02').valueOf(),
   },
   {
     [PATH]: 'qc/test/object/11',
     [LAST_MODIFIED]: new Date('2023-12-03').valueOf(),
     [CREATED]: new Date('2023-12-03').valueOf(),
+    [ID]: '',
+    [VALID_FROM]: new Date('2023-12-03').valueOf(),
+    [VALID_UNTIL]: new Date('2023-12-04').valueOf(),
   },
 ];

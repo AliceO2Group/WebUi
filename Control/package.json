@@ -46,10 +46,10 @@
   ],
   "devDependencies": {
     "eslint": "^8.56.0",
-    "mocha": "^10.7.0",
+    "mocha": "^10.8.2",
     "nock": "^13.5.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^23.6.0",
+    "puppeteer": "^23.7.0",
     "sinon": "19.0.2"
   }
 }
