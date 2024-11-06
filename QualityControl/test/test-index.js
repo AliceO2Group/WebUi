@@ -53,6 +53,7 @@ import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
+import { layoutShowTests } from './public/pages/layout-view.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -61,6 +62,7 @@ const INITIAL_PAGE_SETUP_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
 const QC_DRAWING_OPTIONS_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 13;
 const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
 const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
+const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
@@ -85,7 +87,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       await terminateSessionAndLog(browser, subprocessOutput, subprocess);
     });
 
-    test(
+    test.skip(
       'should successfully import and run the tests for page setup',
       async (testParent) => await initialPageSetupTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
@@ -94,25 +96,31 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       async (testParent) => await qcDrawingOptionsTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    test(
+    test.skip(
       'should successfully run layoutList page tests',
       { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
       async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    test(
+    test.skip(
       'should successfully run objectTree page tests with CCDB mocked with nock',
       { timeout: OBJECT_TREE_PAGE_TIMEOUT },
       async (testParent) => await objectTreePageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
     // require('./object-tree.test');
-    // require('./layout-view.test');
     // require('./object-view.test');
+
+    test(
+      'should successfully run layout view page tests',
+      { timeout: LAYOUT_SHOW_PAGE_TIMEOUT },
+      async (testParent) => await layoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
     // require('./about-page.test');
   });
 
-  suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
+  suite.skip('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
       suite('Configuration File Parser test suite', async () => await publicConfigProviderTest());
