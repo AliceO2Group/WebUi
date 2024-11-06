@@ -12,7 +12,7 @@
  */
 
 import { strictEqual, deepStrictEqual } from 'node:assert';
-import { delay } from '../../testUtils/delay';
+import { delay } from '../../testUtils/delay.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
 
@@ -89,12 +89,10 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     async () => {
       const layoutId = '671b95883d23cd0d67bdc787';
       await page.locator('div > div > div > a').click();
-      delay(300);
 
-      const result = await page.evaluate(() => ({
-        location: window.location.search,
-      }));
-      strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}&tab=main`);
+      await delay(500);
+      const location = await page.evaluate(() => window.location);
+      strictEqual(location.search, `?page=layoutShow&layoutId=${layoutId}&tab=main`);
     },
   );
 

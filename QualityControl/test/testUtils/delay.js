@@ -16,4 +16,4 @@
  * @param {number} ms - Time in milliseconds to wait
  * @returns {Promise<void>}
  */
-export const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
+export const delay = (ms = 500) => new Promise((resolve) => setTimeout(() => resolve(), ms));
