@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { deepStrictEqual, strictEqual } from 'node:assert';
+import { strictEqual } from 'node:assert';
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView';
 
 export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, testParent) => {
