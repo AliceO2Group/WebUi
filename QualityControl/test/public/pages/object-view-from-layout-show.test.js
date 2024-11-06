@@ -12,6 +12,8 @@
  */
 
 import { strictEqual, deepStrictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay';
+
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
 
 export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, testParent) => {
@@ -86,12 +88,13 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     { timeout },
     async () => {
       const layoutId = '671b95883d23cd0d67bdc787';
-      await page.evaluate(() => document.querySelector('div div div a').click());
+      await page.locator('div > div > div > a').click();
+      delay(300);
 
       const result = await page.evaluate(() => ({
         location: window.location.search,
       }));
-      strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}`);
+      strictEqual(result.location, `?page=layoutShow&layoutId=${layoutId}&tab=main`);
     },
   );
 
