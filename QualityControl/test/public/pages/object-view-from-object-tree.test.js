@@ -43,8 +43,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
     { timeout },
     async () => {
       const backButtonElement = 'div div div a';
-      await page.waitForSelector(backButtonElement);
-      await page.evaluate((element) => document.querySelector(element).click(), backButtonElement);
+      await page.locator(backButtonElement).click();
       const result = await page.evaluate(() => ({
         location: window.location.search,
         objectSelected: window.model.object.selected,
@@ -84,7 +83,6 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
       deepStrictEqual(result.rootPlotClassList[0], 'relative');
       deepStrictEqual(result.rootPlotClassList[1], 'jsroot-container');
 
-      //TODO: Check objectSelected
       // const objectSelected = window.model.object.selected;
       // assert.deepStrictEqual(result.objectSelected, { name: objectName, createTime: 3, lastModified: 100 });
     },

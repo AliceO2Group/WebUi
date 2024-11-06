@@ -46,7 +46,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should take back the user to page=layoutShow when clicking "Back To QCG" (no object passed or selected)',
     { timeout },
     async () => {
-      await page.evaluate(() => document.querySelector('div div div div a').click());
+      const backButtonPath = 'div > div > div > div > a';
+      await page.locator(backButtonPath).click();
 
       const result = await page.evaluate(() => ({
         location: window.location.search,
@@ -86,7 +87,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     { timeout },
     async () => {
       const layoutId = '671b95883d23cd0d67bdc787';
-      await page.evaluate(() => document.querySelector('div div div a').click());
+      const backToLayoutButtonPath = 'div > div > div > div > a';
+      await page.locator(backToLayoutButtonPath).click();
 
       const result = await page.evaluate(() => ({
         location: window.location.search,
