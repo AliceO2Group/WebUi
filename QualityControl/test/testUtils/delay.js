@@ -11,10 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-describe('Integration Test Suite', async () => {
-  require('./layout-list.test');
-  require('./object-tree.test');
-  require('./layout-view.test');
-  require('./object-view.test');
-  require('./about-page.test');
-});
+/**
+ * Add a bit of waiting time to ensure page finished rendering
+ * @param {number} ms - Time in milliseconds to wait
+ * @returns {Promise<void>}
+ */
+export const delay = (ms = 500) => new Promise((resolve) => setTimeout(() => resolve(), ms));

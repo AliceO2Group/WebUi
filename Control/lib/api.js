@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+const { Kafka, logLevel } = require('kafkajs');
 const logger = (require('@aliceo2/web-ui').LogManager)
   .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
@@ -45,6 +46,7 @@ const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.j
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
+const { AliEcsSynchronizer } = require('./control-core/AliEcsSynchronizer.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
@@ -100,7 +102,7 @@ module.exports.setup = (http, ws) => {
   aliecsReqHandler.setWs(ws);
   aliecsReqHandler.workflowService = workflowService;
 
-  const envCache = new EnvCache(ctrlService, envService);
+  const envCache = new EnvCache(ctrlService, envService, cacheService);
   envCache.setWs(ws);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
@@ -108,9 +110,22 @@ module.exports.setup = (http, ws) => {
   runService.retrieveStaticConfigurations();
   const runController = new RunController(runService, cacheService);
 
-  const notificationService = new NotificationService(config.kafka);
+  const notificationService = new NotificationService();
   if (notificationService.isConfigured()) {
     notificationService.proxyWebNotificationToWs(ws);
+  }
+
+  let aliEcsSynchronizer = undefined;
+  if (config.kafka && config.kafka?.enable) {
+    const kafkaClient = new Kafka({
+      clientId: 'control-gui',
+      brokers: config.kafka.brokers,
+      retry: { retries: 3 },
+      logLevel: logLevel.NOTHING,
+    });
+
+    aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
+    aliEcsSynchronizer.start();
   }
 
   const statusService = new StatusService(

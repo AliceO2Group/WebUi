@@ -21,7 +21,6 @@ jobs:
           node-version: '20.x'
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run coverage )
-      - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for QualityControl
         uses: codecov/codecov-action@v4
         with:

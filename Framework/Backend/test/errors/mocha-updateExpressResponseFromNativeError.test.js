@@ -22,7 +22,7 @@ const { updateAndSendExpressResponseFromNativeError } = require('../../errors/up
 const assert = require('assert');
 const sinon = require('sinon');
 
-describe(`'updateAndSendExpressResponseFromNativeError' test suite`, () => {
+describe('\'updateAndSendExpressResponseFromNativeError\' test suite', () => {
   let response;
   before(() => {
     response = {

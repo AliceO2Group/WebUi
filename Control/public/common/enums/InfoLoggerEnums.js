@@ -13,14 +13,19 @@
 */
 
 /**
- * Keys that are used to set/get information to/from the CacheService
+ * Known values for certain fields in the InfoLogger to be matched against
  */
-const CacheKeys =  Object.freeze({
-  CALIBRATION_RUNS_BY_DETECTOR: 'CALIBRATION_RUNS_BY_DETECTOR',
-  CALIBRATION_RUNS_REQUESTS: 'CALIBRATION_RUNS_REQUESTS',
-  DCS: {
-    SOR: 'DCS.SOR',
-  }
+const O2Systems = Object.freeze({
+  ECS: 'ECS',
+  FLP: 'FLP',
+  GUI: 'GUI',
 });
 
-exports.CacheKeys = CacheKeys;
+/**
+ * Known values for certain fields in the InfoLogger to be matched against
+ */
+const O2Facilities = Object.freeze({
+  CORE_DCS_CLIENT: 'core/dcsclient',
+});
+
+export { O2Systems, O2Facilities };

@@ -38,3 +38,29 @@ export const DetectorState = Object.freeze({
   PFR_UNAVAILABLE: 'PFR_UNAVAILABLE',
   TIMEOUT: 'TIMEOUT',
 });
+
+/**
+ * Detector state style as per the DCS interface from P2
+ */
+export const DetectorStateStyle = Object.freeze({
+  UNDEFINED: '',
+  NULL_STATE: '',
+  READY: 'bg-primary white',
+  RUN_OK: 'bg-success white',
+  RUN_FAILURE: 'bg-danger white',
+  RUN_INHIBIT: '',
+  SOR_PROGRESSING: 'bg-yellow italic',
+  EOR_PROGRESSING: '',
+  SOR_FAILURE: 'bg-danger white',
+  EOR_FAILURE: '',
+  ERROR: 'bg-danger white',
+  DEAD: 'bg-danger white',
+  SOR_UNAVAILABLE: 'bg-danger white',
+  EOR_UNAVAILABLE: '',
+  PREPARING: '',
+  SOR_AVAILABLE: 'bg-primary white',
+  EOR_AVAILABLE: '',
+  PFR_AVAILABLE: '',
+  PFR_UNAVAILABLE: '',
+  TIMEOUT: '',
+});

@@ -113,7 +113,7 @@ class QueryService {
   async queryGroupCountLogsBySeverity(runNumber) {
     const groupByStatement =
       'SELECT severity, COUNT(*) FROM messages WHERE run=? and severity '
-      + `in ('D', 'I', 'W', 'E', 'F') GROUP BY severity;`;
+      + 'in (\'D\', \'I\', \'W\', \'E\', \'F\') GROUP BY severity;';
     let data = [];
     try {
       data = await this._pool.query({

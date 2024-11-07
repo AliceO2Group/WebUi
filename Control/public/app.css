@@ -112,3 +112,7 @@
 .table-ecs-sm th, .table-ecs-sm td { padding: 0.3em; }
 .table-ecs-primary>th, .table-ecs-primary>td { background-color: var(--color-primary); color: var(--color-white); }
 .z-index-one { z-index: 1; }
+
+.grid-container { display: grid; gap: 1  rem; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.bg-yellow { background-color: #e6e200; }
+.italic { font-style: italic; }

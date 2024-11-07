@@ -13,6 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
+import {dcsSorPanel} from './components/dcs/dcsSorPanel.js';
 import {environmentActionPanel} from './components/environmentActionPanel.js';
 import {environmentNavigationTabs} from './components/environmentNavigationTabs.js';
 import {environmentTasksSummaryTable} from './components/environmentTasksSummaryTable.js';
@@ -53,7 +54,8 @@ export const EnvironmentPageContent = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode} - content of environment info
  */
 const showEnvironmentPage = (model, environmentInfo) => {
-  const {state, currentTransition = undefined} = environmentInfo;
+  const { id, state, currentTransition = undefined, includedDetectors, userVars } = environmentInfo;
+  const isDcsEnabled = userVars?.['dcs_enabled'] === 'true';
   const isRunningStable = !currentTransition && state === EnvironmentState.RUNNING;
   const { services: { detectors: { availability = {} } = {} } } = model;
 
@@ -74,6 +76,7 @@ const showEnvironmentPage = (model, environmentInfo) => {
   return h('.w-100.p1.g2.flex-column', [
     environmentStateSummary(environmentInfo),
     environmentActionPanel(model, environmentInfo),
+    isDcsEnabled && (currentTransition === 'START_ACTIVITY' || state === 'ERROR') && dcsSorPanel(id, includedDetectors),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
     h('.flex-row.g2.z-index-one', [
       environmentTasksSummaryTable(environmentInfo, availability, onRowClick),

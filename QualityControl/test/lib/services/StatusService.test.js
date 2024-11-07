@@ -16,59 +16,60 @@
 /* eslint-disable max-len */
 
 import { stub } from 'sinon';
-import assert from 'assert';
+import { deepStrictEqual } from 'node:assert';
+import { suite, test, before } from 'node:test';
 
 import { StatusService } from './../../../lib/services/Status.service.js';
 
 export const statusServiceTestSuite = async () => {
-  describe('`retrieveDataServiceStatus()` tests', () => {
+  suite('`retrieveDataServiceStatus()` tests', () => {
     let statusService;
     before(() => {
       statusService = new StatusService({ version: '0.1.1' });
     });
-    it('should return status in error is data connector throws error', async () => {
+    test('should return status in error is data connector throws error', async () => {
       statusService.dataService = {
         getVersion: stub().throws(new Error('Service is currently unavailable')),
       };
       const result = await statusService.retrieveDataServiceStatus();
-      assert.deepStrictEqual(result, { status: { ok: false, message: 'Service is currently unavailable' } });
+      deepStrictEqual(result, { status: { ok: false, message: 'Service is currently unavailable' } });
     });
-    it('should successfully return status ok if data connector passed checks', async () => {
+    test('should successfully return status ok if data connector passed checks', async () => {
       statusService.dataService = {
         getVersion: stub().resolves({ version: '0.0.1' }),
       };
       const response = await statusService.retrieveDataServiceStatus();
-      assert.deepStrictEqual(response, { status: { ok: true }, version: '0.0.1' });
+      deepStrictEqual(response, { status: { ok: true }, version: '0.0.1' });
     });
   });
 
-  describe('`retrieveOnlineServiceStatus()` tests', () => {
+  suite('`retrieveOnlineServiceStatus()` tests', () => {
     let statusService;
     before(() => {
       statusService = new StatusService();
     });
-    it('should successfully return status if no online service was configured with customized version', async () => {
+    test('should successfully return status if no online service was configured with customized version', async () => {
       const response = await statusService.retrieveOnlineServiceStatus();
-      assert.deepStrictEqual(response, { status: { ok: true }, version: 'Live Mode was not configured' });
+      deepStrictEqual(response, { status: { ok: true }, version: 'Live Mode was not configured' });
     });
-    it('should return status in error if online service threw an error', async () => {
+    test('should return status in error if online service threw an error', async () => {
       statusService.onlineService = {
         getConsulLeaderStatus: stub().rejects(new Error('Unable to retrieve status of live mode')),
       };
       const response = await statusService.retrieveOnlineServiceStatus();
-      assert.deepStrictEqual(response, { status: { ok: false, message: 'Unable to retrieve status of live mode' } });
+      deepStrictEqual(response, { status: { ok: false, message: 'Unable to retrieve status of live mode' } });
     });
-    it('should successfully return status ok if online service passed checks', async () => {
+    test('should successfully return status ok if online service passed checks', async () => {
       statusService.onlineService = {
         getConsulLeaderStatus: stub().resolves(),
       };
       const response = await statusService.retrieveOnlineServiceStatus();
-      assert.deepStrictEqual(response, { status: { ok: true } });
+      deepStrictEqual(response, { status: { ok: true } });
     });
   });
 
-  describe('`retrieveFrameworkInfo()` tests', () => {
-    it('should successfully build an object with framework information from all used sources', async () => {
+  suite('`retrieveFrameworkInfo()` tests', () => {
+    test('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
       statusService.dataService = { getVersion: stub().resolves({ version: '0.0.1-beta' }) };
       statusService.onlineService = { getConsulLeaderStatus: stub().rejects(new Error('Online mode failed to retrieve')) };
@@ -80,36 +81,36 @@ export const statusServiceTestSuite = async () => {
         data_service_ccdb: { status: { ok: true }, version: '0.0.1-beta' },
         online_service_consul: { status: { ok: false, message: 'Online mode failed to retrieve' } },
       };
-      assert.deepStrictEqual(response, result);
+      deepStrictEqual(response, result);
     });
 
-    describe('`retrieveQcVersion()` tests', () => {
-      it('should return message that is not part of an FLP deployment', async () => {
+    suite('`retrieveQcVersion()` tests', () => {
+      test('should return message that is not part of an FLP deployment', async () => {
         const statusService = new StatusService();
         const response = await statusService.retrieveQcVersion();
         const result = { status: { ok: true }, version: 'Not part of an FLP deployment' };
-        assert.deepStrictEqual(response, result);
+        deepStrictEqual(response, result);
       });
     });
   });
 
-  describe('`retrieveOwnStatus()` tests', () => {
-    it('should successfully return an object with status and version of itself', async () => {
+  suite('`retrieveOwnStatus()` tests', () => {
+    test('should successfully return an object with status and version of itself', async () => {
       const statusService = new StatusService({ version: '0.0.1' });
       const result = statusService.retrieveOwnStatus();
 
-      assert.deepStrictEqual(result, {
+      deepStrictEqual(result, {
         status: { ok: true },
         version: '0.0.1',
         clients: -1,
       });
     });
 
-    it('should successfully return an object with status and no version of itself', async () => {
+    test('should successfully return an object with status and no version of itself', async () => {
       const statusService = new StatusService();
       const result = statusService.retrieveOwnStatus();
 
-      assert.deepStrictEqual(result, {
+      deepStrictEqual(result, {
         status: { ok: true },
         version: '-',
         clients: -1,
