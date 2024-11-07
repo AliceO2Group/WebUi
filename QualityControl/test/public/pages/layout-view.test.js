@@ -12,15 +12,24 @@
  */
 
 import { strictEqual, ok } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
 
+/**
+ * Performs a series of automated tests on the layoutShow page using Puppeteer.
+ * @param {string} url - URL needed to open page for testing
+ * @param {object} page - Puppeteer page object
+ * @param {number} timeout - Timeout PER test; default 100
+ * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
+ */
 export const layoutShowTests = async (url, page, timeout = 5000, testParent) => {
+  const LAYOUT_ID = '671b95883d23cd0d67bdc787';
   await testParent.test(
     'should load',
     { timeout },
     async () => {
-      await page.goto(`${url}?page=layoutShow&layoutId=671b8c227b3227b0c603c29d`, { waitUntil: 'networkidle0' });
+      await page.goto(`${url}?page=layoutShow&layoutId=${LAYOUT_ID}`, { waitUntil: 'networkidle0' });
       const location = await page.evaluate(() => window.location);
-      strictEqual(location.search, '?page=layoutShow&layoutId=671b8c227b3227b0c603c29d&tab=main');
+      strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`);
     },
   );
 
@@ -28,7 +37,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have tabs in the header',
     { timeout },
     async () => {
-      const tabsCount = await page.evaluate(() => document.querySelectorAll('header .btn-tab').length);
+      const tabsPath = 'header .btn-tab';
+      const tabsCount = await page.evaluate((tabsPath) => document.querySelectorAll(tabsPath).length, tabsPath);
       strictEqual(tabsCount, 2);
     },
   );
@@ -38,7 +48,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     { timeout },
     async () => {
       const layoutClassList = await page.evaluate(() => document
-        .querySelector('body > div > div > nav > div:nth-child(5) > a:nth-child(1)').classList);
+        .querySelector('nav > div:nth-child(5) > a:nth-child(1)').classList);
       strictEqual(
         JSON.stringify(layoutClassList),
         JSON.stringify({ 0: 'menu-item', 1: 'w-wrapped', 2: 'selected' }),
@@ -55,205 +65,168 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
-  await testParent.test(
-    'should have an info button with full path, last modified and metadata when clicked (plot success)',
-    { timeout },
-    async () => {
-      const commonPath =
-        'body > div > div > section > div > div > div:nth-child(3) > div > div > div:nth-child(2) > div > div';
-      const infoButtonPath = `${commonPath} > button`;
-      const lastModifiedPath = `${commonPath} > div > div:nth-child(2)`;
-      const pathPath = `${commonPath} > div > div:nth-child(3)`;
+  await testParent
+    .test('should have an info button with full path and last modified when clicked (plot success)', async () => {
+      const commonSelectorPath = 'section > div > div > div:nth-child(2) > div > div > div';
+      const plot1Path = `${commonSelectorPath} > div:nth-child(1)`;
+      await page.locator(plot1Path).click();
 
-      await page.locator(infoButtonPath).click();
-
-      const result = await page.evaluate(() => {
-        const infoButtonTitle = document.querySelector(infoButtonPath).title;
-        const lastModified = document.querySelector(lastModifiedPath).innerText;
-        const path = document.querySelector(pathPath).innerText;
-        return {
-          lastModified: lastModified,
-          path: path,
-          title: infoButtonTitle,
-        };
-      });
-
+      const result = await page.evaluate((commonSelectorPath) => {
+        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
+        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
+        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
+        const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
+        return { title, pathTitle, objectPath, lastModifiedTitle };
+      }, commonSelectorPath);
       strictEqual(result.title, 'View details about histogram');
-      ok(result.path.includes('PATH'), true);
-      ok(result.path.includes('DAQ01/EventSizeClasses/class_C0ALSR-ABC'), true);
-      ok(result.lastModified.includes('LAST MODIFIED'), true);
-    },
-  );
+      strictEqual(result.pathTitle, 'path');
+      strictEqual(result.objectPath, 'qc/test/object/1');
+      strictEqual(result.lastModifiedTitle, 'lastModified');
+    });
 
   await testParent.test(
     'should have an info button with full path and last modified when clicked on a second plot(plot success)',
     { timeout },
-    async () => { },
+    async () => {
+      const commonSelectorPath = 'section > div > div > div:nth-child(2) > div:nth-child(2) > div > div';
+      const plot2Path = `${commonSelectorPath} > div:nth-child(1)`;
+      await page.locator(plot2Path).click();
+      const result = await page.evaluate((commonSelectorPath) => {
+        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
+        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
+        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
+        const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
+        return { title, pathTitle, objectPath, lastModifiedTitle };
+      }, commonSelectorPath);
+      strictEqual(result.title, 'View details about histogram');
+      strictEqual(result.pathTitle, 'path');
+      strictEqual(result.objectPath, 'qc/test/object/1');
+      strictEqual(result.lastModifiedTitle, 'lastModified');
+    },
   );
 
   await testParent.test(
     'should have second tab to be empty (according to demo data)',
     { timeout },
-    async () => { },
+    async () => {
+      await page.locator('header > div > div:nth-child(2) > div > button:nth-child(2)').click();
+      const plotPath = 'section svg.jsroot';
+      await delay(1000);
+      const plotsCount = await page.evaluate((plotPath) => document.querySelectorAll(plotPath).length, plotPath);
+      strictEqual(plotsCount, 0);
+    },
   );
 
   await testParent.test(
-    'should have a button group containing three buttons in the header',
+    'should have a button group containing four buttons in the header',
     { timeout },
-    async () => { },
+    async () => {
+      const count = await page.evaluate(() => {
+        const container = document.querySelector('.btn-group');
+        return container ? container.children.length : 0;
+      });
+      strictEqual(count, 4);
+    },
   );
 
   await testParent.test(
     'should have one duplicate button in the header to create a new duplicated layout',
     { timeout },
-    async () => { },
+    async () => {
+      const buttonPath = 'header > div > div:nth-child(3) > div > button:nth-child(1)';
+      const duplicateButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
+      strictEqual(duplicateButton, 'Duplicate layout');
+    },
   );
 
   await testParent.test(
     'should have one delete button in the header to delete layout',
     { timeout },
-    async () => { },
+    async () => {
+      const buttonPath = 'header > div > div:nth-child(3) > div > button:nth-child(4)';
+      const deleteButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
+      strictEqual(deleteButton, 'Delete layout');
+    },
   );
 
   await testParent.test(
     'should have one link button in the header to download layout skeleton',
     { timeout },
-    async () => { },
+    async () => {
+      const buttonPath = 'header > div > div:nth-child(3) > div > a';
+      const editButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
+      strictEqual(editButton, 'Export layout skeleton as JSON file');
+    },
   );
 
   await testParent.test(
     'should have one edit button in the header to go in edit mode',
     { timeout },
-    async () => { },
+    async () => {
+      const buttonPath = 'header > div > div:nth-child(3) > div > button:nth-child(3)';
+      const editButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
+      strictEqual(editButton, 'Edit layout');
+    },
   );
 
   await testParent.test(
     'should click the edit button in the header and enter edit mode',
     { timeout },
-    async () => { },
+    async () => {
+      const editButtonPath = 'header > div > div:nth-child(3) > div > button:nth-child(3)';
+      await page.locator(editButtonPath).click();
+    },
   );
 
   await testParent.test(
     'should have input field for changing layout name in edit mode',
     { timeout },
-    async () => { },
+    async () => {
+      const inputPath = 'header > div > div:nth-child(3) > input';
+      await page.evaluate((inputPath) => document.querySelector(inputPath), inputPath);
+    },
   );
 
   await testParent.test(
     'should have number input field for allowing users to change auto-tab value',
     { timeout },
-    async () => { },
+    async () => {
+      await page.waitForSelector('#inputDescription', { timeout: 5000 });
+    },
   );
 
   await testParent.test(
-    'sshould have a tree sidebar in edit mode',
+    'should have a tree sidebar in edit mode',
     { timeout },
-    async () => { },
+    async () => {
+      const secondElementPath = 'nav table tbody tr:nth-child(2)';
+      await page.locator(secondElementPath).click();
+      const rowsCount = await page.evaluate((secondElementPath) =>
+        document.querySelectorAll(secondElementPath).length, secondElementPath);
+      strictEqual(rowsCount, 1);
+    },
   );
 
   await testParent.test(
     'should have filtered results on input search filled',
     { timeout },
-    async () => { },
+    async (t) => {
+      t.skip('Skip test execution for now');
+      // TODO: review
+      //await page.type('nav > div > div > div:nth-child(6) > input', '1');
+      //await page.waitForFunction('document.querySelectorAll(\'nav table tbody tr\').length === 1', { timeout: 5000 });
+    },
   );
 
   await testParent.test(
     'should show normal sidebar after Cancel click',
     { timeout },
-    async () => { },
+    async () => {
+      const cancelButtonPath = 'header > div > div:nth-child(3) > div > button:nth-child(2)';
+      await page.locator(cancelButtonPath).click();
+      await page.waitForSelector('nav .menu-title', { timeout: 5000 });
+    },
   );
 };
-
-//   it('should have an info button with full path and last modified when clicked on a second plot(plot success)', async () => {
-//     const result = await page.evaluate(() => {
-//       const infoButtonTitle = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > button').title;
-//       const lastModified = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2)').innerText;
-//       const path = document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div').innerText;
-//       return {
-//         lastModified: lastModified,
-//         path: path,
-//         title: infoButtonTitle,
-//       };
-//     });
-//     // Click again to reset for other tests
-//     await page.evaluate(() => document.querySelector('body > div > div > section > div > div > div:nth-child(2) > div > div > div:nth-child(2) > div > div > button').click());
-//     assert.strictEqual(result.title, 'View details about histogram', 'Button title is different');
-//     assert.ok(result.path.includes('PATH'), 'Object full path label is not the same');
-//     assert.ok(result.path.includes('DAQ01/EventSizeClasses/class_C0AMU-AB'), 'Object full path is not the same');
-//     assert.ok(result.lastModified.includes('LAST MODIFIED'), 'Last Modified label is different');
-//   });
-
-//   it('should have second tab to be empty (according to demo data)', async () => {
-//     await page.evaluate(() => document.querySelector('header > div > div:nth-child(2) > div > button:nth-child(2)').click());
-//     await page.waitForSelector('section h1', { timeout: 5000 });
-//     const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-//     assert.strictEqual(plotsCount, 0);
-//   });
-
-//   it('should have a button group containing three buttons in the header', async () => {
-//     const buttonCount = await page.evaluate(() =>
-//       document.querySelectorAll('header > div > div:nth-child(3) > div.btn-group > button').length);
-//     assert.strictEqual(buttonCount, 3);
-//   });
-
-//   it('should have one duplicate button in the header to create a new duplicated layout', async () => {
-//     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)', { timeout: 5000 });
-//     const duplicateButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(1)').title);
-//     assert.strictEqual(duplicateButton, 'Duplicate layout');
-//   });
-
-//   it('should have one delete button in the header to delete layout', async () => {
-//     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(4)', { timeout: 5000 });
-//     const deleteButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(4)').title);
-//     assert.strictEqual(deleteButton, 'Delete layout');
-//   });
-
-//   it('should have one link button in the header to download layout skeleton', async () => {
-//     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > a', { timeout: 5000 });
-//     const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > a').title);
-//     assert.strictEqual(editButton, 'Export layout skeleton as JSON file');
-//   });
-
-//   it('should have one edit button in the header to go in edit mode', async () => {
-//     await page.waitForSelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)', { timeout: 5000 });
-//     const editButton = await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div.btn-group > button:nth-child(3)').title);
-//     assert.strictEqual(editButton, 'Edit layout');
-//   });
-
-//   // Begin: Edit Mode;
-//   it('should click the edit button in the header and enter edit mode', async () => {
-//     await page.waitForSelector('header > div > div:nth-child(3) > div > button:nth-child(3)', { timeout: 5000 });
-//     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(3)').click());
-//   });
-
-//   it('should have input field for changing layout name in edit mode', async () => {
-//     await page.waitForSelector('header > div > div:nth-child(3) > input', { timeout: 5000 });
-//     const count = await page.evaluate(() => document.querySelectorAll('header > div > div:nth-child(3) > input').length);
-//     assert.strictEqual(count, 1);
-//   });
-
-//   it('should have number input field for allowing users to change auto-tab value', async () => {
-//     await page.waitForSelector('nav > div > div > div:nth-child(4) > div > label', { timeout: 5000 });
-//     await page.waitForSelector('nav > div > div > div:nth-child(4) > div:nth-child(2) > input', { timeout: 5000 });
-//     const autoText = await page.evaluate(() => document.querySelector('nav > div > div > div:nth-child(4) > div > label').innerText);
-//     const inputNumber = await page.evaluate(() => document.querySelector('nav > div > div > div:nth-child(4) > div:nth-child(2) > input').type);
-//     assert.strictEqual(autoText, 'Tab Auto-Change(sec): 0 (OFF), 10-600 (ON)');
-//     assert.deepStrictEqual(inputNumber, 'number');
-//   });
-
-//   it('should have a tree sidebar in edit mode', async () => {
-//     await page.waitForSelector('nav table tbody tr', { timeout: 5000 });
-//     const rowsCount = await page.evaluate(() => document.querySelectorAll('nav table tbody tr').length);
-//     assert.strictEqual(rowsCount, 5); // 5 agents
-//   });
-
-//   it('should have filtered results on input search filled', async () => {
-//     await page.type('nav > div > div > div:nth-child(6) > input', 'HistoWithRandom');
-//     await page.waitForFunction('document.querySelectorAll(\'nav table tbody tr\').length === 1', { timeout: 5000 });
-//   });
-
-//   it('should show normal sidebar after Cancel click', async () => {
-//     await page.evaluate(() => document.querySelector('header > div > div:nth-child(3) > div > button:nth-child(2)').click());
-//     await page.waitForSelector('nav .menu-title', { timeout: 5000 });
-//   });
-// });

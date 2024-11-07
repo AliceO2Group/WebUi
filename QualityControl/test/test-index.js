@@ -89,7 +89,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       await terminateSessionAndLog(browser, subprocessOutput, subprocess);
     });
 
-    test.skip(
+    test(
       'should successfully import and run the tests for page setup',
       async (testParent) => await initialPageSetupTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
@@ -98,13 +98,13 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       async (testParent) => await qcDrawingOptionsTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    test.skip(
+    test(
       'should successfully run layoutList page tests',
       { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
       async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    test.skip(
+    test(
       'should successfully run objectTree page tests with CCDB mocked with nock',
       { timeout: OBJECT_TREE_PAGE_TIMEOUT },
       async (testParent) => await objectTreePageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
@@ -131,7 +131,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     // require('./about-page.test');
   });
 
-  suite.skip('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
+  suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
       suite('Configuration File Parser test suite', async () => await publicConfigProviderTest());
