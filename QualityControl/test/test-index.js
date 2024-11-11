@@ -123,7 +123,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     );
 
     test(
-      'should successfully run layout view page tests',
+      'should successfully run layoutShow page tests',
       { timeout: LAYOUT_SHOW_PAGE_TIMEOUT },
       async (testParent) => await layoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
