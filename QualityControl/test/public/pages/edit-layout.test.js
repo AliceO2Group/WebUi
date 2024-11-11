@@ -13,7 +13,7 @@
 
 import { strictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { defaultMockedLayout, editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
 export const editLayoutTests = async (page, timeout = 5000, testParent) => {
   await testParent.test(
     'should have two options for editing the layout',
@@ -175,7 +175,17 @@ export const editLayoutTests = async (page, timeout = 5000, testParent) => {
     'should update template when clicking "Update template"',
     { timeout },
     async () => {
-      await setNewLayout(page, editedMockedLayout);
+      const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+      await page.locator(editViaJSONButtonPath).click();
+      await delay(50);
+
+      const textareaPath = 'body > div > div > div > div > textarea';
+      const mockedJSON = JSON.stringify(editedMockedLayout);
+      await page.locator(textareaPath).fill(mockedJSON);
+
+      const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
+      await page.locator(updateButtonPath).click();
+      await delay(50);
 
       const buttonsPath = 'header > div > div:nth-child(2) > div > button';
       const result = await page.evaluate((buttonsPath) => {
@@ -184,7 +194,6 @@ export const editLayoutTests = async (page, timeout = 5000, testParent) => {
       }, buttonsPath);
 
       strictEqual(result, true);
-      await setNewLayout(page, defaultMockedLayout);
     },
   );
 };
@@ -204,18 +213,4 @@ const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
 
   strictEqual(updateButtonIsDisabled, true);
   strictEqual(message, errorMessage);
-};
-
-const setNewLayout = async (page, newLayout) => {
-  const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
-  await page.locator(editViaJSONButtonPath).click();
-  await delay(50);
-
-  const textareaPath = 'body > div > div > div > div > textarea';
-  const mockedJSON = JSON.stringify(newLayout);
-  await page.locator(textareaPath).fill(mockedJSON);
-
-  const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
-  await page.locator(updateButtonPath).click();
-  await delay(50);
 };
