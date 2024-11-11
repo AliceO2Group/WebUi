@@ -12,7 +12,7 @@
  */
 
 import { editLayoutTests } from './edit-layout.test.js';
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 export const layoutViewTests = async (url, page, timeout = 5000, testParent) => {
 /**
@@ -24,7 +24,7 @@ export const layoutViewTests = async (url, page, timeout = 5000, testParent) => 
  */
   const LAYOUT_ID = '671b95883d23cd0d67bdc787';
   await testParent.test(
-    'should load',
+    'should load the layoutShow page',
     { timeout },
     async () => {
       await page.goto(`${url}?page=layoutShow&layoutId=${LAYOUT_ID}`, { waitUntil: 'networkidle0' });
@@ -49,10 +49,7 @@ export const layoutViewTests = async (url, page, timeout = 5000, testParent) => 
     async () => {
       const layoutClassList = await page.evaluate(() => document
         .querySelector('nav > div:nth-child(5) > a:nth-child(1)').classList);
-      strictEqual(
-        JSON.stringify(layoutClassList),
-        JSON.stringify({ 0: 'menu-item', 1: 'w-wrapped', 2: 'selected' }),
-      );
+      deepStrictEqual(layoutClassList, { 0: 'menu-item', 1: 'w-wrapped', 2: 'selected' });
     },
   );
 
