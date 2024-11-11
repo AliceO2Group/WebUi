@@ -94,6 +94,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       );
       const result = await page.evaluate(() => {
         const title = document.querySelector('div div b').textContent;
+        console.log('aaaaaaa', document.querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div'));
         const rootPlotClassList = document
           .querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div').classList;
         const selectedObjectPath = window.model.objectViewModel.selected.payload.path;

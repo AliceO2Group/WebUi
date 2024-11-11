@@ -91,28 +91,28 @@
    "autoTabChange": 0,
    "tabs": [
     {
-     "id": "671b95884312f03458f1d9ca",
      "name": "main",
      "objects": [
       {
-       "id": "6724a6bd1b2bad3d713cc4ee",
        "x": 0,
        "y": 0,
        "h": 1,
        "w": 1,
        "name": "qc/test/object/1",
        "options": [],
-       "autoSize": false,
-       "ignoreDefaults": false
+       "ignoreDefaults": false,
+       "id": "6731ceb1701658516c91b76b",
+       "autoSize": false
       }
      ],
-     "columns": 2
+     "columns": 2,
+     "id": "6731ceb12f8ad3cd0d51b3fb"
     },
     {
-     "id": "671b958b8a5cfb52ee9ef2a1",
      "name": "a",
      "objects": [],
-     "columns": 2
+     "columns": 2,
+     "id": "6731ceb1282dd7fa7d54f833"
     }
    ],
    "collaborators": []
