@@ -64,7 +64,9 @@ const INITIAL_PAGE_SETUP_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
 const QC_DRAWING_OPTIONS_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 13;
 const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
 const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
-const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
+const OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
+const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
+const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 23;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
@@ -112,13 +114,13 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     test(
       'should successfully run objectView page tests from object tree with CCDB mocked with nock',
-      { timeout: OBJECT_TREE_PAGE_TIMEOUT },
+      { timeout: OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT },
       async (testParent) => await objectViewFromObjectTreeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
     test(
       'should successfully run objectView page from layout show tests with CCDB mocked with nock',
-      { timeout: OBJECT_TREE_PAGE_TIMEOUT },
+      { timeout: OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT },
       async (testParent) => await objectViewFromLayoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
