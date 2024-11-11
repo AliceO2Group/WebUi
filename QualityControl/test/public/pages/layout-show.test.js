@@ -14,7 +14,7 @@
 import { editLayoutTests } from './edit-layout.test.js';
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-export const layoutViewTests = async (url, page, timeout = 5000, testParent) => {
+export const layoutShowTests = async (url, page, timeout = 5000, testParent) => {
 /**
  * Performs a series of automated tests on the layoutShow page using Puppeteer.
  * @param {string} url - URL needed to open page for testing
