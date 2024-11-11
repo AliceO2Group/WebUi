@@ -101,18 +101,18 @@
        "name": "qc/test/object/1",
        "options": [],
        "ignoreDefaults": false,
-       "id": "6731ceb1701658516c91b76b",
+       "id": "6731d3868671ec3d4a0ebab3",
        "autoSize": false
       }
      ],
      "columns": 2,
-     "id": "6731ceb12f8ad3cd0d51b3fb"
+     "id": "6731d38637b694fa826793eb"
     },
     {
      "name": "a",
      "objects": [],
      "columns": 2,
-     "id": "6731ceb1282dd7fa7d54f833"
+     "id": "6731d3865f5d1b8a2601cf78"
     }
    ],
    "collaborators": []
