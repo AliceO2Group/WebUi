@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 
 /**
@@ -49,10 +49,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     async () => {
       const layoutClassList = await page.evaluate(() => document
         .querySelector('nav > div:nth-child(5) > a:nth-child(1)').classList);
-      strictEqual(
-        JSON.stringify(layoutClassList),
-        JSON.stringify({ 0: 'menu-item', 1: 'w-wrapped', 2: 'selected' }),
-      );
+      deepStrictEqual(layoutClassList, { 0: 'menu-item', 1: 'w-wrapped', 2: 'selected' });
     },
   );
 
