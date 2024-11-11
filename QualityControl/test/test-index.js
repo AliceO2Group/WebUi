@@ -34,7 +34,7 @@ import { layoutListPageTests } from './public/pages/layout-list.test.js';
 import { objectTreePageTests } from './public/pages/object-tree.test.js';
 import { objectViewFromObjectTreeTests } from './public/pages/object-view-from-object-tree.test.js';
 import { objectViewFromLayoutShowTests } from './public/pages/object-view-from-layout-show.test.js';
-import { layoutViewTests } from './public/pages/layout-view.test.js';
+import { layoutShowTests } from './public/pages/layout-show.test.js';
 
 /**
  * Backend tests imports
@@ -56,7 +56,6 @@ import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
-import { layoutShowTests } from './public/pages/layout-show.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
