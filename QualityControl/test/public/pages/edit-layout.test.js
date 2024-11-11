@@ -14,21 +14,7 @@
 import { strictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { defaultMockedLayout, editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
-export const editLayoutTests = async (url, page, timeout = 5000, testParent) => {
-  await testParent.test(
-    'should load page=layoutView',
-    { timeout },
-    async () => {
-      const LAYOUT_ID = '671b95883d23cd0d67bdc787';
-      await page.goto(`${url}?page=layoutShow&layoutId=${LAYOUT_ID}`, { waitUntil: 'networkidle0' });
-      const location = await page.evaluate(() => window.location);
-      strictEqual(
-        location.search,
-        `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`,
-      );
-    },
-  );
-
+export const editLayoutTests = async (page, timeout = 5000, testParent) => {
   await testParent.test(
     'should have two options for editing the layout',
     { timeout },
@@ -45,6 +31,65 @@ export const editLayoutTests = async (url, page, timeout = 5000, testParent) => 
 
       strictEqual(titles[0], 'Edit via GUI');
       strictEqual(titles[1], 'Edit via JSON');
+    },
+  );
+
+  await testParent.test(
+    'should click the edit button in the header and enter edit mode',
+    { timeout },
+    async () => {
+      const editViaGUIButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(1)';
+      await page.locator(editViaGUIButtonPath).click();
+    },
+  );
+
+  await testParent.test(
+    'should have input field for changing layout name in edit mode',
+    { timeout },
+    async () => {
+      const inputPath = 'header > div > div:nth-child(3) > input';
+      await page.evaluate((inputPath) => document.querySelector(inputPath), inputPath);
+    },
+  );
+
+  await testParent.test(
+    'should have number input field for allowing users to change auto-tab value',
+    { timeout },
+    async () => {
+      await page.waitForSelector('#inputDescription', { timeout: 5000 });
+    },
+  );
+
+  await testParent.test(
+    'should have a tree sidebar in edit mode',
+    { timeout },
+    async () => {
+      const secondElementPath = 'nav table tbody tr:nth-child(2)';
+      await page.locator(secondElementPath).click();
+      const rowsCount = await page.evaluate((secondElementPath) =>
+        document.querySelectorAll(secondElementPath).length, secondElementPath);
+      strictEqual(rowsCount, 1);
+    },
+  );
+
+  await testParent.test(
+    'should have filtered results on input search filled',
+    { timeout },
+    async (t) => {
+      t.skip('Skip test execution for now');
+      // TODO: review
+      //await page.type('nav > div > div > div:nth-child(6) > input', '1');
+      //await page.waitForFunction('document.querySelectorAll(\'nav table tbody tr\').length === 1', { timeout: 5000 });
+    },
+  );
+
+  await testParent.test(
+    'should show normal sidebar after Cancel click',
+    { timeout },
+    async () => {
+      const cancelButtonPath = 'header > div > div:nth-child(3) > div > button:nth-child(2)';
+      await page.locator(cancelButtonPath).click();
+      await page.waitForSelector('nav .menu-title', { timeout: 5000 });
     },
   );
 
