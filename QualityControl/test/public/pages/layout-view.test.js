@@ -24,7 +24,7 @@ import { delay } from '../../testUtils/delay.js';
 export const layoutShowTests = async (url, page, timeout = 5000, testParent) => {
   const LAYOUT_ID = '671b95883d23cd0d67bdc787';
   await testParent.test(
-    'should load',
+    'should load the layoutShow page',
     { timeout },
     async () => {
       await page.goto(`${url}?page=layoutShow&layoutId=${LAYOUT_ID}`, { waitUntil: 'networkidle0' });
