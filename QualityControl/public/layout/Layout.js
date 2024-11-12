@@ -742,7 +742,6 @@ export default class Layout extends Observable {
 
   /**
    * Returns the updated layout in a formatted JSON string.
-   *
    * @returns {string} The updated JSON string representing the layout.
    */
   getUpdatedLayout() {
@@ -793,7 +792,6 @@ export default class Layout extends Observable {
 
   /**
    * Merges skeleton to the layout
-   *
    * @returns {object} item updated with user changes
    */
   getUpdatedItem() {
@@ -820,7 +818,6 @@ export default class Layout extends Observable {
 
   /**
    * Sets the status of the layout update
-   *
    * @param {RemoteData} status new layout update status
    */
   changeUpdateStatus(status) {
