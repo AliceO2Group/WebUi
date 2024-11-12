@@ -34,7 +34,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "2.7.3",
     "joi": "17.13.3",
-    "jsroot": "7.7.3"
+    "jsroot": "7.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
