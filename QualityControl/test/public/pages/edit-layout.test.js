@@ -148,7 +148,7 @@ export const editLayoutTests = async (page, timeout = 5000, testParent) => {
   );
 
   await testParent.test(
-    'should display error message according to JSON validation and disable the "Update template" button',
+    'should disable the "Update template" button when JSON is invalid and display error message',
     { timeout },
     async () => {
       const mockJSONInvalid = '{ "name" : "test" ';
@@ -166,8 +166,14 @@ export const editLayoutTests = async (page, timeout = 5000, testParent) => {
       const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
       await page.locator(cancelButtonPath).click();
       await delay(50);
-      const modalElement = await page.$('.o2-modal');
-      strictEqual(modalElement, null);
+      // pasa si body tiene 2 hijos en vez de 3
+
+      const childrenCount = await page.evaluate(() => {
+        const bodyPath = 'body';
+        const body = document.querySelector(bodyPath);
+        return body.children.length;
+      });
+      strictEqual(childrenCount, 2);
     },
   );
 
@@ -177,7 +183,6 @@ export const editLayoutTests = async (page, timeout = 5000, testParent) => {
     async () => {
       const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
       await page.locator(editViaJSONButtonPath).click();
-      await delay(50);
 
       const textareaPath = 'body > div > div > div > div > textarea';
       const mockedJSON = JSON.stringify(editedMockedLayout);
