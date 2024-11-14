@@ -15,6 +15,8 @@
 import puppeteer from 'puppeteer';
 import { config } from '../config.js';
 import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 /* eslint-disable no-console */
 
@@ -60,6 +62,8 @@ export async function setupServerForIntegrationTests() {
       console.log(`        ${msg.args()[i]}`);
     }
   });
+
+  copyMockDataFileToUse();
   return { url, page, browser, subprocess, subprocessOutput };
 };
 
@@ -79,4 +83,14 @@ export const terminateSessionAndLog = async (
   console.log('Output of server logs for the previous tests:');
   console.log(subprocessOutput);
   subprocess.kill();
+};
+
+/**
+ * Method to copy the mock data file to use 'qcg-mock-data-template.json' so that
+ * it can be used by the test suite and suffer changes without impacting the original file.
+ */
+const copyMockDataFileToUse = () => {
+  const sourceFile = path.resolve('test/setup/seeders/qcg-mock-data-template.json');
+  const destinationFile = path.resolve('test/setup/seeders/qcg-mock-data.json');
+  fs.copyFileSync(sourceFile, destinationFile);
 };
