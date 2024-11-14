@@ -1,6 +1,7 @@
 public/config.js
 /config.js
 public/config.cjs
+test/setup/seeders/qcg-mock-data.json
 *~
 .DS_Store
 cert/*
