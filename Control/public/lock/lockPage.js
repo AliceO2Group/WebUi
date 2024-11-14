@@ -64,8 +64,10 @@ export const content = (model) => {
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'),
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'),
             ],
-            detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'),
-            detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'),
+            isUserAllowedRole(ROLES.Detector) && [
+              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'),
+              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'),
+            ],
           ]),
           h('small.text-left.ph2',
             'Note: Release/Take all will only affect the detectors you have access to and detectors that are available.'
