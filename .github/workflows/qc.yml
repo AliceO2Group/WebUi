@@ -34,7 +34,7 @@ jobs:
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run test )
   coverage:
-    name: Tests on ubuntu-latest
+    name: Tests and generate lcov reoprt coverage on ubuntu-latest
     runs-on: ubuntu-latest
     needs: lint-check
     steps:
