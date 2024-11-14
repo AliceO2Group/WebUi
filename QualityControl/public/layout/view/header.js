@@ -74,7 +74,9 @@ const toolbarViewMode = (model) => {
                 h('a.menu-item', { title: 'Edit via GUI', onclick: () => model.layout.edit() }, 'Edit via GUI'),
                 h('a.menu-item', {
                   title: 'Edit via JSON',
-                  onclick: () => openJSONEditModal(model),
+                  onclick: () => {
+                    model.isUpdateVisible = true;
+                  }
                 }, 'Edit via JSON'),
               ]),
             ]),
