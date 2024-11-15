@@ -60,11 +60,9 @@ export const content = (model) => {
         Failure: (error) => errorPage(error),
         Success: (detectorsLocksState) => h('.flex-column', [
           h('.flex-row.g2.pv2', [
-            isUserAllowedRole(ROLES.Admin) && [
+            isUserAllowedRole(ROLES.Global) && [
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'),
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'),
-            ],
-            isUserAllowedRole(ROLES.Detector) && [
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'),
               detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'),
             ],
