@@ -28,7 +28,7 @@ export default (model) => h('.o2-modal', [
         oninput: (e) => model.layout.checkLayoutToUpdate(e.target.value),
         style: 'resize: vertical;',
         id: 'layout-json-editor',
-        value: model.layout.getUpdatedLayout(),
+        value: model.layout.getLayoutInEditJSONStructure(),
       })),
       model.services.layout.update.match({
         NotAsked: () => null,

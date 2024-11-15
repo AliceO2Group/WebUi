@@ -744,7 +744,7 @@ export default class Layout extends Observable {
    * Returns the updated layout in a formatted JSON string.
    * @returns {string} The updated JSON string representing the layout.
    */
-  getUpdatedLayout() {
+  getLayoutInEditJSONStructure() {
     if (!this.updatedJSON) {
       this.updatedJSON = LayoutUtils.toSkeleton(this.item);
     }
@@ -782,46 +782,23 @@ export default class Layout extends Observable {
    */
   updateLayout() {
     try {
-      this.item = this.getUpdatedItem();
-      this.saveUpdatedItem();
+      const updatedLayout = LayoutUtils.fromSkeleton({
+        ...this.item,
+        ...JSON.parse(this.updatedJSON),
+      });
+
+      this.item = {
+        ...updatedLayout,
+        id: this.item.id,
+      };
+
+      this.save();
+      this.updatedJSON = undefined;
+      this.toggleUpdatePanel();
     } catch (error) {
       this.changeUpdateStatus(RemoteData.failure(error.message || error));
     }
     this.notify();
-  }
-
-  /**
-   * Merges skeleton to the layout
-   * @returns {object} item updated with user changes
-   */
-  getUpdatedItem() {
-    const updatedLayout = LayoutUtils.fromSkeleton({
-      ...this.item,
-      ...JSON.parse(this.updatedJSON),
-    });
-    return {
-      ...updatedLayout,
-      id: this.item.id,
-    };
-  }
-
-  /**
-   * Saves the updated item and manages the update status.
-   */
-  saveUpdatedItem() {
-    this.changeUpdateStatus(RemoteData.Loading());
-    this.save();
-    this.updatedJSON = undefined;
-    this.changeUpdateStatus(RemoteData.Success());
-    this.toggleUpdatePanel();
-  }
-
-  /**
-   * Sets the status of the layout update
-   * @param {RemoteData} status new layout update status
-   */
-  changeUpdateStatus(status) {
-    this.model.services.update = status;
   }
 
   /**

@@ -11,9 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { editLayoutTests } from './edit-layout.test.js';
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
 
 /**
  * Performs a series of automated tests on the layoutShow page using Puppeteer.
@@ -159,5 +159,207 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
-  await editLayoutTests(page, timeout, testParent);
+  await testParent.test(
+    'should have two options for editing the layout',
+    { timeout },
+    async () => {
+      const editButtonPath = 'header > div > div:nth-child(3) > div > div > button';
+      await page.locator(editButtonPath).click();
+      const titles = await page.evaluate(() => {
+        const firstLinkPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(1)';
+        const secondLinkPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+        const firstLinkTitle = document.querySelector(firstLinkPath).title;
+        const secondLinkTitle = document.querySelector(secondLinkPath).title;
+        return [firstLinkTitle, secondLinkTitle];
+      });
+
+      strictEqual(titles[0], 'Edit via GUI');
+      strictEqual(titles[1], 'Edit via JSON');
+    },
+  );
+
+  await testParent.test(
+    'should click the edit button in the header and enter edit mode',
+    { timeout },
+    async () => {
+      const editViaGUIButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(1)';
+      await page.locator(editViaGUIButtonPath).click();
+    },
+  );
+
+  await testParent.test(
+    'should have input field for changing layout name in edit mode',
+    { timeout },
+    async () => {
+      const inputPath = 'header > div > div:nth-child(3) > input';
+      await page.evaluate((inputPath) => document.querySelector(inputPath), inputPath);
+    },
+  );
+
+  await testParent.test(
+    'should have number input field for allowing users to change auto-tab value',
+    { timeout },
+    async () => {
+      await page.waitForSelector('#inputDescription', { timeout: 5000 });
+    },
+  );
+
+  await testParent.test(
+    'should have a tree sidebar in edit mode',
+    { timeout },
+    async () => {
+      const secondElementPath = 'nav table tbody tr:nth-child(2)';
+      await page.locator(secondElementPath).click();
+      const rowsCount = await page.evaluate((secondElementPath) =>
+        document.querySelectorAll(secondElementPath).length, secondElementPath);
+      strictEqual(rowsCount, 1);
+    },
+  );
+
+  await testParent.test(
+    'should have filtered results on input search filled',
+    { timeout },
+    async (t) => {
+      t.skip('Skip test execution for now');
+      // TODO: review
+      //await page.type('nav > div > div > div:nth-child(6) > input', '1');
+      //await page.waitForFunction('document.querySelectorAll(\'nav table tbody tr\').length === 1', { timeout: 5000 });
+    },
+  );
+
+  await testParent.test(
+    'should show normal sidebar after Cancel click',
+    { timeout },
+    async () => {
+      const cancelButtonPath = 'header > div > div:nth-child(3) > div > button:nth-child(2)';
+      await page.locator(cancelButtonPath).click();
+      await page.waitForSelector('nav .menu-title', { timeout: 5000 });
+    },
+  );
+
+  await testParent.test(
+    'should open JSON editor when clicking "Edit via JSON"',
+    { timeout },
+    async () => {
+      const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+      await page.locator(editViaJSONButtonPath).click();
+      await delay(50);
+      const result = await page.evaluate(() => {
+        const titlePath = 'body > div > div > div > h4';
+        const textareaPath = 'body > div > div > div > div > textarea';
+        const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
+        const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
+        const title = document.querySelector(titlePath).textContent;
+        const textAreaId = document.querySelector(textareaPath).id;
+        const updateButtonTitle = document.querySelector(updateButtonPath).textContent;
+        const cancelButtonTitle = document.querySelector(cancelButtonPath).textContent;
+        return { title, textAreaId, updateButtonTitle, cancelButtonTitle };
+      });
+
+      strictEqual(result.title, 'Edit JSON file of a layout');
+      strictEqual(result.textAreaId, 'layout-json-editor');
+      strictEqual(result.updateButtonTitle, 'Update template');
+      strictEqual(result.cancelButtonTitle, 'Cancel');
+    },
+  );
+
+  await testParent.test(
+    'should not have ID as an editable key in the JSON editor',
+    { timeout },
+    async () => {
+      const result = await page.evaluate(() => {
+        const textareaPath = 'body > div > div > div > div > textarea';
+        const textAreaValue = document.querySelector(textareaPath).value;
+        const json = JSON.parse(textAreaValue);
+        const jsonDoesNotContainId = !Object.prototype.hasOwnProperty.call(json, 'id');
+        return jsonDoesNotContainId;
+      });
+      strictEqual(result, true);
+    },
+  );
+
+  await testParent.test(
+    'should disable the "Update template" button when JSON has an "id" key and display error message',
+    { timeout },
+    async () => {
+      const mockJSONWithId = '{ "id" : "test" }';
+      const expectedErrorMessage =
+      'Error: Manual entry of an ID is not allowed, as it is automatically assigned by the system.';
+
+      await checkInvalidJSON(page, mockJSONWithId, expectedErrorMessage);
+    },
+  );
+
+  await testParent.test(
+    'should disable the "Update template" button when JSON is invalid and display error message',
+    { timeout },
+    async () => {
+      const mockJSONInvalid = '{ "name" : "test" ';
+      const expectedErrorMessage =
+        'Expected \',\' or \'}\' after property value in JSON at position 18 (line 1 column 19)';
+
+      await checkInvalidJSON(page, mockJSONInvalid, expectedErrorMessage);
+    },
+  );
+
+  await testParent.test(
+    'should close JSON editor when clicking "Cancel"',
+    { timeout },
+    async () => {
+      const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
+      await page.locator(cancelButtonPath).click();
+      await delay(50);
+      const childrenCount = await page.evaluate(() => {
+        const bodyPath = 'body';
+        const body = document.querySelector(bodyPath);
+        return body.children.length;
+      });
+      strictEqual(childrenCount, 2);
+    },
+  );
+
+  await testParent.test(
+    'should update template when clicking "Update template"',
+    { timeout },
+    async () => {
+      const pencilButtonPath = 'header > div > div:nth-child(3) > div > div > button';
+      await page.locator(pencilButtonPath).click();
+      const editViaJSONButtonPath =
+        'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+      page.locator(editViaJSONButtonPath).click();
+
+      const textareaPath = 'body > div > div > div > div > textarea';
+      const mockedJSON = JSON.stringify(editedMockedLayout);
+      await page.locator(textareaPath).fill(mockedJSON);
+
+      const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
+      await page.locator(updateButtonPath).click();
+      await delay(50);
+
+      const buttonsPath = 'header > div > div:nth-child(2) > div > button';
+      const result = await page.evaluate((buttonsPath) => {
+        const tabs = document.querySelectorAll(buttonsPath);
+        return tabs.length === 3 && tabs[2].textContent === 'test';
+      }, buttonsPath);
+
+      strictEqual(result, true);
+    },
+  );
+};
+
+const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
+  const textareaPath = 'body > div > div > div > div > textarea';
+  await page.locator(textareaPath).fill(mockedJSON);
+  await delay(50);
+
+  const [updateButtonIsDisabled, message] = await page.evaluate(() => {
+    const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
+    const updateButton = document.querySelector(updateButtonPath);
+    const errorTextPath = 'body > div:nth-child(1) > div > div > div:nth-child(3)';
+    const errorText = document.querySelector(errorTextPath).textContent;
+    return [updateButton.disabled, errorText];
+  });
+
+  strictEqual(updateButtonIsDisabled, true);
+  strictEqual(message, errorMessage);
 };

@@ -66,17 +66,15 @@ const toolbarViewMode = (model) => {
             class: model.layout.editMenuOpen ? 'dropdown-open' : '',
           }, [
             h('button.btn.btn-primary', { onclick: () => model.layout.toggleEditMenu() }, iconPencil()),
-            h('.dropdown-menu', { style: {
-              right: '0',
-              left: 'auto',
-            } }, [
+            h('.dropdown-menu.right-menu', [
               h('p.m3.mv2.text-ellipsis', [
                 h('a.menu-item', { title: 'Edit via GUI', onclick: () => model.layout.edit() }, 'Edit via GUI'),
                 h('a.menu-item', {
                   title: 'Edit via JSON',
                   onclick: () => {
                     model.isUpdateVisible = true;
-                  }
+                    model.layout.toggleEditMenu();
+                  },
                 }, 'Edit via JSON'),
               ]),
             ]),
@@ -89,10 +87,6 @@ const toolbarViewMode = (model) => {
       ]),
     ]),
   ];
-};
-
-const openJSONEditModal = (model) => {
-  model.isUpdateVisible = true;
 };
 
 /**
