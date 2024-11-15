@@ -170,8 +170,8 @@ describe('Control', function() {
   require('./public/page-hardware-mocha');
   require('./public/page-lock-mocha');
 
-  require('./api/lock/api-get-locks.test')
-  require('./api/lock/api-put-locks.test')
+  require('./api/lock/api-get-locks.test');
+  require('./api/lock/api-put-locks.test');
 
   beforeEach(() => this.ok = true);
 
