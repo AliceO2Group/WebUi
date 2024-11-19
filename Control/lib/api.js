@@ -184,7 +184,10 @@ module.exports.setup = (http, ws) => {
 
   // Lock Service
   http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
-  http.put('/locks/:action/:detectorId', lockController.actionLockHandler.bind(lockController));
+  http.put('/locks/:action/:detectorId',
+    minimumRoleMiddleware(Role.DETECTOR),
+    lockController.actionLockHandler.bind(lockController)
+  );
   http.put('/locks/force/:action/:detectorId',
     minimumRoleMiddleware(Role.GLOBAL),
     lockController.actionForceLockHandler.bind(lockController));
