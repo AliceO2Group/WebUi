@@ -463,6 +463,7 @@ export default class Layout extends Observable {
       this.editingTabObject = null;
       window.dispatchEvent(new Event('resize'));
       this.model.services.object.list = RemoteData.success();
+      this.model.object.searchInput = '';
       this.notify();
     } catch (error) {
       this.model.services.object.list = RemoteData.failure({
@@ -493,6 +494,7 @@ export default class Layout extends Observable {
     this.editingTabObject = null;
     this.item = this.editOriginalClone;
     this.selectTab(this._tabIndex);
+    this.model.object.searchInput = '';
     this.notify();
   }
 
