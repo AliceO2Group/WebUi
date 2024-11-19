@@ -36,7 +36,7 @@ It interfaces with the system using two modes:
 
 ## Requirements
 - `nodejs` >= `16.x`
-- InfoLogger MySQL database for Query mode
+- InfoLogger MariaDB database for Query mode
 - InfoLoggerServer endpoint for Live mode
 
 ## Installation
@@ -46,6 +46,45 @@ It interfaces with the system using two modes:
 4. Modify `config.js` file to set InfoLogger database and endpoint details
 5. Start web app: `npm start`
 6. Open browser and navigate to http://localhost:8080
+
+## Development database installation
+In order to run queries in the InfoLogger a MariaDB server is required. To run a local MariaDB server that can easily be updated/wiped/configured you will need Docker installed.
+1. Follow the instructions specific for you platform: [docker install](https://docs.docker.com/engine/install/)
+2. Create a `compose.yaml` file somewhere on you pc with the following content: 
+```
+services:
+  db:
+    image: mariadb
+    restart: unless-stopped
+    ports:
+     - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    # (this is just an example, not intended to be a production configuration)
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 9090:8080
+```
+This will get you a MariaDB server with adminer (an alternative to MySqlAdmin).
+
+3. Execute the following command in the same directory as the compose.yaml file: `compose up -d` this will start the containers and the `-d` parameter makes sure you can close your commandline window by running in deamon mode.
+4. You should now be able to visit `http://localhost:9090/` in your browser of choice, enter user and password root to login.
+5. Create the `INFOLOGGER` database by clicking `Create database` in the UI.
+6. Edit `config.js` to point to your local database: 
+```
+mysql: {
+  host: '127.0.0.1',
+  user: 'root',
+  password: 'root',
+  database: 'INFOLOGGER',
+  port: 3306,
+  timeout: 60000,
+  retryMs: 5000,
+},
+```
+7. Run the InfoLogger and check for the following message in the console: `info: Connection to DB successfully established: 127.0.0.1:3306`
 
 ## Dummy InfoLogger test server
 InfoLoggerServer can be simulated by running `npm run simul`. The dummy server binds `localhost:6102` endpoint.
