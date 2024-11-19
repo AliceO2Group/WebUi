@@ -68,11 +68,13 @@ services:
       - 9090:8080
 ```
 This will get you a MariaDB server with adminer (an alternative to MySqlAdmin).
+Should you ever feel the need to test a specific version of MariaDB then change the image to `mariadb:11.5` where 11.5 is the version. By default the compose.yaml will get you the latest MariaDB image.
 
 3. Execute the following command in the same directory as the compose.yaml file: `compose up -d` this will start the containers and the `-d` parameter makes sure you can close your commandline window by running in deamon mode.
 4. You should now be able to visit `http://localhost:9090/` in your browser of choice, enter user and password root to login.
 5. Create the `INFOLOGGER` database by clicking `Create database` in the UI.
-6. Edit `config.js` to point to your local database: 
+6. In the Adminer UI select `SQL Command` on the left side of the page. Then enter the contents of the `InfoLogger/docs/database-specs.sql` file in the field.
+7. Edit `config.js` to point to your local database: 
 ```
 mysql: {
   host: '127.0.0.1',
@@ -84,7 +86,7 @@ mysql: {
   retryMs: 5000,
 },
 ```
-7. Run the InfoLogger and check for the following message in the console: `info: Connection to DB successfully established: 127.0.0.1:3306`
+8. Run the InfoLogger and check for the following message in the console: `info: Connection to DB successfully established: 127.0.0.1:3306`
 
 ## Dummy InfoLogger test server
 InfoLoggerServer can be simulated by running `npm run simul`. The dummy server binds `localhost:6102` endpoint.
