@@ -62,7 +62,7 @@ const toolbarViewMode = (model) => {
         }, iconShareBoxed()),
         model.session.personid == layoutItem.owner_id && [
           h('button.btn.btn-primary', {
-            onclick: async () => await model.layout.edit(),
+            onclick: async () => model.layout.edit(),
             title: 'Edit layout',
           }, iconPencil()),
           h('button.btn.btn-danger', {
