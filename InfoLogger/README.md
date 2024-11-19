@@ -49,8 +49,8 @@ It interfaces with the system using two modes:
 
 ## Development database installation
 In order to run queries in the InfoLogger a MariaDB server is required. To run a local MariaDB server that can easily be updated/wiped/configured you will need Docker installed.
-1. Follow the instructions specific for you platform: [docker install](https://www.docker.com/products/docker-desktop/)
-2. Create a `compose.yaml` file somewhere on you pc with the following content: 
+1. Follow the instructions specific for you platform: [docker desktop install](https://www.docker.com/products/docker-desktop/)
+2. Create a `compose.yaml` file somewhere on your pc with the following content: 
 ```
 services:
   db:
@@ -70,9 +70,9 @@ services:
 This will get you a MariaDB server with adminer (an alternative to MySqlAdmin).
 Should you ever feel the need to test a specific version of MariaDB then change the image to `mariadb:11.5` where 11.5 is the version. By default the compose.yaml will get you the latest MariaDB image.
 
-3. Execute the following command in the same directory as the compose.yaml file: `compose up -d` this will start the containers and the `-d` parameter makes sure you can close your commandline window by running in deamon mode.
+3. Execute the following command in the same directory as the compose.yaml file: `docker compose up -d` this will start the containers and the `-d` parameter makes sure you can close your commandline window by running in daemon mode.
 4. You should now be able to visit `http://localhost:9090/` in your browser of choice, enter user and password root to login.
-5. Create the `INFOLOGGER` database by clicking `Create database` in the UI.
+5. Create the `INFOLOGGER` database by clicking `Create database` in the Adminer UI.
 6. In the Adminer UI select `SQL Command` on the left side of the page. Then enter the contents of the `InfoLogger/docs/database-specs.sql` file in the field.
 7. Edit `config.js` to point to your local database: 
 ```
