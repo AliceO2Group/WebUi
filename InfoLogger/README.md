@@ -49,7 +49,7 @@ It interfaces with the system using two modes:
 
 ## Development database installation
 In order to run queries in the InfoLogger a MariaDB server is required. To run a local MariaDB server that can easily be updated/wiped/configured you will need Docker installed.
-1. Follow the instructions specific for you platform: [docker install](https://docs.docker.com/engine/install/)
+1. Follow the instructions specific for you platform: [docker install](https://www.docker.com/products/docker-desktop/)
 2. Create a `compose.yaml` file somewhere on you pc with the following content: 
 ```
 services:
