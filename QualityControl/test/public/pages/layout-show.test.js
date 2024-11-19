@@ -234,13 +234,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const inputs = await page.$$('nav input');
       await inputs[3].type('123');
       await delay(50);
-      const { count, noResultsTitle } = await page.evaluate(() => {
-        const count = document.querySelectorAll('nav table tbody tr').length;
-        const noResultsTitle = document.querySelector('nav table thead tr th').textContent;
-        return { count, noResultsTitle };
-      });
-      strictEqual(count, 0);
-      strictEqual(noResultsTitle, 'No objects found for this search');
+      const text = await page.evaluate(() => document.querySelector('nav p.text-center').textContent);
+      strictEqual(text, 'No objects found for this search');
     },
   );
 

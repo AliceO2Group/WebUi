@@ -29,14 +29,15 @@ export default function virtualTable(model, location = 'main') {
   return h('.flex-grow.flex-column', {
   }, [
     location !== 'side' && tableHeader(),
-    model.object.searchResult.length === 0 ? tableEmpty() :
+    h(
+      '.scroll-y.animate-width',
+      tableContainerHooks(model),
       h(
-        '.scroll-y.animate-width',
-        tableContainerHooks(model),
-        h(
-          '',
-          maximumTableSizeStyling(model.object.searchResult.length),
-          h(
+        '',
+        maximumTableSizeStyling(model.object.searchResult.length === 0 ? 1 : model.object.searchResult.length),
+        model.object.searchResult.length === 0
+          ? h('p.text-center', 'No objects found for this search')
+          : h(
             `table.table-logs-content.text-no-select.table.table-sm${FONT}`,
             scrollStyling(model),
             [
@@ -49,17 +50,10 @@ export default function virtualTable(model, location = 'main') {
               ),
             ],
           ),
-        ),
       ),
+    ),
   ]);
 }
-
-/**
- * Return a table with a single row containing a cell with the text "No objects found".
- * @returns {vnode} - virtual node element
- */
-const tableEmpty = () =>
-  h('table.table.table-sm.text-no-select', [h('thead', [h('tr', [h('th', 'No objects found for this search')])])]);
 
 /**
  * Build a <tr> element based on the item given
