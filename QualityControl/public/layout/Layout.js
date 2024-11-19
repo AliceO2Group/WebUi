@@ -449,19 +449,26 @@ export default class Layout extends Observable {
    * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
    * @returns {undefined}
    */
-  edit() {
-    this.model.services.object.listObjects();
-
-    if (!this.item) {
-      throw new Error('An item should be loaded before editing it');
+  async edit() {
+    try {
+      this.model.services.object.list = RemoteData.loading();
+      await this.model.services.object.listObjects();
+      await this.model.object.loadList();
+      if (!this.item) {
+        throw new Error('An item should be loaded before editing it');
+      }
+      this.setTabInterval(0);
+      this.editEnabled = true;
+      this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
+      this.editingTabObject = null;
+      window.dispatchEvent(new Event('resize'));
+      this.model.services.object.list = RemoteData.success();
+      this.notify();
+    } catch (error) {
+      this.model.services.object.list = RemoteData.failure({
+        message: error.message,
+      });
     }
-    this.setTabInterval(0);
-    this.editEnabled = true;
-    this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
-    this.editingTabObject = null;
-    window.dispatchEvent(new Event('resize'));
-
-    this.notify();
   }
 
   /**
