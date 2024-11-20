@@ -53,7 +53,7 @@ In order to run queries in the InfoLogger a MariaDB server is required. To run a
 2. Create a `compose.yaml` file somewhere on your pc with the following content: 
 ```
 services:
-  db:
+  mariadb:
     image: mariadb
     restart: unless-stopped
     ports:
@@ -61,19 +61,21 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: root
     # (this is just an example, not intended to be a production configuration)
-  adminer:
-    image: adminer
+  phpmyadmin:
+    image: phpmyadmin
     restart: unless-stopped
     ports:
-      - 9090:8080
+      - 9090:80
+    environment:
+      - PMA_HOST=mariadb
 ```
-This will get you a MariaDB server with adminer (an alternative to MySqlAdmin).
+This will get you a MariaDB server with phpmyadmin.
 Should you ever feel the need to test a specific version of MariaDB then change the image to `mariadb:11.5` where 11.5 is the version. By default the compose.yaml will get you the latest MariaDB image.
 
 3. Execute the following command in the same directory as the compose.yaml file: `docker compose up -d` this will start the containers and the `-d` parameter makes sure you can close your commandline window by running in daemon mode.
 4. You should now be able to visit `http://localhost:9090/` in your browser of choice, enter user and password root to login.
-5. Create the `INFOLOGGER` database by clicking `Create database` in the Adminer UI.
-6. In the Adminer UI select `SQL Command` on the left side of the page. Then enter the contents of the `InfoLogger/docs/database-specs.sql` file in the field.
+5. Create the `INFOLOGGER` database by clicking `New` in the phpMyAdmin UI on the left side.
+6. In the phpMyAdmin UI select `SQL` on the top of the page. Then enter the contents of the `InfoLogger/docs/database-specs.sql` file in the field and pressing the `Go` button.
 7. Edit `config.js` to point to your local database: 
 ```
 mysql: {
